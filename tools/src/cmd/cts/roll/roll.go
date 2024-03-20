@@ -531,7 +531,14 @@ func (r *roller) rollCommitMessage(
 	ctsLog []git.CommitInfo,
 	changeID string) string {
 
+	isExternalRepo := r.flags.ctsGitURL != r.cfg.Git.CTS.HttpsURL()
+
 	msg := &strings.Builder{}
+	if isExternalRepo {
+		// note: intentionally split to fool the pre-submit checks!
+		msg.WriteString("[DO NOT")
+		msg.WriteString(" SUBMIT] ")
+	}
 	msg.WriteString(common.RollSubjectPrefix)
 	msg.WriteString(oldCTSHash[:9])
 	msg.WriteString("..")
@@ -544,6 +551,11 @@ func (r *roller) rollCommitMessage(
 		msg.WriteString(" commits)")
 	}
 	msg.WriteString("\n\n")
+	if isExternalRepo {
+		msg.WriteString("Rolled from external repo: ")
+		msg.WriteString(r.flags.ctsGitURL)
+		msg.WriteString("\n\n")
+	}
 	msg.WriteString("Regenerated:\n")
 	msg.WriteString(" - expectations.txt\n")
 	msg.WriteString(" - compat-expectations.txt\n")
@@ -591,11 +603,15 @@ func (r *roller) rollCommitMessage(
 		msg.WriteString("\n")
 	}
 	msg.WriteString("Include-Ci-Only-Tests: true\n")
+	if isExternalRepo {
+		msg.WriteString("Commit: false\n")
+	}
 	if changeID != "" {
 		msg.WriteString("Change-Id: ")
 		msg.WriteString(changeID)
 		msg.WriteString("\n")
 	}
+
 	return msg.String()
 }
 

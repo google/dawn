@@ -44,7 +44,7 @@ func MustParseHash(s string) git.Hash {
 	return hash
 }
 
-func TestRollCommitMessage(t *testing.T) {
+func rollCommitMessageFor(ctsGitURL string) string {
 	r := roller{
 		cfg: common.Config{
 			Builders: map[string]buildbucket.Builder{
@@ -53,7 +53,12 @@ func TestRollCommitMessage(t *testing.T) {
 				"Linux": {Project: "chromium", Bucket: "try", Builder: "linux-dawn-rel"},
 			},
 		},
+		flags: rollerFlags{ctsGitURL: ctsGitURL},
 	}
+
+	r.cfg.Git.CTS.Host = "chromium.googlesource.com"
+	r.cfg.Git.CTS.Project = "external/github.com/gpuweb/cts"
+
 	msg := r.rollCommitMessage(
 		"d5e605a556408eaeeda64fb9d33c3f596fd90b70",
 		"29275672eefe76986bd4baa7c29ed17b66616b1b",
@@ -69,6 +74,12 @@ func TestRollCommitMessage(t *testing.T) {
 		},
 		"I4aa059c6c183e622975b74dbdfdfe0b12341ae15",
 	)
+
+	return msg
+}
+
+func TestRollCommitMessageFromInternal(t *testing.T) {
+	msg := rollCommitMessageFor("https://chromium.googlesource.com/external/github.com/gpuweb/cts")
 	expect := `Roll third_party/webgpu-cts/ d5e605a55..29275672e (2 commits)
 
 Regenerated:
@@ -88,6 +99,38 @@ Created with './tools/run cts roll'
 
 Cq-Include-Trybots: luci.chromium.try:linux-dawn-rel,win-dawn-rel;luci.dawn.try:mac-dbg
 Include-Ci-Only-Tests: true
+Change-Id: I4aa059c6c183e622975b74dbdfdfe0b12341ae15
+`
+	if diff := cmp.Diff(msg, expect); diff != "" {
+		t.Errorf("rollCommitMessage: %v", diff)
+	}
+}
+
+func TestRollCommitMessageFromExternal(t *testing.T) {
+	msg := rollCommitMessageFor("https://www.github.com/a_cts_contributor/cts.git")
+
+	expect := `[DO NOT` + ` SUBMIT] Roll third_party/webgpu-cts/ d5e605a55..29275672e (2 commits)
+
+Rolled from external repo: https://www.github.com/a_cts_contributor/cts.git
+
+Regenerated:
+ - expectations.txt
+ - compat-expectations.txt
+ - ts_sources.txt
+ - test_list.txt
+ - resource_files.txt
+ - webtest .html files
+
+
+https://chromium.googlesource.com/external/github.com/gpuweb/cts/+log/d5e605a55640..29275672eefe
+ - d5e605 Added thing A
+ - d5e605 Tweaked thing B
+
+Created with './tools/run cts roll'
+
+Cq-Include-Trybots: luci.chromium.try:linux-dawn-rel,win-dawn-rel;luci.dawn.try:mac-dbg
+Include-Ci-Only-Tests: true
+Commit: false
 Change-Id: I4aa059c6c183e622975b74dbdfdfe0b12341ae15
 `
 	if diff := cmp.Diff(msg, expect); diff != "" {
