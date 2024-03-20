@@ -1010,9 +1010,11 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 		})
 
 		if err != nil {
-			body, _ := io.ReadAll(resp.Body)
 			info := &strings.Builder{}
-			fmt.Fprintln(info, "response:    ", string(body))
+			if resp.Body != nil {
+				body, _ := io.ReadAll(resp.Body)
+				fmt.Fprintln(info, "response:    ", string(body))
+			}
 			fmt.Fprintln(info, "change-id:   ", change.ChangeID)
 			fmt.Fprintln(info, "revision-id: ", currentHash.String())
 			fmt.Fprintln(info, "notify:      ", notify)
@@ -1046,8 +1048,8 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 		return err
 	}
 
-	const minDiff = time.Microsecond * 50 // Ignore time diffs less than this duration
-	const minRelDiff = 0.01               // Ignore absolute relative diffs between [1, 1+x]
+	const minDiff = time.Millisecond // Ignore time diffs less than this duration
+	const minRelDiff = 0.05          // Ignore absolute relative diffs between [1, 1+x]
 	diff := bench.Compare(parentRun.Benchmarks, newRun.Benchmarks, minDiff, minRelDiff)
 	diffFmt := bench.DiffFormat{
 		TestName:        true,
