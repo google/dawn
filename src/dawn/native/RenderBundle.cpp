@@ -58,6 +58,7 @@ RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
 }
 
 void RenderBundleBase::DestroyImpl() {
+    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     FreeCommands(&mCommands);
 
     // Remove reference to the attachment state so that we don't have lingering references to

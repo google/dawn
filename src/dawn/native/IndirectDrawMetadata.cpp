@@ -233,6 +233,10 @@ void IndirectDrawMetadata::AddIndirectDraw(BufferBase* indirectBuffer,
     it->second.AddIndirectDraw(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange, draw);
 }
 
+void IndirectDrawMetadata::ClearIndexedIndirectBufferValidationInfo() {
+    mIndexedIndirectBufferValidationInfo.clear();
+}
+
 bool IndirectDrawMetadata::IndexedIndirectConfig::operator<(
     const IndexedIndirectConfig& other) const {
     return std::tie(inputIndirectBufferPtr, duplicateBaseVertexInstance, drawType) <

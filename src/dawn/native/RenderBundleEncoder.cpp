@@ -123,6 +123,7 @@ RenderBundleEncoder::~RenderBundleEncoder() {
 }
 
 void RenderBundleEncoder::DestroyImpl() {
+    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mCommandBufferState.End();
     RenderEncoderBase::DestroyImpl();
     mBundleEncodingContext.Destroy();

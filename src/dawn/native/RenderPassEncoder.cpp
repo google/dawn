@@ -133,6 +133,7 @@ RenderPassEncoder::~RenderPassEncoder() {
 }
 
 void RenderPassEncoder::DestroyImpl() {
+    mIndirectDrawMetadata.ClearIndexedIndirectBufferValidationInfo();
     mCommandBufferState.End();
 
     RenderEncoderBase::DestroyImpl();
