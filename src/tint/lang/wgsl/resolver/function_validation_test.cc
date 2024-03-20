@@ -456,7 +456,7 @@ TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(56:78 error: duplicate stage attribute
+              R"(56:78 error: duplicate fragment attribute
 12:34 note: first attribute declared here)");
 }
 

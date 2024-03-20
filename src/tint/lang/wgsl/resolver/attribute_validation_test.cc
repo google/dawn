@@ -106,7 +106,7 @@ static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
         case AttributeKind::kSize:
             return o << "@size";
         case AttributeKind::kStageCompute:
-            return o << "@stage(compute)";
+            return o << "@compute";
         case AttributeKind::kStride:
             return o << "@stride";
         case AttributeKind::kWorkgroupSize:
@@ -192,7 +192,7 @@ static std::vector<TestParams> OnlyDiagnosticValidFor(std::string thing) {
             },
             TestParams{
                 {AttributeKind::kStageCompute},
-                "1:2 error: '@stage' is not valid for " + thing,
+                "1:2 error: '@compute' is not valid for " + thing,
             },
             TestParams{
                 {AttributeKind::kStride},
@@ -547,7 +547,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for function parameters)",
+            R"(1:2 error: '@compute' is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -632,7 +632,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for non-entry point function return types)",
+            R"(1:2 error: '@compute' is not valid for non-entry point function return types)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -722,7 +722,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for function parameters)",
+            R"(1:2 error: '@compute' is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -823,7 +823,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for function parameters)",
+            R"(1:2 error: '@compute' is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -930,7 +930,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for function parameters)",
+            R"(1:2 error: '@compute' is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -1019,7 +1019,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for entry point return types)",
+            R"(1:2 error: '@compute' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -1117,7 +1117,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for entry point return types)",
+            R"(1:2 error: '@compute' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -1218,7 +1218,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for entry point return types)",
+            R"(1:2 error: '@compute' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -1342,7 +1342,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for 'struct' declarations)",
+            R"(1:2 error: '@compute' is not valid for 'struct' declarations)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -1434,7 +1434,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for 'struct' members)",
+            R"(1:2 error: '@compute' is not valid for 'struct' members)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -1694,7 +1694,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              },
                              TestParams{
                                  {AttributeKind::kStageCompute},
-                                 R"(1:2 error: '@stage' is not valid for 'array' types)",
+                                 R"(1:2 error: '@compute' is not valid for 'array' types)",
                              },
                              TestParams{
                                  {AttributeKind::kStride},
@@ -1785,7 +1785,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for module-scope 'var')",
+            R"(1:2 error: '@compute' is not valid for module-scope 'var')",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -1889,7 +1889,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for 'const' declaration)",
+            R"(1:2 error: '@compute' is not valid for 'const' declaration)",
         },
         TestParams{
             {AttributeKind::kStride},
@@ -1970,7 +1970,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kStageCompute},
-            R"(1:2 error: '@stage' is not valid for 'override' declaration)",
+            R"(1:2 error: '@compute' is not valid for 'override' declaration)",
         },
         TestParams{
             {AttributeKind::kStride},

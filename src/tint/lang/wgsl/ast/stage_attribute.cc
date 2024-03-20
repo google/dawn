@@ -42,6 +42,16 @@ StageAttribute::StageAttribute(GenerationID pid, NodeID nid, const Source& src, 
 StageAttribute::~StageAttribute() = default;
 
 std::string StageAttribute::Name() const {
+    switch (stage) {
+        case PipelineStage::kVertex:
+            return "vertex";
+        case PipelineStage::kFragment:
+            return "fragment";
+        case PipelineStage::kCompute:
+            return "compute";
+        case PipelineStage::kNone:
+            break;
+    }
     return "stage";
 }
 
