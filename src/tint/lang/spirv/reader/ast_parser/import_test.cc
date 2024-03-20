@@ -67,15 +67,7 @@ TEST_F(SpvParserImportTest, Import_NonSemantic_IgnoredImport) {
     p->DeliberatelyInvalidSpirv();
 }
 
-TEST_F(SpvParserImportTest, DISABLED_Import_NonSemantic_IgnoredExtInsts) {
-    // TODO(crbug.com/tint/1789): The NonSemantic.ClspvReflection.1 instruction
-    // set grammar has changed
-    // but the corresponding feature in Clspv has not yet landed.
-    // See:
-    //   https://github.com/KhronosGroup/SPIRV-Headers/pull/308
-    //   https://github.com/google/clspv/pull/925
-    // Disable this test until upstream has settled.
-
+TEST_F(SpvParserImportTest, Import_NonSemantic_IgnoredExtInsts) {
     // This is the clspv-compiled output of this OpenCL C:
     //    kernel void foo(global int*A) { A=A; }
     // It emits NonSemantic.ClspvReflection.1 extended instructions.
