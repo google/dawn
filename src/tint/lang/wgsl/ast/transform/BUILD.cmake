@@ -65,6 +65,8 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/expand_compound_assignment.h
   lang/wgsl/ast/transform/first_index_offset.cc
   lang/wgsl/ast/transform/first_index_offset.h
+  lang/wgsl/ast/transform/fold_constants.cc
+  lang/wgsl/ast/transform/fold_constants.h
   lang/wgsl/ast/transform/get_insertion_point.cc
   lang/wgsl/ast/transform/get_insertion_point.h
   lang/wgsl/ast/transform/hoist_to_decl_before.cc
@@ -160,6 +162,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/disable_uniformity_analysis_test.cc
   lang/wgsl/ast/transform/expand_compound_assignment_test.cc
   lang/wgsl/ast/transform/first_index_offset_test.cc
+  lang/wgsl/ast/transform/fold_constants_test.cc
   lang/wgsl/ast/transform/get_insertion_point_test.cc
   lang/wgsl/ast/transform/helper_test.h
   lang/wgsl/ast/transform/hoist_to_decl_before_test.cc

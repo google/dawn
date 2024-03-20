@@ -16,7 +16,8 @@ void tint_symbol() {
   vec2 runtime_in = vec2(1.25f, 3.75f);
   modf_result_vec2_f32 res = modf_result_vec2_f32(vec2(0.25f, 0.75f), vec2(1.0f, 3.0f));
   res = tint_modf(runtime_in);
-  res = modf_result_vec2_f32(vec2(0.25f, 0.75f), vec2(1.0f, 3.0f));
+  modf_result_vec2_f32 tint_symbol_2 = modf_result_vec2_f32(vec2(0.25f, 0.75f), vec2(1.0f, 3.0f));
+  res = tint_symbol_2;
   vec2 tint_symbol_1 = res.fract;
   vec2 whole = res.whole;
 }

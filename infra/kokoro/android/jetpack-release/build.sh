@@ -85,3 +85,4 @@ echo "Successfully built webgpu aar"
 
 # Rename .aar to Chromium branch name
 mv webgpu/build/outputs/aar/webgpu-release.aar webgpu/build/outputs/aar/$KOKORO_GOB_BRANCH.aar
+

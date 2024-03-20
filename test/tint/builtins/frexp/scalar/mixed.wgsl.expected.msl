@@ -16,7 +16,8 @@ kernel void tint_symbol() {
   float const runtime_in = 1.25f;
   frexp_result_f32 res = frexp_result_f32{.fract=0.625f, .exp=1};
   res = tint_frexp(runtime_in);
-  res = frexp_result_f32{.fract=0.625f, .exp=1};
+  frexp_result_f32 const tint_symbol_1 = frexp_result_f32{.fract=0.625f, .exp=1};
+  res = tint_symbol_1;
   float const fract = res.fract;
   int const exp = res.exp;
   return;

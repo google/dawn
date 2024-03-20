@@ -16,7 +16,8 @@ void tint_symbol() {
   float runtime_in = 1.25f;
   frexp_result_f32 res = frexp_result_f32(0.625f, 1);
   res = tint_frexp(runtime_in);
-  res = frexp_result_f32(0.625f, 1);
+  frexp_result_f32 tint_symbol_3 = frexp_result_f32(0.625f, 1);
+  res = tint_symbol_3;
   float tint_symbol_1 = res.fract;
   int tint_symbol_2 = res.exp;
 }

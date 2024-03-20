@@ -63,6 +63,7 @@
 #include "src/tint/lang/wgsl/ast/transform/direct_variable_access.h"
 #include "src/tint/lang/wgsl/ast/transform/disable_uniformity_analysis.h"
 #include "src/tint/lang/wgsl/ast/transform/expand_compound_assignment.h"
+#include "src/tint/lang/wgsl/ast/transform/fold_constants.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
@@ -184,6 +185,8 @@ SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 SanitizedResult Sanitize(const Program& in, const Options& options) {
     ast::transform::Manager manager;
     ast::transform::DataMap data;
+
+    manager.Add<ast::transform::FoldConstants>();
 
     manager.Add<ast::transform::DisableUniformityAnalysis>();
 

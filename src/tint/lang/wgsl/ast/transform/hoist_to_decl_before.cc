@@ -29,16 +29,13 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/builder.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/if_statement.h"
-#include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/lang/wgsl/sem/while_statement.h"
 #include "src/tint/utils/containers/hashmap.h"
-#include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/transform.h"
 
 namespace tint::ast::transform {

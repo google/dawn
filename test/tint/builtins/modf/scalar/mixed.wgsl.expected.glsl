@@ -16,7 +16,8 @@ void tint_symbol() {
   float runtime_in = 1.25f;
   modf_result_f32 res = modf_result_f32(0.25f, 1.0f);
   res = tint_modf(runtime_in);
-  res = modf_result_f32(0.25f, 1.0f);
+  modf_result_f32 tint_symbol_2 = modf_result_f32(0.25f, 1.0f);
+  res = tint_symbol_2;
   float tint_symbol_1 = res.fract;
   float whole = res.whole;
 }

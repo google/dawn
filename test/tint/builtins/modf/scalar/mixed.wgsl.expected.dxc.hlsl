@@ -8,13 +8,13 @@ modf_result_f32 tint_modf(float param_0) {
   return result;
 }
 
-static const modf_result_f32 c = {0.25f, 1.0f};
 [numthreads(1, 1, 1)]
 void main() {
   float runtime_in = 1.25f;
   modf_result_f32 res = {0.25f, 1.0f};
   res = tint_modf(runtime_in);
-  res = c;
+  modf_result_f32 tint_symbol = {0.25f, 1.0f};
+  res = tint_symbol;
   float fract = res.fract;
   float whole = res.whole;
   return;
