@@ -175,6 +175,22 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     // Ensure DXC if use_dxc toggle is set.
     DAWN_TRY(EnsureDXCIfRequired());
 
+    // Set up shader profile for DXC.
+    if (IsToggleEnabled(Toggle::UseDXC)) {
+        uint32_t appliedShaderModel =
+            ToBackend(GetPhysicalDevice())->GetAppliedShaderModelUnderToggles(GetTogglesState());
+        uint32_t shaderModelMajor = appliedShaderModel / 10;
+        uint32_t shaderModelMinor = appliedShaderModel % 10;
+        // Profiles are always <stage>s_<minor>_<major> so we build the s_<minor>_major and add
+        // it to each of the stage's suffix.
+        std::wstring profileSuffix = L"s_M_n";
+        profileSuffix[2] = wchar_t('0' + shaderModelMajor);
+        profileSuffix[4] = wchar_t('0' + shaderModelMinor);
+        mDxcShaderProfiles[SingleShaderStage::Vertex] = L"v" + profileSuffix;
+        mDxcShaderProfiles[SingleShaderStage::Fragment] = L"p" + profileSuffix;
+        mDxcShaderProfiles[SingleShaderStage::Compute] = L"c" + profileSuffix;
+    }
+
     DAWN_TRY(CreateZeroBuffer());
 
     SetLabelImpl();
@@ -877,6 +893,10 @@ ComPtr<IDxcLibrary> Device::GetDxcLibrary() const {
 
 ComPtr<IDxcCompiler3> Device::GetDxcCompiler() const {
     return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcCompiler();
+}
+
+const PerStage<std::wstring>& Device::GetDxcShaderProfiles() const {
+    return mDxcShaderProfiles;
 }
 
 }  // namespace dawn::native::d3d12

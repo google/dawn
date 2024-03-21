@@ -41,14 +41,13 @@ struct D3D12DeviceInfo {
     bool isCacheCoherentUMA;
     uint32_t resourceHeapTier;
     bool supportsRenderPass;
-    bool supportsShaderF16;
-    // shaderModel indicates the maximum supported shader model, for example, the value 62
-    // indicates that current driver supports the maximum shader model is shader model 6.2.
-    uint32_t shaderModel;
-    PerStage<std::wstring> shaderProfiles;
+    // Whether the device support native 16bit shader ops, required for shader f16 feature. Note
+    // that the feature also requires using shader model version >= 6.2.
+    bool supportsNative16BitShaderOps;
+    // highestSupportedShaderModel indicates the maximum supported shader model, for example, the
+    // value 62 indicates that current driver supports the maximum shader model is shader model 6.2.
+    uint32_t highestSupportedShaderModel;
     bool supportsSharedResourceCapabilityTier1;
-    bool supportsPacked4x8IntegerDotProduct;
-    bool supportsPackUnpack4x8Intrinsics;
     bool supportsCastingFullyTypedFormat;
     uint32_t programmableSamplePositionsTier;
     bool supportsRootSignatureVersion1_1;

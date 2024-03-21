@@ -537,6 +537,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use the StorageInputOutput16 SPIR-V capability for f16 shader IO types when the device "
       "supports it.",
       "https://crbug.com/tint/2161", ToggleStage::Device}},
+    {Toggle::D3D12DontUseShaderModel66OrHigher,
+     {"d3d12_dont_use_shader_model_66_or_higher",
+      "Only use shader model 6.5 or less for D3D12 backend, to workaround issues on some Intel "
+      "devices.",
+      "https://crbug.com/dawn/2470", ToggleStage::Adapter}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

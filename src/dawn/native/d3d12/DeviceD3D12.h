@@ -180,6 +180,8 @@ class Device final : public d3d::Device {
     ComPtr<IDxcLibrary> GetDxcLibrary() const;
     ComPtr<IDxcCompiler3> GetDxcCompiler() const;
 
+    const PerStage<std::wstring>& GetDxcShaderProfiles() const;
+
   private:
     using Base = d3d::Device;
 
@@ -297,6 +299,9 @@ class Device final : public d3d::Device {
 
     // The number of nanoseconds required for a timestamp query to be incremented by 1
     float mTimestampPeriod = 1.0f;
+
+    // Shader profiles used for compiling shader with DXC
+    PerStage<std::wstring> mDxcShaderProfiles;
 };
 
 }  // namespace dawn::native::d3d12
