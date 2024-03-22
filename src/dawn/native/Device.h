@@ -435,21 +435,6 @@ class DeviceBase : public RefCountedWithExternalCount {
     CallbackTaskManager* GetCallbackTaskManager() const;
     dawn::platform::WorkerTaskPool* GetWorkerTaskPool() const;
 
-    // Enqueue a successfully-create async pipeline creation callback.
-    // TODO(dawn:2353): Remove.
-    void AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
-                                            WGPUCreateRenderPipelineAsyncCallback callback,
-                                            void* userdata);
-    // Enqueue a failed async pipeline creation callback.
-    // If the device is lost, then further errors should not be reported to
-    // the application. Instead of an error, a successful callback is enqueued, using
-    // an error pipeline created with `label`.
-    // TODO(dawn:2353): Remove.
-    void AddRenderPipelineAsyncCallbackTask(std::unique_ptr<ErrorData> error,
-                                            const char* label,
-                                            WGPUCreateRenderPipelineAsyncCallback callback,
-                                            void* userdata);
-
     PipelineCompatibilityToken GetNextPipelineCompatibilityToken();
 
     const CacheKey& GetCacheKey() const;
@@ -475,6 +460,7 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     Ref<ComputePipelineBase> AddOrGetCachedComputePipeline(
         Ref<ComputePipelineBase> computePipeline);
+    Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline);
 
   protected:
     // Constructor used only for mocking and testing.
@@ -542,14 +528,13 @@ class DeviceBase : public RefCountedWithExternalCount {
         ComputePipelineBase* uninitializedComputePipeline);
     Ref<RenderPipelineBase> GetCachedRenderPipeline(
         RenderPipelineBase* uninitializedRenderPipeline);
-    Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline);
     virtual Ref<PipelineCacheBase> GetOrCreatePipelineCacheImpl(const CacheKey& key);
     virtual Ref<EventManager::TrackedEvent> InitializeComputePipelineAsyncImpl(
         Ref<ComputePipelineBase> computePipeline,
         const CreateComputePipelineAsyncCallbackInfo& callbackInfo);
-    virtual void InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
-                                                   WGPUCreateRenderPipelineAsyncCallback callback,
-                                                   void* userdata);
+    virtual Ref<EventManager::TrackedEvent> InitializeRenderPipelineAsyncImpl(
+        Ref<RenderPipelineBase> renderPipeline,
+        const CreateRenderPipelineAsyncCallbackInfo& callbackInfo);
 
     void ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescriptor);
 

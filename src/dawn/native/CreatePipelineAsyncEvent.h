@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <string>
+#include <type_traits>
 
 #include "dawn/common/Ref.h"
 #include "dawn/native/CallbackTaskManager.h"
@@ -47,27 +48,30 @@ class PipelineLayoutBase;
 class RenderPipelineBase;
 class ShaderModuleBase;
 
-// CreateComputePipelineAsyncEvent represents the async event managed by event manager,
+// CreatePipelineAsyncEvent represents the async event managed by event manager,
 // and the async task run on a separate task to initialize the pipeline.
-class CreateComputePipelineAsyncEvent final : public EventManager::TrackedEvent {
+template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
+class CreatePipelineAsyncEvent final : public EventManager::TrackedEvent {
   public:
+    using CallbackType = decltype(std::declval<CreatePipelineAsyncCallbackInfo>().callback);
+
     // Create an event backed by the given system event (for async pipeline creation goes through
     // the backend).
-    CreateComputePipelineAsyncEvent(DeviceBase* device,
-                                    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
-                                    Ref<ComputePipelineBase> pipeline,
-                                    Ref<SystemEvent> systemEvent);
+    CreatePipelineAsyncEvent(DeviceBase* device,
+                             const CreatePipelineAsyncCallbackInfo& callbackInfo,
+                             Ref<PipelineType> pipeline,
+                             Ref<SystemEvent> systemEvent);
     // Create an event that's ready at creation (for cached results)
-    CreateComputePipelineAsyncEvent(DeviceBase* device,
-                                    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
-                                    Ref<ComputePipelineBase> pipeline);
+    CreatePipelineAsyncEvent(DeviceBase* device,
+                             const CreatePipelineAsyncCallbackInfo& callbackInfo,
+                             Ref<PipelineType> pipeline);
     // Create an event that's ready at creation (for errors)
-    CreateComputePipelineAsyncEvent(DeviceBase* device,
-                                    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
-                                    std::unique_ptr<ErrorData> error,
-                                    const char* label);
+    CreatePipelineAsyncEvent(DeviceBase* device,
+                             const CreatePipelineAsyncCallbackInfo& callbackInfo,
+                             std::unique_ptr<ErrorData> error,
+                             const char* label);
 
-    ~CreateComputePipelineAsyncEvent() override;
+    ~CreatePipelineAsyncEvent() override;
 
     // Entrance call to start an AsyncTask initializing the pipeline.
     void InitializeAsync();
@@ -77,40 +81,29 @@ class CreateComputePipelineAsyncEvent final : public EventManager::TrackedEvent 
     void Complete(EventCompletionType completionType) override;
 
   private:
-    WGPUCreateComputePipelineAsyncCallback mCallback;
+    static const char* kDawnHistogramMetricsSuccess;
+    static const char* kDawnHistogramMetricsUS;
+
+    void AddOrGetCachedPipeline();
+
+    CallbackType mCallback;
     // TODO(https://crbug.com/2364): The pointer is dangling in
     // webgpu_cts_with_validation_tests. We should investigate, and decide if
     // this should be fixed, or turned into a DisableDanglingPtrDetection.
     raw_ptr<void, DanglingUntriaged> mUserdata;
     // For some errors (e.g. device lost) we still need to resolve and return a pipeline with
     // Pipeline::MakeError. So we need to hold the pipeline and the error separately.
-    Ref<ComputePipelineBase> mPipeline;
+    Ref<PipelineType> mPipeline;
     std::unique_ptr<ErrorData> mError;
 
     // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
     PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
 };
 
-// CreateRenderPipelineAsyncTask defines all the inputs and outputs of
-// CreateRenderPipelineAsync() tasks, which are the same among all the backends.
-class CreateRenderPipelineAsyncTask {
-  public:
-    CreateRenderPipelineAsyncTask(Ref<RenderPipelineBase> nonInitializedRenderPipeline,
-                                  WGPUCreateRenderPipelineAsyncCallback callback,
-                                  void* userdata);
-    ~CreateRenderPipelineAsyncTask();
-
-    void Run();
-
-    static void RunAsync(std::unique_ptr<CreateRenderPipelineAsyncTask> task);
-
-  private:
-    Ref<RenderPipelineBase> mRenderPipeline;
-    WGPUCreateRenderPipelineAsyncCallback mCallback;
-    raw_ptr<void> mUserdata;
-    // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
-    PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
-};
+using CreateComputePipelineAsyncEvent =
+    CreatePipelineAsyncEvent<ComputePipelineBase, CreateComputePipelineAsyncCallbackInfo>;
+using CreateRenderPipelineAsyncEvent =
+    CreatePipelineAsyncEvent<RenderPipelineBase, CreateRenderPipelineAsyncCallbackInfo>;
 
 }  // namespace dawn::native
 

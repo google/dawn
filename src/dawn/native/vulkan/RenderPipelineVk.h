@@ -31,6 +31,7 @@
 #include "dawn/native/RenderPipeline.h"
 
 #include "dawn/common/vulkan_platform.h"
+#include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/Error.h"
 
 namespace dawn::native::vulkan {
@@ -42,9 +43,10 @@ class RenderPipeline final : public RenderPipelineBase {
     static Ref<RenderPipeline> CreateUninitialized(
         Device* device,
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
-    static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
-                                WGPUCreateRenderPipelineAsyncCallback callback,
-                                void* userdata);
+    static Ref<CreateRenderPipelineAsyncEvent> InitializeAsync(
+        Device* device,
+        Ref<RenderPipelineBase> renderPipeline,
+        const CreateRenderPipelineAsyncCallbackInfo& callbackInfo);
 
     VkPipeline GetHandle() const;
 

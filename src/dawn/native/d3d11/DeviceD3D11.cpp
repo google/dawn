@@ -236,10 +236,10 @@ Ref<EventManager::TrackedEvent> Device::InitializeComputePipelineAsyncImpl(
     return ComputePipeline::InitializeAsync(this, std::move(computePipeline), callbackInfo);
 }
 
-void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
-                                               WGPUCreateRenderPipelineAsyncCallback callback,
-                                               void* userdata) {
-    RenderPipeline::InitializeAsync(std::move(renderPipeline), callback, userdata);
+Ref<EventManager::TrackedEvent> Device::InitializeRenderPipelineAsyncImpl(
+    Ref<RenderPipelineBase> renderPipeline,
+    const CreateRenderPipelineAsyncCallbackInfo& callbackInfo) {
+    return RenderPipeline::InitializeAsync(this, std::move(renderPipeline), callbackInfo);
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
