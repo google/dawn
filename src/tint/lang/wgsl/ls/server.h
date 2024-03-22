@@ -55,6 +55,10 @@ class Server {
     bool ShuttingDown() const { return shutting_down_; }
 
   private:
+    ////////////////////////////////////////////////////////////////////////////
+    // Requests
+    ////////////////////////////////////////////////////////////////////////////
+
     /// Handler for langsvr::lsp::TextDocumentDefinitionRequest
     typename langsvr::lsp::TextDocumentDefinitionRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentDefinitionRequest&);
@@ -71,6 +75,22 @@ class Server {
     typename langsvr::lsp::TextDocumentReferencesRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentReferencesRequest&);
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Notifications
+    ////////////////////////////////////////////////////////////////////////////
+
+    /// Handler for langsvr::lsp::CancelRequestNotification
+    langsvr::Result<langsvr::SuccessType>  //
+    Handle(const langsvr::lsp::CancelRequestNotification&);
+
+    /// Handler for langsvr::lsp::InitializedNotification
+    langsvr::Result<langsvr::SuccessType>  //
+    Handle(const langsvr::lsp::InitializedNotification&);
+
+    /// Handler for langsvr::lsp::SetTraceNotification
+    langsvr::Result<langsvr::SuccessType>  //
+    Handle(const langsvr::lsp::SetTraceNotification&);
+
     /// Handler for langsvr::lsp::TextDocumentDidOpenNotification
     langsvr::Result<langsvr::SuccessType>  //
     Handle(const langsvr::lsp::TextDocumentDidOpenNotification&);
@@ -82,6 +102,10 @@ class Server {
     /// Handler for langsvr::lsp::TextDocumentDidChangeNotification
     langsvr::Result<langsvr::SuccessType>  //
     Handle(const langsvr::lsp::TextDocumentDidChangeNotification&);
+
+    /// Handler for langsvr::lsp::WorkspaceDidChangeConfigurationNotification
+    langsvr::Result<langsvr::SuccessType>  //
+    Handle(const langsvr::lsp::WorkspaceDidChangeConfigurationNotification&);
 
     /// Publishes the tint::Program diagnostics to the server via a
     /// TextDocumentPublishDiagnosticsNotification.

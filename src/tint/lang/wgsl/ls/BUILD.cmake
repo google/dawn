@@ -41,17 +41,21 @@ if(TINT_BUILD_TINTD AND TINT_BUILD_WGSL_READER)
 # Condition: TINT_BUILD_TINTD AND TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_ls lib
+  lang/wgsl/ls/cancel_request.cc
+  lang/wgsl/ls/change_configuration.cc
   lang/wgsl/ls/definition.cc
   lang/wgsl/ls/diagnostics.cc
   lang/wgsl/ls/document.cc
   lang/wgsl/ls/file.cc
   lang/wgsl/ls/file.h
   lang/wgsl/ls/hover.cc
+  lang/wgsl/ls/initialize.cc
   lang/wgsl/ls/references.cc
   lang/wgsl/ls/serve.cc
   lang/wgsl/ls/serve.h
   lang/wgsl/ls/server.cc
   lang/wgsl/ls/server.h
+  lang/wgsl/ls/set_trace.cc
   lang/wgsl/ls/symbols.cc
   lang/wgsl/ls/utils.h
 )

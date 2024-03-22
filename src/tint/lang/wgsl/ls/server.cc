@@ -48,6 +48,12 @@ Server::Server(langsvr::Session& session) : session_(session) {
             lsp::ReferenceOptions opts;
             return opts;
         }();
+        result.capabilities.text_document_sync = [] {
+            lsp::TextDocumentSyncOptions opts;
+            opts.open_close = true;
+            opts.change = lsp::TextDocumentSyncKind::kIncremental;
+            return opts;
+        }();
         return result;
     });
 
@@ -57,11 +63,14 @@ Server::Server(langsvr::Session& session) : session_(session) {
     });
 
     // Notification handlers
-    session.Register([&](const lsp::TextDocumentDidOpenNotification& n) { return Handle(n); });
-    session.Register([&](const lsp::TextDocumentDidCloseNotification& n) { return Handle(n); });
+    session.Register([&](const lsp::CancelRequestNotification& n) { return Handle(n); });
+    session.Register([&](const lsp::InitializedNotification& n) { return Handle(n); });
+    session.Register([&](const lsp::SetTraceNotification& n) { return Handle(n); });
     session.Register([&](const lsp::TextDocumentDidChangeNotification& n) { return Handle(n); });
+    session.Register([&](const lsp::TextDocumentDidCloseNotification& n) { return Handle(n); });
+    session.Register([&](const lsp::TextDocumentDidOpenNotification& n) { return Handle(n); });
     session.Register(
-        [&](const lsp::WorkspaceDidChangeConfigurationNotification&) { return langsvr::Success; });
+        [&](const lsp::WorkspaceDidChangeConfigurationNotification& n) { return Handle(n); });
 
     // Request handlers
     session.Register([&](const lsp::TextDocumentDefinitionRequest& r) { return Handle(r); });
