@@ -298,7 +298,7 @@ deps = {
   },
 
   'third_party/langsvr': {
-    'url': '{github_git}/google/langsvr.git@a34f394de431efaeb79bec26577389516b531e31',
+    'url': '{github_git}/google/langsvr.git@a79fcb7068cb9c75ad77df9abe16d726402477aa',
     'condition': 'dawn_standalone',
   },
 
