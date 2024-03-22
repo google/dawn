@@ -157,9 +157,9 @@ class Device final : public DeviceBase {
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
     Ref<PipelineCacheBase> GetOrCreatePipelineCacheImpl(const CacheKey& key) override;
-    void InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
-                                            WGPUCreateComputePipelineAsyncCallback callback,
-                                            void* userdata) override;
+    Ref<EventManager::TrackedEvent> InitializeComputePipelineAsyncImpl(
+        Ref<ComputePipelineBase> computePipeline,
+        const CreateComputePipelineAsyncCallbackInfo& callbackInfo) override;
     void InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
                                            WGPUCreateRenderPipelineAsyncCallback callback,
                                            void* userdata) override;

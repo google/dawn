@@ -46,4 +46,8 @@ DawnMockTest::~DawnMockTest() {
     dawnProcSetProcs(nullptr);
 }
 
+void DawnMockTest::ProcessEvents() {
+    mDeviceMock->GetInstance()->ProcessEvents();
+}
+
 }  // namespace dawn::native

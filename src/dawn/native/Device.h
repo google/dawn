@@ -167,7 +167,7 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
-    InstanceBase* GetInstance() const;
+    virtual InstanceBase* GetInstance() const;
     AdapterBase* GetAdapter() const;
     PhysicalDeviceBase* GetPhysicalDevice() const;
     virtual dawn::platform::Platform* GetPlatform() const;
@@ -436,9 +436,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     dawn::platform::WorkerTaskPool* GetWorkerTaskPool() const;
 
     // Enqueue a successfully-create async pipeline creation callback.
-    void AddComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
-                                             WGPUCreateComputePipelineAsyncCallback callback,
-                                             void* userdata);
+    // TODO(dawn:2353): Remove.
     void AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
                                             WGPUCreateRenderPipelineAsyncCallback callback,
                                             void* userdata);
@@ -446,10 +444,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     // If the device is lost, then further errors should not be reported to
     // the application. Instead of an error, a successful callback is enqueued, using
     // an error pipeline created with `label`.
-    void AddComputePipelineAsyncCallbackTask(std::unique_ptr<ErrorData> error,
-                                             const char* label,
-                                             WGPUCreateComputePipelineAsyncCallback callback,
-                                             void* userdata);
+    // TODO(dawn:2353): Remove.
     void AddRenderPipelineAsyncCallbackTask(std::unique_ptr<ErrorData> error,
                                             const char* label,
                                             WGPUCreateRenderPipelineAsyncCallback callback,
@@ -477,6 +472,9 @@ class DeviceBase : public RefCountedWithExternalCount {
     // turned on. Thus it should only be wrapped inside DAWN_ASSERT() macro. i.e.
     // DAWN_ASSERT(device.IsLockedByCurrentThread())
     bool IsLockedByCurrentThreadIfNeeded() const;
+
+    Ref<ComputePipelineBase> AddOrGetCachedComputePipeline(
+        Ref<ComputePipelineBase> computePipeline);
 
   protected:
     // Constructor used only for mocking and testing.
@@ -544,13 +542,11 @@ class DeviceBase : public RefCountedWithExternalCount {
         ComputePipelineBase* uninitializedComputePipeline);
     Ref<RenderPipelineBase> GetCachedRenderPipeline(
         RenderPipelineBase* uninitializedRenderPipeline);
-    Ref<ComputePipelineBase> AddOrGetCachedComputePipeline(
-        Ref<ComputePipelineBase> computePipeline);
     Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline);
     virtual Ref<PipelineCacheBase> GetOrCreatePipelineCacheImpl(const CacheKey& key);
-    virtual void InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
-                                                    WGPUCreateComputePipelineAsyncCallback callback,
-                                                    void* userdata);
+    virtual Ref<EventManager::TrackedEvent> InitializeComputePipelineAsyncImpl(
+        Ref<ComputePipelineBase> computePipeline,
+        const CreateComputePipelineAsyncCallbackInfo& callbackInfo);
     virtual void InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
                                                    WGPUCreateRenderPipelineAsyncCallback callback,
                                                    void* userdata);

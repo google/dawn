@@ -27,6 +27,7 @@
 
 #include <string>
 
+#include "dawn/native/DawnNative.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -168,6 +169,33 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
         &task);
 
     ValidateCreateComputePipelineAsync();
+}
+
+// Verify that callback can be nullptr.
+TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncNullCallback) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    // TODO(crbug.com/dawn/2471): QueueGL hangs
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        struct SSBO {
+            value : u32
+        }
+        @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
+
+        @compute @workgroup_size(1) fn main() {
+            ssbo.value = 1u;
+        })");
+
+    wgpu::CreateComputePipelineAsyncCallbackInfo callbackInfo;
+    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
+    callbackInfo.callback = nullptr;
+    device.CreateComputePipelineAsync(&csDesc, callbackInfo);
+
+    while (dawn::native::InstanceProcessEvents(instance.Get())) {
+        WaitABit();
+    }
 }
 
 // This is a regression test for a bug on the member "entryPoint" of FlatComputePipelineDescriptor.

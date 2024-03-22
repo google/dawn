@@ -55,6 +55,8 @@ class DeviceMock : public DeviceBase {
     ~DeviceMock() override;
     dawn::platform::Platform* GetPlatform() const override;
 
+    dawn::native::InstanceBase* GetInstance() const override;
+
     // Mock specific functionality.
     QueueMock* GetQueueMock();
 

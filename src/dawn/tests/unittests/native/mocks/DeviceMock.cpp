@@ -133,6 +133,10 @@ dawn::platform::Platform* DeviceMock::GetPlatform() const {
     return mInstance->GetPlatform();
 }
 
+dawn::native::InstanceBase* DeviceMock::GetInstance() const {
+    return mInstance.Get();
+}
+
 QueueMock* DeviceMock::GetQueueMock() {
     return reinterpret_cast<QueueMock*>(GetQueue());
 }

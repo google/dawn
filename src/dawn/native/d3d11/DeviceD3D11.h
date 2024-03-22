@@ -137,9 +137,9 @@ class Device final : public d3d::Device {
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor) override;
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
-    void InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
-                                            WGPUCreateComputePipelineAsyncCallback callback,
-                                            void* userdata) override;
+    Ref<EventManager::TrackedEvent> InitializeComputePipelineAsyncImpl(
+        Ref<ComputePipelineBase> computePipeline,
+        const CreateComputePipelineAsyncCallbackInfo& callbackInfo) override;
     void InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
                                            WGPUCreateRenderPipelineAsyncCallback callback,
                                            void* userdata) override;

@@ -38,6 +38,8 @@ class DawnMockTest : public ::testing::Test {
     DawnMockTest();
     ~DawnMockTest() override;
 
+    void ProcessEvents();
+
   protected:
     // TODO(https://crbug.com/dawn/2346): Investigate `DanglingUntriaged` pointers in dawn/test.
     raw_ptr<::testing::NiceMock<DeviceMock>, DanglingUntriaged> mDeviceMock;

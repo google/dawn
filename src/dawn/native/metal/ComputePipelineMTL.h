@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "dawn/native/ComputePipeline.h"
+#include "dawn/native/CreatePipelineAsyncTask.h"
 
 #include "dawn/common/NSRef.h"
 
@@ -45,9 +46,10 @@ class ComputePipeline final : public ComputePipelineBase {
     static Ref<ComputePipeline> CreateUninitialized(
         Device* device,
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
-    static void InitializeAsync(Ref<ComputePipelineBase> computePipeline,
-                                WGPUCreateComputePipelineAsyncCallback callback,
-                                void* userdata);
+    static Ref<CreateComputePipelineAsyncEvent> InitializeAsync(
+        Device* device,
+        Ref<ComputePipelineBase> computePipeline,
+        const CreateComputePipelineAsyncCallbackInfo& callbackInfo);
 
     ComputePipeline(DeviceBase* device, const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
     ~ComputePipeline() override;
