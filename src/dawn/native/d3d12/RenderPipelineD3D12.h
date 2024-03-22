@@ -30,7 +30,6 @@
 
 #include "dawn/native/RenderPipeline.h"
 
-#include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 
@@ -43,10 +42,9 @@ class RenderPipeline final : public RenderPipelineBase {
     static Ref<RenderPipeline> CreateUninitialized(
         Device* device,
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
-    static Ref<CreateRenderPipelineAsyncEvent> InitializeAsync(
-        Device* device,
-        Ref<RenderPipelineBase> renderPipeline,
-        const CreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+    static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
+                                WGPUCreateRenderPipelineAsyncCallback callback,
+                                void* userdata);
     RenderPipeline() = delete;
 
     MaybeError InitializeImpl() override;

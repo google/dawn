@@ -140,9 +140,9 @@ class Device final : public d3d::Device {
     Ref<EventManager::TrackedEvent> InitializeComputePipelineAsyncImpl(
         Ref<ComputePipelineBase> computePipeline,
         const CreateComputePipelineAsyncCallbackInfo& callbackInfo) override;
-    Ref<EventManager::TrackedEvent> InitializeRenderPipelineAsyncImpl(
-        Ref<RenderPipelineBase> renderPipeline,
-        const CreateRenderPipelineAsyncCallbackInfo& callbackInfo) override;
+    void InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
+                                           WGPUCreateRenderPipelineAsyncCallback callback,
+                                           void* userdata) override;
 
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
         const SharedTextureMemoryDescriptor* descriptor) override;

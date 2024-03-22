@@ -215,10 +215,10 @@ Ref<EventManager::TrackedEvent> Device::InitializeComputePipelineAsyncImpl(
     const CreateComputePipelineAsyncCallbackInfo& callbackInfo) {
     return ComputePipeline::InitializeAsync(this, std::move(computePipeline), callbackInfo);
 }
-Ref<EventManager::TrackedEvent> Device::InitializeRenderPipelineAsyncImpl(
-    Ref<RenderPipelineBase> renderPipeline,
-    const CreateRenderPipelineAsyncCallbackInfo& callbackInfo) {
-    return RenderPipeline::InitializeAsync(this, std::move(renderPipeline), callbackInfo);
+void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
+                                               WGPUCreateRenderPipelineAsyncCallback callback,
+                                               void* userdata) {
+    RenderPipeline::InitializeAsync(std::move(renderPipeline), callback, userdata);
 }
 
 ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(

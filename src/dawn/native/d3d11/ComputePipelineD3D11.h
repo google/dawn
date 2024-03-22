@@ -29,7 +29,7 @@
 #define SRC_DAWN_NATIVE_D3D11_COMPUTEPIPELINEGL_H_
 
 #include "dawn/native/ComputePipeline.h"
-#include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/CreatePipelineAsyncTask.h"
 
 #include "dawn/native/d3d/d3d_platform.h"
 

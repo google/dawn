@@ -30,7 +30,7 @@
 #include <memory>
 #include <utility>
 
-#include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/d3d/BlobD3D.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"

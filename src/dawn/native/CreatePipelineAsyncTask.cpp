@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/CreatePipelineAsyncTask.h"
 
 #include <utility>
 
@@ -42,51 +42,10 @@
 
 namespace dawn::native {
 
-template <>
-const char*
-    CreatePipelineAsyncEvent<ComputePipelineBase,
-                             CreateComputePipelineAsyncCallbackInfo>::kDawnHistogramMetricsSuccess =
-        "CreateComputePipelineSuccess";
-template <>
-const char*
-    CreatePipelineAsyncEvent<ComputePipelineBase,
-                             CreateComputePipelineAsyncCallbackInfo>::kDawnHistogramMetricsUS =
-        "CreateComputePipelineUS";
-template <>
-void CreatePipelineAsyncEvent<ComputePipelineBase,
-                              CreateComputePipelineAsyncCallbackInfo>::AddOrGetCachedPipeline() {
-    DeviceBase* device = mPipeline->GetDevice();
-    auto deviceLock(device->GetScopedLock());
-    if (device->GetState() == DeviceBase::State::Alive) {
-        mPipeline = device->AddOrGetCachedComputePipeline(std::move(mPipeline));
-    }
-}
-
-template <>
-const char*
-    CreatePipelineAsyncEvent<RenderPipelineBase,
-                             CreateRenderPipelineAsyncCallbackInfo>::kDawnHistogramMetricsSuccess =
-        "CreateRenderPipelineSuccess";
-template <>
-const char*
-    CreatePipelineAsyncEvent<RenderPipelineBase,
-                             CreateRenderPipelineAsyncCallbackInfo>::kDawnHistogramMetricsUS =
-        "CreateRenderPipelineUS";
-template <>
-void CreatePipelineAsyncEvent<RenderPipelineBase,
-                              CreateRenderPipelineAsyncCallbackInfo>::AddOrGetCachedPipeline() {
-    DeviceBase* device = mPipeline->GetDevice();
-    auto deviceLock(device->GetScopedLock());
-    if (device->GetState() == DeviceBase::State::Alive) {
-        mPipeline = device->AddOrGetCachedRenderPipeline(std::move(mPipeline));
-    }
-}
-
-template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
-CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreatePipelineAsyncEvent(
+CreateComputePipelineAsyncEvent::CreateComputePipelineAsyncEvent(
     DeviceBase* device,
-    const CreatePipelineAsyncCallbackInfo& callbackInfo,
-    Ref<PipelineType> pipeline,
+    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
+    Ref<ComputePipelineBase> pipeline,
     Ref<SystemEvent> systemEvent)
     : TrackedEvent(callbackInfo.mode, std::move(systemEvent)),
       mCallback(callbackInfo.callback),
@@ -94,49 +53,45 @@ CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreateP
       mPipeline(std::move(pipeline)),
       mScopedUseShaderPrograms(mPipeline->UseShaderPrograms()) {}
 
-template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
-CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreatePipelineAsyncEvent(
+CreateComputePipelineAsyncEvent::CreateComputePipelineAsyncEvent(
     DeviceBase* device,
-    const CreatePipelineAsyncCallbackInfo& callbackInfo,
-    Ref<PipelineType> pipeline)
+    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
+    Ref<ComputePipelineBase> pipeline)
     : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
       mCallback(callbackInfo.callback),
       mUserdata(callbackInfo.userdata),
       mPipeline(std::move(pipeline)) {}
 
-template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
-CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreatePipelineAsyncEvent(
+CreateComputePipelineAsyncEvent::CreateComputePipelineAsyncEvent(
     DeviceBase* device,
-    const CreatePipelineAsyncCallbackInfo& callbackInfo,
+    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
     std::unique_ptr<ErrorData> error,
     const char* label)
     : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
       mCallback(callbackInfo.callback),
       mUserdata(callbackInfo.userdata),
-      mPipeline(PipelineType::MakeError(device, label)),
+      mPipeline(ComputePipelineBase::MakeError(device, label)),
       mError(std::move(error)) {}
 
-template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
-CreatePipelineAsyncEvent<PipelineType,
-                         CreatePipelineAsyncCallbackInfo>::~CreatePipelineAsyncEvent() {
+CreateComputePipelineAsyncEvent::~CreateComputePipelineAsyncEvent() {
     EnsureComplete(EventCompletionType::Shutdown);
 }
 
-template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
-void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Initialize() {
+void CreateComputePipelineAsyncEvent::Initialize() {
     const char* eventLabel = utils::GetLabelForTrace(mPipeline->GetLabel().c_str());
     DeviceBase* device = mPipeline->GetDevice();
     TRACE_EVENT_FLOW_END1(device->GetPlatform(), General,
-                          "CreatePipelineAsyncEvent::InitializeAsync", this, "label", eventLabel);
-    TRACE_EVENT1(device->GetPlatform(), General, "CreatePipelineAsyncEvent::Initialize", "label",
-                 eventLabel);
+                          "CreateComputePipelineAsyncEvent::InitializeAsync", this, "label",
+                          eventLabel);
+    TRACE_EVENT1(device->GetPlatform(), General, "CreateComputePipelineAsyncEvent::Initialize",
+                 "label", eventLabel);
 
     MaybeError maybeError;
     {
-        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), kDawnHistogramMetricsUS);
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "CreateComputePipelineUS");
         maybeError = mPipeline->Initialize(std::move(mScopedUseShaderPrograms));
     }
-    DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), kDawnHistogramMetricsSuccess,
+    DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateComputePipelineSuccess",
                            maybeError.IsSuccess());
     if (maybeError.IsError()) {
         mError = maybeError.AcquireError();
@@ -147,20 +102,18 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::In
     device->GetInstance()->GetEventManager()->SetFutureReady(mFutureID);
 }
 
-template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
-void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::InitializeAsync() {
+void CreateComputePipelineAsyncEvent::InitializeAsync() {
     DeviceBase* device = mPipeline->GetDevice();
     const char* eventLabel = utils::GetLabelForTrace(mPipeline->GetLabel().c_str());
     TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
-                            "CreatePipelineAsyncEvent::InitializeAsync", this, "label", eventLabel);
+                            "CreateComputePipelineAsyncEvent::InitializeAsync", this, "label",
+                            eventLabel);
 
-    auto asyncTask = [event = Ref<CreatePipelineAsyncEvent>(this)] { event->Initialize(); };
+    auto asyncTask = [event = Ref<CreateComputePipelineAsyncEvent>(this)] { event->Initialize(); };
     device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
 }
 
-template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
-void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Complete(
-    EventCompletionType completionType) {
+void CreateComputePipelineAsyncEvent::Complete(EventCompletionType completionType) {
     if (completionType == EventCompletionType::Shutdown) {
         if (mCallback) {
             mCallback(ToAPI(wgpu::CreatePipelineAsyncStatus::InstanceDropped), nullptr,
@@ -175,7 +128,7 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
     if (device->IsLost()) {
         // Invalid async creation should "succeed" if the device is already lost.
         if (!mPipeline->IsError()) {
-            mPipeline = PipelineType::MakeError(device, mPipeline->GetLabel().c_str());
+            mPipeline = ComputePipelineBase::MakeError(device, mPipeline->GetLabel().c_str());
         }
         if (mCallback) {
             mCallback(ToAPI(wgpu::CreatePipelineAsyncStatus::Success),
@@ -200,15 +153,72 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
         return;
     }
 
-    AddOrGetCachedPipeline();
+    {
+        auto deviceLock(device->GetScopedLock());
+        if (device->GetState() == DeviceBase::State::Alive) {
+            mPipeline = device->AddOrGetCachedComputePipeline(std::move(mPipeline));
+        }
+    }
     if (mCallback) {
         mCallback(ToAPI(wgpu::CreatePipelineAsyncStatus::Success),
                   ToAPI(ReturnToAPI(std::move(mPipeline))), "", mUserdata);
     }
 }
 
-template class CreatePipelineAsyncEvent<ComputePipelineBase,
-                                        CreateComputePipelineAsyncCallbackInfo>;
-template class CreatePipelineAsyncEvent<RenderPipelineBase, CreateRenderPipelineAsyncCallbackInfo>;
+CreateRenderPipelineAsyncTask::CreateRenderPipelineAsyncTask(
+    Ref<RenderPipelineBase> nonInitializedRenderPipeline,
+    WGPUCreateRenderPipelineAsyncCallback callback,
+    void* userdata)
+    : mRenderPipeline(std::move(nonInitializedRenderPipeline)),
+      mCallback(callback),
+      mUserdata(userdata),
+      mScopedUseShaderPrograms(mRenderPipeline->UseShaderPrograms()) {
+    DAWN_ASSERT(mRenderPipeline != nullptr);
+}
 
+CreateRenderPipelineAsyncTask::~CreateRenderPipelineAsyncTask() = default;
+
+void CreateRenderPipelineAsyncTask::Run() {
+    const char* eventLabel = utils::GetLabelForTrace(mRenderPipeline->GetLabel().c_str());
+
+    DeviceBase* device = mRenderPipeline->GetDevice();
+    TRACE_EVENT_FLOW_END1(device->GetPlatform(), General, "CreateRenderPipelineAsyncTask::RunAsync",
+                          this, "label", eventLabel);
+    TRACE_EVENT1(device->GetPlatform(), General, "CreateRenderPipelineAsyncTask::Run", "label",
+                 eventLabel);
+
+    MaybeError maybeError;
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "CreateRenderPipelineUS");
+        maybeError = mRenderPipeline->Initialize(std::move(mScopedUseShaderPrograms));
+    }
+    DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateRenderPipelineSuccess",
+                           maybeError.IsSuccess());
+    if (maybeError.IsError()) {
+        device->AddRenderPipelineAsyncCallbackTask(
+            maybeError.AcquireError(), mRenderPipeline->GetLabel().c_str(), mCallback, mUserdata);
+    } else {
+        device->AddRenderPipelineAsyncCallbackTask(mRenderPipeline, mCallback, mUserdata);
+    }
+}
+
+void CreateRenderPipelineAsyncTask::RunAsync(std::unique_ptr<CreateRenderPipelineAsyncTask> task) {
+    DeviceBase* device = task->mRenderPipeline->GetDevice();
+
+    const char* eventLabel = utils::GetLabelForTrace(task->mRenderPipeline->GetLabel().c_str());
+
+    TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
+                            "CreateRenderPipelineAsyncTask::RunAsync", task.get(), "label",
+                            eventLabel);
+
+    // Using "taskPtr = std::move(task)" causes compilation error while it should be supported
+    // since C++14:
+    // https://docs.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp?view=msvc-160
+    auto asyncTask = [taskPtr = task.release()] {
+        std::unique_ptr<CreateRenderPipelineAsyncTask> innerTaskPtr(taskPtr);
+        innerTaskPtr->Run();
+    };
+
+    device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
+}
 }  // namespace dawn::native

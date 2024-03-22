@@ -348,7 +348,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
         .Times(1);
 
     device.CreateRenderPipelineAsync(ToCppAPI(&desc), cb.Callback(), cb.MakeUserdata(this));
-    ProcessEvents();
+    device.Tick();
 
     // Device lost should only happen because of destruction.
     EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
@@ -400,7 +400,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
         .Times(1);
 
     device.CreateRenderPipelineAsync(ToCppAPI(&desc), cb.Callback(), cb.MakeUserdata(this));
-    ProcessEvents();
+    device.Tick();
 
     // Device lost should only happen because of destruction.
     EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);

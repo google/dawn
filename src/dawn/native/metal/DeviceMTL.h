@@ -126,9 +126,9 @@ class Device final : public DeviceBase {
     Ref<EventManager::TrackedEvent> InitializeComputePipelineAsyncImpl(
         Ref<ComputePipelineBase> computePipeline,
         const CreateComputePipelineAsyncCallbackInfo& callbackInfo) override;
-    Ref<EventManager::TrackedEvent> InitializeRenderPipelineAsyncImpl(
-        Ref<RenderPipelineBase> renderPipeline,
-        const CreateRenderPipelineAsyncCallbackInfo& callbackInfo) override;
+    void InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
+                                           WGPUCreateRenderPipelineAsyncCallback callback,
+                                           void* userdata) override;
 
     ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
         const Surface* surface) const override;

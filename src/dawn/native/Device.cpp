@@ -46,7 +46,7 @@
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/CompilationMessages.h"
-#include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/ErrorInjector.h"
@@ -1306,46 +1306,38 @@ void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor* de
     TRACE_EVENT1(GetPlatform(), General, "DeviceBase::APICreateRenderPipelineAsync", "label",
                  utils::GetLabelForTrace(descriptor->label));
 
-    CreateRenderPipelineAsyncCallbackInfo callbackInfo = {};
-    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
-    callbackInfo.callback = callback;
-    callbackInfo.userdata = userdata;
-    APICreateRenderPipelineAsyncF(descriptor, callbackInfo);
+    auto resultOrError = CreateUninitializedRenderPipeline(descriptor);
+
+    // Enqueue the callback directly when an error has been found in the front-end
+    // validation.
+    if (resultOrError.IsError()) {
+        AddRenderPipelineAsyncCallbackTask(resultOrError.AcquireError(), descriptor->label,
+                                           callback, userdata);
+        return;
+    }
+
+    Ref<RenderPipelineBase> uninitializedRenderPipeline = resultOrError.AcquireSuccess();
+
+    // Call the callback directly when we can get a cached render pipeline object.
+    Ref<RenderPipelineBase> cachedRenderPipeline =
+        GetCachedRenderPipeline(uninitializedRenderPipeline.Get());
+    if (cachedRenderPipeline != nullptr) {
+        mCallbackTaskManager->AddCallbackTask(
+            std::bind(callback, WGPUCreatePipelineAsyncStatus_Success,
+                      ToAPI(ReturnToAPI(std::move(cachedRenderPipeline))), "", userdata));
+    } else {
+        // Otherwise we will create the pipeline object in InitializeRenderPipelineAsyncImpl(),
+        // where the pipeline object may be initialized asynchronously and the result will be
+        // saved to mCreatePipelineAsyncTracker.
+        InitializeRenderPipelineAsyncImpl(std::move(uninitializedRenderPipeline), callback,
+                                          userdata);
+    }
 }
 Future DeviceBase::APICreateRenderPipelineAsyncF(
     const RenderPipelineDescriptor* descriptor,
     const CreateRenderPipelineAsyncCallbackInfo& callbackInfo) {
-    EventManager* manager = GetInstance()->GetEventManager();
-    auto GetFuture = [&](Ref<EventManager::TrackedEvent>&& event) {
-        FutureID futureID = manager->TrackEvent(std::move(event));
-        return Future{futureID};
-    };
-
-    if (IsLost()) {
-        // Device lost error: create an async event that completes when created.
-        return GetFuture(AcquireRef(new CreateRenderPipelineAsyncEvent(
-            this, callbackInfo, DAWN_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
-    }
-
-    auto resultOrError = CreateUninitializedRenderPipeline(descriptor);
-    if (resultOrError.IsError()) {
-        // Validation error: create an async event that completes when created.
-        return GetFuture(AcquireRef(new CreateRenderPipelineAsyncEvent(
-            this, callbackInfo, resultOrError.AcquireError(), descriptor->label)));
-    }
-
-    Ref<RenderPipelineBase> uninitializedRenderPipeline = resultOrError.AcquireSuccess();
-    Ref<RenderPipelineBase> cachedRenderPipeline =
-        GetCachedRenderPipeline(uninitializedRenderPipeline.Get());
-    if (cachedRenderPipeline.Get() != nullptr) {
-        // Cached pipeline: create an async event that completes when created.
-        return GetFuture(AcquireRef(new CreateRenderPipelineAsyncEvent(
-            this, callbackInfo, std::move(cachedRenderPipeline))));
-    }
-
-    // New pipeline: create an async event that is really async.
-    return GetFuture(
-        InitializeRenderPipelineAsyncImpl(std::move(uninitializedRenderPipeline), callbackInfo));
+    // TODO(dawn:1987) Implement this.
+    DAWN_CHECK(false);
 }
 RenderBundleEncoder* DeviceBase::APICreateRenderBundleEncoder(
     const RenderBundleEncoderDescriptor* descriptor) {
@@ -1955,11 +1947,11 @@ Ref<EventManager::TrackedEvent> DeviceBase::InitializeComputePipelineAsyncImpl(
         new CreateComputePipelineAsyncEvent(this, callbackInfo, std::move(computePipeline)));
 }
 
-// This base version is creating the pipeline synchronously,
-// and is overwritten on the backends that actually support asynchronous pipeline creation.
-Ref<EventManager::TrackedEvent> DeviceBase::InitializeRenderPipelineAsyncImpl(
-    Ref<RenderPipelineBase> renderPipeline,
-    const CreateRenderPipelineAsyncCallbackInfo& callbackInfo) {
+// This function is overwritten with the async version on the backends
+// that supports initializing render pipeline asynchronously
+void DeviceBase::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
+                                                   WGPUCreateRenderPipelineAsyncCallback callback,
+                                                   void* userdata) {
     MaybeError maybeError;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateRenderPipelineUS");
@@ -1968,11 +1960,11 @@ Ref<EventManager::TrackedEvent> DeviceBase::InitializeRenderPipelineAsyncImpl(
     DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateRenderPipelineSuccess", maybeError.IsSuccess());
 
     if (maybeError.IsError()) {
-        return AcquireRef(new CreateRenderPipelineAsyncEvent(
-            this, callbackInfo, maybeError.AcquireError(), renderPipeline->GetLabel().c_str()));
+        AddRenderPipelineAsyncCallbackTask(maybeError.AcquireError(),
+                                           renderPipeline->GetLabel().c_str(), callback, userdata);
+    } else {
+        AddRenderPipelineAsyncCallbackTask(std::move(renderPipeline), callback, userdata);
     }
-    return AcquireRef(
-        new CreateRenderPipelineAsyncEvent(this, callbackInfo, std::move(renderPipeline)));
 }
 
 ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreatePipelineLayout(
@@ -2252,6 +2244,53 @@ CallbackTaskManager* DeviceBase::GetCallbackTaskManager() const {
 
 dawn::platform::WorkerTaskPool* DeviceBase::GetWorkerTaskPool() const {
     return mWorkerTaskPool.get();
+}
+
+void DeviceBase::AddRenderPipelineAsyncCallbackTask(std::unique_ptr<ErrorData> error,
+                                                    const char* label,
+                                                    WGPUCreateRenderPipelineAsyncCallback callback,
+                                                    void* userdata) {
+    if (GetState() != State::Alive) {
+        // If the device is no longer alive, errors should not be reported anymore.
+        // Call the callback with an error pipeline.
+        return mCallbackTaskManager->AddCallbackTask(
+            [callback, pipeline = RenderPipelineBase::MakeError(this, label), userdata]() mutable {
+                callback(WGPUCreatePipelineAsyncStatus_Success,
+                         ToAPI(ReturnToAPI(std::move(pipeline))), "", userdata);
+            });
+    }
+
+    WGPUCreatePipelineAsyncStatus status = CreatePipelineAsyncStatusFromErrorType(error->GetType());
+    mCallbackTaskManager->AddCallbackTask(
+        [callback, message = error->GetFormattedMessage(), status, userdata]() {
+            callback(status, nullptr, message.c_str(), userdata);
+        });
+}
+
+void DeviceBase::AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
+                                                    WGPUCreateRenderPipelineAsyncCallback callback,
+                                                    void* userdata) {
+    mCallbackTaskManager->AddCallbackTask(
+        [callback, pipeline = std::move(pipeline), userdata]() mutable {
+            // TODO(dawn:529): call AddOrGetCachedRenderPipeline() asynchronously in
+            // CreateRenderPipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
+            // thread-safe.
+            DAWN_ASSERT(pipeline != nullptr);
+            {
+                // This is called inside a callback, and no lock will be held by default so we have
+                // to lock now to protect the cache.
+                // Note: we don't lock inside AddOrGetCachedRenderPipeline() to avoid deadlock
+                // because many places calling that method might already have the lock held. For
+                // example, APICreateRenderPipeline()
+                DeviceBase* device = pipeline->GetDevice();
+                auto deviceLock(device->GetScopedLock());
+                if (device->GetState() == State::Alive) {
+                    pipeline = device->AddOrGetCachedRenderPipeline(std::move(pipeline));
+                }
+            }
+            callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))),
+                     "", userdata);
+        });
 }
 
 PipelineCompatibilityToken DeviceBase::GetNextPipelineCompatibilityToken() {

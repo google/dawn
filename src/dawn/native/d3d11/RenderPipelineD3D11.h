@@ -31,7 +31,6 @@
 #include <array>
 #include <vector>
 
-#include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/d3d/d3d_platform.h"
 
@@ -47,10 +46,9 @@ class RenderPipeline final : public RenderPipelineBase {
         Device* device,
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
 
-    static Ref<CreateRenderPipelineAsyncEvent> InitializeAsync(
-        Device* device,
-        Ref<RenderPipelineBase> renderPipeline,
-        const CreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+    static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
+                                WGPUCreateRenderPipelineAsyncCallback callback,
+                                void* userdata);
 
     void ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext,
                   const std::array<float, 4>& blendColor,

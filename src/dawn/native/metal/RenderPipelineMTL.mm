@@ -28,7 +28,7 @@
 #include "dawn/native/metal/RenderPipelineMTL.h"
 
 #include "dawn/native/Adapter.h"
-#include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/metal/BackendMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
@@ -582,29 +582,21 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
     return AcquireNSRef(mtlVertexDescriptor);
 }
 
-Ref<CreateRenderPipelineAsyncEvent> RenderPipeline::InitializeAsync(
-    Device* device,
-    Ref<RenderPipelineBase> renderPipeline,
-    const CreateRenderPipelineAsyncCallbackInfo& callbackInfo) {
+void RenderPipeline::InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
+                                     WGPUCreateRenderPipelineAsyncCallback callback,
+                                     void* userdata) {
+    PhysicalDeviceBase* physicalDevice = renderPipeline->GetDevice()->GetPhysicalDevice();
+    std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
+        std::make_unique<CreateRenderPipelineAsyncTask>(std::move(renderPipeline), callback,
+                                                        userdata);
     // Workaround a crash where the validation layers on AMD crash with partition alloc.
     // See crbug.com/dawn/1200.
-    PhysicalDeviceBase* physicalDevice = renderPipeline->GetDevice()->GetPhysicalDevice();
     if (IsMetalValidationEnabled(physicalDevice) &&
         gpu_info::IsAMD(physicalDevice->GetVendorId())) {
-        MaybeError maybeError = renderPipeline->Initialize();
-        if (maybeError.IsError()) {
-            return AcquireRef(
-                new CreateRenderPipelineAsyncEvent(device, callbackInfo, maybeError.AcquireError(),
-                                                   renderPipeline->GetLabel().c_str()));
-        }
-        return AcquireRef(
-            new CreateRenderPipelineAsyncEvent(device, callbackInfo, std::move(renderPipeline)));
+        asyncTask->Run();
+        return;
     }
-
-    Ref<CreateRenderPipelineAsyncEvent> event = AcquireRef(new CreateRenderPipelineAsyncEvent(
-        device, callbackInfo, std::move(renderPipeline), AcquireRef(new SystemEvent())));
-    event->InitializeAsync();
-    return event;
+    CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
 }
 
 }  // namespace dawn::native::metal
