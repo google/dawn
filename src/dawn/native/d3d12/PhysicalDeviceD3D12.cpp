@@ -571,6 +571,18 @@ void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adapterToggles) co
         gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
         adapterToggles->Default(Toggle::D3D12DontUseShaderModel66OrHigher, true);
     }
+
+    // Workaround for textureDimensions() produces incorrect results with shader model 6.6 on Intel
+    // D3D driver > 27.20.100.8935 and < 27.20.100.9684 on Intel Gen9, Gen9.5 and Gen11 GPUs.
+    // See https://crbug.com/dawn/2448 for more information.
+    if (gpu_info::IsIntelGen9(vendorId, deviceId) || gpu_info::IsIntelGen11(vendorId, deviceId)) {
+        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
+                                                  {27, 20, 100, 8935}) == 1 &&
+            gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
+                                                  {27, 20, 100, 9684}) == -1) {
+            adapterToggles->ForceSet(Toggle::D3D12DontUseShaderModel66OrHigher, true);
+        }
+    }
 }
 
 void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
