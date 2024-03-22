@@ -40,7 +40,7 @@ Server::Handle(const lsp::TextDocumentDefinitionRequest& r) {
     if (auto file = files_.Get(r.text_document.uri)) {
         if (auto def = (*file)->Definition(Conv(r.position))) {
             lsp::Location loc;
-            loc.range = Conv(def->range);
+            loc.range = Conv(def->definition);
             loc.uri = r.text_document.uri;
             result = lsp::Definition{loc};
         }

@@ -51,6 +51,7 @@ tint_add_target(tint_lang_wgsl_ls lib
   lang/wgsl/ls/hover.cc
   lang/wgsl/ls/initialize.cc
   lang/wgsl/ls/references.cc
+  lang/wgsl/ls/rename.cc
   lang/wgsl/ls/serve.cc
   lang/wgsl/ls/serve.h
   lang/wgsl/ls/server.cc
@@ -117,6 +118,7 @@ tint_add_target(tint_lang_wgsl_ls_test test
   lang/wgsl/ls/helpers_test.h
   lang/wgsl/ls/hover_test.cc
   lang/wgsl/ls/references_test.cc
+  lang/wgsl/ls/rename_test.cc
   lang/wgsl/ls/symbols_test.cc
 )
 

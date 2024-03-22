@@ -54,20 +54,24 @@ class File {
     /// Constructor
     File(std::unique_ptr<Source::File>&& source_, int64_t version_, Program program_);
 
-    /// A structure holding source text and it's range in the file.
-    struct TextAndRange {
-        std::string text;
-        Source::Range range;
-    };
-
     /// @returns all the references to the symbol at the location @p l in the file.
     /// @param l the source location to lookup the symbol.
     /// @param include_declaration if true, the declaration of @p l will be included in the returned
     /// list.
     std::vector<Source::Range> References(Source::Location l, bool include_declaration);
 
+    /// The result of Definition
+    struct DefinitionResult {
+        // The identifier text
+        std::string text;
+        // The source range of the definition identifier
+        Source::Range definition;
+        // The source range of the reference identifier
+        Source::Range reference;
+    };
+
     /// @returns the definition of the symbol at the location @p l in the file.
-    std::optional<TextAndRange> Definition(Source::Location l);
+    std::optional<DefinitionResult> Definition(Source::Location l);
 
     /// @returns the inner-most semantic node at the location @p l in the file.
     /// @tparam T the type or subtype of the node to scan for.

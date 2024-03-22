@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& stream, const Case& c) {
 }
 
 using LsHoverTest = LsTestWithParam<Case>;
-TEST_P(LsHoverTest, Symbols) {
+TEST_P(LsHoverTest, Hover) {
     auto parsed = ParseMarkers(GetParam().markup);
     ASSERT_EQ(parsed.positions.size(), 1u);
 

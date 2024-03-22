@@ -71,9 +71,17 @@ class Server {
     typename langsvr::lsp::TextDocumentHoverRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentHoverRequest&);
 
+    /// Handler for langsvr::lsp::TextDocumentPrepareRenameRequest
+    typename langsvr::lsp::TextDocumentPrepareRenameRequest::ResultType  //
+    Handle(const langsvr::lsp::TextDocumentPrepareRenameRequest&);
+
     /// Handler for langsvr::lsp::TextDocumentReferencesRequest
     typename langsvr::lsp::TextDocumentReferencesRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentReferencesRequest&);
+
+    /// Handler for langsvr::lsp::TextDocumentRenameRequest
+    typename langsvr::lsp::TextDocumentRenameRequest::ResultType  //
+    Handle(const langsvr::lsp::TextDocumentRenameRequest&);
 
     ////////////////////////////////////////////////////////////////////////////
     // Notifications

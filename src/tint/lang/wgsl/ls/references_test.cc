@@ -51,7 +51,7 @@ std::ostream& operator<<(std::ostream& stream, const Case& c) {
 }
 
 using LsReferencesTest = LsTestWithParam<Case>;
-TEST_P(LsReferencesTest, Symbols) {
+TEST_P(LsReferencesTest, References) {
     auto parsed = ParseMarkers(GetParam().markup);
     ASSERT_EQ(parsed.positions.size(), 1u);
 

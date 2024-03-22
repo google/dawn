@@ -48,6 +48,7 @@ cc_library(
     "hover.cc",
     "initialize.cc",
     "references.cc",
+    "rename.cc",
     "serve.cc",
     "server.cc",
     "set_trace.cc",
@@ -109,6 +110,7 @@ cc_library(
     "helpers_test.h",
     "hover_test.cc",
     "references_test.cc",
+    "rename_test.cc",
     "symbols_test.cc",
   ],
   deps = [

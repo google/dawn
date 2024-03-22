@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <optional>
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/identifier.h"
@@ -129,28 +130,67 @@ std::vector<Source::Range> File::References(Source::Location l, bool include_dec
     return references;
 }
 
-std::optional<File::TextAndRange> File::Definition(Source::Location l) {
-    auto* ident = Switch<const ast::Identifier*>(
+std::optional<File::DefinitionResult> File::Definition(Source::Location l) {
+    return Switch<std::optional<DefinitionResult>>(
         Unwrap(NodeAt<CastableBase>(l)),  //
-        [&](const sem::VariableUser* v) { return v->Variable()->Declaration()->name; },
-        [&](const sem::Variable* v) { return v->Declaration()->name; },
-        [&](const sem::FunctionExpression* f) { return f->Function()->Declaration()->name; },
-        [&](const sem::Function* f) { return f->Declaration()->name; },
-        [&](const sem::StructMemberAccess* a) -> const ast::Identifier* {
-            if (auto* member = a->Member()->As<sem::StructMember>()) {
-                return member->Declaration()->name;
-            }
-            return nullptr;
+        [&](const sem::VariableUser* u) {
+            auto* v = u->Variable();
+            return DefinitionResult{
+                v->Declaration()->name->symbol.Name(),
+                v->Declaration()->name->source.range,
+                u->Declaration()->source.range,
+            };
         },
-        [&](const sem::StructMember* m) { return m->Declaration()->name; },
+        [&](const sem::Variable* v) {
+            return DefinitionResult{
+                v->Declaration()->name->symbol.Name(),
+                v->Declaration()->name->source.range,
+                v->Declaration()->name->source.range,
+            };
+        },
+        [&](const sem::FunctionExpression* e) {
+            auto* f = e->Function();
+            return DefinitionResult{
+                f->Declaration()->name->symbol.Name(),
+                f->Declaration()->name->source.range,
+                e->Declaration()->source.range,
+            };
+        },
+        [&](const sem::Function* f) {
+            return DefinitionResult{
+                f->Declaration()->name->symbol.Name(),
+                f->Declaration()->name->source.range,
+                f->Declaration()->name->source.range,
+            };
+        },
+        [&](const sem::StructMemberAccess* a) -> std::optional<DefinitionResult> {
+            if (auto* m = a->Member()->As<sem::StructMember>()) {
+                return DefinitionResult{
+                    m->Declaration()->name->symbol.Name(),
+                    m->Declaration()->name->source.range,
+                    a->Declaration()->member->source.range,
+                };
+            }
+            return std::nullopt;
+        },
+        [&](const sem::StructMember* m) {
+            return DefinitionResult{
+                m->Declaration()->name->symbol.Name(),
+                m->Declaration()->name->source.range,
+                m->Declaration()->name->source.range,
+            };
+        },
         [&](const sem::TypeExpression* te) {
-            return Switch(te->Type(),  //
-                          [&](const sem::Struct* s) { return s->Declaration()->name; });
+            return Switch<std::optional<DefinitionResult>>(
+                te->Type(),  //
+                [&](const sem::Struct* s) {
+                    return DefinitionResult{
+                        s->Declaration()->name->symbol.Name(),
+                        s->Declaration()->name->source.range,
+                        te->Declaration()->source.range,
+                    };
+                });
         });
-    if (ident) {
-        return TextAndRange{ident->symbol.Name(), ident->source.range};
-    }
-    return std::nullopt;
 }
 
 }  // namespace tint::wgsl::ls

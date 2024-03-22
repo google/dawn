@@ -43,7 +43,7 @@ namespace {
 namespace lsp = langsvr::lsp;
 
 using LsDefinitionTest = LsTestWithParam<std::string_view>;
-TEST_P(LsDefinitionTest, Symbols) {
+TEST_P(LsDefinitionTest, Definition) {
     auto parsed = ParseMarkers(GetParam());
     ASSERT_EQ(parsed.positions.size(), 1u);
     ASSERT_LE(parsed.ranges.size(), 1u);

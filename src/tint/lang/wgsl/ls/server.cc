@@ -54,6 +54,11 @@ Server::Server(langsvr::Session& session) : session_(session) {
             opts.change = lsp::TextDocumentSyncKind::kIncremental;
             return opts;
         }();
+        result.capabilities.rename_provider = [] {
+            lsp::RenameOptions opts;
+            opts.prepare_provider = true;
+            return opts;
+        }();
         return result;
     });
 
@@ -76,7 +81,9 @@ Server::Server(langsvr::Session& session) : session_(session) {
     session.Register([&](const lsp::TextDocumentDefinitionRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentDocumentSymbolRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentHoverRequest& r) { return Handle(r); });
+    session.Register([&](const lsp::TextDocumentPrepareRenameRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentReferencesRequest& r) { return Handle(r); });
+    session.Register([&](const lsp::TextDocumentRenameRequest& r) { return Handle(r); });
 }
 
 Server::~Server() = default;
