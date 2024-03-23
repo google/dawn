@@ -55,6 +55,8 @@ if (tint_build_tintd && tint_build_wgsl_reader) {
       "initialize.cc",
       "references.cc",
       "rename.cc",
+      "sem_token.h",
+      "sem_tokens.cc",
       "serve.cc",
       "serve.h",
       "server.cc",
@@ -111,6 +113,7 @@ if (tint_build_unittests) {
         "hover_test.cc",
         "references_test.cc",
         "rename_test.cc",
+        "sem_tokens_test.cc",
         "symbols_test.cc",
       ]
       deps = [

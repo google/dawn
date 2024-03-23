@@ -49,6 +49,7 @@ cc_library(
     "initialize.cc",
     "references.cc",
     "rename.cc",
+    "sem_tokens.cc",
     "serve.cc",
     "server.cc",
     "set_trace.cc",
@@ -56,6 +57,7 @@ cc_library(
   ],
   hdrs = [
     "file.h",
+    "sem_token.h",
     "serve.h",
     "server.h",
     "utils.h",
@@ -111,6 +113,7 @@ cc_library(
     "hover_test.cc",
     "references_test.cc",
     "rename_test.cc",
+    "sem_tokens_test.cc",
     "symbols_test.cc",
   ],
   deps = [

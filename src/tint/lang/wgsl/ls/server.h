@@ -111,6 +111,10 @@ class Server {
     langsvr::Result<langsvr::SuccessType>  //
     Handle(const langsvr::lsp::TextDocumentDidChangeNotification&);
 
+    /// Handler for langsvr::lsp::TextDocumentSemanticTokensFullRequest
+    typename langsvr::lsp::TextDocumentSemanticTokensFullRequest::ResultType  //
+    Handle(const langsvr::lsp::TextDocumentSemanticTokensFullRequest&);
+
     /// Handler for langsvr::lsp::WorkspaceDidChangeConfigurationNotification
     langsvr::Result<langsvr::SuccessType>  //
     Handle(const langsvr::lsp::WorkspaceDidChangeConfigurationNotification&);

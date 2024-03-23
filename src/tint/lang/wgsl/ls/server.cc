@@ -29,6 +29,7 @@
 
 #include "langsvr/session.h"
 
+#include "src/tint/lang/wgsl/ls/sem_token.h"
 #include "src/tint/lang/wgsl/ls/utils.h"
 
 namespace lsp = langsvr::lsp;
@@ -59,6 +60,14 @@ Server::Server(langsvr::Session& session) : session_(session) {
             opts.prepare_provider = true;
             return opts;
         }();
+        result.capabilities.semantic_tokens_provider = [] {
+            lsp::SemanticTokensOptions opts;
+            opts.full = true;
+            for (auto name : SemToken::kNames) {
+                opts.legend.token_types.push_back(name);
+            }
+            return opts;
+        }();
         return result;
     });
 
@@ -84,6 +93,8 @@ Server::Server(langsvr::Session& session) : session_(session) {
     session.Register([&](const lsp::TextDocumentPrepareRenameRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentReferencesRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentRenameRequest& r) { return Handle(r); });
+    session.Register(
+        [&](const lsp::TextDocumentSemanticTokensFullRequest& r) { return Handle(r); });
 }
 
 Server::~Server() = default;
