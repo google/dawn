@@ -45,6 +45,7 @@ Server::Server(langsvr::Session& session) : session_(session) {
             return opts;
         }();
         result.capabilities.hover_provider = true;
+        result.capabilities.inlay_hint_provider = true;
         result.capabilities.references_provider = [] {
             lsp::ReferenceOptions opts;
             return opts;
@@ -90,6 +91,7 @@ Server::Server(langsvr::Session& session) : session_(session) {
     session.Register([&](const lsp::TextDocumentDefinitionRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentDocumentSymbolRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentHoverRequest& r) { return Handle(r); });
+    session.Register([&](const lsp::TextDocumentInlayHintRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentPrepareRenameRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentReferencesRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentRenameRequest& r) { return Handle(r); });

@@ -119,7 +119,7 @@ TEST_P(LsSemTokensTest, SemTokens) {
 }
 
 // TODO(bclayton): Type aliases.
-INSTANTIATE_TEST_SUITE_P(IncludeDeclaration,
+INSTANTIATE_TEST_SUITE_P(,
                          LsSemTokensTest,
                          ::testing::ValuesIn(std::vector<Case>{
                              {

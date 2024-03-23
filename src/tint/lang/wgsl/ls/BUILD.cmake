@@ -50,6 +50,7 @@ tint_add_target(tint_lang_wgsl_ls lib
   lang/wgsl/ls/file.h
   lang/wgsl/ls/hover.cc
   lang/wgsl/ls/initialize.cc
+  lang/wgsl/ls/inlay_hints.cc
   lang/wgsl/ls/references.cc
   lang/wgsl/ls/rename.cc
   lang/wgsl/ls/sem_token.h
@@ -119,6 +120,7 @@ tint_add_target(tint_lang_wgsl_ls_test test
   lang/wgsl/ls/helpers_test.cc
   lang/wgsl/ls/helpers_test.h
   lang/wgsl/ls/hover_test.cc
+  lang/wgsl/ls/inlay_hints_test.cc
   lang/wgsl/ls/references_test.cc
   lang/wgsl/ls/rename_test.cc
   lang/wgsl/ls/sem_tokens_test.cc

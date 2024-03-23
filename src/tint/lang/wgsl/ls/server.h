@@ -71,6 +71,10 @@ class Server {
     typename langsvr::lsp::TextDocumentHoverRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentHoverRequest&);
 
+    /// Handler for langsvr::lsp::TextDocumentInlayHintRequest
+    typename langsvr::lsp::TextDocumentInlayHintRequest::ResultType  //
+    Handle(const langsvr::lsp::TextDocumentInlayHintRequest&);
+
     /// Handler for langsvr::lsp::TextDocumentPrepareRenameRequest
     typename langsvr::lsp::TextDocumentPrepareRenameRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentPrepareRenameRequest&);
