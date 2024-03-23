@@ -241,7 +241,6 @@ option_if_not_defined(TINT_BUILD_TESTS "Build tests" ON)
 option_if_not_defined(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 
 option_if_not_defined(TINT_BUILD_TINTD "Build the WGSL language server" OFF)
-option_if_not_defined(TINT_INSTALL_TINTD "Install the WGSL language server" OFF)
 
 set_if_not_defined(TINT_EXTERNAL_BENCHMARK_CORPUS_DIR "" "Directory that holds a corpus of external shaders to benchmark.")
 

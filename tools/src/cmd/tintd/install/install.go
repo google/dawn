@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Package install installs the tintd vscode extension for local development
-// via a symlink to the build directory
 package install
 
 import (
@@ -49,6 +48,7 @@ func init() {
 
 type Cmd struct {
 	flags struct {
+		symlink  bool
 		buildDir string
 		npmPath  string
 	}
@@ -59,12 +59,13 @@ func (Cmd) Name() string {
 }
 
 func (Cmd) Desc() string {
-	return `install installs the tintd vscode extension for local development via a symlink to the build directory`
+	return `install installs the tintd vscode extension for local development`
 }
 
 func (c *Cmd) RegisterFlags(ctx context.Context, _ any) ([]string, error) {
 	dawnRoot := fileutils.DawnRoot()
 	npmPath, _ := exec.LookPath("npm")
+	flag.BoolVar(&c.flags.symlink, "symlink", false, "create a symlink from the vscode extension directory to the build directory")
 	flag.StringVar(&c.flags.buildDir, "build", filepath.Join(dawnRoot, "out", "active"), "the output build directory")
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
 
@@ -102,7 +103,6 @@ func (c Cmd) Run(ctx context.Context, _ any) error {
 		return fmt.Errorf("could not parse '%v': %v", packageJSONPath, err)
 	}
 
-	// Symlink to vscode extensions directory
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return fmt.Errorf("failed to obtain home directory: %w", err)
@@ -115,8 +115,16 @@ func (c Cmd) Run(ctx context.Context, _ any) error {
 	vscodeTintdDir := filepath.Join(vscodeBaseExtsDir, fmt.Sprintf("google.%v-%v", pkg.Name, pkg.Version))
 	os.RemoveAll(vscodeTintdDir)
 
-	if err := os.Symlink(pkgDir, vscodeTintdDir); err != nil {
-		return fmt.Errorf("failed to create symlink '%v' <- '%v': %w", pkgDir, vscodeTintdDir, err)
+	if c.flags.symlink {
+		// Symlink the vscode extensions directory to the build directory
+		if err := os.Symlink(pkgDir, vscodeTintdDir); err != nil {
+			return fmt.Errorf("failed to create symlink '%v' <- '%v': %w", pkgDir, vscodeTintdDir, err)
+		}
+	} else {
+		// Copy the build directory to vscode extensions directory
+		if err := fileutils.CopyDir(vscodeTintdDir, pkgDir); err != nil {
+			return fmt.Errorf("failed to copy '%v' to '%v': %w", pkgDir, vscodeTintdDir, err)
+		}
 	}
 
 	return nil

@@ -661,7 +661,8 @@ endforeach()
 ################################################################################
 # tintd (VSCode WGSL language server)
 ################################################################################
-if(TINT_INSTALL_TINTD)
+if(TINT_BUILD_TINTD)
+  # Copy all the files out of cmd/tintd/vscode to {build}/vscode
   set(VSCODE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmd/tintd/vscode")
   set(VSCODE_DST_DIR "${DAWN_BUILD_GEN_DIR}/vscode")
 
@@ -670,7 +671,7 @@ if(TINT_INSTALL_TINTD)
     configure_file("${VSCODE_SRC_DIR}/${FILE}" "${VSCODE_DST_DIR}/${FILE}" COPYONLY)
   endforeach()
   set_target_properties(tint_cmd_tintd_cmd PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${VSCODE_DST_DIR}")
-endif(TINT_INSTALL_TINTD)
+endif(TINT_BUILD_TINTD)
 
 
 ################################################################################
