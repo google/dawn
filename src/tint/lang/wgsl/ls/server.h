@@ -103,6 +103,10 @@ class Server {
     langsvr::Result<langsvr::SuccessType>  //
     Handle(const langsvr::lsp::SetTraceNotification&);
 
+    /// Handler for langsvr::lsp::TextDocumentSignatureHelpRequest
+    typename langsvr::lsp::TextDocumentSignatureHelpRequest::ResultType  //
+    Handle(const langsvr::lsp::TextDocumentSignatureHelpRequest&);
+
     /// Handler for langsvr::lsp::TextDocumentDidOpenNotification
     langsvr::Result<langsvr::SuccessType>  //
     Handle(const langsvr::lsp::TextDocumentDidOpenNotification&);

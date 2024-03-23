@@ -180,7 +180,7 @@ Server::Handle(const lsp::TextDocumentHoverRequest& r) {
         return lsp::Null{};
     }
 
-    auto* node = (*file)->NodeAt<CastableBase>(Conv(r.position));
+    auto* node = (*file)->NodeAt<CastableBase, File::UnwrapMode::kNoUnwrap>(Conv(r.position));
     if (!node) {
         return lsp::Null{};
     }

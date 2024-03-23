@@ -69,6 +69,10 @@ Server::Server(langsvr::Session& session) : session_(session) {
             }
             return opts;
         }();
+        result.capabilities.signature_help_provider = [] {
+            lsp::SignatureHelpOptions opts;
+            return opts;
+        }();
         return result;
     });
 
@@ -97,6 +101,7 @@ Server::Server(langsvr::Session& session) : session_(session) {
     session.Register([&](const lsp::TextDocumentRenameRequest& r) { return Handle(r); });
     session.Register(
         [&](const lsp::TextDocumentSemanticTokensFullRequest& r) { return Handle(r); });
+    session.Register([&](const lsp::TextDocumentSignatureHelpRequest& r) { return Handle(r); });
 }
 
 Server::~Server() = default;

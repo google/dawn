@@ -60,6 +60,7 @@ tint_add_target(tint_lang_wgsl_ls lib
   lang/wgsl/ls/server.cc
   lang/wgsl/ls/server.h
   lang/wgsl/ls/set_trace.cc
+  lang/wgsl/ls/signature_help.cc
   lang/wgsl/ls/symbols.cc
   lang/wgsl/ls/utils.h
 )
@@ -68,12 +69,14 @@ tint_target_add_dependencies(tint_lang_wgsl_ls lib
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_intrinsic
   tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_common
   tint_lang_wgsl_features
+  tint_lang_wgsl_intrinsic
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils_containers
@@ -124,6 +127,7 @@ tint_add_target(tint_lang_wgsl_ls_test test
   lang/wgsl/ls/references_test.cc
   lang/wgsl/ls/rename_test.cc
   lang/wgsl/ls/sem_tokens_test.cc
+  lang/wgsl/ls/signature_help_test.cc
   lang/wgsl/ls/symbols_test.cc
 )
 

@@ -31,10 +31,15 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "src/tint/lang/wgsl/ast/node.h"
+#include "src/tint/lang/wgsl/ls/utils.h"
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/lang/wgsl/sem/expression.h"
+#include "src/tint/lang/wgsl/sem/load.h"
+#include "src/tint/lang/wgsl/sem/materialize.h"
 #include "src/tint/utils/diagnostic/source.h"
 
 namespace tint::wgsl::ls {
@@ -73,9 +78,24 @@ class File {
     /// @returns the definition of the symbol at the location @p l in the file.
     std::optional<DefinitionResult> Definition(Source::Location l);
 
+    /// Behaviour of NodeAt()
+    enum class UnwrapMode {
+        /// NodeAt will Unwrap() the semantic node when searching for the template type.
+        kNoUnwrap,
+        /// NodeAt will not Unwrap() the semantic node when searching for the template type.
+        kUnwrap
+    };
+
+    // Default UnwrapMode is to unwrap, unless searching for a sem::Materialize or sem::Load
+    template <typename T>
+    static constexpr UnwrapMode DefaultUnwrapMode =
+        (std::is_same_v<T, sem::Materialize> || std::is_same_v<T, sem::Load>)
+            ? UnwrapMode::kNoUnwrap
+            : UnwrapMode::kUnwrap;
+
     /// @returns the inner-most semantic node at the location @p l in the file.
     /// @tparam T the type or subtype of the node to scan for.
-    template <typename T = sem::Node>
+    template <typename T = sem::Node, UnwrapMode UNWRAP_MODE = DefaultUnwrapMode<T>>
     const T* NodeAt(Source::Location l) const {
         // TODO(bclayton): This is a brute-force search. Optimize.
         size_t best_len = std::numeric_limits<uint32_t>::max();
@@ -83,12 +103,15 @@ class File {
         for (auto* node : nodes) {
             if (node->source.range.begin.line == node->source.range.end.line &&
                 node->source.range.begin <= l && node->source.range.end >= l) {
-                if (auto* sem =
-                        As<T, CastFlags::kDontErrorOnImpossibleCast>(program.Sem().Get(node))) {
+                auto* sem = program.Sem().Get(node);
+                if constexpr (UNWRAP_MODE == UnwrapMode::kUnwrap) {
+                    sem = Unwrap(sem);
+                }
+                if (auto* cast = As<T, CastFlags::kDontErrorOnImpossibleCast>(sem)) {
                     size_t len = node->source.range.end.column - node->source.range.begin.column;
                     if (len < best_len) {
                         best_len = len;
-                        best_node = sem;
+                        best_node = cast;
                     }
                 }
             }
