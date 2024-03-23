@@ -814,13 +814,6 @@ crbug.com/dawn/1898 [ android-u ] webgpu:api,operation,vertex_state,index_format
 crbug.com/dawn/1898 [ android-u ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="triangle-list" [ Failure ]
 
 ################################################################################
-# Frequent Timeouts on Android Arm (Pixel 6)
-################################################################################
-crbug.com/dawn/2353 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,step:f16:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/2353 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/2353 [ android-pixel-6 ] webgpu:shader,execution,expression,unary,af_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
-
-################################################################################
 # Atomics tests fail with workgroupSize=2 on Android Arm (Pixel 6)
 ################################################################################
 crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:add_workgroup:workgroupSize=2;dispatchSize=16;scalarType="i32" [ Failure ]

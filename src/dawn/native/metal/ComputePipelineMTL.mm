@@ -123,29 +123,21 @@ bool ComputePipeline::RequiresStorageBufferLength() const {
     return mRequiresStorageBufferLength;
 }
 
-Ref<CreateComputePipelineAsyncEvent> ComputePipeline::InitializeAsync(
-    Device* device,
-    Ref<ComputePipelineBase> computePipeline,
-    const CreateComputePipelineAsyncCallbackInfo& callbackInfo) {
+void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
+                                      WGPUCreateComputePipelineAsyncCallback callback,
+                                      void* userdata) {
+    PhysicalDeviceBase* physicalDevice = computePipeline->GetDevice()->GetPhysicalDevice();
+    std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
+        std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
+                                                         userdata);
     // Workaround a crash where the validation layers on AMD crash with partition alloc.
     // See crbug.com/dawn/1200.
-    PhysicalDeviceBase* physicalDevice = computePipeline->GetDevice()->GetPhysicalDevice();
     if (IsMetalValidationEnabled(physicalDevice) &&
         gpu_info::IsAMD(physicalDevice->GetVendorId())) {
-        MaybeError maybeError = computePipeline->Initialize();
-        if (maybeError.IsError()) {
-            return AcquireRef(
-                new CreateComputePipelineAsyncEvent(device, callbackInfo, maybeError.AcquireError(),
-                                                    computePipeline->GetLabel().c_str()));
-        }
-        return AcquireRef(
-            new CreateComputePipelineAsyncEvent(device, callbackInfo, std::move(computePipeline)));
+        asyncTask->Run();
+        return;
     }
-
-    Ref<CreateComputePipelineAsyncEvent> event = AcquireRef(new CreateComputePipelineAsyncEvent(
-        device, callbackInfo, std::move(computePipeline), AcquireRef(new SystemEvent())));
-    event->InitializeAsync();
-    return event;
+    CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
 }
 
 }  // namespace dawn::native::metal

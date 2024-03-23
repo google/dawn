@@ -29,7 +29,6 @@
 #define SRC_DAWN_NATIVE_D3D11_COMPUTEPIPELINEGL_H_
 
 #include "dawn/native/ComputePipeline.h"
-#include "dawn/native/CreatePipelineAsyncTask.h"
 
 #include "dawn/native/d3d/d3d_platform.h"
 
@@ -43,10 +42,9 @@ class ComputePipeline final : public ComputePipelineBase {
     static Ref<ComputePipeline> CreateUninitialized(
         Device* device,
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
-    static Ref<CreateComputePipelineAsyncEvent> InitializeAsync(
-        Device* device,
-        Ref<ComputePipelineBase> computePipeline,
-        const CreateComputePipelineAsyncCallbackInfo& callbackInfo);
+    static void InitializeAsync(Ref<ComputePipelineBase> computePipeline,
+                                WGPUCreateComputePipelineAsyncCallback callback,
+                                void* userdata);
 
     void ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext);
 

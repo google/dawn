@@ -34,7 +34,6 @@
 #include "dawn/common/Ref.h"
 #include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/Error.h"
-#include "dawn/native/EventManager.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -46,47 +45,28 @@ class DeviceBase;
 class PipelineLayoutBase;
 class RenderPipelineBase;
 class ShaderModuleBase;
+struct FlatComputePipelineDescriptor;
 
-// CreateComputePipelineAsyncEvent represents the async event managed by event manager,
-// and the async task run on a separate task to initialize the pipeline.
-class CreateComputePipelineAsyncEvent final : public EventManager::TrackedEvent {
+// CreateComputePipelineAsyncTask defines all the inputs and outputs of
+// CreateComputePipelineAsync() tasks, which are the same among all the backends.
+class CreateComputePipelineAsyncTask {
   public:
-    // Create an event backed by the given system event (for async pipeline creation goes through
-    // the backend).
-    CreateComputePipelineAsyncEvent(DeviceBase* device,
-                                    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
-                                    Ref<ComputePipelineBase> pipeline,
-                                    Ref<SystemEvent> systemEvent);
-    // Create an event that's ready at creation (for cached results)
-    CreateComputePipelineAsyncEvent(DeviceBase* device,
-                                    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
-                                    Ref<ComputePipelineBase> pipeline);
-    // Create an event that's ready at creation (for errors)
-    CreateComputePipelineAsyncEvent(DeviceBase* device,
-                                    const CreateComputePipelineAsyncCallbackInfo& callbackInfo,
-                                    std::unique_ptr<ErrorData> error,
-                                    const char* label);
+    CreateComputePipelineAsyncTask(Ref<ComputePipelineBase> nonInitializedComputePipeline,
+                                   WGPUCreateComputePipelineAsyncCallback callback,
+                                   void* userdata);
+    ~CreateComputePipelineAsyncTask();
 
-    ~CreateComputePipelineAsyncEvent() override;
+    void Run();
 
-    // Entrance call to start an AsyncTask initializing the pipeline.
-    void InitializeAsync();
-    // Body of pipeline initialization wrapped in an AsyncTask run by AsyncTaskManager.
-    void Initialize();
-
-    void Complete(EventCompletionType completionType) override;
+    static void RunAsync(std::unique_ptr<CreateComputePipelineAsyncTask> task);
 
   private:
+    Ref<ComputePipelineBase> mComputePipeline;
     WGPUCreateComputePipelineAsyncCallback mCallback;
     // TODO(https://crbug.com/2364): The pointer is dangling in
     // webgpu_cts_with_validation_tests. We should investigate, and decide if
     // this should be fixed, or turned into a DisableDanglingPtrDetection.
     raw_ptr<void, DanglingUntriaged> mUserdata;
-    // For some errors (e.g. device lost) we still need to resolve and return a pipeline with
-    // Pipeline::MakeError. So we need to hold the pipeline and the error separately.
-    Ref<ComputePipelineBase> mPipeline;
-    std::unique_ptr<ErrorData> mError;
-
     // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
     PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
 };

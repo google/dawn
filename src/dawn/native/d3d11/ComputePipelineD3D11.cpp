@@ -92,14 +92,13 @@ void ComputePipeline::ApplyNow(const ScopedSwapStateCommandRecordingContext* com
     d3dDeviceContext->CSSetShader(mComputeShader.Get(), nullptr, 0);
 }
 
-Ref<CreateComputePipelineAsyncEvent> ComputePipeline::InitializeAsync(
-    Device* device,
-    Ref<ComputePipelineBase> computePipeline,
-    const CreateComputePipelineAsyncCallbackInfo& callbackInfo) {
-    Ref<CreateComputePipelineAsyncEvent> event = AcquireRef(new CreateComputePipelineAsyncEvent(
-        device, callbackInfo, std::move(computePipeline), AcquireRef(new SystemEvent())));
-    event->InitializeAsync();
-    return event;
+void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
+                                      WGPUCreateComputePipelineAsyncCallback callback,
+                                      void* userdata) {
+    std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
+        std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
+                                                         userdata);
+    CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
 }
 
 bool ComputePipeline::UsesNumWorkgroups() const {

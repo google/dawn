@@ -345,7 +345,6 @@ bool EventManager::IsShutDown() const {
 
 FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
     FutureID futureID = mNextFutureID++;
-    event->mFutureID = futureID;
     return mEvents.Use([&](auto events) {
         if (!events->has_value()) {
             return futureID;
