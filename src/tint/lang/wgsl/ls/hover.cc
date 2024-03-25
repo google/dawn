@@ -64,6 +64,7 @@ namespace tint::wgsl::ls {
 
 namespace {
 
+/// @returns a lsp::MarkedStringWithLanguage with the content @p wgsl, using the language `wgsl`
 lsp::MarkedStringWithLanguage WGSL(std::string wgsl) {
     lsp::MarkedStringWithLanguage str;
     str.language = "wgsl";
@@ -71,6 +72,7 @@ lsp::MarkedStringWithLanguage WGSL(std::string wgsl) {
     return str;
 }
 
+/// PrintConstant() writes the constant value @p val as a WGSL value to the StringStream @p ss
 void PrintConstant(const core::constant::Value* val, StringStream& ss) {
     Switch(
         val,  //
@@ -98,6 +100,7 @@ void PrintConstant(const core::constant::Value* val, StringStream& ss) {
         });
 }
 
+/// Variable() writes the hover information for the variable @p v to @p out
 void Variable(const sem::Variable* v, std::vector<lsp::MarkedString>& out) {
     StringStream ss;
     auto* kind = Switch(
@@ -122,6 +125,7 @@ void Variable(const sem::Variable* v, std::vector<lsp::MarkedString>& out) {
     out.push_back(WGSL(ss.str()));
 }
 
+/// Function() writes the hover information for the function @p f to @p out
 void Function(const sem::Function* f, std::vector<lsp::MarkedString>& out) {
     StringStream ss;
     ss << "fn " << f->Declaration()->name->symbol.NameView();
@@ -142,6 +146,8 @@ void Function(const sem::Function* f, std::vector<lsp::MarkedString>& out) {
     out.push_back(WGSL(ss.str()));
 }
 
+/// Call() writes the hover information for a call to the function with the name @p name with
+/// semantic info @p c, to @p out
 void Call(std::string_view name, const sem::Call* c, std::vector<lsp::MarkedString>& out) {
     StringStream ss;
     ss << name << "(";
@@ -165,6 +171,7 @@ void Call(std::string_view name, const sem::Call* c, std::vector<lsp::MarkedStri
     out.push_back(WGSL(ss.str()));
 }
 
+/// Constant() writes the hover information for the constant value @p val to @p out
 void Constant(const core::constant::Value* val, std::vector<lsp::MarkedString>& out) {
     StringStream ss;
     PrintConstant(val, ss);

@@ -41,8 +41,10 @@ namespace tint::wgsl::ls {
 
 namespace {
 
-std::vector<lsp::ParameterInformation> Params(const core::intrinsic::TableData& data,
-                                              const core::intrinsic::OverloadInfo& overload) {
+/// @returns the parameter information for all the parameters of the intrinsic overload @p overload.
+std::vector<lsp::ParameterInformation> Params(const core::intrinsic::OverloadInfo& overload) {
+    auto& data = wgsl::intrinsic::Dialect::kData;
+
     std::vector<lsp::ParameterInformation> params;
     for (size_t i = 0; i < overload.num_parameters; i++) {
         lsp::ParameterInformation param_out;
@@ -93,6 +95,8 @@ size_t CalcParamIndex(const Source& call_source, const Source::Location& positio
     return index;
 }
 
+/// PrintOverload() emits a description of the intrinsic overload @p overload of the function with
+/// name @p intrinsic_name to @p ss.
 void PrintOverload(StyledText& ss,
                    core::intrinsic::Context& context,
                    const core::intrinsic::OverloadInfo& overload,
@@ -192,7 +196,7 @@ Server::Handle(const lsp::TextDocumentSignatureHelpRequest& r) {
                for (size_t i = 0; i < intrinsic_info.num_overloads; i++) {
                    auto& overload = data[intrinsic_info.overloads + i];
 
-                   auto params = Params(data, overload);
+                   auto params = Params(overload);
 
                    auto type_mgr = core::type::Manager::Wrap(program.Types());
                    auto symbols = SymbolTable::Wrap(program.Symbols());
