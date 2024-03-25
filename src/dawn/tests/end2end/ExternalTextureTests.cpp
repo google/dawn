@@ -1260,6 +1260,31 @@ TEST_P(ExternalTextureTests, SampleExternalTextureAlpha) {
     EXPECT_PIXEL_RGBA8_EQ(kColor, renderTexture, 0, 0);
 }
 
+// Test for crbug.com/dawn/2472
+TEST_P(ExternalTextureTests, RemappingBugDawn2472) {
+    auto wgslModule = utils::CreateShaderModule(device, R"(
+    @vertex
+    fn vertexMain() -> @builtin(position) vec4f {
+      return vec4f(1);
+    }
+
+    @group(0) @binding(0) var myTexture: texture_external;
+
+    @fragment
+    fn fragmentMain() -> @location(0) vec4f {
+      let result = textureLoad(myTexture, vec2u(1, 1));
+      return vec4f(1);
+    })");
+
+    // Pipeline Creation
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = wgslModule;
+    descriptor.cFragment.module = wgslModule;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    ASSERT_NE(pipeline.Get(), nullptr);
+}
+
 DAWN_INSTANTIATE_TEST(ExternalTextureTests,
                       D3D11Backend(),
                       D3D12Backend(),

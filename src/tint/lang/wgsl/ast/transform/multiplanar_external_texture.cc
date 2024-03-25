@@ -174,6 +174,12 @@ struct MultiplanarExternalTexture::State {
 
             // Replace the original texture_external binding with a texture_2d<f32> binding.
             auto cloned_attributes = ctx.Clone(global->attributes);
+
+            // Allow the originating binding to have collisions.
+            if (new_binding_points->allow_collisions) {
+                cloned_attributes.Push(b.Disable(DisabledValidation::kBindingPointCollision));
+            }
+
             const Expression* cloned_initializer = ctx.Clone(global->initializer);
 
             auto* replacement = b.Var(

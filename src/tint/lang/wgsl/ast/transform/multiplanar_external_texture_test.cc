@@ -176,6 +176,83 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(MultiplanarExternalTextureTest, Collisions) {
+    auto* src = R"(
+@group(0) @binding(0) var myTexture: texture_external;
+
+@fragment
+fn fragmentMain() -> @location(0) vec4f {
+  let result = textureLoad(myTexture, vec2u(1, 1));
+  return vec4f(1);
+})";
+
+    auto* expect = R"(
+struct GammaTransferParams {
+  G : f32,
+  A : f32,
+  B : f32,
+  C : f32,
+  D : f32,
+  E : f32,
+  F : f32,
+  padding : u32,
+}
+
+struct ExternalTextureParams {
+  numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
+  gammaDecodeParams : GammaTransferParams,
+  gammaEncodeParams : GammaTransferParams,
+  gamutConversionMatrix : mat3x3<f32>,
+  coordTransformationMatrix : mat3x2<f32>,
+}
+
+@internal(disable_validation__binding_point_collision) @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
+
+@internal(disable_validation__binding_point_collision) @group(0) @binding(0) var<uniform> ext_tex_params : ExternalTextureParams;
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var myTexture : texture_2d<f32>;
+
+fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
+  let cond = (abs(v) < vec3<f32>(params.D));
+  let t = (sign(v) * ((params.C * abs(v)) + params.F));
+  let f = (sign(v) * (pow(((params.A * abs(v)) + params.B), vec3<f32>(params.G)) + params.E));
+  return select(f, t, cond);
+}
+
+fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<u32>, params : ExternalTextureParams) -> vec4<f32> {
+  let coord1 = (coord >> vec2<u32>(1));
+  var color : vec4<f32>;
+  if ((params.numPlanes == 1)) {
+    color = textureLoad(plane0, coord, 0).rgba;
+  } else {
+    color = vec4<f32>((vec4<f32>(textureLoad(plane0, coord, 0).r, textureLoad(plane1, coord1, 0).rg, 1) * params.yuvToRgbConversionMatrix), 1);
+  }
+  if ((params.doYuvToRgbConversionOnly == 0)) {
+    color = vec4<f32>(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = vec4<f32>((params.gamutConversionMatrix * color.rgb), color.a);
+    color = vec4<f32>(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
+  }
+  return color;
+}
+
+@fragment
+fn fragmentMain() -> @location(0) vec4f {
+  let result = textureLoadExternal(myTexture, ext_tex_plane_1, vec2u(1, 1), ext_tex_params);
+  return vec4f(1);
+}
+)";
+
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 0}}}},
+        /* allow collisions */ true);
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 // Tests that the transform works with a textureDimensions call.
 TEST_F(MultiplanarExternalTextureTest, Dimensions_OutOfOrder) {
     auto* src = R"(
