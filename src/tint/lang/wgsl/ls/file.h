@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_WGSL_LS_FILE_H_
 #define SRC_TINT_LANG_WGSL_LS_FILE_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <memory>
 #include <string>
@@ -98,17 +100,16 @@ class File {
     template <typename T = sem::Node, UnwrapMode UNWRAP_MODE = DefaultUnwrapMode<T>>
     const T* NodeAt(Source::Location l) const {
         // TODO(bclayton): This is a brute-force search. Optimize.
-        size_t best_len = std::numeric_limits<uint32_t>::max();
+        size_t best_len = std::numeric_limits<size_t>::max();
         const T* best_node = nullptr;
         for (auto* node : nodes) {
-            if (node->source.range.begin.line == node->source.range.end.line &&
-                node->source.range.begin <= l && node->source.range.end >= l) {
+            if (node->source.range.begin <= l && node->source.range.end >= l) {
                 auto* sem = program.Sem().Get(node);
                 if constexpr (UNWRAP_MODE == UnwrapMode::kUnwrap) {
                     sem = Unwrap(sem);
                 }
                 if (auto* cast = As<T, CastFlags::kDontErrorOnImpossibleCast>(sem)) {
-                    size_t len = node->source.range.end.column - node->source.range.begin.column;
+                    size_t len = node->source.range.Length(source->content);
                     if (len < best_len) {
                         best_len = len;
                         best_node = cast;

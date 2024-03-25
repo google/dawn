@@ -271,6 +271,28 @@ const C = max(1, array(1,2,3)[⧘2]);
                              },  // =========================================
                              {
                                  R"(
+const C = max(1
+              ⧘
+              ,
+              2);
+)",
+                                 MaxSignatures(),
+                                 /* active_signature */ 0,
+                                 /* active_parameter */ 0,
+                             },  // =========================================
+                             {
+                                 R"(
+const C = max(1
+              ,
+              ⧘
+              2);
+)",
+                                 MaxSignatures(),
+                                 /* active_signature */ 0,
+                                 /* active_parameter */ 1,
+                             },  // =========================================
+                             {
+                                 R"(
 const C = max(1, 2) ⧘;
 )",
                                  {},

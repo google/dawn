@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/wgsl/ls/server.h"
 
+#include "langsvr/lsp/comparators.h"
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/lang/wgsl/ls/utils.h"
@@ -56,18 +57,22 @@ std::vector<lsp::ParameterInformation> Params(const core::intrinsic::TableData& 
     return params;
 }
 
-size_t CalcParamIndex(const Source& call_source, const Source::Location& carat) {
+/// @returns the zero-based index of the parameter at with the cursor at @p position, for a call
+/// with the source @p call_source.
+size_t CalcParamIndex(const Source& call_source, const Source::Location& position) {
     size_t index = 0;
     int depth = 0;
 
-    auto start = call_source.range.begin;
-    auto end = std::min(call_source.range.end, carat);
+    auto range = Conv(call_source.range);
+    auto start = range.start;
+    auto end = std::min(range.end, Conv(position));
     auto& lines = call_source.file->content.lines;
 
-    for (auto line = start.line; line <= end.line; line++) {
-        auto start_column = line == start.line ? start.column : 0;
-        auto end_column = line == end.line ? end.column : 0;
-        auto text = lines[line - 1].substr(start_column - 1, end_column - start_column);
+    for (auto line_idx = start.line; line_idx <= end.line; line_idx++) {
+        auto& line = lines[line_idx];
+        auto start_character = (line_idx == start.line) ? start.character : 0;
+        auto end_character = (line_idx == end.line) ? end.character : line.size();
+        auto text = line.substr(start_character, end_character - start_character);
         for (char c : text) {
             switch (c) {
                 case '(':
