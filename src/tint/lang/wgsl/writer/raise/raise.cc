@@ -36,6 +36,7 @@
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/writer/raise/rename_conflicts.h"
+#include "src/tint/lang/wgsl/writer/raise/value_to_let.h"
 
 namespace tint::wgsl::writer {
 namespace {
@@ -231,6 +232,9 @@ Result<SuccessType> Raise(core::ir::Module& mod) {
     }
 
     if (auto result = raise::RenameConflicts(mod); result != Success) {
+        return result.Failure();
+    }
+    if (auto result = raise::ValueToLet(mod); result != Success) {
         return result.Failure();
     }
 

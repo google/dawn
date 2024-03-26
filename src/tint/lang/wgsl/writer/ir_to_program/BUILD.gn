@@ -116,10 +116,7 @@ if (tint_build_unittests) {
     ]
 
     if (tint_build_wgsl_writer) {
-      sources += [
-        "inlining_test.cc",
-        "ir_to_program_test.cc",
-      ]
+      sources += [ "ir_to_program_test.cc" ]
       deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
     }
   }

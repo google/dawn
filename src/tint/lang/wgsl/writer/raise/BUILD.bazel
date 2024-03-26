@@ -41,10 +41,12 @@ cc_library(
   srcs = [
     "raise.cc",
     "rename_conflicts.cc",
+    "value_to_let.cc",
   ],
   hdrs = [
     "raise.h",
     "rename_conflicts.h",
+    "value_to_let.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -79,6 +81,7 @@ cc_library(
   srcs = [
     "raise_test.cc",
     "rename_conflicts_test.cc",
+    "value_to_let_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

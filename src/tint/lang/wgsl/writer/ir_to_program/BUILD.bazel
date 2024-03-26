@@ -85,7 +85,6 @@ cc_library(
     "ir_to_program_test.h",
   ] + select({
     ":tint_build_wgsl_writer": [
-      "inlining_test.cc",
       "ir_to_program_test.cc",
     ],
     "//conditions:default": [],

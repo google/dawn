@@ -60,6 +60,7 @@ TEST_F(WgslWriter_RaiseTest, BuiltinConversion) {
 %f = func():void -> %b1 {
   %b1 = block {
     %2:i32 = wgsl.max 1i, 2i
+    %3:i32 = let %2
     ret
   }
 }
@@ -154,8 +155,9 @@ TEST_F(WgslWriter_RaiseTest, WorkgroupBarrier_NoMatch) {
     %3:void = wgsl.workgroupBarrier
     store %W, 42i
     %4:i32 = load %W
-    %5:void = wgsl.workgroupBarrier
-    ret %4
+    %5:i32 = let %4
+    %6:void = wgsl.workgroupBarrier
+    ret %5
   }
 }
 )";
