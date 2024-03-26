@@ -1362,15 +1362,20 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
         mEncodingContext.EnterPass(passEncoder.Get());
 
-        MaybeError error;
-        if (validationState.GetImplicitSampleCount() > 1) {
-            error = ApplyMSAARenderToSingleSampledLoadOp(device, passEncoder.Get(), *descriptor,
-                                                         validationState.GetImplicitSampleCount());
-        } else if (ShouldApplyClearBigIntegerColorValueWithDraw(device, *descriptor)) {
-            // This is skipped if implicitSampleCount > 1. Because implicitSampleCount > 1 is only
-            // supported for non-integer textures.
-            error = ApplyClearBigIntegerColorValueWithDraw(passEncoder.Get(), *descriptor);
-        }
+        auto error = [&]() -> MaybeError {
+            if (validationState.GetImplicitSampleCount() > 1) {
+                DAWN_TRY(
+                    ApplyMSAARenderToSingleSampledLoadOp(device, passEncoder.Get(), *descriptor,
+                                                         validationState.GetImplicitSampleCount()));
+            }
+            // ApplyClearWithDraw() applies clear with draw if clear_color_with_draw or
+            // apply_clear_big_integer_color_value_with_draw toggle is enabled, and the render pass
+            // attachments need to be cleared.
+            DAWN_TRY(ApplyClearWithDraw(passEncoder.Get(), *descriptor));
+
+            return {};
+        }();
+
         if (device->ConsumedError(std::move(error))) {
             return MakeError();
         }

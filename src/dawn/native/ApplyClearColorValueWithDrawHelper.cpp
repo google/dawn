@@ -28,6 +28,7 @@
 #include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 
 #include <limits>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -53,10 +54,10 @@ static const char kVSSource[] = R"(
 @vertex
 fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
     var pos = array(
-        vec2f( 0.0, -1.0),
+        vec2f(-1.0, -1.0),
         vec2f( 1.0, -1.0),
-        vec2f( 0.0,  1.0),
-        vec2f( 0.0,  1.0),
+        vec2f(-1.0,  1.0),
+        vec2f(-1.0,  1.0),
         vec2f( 1.0, -1.0),
         vec2f( 1.0,  1.0));
         return vec4f(pos[VertexIndex], 0.0, 1.0);
@@ -72,7 +73,7 @@ const char* GetTextureComponentTypeString(DeviceBase* device, wgpu::TextureForma
         case TextureComponentType::Uint:
             return "u32";
         case TextureComponentType::Float:
-            break;
+            return "f32";
     }
     DAWN_UNREACHABLE();
 }
@@ -117,7 +118,6 @@ fn main() -> OutputColor {
                          << R"(
 return outputColor;
 })";
-
     return fragmentShaderStream.str();
 }
 
@@ -169,7 +169,12 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearValueWithDrawPipeline(
 
     renderPipelineDesc.vertex = vertex;
     renderPipelineDesc.fragment = &fragment;
-    renderPipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    renderPipelineDesc.multisample.count = key.sampleCount;
+    DepthStencilState depthStencilState = {};
+    if (key.depthStencilFormat != wgpu::TextureFormat::Undefined) {
+        depthStencilState.format = key.depthStencilFormat;
+        renderPipelineDesc.depthStencil = &depthStencilState;
+    }
     fragment.targetCount = key.colorAttachmentCount;
     fragment.targets = colorTargets.data();
 
@@ -239,17 +244,7 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
     return std::move(outputBuffer);
 }
 
-// Helper functions for applying big integer clear values with draw
-bool ShouldApplyClearBigIntegerColorValueWithDraw(
-    const RenderPassColorAttachment& colorAttachmentInfo) {
-    if (colorAttachmentInfo.view == nullptr) {
-        return false;
-    }
-
-    if (colorAttachmentInfo.loadOp != wgpu::LoadOp::Clear) {
-        return false;
-    }
-
+bool NeedsBigIntClear(const RenderPassColorAttachment& colorAttachmentInfo) {
     // We should only apply this workaround on 32-bit signed and unsigned integer formats.
     const Format& format = colorAttachmentInfo.view->GetFormat();
     switch (format.format) {
@@ -300,8 +295,17 @@ bool ShouldApplyClearBigIntegerColorValueWithDraw(
     return true;
 }
 
-KeyOfApplyClearColorValueWithDrawPipelines GetKeyOfApplyClearColorValueWithDrawPipelines(
-    const RenderPassDescriptor* renderPassDescriptor) {
+std::optional<KeyOfApplyClearColorValueWithDrawPipelines>
+GetKeyOfApplyClearColorValueWithDrawPipelines(const DeviceBase* device,
+                                              const RenderPassDescriptor* renderPassDescriptor) {
+    bool clearWithDraw = device->IsToggleEnabled(Toggle::ClearColorWithDraw);
+    bool clearWithDrawForBigInt =
+        device->IsToggleEnabled(Toggle::ApplyClearBigIntegerColorValueWithDraw);
+
+    if (!clearWithDraw && !clearWithDrawForBigInt) {
+        return std::nullopt;
+    }
+
     KeyOfApplyClearColorValueWithDrawPipelines key;
     key.colorAttachmentCount = renderPassDescriptor->colorAttachmentCount;
 
@@ -310,14 +314,36 @@ KeyOfApplyClearColorValueWithDrawPipelines GetKeyOfApplyClearColorValueWithDrawP
 
     key.colorTargetFormats.fill(wgpu::TextureFormat::Undefined);
     for (auto [i, attachment] : Enumerate(colorAttachments)) {
-        if (attachment.view != nullptr) {
-            key.colorTargetFormats[i] = attachment.view->GetFormat().format;
+        if (attachment.view == nullptr) {
+            continue;
         }
 
-        if (ShouldApplyClearBigIntegerColorValueWithDraw(attachment)) {
+        key.colorTargetFormats[i] = attachment.view->GetFormat().format;
+        if (key.sampleCount == 0) {
+            key.sampleCount = attachment.view->GetTexture()->GetSampleCount();
+        } else {
+            DAWN_ASSERT(key.sampleCount == attachment.view->GetTexture()->GetSampleCount());
+        }
+
+        if (attachment.loadOp != wgpu::LoadOp::Clear) {
+            continue;
+        }
+
+        if (clearWithDraw || (clearWithDrawForBigInt && NeedsBigIntClear(attachment))) {
             key.colorTargetsToApplyClearColorValue.set(i);
         }
     }
+
+    if (renderPassDescriptor->depthStencilAttachment &&
+        renderPassDescriptor->depthStencilAttachment->view != nullptr) {
+        key.depthStencilFormat =
+            renderPassDescriptor->depthStencilAttachment->view->GetFormat().format;
+    }
+
+    if (key.colorTargetsToApplyClearColorValue.none()) {
+        return std::nullopt;
+    }
+
     return key;
 }
 
@@ -334,6 +360,10 @@ size_t KeyOfApplyClearColorValueWithDrawPipelinesHashFunc::operator()(
     for (wgpu::TextureFormat format : key.colorTargetFormats) {
         HashCombine(&hash, format);
     }
+
+    HashCombine(&hash, key.sampleCount);
+
+    HashCombine(&hash, key.depthStencilFormat);
 
     return hash;
 }
@@ -354,43 +384,29 @@ bool KeyOfApplyClearColorValueWithDrawPipelinesEqualityFunc::operator()(
             return false;
         }
     }
-    return true;
+
+    return key1.sampleCount == key2.sampleCount &&
+           key1.depthStencilFormat == key2.depthStencilFormat;
 }
 
-bool ShouldApplyClearBigIntegerColorValueWithDraw(
-    const DeviceBase* device,
-    const RenderPassDescriptor* renderPassDescriptor) {
-    if (!device->IsToggleEnabled(Toggle::ApplyClearBigIntegerColorValueWithDraw)) {
-        return false;
-    }
-
-    for (uint32_t i = 0; i < renderPassDescriptor->colorAttachmentCount; ++i) {
-        if (ShouldApplyClearBigIntegerColorValueWithDraw(
-                renderPassDescriptor->colorAttachments[i])) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-MaybeError ApplyClearBigIntegerColorValueWithDraw(
-    RenderPassEncoder* renderPassEncoder,
-    const RenderPassDescriptor* renderPassDescriptor) {
+MaybeError ApplyClearWithDraw(RenderPassEncoder* renderPassEncoder,
+                              const RenderPassDescriptor* renderPassDescriptor) {
     DeviceBase* device = renderPassEncoder->GetDevice();
-
-    KeyOfApplyClearColorValueWithDrawPipelines key =
-        GetKeyOfApplyClearColorValueWithDrawPipelines(renderPassDescriptor);
+    std::optional<KeyOfApplyClearColorValueWithDrawPipelines> key =
+        GetKeyOfApplyClearColorValueWithDrawPipelines(device, renderPassDescriptor);
+    if (!key.has_value()) {
+        return {};
+    }
 
     RenderPipelineBase* pipeline = nullptr;
-    DAWN_TRY_ASSIGN(pipeline, GetOrCreateApplyClearValueWithDrawPipeline(device, key));
+    DAWN_TRY_ASSIGN(pipeline, GetOrCreateApplyClearValueWithDrawPipeline(device, key.value()));
 
     Ref<BindGroupLayoutBase> layout;
     DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
 
     Ref<BufferBase> uniformBufferWithClearColorValues;
     DAWN_TRY_ASSIGN(uniformBufferWithClearColorValues,
-                    CreateUniformBufferWithClearValues(device, renderPassDescriptor, key));
+                    CreateUniformBufferWithClearValues(device, renderPassDescriptor, key.value()));
 
     Ref<BindGroupBase> bindGroup;
     DAWN_TRY_ASSIGN(bindGroup,

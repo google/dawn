@@ -42,9 +42,11 @@ class RenderPassEncoder;
 struct RenderPassDescriptor;
 
 struct KeyOfApplyClearColorValueWithDrawPipelines {
-    uint8_t colorAttachmentCount;
+    uint8_t colorAttachmentCount = 0;
     PerColorAttachment<wgpu::TextureFormat> colorTargetFormats;
     ColorAttachmentMask colorTargetsToApplyClearColorValue;
+    uint32_t sampleCount = 0;
+    wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
 };
 
 struct KeyOfApplyClearColorValueWithDrawPipelinesHashFunc {
@@ -60,11 +62,8 @@ using ApplyClearColorValueWithDrawPipelinesCache =
                         KeyOfApplyClearColorValueWithDrawPipelinesHashFunc,
                         KeyOfApplyClearColorValueWithDrawPipelinesEqualityFunc>;
 
-bool ShouldApplyClearBigIntegerColorValueWithDraw(const DeviceBase* device,
-                                                  const RenderPassDescriptor* renderPassDescriptor);
-
-MaybeError ApplyClearBigIntegerColorValueWithDraw(RenderPassEncoder* renderPassEncoder,
-                                                  const RenderPassDescriptor* renderPassDescriptor);
+MaybeError ApplyClearWithDraw(RenderPassEncoder* renderPassEncoder,
+                              const RenderPassDescriptor* renderPassDescriptor);
 
 }  // namespace dawn::native
 

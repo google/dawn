@@ -558,6 +558,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Using D3D12_BLEND_DEST_ALPHA as source blend factor for both color and alpha blending "
       "doesn't work correctly on the D3D12 backend using Intel Gen9 or Gen9.5 GPUs.",
       "https://crbug.com/dawn/1579", ToggleStage::Device}},
+    {Toggle::ClearColorWithDraw,
+     {"clear_color_with_draw",
+      "Use Draw instead of ClearRenderTargetView() to clear color attachments. On D3D11, "
+      "ClearRenderTargetView() does not always clear texture correctly.",
+      "https://crbug.com/chromium/329702368", ToggleStage::Device}},
+
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

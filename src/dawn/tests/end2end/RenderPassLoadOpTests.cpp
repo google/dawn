@@ -752,6 +752,7 @@ TEST_P(RenderPassLoadOpTests, MixedUseOfLoadOpLoadAndLoadOpClearWithBigIntegerVa
 
 DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests,
                       D3D11Backend(),
+                      D3D11Backend({"clear_color_with_draw"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
