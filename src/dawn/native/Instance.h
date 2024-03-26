@@ -175,6 +175,8 @@ class InstanceBase final : public RefCountedWithExternalCount {
     // TODO(https://github.com/webgpu-native/webgpu-headers/issues/252): Add a count argument.
     size_t APIEnumerateWGSLLanguageFeatures(wgpu::WGSLFeatureName* features) const;
 
+    void DisconnectDawnPlatform();
+
   private:
     explicit InstanceBase(const TogglesState& instanceToggles);
     ~InstanceBase() override;
@@ -217,9 +219,9 @@ class InstanceBase final : public RefCountedWithExternalCount {
     wgpu::LoggingCallback mLoggingCallback = nullptr;
     raw_ptr<void> mLoggingCallbackUserdata = nullptr;
 
+    std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
     // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
     raw_ptr<dawn::platform::Platform, DanglingUntriaged> mPlatform = nullptr;
-    std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
 
     BackendsArray mBackends;
     BackendsBitset mBackendsTried;

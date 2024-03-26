@@ -219,6 +219,10 @@ WGPUInstance Instance::Get() const {
     return ToAPI(mImpl);
 }
 
+void Instance::DisconnectDawnPlatform() {
+    mImpl->DisconnectDawnPlatform();
+}
+
 size_t GetLazyClearCountForTesting(WGPUDevice device) {
     return FromAPI(device)->GetLazyClearCountForTesting();
 }

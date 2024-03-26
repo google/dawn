@@ -188,6 +188,9 @@ class DAWN_NATIVE_EXPORT Instance {
     // Returns the underlying WGPUInstance object.
     WGPUInstance Get() const;
 
+    // Make mImpl->mPlatform point to an object inside Dawn in case it becomes a dangling pointer
+    void DisconnectDawnPlatform();
+
   private:
     InstanceBase* mImpl = nullptr;
 };

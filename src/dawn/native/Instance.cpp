@@ -186,9 +186,11 @@ void InstanceBase::DeleteThis() {
         mCallbackTaskManager->Flush();
     } while (!mCallbackTaskManager->IsEmpty());
 
-    mPlatform = nullptr;
-
     RefCountedWithExternalCount::DeleteThis();
+}
+
+void InstanceBase::DisconnectDawnPlatform() {
+    SetPlatform(nullptr);
 }
 
 void InstanceBase::WillDropLastExternalRef() {
