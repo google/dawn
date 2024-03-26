@@ -40,10 +40,13 @@
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/PerStage.h"
+#include "dawn/native/PhysicalDevice.h"
+#include "dawn/native/Sampler.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 
 namespace dawn::native {
@@ -119,6 +122,21 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
     if (entry->sampler.type != wgpu::SamplerBindingType::Undefined) {
         bindingMemberCount++;
         DAWN_TRY(ValidateSamplerBindingType(entry->sampler.type));
+
+        UnpackedPtr<SamplerBindingLayout> samplerLayout;
+        DAWN_TRY_ASSIGN(samplerLayout, ValidateAndUnpack(&entry->sampler));
+
+        auto staticSampler = samplerLayout.Get<StaticSampler>();
+        if (staticSampler) {
+            DAWN_INVALID_IF(!device->HasFeature(Feature::StaticSamplers),
+                            "Static samplers used without the %s feature enabled.",
+                            device->GetPhysicalDevice()
+                                ->GetInstance()
+                                ->GetFeatureInfo(ToAPI(Feature::StaticSamplers))
+                                ->name);
+
+            DAWN_TRY(device->ValidateObject(staticSampler->sampler));
+        }
     }
 
     if (entry->texture.sampleType != wgpu::TextureSampleType::Undefined) {

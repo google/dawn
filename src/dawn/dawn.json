@@ -375,7 +375,15 @@
             {"name": "type", "type": "sampler binding type", "default": "undefined"}
         ]
     },
-
+    "static sampler": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["sampler binding layout"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "sampler", "type": "sampler"}
+        ]
+    },
     "texture sample type": {
         "category": "enum",
         "values": [
@@ -3680,7 +3688,8 @@
             {"value": 1211, "name": "shared fence DXGI shared handle export info", "tags": ["dawn", "native"]},
             {"value": 1212, "name": "shared fence MTL shared event descriptor", "tags": ["dawn", "native"]},
             {"value": 1213, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]},
-            {"value": 1214, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]}
+            {"value": 1214, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
+            {"value": 1215, "name": "static sampler", "tags": ["dawn"]}
         ]
     },
     "texture": {
