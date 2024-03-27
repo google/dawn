@@ -27,6 +27,7 @@
 
 #include "src/tint/utils/diagnostic/source.h"
 
+#include <cstddef>
 #include <memory>
 #include <string_view>
 #include <utility>

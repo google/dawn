@@ -27,12 +27,17 @@
 
 #include "src/tint/lang/wgsl/writer/writer.h"
 
+#include <ostream>
 #include <string>
+#include <string_view>
 
+#include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/program_options.h"
 #include "src/tint/lang/wgsl/writer/raise/raise.h"
+#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/text/string.h"
 
 namespace tint::wgsl::writer {
