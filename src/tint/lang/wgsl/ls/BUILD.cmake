@@ -43,6 +43,7 @@ if(TINT_BUILD_TINTD AND TINT_BUILD_WGSL_READER)
 tint_add_target(tint_lang_wgsl_ls lib
   lang/wgsl/ls/cancel_request.cc
   lang/wgsl/ls/change_configuration.cc
+  lang/wgsl/ls/change_watched_files.cc
   lang/wgsl/ls/definition.cc
   lang/wgsl/ls/diagnostics.cc
   lang/wgsl/ls/document.cc

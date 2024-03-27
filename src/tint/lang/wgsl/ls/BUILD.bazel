@@ -41,6 +41,7 @@ cc_library(
   srcs = [
     "cancel_request.cc",
     "change_configuration.cc",
+    "change_watched_files.cc",
     "definition.cc",
     "diagnostics.cc",
     "document.cc",

@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/wgsl/ls/server.h"
 
+#include "langsvr/lsp/lsp.h"
 #include "langsvr/session.h"
 
 #include "src/tint/lang/wgsl/ls/sem_token.h"
@@ -102,6 +103,8 @@ Server::Server(langsvr::Session& session) : session_(session) {
     session.Register(
         [&](const lsp::TextDocumentSemanticTokensFullRequest& r) { return Handle(r); });
     session.Register([&](const lsp::TextDocumentSignatureHelpRequest& r) { return Handle(r); });
+    session.Register(
+        [&](const lsp::WorkspaceDidChangeWatchedFilesNotification& n) { return Handle(n); });
 }
 
 Server::~Server() = default;

@@ -127,6 +127,10 @@ class Server {
     langsvr::Result<langsvr::SuccessType>  //
     Handle(const langsvr::lsp::WorkspaceDidChangeConfigurationNotification&);
 
+    /// Handler for langsvr::lsp::WorkspaceDidChangeWatchedFilesNotification
+    langsvr::Result<langsvr::SuccessType>  //
+    Handle(const langsvr::lsp::WorkspaceDidChangeWatchedFilesNotification&);
+
     /// Publishes the tint::Program diagnostics to the server via a
     /// TextDocumentPublishDiagnosticsNotification.
     langsvr::Result<langsvr::SuccessType>  //

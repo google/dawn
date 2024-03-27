@@ -46,6 +46,7 @@ if (tint_build_tintd && tint_build_wgsl_reader) {
     sources = [
       "cancel_request.cc",
       "change_configuration.cc",
+      "change_watched_files.cc",
       "definition.cc",
       "diagnostics.cc",
       "document.cc",
