@@ -877,6 +877,10 @@ void BufferBase::MarkUsedInPendingCommands() {
     mLastUsageSerial = serial;
 }
 
+ExecutionSerial BufferBase::GetLastUsageSerial() const {
+    return mLastUsageSerial;
+}
+
 void BufferBase::SetHasAccess(bool hasAccess) {
     mState = hasAccess ? BufferState::Unmapped : BufferState::SharedMemoryNoAccess;
 }
