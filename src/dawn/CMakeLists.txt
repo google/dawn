@@ -77,19 +77,9 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWN_HEADERS_GEN_SOURCES"
 )
 
-# Headers only INTERFACE library with generated headers don't work in CMake
-# because the GENERATED property is local to a directory. Instead we make a
-# STATIC library with a placeholder cpp file.
-#
-# INTERFACE libraries can only have INTERFACE sources so the sources get added
-# to the dependant's list of sources. If these dependents are in another
-# directory, they don't see the GENERATED property and fail to configure
-# because the file doesn't exist on disk.
-add_library(dawn_headers STATIC ${DAWN_PLACEHOLDER_FILE})
-common_compile_options(dawn_headers)
+add_library(dawn_headers INTERFACE)
 target_sources(dawn_headers INTERFACE
     "${DAWN_INCLUDE_DIR}/webgpu/webgpu.h"
-    PRIVATE
     ${DAWN_HEADERS_GEN_SOURCES}
 )
 target_link_libraries(dawn_headers INTERFACE dawn_public_config)
@@ -105,15 +95,11 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWNCPP_HEADERS_GEN_SOURCES"
 )
 
-# This headers only library needs to be a STATIC library, see comment for
-# dawn_headers above.
-add_library(dawncpp_headers STATIC ${DAWN_PLACEHOLDER_FILE})
-common_compile_options(dawncpp_headers)
+add_library(dawncpp_headers INTERFACE)
 target_sources(dawncpp_headers
   INTERFACE
     "${DAWN_INCLUDE_DIR}/webgpu/webgpu_cpp.h"
     "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
-  PRIVATE
     ${DAWNCPP_HEADERS_GEN_SOURCES}
 )
 target_link_libraries(dawncpp_headers INTERFACE dawn_headers)

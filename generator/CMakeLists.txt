@@ -105,7 +105,20 @@ function(DawnGenerator)
         COMMENT "Dawn: Generating files for ${G_PRINT_NAME}."
     )
 
-    set_source_files_properties(${OUTPUTS} PROPERTIES GENERATED TRUE)
+    # Prior to CMake 3.20 the GENERATED property is local to a directory which means that putting
+    # generated headers in INTERFACE properties causes dependent targets to complain that they
+    # cannot find the file. (because they don't see it as generated and want to check is is
+    # actually on the filesystem).
+    # Work around this by creating empty files placeholder generated files so that the build
+    # configuration process can success.
+    foreach(path ${OUTPUTS})
+        if (NOT EXISTS ${path})
+            string(FIND "${path}" "/" foundIndex REVERSE)
+            string(SUBSTRING "${path}" 0 ${foundIndex} dir)
+            file(MAKE_DIRECTORY ${dir})
+            file(TOUCH ${path})
+        endif()
+    endforeach()
 
     # Return the list of outputs.
     set(${G_RESULT_VARIABLE} ${OUTPUTS} PARENT_SCOPE)

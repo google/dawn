@@ -27,12 +27,15 @@
 
 cmake_minimum_required(VERSION 3.10.2)
 
-# When upgrading to CMake 3.11 we can remove DAWN_PLACEHOLDER_FILE because source-less add_library
-# becomes available.
-# When upgrading to CMake 3.12 we should add CONFIGURE_DEPENDS to DawnGenerator to rerun CMake in
-# case any of the generator files changes. We should also remove the CACHE "" FORCE stuff to
-# override options in third_party dependencies. We can also add the HOMEPAGE_URL
-# entry to the project `HOMEPAGE_URL "https://dawn.googlesource.com/dawn"`
+# - When upgrading to CMake 3.11 we can remove DAWN_PLACEHOLDER_FILE because source-less
+#   add_library becomes available.
+# - When upgrading to CMake 3.12 we should add CONFIGURE_DEPENDS to DawnGenerator to rerun CMake
+#   in case any of the generator files changes. We should also remove the CACHE "" FORCE stuff to
+#   override options in third_party dependencies. We can also add the HOMEPAGE_URL entry to the
+#   project `HOMEPAGE_URL "https://dawn.googlesource.com/dawn"`
+# - When upgrading to CMake 3.20 we can take advantage of the GENERATED property being global in
+#   DawnGenerator. We should also use the path utilities in install_if_enabled.
+
 
 project(
     Dawn
