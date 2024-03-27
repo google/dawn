@@ -548,6 +548,15 @@ crbug.com/tint/2169 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,cal
 crbug.com/tint/2169 [ amd-0x67ef sonoma ] webgpu:shader,execution,expression,call,builtin,ldexp:f16:inputSource="uniform";vectorize=3 [ Failure ]
 
 ################################################################################
+# Intel failures for robust access on Windows
+# crbug.com/tint/2213: F16 tests always fail.
+# crbug.com/tint/2130: Non-f16 tests are flaky on DXC.
+# As these are overlapping, mark the whole lot as Failure.
+# KEEP
+################################################################################
+crbug.com/tint/2130 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ]
+
+################################################################################
 # video tests fail on SwiftShader. Due to multiplanar formatted textures not
 # being handled properly in Chrome's WebGPU decoder.
 ################################################################################
@@ -948,20 +957,9 @@ crbug.com/tint/2033 [ android-r ] webgpu:shader,execution,expression,call,builti
 crbug.com/tint/2033 [ android-r ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:exchange_storage_basic:workgroupSize=1;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
 
 ################################################################################
-# Intel F16 failures robust access on Windows
-################################################################################
-crbug.com/tint/2213 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="array";shadowingMode="function-scope";isAtomic=false;baseType="f16" [ Failure ]
-crbug.com/tint/2213 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="array";shadowingMode="module-scope";isAtomic=false;baseType="f16" [ Failure ]
-crbug.com/tint/2213 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="array";shadowingMode="none";isAtomic=false;baseType="f16" [ Failure ]
-crbug.com/tint/2213 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="write";containerType="array";shadowingMode="function-scope";isAtomic=false;baseType="f16" [ Failure ]
-crbug.com/tint/2213 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="write";containerType="array";shadowingMode="module-scope";isAtomic=false;baseType="f16" [ Failure ]
-crbug.com/tint/2213 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="write";containerType="array";shadowingMode="none";isAtomic=false;baseType="f16" [ Failure ]
-
-################################################################################
 # DXC failures
 ################################################################################
 crbug.com/tint/2057 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,execution,flow_control,loop:nested_loops:preventValueOptimizations=false [ Failure ]
-crbug.com/tint/2130 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ RetryOnFailure ]
 crbug.com/dawn/2142 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,expression,call,builtin,tanh:f32:* [ Failure ]
 
 ################################################################################
