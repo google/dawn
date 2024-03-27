@@ -31,7 +31,7 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWN_NATIVE_UTILS_GEN_SOURCES"
 )
 
-add_library(dawn_native ${DAWN_PLACEHOLDER_FILE})
+add_library(dawn_native)
 common_compile_options(dawn_native)
 
 target_compile_definitions(dawn_native PRIVATE "DAWN_NATIVE_IMPLEMENTATION")
@@ -764,7 +764,7 @@ DawnJSONGenerator(
     RESULT_VARIABLE "WEBGPU_DAWN_NATIVE_PROC_GEN"
 )
 
-add_library(webgpu_dawn ${DAWN_PLACEHOLDER_FILE})
+add_library(webgpu_dawn)
 common_compile_options(webgpu_dawn)
 target_link_libraries(webgpu_dawn PRIVATE dawn_native)
 target_link_libraries(webgpu_dawn PUBLIC dawn_headers)

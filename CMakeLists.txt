@@ -25,22 +25,20 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 3.10.2)
+# As per https://github.com/google/oss-policies-info/blob/main/foundational-cxx-support-matrix.md
+cmake_minimum_required(VERSION 3.13)
 
-# - When upgrading to CMake 3.11 we can remove DAWN_PLACEHOLDER_FILE because source-less
-#   add_library becomes available.
-# - When upgrading to CMake 3.12 we should add CONFIGURE_DEPENDS to DawnGenerator to rerun CMake
+# - Since we are past CMake 3.12 we can add CONFIGURE_DEPENDS to DawnGenerator to rerun CMake
 #   in case any of the generator files changes. We should also remove the CACHE "" FORCE stuff to
-#   override options in third_party dependencies. We can also add the HOMEPAGE_URL entry to the
-#   project `HOMEPAGE_URL "https://dawn.googlesource.com/dawn"`
+#   override options in third_party dependencies.
 # - When upgrading to CMake 3.20 we can take advantage of the GENERATED property being global in
 #   DawnGenerator. We should also use the path utilities in install_if_enabled.
-
 
 project(
     Dawn
     DESCRIPTION "Dawn, a WebGPU implementation"
     LANGUAGES C CXX
+    HOMEPAGE_URL "https://dawn.googlesource.com/dawn"
 )
 enable_testing()
 
@@ -62,8 +60,6 @@ set(DAWN_GENERATOR_DIR "${Dawn_SOURCE_DIR}/generator")
 set(DAWN_SRC_DIR "${Dawn_SOURCE_DIR}/src")
 set(DAWN_INCLUDE_DIR "${Dawn_SOURCE_DIR}/include")
 set(DAWN_TEMPLATE_DIR "${DAWN_GENERATOR_DIR}/templates")
-
-set(DAWN_PLACEHOLDER_FILE "${DAWN_SRC_DIR}/Placeholder.cpp")
 
 ################################################################################
 # Configuration options

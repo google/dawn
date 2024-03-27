@@ -104,6 +104,7 @@ target_sources(dawncpp_headers
 )
 target_link_libraries(dawncpp_headers INTERFACE dawn_headers)
 install_if_enabled(dawncpp_headers)
+
 ###############################################################################
 # Dawn C++ wrapper
 ###############################################################################
@@ -114,14 +115,13 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWNCPP_GEN_SOURCES"
 )
 
-add_library(dawncpp STATIC ${DAWN_PLACEHOLDER_FILE})
+add_library(dawncpp)
 common_compile_options(dawncpp)
 target_sources(dawncpp PRIVATE ${DAWNCPP_GEN_SOURCES})
 target_link_libraries(dawncpp PUBLIC dawncpp_headers)
+install_if_enabled(dawncpp)
 
 add_library(webgpu_cpp ALIAS dawncpp)
-
-install_if_enabled(dawncpp)
 
 ###############################################################################
 # libdawn_proc
@@ -133,7 +133,7 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWNPROC_GEN_SOURCES"
 )
 
-add_library(dawn_proc ${DAWN_PLACEHOLDER_FILE})
+add_library(dawn_proc)
 common_compile_options(dawn_proc)
 target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)

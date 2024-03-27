@@ -27,7 +27,7 @@
 
 if(DAWN_USE_GLFW)
 
-add_library(dawn_glfw STATIC ${DAWN_PLACEHOLDER_FILE})
+add_library(dawn_glfw STATIC)
 common_compile_options(dawn_glfw)
 target_sources(dawn_glfw
   INTERFACE
