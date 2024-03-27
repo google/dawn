@@ -32,7 +32,7 @@ set(BUILD_TESTING OFF)
 # It is particularly interesting when building dawn as a subdirectory in
 # a parent project that does not want to use depot_tools.
 if (${DAWN_FETCH_DEPENDENCIES})
-    find_package(PythonInterp 3 REQUIRED)
+    find_package(Python3 REQUIRED)
 
     set(EXTRA_FETCH_ARGS)
     if (NOT TARGET gmock AND ${TINT_BUILD_TESTS})

@@ -370,7 +370,7 @@ if (NOT ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS} STREQUAL "")
 endif()
 
 message(STATUS "Using python3")
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 REQUIRED)
 
 ################################################################################
 # common_compile_options - sets compiler and linker options common for dawn and
