@@ -170,6 +170,14 @@ function(AddSubdirectoryDXC)
     set(LLVM_ENABLE_EH ON)
     set(CLANG_CL OFF)
 
+    if (DAWN_ENABLE_ASAN AND DAWN_ENABLE_UBSAN)
+        set(LLVM_USE_SANITIZER "Address;Undefined")
+    elseif(DAWN_ENABLE_ASAN)
+        set(LLVM_USE_SANITIZER "Address")
+    elseif(DAWN_ENABLE_UBSAN)
+        set(LLVM_USE_SANITIZER "Undefined")
+    endif()
+
     # Cache variables -- these are *not* scoped to this function
     set(LLVM_TARGETS_TO_BUILD "None" CACHE STRING "" FORCE)
     set(LLVM_DEFAULT_TARGET_TRIPLE "dxil-ms-dx" CACHE STRING "" FORCE)
