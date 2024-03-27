@@ -56,6 +56,26 @@ python tools/fetch_dawn_dependencies.py --use-test-deps
 
 Use `python tools/fetch_dawn_dependencies.py -h` to know more about the available options. The `--use-test-deps` option used above specifies to also fetch dependencies needed by tests. Contrary to `depot_tools`, this scripts does not figure out option-dependent requirements automatically.
 
+### Linux dependencies
+
+The following packages are needed to build Dawn. (Package names are the Ubuntu names).
+
+* `libxrandr-dev`
+* `libxinerama-dev`
+* `libxcursor-dev`
+* `mesa-common-dev`
+* `libx11-xcb-dev`
+* `pkg-config`
+* `nodejs`
+* `npm`
+
+```sh
+sudo apt-get install libxrandr-dev libxinerama-dev libxcursor-dev mesa-common-dev libx11-xcb-dev pkg-config nodejs npm
+```
+
+Note, `nodejs` and `npm` are only needed if building `dawn.node`.
+
+
 ## Build Dawn
 
 ### Compiling using CMake + Ninja

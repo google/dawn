@@ -30,13 +30,7 @@ cp scripts/standalone-with-node.gclient .gclient
 gclient sync
 ```
 
-Optionally, on Linux install X11-xcb support:
-
-```sh
-sudo apt-get install libx11-xcb-dev
-```
-
-If you don't have those supporting libraries, then you must use the
+If you don't have the `libx11-xbc-dev` supporting library, then you must use the
 `-DDAWN_USE_X11=OFF` flag on CMake (see below).
 
 ### Build
