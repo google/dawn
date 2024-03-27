@@ -171,7 +171,6 @@ class DAWN_NATIVE_EXPORT Instance {
         const wgpu::RequestAdapterOptions* options = nullptr) const;
 
     const ToggleInfo* GetToggleInfo(const char* toggleName);
-    const FeatureInfo* GetFeatureInfo(WGPUFeatureName feature);
 
     // Enables backend validation layers
     void EnableBackendValidation(bool enableBackendValidation);

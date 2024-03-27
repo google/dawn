@@ -352,10 +352,6 @@ Toggle InstanceBase::ToggleNameToEnum(const char* toggleName) {
     return mTogglesInfo.ToggleNameToEnum(toggleName);
 }
 
-const FeatureInfo* InstanceBase::GetFeatureInfo(wgpu::FeatureName feature) {
-    return dawn::native::GetFeatureInfo(feature);
-}
-
 std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     const RequestAdapterOptions* options) {
     static constexpr RequestAdapterOptions kDefaultOptions = {};

@@ -402,8 +402,7 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
             case wgpu::FeatureName::ShaderF16:
             case wgpu::FeatureName::ChromiumExperimentalSubgroups:
                 return FeatureValidationResult(
-                    absl::StrFormat("Feature %s requires DXC for D3D12.",
-                                    GetInstance()->GetFeatureInfo(feature)->name));
+                    absl::StrFormat("Feature %s requires DXC for D3D12.", feature));
             default:
                 break;
         }
@@ -413,9 +412,8 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
         // The feature `shader-f16` requires using shader model 6.2 or higher.
         case wgpu::FeatureName::ShaderF16: {
             if (!(GetAppliedShaderModelUnderToggles(toggles) >= 62)) {
-                return FeatureValidationResult(
-                    absl::StrFormat("Feature %s requires shader model 6.2 or higher for D3D12.",
-                                    GetInstance()->GetFeatureInfo(feature)->name));
+                return FeatureValidationResult(absl::StrFormat(
+                    "Feature %s requires shader model 6.2 or higher for D3D12.", feature));
             }
             break;
         }

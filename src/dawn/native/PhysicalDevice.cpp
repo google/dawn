@@ -177,7 +177,7 @@ FeatureValidationResult PhysicalDeviceBase::ValidateFeatureSupportedWithToggles(
             absl::StrFormat("Requested feature %s is not supported.", feature));
     }
 
-    const FeatureInfo* featureInfo = GetInstance()->GetFeatureInfo(feature);
+    const FeatureInfo* featureInfo = GetFeatureInfo(feature);
     // Experimental features are guarded by the AllowUnsafeAPIs toggle.
     if (featureInfo->featureState == FeatureInfo::FeatureState::Experimental) {
         // AllowUnsafeAPIs toggle is by default disabled if not explicitly enabled.
