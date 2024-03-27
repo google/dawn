@@ -83,6 +83,7 @@ struct PerStageBindingCounts {
     uint32_t storageTextureCount;
     uint32_t uniformBufferCount;
     uint32_t externalTextureCount;
+    uint32_t staticSamplerCount;
 };
 
 struct BindingCounts {
