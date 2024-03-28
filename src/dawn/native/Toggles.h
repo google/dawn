@@ -139,6 +139,7 @@ enum class Toggle {
     NoWorkaroundDstAlphaAsSrcBlendFactorForBothColorAndAlphaDoesNotWork,
 
     ClearColorWithDraw,
+    VulkanSkipDraw,
 
     EnumCount,
     InvalidEnum = EnumCount,
