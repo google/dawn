@@ -70,16 +70,6 @@ TEST_F(UnsafeAPIValidationTest, chromium_disable_uniformity_analysis) {
     )"));
 }
 
-// Check that create 3D texture for the render attachment is validated as unsafe.
-TEST_F(UnsafeAPIValidationTest, Create3DTextureForRenderAttachment) {
-    wgpu::TextureDescriptor descriptor;
-    descriptor.dimension = wgpu::TextureDimension::e3D;
-    descriptor.size = {1, 1};
-    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
-    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-}
-
 class TimestampQueryUnsafeAPIValidationTest : public ValidationTest {
   protected:
     WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,

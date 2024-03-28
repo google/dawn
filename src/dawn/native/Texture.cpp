@@ -371,13 +371,6 @@ MaybeError ValidateTextureUsage(const DeviceBase* device,
                     "dimension (%s).",
                     usage, wgpu::TextureUsage::RenderAttachment, descriptor->dimension);
 
-    DAWN_INVALID_IF(!device->IsToggleEnabled(Toggle::AllowUnsafeAPIs) &&
-                        descriptor->dimension == wgpu::TextureDimension::e3D &&
-                        (usage & wgpu::TextureUsage::RenderAttachment),
-                    "The texture dimension must not be %s for a render attachment if "
-                    "allow_unsafe_apis is not enabled. See crbug.com/dawn/1020.",
-                    wgpu::TextureDimension::e3D);
-
     DAWN_INVALID_IF(
         !format->supportsStorageUsage && (usage & wgpu::TextureUsage::StorageBinding),
         "The texture usage (%s) includes %s, which is incompatible with the format (%s).", usage,
