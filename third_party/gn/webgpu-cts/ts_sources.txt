@@ -16,8 +16,6 @@ src/common/internal/query/query.ts
 src/common/internal/query/compare.ts
 src/common/internal/params_utils.ts
 src/common/framework/fixture.ts
-src/common/internal/version.ts
-src/common/internal/logging/logger.ts
 src/common/util/data_tables.ts
 src/common/util/timeout.ts
 src/common/util/util.ts
@@ -32,6 +30,8 @@ src/common/internal/test_suite_listing.ts
 src/common/internal/util.ts
 src/common/internal/tree.ts
 src/common/internal/file_loader.ts
+src/common/internal/version.ts
+src/common/internal/logging/logger.ts
 src/common/util/colors.ts
 src/common/util/navigator_gpu.ts
 src/common/runtime/helper/sys.ts
@@ -378,6 +378,7 @@ src/webgpu/shader/execution/stage.spec.ts
 src/webgpu/shader/execution/zero_init.spec.ts
 src/webgpu/shader/execution/expression/expression.ts
 src/webgpu/shader/execution/expression/access/array/index.spec.ts
+src/webgpu/shader/execution/expression/access/matrix/index.spec.ts
 src/webgpu/shader/execution/expression/access/vector/components.spec.ts
 src/webgpu/shader/execution/expression/access/vector/index.spec.ts
 src/webgpu/shader/execution/expression/binary/af_addition.cache.ts
@@ -642,6 +643,8 @@ src/webgpu/shader/execution/expression/call/builtin/atomics/atomicStore.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/atomicSub.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/atomics/atomicXor.spec.ts
 src/webgpu/shader/execution/expression/call/user/ptr_params.spec.ts
+src/webgpu/shader/execution/expression/constructor/non_zero.spec.ts
+src/webgpu/shader/execution/expression/constructor/zero_value.spec.ts
 src/webgpu/shader/execution/expression/unary/address_of_and_indirection.spec.ts
 src/webgpu/shader/execution/expression/unary/af_arithmetic.cache.ts
 src/webgpu/shader/execution/expression/unary/unary.ts

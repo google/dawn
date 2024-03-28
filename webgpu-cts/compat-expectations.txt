@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-03-25 01:00:23PM
+# Last rolled: 2024-03-28 06:49:31AM
 
 # Flaky on all platforms
 # KEEP
@@ -103,6 +103,14 @@ crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importEx
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-270.mp4";* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-90.mp4";* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-vflip.mp4";* [ Failure ]
+
+################################################################################
+# Failures due to splitting off worker tests (crbug.com/330501141)
+# KEEP
+################################################################################
+crbug.com/dawn/2478 [ linux nvidia ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
+crbug.com/dawn/2478 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
+crbug.com/dawn/2478 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
 
 ### This section represents things that are probably fixable in Dawn.
 
@@ -493,14 +501,6 @@ crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTex
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
 
 ################################################################################
-# Failures due to splitting off worker tests (crbug.com/330501141)
-# KEEP
-################################################################################
-crbug.com/dawn/2478 [ linux nvidia ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
-crbug.com/dawn/2478 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
-crbug.com/dawn/2478 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
-
-################################################################################
 # New flakes. Please triage:
 ################################################################################
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ RetryOnFailure ]
@@ -509,3 +509,8 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,binary,
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,cross:abstract_float:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="storage_rw" [ RetryOnFailure ]
+
+################################################################################
+# New failures. Please triage:
+################################################################################
+crbug.com/dawn/0000 webgpu:shader,validation,functions,restrictions:function_parameter_types:case="invalid_ptr8" [ Failure ]
