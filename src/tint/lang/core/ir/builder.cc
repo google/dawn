@@ -98,11 +98,11 @@ ir::Discard* Builder::Discard() {
     return Append(ir.instructions.Create<ir::Discard>());
 }
 
-ir::Var* Builder::Var(const core::type::Pointer* type) {
+ir::Var* Builder::Var(const core::type::MemoryView* type) {
     return Append(ir.instructions.Create<ir::Var>(InstructionResult(type)));
 }
 
-ir::Var* Builder::Var(std::string_view name, const core::type::Pointer* type) {
+ir::Var* Builder::Var(std::string_view name, const core::type::MemoryView* type) {
     auto* var = Var(type);
     ir.SetName(var, name);
     return var;

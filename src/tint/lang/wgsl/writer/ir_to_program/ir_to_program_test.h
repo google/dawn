@@ -29,8 +29,10 @@
 #define SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_IR_TO_PROGRAM_TEST_H_
 
 #include <string>
+#include <utility>
 
 #include "src/tint/lang/core/ir/ir_helper_test.h"
+#include "src/tint/lang/core/type/reference.h"
 
 namespace tint::wgsl::writer {
 
@@ -50,6 +52,51 @@ class IRToProgramTest : public core::ir::IRTestHelper {
     };
     /// @returns the WGSL generated from the IR
     Result Run();
+
+    /// Creates a new `var` declaration with a name and initializer value, using a reference type.
+    /// @tparam SPACE the var's address space
+    /// @tparam ACCESS the var's access mode
+    /// @param name the var name
+    /// @param init the var initializer
+    /// @returns the instruction
+    template <
+        core::AddressSpace SPACE = core::AddressSpace::kFunction,
+        core::Access ACCESS = core::Access::kReadWrite,
+        typename VALUE = void,
+        typename = std::enable_if_t<
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
+    core::ir::Var* Var(std::string_view name, VALUE&& init) {
+        auto* val = b.Value(std::forward<VALUE>(init));
+        if (TINT_UNLIKELY(!val)) {
+            TINT_ASSERT(val);
+            return nullptr;
+        }
+        auto* var = b.Var(name, mod.Types().ref(SPACE, val->Type(), ACCESS));
+        var->SetInitializer(val);
+        mod.SetName(var->Result(0), name);
+        return var;
+    }
+
+    /// Creates a new `var` declaration
+    /// @tparam SPACE the var's address space
+    /// @tparam T the storage pointer's element type
+    /// @tparam ACCESS the var's access mode
+    /// @returns the instruction
+    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
+    core::ir::Var* Var() {
+        return b.Var(mod.Types().ref<SPACE, T, ACCESS>());
+    }
+
+    /// Creates a new `var` declaration with a name
+    /// @tparam SPACE the var's address space
+    /// @tparam T the storage pointer's element type
+    /// @tparam ACCESS the var's access mode
+    /// @param name the var name
+    /// @returns the instruction
+    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
+    core::ir::Var* Var(std::string_view name) {
+        return b.Var(name, mod.Types().ref<SPACE, T, ACCESS>());
+    }
 };
 
 #define EXPECT_WGSL(expected_wgsl)                                       \

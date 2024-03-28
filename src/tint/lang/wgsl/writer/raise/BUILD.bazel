@@ -39,11 +39,13 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "raise",
   srcs = [
+    "ptr_to_ref.cc",
     "raise.cc",
     "rename_conflicts.cc",
     "value_to_let.cc",
   ],
   hdrs = [
+    "ptr_to_ref.h",
     "raise.h",
     "rename_conflicts.h",
     "value_to_let.h",
@@ -79,6 +81,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "ptr_to_ref_test.cc",
     "raise_test.cc",
     "rename_conflicts_test.cc",
     "value_to_let_test.cc",

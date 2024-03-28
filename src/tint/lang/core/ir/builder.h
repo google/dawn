@@ -1037,8 +1037,8 @@ class Builder {
     template <typename VAL>
     ir::Load* Load(VAL&& from) {
         auto* value = Value(std::forward<VAL>(from));
-        return Append(
-            ir.instructions.Create<ir::Load>(InstructionResult(value->Type()->UnwrapPtr()), value));
+        return Append(ir.instructions.Create<ir::Load>(
+            InstructionResult(value->Type()->UnwrapPtrOrRef()), value));
     }
 
     /// Creates a store instruction
@@ -1083,13 +1083,13 @@ class Builder {
     /// Creates a new `var` declaration
     /// @param type the var type
     /// @returns the instruction
-    ir::Var* Var(const core::type::Pointer* type);
+    ir::Var* Var(const core::type::MemoryView* type);
 
     /// Creates a new `var` declaration with a name
     /// @param name the var name
     /// @param type the var type
     /// @returns the instruction
-    ir::Var* Var(std::string_view name, const core::type::Pointer* type);
+    ir::Var* Var(std::string_view name, const core::type::MemoryView* type);
 
     /// Creates a new `var` declaration with a name and initializer value
     /// @tparam SPACE the var's address space
@@ -1097,9 +1097,12 @@ class Builder {
     /// @param name the var name
     /// @param init the var initializer
     /// @returns the instruction
-    template <core::AddressSpace SPACE = core::AddressSpace::kFunction,
-              core::Access ACCESS = core::type::DefaultAccessFor(SPACE),
-              typename VALUE = void>
+    template <
+        core::AddressSpace SPACE = core::AddressSpace::kFunction,
+        core::Access ACCESS = core::Access::kReadWrite,
+        typename VALUE = void,
+        typename = std::enable_if_t<
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
     ir::Var* Var(std::string_view name, VALUE&& init) {
         auto* val = Value(std::forward<VALUE>(init));
         if (TINT_UNLIKELY(!val)) {

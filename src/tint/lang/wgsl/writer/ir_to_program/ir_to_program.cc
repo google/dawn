@@ -77,6 +77,7 @@
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
+#include "src/tint/lang/wgsl/ir/unary.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/utils/containers/hashmap.h"
@@ -127,12 +128,6 @@ class State {
     }
 
   private:
-    /// The AST representation for an IR pointer type
-    enum class PtrKind {
-        kPtr,  // IR pointer is represented in the AST as a pointer
-        kRef,  // IR pointer is represented in the AST as a reference
-    };
-
     /// The source IR module
     const core::ir::Module& mod;
 
@@ -142,13 +137,11 @@ class State {
     /// The structure for a value held by a 'let', 'var' or parameter.
     struct VariableValue {
         Symbol name;  // Name of the variable
-        PtrKind ptr_kind = PtrKind::kRef;
     };
 
     /// The structure for an inlined value
     struct InlinedValue {
         const ast::Expression* expr = nullptr;
-        PtrKind ptr_kind = PtrKind::kRef;
     };
 
     /// Empty struct used as a sentinel value to indicate that an ast::Value has been consumed by
@@ -203,7 +196,7 @@ class State {
             auto ty = Type(param->Type());
             auto name = NameFor(param);
             Vector<const ast::Attribute*, 1> attrs{};
-            Bind(param, name, PtrKind::kPtr);
+            Bind(param, name);
 
             // Emit parameter attributes.
             if (auto builtin = param->Builtin()) {
@@ -554,10 +547,11 @@ class State {
 
     void Var(const core::ir::Var* var) {
         auto* val = var->Result(0);
-        auto* ptr = As<core::type::Pointer>(val->Type());
-        auto ty = Type(ptr->StoreType());
+        auto* ref = As<core::type::Reference>(val->Type());
+        TINT_ASSERT(ref /* converted by PtrToRef */);
+        auto ty = Type(ref->StoreType());
         Symbol name = NameFor(var->Result(0));
-        Bind(var->Result(0), name, PtrKind::kRef);
+        Bind(var->Result(0), name);
 
         Vector<const ast::Attribute*, 4> attrs;
         if (auto bp = var->BindingPoint()) {
@@ -569,18 +563,18 @@ class State {
         if (var->Initializer()) {
             init = Expr(var->Initializer());
         }
-        switch (ptr->AddressSpace()) {
+        switch (ref->AddressSpace()) {
             case core::AddressSpace::kFunction:
                 Append(b.Decl(b.Var(name, ty, init, std::move(attrs))));
                 return;
             case core::AddressSpace::kStorage:
-                b.GlobalVar(name, ty, init, ptr->Access(), ptr->AddressSpace(), std::move(attrs));
+                b.GlobalVar(name, ty, init, ref->Access(), ref->AddressSpace(), std::move(attrs));
                 return;
             case core::AddressSpace::kHandle:
                 b.GlobalVar(name, ty, init, std::move(attrs));
                 return;
             default:
-                b.GlobalVar(name, ty, init, ptr->AddressSpace(), std::move(attrs));
+                b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
                 return;
         }
     }
@@ -589,10 +583,10 @@ class State {
         auto* result = let->Result(0);
         if (mod.NameOf(result).IsValid() || result->NumUsages() > 0) {
             Symbol name = NameFor(result);
-            Append(b.Decl(b.Let(name, Expr(let->Value(), PtrKind::kPtr))));
-            Bind(result, name, PtrKind::kPtr);
+            Append(b.Decl(b.Let(name, Expr(let->Value()))));
+            Bind(result, name);
         } else {
-            Append(b.Assign(b.Phony(), Expr(let->Value(), PtrKind::kPtr)));
+            Append(b.Assign(b.Phony(), Expr(let->Value())));
         }
     }
 
@@ -611,7 +605,7 @@ class State {
     void Call(const core::ir::Call* call) {
         auto args = tint::Transform<4>(call->Args(), [&](const core::ir::Value* arg) {
             // Pointer-like arguments are passed by pointer, never reference.
-            return Expr(arg, PtrKind::kPtr);
+            return Expr(arg);
         });
         tint::Switch(
             call,  //
@@ -621,7 +615,7 @@ class State {
                     Append(b.CallStmt(expr));
                     return;
                 }
-                Bind(c->Result(0), expr, PtrKind::kPtr);
+                Bind(c->Result(0), expr);
             },
             [&](const wgsl::ir::BuiltinCall* c) {
                 if (!disabled_derivative_uniformity_ && RequiresDerivativeUniformity(c->Func())) {
@@ -641,23 +635,23 @@ class State {
                 }
 
                 auto* expr = b.Call(c->Func(), std::move(args));
-                if (call->Results().IsEmpty() || call->Result(0)->Type()->Is<core::type::Void>()) {
+                if (call->Results().IsEmpty() || !call->Result(0)->IsUsed()) {
                     Append(b.CallStmt(expr));
                     return;
                 }
-                Bind(c->Result(0), expr, PtrKind::kPtr);
+                Bind(c->Result(0), expr);
             },
             [&](const core::ir::Construct* c) {
                 auto ty = Type(c->Result(0)->Type());
-                Bind(c->Result(0), b.Call(ty, std::move(args)), PtrKind::kPtr);
+                Bind(c->Result(0), b.Call(ty, std::move(args)));
             },
             [&](const core::ir::Convert* c) {
                 auto ty = Type(c->Result(0)->Type());
-                Bind(c->Result(0), b.Call(ty, std::move(args)), PtrKind::kPtr);
+                Bind(c->Result(0), b.Call(ty, std::move(args)));
             },
             [&](const core::ir::Bitcast* c) {
                 auto ty = Type(c->Result(0)->Type());
-                Bind(c->Result(0), b.Bitcast(ty, args[0]), PtrKind::kPtr);
+                Bind(c->Result(0), b.Bitcast(ty, args[0]));
             },
             [&](const core::ir::Discard*) { Append(b.Discard()); },  //
             TINT_ICE_ON_NO_MATCH);
@@ -665,9 +659,9 @@ class State {
 
     void Load(const core::ir::Load* l) { Bind(l->Result(0), Expr(l->From())); }
 
-    void LoadVectorElement(const core::ir::LoadVectorElement* load) {
-        auto* ptr = Expr(load->From());
-        Bind(load->Result(0), VectorMemberAccess(ptr, load->Index()));
+    void LoadVectorElement(const core::ir::LoadVectorElement* l) {
+        auto* vec = Expr(l->From());
+        Bind(l->Result(0), VectorMemberAccess(vec, l->Index()));
     }
 
     void Unary(const core::ir::Unary* u) {
@@ -679,6 +673,12 @@ class State {
             case core::UnaryOp::kNegation:
                 expr = b.Negation(Expr(u->Val()));
                 break;
+            case core::UnaryOp::kAddressOf:
+                expr = b.AddressOf(Expr(u->Val()));
+                break;
+            case core::UnaryOp::kIndirection:
+                expr = b.Deref(Expr(u->Val()));
+                break;
             default:
                 TINT_UNIMPLEMENTED() << u->Op();
                 break;
@@ -688,7 +688,7 @@ class State {
 
     void Access(const core::ir::Access* a) {
         auto* expr = Expr(a->Object());
-        auto* obj_ty = a->Object()->Type()->UnwrapPtr();
+        auto* obj_ty = a->Object()->Type()->UnwrapRef();
         for (auto* index : a->Indices()) {
             tint::Switch(
                 obj_ty,
@@ -809,32 +809,27 @@ class State {
 
     TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
 
-    const ast::Expression* Expr(const core::ir::Value* value,
-                                PtrKind want_ptr_kind = PtrKind::kRef) {
-        using ExprAndPtrKind = std::pair<const ast::Expression*, PtrKind>;
-
-        auto [expr, got_ptr_kind] = tint::Switch(
-            value,
-            [&](const core::ir::Constant* c) -> ExprAndPtrKind {
-                return {Constant(c), PtrKind::kRef};
-            },
-            [&](Default) -> ExprAndPtrKind {
+    const ast::Expression* Expr(const core::ir::Value* value) {
+        auto expr = tint::Switch(
+            value,  //
+            [&](const core::ir::Constant* c) { return Constant(c); },
+            [&](Default) -> const ast::Expression* {
                 auto lookup = bindings_.Get(value);
                 if (TINT_UNLIKELY(!lookup)) {
                     TINT_ICE() << "Expr(" << (value ? value->TypeInfo().name : "null")
                                << ") value has no expression";
-                    return {};
+                    return nullptr;
                 }
                 return std::visit(
-                    [&](auto&& got) -> ExprAndPtrKind {
+                    [&](auto&& got) -> const ast::Expression* {
                         using T = std::decay_t<decltype(got)>;
 
                         if constexpr (std::is_same_v<T, VariableValue>) {
-                            return {b.Expr(got.name), got.ptr_kind};
+                            return b.Expr(got.name);
                         }
 
                         if constexpr (std::is_same_v<T, InlinedValue>) {
-                            auto result = ExprAndPtrKind{got.expr, got.ptr_kind};
+                            auto result = got.expr;
                             // Single use (inlined) expression.
                             // Mark the bindings_ map entry as consumed.
                             *lookup = ConsumedValue{};
@@ -848,17 +843,13 @@ class State {
                             TINT_ICE()
                                 << "Expr(" << value->TypeInfo().name << ") has unhandled value";
                         }
-                        return {};
+                        return nullptr;
                     },
                     *lookup);
             });
 
         if (!expr) {
             return b.Expr("<error>");
-        }
-
-        if (value->Type()->Is<core::type::Pointer>()) {
-            return ToPtrKind(expr, got_ptr_kind, want_ptr_kind);
         }
 
         return expr;
@@ -1041,16 +1032,6 @@ class State {
         return b.ty(n);
     }
 
-    const ast::Expression* ToPtrKind(const ast::Expression* in, PtrKind got, PtrKind want) {
-        if (want == PtrKind::kRef && got == PtrKind::kPtr) {
-            return b.Deref(in);
-        }
-        if (want == PtrKind::kPtr && got == PtrKind::kRef) {
-            return b.AddressOf(in);
-        }
-        return in;
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Bindings
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1070,24 +1051,20 @@ class State {
     }
 
     /// Associates the IR value @p value with the AST expression @p expr.
-    /// @p ptr_kind defines how pointer values are represented by @p expr.
-    void Bind(const core::ir::Value* value,
-              const ast::Expression* expr,
-              PtrKind ptr_kind = PtrKind::kRef) {
+    void Bind(const core::ir::Value* value, const ast::Expression* expr) {
         TINT_ASSERT(value);
         // Value will be inlined at its place of usage.
-        if (TINT_UNLIKELY(!bindings_.Add(value, InlinedValue{expr, ptr_kind}))) {
+        if (TINT_UNLIKELY(!bindings_.Add(value, InlinedValue{expr}))) {
             TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
         }
     }
 
     /// Associates the IR value @p value with the AST 'var', 'let' or parameter with the name @p
     /// name.
-    /// @p ptr_kind defines how pointer values are represented by @p expr.
-    void Bind(const core::ir::Value* value, Symbol name, PtrKind ptr_kind) {
+    void Bind(const core::ir::Value* value, Symbol name) {
         TINT_ASSERT(value);
 
-        bool added = bindings_.Add(value, VariableValue{name, ptr_kind});
+        bool added = bindings_.Add(value, VariableValue{name});
         if (TINT_UNLIKELY(!added)) {
             TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
         }

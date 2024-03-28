@@ -132,6 +132,7 @@ type mat4x4<T>
 @display("vec{N}<{T}>")     type vec<N: num, T>
 @display("mat{N}x{M}<{T}>") type mat<N: num, M: num, T>
 type ptr<S: address_space, T, A: access>
+type ref<S: address_space, T, A: access>
 type atomic<T>
 type array<T>
 type sampler
@@ -838,6 +839,9 @@ ctor mat4x4[T: fa_f32_f16](T, T, T, T,
 ////////////////////////////////////////////////////////////////////////////////
 // Unary Operators                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+@must_use op & [S: address_space, T, A: access] (ref<S, T, A>) -> ptr<S, T, A>
+@must_use op * [S: address_space, T, A: access] (ptr<S, T, A>) -> ref<S, T, A>
+
 @must_use @const op ! (bool) -> bool
 @must_use @const op ! [N: num](vec<N, bool>) -> vec<N, bool>
 

@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -299,6 +300,36 @@ inline const type::Pointer* BuildPtr(intrinsic::MatchState& state,
                                      const type::Type* T,
                                      intrinsic::Number& A) {
     return state.types.ptr(static_cast<core::AddressSpace>(S.Value()), T,
+                           static_cast<core::Access>(A.Value()));
+}
+
+inline bool MatchRef(intrinsic::MatchState&,
+                     const type::Type* ty,
+                     intrinsic::Number& S,
+                     const type::Type*& T,
+                     intrinsic::Number& A) {
+    if (ty->Is<intrinsic::Any>()) {
+        S = intrinsic::Number::any;
+        T = ty;
+        A = intrinsic::Number::any;
+        return true;
+    }
+
+    if (auto* p = ty->As<type::Reference>()) {
+        S = intrinsic::Number(static_cast<uint32_t>(p->AddressSpace()));
+        T = p->StoreType();
+        A = intrinsic::Number(static_cast<uint32_t>(p->Access()));
+        return true;
+    }
+    return false;
+}
+
+inline const type::Reference* BuildRef(intrinsic::MatchState& state,
+                                       const type::Type*,
+                                       intrinsic::Number S,
+                                       const type::Type* T,
+                                       intrinsic::Number& A) {
+    return state.types.ref(static_cast<core::AddressSpace>(S.Value()), T,
                            static_cast<core::Access>(A.Value()));
 }
 

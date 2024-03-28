@@ -41,7 +41,7 @@ Var::Var() = default;
 
 Var::Var(InstructionResult* result) {
     if (result && result->Type()) {
-        TINT_ASSERT(result->Type()->Is<core::type::Pointer>());
+        TINT_ASSERT(result->Type()->Is<core::type::MemoryView>());
     }
 
     // Default to no initializer.

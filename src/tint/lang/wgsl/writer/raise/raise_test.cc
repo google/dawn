@@ -100,13 +100,14 @@ TEST_F(WgslWriter_RaiseTest, WorkgroupBarrier) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %W:ptr<workgroup, i32, read_write> = var
+  %W:ref<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 -> %b2 {
   %b2 = block {
-    %3:i32 = wgsl.workgroupUniformLoad %W
-    ret %3
+    %3:ptr<workgroup, i32, read_write> = ref-to-ptr %W
+    %4:i32 = wgsl.workgroupUniformLoad %3
+    ret %4
   }
 }
 )";
@@ -147,7 +148,7 @@ TEST_F(WgslWriter_RaiseTest, WorkgroupBarrier_NoMatch) {
 
     auto* expect = R"(
 %b1 = block {  # root
-  %W:ptr<workgroup, i32, read_write> = var
+  %W:ref<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 -> %b2 {

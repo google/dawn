@@ -55,6 +55,7 @@ class I32;
 class Invalid;
 class Matrix;
 class Pointer;
+class Reference;
 class U32;
 class Vector;
 class Void;
@@ -454,6 +455,32 @@ class Manager final {
     template <core::AddressSpace SPACE, core::Access ACCESS = DefaultAccessFor(SPACE)>
     const core::type::Pointer* ptr(const core::type::Type* subtype) {
         return ptr(SPACE, subtype, ACCESS);
+    }
+
+    /// @param address_space the address space
+    /// @param subtype the reference subtype
+    /// @param access the access settings
+    /// @returns the reference type
+    const core::type::Reference* ref(core::AddressSpace address_space,
+                                     const core::type::Type* subtype,
+                                     core::Access access = core::Access::kReadWrite);
+
+    /// @tparam SPACE the address space
+    /// @tparam T the storage type
+    /// @tparam ACCESS the access mode
+    /// @returns the reference type with the templated address space, storage type and access.
+    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
+    const core::type::Reference* ref() {
+        return ref(SPACE, Get<T>(), ACCESS);
+    }
+
+    /// @param subtype the reference subtype
+    /// @tparam SPACE the address space
+    /// @tparam ACCESS the access mode
+    /// @returns the reference type with the templated address space, storage type and access.
+    template <core::AddressSpace SPACE, core::Access ACCESS = core::Access::kReadWrite>
+    const core::type::Reference* ref(const core::type::Type* subtype) {
+        return ref(SPACE, subtype, ACCESS);
     }
 
     /// @returns the sampler type

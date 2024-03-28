@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
+#include "src/tint/lang/wgsl/writer/raise/ptr_to_ref.h"
 #include "src/tint/lang/wgsl/writer/raise/rename_conflicts.h"
 #include "src/tint/lang/wgsl/writer/raise/value_to_let.h"
 
@@ -235,6 +236,9 @@ Result<SuccessType> Raise(core::ir::Module& mod) {
         return result.Failure();
     }
     if (auto result = raise::ValueToLet(mod); result != Success) {
+        return result.Failure();
+    }
+    if (auto result = raise::PtrToRef(mod); result != Success) {
         return result.Failure();
     }
 

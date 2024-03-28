@@ -62,6 +62,9 @@ class Store final : public Castable<Store, OperandInstruction<2, 0>> {
     /// @returns the value being stored too
     const Value* To() const { return operands_[kToOperandOffset]; }
 
+    /// @param to the value being stored too
+    void SetTo(Value* to) { SetOperand(kToOperandOffset, to); }
+
     /// @returns the value being stored
     Value* From() { return operands_[kFromOperandOffset]; }
 

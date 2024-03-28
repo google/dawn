@@ -44,6 +44,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("raise") {
   sources = [
+    "ptr_to_ref.cc",
+    "ptr_to_ref.h",
     "raise.cc",
     "raise.h",
     "rename_conflicts.cc",
@@ -79,6 +81,7 @@ libtint_source_set("raise") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "ptr_to_ref_test.cc",
       "raise_test.cc",
       "rename_conflicts_test.cc",
       "value_to_let_test.cc",
