@@ -42,7 +42,7 @@ if (${DAWN_FETCH_DEPENDENCIES})
     message(STATUS "Running fetch_dawn_dependencies:")
     execute_process(
         COMMAND
-            ${PYTHON_EXECUTABLE}
+            ${Python3_EXECUTABLE}
             "${PROJECT_SOURCE_DIR}/tools/fetch_dawn_dependencies.py"
             --directory ${PROJECT_SOURCE_DIR}
             ${EXTRA_FETCH_ARGS}
