@@ -67,13 +67,6 @@ class IncompleteType : public Castable<IncompleteType, core::type::Type> {
     /// @copydoc core::type::Type::Clone
     core::type::Type* Clone(core::type::CloneContext& ctx) const override;
 
-    /// @copydoc core::type::Type::Elements
-    core::type::TypeAndCount Elements(const Type* type_if_invalid = nullptr,
-                                      uint32_t count_if_invalid = 0) const override;
-
-    /// @copydoc core::type::Type::Element
-    const Type* Element(uint32_t index) const override;
-
     /// @copydoc core::type::UniqueNode::Equals
     bool Equals(const UniqueNode& other) const override;
 };

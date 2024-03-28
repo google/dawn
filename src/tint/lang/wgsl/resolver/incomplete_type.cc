@@ -54,14 +54,6 @@ core::type::Type* IncompleteType::Clone(core::type::CloneContext&) const {
     return nullptr;
 }
 
-core::type::TypeAndCount IncompleteType::Elements(const Type*, uint32_t) const {
-    return {};
-}
-
-const core::type::Type* IncompleteType::Element(uint32_t) const {
-    return nullptr;
-}
-
 bool IncompleteType::Equals(const core::type::UniqueNode& other) const {
     if (auto* o = other.As<IncompleteType>()) {
         return o->builtin == builtin;
