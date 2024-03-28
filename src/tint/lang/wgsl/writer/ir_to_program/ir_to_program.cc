@@ -105,7 +105,8 @@ class State {
     explicit State(const core::ir::Module& m) : mod(m) {}
 
     Program Run(const ProgramOptions& options) {
-        if (auto res = core::ir::Validate(mod); res != Success) {
+        core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes};
+        if (auto res = core::ir::Validate(mod, caps); res != Success) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure().reason;
             return Program{resolver::Resolve(b)};

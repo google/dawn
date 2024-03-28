@@ -28,6 +28,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/wgsl/writer/raise/raise.h"
 
@@ -37,7 +38,10 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using WgslWriter_RaiseTest = core::ir::transform::TransformTest;
+class WgslWriter_RaiseTest : public core::ir::transform::TransformTest {
+  public:
+    WgslWriter_RaiseTest() { capabilities.Add(core::ir::Capability::kAllowRefTypes); }
+};
 
 TEST_F(WgslWriter_RaiseTest, BuiltinConversion) {
     auto* f = b.Function("f", ty.void_());

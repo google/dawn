@@ -59,7 +59,8 @@ class WgslWriter_PtrToRefTest : public testing::Test {
         EXPECT_EQ(result, Success);
 
         // Validate the output IR.
-        auto res = core::ir::Validate(mod);
+        core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes};
+        auto res = core::ir::Validate(mod, caps);
         EXPECT_EQ(res, Success);
     }
 

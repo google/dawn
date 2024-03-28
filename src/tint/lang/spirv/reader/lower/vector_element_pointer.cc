@@ -163,7 +163,7 @@ struct State {
 
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "VectorElementPointer transform",
-                                          EnumSet<core::ir::Capability>{
+                                          core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
                                           });
     if (result != Success) {

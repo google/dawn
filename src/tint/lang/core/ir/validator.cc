@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/ir/validator.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <utility>
@@ -68,6 +69,7 @@
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/reverse.h"
@@ -88,13 +90,47 @@ namespace tint::core::ir {
 
 namespace {
 
+/// @returns true if the type @p type is of, or indirectly references a type of type `T`.
+template <typename T>
+bool HoldsType(const type::Type* type) {
+    if (!type) {
+        return false;
+    }
+    Vector<const type::Type*, 8> stack{type};
+    Hashset<const type::Type*, 8> seen{type};
+    while (!stack.IsEmpty()) {
+        auto* ty = stack.Pop();
+        if (ty->Is<T>()) {
+            return true;
+        }
+
+        if (auto* view = ty->As<type::MemoryView>(); view && seen.Add(view)) {
+            stack.Push(view);
+            continue;
+        }
+
+        auto type_count = ty->Elements();
+        if (type_count.type && seen.Add(type_count.type)) {
+            stack.Push(type_count.type);
+            continue;
+        }
+
+        for (uint32_t i = 0; i < type_count.count; i++) {
+            if (auto* subtype = ty->Element(i); subtype && seen.Add(subtype)) {
+                stack.Push(subtype);
+            }
+        }
+    }
+    return false;
+}
+
 /// The core IR validator.
 class Validator {
   public:
     /// Create a core validator
     /// @param mod the module to be validated
     /// @param capabilities the optional capabilities that are allowed
-    explicit Validator(const Module& mod, EnumSet<Capability> capabilities);
+    explicit Validator(const Module& mod, Capabilities capabilities);
 
     /// Destructor
     ~Validator();
@@ -281,7 +317,7 @@ class Validator {
 
   private:
     const Module& mod_;
-    EnumSet<Capability> capabilities_;
+    Capabilities capabilities_;
     std::shared_ptr<Source::File> disassembly_file;
     diag::List diagnostics_;
     Disassembler dis_{mod_};
@@ -293,7 +329,7 @@ class Validator {
     void DisassembleIfNeeded();
 };
 
-Validator::Validator(const Module& mod, EnumSet<Capability> capabilities)
+Validator::Validator(const Module& mod, Capabilities capabilities)
     : mod_(mod), capabilities_(capabilities) {}
 
 Validator::~Validator() = default;
@@ -451,6 +487,18 @@ void Validator::CheckRootBlock(const Block* blk) {
 
 void Validator::CheckFunction(const Function* func) {
     CheckBlock(func->Block());
+
+    // References not allowed on function signatures even with Capability::kAllowRefTypes
+    for (auto* param : func->Params()) {
+        if (HoldsType<type::Reference>(param->Type())) {
+            // TODO(dsinclair): Parameters need a source mapping.
+            AddError(Source{}) << "references are not permitted as parameter types";
+        }
+    }
+    if (HoldsType<type::Reference>(func->ReturnType())) {
+        // TODO(dsinclair): Function need a source mapping.
+        AddError(Source{}) << "references are not permitted as return types";
+    }
 }
 
 void Validator::CheckBlock(const Block* blk) {
@@ -494,6 +542,12 @@ void Validator::CheckInstruction(const Instruction* inst) {
         } else if (res->Instruction() != inst) {
             AddResultError(inst, i) << "instruction of result is a different instruction";
         }
+
+        if (!capabilities_.Contains(Capability::kAllowRefTypes)) {
+            if (HoldsType<type::Reference>(res->Type())) {
+                AddResultError(inst, i) << "reference type is not permitted";
+            }
+        }
     }
 
     auto ops = inst->Operands();
@@ -511,6 +565,12 @@ void Validator::CheckInstruction(const Instruction* inst) {
 
         if (!op->HasUsage(inst, i)) {
             AddError(inst, i) << "operand missing usage";
+        }
+
+        if (!capabilities_.Contains(Capability::kAllowRefTypes)) {
+            if (HoldsType<type::Reference>(op->Type())) {
+                AddError(inst, i) << "reference type is not permitted";
+            }
         }
     }
 
@@ -1029,14 +1089,14 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
 
 }  // namespace
 
-Result<SuccessType> Validate(const Module& mod, EnumSet<Capability> capabilities) {
+Result<SuccessType> Validate(const Module& mod, Capabilities capabilities) {
     Validator v(mod, capabilities);
     return v.Run();
 }
 
 Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
                                             [[maybe_unused]] const char* msg,
-                                            [[maybe_unused]] EnumSet<Capability> capabilities) {
+                                            [[maybe_unused]] Capabilities capabilities) {
 #if TINT_DUMP_IR_WHEN_VALIDATING
     std::cout << "=========================================================" << std::endl;
     std::cout << "== IR dump before " << msg << ":" << std::endl;

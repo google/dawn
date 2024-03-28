@@ -26,15 +26,22 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
+#include <tuple>
 #include <utility>
 
 #include "gmock/gmock.h"
+
+#include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/utils/text/string.h"
 
@@ -770,7 +777,7 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_WithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, EnumSet<Capability>{Capability::kAllowVectorElementPointer});
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowVectorElementPointer});
     ASSERT_EQ(res, Success);
 }
 
@@ -815,7 +822,7 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr_WithCapability) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, EnumSet<Capability>{Capability::kAllowVectorElementPointer});
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowVectorElementPointer});
     ASSERT_EQ(res, Success);
 }
 
@@ -3518,5 +3525,112 @@ note: # Disassembly
 )");
 }
 
+template <typename T>
+static const type::Type* TypeBuilder(type::Manager& m) {
+    return m.Get<T>();
+}
+template <typename T>
+static const type::Type* RefTypeBuilder(type::Manager& m) {
+    return m.ref<AddressSpace::kFunction, T>();
+}
+using TypeBuilderFn = decltype(&TypeBuilder<i32>);
+
+using IR_ValidatorRefTypeTest = IRTestParamHelper<std::tuple</* holds_ref */ bool,
+                                                             /* refs_allowed */ bool,
+                                                             /* type_builder */ TypeBuilderFn>>;
+
+TEST_P(IR_ValidatorRefTypeTest, Var) {
+    bool holds_ref = std::get<0>(GetParam());
+    bool refs_allowed = std::get<1>(GetParam());
+    auto* type = std::get<2>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        if (auto* view = type->As<type::MemoryView>()) {
+            b.Var(view);
+        } else {
+            b.Var(ty.ptr<function>(type));
+        }
+
+        b.Return(fn);
+    });
+
+    Capabilities caps;
+    if (refs_allowed) {
+        caps.Add(Capability::kAllowRefTypes);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (!holds_ref || refs_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("3:5 error: var: reference type is not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorRefTypeTest, FnParam) {
+    bool holds_ref = std::get<0>(GetParam());
+    bool refs_allowed = std::get<1>(GetParam());
+    auto* type = std::get<2>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    fn->SetParams(Vector{b.FunctionParam(type)});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    Capabilities caps;
+    if (refs_allowed) {
+        caps.Add(Capability::kAllowRefTypes);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (!holds_ref) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("references are not permitted as parameter types"));
+    }
+}
+
+TEST_P(IR_ValidatorRefTypeTest, FnRet) {
+    bool holds_ref = std::get<0>(GetParam());
+    bool refs_allowed = std::get<1>(GetParam());
+    auto* type = std::get<2>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", type);
+    b.Append(fn->Block(), [&] { b.Unreachable(); });
+
+    Capabilities caps;
+    if (refs_allowed) {
+        caps.Add(Capability::kAllowRefTypes);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (!holds_ref) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("references are not permitted as return types"));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(NonRefTypes,
+                         IR_ValidatorRefTypeTest,
+                         testing::Combine(/* holds_ref */ testing::Values(false),
+                                          /* refs_allowed */ testing::Values(false, true),
+                                          /* type_builder */
+                                          testing::Values(TypeBuilder<i32>,
+                                                          TypeBuilder<bool>,
+                                                          TypeBuilder<vec4<f32>>,
+                                                          TypeBuilder<array<f32, 3>>)));
+
+INSTANTIATE_TEST_SUITE_P(RefTypes,
+                         IR_ValidatorRefTypeTest,
+                         testing::Combine(/* holds_ref */ testing::Values(true),
+                                          /* refs_allowed */ testing::Values(false, true),
+                                          /* type_builder */
+                                          testing::Values(RefTypeBuilder<i32>,
+                                                          RefTypeBuilder<bool>,
+                                                          RefTypeBuilder<vec4<f32>>)));
 }  // namespace
 }  // namespace tint::core::ir
