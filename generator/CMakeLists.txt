@@ -115,6 +115,9 @@ function(DawnGenerator)
             string(SUBSTRING "${path}" 0 ${foundIndex} dir)
             file(MAKE_DIRECTORY ${dir})
             file(TOUCH ${path})
+            # Also touch the generator script to make a dependency of the generated file dirty,
+            # ensuring that it gets generated and not used while it is an empty file.
+            file(TOUCH ${G_SCRIPT})
         endif()
     endforeach()
 

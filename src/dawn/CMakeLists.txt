@@ -78,7 +78,7 @@ DawnJSONGenerator(
 )
 
 add_library(dawn_headers INTERFACE)
-target_sources(dawn_headers INTERFACE
+target_sources(dawn_headers PUBLIC
     "${DAWN_INCLUDE_DIR}/webgpu/webgpu.h"
     ${DAWN_HEADERS_GEN_SOURCES}
 )
@@ -96,8 +96,7 @@ DawnJSONGenerator(
 )
 
 add_library(dawncpp_headers INTERFACE)
-target_sources(dawncpp_headers
-  INTERFACE
+target_sources(dawncpp_headers PUBLIC
     "${DAWN_INCLUDE_DIR}/webgpu/webgpu_cpp.h"
     "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
     ${DAWNCPP_HEADERS_GEN_SOURCES}
