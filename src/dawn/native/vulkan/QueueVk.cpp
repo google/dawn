@@ -364,7 +364,7 @@ MaybeError Queue::SubmitPendingCommands() {
         mRecordingContext.waitSemaphores.insert(mRecordingContext.waitSemaphores.end(),
                                                 waitRequirements.begin(), waitRequirements.end());
 
-        SharedTextureMemoryContents* contents = texture->GetSharedTextureMemoryContents();
+        SharedResourceMemoryContents* contents = texture->GetSharedResourceMemoryContents();
         if (contents != nullptr) {
             SharedTextureMemoryBase::PendingFenceList fences;
             contents->AcquirePendingFences(&fences);

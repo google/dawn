@@ -149,11 +149,24 @@ class RefBase {
         return &mValue;
     }
 
+    // Cast operator.
+    template <typename Other>
+    Other Cast() && {
+        Other other;
+        CastImpl(this, &other);
+        return other;
+    }
+
   private:
     // Friend is needed so that instances of RefBase<U> can call Reference and Release on
     // RefBase<T>.
     template <typename U, typename UTraits>
     friend class RefBase;
+
+    template <typename U, typename UTraits, typename = typename std::is_convertible<U, T>::type>
+    static void CastImpl(RefBase<T, Traits>* ref, RefBase<U, UTraits>* other) {
+        other->Acquire(static_cast<U>(ref->Detach()));
+    }
 
     static void Reference(T value) {
         if (value != Traits::kNullValue) {

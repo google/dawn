@@ -300,7 +300,7 @@ MaybeError Device::ClearBufferToZero(CommandRecordingContext* commandContext,
     // the allocation of the staging buffer causes various end2end tests that monitor heap usage
     // to fail if it's done during device creation. Perhaps ClearUnorderedAccessView*() can be
     // used to avoid that.
-    if (!mZeroBuffer->IsDataInitialized()) {
+    if (!mZeroBuffer->IsInitialized()) {
         DynamicUploader* uploader = GetDynamicUploader();
         UploadHandle uploadHandle;
         DAWN_TRY_ASSIGN(uploadHandle,
@@ -313,7 +313,7 @@ MaybeError Device::ClearBufferToZero(CommandRecordingContext* commandContext,
                                       uploadHandle.startOffset, mZeroBuffer.Get(), 0,
                                       kZeroBufferSize);
 
-        mZeroBuffer->SetIsDataInitialized();
+        mZeroBuffer->SetInitialized(true);
     }
 
     Buffer* dstBuffer = ToBackend(destination);

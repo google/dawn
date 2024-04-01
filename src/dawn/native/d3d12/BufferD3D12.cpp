@@ -138,7 +138,7 @@ ResultOrError<Ref<Buffer>> Buffer::CreateFromSharedBufferMemory(
     Device* device = ToBackend(memory->GetDevice());
     Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
     DAWN_TRY(buffer->InitializeAsExternalBuffer(memory->GetD3DResource(), descriptor));
-    buffer->mSharedBufferMemoryContents = memory->GetContents();
+    buffer->mSharedResourceMemoryContents = memory->GetContents();
     return buffer;
 }
 
@@ -299,7 +299,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     SetLabelImpl();
 
     // Assume the data is initialized since an external pointer was provided.
-    SetIsDataInitialized();
+    SetInitialized(true);
     return {};
 }
 
@@ -571,7 +571,7 @@ ResultOrError<bool> Buffer::EnsureDataInitializedAsDestination(
     }
 
     if (IsFullBufferRange(offset, size)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
         return {false};
     }
 
@@ -586,7 +586,7 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* c
     }
 
     if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
     } else {
         DAWN_TRY(InitializeToZero(commandContext));
     }
@@ -605,7 +605,7 @@ MaybeError Buffer::InitializeToZero(CommandRecordingContext* commandContext) {
     // TODO(crbug.com/dawn/484): skip initializing the buffer when it is created on a heap
     // that has already been zero initialized.
     DAWN_TRY(ClearBuffer(commandContext, uint8_t(0u)));
-    SetIsDataInitialized();
+    SetInitialized(true);
     GetDevice()->IncrementLazyClearCountForTesting();
 
     return {};

@@ -354,6 +354,8 @@ source_set("sources") {
     "SharedBufferMemory.h",
     "SharedFence.cpp",
     "SharedFence.h",
+    "SharedResourceMemory.cpp",
+    "SharedResourceMemory.h",
     "SharedTextureMemory.cpp",
     "SharedTextureMemory.h",
     "Subresource.cpp",

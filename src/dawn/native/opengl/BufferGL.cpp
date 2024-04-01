@@ -80,7 +80,7 @@ Buffer::Buffer(Device* device,
                bool shouldLazyClear)
     : Buffer(device, descriptor) {
     if (!shouldLazyClear) {
-        SetIsDataInitialized();
+        SetInitialized(true);
     }
 }
 
@@ -105,7 +105,7 @@ bool Buffer::EnsureDataInitializedAsDestination(uint64_t offset, uint64_t size) 
     }
 
     if (IsFullBufferRange(offset, size)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
         return false;
     }
 
@@ -119,7 +119,7 @@ bool Buffer::EnsureDataInitializedAsDestination(const CopyTextureToBufferCmd* co
     }
 
     if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
         return false;
     }
 
@@ -140,7 +140,7 @@ void Buffer::InitializeToZero() {
     device->IncrementLazyClearCountForTesting();
 
     TrackUsage();
-    SetIsDataInitialized();
+    SetInitialized(true);
 }
 
 bool Buffer::IsCPUWritableAtCreation() const {

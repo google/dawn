@@ -237,7 +237,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), memory->GetKeyedMutex(),
                                                   {}, false));
-    texture->mSharedTextureMemoryContents = memory->GetContents();
+    texture->mSharedResourceMemoryContents = memory->GetContents();
     return texture;
 }
 
@@ -438,7 +438,7 @@ MaybeError Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* command
     // Perform the wait only on the first call.
     std::vector<FenceAndSignalValue> waitFences = std::move(mWaitFences);
 
-    if (SharedTextureMemoryContents* contents = GetSharedTextureMemoryContents()) {
+    if (SharedResourceMemoryContents* contents = GetSharedResourceMemoryContents()) {
         SharedTextureMemoryBase::PendingFenceList fences;
         contents->AcquirePendingFences(&fences);
         waitFences.insert(waitFences.end(), std::make_move_iterator(fences->begin()),
@@ -577,7 +577,7 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
         }
     }
 
-    if (mSharedTextureMemoryContents) {
+    if (mSharedResourceMemoryContents) {
         // SharedTextureMemory supports concurrent reads of the underlying D3D12
         // texture via multiple TextureD3D12 instances created from a single
         // SharedTextureMemory instance. Concurrent read access requires that the

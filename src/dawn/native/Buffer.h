@@ -69,7 +69,7 @@ static constexpr wgpu::BufferUsage kShaderBufferUsages =
 static constexpr wgpu::BufferUsage kReadOnlyShaderBufferUsages =
     kShaderBufferUsages & kReadOnlyBufferUsages;
 
-class BufferBase : public ApiObjectBase {
+class BufferBase : public SharedResource {
   public:
     enum class BufferState {
         Unmapped,
@@ -101,12 +101,14 @@ class BufferBase : public ApiObjectBase {
 
     bool IsFullBufferRange(uint64_t offset, uint64_t size) const;
     bool NeedsInitialization() const;
-    bool IsDataInitialized() const;
-    void SetIsDataInitialized();
     void MarkUsedInPendingCommands();
 
-    // SetHasAccess determines Dawn's ability to access SharedBufferMemory.
-    void SetHasAccess(bool hasAccess);
+    // SharedResource impl.
+    void SetHasAccess(bool hasAccess) override;
+    bool HasAccess() const override;
+    bool IsDestroyed() const override;
+    void SetInitialized(bool initialized) override;
+    bool IsInitialized() const override;
 
     virtual void* GetMappedPointer() = 0;
     void* GetMappedRange(size_t offset, size_t size, bool writable = true);
@@ -143,9 +145,6 @@ class BufferBase : public ApiObjectBase {
     uint64_t mAllocatedSize = 0;
 
     ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
-
-    // The shared buffer memory state the buffer was created from. May be null.
-    Ref<SharedBufferMemoryContents> mSharedBufferMemoryContents;
 
   private:
     std::function<void()> PrepareMappingCallback(MapRequestID mapID,

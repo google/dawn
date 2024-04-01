@@ -60,25 +60,18 @@ SharedBufferMemoryBase* SharedBufferMemoryBase::MakeError(
 SharedBufferMemoryBase::SharedBufferMemoryBase(DeviceBase* device,
                                                const SharedBufferMemoryDescriptor* descriptor,
                                                ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag, descriptor->label),
+    : SharedResourceMemory(device, tag, descriptor->label),
       mProperties{nullptr, wgpu::BufferUsage::None, 0} {}
 
 SharedBufferMemoryBase::SharedBufferMemoryBase(DeviceBase* device,
                                                const char* label,
                                                const SharedBufferMemoryProperties& properties)
-    : ApiObjectBase(device, label), mProperties(properties) {
+    : SharedResourceMemory(device, label), mProperties(properties) {
     GetObjectTrackingList()->Track(this);
 }
 
 ObjectType SharedBufferMemoryBase::GetType() const {
     return ObjectType::SharedBufferMemory;
-}
-
-void SharedBufferMemoryBase::DestroyImpl() {}
-
-void SharedBufferMemoryBase::Initialize() {
-    DAWN_ASSERT(!IsError());
-    mContents = CreateContents();
 }
 
 void SharedBufferMemoryBase::APIGetProperties(SharedBufferMemoryProperties* properties) const {
@@ -135,35 +128,6 @@ ResultOrError<Ref<BufferBase>> SharedBufferMemoryBase::CreateBuffer(
     // Access is not allowed until BeginAccess has been called.
     buffer->SetHasAccess(false);
     return buffer;
-}
-
-Ref<SharedBufferMemoryContents> SharedBufferMemoryBase::CreateContents() {
-    return AcquireRef(new SharedBufferMemoryContents(GetWeakRef(this)));
-}
-
-SharedBufferMemoryContents* SharedBufferMemoryBase::GetContents() const {
-    return mContents.Get();
-}
-
-bool SharedBufferMemoryBase::APIBeginAccess(BufferBase* buffer,
-                                            const BeginAccessDescriptor* descriptor) {
-    return false;
-}
-
-bool SharedBufferMemoryBase::APIEndAccess(BufferBase* buffer, EndAccessState* state) {
-    return false;
-}
-
-bool SharedBufferMemoryBase::APIIsDeviceLost() {
-    return GetDevice()->IsLost();
-}
-
-SharedBufferMemoryContents::SharedBufferMemoryContents(
-    WeakRef<SharedBufferMemoryBase> sharedBufferMemory)
-    : mSharedBufferMemory(std::move(sharedBufferMemory)) {}
-
-const WeakRef<SharedBufferMemoryBase>& SharedBufferMemoryContents::GetSharedBufferMemory() const {
-    return mSharedBufferMemory;
 }
 
 void APISharedBufferMemoryEndAccessStateFreeMembers(WGPUSharedBufferMemoryEndAccessState cState) {

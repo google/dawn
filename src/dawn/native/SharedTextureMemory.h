@@ -36,48 +36,30 @@
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/SharedFence.h"
+#include "dawn/native/SharedResourceMemory.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 
-class SharedTextureMemoryContents;
+class SharedResourceMemoryContents;
 struct SharedTextureMemoryDescriptor;
 struct SharedTextureMemoryBeginAccessDescriptor;
 struct SharedTextureMemoryEndAccessState;
 struct SharedTextureMemoryProperties;
 struct TextureDescriptor;
 
-class SharedTextureMemoryBase : public ApiObjectBase,
-                                public WeakRefSupport<SharedTextureMemoryBase> {
+class SharedTextureMemoryBase : public SharedResourceMemory {
   public:
     using BeginAccessDescriptor = SharedTextureMemoryBeginAccessDescriptor;
     using EndAccessState = SharedTextureMemoryEndAccessState;
-    using PendingFenceList = StackVector<FenceAndSignalValue, 1>;
 
     static Ref<SharedTextureMemoryBase> MakeError(DeviceBase* device,
                                                   const SharedTextureMemoryDescriptor* descriptor);
 
-    void Initialize();
-
     void APIGetProperties(SharedTextureMemoryProperties* properties) const;
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
-    // Returns true if access was acquired. If it returns true, then APIEndAccess must
-    // be called to release access. Other errors may occur even if `true` is returned.
-    // Use an error scope to catch them.
-    bool APIBeginAccess(TextureBase* texture, const BeginAccessDescriptor* descriptor);
-    // Returns true if access was released.
-    bool APIEndAccess(TextureBase* texture, EndAccessState* state);
-    // Returns true iff the device passed to this object on creation is now lost.
-    // TODO(crbug.com/1506468): Eliminate this API once Chromium has been
-    // transitioned away from using it in favor of observing device lost events.
-    bool APIIsDeviceLost();
 
     ObjectType GetType() const override;
-
-    SharedTextureMemoryContents* GetContents() const;
-
-    // Validate that the texture was created from this SharedTextureMemory.
-    MaybeError ValidateTextureCreatedFromSelf(TextureBase* texture);
 
   protected:
     SharedTextureMemoryBase(DeviceBase* device,
@@ -87,68 +69,13 @@ class SharedTextureMemoryBase : public ApiObjectBase,
                             const SharedTextureMemoryDescriptor* descriptor,
                             ObjectBase::ErrorTag tag);
 
-    void DestroyImpl() override;
-
-    bool HasWriteAccess() const;
-    bool HasExclusiveReadAccess() const;
-    int GetReadAccessCount() const;
-
   private:
-    virtual Ref<SharedTextureMemoryContents> CreateContents();
-
     ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
-    MaybeError BeginAccess(TextureBase* texture, const BeginAccessDescriptor* rawDescriptor);
-    MaybeError EndAccess(TextureBase* texture, EndAccessState* state, bool* didEnd);
-    ResultOrError<FenceAndSignalValue> EndAccessInternal(TextureBase* texture,
-                                                         EndAccessState* rawState);
 
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) = 0;
 
-    // BeginAccessImpl validates the operation is valid on the backend, and performs any
-    // backend specific operations. It does NOT need to acquire begin fences; that is done in the
-    // frontend in BeginAccess.
-    virtual MaybeError BeginAccessImpl(TextureBase* texture,
-                                       const UnpackedPtr<BeginAccessDescriptor>& descriptor) = 0;
-    // EndAccessImpl validates the operation is valid on the backend, and returns the end fence.
-    // It should also write out any backend specific state in chained out structs of EndAccessState.
-    virtual ResultOrError<FenceAndSignalValue> EndAccessImpl(
-        TextureBase* texture,
-        UnpackedPtr<EndAccessState>& state) = 0;
-
     SharedTextureMemoryProperties mProperties;
-    bool mHasWriteAccess = false;
-    bool mHasExclusiveReadAccess = false;
-    int mReadAccessCount = 0;
-    Ref<SharedTextureMemoryContents> mContents;
-};
-
-// SharedTextureMemoryContents is a separate object because it needs to live as long as
-// the SharedTextureMemory or any textures created from the SharedTextureMemory. This
-// allows state and objects needed by the texture to persist after the
-// SharedTextureMemory itself has been dropped.
-class SharedTextureMemoryContents : public RefCounted {
-  public:
-    using PendingFenceList = SharedTextureMemoryBase::PendingFenceList;
-
-    explicit SharedTextureMemoryContents(WeakRef<SharedTextureMemoryBase> sharedTextureMemory);
-
-    void AcquirePendingFences(PendingFenceList* fences);
-
-    // Set the last usage serial. This indicates when the SharedFence exported
-    // from APIEndAccess will complete.
-    void SetLastUsageSerial(ExecutionSerial lastUsageSerial);
-    ExecutionSerial GetLastUsageSerial() const;
-
-    const WeakRef<SharedTextureMemoryBase>& GetSharedTextureMemory() const;
-
-  private:
-    friend class SharedTextureMemoryBase;
-
-    PendingFenceList mPendingFences;
-    ExecutionSerial mLastUsageSerial{0};
-
-    WeakRef<SharedTextureMemoryBase> mSharedTextureMemory;
 };
 
 }  // namespace dawn::native

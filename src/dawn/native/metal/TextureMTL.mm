@@ -321,7 +321,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(texture->InitializeFromSharedTextureMemory(memory, descriptor));
-    texture->mSharedTextureMemoryContents = memory->GetContents();
+    texture->mSharedResourceMemoryContents = memory->GetContents();
     return texture;
 }
 
@@ -414,7 +414,7 @@ MaybeError Texture::InitializeFromSharedTextureMemory(
 void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContext) {
     if (@available(macOS 10.14, iOS 12.0, *)) {
         SharedTextureMemoryBase::PendingFenceList fences;
-        SharedTextureMemoryContents* contents = GetSharedTextureMemoryContents();
+        SharedResourceMemoryContents* contents = GetSharedResourceMemoryContents();
         if (contents != nullptr) {
             contents->AcquirePendingFences(&fences);
             contents->SetLastUsageSerial(GetDevice()->GetQueue()->GetPendingCommandSerial());

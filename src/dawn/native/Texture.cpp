@@ -725,7 +725,7 @@ bool IsValidSampleCount(uint32_t sampleCount) {
 TextureBase::TextureState::TextureState() : hasAccess(true), destroyed(false) {}
 
 TextureBase::TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor)
-    : ApiObjectBase(device, descriptor->label),
+    : SharedResource(device, descriptor->label),
       mDimension(descriptor->dimension),
       mCompatibilityTextureBindingViewDimension(
           ResolveDefaultCompatiblityTextureBindingViewDimension(device, descriptor)),
@@ -787,7 +787,7 @@ static constexpr Format kUnusedFormat;
 TextureBase::TextureBase(DeviceBase* device,
                          const TextureDescriptor* descriptor,
                          ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag, descriptor->label),
+    : SharedResource(device, tag, descriptor->label),
       mDimension(descriptor->dimension),
       mCompatibilityTextureBindingViewDimension(
           ResolveDefaultCompatiblityTextureBindingViewDimension(device, Unpack(descriptor))),
@@ -973,6 +973,14 @@ bool TextureBase::IsDestroyed() const {
     return mState.destroyed;
 }
 
+bool TextureBase::IsInitialized() const {
+    return IsSubresourceContentInitialized(GetAllSubresources());
+}
+
+void TextureBase::SetInitialized(bool initialized) {
+    SetIsSubresourceContentInitialized(initialized, GetAllSubresources());
+}
+
 void TextureBase::SetHasAccess(bool hasAccess) {
     DAWN_ASSERT(!IsError());
     mState.hasAccess = hasAccess;
@@ -1029,8 +1037,11 @@ MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
     if (DAWN_UNLIKELY(mState.destroyed || !mState.hasAccess)) {
         DAWN_INVALID_IF(mState.destroyed, "Destroyed texture %s used in a submit.", this);
         if (DAWN_UNLIKELY(!mState.hasAccess)) {
-            if (mSharedTextureMemoryContents != nullptr) {
-                auto memory = mSharedTextureMemoryContents->GetSharedTextureMemory().Promote();
+            if (mSharedResourceMemoryContents != nullptr) {
+                Ref<SharedTextureMemoryBase> memory =
+                    mSharedResourceMemoryContents->GetSharedResourceMemory()
+                        .Promote()
+                        .Cast<Ref<SharedTextureMemoryBase>>();
                 if (memory != nullptr) {
                     return DAWN_VALIDATION_ERROR("%s used in a submit without current access to %s",
                                                  this, memory.Get());
@@ -1162,10 +1173,6 @@ TextureViewBase* TextureBase::APICreateErrorView(const TextureViewDescriptor* de
 
 bool TextureBase::IsImplicitMSAARenderTextureViewSupported() const {
     return (GetUsage() & wgpu::TextureUsage::TextureBinding) != 0;
-}
-
-SharedTextureMemoryContents* TextureBase::GetSharedTextureMemoryContents() const {
-    return mSharedTextureMemoryContents.Get();
 }
 
 void TextureBase::APIDestroy() {

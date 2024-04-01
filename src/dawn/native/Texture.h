@@ -78,7 +78,7 @@ static constexpr wgpu::TextureUsage kShaderTextureUsages =
     wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture |
     wgpu::TextureUsage::StorageBinding | kWriteOnlyStorageTexture;
 
-class TextureBase : public ApiObjectBase {
+class TextureBase : public SharedResource {
   public:
     enum class ClearValue { Zero, NonZero };
 
@@ -112,9 +112,14 @@ class TextureBase : public ApiObjectBase {
     wgpu::TextureUsage GetUsage() const;
     wgpu::TextureUsage GetInternalUsage() const;
 
-    bool IsDestroyed() const;
-    void SetHasAccess(bool hasAccess);
-    bool HasAccess() const;
+    // SharedResource implementation
+    void SetHasAccess(bool hasAccess) override;
+    bool HasAccess() const override;
+    bool IsDestroyed() const override;
+    bool IsInitialized() const override;
+    void SetInitialized(bool initialized) override;
+
+    bool IsReadOnly() const;
     uint32_t GetSubresourceIndex(uint32_t mipLevel, uint32_t arraySlice, Aspect aspect) const;
     bool IsSubresourceContentInitialized(const SubresourceRange& range) const;
     void SetIsSubresourceContentInitialized(bool isInitialized, const SubresourceRange& range);
@@ -122,7 +127,6 @@ class TextureBase : public ApiObjectBase {
     MaybeError ValidateCanUseInSubmitNow() const;
 
     bool IsMultisampledTexture() const;
-    bool IsReadOnly() const;
 
     // Returns true if the size covers the whole subresource.
     bool CoversFullSubresource(uint32_t mipLevel, Aspect aspect, const Extent3D& size) const;
@@ -149,8 +153,6 @@ class TextureBase : public ApiObjectBase {
 
     bool IsImplicitMSAARenderTextureViewSupported() const;
 
-    SharedTextureMemoryContents* GetSharedTextureMemoryContents() const;
-
     // Dawn API
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
     TextureViewBase* APICreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
@@ -170,9 +172,6 @@ class TextureBase : public ApiObjectBase {
 
     void DestroyImpl() override;
     void AddInternalUsage(wgpu::TextureUsage usage);
-
-    // The shared texture memory state the texture was created from. May be null.
-    Ref<SharedTextureMemoryContents> mSharedTextureMemoryContents;
 
   private:
     struct TextureState {

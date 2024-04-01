@@ -270,7 +270,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
     if (IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
-        destination->SetIsDataInitialized();
+        destination->SetInitialized(true);
     }
 
     auto operation = std::make_unique<CopyFromStagingToBufferOperation>();

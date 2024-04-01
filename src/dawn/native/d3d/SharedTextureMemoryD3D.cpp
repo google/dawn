@@ -79,7 +79,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
 
     return FenceAndSignalValue{
         std::move(sharedFence),
-        static_cast<uint64_t>(texture->GetSharedTextureMemoryContents()->GetLastUsageSerial())};
+        static_cast<uint64_t>(texture->GetSharedResourceMemoryContents()->GetLastUsageSerial())};
 }
 
 }  // namespace dawn::native::d3d

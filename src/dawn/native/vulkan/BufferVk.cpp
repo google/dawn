@@ -362,7 +362,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     SetLabelImpl();
 
     // Assume the data is initialized since an external pointer was provided.
-    SetIsDataInitialized();
+    SetInitialized(true);
     return {};
 }
 
@@ -599,7 +599,7 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordi
     }
 
     if (IsFullBufferRange(offset, size)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
         return false;
     }
 
@@ -614,7 +614,7 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordi
     }
 
     if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
         return false;
     }
 
@@ -668,7 +668,7 @@ void Buffer::InitializeToZero(CommandRecordingContext* recordingContext) {
 
     ClearBuffer(recordingContext, 0u);
     GetDevice()->IncrementLazyClearCountForTesting();
-    SetIsDataInitialized();
+    SetInitialized(true);
 }
 
 void Buffer::ClearBuffer(CommandRecordingContext* recordingContext,

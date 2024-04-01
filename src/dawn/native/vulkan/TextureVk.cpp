@@ -783,7 +783,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     const UnpackedPtr<TextureDescriptor>& textureDescriptor) {
     Ref<Texture> texture =
         AcquireRef(new Texture(ToBackend(memory->GetDevice()), textureDescriptor));
-    texture->mSharedTextureMemoryContents = memory->GetContents();
+    texture->mSharedResourceMemoryContents = memory->GetContents();
     texture->mSharedTextureMemoryObjects = {memory->GetVkImage(), memory->GetVkDeviceMemory()};
     texture->mHandle = texture->mSharedTextureMemoryObjects.vkImage->Get();
     texture->mExternalAllocation = texture->mSharedTextureMemoryObjects.vkDeviceMemory->Get();
@@ -1081,7 +1081,7 @@ std::vector<VkSemaphore> Texture::AcquireWaitRequirements() {
 
 void Texture::SetPendingAcquire(VkImageLayout pendingAcquireOldLayout,
                                 VkImageLayout pendingAcquireNewLayout) {
-    DAWN_ASSERT(GetSharedTextureMemoryContents() != nullptr);
+    DAWN_ASSERT(GetSharedResourceMemoryContents() != nullptr);
     mExternalState = ExternalState::PendingAcquire;
     mLastExternalState = ExternalState::PendingAcquire;
 
@@ -1190,7 +1190,7 @@ void Texture::DestroyImpl() {
     // to skip the deallocation of the (absence of) VkDeviceMemory.
     device->GetResourceMemoryAllocator()->Deallocate(&mMemoryAllocation);
 
-    if (mExternalAllocation != VK_NULL_HANDLE && GetSharedTextureMemoryContents() == nullptr) {
+    if (mExternalAllocation != VK_NULL_HANDLE && GetSharedResourceMemoryContents() == nullptr) {
         device->GetFencedDeleter()->DeleteWhenUnused(mExternalAllocation);
     }
 

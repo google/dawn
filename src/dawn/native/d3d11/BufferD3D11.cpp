@@ -381,7 +381,7 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(
     }
 
     if (IsFullBufferRange(offset, size)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
         return {};
     }
 
@@ -397,7 +397,7 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(
     }
 
     if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
     } else {
         DAWN_TRY(InitializeToZero(commandContext));
     }
@@ -409,7 +409,7 @@ MaybeError Buffer::InitializeToZero(const ScopedCommandRecordingContext* command
     DAWN_ASSERT(NeedsInitialization());
 
     DAWN_TRY(ClearInternal(commandContext, uint8_t(0u)));
-    SetIsDataInitialized();
+    SetInitialized(true);
     GetDevice()->IncrementLazyClearCountForTesting();
 
     return {};

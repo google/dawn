@@ -176,7 +176,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     }
 
     // Data is assumed to be initialized since it is externally allocated.
-    SetIsDataInitialized();
+    SetInitialized(true);
     SetLabelImpl();
     return {};
 }
@@ -245,7 +245,7 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* command
     }
 
     if (IsFullBufferRange(offset, size)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
         return false;
     }
 
@@ -260,7 +260,7 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* command
     }
 
     if (IsFullBufferOverwrittenInTextureToBufferCopy(copy)) {
-        SetIsDataInitialized();
+        SetInitialized(true);
         return false;
     }
 
@@ -273,7 +273,7 @@ void Buffer::InitializeToZero(CommandRecordingContext* commandContext) {
 
     ClearBuffer(commandContext, uint8_t(0u));
 
-    SetIsDataInitialized();
+    SetInitialized(true);
     GetDevice()->IncrementLazyClearCountForTesting();
 }
 
