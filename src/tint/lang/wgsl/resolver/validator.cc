@@ -509,13 +509,14 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
     }
 
     if (auto* str = store_ty->As<sem::Struct>()) {
+        auto& str_source = str->Declaration()->name->source;
         for (size_t i = 0; i < str->Members().Length(); ++i) {
             auto* const m = str->Members()[i];
             uint32_t required_align = required_alignment_of(m->Type());
 
             // Recurse into the member type.
             if (!AddressSpaceLayout(m->Type(), address_space, m->Declaration()->type->source)) {
-                AddNote(str->Declaration()->source) << "see layout of struct:\n" << str->Layout();
+                AddNote(str_source) << "see layout of struct:\n" << str->Layout();
                 note_usage();
                 return false;
             }
@@ -533,11 +534,12 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
                     << style::Attribute("@align") << style::Code("(", required_align, ")")
                     << " on this member";
 
-                AddNote(str->Declaration()->source) << "see layout of struct:\n" << str->Layout();
+                AddNote(str_source) << "see layout of struct:\n" << str->Layout();
 
                 if (auto* member_str = m->Type()->As<sem::Struct>()) {
-                    AddNote(member_str->Declaration()->source) << "and layout of struct member:\n"
-                                                               << member_str->Layout();
+                    AddNote(member_str->Declaration()->name->source)
+                        << "and layout of struct member:\n"
+                        << member_str->Layout();
                 }
 
                 note_usage();
@@ -562,11 +564,10 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
                         << style::Variable(member_name_of(m)) << ". Consider setting "
                         << style::Attribute("@align") << style::Code("(16)") << " on this member";
 
-                    AddNote(str->Declaration()->source) << "see layout of struct:\n"
-                                                        << str->Layout();
+                    AddNote(str_source) << "see layout of struct:\n" << str->Layout();
 
                     auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
-                    AddNote(prev_member_str->Declaration()->source)
+                    AddNote(prev_member_str->Declaration()->name->source)
                         << "and layout of previous member struct:\n"
                         << prev_member_str->Layout();
                     note_usage();
@@ -2220,7 +2221,7 @@ bool Validator::Alias(const ast::Alias*) const {
 
 bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) const {
     if (str->Members().IsEmpty()) {
-        AddError(str->Declaration()->source) << "structures must have at least one member";
+        AddError(str->Declaration()->name->source) << "structures must have at least one member";
         return false;
     }
 

@@ -41,6 +41,7 @@
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/symbol/symbol.h"
+#include "src/tint/utils/text/styled_text.h"
 
 // Forward declarations
 namespace tint::core::type {
@@ -169,7 +170,7 @@ class Struct : public Castable<Struct, Type> {
 
     /// @returns a multiline string that describes the layout of this struct,
     /// including size and alignment information.
-    std::string Layout() const;
+    StyledText Layout() const;
 
     /// @param concrete the conversion-rank ordered concrete versions of this abstract structure.
     void SetConcreteTypes(VectorRef<const Struct*> concrete) { concrete_types_ = concrete; }

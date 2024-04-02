@@ -28,6 +28,8 @@
 
 #include <iostream>
 
+#include "src/tint/utils/text/styled_text_printer.h"
+
 #if TINT_BUILD_SPV_READER
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER
@@ -293,6 +295,7 @@ void EmitJson(const tint::Program& program) {
 }
 
 void EmitText(const tint::Program& program) {
+    auto printer = tint::StyledTextPrinter::Create(stdout);
     tint::inspector::Inspector inspector(program);
     if (!inspector.GetUsedExtensionNames().empty()) {
         std::cout << "Extensions:" << std::endl;
@@ -320,7 +323,7 @@ void EmitText(const tint::Program& program) {
                 continue;
             }
             const auto* s = ty->As<tint::core::type::Struct>();
-            std::cout << s->Layout() << std::endl << std::endl;
+            printer->Print(s->Layout() << "\n\n");
         }
     }
 }

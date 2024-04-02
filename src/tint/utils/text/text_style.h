@@ -53,68 +53,72 @@ class TextStyle {
 
     /// Bit patterns
 
-    static constexpr Bits kStyleMask /*          */ = 0b0000'0000'0000'0011;
-    static constexpr Bits kStyleUnderlined /*    */ = 0b0000'0000'0000'0001;
-    static constexpr Bits kStyleBold /*          */ = 0b0000'0000'0000'0010;
+    static constexpr Bits kStyleMask /*          */ = 0b00'000000'0000'00'11;
+    static constexpr Bits kStyleUnderlined /*    */ = 0b00'000000'0000'00'01;
+    static constexpr Bits kStyleBold /*          */ = 0b00'000000'0000'00'10;
 
-    static constexpr Bits kCompareMask /*        */ = 0b0000'0000'0000'1100;
-    static constexpr Bits kCompareMatch /*       */ = 0b0000'0000'0000'0100;
-    static constexpr Bits kCompareMismatch /*    */ = 0b0000'0000'0000'1000;
+    static constexpr Bits kCompareMask /*        */ = 0b00'000000'0000'11'00;
+    static constexpr Bits kCompareMatch /*       */ = 0b00'000000'0000'01'00;
+    static constexpr Bits kCompareMismatch /*    */ = 0b00'000000'0000'10'00;
 
-    static constexpr Bits kSeverityMask /*       */ = 0b0000'0000'1111'0000;
-    static constexpr Bits kSeverityDefault /*    */ = 0b0000'0000'0000'0000;
-    static constexpr Bits kSeveritySuccess /*    */ = 0b0000'0000'0001'0000;
-    static constexpr Bits kSeverityWarning /*    */ = 0b0000'0000'0010'0000;
-    static constexpr Bits kSeverityError /*      */ = 0b0000'0000'0011'0000;
-    static constexpr Bits kSeverityFatal /*      */ = 0b0000'0000'0100'0000;
+    static constexpr Bits kSeverityMask /*       */ = 0b00'000000'1111'00'00;
+    static constexpr Bits kSeverityDefault /*    */ = 0b00'000000'0000'00'00;
+    static constexpr Bits kSeveritySuccess /*    */ = 0b00'000000'0001'00'00;
+    static constexpr Bits kSeverityWarning /*    */ = 0b00'000000'0010'00'00;
+    static constexpr Bits kSeverityError /*      */ = 0b00'000000'0011'00'00;
+    static constexpr Bits kSeverityFatal /*      */ = 0b00'000000'0100'00'00;
 
-    static constexpr Bits kKindMask /*           */ = 0b0000'1111'0000'0000;
-    static constexpr Bits kKindCode /*           */ = 0b0000'0001'0000'0000;
-    static constexpr Bits kKindKeyword /*        */ = 0b0000'0011'0000'0000;
-    static constexpr Bits kKindVariable /*       */ = 0b0000'0101'0000'0000;
-    static constexpr Bits kKindType /*           */ = 0b0000'0111'0000'0000;
-    static constexpr Bits kKindFunction /*       */ = 0b0000'1001'0000'0000;
-    static constexpr Bits kKindEnum /*           */ = 0b0000'1011'0000'0000;
-    static constexpr Bits kKindLiteral /*        */ = 0b0000'1101'0000'0000;
-    static constexpr Bits kKindAttribute /*      */ = 0b0000'1111'0000'0000;
-    static constexpr Bits kKindSquiggle /*       */ = 0b0000'0010'0000'0000;
+    static constexpr Bits kKindMask /*           */ = 0b00'111111'0000'00'00;
+    static constexpr Bits kKindCode /*           */ = 0b00'000001'0000'00'00;
+    static constexpr Bits kKindCodeNoQuote /*    */ = 0b00'000011'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindKeyword /*        */ = 0b00'000101'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindVariable /*       */ = 0b00'001001'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindType /*           */ = 0b00'001101'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindFunction /*       */ = 0b00'010001'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindEnum /*           */ = 0b00'010101'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindLiteral /*        */ = 0b00'011001'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindAttribute /*      */ = 0b00'011101'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindComment /*        */ = 0b00'100001'0000'00'00;  // includes kKindCode
+    static constexpr Bits kKindSquiggle /*       */ = 0b00'000100'0000'00'00;
 
     /// Getters
 
-    bool IsBold() const { return (bits & kStyleBold) != 0; }
-    bool IsUnderlined() const { return (bits & kStyleUnderlined) != 0; }
+    constexpr bool IsBold() const { return (bits & kStyleBold) != 0; }
+    constexpr bool IsUnderlined() const { return (bits & kStyleUnderlined) == kStyleUnderlined; }
 
-    bool HasCompare() const { return (bits & kCompareMask) != 0; }
-    bool IsMatch() const { return (bits & kCompareMask) == kCompareMatch; }
-    bool IsMismatch() const { return (bits & kCompareMask) == kCompareMismatch; }
+    constexpr bool HasCompare() const { return (bits & kCompareMask) != 0; }
+    constexpr bool IsMatch() const { return (bits & kCompareMask) == kCompareMatch; }
+    constexpr bool IsMismatch() const { return (bits & kCompareMask) == kCompareMismatch; }
 
-    bool HasSeverity() const { return (bits & kSeverityMask) != 0; }
-    bool IsSuccess() const { return (bits & kSeverityMask) == kSeveritySuccess; }
-    bool IsWarning() const { return (bits & kSeverityMask) == kSeverityWarning; }
-    bool IsError() const { return (bits & kSeverityMask) == kSeverityError; }
-    bool IsFatal() const { return (bits & kSeverityMask) == kSeverityFatal; }
+    constexpr bool HasSeverity() const { return (bits & kSeverityMask) != 0; }
+    constexpr bool IsSuccess() const { return (bits & kSeverityMask) == kSeveritySuccess; }
+    constexpr bool IsWarning() const { return (bits & kSeverityMask) == kSeverityWarning; }
+    constexpr bool IsError() const { return (bits & kSeverityMask) == kSeverityError; }
+    constexpr bool IsFatal() const { return (bits & kSeverityMask) == kSeverityFatal; }
 
-    bool HasKind() const { return (bits & kKindMask) != 0; }
-    bool IsCode() const { return (bits & kKindCode) != 0; }
-    bool IsKeyword() const { return (bits & kKindMask) == kKindKeyword; }
-    bool IsVariable() const { return (bits & kKindMask) == kKindVariable; }
-    bool IsType() const { return (bits & kKindMask) == kKindType; }
-    bool IsFunction() const { return (bits & kKindMask) == kKindFunction; }
-    bool IsEnum() const { return (bits & kKindMask) == kKindEnum; }
-    bool IsLiteral() const { return (bits & kKindMask) == kKindLiteral; }
-    bool IsAttribute() const { return (bits & kKindMask) == kKindAttribute; }
-    bool IsSquiggle() const { return (bits & kKindMask) == kKindSquiggle; }
+    constexpr bool HasKind() const { return (bits & kKindMask) != 0; }
+    constexpr bool IsCode() const { return (bits & kKindCode) == kKindCode; }
+    constexpr bool IsCodeNoQuote() const { return (bits & kKindCodeNoQuote) == kKindCodeNoQuote; }
+    constexpr bool IsKeyword() const { return (bits & kKindMask) == kKindKeyword; }
+    constexpr bool IsVariable() const { return (bits & kKindMask) == kKindVariable; }
+    constexpr bool IsType() const { return (bits & kKindMask) == kKindType; }
+    constexpr bool IsFunction() const { return (bits & kKindMask) == kKindFunction; }
+    constexpr bool IsEnum() const { return (bits & kKindMask) == kKindEnum; }
+    constexpr bool IsLiteral() const { return (bits & kKindMask) == kKindLiteral; }
+    constexpr bool IsAttribute() const { return (bits & kKindMask) == kKindAttribute; }
+    constexpr bool IsComment() const { return (bits & kKindMask) == kKindComment; }
+    constexpr bool IsSquiggle() const { return (bits & kKindMask) == kKindSquiggle; }
 
     /// Equality operator
-    bool operator==(TextStyle other) const { return bits == other.bits; }
+    constexpr bool operator==(TextStyle other) const { return bits == other.bits; }
 
     /// Inequality operator
-    bool operator!=(TextStyle other) const { return bits != other.bits; }
+    constexpr bool operator!=(TextStyle other) const { return bits != other.bits; }
 
     /// @returns the combination of this TextStyle and @p other.
     /// If both this TextStyle and @p other have a compare style, severity style or kind style, then
     /// the style collision will resolve by using the style of @p other.
-    TextStyle operator+(TextStyle other) const {
+    constexpr TextStyle operator+(TextStyle other) const {
         Bits out = other.bits;
         out |= bits & kStyleMask;
         if (HasCompare() && !other.HasCompare()) {
@@ -184,6 +188,9 @@ static constexpr TextStyle Error = TextStyle{TextStyle::kSeverityError};
 static constexpr TextStyle Fatal = TextStyle{TextStyle::kSeverityFatal};
 /// Code renders text with a 'code' style
 static constexpr TextStyle Code = TextStyle{TextStyle::kKindCode};
+/// Code renders text with a 'code' style, but does not use a single quote when printed as plain
+/// text.
+static constexpr TextStyle CodeNoQuote = TextStyle{TextStyle::kKindCodeNoQuote};
 /// Keyword renders text with a 'code' style that represents a 'keyword' token
 static constexpr TextStyle Keyword = TextStyle{TextStyle::kKindKeyword};
 /// Variable renders text with a 'code' style that represents a 'variable' token
@@ -198,6 +205,8 @@ static constexpr TextStyle Enum = TextStyle{TextStyle::kKindEnum};
 static constexpr TextStyle Literal = TextStyle{TextStyle::kKindLiteral};
 /// Attribute renders text with a 'code' style that represents an 'attribute' token
 static constexpr TextStyle Attribute = TextStyle{TextStyle::kKindAttribute};
+/// Comment renders text with a 'code' style that represents an 'comment' token
+static constexpr TextStyle Comment = TextStyle{TextStyle::kKindComment};
 /// Squiggle renders text with a squiggle-highlight style (`^^^^^`)
 static constexpr TextStyle Squiggle = TextStyle{TextStyle::kKindSquiggle};
 

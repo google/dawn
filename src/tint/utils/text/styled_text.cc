@@ -72,16 +72,16 @@ StyledText& StyledText::SetStyle(TextStyle style) {
 
 std::string StyledText::Plain() const {
     StringStream ss;
-    bool is_code = false;
+    bool is_code_no_quote = false;
     Walk([&](std::string_view text, TextStyle style) {
-        if (is_code != style.IsCode()) {
+        if (is_code_no_quote != (style.IsCode() && !style.IsCodeNoQuote())) {
             ss << "'";
         }
-        is_code = style.IsCode();
+        is_code_no_quote = style.IsCode() && !style.IsCodeNoQuote();
 
         ss << text;
     });
-    if (is_code) {
+    if (is_code_no_quote) {
         ss << "'";
     }
     return ss.str();

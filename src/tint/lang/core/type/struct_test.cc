@@ -83,22 +83,22 @@ TEST_F(TypeStructTest, Layout) {
     auto* sem_inner_st = p.Sem().Get(inner_st);
     auto* sem_outer_st = p.Sem().Get(outer_st);
 
-    EXPECT_EQ(sem_inner_st->Layout(),
+    EXPECT_EQ(sem_inner_st->Layout().Plain(),
               R"(/*            align(16) size(64) */ struct Inner {
-/* offset( 0) align( 4) size( 4) */   a : i32;
-/* offset( 4) align( 4) size( 4) */   b : u32;
-/* offset( 8) align( 4) size( 4) */   c : f32;
-/* offset(12) align( 1) size( 4) */   // -- implicit field alignment padding --;
-/* offset(16) align(16) size(12) */   d : vec3<f32>;
-/* offset(28) align( 1) size( 4) */   // -- implicit field alignment padding --;
-/* offset(32) align( 8) size(32) */   e : mat4x2<f32>;
+/* offset( 0) align( 4) size( 4) */   a : i32,
+/* offset( 4) align( 4) size( 4) */   b : u32,
+/* offset( 8) align( 4) size( 4) */   c : f32,
+/* offset(12) align( 1) size( 4) */   // -- implicit field alignment padding --
+/* offset(16) align(16) size(12) */   d : vec3<f32>,
+/* offset(28) align( 1) size( 4) */   // -- implicit field alignment padding --
+/* offset(32) align( 8) size(32) */   e : mat4x2<f32>,
 /*                               */ };)");
 
-    EXPECT_EQ(sem_outer_st->Layout(),
+    EXPECT_EQ(sem_outer_st->Layout().Plain(),
               R"(/*            align(16) size(80) */ struct Outer {
-/* offset( 0) align(16) size(64) */   inner : Inner;
-/* offset(64) align( 4) size( 4) */   a : i32;
-/* offset(68) align( 1) size(12) */   // -- implicit struct size padding --;
+/* offset( 0) align(16) size(64) */   inner : Inner,
+/* offset(64) align( 4) size( 4) */   a : i32,
+/* offset(68) align( 1) size(12) */   // -- implicit struct size padding --
 /*                               */ };)");
 }
 

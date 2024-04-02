@@ -560,7 +560,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBuffer_Struct_Run
         R"(12:34 error: 'uniform' storage requires that array elements are aligned to 16 bytes, but array element of type 'i32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.
 note: see layout of struct:
 /*           align(4) size(4) */ struct S {
-/* offset(0) align(4) size(4) */   m : array<i32>;
+/* offset(0) align(4) size(4) */   m : array<i32>,
 /*                            */ };
 90:12 note: 'S' used in address space 'uniform' here)");
 }
