@@ -496,10 +496,9 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 
     Buffer* dstBuffer = ToBackend(destination);
 
-    bool cleared;
+    [[maybe_unused]] bool cleared;
     DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
                                  commandRecordingContext, destinationOffset, size));
-    DAWN_UNUSED(cleared);
 
     CopyFromStagingToBufferHelper(commandRecordingContext, source, sourceOffset, destination,
                                   destinationOffset, size);

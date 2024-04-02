@@ -66,7 +66,7 @@ ObjectType SharedFenceBase::GetType() const {
 }
 
 void SharedFenceBase::APIExportInfo(SharedFenceExportInfo* info) const {
-    DAWN_UNUSED(GetDevice()->ConsumedError(ExportInfo(info)));
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(ExportInfo(info));
 }
 
 void SharedFenceBase::DestroyImpl() {}

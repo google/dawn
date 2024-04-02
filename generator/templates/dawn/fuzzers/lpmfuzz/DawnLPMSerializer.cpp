@@ -137,10 +137,8 @@ namespace dawn::wire {
 
     WireResult {{WGPU}}{{name}}ProtoConvert(fuzzing::{{ name }} proto_record, {{WGPU}}{{ name }}{{ Cmd }} const *record, SerializeBuffer* serializeBuffer, PerObjectType<DawnLPMObjectStore> &objectStores) {
 
-        {{WGPU}}{{ name }}{{ Cmd }} *mutable_record = const_cast<{{WGPU}}{{ name }}{{ Cmd }} *>(record);
-
-        //* Some commands don't set any members.
-        DAWN_UNUSED(mutable_record);
+        //* maybe_unused because some commands don't set any members.
+        [[maybe_unused]] {{WGPU}}{{ name }}{{ Cmd }} *mutable_record = const_cast<{{WGPU}}{{ name }}{{ Cmd }} *>(record);
 
         //* Clear the entire structure to make optional handling simpler.
         memset(mutable_record, 0, sizeof({{WGPU}}{{ name }}{{ Cmd }}));

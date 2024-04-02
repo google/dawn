@@ -52,9 +52,7 @@ class EnumeratorTest : public testing::Test {
 
     template <typename Thing>
     void CheckEmpty(Thing thingToEnumerate) {
-        for (auto [index, value] : Enumerate(thingToEnumerate)) {
-            DAWN_UNUSED(index);
-            DAWN_UNUSED(value);
+        for ([[maybe_unused]] auto [index, value] : Enumerate(thingToEnumerate)) {
             FAIL();
         }
     }

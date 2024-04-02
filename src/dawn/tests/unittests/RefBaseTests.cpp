@@ -133,7 +133,7 @@ TEST(RefBase, Detach) {
     Ref ref(tracker);
 
     events.clear();
-    { DAWN_UNUSED(ref.Detach()); }
+    { [[maybe_unused]] auto ptr = ref.Detach(); }
     EXPECT_THAT(events, testing::ElementsAre(Event{Action::kAssign, 1, 0}  // nullify ref
                                              ));
 }

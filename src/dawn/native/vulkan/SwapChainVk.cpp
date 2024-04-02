@@ -53,14 +53,12 @@ namespace {
 
 ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const PhysicalDevice* physicalDevice,
                                                 const Surface* surface) {
-    const VulkanGlobalInfo& info = physicalDevice->GetVulkanInstance()->GetGlobalInfo();
-    const VulkanFunctions& fn = physicalDevice->GetVulkanInstance()->GetFunctions();
-    VkInstance instance = physicalDevice->GetVulkanInstance()->GetVkInstance();
-
     // May not be used in the platform-specific switches below.
-    DAWN_UNUSED(info);
-    DAWN_UNUSED(fn);
-    DAWN_UNUSED(instance);
+    [[maybe_unused]] const VulkanGlobalInfo& info =
+        physicalDevice->GetVulkanInstance()->GetGlobalInfo();
+    [[maybe_unused]] const VulkanFunctions& fn =
+        physicalDevice->GetVulkanInstance()->GetFunctions();
+    [[maybe_unused]] VkInstance instance = physicalDevice->GetVulkanInstance()->GetVkInstance();
 
     switch (surface->GetType()) {
 #if defined(DAWN_ENABLE_BACKEND_METAL)

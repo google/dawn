@@ -128,11 +128,10 @@ DrawCallParam MakeParam(Ts... args) {
     DrawCallParamTuple paramTuple{Pipeline::Static, VertexBuffer::NoChange, BindGroup::NoChange,
                                   UniformData::Static, RenderBundle::No};
 
-    unsigned int unused[] = {
+    [[maybe_unused]] unsigned int unused[] = {
         0,  // Avoid making a 0-sized array.
         AssignParam(std::get<Ts>(paramTuple), args)...,
     };
-    DAWN_UNUSED(unused);
 
     return DrawCallParam{
         std::get<Pipeline>(paramTuple),     std::get<VertexBuffer>(paramTuple),

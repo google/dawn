@@ -35,20 +35,18 @@ namespace {
 
 // Test that iterating an empty range doesn't iterate at all.
 TEST(RangeTests, Empty) {
-    for (auto i : Range(0)) {
+    for ([[maybe_unused]] auto i : Range(0)) {
         // Silence a -Wunreachable-code-loop-increment
         if ((0)) {
             continue;
         }
-        DAWN_UNUSED(i);
         FAIL();
     }
-    for (auto i : Range(0, 0)) {
+    for ([[maybe_unused]] auto i : Range(0, 0)) {
         // Silence a -Wunreachable-code-loop-increment
         if ((0)) {
             continue;
         }
-        DAWN_UNUSED(i);
         FAIL();
     }
 }

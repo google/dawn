@@ -168,16 +168,16 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
 bool SharedResourceMemory::APIEndAccess(TextureBase* texture,
                                         SharedTextureMemoryEndAccessState* state) {
     bool didEnd = false;
-    DAWN_UNUSED(GetDevice()->ConsumedError(EndAccess(texture, state, &didEnd),
-                                           "calling %s.EndAccess(%s).", this, texture));
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        EndAccess(texture, state, &didEnd), "calling %s.EndAccess(%s).", this, texture);
     return didEnd;
 }
 
 bool SharedResourceMemory::APIEndAccess(BufferBase* buffer,
                                         SharedBufferMemoryEndAccessState* state) {
     bool didEnd = false;
-    DAWN_UNUSED(GetDevice()->ConsumedError(EndAccess(buffer, state, &didEnd),
-                                           "calling %s.EndAccess(%s).", this, buffer));
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        EndAccess(buffer, state, &didEnd), "calling %s.EndAccess(%s).", this, buffer);
     return didEnd;
 }
 

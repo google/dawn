@@ -68,8 +68,7 @@ TEST_F(BitSetIteratorTest, EmptySet) {
     // We don't use the FAIL gtest macro here since it returns immediately,
     // causing an unreachable code warning in MSVC
     bool sawBit = false;
-    for (uint32_t bit : IterateBitSet(mStateBits)) {
-        DAWN_UNUSED(bit);
+    for ([[maybe_unused]] uint32_t bit : IterateBitSet(mStateBits)) {
         sawBit = true;
     }
     EXPECT_FALSE(sawBit);
@@ -136,8 +135,7 @@ TEST_F(EnumBitSetIteratorTest, EmptySet) {
     // We don't use the FAIL gtest macro here since it returns immediately,
     // causing an unreachable code warning in MSVC
     bool sawBit = false;
-    for (TestEnum bit : IterateBitSet(mStateBits)) {
-        DAWN_UNUSED(bit);
+    for ([[maybe_unused]] TestEnum bit : IterateBitSet(mStateBits)) {
         sawBit = true;
     }
     EXPECT_FALSE(sawBit);
@@ -202,8 +200,7 @@ TEST_F(ITypBitsetIteratorTest, EmptySet) {
     // We don't use the FAIL gtest macro here since it returns immediately,
     // causing an unreachable code warning in MSVC
     bool sawBit = false;
-    for (IntegerT bit : IterateBitSet(mStateBits)) {
-        DAWN_UNUSED(bit);
+    for ([[maybe_unused]] IntegerT bit : IterateBitSet(mStateBits)) {
         sawBit = true;
     }
     EXPECT_FALSE(sawBit);

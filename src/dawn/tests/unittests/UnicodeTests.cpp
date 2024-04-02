@@ -84,7 +84,7 @@ TEST_F(CountUTF16CodeUnitsFromUTF8StringTest, InvalidUnicodeString) {
         native::ResultOrError<uint64_t> resultOrError =
             native::CountUTF16CodeUnitsFromUTF8String(std::string_view(testCase));
         ASSERT_TRUE(resultOrError.IsError());
-        std::ignore = resultOrError.AcquireError();
+        [[maybe_unused]] auto err = resultOrError.AcquireError();
     }
 }
 

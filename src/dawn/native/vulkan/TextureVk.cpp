@@ -952,7 +952,7 @@ MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* desc
     VkFormat format = VulkanImageFormat(device, GetFormat().format);
     VkImageUsageFlags usage = VulkanImageUsage(GetInternalUsage(), GetFormat());
 
-    bool supportsDisjoint;
+    [[maybe_unused]] bool supportsDisjoint;
     DAWN_INVALID_IF(
         !externalMemoryService->SupportsCreateImage(descriptor, format, usage, &supportsDisjoint),
         "Creating an image from external memory is not supported.");
@@ -960,7 +960,6 @@ MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* desc
     // the combined aspect without checking for disjoint support.
     // TODO(dawn:1548): Support multi-planar images with the DISJOINT feature and potentially allow
     // acting on planes individually? Always using Color is valid even for disjoint images.
-    DAWN_UNUSED(supportsDisjoint);
     DAWN_ASSERT(!GetFormat().IsMultiPlanar() || mCombinedAspect == Aspect::Color);
 
     mExternalState = ExternalState::PendingAcquire;

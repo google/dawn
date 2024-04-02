@@ -45,8 +45,7 @@ TEST(SerialQueue, BasicTest) {
     ASSERT_TRUE(queue.Empty());
 
     // Iterating on empty queue 1) works 2) doesn't produce any values
-    for (int value : queue.IterateAll()) {
-        DAWN_UNUSED(value);
+    for ([[maybe_unused]] int value : queue.IterateAll()) {
         ASSERT_TRUE(false);
     }
 
@@ -68,8 +67,7 @@ TEST(SerialQueue, BasicTest) {
     queue.Clear();
     ASSERT_TRUE(queue.Empty());
 
-    for (int value : queue.IterateAll()) {
-        DAWN_UNUSED(value);
+    for ([[maybe_unused]] int value : queue.IterateAll()) {
         ASSERT_TRUE(false);
     }
 }

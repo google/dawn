@@ -45,8 +45,7 @@ TEST(SerialMap, BasicTest) {
     ASSERT_TRUE(map.Empty());
 
     // Iterating on empty map 1) works 2) doesn't produce any values
-    for (int value : map.IterateAll()) {
-        DAWN_UNUSED(value);
+    for ([[maybe_unused]] int value : map.IterateAll()) {
         ASSERT_TRUE(false);
     }
 
@@ -68,8 +67,7 @@ TEST(SerialMap, BasicTest) {
     map.Clear();
     ASSERT_TRUE(map.Empty());
 
-    for (int value : map.IterateAll()) {
-        DAWN_UNUSED(value);
+    for ([[maybe_unused]] int value : map.IterateAll()) {
         ASSERT_TRUE(false);
     }
 }

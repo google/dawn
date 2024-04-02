@@ -287,9 +287,9 @@ void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* comma
         commands[i]->Destroy();
     }
 
-    DAWN_UNUSED(GetDevice()->ConsumedError(
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         std::move(result), "calling %s.Submit(%s)", this,
-        ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount)));
+        ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount));
 }
 
 void QueueBase::APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata) {
@@ -411,10 +411,10 @@ void QueueBase::APIWriteBuffer(BufferBase* buffer,
                                uint64_t bufferOffset,
                                const void* data,
                                size_t size) {
-    DAWN_UNUSED(
+    [[maybe_unused]] bool hadError =
         GetDevice()->ConsumedError(WriteBuffer(buffer, bufferOffset, data, size),
                                    "calling %s.WriteBuffer(%s, (%d bytes), data, (%d bytes))", this,
-                                   buffer, bufferOffset, size));
+                                   buffer, bufferOffset, size);
 }
 
 MaybeError QueueBase::WriteBuffer(BufferBase* buffer,
@@ -455,10 +455,10 @@ void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
                                 size_t dataSize,
                                 const TextureDataLayout* dataLayout,
                                 const Extent3D* writeSize) {
-    DAWN_UNUSED(GetDevice()->ConsumedError(
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
         WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize),
         "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, destination, dataSize, dataLayout,
-        writeSize));
+        writeSize);
 }
 
 MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destinationOrig,
@@ -527,16 +527,16 @@ void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,
                                          const ImageCopyTexture* destination,
                                          const Extent3D* copySize,
                                          const CopyTextureForBrowserOptions* options) {
-    DAWN_UNUSED(GetDevice()->ConsumedError(
-        CopyTextureForBrowserInternal(source, destination, copySize, options)));
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        CopyTextureForBrowserInternal(source, destination, copySize, options));
 }
 
 void QueueBase::APICopyExternalTextureForBrowser(const ImageCopyExternalTexture* source,
                                                  const ImageCopyTexture* destination,
                                                  const Extent3D* copySize,
                                                  const CopyTextureForBrowserOptions* options) {
-    DAWN_UNUSED(GetDevice()->ConsumedError(
-        CopyExternalTextureForBrowserInternal(source, destination, copySize, options)));
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        CopyExternalTextureForBrowserInternal(source, destination, copySize, options));
 }
 
 MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* sourceOrig,

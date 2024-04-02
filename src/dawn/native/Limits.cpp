@@ -157,8 +157,7 @@ constexpr void StaticAssertSame() {
 
 template <uint32_t I, uint32_t... Is>
 constexpr uint32_t ReduceSameValue(std::integer_sequence<uint32_t, I, Is...>) {
-    int unused[] = {0, (StaticAssertSame<I, Is>(), 0)...};
-    DAWN_UNUSED(unused);
+    [[maybe_unused]] int unused[] = {0, (StaticAssertSame<I, Is>(), 0)...};
     return I;
 }
 

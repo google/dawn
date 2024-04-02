@@ -122,11 +122,6 @@
 #define DAWN_NO_SANITIZE(instrumentation)
 #endif
 
-// DAWN_UNUSED
-//
-// Prevents unused variable/expression warnings on EXPR.
-#define DAWN_UNUSED(EXPR) (void)EXPR
-
 // DAWN_UNUSED_FUNC
 //
 // Prevents unused variable/expression warnings on FUNC.

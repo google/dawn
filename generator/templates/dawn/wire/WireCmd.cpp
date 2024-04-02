@@ -176,8 +176,7 @@
     {% endif %}
 
     //* Returns the required transfer size for `record` in addition to the transfer structure.
-    DAWN_DECLARE_UNUSED size_t {{Return}}{{name}}GetExtraRequiredSize(const {{Return}}{{name}}{{Cmd}}& record) {
-        DAWN_UNUSED(record);
+    DAWN_DECLARE_UNUSED size_t {{Return}}{{name}}GetExtraRequiredSize([[maybe_unused]] const {{Return}}{{name}}{{Cmd}}& record) {
         size_t result = 0;
 
         //* Gather how much space will be needed for the extension chain.
@@ -242,12 +241,11 @@
     DAWN_DECLARE_UNUSED WireResult {{Return}}{{name}}Serialize(
         const {{Return}}{{name}}{{Cmd}}& record,
         {{Return}}{{name}}Transfer* transfer,
-        SerializeBuffer* buffer
+        [[maybe_unused]] SerializeBuffer* buffer
         {%- if record.may_have_dawn_object -%}
             , const ObjectIdProvider& provider
         {%- endif -%}
     ) {
-        DAWN_UNUSED(buffer);
         //* Handle special transfer members of methods.
         {% if is_cmd %}
             transfer->commandId = {{Return}}WireCmd::{{name}};
@@ -338,13 +336,11 @@
         {{Return}}{{name}}{{Cmd}}* record,
         const volatile {{Return}}{{name}}Transfer* transfer,
         DeserializeBuffer* deserializeBuffer,
-        DeserializeAllocator* allocator
+        [[maybe_unused]] DeserializeAllocator* allocator
         {%- if record.may_have_dawn_object -%}
             , const ObjectIdResolver& resolver
         {%- endif -%}
     ) {
-        DAWN_UNUSED(allocator);
-
         {% if is_cmd %}
             DAWN_ASSERT(transfer->commandId == {{Return}}WireCmd::{{name}});
         {% endif %}

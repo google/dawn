@@ -188,11 +188,11 @@ MaybeError Queue::WaitForIdleForDestruction() {
     Device* device = ToBackend(GetDevice());
     VkDevice vkDevice = device->GetVkDevice();
 
-    VkResult waitIdleResult = VkResult::WrapUnsafe(device->fn.QueueWaitIdle(mQueue));
     // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
     // about, Device lost, which means workloads running on the GPU are no longer accessible
     // (so they are as good as waited on) or success.
-    DAWN_UNUSED(waitIdleResult);
+    [[maybe_unused]] VkResult waitIdleResult =
+        VkResult::WrapUnsafe(device->fn.QueueWaitIdle(mQueue));
 
     // Make sure all fences are complete by explicitly waiting on them all
     mFencesInFlight.Use([&](auto fencesInFlight) {

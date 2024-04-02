@@ -182,8 +182,7 @@ MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
 
 #elif DAWN_PLATFORM_IS(IOS)
 
-MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
-    DAWN_UNUSED(device);
+MaybeError GetDevicePCIInfo(id<MTLDevice>, PCIIDs* ids) {
     *ids = PCIIDs{0, 0};
     return {};
 }
