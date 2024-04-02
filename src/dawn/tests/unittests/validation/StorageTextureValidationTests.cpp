@@ -257,60 +257,124 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
 // Validate it is an error to declare a read-only or write-only storage texture in shaders with any
 // format that doesn't support TextureUsage::StorageBinding texture usages.
 TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
-    // Not include RGBA8UnormSrgb, BGRA8UnormSrgb because they are neither related to any SPIR-V
-    // Image Formats nor WGSL texture formats.
-    constexpr std::array<wgpu::TextureFormat, 34> kWGPUTextureFormatSupportedAsSPIRVImageFormats = {
-        wgpu::TextureFormat::R32Uint,       wgpu::TextureFormat::R32Sint,
-        wgpu::TextureFormat::R32Float,      wgpu::TextureFormat::RGBA8Unorm,
-        wgpu::TextureFormat::RGBA8Snorm,    wgpu::TextureFormat::RGBA8Uint,
-        wgpu::TextureFormat::RGBA8Sint,     wgpu::TextureFormat::RG32Uint,
-        wgpu::TextureFormat::RG32Sint,      wgpu::TextureFormat::RG32Float,
-        wgpu::TextureFormat::RGBA16Uint,    wgpu::TextureFormat::RGBA16Sint,
-        wgpu::TextureFormat::RGBA16Float,   wgpu::TextureFormat::RGBA32Uint,
-        wgpu::TextureFormat::RGBA32Sint,    wgpu::TextureFormat::RGBA32Float,
-        wgpu::TextureFormat::R8Unorm,       wgpu::TextureFormat::R8Snorm,
-        wgpu::TextureFormat::R8Uint,        wgpu::TextureFormat::R8Sint,
-        wgpu::TextureFormat::R16Uint,       wgpu::TextureFormat::R16Sint,
-        wgpu::TextureFormat::R16Float,      wgpu::TextureFormat::RG8Unorm,
-        wgpu::TextureFormat::RG8Snorm,      wgpu::TextureFormat::RG8Uint,
-        wgpu::TextureFormat::RG8Sint,       wgpu::TextureFormat::RG16Uint,
-        wgpu::TextureFormat::RG16Sint,      wgpu::TextureFormat::RG16Float,
-        wgpu::TextureFormat::RGB10A2Uint,   wgpu::TextureFormat::RGB10A2Unorm,
-        wgpu::TextureFormat::RG11B10Ufloat, wgpu::TextureFormat::BGRA8Unorm};
+    // Only include valid WGSL texel format tokens.
+    constexpr std::array<wgpu::TextureFormat, 17> kWGPUTextureFormatSupportedAsSPIRVImageFormats = {
+        wgpu::TextureFormat::R32Uint, wgpu::TextureFormat::R32Sint, wgpu::TextureFormat::R32Float,
+        wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8Snorm,
+        wgpu::TextureFormat::RGBA8Uint, wgpu::TextureFormat::RGBA8Sint,
+        wgpu::TextureFormat::RG32Uint, wgpu::TextureFormat::RG32Sint,
+        wgpu::TextureFormat::RG32Float, wgpu::TextureFormat::RGBA16Uint,
+        wgpu::TextureFormat::RGBA16Sint, wgpu::TextureFormat::RGBA16Float,
+        wgpu::TextureFormat::RGBA32Uint, wgpu::TextureFormat::RGBA32Sint,
+        wgpu::TextureFormat::RGBA32Float,
+        // Although BGRA8Unorm stoarge capability depends on Feature::BGRA8UnormStorage,
+        // It is always a valid storage format token in WGSL.
+        wgpu::TextureFormat::BGRA8Unorm};
 
     for (wgpu::StorageTextureAccess storageTextureBindingType : kSupportedStorageTextureAccess) {
         for (wgpu::TextureFormat format : kWGPUTextureFormatSupportedAsSPIRVImageFormats) {
             std::string computeShader =
                 CreateComputeShaderWithStorageTexture(storageTextureBindingType, format);
-            if (utils::TextureFormatSupportsStorageTexture(format, device,
-                                                           UseCompatibilityMode())) {
-                utils::CreateShaderModule(device, computeShader.c_str());
-            } else {
-                ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, computeShader.c_str()));
-            }
+            utils::CreateShaderModule(device, computeShader.c_str());
         }
     }
 }
 
-class BGRA8UnormStorageTextureInShaderValidationTests : public StorageTextureValidationTests {
+class BGRA8UnormStorageTextureValidationTests
+    : public StorageTextureValidationTests,
+      // Bool param indicates whether requires the BGRA8UnormStorage feature or not.
+      public ::testing::WithParamInterface<bool> {
   protected:
     WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
+        if (GetParam()) {
+            descriptor.requiredFeatures = requiredFeatures;
+            descriptor.requiredFeatureCount = 1;
+        }
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
 
-// Test that 'bgra8unorm' is a valid storage texture format if 'bgra8unorm-storage' is enabled.
-TEST_F(BGRA8UnormStorageTextureInShaderValidationTests, BGRA8UnormAsStorageInShader) {
+// Test that bgra8unorm storage texture at create bind group layout.
+TEST_P(BGRA8UnormStorageTextureValidationTests, CreateBindGroupLayout) {
+    for (wgpu::StorageTextureAccess storageTextureBindingType : kSupportedStorageTextureAccess) {
+        wgpu::BindGroupLayoutEntry entry = utils::BindingLayoutEntryInitializationHelper(
+            0, wgpu::ShaderStage::Compute, storageTextureBindingType,
+            wgpu::TextureFormat::BGRA8Unorm);
+        wgpu::BindGroupLayoutDescriptor descriptor;
+        descriptor.entryCount = 1;
+        descriptor.entries = &entry;
+
+        if (GetParam()) {
+            device.CreateBindGroupLayout(&descriptor);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+        }
+    }
+}
+
+// Test that bgra8unorm storage texture at create pipeline with implicit pipeline layout.
+TEST_P(BGRA8UnormStorageTextureValidationTests, CreatePipelineWithImplicitLayout) {
     for (wgpu::StorageTextureAccess storageTextureBindingType : kSupportedStorageTextureAccess) {
         std::string computeShader = CreateComputeShaderWithStorageTexture(
             storageTextureBindingType, wgpu::TextureFormat::BGRA8Unorm);
         utils::CreateShaderModule(device, computeShader.c_str());
+
+        wgpu::ComputePipelineDescriptor descriptor;
+        descriptor.layout = nullptr;
+        descriptor.compute.module = utils::CreateShaderModule(device, computeShader.c_str());
+
+        if (GetParam()) {
+            wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+            pipeline.GetBindGroupLayout(0);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&descriptor));
+        }
     }
 }
+
+// Test that bgra8unorm storage texture at create pipeline with explicit pipeline layout.
+TEST_P(BGRA8UnormStorageTextureValidationTests, CreatePipelineWithExplicitLayout) {
+    // Skip if wgpu::FeatureName::BGRA8UnormStorage is not required as it will fail at create bind
+    // group layout.
+    DAWN_SKIP_TEST_IF(!GetParam());
+    for (wgpu::StorageTextureAccess storageTextureBindingType : kSupportedStorageTextureAccess) {
+        wgpu::BindGroupLayout bindGroupLayout;
+        {
+            wgpu::BindGroupLayoutEntry entry = utils::BindingLayoutEntryInitializationHelper(
+                0, wgpu::ShaderStage::Compute, storageTextureBindingType,
+                wgpu::TextureFormat::BGRA8Unorm);
+            wgpu::BindGroupLayoutDescriptor descriptor;
+            descriptor.entryCount = 1;
+            descriptor.entries = &entry;
+            bindGroupLayout = device.CreateBindGroupLayout(&descriptor);
+        }
+
+        wgpu::PipelineLayout pipelineLayout;
+        {
+            wgpu::PipelineLayoutDescriptor descriptor;
+            descriptor.bindGroupLayoutCount = 1;
+            descriptor.bindGroupLayouts = &bindGroupLayout;
+            pipelineLayout = device.CreatePipelineLayout(&descriptor);
+        }
+
+        std::string computeShader = CreateComputeShaderWithStorageTexture(
+            storageTextureBindingType, wgpu::TextureFormat::BGRA8Unorm);
+        wgpu::ComputePipelineDescriptor descriptor;
+        descriptor.layout = pipelineLayout;
+        descriptor.compute.module = utils::CreateShaderModule(device, computeShader.c_str());
+
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&descriptor);
+        pipeline.GetBindGroupLayout(0);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ,
+    BGRA8UnormStorageTextureValidationTests,
+    // Bool param indicates whether requires the BGRA8UnormStorage feature or not.
+    ::testing::ValuesIn({false, true}));
 
 // Verify that declaring a storage texture format that is not supported in WebGPU causes validation
 // error.
