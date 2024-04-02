@@ -512,7 +512,7 @@ std::function<void()> BufferBase::PrepareMappingCallback(MapRequestID mapID,
 
     if (mMapCallback != nullptr && mapID == mLastMapID) {
         auto callback = std::move(mMapCallback);
-        auto userdata = std::move(mMapUserdata);
+        void* userdata = std::move(mMapUserdata);
         WGPUBufferMapAsyncStatus actualStatus;
         if (GetDevice()->IsLost()) {
             actualStatus = WGPUBufferMapAsyncStatus_DeviceLost;
