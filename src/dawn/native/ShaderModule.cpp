@@ -1399,8 +1399,7 @@ void ShaderModuleBase::APIGetCompilationInfo(wgpu::CompilationInfoCallback callb
 Future ShaderModuleBase::APIGetCompilationInfoF(const CompilationInfoCallbackInfo& callbackInfo) {
     struct CompilationInfoEvent final : public EventManager::TrackedEvent {
         WGPUCompilationInfoCallback mCallback;
-        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-        raw_ptr<void, DanglingUntriaged> mUserdata;
+        raw_ptr<void> mUserdata;
         // Need to keep a Ref of the compilation messages in case the ShaderModule goes away before
         // the callback happens.
         Ref<ShaderModuleBase> mShaderModule;
@@ -1423,7 +1422,9 @@ Future ShaderModuleBase::APIGetCompilationInfoF(const CompilationInfoCallbackInf
                 compilationInfo = mShaderModule->mCompilationMessages->GetCompilationInfo();
             }
             if (mCallback) {
-                mCallback(status, compilationInfo, mUserdata);
+                mCallback(status, compilationInfo, mUserdata.ExtractAsDangling());
+            } else {
+                DAWN_ASSERT(mUserdata == nullptr);
             }
         }
     };

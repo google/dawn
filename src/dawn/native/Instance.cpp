@@ -284,8 +284,7 @@ Future InstanceBase::APIRequestAdapterF(const RequestAdapterOptions* options,
                                         const RequestAdapterCallbackInfo& callbackInfo) {
     struct RequestAdapterEvent final : public EventManager::TrackedEvent {
         WGPURequestAdapterCallback mCallback;
-        // TODO(https://crbug.com/2349): Investigate dangling pointers in dawn/native.
-        raw_ptr<void, DanglingUntriaged> mUserdata;
+        raw_ptr<void> mUserdata;
         Ref<AdapterBase> mAdapter;
 
         RequestAdapterEvent(const RequestAdapterCallbackInfo& callbackInfo,
@@ -299,16 +298,18 @@ Future InstanceBase::APIRequestAdapterF(const RequestAdapterOptions* options,
 
         void Complete(EventCompletionType completionType) override {
             if (completionType == EventCompletionType::Shutdown) {
-                mCallback(WGPURequestAdapterStatus_InstanceDropped, nullptr, nullptr, mUserdata);
+                mCallback(WGPURequestAdapterStatus_InstanceDropped, nullptr, nullptr,
+                          mUserdata.ExtractAsDangling());
                 return;
             }
 
             WGPUAdapter adapter = ToAPI(ReturnToAPI(std::move(mAdapter)));
             if (adapter == nullptr) {
                 mCallback(WGPURequestAdapterStatus_Unavailable, nullptr, "No supported adapters",
-                          mUserdata);
+                          mUserdata.ExtractAsDangling());
             } else {
-                mCallback(WGPURequestAdapterStatus_Success, adapter, nullptr, mUserdata);
+                mCallback(WGPURequestAdapterStatus_Success, adapter, nullptr,
+                          mUserdata.ExtractAsDangling());
             }
         }
     };

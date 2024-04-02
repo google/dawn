@@ -285,8 +285,7 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
                                       const RequestDeviceCallbackInfo& callbackInfo) {
     struct RequestDeviceEvent final : public EventManager::TrackedEvent {
         WGPURequestDeviceCallback mCallback;
-        // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-        raw_ptr<void, DanglingUntriaged> mUserdata;
+        raw_ptr<void> mUserdata;
         ResultOrError<Ref<DeviceBase>> mDeviceOrError;
 
         RequestDeviceEvent(const RequestDeviceCallbackInfo& callbackInfo,
@@ -308,14 +307,16 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
                 if (mDeviceOrError.IsError()) {
                     std::unique_ptr<ErrorData> errorData = mDeviceOrError.AcquireError();
                     mCallback(WGPURequestDeviceStatus_Error, nullptr,
-                              errorData->GetFormattedMessage().c_str(), mUserdata);
+                              errorData->GetFormattedMessage().c_str(),
+                              mUserdata.ExtractAsDangling());
                     return;
                 }
                 device = mDeviceOrError.AcquireSuccess();
                 status = device == nullptr ? WGPURequestDeviceStatus_Unknown
                                            : WGPURequestDeviceStatus_Success;
             }
-            mCallback(status, ToAPI(ReturnToAPI(std::move(device))), nullptr, mUserdata);
+            mCallback(status, ToAPI(ReturnToAPI(std::move(device))), nullptr,
+                      mUserdata.ExtractAsDangling());
         }
     };
 

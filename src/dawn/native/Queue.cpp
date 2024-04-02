@@ -202,8 +202,7 @@ class ErrorQueue : public QueueBase {
 struct WorkDoneEvent final : public EventManager::TrackedEvent {
     std::optional<wgpu::QueueWorkDoneStatus> mEarlyStatus;
     WGPUQueueWorkDoneCallback mCallback;
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<void, DanglingUntriaged> mUserdata;
+    raw_ptr<void> mUserdata;
 
     // Create an event backed by the given queue execution serial.
     WorkDoneEvent(const QueueWorkDoneCallbackInfo& callbackInfo,
@@ -233,7 +232,7 @@ struct WorkDoneEvent final : public EventManager::TrackedEvent {
             status = mEarlyStatus.value();
         }
 
-        mCallback(ToAPI(status), mUserdata);
+        mCallback(ToAPI(status), mUserdata.ExtractAsDangling());
     }
 };
 
