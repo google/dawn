@@ -415,11 +415,13 @@ void DeviceBase::WillDropLastExternalRef() {
         dawn::WarningLog() << "Uncaptured error after last external device reference dropped.\n"
                            << message;
     };
+    mUncapturedErrorUserdata = nullptr;
 
     mDeviceLostCallback = [](WGPUDeviceLostReason, char const* message, void*) {
         dawn::WarningLog() << "Device lost after last external device reference dropped.\n"
                            << message;
     };
+    mDeviceLostUserdata = nullptr;
 
     // mAdapter is not set for mock test devices.
     // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
@@ -689,6 +691,13 @@ void DeviceBase::APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, voi
     // this call.
     FlushCallbackTaskQueue();
     auto deviceLock(GetScopedLock());
+    // Clearing the callback and userdata is allowed because in Chromium they should be cleared
+    // after Dawn device is destroyed and before Dawn wire server is destroyed.
+    if (callback == nullptr) {
+        mUncapturedErrorCallback = nullptr;
+        mUncapturedErrorUserdata = nullptr;
+        return;
+    }
     if (IsLost()) {
         return;
     }
@@ -706,6 +715,13 @@ void DeviceBase::APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, voi
     // this call.
     FlushCallbackTaskQueue();
     auto deviceLock(GetScopedLock());
+    // Clearing the callback and userdata is allowed because in Chromium they should be cleared
+    // after Dawn device is destroyed and before Dawn wire server is destroyed.
+    if (callback == nullptr) {
+        mDeviceLostCallback = nullptr;
+        mDeviceLostUserdata = nullptr;
+        return;
+    }
     if (IsLost()) {
         return;
     }
