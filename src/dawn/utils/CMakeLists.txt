@@ -78,7 +78,3 @@ elseif(APPLE)
 elseif(UNIX)
     target_sources(dawn_utils PRIVATE "PosixTimer.cpp")
 endif()
-
-if (DAWN_ENABLE_METAL)
-    target_link_libraries(dawn_utils PRIVATE "-framework Metal")
-endif()

@@ -32,8 +32,6 @@ set(BUILD_TESTING OFF)
 # It is particularly interesting when building dawn as a subdirectory in
 # a parent project that does not want to use depot_tools.
 if (${DAWN_FETCH_DEPENDENCIES})
-    find_package(Python3 REQUIRED)
-
     set(EXTRA_FETCH_ARGS)
     if (NOT TARGET gmock AND ${TINT_BUILD_TESTS})
         list(APPEND EXTRA_FETCH_ARGS --use-test-deps)
@@ -76,6 +74,7 @@ endif()
 
 if(NOT TARGET glslang AND (${TINT_BUILD_GLSL_WRITER} OR ${TINT_BUILD_GLSL_VALIDATOR}) AND ${TINT_BUILD_CMD_TOOLS})
     set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "" FORCE)
+    set(ENABLE_OPT OFF CACHE BOOL "" FORCE)
     add_subdirectory("${DAWN_THIRD_PARTY_DIR}/vulkan-deps/glslang/src" "${CMAKE_CURRENT_BINARY_DIR}/glslang" EXCLUDE_FROM_ALL)
 endif()
 

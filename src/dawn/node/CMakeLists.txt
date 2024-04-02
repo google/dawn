@@ -25,6 +25,24 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+set(NODE_BINDING_DEPS
+    ${NODE_ADDON_API_DIR}
+    ${NODE_API_HEADERS_DIR}
+    ${WEBGPU_IDL_PATH}
+)
+foreach(DEP ${NODE_BINDING_DEPS})
+    if (NOT EXISTS ${DEP})
+        message(FATAL_ERROR
+            "DAWN_BUILD_NODE_BINDINGS requires missing dependency '${DEP}'\n"
+            "Please follow the 'Fetch dependencies' instructions at:\n"
+            "./src/dawn/node/README.md"
+        )
+    endif()
+endforeach()
+if (NOT CMAKE_POSITION_INDEPENDENT_CODE)
+    message(FATAL_ERROR "DAWN_BUILD_NODE_BINDINGS requires building with DAWN_ENABLE_PIC")
+endif()
+
 set(DAWN_NODE_GEN_DIR "${DAWN_BUILD_GEN_DIR}/node")
 set(IDLGEN_TOOL_DIR   "${PROJECT_SOURCE_DIR}/tools/src/cmd/idlgen")
 

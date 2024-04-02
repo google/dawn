@@ -25,18 +25,19 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if (${DAWN_BUILD_BENCHMARKS})
-  add_executable(dawn_benchmarks
+add_executable(dawn_benchmarks
     "NullDeviceSetup.cpp"
     "NullDeviceSetup.h"
     "ObjectCreation.cpp"
-  )
-  set_target_properties(dawn_benchmarks PROPERTIES FOLDER "Benchmarks")
+)
+set_target_properties(dawn_benchmarks PROPERTIES FOLDER "Benchmarks")
 
-  target_include_directories(dawn_benchmarks PUBLIC "${PROJECT_SOURCE_DIR}/include")
-  target_include_directories(dawn_benchmarks PUBLIC "${PROJECT_SOURCE_DIR}/src")
+target_include_directories(dawn_benchmarks PUBLIC
+    "${PROJECT_SOURCE_DIR}/include"
+    "${PROJECT_SOURCE_DIR}/src"
+)
 
-  target_link_libraries(dawn_benchmarks PRIVATE
+target_link_libraries(dawn_benchmarks PRIVATE
     benchmark::benchmark
     benchmark::benchmark_main
     dawn_common
@@ -44,5 +45,5 @@ if (${DAWN_BUILD_BENCHMARKS})
     dawn_utils
     dawncpp_headers
     dawncpp
-    dawn_proc)
-endif()
+    dawn_proc
+)

@@ -25,9 +25,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if(DAWN_USE_GLFW)
-
-add_library(dawn_glfw STATIC)
+add_library(dawn_glfw)
 common_compile_options(dawn_glfw)
 target_sources(dawn_glfw
   INTERFACE
@@ -37,25 +35,21 @@ target_sources(dawn_glfw
 )
 target_link_libraries(dawn_glfw
   PUBLIC
-    glfw
     dawncpp_headers
-    dawn_common
   PRIVATE
+    glfw
+    dawn_common
     dawn_internal_config
 )
 
-target_compile_definitions(dawn_glfw PRIVATE "WGPU_IMPLEMENTATION")
+target_compile_definitions(dawn_glfw PRIVATE "WGPU_GLFW_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(dawn_glfw PRIVATE "WGPU_SHARED_LIBRARY")
+    target_compile_definitions(dawn_glfw PRIVATE "WGPU_GLFW_SHARED_LIBRARY")
 endif()
 
 if (DAWN_ENABLE_METAL)
     target_link_libraries(dawn_glfw PRIVATE "-framework Metal")
-    target_sources(dawn_glfw PRIVATE
-        "utils_metal.mm"
-    )
+    target_sources(dawn_glfw PRIVATE "utils_metal.mm")
 endif()
 
 add_library(webgpu_glfw ALIAS dawn_glfw)
-
-endif()

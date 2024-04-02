@@ -369,8 +369,8 @@ if (NOT ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS} STREQUAL "")
   message(STATUS "Using provided LIB_FUZZING_ENGINE options: ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}")
 endif()
 
-message(STATUS "Using python3")
 find_package(Python3 REQUIRED)
+message(STATUS "Dawn: using python at ${Python3_EXECUTABLE}")
 
 ################################################################################
 # common_compile_options - sets compiler and linker options common for dawn and
@@ -562,7 +562,6 @@ set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS 0)
 add_subdirectory(src/tint)
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
-
 add_subdirectory(generator)
 add_subdirectory(src/dawn)
 
