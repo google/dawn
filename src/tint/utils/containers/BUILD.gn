@@ -48,6 +48,7 @@ libtint_source_set("containers") {
     "const_propagating_ptr.h",
     "containers.cc",
     "enum_set.h",
+    "filtered_iterator.h",
     "hashmap.h",
     "hashmap_base.h",
     "hashset.h",
@@ -75,6 +76,7 @@ if (tint_build_unittests) {
     sources = [
       "bitset_test.cc",
       "enum_set_test.cc",
+      "filtered_iterator_test.cc",
       "hashmap_test.cc",
       "hashset_test.cc",
       "map_test.cc",

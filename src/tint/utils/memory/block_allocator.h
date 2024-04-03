@@ -131,13 +131,16 @@ class BlockAllocator {
     template <bool IS_CONST>
     class TView {
       public:
+        /// The iterator type
+        using iterator = TIterator<IS_CONST>;
+        /// The const iterator type
+        using const_iterator = TIterator<true>;
+
         /// @returns an iterator to the beginning of the view
-        TIterator<IS_CONST> begin() const {
-            return TIterator<IS_CONST>{allocator_->data.pointers.root, 0};
-        }
+        iterator begin() const { return iterator{allocator_->data.pointers.root, 0}; }
 
         /// @returns an iterator to the end of the view
-        TIterator<IS_CONST> end() const { return TIterator<IS_CONST>{nullptr, 0}; }
+        iterator end() const { return iterator{nullptr, 0}; }
 
       private:
         friend BlockAllocator;  // For BlockAllocator::operator View()

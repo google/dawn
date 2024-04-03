@@ -45,6 +45,7 @@ cc_library(
     "bitset.h",
     "const_propagating_ptr.h",
     "enum_set.h",
+    "filtered_iterator.h",
     "hashmap.h",
     "hashmap_base.h",
     "hashset.h",
@@ -75,6 +76,7 @@ cc_library(
   srcs = [
     "bitset_test.cc",
     "enum_set_test.cc",
+    "filtered_iterator_test.cc",
     "hashmap_test.cc",
     "hashset_test.cc",
     "map_test.cc",
