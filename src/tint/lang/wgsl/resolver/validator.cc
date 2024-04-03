@@ -339,6 +339,16 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
         return false;
     }
 
+    if (s->AddressSpace() != core::AddressSpace::kHandle) {
+        if (s->StoreType()->Is<core::type::Texture>()) {
+            AddError(a->source) << "pointer can not be formed to a texture";
+            return false;
+        } else if (s->StoreType()->Is<core::type::Sampler>()) {
+            AddError(a->source) << "pointer can not be formed to a sampler";
+            return false;
+        }
+    }
+
     if (a->arguments.Length() > 2) {  // ptr<address-space, type [, access]>
         // https://www.w3.org/TR/WGSL/#access-mode-defaults
         // When writing a variable declaration or a pointer type in WGSL source:

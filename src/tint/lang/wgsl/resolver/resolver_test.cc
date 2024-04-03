@@ -31,6 +31,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
+#include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -2419,7 +2420,7 @@ TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
          });
 
     ASSERT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: cannot take the address of 'var s' in handle address space");
+    EXPECT_EQ(r()->error(), "error: pointer can not be formed to a sampler");
 }
 
 TEST_F(ResolverTest, ModuleDependencyOrderedDeclarations) {
@@ -2741,6 +2742,124 @@ TEST_F(ResolverTest, MaxNestDepthOfCompositeType_ArraysOfStruct_Invalid) {
     Alias("a", a);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array has nesting depth of 256, maximum is 255");
+}
+
+TEST_F(ResolverTest, PointerToHandleTextureParameter) {
+    Func("helper",
+         Vector{
+             Param("sl", ty.ptr<function>(
+                             Source{{12, 34}},
+                             ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32()))),
+         },
+         ty.void_(), {});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a texture");
+}
+
+TEST_F(ResolverTest, PointerToHandleTextureReturn) {
+    Func("helper", {},
+         ty.ptr<function>(Source{{12, 34}},
+                          ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32())),
+         {});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a texture");
+}
+
+TEST_F(ResolverTest, PointerToHandleSamplerParameter) {
+    Func("helper",
+         Vector{
+             Param("sl", ty.ptr<function>(Source{{12, 34}},
+                                          ty.sampler(core::type::SamplerKind::kSampler))),
+         },
+         ty.void_(), {});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a sampler");
+}
+
+TEST_F(ResolverTest, PointerToHandleTextureParameterAlias) {
+    auto* my_ty = Alias(
+        "MyTy", ty.ptr<private_>(Source{{12, 34}},
+                                 ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32())));
+    Func("helper",
+         Vector{
+             Param("sl", ty.Of(my_ty)),
+         },
+         ty.void_(), {});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a texture");
+}
+
+TEST_F(ResolverTest, PointerToHandleSamplerParameterAlias) {
+    auto* my_ty = Alias(
+        "MyTy", ty.ptr<private_>(Source{{12, 34}}, ty.sampler(core::type::SamplerKind::kSampler)));
+    Func("helper",
+         Vector{
+             Param("sl", ty.Of(my_ty)),
+         },
+         ty.void_(), {});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a sampler");
+}
+
+TEST_F(ResolverTest, PointerToHandleTextureVar) {
+    GlobalVar("s",
+              ty.ptr<private_>(Source{{12, 34}},
+                               ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32())),
+              core::AddressSpace::kPrivate, Group(0_a), Binding(0_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a texture");
+}
+
+TEST_F(ResolverTest, PointerToHandleSamplerVar) {
+    GlobalVar("s",
+              ty.ptr<private_>(Source{{12, 34}}, ty.sampler(core::type::SamplerKind::kSampler)),
+              Group(0_a), core::AddressSpace::kPrivate, Binding(0_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a sampler");
+}
+
+TEST_F(ResolverTest, PointerToHandleTextureVarAlias) {
+    auto* my_ty = Alias(
+        "MyTy", ty.ptr<private_>(Source{{12, 34}},
+                                 ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32())));
+    GlobalVar("s", ty.Of(my_ty), core::AddressSpace::kPrivate, Group(0_a), Binding(0_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a texture");
+}
+
+TEST_F(ResolverTest, PointerToHandleSamplerVarAlias) {
+    auto* my_ty = Alias(
+        "MyTy", ty.ptr<private_>(Source{{12, 34}}, ty.sampler(core::type::SamplerKind::kSampler)));
+
+    GlobalVar("s", ty.Of(my_ty), Group(0_a), core::AddressSpace::kPrivate, Binding(0_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a sampler");
+}
+
+TEST_F(ResolverTest, PointerToHandleTextureAlias) {
+    Alias("MyTy",
+          ty.ptr<private_>(Source{{12, 34}},
+                           ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32())));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a texture");
+}
+
+TEST_F(ResolverTest, PointerToHandleSamplerAlias) {
+    Alias("MyTy",
+          ty.ptr<private_>(Source{{12, 34}}, ty.sampler(core::type::SamplerKind::kSampler)));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: pointer can not be formed to a sampler");
 }
 
 }  // namespace
