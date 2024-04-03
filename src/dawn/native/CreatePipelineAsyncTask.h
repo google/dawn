@@ -63,10 +63,7 @@ class CreateComputePipelineAsyncTask {
   private:
     Ref<ComputePipelineBase> mComputePipeline;
     WGPUCreateComputePipelineAsyncCallback mCallback;
-    // TODO(https://crbug.com/2364): The pointer is dangling in
-    // webgpu_cts_with_validation_tests. We should investigate, and decide if
-    // this should be fixed, or turned into a DisableDanglingPtrDetection.
-    raw_ptr<void, DanglingUntriaged> mUserdata;
+    raw_ptr<void> mUserdata;
     // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
     PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
 };

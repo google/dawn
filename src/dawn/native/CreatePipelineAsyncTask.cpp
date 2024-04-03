@@ -70,10 +70,12 @@ void CreateComputePipelineAsyncTask::Run() {
     DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateComputePipelineSuccess",
                            maybeError.IsSuccess());
     if (maybeError.IsError()) {
-        device->AddComputePipelineAsyncCallbackTask(
-            maybeError.AcquireError(), mComputePipeline->GetLabel().c_str(), mCallback, mUserdata);
+        device->AddComputePipelineAsyncCallbackTask(maybeError.AcquireError(),
+                                                    mComputePipeline->GetLabel().c_str(), mCallback,
+                                                    mUserdata.ExtractAsDangling());
     } else {
-        device->AddComputePipelineAsyncCallbackTask(mComputePipeline, mCallback, mUserdata);
+        device->AddComputePipelineAsyncCallbackTask(mComputePipeline, mCallback,
+                                                    mUserdata.ExtractAsDangling());
     }
 }
 
@@ -87,9 +89,10 @@ void CreateComputePipelineAsyncTask::RunAsync(
                             "CreateComputePipelineAsyncTask::RunAsync", task.get(), "label",
                             eventLabel);
 
-    // Using "taskPtr = std::move(task)" causes compilation error while it should be supported
-    // since C++14:
-    // https://docs.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp?view=msvc-160
+    // Using "taskPtr = std::move(task)" will cause compilation error when constructing an
+    // `AsyncTask` (`std::function`) from the lambda expression `asyncTask` because `asyncTask` is
+    // non-copyable (it captures a `std::unique_ptr`), while `std::function` requires the callable
+    // to be copyable.
     auto asyncTask = [taskPtr = task.release()] {
         std::unique_ptr<CreateComputePipelineAsyncTask> innnerTaskPtr(taskPtr);
         innnerTaskPtr->Run();
@@ -128,10 +131,12 @@ void CreateRenderPipelineAsyncTask::Run() {
     DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateRenderPipelineSuccess",
                            maybeError.IsSuccess());
     if (maybeError.IsError()) {
-        device->AddRenderPipelineAsyncCallbackTask(
-            maybeError.AcquireError(), mRenderPipeline->GetLabel().c_str(), mCallback, mUserdata);
+        device->AddRenderPipelineAsyncCallbackTask(maybeError.AcquireError(),
+                                                   mRenderPipeline->GetLabel().c_str(), mCallback,
+                                                   mUserdata.ExtractAsDangling());
     } else {
-        device->AddRenderPipelineAsyncCallbackTask(mRenderPipeline, mCallback, mUserdata);
+        device->AddRenderPipelineAsyncCallbackTask(mRenderPipeline, mCallback,
+                                                   mUserdata.ExtractAsDangling());
     }
 }
 
@@ -144,9 +149,10 @@ void CreateRenderPipelineAsyncTask::RunAsync(std::unique_ptr<CreateRenderPipelin
                             "CreateRenderPipelineAsyncTask::RunAsync", task.get(), "label",
                             eventLabel);
 
-    // Using "taskPtr = std::move(task)" causes compilation error while it should be supported
-    // since C++14:
-    // https://docs.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp?view=msvc-160
+    // Using "taskPtr = std::move(task)" will cause compilation error when constructing an
+    // `AsyncTask` (`std::function`) from the lambda expression `asyncTask` because `asyncTask` is
+    // non-copyable (it captures a `std::unique_ptr`), while `std::function` requires the callable
+    // to be copyable.
     auto asyncTask = [taskPtr = task.release()] {
         std::unique_ptr<CreateRenderPipelineAsyncTask> innerTaskPtr(taskPtr);
         innerTaskPtr->Run();
