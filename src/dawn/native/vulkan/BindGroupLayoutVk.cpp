@@ -85,6 +85,13 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
             }
         },
         [](const SamplerBindingLayout&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
+        [](const StaticSamplerHolderBindingLayout&) {
+            // Static samplers are implemented in the frontend.
+            // TODO(crbug.com/dawn/2463): Implement static samplers in the backend
+            // on Vulkan.
+            DAWN_UNREACHABLE();
+            return VK_DESCRIPTOR_TYPE_SAMPLER;
+        },
         [](const TextureBindingLayout&) { return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; },
         [](const StorageTextureBindingLayout&) { return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; });
 }

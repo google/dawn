@@ -624,6 +624,12 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                                          atIndex:computeIndex];
                     }
                 },
+                [&](const StaticSamplerHolderBindingLayout&) {
+                    // Static samplers are handled in the frontend.
+                    // TODO(crbug.com/dawn/2482): Implement static samplers in the
+                    // Metal backend.
+                    DAWN_UNREACHABLE();
+                },
                 [&](const TextureBindingLayout&) {
                     auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     if (hasVertStage) {

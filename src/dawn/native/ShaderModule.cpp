@@ -468,6 +468,15 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
 
     BindingInfoType bindingLayoutType = GetBindingInfoType(layoutInfo);
     BindingInfoType shaderBindingType = GetShaderBindingType(shaderInfo);
+
+    if (bindingLayoutType == BindingInfoType::StaticSampler) {
+        DAWN_INVALID_IF(shaderBindingType != BindingInfoType::Sampler,
+                        "Binding type in the shader (%s) doesn't match the required type of %s for "
+                        "the %s type in the layout.",
+                        shaderBindingType, BindingInfoType::Sampler, bindingLayoutType);
+        return {};
+    }
+
     DAWN_INVALID_IF(bindingLayoutType != shaderBindingType,
                     "Binding type in the shader (%s) doesn't match the type in the layout (%s).",
                     shaderBindingType, bindingLayoutType);
@@ -901,6 +910,9 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             case BindingInfoType::ExternalTexture: {
                 info.bindingInfo.emplace<ExternalTextureBindingInfo>();
                 break;
+            }
+            case BindingInfoType::StaticSampler: {
+                return DAWN_VALIDATION_ERROR("Static samplers not supported in WGSL");
             }
             default:
                 return DAWN_VALIDATION_ERROR("Unknown binding type in Shader");

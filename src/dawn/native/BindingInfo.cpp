@@ -41,6 +41,9 @@ BindingInfoType GetBindingInfoType(const BindingInfo& info) {
         [](const TextureBindingLayout&) -> BindingInfoType { return BindingInfoType::Texture; },
         [](const StorageTextureBindingLayout&) -> BindingInfoType {
             return BindingInfoType::StorageTexture;
+        },
+        [](const StaticSamplerHolderBindingLayout&) -> BindingInfoType {
+            return BindingInfoType::StaticSampler;
         });
 }
 
@@ -89,6 +92,7 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
     } else if (auto* externalTextureBindingLayout = entry.Get<ExternalTextureBindingLayout>()) {
         perStageBindingCountMember = &PerStageBindingCounts::externalTextureCount;
     } else if (auto* staticSamplerBindingLayout = entry.Get<StaticSamplerBindingLayout>()) {
+        ++bindingCounts->staticSamplerCount;
         perStageBindingCountMember = &PerStageBindingCounts::staticSamplerCount;
     }
 

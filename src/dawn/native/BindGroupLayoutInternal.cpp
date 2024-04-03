@@ -356,6 +356,11 @@ bool operator!=(const BindingInfo& a, const BindingInfo& b) {
             const SamplerBindingLayout& layoutB = std::get<SamplerBindingLayout>(b.bindingLayout);
             return layoutA.type != layoutB.type;
         },
+        [&](const StaticSamplerHolderBindingLayout& layoutA) -> bool {
+            const StaticSamplerHolderBindingLayout& layoutB =
+                std::get<StaticSamplerHolderBindingLayout>(b.bindingLayout);
+            return layoutA.sampler != layoutB.sampler;
+        },
         [&](const TextureBindingLayout& layoutA) -> bool {
             const TextureBindingLayout& layoutB = std::get<TextureBindingLayout>(b.bindingLayout);
             return layoutA.sampleType != layoutB.sampleType ||
@@ -405,7 +410,9 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
         }
         bindingInfo.bindingLayout = bindingLayout;
     } else if (auto* staticSamplerBindingLayout = binding.Get<StaticSamplerBindingLayout>()) {
-        // TODO(crbug.com/dawn/2463): Populate BindingInfo for this entry.
+        StaticSamplerHolderBindingLayout bindingLayout;
+        bindingLayout.sampler = staticSamplerBindingLayout->sampler;
+        bindingInfo.bindingLayout = bindingLayout;
     } else {
         DAWN_UNREACHABLE();
     }
@@ -501,6 +508,14 @@ bool SortBindingsCompare(const UnpackedPtr<BindGroupLayoutEntry>& a,
             }
             if (aLayout.format != bLayout.format) {
                 return aLayout.format < bLayout.format;
+            }
+            break;
+        }
+        case BindingInfoType::StaticSampler: {
+            const auto& aLayout = std::get<StaticSamplerHolderBindingLayout>(aInfo.bindingLayout);
+            const auto& bLayout = std::get<StaticSamplerHolderBindingLayout>(bInfo.bindingLayout);
+            if (aLayout.sampler != bLayout.sampler) {
+                return aLayout.sampler < bLayout.sampler;
             }
             break;
         }
@@ -632,6 +647,9 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
             [&](const StorageTextureBindingLayout& layout) {
                 recorder.Record(BindingInfoType::StorageTexture, layout.access, layout.format,
                                 layout.viewDimension);
+            },
+            [&](const StaticSamplerHolderBindingLayout& layout) {
+                recorder.Record(BindingInfoType::StaticSampler, layout.sampler->GetContentHash());
             });
     }
 
@@ -661,6 +679,10 @@ BindingIndex BindGroupLayoutInternalBase::GetDynamicBufferCount() const {
 
 uint32_t BindGroupLayoutInternalBase::GetUnverifiedBufferCount() const {
     return mBindingCounts.unverifiedBufferCount;
+}
+
+uint32_t BindGroupLayoutInternalBase::GetStaticSamplerCount() const {
+    return mBindingCounts.staticSamplerCount;
 }
 
 uint32_t BindGroupLayoutInternalBase::GetExternalTextureBindingCount() const {

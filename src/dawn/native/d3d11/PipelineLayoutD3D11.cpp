@@ -84,6 +84,11 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                 [&](const SamplerBindingLayout&) {
                     mIndexInfo[group][bindingIndex] = samplerIndex++;
                 },
+                [&](const StaticSamplerHolderBindingLayout&) {
+                    // Static samplers are implemented in the frontend on
+                    // D3D11.
+                    DAWN_UNREACHABLE();
+                },
                 [&](const TextureBindingLayout&) {
                     mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
                 },

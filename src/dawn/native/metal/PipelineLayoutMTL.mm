@@ -78,6 +78,12 @@ PipelineLayout::PipelineLayout(Device* device,
                     [&](const StorageTextureBindingLayout&) {
                         mIndexInfo[stage][group][bindingIndex] = textureIndex;
                         textureIndex++;
+                    },
+                    [&](const StaticSamplerHolderBindingLayout&) {
+                        // Static samplers are handled in the frontend.
+                        // TODO(crbug.com/dawn/2482): Implement static samplers in the
+                        // Metal backend.
+                        DAWN_UNREACHABLE();
                     });
             }
         }

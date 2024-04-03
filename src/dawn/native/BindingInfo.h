@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "dawn/common/Constants.h"
+#include "dawn/common/Ref.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Format.h"
@@ -56,7 +57,18 @@ static constexpr BindingIndex kMaxBindingsPerPipelineLayoutTyped =
 // TODO(enga): Figure out a good number for this.
 static constexpr uint32_t kMaxOptimalBindingsPerGroup = 32;
 
-enum class BindingInfoType { Buffer, Sampler, Texture, StorageTexture, ExternalTexture };
+enum class BindingInfoType {
+    Buffer,
+    Sampler,
+    Texture,
+    StorageTexture,
+    ExternalTexture,
+    StaticSampler
+};
+
+struct StaticSamplerHolderBindingLayout {
+    Ref<SamplerBase> sampler;
+};
 
 struct BindingInfo {
     BindingNumber binding;
@@ -65,7 +77,8 @@ struct BindingInfo {
     std::variant<BufferBindingLayout,
                  SamplerBindingLayout,
                  TextureBindingLayout,
-                 StorageTextureBindingLayout>
+                 StorageTextureBindingLayout,
+                 StaticSamplerHolderBindingLayout>
         bindingLayout;
 };
 
@@ -92,6 +105,7 @@ struct BindingCounts {
     uint32_t unverifiedBufferCount;  // Buffers with minimum buffer size unspecified
     uint32_t dynamicUniformBufferCount;
     uint32_t dynamicStorageBufferCount;
+    uint32_t staticSamplerCount;
     PerStage<PerStageBindingCounts> perStage;
 };
 

@@ -194,6 +194,12 @@ BindGroup::BindGroup(Device* device,
                         DAWN_UNREACHABLE();
                 }
             },
+            [](const StaticSamplerHolderBindingLayout&) {
+                // Static samplers are handled in the frontend.
+                // TODO(crbug.com/dawn/2483): Implement static samplers in the
+                // D3D12 backend.
+                DAWN_UNREACHABLE();
+            },
             // No-op as samplers will be later initialized by CreateSamplers().
             [](const SamplerBindingLayout&) {});
     }

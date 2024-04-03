@@ -100,6 +100,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+struct StaticSamplerHolderBindingLayout;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const StaticSamplerHolderBindingLayout& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 //
 // Objects
 //

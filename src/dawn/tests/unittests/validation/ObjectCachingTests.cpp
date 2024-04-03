@@ -40,6 +40,14 @@ using testing::Not;
 // These tests works assuming Dawn Native's object deduplication. Comparing the pointer is
 // exploiting an implementation detail of Dawn Native.
 class ObjectCachingTest : public ValidationTest {
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::StaticSamplers};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeatureCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+
     void SetUp() override {
         ValidationTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
@@ -112,6 +120,77 @@ TEST_F(ObjectCachingTest, BindGroupLayoutViewDimension) {
 
     EXPECT_THAT(bgl, Not(BindGroupLayoutEq(otherBgl)));
     EXPECT_THAT(bgl, BindGroupLayoutEq(sameBgl));
+}
+
+// Test that BindGroupLayouts with a static sampler entry are correctly
+// deduplicated.
+TEST_F(ObjectCachingTest, BindGroupLayoutStaticSamplerDeduplication) {
+    // TODO(crbug.com/dawn/2489): The inequality check between bind group
+    // layouts with distinct static samplers fails on the MSVC bots.
+    DAWN_SKIP_TEST_IF(DAWN_PLATFORM_IS(WINDOWS));
+
+    wgpu::BindGroupLayoutEntry binding = {};
+    binding.binding = 0;
+    wgpu::StaticSamplerBindingLayout staticSamplerBinding = {};
+    wgpu::SamplerDescriptor samplerDesc;
+    samplerDesc.addressModeU = wgpu::AddressMode::ClampToEdge;
+    staticSamplerBinding.sampler = device.CreateSampler(&samplerDesc);
+    binding.nextInChain = &staticSamplerBinding;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &binding;
+
+    wgpu::SamplerDescriptor otherSamplerDesc;
+    otherSamplerDesc.addressModeU = wgpu::AddressMode::Repeat;
+    wgpu::Sampler otherSampler = device.CreateSampler(&otherSamplerDesc);
+
+    EXPECT_NE(staticSamplerBinding.sampler.Get(), otherSampler.Get());
+
+    wgpu::BindGroupLayoutEntry otherBinding = {};
+    otherBinding.binding = 0;
+    wgpu::StaticSamplerBindingLayout otherStaticSamplerBinding = {};
+    otherStaticSamplerBinding.sampler = otherSampler;
+    otherBinding.nextInChain = &otherStaticSamplerBinding;
+
+    EXPECT_NE(staticSamplerBinding.sampler.Get(), otherStaticSamplerBinding.sampler.Get());
+
+    wgpu::BindGroupLayoutDescriptor otherDesc = {};
+    otherDesc.entryCount = 1;
+    otherDesc.entries = &otherBinding;
+
+    wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&desc);
+    wgpu::BindGroupLayout sameBgl = device.CreateBindGroupLayout(&desc);
+    wgpu::BindGroupLayout otherStaticSamplerBgl = device.CreateBindGroupLayout(&otherDesc);
+    wgpu::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
+
+    EXPECT_THAT(bgl, BindGroupLayoutEq(sameBgl));
+    EXPECT_THAT(bgl, Not(BindGroupLayoutEq(otherStaticSamplerBgl)));
+    EXPECT_THAT(bgl, Not(BindGroupLayoutEq(otherBgl)));
+}
+
+// Test that BindGroupLayouts with a static sampler entry keep a reference
+// to the static sampler, such that if a sampler is created from the same
+// params the same object will be returned.
+TEST_F(ObjectCachingTest, BindGroupLayoutKeepsRefToStaticSampler) {
+    auto sampler1 = device.CreateSampler();
+    wgpu::BindGroupLayoutEntry binding = {};
+    binding.binding = 0;
+    wgpu::StaticSamplerBindingLayout staticSamplerBinding = {};
+    staticSamplerBinding.sampler = sampler1;
+    binding.nextInChain = &staticSamplerBinding;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &binding;
+
+    wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&desc);
+
+    auto samplerRawPtr = sampler1.Get();
+    sampler1 = nullptr;
+    auto sampler2 = device.CreateSampler();
+    EXPECT_EQ(samplerRawPtr, sampler2.Get());
 }
 
 // Test that PipelineLayouts are correctly deduplicated.

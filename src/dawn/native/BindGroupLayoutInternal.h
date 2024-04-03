@@ -97,6 +97,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     // Returns |BindingIndex| because dynamic buffers are packed at the front.
     BindingIndex GetDynamicBufferCount() const;
     uint32_t GetUnverifiedBufferCount() const;
+    uint32_t GetStaticSamplerCount() const;
 
     // Used to get counts and validate them in pipeline layout creation. Other getters
     // should be used to get typed integer counts.

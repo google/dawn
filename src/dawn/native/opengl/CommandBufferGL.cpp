@@ -308,6 +308,11 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
                     gl.BindBufferRange(target, index, buffer, offset, binding.size);
                 },
+                [&](const StaticSamplerHolderBindingLayout&) {
+                    // Static samplers are implemented in the frontend on
+                    // GL.
+                    DAWN_UNREACHABLE();
+                },
                 [&](const SamplerBindingLayout&) {
                     Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                     GLuint samplerIndex = indices[bindingIndex];

@@ -228,7 +228,13 @@ MaybeError BindGroupTracker::Apply() {
                         return {};
                     },
                     [](const TextureBindingLayout&) -> MaybeError { return {}; },
-                    [](const SamplerBindingLayout&) -> MaybeError { return {}; }));
+                    [](const SamplerBindingLayout&) -> MaybeError { return {}; },
+                    [](const StaticSamplerHolderBindingLayout&) -> MaybeError {
+                        // Static samplers are implemented in the frontend on
+                        // D3D11.
+                        DAWN_UNREACHABLE();
+                        return {};
+                    }));
             }
         }
 
@@ -364,6 +370,12 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                     case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                 }
+                return {};
+            },
+            [&](const StaticSamplerHolderBindingLayout&) -> MaybeError {
+                // Static samplers are implemented in the frontend on
+                // D3D11.
+                DAWN_UNREACHABLE();
                 return {};
             },
             [&](const SamplerBindingLayout&) -> MaybeError {
@@ -502,6 +514,11 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                     case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                 }
+            },
+            [&](const StaticSamplerHolderBindingLayout&) {
+                // Static samplers are implemented in the frontend on
+                // D3D11.
+                DAWN_UNREACHABLE();
             },
             [&](const SamplerBindingLayout&) {
                 ID3D11SamplerState* nullSampler = nullptr;

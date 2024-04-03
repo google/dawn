@@ -305,11 +305,17 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
     DAWN_TRY(device->ValidateObject(descriptor->layout));
 
     BindGroupLayoutInternalBase* layout = descriptor->layout->GetInternalBindGroupLayout();
+
+    // NOTE: Static sampler layout bindings should not have bind group entries,
+    // as the sampler is specified in the layout itself.
+    const auto expectedBindingsCount =
+        layout->GetUnexpandedBindingCount() - layout->GetStaticSamplerCount();
+
     DAWN_INVALID_IF(
-        descriptor->entryCount != layout->GetUnexpandedBindingCount(),
-        "Number of entries (%u) did not match the number of entries (%u) specified in %s."
+        descriptor->entryCount != expectedBindingsCount,
+        "Number of entries (%u) did not match the expected number of entries (%u) for %s."
         "\nExpected layout: %s",
-        descriptor->entryCount, static_cast<uint32_t>(layout->GetBindingCount()), layout,
+        descriptor->entryCount, static_cast<uint32_t>(expectedBindingsCount), layout,
         layout->EntriesToString());
 
     const BindGroupLayoutInternalBase::BindingMap& bindingMap = layout->GetBindingMap();
@@ -389,6 +395,12 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
                                  "\nExpected entry layout: %s",
                                  i, layout);
                 return {};
+            },
+            [&](const StaticSamplerHolderBindingLayout& layout) -> MaybeError {
+                return DAWN_VALIDATION_ERROR(
+                    "entries[%u] is provided when the layout contains a static sampler for that "
+                    "binding.",
+                    i);
             }));
     }
 
@@ -397,7 +409,7 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
     //  - Each binding must be set at most once
     //
     // We don't validate the equality because it wouldn't be possible to cover it with a test.
-    DAWN_ASSERT(bindingsSet.count() == layout->GetUnexpandedBindingCount());
+    DAWN_ASSERT(bindingsSet.count() == expectedBindingsCount);
 
     return {};
 }

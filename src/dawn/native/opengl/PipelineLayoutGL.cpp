@@ -67,6 +67,11 @@ PipelineLayout::PipelineLayout(Device* device,
                             DAWN_UNREACHABLE();
                     }
                 },
+                [&](const StaticSamplerHolderBindingLayout&) {
+                    // Static samplers are implemented in the frontend on
+                    // GL.
+                    DAWN_UNREACHABLE();
+                },
                 [&](const SamplerBindingLayout&) {
                     mIndexInfo[group][bindingIndex] = samplerIndex;
                     samplerIndex++;
