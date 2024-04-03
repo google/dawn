@@ -86,6 +86,13 @@ class SwapChainTests : public DawnTest {
         DawnTest::TearDown();
     }
 
+    wgpu::SwapChain CreateSwapChain(wgpu::Surface const& otherSurface,
+                                    wgpu::SwapChainDescriptor const* descriptor) {
+        wgpu::SwapChain swapchain;
+        EXPECT_DEPRECATION_WARNING(swapchain = device.CreateSwapChain(otherSurface, descriptor));
+        return swapchain;
+    }
+
     void ClearTexture(wgpu::Texture texture, wgpu::Color color) {
         utils::ComboRenderPassDescriptor desc({texture.CreateView()});
         desc.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
@@ -108,47 +115,47 @@ class SwapChainTests : public DawnTest {
 
 // Basic test for creating a swapchain and presenting one frame.
 TEST_P(SwapChainTests, Basic) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &baseDescriptor);
     ClearTexture(swapchain.GetCurrentTexture(), {1.0, 0.0, 0.0, 1.0});
     swapchain.Present();
 }
 
 // Test replacing the swapchain
 TEST_P(SwapChainTests, ReplaceBasic) {
-    wgpu::SwapChain swapchain1 = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain1 = CreateSwapChain(surface, &baseDescriptor);
     ClearTexture(swapchain1.GetCurrentTexture(), {1.0, 0.0, 0.0, 1.0});
     swapchain1.Present();
 
-    wgpu::SwapChain swapchain2 = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain2 = CreateSwapChain(surface, &baseDescriptor);
     ClearTexture(swapchain2.GetCurrentTexture(), {0.0, 1.0, 0.0, 1.0});
     swapchain2.Present();
 }
 
 // Test replacing the swapchain after GetCurrentTexture
 TEST_P(SwapChainTests, ReplaceAfterGet) {
-    wgpu::SwapChain swapchain1 = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain1 = CreateSwapChain(surface, &baseDescriptor);
     ClearTexture(swapchain1.GetCurrentTexture(), {1.0, 0.0, 0.0, 1.0});
 
-    wgpu::SwapChain swapchain2 = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain2 = CreateSwapChain(surface, &baseDescriptor);
     ClearTexture(swapchain2.GetCurrentTexture(), {0.0, 1.0, 0.0, 1.0});
     swapchain2.Present();
 }
 
 // Test destroying the swapchain after GetCurrentTexture
 TEST_P(SwapChainTests, DestroyAfterGet) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &baseDescriptor);
     ClearTexture(swapchain.GetCurrentTexture(), {1.0, 0.0, 0.0, 1.0});
 }
 
 // Test destroying the surface before the swapchain
 TEST_P(SwapChainTests, DestroySurface) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &baseDescriptor);
     surface = nullptr;
 }
 
 // Test destroying the surface before the swapchain but after GetCurrentTexture
 TEST_P(SwapChainTests, DestroySurfaceAfterGet) {
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &baseDescriptor);
     ClearTexture(swapchain.GetCurrentTexture(), {1.0, 0.0, 0.0, 1.0});
     surface = nullptr;
 }
@@ -174,12 +181,12 @@ TEST_P(SwapChainTests, SwitchPresentMode) {
             wgpu::SwapChainDescriptor desc = baseDescriptor;
 
             desc.presentMode = mode1;
-            wgpu::SwapChain swapchain1 = device.CreateSwapChain(surface, &desc);
+            wgpu::SwapChain swapchain1 = CreateSwapChain(surface, &desc);
             ClearTexture(swapchain1.GetCurrentTexture(), {0.0, 0.0, 0.0, 1.0});
             swapchain1.Present();
 
             desc.presentMode = mode2;
-            wgpu::SwapChain swapchain2 = device.CreateSwapChain(surface, &desc);
+            wgpu::SwapChain swapchain2 = CreateSwapChain(surface, &desc);
             ClearTexture(swapchain2.GetCurrentTexture(), {0.0, 0.0, 0.0, 1.0});
             swapchain2.Present();
         }
@@ -193,7 +200,7 @@ TEST_P(SwapChainTests, ResizingSwapChainOnly) {
         desc.width += i * 10;
         desc.height -= i * 10;
 
-        wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &desc);
+        wgpu::SwapChain swapchain = CreateSwapChain(surface, &desc);
         ClearTexture(swapchain.GetCurrentTexture(), {0.05f * i, 0.0f, 0.0f, 1.0f});
         swapchain.Present();
     }
@@ -204,7 +211,7 @@ TEST_P(SwapChainTests, ResizingWindowOnly) {
     // TODO(crbug.com/1503912): Failing new ValidateImageAcquireWait in Vulkan Validation Layer.
     DAWN_SUPPRESS_TEST_IF(IsBackendValidationEnabled() && IsWindows() && IsVulkan() && IsIntel());
 
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &baseDescriptor);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &baseDescriptor);
 
     for (int i = 0; i < 10; i++) {
         glfwSetWindowSize(window.get(), 400 - 10 * i, 400 + 10 * i);
@@ -231,7 +238,7 @@ TEST_P(SwapChainTests, ResizingWindowAndSwapChain) {
         desc.width = width;
         desc.height = height;
 
-        wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &desc);
+        wgpu::SwapChain swapchain = CreateSwapChain(surface, &desc);
         ClearTexture(swapchain.GetCurrentTexture(), {0.05f * i, 0.0f, 0.0f, 1.0f});
         swapchain.Present();
     }
@@ -242,12 +249,13 @@ TEST_P(SwapChainTests, SwitchingDevice) {
     // TODO(https://crbug.com/dawn/2116): Disabled due to new Validation Layer failures.
     DAWN_SUPPRESS_TEST_IF(IsVulkan());
 
+    wgpu::Device device1 = CreateDevice();
     wgpu::Device device2 = CreateDevice();
 
     for (int i = 0; i < 3; i++) {
         wgpu::Device deviceToUse;
         if (i % 2 == 0) {
-            deviceToUse = device;
+            deviceToUse = device1;
         } else {
             deviceToUse = device2;
         }
@@ -282,7 +290,7 @@ TEST_P(SwapChainTests, ErrorCreateWithTextureBindingUsage) {
     desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
 
     ASSERT_DEVICE_ERROR_MSG(
-        { auto swapchain = device.CreateSwapChain(surface, &desc); },
+        { auto swapchain = CreateSwapChain(surface, &desc); },
         testing::HasSubstr("require enabling FeatureName::SurfaceCapabilities"));
 }
 
@@ -392,7 +400,7 @@ TEST_P(SwapChainWithAdditionalUsageTests, SamplingFromSwapChain) {
     auto desc = baseDescriptor;
     desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
 
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &desc);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &desc);
     ClearTexture(swapchain.GetCurrentTexture(), {1.0, 0.0, 0.0, 1.0});
 
     SampleTexture(swapchain.GetCurrentTexture(), utils::RGBA8::kRed);
@@ -412,7 +420,7 @@ TEST_P(SwapChainWithAdditionalUsageTests, ErrorIncludeUnsupportedUsage) {
     auto desc = baseDescriptor;
     desc.usage = supportedUsage | wgpu::TextureUsage::StorageBinding;
 
-    ASSERT_DEVICE_ERROR_MSG({ auto swapchain = device.CreateSwapChain(surface, &desc); },
+    ASSERT_DEVICE_ERROR_MSG({ auto swapchain = CreateSwapChain(surface, &desc); },
                             testing::HasSubstr("is not supported"));
 }
 
@@ -429,7 +437,7 @@ TEST_P(SwapChainWithAdditionalUsageTests, CopyingToSwapChain) {
     desc.width = 1;
     desc.height = 1;
 
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &desc);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &desc);
     wgpu::Texture texture = swapchain.GetCurrentTexture();
     WriteTexture(texture, utils::RGBA8::kRed);
 
@@ -450,7 +458,7 @@ TEST_P(SwapChainWithAdditionalUsageTests, CopyingFromSwapChain) {
     wgpu::SwapChainDescriptor desc = baseDescriptor;
     desc.usage |= wgpu::TextureUsage::CopySrc;
 
-    wgpu::SwapChain swapchain = device.CreateSwapChain(surface, &desc);
+    wgpu::SwapChain swapchain = CreateSwapChain(surface, &desc);
     wgpu::Texture texture = swapchain.GetCurrentTexture();
 
     ClearTexture(swapchain.GetCurrentTexture(), {1.0, 0.0, 0.0, 1.0});

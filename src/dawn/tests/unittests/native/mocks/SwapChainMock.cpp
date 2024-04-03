@@ -31,8 +31,8 @@ namespace dawn::native {
 
 SwapChainMock::SwapChainMock(DeviceBase* device,
                              Surface* surface,
-                             const SwapChainDescriptor* descriptor)
-    : SwapChainBase(device, surface, descriptor) {
+                             const SurfaceConfiguration* config)
+    : SwapChainBase(device, surface, config) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->SwapChainBase::DestroyImpl(); });
 }
 
