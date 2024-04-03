@@ -120,6 +120,13 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
         descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
         return device.CreateBuffer(&descriptor);
     }
+
+    wgpu::Buffer CreateUniformBuffer(uint64_t size) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.size = size;
+        descriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+        return device.CreateBuffer(&descriptor);
+    }
 };
 
 void CheckMapping(const void* actual, const void* expected, size_t size) {
@@ -716,9 +723,10 @@ class BufferMappingCallbackTests : public BufferMappingTests {
             constexpr int kRepeatCount = 50;
             constexpr int kBufferSize = 1024 * 1024 * 10;
             wgpu::Buffer tempWriteBuffer = CreateMapWriteBuffer(kBufferSize);
-            wgpu::Buffer tempReadBuffer = CreateMapReadBuffer(kBufferSize);
+            wgpu::Buffer tempReadBuffer = CreateUniformBuffer(kBufferSize);
             for (int i = 0; i < kRepeatCount; ++i) {
-                encoder.CopyBufferToBuffer(tempWriteBuffer, 0, tempReadBuffer, 0, kBufferSize);
+                encoder.CopyBufferToBuffer(tempWriteBuffer, 0, tempReadBuffer, 0,
+                                           kBufferSize - 1024);
             }
         }
 

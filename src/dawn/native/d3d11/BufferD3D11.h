@@ -40,11 +40,12 @@ namespace dawn::native::d3d11 {
 class Device;
 class ScopedCommandRecordingContext;
 
-class Buffer final : public BufferBase {
+class Buffer : public BufferBase {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device,
                                              const UnpackedPtr<BufferDescriptor>& descriptor,
-                                             const ScopedCommandRecordingContext* commandContext);
+                                             const ScopedCommandRecordingContext* commandContext,
+                                             bool allowUploadBufferEmulation = true);
 
     MaybeError EnsureDataInitialized(const ScopedCommandRecordingContext* commandContext);
     MaybeError EnsureDataInitializedAsDestination(
@@ -119,11 +120,27 @@ class Buffer final : public BufferBase {
         bool mNeedsUnmap = false;
     };
 
-  private:
+  protected:
     using BufferBase::BufferBase;
 
     ~Buffer() override;
 
+    virtual MaybeError InitializeInternal();
+
+    virtual MaybeError MapInternal(const ScopedCommandRecordingContext* commandContext);
+    virtual void UnmapInternal(const ScopedCommandRecordingContext* commandContext);
+
+    // Clear the buffer without checking if the buffer is initialized.
+    virtual MaybeError ClearInternal(const ScopedCommandRecordingContext* commandContext,
+                                     uint8_t clearValue,
+                                     uint64_t offset = 0,
+                                     uint64_t size = 0);
+
+    virtual uint8_t* GetUploadData();
+
+    raw_ptr<uint8_t, AllowPtrArithmetic> mMappedData = nullptr;
+
+  private:
     MaybeError Initialize(bool mappedAtCreation,
                           const ScopedCommandRecordingContext* commandContext);
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
@@ -133,15 +150,7 @@ class Buffer final : public BufferBase {
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointer() override;
 
-    MaybeError MapInternal(const ScopedCommandRecordingContext* commandContext);
-    void UnmapInternal(const ScopedCommandRecordingContext* commandContext);
-
     MaybeError InitializeToZero(const ScopedCommandRecordingContext* commandContext);
-    // Clear the buffer without checking if the buffer is initialized.
-    MaybeError ClearInternal(const ScopedCommandRecordingContext* commandContext,
-                             uint8_t clearValue,
-                             uint64_t offset = 0,
-                             uint64_t size = 0);
     // Write the buffer without checking if the buffer is initialized.
     MaybeError WriteInternal(const ScopedCommandRecordingContext* commandContext,
                              uint64_t bufferOffset,
@@ -159,7 +168,6 @@ class Buffer final : public BufferBase {
     // The buffer object for non-constant buffer usages(e.g. storage buffer, vertex buffer, etc.)
     ComPtr<ID3D11Buffer> mD3d11NonConstantBuffer;
     bool mConstantBufferIsUpdated = true;
-    raw_ptr<uint8_t, AllowPtrArithmetic> mMappedData = nullptr;
     ExecutionSerial mMapReadySerial = kMaxExecutionSerial;
 };
 

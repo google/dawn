@@ -560,7 +560,8 @@ ResultOrError<Ref<BufferBase>> Device::GetStagingBuffer(
     Ref<BufferBase> buffer;
     // We don't cache the buffer if it's too large.
     if (bufferSize > kMaxStagingBufferSize) {
-        DAWN_TRY_ASSIGN(buffer, Buffer::Create(this, Unpack(&descriptor), commandContext));
+        DAWN_TRY_ASSIGN(buffer, Buffer::Create(this, Unpack(&descriptor), commandContext,
+                                               /*allowUploadBufferEmulation=*/false));
         return buffer;
     }
 
@@ -580,7 +581,8 @@ ResultOrError<Ref<BufferBase>> Device::GetStagingBuffer(
     }
 
     // Create a new staging buffer as no existing one can be re-used.
-    DAWN_TRY_ASSIGN(buffer, Buffer::Create(this, Unpack(&descriptor), commandContext));
+    DAWN_TRY_ASSIGN(buffer, Buffer::Create(this, Unpack(&descriptor), commandContext,
+                                           /*allowUploadBufferEmulation=*/false));
     mTotalStagingBufferSize += bufferSize;
 
     // Purge the old staging buffers if the total size is too large.
