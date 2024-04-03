@@ -766,10 +766,16 @@ DawnJSONGenerator(
     RESULT_VARIABLE "WEBGPU_DAWN_NATIVE_PROC_GEN"
 )
 
+# A convenience target that bundles dawn_native and procs calling it directly so that
+# applications link against it and have WebGPU work without jumping through more hoops.
+# Note that this library name is referenced in several places, search for it and things like:
+# "{{.*}}_dawn" when you rename it.
 add_library(webgpu_dawn)
 common_compile_options(webgpu_dawn)
-target_link_libraries(webgpu_dawn PRIVATE dawn_native)
-target_link_libraries(webgpu_dawn PUBLIC dawn_headers)
+target_link_libraries(webgpu_dawn
+    PRIVATE dawn_native
+    PUBLIC dawn_headers
+)
 target_compile_definitions(webgpu_dawn PRIVATE "WGPU_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(webgpu_dawn PRIVATE "WGPU_SHARED_LIBRARY")
