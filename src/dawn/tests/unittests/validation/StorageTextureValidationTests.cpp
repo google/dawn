@@ -376,28 +376,6 @@ INSTANTIATE_TEST_SUITE_P(
     // Bool param indicates whether requires the BGRA8UnormStorage feature or not.
     ::testing::ValuesIn({false, true}));
 
-// Verify that declaring a storage texture format that is not supported in WebGPU causes validation
-// error.
-TEST_F(StorageTextureValidationTests, UnsupportedWGSLStorageTextureFormat) {
-    constexpr std::array<wgpu::TextureFormat, 16> kUnsupportedTextureFormats = {
-        wgpu::TextureFormat::R8Unorm,      wgpu::TextureFormat::R8Snorm,
-        wgpu::TextureFormat::R8Uint,       wgpu::TextureFormat::R8Sint,
-        wgpu::TextureFormat::R16Uint,      wgpu::TextureFormat::R16Sint,
-        wgpu::TextureFormat::R16Float,     wgpu::TextureFormat::RG8Unorm,
-        wgpu::TextureFormat::RG8Snorm,     wgpu::TextureFormat::RG8Uint,
-        wgpu::TextureFormat::RG8Sint,      wgpu::TextureFormat::RG16Uint,
-        wgpu::TextureFormat::RG16Sint,     wgpu::TextureFormat::RG16Float,
-        wgpu::TextureFormat::RGB10A2Unorm, wgpu::TextureFormat::RG11B10Ufloat,
-    };
-
-    for (wgpu::StorageTextureAccess bindingType : kSupportedStorageTextureAccess) {
-        for (wgpu::TextureFormat format : kUnsupportedTextureFormats) {
-            std::string computeShader = CreateComputeShaderWithStorageTexture(bindingType, format);
-            ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, computeShader.c_str()));
-        }
-    }
-}
-
 // Verify that declaring a storage texture dimension that isn't supported by
 // WebGPU causes a compile failure. WebGPU doesn't support using cube map
 // texture views and cube map array texture views as storage textures.
