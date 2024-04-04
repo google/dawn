@@ -71,8 +71,7 @@ namespace dawn::native {
 // and CommandIterator
 struct BlockDef {
     size_t size;
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<uint8_t, AllowPtrArithmetic | DanglingUntriaged> block;
+    raw_ptr<uint8_t> block;
 };
 using CommandBlocks = std::vector<BlockDef>;
 
@@ -156,8 +155,7 @@ class CommandIterator : public NonCopyable {
     }
 
     CommandBlocks mBlocks;
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<uint8_t, AllowPtrArithmetic | DanglingUntriaged> mCurrentPtr = nullptr;
+    raw_ptr<uint8_t> mCurrentPtr = nullptr;
     size_t mCurrentBlock = 0;
     // Used to avoid a special case for empty iterators.
     uint32_t mEndOfBlock = detail::kEndOfBlock;
@@ -280,10 +278,8 @@ class CommandAllocator : public NonCopyable {
     // Pointers to the current range of allocation in the block. Guaranteed to allow for at
     // least one uint32_t if not nullptr, so that the special kEndOfBlock command id can always
     // be written. Nullptr iff the blocks were moved out.
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<uint8_t, AllowPtrArithmetic | DanglingUntriaged> mCurrentPtr = nullptr;
-    // TODO(https://crbug.com/dawn/2349): Investigate DanglingUntriaged in dawn/native.
-    raw_ptr<uint8_t, AllowPtrArithmetic | DanglingUntriaged> mEndPtr = nullptr;
+    raw_ptr<uint8_t, AllowPtrArithmetic> mCurrentPtr = nullptr;
+    raw_ptr<uint8_t, AllowPtrArithmetic> mEndPtr = nullptr;
 };
 
 }  // namespace dawn::native

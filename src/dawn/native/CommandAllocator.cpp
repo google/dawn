@@ -115,8 +115,9 @@ void CommandIterator::MakeEmptyAsDataWasDestroyed() {
         return;
     }
 
+    mCurrentPtr = reinterpret_cast<uint8_t*>(&mEndOfBlock);
     for (BlockDef& block : mBlocks) {
-        free(block.block);
+        free(block.block.ExtractAsDangling());
     }
     mBlocks.clear();
     Reset();
@@ -170,12 +171,12 @@ CommandAllocator& CommandAllocator::operator=(CommandAllocator&& other) {
 }
 
 void CommandAllocator::Reset() {
+    ResetPointers();
     for (BlockDef& block : mBlocks) {
-        free(block.block);
+        free(block.block.ExtractAsDangling());
     }
     mBlocks.clear();
     mLastAllocationSize = kDefaultBaseAllocationSize;
-    ResetPointers();
 }
 
 bool CommandAllocator::IsEmpty() const {
