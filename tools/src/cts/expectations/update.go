@@ -519,7 +519,6 @@ func (u *updater) addExpectations(out container.Map[string, Expectation], in Exp
 	if !out.Contains(keyOf(in)) && len(expectations) == 0 {
 		switch {
 		case somePass && someConsumed:
-			fmt.Println("\n", strings.Join(out.Keys(), "\n"))
 			u.diag(Note, in.Line, "expectation is partly covered by previous expectations and the remaining tests all pass")
 		case someConsumed:
 			u.diag(Note, in.Line, "expectation is fully covered by previous expectations")
