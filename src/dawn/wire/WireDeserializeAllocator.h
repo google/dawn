@@ -48,10 +48,9 @@ class WireDeserializeAllocator : public DeserializeAllocator {
 
   private:
     size_t mRemainingSize = 0;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<char, AllowPtrArithmetic | DanglingUntriaged> mCurrentBuffer = nullptr;
+    raw_ptr<char, AllowPtrArithmetic> mCurrentBuffer = nullptr;
     char mStaticBuffer[2048];
-    std::vector<char*> mAllocations;
+    std::vector<raw_ptr<char>> mAllocations;
 };
 }  // namespace dawn::wire
 

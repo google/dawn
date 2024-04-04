@@ -61,13 +61,13 @@ void* WireDeserializeAllocator::GetSpace(size_t size) {
 }
 
 void WireDeserializeAllocator::Reset() {
-    for (auto* allocation : mAllocations) {
-        free(allocation);
-    }
-    mAllocations.clear();
-
     // The initial buffer is the inline buffer so that some allocations can be skipped
     mCurrentBuffer = mStaticBuffer;
     mRemainingSize = sizeof(mStaticBuffer);
+
+    for (auto& allocation : mAllocations) {
+        free(allocation.ExtractAsDangling());
+    }
+    mAllocations.clear();
 }
 }  // namespace dawn::wire
