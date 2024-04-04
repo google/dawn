@@ -52,7 +52,7 @@ source_set("cpp") {
 dawn_json_generator("proc_gen") {
   target = "proc"
   outputs = [
-    "src/dawn/dawn_proc.cpp",
+    "src/dawn/dawn_proc.c",
     "src/dawn/dawn_thread_dispatch_proc.cpp",
   ]
 }

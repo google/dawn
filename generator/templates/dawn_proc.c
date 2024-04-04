@@ -32,33 +32,16 @@
 // The sanitizer is disabled for calls to procs.* since those functions may be
 // dynamically loaded.
 #include "dawn/common/Compiler.h"
-#include "dawn/common/Log.h"
 
-// A fake wgpuCreateInstance that prints a warning so folks know that they are using dawn_procs and
-// should either use a different target to link against, or call dawnProcSetProcs.
-WGPUInstance CreateInstanceThatWarns(const WGPUInstanceDescriptor* desc) {
-    dawn::ErrorLog() <<
-        R"(The \"null\" {{metadata.namespace}}CreateInstance from {{prefix}}_proc was called which always returns nullptr. You either need to:
-  - call {{prefix}}ProcSetProcs with a {{Prefix}}ProcTable object retrieved somewhere else, or
-  - (most likely) link against a different target that implements {{metadata.api}} directly, for example {{metadata.api.lower()}}_dawn)";
+static {{Prefix}}ProcTable procs;
 
-    return nullptr;
-}
-
-constexpr {{Prefix}}ProcTable MakeNullProcTable() {
-    {{Prefix}}ProcTable procs = {};
-    procs.createInstance = CreateInstanceThatWarns;
-    return procs;
-}
-
-static {{Prefix}}ProcTable kNullProcs = MakeNullProcTable();
-static {{Prefix}}ProcTable procs = kNullProcs;
+static {{Prefix}}ProcTable nullProcs;
 
 void {{prefix}}ProcSetProcs(const {{Prefix}}ProcTable* procs_) {
     if (procs_) {
         procs = *procs_;
     } else {
-        procs = kNullProcs;
+        procs = nullProcs;
     }
 }
 

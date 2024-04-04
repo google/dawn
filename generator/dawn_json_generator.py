@@ -1066,7 +1066,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'proc' in targets:
             renders.append(
-                FileRender('dawn_proc.cpp', 'src/dawn/' + prefix + '_proc.cpp',
+                FileRender('dawn_proc.c', 'src/dawn/' + prefix + '_proc.c',
                            [RENDER_PARAMS_BASE, params_dawn]))
             renders.append(
                 FileRender('dawn_thread_dispatch_proc.cpp',
