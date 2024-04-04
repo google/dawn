@@ -164,7 +164,7 @@ class Device final : public DeviceBase {
     ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         Surface* surface,
         SwapChainBase* previousSwapChain,
-        const SurfaceConfiguration* config) override;
+        const SwapChainDescriptor* descriptor) override;
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) override;
     ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
@@ -193,9 +193,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool SupportsExternalImages() const override;
 
     bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
-
-    ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
-        const Surface* surface) const override;
 
     // Used for the tests that intend to use an adapter without all features enabled.
     using PhysicalDeviceBase::SetSupportedFeaturesForTesting;
@@ -324,7 +321,7 @@ class SwapChain final : public SwapChainBase {
     static ResultOrError<Ref<SwapChain>> Create(Device* device,
                                                 Surface* surface,
                                                 SwapChainBase* previousSwapChain,
-                                                const SurfaceConfiguration* config);
+                                                const SwapChainDescriptor* descriptor);
     ~SwapChain() override;
 
   private:
@@ -334,7 +331,7 @@ class SwapChain final : public SwapChainBase {
     Ref<Texture> mTexture;
 
     MaybeError PresentImpl() override;
-    ResultOrError<SwapChainTextureInfo> GetCurrentTextureImpl() override;
+    ResultOrError<Ref<TextureBase>> GetCurrentTextureImpl() override;
     void DetachFromSurfaceImpl() override;
 };
 

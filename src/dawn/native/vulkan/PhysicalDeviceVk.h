@@ -61,9 +61,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     uint32_t GetDefaultComputeSubgroupSize() const;
 
-    ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
-        const Surface* surface) const override;
-
   private:
     MaybeError InitializeImpl() override;
     void InitializeSupportedFeaturesImpl() override;

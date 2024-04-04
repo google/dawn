@@ -52,34 +52,6 @@ Backend* PhysicalDevice::GetBackend() const {
     return mBackend;
 }
 
-ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
-    const Surface*) const {
-    PhysicalDeviceSurfaceCapabilities capabilities;
-
-    // Formats
-
-    // This is the only supported format in native mode (see crbug.com/dawn/160).
-    capabilities.formats.push_back(wgpu::TextureFormat::BGRA8Unorm);
-
-    // Present Modes
-
-    capabilities.presentModes = {
-        wgpu::PresentMode::Fifo,
-        wgpu::PresentMode::Immediate,
-        wgpu::PresentMode::Mailbox,
-    };
-
-    // Alpha Modes
-
-    capabilities.alphaModes = {
-        wgpu::CompositeAlphaMode::Opaque,
-        wgpu::CompositeAlphaMode::Premultiplied,
-        wgpu::CompositeAlphaMode::Auto,
-    };
-
-    return capabilities;
-}
-
 MaybeError PhysicalDevice::InitializeImpl() {
     DXGI_ADAPTER_DESC1 adapterDesc;
     GetHardwareAdapter()->GetDesc1(&adapterDesc);

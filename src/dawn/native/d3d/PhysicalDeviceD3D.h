@@ -47,9 +47,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
     IDXGIAdapter3* GetHardwareAdapter() const;
     Backend* GetBackend() const;
 
-    ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
-        const Surface* surface) const override;
-
   protected:
     MaybeError InitializeImpl() override;
 

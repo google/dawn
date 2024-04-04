@@ -406,14 +406,15 @@
     },
     "surface capabilities": {
         "category": "structure",
+        "tags": ["upstream"],
         "extensible": "out",
         "members": [
             {"name": "format count", "type": "size_t"},
-            {"name": "formats", "type": "texture format", "annotation": "const*"},
+            {"name": "formats", "type": "texture format", "annotation": "*"},
             {"name": "present mode count", "type": "size_t"},
-            {"name": "present modes", "type": "present mode", "annotation": "const*"},
+            {"name": "present modes", "type": "present mode", "annotation": "*"},
             {"name": "alpha mode count", "type": "size_t"},
-            {"name": "alpha modes", "type": "composite alpha mode", "annotation": "const*"}
+            {"name": "alpha modes", "type": "composite alpha mode", "annotation": "*"}
         ],
         "methods": [
             {
@@ -425,17 +426,18 @@
     },
     "surface configuration": {
         "category": "structure",
+        "tags": ["upstream"],
         "extensible": "in",
         "members": [
             {"name": "device", "type": "device"},
             {"name": "format", "type": "texture format"},
-            {"name": "usage", "type": "texture usage", "default": "render attachment"},
-            {"name": "view format count", "type": "size_t", "default": 0},
-            {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count"},
-            {"name": "alpha mode", "type": "composite alpha mode", "default": "opaque"},
+            {"name": "usage", "type": "texture usage"},
+            {"name": "view format count", "type": "size_t"},
+            {"name": "view formats", "type": "texture format", "annotation": "const*"},
+            {"name": "alpha mode", "type": "composite alpha mode"},
             {"name": "width", "type": "uint32_t"},
             {"name": "height", "type": "uint32_t"},
-            {"name": "present mode", "type": "present mode", "default": "fifo"}
+            {"name": "present mode", "type": "present mode"}
         ]
     },
     "external texture binding entry": {
@@ -1031,6 +1033,7 @@
     },
     "composite alpha mode": {
         "category": "enum",
+        "tags": ["upstream"],
         "values": [
             {"value": 0, "name": "auto"},
             {"value": 1, "name": "opaque"},
@@ -3449,6 +3452,7 @@
             {
                 "name": "configure",
                 "returns": "void",
+                "tags": ["upstream"],
                 "args": [
                     {"name": "config", "type": "surface configuration", "annotation": "const*"}
                 ]
@@ -3456,6 +3460,7 @@
             {
                 "name": "get capabilities",
                 "returns": "void",
+                "tags": ["upstream"],
                 "args": [
                     {"name": "adapter", "type": "adapter"},
                     {"name": "capabilities", "type": "surface capabilities", "annotation": "*"}
@@ -3464,6 +3469,7 @@
             {
                 "name": "get current texture",
                 "returns": "void",
+                "tags": ["upstream"],
                 "args": [
                     {"name": "surface texture", "type": "surface texture", "annotation": "*"}
                 ]
@@ -3478,20 +3484,14 @@
             {
                 "name": "present",
                 "returns": "void",
+                "tags": ["upstream"],
                 "args": []
             },
             {
                 "name": "unconfigure",
                 "returns": "void",
+                "tags": ["upstream"],
                 "args": []
-            },
-            {
-                "name": "set label",
-                "tags": [],
-                "returns": "void",
-                "args": [
-                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
-                ]
             }
         ]
     },
@@ -3610,6 +3610,7 @@
     },
     "surface texture": {
         "category": "structure",
+        "tags": ["upstream"],
         "members": [
             {"name": "texture", "type": "texture"},
             {"name": "suboptimal", "type": "bool"},
@@ -3755,6 +3756,7 @@
     },
     "surface get current texture status": {
         "category": "enum",
+        "tags": ["upstream"],
         "values": [
             {"value": 0, "name": "success"},
             {"value": 1, "name": "timeout"},

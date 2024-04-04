@@ -27,11 +27,7 @@
 
 #include "dawn/wire/client/Surface.h"
 
-#include "dawn/common/Log.h"
 #include "dawn/common/Platform.h"
-#include "dawn/wire/client/Client.h"
-#include "dawn/wire/client/Device.h"
-#include "dawn/wire/client/Texture.h"
 
 namespace dawn::wire::client {
 
@@ -43,50 +39,9 @@ ObjectType Surface::GetObjectType() const {
     return ObjectType::Surface;
 }
 
-void Surface::Configure(WGPUSurfaceConfiguration const* config) {
-    mTextureDescriptor = {};
-    mTextureDescriptor.size = {config->width, config->height, 1};
-    mTextureDescriptor.format = config->format;
-    mTextureDescriptor.usage = config->usage;
-    mTextureDescriptor.dimension = WGPUTextureDimension_2D;
-    mTextureDescriptor.mipLevelCount = 1;
-    mTextureDescriptor.sampleCount = 1;
-
-    SurfaceConfigureCmd cmd;
-    cmd.self = ToAPI(this);
-    cmd.config = config;
-    GetClient()->SerializeCommand(cmd);
-}
-
 WGPUTextureFormat Surface::GetPreferredFormat([[maybe_unused]] WGPUAdapter adapter) const {
-    // TODO(dawn:2320) Use the result of GetCapabilities
     // This is the only supported format in native mode (see crbug.com/dawn/160).
     return WGPUTextureFormat_BGRA8Unorm;
-}
-
-void Surface::GetCapabilities(WGPUAdapter adapter, WGPUSurfaceCapabilities* capabilities) const {
-    // TODO(dawn:2320) Implement this
-    dawn::ErrorLog() << "surface.GetCapabilities not supported yet with dawn_wire.";
-}
-
-void Surface::GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
-    // TODO(dawn:2320) Implement this
-    dawn::ErrorLog() << "surface.GetCurrentTexture not supported yet with dawn_wire.";
-
-    Client* wireClient = GetClient();
-    Texture* texture = wireClient->Make<Texture>(&mTextureDescriptor);
-    surfaceTexture->texture = ToAPI(texture);
-
-    SurfaceGetCurrentTextureCmd cmd;
-    cmd.self = ToAPI(this);
-    cmd.selfId = GetWireId();
-    // cmd.result = texture->GetWireHandle(); // TODO(dawn:2320) Feed surfaceTexture to cmd
-    wireClient->SerializeCommand(cmd);
-}
-
-void ClientSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
-    // TODO(dawn:2320) Implement this
-    dawn::ErrorLog() << "surfaceCapabilities.FreeMembers not supported yet with dawn_wire.";
 }
 
 }  // namespace dawn::wire::client
