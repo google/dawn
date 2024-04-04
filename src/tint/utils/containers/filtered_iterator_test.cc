@@ -42,20 +42,56 @@ struct IsOdd {
     bool operator()(int i) const { return (i & 1) != 0; }
 };
 
-TEST(FilteredIterableTest, Vector) {
+struct Never {
+    bool operator()(int) const { return false; }
+};
+
+struct Always {
+    bool operator()(int) const { return true; }
+};
+
+TEST(FilteredIterableTest, Vector_Odds) {
     std::vector<int> vec{1, 2, 3, 4, 5};
     std::vector<int> even;
-    std::vector<int> odd;
+
+    for (auto v : Filter<IsOdd>(vec)) {
+        even.emplace_back(v);
+    }
+
+    ASSERT_THAT(even, testing::ElementsAre(1, 3, 5));
+}
+
+TEST(FilteredIterableTest, Vector_Evens) {
+    std::vector<int> vec{1, 2, 3, 4, 5};
+    std::vector<int> even;
 
     for (auto v : Filter<IsEven>(vec)) {
         even.emplace_back(v);
     }
-    for (auto v : Filter<IsOdd>(vec)) {
-        odd.emplace_back(v);
-    }
 
     ASSERT_THAT(even, testing::ElementsAre(2, 4));
-    ASSERT_THAT(odd, testing::ElementsAre(1, 3, 5));
+}
+
+TEST(FilteredIterableTest, Vector_None) {
+    std::vector<int> vec{1, 2, 3, 4, 5};
+    std::vector<int> none;
+
+    for (auto v : Filter<Never>(vec)) {
+        none.emplace_back(v);
+    }
+
+    ASSERT_TRUE(none.empty());
+}
+
+TEST(FilteredIterableTest, Vector_All) {
+    std::vector<int> vec{1, 2, 3, 4, 5};
+    std::vector<int> all;
+
+    for (auto v : Filter<Always>(vec)) {
+        all.emplace_back(v);
+    }
+
+    ASSERT_THAT(all, testing::ElementsAre(1, 2, 3, 4, 5));
 }
 
 }  // namespace
