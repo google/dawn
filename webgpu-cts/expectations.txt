@@ -1683,6 +1683,11 @@ crbug.com/329724358 [ nvidia-0x2184 webgpu-adapter-swiftshader win10 ] webgpu:we
 crbug.com/dawn/2275 [ dawn-backend-validation win10 ] webgpu:api,operation,rendering,3d_texture_slices:multiple_color_attachments,same_mip_level:sameTexture=true [ Failure ]
 
 ################################################################################
+# Cannot readback Multiplanar d3d11 textures and then upload to swiftshader
+################################################################################
+crbug.com/332878144 [ win webgpu-adapter-swiftshader graphite-enabled ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
+
+################################################################################
 # New flakes. Please triage:
 ################################################################################
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
