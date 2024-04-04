@@ -43,6 +43,7 @@
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/Sampler.h"
 #include "dawn/native/TintUtils.h"
 
 #ifdef DAWN_ENABLE_SPIRV_VALIDATION
@@ -1173,9 +1174,17 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
             layout->GetBindGroupLayout(pair.sampler.group);
         const BindingInfo& samplerInfo =
             samplerBGL->GetBindingInfo(samplerBGL->GetBindingIndex(pair.sampler.binding));
-        const SamplerBindingLayout& samplerLayout =
-            std::get<SamplerBindingLayout>(samplerInfo.bindingLayout);
-        if (samplerLayout.type != wgpu::SamplerBindingType::Filtering) {
+        bool samplerIsFiltering = false;
+        if (std::holds_alternative<StaticSamplerHolderBindingLayout>(samplerInfo.bindingLayout)) {
+            const StaticSamplerHolderBindingLayout& samplerLayout =
+                std::get<StaticSamplerHolderBindingLayout>(samplerInfo.bindingLayout);
+            samplerIsFiltering = samplerLayout.sampler->IsFiltering();
+        } else {
+            const SamplerBindingLayout& samplerLayout =
+                std::get<SamplerBindingLayout>(samplerInfo.bindingLayout);
+            samplerIsFiltering = (samplerLayout.type == wgpu::SamplerBindingType::Filtering);
+        }
+        if (!samplerIsFiltering) {
             continue;
         }
         const BindGroupLayoutInternalBase* textureBGL =

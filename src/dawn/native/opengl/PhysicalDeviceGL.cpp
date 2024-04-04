@@ -178,6 +178,8 @@ MaybeError PhysicalDevice::InitializeImpl() {
 }
 
 void PhysicalDevice::InitializeSupportedFeaturesImpl() {
+    EnableFeature(Feature::StaticSamplers);
+
     // TextureCompressionBC
     {
         // BC1, BC2 and BC3 are not supported in OpenGL or OpenGL ES core features.

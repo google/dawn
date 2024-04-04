@@ -260,6 +260,20 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     }
 
   private:
+    void BindSamplerAtIndex(const OpenGLFunctions& gl, SamplerBase* s, GLuint samplerIndex) {
+        Sampler* sampler = ToBackend(s);
+
+        for (PipelineGL::SamplerUnit unit : mPipeline->GetTextureUnitsForSampler(samplerIndex)) {
+            // Only use filtering for certain texture units, because int
+            // and uint texture are only complete without filtering
+            if (unit.shouldUseFiltering) {
+                gl.BindSampler(unit.unit, sampler->GetFilteringHandle());
+            } else {
+                gl.BindSampler(unit.unit, sampler->GetNonFilteringHandle());
+            }
+        }
+    }
+
     void ApplyBindGroup(const OpenGLFunctions& gl,
                         BindGroupIndex groupIndex,
                         BindGroupBase* group,
@@ -308,25 +322,12 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
                     gl.BindBufferRange(target, index, buffer, offset, binding.size);
                 },
-                [&](const StaticSamplerHolderBindingLayout&) {
-                    // Static samplers are implemented in the frontend on
-                    // GL.
-                    DAWN_UNREACHABLE();
+                [&](const StaticSamplerHolderBindingLayout& layout) {
+                    BindSamplerAtIndex(gl, layout.sampler.Get(), indices[bindingIndex]);
                 },
                 [&](const SamplerBindingLayout&) {
-                    Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
-                    GLuint samplerIndex = indices[bindingIndex];
-
-                    for (PipelineGL::SamplerUnit unit :
-                         mPipeline->GetTextureUnitsForSampler(samplerIndex)) {
-                        // Only use filtering for certain texture units, because int
-                        // and uint texture are only complete without filtering
-                        if (unit.shouldUseFiltering) {
-                            gl.BindSampler(unit.unit, sampler->GetFilteringHandle());
-                        } else {
-                            gl.BindSampler(unit.unit, sampler->GetNonFilteringHandle());
-                        }
-                    }
+                    BindSamplerAtIndex(gl, group->GetBindingAsSampler(bindingIndex),
+                                       indices[bindingIndex]);
                 },
                 [&](const TextureBindingLayout&) {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
