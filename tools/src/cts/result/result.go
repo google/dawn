@@ -336,7 +336,7 @@ func (l List) FilterByVariant(tags Tags) List {
 	})
 }
 
-// / FilterByQuery returns the results that match the given query
+// FilterByQuery returns the results that match the given query
 func (l List) FilterByQuery(q query.Query) List {
 	return l.Filter(func(r Result) bool {
 		return q.Contains(r.Query)

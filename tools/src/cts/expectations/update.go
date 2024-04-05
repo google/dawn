@@ -170,7 +170,8 @@ func (c *Content) appendConsumedResultsForSkippedTests(results result.List,
 				for _, qd := range glob {
 					// If we don't have a result for the test, then append a
 					// synthetic 'consumed' result.
-					if !resultsForVariant.Contains(qd.Query.String()) {
+					if query := qd.Query.String(); !resultsForVariant.Contains(query) {
+						resultsForVariant.Add(query)
 						results = append(results, result.Result{
 							Query:  qd.Query,
 							Tags:   variant,
