@@ -197,9 +197,9 @@ func (c *cmd) runChromeInstance(
 	handler.HandleFunc("/test_page.html", serveFile("webgpu-cts/test_page.html"))
 	handler.HandleFunc("/test_runner.js", serveFile("webgpu-cts/test_runner.js"))
 	handler.HandleFunc("/third_party/webgpu-cts/resources/",
-		serveDir("/third_party/webgpu-cts/resources/", "third_party/webgpu-cts/out/resources/"))
+		serveDir("/third_party/webgpu-cts/resources/", c.flags.CTS+"/out/resources/"))
 	handler.HandleFunc("/third_party/webgpu-cts/src/",
-		serveDir("/third_party/webgpu-cts/src/", "third_party/webgpu-cts/out/"))
+		serveDir("/third_party/webgpu-cts/src/", c.flags.CTS+"/out/"))
 	handler.HandleFunc("/", websocket.Handler(func(ws *websocket.Conn) {
 		go func() {
 			d := json.NewDecoder(ws)
@@ -336,9 +336,8 @@ func serveFile(relPath string) func(http.ResponseWriter, *http.Request) {
 }
 
 func serveDir(remote, local string) func(http.ResponseWriter, *http.Request) {
-	dawnRoot := fileutils.DawnRoot()
 	return func(w http.ResponseWriter, r *http.Request) {
-		fullPath := filepath.Join(dawnRoot, local, strings.TrimPrefix(r.URL.Path, remote))
+		fullPath := filepath.Join(local, strings.TrimPrefix(r.URL.Path, remote))
 		if !fileutils.IsFile(fullPath) {
 			log.Printf("'%v' file does not exist", fullPath)
 		}
