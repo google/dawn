@@ -46,7 +46,7 @@ Bitcast::~Bitcast() = default;
 Bitcast* Bitcast::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* val = ctx.Remap(Val());
-    return ctx.ir.instructions.Create<Bitcast>(new_result, val);
+    return ctx.ir.allocators.instructions.Create<Bitcast>(new_result, val);
 }
 
 }  // namespace tint::core::ir

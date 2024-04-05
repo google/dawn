@@ -51,7 +51,7 @@ CoreBuiltinCall::~CoreBuiltinCall() = default;
 CoreBuiltinCall* CoreBuiltinCall::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto args = ctx.Remap<CoreBuiltinCall::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<CoreBuiltinCall>(new_result, func_, args);
+    return ctx.ir.allocators.instructions.Create<CoreBuiltinCall>(new_result, func_, args);
 }
 
 }  // namespace tint::core::ir

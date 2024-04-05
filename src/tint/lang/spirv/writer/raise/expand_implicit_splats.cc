@@ -48,10 +48,7 @@ void Run(core::ir::Module& ir) {
     // to be replaced in a second pass.
     Vector<core::ir::CoreBinary*, 4> binary_worklist;
     Vector<core::ir::CoreBuiltinCall*, 4> builtin_worklist;
-    for (auto* inst : ir.instructions.Objects()) {
-        if (!inst->Alive()) {
-            continue;
-        }
+    for (auto* inst : ir.Instructions()) {
         if (auto* construct = inst->As<core::ir::Construct>()) {
             // A vector constructor with a single scalar argument needs to be modified to replicate
             // the argument N times.

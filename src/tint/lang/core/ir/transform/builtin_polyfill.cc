@@ -62,10 +62,7 @@ struct State {
     void Process() {
         // Find the builtin call instructions that may need to be polyfilled.
         Vector<ir::CoreBuiltinCall*, 4> worklist;
-        for (auto* inst : ir.instructions.Objects()) {
-            if (!inst->Alive()) {
-                continue;
-            }
+        for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
                     case core::BuiltinFn::kClamp:

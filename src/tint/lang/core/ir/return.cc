@@ -53,9 +53,9 @@ Return::~Return() = default;
 Return* Return::Clone(CloneContext& ctx) {
     auto* fn = ctx.Remap(Func());
     if (auto* val = Value()) {
-        return ctx.ir.instructions.Create<Return>(fn, ctx.Remap(val));
+        return ctx.ir.allocators.instructions.Create<Return>(fn, ctx.Remap(val));
     }
-    return ctx.ir.instructions.Create<Return>(fn);
+    return ctx.ir.allocators.instructions.Create<Return>(fn);
 }
 
 Function* Return::Func() {

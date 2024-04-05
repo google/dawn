@@ -68,7 +68,7 @@ If* If::Clone(CloneContext& ctx) {
     auto* new_true = ctx.ir.blocks.Create<ir::Block>();
     auto* new_false = ctx.ir.blocks.Create<ir::Block>();
 
-    auto* new_if = ctx.ir.instructions.Create<If>(cond, new_true, new_false);
+    auto* new_if = ctx.ir.allocators.instructions.Create<If>(cond, new_true, new_false);
     ctx.Replace(this, new_if);
 
     true_->CloneInto(ctx, new_true);

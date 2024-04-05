@@ -45,7 +45,7 @@ Unary::~Unary() = default;
 Unary* Unary::Clone(core::ir::CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* val = ctx.Remap(Val());
-    return ctx.ir.instructions.Create<Unary>(new_result, Op(), val);
+    return ctx.ir.allocators.instructions.Create<Unary>(new_result, Op(), val);
 }
 
 const core::intrinsic::TableData& Unary::TableData() const {

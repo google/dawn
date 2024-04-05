@@ -50,7 +50,7 @@ ExitIf::~ExitIf() = default;
 ExitIf* ExitIf::Clone(CloneContext& ctx) {
     auto* if_ = ctx.Remap(If());
     auto args = ctx.Remap<ExitIf::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<ExitIf>(if_, args);
+    return ctx.ir.allocators.instructions.Create<ExitIf>(if_, args);
 }
 
 void ExitIf::SetIf(ir::If* i) {

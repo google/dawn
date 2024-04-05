@@ -2545,7 +2545,7 @@ fn f() {
 TEST_F(IRToProgramTest, Enable_ChromiumExperimentalSubgroups_SubgroupBallot) {
     auto* fn = b.Function("f", ty.void_());
     b.Append(fn->Block(), [&] {
-        auto* call = b.Append(mod.instructions.Create<wgsl::ir::BuiltinCall>(
+        auto* call = b.Append(mod.allocators.instructions.Create<wgsl::ir::BuiltinCall>(
             b.InstructionResult(ty.vec4<u32>()), wgsl::BuiltinFn::kSubgroupBallot, Empty));
         b.Let("v", call);
         b.Return(fn);
@@ -2564,7 +2564,7 @@ TEST_F(IRToProgramTest, Enable_ChromiumExperimentalSubgroups_SubgroupBroadcast) 
     auto* fn = b.Function("f", ty.void_());
     b.Append(fn->Block(), [&] {
         auto* one = b.Value(1_u);
-        auto* call = b.Append(mod.instructions.Create<wgsl::ir::BuiltinCall>(
+        auto* call = b.Append(mod.allocators.instructions.Create<wgsl::ir::BuiltinCall>(
             b.InstructionResult(ty.u32()), wgsl::BuiltinFn::kSubgroupBroadcast, Vector{one, one}));
         b.Let("v", call);
         b.Return(fn);

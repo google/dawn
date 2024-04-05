@@ -37,7 +37,7 @@ namespace tint::core::ir {
 Unreachable::~Unreachable() = default;
 
 Unreachable* Unreachable::Clone(CloneContext& ctx) {
-    return ctx.ir.instructions.Create<Unreachable>();
+    return ctx.ir.allocators.instructions.Create<Unreachable>();
 }
 
 }  // namespace tint::core::ir

@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/utils/containers/const_propagating_ptr.h"
+#include "src/tint/utils/containers/filtered_iterator.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
 #include "src/tint/utils/id/generation_id.h"
@@ -55,6 +56,12 @@ class Module {
 
     /// Map of value to name
     Hashmap<const Value*, Symbol, 32> value_to_name_;
+
+    /// A predicate function that returns true if the instruction or value is alive.
+    struct IsAlive {
+        bool operator()(const Instruction* instruction) const { return instruction->Alive(); }
+        bool operator()(const Value* value) const { return value->Alive(); }
+    };
 
   public:
     /// Constructor
@@ -102,17 +109,40 @@ class Module {
     /// @return the type manager for the module
     const core::type::Manager& Types() const { return constant_values.types; }
 
+    /// @returns a iterable of all the alive instructions
+    FilteredIterable<IsAlive, BlockAllocator<Instruction>::View> Instructions() {
+        return {allocators.instructions.Objects()};
+    }
+
+    /// @returns a iterable of all the alive instructions
+    FilteredIterable<IsAlive, BlockAllocator<Instruction>::ConstView> Instructions() const {
+        return {allocators.instructions.Objects()};
+    }
+
+    /// @returns a iterable of all the alive values
+    FilteredIterable<IsAlive, BlockAllocator<Value>::View> Values() {
+        return {allocators.values.Objects()};
+    }
+
+    /// @returns a iterable of all the alive values
+    FilteredIterable<IsAlive, BlockAllocator<Value>::ConstView> Values() const {
+        return {allocators.values.Objects()};
+    }
+
     /// The block allocator
     BlockAllocator<Block> blocks;
 
     /// The constant value manager
     core::constant::Manager constant_values;
 
-    /// The instruction allocator
-    BlockAllocator<Instruction> instructions;
+    /// The various BlockAllocators for the module
+    struct {
+        /// The instruction allocator
+        BlockAllocator<Instruction> instructions;
 
-    /// The value allocator
-    BlockAllocator<Value> values;
+        /// The value allocator
+        BlockAllocator<Value> values;
+    } allocators;
 
     /// List of functions in the program
     Vector<ConstPropagatingPtr<Function>, 8> functions;

@@ -153,7 +153,7 @@ struct Decoder {
     // Functions
     ////////////////////////////////////////////////////////////////////////////
     ir::Function* CreateFunction(const pb::Function&) {
-        return mod_out_.values.Create<ir::Function>();
+        return mod_out_.allocators.values.Create<ir::Function>();
     }
 
     void PopulateFunction(ir::Function* fn_out, const pb::Function& fn_in) {
@@ -344,69 +344,69 @@ struct Decoder {
     }
 
     ir::Access* CreateInstructionAccess(const pb::InstructionAccess&) {
-        return mod_out_.instructions.Create<ir::Access>();
+        return mod_out_.allocators.instructions.Create<ir::Access>();
     }
 
     ir::CoreBinary* CreateInstructionBinary(const pb::InstructionBinary& binary_in) {
-        auto* binary_out = mod_out_.instructions.Create<ir::CoreBinary>();
+        auto* binary_out = mod_out_.allocators.instructions.Create<ir::CoreBinary>();
         binary_out->SetOp(BinaryOp(binary_in.op()));
         return binary_out;
     }
 
     ir::Bitcast* CreateInstructionBitcast(const pb::InstructionBitcast&) {
-        return mod_out_.instructions.Create<ir::Bitcast>();
+        return mod_out_.allocators.instructions.Create<ir::Bitcast>();
     }
 
     ir::BreakIf* CreateInstructionBreakIf(const pb::InstructionBreakIf&) {
-        auto* break_if_out = mod_out_.instructions.Create<ir::BreakIf>();
+        auto* break_if_out = mod_out_.allocators.instructions.Create<ir::BreakIf>();
         break_ifs_.Push(break_if_out);
         return break_if_out;
     }
 
     ir::CoreBuiltinCall* CreateInstructionBuiltinCall(const pb::InstructionBuiltinCall& call_in) {
-        auto* call_out = mod_out_.instructions.Create<ir::CoreBuiltinCall>();
+        auto* call_out = mod_out_.allocators.instructions.Create<ir::CoreBuiltinCall>();
         call_out->SetFunc(BuiltinFn(call_in.builtin()));
         return call_out;
     }
 
     ir::Construct* CreateInstructionConstruct(const pb::InstructionConstruct&) {
-        return mod_out_.instructions.Create<ir::Construct>();
+        return mod_out_.allocators.instructions.Create<ir::Construct>();
     }
 
     ir::Continue* CreateInstructionContinue(const pb::InstructionContinue&) {
-        auto* continue_ = mod_out_.instructions.Create<ir::Continue>();
+        auto* continue_ = mod_out_.allocators.instructions.Create<ir::Continue>();
         continues_.Push(continue_);
         return continue_;
     }
 
     ir::Convert* CreateInstructionConvert(const pb::InstructionConvert&) {
-        return mod_out_.instructions.Create<ir::Convert>();
+        return mod_out_.allocators.instructions.Create<ir::Convert>();
     }
 
     ir::ExitIf* CreateInstructionExitIf(const pb::InstructionExitIf&) {
-        auto* exit_out = mod_out_.instructions.Create<ir::ExitIf>();
+        auto* exit_out = mod_out_.allocators.instructions.Create<ir::ExitIf>();
         exit_ifs_.Push(exit_out);
         return exit_out;
     }
 
     ir::ExitLoop* CreateInstructionExitLoop(const pb::InstructionExitLoop&) {
-        auto* exit_out = mod_out_.instructions.Create<ir::ExitLoop>();
+        auto* exit_out = mod_out_.allocators.instructions.Create<ir::ExitLoop>();
         exit_loops_.Push(exit_out);
         return exit_out;
     }
 
     ir::ExitSwitch* CreateInstructionExitSwitch(const pb::InstructionExitSwitch&) {
-        auto* exit_out = mod_out_.instructions.Create<ir::ExitSwitch>();
+        auto* exit_out = mod_out_.allocators.instructions.Create<ir::ExitSwitch>();
         exit_switches_.Push(exit_out);
         return exit_out;
     }
 
     ir::Discard* CreateInstructionDiscard(const pb::InstructionDiscard&) {
-        return mod_out_.instructions.Create<ir::Discard>();
+        return mod_out_.allocators.instructions.Create<ir::Discard>();
     }
 
     ir::If* CreateInstructionIf(const pb::InstructionIf& if_in) {
-        auto* if_out = mod_out_.instructions.Create<ir::If>();
+        auto* if_out = mod_out_.allocators.instructions.Create<ir::If>();
         if (if_in.has_true_()) {
             if_out->SetTrue(Block(if_in.true_()));
         }
@@ -417,20 +417,20 @@ struct Decoder {
     }
 
     ir::Let* CreateInstructionLet(const pb::InstructionLet&) {
-        return mod_out_.instructions.Create<ir::Let>();
+        return mod_out_.allocators.instructions.Create<ir::Let>();
     }
 
     ir::Load* CreateInstructionLoad(const pb::InstructionLoad&) {
-        return mod_out_.instructions.Create<ir::Load>();
+        return mod_out_.allocators.instructions.Create<ir::Load>();
     }
 
     ir::LoadVectorElement* CreateInstructionLoadVectorElement(
         const pb::InstructionLoadVectorElement&) {
-        return mod_out_.instructions.Create<ir::LoadVectorElement>();
+        return mod_out_.allocators.instructions.Create<ir::LoadVectorElement>();
     }
 
     ir::Loop* CreateInstructionLoop(const pb::InstructionLoop& loop_in) {
-        auto* loop_out = mod_out_.instructions.Create<ir::Loop>();
+        auto* loop_out = mod_out_.allocators.instructions.Create<ir::Loop>();
         if (loop_in.has_initalizer()) {
             loop_out->SetInitializer(Block(loop_in.initalizer()));
         } else {
@@ -446,26 +446,26 @@ struct Decoder {
     }
 
     ir::NextIteration* CreateInstructionNextIteration(const pb::InstructionNextIteration&) {
-        auto* next_it_out = mod_out_.instructions.Create<ir::NextIteration>();
+        auto* next_it_out = mod_out_.allocators.instructions.Create<ir::NextIteration>();
         next_iterations_.Push(next_it_out);
         return next_it_out;
     }
 
     ir::Return* CreateInstructionReturn(const pb::InstructionReturn&) {
-        return mod_out_.instructions.Create<ir::Return>();
+        return mod_out_.allocators.instructions.Create<ir::Return>();
     }
 
     ir::Store* CreateInstructionStore(const pb::InstructionStore&) {
-        return mod_out_.instructions.Create<ir::Store>();
+        return mod_out_.allocators.instructions.Create<ir::Store>();
     }
 
     ir::StoreVectorElement* CreateInstructionStoreVectorElement(
         const pb::InstructionStoreVectorElement&) {
-        return mod_out_.instructions.Create<ir::StoreVectorElement>();
+        return mod_out_.allocators.instructions.Create<ir::StoreVectorElement>();
     }
 
     ir::Swizzle* CreateInstructionSwizzle(const pb::InstructionSwizzle& swizzle_in) {
-        auto* swizzle_out = mod_out_.instructions.Create<ir::Swizzle>();
+        auto* swizzle_out = mod_out_.allocators.instructions.Create<ir::Swizzle>();
         Vector<uint32_t, 4> indices;
         for (auto idx : swizzle_in.indices()) {
             indices.Push(idx);
@@ -475,7 +475,7 @@ struct Decoder {
     }
 
     ir::Switch* CreateInstructionSwitch(const pb::InstructionSwitch& switch_in) {
-        auto* switch_out = mod_out_.instructions.Create<ir::Switch>();
+        auto* switch_out = mod_out_.allocators.instructions.Create<ir::Switch>();
         for (auto& case_in : switch_in.cases()) {
             ir::Switch::Case case_out{};
             case_out.block = Block(case_in.block());
@@ -495,17 +495,17 @@ struct Decoder {
     }
 
     ir::CoreUnary* CreateInstructionUnary(const pb::InstructionUnary& unary_in) {
-        auto* unary_out = mod_out_.instructions.Create<ir::CoreUnary>();
+        auto* unary_out = mod_out_.allocators.instructions.Create<ir::CoreUnary>();
         unary_out->SetOp(UnaryOp(unary_in.op()));
         return unary_out;
     }
 
     ir::UserCall* CreateInstructionUserCall(const pb::InstructionUserCall&) {
-        return mod_out_.instructions.Create<ir::UserCall>();
+        return mod_out_.allocators.instructions.Create<ir::UserCall>();
     }
 
     ir::Var* CreateInstructionVar(const pb::InstructionVar& var_in) {
-        auto* var_out = mod_out_.instructions.Create<ir::Var>();
+        auto* var_out = mod_out_.allocators.instructions.Create<ir::Var>();
         if (var_in.has_binding_point()) {
             auto& bp_in = var_in.binding_point();
             var_out->SetBindingPoint(bp_in.group(), bp_in.binding());

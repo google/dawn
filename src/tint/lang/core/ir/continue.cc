@@ -58,7 +58,7 @@ Continue* Continue::Clone(CloneContext& ctx) {
     auto* loop = ctx.Remap(Loop());
     auto args = ctx.Remap<Continue::kDefaultNumOperands>(Args());
 
-    return ctx.ir.instructions.Create<Continue>(loop, args);
+    return ctx.ir.allocators.instructions.Create<Continue>(loop, args);
 }
 
 void Continue::SetLoop(ir::Loop* loop) {

@@ -55,8 +55,8 @@ struct State {
     void Process() {
         // Find and replace matrix constructors that take scalar operands.
         Vector<Construct*, 8> worklist;
-        for (auto inst : ir.instructions.Objects()) {
-            if (auto* construct = inst->As<Construct>(); construct && construct->Alive()) {
+        for (auto inst : ir.Instructions()) {
+            if (auto* construct = inst->As<Construct>()) {
                 if (construct->Result(0)->Type()->As<type::Matrix>()) {
                     if (construct->Operands().Length() > 0 &&
                         construct->Operands()[0]->Type()->Is<type::Scalar>()) {

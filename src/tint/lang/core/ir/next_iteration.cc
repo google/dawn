@@ -57,7 +57,7 @@ NextIteration::~NextIteration() = default;
 NextIteration* NextIteration::Clone(CloneContext& ctx) {
     auto* new_loop = ctx.Clone(loop_);
     auto args = ctx.Remap<NextIteration::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<NextIteration>(new_loop, args);
+    return ctx.ir.allocators.instructions.Create<NextIteration>(new_loop, args);
 }
 
 void NextIteration::SetLoop(ir::Loop* loop) {

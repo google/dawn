@@ -41,7 +41,7 @@ Discard::Discard() {
 Discard::~Discard() = default;
 
 Discard* Discard::Clone(CloneContext& ctx) {
-    return ctx.ir.instructions.Create<Discard>();
+    return ctx.ir.allocators.instructions.Create<Discard>();
 }
 
 }  // namespace tint::core::ir

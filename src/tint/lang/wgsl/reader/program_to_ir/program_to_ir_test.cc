@@ -51,7 +51,7 @@ template <typename T>
 T* FindSingleInstruction(core::ir::Module& mod) {
     T* found = nullptr;
     size_t count = 0;
-    for (auto* node : mod.instructions.Objects()) {
+    for (auto* node : mod.Instructions()) {
         if (auto* as = node->As<T>()) {
             count++;
             if (!found) {

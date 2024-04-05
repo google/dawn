@@ -48,7 +48,7 @@ Construct::~Construct() = default;
 Construct* Construct::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto args = ctx.Remap<Construct::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<Construct>(new_result, args);
+    return ctx.ir.allocators.instructions.Create<Construct>(new_result, args);
 }
 
 }  // namespace tint::core::ir

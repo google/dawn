@@ -62,10 +62,7 @@ struct State {
     void Process() {
         // Find the access instructions that need to be replaced.
         Vector<Access, 8> worklist;
-        for (auto* inst : ir.instructions.Objects()) {
-            if (!inst->Alive()) {
-                continue;
-            }
+        for (auto* inst : ir.Instructions()) {
             if (auto* access = inst->As<core::ir::Access>()) {
                 auto* source_ty = access->Object()->Type();
                 if (!source_ty->Is<core::type::Pointer>()) {

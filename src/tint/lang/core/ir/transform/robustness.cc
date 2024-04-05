@@ -65,48 +65,46 @@ struct State {
         Vector<ir::LoadVectorElement*, 64> vector_loads;
         Vector<ir::StoreVectorElement*, 64> vector_stores;
         Vector<ir::CoreBuiltinCall*, 64> texture_calls;
-        for (auto* inst : ir.instructions.Objects()) {
-            if (inst->Alive()) {
-                tint::Switch(
-                    inst,  //
-                    [&](ir::Access* access) {
-                        // Check if accesses into this object should be clamped.
-                        auto* ptr = access->Object()->Type()->As<type::Pointer>();
-                        if (ptr) {
-                            if (ShouldClamp(ptr->AddressSpace())) {
-                                accesses.Push(access);
-                            }
-                        } else {
-                            if (config.clamp_value) {
-                                accesses.Push(access);
-                            }
-                        }
-                    },
-                    [&](ir::LoadVectorElement* lve) {
-                        // Check if loads from this address space should be clamped.
-                        auto* ptr = lve->From()->Type()->As<type::Pointer>();
+        for (auto* inst : ir.Instructions()) {
+            tint::Switch(
+                inst,  //
+                [&](ir::Access* access) {
+                    // Check if accesses into this object should be clamped.
+                    auto* ptr = access->Object()->Type()->As<type::Pointer>();
+                    if (ptr) {
                         if (ShouldClamp(ptr->AddressSpace())) {
-                            vector_loads.Push(lve);
+                            accesses.Push(access);
                         }
-                    },
-                    [&](ir::StoreVectorElement* sve) {
-                        // Check if stores to this address space should be clamped.
-                        auto* ptr = sve->To()->Type()->As<type::Pointer>();
-                        if (ShouldClamp(ptr->AddressSpace())) {
-                            vector_stores.Push(sve);
+                    } else {
+                        if (config.clamp_value) {
+                            accesses.Push(access);
                         }
-                    },
-                    [&](ir::CoreBuiltinCall* call) {
-                        // Check if this is a texture builtin that needs to be clamped.
-                        if (config.clamp_texture) {
-                            if (call->Func() == core::BuiltinFn::kTextureDimensions ||
-                                call->Func() == core::BuiltinFn::kTextureLoad ||
-                                call->Func() == core::BuiltinFn::kTextureStore) {
-                                texture_calls.Push(call);
-                            }
+                    }
+                },
+                [&](ir::LoadVectorElement* lve) {
+                    // Check if loads from this address space should be clamped.
+                    auto* ptr = lve->From()->Type()->As<type::Pointer>();
+                    if (ShouldClamp(ptr->AddressSpace())) {
+                        vector_loads.Push(lve);
+                    }
+                },
+                [&](ir::StoreVectorElement* sve) {
+                    // Check if stores to this address space should be clamped.
+                    auto* ptr = sve->To()->Type()->As<type::Pointer>();
+                    if (ShouldClamp(ptr->AddressSpace())) {
+                        vector_stores.Push(sve);
+                    }
+                },
+                [&](ir::CoreBuiltinCall* call) {
+                    // Check if this is a texture builtin that needs to be clamped.
+                    if (config.clamp_texture) {
+                        if (call->Func() == core::BuiltinFn::kTextureDimensions ||
+                            call->Func() == core::BuiltinFn::kTextureLoad ||
+                            call->Func() == core::BuiltinFn::kTextureStore) {
+                            texture_calls.Push(call);
                         }
-                    });
-            }
+                    }
+                });
         }
 
         // Clamp access indices.

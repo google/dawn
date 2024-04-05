@@ -37,7 +37,7 @@ namespace tint::core::ir {
 TerminateInvocation::~TerminateInvocation() = default;
 
 TerminateInvocation* TerminateInvocation::Clone(CloneContext& ctx) {
-    return ctx.ir.instructions.Create<TerminateInvocation>();
+    return ctx.ir.allocators.instructions.Create<TerminateInvocation>();
 }
 
 }  // namespace tint::core::ir

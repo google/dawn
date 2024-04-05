@@ -67,10 +67,7 @@ struct State {
     void Process() {
         // Find the binary instructions that need to be polyfilled.
         Vector<ir::CoreBinary*, 64> worklist;
-        for (auto* inst : ir.instructions.Objects()) {
-            if (!inst->Alive()) {
-                continue;
-            }
+        for (auto* inst : ir.Instructions()) {
             if (auto* binary = inst->As<ir::CoreBinary>()) {
                 switch (binary->Op()) {
                     case BinaryOp::kDivide:

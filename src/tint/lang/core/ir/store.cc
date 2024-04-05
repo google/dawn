@@ -50,7 +50,7 @@ Store::~Store() = default;
 Store* Store::Clone(CloneContext& ctx) {
     auto* to = ctx.Remap(To());
     auto* from = ctx.Remap(From());
-    return ctx.ir.instructions.Create<Store>(to, from);
+    return ctx.ir.allocators.instructions.Create<Store>(to, from);
 }
 
 }  // namespace tint::core::ir

@@ -50,10 +50,7 @@ void Run(core::ir::Module& ir) {
     // Find the instructions that need to be modified.
     Vector<core::ir::CoreBinary*, 4> binary_worklist;
     Vector<core::ir::Convert*, 4> convert_worklist;
-    for (auto* inst : ir.instructions.Objects()) {
-        if (!inst->Alive()) {
-            continue;
-        }
+    for (auto* inst : ir.Instructions()) {
         if (auto* binary = inst->As<core::ir::CoreBinary>()) {
             TINT_ASSERT(binary->Operands().Length() == 2);
             if (binary->LHS()->Type()->Is<core::type::Matrix>() ||

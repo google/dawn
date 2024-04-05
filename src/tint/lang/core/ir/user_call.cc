@@ -53,7 +53,7 @@ UserCall* UserCall::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* target = ctx.Remap(Target());
     auto args = ctx.Remap<UserCall::kDefaultNumOperands>(Args());
-    return ctx.ir.instructions.Create<UserCall>(new_result, target, args);
+    return ctx.ir.allocators.instructions.Create<UserCall>(new_result, target, args);
 }
 
 void UserCall::SetArgs(VectorRef<Value*> arguments) {

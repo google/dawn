@@ -46,7 +46,7 @@ CoreBinary* CoreBinary::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* lhs = ctx.Remap(LHS());
     auto* rhs = ctx.Remap(RHS());
-    return ctx.ir.instructions.Create<CoreBinary>(new_result, Op(), lhs, rhs);
+    return ctx.ir.allocators.instructions.Create<CoreBinary>(new_result, Op(), lhs, rhs);
 }
 
 const core::intrinsic::TableData& CoreBinary::TableData() const {

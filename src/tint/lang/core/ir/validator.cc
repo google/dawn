@@ -357,8 +357,8 @@ Result<SuccessType> Validator::Run() {
 
     if (!diagnostics_.ContainsErrors()) {
         // Check for orphaned instructions.
-        for (auto* inst : mod_.instructions.Objects()) {
-            if (inst->Alive() && !visited_instructions_.Contains(inst)) {
+        for (auto* inst : mod_.Instructions()) {
+            if (!visited_instructions_.Contains(inst)) {
                 AddError(inst) << "orphaned instruction: " << inst->FriendlyName();
             }
         }

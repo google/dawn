@@ -171,7 +171,7 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
 
 void ReplaceBuiltinFnCall(core::ir::Module& mod, core::ir::CoreBuiltinCall* call) {
     Vector<core::ir::Value*, 8> args(call->Args());
-    auto* replacement = mod.instructions.Create<wgsl::ir::BuiltinCall>(
+    auto* replacement = mod.allocators.instructions.Create<wgsl::ir::BuiltinCall>(
         call->Result(0), Convert(call->Func()), std::move(args));
     call->ReplaceWith(replacement);
     call->ClearResults();
@@ -206,7 +206,7 @@ void ReplaceWorkgroupBarrier(core::ir::Module& mod, core::ir::CoreBuiltinCall* c
     call->Destroy();
 
     // Replace load with workgroupUniformLoad
-    auto* replacement = mod.instructions.Create<wgsl::ir::BuiltinCall>(
+    auto* replacement = mod.allocators.instructions.Create<wgsl::ir::BuiltinCall>(
         load->Result(0), wgsl::BuiltinFn::kWorkgroupUniformLoad, Vector{load->From()});
     load->ReplaceWith(replacement);
     load->ClearResults();
@@ -216,10 +216,7 @@ void ReplaceWorkgroupBarrier(core::ir::Module& mod, core::ir::CoreBuiltinCall* c
 }  // namespace
 
 Result<SuccessType> Raise(core::ir::Module& mod) {
-    for (auto* inst : mod.instructions.Objects()) {
-        if (!inst->Alive()) {
-            continue;
-        }
+    for (auto* inst : mod.Instructions()) {
         if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
             switch (call->Func()) {
                 case core::BuiltinFn::kWorkgroupBarrier:

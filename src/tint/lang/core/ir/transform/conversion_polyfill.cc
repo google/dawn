@@ -68,10 +68,7 @@ struct State {
     void Process() {
         // Find the conversion instructions that need to be polyfilled.
         Vector<ir::Convert*, 64> ftoi_worklist;
-        for (auto* inst : ir.instructions.Objects()) {
-            if (!inst->Alive()) {
-                continue;
-            }
+        for (auto* inst : ir.Instructions()) {
             if (auto* convert = inst->As<ir::Convert>()) {
                 auto* src_ty = convert->Args()[0]->Type();
                 auto* res_ty = convert->Result(0)->Type();

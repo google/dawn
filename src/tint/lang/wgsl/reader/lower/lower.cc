@@ -181,10 +181,7 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
 
     core::ir::Builder b{mod};
     core::type::Manager& ty{mod.Types()};
-    for (auto* inst : mod.instructions.Objects()) {
-        if (!inst->Alive()) {
-            continue;
-        }
+    for (auto* inst : mod.Instructions()) {
         if (auto* call = inst->As<wgsl::ir::BuiltinCall>()) {
             switch (call->Func()) {
                 case BuiltinFn::kWorkgroupUniformLoad: {
@@ -204,8 +201,9 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
                 }
                 default: {
                     Vector<core::ir::Value*, 8> args(call->Args());
-                    auto* replacement = mod.instructions.Create<core::ir::CoreBuiltinCall>(
-                        call->Result(0), Convert(call->Func()), std::move(args));
+                    auto* replacement =
+                        mod.allocators.instructions.Create<core::ir::CoreBuiltinCall>(
+                            call->Result(0), Convert(call->Func()), std::move(args));
                     call->ReplaceWith(replacement);
                     call->ClearResults();
                     break;
