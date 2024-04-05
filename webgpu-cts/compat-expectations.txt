@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-03-28 06:49:31AM
+# Last rolled: 2024-04-05 11:15:08AM
 
 # Flaky on all platforms
 # KEEP
@@ -187,9 +187,6 @@ crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimen
 crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba8unorm";aspect="all";samples=1 [ Failure ]
 crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba8unorm-srgb";aspect="all";samples=1 [ Failure ]
 crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="stencil8";aspect="all";samples=1 [ Failure ]
-crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rg32float";aspect="all" [ Failure ]
-crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rg32sint";aspect="all" [ Failure ]
-crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:storage:format="rg32uint";aspect="all" [ Failure ]
 
 ### This section represents tests which may require CTS changes.
 
@@ -513,4 +510,7 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ################################################################################
 # New failures. Please triage:
 ################################################################################
-crbug.com/dawn/0000 webgpu:shader,validation,functions,restrictions:function_parameter_types:case="invalid_ptr8" [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
