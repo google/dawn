@@ -695,15 +695,15 @@ func (e env) resultsFilePathForDate(year int, month time.Month) (string, error) 
 func (e env) allResultFilePaths() (paths []string, err error) {
 	year := time.Now().Year()
 	month := time.Now().Month()
-	for {
+	monthsToScan := 12 * 10 // 10 years
+	for i := 0; i < monthsToScan; i++ {
 		path, err := e.resultsFilePathForDate(year, month)
 		if err != nil {
 			return nil, err
 		}
-		if !fileutils.IsFile(path) {
-			return paths, nil
+		if fileutils.IsFile(path) {
+			paths = append(paths, path)
 		}
-		paths = append(paths, path)
 
 		month--
 		if month == 0 {
@@ -711,6 +711,8 @@ func (e env) allResultFilePaths() (paths []string, err error) {
 			month = 12
 		}
 	}
+
+	return paths, nil
 }
 
 // loadHistoricResults loads and returns the result files as a single HistoricResults
