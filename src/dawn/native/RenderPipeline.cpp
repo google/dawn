@@ -353,8 +353,7 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
 MaybeError ValidateMultisampleState(const DeviceBase* device, const MultisampleState* descriptor) {
     UnpackedPtr<MultisampleState> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-    if (auto* msaaRenderToSingleSampledDesc =
-            unpacked.Get<DawnMultisampleStateRenderToSingleSampled>()) {
+    if (unpacked.Get<DawnMultisampleStateRenderToSingleSampled>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::MSAARenderToSingleSampled),
                         "The msaaRenderToSingleSampledDesc is not empty while the "
                         "msaa-render-to-single-sampled feature is not enabled.");

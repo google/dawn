@@ -195,7 +195,7 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         DAWN_TRY(device->ValidateObject(staticSamplerBindingLayout->sampler));
     }
 
-    if (auto* externalTextureBindingLayout = entry.Get<ExternalTextureBindingLayout>()) {
+    if (entry.Get<ExternalTextureBindingLayout>()) {
         bindingMemberCount++;
     }
 
@@ -258,7 +258,7 @@ UnpackedExpandedBglEntries ExtractAndExpandBglEntries(
         // External textures are expanded from a texture_external into two sampled texture
         // bindings and one uniform buffer binding. The original binding number is used
         // for the first sampled texture.
-        if (auto* externalTextureBindingLayout = entry.Get<ExternalTextureBindingLayout>()) {
+        if (entry.Get<ExternalTextureBindingLayout>()) {
             for (SingleShaderStage stage : IterateStages(entry->visibility)) {
                 // External textures are not fully implemented, which means that expanding
                 // the external texture at this time will not occupy the same number of
