@@ -315,6 +315,12 @@ class StaticSamplerTest : public SamplerTest {
 // Test drawing a rect with a checkerboard texture using a static sampler with different address
 // modes.
 TEST_P(StaticSamplerTest, AddressMode) {
+    // TODO(crbug.com/dawn/2489): This test fails on the MSVC bots, likely due
+    // to the underlying issue that is causing the inequality check between BGLs
+    // that have static samplers with distinct addressU modes to fail on those
+    // bots.
+    DAWN_SUPPRESS_TEST_IF(IsWindows());
+
     for (auto u : addressModes) {
         for (auto v : addressModes) {
             for (auto w : addressModes) {
@@ -332,6 +338,12 @@ TEST_P(StaticSamplerTest, AddressMode) {
 // Test that passing texture and static sampler objects through user-defined functions works
 // correctly.
 TEST_P(StaticSamplerTest, PassThroughUserFunctionParameters) {
+    // TODO(crbug.com/dawn/2489): This test fails on the MSVC bots, likely due
+    // to the underlying issue that is causing the inequality check between BGLs
+    // that have static samplers with distinct addressU modes to fail on those
+    // bots.
+    DAWN_SUPPRESS_TEST_IF(IsWindows());
+
     for (auto u : addressModes) {
         for (auto v : addressModes) {
             for (auto w : addressModes) {

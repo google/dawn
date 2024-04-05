@@ -105,7 +105,7 @@ class alignas(detail::kNativeVkHandleAlignment) VkHandle {
     // Implicit conversion to real Vulkan types.
     operator HandleType() const { return GetHandle(); }
 
-    HandleType GetHandle() const { return mHandle; }
+    const HandleType& GetHandle() const { return mHandle; }
 
     HandleType& operator*() { return mHandle; }
 

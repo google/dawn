@@ -79,7 +79,7 @@ BindGroup::BindGroup(Device* device,
         write.descriptorCount = 1;
         write.descriptorType = VulkanDescriptorType(bindingInfo);
 
-        bool isValidDescriptorSet = MatchVariant(
+        bool shouldWriteDescriptor = MatchVariant(
             bindingInfo.bindingLayout,
             [&](const BufferBindingLayout&) -> bool {
                 BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
@@ -104,12 +104,11 @@ BindGroup::BindGroup(Device* device,
                 write.pImageInfo = &writeImageInfo[numWrites];
                 return true;
             },
-            [&](const StaticSamplerHolderBindingLayout&) -> bool {
-                // Static samplers are implemented in the frontend.
-                // TODO(crbug.com/dawn/2463): Implement static samplers in the backend
-                // on Vulkan.
-                DAWN_UNREACHABLE();
-                return true;
+            [&](const StaticSamplerHolderBindingLayout& layout) -> bool {
+                // Static samplers are bound into the Vulkan layout as immutable
+                // samplers at BindGroupLayout creation time. There is no work
+                // to be done at BindGroup creation time.
+                return false;
             },
             [&](const TextureBindingLayout&) -> bool {
                 TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
@@ -154,7 +153,7 @@ BindGroup::BindGroup(Device* device,
                 return true;
             });
 
-        if (isValidDescriptorSet) {
+        if (shouldWriteDescriptor) {
             numWrites++;
         }
     }

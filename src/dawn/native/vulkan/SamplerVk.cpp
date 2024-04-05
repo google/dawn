@@ -139,7 +139,7 @@ void Sampler::DestroyImpl() {
     }
 }
 
-VkSampler Sampler::GetHandle() const {
+const VkSampler& Sampler::GetHandle() const {
     return mHandle;
 }
 
