@@ -122,7 +122,8 @@ class VideoViewsTestsBase : public DawnTestWithParams<Params> {
     bool IsMultiPlanarFormatsSupported() const;
     bool IsMultiPlanarFormatP010Supported() const;
     bool IsMultiPlanarFormatNv12aSupported() const;
-    bool IsNorm16TextureFormatsSupported() const;
+    bool IsUnorm16TextureFormatsSupported() const;
+    bool IsSnorm16TextureFormatsSupported() const;
     wgpu::ShaderModule GetTestVertexShaderModule() const;
     wgpu::TextureFormat GetFormat() const;
     wgpu::TextureFormat GetPlaneFormat(int plane) const;
@@ -132,7 +133,8 @@ class VideoViewsTestsBase : public DawnTestWithParams<Params> {
     bool mIsMultiPlanarFormatsSupported = false;
     bool mIsMultiPlanarFormatP010Supported = false;
     bool mIsMultiPlanarFormatNv12aSupported = false;
-    bool mIsNorm16TextureFormatsSupported = false;
+    bool mIsUnorm16TextureFormatsSupported = false;
+    bool mIsSnorm16TextureFormatsSupported = false;
 };
 
 }  // namespace dawn

@@ -85,9 +85,15 @@ std::vector<wgpu::FeatureName> VideoViewsTestsBase::GetRequiredFeatures() {
     if (mIsMultiPlanarFormatNv12aSupported) {
         requiredFeatures.push_back(wgpu::FeatureName::MultiPlanarFormatNv12a);
     }
-    mIsNorm16TextureFormatsSupported = SupportsFeatures({wgpu::FeatureName::Norm16TextureFormats});
-    if (mIsNorm16TextureFormatsSupported) {
-        requiredFeatures.push_back(wgpu::FeatureName::Norm16TextureFormats);
+    mIsUnorm16TextureFormatsSupported =
+        SupportsFeatures({wgpu::FeatureName::Unorm16TextureFormats});
+    if (mIsUnorm16TextureFormatsSupported) {
+        requiredFeatures.push_back(wgpu::FeatureName::Unorm16TextureFormats);
+    }
+    mIsSnorm16TextureFormatsSupported =
+        SupportsFeatures({wgpu::FeatureName::Snorm16TextureFormats});
+    if (mIsSnorm16TextureFormatsSupported) {
+        requiredFeatures.push_back(wgpu::FeatureName::Snorm16TextureFormats);
     }
     requiredFeatures.push_back(wgpu::FeatureName::DawnInternalUsages);
     return requiredFeatures;
@@ -105,8 +111,12 @@ bool VideoViewsTestsBase::IsMultiPlanarFormatNv12aSupported() const {
     return mIsMultiPlanarFormatNv12aSupported;
 }
 
-bool VideoViewsTestsBase::IsNorm16TextureFormatsSupported() const {
-    return mIsNorm16TextureFormatsSupported;
+bool VideoViewsTestsBase::IsUnorm16TextureFormatsSupported() const {
+    return mIsUnorm16TextureFormatsSupported;
+}
+
+bool VideoViewsTestsBase::IsSnorm16TextureFormatsSupported() const {
+    return mIsSnorm16TextureFormatsSupported;
 }
 
 bool VideoViewsTestsBase::IsFormatSupported() const {
@@ -119,7 +129,7 @@ bool VideoViewsTestsBase::IsFormatSupported() const {
         if (IsWARP()) {
             return false;
         }
-        return IsNorm16TextureFormatsSupported() && IsMultiPlanarFormatP010Supported();
+        return IsUnorm16TextureFormatsSupported() && IsMultiPlanarFormatP010Supported();
     }
 
     if (GetFormat() == wgpu::TextureFormat::R8BG8A8Triplanar420Unorm) {

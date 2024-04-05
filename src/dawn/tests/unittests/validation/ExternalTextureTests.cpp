@@ -766,7 +766,7 @@ class ExternalTextureNorm16Test : public ExternalTextureTest {
 
     WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Norm16TextureFormats};
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Unorm16TextureFormats};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);

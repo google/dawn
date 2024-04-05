@@ -453,8 +453,8 @@ class TextureFormatTest : public DawnTest {
         DAWN_ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
         DAWN_ASSERT(formatInfo.type == TextureComponentType::Float);
 
-        DAWN_TEST_UNSUPPORTED_IF((utils::IsNorm16TextureFormat(formatInfo.format)) &&
-                                 !IsNorm16TextureFormatsSupported());
+        DAWN_TEST_UNSUPPORTED_IF((utils::IsUnorm16TextureFormat(formatInfo.format)) &&
+                                 !IsUnorm16TextureFormatsSupported());
 
         T maxValue = std::numeric_limits<T>::max();
         std::vector<T> textureData = {0, 1, maxValue, maxValue};
@@ -470,8 +470,8 @@ class TextureFormatTest : public DawnTest {
         DAWN_ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
         DAWN_ASSERT(formatInfo.type == TextureComponentType::Float);
 
-        DAWN_TEST_UNSUPPORTED_IF((utils::IsNorm16TextureFormat(formatInfo.format)) &&
-                                 !IsNorm16TextureFormatsSupported());
+        DAWN_TEST_UNSUPPORTED_IF((utils::IsSnorm16TextureFormat(formatInfo.format)) &&
+                                 !IsSnorm16TextureFormatsSupported());
 
         T maxValue = std::numeric_limits<T>::max();
         T minValue = std::numeric_limits<T>::min();
@@ -548,19 +548,25 @@ class TextureFormatTest : public DawnTest {
             mIsRG11B10UfloatRenderableSupported = true;
             requiredFeatures.push_back(wgpu::FeatureName::RG11B10UfloatRenderable);
         }
-        if (SupportsFeatures({wgpu::FeatureName::Norm16TextureFormats})) {
-            mIsNorm16TextureFormatsSupported = true;
-            requiredFeatures.push_back(wgpu::FeatureName::Norm16TextureFormats);
+        if (SupportsFeatures({wgpu::FeatureName::Unorm16TextureFormats})) {
+            mIsUnorm16TextureFormatsSupported = true;
+            requiredFeatures.push_back(wgpu::FeatureName::Unorm16TextureFormats);
+        }
+        if (SupportsFeatures({wgpu::FeatureName::Snorm16TextureFormats})) {
+            mIsSnorm16TextureFormatsSupported = true;
+            requiredFeatures.push_back(wgpu::FeatureName::Snorm16TextureFormats);
         }
         return requiredFeatures;
     }
 
     bool IsRG11B10UfloatRenderableSupported() { return mIsRG11B10UfloatRenderableSupported; }
-    bool IsNorm16TextureFormatsSupported() { return mIsNorm16TextureFormatsSupported; }
+    bool IsUnorm16TextureFormatsSupported() { return mIsUnorm16TextureFormatsSupported; }
+    bool IsSnorm16TextureFormatsSupported() { return mIsSnorm16TextureFormatsSupported; }
 
   private:
     bool mIsRG11B10UfloatRenderableSupported = false;
-    bool mIsNorm16TextureFormatsSupported = false;
+    bool mIsUnorm16TextureFormatsSupported = false;
+    bool mIsSnorm16TextureFormatsSupported = false;
 };
 
 // Test the R8Unorm format

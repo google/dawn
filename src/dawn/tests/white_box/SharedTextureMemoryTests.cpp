@@ -99,7 +99,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
         wgpu::FeatureName::MultiPlanarFormatExtendedUsages,
         wgpu::FeatureName::MultiPlanarRenderTargets,
         wgpu::FeatureName::TransientAttachments,
-        wgpu::FeatureName::Norm16TextureFormats,
+        wgpu::FeatureName::Unorm16TextureFormats,
         wgpu::FeatureName::BGRA8UnormStorage,
     };
     for (auto feature : kOptionalFeatures) {

@@ -1514,6 +1514,8 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::MultiPlanarFormatNv12a:
         case wgpu::FeatureName::MultiPlanarRenderTargets:
         case wgpu::FeatureName::Norm16TextureFormats:
+        case wgpu::FeatureName::Unorm16TextureFormats:
+        case wgpu::FeatureName::Snorm16TextureFormats:
         case wgpu::FeatureName::PixelLocalStorageCoherent:
         case wgpu::FeatureName::PixelLocalStorageNonCoherent:
         case wgpu::FeatureName::R8UnormStorage:

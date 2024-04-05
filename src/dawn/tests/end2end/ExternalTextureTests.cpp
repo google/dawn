@@ -115,14 +115,14 @@ class ExternalTextureTests : public DawnTest {
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
-        if (SupportsFeatures({wgpu::FeatureName::Norm16TextureFormats})) {
-            mIsNorm16TextureFormatsSupported = true;
-            requiredFeatures.push_back(wgpu::FeatureName::Norm16TextureFormats);
+        if (SupportsFeatures({wgpu::FeatureName::Unorm16TextureFormats})) {
+            mIsUnorm16TextureFormatsSupported = true;
+            requiredFeatures.push_back(wgpu::FeatureName::Unorm16TextureFormats);
         }
         return requiredFeatures;
     }
 
-    bool IsNorm16TextureFormatsSupported() { return mIsNorm16TextureFormatsSupported; }
+    bool IsUnorm16TextureFormatsSupported() { return mIsUnorm16TextureFormatsSupported; }
 
     static constexpr uint32_t kWidth = 4;
     static constexpr uint32_t kHeight = 4;
@@ -134,7 +134,7 @@ class ExternalTextureTests : public DawnTest {
     wgpu::ShaderModule vsModule;
     wgpu::ShaderModule fsSampleExternalTextureModule;
 
-    bool mIsNorm16TextureFormatsSupported = false;
+    bool mIsUnorm16TextureFormatsSupported = false;
 };
 
 TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
@@ -398,7 +398,7 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
 }
 
 TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
-    DAWN_TEST_UNSUPPORTED_IF(!IsNorm16TextureFormatsSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsUnorm16TextureFormatsSupported());
 
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());

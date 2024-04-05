@@ -143,11 +143,19 @@ bool IsCompressedTextureFormat(wgpu::TextureFormat textureFormat) {
            IsETC2TextureFormat(textureFormat);
 }
 
-bool IsNorm16TextureFormat(wgpu::TextureFormat textureFormat) {
+bool IsUnorm16TextureFormat(wgpu::TextureFormat textureFormat) {
     switch (textureFormat) {
         case wgpu::TextureFormat::R16Unorm:
         case wgpu::TextureFormat::RG16Unorm:
         case wgpu::TextureFormat::RGBA16Unorm:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool IsSnorm16TextureFormat(wgpu::TextureFormat textureFormat) {
+    switch (textureFormat) {
         case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::RG16Snorm:
         case wgpu::TextureFormat::RGBA16Snorm:
@@ -199,8 +207,12 @@ bool IsRenderableFormat(const wgpu::Device& device, wgpu::TextureFormat textureF
         return false;
     }
 
-    if (IsNorm16TextureFormat(textureFormat)) {
-        return device.HasFeature(wgpu::FeatureName::Norm16TextureFormats);
+    if (IsUnorm16TextureFormat(textureFormat)) {
+        return device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats);
+    }
+
+    if (IsSnorm16TextureFormat(textureFormat)) {
+        return device.HasFeature(wgpu::FeatureName::Snorm16TextureFormats);
     }
 
     switch (textureFormat) {
@@ -225,8 +237,12 @@ bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
         return false;
     }
 
-    if (IsNorm16TextureFormat(textureFormat)) {
-        return device.HasFeature(wgpu::FeatureName::Norm16TextureFormats);
+    if (IsUnorm16TextureFormat(textureFormat)) {
+        return device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats);
+    }
+
+    if (IsSnorm16TextureFormat(textureFormat)) {
+        return device.HasFeature(wgpu::FeatureName::Snorm16TextureFormats);
     }
 
     switch (textureFormat) {
@@ -273,7 +289,7 @@ bool TextureFormatSupportsResolveTarget(const wgpu::Device& device,
         case wgpu::TextureFormat::RG16Snorm:
         case wgpu::TextureFormat::RGBA16Unorm:
         case wgpu::TextureFormat::RGBA16Snorm:
-            return device.HasFeature(wgpu::FeatureName::Norm16TextureFormats);
+            return device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats);
 
         default:
             return false;

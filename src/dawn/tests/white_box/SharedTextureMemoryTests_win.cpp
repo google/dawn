@@ -211,8 +211,8 @@ class Backend : public SharedTextureMemoryTestBackend {
             {DXGI_FORMAT_R8G8B8A8_UNORM},
             {DXGI_FORMAT_B8G8R8A8_UNORM},
             {DXGI_FORMAT_R10G10B10A2_UNORM},
-            {DXGI_FORMAT_R16G16_UNORM, wgpu::FeatureName::Norm16TextureFormats},
-            {DXGI_FORMAT_R16_UNORM, wgpu::FeatureName::Norm16TextureFormats},
+            {DXGI_FORMAT_R16G16_UNORM, wgpu::FeatureName::Unorm16TextureFormats},
+            {DXGI_FORMAT_R16_UNORM, wgpu::FeatureName::Unorm16TextureFormats},
             {DXGI_FORMAT_R8G8_UNORM},
             {DXGI_FORMAT_R8_UNORM},
         }};
