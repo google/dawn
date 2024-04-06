@@ -43,12 +43,14 @@ add_subdirectory(../../../../../.. dawn)
 
 target_compile_definitions(webgpu_dawn PRIVATE WGPU_IMPLEMENTATION WGPU_SHARED_LIBRARY)
 
+add_library(native_dawn Util.cpp)
+
 # It is not clear why abs::raw_hash_set is not part of the bundled dependency tree naturally.
-bundle_libraries(webgpu_c_bundled webgpu_dawn absl::raw_hash_set)
+bundle_libraries(webgpu_c_bundled webgpu_dawn native_dawn absl::raw_hash_set)
 
 find_library(log-lib log)
 
-target_link_libraries(webgpu_c_bundled ${log-lib})
+target_link_libraries(webgpu_c_bundled ${log-lib} android)
 
 add_custom_command(TARGET webgpu_c_bundled POST_BUILD
                    COMMAND rm -r "${CMAKE_SOURCE_DIR}/gen" || echo)
