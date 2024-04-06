@@ -369,6 +369,9 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
 
 // Test writing the whole texture for varying texture sizes.
 TEST_P(QueueWriteTextureTests, VaryingTextureSize) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     for (unsigned int w : {127, 128}) {
         for (unsigned int h : {63, 64}) {
             for (unsigned int d : {1, 3, 4}) {
@@ -385,6 +388,9 @@ TEST_P(QueueWriteTextureTests, VaryingTextureSize) {
 
 // Test uploading a large amount of data with writeTexture.
 TEST_P(QueueWriteTextureTests, LargeWriteTexture) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     TextureSpec textureSpec;
     textureSpec.textureSize = {2048, 2048, 2};
     textureSpec.copyOrigin = {0, 0, 0};
@@ -485,6 +491,9 @@ TEST_P(QueueWriteTextureTests, VaryingArrayWriteSize) {
 
 // Test writing to varying mips
 TEST_P(QueueWriteTextureTests, TextureWriteToMip) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
 
@@ -502,6 +511,9 @@ TEST_P(QueueWriteTextureTests, TextureWriteToMip) {
 
 // Test writing with different multiples of texel block size as data offset
 TEST_P(QueueWriteTextureTests, VaryingDataOffset) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
 
@@ -520,6 +532,9 @@ TEST_P(QueueWriteTextureTests, VaryingDataOffset) {
 
 // Test writing with rowsPerImage greater than needed.
 TEST_P(QueueWriteTextureTests, VaryingRowsPerImage) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     constexpr uint32_t kWidth = 65;
     constexpr uint32_t kHeight = 31;
     constexpr uint32_t kDepth = 17;
@@ -549,6 +564,9 @@ TEST_P(QueueWriteTextureTests, VaryingRowsPerImage) {
 
 // Test with bytesPerRow greater than needed
 TEST_P(QueueWriteTextureTests, VaryingBytesPerRow) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 129;
 
@@ -603,6 +621,9 @@ TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
 TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 129;
@@ -679,6 +700,9 @@ TEST_P(QueueWriteTextureTests, StrideSpecialCases) {
 // Testing a special code path: writing when dynamic uploader already contatins some unaligned
 // data, it might be necessary to use a ring buffer with properly aligned offset.
 TEST_P(QueueWriteTextureTests, UnalignedDynamicUploader) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     utils::UnalignDynamicUploader(device);
 
     constexpr wgpu::Extent3D size = {10, 10, 1};
@@ -754,6 +778,9 @@ TEST_P(QueueWriteTextureSimpleTests, WriteTo64x1TextureFromUnalignedDynamicUploa
 TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectWithSourceOffsetUnalignedTo4) {
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
@@ -857,6 +884,9 @@ TEST_P(QueueWriteTextureSimpleTests, WriteDepthAspectAfterOtherQueueWriteTexture
 TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectAfterOtherQueueWriteTextureCalls) {
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;

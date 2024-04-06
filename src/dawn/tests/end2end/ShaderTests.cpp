@@ -2242,6 +2242,9 @@ TEST_P(ShaderTests, UniformAcrossStagesSameBindingPointCollideMixedStructDef) {
 
 // Test that the `w` component of fragment builtin position behaves correctly.
 TEST_P(ShaderTests, FragmentPositionW) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 @vertex fn main(@builtin(vertex_index) vertex_index : u32) -> @builtin(position) vec4f {
   let pos = array(

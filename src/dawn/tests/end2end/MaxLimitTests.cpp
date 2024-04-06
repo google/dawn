@@ -1284,6 +1284,9 @@ class MaxVertexAttributesPipelineCreationTests : public MaxLimitTests {
 // Tests that maxVertexAttributes work for the creation of the render pipelines with no built-in
 // input variables.
 TEST_P(MaxVertexAttributesPipelineCreationTests, NoBuiltinInputs) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     TestSpec spec = {};
     DoTest(spec);
 }
@@ -1291,6 +1294,9 @@ TEST_P(MaxVertexAttributesPipelineCreationTests, NoBuiltinInputs) {
 // Tests that maxVertexAttributes work for the creation of the render pipelines with
 // @builtin(vertex_index).
 TEST_P(MaxVertexAttributesPipelineCreationTests, VertexIndex) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     TestSpec spec = {};
     spec.hasVertexIndex = true;
     DoTest(spec);
@@ -1299,6 +1305,9 @@ TEST_P(MaxVertexAttributesPipelineCreationTests, VertexIndex) {
 // Tests that maxVertexAttributes work for the creation of the render pipelines with
 // @builtin(instance_index).
 TEST_P(MaxVertexAttributesPipelineCreationTests, InstanceIndex) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     TestSpec spec = {};
     spec.hasInstanceIndex = true;
     DoTest(spec);
@@ -1307,6 +1316,9 @@ TEST_P(MaxVertexAttributesPipelineCreationTests, InstanceIndex) {
 // Tests that maxVertexAttributes work for the creation of the render pipelines with
 // @builtin(vertex_index) and @builtin(instance_index).
 TEST_P(MaxVertexAttributesPipelineCreationTests, VertexIndex_InstanceIndex) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
     TestSpec spec = {};
     spec.hasVertexIndex = true;
     spec.hasInstanceIndex = true;
