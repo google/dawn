@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-04-05 11:15:08AM
+# Last rolled: 2024-04-06 07:40:16AM
 
 # Flaky on all platforms
 # KEEP
@@ -514,3 +514,8 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:getMap
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,i32_conversion:abstract_float:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,u32_conversion:abstract_float:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:builtin_value_names:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_sampling_names:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_type_names:* [ Failure ]
