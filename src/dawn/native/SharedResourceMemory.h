@@ -42,6 +42,8 @@ namespace dawn::native {
 
 class SharedResourceMemoryContents;
 
+enum SharedResourceAccessState { NotAccessed, ExclusiveRead, SimultaneousRead, Write };
+
 class SharedResource : public ApiObjectBase {
   public:
     using ApiObjectBase::ApiObjectBase;
@@ -133,8 +135,8 @@ class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedR
         BufferBase* buffer,
         UnpackedPtr<SharedBufferMemoryEndAccessState>& state);
 
-    bool mHasWriteAccess = false;
-    bool mHasExclusiveReadAccess = false;
+    Ref<SharedResource> mExclusiveAccess;
+    SharedResourceAccessState mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
     int mReadAccessCount = 0;
     Ref<SharedResourceMemoryContents> mContents;
 };

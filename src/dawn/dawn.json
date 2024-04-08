@@ -1867,7 +1867,7 @@
         "tags": ["dawn", "native"],
         "members": [
             {"name": "initialized", "type": "bool"},
-            {"name": "fence count", "type": "size_t"},
+            {"name": "fence count", "type": "size_t", "default": "0"},
             {"name": "fences", "type": "shared fence", "annotation": "const*", "length": "fence count"},
             {"name": "signaled values", "type": "uint64_t", "annotation": "const*", "length": "fence count"}
         ]
@@ -1878,7 +1878,7 @@
         "tags": ["dawn", "native"],
         "members": [
             {"name": "initialized", "type": "bool"},
-            {"name": "fence count", "type": "size_t"},
+            {"name": "fence count", "type": "size_t", "default": "0"},
             {"name": "fences", "type": "shared fence", "annotation": "const*", "length": "fence count"},
             {"name": "signaled values", "type": "uint64_t", "annotation": "const*", "length": "fence count"}
         ]

@@ -65,13 +65,13 @@ class SharedBufferMemoryBase : public SharedResourceMemory {
                            const SharedBufferMemoryDescriptor* descriptor,
                            ObjectBase::ErrorTag tag);
 
-    SharedBufferMemoryProperties mProperties;
-
   private:
     ResultOrError<Ref<BufferBase>> CreateBuffer(const BufferDescriptor* rawDescriptor);
 
     virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(
         const UnpackedPtr<BufferDescriptor>& descriptor) = 0;
+
+    SharedBufferMemoryProperties mProperties;
 };
 
 }  // namespace dawn::native

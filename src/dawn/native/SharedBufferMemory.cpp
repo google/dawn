@@ -32,6 +32,7 @@
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Queue.h"
 
 namespace dawn::native {
 
@@ -42,10 +43,20 @@ class ErrorSharedBufferMemory : public SharedBufferMemoryBase {
     ErrorSharedBufferMemory(DeviceBase* device, const SharedBufferMemoryDescriptor* descriptor)
         : SharedBufferMemoryBase(device, descriptor, ObjectBase::kError) {}
 
+    Ref<SharedResourceMemoryContents> CreateContents() override { DAWN_UNREACHABLE(); }
     ResultOrError<Ref<BufferBase>> CreateBufferImpl(
         const UnpackedPtr<BufferDescriptor>& descriptor) override {
         DAWN_UNREACHABLE();
     }
+    MaybeError BeginAccessImpl(BufferBase* buffer,
+                               const UnpackedPtr<BeginAccessDescriptor>& descriptor) override {
+        DAWN_UNREACHABLE();
+    }
+    ResultOrError<FenceAndSignalValue> EndAccessImpl(BufferBase* buffer,
+                                                     UnpackedPtr<EndAccessState>& state) override {
+        DAWN_UNREACHABLE();
+    }
+    void DestroyImpl() override {}
 };
 
 }  // namespace
@@ -112,6 +123,12 @@ ResultOrError<Ref<BufferBase>> SharedBufferMemoryBase::CreateBuffer(
     // Validate the buffer descriptor.
     UnpackedPtr<BufferDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateBufferDescriptor(GetDevice(), rawDescriptor));
+
+    // Emit a specific error message if the user attempts to create a buffer with Uniform usage.
+    DAWN_INVALID_IF(descriptor->usage & wgpu::BufferUsage::Uniform,
+                    "The buffer usage (%s) contains (%s), which is not allowed on buffers created "
+                    "from SharedBufferMemory.",
+                    descriptor->usage, wgpu::BufferUsage::Uniform);
 
     // Ensure the buffer descriptor usage is a subset of the shared buffer memory's usage.
     DAWN_INVALID_IF(!IsSubset(descriptor->usage, mProperties.usage),

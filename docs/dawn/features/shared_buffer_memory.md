@@ -2,7 +2,9 @@
 
 ## Overview
 
-TODO(dawn:2382): Add feature name(s) when implementation is complete.
+Shared Buffer Memory refers to a superset of features that allow Dawn to import externally allocated buffers.
+
+- `wgpu::FeatureName::SharedBufferMemoryD3D12Resource`
 
 ```c++
 wgpu::SharedBufferMemoryFooBarDescriptor fooBarDesc = {
@@ -60,6 +62,10 @@ queue.submit(1, &commandBuffer);
 wgpu::SharedBufferMemoryEndAccessState endAccessDesc = { ... };
 memory.EndAccess(buffer, &endAccessDesc);
 ```
+
+# Uniform Usage Restriction
+
+Using wgpu:BufferUsage::Uniform with a buffer created from SharedBufferMemory is not allowed due to an alignment restriction on D3D12 when creating a constant buffer view. It is possible this restriction could be removed in the future if additional alignment restrictions are placed on the provided SharedBufferMemory during import.
 
 # Mappable Buffers
 

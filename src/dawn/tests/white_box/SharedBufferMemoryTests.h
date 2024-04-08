@@ -47,7 +47,14 @@ class SharedBufferMemoryTestBackend {
     virtual std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& device) const = 0;
 
     // Create one basic shared buffer memory. It should support most operations.
-    virtual wgpu::SharedBufferMemory CreateSharedBufferMemory(const wgpu::Device& device) = 0;
+    virtual wgpu::SharedBufferMemory CreateSharedBufferMemory(const wgpu::Device& device,
+                                                              wgpu::BufferUsage usages,
+                                                              uint32_t bufferSize,
+                                                              uint32_t data = 0) = 0;
+
+    // Creates a SharedFence from a backend-specific fence type.
+    wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
+                                    const wgpu::SharedFence& fence);
 };
 
 using Backend = SharedBufferMemoryTestBackend*;
@@ -57,6 +64,9 @@ class SharedBufferMemoryTests : public DawnTestWithParams<SharedBufferMemoryTest
   public:
     void SetUp() override;
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
+
+  protected:
+    void MapAsyncAndWait(const wgpu::Buffer& buffer, wgpu::MapMode mode, uint32_t bufferSize);
 };
 }  // namespace dawn
 

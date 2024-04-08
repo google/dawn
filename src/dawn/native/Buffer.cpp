@@ -764,7 +764,7 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
         case BufferState::HostMappedPersistent:
             return DAWN_VALIDATION_ERROR("Host-mapped %s cannot be mapped again.", this);
         case BufferState::SharedMemoryNoAccess:
-            return DAWN_VALIDATION_ERROR("%s used in submit without shared memory access.", this);
+            return DAWN_VALIDATION_ERROR("%s used without shared memory access.", this);
         case BufferState::Unmapped:
             break;
     }
