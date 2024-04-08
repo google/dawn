@@ -50,7 +50,7 @@ foreach(file, list_from_ts_sources_txt) {
 js_outputs = []
 foreach(ts_file, filter_exclude(list_from_ts_sources_txt, [ "*.d.ts" ])) {
   js_file = string_replace(ts_file, ".ts", ".js")
-  js_node_file = string_replace(js_file, "src/", "src-node/")
+  js_node_file = string_replace(js_file, "src/", "src-node/", 1)
 
   js_outputs += [ "$target_gen_dir/../../webgpu-cts/$js_file" ]
 
@@ -61,6 +61,15 @@ foreach(ts_file, filter_exclude(list_from_ts_sources_txt, [ "*.d.ts" ])) {
       "src-node/webgpu/web_platform/worker/worker_launcher.js") {
     js_outputs += [ "$target_gen_dir/../../webgpu-cts/$js_node_file" ]
   }
+}
+foreach(ts_file,
+        filter_include(list_from_ts_sources_txt, [ "src/webgpu/*.spec.ts" ])) {
+  worker_js_file =
+      string_replace(string_replace(ts_file, ".spec.ts", ".worker.js"),
+                     "src/webgpu/",
+                     "src/webgpu/webworker/",
+                     1)
+  js_outputs += [ "$target_gen_dir/../../webgpu-cts/$worker_js_file" ]
 }
 
 action("compile_src") {

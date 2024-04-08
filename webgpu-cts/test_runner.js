@@ -34,8 +34,9 @@ import { Logger } from '../third_party/webgpu-cts/src/common/internal/logging/lo
 import { parseQuery } from '../third_party/webgpu-cts/src/common/internal/query/parseQuery.js';
 import { parseSearchParamLikeWithCTSOptions } from '../third_party/webgpu-cts/src/common/runtime/helper/options.js';
 import { setDefaultRequestAdapterOptions } from '../third_party/webgpu-cts/src/common/util/navigator_gpu.js';
+import { unreachable } from '../third_party/webgpu-cts/src/common/util/util.js';
 
-import { TestWorker, TestDedicatedWorker, TestSharedWorker, TestServiceWorker } from '../third_party/webgpu-cts/src/common/runtime/helper/test_worker.js';
+import { TestDedicatedWorker, TestSharedWorker, TestServiceWorker } from '../third_party/webgpu-cts/src/common/runtime/helper/test_worker.js';
 
 // The Python-side websockets library has a max payload size of 72638. Set the
 // max allowable logs size in a single payload to a bit less than that.
@@ -115,7 +116,7 @@ async function setupWebsocket(port) {
 
 async function runCtsTestViaSocket(event) {
   let input = JSON.parse(event.data);
-  runCtsTest(input['q'], input['w']);
+  runCtsTest(input['q']);
 }
 
 dataCache.setStore({
@@ -174,19 +175,14 @@ if (!isWindows) {
   globalTestConfig.unrollConstEvalLoops = true;
 }
 
-// MAINTENANCE_TODO(gman): remove use_worker since you can use worker=1 instead
-async function runCtsTest(queryString, use_worker) {
+async function runCtsTest(queryString) {
   const { queries, options } = parseSearchParamLikeWithCTSOptions(queryString);
-  const workerEnabled = use_worker || options.worker;
-  const worker = workerEnabled ? new TestWorker(options) : undefined;
-  const dedicatedWorker =
-    options.worker === "dedicated"
-      ? new TestDedicatedWorker(options)
-      : undefined;
-  const sharedWorker =
-    options.worker === "shared" ? new TestSharedWorker(options) : undefined;
-  const serviceWorker =
-    options.worker === "service" ? new TestServiceWorker(options) : undefined;
+  const testWorker =
+    options.worker === null ? null :
+    options.worker === 'dedicated' ? new TestDedicatedWorker(options) :
+    options.worker === 'shared' ? new TestSharedWorker(options) :
+    options.worker === 'service' ? new TestServiceWorker(options) :
+    unreachable();
 
   const loader = new DefaultTestFileLoader();
   const filterQuery = parseQuery(queries[0]);
@@ -223,14 +219,8 @@ async function runCtsTest(queryString, use_worker) {
     const [rec, res] = log.record(name);
 
     beginHeartbeatScope();
-    if (worker) {
-      await worker.run(rec, name, expectations);
-    } else if (dedicatedWorker) {
-      await dedicatedWorker.run(rec, name, expectations);
-    } else if (sharedWorker) {
-      await sharedWorker.run(rec, name, expectations);
-    } else if (serviceWorker) {
-      await serviceWorker.run(rec, name, expectations);
+    if (testWorker) {
+      await testWorker.run(rec, name, expectations);
     } else {
       await testcase.run(rec, expectations);
     }
@@ -304,5 +294,4 @@ function sendMessageInfraFailure(message) {
   }));
 }
 
-window.runCtsTest = runCtsTest;
 window.setupWebsocket = setupWebsocket

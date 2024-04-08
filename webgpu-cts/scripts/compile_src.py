@@ -107,8 +107,7 @@ if __name__ == "__main__":
     # from transpiling src/
     RunNode([
         os.path.join(gen_dir, "src-node", "common", "tools",
-                     "gen_listings.js"),
-        "--no-validate",
+                     "gen_listings_and_webworkers.js"),
         os.path.join(gen_dir, "src"),
         os.path.join(gen_dir, "src-node", "webgpu"),
     ])
