@@ -64,7 +64,7 @@ class ObjectBase : public LinkNode<ObjectBase> {
     Client* GetClient() const;
 
     void Reference();
-    void Release();
+    uint32_t Release();
 
   protected:
     uint32_t GetRefcount() const { return mRefcount; }

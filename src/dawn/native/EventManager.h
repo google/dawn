@@ -72,8 +72,8 @@ class EventManager final : NonMovable {
 
     class TrackedEvent;
     // Track a TrackedEvent and give it a FutureID.
-    [[nodiscard]] FutureID TrackEvent(Ref<TrackedEvent>&&);
-    void SetFutureReady(FutureID futureID);
+    FutureID TrackEvent(Ref<TrackedEvent>&&);
+    void SetFutureReady(TrackedEvent* event);
 
     // Returns true if future ProcessEvents is needed.
     bool ProcessPollEvents();
@@ -152,6 +152,7 @@ class EventManager::TrackedEvent : public RefCounted {
     virtual void Complete(EventCompletionType) = 0;
 
     wgpu::CallbackMode mCallbackMode;
+    FutureID mFutureID = kNullFutureID;
 
 #if DAWN_ENABLE_ASSERTS
     std::atomic<bool> mCurrentlyBeingWaited = false;

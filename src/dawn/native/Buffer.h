@@ -186,7 +186,6 @@ class BufferBase : public SharedResource {
     size_t mMapSize = 0;
 
     struct MapAsyncEvent;
-    FutureID mPendingMapFutureID = kNullFutureID;
     Ref<MapAsyncEvent> mPendingMapEvent;
 };
 

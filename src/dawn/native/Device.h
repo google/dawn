@@ -78,9 +78,40 @@ struct ShaderModuleParseResult;
 
 class DeviceBase : public RefCountedWithExternalCount {
   public:
+    struct DeviceLostEvent final : public EventManager::TrackedEvent {
+        // TODO(https://crbug.com/dawn/2465): Pass just the DeviceLostCallbackInfo when setters are
+        // deprecated. Creates and sets the device lost event for the given device if applicable. If
+        // the device is nullptr, an event is still created, but the caller owns the last ref of the
+        // event. When passing a device, note that device construction can be successful but fail
+        // later at initialization, and this should only be called with the device if initialization
+        // was successful.
+        static Ref<DeviceLostEvent> Create(const DeviceDescriptor* descriptor);
+
+        // Event result fields need to be public so that they can easily be updated prior to
+        // completing the event.
+        wgpu::DeviceLostReason mReason;
+        std::string mMessage;
+
+        wgpu::DeviceLostCallbackNew mCallback = nullptr;
+        // TODO(https://crbug.com/dawn/2465): Remove old callback when setters are deprecated, and
+        // move userdata into private.
+        wgpu::DeviceLostCallback mOldCallback = nullptr;
+        raw_ptr<void> mUserdata;
+        // Note that the device is set when the event is passed to construct a device.
+        Ref<DeviceBase> mDevice = nullptr;
+
+      private:
+        explicit DeviceLostEvent(const DeviceLostCallbackInfo& callbackInfo);
+        DeviceLostEvent(wgpu::DeviceLostCallback oldCallback, void* userdata);
+        ~DeviceLostEvent() override;
+
+        void Complete(EventCompletionType completionType) override;
+    };
+
     DeviceBase(AdapterBase* adapter,
                const UnpackedPtr<DeviceDescriptor>& descriptor,
-               const TogglesState& deviceToggles);
+               const TogglesState& deviceToggles,
+               Ref<DeviceLostEvent>&& lostEvent);
     ~DeviceBase() override;
 
     // Handles the error, causing a device loss if applicable. Almost always when a device loss
@@ -167,7 +198,9 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
-    InstanceBase* GetInstance() const;
+    // TODO(dawn:1702) Remove virtual when we mock the adapter.
+    virtual InstanceBase* GetInstance() const;
+
     AdapterBase* GetAdapter() const;
     PhysicalDeviceBase* GetPhysicalDevice() const;
     virtual dawn::platform::Platform* GetPlatform() const;
@@ -488,6 +521,11 @@ class DeviceBase : public RefCountedWithExternalCount {
     void DestroyObjects();
     void Destroy();
 
+    // Device lost event needs to be protected for now because mock device needs it.
+    // TODO(dawn:1702) Make this private and move the class in the implementation file when we mock
+    // the adapter.
+    Ref<DeviceLostEvent> mLostEvent = nullptr;
+
   private:
     void WillDropLastExternalRef() override;
 
@@ -579,15 +617,11 @@ class DeviceBase : public RefCountedWithExternalCount {
                                                     const TextureCopy& dst,
                                                     const Extent3D& copySizePixels) = 0;
 
-    wgpu::ErrorCallback mUncapturedErrorCallback = nullptr;
-    raw_ptr<void> mUncapturedErrorUserdata = nullptr;
+    UncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo;
 
     std::shared_mutex mLoggingMutex;
     wgpu::LoggingCallback mLoggingCallback = nullptr;
     raw_ptr<void> mLoggingUserdata = nullptr;
-
-    wgpu::DeviceLostCallback mDeviceLostCallback = nullptr;
-    raw_ptr<void> mDeviceLostUserdata = nullptr;
 
     std::unique_ptr<ErrorScopeStack> mErrorScopeStack;
 

@@ -208,8 +208,10 @@
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required feature count", "default": "nullptr"},
             {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
             {"name": "default queue", "type": "queue descriptor"},
-            {"name": "device lost callback", "type": "device lost callback", "default": "nullptr"},
-            {"name": "device lost userdata", "type": "void *", "default": "nullptr"}
+            {"name": "device lost callback", "type": "device lost callback", "default": "nullptr", "tags": ["deprecated"]},
+            {"name": "device lost userdata", "type": "void *", "default": "nullptr", "tags": ["deprecated"]},
+            {"name": "device lost callback info", "type": "device lost callback info"},
+            {"name": "uncaptured error callback info", "type": "uncaptured error callback info"}
         ]
     },
     "dawn toggles descriptor": {
@@ -1507,12 +1509,32 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "device lost callback new": {
+        "category": "function pointer",
+        "args": [
+            {"name": "device", "type": "device", "annotation": "const*", "length": 1},
+            {"name": "reason", "type": "device lost reason"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "device lost callback info": {
+        "category": "structure",
+        "extensible": "in",
+        "members": [
+            {"name": "mode", "type": "callback mode", "default": "wait any only", "_comment": "TODO(crbug.com/dawn/2458) Default should be removed."},
+            {"name": "callback", "type": "device lost callback new", "default": "nullptr"},
+            {"name": "userdata", "type": "void *", "default": "nullptr"}
+        ]
+    },
     "device lost reason": {
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "destroyed"}
+            {"value": 1, "name": "destroyed"},
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "failed creation"}
         ]
     },
     "double": {
@@ -1524,6 +1546,14 @@
             {"name": "type", "type": "error type"},
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "uncaptured error callback info": {
+        "category": "structure",
+        "extensible": "in",
+        "members": [
+            {"name": "callback", "type": "error callback", "default": "nullptr"},
+            {"name": "userdata", "type": "void *", "default": "nullptr"}
         ]
     },
     "pop error scope status": {
@@ -2371,7 +2401,7 @@
     "callback mode": {
         "category": "enum",
         "emscripten_no_enum_table": true,
-        "_comment": "TODO(crbug.com/dawn/2224): Should this be renumbered to reserve 0?",
+        "_comment": "TODO(crbug.com/dawn/2458): Should this be renumbered to reserve 0?",
         "values": [
             {"value": 0, "name": "wait any only"},
             {"value": 1, "name": "allow process events"},

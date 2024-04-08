@@ -66,15 +66,4 @@ WireResult Client::DoDeviceLoggingCallback(Device* device,
     return WireResult::Success;
 }
 
-WireResult Client::DoDeviceLostCallback(Device* device,
-                                        WGPUDeviceLostReason reason,
-                                        char const* message) {
-    if (device == nullptr) {
-        // The device might have been deleted or recreated so this isn't an error.
-        return WireResult::Success;
-    }
-    device->HandleDeviceLost(reason, message);
-    return WireResult::Success;
-}
-
 }  // namespace dawn::wire::client

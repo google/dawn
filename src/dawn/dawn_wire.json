@@ -115,6 +115,7 @@
             { "name": "event manager handle", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "device object handle", "type": "ObjectHandle", "handle_type": "device"},
+            { "name": "device lost future", "type": "future" },
             { "name": "descriptor", "type": "device descriptor", "annotation": "const*" }
         ]
     },
@@ -149,7 +150,8 @@
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
         "device lost callback" : [
-            { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
+            { "name": "event manager", "type": "ObjectHandle" },
+            { "name": "future", "type": "future" },
             { "name": "reason", "type": "device lost reason" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],

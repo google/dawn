@@ -56,9 +56,13 @@ void Server::OnUncapturedError(ObjectHandle device, WGPUErrorType type, const ch
     SerializeCommand(cmd);
 }
 
-void Server::OnDeviceLost(ObjectHandle device, WGPUDeviceLostReason reason, const char* message) {
+void Server::OnDeviceLost(DeviceLostUserdata* userdata,
+                          WGPUDevice const* device,
+                          WGPUDeviceLostReason reason,
+                          const char* message) {
     ReturnDeviceLostCallbackCmd cmd;
-    cmd.device = device;
+    cmd.eventManager = userdata->eventManager;
+    cmd.future = userdata->future;
     cmd.reason = reason;
     cmd.message = message;
 
