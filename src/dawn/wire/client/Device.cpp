@@ -200,7 +200,7 @@ Device::Device(const ObjectBaseParams& params,
 
 Device::~Device() {
     if (mQueue != nullptr) {
-        GetProcs().queueRelease(ToAPI(mQueue));
+        GetProcs().queueRelease(ToAPI(mQueue.ExtractAsDangling()));
     }
 }
 

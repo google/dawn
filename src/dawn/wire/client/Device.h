@@ -105,8 +105,7 @@ class Device final : public ObjectWithEventsBase {
     raw_ptr<void, DanglingUntriaged> mDeviceLostUserdata = nullptr;
     raw_ptr<void> mLoggingUserdata = nullptr;
 
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire:
-    raw_ptr<Queue, DanglingUntriaged> mQueue = nullptr;
+    raw_ptr<Queue> mQueue = nullptr;
 
     std::shared_ptr<bool> mIsAlive;
 };
