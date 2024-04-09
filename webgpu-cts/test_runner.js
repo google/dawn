@@ -175,14 +175,25 @@ if (!isWindows) {
   globalTestConfig.unrollConstEvalLoops = true;
 }
 
+let lastOptionsKey, testWorker;
+
 async function runCtsTest(queryString) {
   const { queries, options } = parseSearchParamLikeWithCTSOptions(queryString);
-  const testWorker =
-    options.worker === null ? null :
-    options.worker === 'dedicated' ? new TestDedicatedWorker(options) :
-    options.worker === 'shared' ? new TestSharedWorker(options) :
-    options.worker === 'service' ? new TestServiceWorker(options) :
-    unreachable();
+
+  // Set up a worker with the options passed into the test, avoiding creating
+  // a new worker if one was already set up for the last test.
+  // In practice, the options probably won't change between tests in a single
+  // invocation of run_gpu_integration_test.py, but this handles if they do.
+  const currentOptionsKey = JSON.stringify(options);
+  if (currentOptionsKey !== lastOptionsKey) {
+    lastOptionsKey = currentOptionsKey;
+    testWorker =
+      options.worker === null ? null :
+      options.worker === 'dedicated' ? new TestDedicatedWorker(options) :
+      options.worker === 'shared' ? new TestSharedWorker(options) :
+      options.worker === 'service' ? new TestServiceWorker(options) :
+      unreachable();
+  }
 
   const loader = new DefaultTestFileLoader();
   const filterQuery = parseQuery(queries[0]);
