@@ -573,10 +573,12 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
             if (!mVulkanInstancesCreated[icd]) {
                 mVulkanInstancesCreated.set(icd);
 
-                instance->ConsumedErrorAndWarnOnce([&]() -> MaybeError {
-                    DAWN_TRY_ASSIGN(mVulkanInstances[icd], VulkanInstance::Create(instance, icd));
-                    return {};
-                }());
+                [[maybe_unused]] bool hadError =
+                    instance->ConsumedErrorAndWarnOnce([&]() -> MaybeError {
+                        DAWN_TRY_ASSIGN(mVulkanInstances[icd],
+                                        VulkanInstance::Create(instance, icd));
+                        return {};
+                    }());
             }
 
             if (mVulkanInstances[icd] == nullptr) {

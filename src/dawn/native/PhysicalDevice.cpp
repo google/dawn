@@ -200,7 +200,7 @@ void PhysicalDeviceBase::SetSupportedFeaturesForTesting(
 }
 
 void PhysicalDeviceBase::ResetInternalDeviceForTesting() {
-    mInstance->ConsumedError(ResetInternalDeviceForTestingImpl());
+    [[maybe_unused]] bool hadError = mInstance->ConsumedError(ResetInternalDeviceForTestingImpl());
 }
 
 MaybeError PhysicalDeviceBase::ResetInternalDeviceForTestingImpl() {

@@ -276,6 +276,7 @@ source_set("sources") {
     "ErrorInjector.h",
     "ErrorScope.cpp",
     "ErrorScope.h",
+    "ErrorSink.h",
     "EventManager.cpp",
     "EventManager.h",
     "ExecutionQueue.cpp",

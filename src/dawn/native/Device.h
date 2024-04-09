@@ -42,6 +42,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/ErrorSink.h"
 #include "dawn/native/ExecutionQueue.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/Format.h"
@@ -76,7 +77,7 @@ struct CallbackTask;
 struct InternalPipelineStore;
 struct ShaderModuleParseResult;
 
-class DeviceBase : public RefCountedWithExternalCount {
+class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
   public:
     DeviceBase(AdapterBase* adapter,
                const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -92,78 +93,6 @@ class DeviceBase : public RefCountedWithExternalCount {
     void HandleError(std::unique_ptr<ErrorData> error,
                      InternalErrorType additionalAllowedErrors = InternalErrorType::None,
                      WGPUDeviceLostReason lost_reason = WGPUDeviceLostReason_Undefined);
-
-    // Variants of ConsumedError must use the returned boolean to handle failure cases since an
-    // error may cause a device loss and further execution may be undefined. This is especially
-    // true for the ResultOrError variants.
-    [[nodiscard]] bool ConsumedError(
-        MaybeError maybeError,
-        InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
-        if (DAWN_UNLIKELY(maybeError.IsError())) {
-            ConsumeError(maybeError.AcquireError(), additionalAllowedErrors);
-            return true;
-        }
-        return false;
-    }
-    template <typename... Args>
-    [[nodiscard]] bool ConsumedError(MaybeError maybeError,
-                                     InternalErrorType additionalAllowedErrors,
-                                     const char* formatStr,
-                                     const Args&... args) {
-        if (DAWN_UNLIKELY(maybeError.IsError())) {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
-            if (error->GetType() == InternalErrorType::Validation) {
-                error->AppendContext(formatStr, args...);
-            }
-            ConsumeError(std::move(error), additionalAllowedErrors);
-            return true;
-        }
-        return false;
-    }
-    template <typename... Args>
-    [[nodiscard]] bool ConsumedError(MaybeError maybeError,
-                                     const char* formatStr,
-                                     const Args&... args) {
-        return ConsumedError(std::move(maybeError), InternalErrorType::None, formatStr, args...);
-    }
-
-    template <typename T>
-    [[nodiscard]] bool ConsumedError(
-        ResultOrError<T> resultOrError,
-        T* result,
-        InternalErrorType additionalAllowedErrors = InternalErrorType::None) {
-        if (DAWN_UNLIKELY(resultOrError.IsError())) {
-            ConsumeError(resultOrError.AcquireError(), additionalAllowedErrors);
-            return true;
-        }
-        *result = resultOrError.AcquireSuccess();
-        return false;
-    }
-    template <typename T, typename... Args>
-    [[nodiscard]] bool ConsumedError(ResultOrError<T> resultOrError,
-                                     T* result,
-                                     InternalErrorType additionalAllowedErrors,
-                                     const char* formatStr,
-                                     const Args&... args) {
-        if (DAWN_UNLIKELY(resultOrError.IsError())) {
-            std::unique_ptr<ErrorData> error = resultOrError.AcquireError();
-            if (error->GetType() == InternalErrorType::Validation) {
-                error->AppendContext(formatStr, args...);
-            }
-            ConsumeError(std::move(error), additionalAllowedErrors);
-            return true;
-        }
-        *result = resultOrError.AcquireSuccess();
-        return false;
-    }
-    template <typename T, typename... Args>
-    [[nodiscard]] bool ConsumedError(ResultOrError<T> resultOrError,
-                                     T* result,
-                                     const char* formatStr,
-                                     const Args&... args) {
-        return ConsumedError(std::move(resultOrError), result, InternalErrorType::None, formatStr,
-                             args...);
-    }
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
@@ -559,8 +488,9 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     void SetWGSLExtensionAllowList();
 
+    // ErrorSink implementation
     void ConsumeError(std::unique_ptr<ErrorData> error,
-                      InternalErrorType additionalAllowedErrors = InternalErrorType::None);
+                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
 
     bool HasPendingTasks();
     bool IsDeviceIdle();

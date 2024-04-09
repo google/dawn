@@ -131,6 +131,7 @@ target_sources(dawn_native
     "ErrorInjector.h"
     "ErrorScope.cpp"
     "ErrorScope.h"
+    "ErrorSink.h"
     "EventManager.cpp"
     "EventManager.h"
     "Features.cpp"

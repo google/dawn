@@ -42,6 +42,7 @@
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
+#include "dawn/native/ErrorSink.h"
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/Forward.h"
@@ -72,7 +73,7 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor);
 
 // This is called InstanceBase for consistency across the frontend, even if the backends don't
 // specialize this class.
-class InstanceBase final : public RefCountedWithExternalCount {
+class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount {
   public:
     static ResultOrError<Ref<InstanceBase>> Create(const InstanceDescriptor* descriptor = nullptr);
 
@@ -88,19 +89,6 @@ class InstanceBase final : public RefCountedWithExternalCount {
     std::vector<Ref<AdapterBase>> EnumerateAdapters(const RequestAdapterOptions* options = nullptr);
 
     size_t GetPhysicalDeviceCountForTesting() const;
-
-    // Used to handle error that happen up to device creation.
-    bool ConsumedError(MaybeError maybeError);
-
-    template <typename T>
-    bool ConsumedError(ResultOrError<T> resultOrError, T* result) {
-        if (resultOrError.IsError()) {
-            ConsumeError(resultOrError.AcquireError());
-            return true;
-        }
-        *result = resultOrError.AcquireSuccess();
-        return false;
-    }
 
     // Consume an error and log its warning at most once. This is useful for
     // physical device creation errors that happen because the backend is not
@@ -202,7 +190,10 @@ class InstanceBase final : public RefCountedWithExternalCount {
                                    wgpu::PowerPreference powerPreference) const;
 
     void GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist);
-    void ConsumeError(std::unique_ptr<ErrorData> error);
+
+    // ErrorSink implementation
+    void ConsumeError(std::unique_ptr<ErrorData> error,
+                      InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
 
     absl::flat_hash_set<std::string> mWarningMessages;
 

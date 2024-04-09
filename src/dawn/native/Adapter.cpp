@@ -117,17 +117,17 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
 
     if (unpacked.Get<AdapterPropertiesMemoryHeaps>() != nullptr &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
-        instance->ConsumedError(
+        [[maybe_unused]] bool hadError = instance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
     }
     if (unpacked.Get<AdapterPropertiesD3D>() != nullptr &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesD3D)) {
-        instance->ConsumedError(
+        [[maybe_unused]] bool hadError = instance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesD3D is not available."));
     }
     if (unpacked.Get<AdapterPropertiesVk>() != nullptr &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk)) {
-        instance->ConsumedError(
+        [[maybe_unused]] bool hadError = instance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesVk is not available."));
     }
 
@@ -197,12 +197,11 @@ DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
         descriptor = &kDefaultDesc;
     }
 
-    auto result = CreateDevice(descriptor);
-    if (result.IsError()) {
-        mPhysicalDevice->GetInstance()->ConsumedError(result.AcquireError());
+    Ref<DeviceBase> device;
+    if (mPhysicalDevice->GetInstance()->ConsumedError(CreateDevice(descriptor), &device)) {
         return nullptr;
     }
-    return ReturnToAPI(result.AcquireSuccess());
+    return ReturnToAPI(std::move(device));
 }
 
 ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor* rawDescriptor) {
@@ -334,7 +333,7 @@ bool AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
                                            FormatCapabilities* capabilities) {
     InstanceBase* instance = mPhysicalDevice->GetInstance();
     if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::FormatCapabilities)) {
-        instance->ConsumedError(
+        [[maybe_unused]] bool hadError = instance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature FormatCapabilities is not available."));
         return false;
     }
@@ -347,7 +346,7 @@ bool AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
 
     if (unpacked.Get<DrmFormatCapabilities>() != nullptr &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DrmFormatCapabilities)) {
-        instance->ConsumedError(
+        [[maybe_unused]] bool hadError = instance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature DrmFormatCapabilities is not available."));
         return false;
     }
