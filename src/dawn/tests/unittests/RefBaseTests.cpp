@@ -316,5 +316,30 @@ TEST(RefBase, TCopyAssignmentAlternate) {
                                              Event{Action::kMarker, 30}));
 }
 
+// Regression test for an issue where RefBase<T*> comparison would end up using operator bool
+// depending on the order in which the compiler did implicit conversions.
+struct FakePtrRefTraits {
+    static constexpr int* kNullValue{nullptr};
+    static void Reference(int*) {}
+    static void Release(int*) {}
+};
+TEST(RefBase, MissingExplicitOnOperatorBool) {
+    using MyRef = RefBase<int*, FakePtrRefTraits>;
+    int a = 0;
+    int b = 1;
+    MyRef refA(&a);
+    MyRef refB(&b);
+
+    EXPECT_TRUE(refA == refA);
+    EXPECT_FALSE(refA != refA);
+    EXPECT_TRUE((refA) == (refA));
+    EXPECT_FALSE((refA) != (refA));
+
+    EXPECT_FALSE(refA == refB);
+    EXPECT_TRUE(refA != refB);
+    EXPECT_FALSE((refA) == (refB));
+    EXPECT_TRUE((refA) != (refB));
+}
+
 }  // anonymous namespace
 }  // namespace dawn

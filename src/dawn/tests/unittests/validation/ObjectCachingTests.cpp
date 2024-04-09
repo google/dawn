@@ -125,10 +125,6 @@ TEST_F(ObjectCachingTest, BindGroupLayoutViewDimension) {
 // Test that BindGroupLayouts with a static sampler entry are correctly
 // deduplicated.
 TEST_F(ObjectCachingTest, BindGroupLayoutStaticSamplerDeduplication) {
-    // TODO(crbug.com/dawn/2489): The inequality check between bind group
-    // layouts with distinct static samplers fails on the MSVC bots.
-    DAWN_SKIP_TEST_IF(DAWN_PLATFORM_IS(WINDOWS));
-
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     wgpu::StaticSamplerBindingLayout staticSamplerBinding = {};
