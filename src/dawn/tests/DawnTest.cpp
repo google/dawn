@@ -940,6 +940,16 @@ bool DawnTestBase::IsAndroid() const {
 #endif
 }
 
+bool DawnTestBase::IsMesa(const std::string& mesaVersion) const {
+#if DAWN_PLATFORM_IS(LINUX)
+    std::string mesaString = "Mesa " + mesaVersion;
+    return mParam.adapterProperties.driverDescription.find(mesaString) == std::string::npos ? false
+                                                                                            : true;
+#else
+    return false;
+#endif
+}
+
 bool DawnTestBase::UsesWire() const {
     return gTestEnv->UsesWire();
 }

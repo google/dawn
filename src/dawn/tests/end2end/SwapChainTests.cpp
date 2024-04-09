@@ -50,6 +50,10 @@ class SwapChainTests : public DawnTest {
         DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
+        // TODO(crbug.com/dawn/2492): Crashing on Ubuntu 22 (Mesa 23.2.1) + Intel UHD 630. Crash
+        // happens in SetUp code, so we cannot skip individual tests.
+        DAWN_TEST_UNSUPPORTED_IF(IsLinux() && IsIntel() && IsVulkan() && IsMesa("23.2.1"));
+
         glfwSetErrorCallback([](int code, const char* message) {
             ErrorLog() << "GLFW error " << code << " " << message;
         });
