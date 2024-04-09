@@ -247,10 +247,12 @@ MaybeError BindGroupTracker::Apply() {
         for (auto& uav : mPixelLocalStorageUAVs) {
             views.push_back(uav.Get());
         }
-        DAWN_ASSERT(uavSlotCount >= views.size());
-        mCommandContext->GetD3D11DeviceContext4()->OMSetRenderTargetsAndUnorderedAccessViews(
-            D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
-            uavSlotCount - views.size(), views.size(), views.data(), nullptr);
+        if (!views.empty()) {
+            DAWN_ASSERT(uavSlotCount >= views.size());
+            mCommandContext->GetD3D11DeviceContext4()->OMSetRenderTargetsAndUnorderedAccessViews(
+                D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
+                uavSlotCount - views.size(), views.size(), views.data(), nullptr);
+        }
     } else {
         BindGroupMask inheritedGroups =
             mPipelineLayout->InheritedGroupsMask(mLastAppliedPipelineLayout);
