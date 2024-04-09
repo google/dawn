@@ -55,9 +55,15 @@ std::vector<lsp::SignatureInformation> MaxSignatures() {
             /* documentation */ {},
         });
 
+        lsp::MarkupContent documentation;
+        documentation.kind = lsp::MarkupKind::kMarkdown;
+        documentation.value =
+            R"(
+`T` is `abstract-float`, `abstract-int`, `f32`, `i32`, `u32` or `f16`)";
+
         lsp::SignatureInformation sig{};
-        sig.label = R"('max(T, T) -> T' where:
-     'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16')";
+        sig.label = "max(T, T) -> T";
+        sig.documentation = documentation;
         sig.parameters = std::move(parameters);
 
         out.push_back(std::move(sig));
@@ -74,9 +80,15 @@ std::vector<lsp::SignatureInformation> MaxSignatures() {
             /* documentation */ {},
         });
 
+        lsp::MarkupContent documentation;
+        documentation.kind = lsp::MarkupKind::kMarkdown;
+        documentation.value =
+            R"(
+`T` is `abstract-float`, `abstract-int`, `f32`, `i32`, `u32` or `f16`)";
+
         lsp::SignatureInformation sig{};
-        sig.label = R"('max(vecN<T>, vecN<T>) -> vecN<T>' where:
-     'T' is 'abstract-float', 'abstract-int', 'f32', 'i32', 'u32' or 'f16')";
+        sig.label = R"(max(vecN<T>, vecN<T>) -> vecN<T>)";
+        sig.documentation = documentation;
         sig.parameters = std::move(parameters);
 
         out.push_back(std::move(sig));
