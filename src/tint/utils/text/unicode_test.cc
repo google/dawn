@@ -27,19 +27,19 @@
 
 #include "src/tint/utils/text/unicode.h"
 
+#include <cstdint>
+#include <ios>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "gmock/gmock.h"
+#include "src/tint/utils/text/string.h"
 
 /// Helper for constructing a CodePoint
 #define C(x) CodePoint(x)
 
 namespace tint {
-
-////////////////////////////////////////////////////////////////////////////////
-// CodePoint character set tests
-////////////////////////////////////////////////////////////////////////////////
 namespace {
 
 struct CodePointCase {
@@ -48,9 +48,29 @@ struct CodePointCase {
     bool is_xid_continue;
 };
 
-std::ostream& operator<<(std::ostream& out, CodePointCase c) {
+static std::ostream& operator<<(std::ostream& out, CodePointCase c) {
     return out << c.code_point;
 }
+
+struct CodePointAndWidth {
+    CodePoint code_point;
+    size_t width;
+};
+
+bool operator==(const CodePointAndWidth& a, const CodePointAndWidth& b) {
+    return a.code_point == b.code_point && a.width == b.width;
+}
+
+static std::ostream& operator<<(std::ostream& out, CodePointAndWidth cpw) {
+    return out << "code_point: " << cpw.code_point << ", width: " << cpw.width;
+}
+
+}  // namespace
+
+////////////////////////////////////////////////////////////////////////////////
+// CodePoint character set tests
+////////////////////////////////////////////////////////////////////////////////
+namespace {
 
 class CodePointTest : public testing::TestWithParam<CodePointCase> {};
 
@@ -232,33 +252,26 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////////////////////
 // DecodeUTF8 valid tests
 ////////////////////////////////////////////////////////////////////////////////
-namespace {
+namespace utf8_tests {
 
-struct CodePointAndWidth {
-    CodePoint code_point;
-    size_t width;
+struct UTF8Case {
+    std::vector<uint8_t> string;
+    std::vector<CodePointAndWidth> code_points;
 };
 
-bool operator==(const CodePointAndWidth& a, const CodePointAndWidth& b) {
-    return a.code_point == b.code_point && a.width == b.width;
+static std::ostream& operator<<(std::ostream& out, UTF8Case c) {
+    for (size_t i = 0; i < c.string.size(); i++) {
+        if (i > 0) {
+            out << ", ";
+        }
+        out << "0x" << std::hex << std::setfill('0') << std::setw(2) << c.string[i];
+    }
+    return out;
 }
 
-std::ostream& operator<<(std::ostream& out, CodePointAndWidth cpw) {
-    return out << "code_point: " << cpw.code_point << ", width: " << cpw.width;
-}
+class UTF8Test : public testing::TestWithParam<UTF8Case> {};
 
-struct DecodeUTF8Case {
-    std::string string;
-    std::vector<CodePointAndWidth> expected;
-};
-
-std::ostream& operator<<(std::ostream& out, DecodeUTF8Case c) {
-    return out << "'" << c.string << "'";
-}
-
-class DecodeUTF8Test : public testing::TestWithParam<DecodeUTF8Case> {};
-
-TEST_P(DecodeUTF8Test, Valid) {
+TEST_P(UTF8Test, Decode) {
     auto param = GetParam();
 
     const uint8_t* data = reinterpret_cast<const uint8_t*>(param.string.data());
@@ -275,75 +288,96 @@ TEST_P(DecodeUTF8Test, Valid) {
         got.emplace_back(CodePointAndWidth{code_point, width});
     }
 
-    EXPECT_THAT(got, ::testing::ElementsAreArray(param.expected));
+    EXPECT_THAT(got, ::testing::ElementsAreArray(param.code_points));
+}
+
+TEST_P(UTF8Test, Encode) {
+    auto param = GetParam();
+
+    Slice<const uint8_t> str{reinterpret_cast<const uint8_t*>(param.string.data()),
+                             param.string.size()};
+    for (auto codepoint : param.code_points) {
+        EXPECT_EQ(utf8::Encode(codepoint.code_point, nullptr), codepoint.width);
+
+        uint8_t encoded[4];
+        size_t len = utf8::Encode(codepoint.code_point, encoded);
+        ASSERT_EQ(len, codepoint.width);
+        EXPECT_THAT(Slice<const uint8_t>(encoded, len),
+                    ::testing::ElementsAreArray(str.Truncate(len)));
+        str = str.Offset(len);
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(AsciiLetters,
-                         DecodeUTF8Test,
+                         UTF8Test,
                          ::testing::ValuesIn({
-                             DecodeUTF8Case{"a", {{C('a'), 1}}},
-                             DecodeUTF8Case{"abc", {{C('a'), 1}, {C('b'), 1}, {C('c'), 1}}},
-                             DecodeUTF8Case{"def", {{C('d'), 1}, {C('e'), 1}, {C('f'), 1}}},
-                             DecodeUTF8Case{"gh", {{C('g'), 1}, {C('h'), 1}}},
-                             DecodeUTF8Case{"ij", {{C('i'), 1}, {C('j'), 1}}},
-                             DecodeUTF8Case{"klm", {{C('k'), 1}, {C('l'), 1}, {C('m'), 1}}},
-                             DecodeUTF8Case{"nop", {{C('n'), 1}, {C('o'), 1}, {C('p'), 1}}},
-                             DecodeUTF8Case{"qr", {{C('q'), 1}, {C('r'), 1}}},
-                             DecodeUTF8Case{"stu", {{C('s'), 1}, {C('t'), 1}, {C('u'), 1}}},
-                             DecodeUTF8Case{"vw", {{C('v'), 1}, {C('w'), 1}}},
-                             DecodeUTF8Case{"xyz", {{C('x'), 1}, {C('y'), 1}, {C('z'), 1}}},
-                             DecodeUTF8Case{"A", {{C('A'), 1}}},
-                             DecodeUTF8Case{"ABC", {{C('A'), 1}, {C('B'), 1}, {C('C'), 1}}},
-                             DecodeUTF8Case{"DEF", {{C('D'), 1}, {C('E'), 1}, {C('F'), 1}}},
-                             DecodeUTF8Case{"GH", {{C('G'), 1}, {C('H'), 1}}},
-                             DecodeUTF8Case{"IJ", {{C('I'), 1}, {C('J'), 1}}},
-                             DecodeUTF8Case{"KLM", {{C('K'), 1}, {C('L'), 1}, {C('M'), 1}}},
-                             DecodeUTF8Case{"NOP", {{C('N'), 1}, {C('O'), 1}, {C('P'), 1}}},
-                             DecodeUTF8Case{"QR", {{C('Q'), 1}, {C('R'), 1}}},
-                             DecodeUTF8Case{"STU", {{C('S'), 1}, {C('T'), 1}, {C('U'), 1}}},
-                             DecodeUTF8Case{"VW", {{C('V'), 1}, {C('W'), 1}}},
-                             DecodeUTF8Case{"XYZ", {{C('X'), 1}, {C('Y'), 1}, {C('Z'), 1}}},
+                             UTF8Case{{'a'}, {{C('a'), 1}}},
+                             UTF8Case{{'a', 'b', 'c'}, {{C('a'), 1}, {C('b'), 1}, {C('c'), 1}}},
+                             UTF8Case{{'d', 'e', 'f'}, {{C('d'), 1}, {C('e'), 1}, {C('f'), 1}}},
+                             UTF8Case{{'g', 'h'}, {{C('g'), 1}, {C('h'), 1}}},
+                             UTF8Case{{'i', 'j'}, {{C('i'), 1}, {C('j'), 1}}},
+                             UTF8Case{{'k', 'l', 'm'}, {{C('k'), 1}, {C('l'), 1}, {C('m'), 1}}},
+                             UTF8Case{{'n', 'o', 'p'}, {{C('n'), 1}, {C('o'), 1}, {C('p'), 1}}},
+                             UTF8Case{{'q', 'r'}, {{C('q'), 1}, {C('r'), 1}}},
+                             UTF8Case{{'s', 't', 'u'}, {{C('s'), 1}, {C('t'), 1}, {C('u'), 1}}},
+                             UTF8Case{{'v', 'w'}, {{C('v'), 1}, {C('w'), 1}}},
+                             UTF8Case{{'x', 'y', 'z'}, {{C('x'), 1}, {C('y'), 1}, {C('z'), 1}}},
+                             UTF8Case{{'A'}, {{C('A'), 1}}},
+                             UTF8Case{{'A', 'B', 'C'}, {{C('A'), 1}, {C('B'), 1}, {C('C'), 1}}},
+                             UTF8Case{{'D', 'E', 'F'}, {{C('D'), 1}, {C('E'), 1}, {C('F'), 1}}},
+                             UTF8Case{{'G', 'H'}, {{C('G'), 1}, {C('H'), 1}}},
+                             UTF8Case{{'I', 'J'}, {{C('I'), 1}, {C('J'), 1}}},
+                             UTF8Case{{'K', 'L', 'M'}, {{C('K'), 1}, {C('L'), 1}, {C('M'), 1}}},
+                             UTF8Case{{'N', 'O', 'P'}, {{C('N'), 1}, {C('O'), 1}, {C('P'), 1}}},
+                             UTF8Case{{'Q', 'R'}, {{C('Q'), 1}, {C('R'), 1}}},
+                             UTF8Case{{'S', 'T', 'U'}, {{C('S'), 1}, {C('T'), 1}, {C('U'), 1}}},
+                             UTF8Case{{'V', 'W'}, {{C('V'), 1}, {C('W'), 1}}},
+                             UTF8Case{{'X', 'Y', 'Z'}, {{C('X'), 1}, {C('Y'), 1}, {C('Z'), 1}}},
                          }));
 
 INSTANTIATE_TEST_SUITE_P(AsciiNumbers,
-                         DecodeUTF8Test,
+                         UTF8Test,
                          ::testing::ValuesIn({
-                             DecodeUTF8Case{"012", {{C('0'), 1}, {C('1'), 1}, {C('2'), 1}}},
-                             DecodeUTF8Case{"345", {{C('3'), 1}, {C('4'), 1}, {C('5'), 1}}},
-                             DecodeUTF8Case{"678", {{C('6'), 1}, {C('7'), 1}, {C('8'), 1}}},
-                             DecodeUTF8Case{"9", {{C('9'), 1}}},
+                             UTF8Case{{'0', '1', '2'}, {{C('0'), 1}, {C('1'), 1}, {C('2'), 1}}},
+                             UTF8Case{{'3', '4', '5'}, {{C('3'), 1}, {C('4'), 1}, {C('5'), 1}}},
+                             UTF8Case{{'6', '7', '8'}, {{C('6'), 1}, {C('7'), 1}, {C('8'), 1}}},
+                             UTF8Case{{'9'}, {{C('9'), 1}}},
                          }));
 
 INSTANTIATE_TEST_SUITE_P(AsciiSymbols,
-                         DecodeUTF8Test,
+                         UTF8Test,
                          ::testing::ValuesIn({
-                             DecodeUTF8Case{"!\"#", {{C('!'), 1}, {C('"'), 1}, {C('#'), 1}}},
-                             DecodeUTF8Case{"$%&", {{C('$'), 1}, {C('%'), 1}, {C('&'), 1}}},
-                             DecodeUTF8Case{"'()", {{C('\''), 1}, {C('('), 1}, {C(')'), 1}}},
-                             DecodeUTF8Case{"*,-", {{C('*'), 1}, {C(','), 1}, {C('-'), 1}}},
-                             DecodeUTF8Case{"/`@", {{C('/'), 1}, {C('`'), 1}, {C('@'), 1}}},
-                             DecodeUTF8Case{"^\\[", {{C('^'), 1}, {C('\\'), 1}, {C('['), 1}}},
-                             DecodeUTF8Case{"]_|", {{C(']'), 1}, {C('_'), 1}, {C('|'), 1}}},
-                             DecodeUTF8Case{"{}", {{C('{'), 1}, {C('}'), 1}}},
+                             UTF8Case{{'!', '"', '#'}, {{C('!'), 1}, {C('"'), 1}, {C('#'), 1}}},
+                             UTF8Case{{'$', '%', '&'}, {{C('$'), 1}, {C('%'), 1}, {C('&'), 1}}},
+                             UTF8Case{{'\'', '(', ')'}, {{C('\''), 1}, {C('('), 1}, {C(')'), 1}}},
+                             UTF8Case{{'*', ',', '-'}, {{C('*'), 1}, {C(','), 1}, {C('-'), 1}}},
+                             UTF8Case{{'/', '`', '@'}, {{C('/'), 1}, {C('`'), 1}, {C('@'), 1}}},
+                             UTF8Case{{'^', '\\', '['}, {{C('^'), 1}, {C('\\'), 1}, {C('['), 1}}},
+                             UTF8Case{{']', '_', '|'}, {{C(']'), 1}, {C('_'), 1}, {C('|'), 1}}},
+                             UTF8Case{{'{', '}'}, {{C('{'), 1}, {C('}'), 1}}},
                          }));
 
-INSTANTIATE_TEST_SUITE_P(AsciiSpecial,
-                         DecodeUTF8Test,
-                         ::testing::ValuesIn({
-                             DecodeUTF8Case{"", {}},
-                             DecodeUTF8Case{" \t\n", {{C(' '), 1}, {C('\t'), 1}, {C('\n'), 1}}},
-                             DecodeUTF8Case{"\a\b\f", {{C('\a'), 1}, {C('\b'), 1}, {C('\f'), 1}}},
-                             DecodeUTF8Case{"\n\r\t", {{C('\n'), 1}, {C('\r'), 1}, {C('\t'), 1}}},
-                             DecodeUTF8Case{"\v", {{C('\v'), 1}}},
-                         }));
+INSTANTIATE_TEST_SUITE_P(
+    AsciiSpecial,
+    UTF8Test,
+    ::testing::ValuesIn({
+        UTF8Case{{}, {}},
+        UTF8Case{{' ', '\t', '\n'}, {{C(' '), 1}, {C('\t'), 1}, {C('\n'), 1}}},
+        UTF8Case{{'\a', '\b', '\f'}, {{C('\a'), 1}, {C('\b'), 1}, {C('\f'), 1}}},
+        UTF8Case{{'\n', '\r', '\t'}, {{C('\n'), 1}, {C('\r'), 1}, {C('\t'), 1}}},
+        UTF8Case{{'\v'}, {{C('\v'), 1}}},
+    }));
 
 INSTANTIATE_TEST_SUITE_P(Hindi,
-                         DecodeUTF8Test,
-                         ::testing::ValuesIn({DecodeUTF8Case{
+                         UTF8Test,
+                         ::testing::ValuesIn({UTF8Case{
                              // नमस्ते दुनिया
-                             "\xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5"
-                             "\x87\x20\xe0\xa4\xa6\xe0\xa5\x81\xe0\xa4\xa8\xe0\xa4\xbf\xe0\xa4\xaf"
-                             "\xe0\xa4\xbe",
+                             {
+                                 0xe0, 0xa4, 0xa8, 0xe0, 0xa4, 0xae, 0xe0, 0xa4, 0xb8, 0xe0,
+                                 0xa5, 0x8d, 0xe0, 0xa4, 0xa4, 0xe0, 0xa5, 0x87, 0x20, 0xe0,
+                                 0xa4, 0xa6, 0xe0, 0xa5, 0x81, 0xe0, 0xa4, 0xa8, 0xe0, 0xa4,
+                                 0xbf, 0xe0, 0xa4, 0xaf, 0xe0, 0xa4, 0xbe,
+                             },
                              {
                                  {C(0x0928), 3},  // न
                                  {C(0x092e), 3},  // म
@@ -362,10 +396,23 @@ INSTANTIATE_TEST_SUITE_P(Hindi,
                          }}));
 
 INSTANTIATE_TEST_SUITE_P(Mandarin,
-                         DecodeUTF8Test,
-                         ::testing::ValuesIn({DecodeUTF8Case{
+                         UTF8Test,
+                         ::testing::ValuesIn({UTF8Case{
                              // 你好世界
-                             "\xe4\xbd\xa0\xe5\xa5\xbd\xe4\xb8\x96\xe7\x95\x8c",
+                             {
+                                 0xe4,
+                                 0xbd,
+                                 0xa0,
+                                 0xe5,
+                                 0xa5,
+                                 0xbd,
+                                 0xe4,
+                                 0xb8,
+                                 0x96,
+                                 0xe7,
+                                 0x95,
+                                 0x8c,
+                             },
                              {
                                  {C(0x4f60), 3},  // 你
                                  {C(0x597d), 3},  // 好
@@ -375,11 +422,13 @@ INSTANTIATE_TEST_SUITE_P(Mandarin,
                          }}));
 
 INSTANTIATE_TEST_SUITE_P(Japanese,
-                         DecodeUTF8Test,
-                         ::testing::ValuesIn({DecodeUTF8Case{
+                         UTF8Test,
+                         ::testing::ValuesIn({UTF8Case{
                              // こんにちは世界
-                             "\xe3\x81\x93\xe3\x82\x93\xe3\x81\xab\xe3\x81\xa1"
-                             "\xe3\x81\xaf\xe4\xb8\x96\xe7\x95\x8c",
+                             {
+                                 0xe3, 0x81, 0x93, 0xe3, 0x82, 0x93, 0xe3, 0x81, 0xab, 0xe3, 0x81,
+                                 0xa1, 0xe3, 0x81, 0xaf, 0xe4, 0xb8, 0x96, 0xe7, 0x95, 0x8c,
+                             },
                              {
                                  {C(0x3053), 3},  // こ
                                  {C(0x3093), 3},  // ん
@@ -392,11 +441,13 @@ INSTANTIATE_TEST_SUITE_P(Japanese,
                          }}));
 
 INSTANTIATE_TEST_SUITE_P(Korean,
-                         DecodeUTF8Test,
-                         ::testing::ValuesIn({DecodeUTF8Case{
+                         UTF8Test,
+                         ::testing::ValuesIn({UTF8Case{
                              // 안녕하세요 세계
-                             "\xec\x95\x88\xeb\x85\x95\xed\x95\x98\xec\x84\xb8"
-                             "\xec\x9a\x94\x20\xec\x84\xb8\xea\xb3\x84",
+                             {
+                                 0xec, 0x95, 0x88, 0xeb, 0x85, 0x95, 0xed, 0x95, 0x98, 0xec, 0x84,
+                                 0xb8, 0xec, 0x9a, 0x94, 0x20, 0xec, 0x84, 0xb8, 0xea, 0xb3, 0x84,
+                             },
                              {
                                  {C(0xc548), 3},  // 안
                                  {C(0xb155), 3},  // 녕
@@ -410,10 +461,19 @@ INSTANTIATE_TEST_SUITE_P(Korean,
                          }}));
 
 INSTANTIATE_TEST_SUITE_P(Emoji,
-                         DecodeUTF8Test,
-                         ::testing::ValuesIn({DecodeUTF8Case{
+                         UTF8Test,
+                         ::testing::ValuesIn({UTF8Case{
                              // 👋🌎
-                             "\xf0\x9f\x91\x8b\xf0\x9f\x8c\x8e",
+                             {
+                                 0xf0,
+                                 0x9f,
+                                 0x91,
+                                 0x8b,
+                                 0xf0,
+                                 0x9f,
+                                 0x8c,
+                                 0x8e,
+                             },
                              {
                                  {C(0x1f44b), 4},  // 👋
                                  {C(0x1f30e), 4},  // 🌎
@@ -421,12 +481,15 @@ INSTANTIATE_TEST_SUITE_P(Emoji,
                          }}));
 
 INSTANTIATE_TEST_SUITE_P(Random,
-                         DecodeUTF8Test,
-                         ::testing::ValuesIn({DecodeUTF8Case{
+                         UTF8Test,
+                         ::testing::ValuesIn({UTF8Case{
                              // Øⓑꚫ쁹Ǵ𐌒岾🥍ⴵ㍨又ᮗ
-                             "\xc3\x98\xe2\x93\x91\xea\x9a\xab\xec\x81\xb9\xc7\xb4\xf0\x90\x8c\x92"
-                             "\xe5\xb2\xbe\xf0\x9f\xa5\x8d\xe2\xb4\xb5\xe3\x8d\xa8\xe5\x8f\x88\xe1"
-                             "\xae\x97",
+                             {
+                                 0xc3, 0x98, 0xe2, 0x93, 0x91, 0xea, 0x9a, 0xab, 0xec,
+                                 0x81, 0xb9, 0xc7, 0xb4, 0xf0, 0x90, 0x8c, 0x92, 0xe5,
+                                 0xb2, 0xbe, 0xf0, 0x9f, 0xa5, 0x8d, 0xe2, 0xb4, 0xb5,
+                                 0xe3, 0x8d, 0xa8, 0xe5, 0x8f, 0x88, 0xe1, 0xae, 0x97,
+                             },
                              {
                                  {C(0x000d8), 2},  // Ø
                                  {C(0x024d1), 3},  // ⓑ
@@ -443,61 +506,336 @@ INSTANTIATE_TEST_SUITE_P(Random,
                              },
                          }}));
 
-}  // namespace
-
 ////////////////////////////////////////////////////////////////////////////////
 // DecodeUTF8 invalid tests
 ////////////////////////////////////////////////////////////////////////////////
-namespace {
-class DecodeUTF8InvalidTest : public testing::TestWithParam<const char*> {};
+class DecodeUTF8InvalidTest : public testing::TestWithParam<std::vector<uint8_t>> {};
 
 TEST_P(DecodeUTF8InvalidTest, Invalid) {
-    auto* param = GetParam();
-
-    const uint8_t* data = reinterpret_cast<const uint8_t*>(param);
-    const size_t len = std::string(param).size();
-
-    auto [code_point, width] = utf8::Decode(data, len);
+    auto [code_point, width] = utf8::Decode(GetParam().data(), GetParam().size());
     EXPECT_EQ(code_point, CodePoint(0));
     EXPECT_EQ(width, 0u);
 }
 
 INSTANTIATE_TEST_SUITE_P(Invalid,
                          DecodeUTF8InvalidTest,
-                         ::testing::ValuesIn({
-                             "\x80\x80\x80\x80",  // 10000000
-                             "\x81\x80\x80\x80",  // 10000001
-                             "\x8f\x80\x80\x80",  // 10001111
-                             "\x90\x80\x80\x80",  // 10010000
-                             "\x91\x80\x80\x80",  // 10010001
-                             "\x9f\x80\x80\x80",  // 10011111
-                             "\xa0\x80\x80\x80",  // 10100000
-                             "\xa1\x80\x80\x80",  // 10100001
-                             "\xaf\x80\x80\x80",  // 10101111
-                             "\xb0\x80\x80\x80",  // 10110000
-                             "\xb1\x80\x80\x80",  // 10110001
-                             "\xbf\x80\x80\x80",  // 10111111
-                             "\xc0\x80\x80\x80",  // 11000000
-                             "\xc1\x80\x80\x80",  // 11000001
-                             "\xf5\x80\x80\x80",  // 11110101
-                             "\xf6\x80\x80\x80",  // 11110110
-                             "\xf7\x80\x80\x80",  // 11110111
-                             "\xf8\x80\x80\x80",  // 11111000
-                             "\xfe\x80\x80\x80",  // 11111110
-                             "\xff\x80\x80\x80",  // 11111111
+                         ::testing::ValuesIn(std::vector<std::vector<uint8_t>>{
+                             {0x80, 0x80, 0x80, 0x80},  // 10000000
+                             {0x81, 0x80, 0x80, 0x80},  // 10000001
+                             {0x8f, 0x80, 0x80, 0x80},  // 10001111
+                             {0x90, 0x80, 0x80, 0x80},  // 10010000
+                             {0x91, 0x80, 0x80, 0x80},  // 10010001
+                             {0x9f, 0x80, 0x80, 0x80},  // 10011111
+                             {0xa0, 0x80, 0x80, 0x80},  // 10100000
+                             {0xa1, 0x80, 0x80, 0x80},  // 10100001
+                             {0xaf, 0x80, 0x80, 0x80},  // 10101111
+                             {0xb0, 0x80, 0x80, 0x80},  // 10110000
+                             {0xb1, 0x80, 0x80, 0x80},  // 10110001
+                             {0xbf, 0x80, 0x80, 0x80},  // 10111111
+                             {0xc0, 0x80, 0x80, 0x80},  // 11000000
+                             {0xc1, 0x80, 0x80, 0x80},  // 11000001
+                             {0xf5, 0x80, 0x80, 0x80},  // 11110101
+                             {0xf6, 0x80, 0x80, 0x80},  // 11110110
+                             {0xf7, 0x80, 0x80, 0x80},  // 11110111
+                             {0xf8, 0x80, 0x80, 0x80},  // 11111000
+                             {0xfe, 0x80, 0x80, 0x80},  // 11111110
+                             {0xff, 0x80, 0x80, 0x80},  // 11111111
 
-                             "\xd0",          // 2-bytes, missing second byte
-                             "\xe8\x8f",      // 3-bytes, missing third byte
-                             "\xf4\x8f\x8f",  // 4-bytes, missing fourth byte
+                             {0xd0},              // 2-bytes, missing second byte
+                             {0xe8, 0x8f},        // 3-bytes, missing third byte
+                             {0xf4, 0x8f, 0x8f},  // 4-bytes, missing fourth byte
 
-                             "\xd0\x7f",          // 2-bytes, second byte MSB unset
-                             "\xe8\x7f\x8f",      // 3-bytes, second byte MSB unset
-                             "\xe8\x8f\x7f",      // 3-bytes, third byte MSB unset
-                             "\xf4\x7f\x8f\x8f",  // 4-bytes, second byte MSB unset
-                             "\xf4\x8f\x7f\x8f",  // 4-bytes, third byte MSB unset
-                             "\xf4\x8f\x8f\x7f",  // 4-bytes, fourth byte MSB unset
+                             {0xd0, 0x7f},              // 2-bytes, second byte MSB unset
+                             {0xe8, 0x7f, 0x8f},        // 3-bytes, second byte MSB unset
+                             {0xe8, 0x8f, 0x7f},        // 3-bytes, third byte MSB unset
+                             {0xf4, 0x7f, 0x8f, 0x8f},  // 4-bytes, second byte MSB unset
+                             {0xf4, 0x8f, 0x7f, 0x8f},  // 4-bytes, third byte MSB unset
+                             {0xf4, 0x8f, 0x8f, 0x7f},  // 4-bytes, fourth byte MSB unset
                          }));
 
-}  // namespace
+}  // namespace utf8_tests
 
+////////////////////////////////////////////////////////////////////////////////
+// DecodeUTF16 valid tests
+////////////////////////////////////////////////////////////////////////////////
+namespace utf16_tests {
+
+struct UTF16Case {
+    std::vector<uint16_t> string;
+    std::vector<CodePointAndWidth> code_points;
+};
+
+static std::ostream& operator<<(std::ostream& out, UTF16Case c) {
+    for (size_t i = 0; i < c.string.size(); i++) {
+        if (i > 0) {
+            out << ", ";
+        }
+        out << "0x" << std::hex << std::setfill('0') << std::setw(4) << c.string[i];
+    }
+    return out;
+}
+
+class UTF16Test : public testing::TestWithParam<UTF16Case> {};
+
+TEST_P(UTF16Test, Decode) {
+    auto param = GetParam();
+
+    const uint16_t* data = reinterpret_cast<const uint16_t*>(param.string.data());
+    const size_t len = param.string.size();
+
+    std::vector<CodePointAndWidth> got;
+    size_t offset = 0;
+    while (offset < len) {
+        auto [code_point, width] = utf16::Decode(data + offset, len - offset);
+        if (width == 0) {
+            FAIL() << "Decode() failed at byte offset " << offset;
+        }
+        offset += width;
+        got.emplace_back(CodePointAndWidth{code_point, width});
+    }
+
+    EXPECT_THAT(got, ::testing::ElementsAreArray(param.code_points));
+}
+
+TEST_P(UTF16Test, Encode) {
+    auto param = GetParam();
+
+    Slice<const uint16_t> str{reinterpret_cast<const uint16_t*>(param.string.data()),
+                              param.string.size()};
+    for (auto codepoint : param.code_points) {
+        EXPECT_EQ(utf16::Encode(codepoint.code_point, nullptr), codepoint.width);
+
+        uint16_t encoded[2];
+        size_t len = utf16::Encode(codepoint.code_point, encoded);
+        ASSERT_EQ(len, codepoint.width);
+        EXPECT_THAT(Slice<const uint16_t>(encoded, len),
+                    ::testing::ElementsAreArray(str.Truncate(len)));
+        str = str.Offset(len);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(AsciiLetters,
+                         UTF16Test,
+                         ::testing::ValuesIn({
+                             UTF16Case{{'a'}, {{C('a'), 1}}},
+                             UTF16Case{{'a', 'b', 'c'}, {{C('a'), 1}, {C('b'), 1}, {C('c'), 1}}},
+                             UTF16Case{{'d', 'e', 'f'}, {{C('d'), 1}, {C('e'), 1}, {C('f'), 1}}},
+                             UTF16Case{{'g', 'h'}, {{C('g'), 1}, {C('h'), 1}}},
+                             UTF16Case{{'i', 'j'}, {{C('i'), 1}, {C('j'), 1}}},
+                             UTF16Case{{'k', 'l', 'm'}, {{C('k'), 1}, {C('l'), 1}, {C('m'), 1}}},
+                             UTF16Case{{'n', 'o', 'p'}, {{C('n'), 1}, {C('o'), 1}, {C('p'), 1}}},
+                             UTF16Case{{'q', 'r'}, {{C('q'), 1}, {C('r'), 1}}},
+                             UTF16Case{{'s', 't', 'u'}, {{C('s'), 1}, {C('t'), 1}, {C('u'), 1}}},
+                             UTF16Case{{'v', 'w'}, {{C('v'), 1}, {C('w'), 1}}},
+                             UTF16Case{{'x', 'y', 'z'}, {{C('x'), 1}, {C('y'), 1}, {C('z'), 1}}},
+                             UTF16Case{{'A'}, {{C('A'), 1}}},
+                             UTF16Case{{'A', 'B', 'C'}, {{C('A'), 1}, {C('B'), 1}, {C('C'), 1}}},
+                             UTF16Case{{'D', 'E', 'F'}, {{C('D'), 1}, {C('E'), 1}, {C('F'), 1}}},
+                             UTF16Case{{'G', 'H'}, {{C('G'), 1}, {C('H'), 1}}},
+                             UTF16Case{{'I', 'J'}, {{C('I'), 1}, {C('J'), 1}}},
+                             UTF16Case{{'K', 'L', 'M'}, {{C('K'), 1}, {C('L'), 1}, {C('M'), 1}}},
+                             UTF16Case{{'N', 'O', 'P'}, {{C('N'), 1}, {C('O'), 1}, {C('P'), 1}}},
+                             UTF16Case{{'Q', 'R'}, {{C('Q'), 1}, {C('R'), 1}}},
+                             UTF16Case{{'S', 'T', 'U'}, {{C('S'), 1}, {C('T'), 1}, {C('U'), 1}}},
+                             UTF16Case{{'V', 'W'}, {{C('V'), 1}, {C('W'), 1}}},
+                             UTF16Case{{'X', 'Y', 'Z'}, {{C('X'), 1}, {C('Y'), 1}, {C('Z'), 1}}},
+                         }));
+
+INSTANTIATE_TEST_SUITE_P(AsciiNumbers,
+                         UTF16Test,
+                         ::testing::ValuesIn({
+                             UTF16Case{{'0', '1', '2'}, {{C('0'), 1}, {C('1'), 1}, {C('2'), 1}}},
+                             UTF16Case{{'3', '4', '5'}, {{C('3'), 1}, {C('4'), 1}, {C('5'), 1}}},
+                             UTF16Case{{'6', '7', '8'}, {{C('6'), 1}, {C('7'), 1}, {C('8'), 1}}},
+                             UTF16Case{{'9'}, {{C('9'), 1}}},
+                         }));
+
+INSTANTIATE_TEST_SUITE_P(AsciiSymbols,
+                         UTF16Test,
+                         ::testing::ValuesIn({
+                             UTF16Case{{'!', '"', '#'}, {{C('!'), 1}, {C('"'), 1}, {C('#'), 1}}},
+                             UTF16Case{{'$', '%', '&'}, {{C('$'), 1}, {C('%'), 1}, {C('&'), 1}}},
+                             UTF16Case{{'\'', '(', ')'}, {{C('\''), 1}, {C('('), 1}, {C(')'), 1}}},
+                             UTF16Case{{'*', ',', '-'}, {{C('*'), 1}, {C(','), 1}, {C('-'), 1}}},
+                             UTF16Case{{'/', '`', '@'}, {{C('/'), 1}, {C('`'), 1}, {C('@'), 1}}},
+                             UTF16Case{{'^', '\\', '['}, {{C('^'), 1}, {C('\\'), 1}, {C('['), 1}}},
+                             UTF16Case{{']', '_', '|'}, {{C(']'), 1}, {C('_'), 1}, {C('|'), 1}}},
+                             UTF16Case{{'{', '}'}, {{C('{'), 1}, {C('}'), 1}}},
+                         }));
+
+INSTANTIATE_TEST_SUITE_P(
+    AsciiSpecial,
+    UTF16Test,
+    ::testing::ValuesIn({
+        UTF16Case{{}, {}},
+        UTF16Case{{' ', '\t', '\n'}, {{C(' '), 1}, {C('\t'), 1}, {C('\n'), 1}}},
+        UTF16Case{{'\a', '\b', '\f'}, {{C('\a'), 1}, {C('\b'), 1}, {C('\f'), 1}}},
+        UTF16Case{{'\n', '\r', '\t'}, {{C('\n'), 1}, {C('\r'), 1}, {C('\t'), 1}}},
+        UTF16Case{{'\v'}, {{C('\v'), 1}}},
+    }));
+
+INSTANTIATE_TEST_SUITE_P(Hindi,
+                         UTF16Test,
+                         ::testing::ValuesIn({UTF16Case{
+                             // नमस्ते दुनिया
+                             {
+                                 0x0928,
+                                 0x092e,
+                                 0x0938,
+                                 0x094d,
+                                 0x0924,
+                                 0x0947,
+                                 0x0020,
+                                 0x0926,
+                                 0x0941,
+                                 0x0928,
+                                 0x093f,
+                                 0x092f,
+                                 0x093e,
+                             },
+                             {
+                                 {C(0x0928), 1},  // न
+                                 {C(0x092e), 1},  // म
+                                 {C(0x0938), 1},  // स
+                                 {C(0x094d), 1},  // ् //
+                                 {C(0x0924), 1},  // त
+                                 {C(0x0947), 1},  // े //
+                                 {C(' '), 1},
+                                 {C(0x0926), 1},  // द
+                                 {C(0x0941), 1},  // ु //
+                                 {C(0x0928), 1},  // न
+                                 {C(0x093f), 1},  // ि //
+                                 {C(0x092f), 1},  // य
+                                 {C(0x093e), 1},  // ा //
+                             },
+                         }}));
+
+INSTANTIATE_TEST_SUITE_P(Mandarin,
+                         UTF16Test,
+                         ::testing::ValuesIn({UTF16Case{
+                             // 你好世界
+                             {0x4f60, 0x597d, 0x4e16, 0x754c},
+                             {
+                                 {C(0x4f60), 1},  // 你
+                                 {C(0x597d), 1},  // 好
+                                 {C(0x4e16), 1},  // 世
+                                 {C(0x754c), 1},  // 界
+                             },
+                         }}));
+
+INSTANTIATE_TEST_SUITE_P(Japanese,
+                         UTF16Test,
+                         ::testing::ValuesIn({UTF16Case{
+                             // こんにちは世界
+                             {
+                                 0x3053,
+                                 0x3093,
+                                 0x306b,
+                                 0x3061,
+                                 0x306f,
+                                 0x4e16,
+                                 0x754c,
+                             },
+                             {
+                                 {C(0x3053), 1},  // こ
+                                 {C(0x3093), 1},  // ん
+                                 {C(0x306B), 1},  // に
+                                 {C(0x3061), 1},  // ち
+                                 {C(0x306F), 1},  // は
+                                 {C(0x4E16), 1},  // 世
+                                 {C(0x754C), 1},  // 界
+                             },
+                         }}));
+
+INSTANTIATE_TEST_SUITE_P(Korean,
+                         UTF16Test,
+                         ::testing::ValuesIn({UTF16Case{
+                             // 안녕하세요 세계
+                             {
+                                 0xc548,
+                                 0xb155,
+                                 0xd558,
+                                 0xc138,
+                                 0xc694,
+                                 0x0020,
+                                 0xc138,
+                                 0xacc4,
+                             },
+                             {
+                                 {C(0xc548), 1},  // 안
+                                 {C(0xb155), 1},  // 녕
+                                 {C(0xd558), 1},  // 하
+                                 {C(0xc138), 1},  // 세
+                                 {C(0xc694), 1},  // 요
+                                 {C(' '), 1},     //
+                                 {C(0xc138), 1},  // 세
+                                 {C(0xacc4), 1},  // 계
+                             },
+                         }}));
+
+INSTANTIATE_TEST_SUITE_P(Emoji,
+                         UTF16Test,
+                         ::testing::ValuesIn({UTF16Case{
+                             // 👋🌎
+                             {0xd83d, 0xdc4b, 0xd83c, 0xdf0e},
+                             {
+                                 {C(0x1f44b), 2},  // 👋
+                                 {C(0x1f30e), 2},  // 🌎
+                             },
+                         }}));
+
+INSTANTIATE_TEST_SUITE_P(Random,
+                         UTF16Test,
+                         ::testing::ValuesIn({UTF16Case{
+                             // Øⓑꚫ쁹Ǵ𐌒岾🥍ⴵ㍨又ᮗ
+                             {
+                                 0x00d8,
+                                 0x24d1,
+                                 0xa6ab,
+                                 0xc079,
+                                 0x01f4,
+                                 0xd800,
+                                 0xdf12,
+                                 0x5cbe,
+                                 0xd83e,
+                                 0xdd4d,
+                                 0x2d35,
+                                 0x3368,
+                                 0x53c8,
+                                 0x1b97,
+                             },
+                             {
+                                 {C(0x000d8), 1},  // Ø
+                                 {C(0x024d1), 1},  // ⓑ
+                                 {C(0x0a6ab), 1},  // ꚫ
+                                 {C(0x0c079), 1},  // 쁹
+                                 {C(0x001f4), 1},  // Ǵ
+                                 {C(0x10312), 2},  // 𐌒
+                                 {C(0x05cbe), 1},  // 岾
+                                 {C(0x1f94d), 2},  // 🥍
+                                 {C(0x02d35), 1},  // ⴵ
+                                 {C(0x03368), 1},  // ㍨
+                                 {C(0x053c8), 1},  // 又
+                                 {C(0x01b97), 1},  // ᮗ
+                             },
+                         }}));
+
+////////////////////////////////////////////////////////////////////////////////
+// DecodeUTF16 invalid tests
+////////////////////////////////////////////////////////////////////////////////
+class DecodeUTF16InvalidTest : public testing::TestWithParam<std::vector<uint16_t>> {};
+
+TEST_P(DecodeUTF16InvalidTest, Invalid) {
+    auto [code_point, width] = utf16::Decode(GetParam().data(), GetParam().size());
+    EXPECT_EQ(code_point, CodePoint(0));
+    EXPECT_EQ(width, 0u);
+}
+INSTANTIATE_TEST_SUITE_P(Invalid,
+                         DecodeUTF16InvalidTest,
+                         ::testing::ValuesIn(std::vector<std::vector<uint16_t>>{
+                             {0xdc00},          // surrogate, end-of-stream
+                             {0xdc00, 0x0040},  // surrogate, non-surrogate
+                         }));
+
+}  // namespace utf16_tests
 }  // namespace tint

@@ -71,22 +71,55 @@ namespace utf8 {
 
 /// Decodes the first code point in the utf8 string.
 /// @param ptr the pointer to the first byte of the utf8 sequence
-/// @param len the maximum number of bytes to read
-/// @returns a pair of CodePoint and width in code units (bytes).
+/// @param len the maximum number of uint8_t to read
+/// @returns a pair of CodePoint and width in code units (uint8_t).
 ///          If the next code point cannot be decoded then returns [0,0].
 std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len);
 
 /// Decodes the first code point in the utf8 string.
 /// @param utf8_string the string view that contains the utf8 sequence
-/// @returns a pair of CodePoint and width in code units (bytes).
-///          If the next code point cannot be decoded then returns [0,0].
+/// @returns a pair of CodePoint and width in code units (uint8_t).
+///          If the next code point cannot be decoded, then returns [0,0].
 std::pair<CodePoint, size_t> Decode(std::string_view utf8_string);
+
+/// Encodes a code point to the utf8 string buffer or queries the number of code units used to
+/// encode the code point.
+/// @param code_point the code point to encode.
+/// @param ptr the pointer to the utf8 string buffer, or nullptr to query the number of code units
+/// that would be written if @p ptr is not nullptr.
+/// @returns the number of code units written / would be written (at most 4).
+size_t Encode(CodePoint code_point, uint8_t* ptr);
 
 /// @returns true if all the utf-8 code points in the string are ASCII
 /// (code-points 0x00..0x7f).
 bool IsASCII(std::string_view);
 
 }  // namespace utf8
+
+namespace utf16 {
+
+/// Decodes the first code point in the utf16 string.
+/// @param ptr the pointer to the first byte of the utf16 sequence
+/// @param len the maximum number of code units to read
+/// @returns a pair of CodePoint and width in code units (16-bit integers).
+///          If the next code point cannot be decoded then returns [0,0].
+std::pair<CodePoint, size_t> Decode(const uint16_t* ptr, size_t len);
+
+/// Decodes the first code point in the utf16 string.
+/// @param utf16_string the string view that contains the utf16 sequence
+/// @returns a pair of CodePoint and width in code units (16-bit integers).
+///          If the next code point cannot be decoded then returns [0,0].
+std::pair<CodePoint, size_t> Decode(std::string_view utf16_string);
+
+/// Encodes a code point to the utf16 string buffer or queries the number of code units used to
+/// encode the code point.
+/// @param code_point the code point to encode.
+/// @param ptr the pointer to the utf16 string buffer, or nullptr to query the number of code units
+/// that would be written if @p ptr is not nullptr.
+/// @returns the number of code units written / would be written (at most 2).
+size_t Encode(CodePoint code_point, uint16_t* ptr);
+
+}  // namespace utf16
 
 }  // namespace tint
 

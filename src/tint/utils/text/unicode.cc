@@ -424,6 +424,40 @@ std::pair<CodePoint, size_t> Decode(std::string_view utf8_string) {
     return Decode(reinterpret_cast<const uint8_t*>(utf8_string.data()), utf8_string.size());
 }
 
+size_t Encode(CodePoint code_point, uint8_t* ptr) {
+    if (code_point <= 0x7f) {
+        if (ptr) {
+            ptr[0] = static_cast<uint8_t>(code_point);
+        }
+        return 1;
+    }
+    if (code_point <= 0x7ff) {
+        if (ptr) {
+            ptr[0] = static_cast<uint8_t>(code_point >> 6) | 0b11000000;
+            ptr[1] = static_cast<uint8_t>(code_point & 0b00111111) | 0b10000000;
+        }
+        return 2;
+    }
+    if (code_point <= 0xffff) {
+        if (ptr) {
+            ptr[0] = static_cast<uint8_t>(code_point >> 12) | 0b11100000;
+            ptr[1] = static_cast<uint8_t>((code_point >> 6) & 0b00111111) | 0b10000000;
+            ptr[2] = static_cast<uint8_t>(code_point & 0b00111111) | 0b10000000;
+        }
+        return 3;
+    }
+    if (code_point <= 0x10ffff) {
+        if (ptr) {
+            ptr[0] = static_cast<uint8_t>(code_point >> 18) | 0b11110000;
+            ptr[1] = static_cast<uint8_t>((code_point >> 12) & 0b00111111) | 0b10000000;
+            ptr[2] = static_cast<uint8_t>((code_point >> 6) & 0b00111111) | 0b10000000;
+            ptr[3] = static_cast<uint8_t>(code_point & 0b00111111) | 0b10000000;
+        }
+        return 4;
+    }
+    return 0;  // invalid code point
+}
+
 bool IsASCII(std::string_view str) {
     for (auto c : str) {
         if (c & 0x80) {
@@ -435,4 +469,49 @@ bool IsASCII(std::string_view str) {
 
 }  // namespace utf8
 
+namespace utf16 {
+
+std::pair<CodePoint, size_t> Decode(const uint16_t* ptr, size_t len) {
+    if (len < 1) {
+        return {};
+    }
+    uint16_t a = ptr[0];
+    if (a <= 0xd7ff || a >= 0xe000) {
+        return {CodePoint{static_cast<uint32_t>(a)}, 1};
+    }
+    if (len < 2) {
+        return {};
+    }
+    uint32_t b = ptr[1];
+    if (b <= 0xd7ff || b >= 0xe000) {
+        return {};
+    }
+    uint32_t high = a - 0xd800;
+    uint32_t low = b - 0xdc00;
+    return {CodePoint{0x10000 + ((high << 10) | low)}, 2};
+}
+
+std::pair<CodePoint, size_t> Decode(std::string_view utf16_string) {
+    return Decode(reinterpret_cast<const uint16_t*>(utf16_string.data()), utf16_string.size() / 2);
+}
+
+size_t Encode(CodePoint code_point, uint16_t* ptr) {
+    if (code_point <= 0xd7ff || (code_point >= 0xe000 && code_point <= 0xffff)) {
+        if (ptr) {
+            ptr[0] = static_cast<uint16_t>(code_point);
+        }
+        return 1;
+    }
+    if (code_point >= 0x10000 && code_point <= 0x10ffff) {
+        if (ptr) {
+            auto biased = code_point - 0x10000;
+            ptr[0] = static_cast<uint16_t>((biased >> 10) + 0xd800);
+            ptr[1] = static_cast<uint16_t>((biased & 0b1111111111) + 0xdc00);
+        }
+        return 2;
+    }
+    return 0;  // invalid code point
+}
+
+}  // namespace utf16
 }  // namespace tint
