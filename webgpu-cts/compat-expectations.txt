@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-04-08 01:26:17PM
+# Last rolled: 2024-04-09 07:29:13AM
 
 # Flaky on all platforms
 # KEEP
@@ -203,44 +203,6 @@ crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:viewFormats:* [ Failure
 ### validation has been added
 
 ### This section represents unimplemented features in Tint, Chrome or core WebGPU
-
-# Video failures also failing on WebGPU core
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=false;dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-hflip.mp4";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-hflip.mp4";dstColorSpace="srgb" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-vflip.mp4";dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-vflip.mp4";dstColorSpace="srgb" [ Failure ]
 
 ### This section represents issues that are likely bugs in ANGLE
 
