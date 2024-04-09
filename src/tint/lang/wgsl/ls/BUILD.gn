@@ -66,6 +66,7 @@ if (tint_build_tintd && tint_build_wgsl_reader) {
       "set_trace.cc",
       "signature_help.cc",
       "symbols.cc",
+      "utils.cc",
       "utils.h",
     ]
     deps = [

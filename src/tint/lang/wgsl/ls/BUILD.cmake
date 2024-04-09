@@ -63,6 +63,7 @@ tint_add_target(tint_lang_wgsl_ls lib
   lang/wgsl/ls/set_trace.cc
   lang/wgsl/ls/signature_help.cc
   lang/wgsl/ls/symbols.cc
+  lang/wgsl/ls/utils.cc
   lang/wgsl/ls/utils.h
 )
 

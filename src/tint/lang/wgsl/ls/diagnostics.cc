@@ -40,7 +40,7 @@ langsvr::Result<langsvr::SuccessType> Server::PublishDiagnostics(File& file) {
     for (auto& diag : file.program.Diagnostics()) {
         lsp::Diagnostic d;
         d.message = diag.message.Plain();
-        d.range = Conv(diag.source.range);
+        d.range = file.Conv(diag.source.range);
         switch (diag.severity) {
             case diag::Severity::Note:
                 d.severity = lsp::DiagnosticSeverity::kInformation;

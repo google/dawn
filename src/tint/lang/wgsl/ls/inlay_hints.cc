@@ -55,7 +55,7 @@ Server::Handle(const lsp::TextDocumentInlayHintRequest& r) {
                 continue;
             }
             for (auto* member : str->Members()) {
-                auto pos = Conv(member->Declaration()->name->source.range.begin);
+                auto pos = (*file)->Conv(member->Declaration()->name->source.range.begin);
                 auto add = [&](std::string text) {
                     lsp::InlayHint hint;
                     hint.position = pos;
@@ -75,7 +75,7 @@ Server::Handle(const lsp::TextDocumentInlayHintRequest& r) {
             if (!decl->type) {
                 if (auto* variable = program.Sem().Get(decl); variable && variable->Type()) {
                     lsp::InlayHint hint;
-                    hint.position = Conv(decl->name->source.range.end);
+                    hint.position = (*file)->Conv(decl->name->source.range.end);
                     hint.label = " : " + variable->Type()->UnwrapRef()->FriendlyName();
                     hints.push_back(hint);
                 }

@@ -119,6 +119,22 @@ class File {
         }
         return best_node;
     }
+
+    /// @return the zero-based langsvr::lsp::Position @p pos in utf-16 code points converted to a
+    /// one-based tint::Source::Location in utf-8 code points.
+    Source::Location Conv(langsvr::lsp::Position pos) const;
+
+    /// @return the one-based tint::Source::Position @p loc in utf-8 code points converted to a
+    /// zero-based langsvr::lsp::Position in utf-16 code points.
+    langsvr::lsp::Position Conv(Source::Location loc) const;
+
+    /// @return the one-based tint::Source::Range @p rng in utf-8 code points converted to a
+    /// zero-based langsvr::lsp::Range in utf-16 code points.
+    langsvr::lsp::Range Conv(Source::Range rng) const;
+
+    /// @return the zero-based langsvr::lsp::Range @p rng in utf-16 code points converted to a
+    /// one-based Source::Range in utf-8 code points.
+    Source::Range Conv(langsvr::lsp::Range rng) const;
 };
 
 }  // namespace tint::wgsl::ls

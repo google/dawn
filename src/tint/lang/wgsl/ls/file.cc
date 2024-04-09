@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <optional>
+#include <string_view>
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/identifier.h"
@@ -40,6 +41,7 @@
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/unicode.h"
 
 namespace tint::wgsl::ls {
 
@@ -191,6 +193,63 @@ std::optional<File::DefinitionResult> File::Definition(Source::Location l) {
                     };
                 });
         });
+}
+
+Source::Location File::Conv(langsvr::lsp::Position pos) const {
+    Source::Location loc;
+    loc.line = static_cast<uint32_t>(pos.line + 1);
+    loc.column = 0;
+
+    // Convert utf-16 code points -> utf-8 code points
+    if (pos.line < source->content.lines.size()) {
+        std::string_view utf8 = source->content.lines[pos.line];
+        for (langsvr::lsp::Uinteger i = 0; i < pos.character;) {
+            const auto [code_point, n] = utf8::Decode(utf8.substr(loc.column));
+            if (n == 0) {
+                break;
+            }
+            loc.column += n;
+            i += utf16::Encode(code_point, nullptr);
+        }
+    }
+
+    loc.column++;  // one-based index
+    return loc;
+}
+
+langsvr::lsp::Position File::Conv(Source::Location loc) const {
+    langsvr::lsp::Position pos;
+    pos.line = loc.line - 1;
+    pos.character = 0;
+
+    // Convert utf-8 code points -> utf-16 code points
+    if (pos.line < source->content.lines.size()) {
+        std::string_view utf8 = source->content.lines[pos.line];
+        for (uint32_t i = 0; i < loc.column - 1;) {
+            const auto [code_point, n] = utf8::Decode(utf8.substr(i));
+            if (n == 0) {
+                break;
+            }
+            pos.character += utf16::Encode(code_point, nullptr);
+            i += n;
+        }
+    }
+
+    return pos;
+}
+
+langsvr::lsp::Range File::Conv(Source::Range rng) const {
+    langsvr::lsp::Range out;
+    out.start = Conv(rng.begin);
+    out.end = Conv(rng.end);
+    return out;
+}
+
+Source::Range File::Conv(langsvr::lsp::Range rng) const {
+    Source::Range out;
+    out.begin = Conv(rng.start);
+    out.end = Conv(rng.end);
+    return out;
 }
 
 }  // namespace tint::wgsl::ls

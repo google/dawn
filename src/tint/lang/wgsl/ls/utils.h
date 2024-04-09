@@ -32,6 +32,8 @@
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/diagnostic/source.h"
 #include "src/tint/utils/rtti/castable.h"
+#include "src/tint/utils/text/styled_text.h"
+#include "src/tint/utils/text/text_style.h"
 
 // Forward declarations
 namespace tint::sem {
@@ -40,29 +42,8 @@ class Node;
 
 namespace tint::wgsl::ls {
 
-/// @return the langsvr::lsp::Position @p pos converted to a tint::Source::Location
-inline Source::Location Conv(langsvr::lsp::Position pos) {
-    Source::Location loc;
-    loc.line = static_cast<uint32_t>(pos.line + 1);
-    loc.column = static_cast<uint32_t>(pos.character + 1);
-    return loc;
-}
-
-/// @return the tint::Source::Location @p loc converted to a langsvr::lsp::Position
-inline langsvr::lsp::Position Conv(Source::Location loc) {
-    langsvr::lsp::Position pos;
-    pos.line = loc.line - 1;
-    pos.character = loc.column - 1;
-    return pos;
-}
-
-/// @return the tint::Source::Range @p rng converted to a langsvr::lsp::Range
-inline langsvr::lsp::Range Conv(Source::Range rng) {
-    langsvr::lsp::Range out;
-    out.start = Conv(rng.begin);
-    out.end = Conv(rng.end);
-    return out;
-}
+/// @return the StyledText converted to lsp::MarkupContent
+langsvr::lsp::MarkupContent Conv(const StyledText& text);
 
 /// @returns the sem::Load() and sem::Materialize() unwrapped sem::ValueExpression, if `T` is a
 /// sem::ValueExpression, otherwise returns @p node.

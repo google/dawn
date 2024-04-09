@@ -72,16 +72,17 @@ langsvr::Result<langsvr::SuccessType> Server::Handle(
         return langsvr::Failure{"document not found"};
     }
 
-    auto content = (*file)->source->content.data;
+    auto utf8 = (*file)->source->content.data;
     for (auto& change : n.content_changes) {
         if (auto* edit = change.Get<lsp::TextDocumentContentChangePartial>()) {
-            std::vector<size_t> line_offsets = LineOffsets(content);
-            size_t start = line_offsets[edit->range.start.line] + edit->range.start.character;
-            size_t end = line_offsets[edit->range.end.line] + edit->range.end.character;
-            content = content.substr(0, start) + edit->text + content.substr(end);
+            auto range = (*file)->Conv(edit->range);
+            std::vector<size_t> line_offsets = LineOffsets(utf8);
+            size_t utf8_start = line_offsets[range.begin.line - 1] + range.begin.column - 1;
+            size_t utf8_end = line_offsets[range.end.line - 1] + range.end.column - 1;
+            utf8 = utf8.substr(0, utf8_start) + edit->text + utf8.substr(utf8_end);
         }
     }
-    auto source = std::make_unique<Source::File>(n.text_document.uri, content);
+    auto source = std::make_unique<Source::File>(n.text_document.uri, utf8);
     auto program = wgsl::reader::Parse(source.get());
     *file = std::make_shared<File>(std::move(source), n.text_document.version, std::move(program));
     return PublishDiagnostics(**file);

@@ -25,28 +25,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ls/server.h"
-
 #include "src/tint/lang/wgsl/ls/utils.h"
-
-namespace lsp = langsvr::lsp;
+#include "langsvr/lsp/lsp.h"
 
 namespace tint::wgsl::ls {
 
-typename lsp::TextDocumentDefinitionRequest::ResultType  //
-Server::Handle(const lsp::TextDocumentDefinitionRequest& r) {
-    typename lsp::TextDocumentDefinitionRequest::SuccessType result = lsp::Null{};
+langsvr::lsp::MarkupContent Conv(const StyledText& styled_text) {
+    langsvr::lsp::MarkupContent out;
+    out.kind = langsvr::lsp::MarkupKind::kMarkdown;
 
-    if (auto file = files_.Get(r.text_document.uri)) {
-        if (auto def = (*file)->Definition((*file)->Conv(r.position))) {
-            lsp::Location loc;
-            loc.range = (*file)->Conv(def->definition);
-            loc.uri = r.text_document.uri;
-            result = lsp::Definition{loc};
+    StringStream ss;
+    bool is_code = false;
+    styled_text.Walk([&](std::string_view text, TextStyle style) {
+        if (style.IsBold()) {
+            ss << "*";
         }
+        if (is_code != style.IsCode()) {
+            ss << "`";
+        }
+        is_code = style.IsCode();
+        ss << text;
+        if (style.IsBold()) {
+            ss << "*";
+        }
+    });
+    if (is_code) {
+        ss << "`";
     }
-
-    return result;
+    out.value = ss.str();
+    return out;
 }
 
 }  // namespace tint::wgsl::ls

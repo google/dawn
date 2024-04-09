@@ -51,13 +51,13 @@ Server::Handle(const lsp::TextDocumentPrepareRenameRequest& r) {
         return lsp::Null{};
     }
 
-    auto def = (*file)->Definition(Conv(r.position));
+    auto def = (*file)->Definition((*file)->Conv(r.position));
     if (!def) {
         return lsp::Null{};
     }
 
     lsp::PrepareRenamePlaceholder out;
-    out.range = Conv(def->reference);
+    out.range = (*file)->Conv(def->reference);
     out.placeholder = def->text;
     return lsp::PrepareRenameResult{out};
 }
@@ -69,14 +69,15 @@ Server::Handle(const lsp::TextDocumentRenameRequest& r) {
         return lsp::Null{};
     }
 
-    if (!(*file)->Definition(Conv(r.position))) {
+    if (!(*file)->Definition((*file)->Conv(r.position))) {
         return lsp::Null{};
     }
 
     std::vector<lsp::TextEdit> changes;
-    for (auto& ref : (*file)->References(Conv(r.position), /* include_declaration */ true)) {
+    for (auto& ref :
+         (*file)->References((*file)->Conv(r.position), /* include_declaration */ true)) {
         lsp::TextEdit edit;
-        edit.range = Conv(ref);
+        edit.range = (*file)->Conv(ref);
         edit.new_text = r.new_name;
         changes.emplace_back(std::move(edit));
     }

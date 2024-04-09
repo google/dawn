@@ -40,9 +40,10 @@ Server::Handle(const lsp::TextDocumentReferencesRequest& r) {
 
     if (auto file = files_.Get(r.text_document.uri)) {
         std::vector<lsp::Location> out;
-        for (auto& ref : (*file)->References(Conv(r.position), r.context.include_declaration)) {
+        for (auto& ref :
+             (*file)->References((*file)->Conv(r.position), r.context.include_declaration)) {
             lsp::Location loc;
-            loc.range = Conv(ref);
+            loc.range = (*file)->Conv(ref);
             loc.uri = r.text_document.uri;
             out.push_back(std::move(loc));
         }

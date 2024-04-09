@@ -61,9 +61,9 @@ struct Token {
 };
 
 /// @returns a Token built from the source range @p range with the kind @p kind
-Token TokenFromRange(const tint::Source::Range& range, SemToken::Kind kind) {
+Token TokenFromRange(const File& file, const tint::Source::Range& range, SemToken::Kind kind) {
     Token tok;
-    tok.position = Conv(range.begin);
+    tok.position = file.Conv(range.begin);
     tok.length = range.end.column - range.begin.column;
     tok.kind = kind;
     return tok;
@@ -91,23 +91,25 @@ std::vector<Token> Tokens(File& file) {
             node,  //
             [&](const ast::IdentifierExpression* expr) {
                 if (auto kind = TokenKindFor(sem.Get(expr))) {
-                    tokens.push_back(TokenFromRange(expr->identifier->source.range, *kind));
+                    tokens.push_back(TokenFromRange(file, expr->identifier->source.range, *kind));
                 }
             },
             [&](const ast::Struct* str) {
-                tokens.push_back(TokenFromRange(str->name->source.range, SemToken::kType));
+                tokens.push_back(TokenFromRange(file, str->name->source.range, SemToken::kType));
             },
             [&](const ast::StructMember* member) {
-                tokens.push_back(TokenFromRange(member->name->source.range, SemToken::kMember));
+                tokens.push_back(
+                    TokenFromRange(file, member->name->source.range, SemToken::kMember));
             },
             [&](const ast::Variable* var) {
-                tokens.push_back(TokenFromRange(var->name->source.range, SemToken::kVariable));
+                tokens.push_back(
+                    TokenFromRange(file, var->name->source.range, SemToken::kVariable));
             },
             [&](const ast::Function* fn) {
-                tokens.push_back(TokenFromRange(fn->name->source.range, SemToken::kFunction));
+                tokens.push_back(TokenFromRange(file, fn->name->source.range, SemToken::kFunction));
             },
             [&](const ast::MemberAccessorExpression* a) {
-                tokens.push_back(TokenFromRange(a->member->source.range, SemToken::kMember));
+                tokens.push_back(TokenFromRange(file, a->member->source.range, SemToken::kMember));
             });
     }
     std::sort(tokens.begin(), tokens.end(),

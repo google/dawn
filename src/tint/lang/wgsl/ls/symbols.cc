@@ -47,16 +47,16 @@ Server::Handle(const lsp::TextDocumentDocumentSymbolRequest& r) {
     if (auto file = files_.Get(r.text_document.uri)) {
         for (auto* decl : (*file)->program.AST().Functions()) {
             lsp::DocumentSymbol sym;
-            sym.range = Conv(decl->source.range);
-            sym.selection_range = Conv(decl->name->source.range);
+            sym.range = (*file)->Conv(decl->source.range);
+            sym.selection_range = (*file)->Conv(decl->name->source.range);
             sym.kind = lsp::SymbolKind::kFunction;
             sym.name = decl->name->symbol.NameView();
             symbols.push_back(sym);
         }
         for (auto* decl : (*file)->program.AST().GlobalVariables()) {
             lsp::DocumentSymbol sym;
-            sym.range = Conv(decl->source.range);
-            sym.selection_range = Conv(decl->name->source.range);
+            sym.range = (*file)->Conv(decl->source.range);
+            sym.selection_range = (*file)->Conv(decl->name->source.range);
             sym.kind =
                 decl->Is<ast::Const>() ? lsp::SymbolKind::kConstant : lsp::SymbolKind::kVariable;
             sym.name = decl->name->symbol.NameView();
@@ -67,16 +67,16 @@ Server::Handle(const lsp::TextDocumentDocumentSymbolRequest& r) {
                 decl,  //
                 [&](const ast::Struct* str) {
                     lsp::DocumentSymbol sym;
-                    sym.range = Conv(str->source.range);
-                    sym.selection_range = Conv(decl->name->source.range);
+                    sym.range = (*file)->Conv(str->source.range);
+                    sym.selection_range = (*file)->Conv(decl->name->source.range);
                     sym.kind = lsp::SymbolKind::kStruct;
                     sym.name = decl->name->symbol.NameView();
                     symbols.push_back(sym);
                 },
                 [&](const ast::Alias* str) {
                     lsp::DocumentSymbol sym;
-                    sym.range = Conv(str->source.range);
-                    sym.selection_range = Conv(decl->name->source.range);
+                    sym.range = (*file)->Conv(str->source.range);
+                    sym.selection_range = (*file)->Conv(decl->name->source.range);
                     // TODO(bclayton): Is there a better symbol kind?
                     sym.kind = lsp::SymbolKind::kObject;
                     sym.name = decl->name->symbol.NameView();

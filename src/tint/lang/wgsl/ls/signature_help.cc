@@ -61,13 +61,15 @@ std::vector<lsp::ParameterInformation> Params(const core::intrinsic::OverloadInf
 
 /// @returns the zero-based index of the parameter at with the cursor at @p position, for a call
 /// with the source @p call_source.
-size_t CalcParamIndex(const Source& call_source, const Source::Location& position) {
+size_t CalcParamIndex(const File& file,
+                      const Source& call_source,
+                      const Source::Location& position) {
     size_t index = 0;
     int depth = 0;
 
-    auto range = Conv(call_source.range);
+    auto range = file.Conv(call_source.range);
     auto start = range.start;
-    auto end = std::min(range.end, Conv(position));
+    auto end = std::min(range.end, file.Conv(position));
     auto& lines = call_source.file->content.lines;
 
     for (auto line_idx = start.line; line_idx <= end.line; line_idx++) {
@@ -177,7 +179,7 @@ Server::Handle(const lsp::TextDocumentSignatureHelpRequest& r) {
     }
 
     auto& program = (*file)->program;
-    auto pos = Conv(r.position);
+    auto pos = (*file)->Conv(r.position);
 
     auto call = (*file)->NodeAt<sem::Call>(pos);
     if (!call) {
@@ -185,7 +187,7 @@ Server::Handle(const lsp::TextDocumentSignatureHelpRequest& r) {
     }
 
     lsp::SignatureHelp help;
-    help.active_parameter = CalcParamIndex(call->Declaration()->source, pos);
+    help.active_parameter = CalcParamIndex(**file, call->Declaration()->source, pos);
     Switch(call->Target(),  //
            [&](const sem::BuiltinFn* target) {
                auto& data = wgsl::intrinsic::Dialect::kData;
