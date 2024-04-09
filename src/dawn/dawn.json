@@ -595,10 +595,12 @@
             },
             {
                 "name": "get usage",
+                "no autolock": true,
                 "returns": "buffer usage"
             },
             {
                 "name": "get size",
+                "no autolock": true,
                 "returns": "uint64_t"
             },
             {
