@@ -29,7 +29,6 @@
 
 #include <algorithm>
 #include <string>
-#include <utility>
 
 #include "dawn/common/GPUInfo.h"
 #include "dawn/native/ChainUtils.h"
@@ -768,9 +767,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     AdapterBase* adapter,
     const UnpackedPtr<DeviceDescriptor>& descriptor,
-    const TogglesState& deviceToggles,
-    Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
-    return Device::Create(adapter, descriptor, deviceToggles, std::move(lostEvent));
+    const TogglesState& deviceToggles) {
+    return Device::Create(adapter, descriptor, deviceToggles);
 }
 
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(

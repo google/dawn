@@ -47,8 +47,7 @@ class Device : public DeviceBase {
   public:
     Device(AdapterBase* adapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
-           const TogglesState& deviceToggles,
-           Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
+           const TogglesState& deviceToggles);
     ~Device() override;
 
     ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(

@@ -36,7 +36,6 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
                                           ObjectHandle eventManager,
                                           WGPUFuture future,
                                           ObjectHandle deviceHandle,
-                                          WGPUFuture deviceLostFuture,
                                           const WGPUDeviceDescriptor* descriptor) {
     Known<WGPUDevice> device;
     WIRE_TRY(DeviceObjects().Allocate(&device, deviceHandle, AllocationState::Reserved));
@@ -45,19 +44,8 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
     userdata->eventManager = eventManager;
     userdata->future = future;
     userdata->deviceObjectId = device.id;
-    userdata->deviceLostFuture = deviceLostFuture;
 
-    // Update the descriptor with the device lost callback associated with this request.
-    auto deviceLostUserdata = MakeUserdata<DeviceLostUserdata>();
-    deviceLostUserdata->eventManager = eventManager;
-    deviceLostUserdata->future = deviceLostFuture;
-
-    WGPUDeviceDescriptor desc = *descriptor;
-    desc.deviceLostCallbackInfo.mode = WGPUCallbackMode_AllowProcessEvents;
-    desc.deviceLostCallbackInfo.callback = ForwardToServer<&Server::OnDeviceLost>;
-    desc.deviceLostCallbackInfo.userdata = deviceLostUserdata.release();
-
-    mProcs.adapterRequestDevice(adapter->handle, &desc,
+    mProcs.adapterRequestDevice(adapter->handle, descriptor,
                                 ForwardToServer<&Server::OnRequestDeviceCallback>,
                                 userdata.release());
     return WireResult::Success;
@@ -73,19 +61,11 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.status = status;
     cmd.message = message;
 
-    // We always fill the reservation once we complete so that the client is the one to release it.
-    auto FillReservation = [&]() {
-        Known<WGPUDevice> reservation =
-            DeviceObjects().FillReservation(data->deviceObjectId, device);
-        reservation->info->server = this;
-        reservation->info->self = reservation.AsHandle();
-        SerializeCommand(cmd);
-        return reservation;
-    };
-
     if (status != WGPURequestDeviceStatus_Success) {
+        // Free the ObjectId which will make it unusable.
+        DeviceObjects().Free(data->deviceObjectId);
         DAWN_ASSERT(device == nullptr);
-        FillReservation();
+        SerializeCommand(cmd);
         return;
     }
 
@@ -103,11 +83,12 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
         if (!IsFeatureSupported(f)) {
             // Release the device.
             mProcs.deviceRelease(device);
-            device = nullptr;
+            // Free the ObjectId which will make it unusable.
+            DeviceObjects().Free(data->deviceObjectId);
 
             cmd.status = WGPURequestDeviceStatus_Error;
             cmd.message = "Requested feature not supported.";
-            FillReservation();
+            SerializeCommand(cmd);
             return;
         }
     }
@@ -124,9 +105,13 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.limits = &limits;
 
     // Assign the handle and allocated status if the device is created successfully.
-    Known<WGPUDevice> reservation = FillReservation();
+    Known<WGPUDevice> reservation = DeviceObjects().FillReservation(data->deviceObjectId, device);
     DAWN_ASSERT(reservation.data != nullptr);
+    reservation->info->server = this;
+    reservation->info->self = reservation.AsHandle();
     SetForwardingDeviceCallbacks(reservation);
+
+    SerializeCommand(cmd);
 }
 
 }  // namespace dawn::wire::server

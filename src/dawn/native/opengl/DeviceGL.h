@@ -55,8 +55,7 @@ class Device final : public DeviceBase {
                                              const UnpackedPtr<DeviceDescriptor>& descriptor,
                                              const OpenGLFunctions& functions,
                                              std::unique_ptr<Context> context,
-                                             const TogglesState& deviceToggles,
-                                             Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
+                                             const TogglesState& deviceToggles);
     ~Device() override;
 
     MaybeError Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor);
@@ -111,8 +110,7 @@ class Device final : public DeviceBase {
            const UnpackedPtr<DeviceDescriptor>& descriptor,
            const OpenGLFunctions& functions,
            std::unique_ptr<Context> context,
-           const TogglesState& deviceToggles,
-           Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
+           const TogglesState& deviceToggless);
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
         const BindGroupDescriptor* descriptor) override;

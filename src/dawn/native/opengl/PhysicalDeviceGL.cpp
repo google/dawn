@@ -430,8 +430,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     AdapterBase* adapter,
     const UnpackedPtr<DeviceDescriptor>& descriptor,
-    const TogglesState& deviceToggles,
-    Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
+    const TogglesState& deviceToggles) {
     EGLenum api =
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
     std::unique_ptr<Device::Context> context;
@@ -444,8 +443,7 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 
     DAWN_TRY_ASSIGN(context,
                     ContextEGL::Create(mEGLFunctions, api, mDisplay, useANGLETextureSharing));
-    return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
-                          std::move(lostEvent));
+    return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles);
 }
 
 bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {

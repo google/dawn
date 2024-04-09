@@ -124,11 +124,10 @@ void API_AVAILABLE(macos(10.15), ios(14)) UpdateTimestampPeriod(id<MTLDevice> de
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           NSPRef<id<MTLDevice>> mtlDevice,
                                           const UnpackedPtr<DeviceDescriptor>& descriptor,
-                                          const TogglesState& deviceToggles,
-                                          Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
+                                          const TogglesState& deviceToggles) {
     @autoreleasepool {
-        Ref<Device> device = AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor,
-                                                   deviceToggles, std::move(lostEvent)));
+        Ref<Device> device =
+            AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor, deviceToggles));
         DAWN_TRY(device->Initialize(descriptor));
         return device;
     }
@@ -137,10 +136,8 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 Device::Device(AdapterBase* adapter,
                NSPRef<id<MTLDevice>> mtlDevice,
                const UnpackedPtr<DeviceDescriptor>& descriptor,
-               const TogglesState& deviceToggles,
-               Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
-    : DeviceBase(adapter, descriptor, deviceToggles, std::move(lostEvent)),
-      mMtlDevice(std::move(mtlDevice)) {
+               const TogglesState& deviceToggles)
+    : DeviceBase(adapter, descriptor, deviceToggles), mMtlDevice(std::move(mtlDevice)) {
     // On macOS < 11.0, we only can check whether counter sampling is supported, and the counter
     // only can be sampled between command boundary using sampleCountersInBuffer API if it's
     // supported.

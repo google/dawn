@@ -59,11 +59,11 @@ void ObjectBase::Reference() {
     mRefcount++;
 }
 
-uint32_t ObjectBase::Release() {
+void ObjectBase::Release() {
     DAWN_ASSERT(mRefcount != 0);
+    mRefcount--;
 
-    uint32_t refCount = --mRefcount;
-    if (refCount == 0) {
+    if (mRefcount == 0) {
         DestroyObjectCmd cmd;
         cmd.objectType = GetObjectType();
         cmd.objectId = GetWireId();
@@ -72,8 +72,6 @@ uint32_t ObjectBase::Release() {
         client->SerializeCommand(cmd);
         client->Free(this, GetObjectType());
     }
-
-    return refCount;
 }
 
 ObjectWithEventsBase::ObjectWithEventsBase(const ObjectBaseParams& params,

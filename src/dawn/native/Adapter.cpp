@@ -29,12 +29,10 @@
 
 #include <algorithm>
 #include <memory>
-#include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
 
-#include "dawn/common/Log.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"
@@ -42,9 +40,6 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
-namespace {
-static constexpr DeviceDescriptor kDefaultDeviceDesc = {};
-}  // anonymous namespace
 
 AdapterBase::AdapterBase(Ref<PhysicalDeviceBase> physicalDevice,
                          FeatureLevel featureLevel,
@@ -196,14 +191,13 @@ size_t AdapterBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
     return mSupportedFeatures.EnumerateFeatures(features);
 }
 
-// TODO(https://crbug.com/dawn/2465) Could potentially re-implement via AllowSpontaneous async mode.
 DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
+    constexpr DeviceDescriptor kDefaultDesc = {};
     if (descriptor == nullptr) {
-        descriptor = &kDefaultDeviceDesc;
+        descriptor = &kDefaultDesc;
     }
 
-    auto [lostEvent, result] = CreateDevice(descriptor);
-    mPhysicalDevice->GetInstance()->GetEventManager()->TrackEvent(lostEvent);
+    auto result = CreateDevice(descriptor);
     if (result.IsError()) {
         mPhysicalDevice->GetInstance()->ConsumedError(result.AcquireError());
         return nullptr;
@@ -211,9 +205,7 @@ DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
     return ReturnToAPI(result.AcquireSuccess());
 }
 
-ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
-    const DeviceDescriptor* rawDescriptor,
-    Ref<DeviceBase::DeviceLostEvent> lostEvent) {
+ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor* rawDescriptor) {
     DAWN_ASSERT(rawDescriptor != nullptr);
 
     // Create device toggles state from required toggles descriptor and inherited adapter toggles
@@ -264,30 +256,29 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
                          "validating required limits");
     }
 
-    return mPhysicalDevice->CreateDevice(this, descriptor, deviceToggles, std::move(lostEvent));
-}
-
-std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrError<Ref<DeviceBase>>>
-AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
-    DAWN_ASSERT(descriptor != nullptr);
-
-    Ref<DeviceBase::DeviceLostEvent> lostEvent = DeviceBase::DeviceLostEvent::Create(descriptor);
-
-    auto result = CreateDeviceInternal(descriptor, lostEvent);
-    if (result.IsError()) {
-        lostEvent->mReason = wgpu::DeviceLostReason::FailedCreation;
-        lostEvent->mMessage = "Failed to create device.";
-        mPhysicalDevice->GetInstance()->GetEventManager()->SetFutureReady(lostEvent.Get());
-    }
-    return {lostEvent, std::move(result)};
+    return mPhysicalDevice->CreateDevice(this, descriptor, deviceToggles);
 }
 
 void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
                                    WGPURequestDeviceCallback callback,
                                    void* userdata) {
-    // Default legacy callback mode for RequestDevice is spontaneous.
-    APIRequestDeviceF(descriptor,
-                      {nullptr, wgpu::CallbackMode::AllowSpontaneous, callback, userdata});
+    constexpr DeviceDescriptor kDefaultDescriptor = {};
+    if (descriptor == nullptr) {
+        descriptor = &kDefaultDescriptor;
+    }
+    auto result = CreateDevice(descriptor);
+    if (result.IsError()) {
+        std::unique_ptr<ErrorData> errorData = result.AcquireError();
+        // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
+        callback(WGPURequestDeviceStatus_Error, nullptr, errorData->GetFormattedMessage().c_str(),
+                 userdata);
+        return;
+    }
+    Ref<DeviceBase> device = result.AcquireSuccess();
+    WGPURequestDeviceStatus status =
+        device == nullptr ? WGPURequestDeviceStatus_Unknown : WGPURequestDeviceStatus_Success;
+    // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
+    callback(status, ToAPI(ReturnToAPI(std::move(device))), nullptr, userdata);
 }
 
 Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
@@ -295,53 +286,47 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
     struct RequestDeviceEvent final : public EventManager::TrackedEvent {
         WGPURequestDeviceCallback mCallback;
         raw_ptr<void> mUserdata;
-
-        WGPURequestDeviceStatus mStatus;
-        Ref<DeviceBase> mDevice = nullptr;
-        std::string mMessage;
-
-        RequestDeviceEvent(const RequestDeviceCallbackInfo& callbackInfo, Ref<DeviceBase> device)
-            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
-              mCallback(callbackInfo.callback),
-              mUserdata(callbackInfo.userdata),
-              mStatus(WGPURequestDeviceStatus_Success),
-              mDevice(std::move(device)) {}
+        ResultOrError<Ref<DeviceBase>> mDeviceOrError;
 
         RequestDeviceEvent(const RequestDeviceCallbackInfo& callbackInfo,
-                           const std::string& message)
+                           ResultOrError<Ref<DeviceBase>> deviceOrError)
             : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
               mCallback(callbackInfo.callback),
               mUserdata(callbackInfo.userdata),
-              mStatus(WGPURequestDeviceStatus_Error),
-              mMessage(message) {}
+              mDeviceOrError(std::move(deviceOrError)) {}
 
         ~RequestDeviceEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 
         void Complete(EventCompletionType completionType) override {
+            WGPURequestDeviceStatus status;
+            Ref<DeviceBase> device;
+
             if (completionType == EventCompletionType::Shutdown) {
-                mStatus = WGPURequestDeviceStatus_InstanceDropped;
-                mDevice = nullptr;
-                mMessage = "A valid external Instance reference no longer exists.";
+                status = WGPURequestDeviceStatus_InstanceDropped;
+            } else {
+                if (mDeviceOrError.IsError()) {
+                    std::unique_ptr<ErrorData> errorData = mDeviceOrError.AcquireError();
+                    mCallback(WGPURequestDeviceStatus_Error, nullptr,
+                              errorData->GetFormattedMessage().c_str(),
+                              mUserdata.ExtractAsDangling());
+                    return;
+                }
+                device = mDeviceOrError.AcquireSuccess();
+                status = device == nullptr ? WGPURequestDeviceStatus_Unknown
+                                           : WGPURequestDeviceStatus_Success;
             }
-            mCallback(mStatus, ToAPI(ReturnToAPI(std::move(mDevice))),
-                      mMessage.empty() ? nullptr : mMessage.c_str(), mUserdata.ExtractAsDangling());
+            mCallback(status, ToAPI(ReturnToAPI(std::move(device))), nullptr,
+                      mUserdata.ExtractAsDangling());
         }
     };
 
+    constexpr DeviceDescriptor kDefaultDescriptor = {};
     if (descriptor == nullptr) {
-        descriptor = &kDefaultDeviceDesc;
+        descriptor = &kDefaultDescriptor;
     }
 
-    FutureID futureID = kNullFutureID;
-    auto [lostEvent, result] = CreateDevice(descriptor);
-    if (result.IsSuccess()) {
-        futureID = mPhysicalDevice->GetInstance()->GetEventManager()->TrackEvent(
-            AcquireRef(new RequestDeviceEvent(callbackInfo, result.AcquireSuccess())));
-    } else {
-        futureID = mPhysicalDevice->GetInstance()->GetEventManager()->TrackEvent(AcquireRef(
-            new RequestDeviceEvent(callbackInfo, result.AcquireError()->GetFormattedMessage())));
-    }
-    mPhysicalDevice->GetInstance()->GetEventManager()->TrackEvent(std::move(lostEvent));
+    FutureID futureID = mPhysicalDevice->GetInstance()->GetEventManager()->TrackEvent(
+        AcquireRef(new RequestDeviceEvent(callbackInfo, CreateDevice(descriptor))));
     return {futureID};
 }
 

@@ -792,9 +792,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     AdapterBase* adapter,
     const UnpackedPtr<DeviceDescriptor>& descriptor,
-    const TogglesState& deviceToggles,
-    Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
-    return Device::Create(adapter, descriptor, deviceToggles, std::move(lostEvent));
+    const TogglesState& deviceToggles) {
+    return Device::Create(adapter, descriptor, deviceToggles);
 }
 
 // Resets the backend device and creates a new one. If any D3D12 objects belonging to the

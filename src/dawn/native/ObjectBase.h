@@ -172,9 +172,6 @@ class RefCountedWithExternalCountBase;
 
 template <class T>
 T* ReturnToAPI(Ref<T>&& object) {
-    if (object == nullptr) {
-        return nullptr;
-    }
     if constexpr (T::HasExternalRefCount) {
         // For an object which has external ref count, just need to increase the external ref count,
         // and keep the total ref count unchanged.

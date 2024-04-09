@@ -32,7 +32,6 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/mock_webgpu.h"
-#include "dawn/tests/MockCallback.h"
 #include "gtest/gtest.h"
 
 #include "webgpu/webgpu_cpp.h"
@@ -149,10 +148,6 @@ class WireTest : public testing::Test {
     void DefaultApiAdapterWasReleased();
 
     testing::StrictMock<MockProcTable> api;
-
-    testing::MockCallback<WGPUDeviceLostCallbackNew> deviceLostCallback;
-    testing::MockCallback<WGPUErrorCallback> uncapturedErrorCallback;
-
     WGPUInstance instance;
     WGPUInstance apiInstance;
     wgpu::Adapter adapter;

@@ -85,17 +85,16 @@ namespace dawn::wire::server {
                     WIRE_TRY({{type.name.CamelCase()}}Objects().Get(objectId, &obj));
 
                     if (obj->state == AllocationState::Allocated) {
+                        DAWN_ASSERT(obj->handle != nullptr);
                         {% if type.name.get() == "device" %}
                             if (obj->handle != nullptr) {
                                 //* Deregisters uncaptured error and device lost callbacks since
                                 //* they should not be forwarded if the device no longer exists on the wire.
                                 ClearDeviceCallbacks(obj->handle);
-                                mProcs.{{as_varName(type.name, Name("release"))}}(obj->handle);
                             }
-                        {% else %}
-                            DAWN_ASSERT(obj->handle != nullptr);
-                            mProcs.{{as_varName(type.name, Name("release"))}}(obj->handle);
                         {% endif %}
+
+                        mProcs.{{as_varName(type.name, Name("release"))}}(obj->handle);
                     }
                     {{type.name.CamelCase()}}Objects().Free(objectId);
                     return WireResult::Success;

@@ -49,7 +49,6 @@ enum class EventType {
     CompilationInfo,
     CreateComputePipeline,
     CreateRenderPipeline,
-    DeviceLost,
     MapAsync,
     PopErrorScope,
     RequestAdapter,

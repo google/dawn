@@ -109,6 +109,10 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenUncapturedErrorCallback
     ASSERT_TRUE(wireHelper->FlushServer());
     ASSERT_NE(device, nullptr);
 
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = 128;
+    bufferDesc.usage = wgpu::BufferUsage::Uniform;
+
     // Destroy the device.
     device.Destroy();
 

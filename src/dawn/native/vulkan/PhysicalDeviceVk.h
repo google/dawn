@@ -72,11 +72,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     void SetupBackendAdapterToggles(TogglesState* adapterToggles) const override;
     void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
-    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
-        AdapterBase* adapter,
-        const UnpackedPtr<DeviceDescriptor>& descriptor,
-        const TogglesState& deviceToggles,
-        Ref<DeviceBase::DeviceLostEvent>&& lostEvent) override;
+    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
+                                                    const UnpackedPtr<DeviceDescriptor>& descriptor,
+                                                    const TogglesState& deviceToggles) override;
 
     uint32_t FindDefaultComputeSubgroupSize() const;
     bool CheckSemaphoreSupport(DeviceExt deviceExt,

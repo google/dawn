@@ -27,8 +27,6 @@
 
 #include "dawn/native/d3d/DeviceD3D.h"
 
-#include <utility>
-
 #include "dawn/native/d3d/BackendD3D.h"
 #include "dawn/native/d3d/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d/Forward.h"
@@ -39,9 +37,8 @@ namespace dawn::native::d3d {
 
 Device::Device(AdapterBase* adapter,
                const UnpackedPtr<DeviceDescriptor>& descriptor,
-               const TogglesState& deviceToggles,
-               Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
-    : DeviceBase(adapter, descriptor, deviceToggles, std::move(lostEvent)) {}
+               const TogglesState& deviceToggles)
+    : DeviceBase(adapter, descriptor, deviceToggles) {}
 
 Device::~Device() {
     Destroy();

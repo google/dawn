@@ -130,15 +130,6 @@ Ref<SystemEvent> SystemEvent::CreateSignaled() {
     return ev;
 }
 
-// static
-Ref<SystemEvent> SystemEvent::CreateNonProgressingEvent() {
-    return AcquireRef(new SystemEvent(kNonProgressingPayload));
-}
-
-bool SystemEvent::IsProgressing() const {
-    return GetRefCountPayload() != kNonProgressingPayload;
-}
-
 bool SystemEvent::IsSignaled() const {
     return mSignaled.load(std::memory_order_acquire);
 }

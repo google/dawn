@@ -179,10 +179,7 @@ class ValidationTest : public testing::Test {
 
     wgpu::Device RequestDeviceSync(const wgpu::DeviceDescriptor& deviceDesc);
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
-    static void OnDeviceLost(WGPUDevice const* device,
-                             WGPUDeviceLostReason reason,
-                             const char* message,
-                             void* userdata);
+    static void OnDeviceLost(WGPUDeviceLostReason reason, const char* message, void* userdata);
 
     virtual bool UseCompatibilityMode() const;
 

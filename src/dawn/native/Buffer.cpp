@@ -235,6 +235,7 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
                 (*buffer)->mState = BufferState::Mapped;
 
                 pendingMapEvent = std::move((*buffer)->mPendingMapEvent);
+                (*buffer)->mPendingMapFutureID = kNullFutureID;
             }
         });
         mCallback(ToAPI(status), mUserdata);
@@ -635,6 +636,9 @@ Future BufferBase::APIMapAsyncF(wgpu::MapMode mode,
     }
 
     FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(std::move(event));
+    if (!earlyStatus) {
+        mPendingMapFutureID = futureID;
+    }
     return {futureID};
 }
 
@@ -709,8 +713,10 @@ void BufferBase::UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus) {
         // state and pending map event needs to be atomic w.r.t. MapAsyncEvent::Complete.
         Ref<MapAsyncEvent> pendingMapEvent = std::move(mPendingMapEvent);
         if (pendingMapEvent != nullptr) {
+            DAWN_ASSERT(mPendingMapFutureID != kNullFutureID);
             pendingMapEvent->UnmapEarly(static_cast<wgpu::BufferMapAsyncStatus>(callbackStatus));
-            GetInstance()->GetEventManager()->SetFutureReady(pendingMapEvent.Get());
+            GetInstance()->GetEventManager()->SetFutureReady(mPendingMapFutureID);
+            mPendingMapFutureID = kNullFutureID;
         } else {
             GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
                 PrepareMappingCallback(mLastMapID, callbackStatus));
