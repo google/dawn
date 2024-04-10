@@ -53,6 +53,7 @@ cache/webgpu/shader/execution/cos.bin
 cache/webgpu/shader/execution/cosh.bin
 cache/webgpu/shader/execution/cross.bin
 cache/webgpu/shader/execution/degrees.bin
+cache/webgpu/shader/execution/derivatives.bin
 cache/webgpu/shader/execution/determinant.bin
 cache/webgpu/shader/execution/distance.bin
 cache/webgpu/shader/execution/dot.bin
