@@ -42,6 +42,7 @@ cc_library(
     "cancel_request.cc",
     "change_configuration.cc",
     "change_watched_files.cc",
+    "completions.cc",
     "definition.cc",
     "diagnostics.cc",
     "document.cc",
@@ -112,6 +113,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "completions_test.cc",
     "definition_test.cc",
     "diagnostics_test.cc",
     "helpers_test.cc",

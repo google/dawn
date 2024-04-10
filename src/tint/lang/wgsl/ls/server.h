@@ -59,6 +59,10 @@ class Server {
     // Requests
     ////////////////////////////////////////////////////////////////////////////
 
+    /// Handler for langsvr::lsp::TextDocumentCompletionRequest
+    typename langsvr::lsp::TextDocumentCompletionRequest::ResultType  //
+    Handle(const langsvr::lsp::TextDocumentCompletionRequest&);
+
     /// Handler for langsvr::lsp::TextDocumentDefinitionRequest
     typename langsvr::lsp::TextDocumentDefinitionRequest::ResultType  //
     Handle(const langsvr::lsp::TextDocumentDefinitionRequest&);
@@ -150,11 +154,15 @@ class Server {
         }
 
         langsvr::Session& session;
+        langsvr::lsp::MessageType type;
         StringStream msg{};
     };
 
     /// Log constructs a new Logger to send a log message to the client.
-    Logger Log() { return Logger{session_}; }
+    Logger Log() { return Logger{session_, langsvr::lsp::MessageType::kLog}; }
+
+    /// Error constructs a new Logger to send a log message to the client.
+    Logger Error() { return Logger{session_, langsvr::lsp::MessageType::kError}; }
 
     /// The LSP session.
     langsvr::Session& session_;
