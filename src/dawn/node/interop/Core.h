@@ -121,7 +121,7 @@ struct EnforceRangeInteger {
 // conversion
 struct [[nodiscard]] Result {
     // Returns true if the operation succeeded, false if there was an error
-    inline operator bool() const { return error.empty(); }
+    inline explicit operator bool() const { return error.empty(); }
 
     // If Result is an error, then a new Error is returned with the
     // stringified values append to the error message.

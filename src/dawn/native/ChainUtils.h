@@ -99,7 +99,7 @@ class UnpackedPtr {
 
     UnpackedPtr() : mStruct(nullptr) {}
 
-    operator bool() const { return mStruct != nullptr; }
+    explicit operator bool() const { return mStruct != nullptr; }
     PtrType operator->() const { return mStruct; }
     PtrType operator*() const { return mStruct; }
 
