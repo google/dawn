@@ -114,16 +114,7 @@ crbug.com/dawn/2478 [ linux nvidia ] webgpu:api,validation,buffer,mapping:mapAsy
 
 ### This section represents things that are probably fixable in Dawn.
 
-# copyToTexture,canvas color_space_conversion failures
-crbug.com/dawn/2377 [ nvidia-0x2184 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="srgb";dstColorFormat="rg16float";dstPremultiplied=false;srcDoFlipYDuringCopy=false [ RetryOnFailure ]
-
-# Device Lost issue (only fails in Telemetry, not in browser standalone)
-crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:valid=false;awaitLost=false [ Failure ]
-crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:valid=false;awaitLost=true [ Failure ]
-crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=false [ Failure ]
-crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
-
-# interpolation "flat" failures
+# interpolation "flat" failures; require spec change
 crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
@@ -188,6 +179,9 @@ crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimen
 crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="rgba8unorm-srgb";aspect="all";samples=1 [ Failure ]
 crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="stencil8";aspect="all";samples=1 [ Failure ]
 
+# bitcast ai_to_f32 failures; precision issue?
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
+
 ### This section represents tests which may require CTS changes.
 
 # ANGLETextureSharing is not supported
@@ -203,6 +197,27 @@ crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:viewFormats:* [ Failure
 ### validation has been added
 
 ### This section represents unimplemented features in Tint, Chrome or core WebGPU
+
+# abstract_float conversions, also failing in Core WebGPU
+crbug.com/tint/2225 webgpu:shader,execution,expression,unary,i32_conversion:abstract_float:* [ Failure ]
+crbug.com/tint/2225 webgpu:shader,execution,expression,unary,u32_conversion:abstract_float:* [ Failure ]
+
+# scalar_vector_out_of_range reliably failing
+# Also failing in core WebGPU
+crbug.com/tint/2218 webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+
+# Implement "context dependent names do not use name resolution"
+# Also failing in core WebGPU
+crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:builtin_value_names:* [ Failure ]
+crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_sampling_names:* [ Failure ]
+crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_type_names:* [ Failure ]
+
+# Device Lost issue (only fails in Telemetry, not in browser standalone)
+# Also failing in core WebGPU
+crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:valid=false;awaitLost=false [ Failure ]
+crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:valid=false;awaitLost=true [ Failure ]
+crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=false [ Failure ]
+crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
 
 ### This section represents issues that are likely bugs in ANGLE
 
@@ -325,6 +340,9 @@ crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries
 crbug.com/dawn/2114 [ intel-0x9bc5 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:* [ Failure ]
 crbug.com/dawn/2114 [ intel-0x9bc5 ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
 crbug.com/dawn/2114 [ nvidia-0x2184 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
+
+# copyToTexture,canvas color_space_conversion failure on NVidia
+crbug.com/dawn/2377 [ nvidia-0x2184 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="srgb";dstColorFormat="rg16float";dstPremultiplied=false;srcDoFlipYDuringCopy=false [ RetryOnFailure ]
 
 # Limits issues on NVidia GL
 crbug.com/dawn/2123 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxBufferSize:createBuffer,at_over:limitTest="atMaximum";testValueName="atLimit" [ Failure ]
@@ -475,12 +493,5 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,i32_conversion:abstract_float:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,u32_conversion:abstract_float:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:builtin_value_names:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_sampling_names:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_type_names:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
