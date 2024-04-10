@@ -37,6 +37,7 @@
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/ityp_span.h"
+#include "dawn/native/Device.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/Forward.h"
@@ -67,7 +68,8 @@ class PhysicalDeviceBase : public RefCounted {
 
     ResultOrError<Ref<DeviceBase>> CreateDevice(AdapterBase* adapter,
                                                 const UnpackedPtr<DeviceDescriptor>& descriptor,
-                                                const TogglesState& deviceToggles);
+                                                const TogglesState& deviceToggles,
+                                                Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
 
     uint32_t GetVendorId() const;
     uint32_t GetDeviceId() const;
@@ -141,7 +143,8 @@ class PhysicalDeviceBase : public RefCounted {
     virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
         AdapterBase* adapter,
         const UnpackedPtr<DeviceDescriptor>& descriptor,
-        const TogglesState& deviceToggles) = 0;
+        const TogglesState& deviceToggles,
+        Ref<DeviceBase::DeviceLostEvent>&& lostEvent) = 0;
 
     virtual MaybeError InitializeImpl() = 0;
 

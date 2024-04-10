@@ -81,8 +81,10 @@ static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const UnpackedPtr<DeviceDescriptor>& descriptor,
-                                          const TogglesState& deviceToggles) {
-    Ref<Device> device = AcquireRef(new Device(adapter, descriptor, deviceToggles));
+                                          const TogglesState& deviceToggles,
+                                          Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
+    Ref<Device> device =
+        AcquireRef(new Device(adapter, descriptor, deviceToggles, std::move(lostEvent)));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }
@@ -200,8 +202,9 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
 Device::Device(AdapterBase* adapter,
                const UnpackedPtr<DeviceDescriptor>& descriptor,
-               const TogglesState& deviceToggles)
-    : Base(adapter, descriptor, deviceToggles) {}
+               const TogglesState& deviceToggles,
+               Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
+    : Base(adapter, descriptor, deviceToggles, std::move(lostEvent)) {}
 
 Device::~Device() = default;
 

@@ -332,11 +332,13 @@ void ValidationTest::ReinitializeInstances(const wgpu::InstanceDescriptor* nativ
     // Reinitialize the device.
     mExpectDestruction = true;
     wgpu::DeviceDescriptor deviceDescriptor = {};
-    deviceDescriptor.deviceLostCallback = ValidationTest::OnDeviceLost;
-    deviceDescriptor.deviceLostUserdata = this;
+    deviceDescriptor.deviceLostCallbackInfo = {nullptr, wgpu::CallbackMode::AllowSpontaneous,
+                                               ValidationTest::OnDeviceLost, this};
+    deviceDescriptor.uncapturedErrorCallbackInfo.callback = ValidationTest::OnDeviceError;
+    deviceDescriptor.uncapturedErrorCallbackInfo.userdata = this;
+
     device = RequestDeviceSync(deviceDescriptor);
     backendDevice = mLastCreatedBackendDevice;
-    device.SetUncapturedErrorCallback(ValidationTest::OnDeviceError, this);
     mExpectDestruction = false;
 }
 
@@ -362,7 +364,8 @@ void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void
     self->mError = true;
 }
 
-void ValidationTest::OnDeviceLost(WGPUDeviceLostReason reason,
+void ValidationTest::OnDeviceLost(WGPUDevice const* device,
+                                  WGPUDeviceLostReason reason,
                                   const char* message,
                                   void* userdata) {
     auto* self = static_cast<ValidationTest*>(userdata);

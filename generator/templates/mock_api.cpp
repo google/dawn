@@ -76,13 +76,15 @@ void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
 
 //* Generate the older Call*Callback if there is no Future call equivalent.
 //* Includes:
-//*   - setDeviceLostCallback
 //*   - setUncapturedErrorCallback
 //*   - setLoggingCallback
-{% set LegacyCallbackFunctions = ['set device lost callback', 'set uncaptured error callback', 'set logging callback'] %}
+{% set LegacyCallbackFunctions = ['set uncaptured error callback', 'set logging callback'] %}
+
+//* Manually implemented mock functions due to incompatibility.
+{% set ManuallyMockedFunctions = ['set device lost callback'] %}
 
 {% for type in by_category["object"] %}
-    {% for method in type.methods %}
+    {% for method in type.methods if method.name.get() not in ManuallyMockedFunctions %}
         {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
         {% if has_callback_arguments(method) %}
             {{as_cType(method.return_type.name)}} ProcTableAsClass::{{Suffix}}(
@@ -185,6 +187,28 @@ void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
         {% endfor %}
     {% endfor %}
 {% endfor %}
+
+// Manually implement device lost related callback helpers for testing.
+void ProcTableAsClass::DeviceSetDeviceLostCallback(WGPUDevice device,
+                                                   WGPUDeviceLostCallback callback,
+                                                   void* userdata) {
+    ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
+    object->mDeviceLostOldCallback = callback;
+    object->mDeviceLostUserdata = userdata;
+
+    OnDeviceSetDeviceLostCallback(device, callback, userdata);
+}
+void ProcTableAsClass::CallDeviceSetDeviceLostCallbackCallback(WGPUDevice device,
+                                                               WGPUDeviceLostReason reason,
+                                                               char const* message) {
+    ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
+    // If we have an old callback set, call that one, otherwise call the new one.
+    if (object->mDeviceLostOldCallback != nullptr) {
+        object->mDeviceLostOldCallback(reason, message, object->mDeviceLostUserdata);
+    } else {
+        object->mDeviceLostCallback(&device, reason, message, object->mDeviceLostUserdata);
+    }
+}
 
 {% for type in by_category["object"] %}
     {{as_cType(type.name)}} ProcTableAsClass::GetNew{{type.name.CamelCase()}}() {

@@ -304,10 +304,12 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool SupportsFeatureLevel(FeatureLevel) const override { return true; }
 
   private:
-    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
-                                                    const UnpackedPtr<DeviceDescriptor>& descriptor,
-                                                    const TogglesState& deviceToggles) override {
-        return Device::Create(adapter, mDevice, descriptor, deviceToggles);
+    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+        AdapterBase* adapter,
+        const UnpackedPtr<DeviceDescriptor>& descriptor,
+        const TogglesState& deviceToggles,
+        Ref<DeviceBase::DeviceLostEvent>&& lostEvent) override {
+        return Device::Create(adapter, mDevice, descriptor, deviceToggles, std::move(lostEvent));
     }
 
     void SetupBackendAdapterToggles(TogglesState* adapterToggles) const override {}

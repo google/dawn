@@ -162,21 +162,13 @@ void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
             info->server->OnLogging(info->self, type, message);
         },
         device->info.get());
-    mProcs.deviceSetDeviceLostCallback(
-        device->handle,
-        [](WGPUDeviceLostReason reason, const char* message, void* userdata) {
-            DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
-            info->server->OnDeviceLost(info->self, reason, message);
-        },
-        device->info.get());
 }
 
 void Server::ClearDeviceCallbacks(WGPUDevice device) {
-    // Un-set the error and lost callbacks since we cannot forward them
+    // Un-set the error and logging callbacks since we cannot forward them
     // after the server has been destroyed.
     mProcs.deviceSetUncapturedErrorCallback(device, nullptr, nullptr);
     mProcs.deviceSetLoggingCallback(device, nullptr, nullptr);
-    mProcs.deviceSetDeviceLostCallback(device, nullptr, nullptr);
 }
 
 }  // namespace dawn::wire::server

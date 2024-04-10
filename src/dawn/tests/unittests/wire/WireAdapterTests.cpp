@@ -114,15 +114,18 @@ TEST_P(WireAdapterTests, RequestDeviceNullDescriptor) {
     });
 }
 
-static void DeviceLostCallback(WGPUDeviceLostReason reason, const char* message, void* userdata) {}
+static void DeviceLostCallback(WGPUDevice const* device,
+                               WGPUDeviceLostReason reason,
+                               const char* message,
+                               void* userdata) {}
 
 // Test that the DeviceDescriptor is not allowed to pass a device lost callback from the client to
 // the server.
 TEST_P(WireAdapterTests, RequestDeviceAssertsOnLostCallbackPointer) {
     int userdata = 1337;
     wgpu::DeviceDescriptor desc = {};
-    desc.deviceLostCallback = DeviceLostCallback;
-    desc.deviceLostUserdata = &userdata;
+    desc.deviceLostCallbackInfo.callback = DeviceLostCallback;
+    desc.deviceLostCallbackInfo.userdata = &userdata;
 
     AdapterRequestDevice(adapter, &desc);
 
@@ -130,9 +133,11 @@ TEST_P(WireAdapterTests, RequestDeviceAssertsOnLostCallbackPointer) {
         .WillOnce(WithArg<1>(Invoke([&](const WGPUDeviceDescriptor* apiDesc) {
             EXPECT_STREQ(apiDesc->label, desc.label);
 
-            // The callback should not be passed through to the server.
-            ASSERT_EQ(apiDesc->deviceLostCallback, nullptr);
-            ASSERT_EQ(apiDesc->deviceLostUserdata, nullptr);
+            // The callback should not be passed through to the server, and it should be overridden.
+            ASSERT_NE(apiDesc->deviceLostCallbackInfo.callback, nullptr);
+            ASSERT_NE(apiDesc->deviceLostCallbackInfo.callback, &DeviceLostCallback);
+            ASSERT_NE(apiDesc->deviceLostCallbackInfo.userdata, nullptr);
+            ASSERT_NE(apiDesc->deviceLostCallbackInfo.userdata, &userdata);
 
             // Call the callback so the test doesn't wait indefinitely.
             api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Error, nullptr,
@@ -172,8 +177,6 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
             EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
                 .Times(1);
             EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, NotNull(), NotNull())).Times(1);
-            EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, NotNull(), NotNull()))
-                .Times(1);
 
             EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
@@ -244,7 +247,6 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
     // Cleared when the device is destroyed.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
-    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, DeviceRelease(apiDevice));
 
     // Server has not recevied the release yet, so the device should be known.
@@ -349,8 +351,6 @@ TEST_P(WireAdapterTests, RequestDeviceAdapterDestroyedBeforeCallback) {
             EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
                 .Times(1);
             EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, NotNull(), NotNull())).Times(1);
-            EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, NotNull(), NotNull()))
-                .Times(1);
 
             EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
@@ -389,7 +389,6 @@ TEST_P(WireAdapterTests, RequestDeviceAdapterDestroyedBeforeCallback) {
     // Cleared when the device is destroyed.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
-    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, DeviceRelease(apiDevice));
     FlushClient();
 }

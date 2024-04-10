@@ -345,62 +345,61 @@ bool EventManager::IsShutDown() const {
 
 FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
     FutureID futureID = mNextFutureID++;
-    return mEvents.Use([&](auto events) {
-        if (!events->has_value()) {
+    event->mFutureID = futureID;
+
+    // Handle the event now if it's spontaneous and ready.
+    if (event->mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
+        bool isReady = false;
+        auto completionData = event->GetCompletionData();
+        if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
+            isReady = std::get<Ref<SystemEvent>>(completionData)->IsSignaled();
+        }
+        if (std::holds_alternative<QueueAndSerial>(completionData)) {
+            auto& queueAndSerial = std::get<QueueAndSerial>(completionData);
+            isReady = queueAndSerial.completionSerial <=
+                      queueAndSerial.queue->GetCompletedCommandSerial();
+        }
+        if (isReady) {
+            event->EnsureComplete(EventCompletionType::Ready);
             return futureID;
         }
+    }
 
-        if (event->mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
-            bool isReady = false;
-            auto completionData = event->GetCompletionData();
-            if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
-                isReady = std::get<Ref<SystemEvent>>(completionData)->IsSignaled();
-            }
-            if (std::holds_alternative<QueueAndSerial>(completionData)) {
-                auto& queueAndSerial = std::get<QueueAndSerial>(completionData);
-                isReady = queueAndSerial.completionSerial <=
-                          queueAndSerial.queue->GetCompletedCommandSerial();
-            }
-            if (isReady) {
-                event->EnsureComplete(EventCompletionType::Ready);
-                return futureID;
-            }
-        }
-
-        (*events)->emplace(futureID, std::move(event));
-        return futureID;
-    });
-}
-
-void EventManager::SetFutureReady(FutureID futureID) {
-    Ref<TrackedEvent> spontaneousEvent;
     mEvents.Use([&](auto events) {
         if (!events->has_value()) {
             return;
         }
-
-        if (auto it = (*events)->find(futureID); it != (*events)->end()) {
-            auto& event = it->second;
-
-            auto completionData = event->GetCompletionData();
-            if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
-                std::get<Ref<SystemEvent>>(event->GetCompletionData())->Signal();
-            }
-            if (std::holds_alternative<QueueAndSerial>(completionData)) {
-                auto& queueAndSerial = std::get<QueueAndSerial>(completionData);
-                queueAndSerial.completionSerial = queueAndSerial.queue->GetCompletedCommandSerial();
-            }
-
-            if (event->mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
-                spontaneousEvent = std::move(event);
-                (*events)->erase(futureID);
-            }
-        }
+        (*events)->emplace(futureID, std::move(event));
     });
+    return futureID;
+}
+
+void EventManager::SetFutureReady(TrackedEvent* event) {
+    auto completionData = event->GetCompletionData();
+    if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
+        std::get<Ref<SystemEvent>>(completionData)->Signal();
+    }
+    if (std::holds_alternative<QueueAndSerial>(completionData)) {
+        auto& queueAndSerial = std::get<QueueAndSerial>(completionData);
+        queueAndSerial.completionSerial = queueAndSerial.queue->GetCompletedCommandSerial();
+    }
+
+    // Sometimes, events might become ready before they are even tracked. This can happen because
+    // tracking is ordered to uphold callback ordering, but events may become ready in any order. If
+    // the event is spontaneous, it will be completed when it is tracked.
+    if (event->mFutureID == kNullFutureID) {
+        return;
+    }
 
     // Handle spontaneous completion now.
-    if (spontaneousEvent) {
-        spontaneousEvent->EnsureComplete(EventCompletionType::Ready);
+    if (event->mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
+        mEvents.Use([&](auto events) {
+            if (!events->has_value()) {
+                return;
+            }
+            (*events)->erase(event->mFutureID);
+        });
+        event->EnsureComplete(EventCompletionType::Ready);
     }
 }
 
@@ -409,7 +408,8 @@ bool EventManager::ProcessPollEvents() {
 
     std::vector<TrackedEvent::WaitRef> completable;
     wgpu::WaitStatus waitStatus;
-    auto needFutureProcessEvents = mEvents.Use([&](auto events) {
+    bool hasProgressingEvents = false;
+    auto hasIncompleteEvents = mEvents.Use([&](auto events) {
         // Iterate all events and record poll events and spontaneous events since they are both
         // allowed to be completed in the ProcessPoll call. Note that spontaneous events are allowed
         // to trigger anywhere which is why we include them in the call.
@@ -417,6 +417,17 @@ bool EventManager::ProcessPollEvents() {
         futures.reserve((*events)->size());
         for (auto& [futureID, event] : **events) {
             if (event->mCallbackMode != wgpu::CallbackMode::WaitAnyOnly) {
+                // Figure out if there are any progressing events. If we only have non-progressing
+                // events, we need to return false to indicate that there isn't any polling work to
+                // be done.
+                auto completionData = event->GetCompletionData();
+                if (std::holds_alternative<Ref<SystemEvent>>(completionData)) {
+                    hasProgressingEvents |=
+                        std::get<Ref<SystemEvent>>(completionData)->IsProgressing();
+                } else {
+                    hasProgressingEvents = true;
+                }
+
                 futures.push_back(
                     TrackedFutureWaitInfo{futureID, TrackedEvent::WaitRef{event.Get()}, 0, false});
             }
@@ -429,7 +440,6 @@ bool EventManager::ProcessPollEvents() {
 
         waitStatus = WaitImpl(futures, Nanoseconds(0));
         if (waitStatus == wgpu::WaitStatus::TimedOut) {
-            // Return the beginning to indicate that nothing completed.
             return true;
         }
         DAWN_ASSERT(waitStatus == wgpu::WaitStatus::Success);
@@ -449,7 +459,9 @@ bool EventManager::ProcessPollEvents() {
     for (auto& event : completable) {
         event->EnsureComplete(EventCompletionType::Ready);
     }
-    return needFutureProcessEvents;
+    // Note that in the event of all progressing events completing, but there exists non-progressing
+    // events, we will return true one extra time.
+    return hasIncompleteEvents && hasProgressingEvents;
 }
 
 wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nanoseconds timeout) {
@@ -548,6 +560,7 @@ EventManager::TrackedEvent::TrackedEvent(wgpu::CallbackMode callbackMode, Comple
     : TrackedEvent(callbackMode, SystemEvent::CreateSignaled()) {}
 
 EventManager::TrackedEvent::~TrackedEvent() {
+    DAWN_ASSERT(mFutureID != kNullFutureID);
     DAWN_ASSERT(mCompleted);
 }
 

@@ -336,7 +336,7 @@ class DawnTestBase {
     // device loss that aren't expected should result in test failures and not just some warnings
     // printed to stdout.
     testing::StrictMock<testing::MockCallback<WGPUErrorCallback>> mDeviceErrorCallback;
-    testing::StrictMock<testing::MockCallback<WGPUDeviceLostCallback>> mDeviceLostCallback;
+    testing::StrictMock<testing::MockCallback<WGPUDeviceLostCallbackNew>> mDeviceLostCallback;
 
     // Helper methods to implement the EXPECT_ macros
     std::ostringstream& AddBufferExpectation(const char* file,

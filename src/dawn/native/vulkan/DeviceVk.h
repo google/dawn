@@ -59,7 +59,8 @@ class Device final : public DeviceBase {
   public:
     static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              const UnpackedPtr<DeviceDescriptor>& descriptor,
-                                             const TogglesState& deviceToggles);
+                                             const TogglesState& deviceToggles,
+                                             Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
     ~Device() override;
 
     MaybeError Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor);
@@ -126,7 +127,8 @@ class Device final : public DeviceBase {
   private:
     Device(AdapterBase* adapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
-           const TogglesState& deviceToggles);
+           const TogglesState& deviceToggles,
+           Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
         const BindGroupDescriptor* descriptor) override;

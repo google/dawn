@@ -160,6 +160,14 @@ struct RequestDeviceUserdata : CallbackUserdata {
     ObjectHandle eventManager;
     WGPUFuture future;
     ObjectId deviceObjectId;
+    WGPUFuture deviceLostFuture;
+};
+
+struct DeviceLostUserdata : CallbackUserdata {
+    using CallbackUserdata::CallbackUserdata;
+
+    ObjectHandle eventManager;
+    WGPUFuture future;
 };
 
 class Server : public ServerBase {
@@ -207,8 +215,13 @@ class Server : public ServerBase {
 
     // Error callbacks
     void OnUncapturedError(ObjectHandle device, WGPUErrorType type, const char* message);
-    void OnDeviceLost(ObjectHandle device, WGPUDeviceLostReason reason, const char* message);
     void OnLogging(ObjectHandle device, WGPULoggingType type, const char* message);
+
+    // Async event callbacks
+    void OnDeviceLost(DeviceLostUserdata* userdata,
+                      WGPUDevice const* device,
+                      WGPUDeviceLostReason reason,
+                      const char* message);
     void OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
                                WGPUErrorType type,
                                const char* message);
