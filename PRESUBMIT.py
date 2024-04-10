@@ -166,22 +166,26 @@ def _DoCommonChecks(input_api, output_api):
     results.extend(
         input_api.canned_checks.CheckForCommitObjects(input_api, output_api))
     results.extend(_CheckNoStaleGen(input_api, output_api))
+
+    # Check infra configs.
     results.extend(
         input_api.canned_checks.CheckChangedLUCIConfigs(input_api, output_api))
+    results.extend(
+        input_api.RunTests(
+            input_api.canned_checks.CheckLucicfgGenOutput(
+                input_api, output_api, 'infra/config/global/main.star')))
 
     result_factory = output_api.PresubmitPromptWarning
     if input_api.is_committing:
         result_factory = output_api.PresubmitError
 
+    # Check for formatting.
     results.extend(
         input_api.canned_checks.CheckPatchFormatted(
             input_api,
             output_api,
             check_python=True,
             result_factory=result_factory))
-    results.extend(
-        input_api.canned_checks.CheckChangeHasDescription(
-            input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckGNFormatted(input_api, output_api))
     results.extend(
@@ -193,6 +197,10 @@ def _DoCommonChecks(input_api, output_api):
         input_api.canned_checks.CheckChangeTodoHasOwner(input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckChangeHasNoStrayWhitespace(
+            input_api, output_api))
+
+    results.extend(
+        input_api.canned_checks.CheckChangeHasDescription(
             input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckDoNotSubmit(input_api, output_api))
