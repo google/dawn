@@ -71,19 +71,19 @@ class PopErrorScopeEvent final : public TrackedEvent {
             mStatus = WGPUPopErrorScopeStatus_InstanceDropped;
             mMessage = std::nullopt;
         }
+        void* userdata = mUserdata.ExtractAsDangling();
         if (mOldCallback) {
-            mOldCallback(mType, mMessage ? mMessage->c_str() : nullptr, mUserdata);
+            mOldCallback(mType, mMessage ? mMessage->c_str() : nullptr, userdata);
         }
         if (mCallback) {
-            mCallback(mStatus, mType, mMessage ? mMessage->c_str() : nullptr, mUserdata);
+            mCallback(mStatus, mType, mMessage ? mMessage->c_str() : nullptr, userdata);
         }
     }
 
     // TODO(crbug.com/dawn/2021) Remove the old callback type.
     WGPUPopErrorScopeCallback mCallback;
     WGPUErrorCallback mOldCallback;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<void, DanglingUntriaged> mUserdata;
+    raw_ptr<void> mUserdata;
 
     WGPUPopErrorScopeStatus mStatus = WGPUPopErrorScopeStatus_Success;
     WGPUErrorType mType = WGPUErrorType_Unknown;

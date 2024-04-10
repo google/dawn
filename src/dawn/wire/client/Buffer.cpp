@@ -66,7 +66,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
         mBuffer->Reference();
     }
 
-    ~MapAsyncEvent() override { mBuffer->Release(); }
+    ~MapAsyncEvent() override { mBuffer.ExtractAsDangling()->Release(); }
 
     EventType GetType() override { return kType; }
 
@@ -169,7 +169,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
 
         auto Callback = [this, &status]() {
             if (mCallback) {
-                mCallback(status, mUserdata);
+                mCallback(status, mUserdata.ExtractAsDangling());
             }
         };
 
@@ -201,14 +201,12 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
     }
 
     WGPUBufferMapCallback mCallback;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<void, DanglingUntriaged> mUserdata;
+    raw_ptr<void> mUserdata;
 
     std::optional<WGPUBufferMapAsyncStatus> mStatus;
 
     // Strong reference to the buffer so that when we call the callback we can pass the buffer.
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    const raw_ptr<Buffer, DanglingUntriaged> mBuffer;
+    raw_ptr<Buffer> mBuffer;
 };
 
 // static
