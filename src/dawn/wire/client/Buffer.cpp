@@ -450,6 +450,7 @@ void Buffer::Unmap() {
         // for mappedAtCreation usage. It is destroyed on unmap after flush to server
         // instead of at buffer destruction.
         if (mDestructWriteHandleOnUnmap) {
+            mMappedData = nullptr;
             mWriteHandle = nullptr;
             if (mReadHandle) {
                 // If it's both mappedAtCreation and MapRead we need to reset
@@ -544,9 +545,9 @@ void Buffer::FreeMappedData() {
 
     mMappedOffset = 0;
     mMappedSize = 0;
+    mMappedData = nullptr;
     mReadHandle = nullptr;
     mWriteHandle = nullptr;
-    mMappedData = nullptr;
     mMappedState = MapState::Unmapped;
 }
 

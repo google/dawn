@@ -112,8 +112,7 @@ class Buffer final : public ObjectWithEventsBase {
     };
     std::optional<MapRequest> mPendingMapRequest = std::nullopt;
     MapState mMappedState = MapState::Unmapped;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<void, DanglingUntriaged> mMappedData = nullptr;
+    raw_ptr<void> mMappedData = nullptr;
     size_t mMappedOffset = 0;
     size_t mMappedSize = 0;
 
