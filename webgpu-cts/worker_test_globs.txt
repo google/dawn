@@ -1,3 +1,4 @@
+webgpu:print_environment:*
 webgpu:api,operation,buffers,map:mapAsync,write:*
 webgpu:api,operation,buffers,map:mapAsync,read:*
 webgpu:api,operation,buffers,map:mapAsync,read,typedArrayAccess:*
@@ -16,3 +17,5 @@ webgpu:api,operation,render_pass,storeop2:*
 webgpu:api,operation,onSubmittedWorkDone:*
 webgpu:api,validation,buffer,destroy:*
 webgpu:api,validation,buffer,mapping:*
+webgpu:idl,*
+webgpu:web_platform,*
