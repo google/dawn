@@ -441,10 +441,6 @@ MaybeError RenderPipeline::InitializeShaders() {
     // Tint does matrix multiplication expecting row major matrices
     compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-    if (!device->IsToggleEnabled(Toggle::D3DDisableIEEEStrictness)) {
-        compileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
-    }
-
     PerStage<d3d::CompiledShader> compiledShader;
 
     std::optional<dawn::native::d3d::InterStageShaderVariablesMask> usedInterstageVariables;
@@ -459,11 +455,17 @@ MaybeError RenderPipeline::InitializeShaders() {
 
     if (GetStageMask() & wgpu::ShaderStage::Vertex) {
         const ProgrammableStage& programmableStage = GetStage(SingleShaderStage::Vertex);
+        uint32_t additionalCompileFlags = 0;
+        if (programmableStage.module->GetStrictMath().value_or(
+                !device->IsToggleEnabled(Toggle::D3DDisableIEEEStrictness))) {
+            additionalCompileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
+        }
+
         DAWN_TRY_ASSIGN(
             compiledShader[SingleShaderStage::Vertex],
             ToBackend(programmableStage.module)
                 ->Compile(programmableStage, SingleShaderStage::Vertex, ToBackend(GetLayout()),
-                          compileFlags, usedInterstageVariables));
+                          compileFlags | additionalCompileFlags, usedInterstageVariables));
         const Blob& shaderBlob = compiledShader[SingleShaderStage::Vertex].shaderBlob;
         DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateVertexShader(
                                   shaderBlob.Data(), shaderBlob.Size(), nullptr, &mVertexShader),
@@ -519,11 +521,17 @@ MaybeError RenderPipeline::InitializeShaders() {
         }
 
         const ProgrammableStage& programmableStage = GetStage(SingleShaderStage::Fragment);
-        DAWN_TRY_ASSIGN(
-            compiledShader[SingleShaderStage::Fragment],
-            ToBackend(programmableStage.module)
-                ->Compile(programmableStage, SingleShaderStage::Fragment, ToBackend(GetLayout()),
-                          compileFlags, usedInterstageVariables, pixelLocalOptions));
+        uint32_t additionalCompileFlags = 0;
+        if (programmableStage.module->GetStrictMath().value_or(
+                !device->IsToggleEnabled(Toggle::D3DDisableIEEEStrictness))) {
+            additionalCompileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
+        }
+
+        DAWN_TRY_ASSIGN(compiledShader[SingleShaderStage::Fragment],
+                        ToBackend(programmableStage.module)
+                            ->Compile(programmableStage, SingleShaderStage::Fragment,
+                                      ToBackend(GetLayout()), compileFlags | additionalCompileFlags,
+                                      usedInterstageVariables, pixelLocalOptions));
         DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreatePixelShader(
                                   compiledShader[SingleShaderStage::Fragment].shaderBlob.Data(),
                                   compiledShader[SingleShaderStage::Fragment].shaderBlob.Size(),

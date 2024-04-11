@@ -356,10 +356,6 @@ MaybeError RenderPipeline::InitializeImpl() {
     // Tint does matrix multiplication expecting row major matrices
     compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-    if (!device->IsToggleEnabled(Toggle::D3DDisableIEEEStrictness)) {
-        compileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
-    }
-
     D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptorD3D12 = {};
 
     PerStage<D3D12_SHADER_BYTECODE*> shaders;
@@ -380,10 +376,16 @@ MaybeError RenderPipeline::InitializeImpl() {
 
     for (auto stage : IterateStages(GetStageMask())) {
         const ProgrammableStage& programmableStage = GetStage(stage);
-        DAWN_TRY_ASSIGN(compiledShader[stage],
-                        ToBackend(programmableStage.module)
-                            ->Compile(programmableStage, stage, ToBackend(GetLayout()),
-                                      compileFlags, usedInterstageVariables));
+        uint32_t additionalCompileFlags = 0;
+        if (programmableStage.module->GetStrictMath().value_or(
+                !device->IsToggleEnabled(Toggle::D3DDisableIEEEStrictness))) {
+            additionalCompileFlags |= D3DCOMPILE_IEEE_STRICTNESS;
+        }
+        DAWN_TRY_ASSIGN(
+            compiledShader[stage],
+            ToBackend(programmableStage.module)
+                ->Compile(programmableStage, stage, ToBackend(GetLayout()),
+                          compileFlags | additionalCompileFlags, usedInterstageVariables));
         *shaders[stage] = {compiledShader[stage].shaderBlob.Data(),
                            compiledShader[stage].shaderBlob.Size()};
     }

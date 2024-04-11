@@ -2262,7 +2262,8 @@
             {"value": 1204, "name": "shared fence MTL shared event", "tags": ["dawn", "native"]},
             {"value": 1205, "name": "shared buffer memory D3D12 resource", "tags": ["dawn", "native"]},
             {"value": 1206, "name": "static samplers", "tags": ["dawn"]},
-            {"value": 1207, "name": "y cb cr vulkan samplers", "tags": ["dawn"]}
+            {"value": 1207, "name": "y cb cr vulkan samplers", "tags": ["dawn"]},
+            {"value": 1208, "name": "shader module compilation options", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -3445,6 +3446,15 @@
             {"name": "allow non uniform derivatives", "type": "bool", "default": "false"}
         ]
     },
+    "shader module compilation options": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shader module descriptor"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "strict math", "type": "bool"}
+        ]
+    },
     "shader stage": {
         "category": "bitmask",
         "values": [
@@ -3696,6 +3706,7 @@
             {"value": 1023, "name": "dawn wire WGSL control", "tags": ["dawn"]},
             {"value": 1024, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
             {"value": 1025, "name": "drm format capabilities", "tags": ["dawn"]},
+            {"value": 1026, "name": "shader module compilation options", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
