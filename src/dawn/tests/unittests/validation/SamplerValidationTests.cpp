@@ -134,4 +134,13 @@ TEST_F(SamplerValidationTest, ValidFilterAnisotropic) {
     }
 }
 
+TEST_F(SamplerValidationTest, ValidFilterAnisotropicWithUndefined) {
+    wgpu::SamplerDescriptor kValidAnisoSamplerDesc = {};
+    kValidAnisoSamplerDesc.maxAnisotropy = 2;
+    kValidAnisoSamplerDesc.minFilter = wgpu::FilterMode::Undefined;
+    kValidAnisoSamplerDesc.magFilter = wgpu::FilterMode::Undefined;
+    kValidAnisoSamplerDesc.mipmapFilter = wgpu::MipmapFilterMode::Undefined;
+    { device.CreateSampler(); }
+}
+
 }  // anonymous namespace
