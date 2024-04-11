@@ -82,6 +82,18 @@ struct BufferBindingInfo {
     bool hasDynamicOffset = false;
 };
 
+// A mirror of wgpu::TextureBindingLayout for use inside dawn::native.
+struct TextureBindingInfo {
+    TextureBindingInfo();
+    explicit TextureBindingInfo(const TextureBindingLayout& apiLayout);
+
+    // For shader reflection UnfilterableFloat is never used and the sample type is Float for any
+    // texture_Nd<f32>.
+    wgpu::TextureSampleType sampleType;
+    wgpu::TextureViewDimension viewDimension;
+    bool multisampled;
+};
+
 // A mirror of wgpu::StorageTextureBindingLayout for use inside dawn::native.
 struct StorageTextureBindingInfo {
     StorageTextureBindingInfo();
@@ -92,13 +104,16 @@ struct StorageTextureBindingInfo {
     wgpu::StorageTextureAccess access;
 };
 
+// A mirror of wgpu::ExternalTextureBindingLayout for use inside dawn::native.
+struct ExternalTextureBindingInfo {};
+
 struct BindingInfo {
     BindingNumber binding;
     wgpu::ShaderStage visibility;
 
     std::variant<BufferBindingInfo,
                  SamplerBindingLayout,
-                 TextureBindingLayout,
+                 TextureBindingInfo,
                  StorageTextureBindingInfo,
                  StaticSamplerHolderBindingLayout>
         bindingLayout;

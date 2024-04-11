@@ -361,8 +361,8 @@ bool operator!=(const BindingInfo& a, const BindingInfo& b) {
                 std::get<StaticSamplerHolderBindingLayout>(b.bindingLayout);
             return layoutA.sampler != layoutB.sampler;
         },
-        [&](const TextureBindingLayout& layoutA) -> bool {
-            const TextureBindingLayout& layoutB = std::get<TextureBindingLayout>(b.bindingLayout);
+        [&](const TextureBindingInfo& layoutA) -> bool {
+            const TextureBindingInfo& layoutB = std::get<TextureBindingInfo>(b.bindingLayout);
             return layoutA.sampleType != layoutB.sampleType ||
                    layoutA.viewDimension != layoutB.viewDimension ||
                    layoutA.multisampled != layoutB.multisampled;
@@ -401,7 +401,7 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
         if (binding->texture.viewDimension == wgpu::TextureViewDimension::Undefined) {
             bindingLayout.viewDimension = wgpu::TextureViewDimension::e2D;
         }
-        bindingInfo.bindingLayout = bindingLayout;
+        bindingInfo.bindingLayout = TextureBindingInfo(bindingLayout);
     } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
         StorageTextureBindingLayout bindingLayout =
             binding->storageTexture.WithTrivialFrontendDefaults();
@@ -484,8 +484,8 @@ bool SortBindingsCompare(const UnpackedPtr<BindGroupLayoutEntry>& a,
             break;
         }
         case BindingInfoType::Texture: {
-            const auto& aLayout = std::get<TextureBindingLayout>(aInfo.bindingLayout);
-            const auto& bLayout = std::get<TextureBindingLayout>(bInfo.bindingLayout);
+            const auto& aLayout = std::get<TextureBindingInfo>(aInfo.bindingLayout);
+            const auto& bLayout = std::get<TextureBindingInfo>(bInfo.bindingLayout);
             if (aLayout.multisampled != bLayout.multisampled) {
                 return aLayout.multisampled < bLayout.multisampled;
             }
@@ -640,7 +640,7 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
             [&](const SamplerBindingLayout& layout) {
                 recorder.Record(BindingInfoType::Sampler, layout.type);
             },
-            [&](const TextureBindingLayout& layout) {
+            [&](const TextureBindingInfo& layout) {
                 recorder.Record(BindingInfoType::Texture, layout.sampleType, layout.viewDimension,
                                 layout.multisampled);
             },

@@ -630,7 +630,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                     // Metal backend.
                     DAWN_UNREACHABLE();
                 },
-                [&](const TextureBindingLayout&) {
+                [&](const TextureBindingInfo&) {
                     auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     if (hasVertStage) {
                         [render setVertexTexture:textureView->GetMTLTexture() atIndex:vertIndex];

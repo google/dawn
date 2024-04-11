@@ -149,7 +149,7 @@ MaybeError ValidateTextureBindGroupEntry(DeviceBase* device, const BindGroupEntr
 
 MaybeError ValidateSampledTextureBinding(DeviceBase* device,
                                          const BindGroupEntry& entry,
-                                         const TextureBindingLayout& layout,
+                                         const TextureBindingInfo& layout,
                                          UsageValidationMode mode) {
     DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
 
@@ -375,7 +375,7 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
                                  i, layout);
                 return {};
             },
-            [&](const TextureBindingLayout& layout) -> MaybeError {
+            [&](const TextureBindingInfo& layout) -> MaybeError {
                 DAWN_TRY_CONTEXT(ValidateSampledTextureBinding(device, entry, layout, mode),
                                  "validating entries[%u] as a Sampled Texture."
                                  "\nExpected entry layout: %s",
@@ -589,7 +589,7 @@ TextureViewBase* BindGroupBase::GetBindingAsTextureView(BindingIndex bindingInde
     DAWN_ASSERT(!IsError());
     const BindGroupLayoutInternalBase* layout = GetLayout();
     DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
-    DAWN_ASSERT(std::holds_alternative<TextureBindingLayout>(
+    DAWN_ASSERT(std::holds_alternative<TextureBindingInfo>(
                     layout->GetBindingInfo(bindingIndex).bindingLayout) ||
                 std::holds_alternative<StorageTextureBindingInfo>(
                     layout->GetBindingInfo(bindingIndex).bindingLayout));

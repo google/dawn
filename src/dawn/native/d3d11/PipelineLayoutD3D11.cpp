@@ -89,7 +89,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                     // D3D11.
                     DAWN_UNREACHABLE();
                 },
-                [&](const TextureBindingLayout&) {
+                [&](const TextureBindingInfo&) {
                     mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
                 },
                 [&](const StorageTextureBindingInfo& layout) {

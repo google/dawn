@@ -144,7 +144,7 @@ BindGroup::BindGroup(Device* device,
                         DAWN_UNREACHABLE();
                 }
             },
-            [&](const TextureBindingLayout&) {
+            [&](const TextureBindingInfo&) {
                 auto* view = ToBackend(GetBindingAsTextureView(bindingIndex));
                 auto& srv = view->GetSRVDescriptor();
 

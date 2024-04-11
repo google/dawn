@@ -63,7 +63,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
         [](const SamplerBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
         },
-        [](const TextureBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+        [](const TextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
         },
         [](const StorageTextureBindingInfo& layout) -> D3D12_DESCRIPTOR_RANGE_TYPE {
@@ -151,7 +151,7 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
                 return D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_STATIC_KEEPING_BUFFER_BOUNDS_CHECKS |
                        D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
             },
-            [](const TextureBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+            [](const TextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
             },
             [](const StorageTextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {

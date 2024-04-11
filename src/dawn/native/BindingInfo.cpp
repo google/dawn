@@ -38,7 +38,7 @@ BindingInfoType GetBindingInfoType(const BindingInfo& info) {
         info.bindingLayout,
         [](const BufferBindingInfo&) -> BindingInfoType { return BindingInfoType::Buffer; },
         [](const SamplerBindingLayout&) -> BindingInfoType { return BindingInfoType::Sampler; },
-        [](const TextureBindingLayout&) -> BindingInfoType { return BindingInfoType::Texture; },
+        [](const TextureBindingInfo&) -> BindingInfoType { return BindingInfoType::Texture; },
         [](const StorageTextureBindingInfo&) -> BindingInfoType {
             return BindingInfoType::StorageTexture;
         },
@@ -237,4 +237,11 @@ BufferBindingInfo::BufferBindingInfo(const BufferBindingLayout& apiLayout)
 StorageTextureBindingInfo::StorageTextureBindingInfo() = default;
 StorageTextureBindingInfo::StorageTextureBindingInfo(const StorageTextureBindingLayout& apiLayout)
     : format(apiLayout.format), viewDimension(apiLayout.viewDimension), access(apiLayout.access) {}
+
+TextureBindingInfo::TextureBindingInfo() {}
+
+TextureBindingInfo::TextureBindingInfo(const TextureBindingLayout& apiLayout)
+    : sampleType(apiLayout.sampleType),
+      viewDimension(apiLayout.viewDimension),
+      multisampled(apiLayout.multisampled) {}
 }  // namespace dawn::native

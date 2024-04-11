@@ -284,7 +284,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
              ++bindingIndex) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
 
-            if (std::holds_alternative<TextureBindingLayout>(bindingInfo.bindingLayout)) {
+            if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout)) {
                 TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                 view->CopyIfNeeded();
             }
@@ -329,7 +329,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     BindSamplerAtIndex(gl, group->GetBindingAsSampler(bindingIndex),
                                        indices[bindingIndex]);
                 },
-                [&](const TextureBindingLayout&) {
+                [&](const TextureBindingInfo&) {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     GLuint handle = view->GetHandle();
                     GLenum target = view->GetGLTarget();

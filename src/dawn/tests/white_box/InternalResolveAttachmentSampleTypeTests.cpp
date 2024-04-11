@@ -143,7 +143,7 @@ TEST_P(InternalResolveAttachmentSampleTypeTests, TextureLoadI32Incompatible) {
     pipelineDescriptor.layout = CreatePipelineLayout(/*withSampler=*/false);
 
     ASSERT_DEVICE_ERROR_MSG(device.CreateRenderPipeline(&pipelineDescriptor),
-                            testing::HasSubstr("not compatible"));
+                            testing::HasSubstr("isn't compatible"));
 }
 
 // Test that using a bind group layout with kInternalResolveAttachmentSampleType is incompatible
@@ -163,7 +163,7 @@ TEST_P(InternalResolveAttachmentSampleTypeTests, TextureLoadU32Incompatible) {
     pipelineDescriptor.layout = CreatePipelineLayout(/*withSampler=*/false);
 
     ASSERT_DEVICE_ERROR_MSG(device.CreateRenderPipeline(&pipelineDescriptor),
-                            testing::HasSubstr("not compatible"));
+                            testing::HasSubstr("isn't compatible"));
 }
 
 DAWN_INSTANTIATE_TEST(InternalResolveAttachmentSampleTypeTests, NullBackend());

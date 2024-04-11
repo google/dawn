@@ -110,7 +110,7 @@ BindGroup::BindGroup(Device* device,
                 // to be done at BindGroup creation time.
                 return false;
             },
-            [&](const TextureBindingLayout&) -> bool {
+            [&](const TextureBindingInfo&) -> bool {
                 TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                 VkImageView handle = view->GetHandle();

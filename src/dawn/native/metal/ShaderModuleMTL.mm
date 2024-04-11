@@ -178,7 +178,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                     bindings.sampler.emplace(srcBindingPoint, tint::msl::writer::binding::Sampler{
                                                                   dstBindingPoint.binding});
                 },
-                [&](const SampledTextureBindingInfo& bindingInfo) {
+                [&](const TextureBindingInfo& bindingInfo) {
                     bindings.texture.emplace(srcBindingPoint, tint::msl::writer::binding::Texture{
                                                                   dstBindingPoint.binding});
                 },

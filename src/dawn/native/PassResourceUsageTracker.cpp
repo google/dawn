@@ -130,7 +130,7 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                         DAWN_UNREACHABLE();
                 }
             },
-            [&](const TextureBindingLayout& layout) {
+            [&](const TextureBindingInfo& layout) {
                 TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
                 switch (layout.sampleType) {
                     case kInternalResolveAttachmentSampleType:
@@ -218,7 +218,7 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
             [&](const BufferBindingInfo&) {
                 mUsage.referencedBuffers.insert(group->GetBindingAsBufferBinding(index).buffer);
             },
-            [&](const TextureBindingLayout&) {
+            [&](const TextureBindingInfo&) {
                 mUsage.referencedTextures.insert(
                     group->GetBindingAsTextureView(index)->GetTexture());
             },

@@ -79,7 +79,6 @@ namespace {{native_namespace}} {
     {% for type in by_category["structure"] %}
         {% if type.name.get() in [
              "sampler binding layout",
-             "texture binding layout",
            ]
         %}
         absl::FormatConvertResult<absl::FormatConversionCharSet::kString>

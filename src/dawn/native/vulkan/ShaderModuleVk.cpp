@@ -278,7 +278,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                              tint::spirv::writer::binding::Sampler{
                                                  dstBindingPoint.group, dstBindingPoint.binding});
                 },
-                [&](const SampledTextureBindingInfo& bindingInfo) {
+                [&](const TextureBindingInfo& bindingInfo) {
                     bindings.texture.emplace(srcBindingPoint,
                                              tint::spirv::writer::binding::Texture{
                                                  dstBindingPoint.group, dstBindingPoint.binding});

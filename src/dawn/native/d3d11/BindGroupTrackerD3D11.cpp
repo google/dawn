@@ -227,7 +227,7 @@ MaybeError BindGroupTracker::Apply() {
                         }
                         return {};
                     },
-                    [](const TextureBindingLayout&) -> MaybeError { return {}; },
+                    [](const TextureBindingInfo&) -> MaybeError { return {}; },
                     [](const SamplerBindingLayout&) -> MaybeError { return {}; },
                     [](const StaticSamplerHolderBindingLayout&) -> MaybeError {
                         // Static samplers are implemented in the frontend on
@@ -394,7 +394,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                 }
                 return {};
             },
-            [&](const TextureBindingLayout&) -> MaybeError {
+            [&](const TextureBindingInfo&) -> MaybeError {
                 TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                 ComPtr<ID3D11ShaderResourceView> srv;
                 // For sampling from stencil, we have to use an internal mirror 'R8Uint' texture.
@@ -534,7 +534,7 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                     deviceContext->CSSetSamplers(bindingSlot, 1, &nullSampler);
                 }
             },
-            [&](const TextureBindingLayout&) {
+            [&](const TextureBindingInfo&) {
                 ID3D11ShaderResourceView* nullSRV = nullptr;
                 if (bindingVisibility & wgpu::ShaderStage::Vertex) {
                     deviceContext->VSSetShaderResources(bindingSlot, 1, &nullSRV);

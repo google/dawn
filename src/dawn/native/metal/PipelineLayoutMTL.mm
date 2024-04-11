@@ -71,7 +71,7 @@ PipelineLayout::PipelineLayout(Device* device,
                         mIndexInfo[stage][group][bindingIndex] = samplerIndex;
                         samplerIndex++;
                     },
-                    [&](const TextureBindingLayout&) {
+                    [&](const TextureBindingInfo&) {
                         mIndexInfo[stage][group][bindingIndex] = textureIndex;
                         textureIndex++;
                     },

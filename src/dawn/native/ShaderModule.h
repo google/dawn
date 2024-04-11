@@ -161,17 +161,6 @@ struct SamplerBindingInfo {
     bool isComparison;
 };
 
-// Mirrors wgpu::TextureBindingLayout but instead has a set of compatible sampleTypes
-// instead of a single enum.
-struct SampledTextureBindingInfo {
-    SampleTypeBit compatibleSampleTypes;
-    wgpu::TextureViewDimension viewDimension;
-    bool multisampled;
-};
-
-// Mirrors wgpu::ExternalTextureBindingLayout
-struct ExternalTextureBindingInfo {};
-
 // Per-binding shader metadata contains some SPIRV specific information in addition to
 // most of the frontend per-binding information.
 struct ShaderBindingInfo {
@@ -186,7 +175,7 @@ struct ShaderBindingInfo {
 
     std::variant<BufferBindingInfo,
                  SamplerBindingInfo,
-                 SampledTextureBindingInfo,
+                 TextureBindingInfo,
                  StorageTextureBindingInfo,
                  ExternalTextureBindingInfo>
         bindingInfo;

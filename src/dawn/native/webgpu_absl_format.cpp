@@ -131,7 +131,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::StaticSampler, layout));
         },
-        [&](const TextureBindingLayout& layout) {
+        [&](const TextureBindingInfo& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::Texture, layout));
         },
@@ -156,6 +156,23 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
     BufferBindingInfo info(value);
+    return AbslFormatConvert(info, spec, s);
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const TextureBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append(absl::StrFormat("{sampleType: %s, viewDimension: %u, multisampled: %u}",
+                              value.sampleType, value.viewDimension, value.multisampled));
+    return {true};
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const TextureBindingLayout& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    TextureBindingInfo info(value);
     return AbslFormatConvert(info, spec, s);
 }
 
