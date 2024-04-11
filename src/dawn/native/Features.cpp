@@ -334,6 +334,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "static_samplers.md",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::YCbCrVulkanSamplers,
+     {"Support setting VkSamplerYcbcrConversionCreateInfo as part of static vulkan sampler "
+      "descriptor",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "y_cb_cr_vulkan_samplers.md",
+      FeatureInfo::FeatureState::Experimental}},
 };
 
 }  // anonymous namespace
