@@ -80,20 +80,23 @@ class RequestAdapterEvent : public TrackedEvent {
             mStatus = WGPURequestAdapterStatus_InstanceDropped;
             mMessage = "A valid external Instance reference no longer exists.";
         }
-        if (mStatus != WGPURequestAdapterStatus_Success && mAdapter != nullptr) {
+        Adapter* adapter = mAdapter.ExtractAsDangling();
+        if (mStatus != WGPURequestAdapterStatus_Success && adapter != nullptr) {
             // If there was an error, we may need to reclaim the adapter allocation, otherwise the
             // adapter is returned to the user who owns it.
-            mAdapter->GetClient()->Free(mAdapter.get());
-            mAdapter = nullptr;
+            adapter->GetClient()->Free(adapter);
+            adapter = nullptr;
         }
         if (mCallback) {
-            mCallback(mStatus, ToAPI(mAdapter), mMessage ? mMessage->c_str() : nullptr, mUserdata);
+            mCallback(mStatus, ToAPI(adapter), mMessage ? mMessage->c_str() : nullptr,
+                      mUserdata.ExtractAsDangling());
+        } else if (adapter != nullptr) {
+            adapter->Release();
         }
     }
 
     WGPURequestAdapterCallback mCallback;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<void, DanglingUntriaged> mUserdata;
+    raw_ptr<void> mUserdata;
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
@@ -104,8 +107,7 @@ class RequestAdapterEvent : public TrackedEvent {
     // throughout the duration of a RequestAdapterEvent because the Event essentially takes
     // ownership of it until either an error occurs at which point the Event cleans it up, or it
     // returns the adapter to the user who then takes ownership as the Event goes away.
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<Adapter, DanglingUntriaged> mAdapter = nullptr;
+    raw_ptr<Adapter> mAdapter = nullptr;
 };
 
 WGPUWGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {

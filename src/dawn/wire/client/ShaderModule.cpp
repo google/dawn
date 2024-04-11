@@ -47,7 +47,7 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         mShader->Reference();
     }
 
-    ~CompilationInfoEvent() override { mShader->Release(); }
+    ~CompilationInfoEvent() override { mShader.ExtractAsDangling()->Release(); }
 
     EventType GetType() override { return kType; }
 
@@ -71,7 +71,6 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         }
         mShader->mCompilationInfo = {nullptr, mShader->mMessages.size(), mShader->mMessages.data()};
 
-        mCompilationInfo = &*mShader->mCompilationInfo;
         return WireResult::Success;
     }
 
@@ -80,31 +79,29 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         // from a previous GetCompilationInfo call).
         DAWN_ASSERT(mShader->mCompilationInfo);
         mStatus = WGPUCompilationInfoRequestStatus_Success;
-        mCompilationInfo = &(*mShader->mCompilationInfo);
         return WireResult::Success;
     }
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
+        WGPUCompilationInfo* compilationInfo = &(*mShader->mCompilationInfo);
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPUCompilationInfoRequestStatus_InstanceDropped;
-            mCompilationInfo = nullptr;
+            compilationInfo = nullptr;
         }
         if (mCallback) {
-            mCallback(mStatus, mCompilationInfo, mUserdata);
+            mCallback(mStatus, compilationInfo, mUserdata.ExtractAsDangling());
         }
     }
 
     WGPUCompilationInfoCallback mCallback;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<void, DanglingUntriaged> mUserdata;
+    raw_ptr<void> mUserdata;
 
     WGPUCompilationInfoRequestStatus mStatus;
-    const WGPUCompilationInfo* mCompilationInfo = nullptr;
 
-    // Strong reference to the buffer so that when we call the callback we can pass the buffer.
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    const raw_ptr<ShaderModule, DanglingUntriaged> mShader;
+    // Strong reference to the shader so that when we call the callback we can pass the
+    // compilation info from `mShader`.
+    raw_ptr<ShaderModule> mShader;
 };
 
 ObjectType ShaderModule::GetObjectType() const {

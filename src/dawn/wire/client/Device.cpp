@@ -129,28 +129,30 @@ class CreatePipelineEventBase : public TrackedEvent {
 
         // By default, we are initialized to a success state, and on shutdown we just return success
         // so we don't need to handle it specifically.
+        Pipeline* pipeline = mPipeline.ExtractAsDangling();
         if (mStatus != WGPUCreatePipelineAsyncStatus_Success) {
             // If there was an error we need to reclaim the pipeline allocation.
-            mPipeline->GetClient()->Free(mPipeline.get());
-            mPipeline = nullptr;
+            pipeline->GetClient()->Free(pipeline);
+            pipeline = nullptr;
         }
         if (mCallback) {
-            mCallback(mStatus, ToAPI(mPipeline), mMessage ? mMessage->c_str() : nullptr, mUserdata);
+            mCallback(mStatus, ToAPI(pipeline), mMessage ? mMessage->c_str() : nullptr,
+                      mUserdata.ExtractAsDangling());
+        } else if (pipeline != nullptr) {
+            pipeline->Release();
         }
     }
 
     using Callback = decltype(std::declval<CallbackInfo>().callback);
     Callback mCallback;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<void, DanglingUntriaged> mUserdata;
+    raw_ptr<void> mUserdata;
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
     WGPUCreatePipelineAsyncStatus mStatus = WGPUCreatePipelineAsyncStatus_Success;
     std::optional<std::string> mMessage;
 
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<Pipeline, DanglingUntriaged> mPipeline = nullptr;
+    raw_ptr<Pipeline> mPipeline = nullptr;
 };
 
 using CreateComputePipelineEvent =
