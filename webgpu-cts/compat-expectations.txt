@@ -54,7 +54,8 @@
 #         renderer-software ]
 # Driver
 # tags: [ mesa_lt_19.1
-#         mesa_ge_21.0 ]
+#         mesa_ge_21.0
+#         mesa_ge_23.2 ]
 # ASan
 # tags: [ asan no-asan ]
 # Display Server
@@ -482,6 +483,45 @@ crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTex
 # Fine derivative tests don't work on compat
 crbug.com/tint/2226 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
 crbug.com/tint/2226 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
+
+################################################################################
+# Failures due to Linux/Intel UHD 630 OS/driver upgrade
+# The keep can be removed once this config is promoted to stable.
+# KEEP
+################################################################################
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm-srgb";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"storage","in":"render-bundle-encoder"};read={"op":"t2b-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"storage","in":"render-pass-encoder"};read={"op":"t2b-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="r32float" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rg32float" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rgb10a2unorm" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rgba32float" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rgba8unorm-srgb" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="rg32float" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="rgb10a2unorm" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="rgba32float" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="rgba8unorm-srgb" [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="fragment";textureDimension="1d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="fragment";textureDimension="2d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="fragment";textureDimension="2d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32float";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32sint";shaderStage="fragment";textureDimension="1d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32sint";shaderStage="fragment";textureDimension="2d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32sint";shaderStage="fragment";textureDimension="2d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32sint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32sint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="1d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="2d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="2d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=1 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
+crbug.com/dawn/2502 [ linux intel-0x9bc5 mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
 
 ################################################################################
 # New flakes. Please triage:
