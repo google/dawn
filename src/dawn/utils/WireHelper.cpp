@@ -86,10 +86,7 @@ class WireServerTraceLayer : public dawn::wire::CommandHandler {
 
   private:
     std::string mDir;
-    // TODO(https://crbug.com/2345): Investigate `DanglingUntriaged` in DawnWire. To reproduce:
-    // dawn_unittests --use-wire --wire-trace-dir={} \
-    //   --gtest_filter=CountUTF16CodeUnitsFromUTF8StringTest.ValidUnicodeString
-    raw_ptr<dawn::wire::CommandHandler, DanglingUntriaged> mHandler;
+    raw_ptr<dawn::wire::CommandHandler> mHandler;
     std::ofstream mFile;
 };
 
@@ -189,9 +186,9 @@ class WireHelperProxy : public WireHelper {
     const DawnProcTable& mBackendProcs;
     std::unique_ptr<dawn::utils::TerribleCommandBuffer> mC2sBuf;
     std::unique_ptr<dawn::utils::TerribleCommandBuffer> mS2cBuf;
-    std::unique_ptr<WireServerTraceLayer> mWireServerTraceLayer;
     std::unique_ptr<dawn::wire::WireServer> mWireServer;
     std::unique_ptr<dawn::wire::WireClient> mWireClient;
+    std::unique_ptr<WireServerTraceLayer> mWireServerTraceLayer;
 };
 
 }  // anonymous namespace
