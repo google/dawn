@@ -69,36 +69,38 @@ class RequestDeviceEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        Device* device = mDevice;
+        Device* device = mDevice.ExtractAsDangling();
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPURequestDeviceStatus_InstanceDropped;
             mMessage = "A valid external Instance reference no longer exists.";
         }
-        if (mStatus != WGPURequestDeviceStatus_Success) {
-            device = nullptr;
-        }
         if (mCallback) {
-            mCallback(mStatus, ToAPI(device), mMessage ? mMessage->c_str() : nullptr, mUserdata);
+            Device* outputDevice = device;
+            if (mStatus != WGPURequestDeviceStatus_Success) {
+                outputDevice = nullptr;
+            }
+            mCallback(mStatus, ToAPI(outputDevice), mMessage ? mMessage->c_str() : nullptr,
+                      mUserdata.ExtractAsDangling());
         }
 
         if (mStatus != WGPURequestDeviceStatus_Success) {
             // If there was an error, we may need to call the device lost callback and reclaim the
             // device allocation, otherwise the device is returned to the user who owns it.
             if (mStatus == WGPURequestDeviceStatus_InstanceDropped) {
-                mDevice->HandleDeviceLost(WGPUDeviceLostReason_InstanceDropped,
-                                          "A valid external Instance reference no longer exists.");
+                device->HandleDeviceLost(WGPUDeviceLostReason_InstanceDropped,
+                                         "A valid external Instance reference no longer exists.");
             } else {
-                mDevice->HandleDeviceLost(WGPUDeviceLostReason_FailedCreation,
-                                          "Device failed at creation.");
+                device->HandleDeviceLost(WGPUDeviceLostReason_FailedCreation,
+                                         "Device failed at creation.");
             }
-            mDevice->Release();
-            mDevice = nullptr;
+            device->Release();
+        } else if (!mCallback) {
+            device->Release();
         }
     }
 
     WGPURequestDeviceCallback mCallback;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<void, DanglingUntriaged> mUserdata;
+    raw_ptr<void> mUserdata;
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
@@ -109,8 +111,7 @@ class RequestDeviceEvent : public TrackedEvent {
     // throughout the duration of a RequestDeviceEvent because the Event essentially takes
     // ownership of it until either an error occurs at which point the Event cleans it up, or it
     // returns the device to the user who then takes ownership as the Event goes away.
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<Device, DanglingUntriaged> mDevice = nullptr;
+    raw_ptr<Device> mDevice = nullptr;
 };
 
 }  // anonymous namespace
