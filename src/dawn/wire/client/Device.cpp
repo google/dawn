@@ -179,7 +179,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
         mDevice->Reference();
     }
 
-    ~DeviceLostEvent() override { mDevice->Release(); }
+    ~DeviceLostEvent() override { mDevice.ExtractAsDangling()->Release(); }
 
     EventType GetType() override { return kType; }
 
@@ -199,14 +199,14 @@ class Device::DeviceLostEvent : public TrackedEvent {
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
+        void* userdata = mDevice->mDeviceLostInfo.userdata.ExtractAsDangling();
         if (mDevice->mDeviceLostInfo.oldCallback != nullptr) {
             mDevice->mDeviceLostInfo.oldCallback(mReason, mMessage ? mMessage->c_str() : nullptr,
-                                                 mDevice->mDeviceLostInfo.userdata);
+                                                 userdata);
         } else if (mDevice->mDeviceLostInfo.callback != nullptr) {
             auto device = mReason != WGPUDeviceLostReason_FailedCreation ? ToAPI(mDevice) : nullptr;
             mDevice->mDeviceLostInfo.callback(&device, mReason,
-                                              mMessage ? mMessage->c_str() : nullptr,
-                                              mDevice->mDeviceLostInfo.userdata);
+                                              mMessage ? mMessage->c_str() : nullptr, userdata);
         }
         mDevice->mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
     }
@@ -217,8 +217,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
     std::optional<std::string> mMessage;
 
     // Strong reference to the device so that when we call the callback we can pass the device.
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire.
-    raw_ptr<Device, DanglingUntriaged> mDevice;
+    raw_ptr<Device> mDevice;
 };
 
 Device::Device(const ObjectBaseParams& params,

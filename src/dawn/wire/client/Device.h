@@ -108,14 +108,12 @@ class Device final : public ObjectWithEventsBase {
         std::unique_ptr<TrackedEvent> event = nullptr;
         WGPUDeviceLostCallbackNew callback = nullptr;
         WGPUDeviceLostCallback oldCallback = nullptr;
-        // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire:
-        raw_ptr<void, DanglingUntriaged> userdata = nullptr;
+        raw_ptr<void> userdata = nullptr;
     };
     DeviceLostInfo mDeviceLostInfo;
 
     WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo;
     WGPULoggingCallback mLoggingCallback = nullptr;
-    // TODO(https://crbug.com/dawn/2345): Investigate `DanglingUntriaged` in dawn/wire:
     raw_ptr<void> mLoggingUserdata = nullptr;
 
     raw_ptr<Queue> mQueue = nullptr;
