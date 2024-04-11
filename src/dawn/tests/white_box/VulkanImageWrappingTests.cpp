@@ -119,8 +119,8 @@ class VulkanImageWrappingTestBase : public DawnTestWithParams<ImageWrappingParam
             return;
         }
 
-        testTextures = {};
         defaultTexture = nullptr;
+        testTextures = {};
         mBackend = nullptr;
         DawnTestWithParams::TearDown();
     }
@@ -187,8 +187,7 @@ class VulkanImageWrappingTestBase : public DawnTestWithParams<ImageWrappingParam
 
     wgpu::TextureDescriptor defaultDescriptor;
     std::array<std::unique_ptr<ExternalTexture>, kTestTexturesCount> testTextures;
-    // TODO(https://crbug.com/dawn/2346): Investigate `DanglingUntriaged` pointers in dawn/test.
-    raw_ptr<ExternalTexture, DanglingUntriaged> defaultTexture;
+    raw_ptr<ExternalTexture> defaultTexture;
 };
 
 using VulkanImageWrappingValidationTests = VulkanImageWrappingTestBase;
