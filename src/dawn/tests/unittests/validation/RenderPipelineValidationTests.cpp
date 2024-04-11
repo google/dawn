@@ -568,7 +568,8 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputComponentCountCompatibility) 
 // Tests that when blendOperationMinOrMax is "min" or "max", both srcBlendFactor and dstBlendFactor
 // must be "one".
 TEST_F(RenderPipelineValidationTest, BlendOperationAndBlendFactors) {
-    constexpr std::array<wgpu::BlendFactor, 8> kBlendFactors = {wgpu::BlendFactor::Zero,
+    constexpr std::array<wgpu::BlendFactor, 9> kBlendFactors = {wgpu::BlendFactor::Undefined,
+                                                                wgpu::BlendFactor::Zero,
                                                                 wgpu::BlendFactor::One,
                                                                 wgpu::BlendFactor::SrcAlpha,
                                                                 wgpu::BlendFactor::OneMinusSrcAlpha,
@@ -595,7 +596,13 @@ TEST_F(RenderPipelineValidationTest, BlendOperationAndBlendFactors) {
 
                 descriptor.cBlends[0].color.operation = blendOperationMinOrMax;
                 descriptor.cBlends[0].alpha.operation = wgpu::BlendOperation::Add;
-                if (srcFactor == wgpu::BlendFactor::One && dstFactor == wgpu::BlendFactor::One) {
+
+                bool srcIsOne = srcFactor == wgpu::BlendFactor::One ||
+                                srcFactor == wgpu::BlendFactor::Undefined;
+                bool dstIsOne = dstFactor == wgpu::BlendFactor::One ||
+                                dstFactor == wgpu::BlendFactor::Undefined;
+
+                if (srcIsOne && dstIsOne) {
                     device.CreateRenderPipeline(&descriptor);
                 } else {
                     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
@@ -603,7 +610,7 @@ TEST_F(RenderPipelineValidationTest, BlendOperationAndBlendFactors) {
 
                 descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
                 descriptor.cBlends[0].alpha.operation = blendOperationMinOrMax;
-                if (srcFactor == wgpu::BlendFactor::One && dstFactor == wgpu::BlendFactor::One) {
+                if (srcIsOne && dstIsOne) {
                     device.CreateRenderPipeline(&descriptor);
                 } else {
                     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
