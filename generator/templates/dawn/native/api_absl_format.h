@@ -68,7 +68,6 @@ namespace {{native_namespace}} {
     //
     {% for type in by_category["structure"] %}
         {% if type.name.get() in [
-             "buffer binding layout",
              "sampler binding layout",
              "texture binding layout",
              "storage texture binding layout"

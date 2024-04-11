@@ -40,7 +40,7 @@ namespace {
 D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingInfo& bindingInfo) {
     return MatchVariant(
         bindingInfo.bindingLayout,
-        [](const BufferBindingLayout& layout) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+        [](const BufferBindingInfo& layout) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             switch (layout.type) {
                 case wgpu::BufferBindingType::Uniform:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
@@ -105,8 +105,8 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
         if (bindingIndex < GetDynamicBufferCount()) {
             continue;
         }
-        DAWN_ASSERT(!std::holds_alternative<BufferBindingLayout>(bindingInfo.bindingLayout) ||
-                    !std::get<BufferBindingLayout>(bindingInfo.bindingLayout).hasDynamicOffset);
+        DAWN_ASSERT(!std::holds_alternative<BufferBindingInfo>(bindingInfo.bindingLayout) ||
+                    !std::get<BufferBindingInfo>(bindingInfo.bindingLayout).hasDynamicOffset);
 
         mDescriptorHeapOffsets[bindingIndex] =
             descriptorRangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER
@@ -139,7 +139,7 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
                 // point to data.
                 return D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
             },
-            [](const BufferBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+            [](const BufferBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 // In Dawn it's allowed to do state transitions on the buffers or textures after
                 // binding
                 // them on the current command list, which indicates a change to its data (or

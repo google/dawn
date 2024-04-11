@@ -66,7 +66,7 @@ VkShaderStageFlags VulkanShaderStageFlags(wgpu::ShaderStage stages) {
 VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
     return MatchVariant(
         bindingInfo.bindingLayout,
-        [](const BufferBindingLayout& layout) -> VkDescriptorType {
+        [](const BufferBindingInfo& layout) -> VkDescriptorType {
             switch (layout.type) {
                 case wgpu::BufferBindingType::Uniform:
                     if (layout.hasDynamicOffset) {

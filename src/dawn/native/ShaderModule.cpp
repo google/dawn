@@ -389,7 +389,7 @@ std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingGroupInfoMap& shad
     for (BindingIndex bindingIndex{0}; bindingIndex < layout->GetBufferCount(); ++bindingIndex) {
         const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
         const auto* bufferBindingLayout =
-            std::get_if<BufferBindingLayout>(&bindingInfo.bindingLayout);
+            std::get_if<BufferBindingInfo>(&bindingInfo.bindingLayout);
         if (bufferBindingLayout == nullptr || bufferBindingLayout->minBindingSize > 0) {
             // Skip bindings that have minimum buffer size set in the layout
             continue;
@@ -548,8 +548,8 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             return {};
         },
         [&](const BufferBindingInfo& bindingInfo) -> MaybeError {
-            const BufferBindingLayout& bindingLayout =
-                std::get<BufferBindingLayout>(layoutInfo.bindingLayout);
+            const BufferBindingInfo& bindingLayout =
+                std::get<BufferBindingInfo>(layoutInfo.bindingLayout);
             // Binding mismatch between shader and bind group is invalid. For example, a
             // writable binding in the shader with a readonly storage buffer in the bind
             // group layout is invalid. For internal usage with internal shaders, a storage

@@ -36,7 +36,7 @@ namespace dawn::native {
 BindingInfoType GetBindingInfoType(const BindingInfo& info) {
     return MatchVariant(
         info.bindingLayout,
-        [](const BufferBindingLayout&) -> BindingInfoType { return BindingInfoType::Buffer; },
+        [](const BufferBindingInfo&) -> BindingInfoType { return BindingInfoType::Buffer; },
         [](const SamplerBindingLayout&) -> BindingInfoType { return BindingInfoType::Sampler; },
         [](const TextureBindingLayout&) -> BindingInfoType { return BindingInfoType::Texture; },
         [](const StorageTextureBindingLayout&) -> BindingInfoType {
@@ -226,5 +226,12 @@ MaybeError ValidateBindingCounts(const CombinedLimits& limits, const BindingCoun
 
     return {};
 }
+
+BufferBindingInfo::BufferBindingInfo() = default;
+
+BufferBindingInfo::BufferBindingInfo(const BufferBindingLayout& apiLayout)
+    : type(apiLayout.type),
+      minBindingSize(apiLayout.minBindingSize),
+      hasDynamicOffset(apiLayout.hasDynamicOffset) {}
 
 }  // namespace dawn::native

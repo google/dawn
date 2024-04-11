@@ -149,8 +149,8 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
         const BindingInfo& bindingInfo = layout->GetBindingInfo(i);
 
         // BGL creation sorts bindings such that the dynamic buffer bindings are first.
-        const BufferBindingLayout& bindingLayout =
-            std::get<BufferBindingLayout>(bindingInfo.bindingLayout);
+        const BufferBindingInfo& bindingLayout =
+            std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
         DAWN_ASSERT(bindingLayout.hasDynamicOffset);
 
         uint64_t requiredAlignment;

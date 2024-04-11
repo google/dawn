@@ -70,11 +70,23 @@ struct StaticSamplerHolderBindingLayout {
     Ref<SamplerBase> sampler;
 };
 
+// A mirror of wgpu::BufferBindingLayout for use inside dawn::native.
+struct BufferBindingInfo {
+    BufferBindingInfo();
+    explicit BufferBindingInfo(const BufferBindingLayout& apiLayout);
+
+    wgpu::BufferBindingType type;
+    uint64_t minBindingSize;
+
+    // Always false in shader reflection.
+    bool hasDynamicOffset = false;
+};
+
 struct BindingInfo {
     BindingNumber binding;
     wgpu::ShaderStage visibility;
 
-    std::variant<BufferBindingLayout,
+    std::variant<BufferBindingInfo,
                  SamplerBindingLayout,
                  TextureBindingLayout,
                  StorageTextureBindingLayout,

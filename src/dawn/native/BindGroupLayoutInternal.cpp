@@ -346,8 +346,8 @@ bool operator!=(const BindingInfo& a, const BindingInfo& b) {
 
     return MatchVariant(
         a.bindingLayout,
-        [&](const BufferBindingLayout& layoutA) -> bool {
-            const BufferBindingLayout& layoutB = std::get<BufferBindingLayout>(b.bindingLayout);
+        [&](const BufferBindingInfo& layoutA) -> bool {
+            const BufferBindingInfo& layoutB = std::get<BufferBindingInfo>(b.bindingLayout);
             return layoutA.type != layoutB.type ||
                    layoutA.hasDynamicOffset != layoutB.hasDynamicOffset ||
                    layoutA.minBindingSize != layoutB.minBindingSize;
@@ -393,7 +393,7 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
     bindingInfo.visibility = binding->visibility;
 
     if (binding->buffer.type != wgpu::BufferBindingType::Undefined) {
-        bindingInfo.bindingLayout = binding->buffer;
+        bindingInfo.bindingLayout = BufferBindingInfo(binding->buffer);
     } else if (binding->sampler.type != wgpu::SamplerBindingType::Undefined) {
         bindingInfo.bindingLayout = binding->sampler;
     } else if (binding->texture.sampleType != wgpu::TextureSampleType::Undefined) {
@@ -468,8 +468,8 @@ bool SortBindingsCompare(const UnpackedPtr<BindGroupLayoutEntry>& a,
 
     switch (GetBindingInfoType(aInfo)) {
         case BindingInfoType::Buffer: {
-            const auto& aLayout = std::get<BufferBindingLayout>(aInfo.bindingLayout);
-            const auto& bLayout = std::get<BufferBindingLayout>(bInfo.bindingLayout);
+            const auto& aLayout = std::get<BufferBindingInfo>(aInfo.bindingLayout);
+            const auto& bLayout = std::get<BufferBindingInfo>(bInfo.bindingLayout);
             if (aLayout.minBindingSize != bLayout.minBindingSize) {
                 return aLayout.minBindingSize < bLayout.minBindingSize;
             }
@@ -532,7 +532,7 @@ bool CheckBufferBindingsFirst(ityp::span<BindingIndex, const BindingInfo> bindin
     BindingIndex lastBufferIndex{0};
     BindingIndex firstNonBufferIndex = std::numeric_limits<BindingIndex>::max();
     for (auto [i, binding] : Enumerate(bindings)) {
-        if (std::holds_alternative<BufferBindingLayout>(binding.bindingLayout)) {
+        if (std::holds_alternative<BufferBindingInfo>(binding.bindingLayout)) {
             lastBufferIndex = std::max(i, lastBufferIndex);
         } else {
             firstNonBufferIndex = std::min(i, firstNonBufferIndex);
@@ -633,7 +633,7 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
 
         MatchVariant(
             info.bindingLayout,
-            [&](const BufferBindingLayout& layout) {
+            [&](const BufferBindingInfo& layout) {
                 recorder.Record(BindingInfoType::Buffer, layout.hasDynamicOffset, layout.type,
                                 layout.minBindingSize);
             },
@@ -746,7 +746,7 @@ BindGroupLayoutInternalBase::ComputeBindingDataPointers(void* dataStart) const {
 
 bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingIndex) const {
     DAWN_ASSERT(bindingIndex < GetBufferCount());
-    switch (std::get<BufferBindingLayout>(GetBindingInfo(bindingIndex).bindingLayout).type) {
+    switch (std::get<BufferBindingInfo>(GetBindingInfo(bindingIndex).bindingLayout).type) {
         case wgpu::BufferBindingType::Uniform:
             return false;
         case kInternalStorageBufferBinding:

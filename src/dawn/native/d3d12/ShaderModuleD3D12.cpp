@@ -260,7 +260,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
             if (bufferBindingInfo) {
                 const auto& bindingLayout =
-                    std::get<BufferBindingLayout>(bgl->GetBindingInfo(bindingIndex).bindingLayout);
+                    std::get<BufferBindingInfo>(bgl->GetBindingInfo(bindingIndex).bindingLayout);
 
                 // Declaring a read-only storage buffer in HLSL but specifying a storage
                 // buffer in the BGL produces the wrong output. Force read-only storage

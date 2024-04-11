@@ -119,7 +119,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         new absl::ParsedFormat<'u', 's', 's', 's'>("{ binding: %u, visibility: %s, %s: %s }");
     MatchVariant(
         value.bindingLayout,
-        [&](const BufferBindingLayout& layout) {
+        [&](const BufferBindingInfo& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::Buffer, layout));
         },
@@ -140,6 +140,23 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
                                       BindingInfoType::StorageTexture, layout));
         });
     return {true};
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const BufferBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append(absl::StrFormat("{type: %s, minBindingSize: %u, hasDynamicOffset: %u}", value.type,
+                              value.minBindingSize, value.hasDynamicOffset));
+    return {true};
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const BufferBindingLayout& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    BufferBindingInfo info(value);
+    return AbslFormatConvert(info, spec, s);
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(

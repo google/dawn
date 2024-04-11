@@ -81,7 +81,7 @@ BindGroup::BindGroup(Device* device,
 
         bool shouldWriteDescriptor = MatchVariant(
             bindingInfo.bindingLayout,
-            [&](const BufferBindingLayout&) -> bool {
+            [&](const BufferBindingInfo&) -> bool {
                 BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                 VkBuffer handle = ToBackend(binding.buffer)->GetHandle();

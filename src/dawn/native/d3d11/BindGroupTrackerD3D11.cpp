@@ -175,7 +175,7 @@ MaybeError BindGroupTracker::Apply() {
 
                 DAWN_TRY(MatchVariant(
                     bindingInfo.bindingLayout,
-                    [&](const BufferBindingLayout& layout) -> MaybeError {
+                    [&](const BufferBindingInfo& layout) -> MaybeError {
                         BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                         auto offset = binding.offset;
                         if (layout.hasDynamicOffset) {
@@ -295,7 +295,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
 
         DAWN_TRY(MatchVariant(
             bindingInfo.bindingLayout,
-            [&](const BufferBindingLayout& layout) -> MaybeError {
+            [&](const BufferBindingInfo& layout) -> MaybeError {
                 BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                 auto offset = binding.offset;
                 if (layout.hasDynamicOffset) {
@@ -465,7 +465,7 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
 
         MatchVariant(
             bindingInfo.bindingLayout,
-            [&](const BufferBindingLayout& layout) {
+            [&](const BufferBindingInfo& layout) {
                 switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform: {
                         ID3D11Buffer* nullBuffer = nullptr;

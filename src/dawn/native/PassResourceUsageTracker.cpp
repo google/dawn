@@ -111,7 +111,7 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
 
         MatchVariant(
             bindingInfo.bindingLayout,
-            [&](const BufferBindingLayout& layout) {
+            [&](const BufferBindingInfo& layout) {
                 BufferBase* buffer = group->GetBindingAsBufferBinding(bindingIndex).buffer;
                 switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform:
@@ -215,7 +215,7 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
 
         MatchVariant(
             bindingInfo.bindingLayout,
-            [&](const BufferBindingLayout&) {
+            [&](const BufferBindingInfo&) {
                 mUsage.referencedBuffers.insert(group->GetBindingAsBufferBinding(index).buffer);
             },
             [&](const TextureBindingLayout&) {

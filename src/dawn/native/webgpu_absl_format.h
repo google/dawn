@@ -82,6 +82,18 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+struct BufferBindingInfo;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const BufferBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
+struct BufferBindingLayout;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const BufferBindingLayout& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 struct ImageCopyTexture;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const ImageCopyTexture* value,

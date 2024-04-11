@@ -63,7 +63,7 @@ PipelineLayout::PipelineLayout(Device* device,
 
                 MatchVariant(
                     bindingInfo.bindingLayout,
-                    [&](const BufferBindingLayout&) {
+                    [&](const BufferBindingInfo&) {
                         mIndexInfo[stage][group][bindingIndex] = bufferIndex;
                         bufferIndex++;
                     },

@@ -172,12 +172,6 @@ struct SampledTextureBindingInfo {
 // Mirrors wgpu::ExternalTextureBindingLayout
 struct ExternalTextureBindingInfo {};
 
-// Mirrors wgpu::BufferBindingLayout
-struct BufferBindingInfo {
-    wgpu::BufferBindingType type;
-    uint64_t minBindingSize;
-};
-
 // Mirrors wgpu::StorageTextureBindingLayout
 struct StorageTextureBindingInfo {
     wgpu::TextureFormat format;

@@ -74,7 +74,7 @@ BindGroup::BindGroup(Device* device,
         // local to the allocation with OffsetFrom().
         MatchVariant(
             bindingInfo.bindingLayout,
-            [&](const BufferBindingLayout& layout) {
+            [&](const BufferBindingInfo& layout) {
                 BufferBinding binding = GetBindingAsBufferBinding(bindingIndex);
 
                 ID3D12Resource* resource = ToBackend(binding.buffer)->GetD3D12Resource();

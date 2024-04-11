@@ -524,7 +524,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
                 D3D12_GPU_VIRTUAL_ADDRESS bufferLocation =
                     ToBackend(binding.buffer)->GetVA() + offset;
 
-                switch (std::get<BufferBindingLayout>(bindingInfo.bindingLayout).type) {
+                switch (std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type) {
                     case wgpu::BufferBindingType::Uniform:
                         if (mInCompute) {
                             commandList->SetComputeRootConstantBufferView(parameterIndex,

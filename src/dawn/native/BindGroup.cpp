@@ -51,7 +51,7 @@ namespace {
 
 MaybeError ValidateBufferBinding(const DeviceBase* device,
                                  const BindGroupEntry& entry,
-                                 const BufferBindingLayout& layout) {
+                                 const BufferBindingInfo& layout) {
     DAWN_INVALID_IF(entry.buffer == nullptr, "Binding entry buffer not set.");
 
     DAWN_INVALID_IF(entry.sampler != nullptr || entry.textureView != nullptr,
@@ -288,7 +288,7 @@ void ForEachUnverifiedBufferBindingIndexImpl(const BindGroupLayoutInternalBase* 
     uint32_t packedIndex = 0;
     for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBufferCount(); ++bindingIndex) {
         const auto* bufferLayout =
-            std::get_if<BufferBindingLayout>(&bgl->GetBindingInfo(bindingIndex).bindingLayout);
+            std::get_if<BufferBindingInfo>(&bgl->GetBindingInfo(bindingIndex).bindingLayout);
         if (bufferLayout == nullptr || bufferLayout->minBindingSize == 0) {
             f(bindingIndex, packedIndex++);
         }
@@ -367,7 +367,7 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
         // Perform binding-type specific validation.
         DAWN_TRY(MatchVariant(
             bindingInfo.bindingLayout,
-            [&](const BufferBindingLayout& layout) -> MaybeError {
+            [&](const BufferBindingInfo& layout) -> MaybeError {
                 // TODO(dawn:1485): Validate buffer binding with usage validation mode.
                 DAWN_TRY_CONTEXT(ValidateBufferBinding(device, entry, layout),
                                  "validating entries[%u] as a Buffer."
@@ -569,7 +569,7 @@ BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex
     DAWN_ASSERT(!IsError());
     const BindGroupLayoutInternalBase* layout = GetLayout();
     DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
-    DAWN_ASSERT(std::holds_alternative<BufferBindingLayout>(
+    DAWN_ASSERT(std::holds_alternative<BufferBindingInfo>(
         layout->GetBindingInfo(bindingIndex).bindingLayout));
     BufferBase* buffer = static_cast<BufferBase*>(mBindingData.bindings[bindingIndex].Get());
     return {buffer, mBindingData.bufferData[bindingIndex].offset,
