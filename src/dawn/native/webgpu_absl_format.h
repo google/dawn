@@ -94,6 +94,18 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+struct StorageTextureBindingInfo;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const StorageTextureBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
+struct StorageTextureBindingLayout;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const StorageTextureBindingLayout& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 struct ImageCopyTexture;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const ImageCopyTexture* value,

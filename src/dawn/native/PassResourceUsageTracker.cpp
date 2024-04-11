@@ -143,7 +143,7 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                         break;
                 }
             },
-            [&](const StorageTextureBindingLayout& layout) {
+            [&](const StorageTextureBindingInfo& layout) {
                 TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
                 switch (layout.access) {
                     case wgpu::StorageTextureAccess::WriteOnly:
@@ -222,7 +222,7 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
                 mUsage.referencedTextures.insert(
                     group->GetBindingAsTextureView(index)->GetTexture());
             },
-            [&](const StorageTextureBindingLayout&) {
+            [&](const StorageTextureBindingInfo&) {
                 mUsage.referencedTextures.insert(
                     group->GetBindingAsTextureView(index)->GetTexture());
             },

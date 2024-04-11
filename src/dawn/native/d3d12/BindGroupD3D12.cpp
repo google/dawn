@@ -161,7 +161,7 @@ BindGroup::BindGroup(Device* device,
                     viewAllocation.OffsetFrom(viewSizeIncrement,
                                               descriptorHeapOffsets[bindingIndex]));
             },
-            [&](const StorageTextureBindingLayout& layout) {
+            [&](const StorageTextureBindingInfo& layout) {
                 TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                 ID3D12Resource* resource = ToBackend(view->GetTexture())->GetD3D12Resource();

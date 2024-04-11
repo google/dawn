@@ -369,7 +369,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     // internal uniform buffer.
                     UpdateTextureBuiltinsUniformData(gl, view, groupIndex, bindingIndex);
                 },
-                [&](const StorageTextureBindingLayout& layout) {
+                [&](const StorageTextureBindingInfo& layout) {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     Texture* texture = ToBackend(view->GetTexture());
                     GLuint handle = texture->GetHandle();

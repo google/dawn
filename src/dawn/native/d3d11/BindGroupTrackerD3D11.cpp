@@ -206,7 +206,7 @@ MaybeError BindGroupTracker::Apply() {
                         }
                         return {};
                     },
-                    [&](const StorageTextureBindingLayout& layout) -> MaybeError {
+                    [&](const StorageTextureBindingInfo& layout) -> MaybeError {
                         switch (layout.access) {
                             case wgpu::StorageTextureAccess::WriteOnly:
                             case wgpu::StorageTextureAccess::ReadWrite: {
@@ -415,7 +415,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                 }
                 return {};
             },
-            [&](const StorageTextureBindingLayout& layout) -> MaybeError {
+            [&](const StorageTextureBindingInfo& layout) -> MaybeError {
                 TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                 switch (layout.access) {
                     case wgpu::StorageTextureAccess::WriteOnly:
@@ -546,7 +546,7 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                     deviceContext->CSSetShaderResources(bindingSlot, 1, &nullSRV);
                 }
             },
-            [&](const StorageTextureBindingLayout& layout) {
+            [&](const StorageTextureBindingInfo& layout) {
                 switch (layout.access) {
                     case wgpu::StorageTextureAccess::WriteOnly:
                     case wgpu::StorageTextureAccess::ReadWrite: {

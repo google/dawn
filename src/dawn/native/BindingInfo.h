@@ -82,6 +82,16 @@ struct BufferBindingInfo {
     bool hasDynamicOffset = false;
 };
 
+// A mirror of wgpu::StorageTextureBindingLayout for use inside dawn::native.
+struct StorageTextureBindingInfo {
+    StorageTextureBindingInfo();
+    explicit StorageTextureBindingInfo(const StorageTextureBindingLayout& apiLayout);
+
+    wgpu::TextureFormat format;
+    wgpu::TextureViewDimension viewDimension;
+    wgpu::StorageTextureAccess access;
+};
+
 struct BindingInfo {
     BindingNumber binding;
     wgpu::ShaderStage visibility;
@@ -89,7 +99,7 @@ struct BindingInfo {
     std::variant<BufferBindingInfo,
                  SamplerBindingLayout,
                  TextureBindingLayout,
-                 StorageTextureBindingLayout,
+                 StorageTextureBindingInfo,
                  StaticSamplerHolderBindingLayout>
         bindingLayout;
 };

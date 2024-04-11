@@ -135,7 +135,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::Texture, layout));
         },
-        [&](const StorageTextureBindingLayout& layout) {
+        [&](const StorageTextureBindingInfo& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::StorageTexture, layout));
         });
@@ -156,6 +156,23 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
     BufferBindingInfo info(value);
+    return AbslFormatConvert(info, spec, s);
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const StorageTextureBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append(absl::StrFormat("{format: %s, viewDimension: %s, access: %s}", value.format,
+                              value.viewDimension, value.access));
+    return {true};
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const StorageTextureBindingLayout& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    StorageTextureBindingInfo info(value);
     return AbslFormatConvert(info, spec, s);
 }
 

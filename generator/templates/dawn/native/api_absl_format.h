@@ -70,7 +70,6 @@ namespace {{native_namespace}} {
         {% if type.name.get() in [
              "sampler binding layout",
              "texture binding layout",
-             "storage texture binding layout"
            ]
         %}
         absl::FormatConvertResult<absl::FormatConversionCharSet::kString>

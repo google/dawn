@@ -66,7 +66,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
         [](const TextureBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
         },
-        [](const StorageTextureBindingLayout& layout) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+        [](const StorageTextureBindingInfo& layout) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             switch (layout.access) {
                 case wgpu::StorageTextureAccess::WriteOnly:
                 case wgpu::StorageTextureAccess::ReadWrite:
@@ -154,7 +154,7 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
             [](const TextureBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
             },
-            [](const StorageTextureBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+            [](const StorageTextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
             });
 

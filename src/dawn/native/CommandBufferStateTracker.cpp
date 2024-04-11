@@ -163,8 +163,7 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
              bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
 
-            const auto* layout =
-                std::get_if<StorageTextureBindingLayout>(&bindingInfo.bindingLayout);
+            const auto* layout = std::get_if<StorageTextureBindingInfo>(&bindingInfo.bindingLayout);
             if (layout == nullptr) {
                 continue;
             }
@@ -363,7 +362,7 @@ MaybeError CommandBufferStateTracker::ValidateNoDifferentTextureViewsOnSameTextu
         for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
             if (!std::holds_alternative<TextureBindingLayout>(bindingInfo.bindingLayout) &&
-                !std::holds_alternative<StorageTextureBindingLayout>(bindingInfo.bindingLayout)) {
+                !std::holds_alternative<StorageTextureBindingInfo>(bindingInfo.bindingLayout)) {
                 continue;
             }
 

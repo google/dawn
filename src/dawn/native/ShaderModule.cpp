@@ -418,7 +418,7 @@ std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingGroupInfoMap& shad
 }
 
 bool IsShaderCompatibleWithPipelineLayoutOnStorageTextureAccess(
-    const StorageTextureBindingLayout& pipelineBindingLayout,
+    const StorageTextureBindingInfo& pipelineBindingLayout,
     const StorageTextureBindingInfo& shaderBindingInfo) {
     return pipelineBindingLayout.access == shaderBindingInfo.access ||
            (pipelineBindingLayout.access == wgpu::StorageTextureAccess::ReadWrite &&
@@ -525,8 +525,8 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             return {};
         },
         [&](const StorageTextureBindingInfo& bindingInfo) -> MaybeError {
-            const StorageTextureBindingLayout& bindingLayout =
-                std::get<StorageTextureBindingLayout>(layoutInfo.bindingLayout);
+            const StorageTextureBindingInfo& bindingLayout =
+                std::get<StorageTextureBindingInfo>(layoutInfo.bindingLayout);
             DAWN_ASSERT(bindingLayout.format != wgpu::TextureFormat::Undefined);
             DAWN_ASSERT(bindingInfo.format != wgpu::TextureFormat::Undefined);
 

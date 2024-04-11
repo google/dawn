@@ -172,13 +172,6 @@ struct SampledTextureBindingInfo {
 // Mirrors wgpu::ExternalTextureBindingLayout
 struct ExternalTextureBindingInfo {};
 
-// Mirrors wgpu::StorageTextureBindingLayout
-struct StorageTextureBindingInfo {
-    wgpu::TextureFormat format;
-    wgpu::TextureViewDimension viewDimension;
-    wgpu::StorageTextureAccess access;
-};
-
 // Per-binding shader metadata contains some SPIRV specific information in addition to
 // most of the frontend per-binding information.
 struct ShaderBindingInfo {

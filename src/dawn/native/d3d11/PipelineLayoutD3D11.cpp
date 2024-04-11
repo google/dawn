@@ -92,7 +92,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                 [&](const TextureBindingLayout&) {
                     mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
                 },
-                [&](const StorageTextureBindingLayout& layout) {
+                [&](const StorageTextureBindingInfo& layout) {
                     switch (layout.access) {
                         case wgpu::StorageTextureAccess::ReadWrite:
                         case wgpu::StorageTextureAccess::WriteOnly:

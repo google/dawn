@@ -367,9 +367,9 @@ bool operator!=(const BindingInfo& a, const BindingInfo& b) {
                    layoutA.viewDimension != layoutB.viewDimension ||
                    layoutA.multisampled != layoutB.multisampled;
         },
-        [&](const StorageTextureBindingLayout& layoutA) -> bool {
-            const StorageTextureBindingLayout& layoutB =
-                std::get<StorageTextureBindingLayout>(b.bindingLayout);
+        [&](const StorageTextureBindingInfo& layoutA) -> bool {
+            const StorageTextureBindingInfo& layoutB =
+                std::get<StorageTextureBindingInfo>(b.bindingLayout);
             return layoutA.access != layoutB.access ||
                    layoutA.viewDimension != layoutB.viewDimension ||
                    layoutA.format != layoutB.format;
@@ -408,7 +408,7 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
         if (binding->storageTexture.viewDimension == wgpu::TextureViewDimension::Undefined) {
             bindingLayout.viewDimension = wgpu::TextureViewDimension::e2D;
         }
-        bindingInfo.bindingLayout = bindingLayout;
+        bindingInfo.bindingLayout = StorageTextureBindingInfo(bindingLayout);
     } else if (auto* staticSamplerBindingLayout = binding.Get<StaticSamplerBindingLayout>()) {
         StaticSamplerHolderBindingLayout bindingLayout;
         bindingLayout.sampler = staticSamplerBindingLayout->sampler;
@@ -498,8 +498,8 @@ bool SortBindingsCompare(const UnpackedPtr<BindGroupLayoutEntry>& a,
             break;
         }
         case BindingInfoType::StorageTexture: {
-            const auto& aLayout = std::get<StorageTextureBindingLayout>(aInfo.bindingLayout);
-            const auto& bLayout = std::get<StorageTextureBindingLayout>(bInfo.bindingLayout);
+            const auto& aLayout = std::get<StorageTextureBindingInfo>(aInfo.bindingLayout);
+            const auto& bLayout = std::get<StorageTextureBindingInfo>(bInfo.bindingLayout);
             if (aLayout.access != bLayout.access) {
                 return aLayout.access < bLayout.access;
             }
@@ -644,7 +644,7 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
                 recorder.Record(BindingInfoType::Texture, layout.sampleType, layout.viewDimension,
                                 layout.multisampled);
             },
-            [&](const StorageTextureBindingLayout& layout) {
+            [&](const StorageTextureBindingInfo& layout) {
                 recorder.Record(BindingInfoType::StorageTexture, layout.access, layout.format,
                                 layout.viewDimension);
             },

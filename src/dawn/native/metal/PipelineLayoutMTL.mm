@@ -75,7 +75,7 @@ PipelineLayout::PipelineLayout(Device* device,
                         mIndexInfo[stage][group][bindingIndex] = textureIndex;
                         textureIndex++;
                     },
-                    [&](const StorageTextureBindingLayout&) {
+                    [&](const StorageTextureBindingInfo&) {
                         mIndexInfo[stage][group][bindingIndex] = textureIndex;
                         textureIndex++;
                     },

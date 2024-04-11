@@ -129,7 +129,7 @@ BindGroup::BindGroup(Device* device,
                 write.pImageInfo = &writeImageInfo[numWrites];
                 return true;
             },
-            [&](const StorageTextureBindingLayout&) -> bool {
+            [&](const StorageTextureBindingInfo&) -> bool {
                 TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
 
                 VkImageView handle = VK_NULL_HANDLE;

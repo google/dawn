@@ -642,7 +642,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                         [compute setTexture:textureView->GetMTLTexture() atIndex:computeIndex];
                     }
                 },
-                [&](const StorageTextureBindingLayout&) {
+                [&](const StorageTextureBindingInfo&) {
                     auto textureView = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     if (hasVertStage) {
                         [render setVertexTexture:textureView->GetMTLTexture() atIndex:vertIndex];
