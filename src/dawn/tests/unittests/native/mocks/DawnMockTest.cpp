@@ -41,8 +41,13 @@ DawnMockTest::DawnMockTest() {
     device = wgpu::Device::Acquire(ToAPI(ReturnToAPI<DeviceBase>(std::move(deviceMock))));
 }
 
+void DawnMockTest::DropDevice() {
+    mDeviceMock = nullptr;
+    device = nullptr;
+}
+
 DawnMockTest::~DawnMockTest() {
-    device = wgpu::Device();
+    DropDevice();
     dawnProcSetProcs(nullptr);
 }
 
