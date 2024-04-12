@@ -145,6 +145,10 @@ void MatrixVectorMultiplyPerf::SetUp() {
     // on D3D12 when using subgroups. Suppress while we figure out why FXC is used.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && GetParam().mSubgroups);
 
+    // TODO(crbug.com/dawn/2508): Fails due to an OS/driver upgrade on Linux/Intel.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsIntel() && IsVulkan() && IsMesa("23.2.1") &&
+                          GetParam().mStoreType == StoreType::F32);
+
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.usage = wgpu::BufferUsage::Storage;
     bufferDesc.size = BytesPerElement() * GetParam().mRows * GetParam().mCols;
