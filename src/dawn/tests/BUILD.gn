@@ -462,6 +462,10 @@ dawn_test("dawn_unittests") {
     sources += [ "unittests/d3d12/CopySplitTests.cpp" ]
   }
 
+  if (dawn_enable_vulkan) {
+    sources += [ "unittests/validation/YCbCrSamplerValidationTests.cpp" ]
+  }
+
   # When building inside Chromium, use their gtest main function because it is
   # needed to run in swarming correctly.
   if (build_with_chromium) {
@@ -714,6 +718,10 @@ source_set("end2end_tests_sources") {
       "end2end/SwapChainValidationTests.cpp",
       "end2end/WindowSurfaceTests.cpp",
     ]
+  }
+
+  if (dawn_enable_vulkan) {
+    sources += [ "end2end/YCbCrSamplerTests.cpp" ]
   }
 
   if (dawn_enable_d3d11 || dawn_enable_d3d12 ||

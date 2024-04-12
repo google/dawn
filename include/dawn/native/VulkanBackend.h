@@ -82,6 +82,13 @@ struct ExternalImageExportInfoVk : ExternalImageExportInfo {
     using ExternalImageExportInfo::ExternalImageExportInfo;
 };
 
+// Can be chained in WGPUSamplerDescriptor
+struct DAWN_NATIVE_EXPORT SamplerYCbCrVulkanDescriptor : wgpu::ChainedStruct {
+    SamplerYCbCrVulkanDescriptor();
+
+    ::VkSamplerYcbcrConversionCreateInfo vulkanYCbCrInfo;
+};
+
 // Can't use DAWN_PLATFORM_IS(LINUX) since header included in both Dawn and Chrome
 #ifdef __linux__
 

@@ -49,6 +49,10 @@ namespace opengl {
 struct RequestAdapterOptionsGetGLProc;
 }
 
+namespace vulkan {
+struct SamplerYCbCrVulkanDescriptor;
+}
+
 namespace detail {
 
 template <>
@@ -97,6 +101,16 @@ template <>
 struct AdditionalExtensions<SharedBufferMemoryDescriptor> {
     using List =
         AdditionalExtensionsList<const d3d12::SharedBufferMemoryD3D12ResourceDescriptor*>;
+};
+
+template <>
+constexpr inline wgpu::SType STypeForImpl<vulkan::SamplerYCbCrVulkanDescriptor> =
+    wgpu::SType(WGPUSType_SamplerYCbCrVulkanDescriptor);
+
+template <>
+struct AdditionalExtensions<SamplerDescriptor> {
+    using List =
+        AdditionalExtensionsList<const vulkan::SamplerYCbCrVulkanDescriptor*>;
 };
 
 }  // namespace detail
