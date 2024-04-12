@@ -52,7 +52,7 @@ namespace dawn::wire::server {
                 {{ assert(member.handle_type) }}
                 {% set Type = member.handle_type.name.CamelCase() %}
                 {% set name = as_varName(member.name) %}
-                Known<WGPU{{Type}}> {{name}}Data;
+                Reserved<WGPU{{Type}}> {{name}}Data;
                 WIRE_TRY({{Type}}Objects().Allocate(&{{name}}Data, cmd.{{name}}));
                 {{name}}Data->generation = cmd.{{name}}.generation;
             {%- endfor %}

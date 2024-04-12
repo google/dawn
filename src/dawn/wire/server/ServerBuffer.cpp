@@ -113,7 +113,7 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
                                         uint64_t writeHandleCreateInfoLength,
                                         const uint8_t* writeHandleCreateInfo) {
     // Create and register the buffer object.
-    Known<WGPUBuffer> buffer;
+    Reserved<WGPUBuffer> buffer;
     WIRE_TRY(BufferObjects().Allocate(&buffer, bufferHandle));
     buffer->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
     buffer->usage = descriptor->usage;

@@ -109,7 +109,7 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
     WGPUFuture future,
     ObjectHandle pipelineObjectHandle,
     const WGPUComputePipelineDescriptor* descriptor) {
-    Known<WGPUComputePipeline> pipeline;
+    Reserved<WGPUComputePipeline> pipeline;
     WIRE_TRY(ComputePipelineObjects().Allocate(&pipeline, pipelineObjectHandle,
                                                AllocationState::Reserved));
 
@@ -147,7 +147,7 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
     WGPUFuture future,
     ObjectHandle pipelineObjectHandle,
     const WGPURenderPipelineDescriptor* descriptor) {
-    Known<WGPURenderPipeline> pipeline;
+    Reserved<WGPURenderPipeline> pipeline;
     WIRE_TRY(RenderPipelineObjects().Allocate(&pipeline, pipelineObjectHandle,
                                               AllocationState::Reserved));
 

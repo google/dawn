@@ -71,7 +71,7 @@ WireResult Server::InjectTexture(WGPUTexture texture,
         return WireResult::FatalError;
     }
 
-    Known<WGPUTexture> data;
+    Reserved<WGPUTexture> data;
     WIRE_TRY(TextureObjects().Allocate(&data, handle));
 
     data->handle = texture;
@@ -95,7 +95,7 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
         return WireResult::FatalError;
     }
 
-    Known<WGPUSwapChain> data;
+    Reserved<WGPUSwapChain> data;
     WIRE_TRY(SwapChainObjects().Allocate(&data, handle));
 
     data->handle = swapchain;
@@ -111,7 +111,7 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
 
 WireResult Server::InjectInstance(WGPUInstance instance, const Handle& handle) {
     DAWN_ASSERT(instance != nullptr);
-    Known<WGPUInstance> data;
+    Reserved<WGPUInstance> data;
     WIRE_TRY(InstanceObjects().Allocate(&data, handle));
 
     data->handle = instance;

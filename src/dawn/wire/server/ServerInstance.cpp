@@ -38,7 +38,7 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
                                             WGPUFuture future,
                                             ObjectHandle adapterHandle,
                                             const WGPURequestAdapterOptions* options) {
-    Known<WGPUAdapter> adapter;
+    Reserved<WGPUAdapter> adapter;
     WIRE_TRY(AdapterObjects().Allocate(&adapter, adapterHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<RequestAdapterUserdata>();
