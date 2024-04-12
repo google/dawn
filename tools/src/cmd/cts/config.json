@@ -76,7 +76,10 @@
     }
   },
   "Tag": {
-    "Remove": [],
+    "Remove": [
+      "ventura",
+      "sonoma"
+    ],
   },
   "Sheets": {
     // Spreadsheet to export results data to
