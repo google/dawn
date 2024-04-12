@@ -393,14 +393,15 @@ MaybeError ValidateBlendComponent(BlendComponent blendComponent, bool dualSource
 
     if (blendComponent.operation == wgpu::BlendOperation::Min ||
         blendComponent.operation == wgpu::BlendOperation::Max) {
-        DAWN_INVALID_IF((blendComponent.srcFactor != wgpu::BlendFactor::One) &&
-                            (blendComponent.srcFactor != wgpu::BlendFactor::Undefined),
-                        "Source blend factor (%s) is defined not %s when blend operation is %s.",
-                        blendComponent.srcFactor, wgpu::BlendFactor::One, blendComponent.operation);
+        DAWN_INVALID_IF(
+            (blendComponent.srcFactor != wgpu::BlendFactor::One) &&
+                (blendComponent.srcFactor != wgpu::BlendFactor::Undefined),
+            "Source blend factor (%s) is defined and not %s when blend operation is %s.",
+            blendComponent.srcFactor, wgpu::BlendFactor::One, blendComponent.operation);
         DAWN_INVALID_IF(
             (blendComponent.dstFactor != wgpu::BlendFactor::One) &&
                 (blendComponent.dstFactor != wgpu::BlendFactor::Undefined),
-            "Destination blend factor (%s) is defined not %s when blend operation is %s.",
+            "Destination blend factor (%s) is defined and not %s when blend operation is %s.",
             blendComponent.dstFactor, wgpu::BlendFactor::One, blendComponent.operation);
     }
 

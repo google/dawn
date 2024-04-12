@@ -27,8 +27,6 @@
 
 import re
 
-USE_PYTHON3 = True
-
 NONINCLUSIVE_REGEXES = [
     r"(?i)black[-_]?list",
     r"(?i)white[-_]?list",
@@ -167,14 +165,6 @@ def _DoCommonChecks(input_api, output_api):
         input_api.canned_checks.CheckForCommitObjects(input_api, output_api))
     results.extend(_CheckNoStaleGen(input_api, output_api))
 
-    # Check infra configs.
-    results.extend(
-        input_api.canned_checks.CheckChangedLUCIConfigs(input_api, output_api))
-    results.extend(
-        input_api.RunTests(
-            input_api.canned_checks.CheckLucicfgGenOutput(
-                input_api, output_api, 'infra/config/global/main.star')))
-
     result_factory = output_api.PresubmitPromptWarning
     if input_api.is_committing:
         result_factory = output_api.PresubmitError
@@ -215,9 +205,5 @@ def _DoCommonChecks(input_api, output_api):
     return results
 
 
-def CheckChangeOnUpload(input_api, output_api):
-    return _DoCommonChecks(input_api, output_api)
-
-
-def CheckChangeOnCommit(input_api, output_api):
-    return _DoCommonChecks(input_api, output_api)
+CheckChangeOnUpload = _DoCommonChecks
+CheckChangeOnCommit = _DoCommonChecks

@@ -27,8 +27,6 @@
 
 import sys
 
-USE_PYTHON3 = True
-
 
 def _DoCommonChecks(input_api, output_api):
     sys.path += [input_api.change.RepositoryRoot()]

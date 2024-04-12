@@ -25,14 +25,20 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-USE_PYTHON3 = True
+
+def _DoCommonChecks(input_api, output_api):
+    if len(input_api.AffectedFiles()) == 0:
+        return
+
+    results = []
+    results.extend(
+        input_api.canned_checks.CheckChangedLUCIConfigs(input_api, output_api))
+    results.extend(
+        input_api.RunTests(
+            input_api.canned_checks.CheckLucicfgGenOutput(
+                input_api, output_api, 'global/main.star')))
+    return results
 
 
-def CheckChangeOnUpload(input_api, output_api):
-    return input_api.canned_checks.CheckChangedLUCIConfigs(
-        input_api, output_api)
-
-
-def CheckChangeOnCommit(input_api, output_api):
-    return input_api.canned_checks.CheckChangedLUCIConfigs(
-        input_api, output_api)
+CheckChangeOnUpload = _DoCommonChecks
+CheckChangeOnCommit = _DoCommonChecks
