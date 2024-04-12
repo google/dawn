@@ -397,18 +397,11 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
     } else if (binding->sampler.type != wgpu::SamplerBindingType::Undefined) {
         bindingInfo.bindingLayout = binding->sampler;
     } else if (binding->texture.sampleType != wgpu::TextureSampleType::Undefined) {
-        TextureBindingLayout bindingLayout = binding->texture.WithTrivialFrontendDefaults();
-        if (binding->texture.viewDimension == wgpu::TextureViewDimension::Undefined) {
-            bindingLayout.viewDimension = wgpu::TextureViewDimension::e2D;
-        }
-        bindingInfo.bindingLayout = TextureBindingInfo(bindingLayout);
+        bindingInfo.bindingLayout =
+            TextureBindingInfo(binding->texture.WithTrivialFrontendDefaults());
     } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
-        StorageTextureBindingLayout bindingLayout =
-            binding->storageTexture.WithTrivialFrontendDefaults();
-        if (binding->storageTexture.viewDimension == wgpu::TextureViewDimension::Undefined) {
-            bindingLayout.viewDimension = wgpu::TextureViewDimension::e2D;
-        }
-        bindingInfo.bindingLayout = StorageTextureBindingInfo(bindingLayout);
+        bindingInfo.bindingLayout =
+            StorageTextureBindingInfo(binding->storageTexture.WithTrivialFrontendDefaults());
     } else if (auto* staticSamplerBindingLayout = binding.Get<StaticSamplerBindingLayout>()) {
         StaticSamplerHolderBindingLayout bindingLayout;
         bindingLayout.sampler = staticSamplerBindingLayout->sampler;
