@@ -58,7 +58,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Load each of the resultsByExecutionMode files and merge together
-	var resultsByExecutionMode result.ResultsByExecutionMode
+	resultsByExecutionMode := make(result.ResultsByExecutionMode)
 	for _, path := range flag.Args() {
 		// Load results
 		r, err := result.Load(path)
