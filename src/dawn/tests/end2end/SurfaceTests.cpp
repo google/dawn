@@ -282,6 +282,9 @@ TEST_P(SurfaceTests, ResizingWindowOnly) {
     // TODO(crbug.com/1503912): Failing new ValidateImageAcquireWait in Vulkan Validation Layer.
     DAWN_SUPPRESS_TEST_IF(IsBackendValidationEnabled() && IsWindows() && IsVulkan() && IsIntel());
 
+    // TODO(crbug.com/dawn/2531): Failing on newer Linux/Intel driver version.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNull() && IsIntel() && IsMesa("23.2"));
+
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
     wgpu::SurfaceTexture surfaceTexture;
