@@ -449,7 +449,9 @@ func (u *updater) chunk(in Chunk, isImmutable bool, progress *Progress) Chunk {
 	}
 
 	// Sort the expectations to keep things clean and tidy.
-	return Chunk{Comments: in.Comments, Expectations: newExpectations.Values()}
+	out := Chunk{Comments: in.Comments, Expectations: newExpectations.Values()}
+	out.Expectations.Sort()
+	return out
 }
 
 // expectation returns a new list of Expectations, based on the Expectation 'in',
@@ -595,13 +597,14 @@ func (u *updater) addNewExpectations() error {
 
 	// Create chunks for any flakes and failures, in that order.
 	for _, group := range []struct {
-		results []Expectation
+		results Expectations
 		comment string
 	}{
 		{flakes, newFlakesComment},
 		{failures, newFailuresComment},
 	} {
 		if len(group.results) > 0 {
+			group.results.Sort()
 			u.out.Chunks = append(u.out.Chunks, Chunk{
 				Comments: []string{
 					"################################################################################",

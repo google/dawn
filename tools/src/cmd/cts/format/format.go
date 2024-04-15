@@ -30,6 +30,7 @@ package format
 import (
 	"context"
 	"flag"
+	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
@@ -54,21 +55,31 @@ func (cmd) Desc() string {
 }
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
-	defaultExpectations := common.DefaultExpectationsPath()
-	flag.StringVar(&c.flags.expectations, "expectations", defaultExpectations, "path to CTS expectations file to update")
+	defaultExpectations := []string{
+		common.DefaultExpectationsPath(),
+		common.DefaultCompatExpectationsPath(),
+	}
+	flag.StringVar(&c.flags.expectations, "expectations", strings.Join(defaultExpectations, ","), "comma separated path to CTS expectation files to update")
 	return nil, nil
 }
 
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
-	ex, err := expectations.Load(c.flags.expectations)
-	if err != nil {
-		return err
-	}
+	for _, path := range strings.Split(c.flags.expectations, ",") {
+		path := strings.TrimSpace(path)
 
-	// Sort the expectations in each chunk.
-	for _, chunk := range ex.Chunks {
-		chunk.Expectations.Sort()
-	}
+		ex, err := expectations.Load(path)
+		if err != nil {
+			return err
+		}
 
-	return ex.Save(c.flags.expectations)
+		// Sort the expectations in each chunk.
+		for _, chunk := range ex.Chunks {
+			chunk.Expectations.Sort()
+		}
+
+		if err := ex.Save(path); err != nil {
+			return err
+		}
+	}
+	return nil
 }
