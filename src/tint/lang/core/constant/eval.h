@@ -55,8 +55,6 @@ namespace tint::core::constant {
 class Eval {
   public:
     /// The failure type used by the methods of this class.
-    /// TODO(bclayton): Use Failure, and bubble up the error diagnostics instead of writing directly
-    /// to the diagnostic list.
     struct Error {};
 
     /// A value of the type Error.

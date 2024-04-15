@@ -189,7 +189,7 @@ type intrinsicCache struct {
 	path           string
 	cachedSem      *sem.Sem            // lazily built by sem()
 	cachedTable    *gen.IntrinsicTable // lazily built by intrinsicTable()
-	cachedPermuter *gen.Permuter       // lazily built by permute()
+	cachedPermuter *gen.Permutator     // lazily built by permute()
 }
 
 // Sem lazily parses and resolves the intrinsic.def file, returning the semantic info.
@@ -244,7 +244,7 @@ func (i *intrinsicCache) Permute(overload *sem.Overload) ([]gen.Permutation, err
 		if err != nil {
 			return nil, err
 		}
-		i.cachedPermuter, err = gen.NewPermuter(sem)
+		i.cachedPermuter, err = gen.NewPermutator(sem)
 		if err != nil {
 			return nil, err
 		}

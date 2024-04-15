@@ -99,7 +99,8 @@ class File {
     /// @tparam T the type or subtype of the node to scan for.
     template <typename T = sem::Node, UnwrapMode UNWRAP_MODE = DefaultUnwrapMode<T>>
     const T* NodeAt(Source::Location l) const {
-        // TODO(bclayton): This is a brute-force search. Optimize.
+        // TODO(crbug.com/tint/2127): This is a brute-force search. Optimize.
+        // Suggested optimization: bin the intersecting ranges per-line.
         size_t best_len = std::numeric_limits<size_t>::max();
         const T* best_node = nullptr;
         for (auto* node : nodes) {

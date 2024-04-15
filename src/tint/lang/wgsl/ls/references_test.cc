@@ -84,7 +84,7 @@ TEST_P(LsReferencesTest, References) {
     }
 }
 
-// TODO(bclayton): Type aliases.
+// TODO(crbug.com/tint/2127): Type aliases.
 INSTANTIATE_TEST_SUITE_P(IncludeDeclaration,
                          LsReferencesTest,
                          ::testing::ValuesIn(std::vector<Case>{

@@ -102,7 +102,6 @@ fn f() {
 }
 )";
 
-    // TODO(bclayton): Optimize this case:
     // This output is not as efficient as it could be.
     // We only actually need to hoist the inner-most array to a `var`
     // (`var_for_index`), as later indexing operations will be working with

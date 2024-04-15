@@ -281,8 +281,7 @@ struct State {
 
     /// @return true if @p s is a builtin (non-user declared) structure.
     bool IsBuiltinStruct(const core::type::Struct* s) {
-        // TODO(bclayton): Need to do better than this.
-        return tint::HasPrefix(s->Name().NameView(), "_");
+        return tint::HasPrefix(s->Name().NameView(), "__");
     }
 };
 

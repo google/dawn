@@ -678,8 +678,6 @@ func checkCompatible(arg, param sem.Named) error {
 
 	anyNumber := "any number"
 	// asNumber() returns anyNumber if n is a TemplateNumberParam.
-	// TODO(bclayton): Once we support number ranges [e.g.: fn F<N: 1..4>()], we
-	// should check number ranges are compatible
 	asNumber := func(n sem.Named) interface{} {
 		switch n.(type) {
 		case *sem.TemplateNumberParam:

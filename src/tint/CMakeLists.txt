@@ -269,7 +269,7 @@ function(tint_fuzz_cmd_compile_options TARGET)
   target_link_libraries(${TARGET} PRIVATE "tint_api_sanitize_fuzzer")
 endfunction()
 
-# TODO(bclayton): Remove this when fuzzers fully migrated to gen build
+# TODO(crbug.com/tint/2223): Remove this when fuzzers are fully migrated to gen build
 function(tint_fuzzer_compile_options TARGET)
   tint_fuzz_cmd_compile_options(${TARGET})
   target_link_libraries(${TARGET} PRIVATE "tint_api_sanitize_fuzzer")

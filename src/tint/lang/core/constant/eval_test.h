@@ -42,13 +42,13 @@
 
 namespace tint::core::constant::test {
 
-// TODO(bclayton): Don't depend on resolver
+// TODO(crbug.com/tint/2221): Don't depend on resolver
 namespace builder = tint::resolver::builder;
 
-// TODO(bclayton): Don't depend on resolver
+// TODO(crbug.com/tint/2221): Don't depend on resolver
 using ConstEvalTest = resolver::ResolverTest;
 
-// TODO(bclayton): Don't depend on resolver
+// TODO(crbug.com/tint/2221): Don't depend on resolver
 template <typename T>
 using ConstEvalTestWithParam = resolver::ResolverTestWithParam<T>;
 

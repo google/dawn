@@ -288,7 +288,7 @@ nextTestCase:
 		requests <- Request{Query: string(res.TestCase)}
 
 		for {
-			// TODO(bclayton): Implement timeouts, browser restarting.
+			// Future enhancements: Timeouts, browser restarting.
 			select {
 			case response := <-responses:
 				switch response.Type {

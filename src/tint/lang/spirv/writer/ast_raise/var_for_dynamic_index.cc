@@ -71,8 +71,6 @@ ast::transform::Transform::ApplyResult VarForDynamicIndex::Apply(const Program& 
             return true;
         }
 
-        // TODO(bclayton): group multiple accesses in the same object.
-        // e.g. arr[i] + arr[i+1] // Don't create two vars for this
         return hoist_to_decl_before.Add(indexed, object_expr,
                                         ast::transform::HoistToDeclBefore::VariableKind::kVar,
                                         "var_for_index");

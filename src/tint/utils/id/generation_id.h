@@ -37,10 +37,8 @@
 
 namespace tint {
 
-/// If 1 then checks are enabled that AST nodes are not leaked from one generation
-/// to another.
-/// TODO(bclayton): We'll want to disable this in production builds. For now we
-/// always check.
+/// If 1 then checks are enabled that AST nodes are not leaked from one generation to another.
+/// It may be worth disabling this in production builds. For now we always check.
 #define TINT_CHECK_FOR_CROSS_GENERATION_LEAKS 1
 
 /// A GenerationID is a unique identifier of a generation.

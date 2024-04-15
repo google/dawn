@@ -171,7 +171,8 @@ if (tint_has_fuzzers) {
       if (target_name == "wgsl") {
         dict = "dictionary.txt"
         libfuzzer_options = [
-          "only_ascii=1",  # TODO(bclayton): Remove this to fuzz unicode?
+          # TODO(crbug.com/tint/2223): Remove this to fuzz unicode?
+          "only_ascii=1",
           "max_len=10000",
         ]
         seed_corpus = fuzzer_corpus_wgsl_dir

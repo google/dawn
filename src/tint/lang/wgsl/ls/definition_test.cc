@@ -74,7 +74,7 @@ TEST_P(LsDefinitionTest, Definition) {
     }
 }
 
-// TODO(bclayton): Type aliases.
+// TODO(crbug.com/tint/2127): Type aliases.
 INSTANTIATE_TEST_SUITE_P(,
                          LsDefinitionTest,
                          ::testing::ValuesIn(std::vector<std::string_view>{

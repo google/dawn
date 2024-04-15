@@ -127,9 +127,7 @@ class CloneContext {
     ast::Type Clone(const ast::Type& ty);
 
     /// Clones the Source `s` into #dst
-    /// TODO(bclayton) - Currently this 'clone' is a shallow copy. If/when
-    /// `Source.File`s are owned by the Program this should make a copy of the
-    /// file.
+    /// @note this 'clone' is a shallow copy.
     /// @param s the `Source` to clone
     /// @return the cloned source
     Source Clone(const Source& s) const { return s; }

@@ -37,25 +37,26 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/sem"
 )
 
-// Permuter generates permutations of intrinsic overloads
-type Permuter struct {
+// Permutator generates permutations of intrinsic overloads
+type Permutator struct {
 	sem      *sem.Sem
 	allTypes []sem.FullyQualifiedName
 }
 
-// NewPermuter returns a new initialized Permuter
-func NewPermuter(s *sem.Sem) (*Permuter, error) {
+// NewPermutator returns a new initialized Permutator
+func NewPermutator(s *sem.Sem) (*Permutator, error) {
 	// allTypes are the list of FQNs that are used for unconstrained types
 	allTypes := []sem.FullyQualifiedName{}
 	for _, ty := range s.Types {
 		if len(ty.TemplateParams) > 0 {
 			// Ignore aggregate types for now.
-			// TODO(bclayton): Support a limited set of aggregate types
+			// If generation of e2e tests with aggregate types is required then selectively allow
+			// them here - just be careful with permutation explosions!
 			continue
 		}
 		allTypes = append(allTypes, sem.FullyQualifiedName{Target: ty})
 	}
-	return &Permuter{
+	return &Permutator{
 		sem:      s,
 		allTypes: allTypes,
 	}, nil
@@ -70,9 +71,9 @@ type Permutation struct {
 }
 
 // Permute generates a set of permutations for the given intrinsic overload
-func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
+func (p *Permutator) Permute(overload *sem.Overload) ([]Permutation, error) {
 	state := permutationState{
-		Permuter:        p,
+		Permutator:      p,
 		templateTypes:   map[sem.TemplateParam]sem.FullyQualifiedName{},
 		templateNumbers: map[sem.TemplateParam]any{},
 		parameters:      map[int]sem.FullyQualifiedName{},
@@ -240,7 +241,7 @@ Increase hashLength in %v`,
 }
 
 type permutationState struct {
-	*Permuter
+	*Permutator
 	templateTypes   map[sem.TemplateParam]sem.FullyQualifiedName
 	templateNumbers map[sem.TemplateParam]any
 	parameters      map[int]sem.FullyQualifiedName

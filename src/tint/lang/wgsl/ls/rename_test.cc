@@ -133,7 +133,7 @@ TEST_P(LsRenameTest, Rename) {
     }
 }
 
-// TODO(bclayton): Type aliases.
+// TODO(crbug.com/tint/2127): Type aliases.
 INSTANTIATE_TEST_SUITE_P(,
                          LsRenameTest,
                          ::testing::ValuesIn(std::vector<Case>{

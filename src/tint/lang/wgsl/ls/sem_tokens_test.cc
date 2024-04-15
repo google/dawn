@@ -118,7 +118,7 @@ TEST_P(LsSemTokensTest, SemTokens) {
     }
 }
 
-// TODO(bclayton): Type aliases.
+// TODO(crbug.com/tint/2127): Type aliases.
 INSTANTIATE_TEST_SUITE_P(,
                          LsSemTokensTest,
                          ::testing::ValuesIn(std::vector<Case>{

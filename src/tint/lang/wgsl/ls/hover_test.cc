@@ -85,7 +85,7 @@ TEST_P(LsHoverTest, Hover) {
     }
 }
 
-// TODO(bclayton): Type aliases.
+// TODO(crbug.com/tint/2127): Type aliases.
 INSTANTIATE_TEST_SUITE_P(
     ,
     LsHoverTest,

@@ -77,7 +77,7 @@ Server::Handle(const lsp::TextDocumentDocumentSymbolRequest& r) {
                     lsp::DocumentSymbol sym;
                     sym.range = (*file)->Conv(str->source.range);
                     sym.selection_range = (*file)->Conv(decl->name->source.range);
-                    // TODO(bclayton): Is there a better symbol kind?
+                    // TODO(crbug.com/tint/2127): Is there a better symbol kind?
                     sym.kind = lsp::SymbolKind::kObject;
                     sym.name = decl->name->symbol.NameView();
                     symbols.push_back(sym);
