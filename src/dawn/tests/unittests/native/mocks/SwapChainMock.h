@@ -37,12 +37,12 @@ namespace dawn::native {
 
 class SwapChainMock : public SwapChainBase {
   public:
-    SwapChainMock(DeviceBase* device, Surface* surface, const SwapChainDescriptor* descriptor);
+    SwapChainMock(DeviceBase* device, Surface* surface, const SurfaceConfiguration* config);
     ~SwapChainMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
 
-    MOCK_METHOD(ResultOrError<Ref<TextureBase>>, GetCurrentTextureImpl, (), (override));
+    MOCK_METHOD(ResultOrError<SwapChainTextureInfo>, GetCurrentTextureImpl, (), (override));
     MOCK_METHOD(MaybeError, PresentImpl, (), (override));
     MOCK_METHOD(void, DetachFromSurfaceImpl, (), (override));
 };

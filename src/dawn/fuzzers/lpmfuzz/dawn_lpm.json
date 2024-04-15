@@ -38,7 +38,8 @@
     "blocklisted_cmds": [
         "surface descriptor from windows core window",
         "surface descriptor from windows swap chain panel",
-        "surface descriptor from canvas html selector"
+        "surface descriptor from canvas html selector",
+        "surface get current texture"
     ],
 
     "lpm_info": {

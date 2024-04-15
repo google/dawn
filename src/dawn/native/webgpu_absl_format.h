@@ -148,6 +148,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 
 class DeviceBase;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const AdapterBase* value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
+class DeviceBase;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const DeviceBase* value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
@@ -161,6 +167,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 class AttachmentState;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const AttachmentState* value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
+class Surface;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const Surface* value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
