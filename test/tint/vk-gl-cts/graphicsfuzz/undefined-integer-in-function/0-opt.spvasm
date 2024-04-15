@@ -23,8 +23,6 @@
                OpDecorate %9 RelaxedPrecision
                OpDecorate %10 RelaxedPrecision
                OpDecorate %11 RelaxedPrecision
-               OpDecorate %10 RelaxedPrecision
-               OpDecorate %10 RelaxedPrecision
        %void = OpTypeVoid
          %13 = OpTypeFunction %void
         %int = OpTypeInt 32 1
