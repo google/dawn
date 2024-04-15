@@ -26,7 +26,10 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
+#include <thread>
+#include <vector>
 
+#include "dawn/native/DawnNative.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -168,6 +171,115 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
         &task);
 
     ValidateCreateComputePipelineAsync();
+}
+
+// Verify that callback can be nullptr.
+TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncNullCallback) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    // TODO(crbug.com/dawn/2471): QueueGL hangs
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        struct SSBO {
+            value : u32
+        }
+        @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
+
+        @compute @workgroup_size(1) fn main() {
+            ssbo.value = 1u;
+        })");
+
+    wgpu::CreateComputePipelineAsyncCallbackInfo callbackInfo;
+    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
+    callbackInfo.callback = nullptr;
+    device.CreateComputePipelineAsync(&csDesc, callbackInfo);
+
+    while (dawn::native::InstanceProcessEvents(instance.Get())) {
+        WaitABit();
+    }
+}
+
+// Stress test that asynchronously creates many compute pipelines.
+TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStress) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    // TODO(crbug.com/dawn/2471): QueueGL hangs
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    wgpu::CreateComputePipelineAsyncCallbackInfo callbackInfo;
+    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
+    callbackInfo.callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline,
+                               const char* message, void* userdata) {
+        EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
+        wgpu::ComputePipeline::Acquire(pipeline);
+    };
+
+    for (size_t i = 0; i < 100; i++) {
+        wgpu::ComputePipelineDescriptor csDesc;
+        std::string shader = R"(
+            struct SSBO {
+                value : u32
+            }
+            @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
+
+            @compute @workgroup_size(1) fn main() {
+                ssbo.value = )";
+        shader += std::to_string(i);
+        shader += "u;\n}";
+        csDesc.compute.module = utils::CreateShaderModule(device, shader);
+
+        device.CreateComputePipelineAsync(&csDesc, callbackInfo);
+    }
+
+    while (dawn::native::InstanceProcessEvents(instance.Get())) {
+        WaitABit();
+    }
+}
+
+// Stress test that asynchronously creates many compute pipelines in different threads.
+TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStressManyThreads) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    // TODO(crbug.com/dawn/2471): QueueGL hangs
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    auto f = [&](size_t t) {
+        wgpu::ComputePipelineDescriptor csDesc;
+        std::string shader = R"(
+            struct SSBO {
+                value : u32
+            }
+            @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
+
+            @compute @workgroup_size(1) fn main() {
+                ssbo.value = )";
+        shader += std::to_string(t);
+        shader += "u;\n}";
+        csDesc.compute.module = utils::CreateShaderModule(device, shader);
+
+        wgpu::CreateComputePipelineAsyncCallbackInfo callbackInfo;
+        callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
+        callbackInfo.callback = [](WGPUCreatePipelineAsyncStatus status,
+                                   WGPUComputePipeline pipeline, const char* message,
+                                   void* userdata) {
+            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
+            wgpu::ComputePipeline::Acquire(pipeline);
+        };
+        device.CreateComputePipelineAsync(&csDesc, callbackInfo);
+    };
+
+    constexpr size_t kNumThreads = 100;
+
+    std::vector<std::thread> threads;
+    for (size_t t = 0; t < kNumThreads; t++) {
+        threads.emplace_back(f, t);
+    }
+    for (size_t t = 0; t < kNumThreads; t++) {
+        threads[t].join();
+    }
+
+    while (dawn::native::InstanceProcessEvents(instance.Get())) {
+        WaitABit();
+    }
 }
 
 // This is a regression test for a bug on the member "entryPoint" of FlatComputePipelineDescriptor.

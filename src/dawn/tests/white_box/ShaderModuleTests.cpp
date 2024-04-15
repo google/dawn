@@ -371,11 +371,10 @@ TEST_P(ShaderModuleTests, CreateComputePipelineAsync) {
     EXPECT_TRUE(shaderModule.Get());
     EXPECT_TRUE(shaderModule->GetTintProgramForTesting());
 
-    if (SupportsCreatePipelineAsync()) {
-        EXPECT_LE(shaderModule->GetExternalRefCountForTesting(), 2ull);
-        EXPECT_NE(shaderModule->GetExternalRefCountForTesting(), 0ull);
-    } else {
-        EXPECT_EQ(shaderModule->GetExternalRefCountForTesting(), 1ull);
+    EXPECT_LE(shaderModule->GetExternalRefCountForTesting(), 2ull);
+    EXPECT_NE(shaderModule->GetExternalRefCountForTesting(), 0ull);
+
+    if (!SupportsCreatePipelineAsync()) {
         do {
             WaitABit();
         } while (!task.isCompleted);

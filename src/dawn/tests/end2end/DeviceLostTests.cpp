@@ -466,6 +466,11 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
 
     device.CreateComputePipelineAsync(&descriptor, callback, nullptr);
     LoseDeviceForTesting();
+    // Need to call ProcessEvents, otherwise it will be an instance drop as LoseDeviceForTesting
+    // is the last statement of the test body.
+    // TODO(dawn:2353): Update to use WGPUCreateComputePipelineAsyncCallbackInfo version of
+    // CreateComputePipelineAsync and then we don't need to call ProcessEvents explicitly
+    GetInstance().ProcessEvents();
 }
 
 // This is a regression test for crbug.com/1212385 where Dawn didn't clean up all

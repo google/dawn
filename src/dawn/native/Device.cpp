@@ -1335,37 +1335,51 @@ void DeviceBase::APICreateComputePipelineAsync(const ComputePipelineDescriptor* 
     TRACE_EVENT1(GetPlatform(), General, "DeviceBase::APICreateComputePipelineAsync", "label",
                  utils::GetLabelForTrace(descriptor->label));
 
-    auto resultOrError = CreateUninitializedComputePipeline(descriptor);
-    // Enqueue the callback directly when an error has been found in the front-end
-    // validation.
-    if (resultOrError.IsError()) {
-        AddComputePipelineAsyncCallbackTask(resultOrError.AcquireError(), descriptor->label,
-                                            callback, userdata);
-        return;
-    }
-
-    Ref<ComputePipelineBase> uninitializedComputePipeline = resultOrError.AcquireSuccess();
-
-    // Call the callback directly when we can get a cached compute pipeline object.
-    Ref<ComputePipelineBase> cachedComputePipeline =
-        GetCachedComputePipeline(uninitializedComputePipeline.Get());
-    if (cachedComputePipeline.Get() != nullptr) {
-        mCallbackTaskManager->AddCallbackTask(
-            std::bind(callback, WGPUCreatePipelineAsyncStatus_Success,
-                      ToAPI(ReturnToAPI(std::move(cachedComputePipeline))), "", userdata));
-    } else {
-        // Otherwise we will create the pipeline object in InitializeComputePipelineAsyncImpl(),
-        // where the pipeline object may be initialized asynchronously and the result will be
-        // saved to mCreatePipelineAsyncTracker.
-        InitializeComputePipelineAsyncImpl(std::move(uninitializedComputePipeline), callback,
-                                           userdata);
-    }
+    CreateComputePipelineAsyncCallbackInfo callbackInfo = {};
+    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
+    callbackInfo.callback = callback;
+    callbackInfo.userdata = userdata;
+    APICreateComputePipelineAsyncF(descriptor, callbackInfo);
 }
 Future DeviceBase::APICreateComputePipelineAsyncF(
     const ComputePipelineDescriptor* descriptor,
     const CreateComputePipelineAsyncCallbackInfo& callbackInfo) {
-    // TODO(dawn:1987) Implement this.
-    DAWN_CHECK(false);
+    EventManager* manager = GetInstance()->GetEventManager();
+
+    auto GetFuture = [&](Ref<EventManager::TrackedEvent>&& event) {
+        FutureID futureID = manager->TrackEvent(std::move(event));
+        return Future{futureID};
+    };
+
+    if (IsLost()) {
+        // Device lost error: create an async event that completes when created.
+        return GetFuture(AcquireRef(new CreateComputePipelineAsyncEvent(
+            this, callbackInfo, DAWN_DEVICE_LOST_ERROR("Device lost"), descriptor->label)));
+    }
+
+    auto resultOrError = CreateUninitializedComputePipeline(descriptor);
+    if (resultOrError.IsError()) {
+        // Validation error: create an async event that completes when created.
+        return GetFuture(AcquireRef(new CreateComputePipelineAsyncEvent(
+            this, callbackInfo, resultOrError.AcquireError(), descriptor->label)));
+    }
+
+    Ref<ComputePipelineBase> uninitializedComputePipeline = resultOrError.AcquireSuccess();
+    Ref<ComputePipelineBase> cachedComputePipeline =
+        GetCachedComputePipeline(uninitializedComputePipeline.Get());
+    if (cachedComputePipeline.Get() != nullptr) {
+        // Cached pipeline: create an async event that completes when created.
+        return GetFuture(AcquireRef(new CreateComputePipelineAsyncEvent(
+            this, callbackInfo, std::move(cachedComputePipeline))));
+    }
+
+    // New pipeline: create an event backed by system event that is really async.
+    Ref<CreateComputePipelineAsyncEvent> event = AcquireRef(new CreateComputePipelineAsyncEvent(
+        this, callbackInfo, std::move(uninitializedComputePipeline),
+        AcquireRef(new SystemEvent())));
+    Future future = GetFuture(event);
+    InitializeComputePipelineAsyncImpl(std::move(event));
+    return future;
 }
 PipelineLayoutBase* DeviceBase::APICreatePipelineLayout(
     const PipelineLayoutDescriptor* descriptor) {
@@ -2031,24 +2045,10 @@ ResultOrError<Ref<ComputePipelineBase>> DeviceBase::CreateUninitializedComputePi
     return CreateUninitializedComputePipelineImpl(Unpack(&appliedDescriptor));
 }
 
-// This function is overwritten with the async version on the backends that supports
-// initializing compute pipelines asynchronously.
-void DeviceBase::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
-                                                    WGPUCreateComputePipelineAsyncCallback callback,
-                                                    void* userdata) {
-    MaybeError maybeError;
-    {
-        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateComputePipelineUS");
-        maybeError = computePipeline->Initialize();
-    }
-    DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateComputePipelineSuccess", maybeError.IsSuccess());
-
-    if (maybeError.IsError()) {
-        AddComputePipelineAsyncCallbackTask(
-            maybeError.AcquireError(), computePipeline->GetLabel().c_str(), callback, userdata);
-    } else {
-        AddComputePipelineAsyncCallbackTask(std::move(computePipeline), callback, userdata);
-    }
+// This base version is creating the pipeline synchronously,
+// and is overwritten on the backends that actually support asynchronous pipeline creation.
+void DeviceBase::InitializeComputePipelineAsyncImpl(Ref<CreateComputePipelineAsyncEvent> event) {
+    event->InitializeSync();
 }
 
 // This function is overwritten with the async version on the backends
@@ -2371,55 +2371,6 @@ CallbackTaskManager* DeviceBase::GetCallbackTaskManager() const {
 
 dawn::platform::WorkerTaskPool* DeviceBase::GetWorkerTaskPool() const {
     return mWorkerTaskPool.get();
-}
-
-void DeviceBase::AddComputePipelineAsyncCallbackTask(
-    std::unique_ptr<ErrorData> error,
-    const char* label,
-    WGPUCreateComputePipelineAsyncCallback callback,
-    void* userdata) {
-    if (GetState() != State::Alive) {
-        // If the device is no longer alive, errors should not be reported anymore.
-        // Call the callback with an error pipeline.
-        return mCallbackTaskManager->AddCallbackTask(
-            [callback, pipeline = ComputePipelineBase::MakeError(this, label), userdata]() mutable {
-                callback(WGPUCreatePipelineAsyncStatus_Success,
-                         ToAPI(ReturnToAPI(std::move(pipeline))), "", userdata);
-            });
-    }
-
-    WGPUCreatePipelineAsyncStatus status = CreatePipelineAsyncStatusFromErrorType(error->GetType());
-    mCallbackTaskManager->AddCallbackTask(
-        [callback, message = error->GetFormattedMessage(), status, userdata]() {
-            callback(status, nullptr, message.c_str(), userdata);
-        });
-}
-
-void DeviceBase::AddComputePipelineAsyncCallbackTask(
-    Ref<ComputePipelineBase> pipeline,
-    WGPUCreateComputePipelineAsyncCallback callback,
-    void* userdata) {
-    mCallbackTaskManager->AddCallbackTask(
-        [callback, pipeline = std::move(pipeline), userdata]() mutable {
-            // TODO(dawn:529): call AddOrGetCachedComputePipeline() asynchronously in
-            // CreateComputePipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
-            // thread-safe.
-            DAWN_ASSERT(pipeline != nullptr);
-            {
-                // This is called inside a callback, and no lock will be held by default so we
-                // have to lock now to protect the cache. Note: we don't lock inside
-                // AddOrGetCachedComputePipeline() to avoid deadlock because many places calling
-                // that method might already have the lock held. For example,
-                // APICreateComputePipeline()
-                DeviceBase* device = pipeline->GetDevice();
-                auto deviceLock(device->GetScopedLock());
-                if (device->GetState() == State::Alive) {
-                    pipeline = device->AddOrGetCachedComputePipeline(std::move(pipeline));
-                }
-            }
-            callback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(pipeline))),
-                     "", userdata);
-        });
 }
 
 void DeviceBase::AddRenderPipelineAsyncCallbackTask(std::unique_ptr<ErrorData> error,

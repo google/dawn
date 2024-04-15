@@ -38,6 +38,8 @@ class DawnMockTest : public ::testing::Test {
     DawnMockTest();
     ~DawnMockTest() override;
 
+    void ProcessEvents();
+
   protected:
     void DropDevice();
 
