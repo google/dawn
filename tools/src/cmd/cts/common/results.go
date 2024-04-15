@@ -152,10 +152,11 @@ func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Opt
 	return resultsByExecutionMode, nil
 }
 
-// CacheResults looks in the cache at 'cacheDir' for the results for the given
-// patchset. If the cache contains the results, then these are loaded and
-// returned. If the cache does not contain the results, then they are fetched
-// using GetResults(), saved to the cache directory and are returned.
+// CacheResults looks in the cache at 'cacheDir' for the results for the given patchset.
+// If the cache contains the results, then these are loaded, transformed with CleanTags() and
+// returned.
+// If the cache does not contain the results, then they are fetched using GetRawResults(), saved to
+// the cache directory, transformed with CleanTags() and then returned.
 func CacheResults(
 	ctx context.Context,
 	cfg Config,
@@ -176,21 +177,51 @@ func CacheResults(
 	}
 
 	log.Printf("fetching results from cl %v ps %v...", ps.Change, ps.Patchset)
-	results, err := GetResults(ctx, cfg, rdb, builds)
+	resultsByExecutionMode, err := GetRawResults(ctx, cfg, rdb, builds)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := result.Save(cachePath, results); err != nil {
+	if err := result.Save(cachePath, resultsByExecutionMode); err != nil {
 		log.Println("failed to save results to cache: %w", err)
 	}
 
-	return results, nil
+	// Expand aliased tags, remove specific tags
+	for i, results := range resultsByExecutionMode {
+		CleanTags(cfg, &results)
+		results.Sort()
+		resultsByExecutionMode[i] = results
+	}
+
+	return resultsByExecutionMode, nil
 }
 
-// GetResults fetches the build results from ResultDB.
+// GetResults calls GetRawResults() to fetch the build results from ResultDB and applies CleanTags().
 // GetResults does not trigger new builds.
 func GetResults(
+	ctx context.Context,
+	cfg Config,
+	rdb *resultsdb.ResultsDB,
+	builds BuildsByName) (result.ResultsByExecutionMode, error) {
+
+	resultsByExecutionMode, err := GetRawResults(ctx, cfg, rdb, builds)
+	if err != nil {
+		return nil, err
+	}
+
+	// Expand aliased tags, remove specific tags
+	for i, results := range resultsByExecutionMode {
+		CleanTags(cfg, &results)
+		results.Sort()
+		resultsByExecutionMode[i] = results
+	}
+
+	return resultsByExecutionMode, err
+}
+
+// GetRawResults fetches the build results from ResultDB, without applying CleanTags().
+// GetRawResults does not trigger new builds.
+func GetRawResults(
 	ctx context.Context,
 	cfg Config,
 	rdb *resultsdb.ResultsDB,
@@ -218,11 +249,10 @@ func GetResults(
 	}
 
 	resultsByExecutionMode := result.ResultsByExecutionMode{}
-	var err error = nil
 	for _, test := range cfg.Tests {
 		results := result.List{}
 		for _, prefix := range test.Prefixes {
-			err = rdb.QueryTestResults(ctx, builds.ids(), prefix+".*", func(rpb *rdbpb.TestResult) error {
+			err := rdb.QueryTestResults(ctx, builds.ids(), prefix+".*", func(rpb *rdbpb.TestResult) error {
 				if time.Since(lastPrintedDot) > 5*time.Second {
 					lastPrintedDot = time.Now()
 					fmt.Printf(".")
@@ -267,12 +297,10 @@ func GetResults(
 
 				return nil
 			})
-			if err != nil {
-				break
-			}
 
-			// Expand aliased tags, remove specific tags
-			CleanTags(cfg, &results)
+			if err != nil {
+				return nil, err
+			}
 
 			results.Sort()
 		}
@@ -281,11 +309,7 @@ func GetResults(
 
 	fmt.Println(" done")
 
-	if err != nil {
-		return nil, err
-	}
-
-	return resultsByExecutionMode, err
+	return resultsByExecutionMode, nil
 }
 
 // LatestCTSRoll returns for the latest merged CTS roll that landed in the past
