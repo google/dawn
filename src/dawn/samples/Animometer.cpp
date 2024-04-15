@@ -43,6 +43,15 @@ wgpu::RenderPipeline pipeline;
 wgpu::BindGroup bindGroup;
 wgpu::Buffer ubo;
 
+void destroyAllObjects() {
+    queue = nullptr;
+    swapchain = nullptr;
+    pipeline = nullptr;
+    bindGroup = nullptr;
+    ubo = nullptr;
+    device = nullptr;
+}
+
 float RandomFloat(float min, float max) {
     // NOLINTNEXTLINE(runtime/threadsafe_fn)
     float zeroOne = rand() / static_cast<float>(RAND_MAX);
@@ -205,4 +214,6 @@ int main(int argc, const char* argv[]) {
             timer->Start();
         }
     }
+
+    destroyAllObjects();
 }

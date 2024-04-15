@@ -47,6 +47,19 @@ wgpu::TextureView depthStencilView;
 wgpu::RenderPipeline pipeline;
 wgpu::BindGroup bindGroup;
 
+void destroyAllObjects() {
+    device = nullptr;
+    indexBuffer = nullptr;
+    vertexBuffer = nullptr;
+    texture = nullptr;
+    sampler = nullptr;
+    queue = nullptr;
+    swapchain = nullptr;
+    depthStencilView = nullptr;
+    pipeline = nullptr;
+    bindGroup = nullptr;
+}
+
 void initBuffers() {
     static const uint32_t indexData[3] = {
         0,
@@ -192,4 +205,6 @@ int main(int argc, const char* argv[]) {
         frame();
         dawn::utils::USleep(16000);
     }
+
+    destroyAllObjects();
 }

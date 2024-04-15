@@ -70,6 +70,19 @@ struct SimParams {
     int particleCount;
 };
 
+void destroyAllObjects() {
+    device = nullptr;
+    queue = nullptr;
+    swapchain = nullptr;
+    depthStencilView = nullptr;
+    modelBuffer = nullptr;
+    particleBuffers.fill(nullptr);
+    renderPipeline = nullptr;
+    updateParams = nullptr;
+    updatePipeline = nullptr;
+    updateBGs.fill(nullptr);
+}
+
 void initBuffers() {
     std::array<std::array<float, 2>, 3> model = {{
         {-0.01, -0.02},
@@ -338,4 +351,6 @@ int main(int argc, const char* argv[]) {
         frame();
         dawn::utils::USleep(16000);
     }
+
+    destroyAllObjects();
 }
