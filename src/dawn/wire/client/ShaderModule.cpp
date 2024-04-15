@@ -84,10 +84,11 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        WGPUCompilationInfo* compilationInfo = &(*mShader->mCompilationInfo);
+        WGPUCompilationInfo* compilationInfo = nullptr;
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPUCompilationInfoRequestStatus_InstanceDropped;
-            compilationInfo = nullptr;
+        } else {
+            compilationInfo = &(*mShader->mCompilationInfo);
         }
         if (mCallback) {
             mCallback(mStatus, compilationInfo, mUserdata.ExtractAsDangling());
