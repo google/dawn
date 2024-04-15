@@ -194,6 +194,7 @@ void WireTest::TearDown() {
     // Incomplete client callbacks will be called on deletion, so the mocks
     // cannot be null.
     api.IgnoreAllReleaseCalls();
+    mS2cBuf->SetHandler(nullptr);
     mWireClient = nullptr;
 
     if (mWireServer && apiDevice) {
@@ -203,6 +204,7 @@ void WireTest::TearDown() {
             .Times(Exactly(1));
         EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(Exactly(1));
     }
+    mC2sBuf->SetHandler(nullptr);
     mWireServer = nullptr;
 }
 
@@ -250,10 +252,12 @@ void WireTest::DeleteServer() {
             .Times(Exactly(1));
         EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(Exactly(1));
     }
+    mC2sBuf->SetHandler(nullptr);
     mWireServer = nullptr;
 }
 
 void WireTest::DeleteClient() {
+    mS2cBuf->SetHandler(nullptr);
     mWireClient = nullptr;
 }
 

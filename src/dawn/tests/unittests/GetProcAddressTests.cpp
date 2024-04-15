@@ -97,6 +97,7 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
                 // accordingly.
                 mDevice = nullptr;
                 mProcs = wire::client::GetProcs();
+                mC2sBuf->SetHandler(mWireClient.get());
                 break;
             }
 
@@ -111,6 +112,9 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
     void TearDown() override {
         // Destroy the device before freeing the instance or the wire client in the destructor
         mDevice = wgpu::Device();
+        if (mC2sBuf != nullptr) {
+            mC2sBuf->SetHandler(nullptr);
+        }
     }
 
   protected:

@@ -348,6 +348,7 @@ TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {
     ASSERT_TRUE(c2sBuf->Flush());
 
     // Delete the server. It should force async work to complete.
+    c2sBuf->SetHandler(nullptr);
     wireServer.reset();
 
     ASSERT_TRUE(s2cBuf->Flush());
@@ -358,6 +359,8 @@ TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {
     wgpuDeviceRelease(device);
     wgpuAdapterRelease(adapter);
     wgpuInstanceRelease(instance);
+
+    s2cBuf->SetHandler(nullptr);
 }
 
 }  // anonymous namespace

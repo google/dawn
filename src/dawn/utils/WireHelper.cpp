@@ -149,6 +149,11 @@ class WireHelperProxy : public WireHelper {
         dawnProcSetProcs(&dawn::wire::client::GetProcs());
     }
 
+    ~WireHelperProxy() override {
+        mC2sBuf->SetHandler(nullptr);
+        mS2cBuf->SetHandler(nullptr);
+    }
+
     wgpu::Instance RegisterInstance(WGPUInstance backendInstance,
                                     const WGPUInstanceDescriptor* wireDesc) override {
         DAWN_ASSERT(backendInstance != nullptr);

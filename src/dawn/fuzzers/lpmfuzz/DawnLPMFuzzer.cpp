@@ -125,6 +125,7 @@ int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::na
 
     // Note: Deleting the server will release all created objects.
     // Deleted devices will wait for idle on destruction.
+    mCommandBuffer->SetHandler(nullptr);
     wireServer = nullptr;
     return result == dawn::wire::WireResult::FatalError;
 }
