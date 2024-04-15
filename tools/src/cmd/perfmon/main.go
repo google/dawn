@@ -1013,7 +1013,7 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 
 		if err != nil {
 			info := &strings.Builder{}
-			if resp.Body != nil {
+			if resp != nil && resp.Body != nil {
 				body, _ := io.ReadAll(resp.Body)
 				fmt.Fprintln(info, "response:    ", string(body))
 			}
