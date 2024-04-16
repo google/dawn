@@ -194,8 +194,11 @@ function(AddSubdirectoryDXC)
     # not visible from our build dir. We don't need this validation, so just disable it.
     set(CLANG_FORMAT_EXE "" CACHE STRING "" FORCE)
 
-    # DXC sometimes asserts on valid HLSL, so disable all assertions.
-    set(LLVM_ENABLE_ASSERTIONS OFF CACHE BOOL "" FORCE)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT DAWN_DXC_DISABLE_ASSERTS_DEBUG)
+        set(LLVM_ENABLE_ASSERTIONS ON CACHE BOOL "" FORCE)
+    else()
+        set(LLVM_ENABLE_ASSERTIONS OFF CACHE BOOL "" FORCE)
+    endif()
 
     # Override RPATH so that it points to current dir (exe path). This allows both executable and
     # shared library to be in the same location, which we set below. Note that DXC places places
