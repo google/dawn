@@ -31,7 +31,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -118,8 +117,22 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 		// Create or update the file at relPath if the file content has changed,
 		// preserving the copyright year in the header.
 		// relPath is a path relative to the template
-		writeFile := func(relPath, body string) error {
+		writeFile := func(relPath, body, commentPrefix string) error {
+			if strings.TrimSpace(body) == "" {
+				// Don't write empty files
+				return nil
+			}
+
 			outPath := filepath.Join(tmplDir, relPath)
+
+			switch filepath.Ext(relPath) {
+			case ".cc", ".h", ".inl":
+				var err error
+				body, err = common.ClangFormat(body)
+				if err != nil {
+					return err
+				}
+			}
 
 			// Load the old file
 			existing, err := os.ReadFile(outPath)
@@ -132,7 +145,7 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 				fmt.Println("  writing", outPath)
 			}
 			sb := strings.Builder{}
-			sb.WriteString(common.Header(string(existing), filepath.ToSlash(relTmplPath), "//"))
+			sb.WriteString(common.Header(string(existing), filepath.ToSlash(relTmplPath), commentPrefix))
 			sb.WriteString("\n")
 			sb.WriteString(body)
 			oldContent, newContent := string(existing), sb.String()
@@ -154,27 +167,10 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 		}
 
 		// Write the content generated using the template and semantic info
-		sb := strings.Builder{}
-		if err := generate(tmplPath, cache, &sb, writeFile); err != nil {
+		_, tmplFileName := filepath.Split(tmplPath)
+		outPath := strings.TrimSuffix(tmplFileName, ".tmpl")
+		if err := generate(tmplPath, outPath, cache, writeFile); err != nil {
 			return fmt.Errorf("while processing '%v': %w", tmplPath, err)
-		}
-
-		if body := sb.String(); body != "" {
-			_, tmplFileName := filepath.Split(tmplPath)
-			outFileName := strings.TrimSuffix(tmplFileName, ".tmpl")
-
-			switch filepath.Ext(outFileName) {
-			case ".cc", ".h", ".inl":
-				var err error
-				body, err = common.ClangFormat(body)
-				if err != nil {
-					return err
-				}
-			}
-
-			if err := writeFile(outFileName, body); err != nil {
-				return err
-			}
 		}
 	}
 
@@ -274,28 +270,38 @@ func (g *genCache) intrinsics(path string) *intrinsicCache {
 }
 
 type generator struct {
-	cache     *genCache
-	writeFile WriteFile
-	rnd       *rand.Rand
+	cache         *genCache
+	writeFile     WriteFile
+	rnd           *rand.Rand
+	commentPrefix string
+}
+
+// setCommentPrefix sets the prefix used for comments, as used by the template
+func (g *generator) setCommentPrefix(commentPrefix string) string {
+	g.commentPrefix = commentPrefix
+	return ""
 }
 
 // WriteFile is a function that Generate() may call to emit a new file from a
 // template.
 // relPath is the relative path from the currently executing template.
 // content is the file content to write.
-type WriteFile func(relPath, content string) error
+// comment is the prefix used for line comments
+type WriteFile func(relPath, content, comment string) error
 
-// generate executes the template tmpl, writing the output to w.
+// generate executes the template tmpl, calling writeFile with the output.
 // See https://golang.org/pkg/text/template/ for documentation on the template
 // syntax.
-func generate(tmplPath string, cache *genCache, w io.Writer, writeFile WriteFile) error {
+func generate(tmplPath, outPath string, cache *genCache, writeFile WriteFile) error {
 	g := generator{
-		cache:     cache,
-		writeFile: writeFile,
-		rnd:       rand.New(rand.NewSource(4561123)),
+		cache:         cache,
+		writeFile:     writeFile,
+		rnd:           rand.New(rand.NewSource(4561123)),
+		commentPrefix: "//",
 	}
 
 	funcs := map[string]any{
+		"SetCommentPrefix":                    g.setCommentPrefix,
 		"SplitDisplayName":                    gen.SplitDisplayName,
 		"Scramble":                            g.scramble,
 		"IsEnumEntry":                         is(sem.EnumEntry{}),
@@ -316,13 +322,19 @@ func generate(tmplPath string, cache *genCache, w io.Writer, writeFile WriteFile
 		"IsFirstIn":                           isFirstIn,
 		"IsLastIn":                            isLastIn,
 		"LoadIntrinsics":                      func(path string) *intrinsicCache { return g.cache.intrinsics(path) },
-		"WriteFile":                           func(relPath, content string) (string, error) { return "", g.writeFile(relPath, content) },
+		"WriteFile": func(relPath, content string) (string, error) {
+			return "", g.writeFile(relPath, content, g.commentPrefix)
+		},
 	}
 	t, err := template.FromFile(tmplPath)
 	if err != nil {
 		return err
 	}
-	return t.Run(w, nil, funcs)
+	w := &strings.Builder{}
+	if err := t.Run(w, nil, funcs); err != nil {
+		return err
+	}
+	return writeFile(outPath, w.String(), g.commentPrefix)
 }
 
 // scramble randomly modifies the input string so that it is no longer equal to
