@@ -155,109 +155,99 @@ class Backend : public SharedTextureMemoryTestBackend {
 
 // Test that a shared event can be imported, and then exported.
 TEST_P(SharedTextureMemoryTests, SharedFenceSuccessfulImportExport) {
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());
-        auto sharedEvent = AcquireNSPRef([*mtlDevice newSharedEvent]);
+    auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());
+    auto sharedEvent = AcquireNSPRef([*mtlDevice newSharedEvent]);
 
-        wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
-        sharedEventDesc.sharedEvent = static_cast<void*>(*sharedEvent);
+    wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
+    sharedEventDesc.sharedEvent = static_cast<void*>(*sharedEvent);
 
-        wgpu::SharedFenceDescriptor fenceDesc;
-        fenceDesc.nextInChain = &sharedEventDesc;
+    wgpu::SharedFenceDescriptor fenceDesc;
+    fenceDesc.nextInChain = &sharedEventDesc;
 
-        wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
+    wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
 
-        // Release the Metal objects. They should be retained by the implementation.
-        mtlDevice = nil;
-        sharedEvent = nil;
+    // Release the Metal objects. They should be retained by the implementation.
+    mtlDevice = nil;
+    sharedEvent = nil;
 
-        wgpu::SharedFenceMTLSharedEventExportInfo sharedEventInfo;
-        wgpu::SharedFenceExportInfo exportInfo;
-        exportInfo.nextInChain = &sharedEventInfo;
-        fence.ExportInfo(&exportInfo);
+    wgpu::SharedFenceMTLSharedEventExportInfo sharedEventInfo;
+    wgpu::SharedFenceExportInfo exportInfo;
+    exportInfo.nextInChain = &sharedEventInfo;
+    fence.ExportInfo(&exportInfo);
 
-        // The exported event should be the same as the imported one.
-        EXPECT_EQ(sharedEventInfo.sharedEvent, sharedEventDesc.sharedEvent);
-        EXPECT_EQ(exportInfo.type, wgpu::SharedFenceType::MTLSharedEvent);
-    }
+    // The exported event should be the same as the imported one.
+    EXPECT_EQ(sharedEventInfo.sharedEvent, sharedEventDesc.sharedEvent);
+    EXPECT_EQ(exportInfo.type, wgpu::SharedFenceType::MTLSharedEvent);
 }
 
 // Test that it is an error to import a shared fence without enabling the feature.
 TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeature) {
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());
-        auto sharedEvent = AcquireNSPRef([*mtlDevice newSharedEvent]);
+    auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());
+    auto sharedEvent = AcquireNSPRef([*mtlDevice newSharedEvent]);
 
-        wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
-        sharedEventDesc.sharedEvent = static_cast<void*>(*sharedEvent);
+    wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
+    sharedEventDesc.sharedEvent = static_cast<void*>(*sharedEvent);
 
-        wgpu::SharedFenceDescriptor fenceDesc;
-        fenceDesc.nextInChain = &sharedEventDesc;
+    wgpu::SharedFenceDescriptor fenceDesc;
+    fenceDesc.nextInChain = &sharedEventDesc;
 
-        ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                                testing::HasSubstr("MTLSharedEvent is not enabled"));
-    }
+    ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
+                            testing::HasSubstr("MTLSharedEvent is not enabled"));
 }
 
 // Test that it is an error to import a shared fence with a null MTLSharedEvent
 TEST_P(SharedTextureMemoryTests, SharedFenceImportMTLSharedEventMissing) {
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
-        sharedEventDesc.sharedEvent = nullptr;
+    wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
+    sharedEventDesc.sharedEvent = nullptr;
 
-        wgpu::SharedFenceDescriptor fenceDesc;
-        fenceDesc.nextInChain = &sharedEventDesc;
+    wgpu::SharedFenceDescriptor fenceDesc;
+    fenceDesc.nextInChain = &sharedEventDesc;
 
-        ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
-                                testing::HasSubstr("missing"));
-    }
+    ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
+                            testing::HasSubstr("missing"));
 }
 
 // Test exporting info from a shared fence with no chained struct.
 // It should be valid and the fence type is exported.
 TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoNoChainedStruct) {
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());
-        auto sharedEvent = AcquireNSPRef([*mtlDevice newSharedEvent]);
+    auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());
+    auto sharedEvent = AcquireNSPRef([*mtlDevice newSharedEvent]);
 
-        wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
-        sharedEventDesc.sharedEvent = static_cast<void*>(*sharedEvent);
+    wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
+    sharedEventDesc.sharedEvent = static_cast<void*>(*sharedEvent);
 
-        wgpu::SharedFenceDescriptor fenceDesc;
-        fenceDesc.nextInChain = &sharedEventDesc;
+    wgpu::SharedFenceDescriptor fenceDesc;
+    fenceDesc.nextInChain = &sharedEventDesc;
 
-        wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
+    wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
 
-        // Test no chained struct.
-        wgpu::SharedFenceExportInfo exportInfo;
-        exportInfo.nextInChain = nullptr;
+    // Test no chained struct.
+    wgpu::SharedFenceExportInfo exportInfo;
+    exportInfo.nextInChain = nullptr;
 
-        fence.ExportInfo(&exportInfo);
-        EXPECT_EQ(exportInfo.type, wgpu::SharedFenceType::MTLSharedEvent);
-    }
+    fence.ExportInfo(&exportInfo);
+    EXPECT_EQ(exportInfo.type, wgpu::SharedFenceType::MTLSharedEvent);
 }
 
 // Test exporting info from a shared fence with an invalid chained struct.
 // It should not be valid, but the fence type should still be exported.
 TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoInvalidChainedStruct) {
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());
-        auto sharedEvent = AcquireNSPRef([*mtlDevice newSharedEvent]);
+    auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());
+    auto sharedEvent = AcquireNSPRef([*mtlDevice newSharedEvent]);
 
-        wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
-        sharedEventDesc.sharedEvent = static_cast<void*>(*sharedEvent);
+    wgpu::SharedFenceMTLSharedEventDescriptor sharedEventDesc;
+    sharedEventDesc.sharedEvent = static_cast<void*>(*sharedEvent);
 
-        wgpu::SharedFenceDescriptor fenceDesc;
-        fenceDesc.nextInChain = &sharedEventDesc;
+    wgpu::SharedFenceDescriptor fenceDesc;
+    fenceDesc.nextInChain = &sharedEventDesc;
 
-        wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
+    wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
 
-        wgpu::ChainedStructOut otherStruct;
-        wgpu::SharedFenceExportInfo exportInfo;
-        exportInfo.nextInChain = &otherStruct;
+    wgpu::ChainedStructOut otherStruct;
+    wgpu::SharedFenceExportInfo exportInfo;
+    exportInfo.nextInChain = &otherStruct;
 
-        ASSERT_DEVICE_ERROR(fence.ExportInfo(&exportInfo));
-    }
+    ASSERT_DEVICE_ERROR(fence.ExportInfo(&exportInfo));
 }
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Metal,

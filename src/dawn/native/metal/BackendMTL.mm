@@ -124,8 +124,7 @@ uint32_t GetEntryProperty(io_registry_entry_t entry, CFStringRef name) {
 //
 // [device registryID] is the ID for one of the IOGraphicsAccelerator2 and we can see that
 // their parent always is an IOPCIDevice that has properties for the device and vendor IDs.
-MaybeError API_AVAILABLE(macos(10.13))
-    GetDeviceIORegistryPCIInfo(id<MTLDevice> device, PCIIDs* ids) {
+MaybeError GetDeviceIORegistryPCIInfo(id<MTLDevice> device, PCIIDs* ids) {
     // Get a matching dictionary for the IOGraphicsAccelerator2
     CFRef<CFMutableDictionaryRef> matchingDict =
         AcquireCFRef(IORegistryEntryIDMatching([device registryID]));
@@ -167,8 +166,6 @@ MaybeError API_AVAILABLE(macos(10.13))
 }
 
 MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
-    // [device registryID] is introduced on macOS 10.13+, otherwise workaround to get vendor
-    // id by vendor name on old macOS
     auto result = GetDeviceIORegistryPCIInfo(device, ids);
     if (result.IsError()) {
         dawn::WarningLog() << "GetDeviceIORegistryPCIInfo failed: "
@@ -346,8 +343,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         {
             bool haveStoreAndMSAAResolve = false;
 #if DAWN_PLATFORM_IS(MACOS)
-            haveStoreAndMSAAResolve =
-                [*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
+            haveStoreAndMSAAResolve = [*mDevice supportsFamily:MTLGPUFamilyCommon2];
 #elif DAWN_PLATFORM_IS(IOS)
 #if !defined(__IPHONE_16_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_16_0
             haveStoreAndMSAAResolve = [*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];
@@ -490,14 +486,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
             EnableFeature(Feature::Float32Filterable);
         }
 #elif DAWN_PLATFORM_IS(MACOS)
-        if (@available(macOS 10.15, *)) {
-            if ([*mDevice supportsFamily:MTLGPUFamilyMac2]) {
-                EnableFeature(Feature::Float32Filterable);
-            }
-        } else if (@available(macOS 10.14, *)) {
-            if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1]) {
-                EnableFeature(Feature::Float32Filterable);
-            }
+        if ([*mDevice supportsFamily:MTLGPUFamilyMac2]) {
+            EnableFeature(Feature::Float32Filterable);
         }
 #endif
 
@@ -757,18 +747,11 @@ class PhysicalDevice : public PhysicalDeviceBase {
             if ([*mDevice supportsFamily:MTLGPUFamilyApple1]) {
                 return MTLGPUFamily::Apple1;
             }
+
+            DAWN_UNREACHABLE();
         }
 
-#if DAWN_PLATFORM_IS(MACOS)
-        if (@available(macOS 10.14, *)) {
-            if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1]) {
-                return MTLGPUFamily::Mac2;
-            }
-        }
-        if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
-            return MTLGPUFamily::Mac1;
-        }
-#elif DAWN_PLATFORM_IS(IOS) && \
+#if DAWN_PLATFORM_IS(IOS) && \
     (!defined(__IPHONE_16_0) || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_16_0)
         if (@available(iOS 10.11, *)) {
             if ([*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily4_v1]) {

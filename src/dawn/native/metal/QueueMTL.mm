@@ -182,7 +182,7 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
 
     TRACE_EVENT_ASYNC_BEGIN0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                              uint64_t(pendingSerial));
-    if (@available(macOS 10.14, *)) {
+    if (@available(macOS 10.14, iOS 12.0, *)) {
         id rawEvent = *mMtlSharedEvent;
         id<MTLSharedEvent> sharedEvent = static_cast<id<MTLSharedEvent>>(rawEvent);
         [*pendingCommands encodeSignalEvent:sharedEvent value:static_cast<uint64_t>(pendingSerial)];
