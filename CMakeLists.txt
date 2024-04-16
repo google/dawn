@@ -382,6 +382,7 @@ function(common_compile_options TARGET)
       -fno-exceptions
       -fno-rtti
 
+      -Werror
       -Wno-deprecated-builtins
       -Wno-unknown-warning-option
       -Wno-switch-default

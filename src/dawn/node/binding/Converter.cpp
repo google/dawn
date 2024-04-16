@@ -1519,6 +1519,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::PixelLocalStorageCoherent:
         case wgpu::FeatureName::PixelLocalStorageNonCoherent:
         case wgpu::FeatureName::R8UnormStorage:
+        case wgpu::FeatureName::ShaderModuleCompilationOptions:
         case wgpu::FeatureName::SharedBufferMemoryD3D12Resource:
         case wgpu::FeatureName::SharedFenceDXGISharedHandle:
         case wgpu::FeatureName::SharedFenceMTLSharedEvent:
@@ -1538,6 +1539,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SurfaceCapabilities:
         case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::Undefined:
+        case wgpu::FeatureName::YCbCrVulkanSamplers:
             return false;
     }
     return false;
