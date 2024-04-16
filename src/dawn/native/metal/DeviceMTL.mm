@@ -252,10 +252,15 @@ void Device::InitializeComputePipelineAsyncImpl(Ref<CreateComputePipelineAsyncEv
 
     event->InitializeAsync();
 }
-void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
-                                               WGPUCreateRenderPipelineAsyncCallback callback,
-                                               void* userdata) {
-    RenderPipeline::InitializeAsync(std::move(renderPipeline), callback, userdata);
+void Device::InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEvent> event) {
+    PhysicalDeviceBase* physicalDevice = GetPhysicalDevice();
+    if (IsMetalValidationEnabled(physicalDevice) &&
+        gpu_info::IsAMD(physicalDevice->GetVendorId())) {
+        event->InitializeSync();
+        return;
+    }
+
+    event->InitializeAsync();
 }
 
 ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(

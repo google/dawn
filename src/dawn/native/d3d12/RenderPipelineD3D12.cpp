@@ -34,7 +34,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
-#include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d/BlobD3D.h"
 #include "dawn/native/d3d/D3DError.h"
@@ -567,15 +567,6 @@ D3D12_INPUT_LAYOUT_DESC RenderPipeline::ComputeInputLayout(
     inputLayoutDescriptor.pInputElementDescs = &(*inputElementDescriptors)[0];
     inputLayoutDescriptor.NumElements = count;
     return inputLayoutDescriptor;
-}
-
-void RenderPipeline::InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
-                                     WGPUCreateRenderPipelineAsyncCallback callback,
-                                     void* userdata) {
-    std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
-        std::make_unique<CreateRenderPipelineAsyncTask>(std::move(renderPipeline), callback,
-                                                        userdata);
-    CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
 }
 
 }  // namespace dawn::native::d3d12

@@ -46,10 +46,6 @@ class RenderPipeline final : public RenderPipelineBase {
         Device* device,
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
 
-    static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
-                                WGPUCreateRenderPipelineAsyncCallback callback,
-                                void* userdata);
-
     void ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext,
                   const std::array<float, 4>& blendColor,
                   uint32_t stencilReference);

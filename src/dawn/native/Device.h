@@ -41,7 +41,7 @@
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
-#include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorSink.h"
 #include "dawn/native/ExecutionQueue.h"
@@ -444,6 +444,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
 
     Ref<ComputePipelineBase> AddOrGetCachedComputePipeline(
         Ref<ComputePipelineBase> computePipeline);
+    Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline);
 
   protected:
     // Constructor used only for mocking and testing.
@@ -516,12 +517,9 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
         ComputePipelineBase* uninitializedComputePipeline);
     Ref<RenderPipelineBase> GetCachedRenderPipeline(
         RenderPipelineBase* uninitializedRenderPipeline);
-    Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline);
     virtual Ref<PipelineCacheBase> GetOrCreatePipelineCacheImpl(const CacheKey& key);
     virtual void InitializeComputePipelineAsyncImpl(Ref<CreateComputePipelineAsyncEvent> event);
-    virtual void InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
-                                                   WGPUCreateRenderPipelineAsyncCallback callback,
-                                                   void* userdata);
+    virtual void InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEvent> event);
 
     void ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescriptor);
 

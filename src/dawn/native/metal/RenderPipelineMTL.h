@@ -43,9 +43,6 @@ class RenderPipeline final : public RenderPipelineBase {
     static Ref<RenderPipelineBase> CreateUninitialized(
         Device* device,
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
-    static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
-                                WGPUCreateRenderPipelineAsyncCallback callback,
-                                void* userdata);
 
     RenderPipeline(DeviceBase* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     ~RenderPipeline() override;

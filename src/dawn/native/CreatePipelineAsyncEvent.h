@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_CREATEPIPELINEASYNCTASK_H_
-#define SRC_DAWN_NATIVE_CREATEPIPELINEASYNCTASK_H_
+#ifndef SRC_DAWN_NATIVE_CREATEPIPELINEASYNCEVENT_H_
+#define SRC_DAWN_NATIVE_CREATEPIPELINEASYNCEVENT_H_
 
 #include <memory>
 #include <string>
@@ -102,28 +102,9 @@ class CreatePipelineAsyncEvent final : public EventManager::TrackedEvent {
 
 using CreateComputePipelineAsyncEvent =
     CreatePipelineAsyncEvent<ComputePipelineBase, CreateComputePipelineAsyncCallbackInfo>;
-
-// CreateRenderPipelineAsyncTask defines all the inputs and outputs of
-// CreateRenderPipelineAsync() tasks, which are the same among all the backends.
-class CreateRenderPipelineAsyncTask {
-  public:
-    CreateRenderPipelineAsyncTask(Ref<RenderPipelineBase> nonInitializedRenderPipeline,
-                                  WGPUCreateRenderPipelineAsyncCallback callback,
-                                  void* userdata);
-    ~CreateRenderPipelineAsyncTask();
-
-    void Run();
-
-    static void RunAsync(std::unique_ptr<CreateRenderPipelineAsyncTask> task);
-
-  private:
-    Ref<RenderPipelineBase> mRenderPipeline;
-    WGPUCreateRenderPipelineAsyncCallback mCallback;
-    raw_ptr<void> mUserdata;
-    // Used to keep ShaderModuleBase::mTintProgram alive until pipeline initialization is done.
-    PipelineBase::ScopedUseShaderPrograms mScopedUseShaderPrograms;
-};
+using CreateRenderPipelineAsyncEvent =
+    CreatePipelineAsyncEvent<RenderPipelineBase, CreateRenderPipelineAsyncCallbackInfo>;
 
 }  // namespace dawn::native
 
-#endif  // SRC_DAWN_NATIVE_CREATEPIPELINEASYNCTASK_H_
+#endif  // SRC_DAWN_NATIVE_CREATEPIPELINEASYNCEVENT_H_

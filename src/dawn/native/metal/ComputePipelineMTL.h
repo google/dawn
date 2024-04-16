@@ -31,7 +31,7 @@
 #include <vector>
 
 #include "dawn/native/ComputePipeline.h"
-#include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/CreatePipelineAsyncEvent.h"
 
 #include "dawn/common/NSRef.h"
 

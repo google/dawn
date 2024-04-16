@@ -235,10 +235,8 @@ void Device::InitializeComputePipelineAsyncImpl(Ref<CreateComputePipelineAsyncEv
     event->InitializeAsync();
 }
 
-void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPipeline,
-                                               WGPUCreateRenderPipelineAsyncCallback callback,
-                                               void* userdata) {
-    RenderPipeline::InitializeAsync(std::move(renderPipeline), callback, userdata);
+void Device::InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEvent> event) {
+    event->InitializeAsync();
 }
 
 ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(

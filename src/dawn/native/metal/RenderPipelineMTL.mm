@@ -28,7 +28,7 @@
 #include "dawn/native/metal/RenderPipelineMTL.h"
 
 #include "dawn/native/Adapter.h"
-#include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/metal/BackendMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
@@ -580,23 +580,6 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
     }
 
     return AcquireNSRef(mtlVertexDescriptor);
-}
-
-void RenderPipeline::InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
-                                     WGPUCreateRenderPipelineAsyncCallback callback,
-                                     void* userdata) {
-    PhysicalDeviceBase* physicalDevice = renderPipeline->GetDevice()->GetPhysicalDevice();
-    std::unique_ptr<CreateRenderPipelineAsyncTask> asyncTask =
-        std::make_unique<CreateRenderPipelineAsyncTask>(std::move(renderPipeline), callback,
-                                                        userdata);
-    // Workaround a crash where the validation layers on AMD crash with partition alloc.
-    // See crbug.com/dawn/1200.
-    if (IsMetalValidationEnabled(physicalDevice) &&
-        gpu_info::IsAMD(physicalDevice->GetVendorId())) {
-        asyncTask->Run();
-        return;
-    }
-    CreateRenderPipelineAsyncTask::RunAsync(std::move(asyncTask));
 }
 
 }  // namespace dawn::native::metal

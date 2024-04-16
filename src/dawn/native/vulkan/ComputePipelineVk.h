@@ -31,7 +31,7 @@
 #include "dawn/native/ComputePipeline.h"
 
 #include "dawn/common/vulkan_platform.h"
-#include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/Error.h"
 
 namespace dawn::native::vulkan {

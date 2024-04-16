@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/CreatePipelineAsyncEvent.h"
 
 #include <utility>
 
@@ -59,6 +59,26 @@ void CreatePipelineAsyncEvent<ComputePipelineBase,
     auto deviceLock(device->GetScopedLock());
     if (device->GetState() == DeviceBase::State::Alive) {
         mPipeline = device->AddOrGetCachedComputePipeline(std::move(mPipeline));
+    }
+}
+
+template <>
+const char*
+    CreatePipelineAsyncEvent<RenderPipelineBase,
+                             CreateRenderPipelineAsyncCallbackInfo>::kDawnHistogramMetricsSuccess =
+        "CreateRenderPipelineSuccess";
+template <>
+const char*
+    CreatePipelineAsyncEvent<RenderPipelineBase,
+                             CreateRenderPipelineAsyncCallbackInfo>::kDawnHistogramMetricsUS =
+        "CreateRenderPipelineUS";
+template <>
+void CreatePipelineAsyncEvent<RenderPipelineBase,
+                              CreateRenderPipelineAsyncCallbackInfo>::AddOrGetCachedPipeline() {
+    DeviceBase* device = mPipeline->GetDevice();
+    auto deviceLock(device->GetScopedLock());
+    if (device->GetState() == DeviceBase::State::Alive) {
+        mPipeline = device->AddOrGetCachedRenderPipeline(std::move(mPipeline));
     }
 }
 
@@ -197,67 +217,8 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
     }
 }
 
-CreateRenderPipelineAsyncTask::CreateRenderPipelineAsyncTask(
-    Ref<RenderPipelineBase> nonInitializedRenderPipeline,
-    WGPUCreateRenderPipelineAsyncCallback callback,
-    void* userdata)
-    : mRenderPipeline(std::move(nonInitializedRenderPipeline)),
-      mCallback(callback),
-      mUserdata(userdata),
-      mScopedUseShaderPrograms(mRenderPipeline->UseShaderPrograms()) {
-    DAWN_ASSERT(mRenderPipeline != nullptr);
-}
-
-CreateRenderPipelineAsyncTask::~CreateRenderPipelineAsyncTask() = default;
-
-void CreateRenderPipelineAsyncTask::Run() {
-    const char* eventLabel = utils::GetLabelForTrace(mRenderPipeline->GetLabel().c_str());
-
-    DeviceBase* device = mRenderPipeline->GetDevice();
-    TRACE_EVENT_FLOW_END1(device->GetPlatform(), General, "CreateRenderPipelineAsyncTask::RunAsync",
-                          this, "label", eventLabel);
-    TRACE_EVENT1(device->GetPlatform(), General, "CreateRenderPipelineAsyncTask::Run", "label",
-                 eventLabel);
-
-    MaybeError maybeError;
-    {
-        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "CreateRenderPipelineUS");
-        maybeError = mRenderPipeline->Initialize(std::move(mScopedUseShaderPrograms));
-    }
-    DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "CreateRenderPipelineSuccess",
-                           maybeError.IsSuccess());
-    if (maybeError.IsError()) {
-        device->AddRenderPipelineAsyncCallbackTask(maybeError.AcquireError(),
-                                                   mRenderPipeline->GetLabel().c_str(), mCallback,
-                                                   mUserdata.ExtractAsDangling());
-    } else {
-        device->AddRenderPipelineAsyncCallbackTask(mRenderPipeline, mCallback,
-                                                   mUserdata.ExtractAsDangling());
-    }
-}
-
-void CreateRenderPipelineAsyncTask::RunAsync(std::unique_ptr<CreateRenderPipelineAsyncTask> task) {
-    DeviceBase* device = task->mRenderPipeline->GetDevice();
-
-    const char* eventLabel = utils::GetLabelForTrace(task->mRenderPipeline->GetLabel().c_str());
-
-    TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
-                            "CreateRenderPipelineAsyncTask::RunAsync", task.get(), "label",
-                            eventLabel);
-
-    // Using "taskPtr = std::move(task)" will cause compilation error when constructing an
-    // `AsyncTask` (`std::function`) from the lambda expression `asyncTask` because `asyncTask` is
-    // non-copyable (it captures a `std::unique_ptr`), while `std::function` requires the callable
-    // to be copyable.
-    auto asyncTask = [taskPtr = task.release()] {
-        std::unique_ptr<CreateRenderPipelineAsyncTask> innerTaskPtr(taskPtr);
-        innerTaskPtr->Run();
-    };
-
-    device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
-}
-
 template class CreatePipelineAsyncEvent<ComputePipelineBase,
                                         CreateComputePipelineAsyncCallbackInfo>;
+template class CreatePipelineAsyncEvent<RenderPipelineBase, CreateRenderPipelineAsyncCallbackInfo>;
 
 }  // namespace dawn::native
