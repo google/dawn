@@ -164,8 +164,22 @@ if (tint_has_fuzzers) {
   }
 
   template("tint_fuzzer_test") {
-    fuzzer_test(target_name) {
-      forward_variables_from(invoker, "*")
+    # fuzzer_test.gni doesn't handle targets that use 'output_name' correctly.
+    # It will build an executable with the requested name, but the ClusterFuzz
+    # data files (corpus, dictionary, options, owners, runtime_deps) will all
+    # use the target name for their output file names, and these will not be
+    # used by ClusterFuzz.
+    # To work around this, if an 'output_name' is specified, pass the
+    # 'output_name' to fuzzer_test() as the target name, then make a proxy
+    # 'target_name' group that depends on the fuzzer target.
+    if (defined(invoker.output_name)) {
+      fuzzer_name = invoker.output_name
+    } else {
+      fuzzer_name = target_name
+    }
+
+    fuzzer_test(fuzzer_name) {
+      forward_variables_from(invoker, "*", [ "output_name" ])
       exclude_main = false
 
       if (target_name == "wgsl") {
@@ -179,6 +193,13 @@ if (tint_has_fuzzers) {
         seed_corpus_deps = [ "${tint_src_dir}:tint_generate_wgsl_corpus" ]
       } else {
         assert(false, "unsupported tint fuzzer target")
+      }
+    }
+
+    if (fuzzer_name != target_name) {
+      group(target_name) {
+        testonly = true
+        deps = [ ":${fuzzer_name}" ]
       }
     }
   }
