@@ -11,7 +11,7 @@ Most of the code generation is done from [`dawn.json`](../../src/dawn/dawn.json)
 At this time it is used to generate:
 
  - the Dawn, Emscripten, and upstream webgpu-native `webgpu.h` C header
- - the Dawn and Emscripten `webgpu_cpp.cpp/h` C++ wrapper over the C header
+ - the Dawn and Emscripten `webgpu_cpp.h` C++ wrapper over the C header
  - libraries that implements `webgpu.h` by calling in a static or `thread_local` proc table
  - other parts of the [Emscripten](https://emscripten.org/) WebGPU implementation
  - a GMock version of the API with its proc table for testing

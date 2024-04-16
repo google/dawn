@@ -34,15 +34,8 @@ import("${dawn_root}/scripts/dawn_component.gni")
 # Dawn C++ wrapper
 ###############################################################################
 
-dawn_json_generator("cpp_gen") {
-  target = "cpp"
-  outputs = [ "src/dawn/webgpu_cpp.cpp" ]
-}
-
 source_set("cpp") {
   public_deps = [ "${dawn_root}/include/dawn:cpp_headers" ]
-  deps = [ ":cpp_gen" ]
-  sources = get_target_outputs(":cpp_gen")
 }
 
 ###############################################################################
@@ -87,7 +80,6 @@ dawn_json_generator("emscripten_bits_gen") {
     "emscripten-bits/system/include/webgpu/webgpu.h",
     "emscripten-bits/system/include/webgpu/webgpu_cpp.h",
     "emscripten-bits/system/include/webgpu/webgpu_cpp_chained_struct.h",
-    "emscripten-bits/system/lib/webgpu/webgpu_cpp.cpp",
     "emscripten-bits/webgpu_struct_info.json",
     "emscripten-bits/library_webgpu_enum_tables.js",
   ]

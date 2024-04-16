@@ -48,6 +48,11 @@ namespace {{metadata.namespace}} {
         constexpr size_t ConstexprMax(size_t a, size_t b) {
             return a > b ? a : b;
         }
+
+        template <typename T>
+        static T& AsNonConstReference(const T& value) {
+            return const_cast<T&>(value);
+        }
     }  // namespace detail
 
     {% set c_prefix = metadata.c_prefix %}
@@ -57,21 +62,54 @@ namespace {{metadata.namespace}} {
         static constexpr {{type}} k{{as_cppType(constant.name)}} = {{ value }};
     {% endfor %}
 
+    {%- macro render_c_actual_arg(arg) -%}
+        {%- if arg.annotation == "value" -%}
+            {%- if arg.type.category == "object" -%}
+                {{as_varName(arg.name)}}.Get()
+            {%- elif arg.type.category == "enum" or arg.type.category == "bitmask" -%}
+                static_cast<{{as_cType(arg.type.name)}}>({{as_varName(arg.name)}})
+            {%- elif arg.type.category == "structure" -%}
+                *reinterpret_cast<{{as_cType(arg.type.name)}} const*>(&{{as_varName(arg.name)}})
+            {%- elif arg.type.category in ["function pointer", "native"] -%}
+                {{as_varName(arg.name)}}
+            {%- else -%}
+                UNHANDLED
+            {%- endif -%}
+        {%- else -%}
+            reinterpret_cast<{{decorate("", as_cType(arg.type.name), arg)}}>({{as_varName(arg.name)}})
+        {%- endif -%}
+    {%- endmacro -%}
+
+    {%- macro render_cpp_to_c_method_call(type, method) -%}
+        {{as_cMethod(type.name, method.name)}}(Get()
+            {%- for arg in method.arguments -%},{{" "}}{{render_c_actual_arg(arg)}}
+            {%- endfor -%}
+        )
+    {%- endmacro -%}
+
     {% for type in by_category["enum"] %}
-        enum class {{as_cppType(type.name)}} : uint32_t {
+        {% set CppType = as_cppType(type.name) %}
+        {% set CType = as_cType(type.name) %}
+        enum class {{CppType}} : uint32_t {
             {% for value in type.values %}
-                {{as_cppEnum(value.name)}} = 0x{{format(value.value, "08X")}},
+                {{as_cppEnum(value.name)}} = {{as_cEnum(type.name, value.name)}},
             {% endfor %}
         };
+        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
     {% endfor %}
 
     {% for type in by_category["bitmask"] %}
-        enum class {{as_cppType(type.name)}} : uint32_t {
+        {% set CppType = as_cppType(type.name) %}
+        {% set CType = as_cType(type.name) + "Flags" %}
+        enum class {{CppType}} : uint32_t {
             {% for value in type.values %}
-                {{as_cppEnum(value.name)}} = 0x{{format(value.value, "08X")}},
+                {{as_cppEnum(value.name)}} = {{as_cEnum(type.name, value.name)}},
             {% endfor %}
         };
+        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
     {% endfor %}
 
@@ -208,10 +246,11 @@ namespace {{metadata.namespace}} {
     {%- endif -%}
 {%- endmacro %}
 
-{% macro render_cpp_method_declaration(type, method) %}
+{% macro render_cpp_method_declaration(type, method, dfn=False) %}
     {% set CppType = as_cppType(type.name) %}
     {% set OriginalMethodName = method.name.CamelCase() %}
     {% set MethodName = OriginalMethodName[:-1] if method.name.chunks[-1] == "f" else OriginalMethodName %}
+    {% set MethodName = CppType + "::" + MethodName if dfn else MethodName %}
     {{as_cppType(method.return_type.name)}} {{MethodName}}(
         {%- for arg in method.arguments -%}
             {%- if not loop.first %}, {% endif -%}
@@ -220,7 +259,7 @@ namespace {{metadata.namespace}} {
             {%- else -%}
                 {{as_annotated_cppType(arg)}}
             {%- endif -%}
-            {{render_cpp_default_value(arg, False)}}
+            {% if not dfn %}{{render_cpp_default_value(arg, False)}}{% endif %}
         {%- endfor -%}
     ) const
 {%- endmacro %}
@@ -234,25 +273,53 @@ namespace {{metadata.namespace}} {
             using ObjectBase::operator=;
 
             {% for method in type.methods %}
-                {{render_cpp_method_declaration(type, method)}};
+                inline {{render_cpp_method_declaration(type, method)}};
             {% endfor %}
 
           private:
             friend ObjectBase<{{CppType}}, {{CType}}>;
-            static void {{c_prefix}}Reference({{CType}} handle);
-            static void {{c_prefix}}Release({{CType}} handle);
+            static inline void {{c_prefix}}Reference({{CType}} handle);
+            static inline void {{c_prefix}}Release({{CType}} handle);
         };
 
     {% endfor %}
 
+    {%- macro render_function_call(function) -%}
+        {{as_cMethod(None, function.name)}}(
+            {%- for arg in function.arguments -%}
+                {% if not loop.first %}, {% endif %}{{render_c_actual_arg(arg)}}
+            {%- endfor -%}
+        )
+    {%- endmacro -%}
+
+    // Free Functions
+
     {% for function in by_category["function"] if not function.no_cpp %}
-        {{as_cppType(function.return_type.name)}} {{as_cppType(function.name)}}(
+        inline {{as_cppType(function.return_type.name)}} {{as_cppType(function.name)}}(
             {%- for arg in function.arguments -%}
                 {%- if not loop.first %}, {% endif -%}
                 {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
             {%- endfor -%}
-        );
+        ) {
+            {% if function.return_type.name.concatcase() == "void" %}
+                {{render_function_call(function)}};
+            {% else %}
+                auto result = {{render_function_call(function)}};
+                return {{convert_cType_to_cppType(function.return_type, 'value', 'result')}};
+            {% endif %}
+        }
     {% endfor %}
+
+     // ChainedStruct
+    {% set c_prefix = metadata.c_prefix %}
+    static_assert(sizeof(ChainedStruct) == sizeof({{c_prefix}}ChainedStruct),
+            "sizeof mismatch for ChainedStruct");
+    static_assert(alignof(ChainedStruct) == alignof({{c_prefix}}ChainedStruct),
+            "alignof mismatch for ChainedStruct");
+    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof({{c_prefix}}ChainedStruct, next),
+            "offsetof mismatch for ChainedStruct::nextInChain");
+    static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStruct, sType),
+            "offsetof mismatch for ChainedStruct::sType");
 
     {% for type in by_category["structure"] %}
         {% set Out = "Out" if type.output else "" %}
@@ -272,11 +339,11 @@ namespace {{metadata.namespace}} {
                 {% endif %}
         {% endif %}
             {% if type.has_free_members_function %}
-                ~{{as_cppType(type.name)}}();
+                inline ~{{as_cppType(type.name)}}();
                 {{as_cppType(type.name)}}(const {{as_cppType(type.name)}}&) = delete;
                 {{as_cppType(type.name)}}& operator=(const {{as_cppType(type.name)}}&) = delete;
-                {{as_cppType(type.name)}}({{as_cppType(type.name)}}&&);
-                {{as_cppType(type.name)}}& operator=({{as_cppType(type.name)}}&&);
+                inline {{as_cppType(type.name)}}({{as_cppType(type.name)}}&&);
+                inline {{as_cppType(type.name)}}& operator=({{as_cppType(type.name)}}&&);
             {% endif %}
             {% if type.extensible %}
                 ChainedStruct{{Out}} {{const}} * nextInChain = nullptr;
@@ -292,6 +359,11 @@ namespace {{metadata.namespace}} {
                     {{member_declaration}};
                 {% endif %}
             {% endfor %}
+            {% if type.has_free_members_function %}
+
+              private:
+                static inline void Reset({{as_cppType(type.name)}}& value);
+            {% endif %}
         };
 
     {% endfor %}
@@ -301,6 +373,109 @@ namespace {{metadata.namespace}} {
         // and need to be imported into this namespace for Argument Dependent Lookup.
         WGPU_IMPORT_BITMASK_OPERATORS
     {% endif %}
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+// error: 'offsetof' within non-standard-layout type '{{metadata.namespace}}::XXX' is conditionally-supported
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+    {% for type in by_category["structure"] %}
+        {% set CppType = as_cppType(type.name) %}
+        {% set CType = as_cType(type.name) %}
+        // {{CppType}} implementation
+        {% if type.has_free_members_function %}
+            {{CppType}}::~{{CppType}}() {
+                if (
+                    {%- for member in type.members if member.annotation != 'value' %}
+                        {% if not loop.first %} || {% endif -%}
+                        this->{{member.name.camelCase()}} != nullptr
+                    {%- endfor -%}
+                ) {
+                    {{as_cMethod(type.name, Name("free members"))}}(
+                        *reinterpret_cast<{{as_cType(type.name)}}*>(this));
+                }
+            }
+
+            {{CppType}}::{{CppType}}({{CppType}}&& rhs)
+                : {% for member in type.members %}
+                {%- set memberName = member.name.camelCase() -%}
+                {{memberName}}(rhs.{{memberName}}){% if not loop.last %},{{"\n            "}}{% endif %}
+            {% endfor -%}
+            {
+                Reset(rhs);
+            }
+
+            {{CppType}}& {{CppType}}::operator=({{CppType}}&& rhs) {
+                if (&rhs == this) {
+                    return *this;
+                }
+                this->~{{CppType}}();
+                {% for member in type.members %}
+                    detail::AsNonConstReference(this->{{member.name.camelCase()}}) = std::move(rhs.{{member.name.camelCase()}});
+                {% endfor %}
+                Reset(rhs);
+                return *this;
+            }
+
+             // static
+            void {{CppType}}::Reset({{CppType}}& value) {
+                {{CppType}} defaultValue{};
+                {% for member in type.members %}
+                    detail::AsNonConstReference(value.{{member.name.camelCase()}}) = defaultValue.{{member.name.camelCase()}};
+                {% endfor %}
+            }
+        {% endif %}
+
+        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
+        {% if type.extensible %}
+            static_assert(offsetof({{CppType}}, nextInChain) == offsetof({{CType}}, nextInChain),
+                    "offsetof mismatch for {{CppType}}::nextInChain");
+        {% endif %}
+        {% for member in type.members %}
+            {% set memberName = member.name.camelCase() %}
+            static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
+                    "offsetof mismatch for {{CppType}}::{{memberName}}");
+        {% endfor %}
+
+    {% endfor %}
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+
+    {% for type in by_category["object"] %}
+        {% set CppType = as_cppType(type.name) %}
+        {% set CType = as_cType(type.name) %}
+        // {{CppType}} implementation
+
+        {% for method in type.methods %}
+            {{render_cpp_method_declaration(type, method, dfn=True)}} {
+                {% for arg in method.arguments if arg.type.has_free_members_function and arg.annotation == '*' %}
+                    *{{as_varName(arg.name)}} = {{as_cppType(arg.type.name)}}();
+                {% endfor %}
+                {% if method.return_type.name.concatcase() == "void" %}
+                    {{render_cpp_to_c_method_call(type, method)}};
+                {% else %}
+                    auto result = {{render_cpp_to_c_method_call(type, method)}};
+                    return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
+                {% endif %}
+            }
+        {% endfor %}
+        void {{CppType}}::{{c_prefix}}Reference({{CType}} handle) {
+            if (handle != nullptr) {
+                {{as_cMethod(type.name, Name("reference"))}}(handle);
+            }
+        }
+        void {{CppType}}::{{c_prefix}}Release({{CType}} handle) {
+            if (handle != nullptr) {
+                {{as_cMethod(type.name, Name("release"))}}(handle);
+            }
+        }
+        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
+
+    {% endfor %}
+
 }  // namespace {{metadata.namespace}}
 
 namespace wgpu {
