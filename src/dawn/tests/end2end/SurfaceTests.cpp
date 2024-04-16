@@ -51,6 +51,11 @@ class SurfaceTests : public DawnTest {
         DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
+        // TODO(crbug.com/dawn/2531): Failing on newer Linux/Intel driver version.
+        // However, IsIntel() and IsMesa() don't work with the null backend.
+        DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNull());
+        DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsIntel() && IsMesa("23.2"));
+
         glfwSetErrorCallback([](int code, const char* message) {
             ErrorLog() << "GLFW error " << code << " " << message;
         });
@@ -281,9 +286,6 @@ TEST_P(SurfaceTests, ResizingSurfaceOnly) {
 TEST_P(SurfaceTests, ResizingWindowOnly) {
     // TODO(crbug.com/1503912): Failing new ValidateImageAcquireWait in Vulkan Validation Layer.
     DAWN_SUPPRESS_TEST_IF(IsBackendValidationEnabled() && IsWindows() && IsVulkan() && IsIntel());
-
-    // TODO(crbug.com/dawn/2531): Failing on newer Linux/Intel driver version.
-    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNull() && IsIntel() && IsMesa("23.2"));
 
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
