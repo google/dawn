@@ -122,6 +122,13 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
 };
 
 void MatrixVectorMultiplyPerf::SetUp() {
+    // TODO(crbug.com/dawn/2508): Fails due to an OS/driver upgrade on Linux/Intel.
+    // Can't specify IsIntel() since this fails with llvmpipe, where IsIntel() is
+    // false. This must also be checked before SetUp() since the crash happens in
+    // SetUp() itself.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsMesa("23.2.1") &&
+                          GetParam().mStoreType == StoreType::F32);
+
     DawnPerfTestWithParams<MatrixVectorMultiplyParams>::SetUp();
 
     // Unoptimized variant too slow for bots.
@@ -144,10 +151,6 @@ void MatrixVectorMultiplyPerf::SetUp() {
     //      error X3004: undeclared identifier 'WaveReadLaneAt'
     // on D3D12 when using subgroups. Suppress while we figure out why FXC is used.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && GetParam().mSubgroups);
-
-    // TODO(crbug.com/dawn/2508): Fails due to an OS/driver upgrade on Linux/Intel.
-    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsIntel() && IsVulkan() && IsMesa("23.2.1") &&
-                          GetParam().mStoreType == StoreType::F32);
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.usage = wgpu::BufferUsage::Storage;
