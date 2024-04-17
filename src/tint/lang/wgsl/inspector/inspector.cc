@@ -1029,8 +1029,14 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::
 
     std::unordered_set<BindingPoint> seen = {};
 
-    auto sample_type_for_call_and_type = [](wgsl::BuiltinFn builtin, const core::type::Type* ty) {
+    auto sample_type_for_call_and_type = [](wgsl::BuiltinFn builtin, const core::type::Type* ty,
+                                            const Vector<const ast::Expression*, 8>& args) {
         if (builtin == wgsl::BuiltinFn::kTextureNumLevels) {
+            return TextureQueryType::kTextureNumLevels;
+        }
+        if (builtin == wgsl::BuiltinFn::kTextureDimensions && args.Length() > 1) {
+            // When textureDimension takes level as the input,
+            // it requires calls to textureNumLevels to clamp mip levels.
             return TextureQueryType::kTextureNumLevels;
         }
         if (builtin == wgsl::BuiltinFn::kTextureLoad) {
@@ -1095,6 +1101,7 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::
                 call->Target(),
                 [&](const sem::BuiltinFn* builtin) {
                     if (builtin->Fn() != wgsl::BuiltinFn::kTextureNumLevels &&
+                        builtin->Fn() != wgsl::BuiltinFn::kTextureDimensions &&
                         builtin->Fn() != wgsl::BuiltinFn::kTextureNumSamples &&
                         builtin->Fn() != wgsl::BuiltinFn::kTextureLoad) {
                         return;
@@ -1104,7 +1111,8 @@ std::vector<Inspector::LevelSampleInfo> Inspector::GetTextureQueries(const std::
                     auto* texture_sem = sem.GetVal(texture_expr)->RootIdentifier();
                     TINT_ASSERT(texture_sem);
 
-                    auto type = sample_type_for_call_and_type(builtin->Fn(), texture_sem->Type());
+                    auto type = sample_type_for_call_and_type(builtin->Fn(), texture_sem->Type(),
+                                                              call->Declaration()->args);
 
                     tint::Switch(
                         texture_sem,  //

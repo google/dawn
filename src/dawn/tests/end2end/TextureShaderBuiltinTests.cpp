@@ -116,11 +116,13 @@ class TextureShaderBuiltinTests : public DawnTest {
     }
 };
 
-// Note: the following tests testing textureNumLevels and textureNumSamples behavior is mainly
+// Note: the following tests for various texture method behavior is mainly
 // targeted at OpenGL/OpenGLES backend without native GLSL support for these builtins.
 // These tests should be trivial for otherbackend, and thus can be used as control case.
 
-// Test calling textureNumLevels & textureNumSamples in one shader.
+// Test calling textureNumLevels & textureNumSamples & textureDimensions in one shader.
+// Note: textureDimensions implicitly calls textureNumLevels after tint shader transform to clamp
+// mip levels.
 TEST_P(TextureShaderBuiltinTests, Basic) {
     constexpr uint32_t kLayers = 3;
     constexpr uint32_t kMipLevels = 2;
@@ -141,12 +143,10 @@ TEST_P(TextureShaderBuiltinTests, Basic) {
                                                 : wgpu::TextureViewDimension::e2D,
                           1, kMipLevelsView);
 
-    const uint32_t expected[] = {
-        kLayers,
-        kMipLevels,
-        kSampleCount,
-        kMipLevelsView,
-    };
+    const uint32_t textureWidthLevel0 = 1 << kMipLevels;
+    const uint32_t textureWidthLevel1 = textureWidthLevel0 >> 1;
+    const uint32_t expected[] = {kLayers,        kMipLevels,         kSampleCount,
+                                 kMipLevelsView, textureWidthLevel0, textureWidthLevel1};
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = sizeof(expected);
@@ -169,6 +169,8 @@ TEST_P(TextureShaderBuiltinTests, Basic) {
         dstBuf[1] = textureNumLevels(tex1);
         dstBuf[2] = textureNumSamples(tex2);
         dstBuf[3] = textureNumLevels(tex3);
+        dstBuf[4] = textureDimensions(tex1, 0).x;
+        dstBuf[5] = textureDimensions(tex1, 1).x;
         }
         )";
     // clang-format on
