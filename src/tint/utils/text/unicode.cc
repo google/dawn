@@ -388,32 +388,34 @@ std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len) {
 
     CodePoint c;
 
-    uint8_t valid = 0x80;
+    uint8_t top_bits = 0b11000000;
     switch (n) {
         // Note: n=0 (invalid) is correctly handled without a case.
         case 1:
             c = CodePoint{ptr[0]};
             break;
         case 2:
-            valid &= ptr[1];
+            top_bits &= ptr[1] ^ 0b01000000;
             c = CodePoint{(static_cast<uint32_t>(ptr[0] & 0b00011111) << 6) |
                           (static_cast<uint32_t>(ptr[1] & 0b00111111))};
             break;
         case 3:
-            valid &= ptr[1] & ptr[2];
+            top_bits &= (ptr[1] ^ 0b01000000) & (ptr[2] ^ 0b01000000);
             c = CodePoint{(static_cast<uint32_t>(ptr[0] & 0b00001111) << 12) |
                           (static_cast<uint32_t>(ptr[1] & 0b00111111) << 6) |
                           (static_cast<uint32_t>(ptr[2] & 0b00111111))};
             break;
         case 4:
-            valid &= ptr[1] & ptr[2] & ptr[3];
+            top_bits &= (ptr[1] ^ 0b01000000) & (ptr[2] ^ 0b01000000) & (ptr[3] ^ 0b01000000);
             c = CodePoint{(static_cast<uint32_t>(ptr[0] & 0b00000111) << 18) |
                           (static_cast<uint32_t>(ptr[1] & 0b00111111) << 12) |
                           (static_cast<uint32_t>(ptr[2] & 0b00111111) << 6) |
                           (static_cast<uint32_t>(ptr[3] & 0b00111111))};
             break;
     }
-    if (!valid) {
+    if (top_bits != 0b11000000) {
+        // Check that the two most significant bits of all the code units after the first code point
+        // are all [1, 0].
         n = 0;
         c = 0;
     }

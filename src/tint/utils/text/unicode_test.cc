@@ -545,12 +545,19 @@ INSTANTIATE_TEST_SUITE_P(Invalid,
                              {0xe8, 0x8f},        // 3-bytes, missing third byte
                              {0xf4, 0x8f, 0x8f},  // 4-bytes, missing fourth byte
 
-                             {0xd0, 0x7f},              // 2-bytes, second byte MSB unset
-                             {0xe8, 0x7f, 0x8f},        // 3-bytes, second byte MSB unset
-                             {0xe8, 0x8f, 0x7f},        // 3-bytes, third byte MSB unset
-                             {0xf4, 0x7f, 0x8f, 0x8f},  // 4-bytes, second byte MSB unset
-                             {0xf4, 0x8f, 0x7f, 0x8f},  // 4-bytes, third byte MSB unset
-                             {0xf4, 0x8f, 0x8f, 0x7f},  // 4-bytes, fourth byte MSB unset
+                             {0xd0, 0x7f},              // 2-bytes, second byte's MSB unset
+                             {0xe8, 0x7f, 0x8f},        // 3-bytes, second byte's MSB unset
+                             {0xe8, 0x8f, 0x7f},        // 3-bytes, third byte's MSB unset
+                             {0xf4, 0x7f, 0x8f, 0x8f},  // 4-bytes, second byte's MSB unset
+                             {0xf4, 0x8f, 0x7f, 0x8f},  // 4-bytes, third byte's MSB unset
+                             {0xf4, 0x8f, 0x8f, 0x7f},  // 4-bytes, fourth byte's MSB unset
+
+                             {0xd0, 0xff},              // 2-bytes, second byte's second-MSB set
+                             {0xe8, 0xff, 0x8f},        // 3-bytes, second byte's second-MSB set
+                             {0xe8, 0x8f, 0xff},        // 3-bytes, third byte's second-MSB set
+                             {0xf4, 0xff, 0x8f, 0x8f},  // 4-bytes, second byte's second-MSB set
+                             {0xf4, 0x8f, 0xff, 0x8f},  // 4-bytes, third byte's second-MSB set
+                             {0xf4, 0x8f, 0x8f, 0xff},  // 4-bytes, fourth byte's second-MSB set
                          }));
 
 }  // namespace utf8_tests
