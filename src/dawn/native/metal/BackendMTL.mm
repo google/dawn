@@ -497,15 +497,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
             EnableFeature(Feature::TextureCompressionBC);
         }
 #elif DAWN_PLATFORM_IS(MACOS)
-        if (@available(macOS 10.15, *)) {
-            if ([*mDevice supportsFamily:MTLGPUFamilyMac1]) {
-                EnableFeature(Feature::TextureCompressionBC);
-            }
-        } else {
-            if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
-                EnableFeature(Feature::TextureCompressionBC);
-            }
-        }
+        EnableFeature(Feature::TextureCompressionBC);
 #endif
 
 #if DAWN_PLATFORM_IS(IOS) && \
@@ -710,7 +702,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
         Apple5,
         Apple6,
         Apple7,
-        Mac1,
         Mac2,
     };
 
@@ -721,9 +712,6 @@ class PhysicalDevice : public PhysicalDeviceBase {
 #if !DAWN_PLATFORM_IS(IOS)
             if ([*mDevice supportsFamily:MTLGPUFamilyMac2]) {
                 return MTLGPUFamily::Mac2;
-            }
-            if ([*mDevice supportsFamily:MTLGPUFamilyMac1]) {
-                return MTLGPUFamily::Mac1;
             }
 #endif
             if ([*mDevice supportsFamily:MTLGPUFamilyApple7]) {
