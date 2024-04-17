@@ -372,6 +372,7 @@ dawn_test("dawn_unittests") {
     "unittests/native/DeviceAsyncTaskTests.cpp",
     "unittests/native/DeviceCreationTests.cpp",
     "unittests/native/LimitsTests.cpp",
+    "unittests/native/MemoryInstrumentationTests.cpp",
     "unittests/native/ObjectContentHasherTests.cpp",
     "unittests/native/StreamTests.cpp",
     "unittests/validation/BindGroupValidationTests.cpp",

@@ -114,6 +114,8 @@ class BufferBase : public SharedResource {
     void* GetMappedRange(size_t offset, size_t size, bool writable = true);
     MaybeError Unmap();
 
+    void DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const;
+
     // Dawn API
     void APIMapAsync(wgpu::MapMode mode,
                      size_t offset,

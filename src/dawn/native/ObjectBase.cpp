@@ -59,27 +59,23 @@ DeviceBase* ObjectBase::GetDevice() const {
 }
 
 void ApiObjectList::Track(ApiObjectBase* object) {
-    if (mMarkedDestroyed) {
+    if (mMarkedDestroyed.load(std::memory_order_acquire)) {
         object->DestroyImpl();
         return;
     }
-    std::lock_guard<std::mutex> lock(mMutex);
-    mObjects.Prepend(object);
+    mObjects.Use([&object](auto lockedObjects) { lockedObjects->Prepend(object); });
 }
 
 bool ApiObjectList::Untrack(ApiObjectBase* object) {
-    std::lock_guard<std::mutex> lock(mMutex);
-    return object->RemoveFromList();
+    return mObjects.Use([&object](auto lockedObjects) { return object->RemoveFromList(); });
 }
 
 void ApiObjectList::Destroy() {
     LinkedList<ApiObjectBase> objects;
-    {
-        std::lock_guard<std::mutex> lock(mMutex);
-        mMarkedDestroyed = true;
-        mObjects.MoveInto(&objects);
-    }
-
+    mObjects.Use([&objects, this](auto lockedObjects) {
+        mMarkedDestroyed.store(true, std::memory_order_release);
+        lockedObjects->MoveInto(&objects);
+    });
     while (!objects.empty()) {
         auto* head = objects.head();
         bool removed = head->RemoveFromList();

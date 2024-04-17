@@ -33,10 +33,13 @@ namespace dawn::native {
 
 using ::testing::Return;
 
-BufferMock::BufferMock(DeviceMock* device, const UnpackedPtr<BufferDescriptor>& descriptor)
+BufferMock::BufferMock(DeviceMock* device,
+                       const UnpackedPtr<BufferDescriptor>& descriptor,
+                       std::optional<uint64_t> allocatedSize)
     : BufferBase(device, descriptor) {
-    mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[GetSize()]);
-    mAllocatedSize = GetSize();
+    mAllocatedSize = allocatedSize.value_or(GetSize());
+    DAWN_ASSERT(mAllocatedSize >= GetSize());
+    mBackingData = std::unique_ptr<uint8_t[]>(new uint8_t[mAllocatedSize]);
 
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->BufferBase::DestroyImpl(); });
     ON_CALL(*this, GetMappedPointer).WillByDefault(Return(mBackingData.get()));
@@ -45,8 +48,10 @@ BufferMock::BufferMock(DeviceMock* device, const UnpackedPtr<BufferDescriptor>& 
     });
 }
 
-BufferMock::BufferMock(DeviceMock* device, const BufferDescriptor* descriptor)
-    : BufferMock(device, Unpack(descriptor)) {}
+BufferMock::BufferMock(DeviceMock* device,
+                       const BufferDescriptor* descriptor,
+                       std::optional<uint64_t> allocatedSize)
+    : BufferMock(device, Unpack(descriptor), allocatedSize) {}
 
 BufferMock::~BufferMock() = default;
 

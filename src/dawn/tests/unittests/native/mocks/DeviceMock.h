@@ -45,6 +45,7 @@ class DeviceMock : public DeviceBase {
   public:
     // Exposes some protected functions for testing purposes.
     using DeviceBase::DestroyObjects;
+    using DeviceBase::ForceEnableFeatureForTesting;
     using DeviceBase::ForceSetToggleForTesting;
 
     // TODO(lokokung): Use real DeviceBase constructor instead of mock specific one.

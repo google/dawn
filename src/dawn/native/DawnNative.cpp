@@ -42,6 +42,11 @@
 
 namespace dawn::native {
 
+const char MemoryDump::kNameSize[] = "size";
+const char MemoryDump::kNameObjectCount[] = "object_count";
+const char MemoryDump::kUnitsBytes[] = "bytes";
+const char MemoryDump::kUnitsObjects[] = "objects";
+
 const DawnProcTable& GetProcsAutogen();
 
 const DawnProcTable& GetProcs() {
@@ -301,6 +306,10 @@ const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature) {
         return nullptr;
     }
     return &kFeatureNameAndInfoList[FromAPI(feature)];
+}
+
+void DumpMemoryStatistics(WGPUDevice device, MemoryDump* dump) {
+    FromAPI(device)->DumpMemoryStatistics(dump);
 }
 
 }  // namespace dawn::native

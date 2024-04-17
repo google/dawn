@@ -1175,6 +1175,41 @@ bool TextureBase::IsImplicitMSAARenderTextureViewSupported() const {
     return (GetUsage() & wgpu::TextureUsage::TextureBinding) != 0;
 }
 
+void TextureBase::SetSharedResourceMemoryContentsForTesting(
+    Ref<SharedResourceMemoryContents> contents) {
+    mSharedResourceMemoryContents = std::move(contents);
+}
+
+void TextureBase::DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const {
+    // Do not emit for destroyed textures or textures that wrap external shared texture memory.
+    if (!IsAlive() || GetSharedResourceMemoryContents() != nullptr) {
+        return;
+    }
+    std::string name = absl::StrFormat("%s/texture_%p", prefix, static_cast<const void*>(this));
+    dump->AddScalar(name.c_str(), MemoryDump::kNameSize, MemoryDump::kUnitsBytes,
+                    ComputeEstimatedByteSize());
+    dump->AddString(name.c_str(), "label", GetLabel());
+    dump->AddString(name.c_str(), "dimensions", GetSizeLabel());
+    dump->AddString(name.c_str(), "format", absl::StrFormat("%s", GetFormat().format));
+}
+
+uint64_t TextureBase::ComputeEstimatedByteSize() const {
+    DAWN_ASSERT(!IsError());
+    uint64_t byteSize = 0;
+    for (Aspect aspect : IterateEnumMask(SelectFormatAspects(*mFormat, wgpu::TextureAspect::All))) {
+        const AspectInfo& info = mFormat->GetAspectInfo(aspect);
+        for (uint32_t i = 0; i < mMipLevelCount; i++) {
+            Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(i, aspect);
+            byteSize += (mipSize.width / info.block.width) * (mipSize.height / info.block.height) *
+                        info.block.byteSize * mSampleCount;
+        }
+    }
+    if (mDimension == wgpu::TextureDimension::e2D) {
+        byteSize *= mBaseSize.depthOrArrayLayers;
+    }
+    return byteSize;
+}
+
 void TextureBase::APIDestroy() {
     Destroy();
 }

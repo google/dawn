@@ -153,6 +153,8 @@ class TextureBase : public SharedResource {
 
     bool IsImplicitMSAARenderTextureViewSupported() const;
 
+    void DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const;
+
     // Dawn API
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
     TextureViewBase* APICreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
@@ -172,6 +174,7 @@ class TextureBase : public SharedResource {
 
     void DestroyImpl() override;
     void AddInternalUsage(wgpu::TextureUsage usage);
+    void SetSharedResourceMemoryContentsForTesting(Ref<SharedResourceMemoryContents> contents);
 
   private:
     struct TextureState {
@@ -186,6 +189,8 @@ class TextureBase : public SharedResource {
     TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, ObjectBase::ErrorTag tag);
 
     std::string GetSizeLabel() const;
+
+    uint64_t ComputeEstimatedByteSize() const;
 
     wgpu::TextureDimension mDimension;
     wgpu::TextureViewDimension

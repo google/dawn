@@ -41,6 +41,8 @@ class TextureMock : public TextureBase {
     TextureMock(DeviceMock* device, const TextureDescriptor* descriptor);
     ~TextureMock() override;
 
+    using TextureBase::SetSharedResourceMemoryContentsForTesting;
+
     MOCK_METHOD(void, DestroyImpl, (), (override));
 };
 

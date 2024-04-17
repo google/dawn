@@ -892,4 +892,16 @@ bool BufferBase::IsFullBufferRange(uint64_t offset, uint64_t size) const {
     return offset == 0 && size == GetSize();
 }
 
+void BufferBase::DumpMemoryStatistics(MemoryDump* dump, const char* prefix) const {
+    // Do not emit for destroyed buffers.
+    if (!IsAlive()) {
+        return;
+    }
+    std::string name = absl::StrFormat("%s/buffer_%p", prefix, static_cast<const void*>(this));
+    dump->AddScalar(name.c_str(), MemoryDump::kNameSize, MemoryDump::kUnitsBytes,
+                    GetAllocatedSize());
+    dump->AddString(name.c_str(), "label", GetLabel());
+    dump->AddString(name.c_str(), "usage", absl::StrFormat("%s", GetUsage()));
+}
+
 }  // namespace dawn::native
