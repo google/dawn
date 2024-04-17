@@ -47,10 +47,6 @@ add_executable(CppHelloTriangle "CppHelloTriangle.cpp")
 common_compile_options(CppHelloTriangle)
 target_link_libraries(CppHelloTriangle dawn_sample_utils)
 
-add_executable(CHelloTriangle "CHelloTriangle.cpp")
-common_compile_options(CHelloTriangle)
-target_link_libraries(CHelloTriangle dawn_sample_utils)
-
 add_executable(ComputeBoids "ComputeBoids.cpp")
 common_compile_options(ComputeBoids)
 target_link_libraries(ComputeBoids dawn_sample_utils)

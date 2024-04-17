@@ -30,7 +30,6 @@ import("../../../scripts/dawn_overrides_with_defaults.gni")
 group("samples") {
   deps = [
     ":Animometer",
-    ":CHelloTriangle",
     ":ComputeBoids",
     ":CppHelloTriangle",
     ":DawnInfo",
@@ -71,10 +70,6 @@ template("sample") {
 
 sample("CppHelloTriangle") {
   sources = [ "CppHelloTriangle.cpp" ]
-}
-
-sample("CHelloTriangle") {
-  sources = [ "CHelloTriangle.cpp" ]
 }
 
 sample("ComputeBoids") {
