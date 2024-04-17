@@ -48,7 +48,7 @@ template("dawn_lpm_template") {
     deps = [
       ":dawn_lpm_proto",
       ":dawn_lpmfuzz_cpp",
-      "${dawn_root}/src/dawn:cpp",
+      "${dawn_root}/include/dawn:cpp_headers",
       "${dawn_root}/src/dawn:proc",
       "${dawn_root}/src/dawn/common",
       "${dawn_root}/src/dawn/native:static",

@@ -40,7 +40,7 @@ if (dawn_supports_glfw_for_windowing) {
 
     sources = [ "utils.cpp" ]
     deps = [
-      "${dawn_root}/src/dawn:cpp",
+      "${dawn_root}/include/dawn:cpp_headers",
       "${dawn_root}/src/dawn:proc",
       "${dawn_root}/src/dawn/common",
     ]

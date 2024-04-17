@@ -39,7 +39,7 @@ if (dawn_has_fuzzers) {
       "DawnWireServerFuzzer.h",
     ]
     public_deps = [
-      "${dawn_root}/src/dawn:cpp",
+      "${dawn_root}/include/dawn:cpp_headers",
       "${dawn_root}/src/dawn:proc",
       "${dawn_root}/src/dawn/common",
       "${dawn_root}/src/dawn/native:static",

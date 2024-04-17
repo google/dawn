@@ -287,7 +287,7 @@ dawn_test("dawn_unittests") {
     ":native_mocks_sources",
     ":partition_alloc_support",
     ":platform_mocks_sources",
-    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:sources",
@@ -505,7 +505,7 @@ source_set("test_infra_sources") {
 
   deps = [
     ":partition_alloc_support",
-    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:sources",
@@ -564,7 +564,7 @@ source_set("end2end_tests_sources") {
   deps = [
     ":platform_mocks_sources",
     ":test_infra_sources",
-    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/native:headers",
@@ -746,7 +746,7 @@ source_set("white_box_tests_sources") {
 
   deps = [
     ":test_infra_sources",
-    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
@@ -882,7 +882,7 @@ dawn_test("dawn_end2end_tests") {
 dawn_test("dawn_perf_tests") {
   deps = [
     ":test_infra_sources",
-    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/include/dawn:cpp_headers",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
