@@ -31,6 +31,7 @@
 #include <cstdlib>
 #include <limits>
 #include <new>
+#include "dawn/common/AlignedAlloc.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
 
@@ -62,7 +63,7 @@ SlabAllocatorImpl::SentinelSlab::~SentinelSlab() {
         DAWN_ASSERT(slab->blocksInUse == 0);
         char* allocation = slab->allocation;
         slab->~Slab();  // Placement delete.
-        delete[] allocation;
+        AlignedFree(allocation);
     }
 }
 
@@ -79,12 +80,7 @@ SlabAllocatorImpl::SlabAllocatorImpl(Index blocksPerSlab,
       mIndexLinkNodeOffset(Align(objectSize, alignof(IndexLinkNode))),
       mBlockStride(Align(mIndexLinkNodeOffset + u32_sizeof<IndexLinkNode>, objectAlignment)),
       mBlocksPerSlab(blocksPerSlab),
-      mTotalAllocationSize(
-          // required allocation size
-          static_cast<size_t>(mSlabBlocksOffset) + mBlocksPerSlab * mBlockStride +
-          // Pad the allocation size by mAllocationAlignment so that the aligned allocation still
-          // fulfills the required size.
-          mAllocationAlignment) {
+      mTotalAllocationSize(static_cast<size_t>(mSlabBlocksOffset) + mBlocksPerSlab * mBlockStride) {
     DAWN_ASSERT(IsPowerOfTwo(mAllocationAlignment));
 }
 
@@ -232,10 +228,7 @@ void SlabAllocatorImpl::GetNewSlab() {
         return;
     }
 
-    // TODO(crbug.com/dawn/824): Use aligned_alloc when possible. It should be available with
-    // C++17 but on macOS it also requires macOS 10.15 to work.
-    char* allocation = new char[mTotalAllocationSize];
-    char* alignedPtr = AlignPtr(allocation, mAllocationAlignment);
+    char* alignedPtr = static_cast<char*>(AlignedAlloc(mTotalAllocationSize, mAllocationAlignment));
 
     char* dataStart = alignedPtr + mSlabBlocksOffset;
 
@@ -247,7 +240,7 @@ void SlabAllocatorImpl::GetNewSlab() {
     IndexLinkNode* lastNode = OffsetFrom(node, mBlocksPerSlab - 1);
     lastNode->nextIndex = kInvalidIndex;
 
-    mAvailableSlabs.Prepend(new (alignedPtr) Slab(allocation, node));
+    mAvailableSlabs.Prepend(new (alignedPtr) Slab(alignedPtr, node));
 }
 
 }  // namespace dawn

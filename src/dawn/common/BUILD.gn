@@ -239,6 +239,8 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
     is_ios) {
   static_library("common") {
     sources = [
+      "AlignedAlloc.cpp",
+      "AlignedAlloc.h",
       "Alloc.h",
       "Assert.cpp",
       "Assert.h",
