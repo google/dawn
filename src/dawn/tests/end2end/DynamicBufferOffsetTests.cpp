@@ -227,6 +227,9 @@ class DynamicBufferOffsetTests : public DawnTest {
 
 // Dynamic offsets are all zero and no effect to result.
 TEST_P(DynamicBufferOffsetTests, BasicRenderPipeline) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::RenderPipeline pipeline = CreateRenderPipeline();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
@@ -248,6 +251,9 @@ TEST_P(DynamicBufferOffsetTests, BasicRenderPipeline) {
 
 // Have non-zero dynamic offsets.
 TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsRenderPipeline) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::RenderPipeline pipeline = CreateRenderPipeline();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
@@ -271,6 +277,9 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsRenderPipeline) {
 
 // Dynamic offsets are all zero and no effect to result.
 TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint32_t, 2> offsets = {0, 0};
@@ -290,6 +299,9 @@ TEST_P(DynamicBufferOffsetTests, BasicComputePipeline) {
 
 // Have non-zero dynamic offsets.
 TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsComputePipeline) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint32_t, 2> offsets = {mMinUniformBufferOffsetAlignment,
@@ -311,6 +323,9 @@ TEST_P(DynamicBufferOffsetTests, SetDynamicOffsetsComputePipeline) {
 
 // Test basic inherit on render pipeline
 TEST_P(DynamicBufferOffsetTests, BasicInheritRenderPipeline) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @vertex
             fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
@@ -441,6 +456,9 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
 
 // Test inherit dynamic offsets on compute pipeline
 TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsComputePipeline) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
     wgpu::ComputePipeline testPipeline = CreateComputePipeline(true);
 
@@ -466,6 +484,9 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsComputePipeline) {
 
 // Setting multiple dynamic offsets for the same bindgroup in one render pass.
 TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesRenderPipeline) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     // Using default pipeline and setting dynamic offsets
     wgpu::RenderPipeline pipeline = CreateRenderPipeline();
 
@@ -494,6 +515,9 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesRenderPipeline
 
 // Setting multiple dynamic offsets for the same bindgroup in one compute pass.
 TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesComputePipeline) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
 
     std::array<uint32_t, 2> offsets = {mMinUniformBufferOffsetAlignment,

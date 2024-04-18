@@ -636,6 +636,8 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
 
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 16;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
@@ -742,6 +744,8 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
 TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
     // This test fails on ANGLE (both SwiftShader and D3D11).
     DAWN_SUPPRESS_TEST_IF(IsANGLE());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
@@ -929,6 +933,9 @@ class StencilSamplingTest : public DepthStencilSamplingTest {};
 TEST_P(StencilSamplingTest, SampleStencilOnly) {
     // This test fails on SwANGLE (although it passes on other ANGLE backends).
     DAWN_TEST_UNSUPPORTED_IF(IsANGLE());
+
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 

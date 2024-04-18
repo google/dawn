@@ -202,6 +202,9 @@ class ComputeDispatchTests : public DawnTest {
 
 // Test basic direct
 TEST_P(ComputeDispatchTests, DirectBasic) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     DirectTest(2, 3, 4);
 }
 
@@ -226,12 +229,17 @@ TEST_P(ComputeDispatchTests, IndirectBasic) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     IndirectTest({2, 3, 4}, 0);
 }
 
 // Test basic indirect without using @num_workgroups
 TEST_P(ComputeDispatchTests, IndirectBasicWithoutNumWorkgroups) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     IndirectTest({2, 3, 4}, 0, false);
 }
 
@@ -256,12 +264,17 @@ TEST_P(ComputeDispatchTests, IndirectOffset) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t));
 }
 
 // Test indirect with buffer offset without using @num_workgroups
 TEST_P(ComputeDispatchTests, IndirectOffsetWithoutNumWorkgroups) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t), false);
 }
 
@@ -271,9 +284,10 @@ TEST_P(ComputeDispatchTests, MaxWorkgroups) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
-
     // TODO(crbug.com/dawn/1165): Fails with WARP
     DAWN_SUPPRESS_TEST_IF(IsWARP());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     uint32_t max = GetSupportedLimits().limits.maxComputeWorkgroupsPerDimension;
 

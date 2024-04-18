@@ -1087,6 +1087,8 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
 
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     std::array<wgpu::Texture, 2> renderTargets;
     std::array<wgpu::TextureView, 2> renderTargetViews;

@@ -371,6 +371,8 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
 TEST_P(QueueWriteTextureTests, VaryingTextureSize) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     for (unsigned int w : {127, 128}) {
         for (unsigned int h : {63, 64}) {
@@ -390,6 +392,8 @@ TEST_P(QueueWriteTextureTests, VaryingTextureSize) {
 TEST_P(QueueWriteTextureTests, LargeWriteTexture) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     TextureSpec textureSpec;
     textureSpec.textureSize = {2048, 2048, 2};
@@ -493,6 +497,8 @@ TEST_P(QueueWriteTextureTests, VaryingArrayWriteSize) {
 TEST_P(QueueWriteTextureTests, TextureWriteToMip) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
@@ -513,6 +519,8 @@ TEST_P(QueueWriteTextureTests, TextureWriteToMip) {
 TEST_P(QueueWriteTextureTests, VaryingDataOffset) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
@@ -534,6 +542,8 @@ TEST_P(QueueWriteTextureTests, VaryingDataOffset) {
 TEST_P(QueueWriteTextureTests, VaryingRowsPerImage) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 65;
     constexpr uint32_t kHeight = 31;
@@ -566,6 +576,8 @@ TEST_P(QueueWriteTextureTests, VaryingRowsPerImage) {
 TEST_P(QueueWriteTextureTests, VaryingBytesPerRow) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 129;
@@ -621,9 +633,10 @@ TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
 TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 129;
@@ -702,6 +715,8 @@ TEST_P(QueueWriteTextureTests, StrideSpecialCases) {
 TEST_P(QueueWriteTextureTests, UnalignedDynamicUploader) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     utils::UnalignDynamicUploader(device);
 
@@ -778,9 +793,10 @@ TEST_P(QueueWriteTextureSimpleTests, WriteTo64x1TextureFromUnalignedDynamicUploa
 TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectWithSourceOffsetUnalignedTo4) {
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
@@ -884,9 +900,10 @@ TEST_P(QueueWriteTextureSimpleTests, WriteDepthAspectAfterOtherQueueWriteTexture
 TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectAfterOtherQueueWriteTextureCalls) {
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;

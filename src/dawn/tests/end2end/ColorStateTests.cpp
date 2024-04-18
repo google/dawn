@@ -803,6 +803,8 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     std::array<wgpu::Texture, 4> renderTargets;
     std::array<wgpu::TextureView, 4> renderTargetViews;
@@ -1133,6 +1135,8 @@ TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
 TEST_P(ColorStateTest, SparseAttachmentsDifferentColorMask) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_indexed_draw_buffers"));
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Outputs {

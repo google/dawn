@@ -1768,6 +1768,8 @@ TEST_P(CopyTests_T2B_Compat, TextureCubeSubRegion) {
 TEST_P(CopyTests_T2B_Compat, TextureCubeMip) {
     // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 32;

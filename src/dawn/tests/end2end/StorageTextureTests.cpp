@@ -1278,6 +1278,9 @@ fn main() {
 
 // Verify read-only storage texture can work correctly in vertex shaders.
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInVertexShader) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
     wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(

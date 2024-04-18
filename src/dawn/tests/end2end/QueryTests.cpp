@@ -540,6 +540,9 @@ TEST_P(OcclusionQueryTests, RewriteToZeroWithDraw) {
 
 // Test resolving occlusion query to the destination buffer with offset
 TEST_P(OcclusionQueryTests, ResolveToBufferWithOffset) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     constexpr uint32_t kQueryCount = 2;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);

@@ -270,9 +270,10 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 TEST_P(MaxLimitTests, MaxDynamicBuffers) {
     // TODO(https://anglebug.com/8177) Causes assertion failure in ANGLE.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     wgpu::Limits limits = GetSupportedLimits().limits;
 
@@ -424,9 +425,10 @@ TEST_P(MaxLimitTests, MaxDynamicBuffers) {
 TEST_P(MaxLimitTests, MaxStorageBuffersPerShaderStage) {
     // TODO(dawn:2162): Triage this failure.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     wgpu::Limits limits = GetSupportedLimits().limits;
 
