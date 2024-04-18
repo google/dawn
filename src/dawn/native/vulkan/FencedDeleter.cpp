@@ -45,6 +45,7 @@ FencedDeleter::~FencedDeleter() {
     DAWN_ASSERT(mPipelineLayoutsToDelete.Empty());
     DAWN_ASSERT(mQueryPoolsToDelete.Empty());
     DAWN_ASSERT(mRenderPassesToDelete.Empty());
+    DAWN_ASSERT(mSamplerYcbcrConversionsToDelete.Empty());
     DAWN_ASSERT(mSamplersToDelete.Empty());
     DAWN_ASSERT(mSemaphoresToDelete.Empty());
     DAWN_ASSERT(mShaderModulesToDelete.Empty());
@@ -90,6 +91,11 @@ void FencedDeleter::DeleteWhenUnused(VkQueryPool querypool) {
 
 void FencedDeleter::DeleteWhenUnused(VkRenderPass renderPass) {
     mRenderPassesToDelete.Enqueue(renderPass, mDevice->GetQueue()->GetPendingCommandSerial());
+}
+
+void FencedDeleter::DeleteWhenUnused(VkSamplerYcbcrConversion samplerYcbcrConversion) {
+    mSamplerYcbcrConversionsToDelete.Enqueue(samplerYcbcrConversion,
+                                             mDevice->GetQueue()->GetPendingCommandSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkSampler sampler) {
@@ -186,6 +192,12 @@ void FencedDeleter::Tick(ExecutionSerial completedSerial) {
         mDevice->fn.DestroyQueryPool(vkDevice, pool, nullptr);
     }
     mQueryPoolsToDelete.ClearUpTo(completedSerial);
+
+    for (VkSamplerYcbcrConversion samplerYcbcrConversion :
+         mSamplerYcbcrConversionsToDelete.IterateUpTo(completedSerial)) {
+        mDevice->fn.DestroySamplerYcbcrConversion(vkDevice, samplerYcbcrConversion, nullptr);
+    }
+    mSamplerYcbcrConversionsToDelete.ClearUpTo(completedSerial);
 
     for (VkSampler sampler : mSamplersToDelete.IterateUpTo(completedSerial)) {
         mDevice->fn.DestroySampler(vkDevice, sampler, nullptr);

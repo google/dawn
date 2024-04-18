@@ -391,6 +391,11 @@ MaybeError VulkanFunctions::LoadDeviceProcs(VkDevice device, const VulkanDeviceI
         GET_DEVICE_PROC(GetImageSparseMemoryRequirements2);
     }
 
+    if (deviceInfo.HasExt(DeviceExt::SamplerYCbCrConversion)) {
+        GET_DEVICE_PROC(CreateSamplerYcbcrConversion);
+        GET_DEVICE_PROC(DestroySamplerYcbcrConversion);
+    }
+
 #if VK_USE_PLATFORM_FUCHSIA
     if (deviceInfo.HasExt(DeviceExt::ExternalMemoryZirconHandle)) {
         GET_DEVICE_PROC(GetMemoryZirconHandleFUCHSIA);

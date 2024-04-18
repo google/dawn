@@ -324,6 +324,8 @@ struct VulkanFunctions {
     VkFn<PFN_vkUnmapMemory> UnmapMemory = nullptr;
     VkFn<PFN_vkUpdateDescriptorSets> UpdateDescriptorSets = nullptr;
     VkFn<PFN_vkWaitForFences> WaitForFences = nullptr;
+    VkFn<PFN_vkCreateSamplerYcbcrConversion> CreateSamplerYcbcrConversion = nullptr;
+    VkFn<PFN_vkDestroySamplerYcbcrConversion> DestroySamplerYcbcrConversion = nullptr;
 
     // VK_KHR_external_memory_fd
     VkFn<PFN_vkGetMemoryFdKHR> GetMemoryFdKHR = nullptr;

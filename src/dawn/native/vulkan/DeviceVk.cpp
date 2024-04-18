@@ -513,6 +513,14 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.shaderSubgroupUniformControlFlowFeatures);
     }
 
+    if (HasFeature(Feature::YCbCrVulkanSamplers) &&
+        mDeviceInfo.HasExt(DeviceExt::SamplerYCbCrConversion) &&
+        mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer)) {
+        usedKnobs.samplerYCbCrConversionFeatures.samplerYcbcrConversion = VK_TRUE;
+        featuresChain.Add(&usedKnobs.samplerYCbCrConversionFeatures,
+                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES);
+    }
+
     // Find a universal queue family
     {
         // Note that GRAPHICS and COMPUTE imply TRANSFER so we don't need to check for it.

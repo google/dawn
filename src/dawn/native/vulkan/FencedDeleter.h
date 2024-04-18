@@ -52,6 +52,7 @@ class FencedDeleter {
     void DeleteWhenUnused(VkRenderPass renderPass);
     void DeleteWhenUnused(VkPipeline pipeline);
     void DeleteWhenUnused(VkQueryPool querypool);
+    void DeleteWhenUnused(VkSamplerYcbcrConversion samplerYcbcrConversion);
     void DeleteWhenUnused(VkSampler sampler);
     void DeleteWhenUnused(VkSemaphore semaphore);
     void DeleteWhenUnused(VkShaderModule module);
@@ -72,6 +73,7 @@ class FencedDeleter {
     SerialQueue<ExecutionSerial, VkPipelineLayout> mPipelineLayoutsToDelete;
     SerialQueue<ExecutionSerial, VkQueryPool> mQueryPoolsToDelete;
     SerialQueue<ExecutionSerial, VkRenderPass> mRenderPassesToDelete;
+    SerialQueue<ExecutionSerial, VkSamplerYcbcrConversion> mSamplerYcbcrConversionsToDelete;
     SerialQueue<ExecutionSerial, VkSampler> mSamplersToDelete;
     SerialQueue<ExecutionSerial, VkSemaphore> mSemaphoresToDelete;
     SerialQueue<ExecutionSerial, VkShaderModule> mShaderModulesToDelete;

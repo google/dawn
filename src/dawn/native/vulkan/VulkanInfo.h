@@ -70,6 +70,7 @@ struct VulkanDeviceKnobs {
     VkPhysicalDeviceRobustness2FeaturesEXT robustness2Features;
     VkPhysicalDeviceShaderSubgroupUniformControlFlowFeaturesKHR
         shaderSubgroupUniformControlFlowFeatures;
+    VkPhysicalDeviceSamplerYcbcrConversionFeatures samplerYCbCrConversionFeatures;
 
     bool HasExt(DeviceExt ext) const;
     DeviceExtSet extensions;
