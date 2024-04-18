@@ -540,15 +540,15 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
         std::min(vkLimits.maxVertexInputBindingStride - 1, vkLimits.maxVertexInputAttributeOffset) +
         1;
 
-    if (vkLimits.maxVertexOutputComponents < baseLimits.v1.maxInterStageShaderComponents ||
-        vkLimits.maxFragmentInputComponents < baseLimits.v1.maxInterStageShaderComponents) {
+    // Reserve 4 components for the SPIR-V builtin `position`. WebGPU SPEC requires the minimum
+    // value of `maxInterStageShaderVariables` be 16. According to Vulkan SPEC, "the Location value
+    // specifies an interface slot comprised of a 32-bit four-component vector conveyed between
+    // stages". So on any WebGPU Vulkan backend `maxVertexOutputComponents` must be no less than
+    // 68 = (16 * 4 + 4).
+    if (vkLimits.maxVertexOutputComponents < baseLimits.v1.maxInterStageShaderVariables * 4 + 4 ||
+        vkLimits.maxFragmentInputComponents < baseLimits.v1.maxInterStageShaderVariables * 4 + 4) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxInterStageShaderComponents");
     }
-    limits->v1.maxInterStageShaderComponents =
-        std::min(vkLimits.maxVertexOutputComponents, vkLimits.maxFragmentInputComponents);
-
-    // Reserve 4 components for the SPIR-V builtin `position`.
-    // See the discussions in https://github.com/gpuweb/gpuweb/issues/1962 for more details.
     limits->v1.maxInterStageShaderComponents =
         std::min(vkLimits.maxVertexOutputComponents, vkLimits.maxFragmentInputComponents) - 4;
     limits->v1.maxInterStageShaderVariables = limits->v1.maxInterStageShaderComponents / 4;

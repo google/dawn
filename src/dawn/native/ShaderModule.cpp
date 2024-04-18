@@ -680,7 +680,6 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         }
 
         // Vertex ouput (inter-stage variables) reflection.
-        uint32_t totalInterStageShaderComponents = 0;
         for (const auto& outputVar : entryPoint.output_variables) {
             EntryPointMetadata::InterStageVariableInfo variable;
             variable.name = outputVar.variable_name;
@@ -693,7 +692,6 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             DAWN_TRY_ASSIGN(variable.interpolationSampling,
                             TintInterpolationSamplingToInterpolationSamplingType(
                                 outputVar.interpolation_sampling));
-            totalInterStageShaderComponents += variable.componentCount;
 
             uint32_t location = outputVar.attributes.location.value();
             if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
@@ -708,10 +706,10 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         }
 
         // Other vertex metadata.
-        metadata->totalInterStageShaderComponents = totalInterStageShaderComponents;
-        DelayedInvalidIf(totalInterStageShaderComponents > maxInterStageShaderComponents,
+        metadata->totalInterStageShaderComponents = 4 * entryPoint.output_variables.size();
+        DelayedInvalidIf(metadata->totalInterStageShaderComponents > maxInterStageShaderComponents,
                          "Total vertex output components count (%u) exceeds the maximum (%u).",
-                         totalInterStageShaderComponents, maxInterStageShaderComponents);
+                         metadata->totalInterStageShaderComponents, maxInterStageShaderComponents);
 
         metadata->usesVertexIndex = entryPoint.vertex_index_used;
         metadata->usesInstanceIndex = entryPoint.instance_index_used;
@@ -719,8 +717,6 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
     // Fragment shader specific reflection.
     if (metadata->stage == SingleShaderStage::Fragment) {
-        uint32_t totalInterStageShaderComponents = 0;
-
         // Fragment input (inter-stage variables) reflection.
         for (const auto& inputVar : entryPoint.input_variables) {
             // Skip over @color framebuffer fetch, it is handled below.
@@ -741,7 +737,6 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             DAWN_TRY_ASSIGN(variable.interpolationSampling,
                             TintInterpolationSamplingToInterpolationSamplingType(
                                 inputVar.interpolation_sampling));
-            totalInterStageShaderComponents += variable.componentCount;
 
             if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
                                  "Fragment input variable \"%s\" has a location (%u) that "
@@ -753,6 +748,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             metadata->usedInterStageVariables[location] = true;
             metadata->interStageVariables[location] = variable;
         }
+
+        uint32_t totalInterStageShaderComponents = 4 * entryPoint.input_variables.size();
 
         // Other fragment metadata
         if (entryPoint.front_facing_used) {

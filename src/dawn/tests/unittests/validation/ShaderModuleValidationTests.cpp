@@ -318,8 +318,8 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
     shaderModule.GetCompilationInfo(callback, nullptr);
 }
 
-// Validate the maximum location of effective inter-stage variables cannot be greater than 14
-// (kMaxInterStageShaderComponents / 4 - 1).
+// Validate the maximum location of effective inter-stage variables cannot be greater than 16
+// (kMaxInterStageShaderVariables == kMaxInterStageShaderComponents / 4).
 TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
     auto CheckTestPipeline = [&](bool success, uint32_t maximumOutputLocation,
                                  wgpu::ShaderStage failingShaderStage) {
@@ -441,15 +441,15 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
             if (lastComponentCount == 1) {
                 stream << "f32,";
             } else {
-                stream << " vec" << lastComponentCount << "<f32>,";
+                stream << " vec" << lastComponentCount << "f,";
             }
             stream << std::endl;
         }
 
         if (failingShaderStage == wgpu::ShaderStage::Vertex) {
-            stream << " @builtin(position) pos: vec4f,";
+            stream << " @builtin(position) pos: vec4f," << std::endl;
         }
-        stream << "}\n";
+        stream << "}" << std::endl;
 
         std::string ioStruct = stream.str();
 
@@ -472,37 +472,38 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
                 } else {
                     errorMatcher = "failingVertex";
                 }
-                pDesc.vertex.entryPoint = "failingVertex";
-                pDesc.vertex.module = utils::CreateShaderModule(device, (ioStruct + R"(
+
+                std::string shader = ioStruct + R"(
                     @vertex fn failingVertex() -> ShaderIO {
                         var shaderIO : ShaderIO;
                         shaderIO.pos = vec4f(0.0, 0.0, 0.0, 1.0);
                         return shaderIO;
                      }
-                )")
-                                                                            .c_str());
-                pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
                     @fragment fn main() -> @location(0) vec4f {
                         return vec4f(0.0);
-                    }
-                )");
+                    })";
+                wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader);
+
+                pDesc.vertex.entryPoint = "failingVertex";
+                pDesc.vertex.module = shaderModule;
+                pDesc.cFragment.module = shaderModule;
                 break;
             }
 
             case wgpu::ShaderStage::Fragment: {
-                errorMatcher = "failingFragment";
-                pDesc.cFragment.entryPoint = "failingFragment";
-                pDesc.cFragment.module = utils::CreateShaderModule(device, (ioStruct + R"(
-                    @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4f {
+                std::string shader = ioStruct + R"(
+                     @vertex fn main() -> @builtin(position) vec4f {
                         return vec4f(0.0);
                      }
-                )")
-                                                                               .c_str());
-                pDesc.vertex.module = utils::CreateShaderModule(device, R"(
-                    @vertex fn main() -> @builtin(position) vec4f {
+                     @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4f {
                         return vec4f(0.0);
-                    }
-                )");
+                     })";
+                wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader);
+
+                errorMatcher = "failingFragment";
+                pDesc.cFragment.entryPoint = "failingFragment";
+                pDesc.cFragment.module = shaderModule;
+                pDesc.vertex.module = shaderModule;
                 break;
             }
 
@@ -538,15 +539,22 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         CheckTestPipeline(false, kMaxInterStageShaderComponents + 1, wgpu::ShaderStage::Vertex);
     }
 
-    // Verify the total user-defined vertex output component count must be less than
-    // (kMaxInterStageShaderComponents - 1) when the primitive topology is PointList.
+    // Verify the total user-defined vertex output component count must be less than or equal to
+    // (kMaxInterStageShaderComponents - 4) when the primitive topology is PointList.
     {
         constexpr bool kUsePointListAsPrimitiveTopology = true;
         const char* kExtraBuiltins = "";
-        CheckTestPipeline(true, kMaxInterStageShaderComponents - 1, wgpu::ShaderStage::Vertex,
-                          kExtraBuiltins, kUsePointListAsPrimitiveTopology);
-        CheckTestPipeline(false, kMaxInterStageShaderComponents, wgpu::ShaderStage::Vertex,
-                          kExtraBuiltins, kUsePointListAsPrimitiveTopology);
+
+        {
+            uint32_t componentCount = kMaxInterStageShaderComponents - 4;
+            CheckTestPipeline(true, componentCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
+                              kUsePointListAsPrimitiveTopology);
+        }
+        {
+            uint32_t componentCount = kMaxInterStageShaderComponents - 3;
+            CheckTestPipeline(false, componentCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
+                              kUsePointListAsPrimitiveTopology);
+        }
     }
 
     // @builtin(position) in fragment shaders shouldn't be counted into the maximum inter-stage
@@ -556,28 +564,37 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
                           "@builtin(position) fragCoord : vec4f,");
     }
 
-    // @builtin(front_facing) should be counted into the maximum inter-stage component count.
+    // @builtin(front_facing), @builtin(sample_index) and @builtin(sample_mask) should all be
+    // counted into the maximum inter-stage component count. Then the maximum user-defined
+    // inter-stage shader components can only be (kMaxInterStageShaderComponents - 4) because each
+    // user-defined inter-stage shader variable always consumes 4 scalar components.
     {
-        CheckTestPipeline(true, kMaxInterStageShaderComponents - 1, wgpu::ShaderStage::Fragment,
-                          "@builtin(front_facing) frontFacing : bool,");
-        CheckTestPipeline(false, kMaxInterStageShaderComponents, wgpu::ShaderStage::Fragment,
-                          "@builtin(front_facing) frontFacing : bool,");
-    }
+        constexpr uint8_t kMaskFrontFacing = 1;
+        constexpr uint8_t kMaskSampleIndex = 1 << 1;
+        constexpr uint8_t kMaskSampleMask = 1 << 2;
+        for (uint8_t mask = 1; mask <= 7; ++mask) {
+            std::string builtInDeclarations = "";
+            if (mask & kMaskFrontFacing) {
+                builtInDeclarations += "@builtin(front_facing) frontFacing : bool,";
+            }
+            if (mask & kMaskSampleIndex) {
+                builtInDeclarations += "@builtin(sample_index) sampleIndex : u32,";
+            }
+            if (mask & kMaskSampleMask) {
+                builtInDeclarations += "@builtin(sample_mask) sampleMask : u32,";
+            }
 
-    // @builtin(sample_index) should be counted into the maximum inter-stage component count.
-    {
-        CheckTestPipeline(true, kMaxInterStageShaderComponents - 1, wgpu::ShaderStage::Fragment,
-                          "@builtin(sample_index) sampleIndex : u32,");
-        CheckTestPipeline(false, kMaxInterStageShaderComponents, wgpu::ShaderStage::Fragment,
-                          "@builtin(sample_index) sampleIndex : u32,");
-    }
-
-    // @builtin(sample_mask) should be counted into the maximum inter-stage component count.
-    {
-        CheckTestPipeline(true, kMaxInterStageShaderComponents - 1, wgpu::ShaderStage::Fragment,
-                          "@builtin(sample_mask) sampleMask : u32,");
-        CheckTestPipeline(false, kMaxInterStageShaderComponents, wgpu::ShaderStage::Fragment,
-                          "@builtin(sample_mask) sampleMask : u32,");
+            {
+                uint32_t componentCount = kMaxInterStageShaderComponents - 4;
+                CheckTestPipeline(true, componentCount, wgpu::ShaderStage::Fragment,
+                                  builtInDeclarations.c_str());
+            }
+            {
+                uint32_t componentCount = kMaxInterStageShaderComponents - 3;
+                CheckTestPipeline(false, componentCount, wgpu::ShaderStage::Fragment,
+                                  builtInDeclarations.c_str());
+            }
+        }
     }
 }
 

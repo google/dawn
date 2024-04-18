@@ -230,6 +230,15 @@ crbug.com/dawn/2086 webgpu:util,texture,texel_data:unorm_texel_data_in_shader:fo
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 
+# Tests on maxInterStageShaderVariables and maxInterStageShaderComponents need to be updated to
+# match the latest WebGPU SPEC
+# KEEP
+crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:default:* [ Skip ]
+crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxInterStageShaderComponents" [ Skip ]
+crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxInterStageShaderComponents" [ Skip ]
+crbug.com/dawn/2398 webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Skip ]
+crbug.com/dawn/2398 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,* [ Skip ]
+
 ### This section represents things that will require Compat validation
 ### These tests will never pass, but should be skipped in CTS once Compat
 ### validation has been added
