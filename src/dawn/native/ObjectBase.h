@@ -48,7 +48,7 @@ namespace detail {
 template <typename T>
 struct APIRefCountedTraits {
     static constexpr T* kNullValue = nullptr;
-    static void Reference(T* value) { value->APIReference(); }
+    static void AddRef(T* value) { value->APIAddRef(); }
     static void Release(T* value) { value->APIRelease(); }
 };
 

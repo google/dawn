@@ -44,7 +44,7 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
           mUserdata(callbackInfo.userdata),
           mShader(shader) {
         DAWN_ASSERT(mShader != nullptr);
-        mShader->Reference();
+        mShader->AddRef();
     }
 
     ~CompilationInfoEvent() override { mShader.ExtractAsDangling()->Release(); }

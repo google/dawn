@@ -63,7 +63,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
           mUserdata(callbackInfo.userdata),
           mBuffer(buffer) {
         DAWN_ASSERT(buffer != nullptr);
-        mBuffer->Reference();
+        mBuffer->AddRef();
     }
 
     ~MapAsyncEvent() override { mBuffer.ExtractAsDangling()->Release(); }

@@ -68,7 +68,7 @@ TEST_F(WireBasicTests, CreateThenCall) {
 TEST_F(WireBasicTests, RefCountKeptInClient) {
     WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
 
-    wgpuCommandEncoderReference(encoder);
+    wgpuCommandEncoderAddRef(encoder);
     wgpuCommandEncoderRelease(encoder);
 
     WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();

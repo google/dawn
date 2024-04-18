@@ -85,7 +85,7 @@ void WireTest::SetUp() {
     auto reservedInstance = GetWireClient()->ReserveInstance();
     instance = reservedInstance.instance;
     apiInstance = api.GetNewInstance();
-    EXPECT_CALL(api, InstanceReference(apiInstance));
+    EXPECT_CALL(api, InstanceAddRef(apiInstance));
     EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, reservedInstance.handle));
 
     // Create the adapter for testing.

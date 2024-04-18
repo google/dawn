@@ -59,7 +59,7 @@ TEST_F(WireInstanceBasicTest, ReserveAndInject) {
     wgpu::Instance instance = wgpu::Instance::Acquire(reserved.instance);
 
     WGPUInstance apiInstance = api.GetNewInstance();
-    EXPECT_CALL(api, InstanceReference(apiInstance));
+    EXPECT_CALL(api, InstanceAddRef(apiInstance));
     EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, reserved.handle));
 
     instance = nullptr;

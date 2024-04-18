@@ -176,7 +176,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
     DeviceLostEvent(const WGPUDeviceLostCallbackInfo& callbackInfo, Device* device)
         : TrackedEvent(callbackInfo.mode), mDevice(device) {
         DAWN_ASSERT(device != nullptr);
-        mDevice->Reference();
+        mDevice->AddRef();
     }
 
     ~DeviceLostEvent() override { mDevice.ExtractAsDangling()->Release(); }
@@ -448,7 +448,7 @@ WGPUQueue Device::GetQueue() {
         client->SerializeCommand(cmd);
     }
 
-    mQueue->Reference();
+    mQueue->AddRef();
     return ToAPI(mQueue);
 }
 

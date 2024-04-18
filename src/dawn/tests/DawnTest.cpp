@@ -761,7 +761,7 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
 
         WGPUAdapter cAdapter = it->Get();
         DAWN_ASSERT(cAdapter);
-        native::GetProcs().adapterReference(cAdapter);
+        native::GetProcs().adapterAddRef(cAdapter);
         callback(WGPURequestAdapterStatus_Success, cAdapter, nullptr, userdata);
     };
 

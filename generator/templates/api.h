@@ -73,6 +73,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define WGPU_BREAKING_REFERENCE_ADDREF
+
 {% for constant in by_category["constant"] %}
     #define {{API}}_{{constant.name.SNAKE_CASE()}} {{constant.value}}
 {% endfor %}

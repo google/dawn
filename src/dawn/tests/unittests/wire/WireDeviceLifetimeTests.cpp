@@ -118,7 +118,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenUncapturedErrorCallback
     // Drop the device, but keep the server-side device alive.
     // This prevents the callbacks from being flushed yet.
     WGPUDevice oldDevice = lastBackendDevice;
-    nativeProcs.deviceReference(oldDevice);
+    nativeProcs.deviceAddRef(oldDevice);
     device = nullptr;
 
     // Request a new device. This overrides the wire's device-related data.
@@ -166,7 +166,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenLoggingCallback) {
     // Drop the device, but keep the server-side device alive.
     // This prevents the callbacks from being flushed yet.
     WGPUDevice oldDevice = lastBackendDevice;
-    nativeProcs.deviceReference(oldDevice);
+    nativeProcs.deviceAddRef(oldDevice);
     device = nullptr;
 
     // Request a new device. This overrides the wire's device-related data.
@@ -203,7 +203,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenLostCallback) {
     // Drop the device, but keep the server-side device alive.
     // This prevents the callbacks from being flushed yet.
     WGPUDevice oldDevice = lastBackendDevice;
-    nativeProcs.deviceReference(oldDevice);
+    nativeProcs.deviceAddRef(oldDevice);
     device = nullptr;
 
     // Destroy the device to enqueue calling the lost callback.

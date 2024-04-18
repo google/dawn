@@ -53,7 +53,7 @@ void AsyncTaskManager::PostTask(AsyncTask asyncTask) {
 
     // Ref the task since it is accessed inside the worker function.
     // The worker function will acquire and release the task upon completion.
-    waitableTask->Reference();
+    waitableTask->AddRef();
     waitableTask->waitableEvent =
         mWorkerTaskPool->PostWorkerTask(DoWaitableTask, waitableTask.Get());
 }

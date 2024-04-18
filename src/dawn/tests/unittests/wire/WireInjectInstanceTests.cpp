@@ -49,7 +49,7 @@ TEST_F(WireInjectInstanceTests, CallAfterReserveInject) {
     auto reserved = GetWireClient()->ReserveInstance();
 
     WGPUInstance serverInstance = api.GetNewInstance();
-    EXPECT_CALL(api, InstanceReference(serverInstance));
+    EXPECT_CALL(api, InstanceAddRef(serverInstance));
     ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 
     WGPUSurfaceDescriptor surfaceDesc = {};
@@ -74,20 +74,20 @@ TEST_F(WireInjectInstanceTests, InjectExistingID) {
     auto reserved = GetWireClient()->ReserveInstance();
 
     WGPUInstance serverInstance = api.GetNewInstance();
-    EXPECT_CALL(api, InstanceReference(serverInstance));
+    EXPECT_CALL(api, InstanceAddRef(serverInstance));
     ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 
     // ID already in use, call fails.
     ASSERT_FALSE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 }
 
-// Test that the server only borrows the instance and does a single reference-release
+// Test that the server only borrows the instance and does a single addref-release
 TEST_F(WireInjectInstanceTests, InjectedInstanceLifetime) {
     auto reserved = GetWireClient()->ReserveInstance();
 
     // Injecting the instance adds a reference
     WGPUInstance serverInstance = api.GetNewInstance();
-    EXPECT_CALL(api, InstanceReference(serverInstance));
+    EXPECT_CALL(api, InstanceAddRef(serverInstance));
     ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 
     // Releasing the instance removes a single reference.

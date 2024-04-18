@@ -35,7 +35,7 @@ class Object : public wgpu::ObjectBase<Object, int*> {
     using ObjectBase::ObjectBase;
     using ObjectBase::operator=;
 
-    static void WGPUReference(int* handle) {
+    static void WGPUAddRef(int* handle) {
         ASSERT_LE(0, *handle);
         *handle += 1;
     }

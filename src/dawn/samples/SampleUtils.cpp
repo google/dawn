@@ -168,7 +168,7 @@ wgpu::Device CreateCppDawnDevice() {
         if (preferredAdapter != adapters.end()) {
             backendAdapter = *preferredAdapter;
             WGPUAdapter cAdapter = preferredAdapter->Get();
-            dawn::native::GetProcs().adapterReference(cAdapter);
+            dawn::native::GetProcs().adapterAddRef(cAdapter);
             callback(WGPURequestAdapterStatus_Success, cAdapter, nullptr, userdata);
         } else {
             callback(WGPURequestAdapterStatus_Error, nullptr,

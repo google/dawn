@@ -63,7 +63,7 @@ Adapter::Adapter() = default;
 
 Adapter::Adapter(AdapterBase* impl) : mImpl(impl) {
     if (mImpl != nullptr) {
-        mImpl->Reference();
+        mImpl->AddRef();
     }
 }
 
@@ -83,7 +83,7 @@ Adapter& Adapter::operator=(const Adapter& other) {
         }
         mImpl = other.mImpl;
         if (mImpl) {
-            mImpl->Reference();
+            mImpl->AddRef();
         }
     }
     return *this;

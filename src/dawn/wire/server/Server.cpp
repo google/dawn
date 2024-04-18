@@ -80,7 +80,7 @@ WireResult Server::InjectTexture(WGPUTexture texture,
 
     // The texture is externally owned so it shouldn't be destroyed when we receive a destroy
     // message from the client. Add a reference to counterbalance the eventual release.
-    mProcs.textureReference(texture);
+    mProcs.textureAddRef(texture);
 
     return WireResult::Success;
 }
@@ -104,7 +104,7 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
 
     // The texture is externally owned so it shouldn't be destroyed when we receive a destroy
     // message from the client. Add a reference to counterbalance the eventual release.
-    mProcs.swapChainReference(swapchain);
+    mProcs.swapChainAddRef(swapchain);
 
     return WireResult::Success;
 }
@@ -120,7 +120,7 @@ WireResult Server::InjectInstance(WGPUInstance instance, const Handle& handle) {
 
     // The instance is externally owned so it shouldn't be destroyed when we receive a destroy
     // message from the client. Add a reference to counterbalance the eventual release.
-    mProcs.instanceReference(instance);
+    mProcs.instanceAddRef(instance);
 
     return WireResult::Success;
 }

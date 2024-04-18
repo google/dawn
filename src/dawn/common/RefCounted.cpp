@@ -136,7 +136,7 @@ uint64_t RefCounted::GetRefCountPayload() const {
     return mRefCount.GetPayload();
 }
 
-void RefCounted::Reference() {
+void RefCounted::AddRef() {
     bool result = mRefCount.Increment();
     // Never increase ref count from 0.
     DAWN_ASSERT(!result);

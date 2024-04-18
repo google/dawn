@@ -46,7 +46,7 @@ class WeakRefSupportBase;
 template <typename T>
 struct RefCountedTraits {
     static constexpr T* kNullValue = nullptr;
-    static void Reference(T* value) { value->Reference(); }
+    static void AddRef(T* value) { value->AddRef(); }
     static void Release(T* value) { value->Release(); }
 };
 

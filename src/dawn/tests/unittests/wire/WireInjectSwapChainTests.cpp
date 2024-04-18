@@ -57,7 +57,7 @@ TEST_F(WireInjectSwapChainTests, CallAfterReserveInject) {
     auto reserved = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
-    EXPECT_CALL(api, SwapChainReference(apiSwapchain));
+    EXPECT_CALL(api, SwapChainAddRef(apiSwapchain));
     ASSERT_TRUE(
         GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 
@@ -80,7 +80,7 @@ TEST_F(WireInjectSwapChainTests, InjectExistingID) {
     auto reserved = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
-    EXPECT_CALL(api, SwapChainReference(apiSwapchain));
+    EXPECT_CALL(api, SwapChainAddRef(apiSwapchain));
     ASSERT_TRUE(
         GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 
@@ -89,13 +89,13 @@ TEST_F(WireInjectSwapChainTests, InjectExistingID) {
         GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 }
 
-// Test that the server only borrows the swapchain and does a single reference-release
+// Test that the server only borrows the swapchain and does a single addref-release
 TEST_F(WireInjectSwapChainTests, InjectedSwapChainLifetime) {
     auto reserved = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
     // Injecting the swapchain adds a reference
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
-    EXPECT_CALL(api, SwapChainReference(apiSwapchain));
+    EXPECT_CALL(api, SwapChainAddRef(apiSwapchain));
     ASSERT_TRUE(
         GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 
@@ -140,7 +140,7 @@ TEST_F(WireInjectSwapChainTests, SwapChainTextureReflection) {
     auto reserved = GetWireClient()->ReserveSwapChain(device, &swapChainDesc);
 
     WGPUSwapChain apiSwapchain = api.GetNewSwapChain();
-    EXPECT_CALL(api, SwapChainReference(apiSwapchain));
+    EXPECT_CALL(api, SwapChainAddRef(apiSwapchain));
     ASSERT_TRUE(
         GetWireServer()->InjectSwapChain(apiSwapchain, reserved.handle, reserved.deviceHandle));
 

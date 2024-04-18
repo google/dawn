@@ -156,7 +156,7 @@ namespace {{metadata.namespace}} {
       public:
         ObjectBase() = default;
         ObjectBase(CType handle): mHandle(handle) {
-            if (mHandle) Derived::{{c_prefix}}Reference(mHandle);
+            if (mHandle) Derived::{{c_prefix}}AddRef(mHandle);
         }
         ~ObjectBase() {
             if (mHandle) Derived::{{c_prefix}}Release(mHandle);
@@ -169,7 +169,7 @@ namespace {{metadata.namespace}} {
             if (&other != this) {
                 if (mHandle) Derived::{{c_prefix}}Release(mHandle);
                 mHandle = other.mHandle;
-                if (mHandle) Derived::{{c_prefix}}Reference(mHandle);
+                if (mHandle) Derived::{{c_prefix}}AddRef(mHandle);
             }
 
             return static_cast<Derived&>(*this);
@@ -278,7 +278,7 @@ namespace {{metadata.namespace}} {
 
           private:
             friend ObjectBase<{{CppType}}, {{CType}}>;
-            static inline void {{c_prefix}}Reference({{CType}} handle);
+            static inline void {{c_prefix}}AddRef({{CType}} handle);
             static inline void {{c_prefix}}Release({{CType}} handle);
         };
 
@@ -461,9 +461,9 @@ namespace {{metadata.namespace}} {
                 {% endif %}
             }
         {% endfor %}
-        void {{CppType}}::{{c_prefix}}Reference({{CType}} handle) {
+        void {{CppType}}::{{c_prefix}}AddRef({{CType}} handle) {
             if (handle != nullptr) {
-                {{as_cMethod(type.name, Name("reference"))}}(handle);
+                {{as_cMethod(type.name, Name("add ref"))}}(handle);
             }
         }
         void {{CppType}}::{{c_prefix}}Release({{CType}} handle) {

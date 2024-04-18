@@ -82,7 +82,7 @@ namespace dawn {
 template <typename T>
 struct NSRefTraits {
     static constexpr T kNullValue = nullptr;
-    static void Reference(T value) { [value retain]; }
+    static void AddRef(T value) { [value retain]; }
     static void Release(T value) { [value release]; }
 };
 

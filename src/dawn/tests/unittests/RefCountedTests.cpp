@@ -92,7 +92,7 @@ TEST(RefCounted, AddingRefKeepsAlive) {
     bool deleted = false;
     auto* test = new RCTest(&deleted);
 
-    test->Reference();
+    test->AddRef();
     test->Release();
     EXPECT_FALSE(deleted);
 
@@ -100,14 +100,14 @@ TEST(RefCounted, AddingRefKeepsAlive) {
     EXPECT_TRUE(deleted);
 }
 
-// Test that Reference and Release atomically change the refcount.
-TEST(RefCounted, RaceOnReferenceRelease) {
+// Test that AddRef and Release atomically change the refcount.
+TEST(RefCounted, RaceOnAddRefRelease) {
     bool deleted = false;
     auto* test = new RCTest(&deleted);
 
     auto referenceManyTimes = [test] {
         for (uint32_t i = 0; i < 100000; ++i) {
-            test->Reference();
+            test->AddRef();
         }
     };
     std::thread t1(referenceManyTimes);
@@ -295,7 +295,7 @@ TEST(Ref, PayloadUnchangedByRefCounting) {
     RCTest* test = new RCTest(1ull);
     EXPECT_EQ(test->GetRefCountPayload(), 1u);
 
-    test->Reference();
+    test->AddRef();
     EXPECT_EQ(test->GetRefCountPayload(), 1u);
     test->Release();
     EXPECT_EQ(test->GetRefCountPayload(), 1u);

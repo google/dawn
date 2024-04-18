@@ -33,7 +33,7 @@
 namespace dawn::native {
 
 // RecCountedWithExternalCountBase is a version of RefCounted which tracks a separate
-// refcount for calls to APIReference/APIRelease (refs added/removed by the application).
+// refcount for calls to APIAddRef/APIRelease (refs added/removed by the application).
 // The external refcount starts at 0, and the total refcount starts at 1 - i.e. the first
 // ref isn't an external ref.
 // When the external refcount drops to zero, WillDropLastExternalRef is called. and it can be called
@@ -44,13 +44,15 @@ class RefCountedWithExternalCountBase : public T {
   public:
     static constexpr bool HasExternalRefCount = true;
 
-    using T::Reference;
+    using T::AddRef;
     using T::Release;
     using T::T;
 
-    void APIReference() {
+    // TODO(dawn:2234): Deprecated. Remove when no longer used.
+    void APIReference() { APIAddRef(); }
+    void APIAddRef() {
         IncrementExternalRefCount();
-        T::APIReference();
+        T::APIAddRef();
     }
 
     void APIRelease() {

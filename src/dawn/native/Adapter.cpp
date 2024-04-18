@@ -82,7 +82,7 @@ const PhysicalDeviceBase* AdapterBase::GetPhysicalDevice() const {
 InstanceBase* AdapterBase::APIGetInstance() const {
     InstanceBase* instance = mPhysicalDevice->GetInstance();
     DAWN_ASSERT(instance != nullptr);
-    instance->APIReference();
+    instance->APIAddRef();
     return instance;
 }
 

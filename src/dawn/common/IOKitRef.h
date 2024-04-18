@@ -37,7 +37,7 @@ namespace dawn {
 template <typename T>
 struct IOKitRefTraits {
     static constexpr T kNullValue = IO_OBJECT_NULL;
-    static void Reference(T value) { IOObjectRetain(value); }
+    static void AddRef(T value) { IOObjectRetain(value); }
     static void Release(T value) { IOObjectRelease(value); }
 };
 

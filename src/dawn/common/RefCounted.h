@@ -71,12 +71,14 @@ class RefCounted {
     uint64_t GetRefCountForTesting() const;
     uint64_t GetRefCountPayload() const;
 
-    void Reference();
+    void AddRef();
     // Release() is called by internal code, so it's assumed that there is already a thread
     // synchronization in place for destruction.
     void Release();
 
-    void APIReference() { Reference(); }
+    // TODO(dawn:2234): Deprecated. Remove when no longer used.
+    void APIReference() { APIAddRef(); }
+    void APIAddRef() { AddRef(); }
     void APIRelease() { Release(); }
 
   protected:

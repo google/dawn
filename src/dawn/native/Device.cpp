@@ -1661,7 +1661,7 @@ MaybeError DeviceBase::Tick() {
 }
 
 AdapterBase* DeviceBase::APIGetAdapter() {
-    mAdapter->APIReference();
+    mAdapter->APIAddRef();
     return mAdapter.Get();
 }
 

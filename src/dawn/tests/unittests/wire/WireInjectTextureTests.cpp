@@ -52,7 +52,7 @@ TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
     auto reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
     WGPUTexture apiTexture = api.GetNewTexture();
-    EXPECT_CALL(api, TextureReference(apiTexture));
+    EXPECT_CALL(api, TextureAddRef(apiTexture));
     ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 
     wgpuTextureCreateView(reserved.texture, nullptr);
@@ -75,7 +75,7 @@ TEST_F(WireInjectTextureTests, InjectExistingID) {
     auto reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
     WGPUTexture apiTexture = api.GetNewTexture();
-    EXPECT_CALL(api, TextureReference(apiTexture));
+    EXPECT_CALL(api, TextureAddRef(apiTexture));
     ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 
     // ID already in use, call fails.
@@ -93,7 +93,7 @@ TEST_F(WireInjectTextureTests, ReuseIDAndGeneration) {
         reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
         apiTexture = api.GetNewTexture();
-        EXPECT_CALL(api, TextureReference(apiTexture));
+        EXPECT_CALL(api, TextureAddRef(apiTexture));
         ASSERT_TRUE(
             GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 
@@ -116,18 +116,18 @@ TEST_F(WireInjectTextureTests, ReuseIDAndGeneration) {
     }
 
     // Valid to inject with the same ID and greater generation.
-    EXPECT_CALL(api, TextureReference(apiTexture));
+    EXPECT_CALL(api, TextureAddRef(apiTexture));
     reserved.handle.generation += 2;
     ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 }
 
-// Test that the server only borrows the texture and does a single reference-release
+// Test that the server only borrows the texture and does a single addref-release
 TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
     auto reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
     // Injecting the texture adds a reference
     WGPUTexture apiTexture = api.GetNewTexture();
-    EXPECT_CALL(api, TextureReference(apiTexture));
+    EXPECT_CALL(api, TextureAddRef(apiTexture));
     ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reserved.handle, reserved.deviceHandle));
 
     // Releasing the texture removes a single reference.

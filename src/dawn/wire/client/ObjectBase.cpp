@@ -55,7 +55,7 @@ Client* ObjectBase::GetClient() const {
     return mClient;
 }
 
-void ObjectBase::Reference() {
+void ObjectBase::AddRef() {
     mRefcount++;
 }
 
