@@ -29,24 +29,6 @@
 
 namespace dawn::wire::server {
 
-namespace {
-
-template <ObjectType objectType, typename Pipeline>
-void HandleCreatePipelineAsyncCallback(KnownObjects<Pipeline>* knownObjects,
-                                       WGPUCreatePipelineAsyncStatus status,
-                                       Pipeline pipeline,
-                                       CreatePipelineAsyncUserData* data) {
-    if (status == WGPUCreatePipelineAsyncStatus_Success) {
-        knownObjects->FillReservation(data->pipelineObjectID, pipeline);
-    } else {
-        // Otherwise, free the ObjectId which will make it unusable.
-        knownObjects->Free(data->pipelineObjectID);
-        DAWN_ASSERT(pipeline == nullptr);
-    }
-}
-
-}  // anonymous namespace
-
 void Server::OnUncapturedError(ObjectHandle device, WGPUErrorType type, const char* message) {
     ReturnDeviceUncapturedErrorCallbackCmd cmd;
     cmd.device = device;
@@ -110,8 +92,8 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
     ObjectHandle pipelineObjectHandle,
     const WGPUComputePipelineDescriptor* descriptor) {
     Reserved<WGPUComputePipeline> pipeline;
-    WIRE_TRY(ComputePipelineObjects().Allocate(&pipeline, pipelineObjectHandle,
-                                               AllocationState::Reserved));
+    WIRE_TRY(Objects<WGPUComputePipeline>().Allocate(&pipeline, pipelineObjectHandle,
+                                                     AllocationState::Reserved));
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
@@ -129,15 +111,16 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
                                                   WGPUCreatePipelineAsyncStatus status,
                                                   WGPUComputePipeline pipeline,
                                                   const char* message) {
-    HandleCreatePipelineAsyncCallback<ObjectType::ComputePipeline>(&ComputePipelineObjects(),
-                                                                   status, pipeline, data);
-
     ReturnDeviceCreateComputePipelineAsyncCallbackCmd cmd;
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;
 
+    if (FillReservation(data->pipelineObjectID, pipeline) == WireResult::FatalError) {
+        cmd.status = WGPUCreatePipelineAsyncStatus_Unknown;
+        cmd.message = "Destroyed before request was fulfilled.";
+    }
     SerializeCommand(cmd);
 }
 
@@ -148,8 +131,8 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
     ObjectHandle pipelineObjectHandle,
     const WGPURenderPipelineDescriptor* descriptor) {
     Reserved<WGPURenderPipeline> pipeline;
-    WIRE_TRY(RenderPipelineObjects().Allocate(&pipeline, pipelineObjectHandle,
-                                              AllocationState::Reserved));
+    WIRE_TRY(Objects<WGPURenderPipeline>().Allocate(&pipeline, pipelineObjectHandle,
+                                                    AllocationState::Reserved));
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
@@ -167,15 +150,16 @@ void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* da
                                                  WGPUCreatePipelineAsyncStatus status,
                                                  WGPURenderPipeline pipeline,
                                                  const char* message) {
-    HandleCreatePipelineAsyncCallback<ObjectType::RenderPipeline>(&RenderPipelineObjects(), status,
-                                                                  pipeline, data);
-
     ReturnDeviceCreateRenderPipelineAsyncCallbackCmd cmd;
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;
 
+    if (FillReservation(data->pipelineObjectID, pipeline) == WireResult::FatalError) {
+        cmd.status = WGPUCreatePipelineAsyncStatus_Unknown;
+        cmd.message = "Destroyed before request was fulfilled.";
+    }
     SerializeCommand(cmd);
 }
 

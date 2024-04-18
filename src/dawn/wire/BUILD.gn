@@ -58,6 +58,7 @@ dawn_json_generator("gen") {
     "src/dawn/wire/server/ServerDoers_autogen.cpp",
     "src/dawn/wire/server/ServerHandlers_autogen.cpp",
     "src/dawn/wire/server/ServerPrototypes_autogen.inc",
+    "src/dawn/wire/server/WGPUTraits_autogen.h",
   ]
 }
 

@@ -1,4 +1,4 @@
-//* Copyright 2020 The Dawn & Tint Authors
+//* Copyright 2024 The Dawn & Tint Authors
 //*
 //* Redistribution and use in source and binary forms, with or without
 //* modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,24 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
-#define DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
+#ifndef DAWNWIRE_SERVER_WGPUTRAITS_AUTOGEN_H_
+#define DAWNWIRE_SERVER_WGPUTRAITS_AUTOGEN_H_
 
-#include "dawn/common/ityp_array.h"
+#include "dawn/dawn_proc_table.h"
 
-namespace dawn::wire {
+namespace dawn::wire::server {
 
-    constexpr uint32_t kObjectTypes = {{len(by_category["object"])}};
+template <typename T>
+struct WGPUTraits;
 
-    enum class ObjectType : uint32_t {
-        {% for type in by_category["object"] %}
-            {{type.name.CamelCase()}},
-        {% endfor %}
+{% for type in by_category["object"] %}
+    {% set cType = as_cType(type.name) %}
+    template <>
+    struct WGPUTraits<{{cType}}> {
+        static constexpr auto Release = &DawnProcTable::{{as_varName(type.name, Name("release"))}};
     };
+{% endfor %}
 
-    template <typename T>
-    using PerObjectType = ityp::array<ObjectType, T, {{len(by_category["object"])}}>;
+}  // namespace dawn::wire::server
 
-} // namespace dawn::wire
-
-
-#endif  // DAWNWIRE_OBJECTTYPE_AUTOGEN_H_
+#endif  // DAWNWIRE_SERVER_WGPUTRAITS_AUTOGEN_H_

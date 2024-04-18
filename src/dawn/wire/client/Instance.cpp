@@ -76,23 +76,21 @@ class RequestAdapterEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
+        if (mCallback == nullptr) {
+            // If there's no callback, just clean up the resources.
+            mAdapter.ExtractAsDangling()->Release();
+            mUserdata.ExtractAsDangling();
+            return;
+        }
+
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPURequestAdapterStatus_InstanceDropped;
             mMessage = "A valid external Instance reference no longer exists.";
         }
+
         Adapter* adapter = mAdapter.ExtractAsDangling();
-        if (mStatus != WGPURequestAdapterStatus_Success && adapter != nullptr) {
-            // If there was an error, we may need to reclaim the adapter allocation, otherwise the
-            // adapter is returned to the user who owns it.
-            adapter->GetClient()->Free(adapter);
-            adapter = nullptr;
-        }
-        if (mCallback) {
-            mCallback(mStatus, ToAPI(adapter), mMessage ? mMessage->c_str() : nullptr,
-                      mUserdata.ExtractAsDangling());
-        } else if (adapter != nullptr) {
-            adapter->Release();
-        }
+        mCallback(mStatus, ToAPI(mStatus == WGPURequestAdapterStatus_Success ? adapter : nullptr),
+                  mMessage ? mMessage->c_str() : nullptr, mUserdata.ExtractAsDangling());
     }
 
     WGPURequestAdapterCallback mCallback;

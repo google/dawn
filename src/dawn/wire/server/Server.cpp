@@ -55,7 +55,7 @@ Server::Server(const DawnProcTable& procs,
 Server::~Server() {
     // Un-set the error and lost callbacks since we cannot forward them
     // after the server has been destroyed.
-    for (WGPUDevice device : DeviceObjects().GetAllHandles()) {
+    for (WGPUDevice device : Objects<WGPUDevice>().GetAllHandles()) {
         ClearDeviceCallbacks(device);
     }
     DestroyAllObjects(mProcs);
@@ -66,13 +66,13 @@ WireResult Server::InjectTexture(WGPUTexture texture,
                                  const Handle& deviceHandle) {
     DAWN_ASSERT(texture != nullptr);
     Known<WGPUDevice> device;
-    WIRE_TRY(DeviceObjects().Get(deviceHandle.id, &device));
+    WIRE_TRY(Objects<WGPUDevice>().Get(deviceHandle.id, &device));
     if (device->generation != deviceHandle.generation) {
         return WireResult::FatalError;
     }
 
     Reserved<WGPUTexture> data;
-    WIRE_TRY(TextureObjects().Allocate(&data, handle));
+    WIRE_TRY(Objects<WGPUTexture>().Allocate(&data, handle));
 
     data->handle = texture;
     data->generation = handle.generation;
@@ -90,13 +90,13 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
                                    const Handle& deviceHandle) {
     DAWN_ASSERT(swapchain != nullptr);
     Known<WGPUDevice> device;
-    WIRE_TRY(DeviceObjects().Get(deviceHandle.id, &device));
+    WIRE_TRY(Objects<WGPUDevice>().Get(deviceHandle.id, &device));
     if (device->generation != deviceHandle.generation) {
         return WireResult::FatalError;
     }
 
     Reserved<WGPUSwapChain> data;
-    WIRE_TRY(SwapChainObjects().Allocate(&data, handle));
+    WIRE_TRY(Objects<WGPUSwapChain>().Allocate(&data, handle));
 
     data->handle = swapchain;
     data->generation = handle.generation;
@@ -112,7 +112,7 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
 WireResult Server::InjectInstance(WGPUInstance instance, const Handle& handle) {
     DAWN_ASSERT(instance != nullptr);
     Reserved<WGPUInstance> data;
-    WIRE_TRY(InstanceObjects().Allocate(&data, handle));
+    WIRE_TRY(Objects<WGPUInstance>().Allocate(&data, handle));
 
     data->handle = instance;
     data->generation = handle.generation;
@@ -127,7 +127,7 @@ WireResult Server::InjectInstance(WGPUInstance instance, const Handle& handle) {
 
 WGPUDevice Server::GetDevice(uint32_t id, uint32_t generation) {
     Known<WGPUDevice> device;
-    if (DeviceObjects().Get(id, &device) != WireResult::Success ||
+    if (Objects<WGPUDevice>().Get(id, &device) != WireResult::Success ||
         device->generation != generation) {
         return nullptr;
     }
@@ -135,7 +135,7 @@ WGPUDevice Server::GetDevice(uint32_t id, uint32_t generation) {
 }
 
 bool Server::IsDeviceKnown(WGPUDevice device) const {
-    return DeviceObjects().IsKnown(device);
+    return Objects<WGPUDevice>().IsKnown(device);
 }
 
 void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {

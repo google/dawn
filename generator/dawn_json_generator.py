@@ -1268,6 +1268,11 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'dawn/wire/server/ServerPrototypes.inc',
                     'src/dawn/wire/server/ServerPrototypes_autogen.inc',
                     wire_params))
+            renders.append(
+                FileRender('dawn/wire/server/WGPUTraits.h',
+                           'src/dawn/wire/server/WGPUTraits_autogen.h',
+                           wire_params))
+
 
         if 'dawn_lpmfuzz_proto' in targets:
             params_dawn_wire = parse_json(loaded_json,

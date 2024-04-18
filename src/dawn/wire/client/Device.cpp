@@ -122,25 +122,22 @@ class CreatePipelineEventBase : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
+        if (mCallback == nullptr) {
+            // If there's no callback, just clean up the resources.
+            mPipeline.ExtractAsDangling()->Release();
+            mUserdata.ExtractAsDangling();
+            return;
+        }
+
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPUCreatePipelineAsyncStatus_InstanceDropped;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
-        // By default, we are initialized to a success state, and on shutdown we just return success
-        // so we don't need to handle it specifically.
         Pipeline* pipeline = mPipeline.ExtractAsDangling();
-        if (mStatus != WGPUCreatePipelineAsyncStatus_Success) {
-            // If there was an error we need to reclaim the pipeline allocation.
-            pipeline->GetClient()->Free(pipeline);
-            pipeline = nullptr;
-        }
-        if (mCallback) {
-            mCallback(mStatus, ToAPI(pipeline), mMessage ? mMessage->c_str() : nullptr,
-                      mUserdata.ExtractAsDangling());
-        } else if (pipeline != nullptr) {
-            pipeline->Release();
-        }
+        mCallback(mStatus,
+                  ToAPI(mStatus == WGPUCreatePipelineAsyncStatus_Success ? pipeline : nullptr),
+                  mMessage ? mMessage->c_str() : nullptr, mUserdata.ExtractAsDangling());
     }
 
     using Callback = decltype(std::declval<CallbackInfo>().callback);

@@ -39,7 +39,7 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
                                           WGPUFuture deviceLostFuture,
                                           const WGPUDeviceDescriptor* descriptor) {
     Reserved<WGPUDevice> device;
-    WIRE_TRY(DeviceObjects().Allocate(&device, deviceHandle, AllocationState::Reserved));
+    WIRE_TRY(Objects<WGPUDevice>().Allocate(&device, deviceHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<RequestDeviceUserdata>();
     userdata->eventManager = eventManager;
@@ -114,7 +114,12 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.limits = &limits;
 
     // Assign the handle and allocated status if the device is created successfully.
-    Known<WGPUDevice> reservation = DeviceObjects().FillReservation(data->deviceObjectId, device);
+    Known<WGPUDevice> reservation;
+    if (FillReservation(data->deviceObjectId, device, &reservation) == WireResult::FatalError) {
+        cmd.status = WGPURequestDeviceStatus_Unknown;
+        cmd.message = "Destroyed before request was fulfilled.";
+        SerializeCommand(cmd);
+    }
     DAWN_ASSERT(reservation.data != nullptr);
     reservation->info->server = this;
     reservation->info->self = reservation.AsHandle();

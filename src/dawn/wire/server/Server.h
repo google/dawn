@@ -210,6 +210,15 @@ class Server : public ServerBase {
         mSerializer->SerializeCommand(cmd, std::forward<Extensions>(es)...);
     }
 
+    template <typename T>
+    WireResult FillReservation(ObjectId id, T handle, Known<T>* known = nullptr) {
+        auto result = Objects<T>().FillReservation(id, handle, known);
+        if (result == WireResult::FatalError) {
+            Release(mProcs, handle);
+        }
+        return result;
+    }
+
     void SetForwardingDeviceCallbacks(Known<WGPUDevice> device);
     void ClearDeviceCallbacks(WGPUDevice device);
 

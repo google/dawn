@@ -69,23 +69,21 @@ class RequestDeviceEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        Device* device = mDevice.ExtractAsDangling();
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPURequestDeviceStatus_InstanceDropped;
             mMessage = "A valid external Instance reference no longer exists.";
         }
+
+        Device* device = mDevice.ExtractAsDangling();
         if (mCallback) {
-            Device* outputDevice = device;
-            if (mStatus != WGPURequestDeviceStatus_Success) {
-                outputDevice = nullptr;
-            }
-            mCallback(mStatus, ToAPI(outputDevice), mMessage ? mMessage->c_str() : nullptr,
-                      mUserdata.ExtractAsDangling());
+            // Callback needs to happen before device lost handling to ensure resolution order.
+            mCallback(mStatus, ToAPI(mStatus == WGPURequestDeviceStatus_Success ? device : nullptr),
+                      mMessage ? mMessage->c_str() : nullptr, mUserdata.ExtractAsDangling());
         }
 
         if (mStatus != WGPURequestDeviceStatus_Success) {
-            // If there was an error, we may need to call the device lost callback and reclaim the
-            // device allocation, otherwise the device is returned to the user who owns it.
+            // If there was an error and we didn't return a device, we need to call the device lost
+            // callback and reclaim the device allocation.
             if (mStatus == WGPURequestDeviceStatus_InstanceDropped) {
                 device->HandleDeviceLost(WGPUDeviceLostReason_InstanceDropped,
                                          "A valid external Instance reference no longer exists.");
@@ -93,9 +91,12 @@ class RequestDeviceEvent : public TrackedEvent {
                 device->HandleDeviceLost(WGPUDeviceLostReason_FailedCreation,
                                          "Device failed at creation.");
             }
+        }
+
+        if (mCallback == nullptr) {
+            // If there's no callback, clean up the resources.
             device->Release();
-        } else if (!mCallback) {
-            device->Release();
+            mUserdata.ExtractAsDangling();
         }
     }
 

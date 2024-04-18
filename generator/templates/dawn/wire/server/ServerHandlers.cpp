@@ -50,18 +50,19 @@ namespace dawn::wire::server {
             //* Allocate any result objects
             {% for member in command.members if member.is_return_value -%}
                 {{ assert(member.handle_type) }}
-                {% set Type = member.handle_type.name.CamelCase() %}
+                {% set cType = as_cType(member.handle_type.name) %}
                 {% set name = as_varName(member.name) %}
-                Reserved<WGPU{{Type}}> {{name}}Data;
-                WIRE_TRY({{Type}}Objects().Allocate(&{{name}}Data, cmd.{{name}}));
+                Reserved<{{cType}}> {{name}}Data;
+                WIRE_TRY(Objects<{{cType}}>().Allocate(&{{name}}Data, cmd.{{name}}));
                 {{name}}Data->generation = cmd.{{name}}.generation;
             {%- endfor %}
 
             //* Get any input objects
             {% for member in command.members if member.id_type != None -%}
+                {% set cType = as_cType(member.id_type.name) %}
                 {% set name = as_varName(member.name) %}
-                Known<WGPU{{member.id_type.name.CamelCase()}}> {{name}}Handle;
-                WIRE_TRY({{member.id_type.name.CamelCase()}}Objects().Get(cmd.{{name}}, &{{name}}Handle));
+                Known<{{cType}}> {{name}}Handle;
+                WIRE_TRY(Objects<{{cType}}>().Get(cmd.{{name}}, &{{name}}Handle));
             {% endfor %}
 
             //* Do command
@@ -123,7 +124,7 @@ namespace dawn::wire::server {
         // After the server handles all the commands from the stream, we additionally run
         // ProcessEvents on all known Instances so that any work done on the server side can be
         // forwarded through to the client.
-        for (auto instance : InstanceObjects().GetAllHandles()) {
+        for (auto instance : Objects<WGPUInstance>().GetAllHandles()) {
             if (DoInstanceProcessEvents(instance) != WireResult::Success) {
                 return nullptr;
             }

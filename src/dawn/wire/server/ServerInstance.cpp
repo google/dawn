@@ -39,7 +39,7 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
                                             ObjectHandle adapterHandle,
                                             const WGPURequestAdapterOptions* options) {
     Reserved<WGPUAdapter> adapter;
-    WIRE_TRY(AdapterObjects().Allocate(&adapter, adapterHandle, AllocationState::Reserved));
+    WIRE_TRY(Objects<WGPUAdapter>().Allocate(&adapter, adapterHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<RequestAdapterUserdata>();
     userdata->eventManager = eventManager;
@@ -63,15 +63,18 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     cmd.message = message;
 
     if (status != WGPURequestAdapterStatus_Success) {
-        // Free the ObjectId which will make it unusable.
-        AdapterObjects().Free(data->adapterObjectId);
         DAWN_ASSERT(adapter == nullptr);
         SerializeCommand(cmd);
         return;
     }
 
     // Assign the handle and allocated status if the adapter is created successfully.
-    AdapterObjects().FillReservation(data->adapterObjectId, adapter);
+    if (FillReservation(data->adapterObjectId, adapter) == WireResult::FatalError) {
+        cmd.status = WGPURequestAdapterStatus_Unknown;
+        cmd.message = "Destroyed before request was fulfilled.";
+        SerializeCommand(cmd);
+        return;
+    }
 
     // Query and report the adapter supported features.
     std::vector<WGPUFeatureName> features;

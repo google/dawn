@@ -194,13 +194,19 @@ class KnownObjectsBase {
         return WireResult::Success;
     }
 
-    Known<T> FillReservation(ObjectId id, T handle) {
+    WireResult FillReservation(ObjectId id, T handle, Known<T>* known = nullptr) {
         DAWN_ASSERT(id < mKnown.size());
         Data* data = &mKnown[id];
-        DAWN_ASSERT(data->state == AllocationState::Reserved);
+
+        if (data->state != AllocationState::Reserved) {
+            return WireResult::FatalError;
+        }
         data->handle = handle;
         data->state = AllocationState::Allocated;
-        return {id, data};
+        if (known != nullptr) {
+            *known = {id, data};
+        }
+        return WireResult::Success;
     }
 
     // Allocates the data for a given ID and returns it in result.
@@ -292,9 +298,11 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
         return WireResult::Success;
     }
 
-    Known<WGPUDevice> FillReservation(ObjectId id, WGPUDevice handle) {
-        Known<WGPUDevice> result = KnownObjectsBase<WGPUDevice>::FillReservation(id, handle);
-        mKnownSet.insert(result->handle);
+    WireResult FillReservation(ObjectId id, WGPUDevice handle, Known<WGPUDevice>* known = nullptr) {
+        auto result = KnownObjectsBase<WGPUDevice>::FillReservation(id, handle, known);
+        if (result == WireResult::Success) {
+            mKnownSet.insert((*known)->handle);
+        }
         return result;
     }
 
