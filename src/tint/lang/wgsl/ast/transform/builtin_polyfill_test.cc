@@ -1971,6 +1971,77 @@ fn f() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// fwidthFine
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillFwidthFine() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.fwidth_fine = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunFwidthFine) {
+    auto* src = R"(
+fn f() {
+  let v = 0.5f;
+  _ = fwidthFine(v);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillFwidthFine()));
+}
+
+TEST_F(BuiltinPolyfillTest, FwidthFine_f32) {
+    auto* src = R"(
+fn f() {
+  let v = 0.5f;
+  let r : f32 = fwidthFine(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_fwidth_fine(v : f32) -> f32 {
+  return (abs(dpdxFine(v)) + abs(dpdyFine(v)));
+}
+
+fn f() {
+  let v = 0.5f;
+  let r : f32 = tint_fwidth_fine(v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillFwidthFine());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, FwidthFine_vec3_f32) {
+    auto* src = R"(
+fn f() {
+  let v = 0.5f;
+  let r : vec3<f32> = fwidthFine(vec3<f32>(v));
+}
+)";
+
+    auto* expect = R"(
+fn tint_fwidth_fine(v : vec3<f32>) -> vec3<f32> {
+  return (abs(dpdxFine(v)) + abs(dpdyFine(v)));
+}
+
+fn f() {
+  let v = 0.5f;
+  let r : vec3<f32> = tint_fwidth_fine(vec3<f32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillFwidthFine());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // insertBits
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillInsertBits(Level level) {

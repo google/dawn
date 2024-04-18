@@ -587,6 +587,27 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function for the `fwidthFine` builtin
+    /// @param ty the parameter and return type for the function
+    /// @return the polyfill function name
+    Symbol fwidthFine(const core::type::Type* ty) {
+        auto name = b.Symbols().New("tint_fwidth_fine");
+        // WGSL polyfill function:
+        //      fn tint_fwidth_fine(v : T) -> T {
+        //          return abs(dpdxFine(v)) + abs(dpdyFine(v));
+        //      }
+        auto body = tint::Vector{
+            b.Return(b.Add(b.Call("abs", b.Call("dpdxFine", "v")),
+                           b.Call("abs", b.Call("dpdyFine", "v")))),
+        };
+        b.Func(name,
+               tint::Vector{
+                   b.Param("v", T(ty)),
+               },
+               T(ty), body);
+        return name;
+    }
+
     /// Builds the polyfill function for the `insertBits` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
@@ -1356,6 +1377,13 @@ struct BuiltinPolyfill::State {
                         if (cfg.builtins.first_trailing_bit) {
                             return builtin_polyfills.GetOrAdd(
                                 builtin, [&] { return firstTrailingBit(builtin->ReturnType()); });
+                        }
+                        return Symbol{};
+
+                    case wgsl::BuiltinFn::kFwidthFine:
+                        if (cfg.builtins.fwidth_fine) {
+                            return builtin_polyfills.GetOrAdd(
+                                builtin, [&] { return fwidthFine(builtin->ReturnType()); });
                         }
                         return Symbol{};
 

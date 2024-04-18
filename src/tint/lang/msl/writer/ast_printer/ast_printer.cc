@@ -178,6 +178,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         polyfills.extract_bits = ast::transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
+        polyfills.fwidth_fine = true;
         polyfills.insert_bits = ast::transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
         polyfills.sign_int = true;

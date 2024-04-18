@@ -78,6 +78,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool first_leading_bit = false;
         /// Should `firstTrailingBit()` be polyfilled?
         bool first_trailing_bit = false;
+        /// Should `fwidthFine()` be polyfilled?
+        bool fwidth_fine = false;
         /// Should `insertBits()` be polyfilled?
         Level insert_bits = Level::kNone;
         /// Should integer scalar / vector divides and modulos be polyfilled to avoid DBZ and
