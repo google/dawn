@@ -34,6 +34,7 @@
 
 #include "absl/container/flat_hash_set.h"
 #include "dawn/common/Log.h"
+#include "dawn/common/Ref.h"
 #include "dawn/common/Version_autogen.h"
 #include "dawn/native/AsyncTask.h"
 #include "dawn/native/AttachmentState.h"
@@ -48,6 +49,7 @@
 #include "dawn/native/CompilationMessages.h"
 #include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/DynamicUploader.h"
+#include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/ErrorInjector.h"
 #include "dawn/native/ErrorScope.h"

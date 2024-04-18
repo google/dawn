@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <chrono>
@@ -32,7 +33,8 @@
 #include <thread>
 #include <utility>
 
-#include "dawn/native/CreatePipelineAsyncEvent.h"
+#include "dawn/native/DawnNative.h"
+#include "dawn/native/Error.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "mocks/ComputePipelineMock.h"
 #include "mocks/DawnMockTest.h"

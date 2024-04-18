@@ -29,13 +29,19 @@
 
 #include <utility>
 
+#include "dawn/common/FutureUtils.h"
+#include "dawn/common/Ref.h"
 #include "dawn/native/AsyncTask.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/ErrorData.h"
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/SystemEvent.h"
+#include "dawn/native/dawn_platform_autogen.h"
 #include "dawn/native/utils/WGPUHelpers.h"
+#include "dawn/native/wgpu_structs_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -172,8 +178,8 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
     EventCompletionType completionType) {
     if (completionType == EventCompletionType::Shutdown) {
         if (mCallback) {
-            mCallback(ToAPI(wgpu::CreatePipelineAsyncStatus::InstanceDropped), nullptr,
-                      "Instance dropped", mUserdata.ExtractAsDangling());
+            mCallback(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr, "Instance dropped",
+                      mUserdata.ExtractAsDangling());
         }
         return;
     }
@@ -187,24 +193,24 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
             mPipeline = PipelineType::MakeError(device, mPipeline->GetLabel().c_str());
         }
         if (mCallback) {
-            mCallback(ToAPI(wgpu::CreatePipelineAsyncStatus::Success),
+            mCallback(WGPUCreatePipelineAsyncStatus_Success,
                       ToAPI(ReturnToAPI(std::move(mPipeline))), "", mUserdata.ExtractAsDangling());
         }
         return;
     }
 
     if (mError != nullptr) {
-        wgpu::CreatePipelineAsyncStatus status;
+        WGPUCreatePipelineAsyncStatus status;
         switch (mError->GetType()) {
             case InternalErrorType::Validation:
-                status = wgpu::CreatePipelineAsyncStatus::ValidationError;
+                status = WGPUCreatePipelineAsyncStatus_ValidationError;
                 break;
             default:
-                status = wgpu::CreatePipelineAsyncStatus::InternalError;
+                status = WGPUCreatePipelineAsyncStatus_InternalError;
                 break;
         }
         if (mCallback) {
-            mCallback(ToAPI(status), nullptr, mError->GetFormattedMessage().c_str(),
+            mCallback(status, nullptr, mError->GetFormattedMessage().c_str(),
                       mUserdata.ExtractAsDangling());
         }
         return;
@@ -212,8 +218,8 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
 
     AddOrGetCachedPipeline();
     if (mCallback) {
-        mCallback(ToAPI(wgpu::CreatePipelineAsyncStatus::Success),
-                  ToAPI(ReturnToAPI(std::move(mPipeline))), "", mUserdata.ExtractAsDangling());
+        mCallback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(mPipeline))),
+                  "", mUserdata.ExtractAsDangling());
     }
 }
 
