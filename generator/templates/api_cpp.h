@@ -44,187 +44,187 @@
 
 namespace {{metadata.namespace}} {
 
-    namespace detail {
-        constexpr size_t ConstexprMax(size_t a, size_t b) {
-            return a > b ? a : b;
-        }
+namespace detail {
+constexpr size_t ConstexprMax(size_t a, size_t b) {
+    return a > b ? a : b;
+}
 
-        template <typename T>
-        static T& AsNonConstReference(const T& value) {
-            return const_cast<T&>(value);
-        }
-    }  // namespace detail
+template <typename T>
+static T& AsNonConstReference(const T& value) {
+    return const_cast<T&>(value);
+}
+}  // namespace detail
 
-    {% set c_prefix = metadata.c_prefix %}
-    {% for constant in by_category["constant"] %}
-        {% set type = as_cppType(constant.type.name) %}
-        {% set value = c_prefix + "_" +  constant.name.SNAKE_CASE() %}
-        static constexpr {{type}} k{{as_cppType(constant.name)}} = {{ value }};
-    {% endfor %}
+{% set c_prefix = metadata.c_prefix %}
+{% for constant in by_category["constant"] %}
+    {% set type = as_cppType(constant.type.name) %}
+    {% set value = c_prefix + "_" +  constant.name.SNAKE_CASE() %}
+    static constexpr {{type}} k{{as_cppType(constant.name)}} = {{ value }};
+{% endfor %}
 
-    {%- macro render_c_actual_arg(arg) -%}
-        {%- if arg.annotation == "value" -%}
-            {%- if arg.type.category == "object" -%}
-                {{as_varName(arg.name)}}.Get()
-            {%- elif arg.type.category == "enum" or arg.type.category == "bitmask" -%}
-                static_cast<{{as_cType(arg.type.name)}}>({{as_varName(arg.name)}})
-            {%- elif arg.type.category == "structure" -%}
-                *reinterpret_cast<{{as_cType(arg.type.name)}} const*>(&{{as_varName(arg.name)}})
-            {%- elif arg.type.category in ["function pointer", "native"] -%}
-                {{as_varName(arg.name)}}
-            {%- else -%}
-                UNHANDLED
-            {%- endif -%}
+{%- macro render_c_actual_arg(arg) -%}
+    {%- if arg.annotation == "value" -%}
+        {%- if arg.type.category == "object" -%}
+            {{as_varName(arg.name)}}.Get()
+        {%- elif arg.type.category == "enum" or arg.type.category == "bitmask" -%}
+            static_cast<{{as_cType(arg.type.name)}}>({{as_varName(arg.name)}})
+        {%- elif arg.type.category == "structure" -%}
+            *reinterpret_cast<{{as_cType(arg.type.name)}} const*>(&{{as_varName(arg.name)}})
+        {%- elif arg.type.category in ["function pointer", "native"] -%}
+            {{as_varName(arg.name)}}
         {%- else -%}
-            reinterpret_cast<{{decorate("", as_cType(arg.type.name), arg)}}>({{as_varName(arg.name)}})
+            UNHANDLED
         {%- endif -%}
-    {%- endmacro -%}
+    {%- else -%}
+        reinterpret_cast<{{decorate("", as_cType(arg.type.name), arg)}}>({{as_varName(arg.name)}})
+    {%- endif -%}
+{%- endmacro -%}
 
-    {%- macro render_cpp_to_c_method_call(type, method) -%}
-        {{as_cMethod(type.name, method.name)}}(Get()
-            {%- for arg in method.arguments -%},{{" "}}{{render_c_actual_arg(arg)}}
-            {%- endfor -%}
-        )
-    {%- endmacro -%}
+{%- macro render_cpp_to_c_method_call(type, method) -%}
+    {{as_cMethod(type.name, method.name)}}(Get()
+        {%- for arg in method.arguments -%},{{" "}}{{render_c_actual_arg(arg)}}
+        {%- endfor -%}
+    )
+{%- endmacro -%}
 
-    {% for type in by_category["enum"] %}
-        {% set CppType = as_cppType(type.name) %}
-        {% set CType = as_cType(type.name) %}
-        enum class {{CppType}} : uint32_t {
-            {% for value in type.values %}
-                {{as_cppEnum(value.name)}} = {{as_cEnum(type.name, value.name)}},
-            {% endfor %}
-        };
-        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
-        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
-
-    {% endfor %}
-
-    {% for type in by_category["bitmask"] %}
-        {% set CppType = as_cppType(type.name) %}
-        {% set CType = as_cType(type.name) + "Flags" %}
-        enum class {{CppType}} : uint32_t {
-            {% for value in type.values %}
-                {{as_cppEnum(value.name)}} = {{as_cEnum(type.name, value.name)}},
-            {% endfor %}
-        };
-        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
-        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
-
-    {% endfor %}
-
-    {% for type in by_category["function pointer"] %}
-        using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
-    {% endfor %}
-
-    {% for type in by_category["object"] %}
-        class {{as_cppType(type.name)}};
-    {% endfor %}
-
-    {% for type in by_category["structure"] %}
-        struct {{as_cppType(type.name)}};
-    {% endfor %}
-
-
-    // Special class for booleans in order to allow implicit conversions.
-    {% set BoolCppType = as_cppType(types["bool"].name) %}
-    {% set BoolCType = as_cType(types["bool"].name) %}
-    class {{BoolCppType}} {
-      public:
-        constexpr {{BoolCppType}}() = default;
-        // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-        constexpr {{BoolCppType}}(bool value) : mValue(static_cast<{{BoolCType}}>(value)) {}
-        // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-        {{BoolCppType}}({{BoolCType}} value): mValue(value) {}
-
-        constexpr operator bool() const { return static_cast<bool>(mValue); }
-
-      private:
-        friend struct std::hash<{{BoolCppType}}>;
-        // Default to false.
-        {{BoolCType}} mValue = static_cast<{{BoolCType}}>(false);
+{% for type in by_category["enum"] %}
+    {% set CppType = as_cppType(type.name) %}
+    {% set CType = as_cType(type.name) %}
+    enum class {{CppType}} : uint32_t {
+        {% for value in type.values %}
+            {{as_cppEnum(value.name)}} = {{as_cEnum(type.name, value.name)}},
+        {% endfor %}
     };
+    static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+    static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
-    {% for typeDef in by_category["typedef"] %}
-        // {{as_cppType(typeDef.name)}} is deprecated.
-        // Use {{as_cppType(typeDef.type.name)}} instead.
-        using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};
+{% endfor %}
 
-    {% endfor %}
-    template<typename Derived, typename CType>
-    class ObjectBase {
-      public:
-        ObjectBase() = default;
-        ObjectBase(CType handle): mHandle(handle) {
+{% for type in by_category["bitmask"] %}
+    {% set CppType = as_cppType(type.name) %}
+    {% set CType = as_cType(type.name) + "Flags" %}
+    enum class {{CppType}} : uint32_t {
+        {% for value in type.values %}
+            {{as_cppEnum(value.name)}} = {{as_cEnum(type.name, value.name)}},
+        {% endfor %}
+    };
+    static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+    static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
+
+{% endfor %}
+
+{% for type in by_category["function pointer"] %}
+    using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
+{% endfor %}
+
+{% for type in by_category["object"] %}
+    class {{as_cppType(type.name)}};
+{% endfor %}
+
+{% for type in by_category["structure"] %}
+    struct {{as_cppType(type.name)}};
+{% endfor %}
+
+
+// Special class for booleans in order to allow implicit conversions.
+{% set BoolCppType = as_cppType(types["bool"].name) %}
+{% set BoolCType = as_cType(types["bool"].name) %}
+class {{BoolCppType}} {
+  public:
+    constexpr {{BoolCppType}}() = default;
+    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
+    constexpr {{BoolCppType}}(bool value) : mValue(static_cast<{{BoolCType}}>(value)) {}
+    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
+    {{BoolCppType}}({{BoolCType}} value): mValue(value) {}
+
+    constexpr operator bool() const { return static_cast<bool>(mValue); }
+
+  private:
+    friend struct std::hash<{{BoolCppType}}>;
+    // Default to false.
+    {{BoolCType}} mValue = static_cast<{{BoolCType}}>(false);
+};
+
+{% for typeDef in by_category["typedef"] %}
+    // {{as_cppType(typeDef.name)}} is deprecated.
+    // Use {{as_cppType(typeDef.type.name)}} instead.
+    using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};
+
+{% endfor %}
+template<typename Derived, typename CType>
+class ObjectBase {
+  public:
+    ObjectBase() = default;
+    ObjectBase(CType handle): mHandle(handle) {
+        if (mHandle) Derived::{{c_prefix}}AddRef(mHandle);
+    }
+    ~ObjectBase() {
+        if (mHandle) Derived::{{c_prefix}}Release(mHandle);
+    }
+
+    ObjectBase(ObjectBase const& other)
+        : ObjectBase(other.Get()) {
+    }
+    Derived& operator=(ObjectBase const& other) {
+        if (&other != this) {
+            if (mHandle) Derived::{{c_prefix}}Release(mHandle);
+            mHandle = other.mHandle;
             if (mHandle) Derived::{{c_prefix}}AddRef(mHandle);
         }
-        ~ObjectBase() {
+
+        return static_cast<Derived&>(*this);
+    }
+
+    ObjectBase(ObjectBase&& other) {
+        mHandle = other.mHandle;
+        other.mHandle = 0;
+    }
+    Derived& operator=(ObjectBase&& other) {
+        if (&other != this) {
             if (mHandle) Derived::{{c_prefix}}Release(mHandle);
-        }
-
-        ObjectBase(ObjectBase const& other)
-            : ObjectBase(other.Get()) {
-        }
-        Derived& operator=(ObjectBase const& other) {
-            if (&other != this) {
-                if (mHandle) Derived::{{c_prefix}}Release(mHandle);
-                mHandle = other.mHandle;
-                if (mHandle) Derived::{{c_prefix}}AddRef(mHandle);
-            }
-
-            return static_cast<Derived&>(*this);
-        }
-
-        ObjectBase(ObjectBase&& other) {
             mHandle = other.mHandle;
             other.mHandle = 0;
         }
-        Derived& operator=(ObjectBase&& other) {
-            if (&other != this) {
-                if (mHandle) Derived::{{c_prefix}}Release(mHandle);
-                mHandle = other.mHandle;
-                other.mHandle = 0;
-            }
 
-            return static_cast<Derived&>(*this);
-        }
+        return static_cast<Derived&>(*this);
+    }
 
-        ObjectBase(std::nullptr_t) {}
-        Derived& operator=(std::nullptr_t) {
-            if (mHandle != nullptr) {
-                Derived::{{c_prefix}}Release(mHandle);
-                mHandle = nullptr;
-            }
-            return static_cast<Derived&>(*this);
+    ObjectBase(std::nullptr_t) {}
+    Derived& operator=(std::nullptr_t) {
+        if (mHandle != nullptr) {
+            Derived::{{c_prefix}}Release(mHandle);
+            mHandle = nullptr;
         }
+        return static_cast<Derived&>(*this);
+    }
 
-        bool operator==(std::nullptr_t) const {
-            return mHandle == nullptr;
-        }
-        bool operator!=(std::nullptr_t) const {
-            return mHandle != nullptr;
-        }
+    bool operator==(std::nullptr_t) const {
+        return mHandle == nullptr;
+    }
+    bool operator!=(std::nullptr_t) const {
+        return mHandle != nullptr;
+    }
 
-        explicit operator bool() const {
-            return mHandle != nullptr;
-        }
-        CType Get() const {
-            return mHandle;
-        }
-        CType MoveToCHandle() {
-            CType result = mHandle;
-            mHandle = 0;
-            return result;
-        }
-        static Derived Acquire(CType handle) {
-            Derived result;
-            result.mHandle = handle;
-            return result;
-        }
+    explicit operator bool() const {
+        return mHandle != nullptr;
+    }
+    CType Get() const {
+        return mHandle;
+    }
+    CType MoveToCHandle() {
+        CType result = mHandle;
+        mHandle = 0;
+        return result;
+    }
+    static Derived Acquire(CType handle) {
+        Derived result;
+        result.mHandle = handle;
+        return result;
+    }
 
-      protected:
-        CType mHandle = nullptr;
-    };
+  protected:
+    CType mHandle = nullptr;
+};
 
 {% macro render_cpp_default_value(member, is_struct, force_default=False) -%}
     {%- if member.json_data.get("no_default", false) -%}
@@ -264,228 +264,228 @@ namespace {{metadata.namespace}} {
     ) const
 {%- endmacro %}
 
-    {% for type in by_category["object"] %}
-        {% set CppType = as_cppType(type.name) %}
-        {% set CType = as_cType(type.name) %}
-        class {{CppType}} : public ObjectBase<{{CppType}}, {{CType}}> {
-          public:
-            using ObjectBase::ObjectBase;
-            using ObjectBase::operator=;
+{% for type in by_category["object"] %}
+    {% set CppType = as_cppType(type.name) %}
+    {% set CType = as_cType(type.name) %}
+    class {{CppType}} : public ObjectBase<{{CppType}}, {{CType}}> {
+      public:
+        using ObjectBase::ObjectBase;
+        using ObjectBase::operator=;
 
-            {% for method in type.methods %}
-                inline {{render_cpp_method_declaration(type, method)}};
-            {% endfor %}
+        {% for method in type.methods %}
+            inline {{render_cpp_method_declaration(type, method)}};
+        {% endfor %}
+
+      private:
+        friend ObjectBase<{{CppType}}, {{CType}}>;
+        static inline void {{c_prefix}}AddRef({{CType}} handle);
+        static inline void {{c_prefix}}Release({{CType}} handle);
+    };
+
+{% endfor %}
+
+{%- macro render_function_call(function) -%}
+    {{as_cMethod(None, function.name)}}(
+        {%- for arg in function.arguments -%}
+            {% if not loop.first %}, {% endif %}{{render_c_actual_arg(arg)}}
+        {%- endfor -%}
+    )
+{%- endmacro -%}
+
+// Free Functions
+
+{% for function in by_category["function"] if not function.no_cpp %}
+    inline {{as_cppType(function.return_type.name)}} {{as_cppType(function.name)}}(
+        {%- for arg in function.arguments -%}
+            {%- if not loop.first %}, {% endif -%}
+            {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
+        {%- endfor -%}
+    ) {
+        {% if function.return_type.name.concatcase() == "void" %}
+            {{render_function_call(function)}};
+        {% else %}
+            auto result = {{render_function_call(function)}};
+            return {{convert_cType_to_cppType(function.return_type, 'value', 'result')}};
+        {% endif %}
+    }
+{% endfor %}
+
+// ChainedStruct
+{% set c_prefix = metadata.c_prefix %}
+static_assert(sizeof(ChainedStruct) == sizeof({{c_prefix}}ChainedStruct),
+    "sizeof mismatch for ChainedStruct");
+static_assert(alignof(ChainedStruct) == alignof({{c_prefix}}ChainedStruct),
+    "alignof mismatch for ChainedStruct");
+static_assert(offsetof(ChainedStruct, nextInChain) == offsetof({{c_prefix}}ChainedStruct, next),
+    "offsetof mismatch for ChainedStruct::nextInChain");
+static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStruct, sType),
+    "offsetof mismatch for ChainedStruct::sType");
+
+{% for type in by_category["structure"] %}
+    {% set Out = "Out" if type.output else "" %}
+    {% set const = "const" if not type.output else "" %}
+    {% if type.chained %}
+        {% for root in type.chain_roots %}
+            // Can be chained in {{as_cppType(root.name)}}
+        {% endfor %}
+        struct {{as_cppType(type.name)}} : ChainedStruct{{Out}} {
+            {{as_cppType(type.name)}}() {
+                sType = SType::{{type.name.CamelCase()}};
+            }
+    {% else %}
+        struct {{as_cppType(type.name)}} {
+            {% if type.has_free_members_function %}
+                {{as_cppType(type.name)}}() = default;
+            {% endif %}
+    {% endif %}
+        {% if type.has_free_members_function %}
+            inline ~{{as_cppType(type.name)}}();
+            {{as_cppType(type.name)}}(const {{as_cppType(type.name)}}&) = delete;
+            {{as_cppType(type.name)}}& operator=(const {{as_cppType(type.name)}}&) = delete;
+            inline {{as_cppType(type.name)}}({{as_cppType(type.name)}}&&);
+            inline {{as_cppType(type.name)}}& operator=({{as_cppType(type.name)}}&&);
+        {% endif %}
+        {% if type.extensible %}
+            ChainedStruct{{Out}} {{const}} * nextInChain = nullptr;
+        {% endif %}
+        {% for member in type.members %}
+            {% set member_declaration = as_annotated_cppType(member, type.has_free_members_function) + render_cpp_default_value(member, True, type.has_free_members_function) %}
+            {% if type.chained and loop.first %}
+                //* Align the first member after ChainedStruct to match the C struct layout.
+                //* It has to be aligned both to its natural and ChainedStruct's alignment.
+                static constexpr size_t kFirstMemberAlignment = detail::ConstexprMax(alignof(ChainedStruct{{out}}), alignof({{decorate("", as_cppType(member.type.name), member)}}));
+                alignas(kFirstMemberAlignment) {{member_declaration}};
+            {% else %}
+                {{member_declaration}};
+            {% endif %}
+        {% endfor %}
+        {% if type.has_free_members_function %}
 
           private:
-            friend ObjectBase<{{CppType}}, {{CType}}>;
-            static inline void {{c_prefix}}AddRef({{CType}} handle);
-            static inline void {{c_prefix}}Release({{CType}} handle);
-        };
-
-    {% endfor %}
-
-    {%- macro render_function_call(function) -%}
-        {{as_cMethod(None, function.name)}}(
-            {%- for arg in function.arguments -%}
-                {% if not loop.first %}, {% endif %}{{render_c_actual_arg(arg)}}
-            {%- endfor -%}
-        )
-    {%- endmacro -%}
-
-    // Free Functions
-
-    {% for function in by_category["function"] if not function.no_cpp %}
-        inline {{as_cppType(function.return_type.name)}} {{as_cppType(function.name)}}(
-            {%- for arg in function.arguments -%}
-                {%- if not loop.first %}, {% endif -%}
-                {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
-            {%- endfor -%}
-        ) {
-            {% if function.return_type.name.concatcase() == "void" %}
-                {{render_function_call(function)}};
-            {% else %}
-                auto result = {{render_function_call(function)}};
-                return {{convert_cType_to_cppType(function.return_type, 'value', 'result')}};
-            {% endif %}
-        }
-    {% endfor %}
-
-     // ChainedStruct
-    {% set c_prefix = metadata.c_prefix %}
-    static_assert(sizeof(ChainedStruct) == sizeof({{c_prefix}}ChainedStruct),
-            "sizeof mismatch for ChainedStruct");
-    static_assert(alignof(ChainedStruct) == alignof({{c_prefix}}ChainedStruct),
-            "alignof mismatch for ChainedStruct");
-    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof({{c_prefix}}ChainedStruct, next),
-            "offsetof mismatch for ChainedStruct::nextInChain");
-    static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStruct, sType),
-            "offsetof mismatch for ChainedStruct::sType");
-
-    {% for type in by_category["structure"] %}
-        {% set Out = "Out" if type.output else "" %}
-        {% set const = "const" if not type.output else "" %}
-        {% if type.chained %}
-            {% for root in type.chain_roots %}
-                // Can be chained in {{as_cppType(root.name)}}
-            {% endfor %}
-            struct {{as_cppType(type.name)}} : ChainedStruct{{Out}} {
-                {{as_cppType(type.name)}}() {
-                    sType = SType::{{type.name.CamelCase()}};
-                }
-        {% else %}
-            struct {{as_cppType(type.name)}} {
-                {% if type.has_free_members_function %}
-                    {{as_cppType(type.name)}}() = default;
-                {% endif %}
+            static inline void Reset({{as_cppType(type.name)}}& value);
         {% endif %}
-            {% if type.has_free_members_function %}
-                inline ~{{as_cppType(type.name)}}();
-                {{as_cppType(type.name)}}(const {{as_cppType(type.name)}}&) = delete;
-                {{as_cppType(type.name)}}& operator=(const {{as_cppType(type.name)}}&) = delete;
-                inline {{as_cppType(type.name)}}({{as_cppType(type.name)}}&&);
-                inline {{as_cppType(type.name)}}& operator=({{as_cppType(type.name)}}&&);
-            {% endif %}
-            {% if type.extensible %}
-                ChainedStruct{{Out}} {{const}} * nextInChain = nullptr;
-            {% endif %}
-            {% for member in type.members %}
-                {% set member_declaration = as_annotated_cppType(member, type.has_free_members_function) + render_cpp_default_value(member, True, type.has_free_members_function) %}
-                {% if type.chained and loop.first %}
-                    //* Align the first member after ChainedStruct to match the C struct layout.
-                    //* It has to be aligned both to its natural and ChainedStruct's alignment.
-                    static constexpr size_t kFirstMemberAlignment = detail::ConstexprMax(alignof(ChainedStruct{{out}}), alignof({{decorate("", as_cppType(member.type.name), member)}}));
-                    alignas(kFirstMemberAlignment) {{member_declaration}};
-                {% else %}
-                    {{member_declaration}};
-                {% endif %}
-            {% endfor %}
-            {% if type.has_free_members_function %}
+    };
 
-              private:
-                static inline void Reset({{as_cppType(type.name)}}& value);
-            {% endif %}
-        };
+{% endfor %}
 
-    {% endfor %}
-
-    {%- if metadata.namespace != 'wgpu' %}
-        // The operators of webgpu_enum_class_bitmasks.h are in the wgpu:: namespace,
-        // and need to be imported into this namespace for Argument Dependent Lookup.
-        WGPU_IMPORT_BITMASK_OPERATORS
-    {% endif %}
+{%- if metadata.namespace != 'wgpu' %}
+    // The operators of webgpu_enum_class_bitmasks.h are in the wgpu:: namespace,
+    // and need to be imported into this namespace for Argument Dependent Lookup.
+    WGPU_IMPORT_BITMASK_OPERATORS
+{% endif %}
 
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 // error: 'offsetof' within non-standard-layout type '{{metadata.namespace}}::XXX' is conditionally-supported
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
 #endif
-    {% for type in by_category["structure"] %}
-        {% set CppType = as_cppType(type.name) %}
-        {% set CType = as_cType(type.name) %}
-        // {{CppType}} implementation
-        {% if type.has_free_members_function %}
-            {{CppType}}::~{{CppType}}() {
-                if (
-                    {%- for member in type.members if member.annotation != 'value' %}
-                        {% if not loop.first %} || {% endif -%}
-                        this->{{member.name.camelCase()}} != nullptr
-                    {%- endfor -%}
-                ) {
-                    {{as_cMethod(type.name, Name("free members"))}}(
-                        *reinterpret_cast<{{as_cType(type.name)}}*>(this));
-                }
+{% for type in by_category["structure"] %}
+    {% set CppType = as_cppType(type.name) %}
+    {% set CType = as_cType(type.name) %}
+    // {{CppType}} implementation
+    {% if type.has_free_members_function %}
+        {{CppType}}::~{{CppType}}() {
+            if (
+                {%- for member in type.members if member.annotation != 'value' %}
+                    {% if not loop.first %} || {% endif -%}
+                    this->{{member.name.camelCase()}} != nullptr
+                {%- endfor -%}
+            ) {
+                {{as_cMethod(type.name, Name("free members"))}}(
+                    *reinterpret_cast<{{as_cType(type.name)}}*>(this));
             }
+        }
 
-            {{CppType}}::{{CppType}}({{CppType}}&& rhs)
-                : {% for member in type.members %}
-                {%- set memberName = member.name.camelCase() -%}
-                {{memberName}}(rhs.{{memberName}}){% if not loop.last %},{{"\n            "}}{% endif %}
-            {% endfor -%}
-            {
-                Reset(rhs);
-            }
+        {{CppType}}::{{CppType}}({{CppType}}&& rhs)
+            : {% for member in type.members %}
+            {%- set memberName = member.name.camelCase() -%}
+            {{memberName}}(rhs.{{memberName}}){% if not loop.last %},{{"\n            "}}{% endif %}
+        {% endfor -%}
+        {
+            Reset(rhs);
+        }
 
-            {{CppType}}& {{CppType}}::operator=({{CppType}}&& rhs) {
-                if (&rhs == this) {
-                    return *this;
-                }
-                this->~{{CppType}}();
-                {% for member in type.members %}
-                    detail::AsNonConstReference(this->{{member.name.camelCase()}}) = std::move(rhs.{{member.name.camelCase()}});
-                {% endfor %}
-                Reset(rhs);
+        {{CppType}}& {{CppType}}::operator=({{CppType}}&& rhs) {
+            if (&rhs == this) {
                 return *this;
             }
+            this->~{{CppType}}();
+            {% for member in type.members %}
+                detail::AsNonConstReference(this->{{member.name.camelCase()}}) = std::move(rhs.{{member.name.camelCase()}});
+            {% endfor %}
+            Reset(rhs);
+            return *this;
+        }
 
-             // static
-            void {{CppType}}::Reset({{CppType}}& value) {
-                {{CppType}} defaultValue{};
-                {% for member in type.members %}
-                    detail::AsNonConstReference(value.{{member.name.camelCase()}}) = defaultValue.{{member.name.camelCase()}};
-                {% endfor %}
-            }
-        {% endif %}
+            // static
+        void {{CppType}}::Reset({{CppType}}& value) {
+            {{CppType}} defaultValue{};
+            {% for member in type.members %}
+                detail::AsNonConstReference(value.{{member.name.camelCase()}}) = defaultValue.{{member.name.camelCase()}};
+            {% endfor %}
+        }
+    {% endif %}
 
-        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
-        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
-        {% if type.extensible %}
-            static_assert(offsetof({{CppType}}, nextInChain) == offsetof({{CType}}, nextInChain),
-                    "offsetof mismatch for {{CppType}}::nextInChain");
-        {% endif %}
-        {% for member in type.members %}
-            {% set memberName = member.name.camelCase() %}
-            static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
-                    "offsetof mismatch for {{CppType}}::{{memberName}}");
-        {% endfor %}
-
+    static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+    static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
+    {% if type.extensible %}
+        static_assert(offsetof({{CppType}}, nextInChain) == offsetof({{CType}}, nextInChain),
+                "offsetof mismatch for {{CppType}}::nextInChain");
+    {% endif %}
+    {% for member in type.members %}
+        {% set memberName = member.name.camelCase() %}
+        static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
+                "offsetof mismatch for {{CppType}}::{{memberName}}");
     {% endfor %}
+
+{% endfor %}
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
-    {% for type in by_category["object"] %}
-        {% set CppType = as_cppType(type.name) %}
-        {% set CType = as_cType(type.name) %}
-        // {{CppType}} implementation
+{% for type in by_category["object"] %}
+    {% set CppType = as_cppType(type.name) %}
+    {% set CType = as_cType(type.name) %}
+    // {{CppType}} implementation
 
-        {% for method in type.methods %}
-            {{render_cpp_method_declaration(type, method, dfn=True)}} {
-                {% for arg in method.arguments if arg.type.has_free_members_function and arg.annotation == '*' %}
-                    *{{as_varName(arg.name)}} = {{as_cppType(arg.type.name)}}();
-                {% endfor %}
-                {% if method.return_type.name.concatcase() == "void" %}
-                    {{render_cpp_to_c_method_call(type, method)}};
-                {% else %}
-                    auto result = {{render_cpp_to_c_method_call(type, method)}};
-                    return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
-                {% endif %}
-            }
-        {% endfor %}
-        void {{CppType}}::{{c_prefix}}AddRef({{CType}} handle) {
-            if (handle != nullptr) {
-                {{as_cMethod(type.name, Name("add ref"))}}(handle);
-            }
+    {% for method in type.methods %}
+        {{render_cpp_method_declaration(type, method, dfn=True)}} {
+            {% for arg in method.arguments if arg.type.has_free_members_function and arg.annotation == '*' %}
+                *{{as_varName(arg.name)}} = {{as_cppType(arg.type.name)}}();
+            {% endfor %}
+            {% if method.return_type.name.concatcase() == "void" %}
+                {{render_cpp_to_c_method_call(type, method)}};
+            {% else %}
+                auto result = {{render_cpp_to_c_method_call(type, method)}};
+                return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
+            {% endif %}
         }
-        void {{CppType}}::{{c_prefix}}Release({{CType}} handle) {
-            if (handle != nullptr) {
-                {{as_cMethod(type.name, Name("release"))}}(handle);
-            }
-        }
-        static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
-        static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
-
     {% endfor %}
+    void {{CppType}}::{{c_prefix}}AddRef({{CType}} handle) {
+        if (handle != nullptr) {
+            {{as_cMethod(type.name, Name("add ref"))}}(handle);
+        }
+    }
+    void {{CppType}}::{{c_prefix}}Release({{CType}} handle) {
+        if (handle != nullptr) {
+            {{as_cMethod(type.name, Name("release"))}}(handle);
+        }
+    }
+    static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
+    static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
+
+{% endfor %}
 
 }  // namespace {{metadata.namespace}}
 
 namespace wgpu {
-    {% for type in by_category["bitmask"] %}
-        template<>
-        struct IsWGPUBitmask<{{metadata.namespace}}::{{as_cppType(type.name)}}> {
-            static constexpr bool enable = true;
-        };
+{% for type in by_category["bitmask"] %}
+    template<>
+    struct IsWGPUBitmask<{{metadata.namespace}}::{{as_cppType(type.name)}}> {
+        static constexpr bool enable = true;
+    };
 
-    {% endfor %}
+{% endfor %}
 } // namespace wgpu
 
 namespace std {
