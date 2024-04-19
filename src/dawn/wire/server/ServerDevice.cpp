@@ -27,6 +27,9 @@
 
 #include "dawn/wire/server/Server.h"
 
+#include "dawn/wire/Wire.h"
+#include "dawn/wire/WireResult.h"
+
 namespace dawn::wire::server {
 
 void Server::OnUncapturedError(ObjectHandle device, WGPUErrorType type, const char* message) {

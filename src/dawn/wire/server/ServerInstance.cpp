@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "dawn/wire/SupportedFeatures.h"
+#include "dawn/wire/server/ObjectStorage.h"
 #include "dawn/wire/server/Server.h"
 
 namespace dawn::wire::server {

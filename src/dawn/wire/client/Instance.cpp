@@ -33,6 +33,7 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/common/WGSLFeatureMapping.h"
+#include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/EventManager.h"
 #include "partition_alloc/pointers/raw_ptr.h"

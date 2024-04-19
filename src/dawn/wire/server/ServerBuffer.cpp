@@ -31,6 +31,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/WireCmd_autogen.h"
+#include "dawn/wire/WireResult.h"
 #include "dawn/wire/server/Server.h"
 
 namespace dawn::wire::server {
