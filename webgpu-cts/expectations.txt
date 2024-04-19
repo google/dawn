@@ -546,6 +546,14 @@ crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,access
 crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,access,structure,index:param:member_types=["bool","u32","f16","vec3f","vec2i"] [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,access,structure,index:param:member_types=["i32","f16","vec4i","mat3x2f"] [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,access,structure,index:param:member_types=["i32","u32","f32","f16","vec3f","vec4i"] [ Failure ]
+crbug.com/dawn/2500 [ android-pixel-6 android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/dawn/2500 [ android-pixel-6 android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/dawn/2500 [ android-pixel-6 android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/dawn/2500 [ android-pixel-6 android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/dawn/2500 [ android-pixel-6 android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/dawn/2500 [ android-pixel-6 android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/dawn/2500 [ android-pixel-6 android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/dawn/2500 [ android-pixel-6 android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 
 ################################################################################
 # Failures due to M2 Macbook OS upgrade
