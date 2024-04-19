@@ -702,6 +702,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         Apple5,
         Apple6,
         Apple7,
+        Mac1,
         Mac2,
     };
 
@@ -736,7 +737,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
                 return MTLGPUFamily::Apple1;
             }
 
-            DAWN_UNREACHABLE();
+            // This family is no longer supported in the macOS 10.15 SDK but still exists so
+            // default to it.
+            return MTLGPUFamily::Mac1;
         }
 
 #if DAWN_PLATFORM_IS(IOS) && \
