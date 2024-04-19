@@ -1098,7 +1098,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesWriteRead) {
 // followed by a read texture on a single SharedTextureMemory.
 TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesWriteConcurrentRead) {
     // TODO(dawn/2276): support concurrent read access.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() || IsVulkan());
+    DAWN_TEST_UNSUPPORTED_IF(IsVulkan());
 
     wgpu::SharedTextureMemory memory = GetParam().mBackend->CreateSharedTextureMemory(device);
 
@@ -1138,7 +1138,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesReadWrite) {
 // followed by a write texture on a single SharedTextureMemory.
 TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesConcurrentReadWrite) {
     // TODO(dawn/2276): support concurrent read access.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() || IsVulkan());
+    DAWN_TEST_UNSUPPORTED_IF(IsVulkan());
 
     wgpu::SharedTextureMemory memory = GetParam().mBackend->CreateSharedTextureMemory(device);
 
@@ -1196,7 +1196,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesReadRead) {
 // SharedTextureMemory.
 TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesConcurrentReadConcurrentRead) {
     // TODO(dawn/2276): support concurrent read access.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() || IsVulkan());
+    DAWN_TEST_UNSUPPORTED_IF(IsVulkan());
 
     wgpu::SharedTextureMemory memory = GetParam().mBackend->CreateSharedTextureMemory(device);
 
@@ -1221,7 +1221,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesConcurrentRead
 // SharedTextureMemory.
 TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesConcurrentReadRead) {
     // TODO(dawn/2276): support concurrent read access.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() || IsVulkan());
+    DAWN_TEST_UNSUPPORTED_IF(IsVulkan());
     wgpu::SharedTextureMemory memory = GetParam().mBackend->CreateSharedTextureMemory(device);
 
     wgpu::Texture readTexture1 = CreateReadTexture(memory);
@@ -1242,7 +1242,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesConcurrentRead
 // SharedTextureMemory.
 TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesReadConcurrentRead) {
     // TODO(dawn/2276): support concurrent read access.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() || IsVulkan());
+    DAWN_TEST_UNSUPPORTED_IF(IsVulkan());
     wgpu::SharedTextureMemory memory = GetParam().mBackend->CreateSharedTextureMemory(device);
 
     wgpu::Texture readTexture1 = CreateReadTexture(memory);
@@ -1263,7 +1263,7 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTexturesReadConcurrent
 // true.
 TEST_P(SharedTextureMemoryTests, ConcurrentWrite) {
     // TODO(dawn/2276): support concurrent read access.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() || IsVulkan());
+    DAWN_TEST_UNSUPPORTED_IF(IsVulkan());
 
     wgpu::SharedTextureMemory memory = GetParam().mBackend->CreateSharedTextureMemory(device);
 
@@ -2039,7 +2039,7 @@ TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite
 // Reads should happen strictly after the writes. The final write should wait for the reads.
 TEST_P(SharedTextureMemoryTests, SameDeviceWriteThenConcurrentReadThenWrite) {
     // TODO(dawn/2276): support concurrent read access.
-    DAWN_TEST_UNSUPPORTED_IF(IsD3D12() || IsVulkan());
+    DAWN_TEST_UNSUPPORTED_IF(IsVulkan());
 
     DAWN_TEST_UNSUPPORTED_IF(!GetParam().mBackend->SupportsConcurrentRead());
 
