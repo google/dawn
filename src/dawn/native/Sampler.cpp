@@ -37,7 +37,7 @@
 namespace dawn::native {
 
 namespace vulkan {
-struct SamplerYCbCrVulkanDescriptor;
+struct YCbCrVulkanDescriptor;
 }
 
 MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor) {
@@ -76,7 +76,7 @@ MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor
 
     UnpackedPtr<SamplerDescriptor> unpacked = Unpack(descriptor);
 
-    if (unpacked.Get<vulkan::SamplerYCbCrVulkanDescriptor>()) {
+    if (unpacked.Get<vulkan::YCbCrVulkanDescriptor>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::YCbCrVulkanSamplers), "%s is not enabled.",
                         wgpu::FeatureName::YCbCrVulkanSamplers);
     }

@@ -50,7 +50,7 @@ struct RequestAdapterOptionsGetGLProc;
 }
 
 namespace vulkan {
-struct SamplerYCbCrVulkanDescriptor;
+struct YCbCrVulkanDescriptor;
 }
 
 namespace detail {
@@ -104,13 +104,13 @@ struct AdditionalExtensions<SharedBufferMemoryDescriptor> {
 };
 
 template <>
-constexpr inline wgpu::SType STypeForImpl<vulkan::SamplerYCbCrVulkanDescriptor> =
-    wgpu::SType(WGPUSType_SamplerYCbCrVulkanDescriptor);
+constexpr inline wgpu::SType STypeForImpl<vulkan::YCbCrVulkanDescriptor> =
+    wgpu::SType(WGPUSType_YCbCrVulkanDescriptor);
 
 template <>
 struct AdditionalExtensions<SamplerDescriptor> {
     using List =
-        AdditionalExtensionsList<const vulkan::SamplerYCbCrVulkanDescriptor*>;
+        AdditionalExtensionsList<const vulkan::YCbCrVulkanDescriptor*>;
 };
 
 }  // namespace detail

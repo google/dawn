@@ -44,7 +44,7 @@ class YCbCrSamplerValidationTest : public ValidationTest {
 // if the required feature is not enabled.
 TEST_F(YCbCrSamplerValidationTest, YCbCrSamplerNotSupportedWithoutFeatureEnabled) {
     wgpu::SamplerDescriptor samplerDesc = {};
-    native::vulkan::SamplerYCbCrVulkanDescriptor samplerYCbCrDesc = {};
+    native::vulkan::YCbCrVulkanDescriptor samplerYCbCrDesc = {};
     samplerDesc.nextInChain = &samplerYCbCrDesc;
 
     ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
@@ -64,7 +64,7 @@ class YCbCrSamplerWithFeatureValidationTest : public YCbCrSamplerValidationTest 
 // required feature is enabled.
 TEST_F(YCbCrSamplerWithFeatureValidationTest, YCbCrSamplerSupportedWhenFeatureEnabled) {
     wgpu::SamplerDescriptor samplerDesc = {};
-    native::vulkan::SamplerYCbCrVulkanDescriptor samplerYCbCrDesc = {};
+    native::vulkan::YCbCrVulkanDescriptor samplerYCbCrDesc = {};
     samplerYCbCrDesc.vulkanYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
     samplerDesc.nextInChain = &samplerYCbCrDesc;
 

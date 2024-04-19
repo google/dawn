@@ -283,8 +283,8 @@ OnInstanceCreationDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT mess
 
 }  // anonymous namespace
 
-SamplerYCbCrVulkanDescriptor::SamplerYCbCrVulkanDescriptor() {
-    sType = wgpu::SType::SamplerYCbCrVulkanDescriptor;
+YCbCrVulkanDescriptor::YCbCrVulkanDescriptor() {
+    sType = wgpu::SType::YCbCrVulkanDescriptor;
 }
 
 VulkanInstance::VulkanInstance() = default;
