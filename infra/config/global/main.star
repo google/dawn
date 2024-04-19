@@ -563,6 +563,7 @@ _os_arch_to_branch_builder = {
     "mac": "dawn-mac-x64-deps-rel",
     "mac-arm64": "dawn-mac-arm64-deps-rel",
     "win": "dawn-win10-x64-deps-rel",
+    "win-arm64": "dawn-win11-arm64-deps-rel",
     "android-arm": "dawn-android-arm-deps-rel",
     "android-arm64": "dawn-android-arm64-deps-rel",
 }
@@ -572,6 +573,7 @@ _os_arch_to_dawn_cq_builder = {
     "mac": "mac-dawn-rel",
     "mac-arm64": "mac-arm64-dawn-rel",
     "win": "win-dawn-rel",
+    "win-arm64": "win11-arm64-dawn-rel",
     "android-arm": "android-dawn-arm-rel",
     "android-arm64": "android-dawn-arm64-rel",
 }
@@ -582,6 +584,7 @@ _os_arch_to_min_milestone = {
     "mac": 112,
     "mac-arm64": 122,
     "win": 112,
+    "win-arm64": 126,
     "android-arm": None,
     "android-arm64": None,
 }
@@ -760,6 +763,7 @@ chromium_dawn_tryjob("linux")
 chromium_dawn_tryjob("mac")
 chromium_dawn_tryjob("mac", "arm64")
 chromium_dawn_tryjob("win")
+chromium_dawn_tryjob("win", "arm64")
 chromium_dawn_tryjob("android", "arm")
 chromium_dawn_tryjob("android", "arm64")
 
