@@ -28,10 +28,13 @@
 #include <string>
 #include <utility>
 
+#include "dawn/native/DawnNative.h"
 #include "dawn/native/SharedResourceMemory.h"
+#include "dawn/native/dawn_platform_autogen.h"
 #include "dawn/tests/unittests/native/mocks/BufferMock.h"
 #include "dawn/tests/unittests/native/mocks/DawnMockTest.h"
 #include "dawn/tests/unittests/native/mocks/TextureMock.h"
+#include "gtest/gtest.h"
 
 namespace dawn::native {
 namespace {

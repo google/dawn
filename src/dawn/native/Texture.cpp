@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "absl/strings/str_format.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"

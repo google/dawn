@@ -33,6 +33,7 @@
 #include <string>
 #include <utility>
 
+#include "absl/strings/str_format.h"
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Assert.h"
 #include "dawn/native/Adapter.h"

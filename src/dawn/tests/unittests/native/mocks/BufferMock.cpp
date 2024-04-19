@@ -27,6 +27,8 @@
 
 #include "dawn/tests/unittests/native/mocks/BufferMock.h"
 
+#include <memory>
+
 #include "dawn/native/ChainUtils.h"
 
 namespace dawn::native {
