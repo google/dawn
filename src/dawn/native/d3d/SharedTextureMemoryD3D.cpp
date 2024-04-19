@@ -46,7 +46,7 @@ SharedTextureMemory::SharedTextureMemory(d3d::Device* device,
 MaybeError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
-    DAWN_TRY(descriptor.ValidateSubset<>());
+    DAWN_TRY(descriptor.ValidateSubset<SharedTextureMemoryD3DSwapchainBeginState>());
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         SharedFenceBase* fence = descriptor->fences[i];
 

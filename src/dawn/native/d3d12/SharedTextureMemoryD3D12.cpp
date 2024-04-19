@@ -129,6 +129,11 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     DAWN_TRY(d3d::SharedTextureMemory::BeginAccessImpl(texture, descriptor));
+
+    if (auto* beginState = descriptor.Get<SharedTextureMemoryD3DSwapchainBeginState>()) {
+        ToBackend(texture)->SetIsSwapchainTexture(beginState->isSwapchain);
+    }
+
     // Reset state to COMMON. BeginAccess contains a list of fences to wait on after
     // which the texture's usage will complete on the GPU.
     // All textures created from SharedTextureMemory must have

@@ -477,6 +477,10 @@ void Texture::NotifySwapChainPresentToPIX() {
     }
 }
 
+void Texture::SetIsSwapchainTexture(bool isSwapChainTexture) {
+    mSwapChainTexture = isSwapChainTexture;
+}
+
 void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                          wgpu::TextureUsage usage,
                                          const SubresourceRange& range) {
