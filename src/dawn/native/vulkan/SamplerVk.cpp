@@ -122,7 +122,8 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
     }
 
     VkSamplerYcbcrConversionInfo samplerYCbCrInfo = {};
-    if (auto* vulkanYCbCrDescriptor = Unpack(descriptor).Get<vulkan::YCbCrVulkanDescriptor>()) {
+    if (auto* vulkanYCbCrDescriptor =
+            Unpack(descriptor).Get<vulkan::SamplerYCbCrVulkanDescriptor>()) {
         const VkSamplerYcbcrConversionCreateInfo& vulkanYCbCrInfo =
             vulkanYCbCrDescriptor->vulkanYCbCrInfo;
 #if DAWN_PLATFORM_IS(ANDROID)

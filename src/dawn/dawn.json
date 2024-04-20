@@ -3745,7 +3745,7 @@
             {"value": 1214, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]},
             {"value": 1215, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 1216, "name": "static sampler binding layout", "tags": ["dawn"]},
-            {"value": 1217, "name": "y cb cr vulkan descriptor", "tags": ["dawn", "native"]}
+            {"value": 1217, "name": "sampler y cb cr vulkan descriptor", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

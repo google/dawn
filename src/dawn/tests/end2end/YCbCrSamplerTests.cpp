@@ -59,7 +59,7 @@ class YCbCrSamplerTest : public DawnTest {
 // Test that it is possible to create the sampler with ycbcr sampler descriptor.
 TEST_P(YCbCrSamplerTest, YCbCrSamplerValidWhenFeatureEnabled) {
     wgpu::SamplerDescriptor samplerDesc = {};
-    native::vulkan::YCbCrVulkanDescriptor samplerYCbCrDesc = {};
+    native::vulkan::SamplerYCbCrVulkanDescriptor samplerYCbCrDesc = {};
     samplerYCbCrDesc.vulkanYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
     samplerYCbCrDesc.vulkanYCbCrInfo.pNext = nullptr;
     samplerYCbCrDesc.vulkanYCbCrInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
@@ -73,7 +73,7 @@ TEST_P(YCbCrSamplerTest, YCbCrSamplerValidWhenFeatureEnabled) {
 // format set.
 TEST_P(YCbCrSamplerTest, YCbCrSamplerValidWithOnlyVkFormat) {
     wgpu::SamplerDescriptor samplerDesc = {};
-    native::vulkan::YCbCrVulkanDescriptor samplerYCbCrDesc = {};
+    native::vulkan::SamplerYCbCrVulkanDescriptor samplerYCbCrDesc = {};
     samplerYCbCrDesc.vulkanYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
     samplerYCbCrDesc.vulkanYCbCrInfo.pNext = nullptr;
     samplerYCbCrDesc.vulkanYCbCrInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
@@ -97,7 +97,7 @@ TEST_P(YCbCrSamplerTest, YCbCrSamplerValidWithOnlyVkFormat) {
 // format set.
 TEST_P(YCbCrSamplerTest, YCbCrSamplerValidWithOnlyExternalFormat) {
     wgpu::SamplerDescriptor samplerDesc = {};
-    native::vulkan::YCbCrVulkanDescriptor samplerYCbCrDesc = {};
+    native::vulkan::SamplerYCbCrVulkanDescriptor samplerYCbCrDesc = {};
     samplerYCbCrDesc.vulkanYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
     samplerYCbCrDesc.vulkanYCbCrInfo.pNext = nullptr;
     // format is set as externalFormat.
@@ -121,7 +121,7 @@ TEST_P(YCbCrSamplerTest, YCbCrSamplerValidWithOnlyExternalFormat) {
 // set.
 TEST_P(YCbCrSamplerTest, YCbCrSamplerInvalidWithNoFormat) {
     wgpu::SamplerDescriptor samplerDesc = {};
-    native::vulkan::YCbCrVulkanDescriptor samplerYCbCrDesc = {};
+    native::vulkan::SamplerYCbCrVulkanDescriptor samplerYCbCrDesc = {};
     samplerYCbCrDesc.vulkanYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
     samplerYCbCrDesc.vulkanYCbCrInfo.pNext = nullptr;
     samplerYCbCrDesc.vulkanYCbCrInfo.format = VK_FORMAT_UNDEFINED;
