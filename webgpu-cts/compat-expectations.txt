@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-04-16 06:44:05AM
+# Last rolled: 2024-04-20 09:27:42AM
 
 # Flaky on all platforms
 # KEEP
@@ -142,6 +142,14 @@ crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,sto
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=1 [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
+
+# Tests on maxInterStageShaderVariables and maxInterStageShaderComponents need to be updated to
+# match the latest WebGPU SPEC
+# KEEP
+crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxInterStageShaderComponents" [ Skip ]
+crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxInterStageShaderComponents" [ Skip ]
+crbug.com/dawn/2398 webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Skip ]
+crbug.com/dawn/2398 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,* [ Skip ]
 
 ################################################################################
 # Failures due to splitting off worker tests (crbug.com/330501141)
@@ -226,18 +234,8 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:ai_t
 crbug.com/dawn/2086 webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="_undef_";forceFallbackAdapter=true [ Failure ]
 crbug.com/dawn/2086 webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="high-performance";forceFallbackAdapter=true [ Failure ]
 crbug.com/dawn/2086 webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="low-power";forceFallbackAdapter=true [ Failure ]
-crbug.com/dawn/2086 webgpu:util,texture,texel_data:unorm_texel_data_in_shader:format="rgba8unorm-srgb" [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-
-# Tests on maxInterStageShaderVariables and maxInterStageShaderComponents need to be updated to
-# match the latest WebGPU SPEC
-# KEEP
-crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:default:* [ Skip ]
-crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxInterStageShaderComponents" [ Skip ]
-crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxInterStageShaderComponents" [ Skip ]
-crbug.com/dawn/2398 webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Skip ]
-crbug.com/dawn/2398 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,* [ Skip ]
 
 ### This section represents things that will require Compat validation
 ### These tests will never pass, but should be skipped in CTS once Compat
@@ -260,11 +258,6 @@ crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:i
 crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_type_names:* [ Failure ]
 
 crbug.com/tint/2230 webgpu:shader,execution,expression,call,builtin,fract:abstract_float:* [ Failure ]
-
-# Device Lost issue (only fails in Telemetry, not in browser standalone)
-# Also failing in core WebGPU
-crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=false [ Failure ]
-crbug.com/dawn/2087 webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
 
 ### This section represents issues that are likely bugs in ANGLE
 
@@ -537,3 +530,28 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,binary,a
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,cross:abstract_float:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="storage_rw" [ RetryOnFailure ]
+
+################################################################################
+# New failures. Please triage:
+################################################################################
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f16:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="storage_r";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="storage_r";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="storage_r";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="storage_rw";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="storage_rw";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="storage_rw";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="uniform";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="private";access_mode="";trailing_comma=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="";trailing_comma=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="read";trailing_comma=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="read_write";trailing_comma=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="uniform";access_mode="";trailing_comma=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="workgroup";access_mode="";trailing_comma=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:* [ Failure ]
