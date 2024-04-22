@@ -35,6 +35,11 @@
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/macros/static_init.h"
 
+#if TINT_BUILD_WGSL_WRITER
+#include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
+#endif
+
 namespace tint::fuzz::wgsl {
 namespace {
 
@@ -63,6 +68,17 @@ void Register(const ProgramFuzzer& fuzzer) {
 void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& options) {
     tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
+#if TINT_BUILD_WGSL_WRITER
+    // Register the Program printer. This is used for debugging purposes.
+    tint::Program::printer = [](const tint::Program& program) {
+        auto result = tint::wgsl::writer::Generate(program, {});
+        if (result != Success) {
+            return result.Failure().reason.Str();
+        }
+        return result->wgsl;
+    };
+#endif
+
     // Ensure that fuzzers are sorted. Without this, the fuzzers may be registered in any order,
     // leading to non-determinism, which we must avoid.
     TINT_STATIC_INIT(Fuzzers().Sort([](auto& a, auto& b) { return a.name < b.name; }));
@@ -80,13 +96,20 @@ void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& opti
     if (options.run_concurrently) {
         size_t n = Fuzzers().Length();
         tint::Vector<std::thread, 32> threads;
-        threads.Resize(n);
+        threads.Reserve(n);
         for (size_t i = 0; i < n; i++) {
-            threads[i] = std::thread([i, &program, &data] {
+            if (!options.filter.empty() &&
+                Fuzzers()[i].name.find(options.filter) == std::string::npos) {
+                continue;
+            }
+            threads.Push(std::thread([i, &program, &data, &options] {
                 auto& fuzzer = Fuzzers()[i];
                 currently_running = fuzzer.name;
+                if (options.verbose) {
+                    std::cout << " • [" << i << "] Running: " << currently_running << std::endl;
+                }
                 fuzzer.fn(program, data);
-            });
+            }));
         }
         for (auto& thread : threads) {
             thread.join();
@@ -94,7 +117,14 @@ void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& opti
     } else {
         TINT_DEFER(currently_running = "");
         for (auto& fuzzer : Fuzzers()) {
+            if (!options.filter.empty() && fuzzer.name.find(options.filter) == std::string::npos) {
+                continue;
+            }
+
             currently_running = fuzzer.name;
+            if (options.verbose) {
+                std::cout << " • Running: " << currently_running << std::endl;
+            }
             fuzzer.fn(program, data);
         }
     }

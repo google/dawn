@@ -56,6 +56,7 @@ if (tint_build_wgsl_reader) {
       "${tint_src_dir}/lang/wgsl/features",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
       "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
@@ -74,6 +75,10 @@ if (tint_build_wgsl_reader) {
 
     if (tint_build_wgsl_reader) {
       deps += [ "${tint_src_dir}/lang/wgsl/reader" ]
+    }
+
+    if (tint_build_wgsl_writer) {
+      deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
     }
   }
 }

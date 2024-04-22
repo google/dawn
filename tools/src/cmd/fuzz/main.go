@@ -29,9 +29,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -75,6 +77,7 @@ func run() error {
 	build := ""
 	flag.BoolVar(&t.verbose, "verbose", false, "print additional output")
 	flag.BoolVar(&check, "check", false, "check that all the end-to-end test do not fail")
+	flag.StringVar(&t.filter, "filter", "", "filter the fuzzers run to those with this substring")
 	flag.StringVar(&t.corpus, "corpus", defaultCorpusDir(), "the corpus directory")
 	flag.StringVar(&build, "build", defaultBuildDir(), "the build directory")
 	flag.StringVar(&t.out, "out", "<tmp>", "the directory to hold generated test files")
@@ -127,6 +130,7 @@ func run() error {
 
 type tool struct {
 	verbose      bool
+	filter       string // filter fuzzers to those with this substring
 	corpus       string // directory of test files
 	out          string // where to emit new test files
 	wgslFuzzer   string // path to tint_wgsl_fuzzer
@@ -189,19 +193,35 @@ func (t tool) run() error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	args := []string{t.out, t.corpus}
+	if t.verbose {
+		args = append(args, "--verbose")
+	}
+	if t.filter != "" {
+		args = append(args, "--filter="+t.filter)
+	}
+
 	fmt.Println("running", t.numProcesses, "fuzzer instances")
 	errs := make(chan error, t.numProcesses)
 	for i := 0; i < t.numProcesses; i++ {
 		go func() {
-			if out, err := exec.CommandContext(ctx, t.wgslFuzzer, t.out, t.corpus).CombinedOutput(); err != nil {
+			cmd := exec.CommandContext(ctx, t.wgslFuzzer, args...)
+			out := bytes.Buffer{}
+			cmd.Stdout = &out
+			cmd.Stderr = &out
+			if t.verbose {
+				cmd.Stdout = io.MultiWriter(&out, os.Stdout)
+				cmd.Stderr = io.MultiWriter(&out, os.Stderr)
+			}
+			if err := cmd.Run(); err != nil {
 				if ctxErr := ctx.Err(); ctxErr != nil {
 					errs <- ctxErr
 				} else {
 					_, fuzzer := filepath.Split(t.wgslFuzzer)
-					errs <- fmt.Errorf("%v failed with %v\n\n%v", fuzzer, err, string(out))
+					errs <- fmt.Errorf("%v failed with %v\n\n%v", fuzzer, err, out.String())
 				}
 			} else {
-				errs <- fmt.Errorf("fuzzer unexpectedly terminated without error:\n%v", string(out))
+				errs <- fmt.Errorf("fuzzer unexpectedly terminated without error:\n%v", out.String())
 			}
 		}()
 	}

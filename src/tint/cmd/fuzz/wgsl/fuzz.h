@@ -78,8 +78,12 @@ struct ProgramFuzzer {
 
 /// Options for Run()
 struct Options {
+    /// If not empty, only run the fuzzers with the given substring.
+    std::string filter;
     /// If true, the fuzzers will be run concurrently on separate threads.
     bool run_concurrently = false;
+    /// If true, print the fuzzer name to stdout before running.
+    bool verbose = false;
 };
 
 /// Runs all the registered WGSL fuzzers with the supplied WGSL

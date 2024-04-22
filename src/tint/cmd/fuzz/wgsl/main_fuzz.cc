@@ -70,8 +70,12 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     };
 
     auto& opt_help = opts.Add<tint::cli::BoolOption>("help", "shows the usage");
+    auto& opt_filter = opts.Add<tint::cli::StringOption>(
+        "filter", "runs only the fuzzers with the given substring");
     auto& opt_concurrent =
         opts.Add<tint::cli::BoolOption>("concurrent", "runs the fuzzers concurrently");
+    auto& opt_verbose =
+        opts.Add<tint::cli::BoolOption>("verbose", "prints the name of each fuzzer before running");
 
     tint::cli::ParseOptions parse_opts;
     parse_opts.ignore_unknown = true;
@@ -86,6 +90,8 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
         return 0;
     }
 
+    options.filter = opt_filter.value.value_or("");
     options.run_concurrently = opt_concurrent.value.value_or(false);
+    options.verbose = opt_verbose.value.value_or(false);
     return 0;
 }
