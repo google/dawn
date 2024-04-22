@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
+void f() {
+  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    discard_fragment();
+    return;
+  }
+}
+

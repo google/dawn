@@ -588,10 +588,8 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     current_label_id_ = current_function_.label_id();
     TINT_DEFER(current_function_ = Function());
 
-    for (auto* stmt : func_ast->body->statements) {
-        if (!GenerateStatement(stmt)) {
-            return false;
-        }
+    if (!GenerateBlockStatementWithoutScoping(func_ast->body)) {
+        return false;
     }
 
     if (InsideBasicBlock()) {
@@ -2198,6 +2196,9 @@ bool Builder::GenerateBlockStatement(const ast::BlockStatement* stmt) {
 
 bool Builder::GenerateBlockStatementWithoutScoping(const ast::BlockStatement* stmt) {
     for (auto* block_stmt : stmt->statements) {
+        if (!InsideBasicBlock()) {
+            break;
+        }
         if (!GenerateStatement(block_stmt)) {
             return false;
         }
