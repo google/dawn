@@ -3931,22 +3931,20 @@ fn main() {
     Inspector& inspector = Initialize(shader);
     auto info = inspector.GetTextureQueries("main");
 
-    ASSERT_EQ(1u, info.size());
-
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumSamples, info[0].type);
-    EXPECT_EQ(2u, info[0].group);
-    EXPECT_EQ(3u, info[0].binding);
+    ASSERT_EQ(0u, info.size());
 }
 
 TEST_F(InspectorTextureTest, TextureLoadMultipleInEP) {
     std::string shader = R"(
 @group(2) @binding(3) var tex1: texture_2d<f32>;
 @group(1) @binding(4) var tex2: texture_multisampled_2d<f32>;
+@group(0) @binding(1) var tex3: texture_2d<f32>;
 
 @compute @workgroup_size(1)
 fn main() {
   let num1 = textureLoad(tex1, vec2(0, 0), 0);
   let num2 = textureLoad(tex2, vec2(0, 0), 0);
+  let num3 = textureLoad(tex3, vec2(0, 0), 0);
 })";
 
     Inspector& inspector = Initialize(shader);
@@ -3957,9 +3955,9 @@ fn main() {
     EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[0].type);
     EXPECT_EQ(2u, info[0].group);
     EXPECT_EQ(3u, info[0].binding);
-    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumSamples, info[1].type);
-    EXPECT_EQ(1u, info[1].group);
-    EXPECT_EQ(4u, info[1].binding);
+    EXPECT_EQ(Inspector::TextureQueryType::kTextureNumLevels, info[1].type);
+    EXPECT_EQ(0u, info[1].group);
+    EXPECT_EQ(1u, info[1].binding);
 }
 
 TEST_F(InspectorTextureTest, TextureInSubfunction) {
