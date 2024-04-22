@@ -432,22 +432,7 @@ MaybeError QueueBase::WriteBufferImpl(BufferBase* buffer,
                                       uint64_t bufferOffset,
                                       const void* data,
                                       size_t size) {
-    if (size == 0) {
-        return {};
-    }
-
-    DeviceBase* device = GetDevice();
-
-    UploadHandle uploadHandle;
-    DAWN_TRY_ASSIGN(uploadHandle,
-                    device->GetDynamicUploader()->Allocate(size, GetPendingCommandSerial(),
-                                                           kCopyBufferToBufferOffsetAlignment));
-    DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
-
-    memcpy(uploadHandle.mappedBuffer, data, size);
-
-    return device->CopyFromStagingToBuffer(uploadHandle.stagingBuffer, uploadHandle.startOffset,
-                                           buffer, bufferOffset, size);
+    return buffer->UploadData(bufferOffset, data, size);
 }
 
 void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
