@@ -134,9 +134,6 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     // Multisample state.
     DAWN_ASSERT(sampleCount > 1);
     renderPipelineDesc.multisample.count = sampleCount;
-    DawnMultisampleStateRenderToSingleSampled msaaRenderToSingleSampledDesc = {};
-    msaaRenderToSingleSampledDesc.enabled = true;
-    renderPipelineDesc.multisample.nextInChain = &msaaRenderToSingleSampledDesc;
 
     // Bind group layout.
     Ref<BindGroupLayoutBase> bindGroupLayout;
@@ -161,11 +158,9 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
 
 }  // namespace
 
-MaybeError BlitMSAARenderToSingleSampledColorWithDraw(
-    DeviceBase* device,
-    RenderPassEncoder* renderEncoder,
-    const RenderPassDescriptor* renderPassDescriptor,
-    uint32_t renderPassImplicitSampleCount) {
+MaybeError ExpandResolveTextureWithDraw(DeviceBase* device,
+                                        RenderPassEncoder* renderEncoder,
+                                        const RenderPassDescriptor* renderPassDescriptor) {
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     DAWN_ASSERT(device->IsResolveTextureBlitWithDrawSupported());
 
@@ -173,11 +168,11 @@ MaybeError BlitMSAARenderToSingleSampledColorWithDraw(
     DAWN_ASSERT(renderPassDescriptor->colorAttachmentCount == 1);
 
     // The original color attachment of the render pass will be used as source.
-    TextureViewBase* src = renderPassDescriptor->colorAttachments[0].view;
-    TextureBase* srcTexture = src->GetTexture();
+    TextureViewBase* src = renderPassDescriptor->colorAttachments[0].resolveTarget;
+    TextureViewBase* dst = renderPassDescriptor->colorAttachments[0].view;
 
-    // DAWN_ASSERT that the src texture is not multisampled nor having more than 1 layer.
-    DAWN_ASSERT(srcTexture->GetSampleCount() == 1u);
+    TextureBase* dstTexture = dst->GetTexture();
+
     DAWN_ASSERT(src->GetLayerCount() == 1u);
     DAWN_ASSERT(src->GetDimension() == wgpu::TextureViewDimension::e2D);
 
@@ -186,12 +181,10 @@ MaybeError BlitMSAARenderToSingleSampledColorWithDraw(
         depthStencilFormat = renderPassDescriptor->depthStencilAttachment->view->GetFormat().format;
     }
 
-    DAWN_ASSERT(renderPassImplicitSampleCount > 1);
-
     Ref<RenderPipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline,
                     GetOrCreateColorBlitPipeline(device, src->GetFormat(), depthStencilFormat,
-                                                 renderPassImplicitSampleCount));
+                                                 /*sampleCount=*/dstTexture->GetSampleCount()));
 
     Ref<BindGroupLayoutBase> bgl;
     DAWN_TRY_ASSIGN(bgl, pipeline->GetBindGroupLayout(0));

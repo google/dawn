@@ -44,6 +44,11 @@ D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE D3D12BeginningAccessType(wgpu::LoadOp lo
             return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_CLEAR;
         case wgpu::LoadOp::Load:
             return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_PRESERVE;
+        case wgpu::LoadOp::ExpandResolveTexture:
+            // TODO(dawn:1710): Implement this on D3D12.
+            DAWN_UNREACHABLE();
+            break;
+
         case wgpu::LoadOp::Undefined:
             DAWN_UNREACHABLE();
             break;

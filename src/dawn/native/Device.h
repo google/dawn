@@ -174,10 +174,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     BindGroupLayoutBase* GetEmptyBindGroupLayout();
     PipelineLayoutBase* GetEmptyPipelineLayout();
 
-    ResultOrError<Ref<TextureViewBase>> CreateImplicitMSAARenderTextureViewFor(
-        const TextureViewBase* singleSampledTexture,
-        uint32_t sampleCount);
-
     ResultOrError<Ref<TextureViewBase>> GetOrCreatePlaceholderTextureViewForExternalTexture();
 
     ResultOrError<Ref<PipelineLayoutBase>> GetOrCreatePipelineLayout(

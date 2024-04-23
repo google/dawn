@@ -150,7 +150,7 @@ class MultisampledRenderingTest : public DawnTest {
                                                    uint32_t mipLevelCount = 1,
                                                    uint32_t arrayLayerCount = 1,
                                                    bool transientAttachment = false,
-                                                   bool supportMSAARenderToSingleSampled = false) {
+                                                   bool supportsTextureBinding = false) {
         wgpu::TextureDescriptor descriptor;
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kWidth << (mipLevelCount - 1);
@@ -166,7 +166,7 @@ class MultisampledRenderingTest : public DawnTest {
             descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         }
 
-        if (supportMSAARenderToSingleSampled) {
+        if (supportsTextureBinding) {
             descriptor.usage |= wgpu::TextureUsage::TextureBinding;
         }
 
@@ -1366,7 +1366,7 @@ class MultisampledRenderToSingleSampledTest : public MultisampledRenderingTest {
 TEST_P(MultisampledRenderToSingleSampledTest, DrawThenLoad) {
     auto singleSampledTexture =
         CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
-                                         /*supportMSAARenderToSingleSampled=*/true);
+                                         /*supportsTextureBinding=*/true);
 
     auto singleSampledTextureView = singleSampledTexture.CreateView();
 
@@ -1413,7 +1413,7 @@ TEST_P(MultisampledRenderToSingleSampledTest, DrawThenLoad) {
 TEST_P(MultisampledRenderToSingleSampledTest, ClearThenLoadThenDraw) {
     auto singleSampledTexture =
         CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
-                                         /*supportMSAARenderToSingleSampled=*/true);
+                                         /*supportsTextureBinding=*/true);
 
     auto singleSampledTextureView = singleSampledTexture.CreateView();
 
@@ -1467,7 +1467,7 @@ TEST_P(MultisampledRenderToSingleSampledTest, ClearThenLoadThenDraw) {
 TEST_P(MultisampledRenderToSingleSampledTest, DrawWithDepthTest) {
     auto singleSampledTexture =
         CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
-                                         /*supportMSAARenderToSingleSampled=*/true);
+                                         /*supportsTextureBinding=*/true);
 
     auto singleSampledTextureView = singleSampledTexture.CreateView();
 
@@ -1517,6 +1517,71 @@ TEST_P(MultisampledRenderToSingleSampledTest, DrawWithDepthTest) {
     VerifyResolveTarget(kGreen, singleSampledTexture);
 }
 
+class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
+    void SetUp() override {
+        MultisampledRenderingTest::SetUp();
+
+        // Skip all tests if the DawnLoadResolveTexture feature is not supported.
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::DawnLoadResolveTexture}));
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::DawnLoadResolveTexture})) {
+            requiredFeatures.push_back(wgpu::FeatureName::DawnLoadResolveTexture);
+        }
+        return requiredFeatures;
+    }
+};
+
+// Test rendering into a resolve texture then start another render pass with
+// LoadOp::ExpandResolveTexture. The resolve texture will have its content preserved between
+// passes.
+TEST_P(DawnLoadResolveTextureTest, DrawThenLoad) {
+    auto multiSampledTexture =
+        CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1, /*transientAttachment=*/false,
+                                         /*supportsTextureBinding=*/false);
+    auto multiSampledTextureView = multiSampledTexture.CreateView();
+
+    auto singleSampledTexture =
+        CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
+                                         /*supportsTextureBinding=*/true);
+    auto singleSampledTextureView = singleSampledTexture.CreateView();
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+        /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
+        /*flipTriangle=*/false, /*enableMSAARenderToSingleSampled=*/false);
+
+    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+
+    // In first render pass we draw a green triangle. StoreOp=Discard to discard the MSAA texture's
+    // content.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {multiSampledTextureView}, {singleSampledTextureView}, wgpu::LoadOp::Clear,
+            wgpu::LoadOp::Clear,
+            /*testDepth=*/false);
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
+    }
+
+    // In second render pass, we only use LoadOp::ExpandResolveTexture with no draw call.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {multiSampledTextureView}, {singleSampledTextureView},
+            wgpu::LoadOp::ExpandResolveTexture, wgpu::LoadOp::Load,
+            /*testDepth=*/false);
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.End();
+    }
+
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    VerifyResolveTarget(kGreen, singleSampledTexture);
+}
+
 DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
                       D3D11Backend(),
                       D3D12Backend(),
@@ -1549,6 +1614,21 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingWithTransientAttachmentTest,
                                     "emulate_store_and_msaa_resolve"}));
 
 DAWN_INSTANTIATE_TEST(MultisampledRenderToSingleSampledTest,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
+                      D3D12Backend({}, {"use_d3d12_render_pass"}),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend(),
+                      VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
+                      MetalBackend({"emulate_store_and_msaa_resolve"}),
+                      MetalBackend({"always_resolve_into_zero_level_and_layer"}),
+                      MetalBackend({"always_resolve_into_zero_level_and_layer",
+                                    "emulate_store_and_msaa_resolve"}));
+
+DAWN_INSTANTIATE_TEST(DawnLoadResolveTextureTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),

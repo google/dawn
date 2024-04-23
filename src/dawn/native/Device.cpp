@@ -1093,32 +1093,6 @@ Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
     return std::move(pipeline);
 }
 
-ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateImplicitMSAARenderTextureViewFor(
-    const TextureViewBase* singleSampledTextureView,
-    uint32_t sampleCount) {
-    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
-
-    TextureDescriptor desc = {};
-    desc.dimension = wgpu::TextureDimension::e2D;
-    desc.format = singleSampledTextureView->GetFormat().format;
-    desc.size = {singleSampledTextureView->GetSingleSubresourceVirtualSize().width,
-                 singleSampledTextureView->GetSingleSubresourceVirtualSize().height, 1};
-    desc.sampleCount = sampleCount;
-    desc.usage = wgpu::TextureUsage::RenderAttachment;
-    if (HasFeature(Feature::TransientAttachments)) {
-        desc.usage = desc.usage | wgpu::TextureUsage::TransientAttachment;
-    }
-
-    Ref<TextureBase> msaaTexture;
-    Ref<TextureViewBase> msaaTextureView;
-
-    DAWN_TRY_ASSIGN(msaaTexture, CreateTexture(&desc));
-
-    DAWN_TRY_ASSIGN(msaaTextureView, msaaTexture->CreateView());
-
-    return std::move(msaaTextureView);
-}
-
 ResultOrError<Ref<TextureViewBase>>
 DeviceBase::GetOrCreatePlaceholderTextureViewForExternalTexture() {
     if (!mExternalTexturePlaceholderView.Get()) {

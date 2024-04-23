@@ -345,6 +345,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "shader_module_compilation_options.md",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::DawnLoadResolveTexture,
+     {"Support ExpandResolveTexture as LoadOp for a render pass. This LoadOp will expand the "
+      "resolve texture into the MSAA texture as a load operation",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "dawn_load_resolve_texture.md",
+      FeatureInfo::FeatureState::Stable}},
 };
 
 }  // anonymous namespace

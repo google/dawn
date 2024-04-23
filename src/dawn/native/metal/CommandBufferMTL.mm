@@ -198,6 +198,12 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                 descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
                 break;
 
+            case wgpu::LoadOp::ExpandResolveTexture:
+                // The loading of resolve texture -> MSAA attachment is inserted at the beginning of
+                // the render pass. We don't care about the intial value of the MSAA attachment.
+                descriptor.colorAttachments[i].loadAction = MTLLoadActionDontCare;
+                break;
+
             case wgpu::LoadOp::Undefined:
                 DAWN_UNREACHABLE();
                 break;
@@ -279,6 +285,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
                     break;
 
+                case wgpu::LoadOp::ExpandResolveTexture:
                 case wgpu::LoadOp::Undefined:
                     DAWN_UNREACHABLE();
                     break;
@@ -314,6 +321,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     descriptor.stencilAttachment.loadAction = MTLLoadActionLoad;
                     break;
 
+                case wgpu::LoadOp::ExpandResolveTexture:
                 case wgpu::LoadOp::Undefined:
                     DAWN_UNREACHABLE();
                     break;
@@ -380,6 +388,13 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
 
                 case wgpu::LoadOp::Load:
                     mtlAttachment.loadAction = MTLLoadActionLoad;
+                    break;
+
+                case wgpu::LoadOp::ExpandResolveTexture:
+                    // The loading of resolve texture -> MSAA attachment is inserted at the
+                    // beginning of the render pass. We don't care about the intial value of the
+                    // MSAA attachment.
+                    mtlAttachment.loadAction = MTLLoadActionDontCare;
                     break;
 
                 case wgpu::LoadOp::Undefined:

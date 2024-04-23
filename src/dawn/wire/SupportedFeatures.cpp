@@ -104,6 +104,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_StaticSamplers:
         case WGPUFeatureName_YCbCrVulkanSamplers:
         case WGPUFeatureName_ShaderModuleCompilationOptions:
+        case WGPUFeatureName_DawnLoadResolveTexture:
             return true;
     }
 

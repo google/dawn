@@ -1540,6 +1540,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::Undefined:
         case wgpu::FeatureName::YCbCrVulkanSamplers:
+        case wgpu::FeatureName::DawnLoadResolveTexture:
             return false;
     }
     return false;

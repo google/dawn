@@ -183,6 +183,7 @@ HandlePixelLocalStorageAndGetPixelLocalStorageUAVs(
                     break;
                 }
                 case wgpu::LoadOp::Load:
+                case wgpu::LoadOp::ExpandResolveTexture:
                     break;
                 case wgpu::LoadOp::Undefined:
                     DAWN_UNREACHABLE();

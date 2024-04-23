@@ -44,6 +44,10 @@ VkAttachmentLoadOp VulkanAttachmentLoadOp(wgpu::LoadOp op) {
             return VK_ATTACHMENT_LOAD_OP_LOAD;
         case wgpu::LoadOp::Clear:
             return VK_ATTACHMENT_LOAD_OP_CLEAR;
+        case wgpu::LoadOp::ExpandResolveTexture:
+            // TODO(dawn:1710): Implement this on vulkan.
+            DAWN_UNREACHABLE();
+            break;
         case wgpu::LoadOp::Undefined:
             DAWN_UNREACHABLE();
             break;

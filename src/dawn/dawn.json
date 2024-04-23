@@ -2269,7 +2269,9 @@
             {"value": 1205, "name": "shared buffer memory D3D12 resource", "tags": ["dawn", "native"]},
             {"value": 1206, "name": "static samplers", "tags": ["dawn"]},
             {"value": 1207, "name": "y cb cr vulkan samplers", "tags": ["dawn"]},
-            {"value": 1208, "name": "shader module compilation options", "tags": ["dawn"]}
+            {"value": 1208, "name": "shader module compilation options", "tags": ["dawn"]},
+
+            {"value": 1209, "name": "dawn load resolve texture", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -2511,7 +2513,8 @@
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "clear"},
-            {"value": 2, "name": "load"}
+            {"value": 2, "name": "load"},
+            {"value": 3, "name": "expand resolve texture", "tags": ["dawn"]}
         ]
     },
     "map mode": {

@@ -186,7 +186,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::TextureCompressionBC);
     EnableFeature(Feature::SurfaceCapabilities);
     EnableFeature(Feature::D3D11MultithreadProtected);
-    EnableFeature(Feature::MSAARenderToSingleSampled);
     EnableFeature(Feature::DualSourceBlending);
     EnableFeature(Feature::Unorm16TextureFormats);
     EnableFeature(Feature::Snorm16TextureFormats);
@@ -195,6 +194,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::AdapterPropertiesD3D);
     EnableFeature(Feature::R8UnormStorage);
     EnableFeature(Feature::ShaderModuleCompilationOptions);
+    EnableFeature(Feature::DawnLoadResolveTexture);
 
     // Multi planar formats are always supported since Feature Level 11.0
     // https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/format-support-for-direct3d-11-0-feature-level-hardware

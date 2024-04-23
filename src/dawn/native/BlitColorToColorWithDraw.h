@@ -59,20 +59,15 @@ using BlitColorToColorWithDrawPipelinesCache =
                         BlitColorToColorWithDrawPipelineKey::HashFunc,
                         BlitColorToColorWithDrawPipelineKey::EqualityFunc>;
 
-// In a MSAA render to single sampled render pass, a color attachment will be used as resolve
-// target internally and an implicit MSAA texture will be used as the actual color attachment.
-//
-// This function performs the load operation for the render pass by blitting the resolve target (the
-// original color attachment) to the implicit MSAA attachment.
+// This function performs the ExpandResolveTexture load operation for the render pass by blitting
+// the resolve target to the MSAA attachment.
 //
 // The function assumes that the render pass is already started. It won't break the render pass,
 // just performing a draw call to blit.
 // This is only valid if the device's IsResolveTextureBlitWithDrawSupported() is true.
-MaybeError BlitMSAARenderToSingleSampledColorWithDraw(
-    DeviceBase* device,
-    RenderPassEncoder* renderEncoder,
-    const RenderPassDescriptor* renderPassDescriptor,
-    uint32_t renderPassImplicitSampleCount);
+MaybeError ExpandResolveTextureWithDraw(DeviceBase* device,
+                                        RenderPassEncoder* renderEncoder,
+                                        const RenderPassDescriptor* renderPassDescriptor);
 
 }  // namespace dawn::native
 

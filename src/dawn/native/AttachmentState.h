@@ -86,6 +86,10 @@ class AttachmentState final : public ObjectBase,
     wgpu::TextureFormat mDepthStencilFormat = wgpu::TextureFormat::Undefined;
     uint32_t mSampleCount = 0;
 
+    // TODO(dawn:1710): This flag needs to be revised. Either remove MSAARenderToSingleSampled
+    // feature or implement it using native extension such as
+    // VK_EXT_multisampled_render_to_single_sampled. The native implementation doesn't need graphics
+    // pipeline and render pass to be strictly compatible.
     bool mIsMSAARenderToSingleSampledEnabled = false;
     bool mHasPLS = false;
     std::vector<wgpu::TextureFormat> mStorageAttachmentSlots;
