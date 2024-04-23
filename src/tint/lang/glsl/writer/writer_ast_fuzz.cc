@@ -40,6 +40,10 @@ void ASTFuzzer(const tint::Program& program, Options options) {
         return;
     }
 
+    if (options.first_instance_offset > 0x10000) {
+        return;  // Excessive values can cause OOM.
+    }
+
     auto inspector = tint::inspector::Inspector(program);
     auto entrypoints = inspector.GetEntryPoints();
 
