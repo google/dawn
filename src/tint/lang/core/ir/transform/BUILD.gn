@@ -193,6 +193,7 @@ tint_fuzz_source_set("fuzz") {
     "robustness_fuzz.cc",
     "std140_fuzz.cc",
     "vectorize_scalar_matrix_constructors_fuzz.cc",
+    "zero_init_workgroup_memory_fuzz.cc",
   ]
   deps = [
     "${tint_src_dir}/api/common",
