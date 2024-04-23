@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,39 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_BINARY_POLYFILL_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_BINARY_POLYFILL_H_
+#include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 
-#include <string>
-
-#include "src/tint/utils/reflection/reflection.h"
-#include "src/tint/utils/result/result.h"
-
-// Forward declarations.
-namespace tint::core::ir {
-class Module;
-}
+#include "src/tint/cmd/fuzz/ir/fuzz.h"
+#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
+namespace {
 
-/// The set of polyfills that should be applied.
-struct BinaryPolyfillConfig {
-    /// Should the RHS of a shift be masked to make it modulo the bit-width of the LHS?
-    bool bitshift_modulo = false;
-    /// Should integer divide and modulo be polyfilled to avoid DBZ and integer overflow?
-    bool int_div_mod = false;
+void BinaryPolyfillFuzzer(Module& module, BinaryPolyfillConfig config) {
+    if (auto res = BinaryPolyfill(module, config); res != Success) {
+        return;
+    }
 
-    /// Reflection for this class
-    TINT_REFLECT(BinaryPolyfillConfig, bitshift_modulo, int_div_mod);
-};
+    Capabilities capabilities;
+    if (auto res = Validate(module, capabilities); res != Success) {
+        TINT_ICE() << "result of BinaryPolyfill failed IR validation\n" << res.Failure();
+    }
+}
 
-/// BinaryPolyfill is a transform that modifies binary instructions to prepare them for raising to
-/// backend dialects that may have different semantics.
-/// @param module the module to transform
-/// @param config the polyfill configuration
-/// @returns success or failure
-Result<SuccessType> BinaryPolyfill(Module& module, const BinaryPolyfillConfig& config);
-
+}  // namespace
 }  // namespace tint::core::ir::transform
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_BINARY_POLYFILL_H_
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BinaryPolyfillFuzzer);

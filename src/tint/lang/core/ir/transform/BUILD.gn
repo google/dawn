@@ -180,6 +180,7 @@ tint_fuzz_source_set("fuzz") {
   sources = [
     "add_empty_entry_point_fuzz.cc",
     "bgra8unorm_polyfill_fuzz.cc",
+    "binary_polyfill_fuzz.cc",
   ]
   deps = [
     "${tint_src_dir}/cmd/fuzz/ir:fuzz",
