@@ -195,10 +195,12 @@ tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/conversion_polyfill_fuzz.cc
   lang/core/ir/transform/demote_to_helper_fuzz.cc
   lang/core/ir/transform/direct_variable_access_fuzz.cc
+  lang/core/ir/transform/multiplanar_external_texture_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_core_ir_transform_fuzz fuzz
   tint_api_common
+  tint_api_options
   tint_cmd_fuzz_ir_fuzz
   tint_lang_core_ir
   tint_lang_core_ir_transform

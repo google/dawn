@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/utils/result/result.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -75,7 +76,7 @@ struct State {
     Function* gamma_correction = nullptr;
 
     /// Process the module.
-    void Process() {
+    Result<SuccessType> Process() {
         // Find module-scope variables that need to be replaced.
         if (!ir.root_block->IsEmpty()) {
             Vector<Instruction*, 4> to_remove;
@@ -86,7 +87,9 @@ struct State {
                 }
                 auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
                 if (ptr->StoreType()->Is<core::type::ExternalTexture>()) {
-                    ReplaceVar(var);
+                    if (auto res = ReplaceVar(var); TINT_UNLIKELY(res != Success)) {
+                        return res.Failure();
+                    }
                     to_remove.Push(var);
                 }
             }
@@ -105,6 +108,8 @@ struct State {
                 }
             }
         }
+
+        return Success;
     }
 
     /// @returns a 2D sampled texture type with a f32 sampled type
@@ -114,11 +119,15 @@ struct State {
 
     /// Replace an external texture variable declaration.
     /// @param old_var the variable declaration to replace
-    void ReplaceVar(Var* old_var) {
+    Result<SuccessType> ReplaceVar(Var* old_var) {
         auto name = ir.NameOf(old_var);
         auto bp = old_var->BindingPoint();
         auto itr = options.bindings_map.find(bp.value());
-        TINT_ASSERT_OR_RETURN(itr != options.bindings_map.end());
+        if (TINT_UNLIKELY(itr == options.bindings_map.end())) {
+            std::stringstream err;
+            err << "ExternalTextureOptions missing binding entry for " << bp.value();
+            return Failure{err.str()};
+        }
         const auto& new_binding_points = itr->second;
 
         // Create a sampled texture for the first plane.
@@ -150,6 +159,8 @@ struct State {
         // Replace all uses of the old variable with the new ones.
         ReplaceUses(old_var->Result(0), plane_0->Result(0), plane_1->Result(0),
                     external_texture_params->Result(0));
+
+        return Success;
     }
 
     /// Replace an external texture function parameter.
@@ -586,9 +597,7 @@ Result<SuccessType> MultiplanarExternalTexture(Module& ir, const ExternalTexture
         return result;
     }
 
-    State{options, ir}.Process();
-
-    return Success;
+    return State{options, ir}.Process();
 }
 
 }  // namespace tint::core::ir::transform
