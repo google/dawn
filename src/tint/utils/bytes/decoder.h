@@ -34,6 +34,7 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -149,6 +150,34 @@ struct Decoder<std::unordered_map<K, V>, void> {
                 return val.Failure();
             }
             out.emplace(std::move(key.Get()), std::move(val.Get()));
+        }
+
+        return out;
+    }
+};
+
+/// Decoder specialization for std::unordered_set
+template <typename V>
+struct Decoder<std::unordered_set<V>, void> {
+    /// Decode decodes the set from @p reader.
+    /// @param reader the reader to decode from
+    /// @returns the decoded set, or an error if the stream is too short.
+    static Result<std::unordered_set<V>> Decode(Reader& reader) {
+        std::unordered_set<V> out;
+
+        while (true) {
+            auto stop = bytes::Decode<bool>(reader);
+            if (stop != Success) {
+                return stop.Failure();
+            }
+            if (stop.Get()) {
+                break;
+            }
+            auto val = bytes::Decode<V>(reader);
+            if (val != Success) {
+                return val.Failure();
+            }
+            out.emplace(std::move(val.Get()));
         }
 
         return out;

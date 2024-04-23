@@ -32,6 +32,7 @@
 #include <unordered_set>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -67,6 +68,19 @@ struct RobustnessConfig {
 
     /// Should the transform skip index clamping on runtime-sized arrays?
     bool disable_runtime_sized_array_index_clamping = false;
+
+    /// Reflection for this class
+    TINT_REFLECT(RobustnessConfig,
+                 clamp_value,
+                 clamp_texture,
+                 clamp_function,
+                 clamp_private,
+                 clamp_push_constant,
+                 clamp_storage,
+                 clamp_uniform,
+                 clamp_workgroup,
+                 bindings_ignored,
+                 disable_runtime_sized_array_index_clamping);
 };
 
 /// Robustness is a transform that prevents out-of-bounds memory accesses.

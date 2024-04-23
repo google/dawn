@@ -30,6 +30,7 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "gmock/gmock.h"
@@ -146,12 +147,30 @@ TEST(BytesDecoderTest, UnorderedMap) {
     auto reader = BufferReader{Slice{data}};
     auto got = Decode<M>(reader);
     EXPECT_THAT(got.Get(), testing::ContainerEq(M{
-                               std::pair<uint8_t, uint32_t>(0x10u, 0x2002u),
-                               std::pair<uint8_t, uint32_t>(0x30u, 0x4004u),
-                               std::pair<uint8_t, uint32_t>(0x50u, 0x6006u),
-                               std::pair<uint8_t, uint32_t>(0x70u, 0x8008u),
+                               std::pair<uint8_t, uint16_t>(0x10u, 0x2002u),
+                               std::pair<uint8_t, uint16_t>(0x30u, 0x4004u),
+                               std::pair<uint8_t, uint16_t>(0x50u, 0x6006u),
+                               std::pair<uint8_t, uint16_t>(0x70u, 0x8008u),
                            }));
     EXPECT_NE(Decode<M>(reader), Success);
+}
+
+TEST(BytesDecoderTest, UnorderedSet) {
+    using S = std::unordered_set<uint16_t>;
+    auto data = Data(0x00, 0x02, 0x20,  //
+                     0x00, 0x04, 0x40,  //
+                     0x00, 0x06, 0x60,  //
+                     0x00, 0x08, 0x80,  //
+                     0x01);
+    auto reader = BufferReader{Slice{data}};
+    auto got = Decode<S>(reader);
+    EXPECT_THAT(got.Get(), testing::ContainerEq(S{
+                               0x2002u,
+                               0x4004u,
+                               0x6006u,
+                               0x8008u,
+                           }));
+    EXPECT_NE(Decode<S>(reader), Success);
 }
 
 TEST(BytesDecoderTest, Vector) {

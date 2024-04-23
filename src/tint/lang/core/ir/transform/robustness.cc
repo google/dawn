@@ -141,6 +141,7 @@ struct State {
 
         // TODO(jrprice): Handle config.bindings_ignored.
         if (!config.bindings_ignored.empty()) {
+            // Also update robustness_fuzz.cc
             TINT_UNIMPLEMENTED();
         }
     }
