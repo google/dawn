@@ -191,6 +191,7 @@ tint_fuzz_source_set("fuzz") {
     "multiplanar_external_texture_fuzz.cc",
     "preserve_padding_fuzz.cc",
     "robustness_fuzz.cc",
+    "std140_fuzz.cc",
   ]
   deps = [
     "${tint_src_dir}/api/common",
