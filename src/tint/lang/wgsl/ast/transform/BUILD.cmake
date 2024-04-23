@@ -249,6 +249,7 @@ if(TINT_BUILD_WGSL_READER)
 ################################################################################
 tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/add_block_attribute_fuzz.cc
+  lang/wgsl/ast/transform/add_empty_entry_point_fuzz.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
 )
 

@@ -239,6 +239,7 @@ if (tint_build_wgsl_reader) {
   tint_fuzz_source_set("fuzz") {
     sources = [
       "add_block_attribute_fuzz.cc",
+      "add_empty_entry_point_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [
