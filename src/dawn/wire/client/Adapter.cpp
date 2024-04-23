@@ -32,6 +32,7 @@
 
 #include "dawn/common/Log.h"
 #include "dawn/wire/client/Client.h"
+#include "dawn/wire/client/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::wire::client {
@@ -237,20 +238,6 @@ void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
     ptr += driverDescriptionCLen;
 }
 
-void ClientAdapterPropertiesFreeMembers(WGPUAdapterProperties properties) {
-    // This single delete is enough because everything is a single allocation.
-    delete[] properties.vendorName;
-}
-
-void ClientAdapterPropertiesMemoryHeapsFreeMembers(
-    WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
-    delete[] memoryHeapProperties.heapInfo;
-}
-
-void ClientDrmFormatCapabilitiesFreeMembers(WGPUDrmFormatCapabilities capabilities) {
-    delete[] capabilities.properties;
-}
-
 void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
                             WGPURequestDeviceCallback callback,
                             void* userdata) {
@@ -325,3 +312,19 @@ bool Adapter::GetFormatCapabilities(WGPUTextureFormat format,
 }
 
 }  // namespace dawn::wire::client
+
+DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterPropertiesFreeMembers(
+    WGPUAdapterProperties properties) {
+    // This single delete is enough because everything is a single allocation.
+    delete[] properties.vendorName;
+}
+
+DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterPropertiesMemoryHeapsFreeMembers(
+    WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties) {
+    delete[] memoryHeapProperties.heapInfo;
+}
+
+DAWN_WIRE_EXPORT void wgpuDawnWireClientDrmFormatCapabilitiesFreeMembers(
+    WGPUDrmFormatCapabilities capabilities) {
+    delete[] capabilities.properties;
+}

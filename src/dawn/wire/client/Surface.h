@@ -29,7 +29,6 @@
 #define SRC_DAWN_WIRE_CLIENT_SURFACE_H_
 
 #include "dawn/webgpu.h"
-
 #include "dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
@@ -54,8 +53,6 @@ class Surface final : public ObjectBase {
   private:
     WGPUTextureDescriptor mTextureDescriptor;
 };
-
-void ClientSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities);
 
 }  // namespace dawn::wire::client
 

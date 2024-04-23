@@ -31,10 +31,16 @@
     #error "Do not include this header. Emscripten already provides headers needed for {{metadata.api}}."
     #endif
 {% endif %}
-#ifndef {{API}}_CPP_H_
-#define {{API}}_CPP_H_
+{% set PREFIX = "" if not c_namespace else c_namespace.SNAKE_CASE() + "_" %}
+#ifndef {{PREFIX}}{{API}}_CPP_H_
+#define {{PREFIX}}{{API}}_CPP_H_
 
-#include "{{api}}/{{api}}.h"
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+
+#include "{{c_header}}"
 #include "{{api}}/{{api}}_cpp_chained_struct.h"
 #include "{{api}}/{{api}}_enum_class_bitmasks.h"
 #include <cmath>
@@ -81,7 +87,7 @@ static T& AsNonConstReference(const T& value) {
 {%- endmacro -%}
 
 {%- macro render_cpp_to_c_method_call(type, method) -%}
-    {{as_cMethod(type.name, method.name)}}(Get()
+    {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get()
         {%- for arg in method.arguments -%},{{" "}}{{render_c_actual_arg(arg)}}
         {%- endfor -%}
     )
@@ -117,15 +123,6 @@ static T& AsNonConstReference(const T& value) {
     using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
 {% endfor %}
 
-{% for type in by_category["object"] %}
-    class {{as_cppType(type.name)}};
-{% endfor %}
-
-{% for type in by_category["structure"] %}
-    struct {{as_cppType(type.name)}};
-{% endfor %}
-
-
 // Special class for booleans in order to allow implicit conversions.
 {% set BoolCppType = as_cppType(types["bool"].name) %}
 {% set BoolCType = as_cType(types["bool"].name) %}
@@ -145,12 +142,6 @@ class {{BoolCppType}} {
     {{BoolCType}} mValue = static_cast<{{BoolCType}}>(false);
 };
 
-{% for typeDef in by_category["typedef"] %}
-    // {{as_cppType(typeDef.name)}} is deprecated.
-    // Use {{as_cppType(typeDef.type.name)}} instead.
-    using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};
-
-{% endfor %}
 template<typename Derived, typename CType>
 class ObjectBase {
   public:
@@ -264,6 +255,32 @@ class ObjectBase {
     ) const
 {%- endmacro %}
 
+{%- macro render_function_call(function) -%}
+    {{as_cMethodNamespaced(None, function.name, c_namespace)}}(
+        {%- for arg in function.arguments -%}
+            {% if not loop.first %}, {% endif %}{{render_c_actual_arg(arg)}}
+        {%- endfor -%}
+    )
+{%- endmacro -%}
+
+{%- if metadata.namespace != 'wgpu' %}
+    // The operators of webgpu_enum_class_bitmasks.h are in the wgpu:: namespace,
+    // and need to be imported into this namespace for Argument Dependent Lookup.
+    WGPU_IMPORT_BITMASK_OPERATORS
+{% endif %}
+
+{% if c_namespace %}
+    namespace {{c_namespace.namespace_case()}} {
+{% endif %}
+
+{% for type in by_category["object"] %}
+    class {{as_cppType(type.name)}};
+{% endfor %}
+
+{% for type in by_category["structure"] %}
+    struct {{as_cppType(type.name)}};
+{% endfor %}
+
 {% for type in by_category["object"] %}
     {% set CppType = as_cppType(type.name) %}
     {% set CType = as_cType(type.name) %}
@@ -282,32 +299,6 @@ class ObjectBase {
         static inline void {{c_prefix}}Release({{CType}} handle);
     };
 
-{% endfor %}
-
-{%- macro render_function_call(function) -%}
-    {{as_cMethod(None, function.name)}}(
-        {%- for arg in function.arguments -%}
-            {% if not loop.first %}, {% endif %}{{render_c_actual_arg(arg)}}
-        {%- endfor -%}
-    )
-{%- endmacro -%}
-
-// Free Functions
-
-{% for function in by_category["function"] if not function.no_cpp %}
-    inline {{as_cppType(function.return_type.name)}} {{as_cppType(function.name)}}(
-        {%- for arg in function.arguments -%}
-            {%- if not loop.first %}, {% endif -%}
-            {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
-        {%- endfor -%}
-    ) {
-        {% if function.return_type.name.concatcase() == "void" %}
-            {{render_function_call(function)}};
-        {% else %}
-            auto result = {{render_function_call(function)}};
-            return {{convert_cType_to_cppType(function.return_type, 'value', 'result')}};
-        {% endif %}
-    }
 {% endfor %}
 
 // ChainedStruct
@@ -368,12 +359,6 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
 
 {% endfor %}
 
-{%- if metadata.namespace != 'wgpu' %}
-    // The operators of webgpu_enum_class_bitmasks.h are in the wgpu:: namespace,
-    // and need to be imported into this namespace for Argument Dependent Lookup.
-    WGPU_IMPORT_BITMASK_OPERATORS
-{% endif %}
-
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 // error: 'offsetof' within non-standard-layout type '{{metadata.namespace}}::XXX' is conditionally-supported
@@ -391,7 +376,7 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
                     this->{{member.name.camelCase()}} != nullptr
                 {%- endfor -%}
             ) {
-                {{as_cMethod(type.name, Name("free members"))}}(
+                {{as_cMethodNamespaced(type.name, Name("free members"), c_namespace)}}(
                     *reinterpret_cast<{{as_cType(type.name)}}*>(this));
             }
         }
@@ -463,17 +448,52 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
     {% endfor %}
     void {{CppType}}::{{c_prefix}}AddRef({{CType}} handle) {
         if (handle != nullptr) {
-            {{as_cMethod(type.name, Name("add ref"))}}(handle);
+            {{as_cMethodNamespaced(type.name, Name("add ref"), c_namespace)}}(handle);
         }
     }
     void {{CppType}}::{{c_prefix}}Release({{CType}} handle) {
         if (handle != nullptr) {
-            {{as_cMethod(type.name, Name("release"))}}(handle);
+            {{as_cMethodNamespaced(type.name, Name("release"), c_namespace)}}(handle);
         }
     }
     static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
     static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
 
+{% endfor %}
+
+{% if c_namespace %}
+    }  // namespace {{c_namespace.namespace_case()}}
+
+    {% for type in by_category["object"] %}
+        using {{as_cppType(type.name)}} = {{c_namespace.namespace_case()}}::{{as_cppType(type.name)}};
+    {% endfor %}
+
+    {% for type in by_category["structure"] %}
+        using {{as_cppType(type.name)}} = {{c_namespace.namespace_case()}}::{{as_cppType(type.name)}};
+    {% endfor %}
+{% endif %}
+
+{% for typeDef in by_category["typedef"] %}
+    // {{as_cppType(typeDef.name)}} is deprecated.
+    // Use {{as_cppType(typeDef.type.name)}} instead.
+    using {{as_cppType(typeDef.name)}} = {{as_cppType(typeDef.type.name)}};
+{% endfor %}
+
+// Free Functions
+{% for function in by_category["function"] if not function.no_cpp %}
+    static inline {{as_cppType(function.return_type.name)}} {{as_cppType(function.name)}}(
+        {%- for arg in function.arguments -%}
+            {%- if not loop.first %}, {% endif -%}
+            {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
+        {%- endfor -%}
+    ) {
+        {% if function.return_type.name.concatcase() == "void" %}
+            {{render_function_call(function)}};
+        {% else %}
+            auto result = {{render_function_call(function)}};
+            return {{convert_cType_to_cppType(function.return_type, 'value', 'result')}};
+        {% endif %}
+    }
 {% endfor %}
 
 }  // namespace {{metadata.namespace}}
@@ -499,4 +519,4 @@ struct hash<{{metadata.namespace}}::{{BoolCppType}}> {
 };
 }  // namespace std
 
-#endif // {{API}}_CPP_H_
+#endif // {{PREFIX}}{{API}}_CPP_H_

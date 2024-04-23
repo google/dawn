@@ -36,6 +36,7 @@
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/EventManager.h"
+#include "dawn/wire/client/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "tint/lang/wgsl/features/language_feature.h"
 #include "tint/lang/wgsl/features/status.h"
@@ -120,23 +121,6 @@ WGPUWGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
 }
 
 }  // anonymous namespace
-
-// Free-standing API functions
-
-WGPUBool ClientGetInstanceFeatures(WGPUInstanceFeatures* features) {
-    if (features->nextInChain != nullptr) {
-        return false;
-    }
-
-    features->timedWaitAnyEnable = false;
-    features->timedWaitAnyMaxCount = kTimedWaitAnyMaxCountDefault;
-    return true;
-}
-
-WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
-    DAWN_UNREACHABLE();
-    return nullptr;
-}
 
 // Instance
 
@@ -338,3 +322,21 @@ size_t Instance::EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) co
 }
 
 }  // namespace dawn::wire::client
+
+// Free-standing API functions
+
+DAWN_WIRE_EXPORT WGPUBool wgpuDawnWireClientGetInstanceFeatures(WGPUInstanceFeatures* features) {
+    if (features->nextInChain != nullptr) {
+        return false;
+    }
+
+    features->timedWaitAnyEnable = false;
+    features->timedWaitAnyMaxCount = dawn::kTimedWaitAnyMaxCountDefault;
+    return true;
+}
+
+DAWN_WIRE_EXPORT WGPUInstance
+wgpuDawnWireClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
+    DAWN_UNREACHABLE();
+    return nullptr;
+}

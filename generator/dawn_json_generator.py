@@ -945,14 +945,19 @@ def make_base_render_params(metadata):
         assert not type_name.native and not value_name.native
         return c_prefix + type_name.CamelCase() + '_' + value_name.CamelCase()
 
-    def as_cMethod(type_name, method_name):
+    def as_cMethodNamespaced(type_name, method_name, namespace=None):
         c_method = c_prefix.lower()
-        if type_name != None:
+        if namespace is not None:
+            c_method += namespace.CamelCase()
+        if type_name is not None:
             assert not type_name.native
             c_method += type_name.CamelCase()
         assert not method_name.native
         c_method += method_name.CamelCase()
         return c_method
+
+    def as_cMethod(type_name, method_name):
+        return as_cMethodNamespaced(type_name, method_name)
 
     def as_cProc(type_name, method_name):
         c_proc = c_prefix + 'Proc'
@@ -972,6 +977,7 @@ def make_base_render_params(metadata):
             'as_cEnum': as_cEnum,
             'as_cppEnum': as_cppEnum,
             'as_cMethod': as_cMethod,
+            'as_cMethodNamespaced': as_cMethodNamespaced,
             'as_MethodSuffix': as_MethodSuffix,
             'as_CppMethodSuffix': as_CppMethodSuffix,
             'as_cProc': as_cProc,
@@ -1047,14 +1053,32 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender('api.h', 'include/dawn/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
             renders.append(
+                FileRender('dawn/wire/client/api.h',
+                           'include/dawn/wire/client/' + api + '.h',
+                           [RENDER_PARAMS_BASE, params_dawn]))
+            renders.append(
                 FileRender('dawn_proc_table.h',
                            'include/dawn/' + prefix + '_proc_table.h',
                            [RENDER_PARAMS_BASE, params_dawn]))
 
         if 'cpp_headers' in targets:
             renders.append(
-                FileRender('api_cpp.h', 'include/dawn/' + api + '_cpp.h',
-                           [RENDER_PARAMS_BASE, params_dawn]))
+                FileRender('api_cpp.h', 'include/dawn/' + api + '_cpp.h', [
+                    RENDER_PARAMS_BASE, params_dawn, {
+                        'c_header': api + '/' + api + '.h',
+                        'c_namespace': None,
+                    }
+                ]))
+
+            renders.append(
+                FileRender(
+                    'api_cpp.h', 'include/dawn/wire/client/' + api + '_cpp.h',
+                    [
+                        RENDER_PARAMS_BASE, params_dawn, {
+                            'c_header': 'dawn/wire/client/' + api + '.h',
+                            'c_namespace': Name('dawn wire client'),
+                        }
+                    ]))
 
             renders.append(
                 FileRender('api_cpp_print.h',
@@ -1101,8 +1125,12 @@ class MultiGeneratorFromDawnJSON(Generator):
             renders.append(
                 FileRender(
                     'api_cpp.h',
-                    'emscripten-bits/system/include/webgpu/webgpu_cpp.h',
-                    [RENDER_PARAMS_BASE, params_emscripten]))
+                    'emscripten-bits/system/include/webgpu/webgpu_cpp.h', [
+                        RENDER_PARAMS_BASE, params_emscripten, {
+                            'c_header': api + '/' + api + '.h',
+                            'c_namespace': None,
+                        }
+                    ]))
             renders.append(
                 FileRender(
                     'api_cpp_chained_struct.h',

@@ -32,6 +32,7 @@
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/Device.h"
 #include "dawn/wire/client/Texture.h"
+#include "dawn/wire/client/webgpu.h"
 
 namespace dawn::wire::client {
 
@@ -84,9 +85,10 @@ void Surface::GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
     wireClient->SerializeCommand(cmd);
 }
 
-void ClientSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
+}  // namespace dawn::wire::client
+
+DAWN_WIRE_EXPORT void wgpuDawnWireClientSurfaceCapabilitiesFreeMembers(
+    WGPUSurfaceCapabilities capabilities) {
     // TODO(dawn:2320): Implement this
     dawn::ErrorLog() << "surfaceCapabilities.FreeMembers not supported yet with dawn_wire.";
 }
-
-}  // namespace dawn::wire::client

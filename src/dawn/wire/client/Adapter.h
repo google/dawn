@@ -30,7 +30,6 @@
 
 #include <vector>
 
-#include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/LimitsAndFeatures.h"
@@ -70,10 +69,6 @@ class Adapter final : public ObjectWithEventsBase {
     WGPUAdapterPropertiesD3D mD3DProperties;
     WGPUAdapterPropertiesVk mVkProperties;
 };
-
-void ClientAdapterPropertiesFreeMembers(WGPUAdapterProperties);
-void ClientAdapterPropertiesMemoryHeapsFreeMembers(WGPUAdapterPropertiesMemoryHeaps);
-void ClientDrmFormatCapabilitiesFreeMembers(WGPUDrmFormatCapabilities capabilities);
 
 }  // namespace dawn::wire::client
 
