@@ -175,3 +175,24 @@ if (tint_build_unittests) {
     }
   }
 }
+
+tint_fuzz_source_set("fuzz") {
+  sources = [ "add_empty_entry_point_fuzz.cc" ]
+  deps = [
+    "${tint_src_dir}/cmd/fuzz/ir:fuzz",
+    "${tint_src_dir}/lang/core/ir",
+    "${tint_src_dir}/lang/core/ir/transform",
+    "${tint_src_dir}/utils/bytes",
+    "${tint_src_dir}/utils/containers",
+    "${tint_src_dir}/utils/diagnostic",
+    "${tint_src_dir}/utils/ice",
+    "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/reflection",
+    "${tint_src_dir}/utils/result",
+    "${tint_src_dir}/utils/rtti",
+    "${tint_src_dir}/utils/text",
+    "${tint_src_dir}/utils/traits",
+  ]
+}
