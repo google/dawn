@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,37 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_CONVERSION_POLYFILL_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_CONVERSION_POLYFILL_H_
+#include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
 
-#include <string>
-
-#include "src/tint/utils/reflection/reflection.h"
-#include "src/tint/utils/result/result.h"
-
-// Forward declarations.
-namespace tint::core::ir {
-class Module;
-}
+#include "src/tint/cmd/fuzz/ir/fuzz.h"
+#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::transform {
+namespace {
 
-/// The set of polyfills that should be applied.
-struct ConversionPolyfillConfig {
-    /// Should converting floating point values to integers be polyfilled?
-    bool ftoi = false;
+void ConversionPolyfillFuzzer(Module& module, ConversionPolyfillConfig config) {
+    if (auto res = ConversionPolyfill(module, config); res != Success) {
+        return;
+    }
 
-    /// Reflection for this class
-    TINT_REFLECT(ConversionPolyfillConfig, ftoi);
-};
+    Capabilities capabilities;
+    if (auto res = Validate(module, capabilities); res != Success) {
+        TINT_ICE() << "result of ConversionPolyfill failed IR validation\n" << res.Failure();
+    }
+}
 
-/// ConversionPolyfill is a transform that modifies convert instructions to prepare them for raising
-/// to backend dialects that may have different semantics.
-/// @param module the module to transform
-/// @param config the polyfill configuration
-/// @returns success or failure
-Result<SuccessType> ConversionPolyfill(Module& module, const ConversionPolyfillConfig& config);
-
+}  // namespace
 }  // namespace tint::core::ir::transform
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_CONVERSION_POLYFILL_H_
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ConversionPolyfillFuzzer);

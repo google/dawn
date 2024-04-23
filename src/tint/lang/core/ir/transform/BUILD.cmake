@@ -192,6 +192,7 @@ tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/block_decorated_structs_fuzz.cc
   lang/core/ir/transform/builtin_polyfill_fuzz.cc
   lang/core/ir/transform/combine_access_instructions_fuzz.cc
+  lang/core/ir/transform/conversion_polyfill_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_core_ir_transform_fuzz fuzz
