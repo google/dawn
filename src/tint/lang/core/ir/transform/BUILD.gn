@@ -177,7 +177,10 @@ if (tint_build_unittests) {
 }
 
 tint_fuzz_source_set("fuzz") {
-  sources = [ "add_empty_entry_point_fuzz.cc" ]
+  sources = [
+    "add_empty_entry_point_fuzz.cc",
+    "bgra8unorm_polyfill_fuzz.cc",
+  ]
   deps = [
     "${tint_src_dir}/cmd/fuzz/ir:fuzz",
     "${tint_src_dir}/lang/core/ir",

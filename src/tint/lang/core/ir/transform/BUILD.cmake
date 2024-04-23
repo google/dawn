@@ -186,6 +186,7 @@ endif(TINT_BUILD_WGSL_WRITER)
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/add_empty_entry_point_fuzz.cc
+  lang/core/ir/transform/bgra8unorm_polyfill_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_core_ir_transform_fuzz fuzz
