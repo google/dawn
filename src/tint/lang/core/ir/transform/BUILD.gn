@@ -181,8 +181,10 @@ tint_fuzz_source_set("fuzz") {
     "add_empty_entry_point_fuzz.cc",
     "bgra8unorm_polyfill_fuzz.cc",
     "binary_polyfill_fuzz.cc",
+    "binding_remapper_fuzz.cc",
   ]
   deps = [
+    "${tint_src_dir}/api/common",
     "${tint_src_dir}/cmd/fuzz/ir:fuzz",
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/ir/transform",
