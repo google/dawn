@@ -75,13 +75,12 @@ inline bool IsHandleValid(zx_handle_t handle) {
 
 inline ResultOrError<zx_handle_t> DuplicateHandle(zx_handle_t handle) {
     zx_handle_t outHandle = ZX_HANDLE_INVALID;
-    zx_status_t status = DAWN_INTERNAL_ERROR_IF(
-        zx_handle_duplicate(descriptor->handle, ZX_RIGHT_SAME_RIGHTS, &outHandle) != ZX_OK,
-        "zx_handle_duplicate failed");
+    DAWN_INTERNAL_ERROR_IF(zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &outHandle) != ZX_OK,
+                           "zx_handle_duplicate failed");
     return outHandle;
 }
 
-inline bool CloseHandle(zx_handle_t handle) {
+inline MaybeError CloseHandle(zx_handle_t handle) {
     DAWN_INTERNAL_ERROR_IF(zx_handle_close(handle) != ZX_OK, "zx_handle_close failed");
     return {};
 }

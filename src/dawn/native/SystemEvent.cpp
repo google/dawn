@@ -31,6 +31,9 @@
 
 #if DAWN_PLATFORM_IS(WINDOWS)
 #include <windows.h>
+#elif DAWN_PLATFORM_IS(FUCHSIA)
+#include <poll.h>
+#include <unistd.h>
 #elif DAWN_PLATFORM_IS(POSIX)
 #include <sys/poll.h>
 #include <unistd.h>

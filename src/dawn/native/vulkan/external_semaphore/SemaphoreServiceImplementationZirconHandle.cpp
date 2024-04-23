@@ -47,10 +47,11 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
 
     ~ServiceImplementationZirconHandle() override = default;
 
-    static bool CheckSupport(
-        const VulkanDeviceInfo& deviceInfo,
-        VkPhysicalDevice vkPhysicalDevice,
-        const VulkanFunctions& fn) static void CloseHandle(ExternalSemaphoreHandle handle) {
+    static bool CheckSupport(const VulkanDeviceInfo& deviceInfo,
+                             VkPhysicalDevice vkPhysicalDevice,
+                             const VulkanFunctions& fn);
+
+    static void CloseHandle(ExternalSemaphoreHandle handle) {
         if (!deviceInfo.HasExt(DeviceExt::ExternalSemaphoreZirconHandle)) {
             return false;
         }
