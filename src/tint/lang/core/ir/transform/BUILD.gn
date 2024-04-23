@@ -183,6 +183,7 @@ tint_fuzz_source_set("fuzz") {
     "binary_polyfill_fuzz.cc",
     "binding_remapper_fuzz.cc",
     "block_decorated_structs_fuzz.cc",
+    "builtin_polyfill_fuzz.cc",
   ]
   deps = [
     "${tint_src_dir}/api/common",
