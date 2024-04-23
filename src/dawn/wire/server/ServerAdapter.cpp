@@ -121,6 +121,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
         cmd.status = WGPURequestDeviceStatus_Unknown;
         cmd.message = "Destroyed before request was fulfilled.";
         SerializeCommand(cmd);
+        return;
     }
     DAWN_ASSERT(reservation.data != nullptr);
     reservation->info->server = this;

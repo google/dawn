@@ -196,6 +196,7 @@ class KnownObjectsBase {
 
     WireResult FillReservation(ObjectId id, T handle, Known<T>* known = nullptr) {
         DAWN_ASSERT(id < mKnown.size());
+        DAWN_ASSERT(handle != nullptr);
         Data* data = &mKnown[id];
 
         if (data->state != AllocationState::Reserved) {
