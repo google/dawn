@@ -233,12 +233,16 @@ TEST(ContentLessObjectCacheTest, FindDeletingLastRef) {
     ContentLessObjectCache<CacheableT> cache;
     Ref<CacheableT> object = AcquireRef(new CacheableT(1));
     object->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
-    object->SetEqualFn([&](const CacheableT* x) {
-        semA.Release();
-        semB.Acquire();
-    });
     EXPECT_TRUE(cache.Insert(object.Get()).second);
     CacheableT* objectPtr = object.Get();
+
+    std::atomic_flag eqOnceFlag;
+    object->SetEqualFn([&](const CacheableT* x) {
+        if (!eqOnceFlag.test_and_set()) {
+            semA.Release();
+            semB.Acquire();
+        }
+    });
 
     // Thread A will release the last reference of the original object after the object has been
     // promoted internally for equality check.
@@ -268,11 +272,15 @@ TEST(ContentLessObjectCacheTest, FindDeletingLastRefHashEquivalent) {
     ContentLessObjectCache<CacheableT> cache;
     Ref<CacheableT> object = AcquireRef(new CacheableT(1, 1));
     object->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
-    object->SetEqualFn([&](const CacheableT* x) {
-        semA.Release();
-        semB.Acquire();
-    });
     EXPECT_TRUE(cache.Insert(object.Get()).second);
+
+    std::atomic_flag eqOnceFlag;
+    object->SetEqualFn([&](const CacheableT* x) {
+        if (!eqOnceFlag.test_and_set()) {
+            semA.Release();
+            semB.Acquire();
+        }
+    });
 
     // Thread A will release the last reference of the original object after the object has been
     // promoted internally for equality check.
@@ -338,13 +346,17 @@ TEST(ContentLessObjectCacheTest, InsertDeletingLastRef) {
 
     ContentLessObjectCache<CacheableT> cache;
     Ref<CacheableT> object1 = AcquireRef(new CacheableT(1));
-    object1->SetEqualFn([&](const CacheableT* x) {
-        semA.Release();
-        semB.Acquire();
-    });
     object1->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
     EXPECT_TRUE(cache.Insert(object1.Get()).second);
     CacheableT* object1Ptr = object1.Get();
+
+    std::atomic_flag eqOnceFlag;
+    object1->SetEqualFn([&](const CacheableT* x) {
+        if (!eqOnceFlag.test_and_set()) {
+            semA.Release();
+            semB.Acquire();
+        }
+    });
 
     // Thread A will release the last reference of the original object after the object has been
     // promoted internally for equality check.
@@ -375,12 +387,16 @@ TEST(ContentLessObjectCacheTest, InsertDeletingLastRefHashEquivalent) {
 
     ContentLessObjectCache<CacheableT> cache;
     Ref<CacheableT> object1 = AcquireRef(new CacheableT(1, 1));
-    object1->SetEqualFn([&](const CacheableT* x) {
-        semA.Release();
-        semB.Acquire();
-    });
     object1->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
     EXPECT_TRUE(cache.Insert(object1.Get()).second);
+
+    std::atomic_flag eqOnceFlag;
+    object1->SetEqualFn([&](const CacheableT* x) {
+        if (!eqOnceFlag.test_and_set()) {
+            semA.Release();
+            semB.Acquire();
+        }
+    });
 
     // Thread A will release the last reference of the original object after the object has been
     // promoted internally for equality check.

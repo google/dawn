@@ -31,10 +31,10 @@
 #include <mutex>
 #include <tuple>
 #include <type_traits>
-#include <unordered_set>
 #include <utility>
 #include <variant>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
@@ -182,11 +182,8 @@ class ContentLessObjectCache {
     using CacheKeyFuncs = detail::ContentLessObjectCacheKeyFuncs<RefCountedT>;
 
   public:
-    // Constructor needs to pass in 'this' to the EqualityFunc. Since the default bucket_count on
-    // sets is implementation defined, creating a temporary unused set to get the value. The actual
-    // type of the temporary does not matter.
     ContentLessObjectCache()
-        : mCache(std::unordered_set<int>().bucket_count(),
+        : mCache(/*capacity=*/0,
                  typename CacheKeyFuncs::HashFunc(),
                  typename CacheKeyFuncs::EqualityFunc(this)) {}
 
@@ -274,17 +271,17 @@ class ContentLessObjectCache {
     }
 
     std::mutex mMutex;
-    std::unordered_set<detail::ContentLessObjectCacheKey<RefCountedT>,
-                       typename CacheKeyFuncs::HashFunc,
-                       typename CacheKeyFuncs::EqualityFunc>
+    absl::flat_hash_set<detail::ContentLessObjectCacheKey<RefCountedT>,
+                        typename CacheKeyFuncs::HashFunc,
+                        typename CacheKeyFuncs::EqualityFunc>
         mCache;
 
     // The cache has a pointer to a StackVector of temporary Refs that are by-products of Promotes
     // inside the EqualityFunc. These Refs need to outlive the EqualityFunc calls because otherwise,
     // they could be the last living Ref of the object resulting in a re-entrant Erase call that
-    // deadlocks on the mutex. Since the default max_load_factor of most std::unordered_set
-    // implementations should be 1.0 (roughly 1 element per bucket), a StackVector of length 4
-    // should be enough space in most cases. See dawn:1993 for more details.
+    // deadlocks on the mutex.
+    // Absl should make fewer than 1 equality checks per set operation, so a StackVector of length
+    // 4 should be sufficient for most cases. See dawn:1993 for more details.
     raw_ptr<StackVector<Ref<RefCountedT>, 4>> mTemporaryRefs = nullptr;
 };
 
