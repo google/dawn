@@ -62,7 +62,8 @@ group("cmds") {
     "src/dawn/samples",
     "src/tint:cmds",
   ]
-  if (target_cpu == "x64" && (is_win || is_linux || is_mac)) {
+  if ((target_cpu == "x64" && (is_win || is_linux || is_mac)) ||
+      (target_cpu == "arm64" && is_win)) {
     deps += [ "third_party/gn/dxc:dxc" ]
   }
 }

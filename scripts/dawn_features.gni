@@ -55,10 +55,9 @@ declare_args() {
   dawn_use_swiftshader = !is_android && !is_ios
 
   # Whether we allow building DXC.
-  # DXC requires SM6.0+ which is blocklisted on x86,
-  # and arm64 support is not implemented yet.
+  # DXC requires SM6.0+ which is blocklisted on x86.
   # See crbug.com/tint/1753.
-  dawn_use_built_dxc = is_win && target_cpu != "x86" && target_cpu != "arm64"
+  dawn_use_built_dxc = is_win && target_cpu != "x86"
 }
 
 declare_args() {
