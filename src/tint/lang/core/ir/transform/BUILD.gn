@@ -187,6 +187,7 @@ tint_fuzz_source_set("fuzz") {
     "combine_access_instructions_fuzz.cc",
     "conversion_polyfill_fuzz.cc",
     "demote_to_helper_fuzz.cc",
+    "direct_variable_access_fuzz.cc",
   ]
   deps = [
     "${tint_src_dir}/api/common",
