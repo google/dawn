@@ -240,9 +240,11 @@ if (tint_build_wgsl_reader) {
     sources = [
       "add_block_attribute_fuzz.cc",
       "add_empty_entry_point_fuzz.cc",
+      "array_length_from_uniform_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [
+      "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",

@@ -90,7 +90,7 @@ struct ArrayLengthFromUniform::State {
     /// @param program the source program
     /// @param in the input transform data
     /// @param out the output transform data
-    explicit State(const Program& program, const DataMap& in, DataMap& out)
+    State(const Program& program, const DataMap& in, DataMap& out)
         : src(program), outputs(out), cfg(in.Get<Config>()) {}
 
     /// Runs the transform
@@ -333,6 +333,7 @@ Transform::ApplyResult ArrayLengthFromUniform::Apply(const Program& src,
     return State{src, inputs, outputs}.Run();
 }
 
+ArrayLengthFromUniform::Config::Config() = default;
 ArrayLengthFromUniform::Config::Config(BindingPoint ubo_bp) : ubo_binding(ubo_bp) {}
 ArrayLengthFromUniform::Config::Config(const Config&) = default;
 ArrayLengthFromUniform::Config& ArrayLengthFromUniform::Config::operator=(const Config&) = default;

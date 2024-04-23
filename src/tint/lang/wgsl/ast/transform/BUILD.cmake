@@ -250,10 +250,12 @@ if(TINT_BUILD_WGSL_READER)
 tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/add_block_attribute_fuzz.cc
   lang/wgsl/ast/transform/add_empty_entry_point_fuzz.cc
+  lang/wgsl/ast/transform/array_length_from_uniform_fuzz.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_ast_transform_fuzz fuzz
+  tint_api_common
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
