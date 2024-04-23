@@ -199,6 +199,7 @@ tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/preserve_padding_fuzz.cc
   lang/core/ir/transform/robustness_fuzz.cc
   lang/core/ir/transform/std140_fuzz.cc
+  lang/core/ir/transform/vectorize_scalar_matrix_constructors_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_core_ir_transform_fuzz fuzz
