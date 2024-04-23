@@ -30,8 +30,6 @@
 #include <iostream>
 #include <thread>
 
-#include "src/tint/lang/wgsl/common/allowed_features.h"
-#include "src/tint/lang/wgsl/reader/options.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/defer.h"
@@ -89,14 +87,8 @@ void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& opti
     tint::Source::File file("test.wgsl", wgsl);
 
     // Parse the WGSL program.
-    tint::wgsl::reader::Options parse_options;
-    parse_options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
-    auto program = tint::wgsl::reader::Parse(&file, parse_options);
+    auto program = tint::wgsl::reader::Parse(&file);
     if (!program.IsValid()) {
-        if (options.verbose) {
-            std::cerr << "invalid WGSL program: " << std::endl
-                      << program.Diagnostics() << std::endl;
-        }
         return;
     }
 
