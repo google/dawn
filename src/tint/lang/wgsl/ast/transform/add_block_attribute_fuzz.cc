@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,27 +25,22 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
-
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
-#include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 
 namespace tint::ast::transform {
+namespace {
 
-void ZeroInitWorkgroupMemoryFuzzer(const Program& program) {
-    if (program.AST().HasOverrides()) {
-        return;
-    }
-
+void AddBlockAttributeFuzzer(const Program& program) {
     DataMap outputs;
-    if (auto result = ZeroInitWorkgroupMemory{}.Apply(program, DataMap{}, outputs)) {
+    if (auto result = AddBlockAttribute{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "ZeroInitWorkgroupMemory returned invalid program:\n"
-                       << result->Diagnostics();
+            TINT_ICE() << "AddBlockAttribute returned invalid program:\n" << result->Diagnostics();
         }
     }
 }
 
+}  // namespace
 }  // namespace tint::ast::transform
 
-TINT_WGSL_PROGRAM_FUZZER(tint::ast::transform::ZeroInitWorkgroupMemoryFuzzer);
+TINT_WGSL_PROGRAM_FUZZER(tint::ast::transform::AddBlockAttributeFuzzer);

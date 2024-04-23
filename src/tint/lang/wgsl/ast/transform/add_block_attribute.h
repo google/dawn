@@ -40,7 +40,7 @@ namespace tint::ast::transform {
 class AddBlockAttribute final : public Castable<AddBlockAttribute, Transform> {
   public:
     /// BlockAttribute is an InternalAttribute that is used to decorate a
-    // structure that is used as a buffer in SPIR-V or GLSL.
+    /// structure that is used as a buffer in SPIR-V or GLSL.
     class BlockAttribute final : public Castable<BlockAttribute, InternalAttribute> {
       public:
         /// Constructor
