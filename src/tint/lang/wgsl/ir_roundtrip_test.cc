@@ -196,6 +196,14 @@ fn f(i : i32, u : u32) -> i32 {
 )");
 }
 
+TEST_F(IRToProgramRoundtripTest, SingleFunction_UnrestrictedPointerParameters) {
+    RUN_TEST(R"(
+fn f(p : ptr<uniform, i32>) -> i32 {
+  return *(p);
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Struct declaration
 ////////////////////////////////////////////////////////////////////////////////
