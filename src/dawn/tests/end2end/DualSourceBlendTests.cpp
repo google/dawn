@@ -188,6 +188,9 @@ class DualSourceBlendTests : public DawnTest {
 
 // Test that Src and Src1 BlendFactors work with dual source blending.
 TEST_P(DualSourceBlendTests, BlendFactorSrc1) {
+    // TODO(crbug.com/dawn/2543): diagnose this on Pixel 6 AP1A.240405.002
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsAndroid() && IsARM());
+
     // Test source blend factor with source index 0
     TestParams params;
     params.srcBlendFactor = wgpu::BlendFactor::Src;
@@ -213,6 +216,9 @@ TEST_P(DualSourceBlendTests, BlendFactorSrc1) {
 
 // Test that SrcAlpha and SrcAlpha1 BlendFactors work with dual source blending.
 TEST_P(DualSourceBlendTests, BlendFactorSrc1Alpha) {
+    // TODO(crbug.com/dawn/2543): diagnose this on Pixel 6 AP1A.240405.002
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsAndroid() && IsARM());
+
     // Test source blend factor with source alpha index 0
     TestParams params;
     params.srcBlendFactor = wgpu::BlendFactor::SrcAlpha;
