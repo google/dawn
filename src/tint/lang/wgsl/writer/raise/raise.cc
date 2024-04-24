@@ -108,6 +108,10 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kPack2X16Unorm)
         CASE(kPack4X8Snorm)
         CASE(kPack4X8Unorm)
+        CASE(kPack4XI8)
+        CASE(kPack4XU8)
+        CASE(kPack4XI8Clamp)
+        CASE(kPack4XU8Clamp)
         CASE(kPow)
         CASE(kQuantizeToF16)
         CASE(kRadians)
@@ -133,6 +137,8 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kUnpack2X16Unorm)
         CASE(kUnpack4X8Snorm)
         CASE(kUnpack4X8Unorm)
+        CASE(kUnpack4XI8)
+        CASE(kUnpack4XU8)
         CASE(kWorkgroupBarrier)
         CASE(kTextureBarrier)
         CASE(kTextureDimensions)
@@ -163,10 +169,11 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kAtomicCompareExchangeWeak)
         CASE(kSubgroupBallot)
         CASE(kSubgroupBroadcast)
-        default:
-            TINT_ICE() << "unhandled builtin function: " << fn;
-            return wgsl::BuiltinFn::kNone;
+        case core::BuiltinFn::kNone:
+            break;
     }
+    TINT_ICE() << "unhandled builtin function: " << fn;
+    return wgsl::BuiltinFn::kNone;
 }
 
 void ReplaceBuiltinFnCall(core::ir::Module& mod, core::ir::CoreBuiltinCall* call) {

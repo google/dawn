@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace tint::wgsl::reader {
 namespace {
@@ -166,10 +167,15 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kAtomicCompareExchangeWeak)
         CASE(kSubgroupBallot)
         CASE(kSubgroupBroadcast)
-        default:
-            TINT_ICE() << "unhandled builtin function: " << fn;
-            return core::BuiltinFn::kNone;
+
+        case tint::wgsl::BuiltinFn::kBitcast:               // should lower to ir::Bitcast
+        case tint::wgsl::BuiltinFn::kWorkgroupUniformLoad:  // should be handled in Lower()
+        case tint::wgsl::BuiltinFn::kTintMaterialize:
+        case tint::wgsl::BuiltinFn::kNone:
+            break;
     }
+    TINT_ICE() << "unhandled builtin function: " << fn;
+    return core::BuiltinFn::kNone;
 }
 
 }  // namespace

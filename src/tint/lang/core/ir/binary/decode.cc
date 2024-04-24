@@ -196,10 +196,13 @@ struct Decoder {
                 return Function::PipelineStage::kFragment;
             case pb::PipelineStage::Vertex:
                 return Function::PipelineStage::kVertex;
-            default:
-                TINT_ICE() << "unhandled PipelineStage: " << stage;
-                return Function::PipelineStage::kCompute;
+
+            case pb::PipelineStage::PipelineStage_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::PipelineStage::PipelineStage_INT_MAX_SENTINEL_DO_NOT_USE_:
+                break;
         }
+        TINT_ICE() << "unhandled PipelineStage: " << stage;
+        return Function::PipelineStage::kCompute;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -322,8 +325,7 @@ struct Decoder {
             case pb::Instruction::KindCase::kUnreachable:
                 inst_out = CreateInstructionUnreachable(inst_in.unreachable());
                 break;
-            default:
-                TINT_UNIMPLEMENTED() << inst_in.kind_case();
+            case pb::Instruction::KindCase::KIND_NOT_SET:
                 break;
         }
         TINT_ASSERT_OR_RETURN_VALUE(inst_out, nullptr);
@@ -550,7 +552,7 @@ struct Decoder {
                 return CreateTypeExternalTexture(type_in.external_texture());
             case pb::Type::KindCase::kSampler:
                 return CreateTypeSampler(type_in.sampler());
-            default:
+            case pb::Type::KindCase::KIND_NOT_SET:
                 break;
         }
         TINT_ICE() << type_in.kind_case();
@@ -571,10 +573,13 @@ struct Decoder {
                 return mod_out_.Types().Get<f32>();
             case pb::TypeBasic::f16:
                 return mod_out_.Types().Get<f16>();
-            default:
-                TINT_ICE() << "invalid TypeBasic: " << basic_in;
-                return nullptr;
+
+            case pb::TypeBasic::TypeBasic_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::TypeBasic::TypeBasic_INT_MAX_SENTINEL_DO_NOT_USE_:
+                break;
         }
+        TINT_ICE() << "invalid TypeBasic: " << basic_in;
+        return nullptr;
     }
 
     const type::Vector* CreateTypeVector(const pb::TypeVector& vector_in) {
@@ -712,10 +717,15 @@ struct Decoder {
             case pb::Value::KindCase::kConstant:
                 value_out = b.Constant(ConstantValue(value_in.constant()));
                 break;
-            default:
-                TINT_ICE() << "invalid TypeDecl.kind: " << value_in.kind_case();
-                return nullptr;
+            case pb::Value::KindCase::KIND_NOT_SET:
+                break;
         }
+
+        if (!value_out) {
+            TINT_ICE() << "invalid TypeDecl.kind: " << value_in.kind_case();
+            return nullptr;
+        }
+
         return value_out;
     }
 
@@ -788,10 +798,11 @@ struct Decoder {
                 return CreateConstantComposite(value_in.composite());
             case pb::ConstantValue::KindCase::kSplat:
                 return CreateConstantSplat(value_in.splat());
-            default:
-                TINT_ICE() << "invalid ConstantValue.kind: " << value_in.kind_case();
-                return nullptr;
+            case pb::ConstantValue::KindCase::KIND_NOT_SET:
+                break;
         }
+        TINT_ICE() << "invalid ConstantValue.kind: " << value_in.kind_case();
+        return nullptr;
     }
 
     const core::constant::Value* CreateConstantScalar(const pb::ConstantValueScalar& value_in) {
@@ -806,10 +817,11 @@ struct Decoder {
                 return b.ConstantValue(f32(value_in.f32()));
             case pb::ConstantValueScalar::KindCase::kF16:
                 return b.ConstantValue(f16(value_in.f16()));
-            default:
-                TINT_ICE() << "invalid ConstantValueScalar.kind: " << value_in.kind_case();
-                return nullptr;
+            case pb::ConstantValueScalar::KindCase::KIND_NOT_SET:
+                break;
         }
+        TINT_ICE() << "invalid ConstantValueScalar.kind: " << value_in.kind_case();
+        return nullptr;
     }
 
     const core::constant::Value* CreateConstantComposite(
@@ -874,10 +886,13 @@ struct Decoder {
                 return core::AddressSpace::kUniform;
             case pb::AddressSpace::workgroup:
                 return core::AddressSpace::kWorkgroup;
-            default:
-                TINT_ICE() << "invalid AddressSpace: " << in;
-                return core::AddressSpace::kUndefined;
+
+            case pb::AddressSpace::AddressSpace_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::AddressSpace::AddressSpace_INT_MAX_SENTINEL_DO_NOT_USE_:
+                break;
         }
+        TINT_ICE() << "invalid AddressSpace: " << in;
+        return core::AddressSpace::kUndefined;
     }
 
     core::Access AccessControl(pb::AccessControl in) {
@@ -888,10 +903,13 @@ struct Decoder {
                 return core::Access::kWrite;
             case pb::AccessControl::read_write:
                 return core::Access::kReadWrite;
-            default:
-                TINT_ICE() << "invalid Access: " << in;
-                return core::Access::kUndefined;
+
+            case pb::AccessControl::AccessControl_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::AccessControl::AccessControl_INT_MAX_SENTINEL_DO_NOT_USE_:
+                break;
         }
+        TINT_ICE() << "invalid Access: " << in;
+        return core::Access::kUndefined;
     }
 
     core::UnaryOp UnaryOp(pb::UnaryOp in) {
@@ -907,10 +925,12 @@ struct Decoder {
             case pb::UnaryOp::not_:
                 return core::UnaryOp::kNot;
 
-            default:
-                TINT_ICE() << "invalid UnaryOp: " << in;
-                return core::UnaryOp::kComplement;
+            case pb::UnaryOp::UnaryOp_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::UnaryOp::UnaryOp_INT_MAX_SENTINEL_DO_NOT_USE_:
+                break;
         }
+        TINT_ICE() << "invalid UnaryOp: " << in;
+        return core::UnaryOp::kComplement;
     }
 
     core::BinaryOp BinaryOp(pb::BinaryOp in) {
@@ -947,11 +967,17 @@ struct Decoder {
                 return core::BinaryOp::kShiftLeft;
             case pb::BinaryOp::shift_right:
                 return core::BinaryOp::kShiftRight;
+            case pb::BinaryOp::logical_and:
+                return core::BinaryOp::kLogicalAnd;
+            case pb::BinaryOp::logical_or:
+                return core::BinaryOp::kLogicalOr;
 
-            default:
-                TINT_ICE() << "invalid BinaryOp: " << in;
-                return core::BinaryOp::kAdd;
+            case pb::BinaryOp::BinaryOp_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::BinaryOp::BinaryOp_INT_MAX_SENTINEL_DO_NOT_USE_:
+                break;
         }
+        TINT_ICE() << "invalid BinaryOp: " << in;
+        return core::BinaryOp::kAdd;
     }
 
     core::type::TextureDimension TextureDimension(pb::TextureDimension in) {
@@ -968,7 +994,9 @@ struct Decoder {
                 return core::type::TextureDimension::kCube;
             case pb::TextureDimension::cube_array:
                 return core::type::TextureDimension::kCubeArray;
-            default:
+
+            case pb::TextureDimension::TextureDimension_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::TextureDimension::TextureDimension_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
 
@@ -980,6 +1008,8 @@ struct Decoder {
         switch (in) {
             case pb::TexelFormat::bgra8_unorm:
                 return core::TexelFormat::kBgra8Unorm;
+            case pb::TexelFormat::r8_unorm:
+                return core::TexelFormat::kR8Unorm;
             case pb::TexelFormat::r32_float:
                 return core::TexelFormat::kR32Float;
             case pb::TexelFormat::r32_sint:
@@ -1012,7 +1042,9 @@ struct Decoder {
                 return core::TexelFormat::kRgba8Uint;
             case pb::TexelFormat::rgba8_unorm:
                 return core::TexelFormat::kRgba8Unorm;
-            default:
+
+            case pb::TexelFormat::TexelFormat_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::TexelFormat::TexelFormat_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
 
@@ -1026,7 +1058,9 @@ struct Decoder {
                 return core::type::SamplerKind::kSampler;
             case pb::SamplerKind::comparison:
                 return core::type::SamplerKind::kComparisonSampler;
-            default:
+
+            case pb::SamplerKind::SamplerKind_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::SamplerKind::SamplerKind_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
 
@@ -1042,7 +1076,9 @@ struct Decoder {
                 return core::InterpolationType::kLinear;
             case pb::InterpolationType::perspective:
                 return core::InterpolationType::kPerspective;
-            default:
+
+            case pb::InterpolationType::InterpolationType_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::InterpolationType::InterpolationType_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
         TINT_ICE() << "invalid InterpolationType: " << in;
@@ -1057,7 +1093,9 @@ struct Decoder {
                 return core::InterpolationSampling::kCentroid;
             case pb::InterpolationSampling::sample:
                 return core::InterpolationSampling::kSample;
-            default:
+
+            case pb::InterpolationSampling::InterpolationSampling_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::InterpolationSampling::InterpolationSampling_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
         TINT_ICE() << "invalid InterpolationSampling: " << in;
@@ -1096,7 +1134,9 @@ struct Decoder {
                 return core::BuiltinValue::kVertexIndex;
             case pb::BuiltinValue::workgroup_id:
                 return core::BuiltinValue::kWorkgroupId;
-            default:
+
+            case pb::BuiltinValue::BuiltinValue_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::BuiltinValue::BuiltinValue_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
         TINT_ICE() << "invalid BuiltinValue: " << in;
@@ -1225,6 +1265,14 @@ struct Decoder {
                 return core::BuiltinFn::kPack4X8Snorm;
             case pb::BuiltinFn::pack4x8_unorm:
                 return core::BuiltinFn::kPack4X8Unorm;
+            case pb::BuiltinFn::pack4xi8:
+                return core::BuiltinFn::kPack4XI8;
+            case pb::BuiltinFn::pack4xu8:
+                return core::BuiltinFn::kPack4XU8;
+            case pb::BuiltinFn::pack4xi8_clamp:
+                return core::BuiltinFn::kPack4XI8Clamp;
+            case pb::BuiltinFn::pack4xu8_clamp:
+                return core::BuiltinFn::kPack4XU8Clamp;
             case pb::BuiltinFn::pow:
                 return core::BuiltinFn::kPow;
             case pb::BuiltinFn::quantize_to_f16:
@@ -1275,6 +1323,10 @@ struct Decoder {
                 return core::BuiltinFn::kUnpack4X8Snorm;
             case pb::BuiltinFn::unpack4x8_unorm:
                 return core::BuiltinFn::kUnpack4X8Unorm;
+            case pb::BuiltinFn::unpack4xi8:
+                return core::BuiltinFn::kUnpack4XI8;
+            case pb::BuiltinFn::unpack4xu8:
+                return core::BuiltinFn::kUnpack4XU8;
             case pb::BuiltinFn::workgroup_barrier:
                 return core::BuiltinFn::kWorkgroupBarrier;
             case pb::BuiltinFn::texture_barrier:
@@ -1335,7 +1387,9 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupBallot;
             case pb::BuiltinFn::subgroup_broadcast:
                 return core::BuiltinFn::kSubgroupBroadcast;
-            default:
+
+            case pb::BuiltinFn::BuiltinFn_INT_MIN_SENTINEL_DO_NOT_USE_:
+            case pb::BuiltinFn::BuiltinFn_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
         TINT_ICE() << "invalid BuiltinFn: " << in;
