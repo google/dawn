@@ -182,7 +182,8 @@ class Texture final : public d3d::Texture {
 
 class TextureView final : public TextureViewBase {
   public:
-    static Ref<TextureView> Create(TextureBase* texture, const TextureViewDescriptor* descriptor);
+    static Ref<TextureView> Create(TextureBase* texture,
+                                   const UnpackedPtr<TextureViewDescriptor>& descriptor);
 
     DXGI_FORMAT GetD3D12Format() const;
 
@@ -192,7 +193,7 @@ class TextureView final : public TextureViewBase {
     D3D12_UNORDERED_ACCESS_VIEW_DESC GetUAVDescriptor() const;
 
   private:
-    TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+    TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor);
 
     D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;
 };

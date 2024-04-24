@@ -132,7 +132,7 @@ class DeviceMock : public DeviceBase {
                 (override));
     MOCK_METHOD(ResultOrError<Ref<TextureViewBase>>,
                 CreateTextureViewImpl,
-                (TextureBase*, const TextureViewDescriptor*),
+                (TextureBase*, const UnpackedPtr<TextureViewDescriptor>&),
                 (override));
 
     MOCK_METHOD(ResultOrError<wgpu::TextureUsage>,

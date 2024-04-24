@@ -66,7 +66,7 @@ class Texture final : public TextureBase {
 
 class TextureView final : public TextureViewBase {
   public:
-    TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+    TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor);
 
     GLuint GetHandle() const;
     GLenum GetGLTarget() const;

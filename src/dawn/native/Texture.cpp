@@ -226,9 +226,10 @@ MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
     return {};
 }
 
-MaybeError ValidateTextureViewDimensionCompatibility(const DeviceBase* device,
-                                                     const TextureBase* texture,
-                                                     const TextureViewDescriptor* descriptor) {
+MaybeError ValidateTextureViewDimensionCompatibility(
+    const DeviceBase* device,
+    const TextureBase* texture,
+    const UnpackedPtr<TextureViewDescriptor>& descriptor) {
     DAWN_INVALID_IF(!IsArrayLayerValidForTextureViewDimension(descriptor->dimension,
                                                               descriptor->arrayLayerCount),
                     "The dimension (%s) of the texture view is not compatible with the layer count "
@@ -587,7 +588,7 @@ MaybeError ValidateTextureDescriptor(
 
 MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                          const TextureBase* texture,
-                                         const TextureViewDescriptor* descriptor) {
+                                         const UnpackedPtr<TextureViewDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
     // Parent texture should have been already validated.
@@ -1248,7 +1249,8 @@ wgpu::TextureUsage TextureBase::APIGetUsage() const {
 
 // TextureViewBase
 
-TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor)
+TextureViewBase::TextureViewBase(TextureBase* texture,
+                                 const UnpackedPtr<TextureViewDescriptor>& descriptor)
     : ApiObjectBase(texture->GetDevice(), descriptor->label),
       mTexture(texture),
       mFormat(GetDevice()->GetValidInternalFormat(descriptor->format)),

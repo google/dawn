@@ -41,7 +41,8 @@ TextureMock::TextureMock(DeviceMock* device, const TextureDescriptor* descriptor
 
 TextureMock::~TextureMock() = default;
 
-TextureViewMock::TextureViewMock(TextureBase* texture, const TextureViewDescriptor* descriptor)
+TextureViewMock::TextureViewMock(TextureBase* texture,
+                                 const UnpackedPtr<TextureViewDescriptor>& descriptor)
     : TextureViewBase(texture, descriptor) {
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->TextureViewBase::DestroyImpl(); });
 }

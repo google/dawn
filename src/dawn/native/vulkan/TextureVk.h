@@ -234,8 +234,9 @@ class Texture final : public TextureBase {
 
 class TextureView final : public TextureViewBase {
   public:
-    static ResultOrError<Ref<TextureView>> Create(TextureBase* texture,
-                                                  const TextureViewDescriptor* descriptor);
+    static ResultOrError<Ref<TextureView>> Create(
+        TextureBase* texture,
+        const UnpackedPtr<TextureViewDescriptor>& descriptor);
     VkImageView GetHandle() const;
     VkImageView GetHandleForBGRA8UnormStorage() const;
 
@@ -245,7 +246,7 @@ class TextureView final : public TextureViewBase {
     ~TextureView() override;
     void DestroyImpl() override;
     using TextureViewBase::TextureViewBase;
-    MaybeError Initialize(const TextureViewDescriptor* descriptor);
+    MaybeError Initialize(const UnpackedPtr<TextureViewDescriptor>& descriptor);
 
     VkImageViewCreateInfo GetCreateInfo(wgpu::TextureFormat format,
                                         wgpu::TextureViewDimension dimension,

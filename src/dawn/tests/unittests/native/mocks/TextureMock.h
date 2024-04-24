@@ -48,7 +48,7 @@ class TextureMock : public TextureBase {
 
 class TextureViewMock : public TextureViewBase {
   public:
-    TextureViewMock(TextureBase* texture, const TextureViewDescriptor* descriptor);
+    TextureViewMock(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor);
     ~TextureViewMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));

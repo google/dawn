@@ -58,7 +58,7 @@ MaybeError ValidateTextureDescriptor(
     std::optional<wgpu::TextureUsage> allowedSharedTextureMemoryUsage = std::nullopt);
 MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                          const TextureBase* texture,
-                                         const TextureViewDescriptor* descriptor);
+                                         const UnpackedPtr<TextureViewDescriptor>& descriptor);
 ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
     const TextureBase* texture,
     const TextureViewDescriptor* descriptor);
@@ -215,7 +215,7 @@ class TextureBase : public SharedResource {
 
 class TextureViewBase : public ApiObjectBase {
   public:
-    TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor);
+    TextureViewBase(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor);
     ~TextureViewBase() override;
 
     static Ref<TextureViewBase> MakeError(DeviceBase* device, const char* label = nullptr);

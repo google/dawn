@@ -104,8 +104,8 @@ DeviceMock::DeviceMock() {
         }));
     ON_CALL(*this, CreateTextureViewImpl)
         .WillByDefault(WithArgs<0, 1>(
-            [](TextureBase* texture,
-               const TextureViewDescriptor* descriptor) -> ResultOrError<Ref<TextureViewBase>> {
+            [](TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor)
+                -> ResultOrError<Ref<TextureViewBase>> {
                 return AcquireRef(new NiceMock<TextureViewMock>(texture, descriptor));
             }));
     ON_CALL(*this, CreateUninitializedComputePipelineImpl)

@@ -207,7 +207,8 @@ class Texture final : public d3d::Texture {
 
 class TextureView final : public TextureViewBase {
   public:
-    static Ref<TextureView> Create(TextureBase* texture, const TextureViewDescriptor* descriptor);
+    static Ref<TextureView> Create(TextureBase* texture,
+                                   const UnpackedPtr<TextureViewDescriptor>& descriptor);
 
     ResultOrError<ID3D11ShaderResourceView*> GetOrCreateD3D11ShaderResourceView();
     ResultOrError<ID3D11RenderTargetView*> GetOrCreateD3D11RenderTargetView(

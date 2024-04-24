@@ -98,8 +98,9 @@ GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
     DAWN_UNREACHABLE();
 }
 
-bool RequiresCreatingNewTextureView(const TextureBase* texture,
-                                    const TextureViewDescriptor* textureViewDescriptor) {
+bool RequiresCreatingNewTextureView(
+    const TextureBase* texture,
+    const UnpackedPtr<TextureViewDescriptor>& textureViewDescriptor) {
     constexpr wgpu::TextureUsage kShaderUsageNeedsView =
         wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
     constexpr wgpu::TextureUsage kUsageNeedsView =
@@ -567,7 +568,7 @@ MaybeError Texture::EnsureSubresourceContentInitialized(const SubresourceRange& 
 
 // TextureView
 
-TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
+TextureView::TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor)
     : TextureViewBase(texture, descriptor), mOwnsHandle(false) {
     mTarget = TargetForTextureViewDimension(descriptor->dimension, descriptor->arrayLayerCount,
                                             texture->GetSampleCount());
