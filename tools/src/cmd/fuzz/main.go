@@ -49,6 +49,10 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/utils"
 )
 
+const (
+	wgslDictionaryRelPath = "src/tint/cmd/fuzz/wgsl/dictionary.txt"
+)
+
 func main() {
 	if err := run(); err != nil {
 		fmt.Println(err)
@@ -193,7 +197,14 @@ func (t tool) run() error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	args := []string{t.out, t.corpus}
+	dictPath, err := filepath.Abs(filepath.Join(fileutils.DawnRoot(), wgslDictionaryRelPath))
+	if err != nil || !fileutils.IsFile(dictPath) {
+		return fmt.Errorf("failed to obtain the dictionary.txt path: %w", err)
+	}
+
+	args := []string{t.out, t.corpus,
+		"-dict=" + dictPath,
+	}
 	if t.verbose {
 		args = append(args, "--verbose")
 	}
