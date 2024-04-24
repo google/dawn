@@ -39,6 +39,8 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_utils_bytes lib
+  utils/bytes/buffer_reader.cc
+  utils/bytes/buffer_reader.h
   utils/bytes/buffer_writer.h
   utils/bytes/bytes.cc
   utils/bytes/decoder.h
@@ -69,9 +71,9 @@ tint_target_add_dependencies(tint_utils_bytes lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_utils_bytes_test test
+  utils/bytes/buffer_reader_test.cc
   utils/bytes/buffer_writer_test.cc
   utils/bytes/decoder_test.cc
-  utils/bytes/reader_test.cc
   utils/bytes/swap_test.cc
 )
 

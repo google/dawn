@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/utils/bytes/buffer_reader.h"
 #include "src/tint/utils/bytes/decoder.h"
 #include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/macros/static_init.h"

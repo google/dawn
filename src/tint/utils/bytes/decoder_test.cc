@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "src/tint/utils/bytes/buffer_reader.h"
 #include "src/tint/utils/result/result.h"
 
 namespace tint {
