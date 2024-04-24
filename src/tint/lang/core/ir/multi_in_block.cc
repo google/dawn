@@ -55,11 +55,25 @@ void MultiInBlock::CloneInto(CloneContext& ctx, Block* out) {
 }
 
 void MultiInBlock::SetParams(VectorRef<BlockParam*> params) {
+    for (auto* param : params_) {
+        param->SetBlock(nullptr);
+    }
     params_ = std::move(params);
+    TINT_ASSERT_OR_RETURN(!params_.Any(IsNull));
+    for (auto* param : params_) {
+        param->SetBlock(this);
+    }
 }
 
 void MultiInBlock::SetParams(std::initializer_list<BlockParam*> params) {
+    for (auto* param : params_) {
+        param->SetBlock(nullptr);
+    }
     params_ = std::move(params);
+    TINT_ASSERT_OR_RETURN(!params_.Any(IsNull));
+    for (auto* param : params_) {
+        param->SetBlock(this);
+    }
 }
 
 void MultiInBlock::AddInboundSiblingBranch(ir::Terminator* node) {

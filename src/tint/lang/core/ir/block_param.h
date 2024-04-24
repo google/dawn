@@ -31,25 +31,42 @@
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/rtti/castable.h"
 
+// Forward declarations
+namespace tint::core::ir {
+class MultiInBlock;
+}  // namespace tint::core::ir
+
 namespace tint::core::ir {
 
-/// An instruction in the IR.
+/// A block parameter in the IR.
 class BlockParam : public Castable<BlockParam, Value> {
   public:
     /// Constructor
-    /// @param type the type of the var
+    /// @param type the type of the parameter
     explicit BlockParam(const core::type::Type* type);
     ~BlockParam() override;
 
-    /// @returns the type of the var
+    /// @returns the type of the parameter
     const core::type::Type* Type() const override { return type_; }
+
+    /// Sets the block that this parameter belongs to.
+    /// @param block the block
+    void SetBlock(MultiInBlock* block) { block_ = block; }
+
+    /// @returns the block that this parameter belongs to, or nullptr
+    MultiInBlock* Block() { return block_; }
+
+    /// @returns the block that this parameter belongs to, or nullptr
+    const MultiInBlock* Block() const { return block_; }
 
     /// @copydoc Instruction::Clone()
     BlockParam* Clone(CloneContext& ctx) override;
 
   private:
-    /// the result type of the instruction
+    /// the type of the parameter
     const core::type::Type* type_ = nullptr;
+    /// the block that the parameter belongs to
+    MultiInBlock* block_ = nullptr;
 };
 
 }  // namespace tint::core::ir
