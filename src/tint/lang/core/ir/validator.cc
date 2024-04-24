@@ -182,6 +182,10 @@ class Validator {
     /// @param inst the instruction
     diag::Diagnostic& AddNote(const Instruction* inst);
 
+    /// Adds a note to @p func and highlights the function in the disassembly
+    /// @param func the function
+    diag::Diagnostic& AddNote(const Function* func);
+
     /// Adds a note to @p inst for operand @p idx and highlights the operand in the
     /// disassembly
     /// @param inst the instruction
@@ -441,6 +445,12 @@ diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
     return AddNote(src);
 }
 
+diag::Diagnostic& Validator::AddNote(const Function* func) {
+    DisassembleIfNeeded();
+    auto src = dis_.FunctionSource(func);
+    return AddNote(src);
+}
+
 diag::Diagnostic& Validator::AddNote(const Instruction* inst, size_t idx) {
     DisassembleIfNeeded();
     auto src = dis_.OperandSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
@@ -510,8 +520,21 @@ void Validator::CheckRootBlock(const Block* blk) {
 void Validator::CheckFunction(const Function* func) {
     CheckBlock(func->Block());
 
-    // References not allowed on function signatures even with Capability::kAllowRefTypes
     for (auto* param : func->Params()) {
+        if (!param->Alive()) {
+            AddError(param) << "destroyed parameter found in function parameter list";
+            return;
+        }
+        if (!param->Function()) {
+            AddError(param) << "function parameter has nullptr parent function";
+            return;
+        } else if (param->Function() != func) {
+            AddError(param) << "function parameter has incorrect parent function";
+            AddNote(param->Function()) << "parent function declared here";
+            return;
+        }
+
+        // References not allowed on function signatures even with Capability::kAllowRefTypes
         if (HoldsType<type::Reference>(param->Type())) {
             AddError(param) << "references are not permitted as parameter types";
         }
