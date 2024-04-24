@@ -158,10 +158,20 @@ class Validator {
     /// @returns the diagnostic
     diag::Diagnostic& AddResultError(const Instruction* inst, size_t idx);
 
-    /// Adds an error the @p block and highlights the block header in the disassembly
+    /// Adds an error for the @p block and highlights the block header in the disassembly
     /// @param blk the block
     /// @returns the diagnostic
     diag::Diagnostic& AddError(const Block* blk);
+
+    /// Adds an error for the @p func and highlights the function in the disassembly
+    /// @param func the function
+    /// @returns the diagnostic
+    diag::Diagnostic& AddError(const Function* func);
+
+    /// Adds an error for the @p param and highlights the parameter in the disassembly
+    /// @param param the parameter
+    /// @returns the diagnostic
+    diag::Diagnostic& AddError(const FunctionParam* param);
 
     /// Adds an error the @p block and highlights the block header in the disassembly
     /// @param src the source lines to highlight
@@ -346,8 +356,8 @@ Result<SuccessType> Validator::Run() {
 
     for (auto& func : mod_.functions) {
         if (!all_functions_.Add(func.Get())) {
-            AddError(Source{}) << "function " << style::Function(Name(func.Get()))
-                               << " added to module multiple times";
+            AddError(func) << "function " << style::Function(Name(func.Get()))
+                           << " added to module multiple times";
         }
     }
 
@@ -410,6 +420,18 @@ diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx)
 diag::Diagnostic& Validator::AddError(const Block* blk) {
     DisassembleIfNeeded();
     auto src = dis_.BlockSource(blk);
+    return AddError(src);
+}
+
+diag::Diagnostic& Validator::AddError(const Function* func) {
+    DisassembleIfNeeded();
+    auto src = dis_.FunctionSource(func);
+    return AddError(src);
+}
+
+diag::Diagnostic& Validator::AddError(const FunctionParam* param) {
+    DisassembleIfNeeded();
+    auto src = dis_.FunctionParamSource(param);
     return AddError(src);
 }
 
@@ -491,13 +513,11 @@ void Validator::CheckFunction(const Function* func) {
     // References not allowed on function signatures even with Capability::kAllowRefTypes
     for (auto* param : func->Params()) {
         if (HoldsType<type::Reference>(param->Type())) {
-            // TODO(dsinclair): Parameters need a source mapping.
-            AddError(Source{}) << "references are not permitted as parameter types";
+            AddError(param) << "references are not permitted as parameter types";
         }
     }
     if (HoldsType<type::Reference>(func->ReturnType())) {
-        // TODO(dsinclair): Function need a source mapping.
-        AddError(Source{}) << "references are not permitted as return types";
+        AddError(func) << "references are not permitted as return types";
     }
 }
 

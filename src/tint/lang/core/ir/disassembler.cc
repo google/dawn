@@ -302,7 +302,12 @@ void Disassembler::EmitFunction(const Function* func) {
     in_function_ = true;
 
     std::string fn_id = IdOf(func);
-    Indent() << "%" << fn_id << " =";
+    {
+        SourceMarker sm(this);
+        Indent() << "%" << fn_id;
+        sm.Store(func);
+    }
+    out_ << " =";
 
     if (func->Stage() != Function::PipelineStage::kUndefined) {
         out_ << " @" << func->Stage();
@@ -318,7 +323,9 @@ void Disassembler::EmitFunction(const Function* func) {
         if (p != func->Params().Front()) {
             out_ << ", ";
         }
+        SourceMarker sm(this);
         out_ << "%" << IdOf(p) << ":" << p->Type()->FriendlyName();
+        sm.Store(p);
 
         EmitParamAttributes(p);
     }

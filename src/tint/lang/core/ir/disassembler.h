@@ -100,9 +100,19 @@ class Disassembler {
     /// @returns the source for the result
     Source ResultSource(IndexedValue result) { return result_to_src_.GetOr(result, Source{}); }
 
-    /// @param blk teh block to retrieve
+    /// @param blk the block to retrieve
     /// @returns the source for the block
     Source BlockSource(const Block* blk) { return block_to_src_.GetOr(blk, Source{}); }
+
+    /// @param func the function to retrieve
+    /// @returns the source for the function
+    Source FunctionSource(const Function* func) { return function_to_src_.GetOr(func, Source{}); }
+
+    /// @param param the function parameter to retrieve
+    /// @returns the source for the parameter
+    Source FunctionParamSource(const FunctionParam* param) {
+        return function_param_to_src_.GetOr(param, Source{});
+    }
 
     /// Stores the given @p src location for @p inst instruction
     /// @param inst the instruction to store
@@ -113,6 +123,18 @@ class Disassembler {
     /// @param blk the block to store
     /// @param src the source location
     void SetSource(const Block* blk, Source src) { block_to_src_.Add(blk, src); }
+
+    /// Stores the given @p src location for @p func function
+    /// @param func the function to store
+    /// @param src the source location
+    void SetSource(const Function* func, Source src) { function_to_src_.Add(func, src); }
+
+    /// Stores the given @p src location for @p param function parameter
+    /// @param param the function parameter to store
+    /// @param src the source location
+    void SetSource(const FunctionParam* param, Source src) {
+        function_param_to_src_.Add(param, src);
+    }
 
     /// Stores the given @p src location for @p op operand
     /// @param op the operand to store
@@ -136,6 +158,10 @@ class Disassembler {
         void Store(const Instruction* inst) { dis_->SetSource(inst, MakeSource()); }
 
         void Store(const Block* blk) { dis_->SetSource(blk, MakeSource()); }
+
+        void Store(const Function* func) { dis_->SetSource(func, MakeSource()); }
+
+        void Store(const FunctionParam* param) { dis_->SetSource(param, MakeSource()); }
 
         void Store(IndexedValue operand) { dis_->SetSource(operand, MakeSource()); }
 
@@ -196,6 +222,8 @@ class Disassembler {
     Hashmap<const Instruction*, Source, 8> instruction_to_src_;
     Hashmap<IndexedValue, Source, 8> operand_to_src_;
     Hashmap<IndexedValue, Source, 8> result_to_src_;
+    Hashmap<const Function*, Source, 8> function_to_src_;
+    Hashmap<const FunctionParam*, Source, 8> function_param_to_src_;
     Hashmap<const If*, std::string, 8> if_names_;
     Hashmap<const Loop*, std::string, 8> loop_names_;
     Hashmap<const Switch*, std::string, 8> switch_names_;
