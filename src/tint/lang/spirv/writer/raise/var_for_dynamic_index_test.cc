@@ -430,5 +430,449 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipCo
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesToFuncParam_FromDifferentBlocks) {
+    auto* arr = b.FunctionParam(ty.array<i32, 4>());
+    auto* cond = b.FunctionParam(ty.bool_());
+    auto* idx_a = b.FunctionParam(ty.i32());
+    auto* idx_b = b.FunctionParam(ty.i32());
+    auto* func = b.Function("func", ty.i32());
+    func->SetParams({arr, cond, idx_a, idx_b});
+    b.Append(func->Block(), [&] {  //
+        auto* if_ = b.If(cond);
+        b.Append(if_->True(), [&] {  //
+            b.Return(func, b.Access(ty.i32(), arr, idx_a));
+        });
+        b.Append(if_->False(), [&] {  //
+            b.Return(func, b.Access(ty.i32(), arr, idx_b));
+        });
+        b.Unreachable();
+    });
+
+    auto* src = R"(
+%func = func(%2:array<i32, 4>, %3:bool, %4:i32, %5:i32):i32 -> %b1 {
+  %b1 = block {
+    if %3 [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+        %6:i32 = access %2, %4
+        ret %6
+      }
+      %b3 = block {  # false
+        %7:i32 = access %2, %5
+        ret %7
+      }
+    }
+    unreachable
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%func = func(%2:array<i32, 4>, %3:bool, %4:i32, %5:i32):i32 -> %b1 {
+  %b1 = block {
+    %6:ptr<function, array<i32, 4>, read_write> = var, %2
+    if %3 [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+        %7:ptr<function, i32, read_write> = access %6, %4
+        %8:i32 = load %7
+        ret %8
+      }
+      %b3 = block {  # false
+        %9:ptr<function, i32, read_write> = access %6, %5
+        %10:i32 = load %9
+        ret %10
+      }
+    }
+    unreachable
+  }
+}
+)";
+
+    Run(VarForDynamicIndex);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_VarForDynamicIndexTest,
+       MultipleAccessesToFuncParam_FromDifferentBlocks_WithLeadingConstantIndex) {
+    auto* arr = b.FunctionParam(ty.array(ty.array<i32, 4>(), 4));
+    auto* cond = b.FunctionParam(ty.bool_());
+    auto* idx_a = b.FunctionParam(ty.i32());
+    auto* idx_b = b.FunctionParam(ty.i32());
+    auto* func = b.Function("func", ty.i32());
+    func->SetParams({arr, cond, idx_a, idx_b});
+    b.Append(func->Block(), [&] {  //
+        auto* if_ = b.If(cond);
+        b.Append(if_->True(), [&] {  //
+            b.Return(func, b.Access(ty.i32(), arr, 0_u, idx_a));
+        });
+        b.Append(if_->False(), [&] {  //
+            b.Return(func, b.Access(ty.i32(), arr, 0_u, idx_b));
+        });
+        b.Unreachable();
+    });
+
+    auto* src = R"(
+%func = func(%2:array<array<i32, 4>, 4>, %3:bool, %4:i32, %5:i32):i32 -> %b1 {
+  %b1 = block {
+    if %3 [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+        %6:i32 = access %2, 0u, %4
+        ret %6
+      }
+      %b3 = block {  # false
+        %7:i32 = access %2, 0u, %5
+        ret %7
+      }
+    }
+    unreachable
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%func = func(%2:array<array<i32, 4>, 4>, %3:bool, %4:i32, %5:i32):i32 -> %b1 {
+  %b1 = block {
+    %6:array<i32, 4> = access %2, 0u
+    %7:ptr<function, array<i32, 4>, read_write> = var, %6
+    if %3 [t: %b2, f: %b3] {  # if_1
+      %b2 = block {  # true
+        %8:ptr<function, i32, read_write> = access %7, %4
+        %9:i32 = load %8
+        ret %9
+      }
+      %b3 = block {  # false
+        %10:ptr<function, i32, read_write> = access %7, %5
+        %11:i32 = load %10
+        ret %11
+      }
+    }
+    unreachable
+  }
+}
+)";
+
+    Run(VarForDynamicIndex);
+
+    EXPECT_EQ(expect, str());
+}
+TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesToBlockParam_FromDifferentBlocks) {
+    auto* arr = b.BlockParam(ty.array<i32, 4>());
+    auto* cond = b.FunctionParam(ty.bool_());
+    auto* idx_a = b.FunctionParam(ty.i32());
+    auto* idx_b = b.FunctionParam(ty.i32());
+    auto* func = b.Function("func", ty.i32());
+    func->SetParams({cond, idx_a, idx_b});
+    b.Append(func->Block(), [&] {  //
+        auto* loop = b.Loop();
+        loop->Body()->SetParams({arr});
+        b.Append(loop->Body(), [&] {
+            auto* if_ = b.If(cond);
+            b.Append(if_->True(), [&] {  //
+                b.Return(func, b.Access(ty.i32(), arr, idx_a));
+            });
+            b.Append(if_->False(), [&] {  //
+                b.Return(func, b.Access(ty.i32(), arr, idx_b));
+            });
+            b.Unreachable();
+        });
+        b.Unreachable();
+    });
+
+    auto* src = R"(
+%func = func(%2:bool, %3:i32, %4:i32):i32 -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block (%5:array<i32, 4>) {  # body
+        if %2 [t: %b3, f: %b4] {  # if_1
+          %b3 = block {  # true
+            %6:i32 = access %5:array<i32, 4>, %3
+            ret %6
+          }
+          %b4 = block {  # false
+            %7:i32 = access %5:array<i32, 4>, %4
+            ret %7
+          }
+        }
+        unreachable
+      }
+    }
+    unreachable
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%func = func(%2:bool, %3:i32, %4:i32):i32 -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block (%5:array<i32, 4>) {  # body
+        %6:ptr<function, array<i32, 4>, read_write> = var, %5:array<i32, 4>
+        if %2 [t: %b3, f: %b4] {  # if_1
+          %b3 = block {  # true
+            %7:ptr<function, i32, read_write> = access %6, %3
+            %8:i32 = load %7
+            ret %8
+          }
+          %b4 = block {  # false
+            %9:ptr<function, i32, read_write> = access %6, %4
+            %10:i32 = load %9
+            ret %10
+          }
+        }
+        unreachable
+      }
+    }
+    unreachable
+  }
+}
+)";
+
+    Run(VarForDynamicIndex);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_VarForDynamicIndexTest,
+       MultipleAccessesToBlockParam_FromDifferentBlocks_WithLeadingConstantIndex) {
+    auto* arr = b.BlockParam(ty.array(ty.array<i32, 4>(), 4));
+    auto* cond = b.FunctionParam(ty.bool_());
+    auto* idx_a = b.FunctionParam(ty.i32());
+    auto* idx_b = b.FunctionParam(ty.i32());
+    auto* func = b.Function("func", ty.i32());
+    func->SetParams({cond, idx_a, idx_b});
+    b.Append(func->Block(), [&] {  //
+        auto* loop = b.Loop();
+        loop->Body()->SetParams({arr});
+        b.Append(loop->Body(), [&] {
+            auto* if_ = b.If(cond);
+            b.Append(if_->True(), [&] {  //
+                b.Return(func, b.Access(ty.i32(), arr, 0_u, idx_a));
+            });
+            b.Append(if_->False(), [&] {  //
+                b.Return(func, b.Access(ty.i32(), arr, 0_u, idx_b));
+            });
+            b.Unreachable();
+        });
+        b.Unreachable();
+    });
+
+    auto* src = R"(
+%func = func(%2:bool, %3:i32, %4:i32):i32 -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block (%5:array<array<i32, 4>, 4>) {  # body
+        if %2 [t: %b3, f: %b4] {  # if_1
+          %b3 = block {  # true
+            %6:i32 = access %5:array<array<i32, 4>, 4>, 0u, %3
+            ret %6
+          }
+          %b4 = block {  # false
+            %7:i32 = access %5:array<array<i32, 4>, 4>, 0u, %4
+            ret %7
+          }
+        }
+        unreachable
+      }
+    }
+    unreachable
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%func = func(%2:bool, %3:i32, %4:i32):i32 -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block (%5:array<array<i32, 4>, 4>) {  # body
+        %6:array<i32, 4> = access %5:array<array<i32, 4>, 4>, 0u
+        %7:ptr<function, array<i32, 4>, read_write> = var, %6
+        if %2 [t: %b3, f: %b4] {  # if_1
+          %b3 = block {  # true
+            %8:ptr<function, i32, read_write> = access %7, %3
+            %9:i32 = load %8
+            ret %9
+          }
+          %b4 = block {  # false
+            %10:ptr<function, i32, read_write> = access %7, %4
+            %11:i32 = load %10
+            ret %11
+          }
+        }
+        unreachable
+      }
+    }
+    unreachable
+  }
+}
+)";
+
+    Run(VarForDynamicIndex);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesToConstant_FromDifferentFunctions) {
+    auto* arr = b.Constant(mod.constant_values.Zero(ty.array<i32, 4>()));
+
+    auto* idx_a = b.FunctionParam(ty.i32());
+    auto* func_a = b.Function("func_a", ty.i32());
+    func_a->SetParams({idx_a});
+    b.Append(func_a->Block(), [&] {  //
+        b.Return(func_a, b.Access(ty.i32(), arr, idx_a));
+    });
+
+    auto* idx_b = b.FunctionParam(ty.i32());
+    auto* func_b = b.Function("func_b", ty.i32());
+    func_b->SetParams({idx_b});
+    b.Append(func_b->Block(), [&] {  //
+        b.Return(func_b, b.Access(ty.i32(), arr, idx_b));
+    });
+
+    auto* idx_c = b.FunctionParam(ty.i32());
+    auto* func_c = b.Function("func_c", ty.i32());
+    func_c->SetParams({idx_c});
+    b.Append(func_c->Block(), [&] {  //
+        b.Return(func_c, b.Access(ty.i32(), arr, idx_c));
+    });
+
+    auto* src = R"(
+%func_a = func(%2:i32):i32 -> %b1 {
+  %b1 = block {
+    %3:i32 = access array<i32, 4>(0i), %2
+    ret %3
+  }
+}
+%func_b = func(%5:i32):i32 -> %b2 {
+  %b2 = block {
+    %6:i32 = access array<i32, 4>(0i), %5
+    ret %6
+  }
+}
+%func_c = func(%8:i32):i32 -> %b3 {
+  %b3 = block {
+    %9:i32 = access array<i32, 4>(0i), %8
+    ret %9
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<private, array<i32, 4>, read_write> = var, array<i32, 4>(0i)
+}
+
+%func_a = func(%3:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:ptr<private, i32, read_write> = access %1, %3
+    %5:i32 = load %4
+    ret %5
+  }
+}
+%func_b = func(%7:i32):i32 -> %b3 {
+  %b3 = block {
+    %8:ptr<private, i32, read_write> = access %1, %7
+    %9:i32 = load %8
+    ret %9
+  }
+}
+%func_c = func(%11:i32):i32 -> %b4 {
+  %b4 = block {
+    %12:ptr<private, i32, read_write> = access %1, %11
+    %13:i32 = load %12
+    ret %13
+  }
+}
+)";
+
+    Run(VarForDynamicIndex);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_VarForDynamicIndexTest,
+       MultipleAccessesToConstant_FromDifferentFunctions_WithLeadingConstantIndex) {
+    auto* arr = b.Constant(mod.constant_values.Zero(ty.array(ty.array<i32, 4>(), 4)));
+
+    auto* idx_a = b.FunctionParam(ty.i32());
+    auto* func_a = b.Function("func_a", ty.i32());
+    func_a->SetParams({idx_a});
+    b.Append(func_a->Block(), [&] {  //
+        b.Return(func_a, b.Access(ty.i32(), arr, 0_u, idx_a));
+    });
+
+    auto* idx_b = b.FunctionParam(ty.i32());
+    auto* func_b = b.Function("func_b", ty.i32());
+    func_b->SetParams({idx_b});
+    b.Append(func_b->Block(), [&] {  //
+        b.Return(func_b, b.Access(ty.i32(), arr, 0_u, idx_b));
+    });
+
+    auto* idx_c = b.FunctionParam(ty.i32());
+    auto* func_c = b.Function("func_c", ty.i32());
+    func_c->SetParams({idx_c});
+    b.Append(func_c->Block(), [&] {  //
+        b.Return(func_c, b.Access(ty.i32(), arr, 0_u, idx_c));
+    });
+
+    auto* src = R"(
+%func_a = func(%2:i32):i32 -> %b1 {
+  %b1 = block {
+    %3:i32 = access array<array<i32, 4>, 4>(array<i32, 4>(0i)), 0u, %2
+    ret %3
+  }
+}
+%func_b = func(%5:i32):i32 -> %b2 {
+  %b2 = block {
+    %6:i32 = access array<array<i32, 4>, 4>(array<i32, 4>(0i)), 0u, %5
+    ret %6
+  }
+}
+%func_c = func(%8:i32):i32 -> %b3 {
+  %b3 = block {
+    %9:i32 = access array<array<i32, 4>, 4>(array<i32, 4>(0i)), 0u, %8
+    ret %9
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %1:ptr<private, array<i32, 4>, read_write> = var, array<i32, 4>(0i)
+}
+
+%func_a = func(%3:i32):i32 -> %b2 {
+  %b2 = block {
+    %4:ptr<private, i32, read_write> = access %1, %3
+    %5:i32 = load %4
+    ret %5
+  }
+}
+%func_b = func(%7:i32):i32 -> %b3 {
+  %b3 = block {
+    %8:ptr<private, i32, read_write> = access %1, %7
+    %9:i32 = load %8
+    ret %9
+  }
+}
+%func_c = func(%11:i32):i32 -> %b4 {
+  %b4 = block {
+    %12:ptr<private, i32, read_write> = access %1, %11
+    %13:i32 = load %12
+    ret %13
+  }
+}
+)";
+
+    Run(VarForDynamicIndex);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise

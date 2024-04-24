@@ -134,7 +134,7 @@ void Run(core::ir::Module& ir) {
     }
 
     // Replace each access instruction that we recorded.
-    Hashmap<core::ir::Value*, core::ir::Value*, 4> object_to_local;
+    Hashmap<core::ir::Value*, core::ir::Value*, 4> object_to_var;
     Hashmap<PartialAccess, core::ir::Value*, 4> source_object_to_value;
     for (const auto& to_replace : worklist) {
         auto* access = to_replace.access;
@@ -145,24 +145,58 @@ void Run(core::ir::Module& ir) {
         if (to_replace.first_dynamic_index > 0) {
             PartialAccess partial_access = {
                 access->Object(), access->Indices().Truncate(to_replace.first_dynamic_index)};
-            source_object = source_object_to_value.GetOrAdd(partial_access, [&] {
-                auto* intermediate_source = builder.Access(to_replace.dynamic_index_source_type,
-                                                           source_object, partial_access.indices);
-                intermediate_source->InsertBefore(access);
-                return intermediate_source->Result(0);
-            });
+            source_object =
+                source_object_to_value.GetOrAdd(partial_access, [&]() -> core::ir::Value* {
+                    // If the source is a constant, then the partial access will also produce a
+                    // constant. Extract the constant::Value and use that as the new source object.
+                    if (source_object->Is<core::ir::Constant>()) {
+                        for (const auto& i : partial_access.indices) {
+                            auto idx = i->As<core::ir::Constant>()->Value()->ValueAs<uint32_t>();
+                            source_object = builder.Constant(
+                                source_object->As<core::ir::Constant>()->Value()->Index(idx));
+                        }
+                        return source_object;
+                    }
+
+                    // Extract a non-constant intermediate source using an access instruction that
+                    // we insert immediately after the definition of the root source object.
+                    auto* intermediate_source =
+                        builder.Access(to_replace.dynamic_index_source_type, source_object,
+                                       partial_access.indices);
+                    builder.InsertAfter(source_object,
+                                        [&] { builder.Append(intermediate_source); });
+                    return intermediate_source->Result(0);
+                });
         }
 
-        // Declare a local variable and copy the source object to it.
-        auto* local = object_to_local.GetOrAdd(source_object, [&] {
-            auto* decl = builder.Var(ir.Types().ptr(
-                core::AddressSpace::kFunction, source_object->Type(), core::Access::kReadWrite));
+        // Declare a variable and copy the source object to it.
+        auto* var = object_to_var.GetOrAdd(source_object, [&] {
+            // If the source object is a constant we use a module-scope variable, as it could be
+            // indexed by multiple functions. Otherwise, we declare a function-scope variable
+            // immediately after the definition of the source object.
+            core::ir::Var* decl = nullptr;
+            if (source_object->Is<core::ir::Constant>()) {
+                decl = builder.Var(ir.Types().ptr(core::AddressSpace::kPrivate,
+                                                  source_object->Type(), core::Access::kReadWrite));
+                ir.root_block->Append(decl);
+            } else {
+                builder.InsertAfter(source_object, [&] {
+                    decl = builder.Var(ir.Types().ptr(core::AddressSpace::kFunction,
+                                                      source_object->Type(),
+                                                      core::Access::kReadWrite));
+
+                    // If we ever support value declarations at module-scope, we will need to modify
+                    // the partial access logic above since `access` instructions cannot be used in
+                    // the root block.
+                    TINT_ASSERT(decl->Block() != ir.root_block);
+                });
+            }
+
             decl->SetInitializer(source_object);
-            decl->InsertBefore(access);
             return decl->Result(0);
         });
 
-        // Create a new access instruction using the local variable as the source.
+        // Create a new access instruction using the new variable as the source.
         Vector<core::ir::Value*, 4> indices{
             access->Indices().Offset(to_replace.first_dynamic_index)};
         const core::type::Type* access_type = access->Result(0)->Type();
@@ -178,9 +212,9 @@ void Run(core::ir::Module& ir) {
             vector_index = indices.Pop();
         }
 
+        auto addrspace = var->Type()->As<core::type::Pointer>()->AddressSpace();
         core::ir::Instruction* new_access = builder.Access(
-            ir.Types().ptr(core::AddressSpace::kFunction, access_type, core::Access::kReadWrite),
-            local, indices);
+            ir.Types().ptr(addrspace, access_type, core::Access::kReadWrite), var, indices);
         new_access->InsertBefore(access);
 
         core::ir::Instruction* load = nullptr;

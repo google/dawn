@@ -219,6 +219,37 @@ class Builder {
         cb();
     }
 
+    /// Calls @p cb with the builder inserting after @p val
+    /// @param val the insertion point for new instructions
+    /// @param cb the function to call with the builder inserting new instructions after @p val
+    template <typename FUNCTION>
+    void InsertAfter(ir::Value* val, FUNCTION&& cb) {
+        tint::Switch(
+            val,
+            [&](core::ir::InstructionResult* result) {
+                const TINT_SCOPED_ASSIGNMENT(insertion_point_,
+                                             InsertionPoints::InsertAfter{result->Instruction()});
+                cb();
+            },
+            [&](core::ir::FunctionParam* param) {
+                auto* body = param->Function()->Block();
+                if (body->IsEmpty()) {
+                    Append(body, cb);
+                } else {
+                    InsertBefore(body->Front(), cb);
+                }
+            },
+            [&](core::ir::BlockParam* param) {
+                auto* block = param->Block();
+                if (block->IsEmpty()) {
+                    Append(block, cb);
+                } else {
+                    InsertBefore(block->Front(), cb);
+                }
+            },
+            TINT_ICE_ON_NO_MATCH);
+    }
+
     /// Adds and returns the instruction @p instruction to the current insertion point. If there
     /// is no current insertion point set, then @p instruction is just returned.
     /// @param instruction the instruction to append
