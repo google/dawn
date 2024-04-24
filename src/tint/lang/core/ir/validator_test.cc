@@ -478,6 +478,115 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Block_DeadParameter) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* p = b.BlockParam("my_param", ty.f32());
+    b.Append(f->Block(), [&] {
+        auto* l = b.Loop();
+        l->Body()->SetParams({p});
+        b.Append(l->Body(), [&] { b.ExitLoop(l); });
+        b.Return(f);
+    });
+
+    p->Destroy();
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:20 error: destroyed parameter found in block parameter list
+      %b2 = block (%my_param:f32) {  # body
+                   ^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block (%my_param:f32) {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Block_ParameterWithNullBlock) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* p = b.BlockParam("my_param", ty.f32());
+    b.Append(f->Block(), [&] {
+        auto* l = b.Loop();
+        l->Body()->SetParams({p});
+        b.Append(l->Body(), [&] { b.ExitLoop(l); });
+        b.Return(f);
+    });
+
+    p->SetBlock(nullptr);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:20 error: block parameter has nullptr parent block
+      %b2 = block (%my_param:f32) {  # body
+                   ^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    loop [b: %b2] {  # loop_1
+      %b2 = block (%my_param:f32) {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Block_ParameterUsedInMultipleBlocks) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* p = b.BlockParam("my_param", ty.f32());
+    b.Append(f->Block(), [&] {
+        auto* l = b.Loop();
+        l->Body()->SetParams({p});
+        b.Append(l->Body(), [&] { b.Continue(l, p); });
+        l->Continuing()->SetParams({p});
+        b.Append(l->Continuing(), [&] { b.NextIteration(l, p); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:20 error: block parameter has incorrect parent block
+      %b2 = block (%my_param:f32) {  # body
+                   ^^^^^^^^^^^^^
+
+:7:7 note: parent block declared here
+      %b3 = block (%my_param:f32) {  # continuing
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    loop [b: %b2, c: %b3] {  # loop_1
+      %b2 = block (%my_param:f32) {  # body
+        continue %b3 %my_param:f32
+      }
+      %b3 = block (%my_param:f32) {  # continuing
+        next_iteration %b2 %my_param:f32
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Access_NegativeIndex) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.vec3<f32>());
