@@ -61,7 +61,13 @@ struct ForErase {
 // even if the last ref of the cached value is dropped, we still get the same hash in the set for
 // erasing.
 template <typename RefCountedT>
-using WeakRefAndHash = std::pair<WeakRef<RefCountedT>, size_t>;
+struct WeakRefAndHash {
+    WeakRef<RefCountedT> weakRef;
+    size_t hash;
+
+    explicit WeakRefAndHash(RefCountedT* obj)
+        : weakRef(GetWeakRef(obj)), hash(typename RefCountedT::HashFunc()(obj)) {}
+};
 
 template <typename RefCountedT>
 struct ContentLessObjectCacheKeyFuncs {
@@ -72,11 +78,9 @@ struct ContentLessObjectCacheKeyFuncs {
         using is_transparent = void;
 
         size_t operator()(const RefCountedT* ptr) const { return BaseHashFunc()(ptr); }
-        size_t operator()(const WeakRefAndHash<RefCountedT>& weakref) const {
-            return weakref.second;
-        }
-        size_t operator()(const ForErase<RefCountedT>& forErase) const {
-            return BaseHashFunc()(forErase.value);
+        size_t operator()(const WeakRefAndHash<RefCountedT>& obj) const { return obj.hash; }
+        size_t operator()(const ForErase<RefCountedT>& obj) const {
+            return BaseHashFunc()(obj.value);
         }
     };
 
@@ -87,8 +91,8 @@ struct ContentLessObjectCacheKeyFuncs {
 
         bool operator()(const WeakRefAndHash<RefCountedT>& a,
                         const WeakRefAndHash<RefCountedT>& b) const {
-            Ref<RefCountedT> aRef = a.first.Promote();
-            Ref<RefCountedT> bRef = b.first.Promote();
+            Ref<RefCountedT> aRef = a.weakRef.Promote();
+            Ref<RefCountedT> bRef = b.weakRef.Promote();
 
             bool equal = (aRef && bRef && BaseEqualityFunc()(aRef.Get(), bRef.Get()));
             if (aRef) {
@@ -108,11 +112,11 @@ struct ContentLessObjectCacheKeyFuncs {
             //       destroyed.
             //   (2) a != b, in which case the lock on the cache guarantees that the element in the
             //       cache has not been erased yet and hence cannot have been destroyed.
-            return a.first.UnsafeGet() == b.value;
+            return a.weakRef.UnsafeGet() == b.value;
         }
 
         bool operator()(const WeakRefAndHash<RefCountedT>& a, const RefCountedT* b) const {
-            Ref<RefCountedT> aRef = a.first.Promote();
+            Ref<RefCountedT> aRef = a.weakRef.Promote();
             bool equal = aRef && BaseEqualityFunc()(aRef.Get(), b);
             if (aRef) {
                 mCache->TrackTemporaryRef(std::move(aRef));
@@ -150,21 +154,19 @@ class ContentLessObjectCache {
     // `object` and false otherwise.
     std::pair<Ref<RefCountedT>, bool> Insert(RefCountedT* obj) {
         return WithLockAndCleanup([&]() -> std::pair<Ref<RefCountedT>, bool> {
-            detail::WeakRefAndHash<RefCountedT> weakref =
-                std::make_pair(GetWeakRef(obj), typename RefCountedT::HashFunc()(obj));
-            auto [it, inserted] = mCache.insert(weakref);
+            auto [it, inserted] = mCache.emplace(obj);
             if (inserted) {
                 obj->mCache = this;
                 return {obj, inserted};
             } else {
                 // Try to promote the found WeakRef to a Ref. If promotion fails, remove the old Key
                 // and insert this one.
-                Ref<RefCountedT> ref = it->first.Promote();
+                Ref<RefCountedT> ref = it->weakRef.Promote();
                 if (ref != nullptr) {
                     return {std::move(ref), false};
                 } else {
                     mCache.erase(it);
-                    auto result = mCache.insert(weakref);
+                    auto result = mCache.emplace(obj);
                     DAWN_ASSERT(result.second);
                     obj->mCache = this;
                     return {obj, true};
@@ -178,7 +180,7 @@ class ContentLessObjectCache {
         return WithLockAndCleanup([&]() -> Ref<RefCountedT> {
             auto it = mCache.find(blueprint);
             if (it != mCache.end()) {
-                return it->first.Promote();
+                return it->weakRef.Promote();
             }
             return nullptr;
         });
