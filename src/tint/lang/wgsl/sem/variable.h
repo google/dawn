@@ -197,7 +197,6 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     const GlobalVariableAttributes& Attributes() const { return attributes_; }
 
   private:
-    std::optional<tint::BindingPoint> binding_point_;
     tint::OverrideId override_id_;
     UniqueVector<const GlobalVariable*, 4> transitively_referenced_overrides_;
     GlobalVariableAttributes attributes_;
