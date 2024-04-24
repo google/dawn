@@ -41,4 +41,8 @@ size_t BufferReader::Read(std::byte* out, size_t count) {
     return n;
 }
 
+bool BufferReader::IsEOF() const {
+    return bytes_remaining_ == 0;
+}
+
 }  // namespace tint::bytes

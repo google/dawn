@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint {
 namespace {
@@ -145,14 +146,21 @@ TEST(BytesDecoderTest, UnorderedMap) {
                      0x00, 0x70, 0x08, 0x80,  //
                      0x01);
     auto reader = BufferReader{Slice{data}};
-    auto got = Decode<M>(reader);
-    EXPECT_THAT(got.Get(), testing::ContainerEq(M{
-                               std::pair<uint8_t, uint16_t>(0x10u, 0x2002u),
-                               std::pair<uint8_t, uint16_t>(0x30u, 0x4004u),
-                               std::pair<uint8_t, uint16_t>(0x50u, 0x6006u),
-                               std::pair<uint8_t, uint16_t>(0x70u, 0x8008u),
-                           }));
-    EXPECT_NE(Decode<M>(reader), Success);
+    {
+        auto got = Decode<M>(reader);
+        ASSERT_EQ(got, Success);
+        EXPECT_THAT(got.Get(), testing::ContainerEq(M{
+                                   std::pair<uint8_t, uint16_t>(0x10u, 0x2002u),
+                                   std::pair<uint8_t, uint16_t>(0x30u, 0x4004u),
+                                   std::pair<uint8_t, uint16_t>(0x50u, 0x6006u),
+                                   std::pair<uint8_t, uint16_t>(0x70u, 0x8008u),
+                               }));
+    }
+    {
+        auto got = Decode<M>(reader);
+        ASSERT_EQ(got, Success);
+        EXPECT_THAT(got.Get(), testing::IsEmpty());
+    }
 }
 
 TEST(BytesDecoderTest, UnorderedSet) {
@@ -163,14 +171,21 @@ TEST(BytesDecoderTest, UnorderedSet) {
                      0x00, 0x08, 0x80,  //
                      0x01);
     auto reader = BufferReader{Slice{data}};
-    auto got = Decode<S>(reader);
-    EXPECT_THAT(got.Get(), testing::ContainerEq(S{
-                               0x2002u,
-                               0x4004u,
-                               0x6006u,
-                               0x8008u,
-                           }));
-    EXPECT_NE(Decode<S>(reader), Success);
+    {
+        auto got = Decode<S>(reader);
+        ASSERT_EQ(got, Success);
+        EXPECT_THAT(got.Get(), testing::ContainerEq(S{
+                                   0x2002u,
+                                   0x4004u,
+                                   0x6006u,
+                                   0x8008u,
+                               }));
+    }
+    {
+        auto got = Decode<S>(reader);
+        ASSERT_EQ(got, Success);
+        EXPECT_THAT(got.Get(), testing::IsEmpty());
+    }
 }
 
 TEST(BytesDecoderTest, Vector) {
@@ -181,14 +196,21 @@ TEST(BytesDecoderTest, Vector) {
                      0x00, 0x70,  //
                      0x01);
     auto reader = BufferReader{Slice{data}};
-    auto got = Decode<M>(reader);
-    EXPECT_THAT(got.Get(), testing::ContainerEq(M{
-                               0x10u,
-                               0x30u,
-                               0x50u,
-                               0x70u,
-                           }));
-    EXPECT_NE(Decode<M>(reader), Success);
+    {
+        auto got = Decode<M>(reader);
+        ASSERT_EQ(got, Success);
+        EXPECT_THAT(got.Get(), testing::ContainerEq(M{
+                                   0x10u,
+                                   0x30u,
+                                   0x50u,
+                                   0x70u,
+                               }));
+    }
+    {
+        auto got = Decode<M>(reader);
+        ASSERT_EQ(got, Success);
+        EXPECT_THAT(got.Get(), testing::IsEmpty());
+    }
 }
 
 TEST(BytesDecoderTest, Optional) {

@@ -133,7 +133,7 @@ struct Decoder<std::unordered_map<K, V>, void> {
     static Result<std::unordered_map<K, V>> Decode(Reader& reader) {
         std::unordered_map<K, V> out;
 
-        while (true) {
+        while (!reader.IsEOF()) {
             auto stop = bytes::Decode<bool>(reader);
             if (stop != Success) {
                 return stop.Failure();
@@ -165,7 +165,7 @@ struct Decoder<std::unordered_set<V>, void> {
     static Result<std::unordered_set<V>> Decode(Reader& reader) {
         std::unordered_set<V> out;
 
-        while (true) {
+        while (!reader.IsEOF()) {
             auto stop = bytes::Decode<bool>(reader);
             if (stop != Success) {
                 return stop.Failure();
@@ -193,7 +193,7 @@ struct Decoder<std::vector<V>, void> {
     static Result<std::vector<V>> Decode(Reader& reader) {
         std::vector<V> out;
 
-        while (true) {
+        while (!reader.IsEOF()) {
             auto stop = bytes::Decode<bool>(reader);
             if (stop != Success) {
                 return stop.Failure();

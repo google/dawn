@@ -54,6 +54,9 @@ class Reader {
     /// then the end of the stream has been reached.
     virtual size_t Read(std::byte* out, size_t count) = 0;
 
+    /// @returns true if the Reader has no more bytes to read.
+    virtual bool IsEOF() const = 0;
+
     /// Reads an integer from the stream, performing byte swapping if the stream's endianness
     /// differs from the native endianness.
     /// If there are too few bytes remaining in the stream, then a failure is returned.
@@ -139,6 +142,9 @@ class BufferReader final : public Reader {
 
     /// @copydoc Reader::Read
     size_t Read(std::byte* out, size_t count) override;
+
+    /// @copydoc Reader::IsEOF
+    bool IsEOF() const override;
 
   private:
     /// The data to read from
