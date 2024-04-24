@@ -10,7 +10,7 @@
 # Devices
 # tags: [ android-nexus-5x android-pixel-2 android-pixel-4
 #             android-pixel-6 android-shield-android-tv android-sm-a135m
-#             android-sm-a235m
+#             android-sm-a235m android-sm-s926b
 #         chromeos-board-amd64-generic chromeos-board-kevin chromeos-board-eve
 #             chromeos-board-jacuzzi chromeos-board-octopus
 #         fuchsia-board-astro fuchsia-board-sherlock fuchsia-board-qemu-x64 ]
@@ -642,6 +642,14 @@ crbug.com/tint/2130 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access
 # KEEP
 ################################################################################
 crbug.com/tint/2230 webgpu:shader,execution,expression,call,builtin,fract:* [ Skip ]
+
+################################################################################
+# Crashes on Samsung S24 (International) devices
+# Skipped instead of just Crash because of the number of failures
+# KEEP
+################################################################################
+crbug.com/dawn/2542 [ android android-sm-s926b ] webgpu:web_platform,* [ Skip ]
+crbug.com/dawn/2542 [ android android-sm-s926b ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:* [ Skip ]
 
 ################################################################################
 # Failures due to splitting off worker tests (crbug.com/330501141)
