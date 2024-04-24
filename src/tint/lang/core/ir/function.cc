@@ -53,7 +53,7 @@ Function* Function::Clone(CloneContext& ctx) {
     auto* new_func =
         ctx.ir.allocators.values.Create<Function>(return_.type, pipeline_stage_, workgroup_size_);
     new_func->block_ = ctx.ir.blocks.Create<ir::Block>();
-    new_func->params_ = ctx.Clone<1>(params_.Slice());
+    new_func->SetParams(ctx.Clone<1>(params_.Slice()));
     new_func->return_.builtin = return_.builtin;
     new_func->return_.location = return_.location;
     new_func->return_.invariant = return_.invariant;
@@ -66,13 +66,25 @@ Function* Function::Clone(CloneContext& ctx) {
 }
 
 void Function::SetParams(VectorRef<FunctionParam*> params) {
+    for (auto* param : params_) {
+        param->SetFunction(nullptr);
+    }
     params_ = std::move(params);
-    TINT_ASSERT(!params_.Any(IsNull));
+    TINT_ASSERT_OR_RETURN(!params_.Any(IsNull));
+    for (auto* param : params_) {
+        param->SetFunction(this);
+    }
 }
 
 void Function::SetParams(std::initializer_list<FunctionParam*> params) {
+    for (auto* param : params_) {
+        param->SetFunction(nullptr);
+    }
     params_ = params;
-    TINT_ASSERT(!params_.Any(IsNull));
+    TINT_ASSERT_OR_RETURN(!params_.Any(IsNull));
+    for (auto* param : params_) {
+        param->SetFunction(this);
+    }
 }
 
 void Function::Destroy() {

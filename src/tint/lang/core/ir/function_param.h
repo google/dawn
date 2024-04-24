@@ -38,6 +38,11 @@
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/castable.h"
 
+// Forward declarations
+namespace tint::core::ir {
+class Function;
+}  // namespace tint::core::ir
+
 namespace tint::core::ir {
 
 /// A function parameter in the IR.
@@ -47,6 +52,16 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @param type the type of the var
     explicit FunctionParam(const core::type::Type* type);
     ~FunctionParam() override;
+
+    /// Sets the function that this parameter belongs to.
+    /// @param func the function
+    void SetFunction(ir::Function* func) { func_ = func; }
+
+    /// @returns the function that this parameter belongs to, or nullptr
+    ir::Function* Function() { return func_; }
+
+    /// @returns the function that this parameter belongs to, or nullptr
+    const ir::Function* Function() const { return func_; }
 
     /// @returns the type of the var
     const core::type::Type* Type() const override { return type_; }
@@ -99,6 +114,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
 
   private:
+    ir::Function* func_ = nullptr;
     const core::type::Type* type_ = nullptr;
     std::optional<core::BuiltinValue> builtin_;
     std::optional<struct Location> location_;
