@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <zircon/syscalls.h>
 #include <utility>
 
 #include "dawn/native/SystemHandle.h"
@@ -49,9 +50,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
 
     static bool CheckSupport(const VulkanDeviceInfo& deviceInfo,
                              VkPhysicalDevice vkPhysicalDevice,
-                             const VulkanFunctions& fn);
-
-    static void CloseHandle(ExternalSemaphoreHandle handle) {
+                             const VulkanFunctions& fn) {
         if (!deviceInfo.HasExt(DeviceExt::ExternalSemaphoreZirconHandle)) {
             return false;
         }
@@ -109,7 +108,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
             VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_ZIRCON_EVENT_BIT_FUCHSIA;
         SystemHandle handleCopy;
         DAWN_TRY_ASSIGN(handleCopy, SystemHandle::Duplicate(handle));
-        importSemaphoreHandleInfo.handle = handleCopy.Get();
+        importSemaphoreHandleInfo.zirconHandle = handleCopy.Get();
 
         MaybeError status = CheckVkSuccess(mDevice->fn.ImportSemaphoreZirconHandleFUCHSIA(
                                                mDevice->GetVkDevice(), &importSemaphoreHandleInfo),
@@ -171,7 +170,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
         return out_handle;
     }
 
-    void ServiceImplementationZirconHandle::CloseHandle(ExternalSemaphoreHandle handle) override {
+    void CloseHandle(ExternalSemaphoreHandle handle) override {
         zx_status_t status = zx_handle_close(handle);
         DAWN_ASSERT(status == ZX_OK);
     }
@@ -181,7 +180,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
 };
 
 std::unique_ptr<ServiceImplementation> CreateZirconHandleService(Device* device) {
-    return td::make_unique<ServiceImplementationZirconHandle>(device);
+    return std::make_unique<ServiceImplementationZirconHandle>(device);
 }
 bool CheckZirconHandleSupport(const VulkanDeviceInfo& deviceInfo,
                               VkPhysicalDevice vkPhysicalDevice,

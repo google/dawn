@@ -98,7 +98,7 @@ template <typename It>
     StackVector<pollfd, 4 /* avoid heap allocation for small waits */> pollfds;
     pollfds->reserve(count);
     for (auto it = begin; it != end; ++it) {
-        pollfds->push_back(pollfd{(*it).first.mPrimitive.Get(), POLLIN, 0});
+        pollfds->push_back(pollfd{static_cast<int>((*it).first.mPrimitive.Get()), POLLIN, 0});
     }
     int status = poll(pollfds->data(), pollfds->size(), ToMilliseconds(timeout));
 

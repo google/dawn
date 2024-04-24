@@ -44,7 +44,7 @@
 
 // TODO(crbug.com/dawn/283): Link against the Vulkan Loader and remove this.
 #if defined(DAWN_ENABLE_SWIFTSHADER)
-#if DAWN_PLATFORM_IS(LINUX) || DAWN_PLATFORM_IS(FUSCHIA)
+#if DAWN_PLATFORM_IS(LINUX) || DAWN_PLATFORM_IS(FUCHSIA)
 constexpr char kSwiftshaderLibName[] = "libvk_swiftshader.so";
 #elif DAWN_PLATFORM_IS(WINDOWS)
 constexpr char kSwiftshaderLibName[] = "vk_swiftshader.dll";

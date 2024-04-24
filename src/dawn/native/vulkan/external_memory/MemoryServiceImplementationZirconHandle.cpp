@@ -79,9 +79,9 @@ class ServiceImplementationZicronHandle : public ServiceImplementation {
         formatProperties.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2_KHR;
         formatProperties.pNext = &externalFormatProperties;
 
-        VkResult result = mDevice->fn.GetPhysicalDeviceImageFormatProperties2(
+        VkResult result = VkResult::WrapUnsafe(mDevice->fn.GetPhysicalDeviceImageFormatProperties2(
             ToBackend(mDevice->GetPhysicalDevice())->GetVkPhysicalDevice(), &formatInfo,
-            &formatProperties);
+            &formatProperties));
 
         // If handle not supported, result == VK_ERROR_FORMAT_NOT_SUPPORTED
         if (result != VK_SUCCESS) {
@@ -105,7 +105,7 @@ class ServiceImplementationZicronHandle : public ServiceImplementation {
     ResultOrError<MemoryImportParams> GetMemoryImportParams(
         const ExternalImageDescriptor* descriptor,
         VkImage image) override {
-        DAWN_INVALID_IF(descriptor->type != ExternalImageType::OpaqueFD,
+        DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::OpaqueFD,
                         "ExternalImageDescriptor is not an OpaqueFD descriptor.");
 
         const ExternalImageDescriptorOpaqueFD* opaqueFDDescriptor =

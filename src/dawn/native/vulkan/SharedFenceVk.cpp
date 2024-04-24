@@ -94,7 +94,7 @@ MaybeError SharedFence::ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info)
     DAWN_TRY(info.ValidateSubset<SharedFenceVkSemaphoreZirconHandleExportInfo>());
     auto* exportInfo = info.Get<SharedFenceVkSemaphoreZirconHandleExportInfo>();
     if (exportInfo != nullptr) {
-        exportInfo->handle = mHandle;
+        exportInfo->handle = mHandle.Get();
     }
 #elif DAWN_PLATFORM_IS(LINUX)
     switch (mType) {
