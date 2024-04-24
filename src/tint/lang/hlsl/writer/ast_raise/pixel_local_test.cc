@@ -61,6 +61,31 @@ TEST_F(HLSLPixelLocalTest, EmptyModule) {
     EXPECT_FALSE(ShouldRun<PixelLocal>(src, Bindings({})));
 }
 
+TEST_F(HLSLPixelLocalTest, MissingBindings) {
+    auto* src = R"(
+enable chromium_experimental_pixel_local;
+
+struct PixelLocal {
+  a : u32,
+}
+
+var<pixel_local> P : PixelLocal;
+
+@fragment
+fn F() -> @location(0) vec4f {
+  P.a += 42;
+  return vec4f(1, 0, 0, 1);
+}
+)";
+
+    auto* expect = R"(error: PixelLocal::Config::attachments missing entry for field 0)";
+    ast::transform::DataMap data;
+    data.Add<PixelLocal::Config>();
+    auto got = Run<PixelLocal>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(HLSLPixelLocalTest, UseInEntryPoint_NoPosition) {
     auto* src = R"(
 enable chromium_experimental_pixel_local;

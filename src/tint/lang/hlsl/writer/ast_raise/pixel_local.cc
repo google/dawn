@@ -39,7 +39,10 @@
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/text_style.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::PixelLocal);
 TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::PixelLocal::RasterizerOrderedView);
@@ -120,7 +123,12 @@ struct PixelLocal::State {
                 // Obtain struct of the pixel local.
                 auto* pixel_local_str =
                     pixel_local_variable->Type()->UnwrapRef()->As<sem::Struct>();
-                TransformEntryPoint(entry_point, pixel_local_variable, pixel_local_str);
+                if (auto res =
+                        TransformEntryPoint(entry_point, pixel_local_variable, pixel_local_str);
+                    res != Success) {
+                    b.Diagnostics().Add(res.Failure().reason);
+                    made_changes = true;
+                }
 
                 break;  // Only a single `var<pixel_local>` can be used by an entry point.
             }
@@ -139,9 +147,9 @@ struct PixelLocal::State {
     /// @param entry_point the entry point
     /// @param pixel_local_var the `var<pixel_local>`
     /// @param pixel_local_str the struct type of the var
-    void TransformEntryPoint(const sem::Function* entry_point,
-                             const sem::GlobalVariable* pixel_local_var,
-                             const sem::Struct* pixel_local_str) {
+    Result<SuccessType> TransformEntryPoint(const sem::Function* entry_point,
+                                            const sem::GlobalVariable* pixel_local_var,
+                                            const sem::Struct* pixel_local_str) {
         // Wrap the old entry point "fn" into a new entry point where functions to load and store
         // ROV data are called.
         auto* original_entry_point_fn = entry_point->Declaration();
@@ -175,9 +183,12 @@ struct PixelLocal::State {
         // load data from and store data into the ROVs.
         auto load_rov_function_name = b.Symbols().New("load_from_pixel_local_storage");
         auto store_rov_function_name = b.Symbols().New("store_into_pixel_local_storage");
-        DeclareROVsAndLoadStoreFunctions(load_rov_function_name, store_rov_function_name,
-                                         pixel_local_var->Declaration()->name->symbol.Name(),
-                                         pixel_local_str);
+        if (auto res = DeclareROVsAndLoadStoreFunctions(
+                load_rov_function_name, store_rov_function_name,
+                pixel_local_var->Declaration()->name->symbol.Name(), pixel_local_str);
+            res != Success) {
+            return res.Failure();
+        }
 
         // Declare new entry point
         Vector<const ast::Statement*, 5> new_entry_point_function_body;
@@ -276,6 +287,7 @@ struct PixelLocal::State {
         // Declare the new entry point that calls the inner function
         b.Func(entry_point_name, std::move(new_entry_point_params), new_entry_point_return_type,
                new_entry_point_function_body, Vector{b.Stage(ast::PipelineStage::kFragment)});
+        return Success;
     }
 
     /// Add the declarations of all the ROVs as a special type of read-write storage texture that
@@ -285,10 +297,11 @@ struct PixelLocal::State {
     /// @param store_rov_function_name the name of the function that stores the data into the ROVs
     /// @param pixel_local_variable_name the name of the pixel local variable
     /// @param pixel_local_str the struct type of the pixel local variable
-    void DeclareROVsAndLoadStoreFunctions(const Symbol& load_rov_function_name,
-                                          const Symbol& store_rov_function_name,
-                                          const std::string& pixel_local_variable_name,
-                                          const sem::Struct* pixel_local_str) {
+    Result<SuccessType> DeclareROVsAndLoadStoreFunctions(
+        const Symbol& load_rov_function_name,
+        const Symbol& store_rov_function_name,
+        const std::string& pixel_local_variable_name,
+        const sem::Struct* pixel_local_str) {
         std::string_view load_store_input_name = "my_input";
         Vector load_parameters{b.Param(load_store_input_name, b.ty.vec4<f32>())};
         Vector store_parameters{b.Param(load_store_input_name, b.ty.vec4<f32>())};
@@ -314,8 +327,11 @@ struct PixelLocal::State {
                 [&](const core::type::F32*) { return core::TexelFormat::kR32Float; },
                 TINT_ICE_ON_NO_MATCH);
             auto rov_format = ROVTexelFormat(member->Index());
-            auto rov_type = b.ty.storage_texture(core::type::TextureDimension::k2d, rov_format,
-                                                 core::Access::kReadWrite);
+            if (TINT_UNLIKELY(rov_format != Success)) {
+                return rov_format.Failure();
+            }
+            auto rov_type = b.ty.storage_texture(core::type::TextureDimension::k2d,
+                                                 rov_format.Get(), core::Access::kReadWrite);
             auto rov_symbol_name = b.Symbols().New("pixel_local_" + member->Name().Name());
             b.GlobalVar(rov_symbol_name, rov_type,
                         tint::Vector{b.Binding(AInt(ROVRegisterIndex(member->Index()))),
@@ -352,7 +368,7 @@ struct PixelLocal::State {
             // textureStore(
             //     pixel_local_member, rov_texcoord, vec4u(bitcast(PLS_Private_Variable.member)));
             std::string rov_pixel_type;
-            switch (rov_format) {
+            switch (rov_format.Get()) {
                 case core::TexelFormat::kR32Uint:
                     rov_pixel_type = "vec4u";
                     break;
@@ -363,8 +379,7 @@ struct PixelLocal::State {
                     rov_pixel_type = "vec4f";
                     break;
                 default:
-                    TINT_ICE() << "Invalid ROV format (now only R32Uint, R32Sint and R32Float are "
-                                  "supported)";
+                    TINT_UNREACHABLE();
                     break;
             }
             auto pixel_local_var_member_access_in_store_call =
@@ -374,7 +389,7 @@ struct PixelLocal::State {
                 to_vec4_call = b.Call(rov_pixel_type, pixel_local_var_member_access_in_store_call);
             } else {
                 ast::Type rov_pixel_ast_type;
-                switch (rov_format) {
+                switch (rov_format.Get()) {
                     case core::TexelFormat::kR32Uint:
                         rov_pixel_ast_type = b.ty.u32();
                         break;
@@ -399,6 +414,7 @@ struct PixelLocal::State {
 
         b.Func(load_rov_function_name, std::move(load_parameters), b.ty.void_(), load_body);
         b.Func(store_rov_function_name, std::move(store_parameters), b.ty.void_(), store_body);
+        return Success;
     }
 
     /// Find and get `@builtin(position)` which is needed for loading and storing data with ROVs
@@ -462,12 +478,14 @@ struct PixelLocal::State {
 
     /// @returns the texel format for the pixel local field with the given index
     /// @param field_index the pixel local field index
-    core::TexelFormat ROVTexelFormat(uint32_t field_index) {
+    Result<core::TexelFormat> ROVTexelFormat(uint32_t field_index) {
         auto format = cfg.pls_member_to_rov_format.Get(field_index);
         if (TINT_UNLIKELY(!format)) {
-            b.Diagnostics().AddError(diag::System::Transform, Source{})
-                << "PixelLocal::Config::attachments missing entry for field " << field_index;
-            return core::TexelFormat::kUndefined;
+            diag::Diagnostic err;
+            err.severity = diag::Severity::Error;
+            err.message << "PixelLocal::Config::attachments missing entry for field "
+                        << field_index;
+            return Failure{std::move(err)};
         }
         return *format;
     }
