@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_WEBGPU_ABSL_FORMAT_H_
 #define SRC_DAWN_NATIVE_WEBGPU_ABSL_FORMAT_H_
 
+#include <optional>
+
 #include "absl/strings/str_format.h"
 #include "dawn/native/dawn_platform.h"
 #include "dawn/native/webgpu_absl_format_autogen.h"
@@ -261,6 +263,29 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kNumeric> AbslFormatCon
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
     s->Append(absl::StrFormat("%u", static_cast<T>(value)));
+    return {true};
+}
+
+template <typename T>
+struct UndefinedWrapper {
+    std::optional<T> value;
+};
+
+template <typename T>
+UndefinedWrapper<T> WrapUndefined(T value, T undefinedValue) {
+    return value == undefinedValue ? UndefinedWrapper<T>() : UndefinedWrapper<T>{value};
+}
+
+template <typename T>
+absl::FormatConvertResult<absl::FormatConversionCharSet::kNumeric> AbslFormatConvert(
+    const UndefinedWrapper<T>& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    if (!value.value) {
+        s->Append("undefined");
+    } else {
+        s->Append(absl::StrFormat("%u", static_cast<T>(*value.value)));
+    }
     return {true};
 }
 
