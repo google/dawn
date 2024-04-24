@@ -1058,12 +1058,17 @@ class State {
         });
     }
 
-    /// Associates the IR value @p value with the AST expression @p expr.
+    /// Associates the IR value @p value with the AST expression @p expr if it is used, otherwise
+    /// creates a phony assignment with @p expr.
     void Bind(const core::ir::Value* value, const ast::Expression* expr) {
         TINT_ASSERT(value);
-        // Value will be inlined at its place of usage.
-        if (TINT_UNLIKELY(!bindings_.Add(value, InlinedValue{expr}))) {
-            TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+        if (value->IsUsed()) {
+            // Value will be inlined at its place of usage.
+            if (TINT_UNLIKELY(!bindings_.Add(value, InlinedValue{expr}))) {
+                TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+            }
+        } else {
+            Append(b.Assign(b.Phony(), expr));
         }
     }
 
