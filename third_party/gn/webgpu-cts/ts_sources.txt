@@ -376,6 +376,7 @@ src/webgpu/shader/execution/robust_access.spec.ts
 src/webgpu/shader/execution/robust_access_vertex.spec.ts
 src/webgpu/shader/execution/shadow.spec.ts
 src/webgpu/shader/execution/stage.spec.ts
+src/webgpu/shader/execution/value_init.spec.ts
 src/webgpu/shader/execution/zero_init.spec.ts
 src/webgpu/shader/execution/expression/expression.ts
 src/webgpu/shader/execution/expression/precedence.spec.ts
@@ -795,6 +796,7 @@ src/webgpu/shader/validation/expression/call/builtin/pow.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/quantizeToF16.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/radians.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/reflect.spec.ts
+src/webgpu/shader/validation/expression/call/builtin/refract.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/reverseBits.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/round.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/saturate.spec.ts
