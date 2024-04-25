@@ -243,6 +243,7 @@ if (tint_build_wgsl_reader) {
       "array_length_from_uniform_fuzz.cc",
       "binding_remapper_fuzz.cc",
       "builtin_polyfill_fuzz.cc",
+      "canonicalize_entry_point_io_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [

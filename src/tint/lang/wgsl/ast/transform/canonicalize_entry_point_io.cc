@@ -1011,6 +1011,8 @@ Transform::ApplyResult CanonicalizeEntryPointIO::Apply(const Program& src,
     return resolver::Resolve(b);
 }
 
+CanonicalizeEntryPointIO::Config::Config() = default;
+
 CanonicalizeEntryPointIO::Config::Config(ShaderStyle style,
                                          uint32_t sample_mask,
                                          bool emit_point_size,

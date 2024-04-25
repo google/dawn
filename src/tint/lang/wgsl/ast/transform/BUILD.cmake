@@ -253,6 +253,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/array_length_from_uniform_fuzz.cc
   lang/wgsl/ast/transform/binding_remapper_fuzz.cc
   lang/wgsl/ast/transform/builtin_polyfill_fuzz.cc
+  lang/wgsl/ast/transform/canonicalize_entry_point_io_fuzz.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
 )
 
