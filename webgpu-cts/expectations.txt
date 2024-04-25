@@ -690,14 +690,6 @@ crbug.com/dawn/2501 [ dawn-backend-validation intel-0x9bc5 linux mesa_ge_23.2 ] 
 crbug.com/tint/2130 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ]
 
 ################################################################################
-# Crashes on Samsung S24 (International) devices
-# Skipped instead of just Crash because of the number of failures
-# KEEP
-################################################################################
-crbug.com/dawn/2542 [ android android-sm-s926b ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:* [ Skip ]
-crbug.com/dawn/2542 [ android android-sm-s926b ] webgpu:web_platform,* [ Skip ]
-
-################################################################################
 # Failures due to splitting off worker tests (crbug.com/330501141)
 ################################################################################
 crbug.com/dawn/2478 [ ubuntu webgpu-dedicated-worker ] webgpu:api,validation,buffer,mapping:getMappedRange,subrange,mappedAtCreation: [ RetryOnFailure ]
