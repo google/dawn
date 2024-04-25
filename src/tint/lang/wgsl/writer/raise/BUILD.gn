@@ -114,7 +114,10 @@ if (tint_build_unittests) {
 }
 
 tint_fuzz_source_set("fuzz") {
-  sources = [ "value_to_let_fuzz.cc" ]
+  sources = [
+    "rename_conflicts_fuzz.cc",
+    "value_to_let_fuzz.cc",
+  ]
   deps = [
     "${tint_src_dir}/cmd/fuzz/ir:fuzz",
     "${tint_src_dir}/lang/core/ir",
