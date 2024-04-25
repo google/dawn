@@ -47,6 +47,7 @@ using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::ast::transform {
 
+BindingRemapper::Remappings::Remappings() = default;
 BindingRemapper::Remappings::Remappings(BindingPoints bp, AccessControls ac, bool may_collide)
     : binding_points(std::move(bp)),
       access_controls(std::move(ac)),
