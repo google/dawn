@@ -35,13 +35,31 @@
 namespace tint::glsl::writer {
 namespace {
 
-void ASTFuzzer(const tint::Program& program, Options options) {
+bool CanRun(const tint::Program& program, const Options& options) {
     if (program.AST().HasOverrides()) {
-        return;
+        return false;  // Overrides are not supported.
     }
 
-    if (options.first_instance_offset > 0x10000) {
-        return;  // Excessive values can cause OOM.
+    // Excessive values can cause OOM / timeouts in the PadStructs transform.
+    static constexpr uint32_t kMaxOffset = 0x1000;
+
+    if (options.first_instance_offset > kMaxOffset) {
+        return false;
+    }
+
+    if (options.depth_range_offsets) {
+        if (options.depth_range_offsets->max > kMaxOffset ||
+            options.depth_range_offsets->min > kMaxOffset) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void ASTFuzzer(const tint::Program& program, const Options& options) {
+    if (!CanRun(program, options)) {
+        return;
     }
 
     auto inspector = tint::inspector::Inspector(program);
