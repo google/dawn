@@ -39,6 +39,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync/atomic"
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
@@ -141,17 +142,20 @@ type tool struct {
 	numProcesses int    // number of concurrent processes to spawn
 }
 
-// check() runs the fuzzers against all the files under to the corpus directory,
+// check() runs the fuzzers against all the .wgsl files under to the corpus directory,
 // ensuring that the fuzzers do not error for the given file.
 func (t tool) check() error {
-	files, err := glob.Glob(filepath.Join(t.corpus, "**"))
+	wgslFiles, err := glob.Glob(filepath.Join(t.corpus, "**.wgsl"))
 	if err != nil {
 		return err
 	}
 
-	log.Printf("checking %v files...\n", len(files))
+	// Remove '*.expected.wgsl'
+	wgslFiles = transform.Filter(wgslFiles, func(s string) bool { return !strings.Contains(s, ".expected.") })
 
-	remaining := transform.SliceToChan(files)
+	log.Printf("checking %v files...\n", len(wgslFiles))
+
+	remaining := transform.SliceToChan(wgslFiles)
 
 	var pb *progressbar.ProgressBar
 	if term.CanUseAnsiEscapeSequences() {
@@ -165,7 +169,7 @@ func (t tool) check() error {
 			atomic.AddUint32(&numDone, 1)
 			if pb != nil {
 				pb.Update(progressbar.Status{
-					Total: len(files),
+					Total: len(wgslFiles),
 					Segments: []progressbar.Segment{
 						{Count: int(atomic.LoadUint32(&numDone))},
 					},
