@@ -27,7 +27,6 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_COMMANDRECORDINGCONTEXT_H_
 #define SRC_DAWN_NATIVE_VULKAN_COMMANDRECORDINGCONTEXT_H_
 
-#include <set>
 #include <vector>
 
 #include "absl/container/flat_hash_set.h"
@@ -65,7 +64,7 @@ struct CommandRecordingContext {
 
     // Mappable buffers which will be eagerly transitioned to usage MapRead or MapWrite after
     // VkSubmit.
-    std::set<Ref<Buffer>> mappableBuffersForEagerTransition;
+    absl::flat_hash_set<Ref<Buffer>> mappableBuffersForEagerTransition;
 
     // For Device state tracking only.
     VkCommandPool commandPool = VK_NULL_HANDLE;

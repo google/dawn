@@ -733,7 +733,7 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordi
 // static
 void Buffer::TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
                                               CommandRecordingContext* recordingContext,
-                                              const std::set<Ref<Buffer>>& buffers) {
+                                              const absl::flat_hash_set<Ref<Buffer>>& buffers) {
     DAWN_ASSERT(!buffers.empty());
 
     VkPipelineStageFlags srcStages = 0;
