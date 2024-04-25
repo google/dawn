@@ -35,24 +35,71 @@
 namespace dawn {
 namespace {
 
-class YCbCrSamplerWithoutFeatureValidationTest : public ValidationTest {
+constexpr uint32_t kWidth = 32u;
+constexpr uint32_t kHeight = 32u;
+constexpr uint32_t kDefaultMipLevels = 1u;
+constexpr uint32_t kDefaultLayerCount = 1u;
+constexpr uint32_t kDefaultSampleCount = 1u;
+constexpr wgpu::TextureFormat kDefaultTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+wgpu::Texture Create2DTexture(wgpu::Device& device) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size.width = kWidth;
+    descriptor.size.height = kHeight;
+    descriptor.size.depthOrArrayLayers = kDefaultLayerCount;
+    descriptor.sampleCount = kDefaultSampleCount;
+    descriptor.format = kDefaultTextureFormat;
+    descriptor.mipLevelCount = kDefaultMipLevels;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+    return device.CreateTexture(&descriptor);
+}
+
+wgpu::TextureViewDescriptor CreateDefaultViewDescriptor(wgpu::TextureViewDimension dimension) {
+    wgpu::TextureViewDescriptor descriptor;
+    descriptor.format = kDefaultTextureFormat;
+    descriptor.dimension = dimension;
+    descriptor.baseMipLevel = 0;
+    if (dimension != wgpu::TextureViewDimension::e1D) {
+        descriptor.mipLevelCount = kDefaultMipLevels;
+    }
+    descriptor.baseArrayLayer = 0;
+    descriptor.arrayLayerCount = kDefaultLayerCount;
+    return descriptor;
+}
+
+class YCbCrInfoWithoutFeatureValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
     }
 };
 
-// Tests that creating a sampler with a valid ycbcr sampler descriptor raises an error
+// Tests that creating a sampler with a valid ycbcr vulkan descriptor raises an error
 // if the required feature is not enabled.
-TEST_F(YCbCrSamplerWithoutFeatureValidationTest, YCbCrSamplerNotSupported) {
+TEST_F(YCbCrInfoWithoutFeatureValidationTest, YCbCrSamplerNotSupported) {
     wgpu::SamplerDescriptor samplerDesc = {};
-    native::vulkan::YCbCrVulkanDescriptor samplerYCbCrDesc = {};
-    samplerDesc.nextInChain = &samplerYCbCrDesc;
+    native::vulkan::YCbCrVulkanDescriptor yCbCrDesc = {};
+    samplerDesc.nextInChain = &yCbCrDesc;
 
     ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
 }
 
-class YCbCrSamplerWithFeatureValidationTest : public YCbCrSamplerWithoutFeatureValidationTest {
+// Tests that creating a texture view with a valid ycbcr vulkan descriptor raises an error
+// if the required feature is not enabled.
+TEST_F(YCbCrInfoWithoutFeatureValidationTest, YCbCrTextureViewNotSupported) {
+    wgpu::Texture texture = Create2DTexture(device);
+
+    wgpu::TextureViewDescriptor descriptor =
+        CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
+    descriptor.arrayLayerCount = 1;
+    native::vulkan::YCbCrVulkanDescriptor yCbCrDesc = {};
+    descriptor.nextInChain = &yCbCrDesc;
+
+    ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+}
+
+class YCbCrInfoWithFeatureValidationTest : public YCbCrInfoWithoutFeatureValidationTest {
     WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::StaticSamplers,
@@ -63,20 +110,20 @@ class YCbCrSamplerWithFeatureValidationTest : public YCbCrSamplerWithoutFeatureV
     }
 };
 
-// Tests that creating a sampler with a valid ycbcr sampler descriptor succeeds if the
+// Tests that creating a sampler with a valid ycbcr vulkan descriptor succeeds if the
 // required feature is enabled.
-TEST_F(YCbCrSamplerWithFeatureValidationTest, YCbCrSamplerSupported) {
+TEST_F(YCbCrInfoWithFeatureValidationTest, YCbCrSamplerSupported) {
     wgpu::SamplerDescriptor samplerDesc = {};
-    native::vulkan::YCbCrVulkanDescriptor samplerYCbCrDesc = {};
-    samplerYCbCrDesc.vulkanYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
-    samplerDesc.nextInChain = &samplerYCbCrDesc;
+    native::vulkan::YCbCrVulkanDescriptor yCbCrDesc = {};
+    yCbCrDesc.vulkanYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
+    samplerDesc.nextInChain = &yCbCrDesc;
 
     device.CreateSampler(&samplerDesc);
 }
 
 // Tests that creating a bind group layout with a valid static sampler succeeds if the
 // required feature is enabled.
-TEST_F(YCbCrSamplerWithFeatureValidationTest, CreateBindGroupWithYCbCrSamplerSupported) {
+TEST_F(YCbCrInfoWithFeatureValidationTest, CreateBindGroupWithYCbCrSamplerSupported) {
     wgpu::BindGroupLayoutEntry binding = {};
     binding.binding = 0;
     wgpu::StaticSamplerBindingLayout staticSamplerBinding = {};
@@ -104,7 +151,7 @@ TEST_F(YCbCrSamplerWithFeatureValidationTest, CreateBindGroupWithYCbCrSamplerSup
 
 // Verifies that creation of a correctly-specified bind group for a layout that
 // has a sampler and a static sampler succeeds.
-TEST_F(YCbCrSamplerWithFeatureValidationTest, CreateBindGroupWithSamplerAndStaticSamplerSupported) {
+TEST_F(YCbCrInfoWithFeatureValidationTest, CreateBindGroupWithSamplerAndStaticSamplerSupported) {
     std::vector<wgpu::BindGroupLayoutEntry> entries;
 
     wgpu::BindGroupLayoutEntry binding0 = {};
@@ -139,7 +186,7 @@ TEST_F(YCbCrSamplerWithFeatureValidationTest, CreateBindGroupWithSamplerAndStati
 // Verifies that creation of a bind group with the correct number of entries for a layout that has a
 // sampler and a static sampler raises an error if the entry is specified at the
 // index of the static sampler rather than that of the sampler.
-TEST_F(YCbCrSamplerWithFeatureValidationTest, BindGroupCreationForSamplerBindingTypeCausesError) {
+TEST_F(YCbCrInfoWithFeatureValidationTest, BindGroupCreationForSamplerBindingTypeCausesError) {
     std::vector<wgpu::BindGroupLayoutEntry> entries;
 
     wgpu::BindGroupLayoutEntry binding0 = {};
@@ -171,6 +218,34 @@ TEST_F(YCbCrSamplerWithFeatureValidationTest, BindGroupCreationForSamplerBinding
     ASSERT_DEVICE_ERROR(
         utils::MakeBindGroup(device, layout, {{1, device.CreateSampler(&samplerDesc0)}}));
 }
+
+// Tests that creating a texture view with a valid ycbcr vulkan descriptor succeeds if the
+// required feature is enabled.
+TEST_F(YCbCrInfoWithFeatureValidationTest, YCbCrTextureViewSupported) {
+    wgpu::Texture texture = Create2DTexture(device);
+
+    wgpu::TextureViewDescriptor descriptor =
+        CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);
+    descriptor.arrayLayerCount = 1;
+    native::vulkan::YCbCrVulkanDescriptor yCbCrDesc = {};
+    yCbCrDesc.vulkanYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
+    descriptor.nextInChain = &yCbCrDesc;
+
+    texture.CreateView(&descriptor);
+}
+
+// TODO(crbug.com/dawn/2476): Add test validating binding fails if sampler or texture view is not
+// YCbCr
+// TODO(crbug.com/dawn/2476): Add test validating binding passes if sampler and texture view is
+// YCbCr
+// TODO(crbug.com/dawn/2476): Add test validating binding fails if texture view ycbcr info is
+// different from that on sampler
+// TODO(crbug.com/dawn/2476): Add test validating binding passes if texture view ycbcr info is same
+// as that on sampler
+// TODO(crbug.com/dawn/2476): Add validation that mipLevel, arrayLayers are always 1 along with 2D
+// view dimension (see
+// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageCreateInfo.html) with
+// YCbCr and tests for it.
 
 }  // anonymous namespace
 }  // namespace dawn

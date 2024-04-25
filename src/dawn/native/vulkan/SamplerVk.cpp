@@ -125,22 +125,7 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
     if (auto* vulkanYCbCrDescriptor = Unpack(descriptor).Get<vulkan::YCbCrVulkanDescriptor>()) {
         const VkSamplerYcbcrConversionCreateInfo& vulkanYCbCrInfo =
             vulkanYCbCrDescriptor->vulkanYCbCrInfo;
-#if DAWN_PLATFORM_IS(ANDROID)
-        const VkBaseInStructure* chain =
-            static_cast<const VkBaseInStructure*>(vulkanYCbCrInfo.pNext);
-        while (chain != nullptr) {
-            if (chain->sType == VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_ANDROID) {
-                const VkExternalFormatANDROID* vkExternalFormat =
-                    reinterpret_cast<const VkExternalFormatANDROID*>(chain);
-                DAWN_INVALID_IF((vkExternalFormat->externalFormat == 0 &&
-                                 vulkanYCbCrInfo.format == VK_FORMAT_UNDEFINED),
-                                "Both VkFormat and VkExternalFormatANDROID are undefined.");
-                break;
-            }
-            chain = chain->pNext;
-        }
-#endif  // DAWN_PLATFORM_IS(ANDROID)
-
+        DAWN_TRY(ValidateCanCreateSamplerYCbCrConversion(vulkanYCbCrInfo));
         DAWN_TRY(CheckVkSuccess(
             device->fn.CreateSamplerYcbcrConversion(device->GetVkDevice(), &vulkanYCbCrInfo,
                                                     nullptr, &*mSamplerYCbCrConversion),

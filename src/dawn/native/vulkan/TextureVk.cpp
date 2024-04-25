@@ -1760,6 +1760,24 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
     usageInfo.usage = VulkanImageUsage(usage, GetFormat());
     createInfo.pNext = &usageInfo;
 
+    VkSamplerYcbcrConversionInfo samplerYCbCrInfo = {};
+    if (auto* vulkanYCbCrDescriptor = descriptor.Get<vulkan::YCbCrVulkanDescriptor>()) {
+        // TODO(crbug.com/dawn/2476): Validate mSamplerYcbcrConversionCreateInfo matches with that
+        // in SamplerDescriptor.
+        mSamplerYcbcrConversionCreateInfo = vulkanYCbCrDescriptor->vulkanYCbCrInfo;
+        DAWN_TRY(ValidateCanCreateSamplerYCbCrConversion(mSamplerYcbcrConversionCreateInfo));
+        DAWN_TRY(CheckVkSuccess(device->fn.CreateSamplerYcbcrConversion(
+                                    device->GetVkDevice(), &mSamplerYcbcrConversionCreateInfo,
+                                    nullptr, &*mSamplerYCbCrConversion),
+                                "CreateSamplerYcbcrConversion for vkImageView"));
+
+        samplerYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO;
+        samplerYCbCrInfo.pNext = nullptr;
+        samplerYCbCrInfo.conversion = mSamplerYCbCrConversion;
+
+        createInfo.pNext = &samplerYCbCrInfo;
+    }
+
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateImageView(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "CreateImageView"));
@@ -1783,6 +1801,11 @@ TextureView::~TextureView() {}
 
 void TextureView::DestroyImpl() {
     Device* device = ToBackend(GetTexture()->GetDevice());
+
+    if (mSamplerYCbCrConversion != VK_NULL_HANDLE) {
+        device->GetFencedDeleter()->DeleteWhenUnused(mSamplerYCbCrConversion);
+        mSamplerYCbCrConversion = VK_NULL_HANDLE;
+    }
 
     if (mHandle != VK_NULL_HANDLE) {
         device->GetFencedDeleter()->DeleteWhenUnused(mHandle);

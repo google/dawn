@@ -178,6 +178,10 @@ ResultOrError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
     VkPhysicalDevice vkPhysicalDevice,
     VkFormat format,
     uint64_t modifier);
+
+MaybeError ValidateCanCreateSamplerYCbCrConversion(
+    const VkSamplerYcbcrConversionCreateInfo& vulkanYCbCrInfo);
+
 }  // namespace dawn::native::vulkan
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_UTILSVULKAN_H_

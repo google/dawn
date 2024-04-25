@@ -46,6 +46,11 @@
 #include "dawn/native/ValidationUtils_autogen.h"
 
 namespace dawn::native {
+
+namespace vulkan {
+struct YCbCrVulkanDescriptor;
+}
+
 namespace {
 
 MaybeError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
@@ -589,13 +594,12 @@ MaybeError ValidateTextureDescriptor(
 MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                          const TextureBase* texture,
                                          const UnpackedPtr<TextureViewDescriptor>& descriptor) {
-    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
-
     // Parent texture should have been already validated.
     DAWN_ASSERT(texture);
     DAWN_ASSERT(!texture->IsError());
 
     DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
+    // TODO(crbug.com/dawn/2476): Add necessary validation for TextureFormat::External.
     DAWN_TRY(ValidateTextureFormat(descriptor->format));
     DAWN_TRY(ValidateTextureAspect(descriptor->aspect));
 
@@ -626,8 +630,15 @@ MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
         "texture's mip level count (%u).",
         descriptor->baseMipLevel, descriptor->mipLevelCount, texture->GetNumMipLevels());
 
+    // TODO(crbug.com/dawn/2476): Add necessary validations to CanViewTextureAs for
+    // TextureFormat::External.
     DAWN_TRY(ValidateCanViewTextureAs(device, texture, *viewFormat, descriptor->aspect));
     DAWN_TRY(ValidateTextureViewDimensionCompatibility(device, texture, descriptor));
+
+    if (descriptor.Get<vulkan::YCbCrVulkanDescriptor>()) {
+        DAWN_INVALID_IF(!device->HasFeature(Feature::YCbCrVulkanSamplers), "%s is not enabled.",
+                        wgpu::FeatureName::YCbCrVulkanSamplers);
+    }
 
     return {};
 }
@@ -667,6 +678,7 @@ ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
         }
     }
 
+    // TODO(crbug.com/dawn/2476): Add TextureFormat::External validation.
     if (desc.format == wgpu::TextureFormat::Undefined) {
         const Format& format = texture->GetFormat();
 

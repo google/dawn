@@ -613,6 +613,8 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
     }
 
     if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
+        // TODO(crbug.com/dawn/2476): Validate TextureViewDescriptor YCbCrInfo matches with that in
+        // SamplerDescriptor.
         for (BindGroupIndex i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
             DAWN_ASSERT(HasPipeline());
 

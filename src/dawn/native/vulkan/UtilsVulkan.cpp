@@ -327,4 +327,23 @@ ResultOrError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
     return DAWN_VALIDATION_ERROR("DRM format modifier %u not supported.", modifier);
 }
 
+MaybeError ValidateCanCreateSamplerYCbCrConversion(
+    const VkSamplerYcbcrConversionCreateInfo& vulkanYCbCrInfo) {
+#if DAWN_PLATFORM_IS(ANDROID)
+    const VkBaseInStructure* chain = static_cast<const VkBaseInStructure*>(vulkanYCbCrInfo.pNext);
+    while (chain != nullptr) {
+        if (chain->sType == VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_ANDROID) {
+            const VkExternalFormatANDROID* vkExternalFormat =
+                reinterpret_cast<const VkExternalFormatANDROID*>(chain);
+            DAWN_INVALID_IF((vkExternalFormat->externalFormat == 0 &&
+                             vulkanYCbCrInfo.format == VK_FORMAT_UNDEFINED),
+                            "Both VkFormat and VkExternalFormatANDROID are undefined.");
+            break;
+        }
+        chain = chain->pNext;
+    }
+#endif  // DAWN_PLATFORM_IS(ANDROID)
+    return {};
+}
+
 }  // namespace dawn::native::vulkan

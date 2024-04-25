@@ -113,6 +113,12 @@ struct AdditionalExtensions<SamplerDescriptor> {
         AdditionalExtensionsList<const vulkan::YCbCrVulkanDescriptor*>;
 };
 
+template <>
+struct AdditionalExtensions<TextureViewDescriptor> {
+    using List =
+        AdditionalExtensionsList<const vulkan::YCbCrVulkanDescriptor*>;
+};
+
 }  // namespace detail
 }  // namespace dawn::native
 

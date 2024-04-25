@@ -40,11 +40,9 @@ using ::testing::HasSubstr;
 // values should be nullptr.
 TEST(ChainUtilsTests, ValidateAndUnpackEmpty) {
     {
-        // TextureViewDescriptor (as of when this test was written) does not have any valid chains
-        // in the JSON nor via additional extensions.
+        // TextureViewDescriptor has at least 1 valid chain extension..
         TextureViewDescriptor desc;
         auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
-        static_assert(std::tuple_size_v<decltype(unpacked)::TupleType> == 0);
         EXPECT_TRUE(unpacked.Empty());
     }
     {

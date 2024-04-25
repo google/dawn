@@ -82,7 +82,7 @@ struct ExternalImageExportInfoVk : ExternalImageExportInfo {
     using ExternalImageExportInfo::ExternalImageExportInfo;
 };
 
-// Can be chained in WGPUSamplerDescriptor
+// Can be chained in WGPUSamplerDescriptor and WGPUTextureViewDescriptor
 struct DAWN_NATIVE_EXPORT YCbCrVulkanDescriptor : wgpu::ChainedStruct {
     YCbCrVulkanDescriptor();
 
