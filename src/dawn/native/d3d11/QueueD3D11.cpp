@@ -27,6 +27,7 @@
 
 #include "dawn/native/d3d11/QueueD3D11.h"
 
+#include <limits>
 #include <utility>
 
 #include "dawn/native/d3d/D3DError.h"
@@ -52,10 +53,6 @@ MaybeError Queue::Initialize() {
                               ->GetD3D11Device5()
                               ->CreateFence(0, D3D11_FENCE_FLAG_SHARED, IID_PPV_ARGS(&mFence)),
                           "D3D11: creating fence"));
-
-    // Create the fence event.
-    mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    DAWN_ASSERT(mFenceEvent != nullptr);
 
     DAWN_TRY_ASSIGN(mSharedFence, SharedFence::Create(ToBackend(GetDevice()),
                                                       "Internal shared DXGI fence", mFence));
@@ -84,11 +81,6 @@ MaybeError Queue::InitializePendingContext() {
 }
 
 void Queue::DestroyImpl() {
-    if (mFenceEvent != nullptr) {
-        ::CloseHandle(mFenceEvent);
-        mFenceEvent = nullptr;
-    }
-
     // Release the shared fence here to prevent a ref-cycle with the device, but do not destroy the
     // underlying native fence so that we can return a SharedFence on EndAccess after destruction.
     mSharedFence = nullptr;
@@ -238,9 +230,9 @@ void Queue::ForceEventualFlushOfCommands() {}
 MaybeError Queue::WaitForIdleForDestruction() {
     DAWN_TRY(NextSerial());
     // Wait for all in-flight commands to finish executing
-    DAWN_TRY(WaitForSerial(GetLastSubmittedCommandSerial()));
-
-    return {};
+    DAWN_TRY_ASSIGN(std::ignore, WaitForQueueSerial(GetLastSubmittedCommandSerial(),
+                                                    std::numeric_limits<Nanoseconds>::max()));
+    return CheckPassedSerials();
 }
 
 MaybeError Queue::NextSerial() {
@@ -255,18 +247,6 @@ MaybeError Queue::NextSerial() {
                      "D3D11 command queue signal fence"));
 
     return {};
-}
-
-MaybeError Queue::WaitForSerial(ExecutionSerial serial) {
-    DAWN_TRY(CheckPassedSerials());
-    if (GetCompletedCommandSerial() >= serial) {
-        return {};
-    }
-
-    DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(uint64_t(serial), mFenceEvent),
-                          "D3D11 set event on completion"));
-    WaitForSingleObject(mFenceEvent, INFINITE);
-    return CheckPassedSerials();
 }
 
 void Queue::SetEventOnCompletion(ExecutionSerial serial, HANDLE event) {

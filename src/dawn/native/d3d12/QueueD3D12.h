@@ -79,7 +79,6 @@ class Queue final : public d3d::Queue {
     void SetLabelImpl() override;
 
     ComPtr<ID3D12Fence> mFence;
-    HANDLE mFenceEvent = nullptr;
     Ref<SharedFence> mSharedFence;
 
     CommandRecordingContext mPendingCommands;

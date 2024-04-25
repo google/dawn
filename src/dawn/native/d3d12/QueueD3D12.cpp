@@ -27,6 +27,7 @@
 
 #include "dawn/native/d3d12/QueueD3D12.h"
 
+#include <limits>
 #include <utility>
 
 #include "dawn/common/Math.h"
@@ -73,9 +74,6 @@ MaybeError Queue::Initialize() {
                                                    D3D12_FENCE_FLAG_SHARED, IID_PPV_ARGS(&mFence)),
                           "D3D12 create fence"));
 
-    mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    DAWN_ASSERT(mFenceEvent != nullptr);
-
     DAWN_TRY_ASSIGN(mSharedFence, SharedFence::Create(ToBackend(GetDevice()),
                                                       "Internal shared DXGI fence", mFence));
 
@@ -87,11 +85,6 @@ void Queue::DestroyImpl() {
     // own and WaitForIdleForDestruction isn't called.
     mPendingCommands.Release();
     mCommandQueue.Reset();
-
-    if (mFenceEvent != nullptr) {
-        ::CloseHandle(mFenceEvent);
-        mFenceEvent = nullptr;
-    }
 
     // Release the shared fence here to prevent a ref-cycle with the device, but do not destroy the
     // underlying native fence so that we can return a SharedFence on EndAccess after destruction.
@@ -167,11 +160,9 @@ MaybeError Queue::WaitForSerial(ExecutionSerial serial) {
     if (GetCompletedCommandSerial() >= serial) {
         return {};
     }
-    DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(uint64_t(serial), mFenceEvent),
-                          "D3D12 set event on completion"));
-    WaitForSingleObject(mFenceEvent, INFINITE);
-    DAWN_TRY(CheckPassedSerials());
-    return {};
+    DAWN_TRY_ASSIGN(std::ignore,
+                    WaitForQueueSerial(serial, std::numeric_limits<Nanoseconds>::max()));
+    return CheckPassedSerials();
 }
 
 bool Queue::HasPendingCommands() const {

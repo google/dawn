@@ -50,7 +50,6 @@ class Queue final : public d3d::Queue {
         SubmitMode submitMode);
     MaybeError SubmitPendingCommands() override;
     MaybeError NextSerial();
-    MaybeError WaitForSerial(ExecutionSerial serial);
 
     // Separated from creation because it creates resources, which is not valid before the
     // DeviceBase is fully created.
@@ -90,7 +89,6 @@ class Queue final : public d3d::Queue {
     MaybeError CheckAndMapReadyBuffers(ExecutionSerial completedSerial);
 
     ComPtr<ID3D11Fence> mFence;
-    HANDLE mFenceEvent = nullptr;
     Ref<SharedFence> mSharedFence;
     MutexProtected<CommandRecordingContext, CommandRecordingContextGuard> mPendingCommands;
     std::atomic<bool> mPendingCommandsNeedSubmit = false;
