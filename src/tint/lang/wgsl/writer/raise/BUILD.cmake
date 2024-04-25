@@ -118,6 +118,7 @@ tint_target_add_external_dependencies(tint_lang_wgsl_writer_raise_test test
 # Kind:      fuzz
 ################################################################################
 tint_add_target(tint_lang_wgsl_writer_raise_fuzz fuzz
+  lang/wgsl/writer/raise/ptr_to_ref_fuzz.cc
   lang/wgsl/writer/raise/rename_conflicts_fuzz.cc
   lang/wgsl/writer/raise/value_to_let_fuzz.cc
 )
