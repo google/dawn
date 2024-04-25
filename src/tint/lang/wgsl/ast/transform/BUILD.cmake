@@ -257,6 +257,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/clamp_frag_depth_fuzz.cc
   lang/wgsl/ast/transform/demote_to_helper_fuzz.cc
   lang/wgsl/ast/transform/direct_variable_access_fuzz.cc
+  lang/wgsl/ast/transform/disable_uniformity_analysis_fuzz.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
 )
 

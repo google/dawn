@@ -247,6 +247,7 @@ if (tint_build_wgsl_reader) {
       "clamp_frag_depth_fuzz.cc",
       "demote_to_helper_fuzz.cc",
       "direct_variable_access_fuzz.cc",
+      "disable_uniformity_analysis_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [
