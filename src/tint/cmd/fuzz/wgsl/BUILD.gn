@@ -98,6 +98,7 @@ if (tint_build_wgsl_reader) {
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/program:fuzz",
       "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/lang/wgsl/writer/raise:fuzz",
       "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/cli",
       "${tint_src_dir}/utils/containers",
