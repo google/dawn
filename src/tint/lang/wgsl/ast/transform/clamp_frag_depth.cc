@@ -221,6 +221,7 @@ ast::transform::Transform::ApplyResult ClampFragDepth::Apply(const Program& src,
     return State{src}.Run(inputs);
 }
 
+ClampFragDepth::Config::Config() = default;
 ClampFragDepth::Config::Config(std::optional<tint::DepthRangeOffsets> off) : offsets(off) {}
 
 ClampFragDepth::Config::~Config() = default;

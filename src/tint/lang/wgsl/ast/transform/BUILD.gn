@@ -244,10 +244,12 @@ if (tint_build_wgsl_reader) {
       "binding_remapper_fuzz.cc",
       "builtin_polyfill_fuzz.cc",
       "canonicalize_entry_point_io_fuzz.cc",
+      "clamp_frag_depth_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [
       "${tint_src_dir}/api/common",
+      "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",

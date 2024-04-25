@@ -254,11 +254,13 @@ tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/binding_remapper_fuzz.cc
   lang/wgsl/ast/transform/builtin_polyfill_fuzz.cc
   lang/wgsl/ast/transform/canonicalize_entry_point_io_fuzz.cc
+  lang/wgsl/ast/transform/clamp_frag_depth_fuzz.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_ast_transform_fuzz fuzz
   tint_api_common
+  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
