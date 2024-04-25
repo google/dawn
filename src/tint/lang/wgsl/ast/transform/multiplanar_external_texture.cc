@@ -531,6 +531,7 @@ struct MultiplanarExternalTexture::State {
     }
 };
 
+MultiplanarExternalTexture::NewBindingPoints::NewBindingPoints() = default;
 MultiplanarExternalTexture::NewBindingPoints::NewBindingPoints(BindingsMap inputBindingsMap,
                                                                bool may_collide)
     : bindings_map(std::move(inputBindingsMap)), allow_collisions(may_collide) {}

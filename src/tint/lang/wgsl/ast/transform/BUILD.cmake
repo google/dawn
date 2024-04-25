@@ -261,6 +261,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/expand_compound_assignment_fuzz.cc
   lang/wgsl/ast/transform/first_index_offset_fuzz.cc
   lang/wgsl/ast/transform/fold_constants_fuzz.cc
+  lang/wgsl/ast/transform/multiplanar_external_texture_fuzz.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
 )
 
