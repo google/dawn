@@ -143,14 +143,6 @@ crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,sto
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
 
-# Tests on maxInterStageShaderVariables and maxInterStageShaderComponents need to be updated to
-# match the latest WebGPU SPEC
-# KEEP
-crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:limit,worse_than_default:limit="maxInterStageShaderComponents" [ Skip ]
-crbug.com/dawn/2398 webgpu:api,operation,adapter,requestDevice:limits,supported:limit="maxInterStageShaderComponents" [ Skip ]
-crbug.com/dawn/2398 webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Skip ]
-crbug.com/dawn/2398 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,* [ Skip ]
-
 ################################################################################
 # Failures due to splitting off worker tests (crbug.com/330501141)
 ################################################################################
