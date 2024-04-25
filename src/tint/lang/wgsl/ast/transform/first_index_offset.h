@@ -28,7 +28,9 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_FIRST_INDEX_OFFSET_H_
 #define SRC_TINT_LANG_WGSL_AST_TRANSFORM_FIRST_INDEX_OFFSET_H_
 
+#include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::ast::transform {
 
@@ -91,11 +93,17 @@ class FirstIndexOffset final : public Castable<FirstIndexOffset, Transform> {
         uint32_t binding = 0;
         /// `@group()` for the first vertex / first instance uniform buffer
         uint32_t group = 0;
+
+        /// Reflection for this struct
+        TINT_REFLECT(BindingPoint, binding, group);
     };
 
     /// Data is outputted by the FirstIndexOffset transform.
     /// Data holds information about shader usage and constant buffer offsets.
     struct Data final : public Castable<Data, transform::Data> {
+        /// Constructor
+        Data();
+
         /// Constructor
         /// @param has_vtx_index True if the shader uses vertex_index
         /// @param has_inst_index True if the shader uses instance_index
@@ -108,9 +116,12 @@ class FirstIndexOffset final : public Castable<FirstIndexOffset, Transform> {
         ~Data() override;
 
         /// True if the shader uses vertex_index
-        const bool has_vertex_index;
+        bool has_vertex_index = false;
         /// True if the shader uses instance_index
-        const bool has_instance_index;
+        bool has_instance_index = false;
+
+        /// Reflection for this struct
+        TINT_REFLECT(Data, has_vertex_index, has_instance_index);
     };
 
     /// Constructor

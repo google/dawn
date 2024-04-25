@@ -69,6 +69,7 @@ FirstIndexOffset::BindingPoint::BindingPoint() = default;
 FirstIndexOffset::BindingPoint::BindingPoint(uint32_t b, uint32_t g) : binding(b), group(g) {}
 FirstIndexOffset::BindingPoint::~BindingPoint() = default;
 
+FirstIndexOffset::Data::Data() = default;
 FirstIndexOffset::Data::Data(bool has_vtx_index, bool has_inst_index)
     : has_vertex_index(has_vtx_index), has_instance_index(has_inst_index) {}
 FirstIndexOffset::Data::Data(const Data&) = default;
