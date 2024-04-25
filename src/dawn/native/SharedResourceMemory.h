@@ -100,10 +100,6 @@ class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedR
     SharedResourceMemory(DeviceBase* device, ObjectBase::ErrorTag, const char* label);
     using ApiObjectBase::ApiObjectBase;
 
-    bool HasWriteAccess() const;
-    bool HasExclusiveReadAccess() const;
-    int GetReadAccessCount() const;
-
   private:
     virtual Ref<SharedResourceMemoryContents> CreateContents();
 
@@ -136,8 +132,6 @@ class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedR
         UnpackedPtr<SharedBufferMemoryEndAccessState>& state);
 
     Ref<SharedResource> mExclusiveAccess;
-    SharedResourceAccessState mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
-    int mReadAccessCount = 0;
     Ref<SharedResourceMemoryContents> mContents;
 };
 
@@ -160,11 +154,18 @@ class SharedResourceMemoryContents : public RefCounted {
 
     const WeakRef<SharedResourceMemory>& GetSharedResourceMemory() const;
 
+    bool HasWriteAccess() const;
+    bool HasExclusiveReadAccess() const;
+    int GetReadAccessCount() const;
+
   private:
     friend class SharedResourceMemory;
 
     PendingFenceList mPendingFences;
     ExecutionSerial mLastUsageSerial{0};
+
+    SharedResourceAccessState mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
+    int mReadAccessCount = 0;
 
     WeakRef<SharedResourceMemory> mSharedResourceMemory;
 };

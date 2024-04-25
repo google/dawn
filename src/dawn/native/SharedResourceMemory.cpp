@@ -53,15 +53,15 @@ SharedResourceMemory::~SharedResourceMemory() = default;
 
 void SharedResourceMemory::DestroyImpl() {}
 
-bool SharedResourceMemory::HasWriteAccess() const {
+bool SharedResourceMemoryContents::HasWriteAccess() const {
     return mSharedResourceAccessState == SharedResourceAccessState::Write;
 }
 
-bool SharedResourceMemory::HasExclusiveReadAccess() const {
+bool SharedResourceMemoryContents::HasExclusiveReadAccess() const {
     return mSharedResourceAccessState == SharedResourceAccessState::ExclusiveRead;
 }
 
-int SharedResourceMemory::GetReadAccessCount() const {
+int SharedResourceMemoryContents::GetReadAccessCount() const {
     return mReadAccessCount;
 }
 
@@ -126,39 +126,39 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
                         "%s with multiplanar format (%s) must be initialized.", resource,
                         resource->GetFormat().format);
 
-        DAWN_INVALID_IF(HasWriteAccess(), "%s is currently accessed for writing.", this);
-        DAWN_INVALID_IF(HasExclusiveReadAccess(), "%s is currently accessed for exclusive reading.",
-                        this);
+        DAWN_INVALID_IF(mContents->HasWriteAccess(), "%s is currently accessed for writing.", this);
+        DAWN_INVALID_IF(mContents->HasExclusiveReadAccess(),
+                        "%s is currently accessed for exclusive reading.", this);
 
         if (static_cast<TextureBase*>(resource)->IsReadOnly()) {
             if (descriptor->concurrentRead) {
                 DAWN_ASSERT(!mExclusiveAccess);
                 DAWN_INVALID_IF(!descriptor->initialized, "Concurrent reading an uninitialized %s.",
                                 resource);
-                ++mReadAccessCount;
-                mSharedResourceAccessState = SharedResourceAccessState::SimultaneousRead;
+                ++mContents->mReadAccessCount;
+                mContents->mSharedResourceAccessState = SharedResourceAccessState::SimultaneousRead;
 
             } else {
                 DAWN_INVALID_IF(
-                    mReadAccessCount != 0,
+                    mContents->mReadAccessCount != 0,
                     "Exclusive read access used while %s is currently accessed for reading.", this);
-                mSharedResourceAccessState = SharedResourceAccessState::ExclusiveRead;
+                mContents->mSharedResourceAccessState = SharedResourceAccessState::ExclusiveRead;
                 mExclusiveAccess = resource;
             }
         } else {
             DAWN_INVALID_IF(descriptor->concurrentRead, "Concurrent reading read-write %s.",
                             resource);
-            DAWN_INVALID_IF(mReadAccessCount != 0,
+            DAWN_INVALID_IF(mContents->mReadAccessCount != 0,
                             "Read-Write access used while %s is currently accessed for reading.",
                             this);
-            mSharedResourceAccessState = SharedResourceAccessState::Write;
+            mContents->mSharedResourceAccessState = SharedResourceAccessState::Write;
             mExclusiveAccess = resource;
         }
     } else if constexpr (std::is_same_v<Resource, BufferBase>) {
         DAWN_INVALID_IF(mExclusiveAccess != nullptr,
                         "Cannot begin access with %s on %s which is currently accessed by %s.",
                         resource, this, mExclusiveAccess.Get());
-        mSharedResourceAccessState = SharedResourceAccessState::Write;
+        mContents->mSharedResourceAccessState = SharedResourceAccessState::Write;
         mExclusiveAccess = resource;
     }
 
@@ -229,24 +229,24 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource,
     DAWN_INVALID_IF(!resource->HasAccess(), "%s is not currently being accessed.", resource);
     if constexpr (std::is_same_v<Resource, TextureBase>) {
         if (static_cast<TextureBase*>(resource)->IsReadOnly()) {
-            DAWN_ASSERT(!HasWriteAccess());
-            if (HasExclusiveReadAccess()) {
-                DAWN_ASSERT(mReadAccessCount == 0);
-                mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
+            DAWN_ASSERT(!mContents->HasWriteAccess());
+            if (mContents->HasExclusiveReadAccess()) {
+                DAWN_ASSERT(mContents->mReadAccessCount == 0);
+                mContents->mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
                 mExclusiveAccess = nullptr;
             } else {
-                DAWN_ASSERT(mSharedResourceAccessState ==
+                DAWN_ASSERT(mContents->mSharedResourceAccessState ==
                             SharedResourceAccessState::SimultaneousRead);
                 DAWN_ASSERT(mExclusiveAccess == nullptr);
-                --mReadAccessCount;
-                if (mReadAccessCount == 0) {
-                    mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
+                --mContents->mReadAccessCount;
+                if (mContents->mReadAccessCount == 0) {
+                    mContents->mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
                 }
             }
         } else {
-            DAWN_ASSERT(mSharedResourceAccessState == SharedResourceAccessState::Write);
-            DAWN_ASSERT(mReadAccessCount == 0);
-            mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
+            DAWN_ASSERT(mContents->mSharedResourceAccessState == SharedResourceAccessState::Write);
+            DAWN_ASSERT(mContents->mReadAccessCount == 0);
+            mContents->mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
             mExclusiveAccess = nullptr;
         }
     } else if constexpr (std::is_same_v<Resource, BufferBase>) {
@@ -256,7 +256,7 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource,
         DAWN_INVALID_IF(mExclusiveAccess != resource,
                         "Cannot end access with %s on %s which is currently accessed by %s.",
                         resource, this, mExclusiveAccess.Get());
-        mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
+        mContents->mSharedResourceAccessState = SharedResourceAccessState::NotAccessed;
         mExclusiveAccess = nullptr;
     }
 

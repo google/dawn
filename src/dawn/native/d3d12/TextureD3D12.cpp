@@ -589,8 +589,8 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
         // state at all times that read accesses are happening; otherwise, the
         // texture can enter a state where it could be modified by one read access
         // (e.g., to be compressed or decrompessed) while being read by another.
-        bool inReadAccess = HasAccess() && IsReadOnly();
-        DAWN_ASSERT(state->isValidToDecay || !inReadAccess);
+        DAWN_ASSERT(state->isValidToDecay || mSharedResourceMemoryContents->HasWriteAccess() ||
+                    mSharedResourceMemoryContents->HasExclusiveReadAccess());
     }
 
     D3D12_RESOURCE_BARRIER barrier;
