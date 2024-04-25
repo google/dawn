@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_WGSL_AST_TRANSFORM_DIRECT_VARIABLE_ACCESS_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::ast::transform {
 
@@ -57,19 +58,29 @@ class DirectVariableAccess final : public Castable<DirectVariableAccess, Transfo
         bool transform_private = false;
         /// If true, then 'function' sub-object pointer arguments will be transformed.
         bool transform_function = false;
+
+        /// Reflection for this struct
+        TINT_REFLECT(Options, transform_private, transform_function);
     };
 
     /// Config is consumed by the DirectVariableAccess transform.
     /// Config specifies the behavior of the transform.
     struct Config final : public Castable<Config, Data> {
         /// Constructor
+        Config();
+
+        /// Constructor
         /// @param options behavior of the transform
         explicit Config(const Options& options);
+
         /// Destructor
         ~Config() override;
 
         /// The transform behavior options
-        const Options options;
+        Options options;
+
+        /// Reflection for this struct
+        TINT_REFLECT(Config, options);
     };
 
     /// @copydoc Transform::Apply

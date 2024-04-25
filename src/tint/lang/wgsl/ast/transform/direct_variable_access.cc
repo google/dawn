@@ -1203,6 +1203,7 @@ struct DirectVariableAccess::State {
     }
 };
 
+DirectVariableAccess::Config::Config() = default;
 DirectVariableAccess::Config::Config(const Options& opt) : options(opt) {}
 
 DirectVariableAccess::Config::~Config() = default;
