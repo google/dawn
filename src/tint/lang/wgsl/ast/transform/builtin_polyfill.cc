@@ -1602,6 +1602,7 @@ Transform::ApplyResult BuiltinPolyfill::Apply(const Program& src,
     return State{src, *cfg}.Run();
 }
 
+BuiltinPolyfill::Config::Config() = default;
 BuiltinPolyfill::Config::Config(const Builtins& b) : builtins(b) {}
 BuiltinPolyfill::Config::Config(const Config&) = default;
 BuiltinPolyfill::Config::~Config() = default;
