@@ -228,7 +228,6 @@ MaybeError ValidateSamplerBinding(const DeviceBase* device,
                                   const SamplerBindingLayout& layout) {
     DAWN_INVALID_IF(entry.sampler == nullptr, "Binding entry sampler not set.");
 
-    // TODO(crbug.com/dawn/2476): Add validation test for this.
     DAWN_INVALID_IF(entry.sampler->IsYCbCr(),
                     "YCbCr sampler is incompatible with SamplerBindingLayout");
 
