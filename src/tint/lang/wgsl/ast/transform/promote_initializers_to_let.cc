@@ -62,16 +62,17 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program& src,
             return false;
         }
 
+        if (expr->Type()->HoldsAbstract()) {
+            // Do not hoist expressions that are not materialized, as doing so would cause
+            // premature materialization.
+            return false;
+        }
+
         // Check whether the expression is an array or structure constructor
         {
             // Follow const-chains
             auto* root_expr = expr;
             if (expr->Stage() == core::EvaluationStage::kConstant) {
-                if (expr->Type()->HoldsAbstract()) {
-                    // Do not hoist expressions that are not materialized, as doing so would cause
-                    // premature materialization.
-                    return false;
-                }
                 while (auto* user = root_expr->UnwrapMaterialize()->As<sem::VariableUser>()) {
                     root_expr = user->Variable()->Initializer();
                 }
@@ -112,12 +113,13 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program& src,
                 continue;
             }
 
-            if (sem->Stage() == core::EvaluationStage::kConstant) {
-                // Expression is constant. We only need to hoist expressions if they're the
-                // outermost constant expression in a chain. Remove the immediate child nodes of the
-                // expression from const_chains, and add this expression to the const_chains. As we
-                // visit leaf-expressions first, this means the content of const_chains only
-                // contains the outer-most constant expressions.
+            if (sem->Stage() == core::EvaluationStage::kConstant ||
+                sem->Stage() == core::EvaluationStage::kNotEvaluated) {
+                // Expression is constant or not evaluated. We only need to hoist expressions if
+                // they're the outermost constant expression in a chain. Remove the immediate child
+                // nodes of the expression from const_chains, and add this expression to the
+                // const_chains. As we visit leaf-expressions first, this means the content of
+                // const_chains only contains the outer-most constant expressions.
                 auto* expr = sem->Declaration();
                 bool ok = TraverseExpressions(expr, [&](const Expression* child) {
                     const_chains.Remove(child);
@@ -126,7 +128,9 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program& src,
                 if (!ok) {
                     return resolver::Resolve(b);
                 }
-                const_chains.Add(expr);
+                if (sem->Stage() == core::EvaluationStage::kConstant) {
+                    const_chains.Add(expr);
+                }
             } else if (should_hoist(sem)) {
                 to_hoist.Push(sem);
             }

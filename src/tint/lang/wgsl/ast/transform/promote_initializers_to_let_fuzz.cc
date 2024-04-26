@@ -31,15 +31,7 @@
 namespace tint::ast::transform {
 namespace {
 
-bool CanRun() {
-    return false;  // TODO(crbug.com/tint/2241)
-}
-
 void PromoteInitializersToLetFuzzer(const Program& program) {
-    if (!CanRun()) {
-        return;
-    }
-
     DataMap outputs;
     if (auto result = PromoteInitializersToLet{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
