@@ -56,12 +56,12 @@ TEST_F(IR_DemoteToHelperTest, NoModify_NoDiscard) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
 %ep = @fragment func():f32 [@location(0)] {
-  %b2 = block {
+  $B2: {
     store %buffer, 42i
     ret 0.5f
   }
@@ -98,14 +98,14 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInEntryPoint) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         discard
         exit_if  # if_1
       }
@@ -118,30 +118,30 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInEntryPoint) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         store %continue_execution, false
         exit_if  # if_1
       }
     }
     %5:bool = load %continue_execution
-    if %5 [t: %b4] {  # if_2
-      %b4 = block {  # true
+    if %5 [t: $B4] {  # if_2
+      $B4: {  # true
         store %buffer, 42i
         exit_if  # if_2
       }
     }
     %6:bool = load %continue_execution
     %7:bool = eq %6, false
-    if %7 [t: %b5] {  # if_3
-      %b5 = block {  # true
+    if %7 [t: $B5] {  # if_3
+      $B5: {  # true
         terminate_invocation
       }
     }
@@ -183,20 +183,20 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     store %buffer, 42i
     ret
   }
 }
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b3 = block {
-    if %front_facing [t: %b4] {  # if_1
-      %b4 = block {  # true
+  $B3: {
+    if %front_facing [t: $B4] {  # if_1
+      $B4: {  # true
         discard
         exit_if  # if_1
       }
@@ -209,16 +209,16 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     %4:bool = load %continue_execution
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %buffer, 42i
         exit_if  # if_1
       }
@@ -227,9 +227,9 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
   }
 }
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b4 = block {
-    if %front_facing [t: %b5] {  # if_2
-      %b5 = block {  # true
+  $B4: {
+    if %front_facing [t: $B5] {  # if_2
+      $B5: {  # true
         store %continue_execution, false
         exit_if  # if_2
       }
@@ -237,8 +237,8 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
     %7:void = call %foo
     %8:bool = load %continue_execution
     %9:bool = eq %8, false
-    if %9 [t: %b6] {  # if_3
-      %b6 = block {  # true
+    if %9 [t: $B6] {  # if_3
+      $B6: {  # true
         terminate_invocation
       }
     }
@@ -282,14 +282,14 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%cond:bool):void {
-  %b2 = block {
-    if %cond [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %cond [t: $B3] {  # if_1
+      $B3: {  # true
         discard
         exit_if  # if_1
       }
@@ -298,7 +298,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
   }
 }
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b4 = block {
+  $B4: {
     %6:void = call %foo, %front_facing
     store %buffer, 42i
     ret 0.5f
@@ -308,15 +308,15 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %foo = func(%cond:bool):void {
-  %b2 = block {
-    if %cond [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %cond [t: $B3] {  # if_1
+      $B3: {  # true
         store %continue_execution, false
         exit_if  # if_1
       }
@@ -325,19 +325,19 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
   }
 }
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b4 = block {
+  $B4: {
     %7:void = call %foo, %front_facing
     %8:bool = load %continue_execution
-    if %8 [t: %b5] {  # if_2
-      %b5 = block {  # true
+    if %8 [t: $B5] {  # if_2
+      $B5: {  # true
         store %buffer, 42i
         exit_if  # if_2
       }
     }
     %9:bool = load %continue_execution
     %10:bool = eq %9, false
-    if %10 [t: %b6] {  # if_3
-      %b6 = block {  # true
+    if %10 [t: $B6] {  # if_3
+      $B6: {  # true
         terminate_invocation
       }
     }
@@ -381,14 +381,14 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%cond:bool):void {
-  %b2 = block {
-    if %cond [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %cond [t: $B3] {  # if_1
+      $B3: {  # true
         discard
         exit_if  # if_1
       }
@@ -398,7 +398,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
   }
 }
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b4 = block {
+  $B4: {
     %6:void = call %foo, %front_facing
     ret 0.5f
   }
@@ -407,22 +407,22 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %foo = func(%cond:bool):void {
-  %b2 = block {
-    if %cond [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %cond [t: $B3] {  # if_1
+      $B3: {  # true
         store %continue_execution, false
         exit_if  # if_1
       }
     }
     %5:bool = load %continue_execution
-    if %5 [t: %b4] {  # if_2
-      %b4 = block {  # true
+    if %5 [t: $B4] {  # if_2
+      $B4: {  # true
         store %buffer, 42i
         exit_if  # if_2
       }
@@ -431,12 +431,12 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
   }
 }
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b5 = block {
+  $B5: {
     %8:void = call %foo, %front_facing
     %9:bool = load %continue_execution
     %10:bool = eq %9, false
-    if %10 [t: %b6] {  # if_3
-      %b6 = block {  # true
+    if %10 [t: $B6] {  # if_3
+      $B6: {  # true
         terminate_invocation
       }
     }
@@ -471,15 +471,15 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %priv:ptr<private, i32, read_write> = var
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
+  $B2: {
     %func:ptr<function, i32, read_write> = var
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         discard
         exit_if  # if_1
       }
@@ -493,16 +493,16 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %priv:ptr<private, i32, read_write> = var
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
+  $B2: {
     %func:ptr<function, i32, read_write> = var
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         store %continue_execution, false
         exit_if  # if_1
       }
@@ -511,8 +511,8 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
     store %func, 42i
     %6:bool = load %continue_execution
     %7:bool = eq %6, false
-    if %7 [t: %b4] {  # if_2
-      %b4 = block {  # true
+    if %7 [t: $B4] {  # if_2
+      $B4: {  # true
         terminate_invocation
       }
     }
@@ -555,14 +555,14 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d<r32float, write>, read> = var @binding_point(0, 0)
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32>):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         discard
         exit_if  # if_1
       }
@@ -576,31 +576,31 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d<r32float, write>, read> = var @binding_point(0, 0)
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32>):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         store %continue_execution, false
         exit_if  # if_1
       }
     }
     %6:texture_storage_2d<r32float, write> = load %texture
     %7:bool = load %continue_execution
-    if %7 [t: %b4] {  # if_2
-      %b4 = block {  # true
+    if %7 [t: $B4] {  # if_2
+      $B4: {  # true
         %8:void = textureStore %6, %coord, vec4<f32>(0.5f)
         exit_if  # if_2
       }
     }
     %9:bool = load %continue_execution
     %10:bool = eq %9, false
-    if %10 [t: %b5] {  # if_3
-      %b5 = block {  # true
+    if %10 [t: $B5] {  # if_3
+      $B5: {  # true
         terminate_invocation
       }
     }
@@ -636,14 +636,14 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         discard
         exit_if  # if_1
       }
@@ -656,30 +656,30 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         store %continue_execution, false
         exit_if  # if_1
       }
     }
     %5:bool = load %continue_execution
-    if %5 [t: %b4] {  # if_2
-      %b4 = block {  # true
+    if %5 [t: $B4] {  # if_2
+      $B4: {  # true
         %6:void = atomicStore %buffer, 42i
         exit_if  # if_2
       }
     }
     %7:bool = load %continue_execution
     %8:bool = eq %7, false
-    if %8 [t: %b5] {  # if_3
-      %b5 = block {  # true
+    if %8 [t: $B5] {  # if_3
+      $B5: {  # true
         terminate_invocation
       }
     }
@@ -716,14 +716,14 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         discard
         exit_if  # if_1
       }
@@ -737,22 +737,22 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         store %continue_execution, false
         exit_if  # if_1
       }
     }
     %5:bool = load %continue_execution
-    %6:i32 = if %5 [t: %b4] {  # if_2
-      %b4 = block {  # true
+    %6:i32 = if %5 [t: $B4] {  # if_2
+      $B4: {  # true
         %7:i32 = atomicAdd %buffer, 42i
         exit_if %7  # if_2
       }
@@ -761,8 +761,8 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
     %8:i32 = add %6, 1i
     %9:bool = load %continue_execution
     %10:bool = eq %9, false
-    if %10 [t: %b5] {  # if_3
-      %b5 = block {  # true
+    if %10 [t: $B5] {  # if_3
+      $B5: {  # true
         terminate_invocation
       }
     }
@@ -806,14 +806,14 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
   exchanged:bool @offset(4)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         discard
         exit_if  # if_1
       }
@@ -833,22 +833,22 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
   exchanged:bool @offset(4)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
-  %b2 = block {
-    if %front_facing [t: %b3] {  # if_1
-      %b3 = block {  # true
+  $B2: {
+    if %front_facing [t: $B3] {  # if_1
+      $B3: {  # true
         store %continue_execution, false
         exit_if  # if_1
       }
     }
     %5:bool = load %continue_execution
-    %6:__atomic_compare_exchange_result_i32 = if %5 [t: %b4] {  # if_2
-      %b4 = block {  # true
+    %6:__atomic_compare_exchange_result_i32 = if %5 [t: $B4] {  # if_2
+      $B4: {  # true
         %7:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %buffer, 0i, 42i
         exit_if %7  # if_2
       }
@@ -858,8 +858,8 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
     %9:i32 = add %8, 1i
     %10:bool = load %continue_execution
     %11:bool = eq %10, false
-    if %11 [t: %b5] {  # if_3
-      %b5 = block {  # true
+    if %11 [t: $B5] {  # if_3
+      $B5: {  # true
         terminate_invocation
       }
     }
@@ -883,7 +883,7 @@ TEST_F(IR_DemoteToHelperTest, UnreachableHelperThatDiscards) {
 
     auto* src = R"(
 %foo = func():void {
-  %b1 = block {
+  $B1: {
     discard
     ret
   }
@@ -892,12 +892,12 @@ TEST_F(IR_DemoteToHelperTest, UnreachableHelperThatDiscards) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     store %continue_execution, false
     ret
   }

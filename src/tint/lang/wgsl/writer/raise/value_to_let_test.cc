@@ -63,7 +63,7 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenStoreVar_ThenUseLoad) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
@@ -77,7 +77,7 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenStoreVar_ThenUseLoad) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
@@ -111,12 +111,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpUnsequencedLHSThenUnsequencedRHS) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = add 1i, 2i
     %5:i32 = add 3i, 4i
     %6:i32 = add %4, %5
@@ -149,12 +149,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpSequencedLHSThenUnsequencedRHS) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = call %a, 1i
     %5:i32 = add 2i, 3i
     %6:i32 = add %4, %5
@@ -187,12 +187,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpUnsequencedLHSThenSequencedRHS) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = add 1i, 2i
     %5:i32 = call %a, 3i
     %6:i32 = add %4, %5
@@ -225,12 +225,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpSequencedLHSThenSequencedRHS) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = call %a, 1i
     %5:i32 = call %a, 2i
     %6:i32 = add %4, %5
@@ -263,12 +263,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpUnsequencedRHSThenUnsequencedLHS) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = add 3i, 4i
     %5:i32 = add 1i, 2i
     %6:i32 = add %5, %4
@@ -301,12 +301,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpUnsequencedRHSThenSequencedLHS) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = add 2i, 3i
     %5:i32 = call %a, 1i
     %6:i32 = add %5, %4
@@ -339,12 +339,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpSequencedRHSThenUnsequencedLHS) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = call %a, 3i
     %5:i32 = add 1i, 2i
     %6:i32 = add %5, %4
@@ -377,12 +377,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpSequencedRHSThenSequencedLHS) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = call %a, 2i
     %5:i32 = call %a, 1i
     %6:i32 = add %5, %4
@@ -395,12 +395,12 @@ TEST_F(WgslWriter_ValueToLetTest, BinaryOpSequencedRHSThenSequencedLHS) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:i32 = call %a, 2i
     %5:i32 = let %4
     %6:i32 = call %a, 1i
@@ -439,17 +439,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedXYZ) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 1i
     %9:i32 = call %a, 2i
     %10:i32 = call %a, 3i
@@ -489,17 +489,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedYXZ) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 2i
     %9:i32 = call %a, 1i
     %10:i32 = call %a, 3i
@@ -513,17 +513,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedYXZ) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 2i
     %9:i32 = let %8
     %10:i32 = call %a, 1i
@@ -560,17 +560,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedXZY) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 1i
     %9:i32 = call %a, 3i
     %10:i32 = call %a, 2i
@@ -584,17 +584,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedXZY) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 1i
     %9:i32 = let %8
     %10:i32 = call %a, 3i
@@ -632,17 +632,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedZXY) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 3i
     %9:i32 = call %a, 1i
     %10:i32 = call %a, 2i
@@ -656,17 +656,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedZXY) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 3i
     %9:i32 = let %8
     %10:i32 = call %a, 1i
@@ -703,17 +703,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedYZX) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 2i
     %9:i32 = call %a, 3i
     %10:i32 = call %a, 1i
@@ -727,17 +727,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedYZX) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 2i
     %9:i32 = let %8
     %10:i32 = call %a, 3i
@@ -775,17 +775,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedZYX) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 3i
     %9:i32 = call %a, 2i
     %10:i32 = call %a, 1i
@@ -799,17 +799,17 @@ TEST_F(WgslWriter_ValueToLetTest, CallSequencedZYX) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 0i
   }
 }
 %b = func(%4:i32, %5:i32, %6:i32):i32 {
-  %b2 = block {
+  $B2: {
     ret 0i
   }
 }
 %c = func():i32 {
-  %b3 = block {
+  $B3: {
     %8:i32 = call %a, 3i
     %9:i32 = let %8
     %10:i32 = call %a, 2i
@@ -841,12 +841,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenCallVoidFn_ThenUseLoad) {
 
     auto* src = R"(
 %a = func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<function, i32, read_write> = var
     store %3, 1i
     %4:i32 = load %3
@@ -860,12 +860,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenCallVoidFn_ThenUseLoad) {
 
     auto* expect = R"(
 %a = func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<function, i32, read_write> = var
     store %3, 1i
     %4:i32 = load %3
@@ -896,12 +896,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenCallUnusedi32Fn_ThenUseLoad) {
 
     auto* src = R"(
 %a = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<function, i32, read_write> = var
     store %3, 1i
     %4:i32 = load %3
@@ -915,12 +915,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenCallUnusedi32Fn_ThenUseLoad) {
 
     auto* expect = R"(
 %a = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<function, i32, read_write> = var
     store %3, 1i
     %4:i32 = load %3
@@ -951,12 +951,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenCalli32Fn_ThenUseLoadBeforeCall) {
 
     auto* src = R"(
 %a = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<function, i32, read_write> = var
     store %3, 1i
     %4:i32 = load %3
@@ -971,12 +971,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenCalli32Fn_ThenUseLoadBeforeCall) {
 
     auto* expect = R"(
 %a = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<function, i32, read_write> = var
     store %3, 1i
     %4:i32 = load %3
@@ -1007,12 +1007,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenCalli32Fn_ThenUseCallBeforeLoad) {
 
     auto* src = R"(
 %a = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<function, i32, read_write> = var
     store %3, 1i
     %4:i32 = load %3
@@ -1027,12 +1027,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenCalli32Fn_ThenUseCallBeforeLoad) {
 
     auto* expect = R"(
 %a = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<function, i32, read_write> = var
     store %3, 1i
     %4:i32 = load %3
@@ -1069,12 +1069,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfArrayOfArray_XYZ) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<function, array<array<array<i32, 3>, 4>, 5>, read_write> = var
     %5:i32 = call %a, 1i
     %6:i32 = call %a, 2i
@@ -1090,12 +1090,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfArrayOfArray_XYZ) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<function, array<array<array<i32, 3>, 4>, 5>, read_write> = var
     %5:i32 = call %a, 1i
     %6:i32 = call %a, 2i
@@ -1129,12 +1129,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfArrayOfArray_YXZ) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<function, array<array<array<i32, 3>, 4>, 5>, read_write> = var
     %5:i32 = call %a, 2i
     %6:i32 = call %a, 1i
@@ -1150,12 +1150,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfArrayOfArray_YXZ) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<function, array<array<array<i32, 3>, 4>, 5>, read_write> = var
     %5:i32 = call %a, 2i
     %6:i32 = let %5
@@ -1190,12 +1190,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfArrayOfArray_ZXY) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<function, array<array<array<i32, 3>, 4>, 5>, read_write> = var
     %5:i32 = call %a, 3i
     %6:i32 = call %a, 1i
@@ -1211,12 +1211,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfArrayOfArray_ZXY) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<function, array<array<array<i32, 3>, 4>, 5>, read_write> = var
     %5:i32 = call %a, 3i
     %6:i32 = let %5
@@ -1251,12 +1251,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfArrayOfArray_ZYX) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<function, array<array<array<i32, 3>, 4>, 5>, read_write> = var
     %5:i32 = call %a, 3i
     %6:i32 = call %a, 2i
@@ -1272,12 +1272,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfArrayOfArray_ZYX) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<function, array<array<array<i32, 3>, 4>, 5>, read_write> = var
     %5:i32 = call %a, 3i
     %6:i32 = let %5
@@ -1313,12 +1313,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_XYZ) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():f32 {
-  %b2 = block {
+  $B2: {
     %4:array<mat3x4<f32>, 5> = construct
     %5:i32 = call %a, 1i
     %6:i32 = call %a, 2i
@@ -1333,12 +1333,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_XYZ) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():f32 {
-  %b2 = block {
+  $B2: {
     %4:array<mat3x4<f32>, 5> = construct
     %5:i32 = call %a, 1i
     %6:i32 = call %a, 2i
@@ -1371,12 +1371,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_YXZ) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():f32 {
-  %b2 = block {
+  $B2: {
     %4:array<mat3x4<f32>, 5> = construct
     %5:i32 = call %a, 2i
     %6:i32 = call %a, 1i
@@ -1391,12 +1391,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_YXZ) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():f32 {
-  %b2 = block {
+  $B2: {
     %4:array<mat3x4<f32>, 5> = construct
     %5:i32 = call %a, 2i
     %6:i32 = let %5
@@ -1430,12 +1430,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_ZXY) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():f32 {
-  %b2 = block {
+  $B2: {
     %4:array<mat3x4<f32>, 5> = construct
     %5:i32 = call %a, 3i
     %6:i32 = call %a, 1i
@@ -1450,12 +1450,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_ZXY) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():f32 {
-  %b2 = block {
+  $B2: {
     %4:array<mat3x4<f32>, 5> = construct
     %5:i32 = call %a, 3i
     %6:i32 = let %5
@@ -1489,12 +1489,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_ZYX) {
 
     auto* src = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():f32 {
-  %b2 = block {
+  $B2: {
     %4:array<mat3x4<f32>, 5> = construct
     %5:i32 = call %a, 3i
     %6:i32 = call %a, 2i
@@ -1509,12 +1509,12 @@ TEST_F(WgslWriter_ValueToLetTest, Access_ArrayOfMat3x4f_ZYX) {
 
     auto* expect = R"(
 %a = func(%2:i32):i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %f = func():f32 {
-  %b2 = block {
+  $B2: {
     %4:array<mat3x4<f32>, 5> = construct
     %5:i32 = call %a, 3i
     %6:i32 = let %5
@@ -1546,10 +1546,10 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedOutsideIf) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:i32 = add 1i, 2i
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         ret %2
       }
     }
@@ -1581,12 +1581,12 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideIf) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var, 1i
     %3:i32 = load %2
     %4:i32 = add %3, 2i
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         ret %4
       }
     }
@@ -1599,13 +1599,13 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideIf) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var, 1i
     %3:i32 = load %2
     %4:i32 = add %3, 2i
     %5:i32 = let %4
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         ret %5
       }
     }
@@ -1630,10 +1630,10 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedUsedByIfCondition) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:bool = eq 1i, 2i
-    if %2 [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if %2 [t: $B2] {  # if_1
+      $B2: {  # true
         ret 3i
       }
     }
@@ -1646,10 +1646,10 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedUsedByIfCondition) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:bool = eq 1i, 2i
-    if %2 [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if %2 [t: $B2] {  # if_1
+      $B2: {  # true
         ret 3i
       }
     }
@@ -1677,12 +1677,12 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedUsedByIfCondition) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var, 1i
     %3:i32 = load %2
     %4:bool = eq %3, 2i
-    if %4 [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if %4 [t: $B2] {  # if_1
+      $B2: {  # true
         ret 3i
       }
     }
@@ -1695,12 +1695,12 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedUsedByIfCondition) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var, 1i
     %3:i32 = load %2
     %4:bool = eq %3, 2i
-    if %4 [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if %4 [t: $B2] {  # if_1
+      $B2: {  # true
         ret 3i
       }
     }
@@ -1730,12 +1730,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInIf_ThenUseLoad) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         store %2, 2i
         exit_if  # if_1
       }
@@ -1749,13 +1749,13 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInIf_ThenUseLoad) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
     %4:i32 = let %3
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         store %2, 2i
         exit_if  # if_1
       }
@@ -1785,10 +1785,10 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedOutsideSwitch) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:i32 = add 1i, 2i
-    switch 3i [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch 3i [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         ret %2
       }
     }
@@ -1821,12 +1821,12 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideSwitch) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var, 1i
     %3:i32 = load %2
     %4:i32 = add %3, 2i
-    switch 3i [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch 3i [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         ret %4
       }
     }
@@ -1839,13 +1839,13 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideSwitch) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var, 1i
     %3:i32 = load %2
     %4:i32 = add %3, 2i
     %5:i32 = let %4
-    switch 3i [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch 3i [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         ret %5
       }
     }
@@ -1871,10 +1871,10 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedUsedBySwitchCondition) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:i32 = add 1i, 2i
-    switch %2 [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch %2 [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         ret 3i
       }
     }
@@ -1887,10 +1887,10 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedUsedBySwitchCondition) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:i32 = add 1i, 2i
-    switch %2 [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch %2 [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         ret 3i
       }
     }
@@ -1918,11 +1918,11 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedUsedBySwitchCondition) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var, 1i
     %3:i32 = load %2
-    switch %3 [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch %3 [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         ret 3i
       }
     }
@@ -1935,11 +1935,11 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedUsedBySwitchCondition) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var, 1i
     %3:i32 = load %2
-    switch %3 [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch %3 [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         ret 3i
       }
     }
@@ -1970,12 +1970,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInSwitch_ThenUseLoad) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
-    switch 1i [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch 1i [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         store %2, 2i
         exit_switch  # switch_1
       }
@@ -1989,13 +1989,13 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInSwitch_ThenUseLoad) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
     %4:i32 = let %3
-    switch 1i [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+    switch 1i [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         store %2, 2i
         exit_switch  # switch_1
       }
@@ -2029,15 +2029,15 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedOutsideLoopInitializer) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     %3:i32 = add 1i, 2i
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         store %2, %3
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         exit_loop  # loop_1
       }
     }
@@ -2072,16 +2072,16 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopInitializer) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     %3:i32 = load %2
     %4:i32 = add %3, 2i
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         store %2, %4
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         exit_loop  # loop_1
       }
     }
@@ -2094,17 +2094,17 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopInitializer) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     %3:i32 = load %2
     %4:i32 = add %3, 2i
     %5:i32 = let %4
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         store %2, %5
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         exit_loop  # loop_1
       }
     }
@@ -2135,16 +2135,16 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopInitializer_ThenUs
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         store %2, 2i
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         exit_loop  # loop_1
       }
     }
@@ -2157,17 +2157,17 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopInitializer_ThenUs
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
     %4:i32 = let %3
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         store %2, 2i
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         exit_loop  # loop_1
       }
     }
@@ -2192,10 +2192,10 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedOutsideLoopBody) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:i32 = add 1i, 2i
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         ret %2
       }
     }
@@ -2226,12 +2226,12 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopBody) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     %3:i32 = load %2
     %4:i32 = add %3, 2i
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         ret %4
       }
     }
@@ -2244,13 +2244,13 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopBody) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     %3:i32 = load %2
     %4:i32 = add %3, 2i
     %5:i32 = let %4
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         ret %5
       }
     }
@@ -2280,12 +2280,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopBody_ThenUseLoad) 
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         store %2, 2i
         exit_loop  # loop_1
       }
@@ -2299,13 +2299,13 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopBody_ThenUseLoad) 
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
     %4:i32 = let %3
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         store %2, 2i
         exit_loop  # loop_1
       }
@@ -2332,15 +2332,15 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedOutsideLoopContinuing) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:i32 = add 1i, 2i
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        continue %b3
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         %3:bool = eq %2, 3i
-        break_if %3 %b2
+        break_if %3 $B2
       }
     }
     ret 0i
@@ -2371,17 +2371,17 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopContinuing) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     %3:i32 = load %2
     %4:i32 = add %3, 2i
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        continue %b3
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         %5:bool = eq %4, 3i
-        break_if %5 %b2
+        break_if %5 $B2
       }
     }
     ret 0i
@@ -2395,18 +2395,18 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopContinuing) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     %3:i32 = load %2
     %4:i32 = add %3, 2i
     %5:i32 = let %4
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        continue %b3
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         %6:bool = eq %5, 3i
-        break_if %6 %b2
+        break_if %6 $B2
       }
     }
     ret 0i
@@ -2434,17 +2434,17 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopContinuing_ThenUse
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        continue %b3
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         store %2, 2i
-        break_if true %b2
+        break_if true $B2
       }
     }
     ret %3
@@ -2456,18 +2456,18 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopContinuing_ThenUse
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
     %3:i32 = load %2
     %4:i32 = let %3
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        continue %b3
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         store %2, 2i
-        break_if true %b2
+        break_if true $B2
       }
     }
     ret %4
@@ -2499,15 +2499,15 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopInitializer_ThenReadAndWriteToVar
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %3:i32 = load %2
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %4:i32 = add %3, 1i
         store %2, %4
         exit_loop  # loop_1
@@ -2522,16 +2522,16 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopInitializer_ThenReadAndWriteToVar
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %3:i32 = load %2
         %4:i32 = let %3
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %5:i32 = add %4, 1i
         store %2, %5
         exit_loop  # loop_1
@@ -2567,21 +2567,21 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopInitializer_ThenReadAndWriteToVar
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
-    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
         %3:i32 = load %2
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
-        continue %b4
+      $B3: {  # body
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %4:i32 = add %3, 1i
         store %2, %4
-        break_if true %b3
+        break_if true $B3
       }
     }
     ret 3i
@@ -2593,22 +2593,22 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopInitializer_ThenReadAndWriteToVar
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
-    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
         %3:i32 = load %2
         %4:i32 = let %3
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
-        continue %b4
+      $B3: {  # body
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %5:i32 = add %4, 1i
         store %2, %5
-        break_if true %b3
+        break_if true $B3
       }
     }
     ret 3i
@@ -2641,18 +2641,18 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopBody_ThenReadAndWriteToVarInLoopC
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %3:i32 = load %2
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         %4:i32 = add %3, 1i
         store %2, %4
-        break_if true %b2
+        break_if true $B2
       }
     }
     ret 3i
@@ -2664,19 +2664,19 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopBody_ThenReadAndWriteToVarInLoopC
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 1i
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %3:i32 = load %2
         %4:i32 = let %3
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         %5:i32 = add %4, 1i
         store %2, %5
-        break_if true %b2
+        break_if true $B2
       }
     }
     ret 3i

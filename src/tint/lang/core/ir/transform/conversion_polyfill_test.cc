@@ -59,7 +59,7 @@ TEST_F(IR_ConversionPolyfillTest, I32_to_F32) {
     Build(ty.i32(), ty.f32());
     auto* src = R"(
 %foo = func(%src:i32):f32 {
-  %b1 = block {
+  $B1: {
     %result:f32 = convert %src
     ret %result
   }
@@ -80,7 +80,7 @@ TEST_F(IR_ConversionPolyfillTest, U32_to_F32) {
     Build(ty.u32(), ty.f32());
     auto* src = R"(
 %foo = func(%src:u32):f32 {
-  %b1 = block {
+  $B1: {
     %result:f32 = convert %src
     ret %result
   }
@@ -100,7 +100,7 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_I32_NoPolyfill) {
     Build(ty.f32(), ty.i32());
     auto* src = R"(
 %foo = func(%src:f32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = convert %src
     ret %result
   }
@@ -120,7 +120,7 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_I32) {
     Build(ty.f32(), ty.i32());
     auto* src = R"(
 %foo = func(%src:f32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = convert %src
     ret %result
   }
@@ -128,13 +128,13 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_I32) {
 )";
     auto* expect = R"(
 %foo = func(%src:f32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = call %tint_f32_to_i32, %src
     ret %result
   }
 }
 %tint_f32_to_i32 = func(%value:f32):i32 {
-  %b2 = block {
+  $B2: {
     %6:i32 = convert %value
     %7:bool = gte %value, -2147483648.0f
     %8:i32 = select -2147483648i, %6, %7
@@ -157,7 +157,7 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_U32) {
     Build(ty.f32(), ty.u32());
     auto* src = R"(
 %foo = func(%src:f32):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = convert %src
     ret %result
   }
@@ -165,13 +165,13 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_U32) {
 )";
     auto* expect = R"(
 %foo = func(%src:f32):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = call %tint_f32_to_u32, %src
     ret %result
   }
 }
 %tint_f32_to_u32 = func(%value:f32):u32 {
-  %b2 = block {
+  $B2: {
     %6:u32 = convert %value
     %7:bool = gte %value, 0.0f
     %8:u32 = select 0u, %6, %7
@@ -194,7 +194,7 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_I32_Vec2) {
     Build(ty.vec2<f32>(), ty.vec2<i32>());
     auto* src = R"(
 %foo = func(%src:vec2<f32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = convert %src
     ret %result
   }
@@ -202,13 +202,13 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_I32_Vec2) {
 )";
     auto* expect = R"(
 %foo = func(%src:vec2<f32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = call %tint_v2f32_to_v2i32, %src
     ret %result
   }
 }
 %tint_v2f32_to_v2i32 = func(%value:vec2<f32>):vec2<i32> {
-  %b2 = block {
+  $B2: {
     %6:vec2<i32> = convert %value
     %7:vec2<bool> = gte %value, vec2<f32>(-2147483648.0f)
     %8:vec2<i32> = select vec2<i32>(-2147483648i), %6, %7
@@ -231,7 +231,7 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_U32_Vec3) {
     Build(ty.vec2<f32>(), ty.vec2<u32>());
     auto* src = R"(
 %foo = func(%src:vec2<f32>):vec2<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<u32> = convert %src
     ret %result
   }
@@ -239,13 +239,13 @@ TEST_F(IR_ConversionPolyfillTest, F32_to_U32_Vec3) {
 )";
     auto* expect = R"(
 %foo = func(%src:vec2<f32>):vec2<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<u32> = call %tint_v2f32_to_v2u32, %src
     ret %result
   }
 }
 %tint_v2f32_to_v2u32 = func(%value:vec2<f32>):vec2<u32> {
-  %b2 = block {
+  $B2: {
     %6:vec2<u32> = convert %value
     %7:vec2<bool> = gte %value, vec2<f32>(0.0f)
     %8:vec2<u32> = select vec2<u32>(0u), %6, %7
@@ -268,7 +268,7 @@ TEST_F(IR_ConversionPolyfillTest, F16_to_I32) {
     Build(ty.f16(), ty.i32());
     auto* src = R"(
 %foo = func(%src:f16):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = convert %src
     ret %result
   }
@@ -276,13 +276,13 @@ TEST_F(IR_ConversionPolyfillTest, F16_to_I32) {
 )";
     auto* expect = R"(
 %foo = func(%src:f16):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = call %tint_f16_to_i32, %src
     ret %result
   }
 }
 %tint_f16_to_i32 = func(%value:f16):i32 {
-  %b2 = block {
+  $B2: {
     %6:i32 = convert %value
     %7:bool = gte %value, -65504.0h
     %8:i32 = select -2147483648i, %6, %7
@@ -305,7 +305,7 @@ TEST_F(IR_ConversionPolyfillTest, F16_to_U32) {
     Build(ty.f16(), ty.u32());
     auto* src = R"(
 %foo = func(%src:f16):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = convert %src
     ret %result
   }
@@ -313,13 +313,13 @@ TEST_F(IR_ConversionPolyfillTest, F16_to_U32) {
 )";
     auto* expect = R"(
 %foo = func(%src:f16):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = call %tint_f16_to_u32, %src
     ret %result
   }
 }
 %tint_f16_to_u32 = func(%value:f16):u32 {
-  %b2 = block {
+  $B2: {
     %6:u32 = convert %value
     %7:bool = gte %value, 0.0h
     %8:u32 = select 0u, %6, %7
@@ -342,7 +342,7 @@ TEST_F(IR_ConversionPolyfillTest, F16_to_I32_Vec2) {
     Build(ty.vec2<f16>(), ty.vec2<i32>());
     auto* src = R"(
 %foo = func(%src:vec2<f16>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = convert %src
     ret %result
   }
@@ -350,13 +350,13 @@ TEST_F(IR_ConversionPolyfillTest, F16_to_I32_Vec2) {
 )";
     auto* expect = R"(
 %foo = func(%src:vec2<f16>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = call %tint_v2f16_to_v2i32, %src
     ret %result
   }
 }
 %tint_v2f16_to_v2i32 = func(%value:vec2<f16>):vec2<i32> {
-  %b2 = block {
+  $B2: {
     %6:vec2<i32> = convert %value
     %7:vec2<bool> = gte %value, vec2<f16>(-65504.0h)
     %8:vec2<i32> = select vec2<i32>(-2147483648i), %6, %7
@@ -379,7 +379,7 @@ TEST_F(IR_ConversionPolyfillTest, F16_to_U32_Vec3) {
     Build(ty.vec2<f16>(), ty.vec2<u32>());
     auto* src = R"(
 %foo = func(%src:vec2<f16>):vec2<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<u32> = convert %src
     ret %result
   }
@@ -387,13 +387,13 @@ TEST_F(IR_ConversionPolyfillTest, F16_to_U32_Vec3) {
 )";
     auto* expect = R"(
 %foo = func(%src:vec2<f16>):vec2<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<u32> = call %tint_v2f16_to_v2u32, %src
     ret %result
   }
 }
 %tint_v2f16_to_v2u32 = func(%value:vec2<f16>):vec2<u32> {
-  %b2 = block {
+  $B2: {
     %6:vec2<u32> = convert %value
     %7:vec2<bool> = gte %value, vec2<f16>(0.0h)
     %8:vec2<u32> = select vec2<u32>(0u), %6, %7

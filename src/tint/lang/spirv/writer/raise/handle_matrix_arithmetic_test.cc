@@ -53,7 +53,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Add_Mat2x3f) {
 
     auto* src = R"(
 %foo = func(%arg1:mat2x3<f32>, %arg2:mat2x3<f32>):mat2x3<f32> {
-  %b1 = block {
+  $B1: {
     %4:mat2x3<f32> = add %arg1, %arg2
     ret %4
   }
@@ -63,7 +63,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Add_Mat2x3f) {
 
     auto* expect = R"(
 %foo = func(%arg1:mat2x3<f32>, %arg2:mat2x3<f32>):mat2x3<f32> {
-  %b1 = block {
+  $B1: {
     %4:vec3<f32> = access %arg1, 0u
     %5:vec3<f32> = access %arg2, 0u
     %6:vec3<f32> = add %4, %5
@@ -94,7 +94,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Add_Mat4x2h) {
 
     auto* src = R"(
 %foo = func(%arg1:mat4x2<f16>, %arg2:mat4x2<f16>):mat4x2<f16> {
-  %b1 = block {
+  $B1: {
     %4:mat4x2<f16> = add %arg1, %arg2
     ret %4
   }
@@ -104,7 +104,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Add_Mat4x2h) {
 
     auto* expect = R"(
 %foo = func(%arg1:mat4x2<f16>, %arg2:mat4x2<f16>):mat4x2<f16> {
-  %b1 = block {
+  $B1: {
     %4:vec2<f16> = access %arg1, 0u
     %5:vec2<f16> = access %arg2, 0u
     %6:vec2<f16> = add %4, %5
@@ -141,7 +141,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Subtract_Mat3x2f) {
 
     auto* src = R"(
 %foo = func(%arg1:mat3x2<f32>, %arg2:mat3x2<f32>):mat3x2<f32> {
-  %b1 = block {
+  $B1: {
     %4:mat3x2<f32> = sub %arg1, %arg2
     ret %4
   }
@@ -151,7 +151,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Subtract_Mat3x2f) {
 
     auto* expect = R"(
 %foo = func(%arg1:mat3x2<f32>, %arg2:mat3x2<f32>):mat3x2<f32> {
-  %b1 = block {
+  $B1: {
     %4:vec2<f32> = access %arg1, 0u
     %5:vec2<f32> = access %arg2, 0u
     %6:vec2<f32> = sub %4, %5
@@ -185,7 +185,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Subtract_Mat2x4h) {
 
     auto* src = R"(
 %foo = func(%arg1:mat2x4<f16>, %arg2:mat2x4<f16>):mat2x4<f16> {
-  %b1 = block {
+  $B1: {
     %4:mat2x4<f16> = sub %arg1, %arg2
     ret %4
   }
@@ -195,7 +195,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Subtract_Mat2x4h) {
 
     auto* expect = R"(
 %foo = func(%arg1:mat2x4<f16>, %arg2:mat2x4<f16>):mat2x4<f16> {
-  %b1 = block {
+  $B1: {
     %4:vec4<f16> = access %arg1, 0u
     %5:vec4<f16> = access %arg2, 0u
     %6:vec4<f16> = sub %4, %5
@@ -226,7 +226,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat2x3f_Scalar) {
 
     auto* src = R"(
 %foo = func(%arg1:mat2x3<f32>, %arg2:f32):mat2x3<f32> {
-  %b1 = block {
+  $B1: {
     %4:mat2x3<f32> = mul %arg1, %arg2
     ret %4
   }
@@ -236,7 +236,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat2x3f_Scalar) {
 
     auto* expect = R"(
 %foo = func(%arg1:mat2x3<f32>, %arg2:f32):mat2x3<f32> {
-  %b1 = block {
+  $B1: {
     %4:mat2x3<f32> = spirv.matrix_times_scalar %arg1, %arg2
     ret %4
   }
@@ -261,7 +261,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat3x4f_Vector) {
 
     auto* src = R"(
 %foo = func(%arg1:mat3x4<f32>, %arg2:vec3<f32>):vec4<f32> {
-  %b1 = block {
+  $B1: {
     %4:vec4<f32> = mul %arg1, %arg2
     ret %4
   }
@@ -271,7 +271,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat3x4f_Vector) {
 
     auto* expect = R"(
 %foo = func(%arg1:mat3x4<f32>, %arg2:vec3<f32>):vec4<f32> {
-  %b1 = block {
+  $B1: {
     %4:vec4<f32> = spirv.matrix_times_vector %arg1, %arg2
     ret %4
   }
@@ -296,7 +296,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat4x2f_Mat2x4) {
 
     auto* src = R"(
 %foo = func(%arg1:mat4x2<f32>, %arg2:mat2x4<f32>):mat2x2<f32> {
-  %b1 = block {
+  $B1: {
     %4:mat2x2<f32> = mul %arg1, %arg2
     ret %4
   }
@@ -306,7 +306,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat4x2f_Mat2x4) {
 
     auto* expect = R"(
 %foo = func(%arg1:mat4x2<f32>, %arg2:mat2x4<f32>):mat2x2<f32> {
-  %b1 = block {
+  $B1: {
     %4:mat2x2<f32> = spirv.matrix_times_matrix %arg1, %arg2
     ret %4
   }
@@ -331,7 +331,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Scalar_Mat3x2h) {
 
     auto* src = R"(
 %foo = func(%arg1:f16, %arg2:mat3x2<f16>):mat3x2<f16> {
-  %b1 = block {
+  $B1: {
     %4:mat3x2<f16> = mul %arg1, %arg2
     ret %4
   }
@@ -341,7 +341,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Scalar_Mat3x2h) {
 
     auto* expect = R"(
 %foo = func(%arg1:f16, %arg2:mat3x2<f16>):mat3x2<f16> {
-  %b1 = block {
+  $B1: {
     %4:mat3x2<f16> = spirv.matrix_times_scalar %arg2, %arg1
     ret %4
   }
@@ -366,7 +366,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Vector_Mat3x4f) {
 
     auto* src = R"(
 %foo = func(%arg1:vec3<f16>, %arg2:mat4x3<f16>):vec4<f16> {
-  %b1 = block {
+  $B1: {
     %4:vec4<f16> = mul %arg1, %arg2
     ret %4
   }
@@ -376,7 +376,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Vector_Mat3x4f) {
 
     auto* expect = R"(
 %foo = func(%arg1:vec3<f16>, %arg2:mat4x3<f16>):vec4<f16> {
-  %b1 = block {
+  $B1: {
     %4:vec4<f16> = spirv.vector_times_matrix %arg1, %arg2
     ret %4
   }
@@ -401,7 +401,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat3x3f_Mat3x3) {
 
     auto* src = R"(
 %foo = func(%arg1:mat3x3<f16>, %arg2:mat3x3<f16>):mat3x3<f16> {
-  %b1 = block {
+  $B1: {
     %4:mat3x3<f16> = mul %arg1, %arg2
     ret %4
   }
@@ -411,7 +411,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Mul_Mat3x3f_Mat3x3) {
 
     auto* expect = R"(
 %foo = func(%arg1:mat3x3<f16>, %arg2:mat3x3<f16>):mat3x3<f16> {
-  %b1 = block {
+  $B1: {
     %4:mat3x3<f16> = spirv.matrix_times_matrix %arg1, %arg2
     ret %4
   }
@@ -435,7 +435,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Convert_Mat2x3_F32_to_F16) {
 
     auto* src = R"(
 %foo = func(%arg:mat2x3<f32>):mat2x3<f16> {
-  %b1 = block {
+  $B1: {
     %3:mat2x3<f16> = convert %arg
     ret %3
   }
@@ -445,7 +445,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Convert_Mat2x3_F32_to_F16) {
 
     auto* expect = R"(
 %foo = func(%arg:mat2x3<f32>):mat2x3<f16> {
-  %b1 = block {
+  $B1: {
     %3:vec3<f32> = access %arg, 0u
     %4:vec3<f16> = convert %3
     %5:vec3<f32> = access %arg, 1u
@@ -473,7 +473,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Convert_Mat4x4_F32_to_F16) {
 
     auto* src = R"(
 %foo = func(%arg:mat4x4<f32>):mat4x4<f16> {
-  %b1 = block {
+  $B1: {
     %3:mat4x4<f16> = convert %arg
     ret %3
   }
@@ -483,7 +483,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Convert_Mat4x4_F32_to_F16) {
 
     auto* expect = R"(
 %foo = func(%arg:mat4x4<f32>):mat4x4<f16> {
-  %b1 = block {
+  $B1: {
     %3:vec4<f32> = access %arg, 0u
     %4:vec4<f16> = convert %3
     %5:vec4<f32> = access %arg, 1u
@@ -515,7 +515,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Convert_Mat4x3_F16_to_F32) {
 
     auto* src = R"(
 %foo = func(%arg:mat4x3<f16>):mat4x3<f32> {
-  %b1 = block {
+  $B1: {
     %3:mat4x3<f32> = convert %arg
     ret %3
   }
@@ -525,7 +525,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Convert_Mat4x3_F16_to_F32) {
 
     auto* expect = R"(
 %foo = func(%arg:mat4x3<f16>):mat4x3<f32> {
-  %b1 = block {
+  $B1: {
     %3:vec3<f16> = access %arg, 0u
     %4:vec3<f32> = convert %3
     %5:vec3<f16> = access %arg, 1u
@@ -557,7 +557,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Convert_Mat2x2_F16_to_F32) {
 
     auto* src = R"(
 %foo = func(%arg:mat2x2<f32>):mat2x2<f16> {
-  %b1 = block {
+  $B1: {
     %3:mat2x2<f16> = convert %arg
     ret %3
   }
@@ -567,7 +567,7 @@ TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Convert_Mat2x2_F16_to_F32) {
 
     auto* expect = R"(
 %foo = func(%arg:mat2x2<f32>):mat2x2<f16> {
-  %b1 = block {
+  $B1: {
     %3:vec2<f32> = access %arg, 0u
     %4:vec2<f16> = convert %3
     %5:vec2<f32> = access %arg, 1u

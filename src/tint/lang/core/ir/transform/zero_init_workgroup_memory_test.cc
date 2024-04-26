@@ -63,7 +63,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NoRootBlock) {
 
     auto* expect = R"(
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -83,12 +83,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, WorkgroupVarUnused) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -112,12 +112,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarBool) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:bool = load %wgvar
     ret
   }
@@ -126,15 +126,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarBool) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, false
         exit_if  # if_1
       }
@@ -161,12 +161,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarI32) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:i32 = load %wgvar
     ret
   }
@@ -175,15 +175,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarI32) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, 0i
         exit_if  # if_1
       }
@@ -210,12 +210,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarU32) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:u32 = load %wgvar
     ret
   }
@@ -224,15 +224,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarU32) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, u32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, 0u
         exit_if  # if_1
       }
@@ -259,12 +259,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarF32) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, f32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:f32 = load %wgvar
     ret
   }
@@ -273,15 +273,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarF32) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, f32, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, 0.0f
         exit_if  # if_1
       }
@@ -308,12 +308,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarF16) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, f16, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:f16 = load %wgvar
     ret
   }
@@ -322,15 +322,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarF16) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, f16, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, 0.0h
         exit_if  # if_1
       }
@@ -357,12 +357,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, AtomicI32) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:i32 = atomicLoad %wgvar
     ret
   }
@@ -371,15 +371,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, AtomicI32) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         %5:void = atomicStore %wgvar, 0i
         exit_if  # if_1
       }
@@ -406,12 +406,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, AtomicU32) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:u32 = atomicLoad %wgvar
     ret
   }
@@ -420,15 +420,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, AtomicU32) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         %5:void = atomicStore %wgvar, 0u
         exit_if  # if_1
       }
@@ -455,12 +455,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfI32) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<i32, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(11, 2, 3) func():void {
-  %b2 = block {
+  $B2: {
     %3:array<i32, 4> = load %wgvar
     ret
   }
@@ -469,30 +469,30 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfI32) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<i32, 4>, read_write> = var
 }
 
 %main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
-        next_iteration %b4 %tint_local_index
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration $B4 %tint_local_index
       }
-      %b4 = block (%idx:u32) {  # body
+      $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 4u
-        if %5 [t: %b6] {  # if_1
-          %b6 = block {  # true
+        if %5 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
         %6:ptr<workgroup, i32, read_write> = access %wgvar, %idx:u32
         store %6, 0i
-        continue %b5
+        continue $B5
       }
-      %b5 = block {  # continuing
+      $B5: {  # continuing
         %7:u32 = add %idx:u32, 66u
-        next_iteration %b4 %7
+        next_iteration $B4 %7
       }
     }
     %8:void = workgroupBarrier
@@ -517,12 +517,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfU32) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<u32, 5>, 7>, read_write> = var
 }
 
 %main = @compute @workgroup_size(11, 2, 3) func():void {
-  %b2 = block {
+  $B2: {
     %3:array<array<u32, 5>, 7> = load %wgvar
     ret
   }
@@ -531,20 +531,20 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfU32) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<u32, 5>, 7>, read_write> = var
 }
 
 %main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
-        next_iteration %b4 %tint_local_index
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration $B4 %tint_local_index
       }
-      %b4 = block (%idx:u32) {  # body
+      $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 35u
-        if %5 [t: %b6] {  # if_1
-          %b6 = block {  # true
+        if %5 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
@@ -552,11 +552,11 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfU32) {
         %7:u32 = div %idx:u32, 5u
         %8:ptr<workgroup, u32, read_write> = access %wgvar, %7, %6
         store %8, 0u
-        continue %b5
+        continue $B5
       }
-      %b5 = block {  # continuing
+      $B5: {  # continuing
         %9:u32 = add %idx:u32, 66u
-        next_iteration %b4 %9
+        next_iteration $B4 %9
       }
     }
     %10:void = workgroupBarrier
@@ -581,12 +581,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfArray) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<array<i32, 7>, 5>, 3>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:array<array<array<i32, 7>, 5>, 3> = load %wgvar
     ret
   }
@@ -595,20 +595,20 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfArray) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<array<i32, 7>, 5>, 3>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
-        next_iteration %b4 %tint_local_index
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration $B4 %tint_local_index
       }
-      %b4 = block (%idx:u32) {  # body
+      $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 105u
-        if %5 [t: %b6] {  # if_1
-          %b6 = block {  # true
+        if %5 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
@@ -618,11 +618,11 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfArray) {
         %9:u32 = div %idx:u32, 35u
         %10:ptr<workgroup, i32, read_write> = access %wgvar, %9, %8, %6
         store %10, 0i
-        continue %b5
+        continue $B5
       }
-      %b5 = block {  # continuing
+      $B5: {  # continuing
         %11:u32 = add %idx:u32, 1u
-        next_iteration %b4 %11
+        next_iteration $B4 %11
       }
     }
     %12:void = workgroupBarrier
@@ -647,12 +647,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayInnerSizeOne) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<array<i32, 1>, 5>, 3>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:array<array<array<i32, 1>, 5>, 3> = load %wgvar
     ret
   }
@@ -661,20 +661,20 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayInnerSizeOne) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<array<i32, 1>, 5>, 3>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
-        next_iteration %b4 %tint_local_index
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration $B4 %tint_local_index
       }
-      %b4 = block (%idx:u32) {  # body
+      $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 15u
-        if %5 [t: %b6] {  # if_1
-          %b6 = block {  # true
+        if %5 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
@@ -682,11 +682,11 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayInnerSizeOne) {
         %7:u32 = div %idx:u32, 5u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, %6, 0u
         store %8, 0i
-        continue %b5
+        continue $B5
       }
-      %b5 = block {  # continuing
+      $B5: {  # continuing
         %9:u32 = add %idx:u32, 1u
-        next_iteration %b4 %9
+        next_iteration $B4 %9
       }
     }
     %10:void = workgroupBarrier
@@ -711,12 +711,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayMiddleSizeOne) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<array<i32, 3>, 1>, 5>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:array<array<array<i32, 3>, 1>, 5> = load %wgvar
     ret
   }
@@ -725,20 +725,20 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayMiddleSizeOne) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<array<i32, 3>, 1>, 5>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
-        next_iteration %b4 %tint_local_index
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration $B4 %tint_local_index
       }
-      %b4 = block (%idx:u32) {  # body
+      $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 15u
-        if %5 [t: %b6] {  # if_1
-          %b6 = block {  # true
+        if %5 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
@@ -746,11 +746,11 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayMiddleSizeOne) {
         %7:u32 = div %idx:u32, 3u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, 0u, %6
         store %8, 0i
-        continue %b5
+        continue $B5
       }
-      %b5 = block {  # continuing
+      $B5: {  # continuing
         %9:u32 = add %idx:u32, 1u
-        next_iteration %b4 %9
+        next_iteration $B4 %9
       }
     }
     %10:void = workgroupBarrier
@@ -775,12 +775,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayOuterSizeOne) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<array<i32, 3>, 5>, 1>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:array<array<array<i32, 3>, 5>, 1> = load %wgvar
     ret
   }
@@ -789,20 +789,20 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayOuterSizeOne) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<array<i32, 3>, 5>, 1>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
-        next_iteration %b4 %tint_local_index
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration $B4 %tint_local_index
       }
-      %b4 = block (%idx:u32) {  # body
+      $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 15u
-        if %5 [t: %b6] {  # if_1
-          %b6 = block {  # true
+        if %5 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
@@ -810,11 +810,11 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayOuterSizeOne) {
         %7:u32 = div %idx:u32, 3u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, 0u, %7, %6
         store %8, 0i
-        continue %b5
+        continue $B5
       }
-      %b5 = block {  # continuing
+      $B5: {  # continuing
         %9:u32 = add %idx:u32, 1u
-        next_iteration %b4 %9
+        next_iteration $B4 %9
       }
     }
     %10:void = workgroupBarrier
@@ -839,12 +839,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayTotalSizeOne) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<i32, 1>, 1>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:array<array<i32, 1>, 1> = load %wgvar
     ret
   }
@@ -853,15 +853,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayTotalSizeOne) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<array<i32, 1>, 1>, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         %5:ptr<workgroup, i32, read_write> = access %wgvar, 0u, 0u
         store %5, 0i
         exit_if  # if_1
@@ -900,12 +900,12 @@ MyStruct = struct @align(4) {
   c:f32 @offset(8)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:MyStruct = load %wgvar
     ret
   }
@@ -920,15 +920,15 @@ MyStruct = struct @align(4) {
   c:f32 @offset(8)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, MyStruct, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, MyStruct(0i, 0u, 0.0f)
         exit_if  # if_1
       }
@@ -975,12 +975,12 @@ Outer = struct @align(4) {
   d:bool @offset(12)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, Outer, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:Outer = load %wgvar
     ret
   }
@@ -1000,15 +1000,15 @@ Outer = struct @align(4) {
   d:bool @offset(12)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, Outer, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, Outer(0.0f, Inner(0i, 0u), false)
         exit_if  # if_1
       }
@@ -1055,12 +1055,12 @@ Outer = struct @align(4) {
   d:bool @offset(12)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, Outer, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:Outer = load %wgvar
     ret
   }
@@ -1080,15 +1080,15 @@ Outer = struct @align(4) {
   d:bool @offset(12)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, Outer, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         %5:ptr<workgroup, f32, read_write> = access %wgvar, 0u
         store %5, 0.0f
         %6:ptr<workgroup, i32, read_write> = access %wgvar, 1u, 0u
@@ -1143,12 +1143,12 @@ Outer = struct @align(4) {
   d:bool @offset(108)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<Outer, 7>, read_write> = var
 }
 
 %main = @compute @workgroup_size(7, 3, 2) func():void {
-  %b2 = block {
+  $B2: {
     %3:array<Outer, 7> = load %wgvar
     ret
   }
@@ -1168,20 +1168,20 @@ Outer = struct @align(4) {
   d:bool @offset(108)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, array<Outer, 7>, read_write> = var
 }
 
 %main = @compute @workgroup_size(7, 3, 2) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
-        next_iteration %b4 %tint_local_index
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration $B4 %tint_local_index
       }
-      %b4 = block (%idx:u32) {  # body
+      $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 7u
-        if %5 [t: %b6] {  # if_1
-          %b6 = block {  # true
+        if %5 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
@@ -1189,21 +1189,21 @@ Outer = struct @align(4) {
         store %6, 0.0f
         %7:ptr<workgroup, bool, read_write> = access %wgvar, %idx:u32, 2u
         store %7, false
-        continue %b5
+        continue $B5
       }
-      %b5 = block {  # continuing
+      $B5: {  # continuing
         %8:u32 = add %idx:u32, 42u
-        next_iteration %b4 %8
+        next_iteration $B4 %8
       }
     }
-    loop [i: %b7, b: %b8, c: %b9] {  # loop_2
-      %b7 = block {  # initializer
-        next_iteration %b8 %tint_local_index
+    loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+      $B7: {  # initializer
+        next_iteration $B8 %tint_local_index
       }
-      %b8 = block (%idx_1:u32) {  # body
+      $B8 (%idx_1:u32): {  # body
         %10:bool = gte %idx_1:u32, 91u
-        if %10 [t: %b10] {  # if_2
-          %b10 = block {  # true
+        if %10 [t: $B10] {  # if_2
+          $B10: {  # true
             exit_loop  # loop_2
           }
         }
@@ -1215,11 +1215,11 @@ Outer = struct @align(4) {
         %15:u32 = div %idx_1:u32, 13u
         %16:ptr<workgroup, atomic<u32>, read_write> = access %wgvar, %15, 1u, %14, 1u
         %17:void = atomicStore %16, 0u
-        continue %b9
+        continue $B9
       }
-      %b9 = block {  # continuing
+      $B9: {  # continuing
         %18:u32 = add %idx_1:u32, 42u
-        next_iteration %b8 %18
+        next_iteration $B8 %18
       }
     }
     %19:void = workgroupBarrier
@@ -1248,14 +1248,14 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_DifferentIterationCount
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %var_a:ptr<workgroup, bool, read_write> = var
   %var_b:ptr<workgroup, array<i32, 4>, read_write> = var
   %var_c:ptr<workgroup, array<array<u32, 5>, 7>, read_write> = var
 }
 
 %main = @compute @workgroup_size(11, 2, 3) func():void {
-  %b2 = block {
+  $B2: {
     %5:bool = load %var_a
     %6:array<i32, 4> = load %var_b
     %7:array<array<u32, 5>, 7> = load %var_c
@@ -1266,49 +1266,49 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_DifferentIterationCount
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %var_a:ptr<workgroup, bool, read_write> = var
   %var_b:ptr<workgroup, array<i32, 4>, read_write> = var
   %var_c:ptr<workgroup, array<array<u32, 5>, 7>, read_write> = var
 }
 
 %main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %6:bool = eq %tint_local_index, 0u
-    if %6 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %6 [t: $B3] {  # if_1
+      $B3: {  # true
         store %var_a, false
         exit_if  # if_1
       }
     }
-    loop [i: %b4, b: %b5, c: %b6] {  # loop_1
-      %b4 = block {  # initializer
-        next_iteration %b5 %tint_local_index
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration $B5 %tint_local_index
       }
-      %b5 = block (%idx:u32) {  # body
+      $B5 (%idx:u32): {  # body
         %8:bool = gte %idx:u32, 4u
-        if %8 [t: %b7] {  # if_2
-          %b7 = block {  # true
+        if %8 [t: $B7] {  # if_2
+          $B7: {  # true
             exit_loop  # loop_1
           }
         }
         %9:ptr<workgroup, i32, read_write> = access %var_b, %idx:u32
         store %9, 0i
-        continue %b6
+        continue $B6
       }
-      %b6 = block {  # continuing
+      $B6: {  # continuing
         %10:u32 = add %idx:u32, 66u
-        next_iteration %b5 %10
+        next_iteration $B5 %10
       }
     }
-    loop [i: %b8, b: %b9, c: %b10] {  # loop_2
-      %b8 = block {  # initializer
-        next_iteration %b9 %tint_local_index
+    loop [i: $B8, b: $B9, c: $B10] {  # loop_2
+      $B8: {  # initializer
+        next_iteration $B9 %tint_local_index
       }
-      %b9 = block (%idx_1:u32) {  # body
+      $B9 (%idx_1:u32): {  # body
         %12:bool = gte %idx_1:u32, 35u
-        if %12 [t: %b11] {  # if_3
-          %b11 = block {  # true
+        if %12 [t: $B11] {  # if_3
+          $B11: {  # true
             exit_loop  # loop_2
           }
         }
@@ -1316,11 +1316,11 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_DifferentIterationCount
         %14:u32 = div %idx_1:u32, 5u
         %15:ptr<workgroup, u32, read_write> = access %var_c, %14, %13
         store %15, 0u
-        continue %b10
+        continue $B10
       }
-      %b10 = block {  # continuing
+      $B10: {  # continuing
         %16:u32 = add %idx_1:u32, 66u
-        next_iteration %b9 %16
+        next_iteration $B9 %16
       }
     }
     %17:void = workgroupBarrier
@@ -1353,7 +1353,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_SharedIterationCounts) 
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %var_a:ptr<workgroup, bool, read_write> = var
   %var_b:ptr<workgroup, i32, read_write> = var
   %var_c:ptr<workgroup, array<i32, 42>, read_write> = var
@@ -1361,7 +1361,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_SharedIterationCounts) 
 }
 
 %main = @compute @workgroup_size(11, 2, 3) func():void {
-  %b2 = block {
+  $B2: {
     %6:bool = load %var_a
     %7:i32 = load %var_b
     %8:array<i32, 42> = load %var_c
@@ -1373,7 +1373,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_SharedIterationCounts) 
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %var_a:ptr<workgroup, bool, read_write> = var
   %var_b:ptr<workgroup, i32, read_write> = var
   %var_c:ptr<workgroup, array<i32, 42>, read_write> = var
@@ -1381,23 +1381,23 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_SharedIterationCounts) 
 }
 
 %main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %7:bool = eq %tint_local_index, 0u
-    if %7 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %7 [t: $B3] {  # if_1
+      $B3: {  # true
         store %var_a, false
         store %var_b, 0i
         exit_if  # if_1
       }
     }
-    loop [i: %b4, b: %b5, c: %b6] {  # loop_1
-      %b4 = block {  # initializer
-        next_iteration %b5 %tint_local_index
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration $B5 %tint_local_index
       }
-      %b5 = block (%idx:u32) {  # body
+      $B5 (%idx:u32): {  # body
         %9:bool = gte %idx:u32, 42u
-        if %9 [t: %b7] {  # if_2
-          %b7 = block {  # true
+        if %9 [t: $B7] {  # if_2
+          $B7: {  # true
             exit_loop  # loop_1
           }
         }
@@ -1407,11 +1407,11 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_SharedIterationCounts) 
         %12:u32 = div %idx:u32, 6u
         %13:ptr<workgroup, u32, read_write> = access %var_d, %12, %11
         store %13, 0u
-        continue %b6
+        continue $B6
       }
-      %b6 = block {  # continuing
+      $B6: {  # continuing
         %14:u32 = add %idx:u32, 66u
-        next_iteration %b5 %14
+        next_iteration $B5 %14
       }
     }
     %15:void = workgroupBarrier
@@ -1444,12 +1444,12 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndex) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec4<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %5:bool = load %wgvar
     ret
   }
@@ -1458,15 +1458,15 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndex) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec4<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %5:bool = eq %index, 0u
-    if %5 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %5 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, false
         exit_if  # if_1
       }
@@ -1526,12 +1526,12 @@ MyStruct = struct @align(16) {
   index:u32 @offset(12), @builtin(local_invocation_index)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%params:MyStruct):void {
-  %b2 = block {
+  $B2: {
     %4:bool = load %wgvar
     ret
   }
@@ -1545,16 +1545,16 @@ MyStruct = struct @align(16) {
   index:u32 @offset(12), @builtin(local_invocation_index)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%params:MyStruct):void {
-  %b2 = block {
+  $B2: {
     %4:u32 = access %params, 1u
     %5:bool = eq %4, 0u
-    if %5 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %5 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, false
         exit_if  # if_1
       }
@@ -1597,23 +1597,23 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideNestedBlock) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
-    if true [t: %b3] {  # if_1
-      %b3 = block {  # true
-        switch 42i [c: (default, %b4)] {  # switch_1
-          %b4 = block {  # case
-            loop [b: %b5, c: %b6] {  # loop_1
-              %b5 = block {  # body
-                continue %b6
+  $B2: {
+    if true [t: $B3] {  # if_1
+      $B3: {  # true
+        switch 42i [c: (default, $B4)] {  # switch_1
+          $B4: {  # case
+            loop [b: $B5, c: $B6] {  # loop_1
+              $B5: {  # body
+                continue $B6
               }
-              %b6 = block {  # continuing
+              $B6: {  # continuing
                 %3:bool = load %wgvar
-                break_if %3 %b5
+                break_if %3 $B5
               }
             }
             exit_switch  # switch_1
@@ -1629,31 +1629,31 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideNestedBlock) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b2 = block {
+  $B2: {
     %4:bool = eq %tint_local_index, 0u
-    if %4 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %4 [t: $B3] {  # if_1
+      $B3: {  # true
         store %wgvar, false
         exit_if  # if_1
       }
     }
     %5:void = workgroupBarrier
-    if true [t: %b4] {  # if_2
-      %b4 = block {  # true
-        switch 42i [c: (default, %b5)] {  # switch_1
-          %b5 = block {  # case
-            loop [b: %b6, c: %b7] {  # loop_1
-              %b6 = block {  # body
-                continue %b7
+    if true [t: $B4] {  # if_2
+      $B4: {  # true
+        switch 42i [c: (default, $B5)] {  # switch_1
+          $B5: {  # case
+            loop [b: $B6, c: $B7] {  # loop_1
+              $B6: {  # body
+                continue $B7
               }
-              %b7 = block {  # continuing
+              $B7: {  # continuing
                 %6:bool = load %wgvar
-                break_if %6 %b6
+                break_if %6 $B6
               }
             }
             exit_switch  # switch_1
@@ -1721,28 +1721,28 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %foo = func():void {
-  %b2 = block {
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
-        continue %b4
+  $B2: {
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %3:bool = load %wgvar
-        break_if %3 %b3
+        break_if %3 $B3
       }
     }
     ret
   }
 }
 %foo_1 = func():void {  # %foo_1: 'foo'
-  %b5 = block {
-    if true [t: %b6] {  # if_1
-      %b6 = block {  # true
+  $B5: {
+    if true [t: $B6] {  # if_1
+      $B6: {  # true
         %5:void = call %foo
         exit_if  # if_1
       }
@@ -1751,18 +1751,18 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
   }
 }
 %func = @compute @workgroup_size(1, 1, 1) func():void {
-  %b7 = block {
-    if true [t: %b8] {  # if_2
-      %b8 = block {  # true
-        switch 42i [c: (default, %b9)] {  # switch_1
-          %b9 = block {  # case
-            loop [b: %b10, c: %b11] {  # loop_2
-              %b10 = block {  # body
-                continue %b11
+  $B7: {
+    if true [t: $B8] {  # if_2
+      $B8: {  # true
+        switch 42i [c: (default, $B9)] {  # switch_1
+          $B9: {  # case
+            loop [b: $B10, c: $B11] {  # loop_2
+              $B10: {  # body
+                continue $B11
               }
-              %b11 = block {  # continuing
+              $B11: {  # continuing
                 %7:void = call %foo_1
-                break_if true %b10
+                break_if true $B10
               }
             }
             exit_switch  # switch_1
@@ -1778,28 +1778,28 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %foo = func():void {
-  %b2 = block {
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
-        continue %b4
+  $B2: {
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %3:bool = load %wgvar
-        break_if %3 %b3
+        break_if %3 $B3
       }
     }
     ret
   }
 }
 %foo_1 = func():void {  # %foo_1: 'foo'
-  %b5 = block {
-    if true [t: %b6] {  # if_1
-      %b6 = block {  # true
+  $B5: {
+    if true [t: $B6] {  # if_1
+      $B6: {  # true
         %5:void = call %foo
         exit_if  # if_1
       }
@@ -1808,26 +1808,26 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
   }
 }
 %func = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b7 = block {
+  $B7: {
     %8:bool = eq %tint_local_index, 0u
-    if %8 [t: %b8] {  # if_2
-      %b8 = block {  # true
+    if %8 [t: $B8] {  # if_2
+      $B8: {  # true
         store %wgvar, false
         exit_if  # if_2
       }
     }
     %9:void = workgroupBarrier
-    if true [t: %b9] {  # if_3
-      %b9 = block {  # true
-        switch 42i [c: (default, %b10)] {  # switch_1
-          %b10 = block {  # case
-            loop [b: %b11, c: %b12] {  # loop_2
-              %b11 = block {  # body
-                continue %b12
+    if true [t: $B9] {  # if_3
+      $B9: {  # true
+        switch 42i [c: (default, $B10)] {  # switch_1
+          $B10: {  # case
+            loop [b: $B11, c: $B12] {  # loop_2
+              $B11: {  # body
+                continue $B12
               }
-              %b12 = block {  # continuing
+              $B12: {  # continuing
                 %10:void = call %foo_1
-                break_if true %b11
+                break_if true $B11
               }
             }
             exit_switch  # switch_1
@@ -1875,32 +1875,32 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleEntryPoints_SameVarViaHelper) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %foo = func():void {
-  %b2 = block {
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
-        continue %b4
+  $B2: {
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %3:bool = load %wgvar
-        break_if %3 %b3
+        break_if %3 $B3
       }
     }
     ret
   }
 }
 %ep1 = @compute @workgroup_size(1, 1, 1) func():void {
-  %b5 = block {
+  $B5: {
     %5:void = call %foo
     ret
   }
 }
 %ep2 = @compute @workgroup_size(1, 1, 1) func():void {
-  %b6 = block {
+  $B6: {
     %7:void = call %foo
     ret
   }
@@ -1909,29 +1909,29 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleEntryPoints_SameVarViaHelper) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
 %foo = func():void {
-  %b2 = block {
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
-        continue %b4
+  $B2: {
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %3:bool = load %wgvar
-        break_if %3 %b3
+        break_if %3 $B3
       }
     }
     ret
   }
 }
 %ep1 = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  %b5 = block {
+  $B5: {
     %6:bool = eq %tint_local_index, 0u
-    if %6 [t: %b6] {  # if_1
-      %b6 = block {  # true
+    if %6 [t: $B6] {  # if_1
+      $B6: {  # true
         store %wgvar, false
         exit_if  # if_1
       }
@@ -1942,10 +1942,10 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleEntryPoints_SameVarViaHelper) {
   }
 }
 %ep2 = @compute @workgroup_size(1, 1, 1) func(%tint_local_index_1:u32 [@local_invocation_index]):void {  # %tint_local_index_1: 'tint_local_index'
-  %b7 = block {
+  $B7: {
     %11:bool = eq %tint_local_index_1, 0u
-    if %11 [t: %b8] {  # if_2
-      %b8 = block {  # true
+    if %11 [t: $B8] {  # if_2
+      $B8: {  # true
         store %wgvar, false
         exit_if  # if_2
       }

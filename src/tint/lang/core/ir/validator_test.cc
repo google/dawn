@@ -68,18 +68,18 @@ TEST_F(IR_ValidatorTest, RootBlock_NonVar) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:2:3 error: loop: root block: invalid instruction: tint::core::ir::Loop
-  loop [b: %b2] {  # loop_1
+  loop [b: $B2] {  # loop_1
   ^^^^^^^^^^^^^
 
 :1:1 note: In block
-%b1 = block {  # root
-^^^^^^^^^^^
+$B1: {  # root
+^^^
 
 note: # Disassembly
-%b1 = block {  # root
-  loop [b: %b2] {  # loop_1
-    %b2 = block {  # body
-      continue %b3
+$B1: {  # root
+  loop [b: $B2] {  # loop_1
+    $B2: {  # body
+      continue $B3
     }
   }
 }
@@ -103,16 +103,16 @@ TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
                                      ^^^
 
 :1:1 note: In block
-%b1 = block {  # root
-^^^^^^^^^^^
+$B1: {  # root
+^^^
 
 note: # Disassembly
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<private, i32, read_write> = var
 }
 
 %f = func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -145,12 +145,12 @@ TEST_F(IR_ValidatorTest, Function_Duplicate) {
 
 note: # Disassembly
 %my_func = func(%2:i32, %3:f32):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
 %my_func = func(%2:i32, %3:f32):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -174,7 +174,7 @@ TEST_F(IR_ValidatorTest, Function_DeadParameter) {
 
 note: # Disassembly
 %my_func = func(%my_param:f32):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -198,7 +198,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithNullFunction) {
 
 note: # Disassembly
 %my_func = func(%my_param:f32):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -227,12 +227,12 @@ TEST_F(IR_ValidatorTest, Function_ParameterUsedInMultipleFunctions) {
 
 note: # Disassembly
 %my_func1 = func(%my_param:f32):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
 %my_func2 = func(%my_param:f32):void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -258,12 +258,12 @@ TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
                    ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %f = func():void {
-  %b1 = block {
+  $B1: {
     %2:void = call %g
     ret
   }
@@ -289,18 +289,18 @@ TEST_F(IR_ValidatorTest, CallToEntryPointFunction) {
                    ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %f = func():void {
-  %b1 = block {
+  $B1: {
     %2:void = call %g
     ret
   }
 }
 %g = @compute func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -326,17 +326,17 @@ TEST_F(IR_ValidatorTest, CallToFunctionTooFewArguments) {
                    ^^
 
 :7:3 note: In block
-  %b2 = block {
-  ^^^^^^^^^^^
+  $B2: {
+  ^^^
 
 note: # Disassembly
 %g = func(%2:i32, %3:i32):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
 %f = func():void {
-  %b2 = block {
+  $B2: {
     %5:void = call %g, 42i
     ret
   }
@@ -363,17 +363,17 @@ TEST_F(IR_ValidatorTest, CallToFunctionTooManyArguments) {
                    ^^
 
 :7:3 note: In block
-  %b2 = block {
-  ^^^^^^^^^^^
+  $B2: {
+  ^^^
 
 note: # Disassembly
 %g = func(%2:i32, %3:i32):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
 %f = func():void {
-  %b2 = block {
+  $B2: {
     %5:void = call %g, 1i, 2i, 3i
     ret
   }
@@ -400,17 +400,17 @@ TEST_F(IR_ValidatorTest, CallToFunctionWrongArgType) {
                            ^^^^
 
 :7:3 note: In block
-  %b2 = block {
-  ^^^^^^^^^^^
+  $B2: {
+  ^^^
 
 note: # Disassembly
 %g = func(%2:i32, %3:i32, %4:i32):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
 %f = func():void {
-  %b2 = block {
+  $B2: {
     %6:void = call %g, 1i, 2.0f, 3i
     ret
   }
@@ -425,12 +425,12 @@ TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:2:3 error: block: does not end in a terminator instruction
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
   }
 }
 )");
@@ -456,22 +456,22 @@ TEST_F(IR_ValidatorTest, Block_VarBlockMismatch) {
                                         ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %f = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     ret
   }
 }
 %g = func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -494,15 +494,15 @@ TEST_F(IR_ValidatorTest, Block_DeadParameter) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:20 error: destroyed parameter found in block parameter list
-      %b2 = block (%my_param:f32) {  # body
-                   ^^^^^^^^^^^^^
+              R"(:4:12 error: destroyed parameter found in block parameter list
+      $B2 (%my_param:f32): {  # body
+           ^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2] {  # loop_1
-      %b2 = block (%my_param:f32) {  # body
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2 (%my_param:f32): {  # body
         exit_loop  # loop_1
       }
     }
@@ -528,15 +528,15 @@ TEST_F(IR_ValidatorTest, Block_ParameterWithNullBlock) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:20 error: block parameter has nullptr parent block
-      %b2 = block (%my_param:f32) {  # body
-                   ^^^^^^^^^^^^^
+              R"(:4:12 error: block parameter has nullptr parent block
+      $B2 (%my_param:f32): {  # body
+           ^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2] {  # loop_1
-      %b2 = block (%my_param:f32) {  # body
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2 (%my_param:f32): {  # body
         exit_loop  # loop_1
       }
     }
@@ -562,23 +562,23 @@ TEST_F(IR_ValidatorTest, Block_ParameterUsedInMultipleBlocks) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:20 error: block parameter has incorrect parent block
-      %b2 = block (%my_param:f32) {  # body
-                   ^^^^^^^^^^^^^
+              R"(:4:12 error: block parameter has incorrect parent block
+      $B2 (%my_param:f32): {  # body
+           ^^^^^^^^^^^^^
 
 :7:7 note: parent block declared here
-      %b3 = block (%my_param:f32) {  # continuing
-      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      $B3 (%my_param:f32): {  # continuing
+      ^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block (%my_param:f32) {  # body
-        continue %b3 %my_param:f32
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2 (%my_param:f32): {  # body
+        continue $B3 %my_param:f32
       }
-      %b3 = block (%my_param:f32) {  # continuing
-        next_iteration %b2 %my_param:f32
+      $B3 (%my_param:f32): {  # continuing
+        next_iteration $B2 %my_param:f32
       }
     }
     ret
@@ -605,12 +605,12 @@ TEST_F(IR_ValidatorTest, Access_NegativeIndex) {
                         ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:vec3<f32>):void {
-  %b1 = block {
+  $B1: {
     %3:f32 = access %2, -1i
     ret
   }
@@ -636,8 +636,8 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Value) {
                             ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 :3:29 note: acceptable range: [0..1]
     %3:f32 = access %2, 1u, 3u
@@ -645,7 +645,7 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Value) {
 
 note: # Disassembly
 %my_func = func(%2:mat3x2<f32>):void {
-  %b1 = block {
+  $B1: {
     %3:f32 = access %2, 1u, 3u
     ret
   }
@@ -672,8 +672,8 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
                                                       ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 :3:55 note: acceptable range: [0..1]
     %3:ptr<private, f32, read_write> = access %2, 1u, 3u
@@ -681,7 +681,7 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
 
 note: # Disassembly
 %my_func = func(%2:ptr<private, array<array<f32, 2>, 3>, read_write>):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<private, f32, read_write> = access %2, 1u, 3u
     ret
   }
@@ -706,12 +706,12 @@ TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Value) {
                         ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:f32):void {
-  %b1 = block {
+  $B1: {
     %3:f32 = access %2, 1u
     ret
   }
@@ -737,12 +737,12 @@ TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Ptr) {
                                                   ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:ptr<private, f32, read_write>):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<private, f32, read_write> = access %2, 1u
     ret
   }
@@ -774,8 +774,8 @@ TEST_F(IR_ValidatorTest, Access_DynamicallyUnindexableType_Value) {
                         ^^
 
 :7:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 MyStruct = struct @align(4) {
@@ -784,7 +784,7 @@ MyStruct = struct @align(4) {
 }
 
 %my_func = func(%2:MyStruct, %3:i32):void {
-  %b1 = block {
+  $B1: {
     %4:i32 = access %2, %3
     ret
   }
@@ -817,8 +817,8 @@ TEST_F(IR_ValidatorTest, Access_DynamicallyUnindexableType_Ptr) {
                         ^^
 
 :7:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 MyStruct = struct @align(4) {
@@ -827,7 +827,7 @@ MyStruct = struct @align(4) {
 }
 
 %my_func = func(%2:ptr<private, MyStruct, read_write>, %3:i32):void {
-  %b1 = block {
+  $B1: {
     %4:i32 = access %2, %3
     ret
   }
@@ -853,12 +853,12 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Value_Value) {
              ^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:mat3x2<f32>):void {
-  %b1 = block {
+  $B1: {
     %3:i32 = access %2, 1u, 1u
     ret
   }
@@ -885,12 +885,12 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Ptr_Ptr) {
                                        ^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:ptr<private, array<array<f32, 2>, 3>, read_write>):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<private, i32, read_write> = access %2, 1u, 1u
     ret
   }
@@ -917,12 +917,12 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Ptr_Value) {
              ^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:ptr<private, array<array<f32, 2>, 3>, read_write>):void {
-  %b1 = block {
+  $B1: {
     %3:f32 = access %2, 1u, 1u
     ret
   }
@@ -948,12 +948,12 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr) {
                         ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:ptr<private, vec3<f32>, read_write>):void {
-  %b1 = block {
+  $B1: {
     %3:f32 = access %2, 1u
     ret
   }
@@ -993,12 +993,12 @@ TEST_F(IR_ValidatorTest, Access_IndexVectorPtr_ViaMatrixPtr) {
                             ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:ptr<private, mat3x2<f32>, read_write>):void {
-  %b1 = block {
+  $B1: {
     %3:f32 = access %2, 1u, 1u
     ret
   }
@@ -1039,12 +1039,12 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_AddressSpace) {
                                  ^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:ptr<storage, array<f32, 2>, read>):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<uniform, f32, read> = access %2, 1u
     ret
   }
@@ -1071,12 +1071,12 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_Access) {
                                        ^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func(%2:ptr<storage, array<f32, 2>, read>):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<storage, f32, read_write> = access %2, 1u
     ret
   }
@@ -1128,12 +1128,12 @@ TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
     ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     ret
     ret
   }
@@ -1166,16 +1166,16 @@ TEST_F(IR_ValidatorTest, If_EmptyTrue) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:7 error: block: does not end in a terminator instruction
-      %b2 = block {  # true
-      ^^^^^^^^^^^
+      $B2: {  # true
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    if true [t: %b2, f: %b3] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
       }
-      %b3 = block {  # false
+      $B3: {  # false
         ret
       }
     }
@@ -1198,21 +1198,21 @@ TEST_F(IR_ValidatorTest, If_ConditionIsBool) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:3:8 error: if: condition must be a `bool` type
-    if 1i [t: %b2, f: %b3] {  # if_1
+    if 1i [t: $B2, f: $B3] {  # if_1
        ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    if 1i [t: %b2, f: %b3] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if 1i [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
         ret
       }
-      %b3 = block {  # false
+      $B3: {  # false
         ret
       }
     }
@@ -1235,21 +1235,21 @@ TEST_F(IR_ValidatorTest, If_ConditionIsNullptr) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:3:8 error: if: operand is undefined
-    if undef [t: %b2, f: %b3] {  # if_1
+    if undef [t: $B2, f: $B3] {  # if_1
        ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    if undef [t: %b2, f: %b3] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if undef [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
         ret
       }
-      %b3 = block {  # false
+      $B3: {  # false
         ret
       }
     }
@@ -1274,21 +1274,21 @@ TEST_F(IR_ValidatorTest, If_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: if: result is undefined
-    undef = if true [t: %b2, f: %b3] {  # if_1
+    undef = if true [t: $B2, f: $B3] {  # if_1
     ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    undef = if true [t: %b2, f: %b3] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    undef = if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
         ret
       }
-      %b3 = block {  # false
+      $B3: {  # false
         ret
       }
     }
@@ -1322,14 +1322,14 @@ TEST_F(IR_ValidatorTest, Loop_EmptyBody) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:7 error: block: does not end in a terminator instruction
-      %b2 = block {  # body
-      ^^^^^^^^^^^
+      $B2: {  # body
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
       }
     }
     ret
@@ -1349,11 +1349,11 @@ TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
   ^^^^^
 
 :1:1 note: In block
-%b1 = block {  # root
-^^^^^^^^^^^
+$B1: {  # root
+^^^
 
 note: # Disassembly
-%b1 = block {  # root
+$B1: {  # root
   undef = var
 }
 
@@ -1376,12 +1376,12 @@ TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
     ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     undef = var
     ret
   }
@@ -1406,12 +1406,12 @@ TEST_F(IR_ValidatorTest, Var_Init_WrongType) {
                                         ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, f32, read_write> = var, %3
     ret
   }
@@ -1435,12 +1435,12 @@ TEST_F(IR_ValidatorTest, Let_NullResult) {
     ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     undef = let 1i
     ret
   }
@@ -1464,12 +1464,12 @@ TEST_F(IR_ValidatorTest, Let_NullValue) {
                  ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:f32 = let undef
     ret
   }
@@ -1494,12 +1494,12 @@ TEST_F(IR_ValidatorTest, Let_WrongType) {
              ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:f32 = let 1i
     ret
   }
@@ -1525,12 +1525,12 @@ TEST_F(IR_ValidatorTest, Instruction_AppendedDead) {
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^$ARROWS^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     <destroyed tint::core::ir::Var $ADDRESS>
     ret
   }
@@ -1562,12 +1562,12 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, f32, read_write> = var
     ret
   }
@@ -1593,12 +1593,12 @@ TEST_F(IR_ValidatorTest, Instruction_DeadOperand) {
                                              ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, f32, read_write> = var, %3
     ret
   }
@@ -1624,12 +1624,12 @@ TEST_F(IR_ValidatorTest, Instruction_OperandUsageRemoved) {
                                              ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, f32, read_write> = var, %3
     ret
   }
@@ -1652,7 +1652,7 @@ TEST_F(IR_ValidatorTest, Instruction_OrphanedInstruction) {
     EXPECT_EQ(res.Failure().reason.Str(), R"(error: load: orphaned instruction: load
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, f32, read_write> = var
     ret
   }
@@ -1674,12 +1674,12 @@ TEST_F(IR_ValidatorTest, Binary_LHS_Nullptr) {
                  ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:i32 = add undef, 2i
     ret
   }
@@ -1701,12 +1701,12 @@ TEST_F(IR_ValidatorTest, Binary_RHS_Nullptr) {
                      ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:i32 = add 2i, undef
     ret
   }
@@ -1731,12 +1731,12 @@ TEST_F(IR_ValidatorTest, Binary_Result_Nullptr) {
     ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     undef = add 3i, 2i
     ret
   }
@@ -1758,12 +1758,12 @@ TEST_F(IR_ValidatorTest, Unary_Value_Nullptr) {
                       ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:i32 = negation undef
     ret
   }
@@ -1788,12 +1788,12 @@ TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
     ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     undef = negation 2i
     ret
   }
@@ -1819,12 +1819,12 @@ TEST_F(IR_ValidatorTest, Unary_ResultTypeNotMatchValueType) {
     ^^^^^^^^^^^^^^^^^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:f32 = complement 2i
     ret
   }
@@ -1860,14 +1860,14 @@ TEST_F(IR_ValidatorTest, ExitIf_NullIf) {
         ^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # true
-      ^^^^^^^^^^^
+      $B2: {  # true
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         exit_if  # undef
       }
     }
@@ -1899,18 +1899,18 @@ TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
         ^^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # true
-      ^^^^^^^^^^^
+      $B2: {  # true
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = if true [t: %b2] {  # if_1
+    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
+      $B2: {  # true
         exit_if 1i  # if_1
       }
       # implicit false block: exit_if undef, undef
@@ -1943,18 +1943,18 @@ TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
         ^^^^^^^^^^^^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # true
-      ^^^^^^^^^^^
+      $B2: {  # true
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = if true [t: %b2] {  # if_1
+    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
+      $B2: {  # true
         exit_if 1i, 2.0f, 3i  # if_1
       }
       # implicit false block: exit_if undef, undef
@@ -2004,18 +2004,18 @@ TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
                     ^^
 
 :4:7 note: In block
-      %b2 = block {  # true
-      ^^^^^^^^^^^
+      $B2: {  # true
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = if true [t: %b2] {  # if_1
+    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
+      $B2: {  # true
         exit_if 1i, 2i  # if_1
       }
       # implicit false block: exit_if undef, undef
@@ -2044,14 +2044,14 @@ TEST_F(IR_ValidatorTest, ExitIf_NotInParentIf) {
     ^^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         ret
       }
     }
@@ -2087,20 +2087,20 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpsOverIf) {
             ^^^^^^^
 
 :6:11 note: In block
-          %b3 = block {  # true
-          ^^^^^^^^^^^
+          $B3: {  # true
+          ^^^
 
 :5:9 note: first control instruction jumped
-        if true [t: %b3] {  # if_2
+        if true [t: $B3] {  # if_2
         ^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
-        if true [t: %b3] {  # if_2
-          %b3 = block {  # true
+  $B1: {
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        if true [t: $B3] {  # if_2
+          $B3: {  # true
             exit_if  # if_1
           }
         }
@@ -2140,20 +2140,20 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
             ^^^^^^^
 
 :6:11 note: In block
-          %b3 = block {  # case
-          ^^^^^^^^^^^
+          $B3: {  # case
+          ^^^
 
 :5:9 note: first control instruction jumped
-        switch 1i [c: (1i, %b3)] {  # switch_1
+        switch 1i [c: (1i, $B3)] {  # switch_1
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
-        switch 1i [c: (1i, %b3)] {  # switch_1
-          %b3 = block {  # case
+  $B1: {
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        switch 1i [c: (1i, $B3)] {  # switch_1
+          $B3: {  # case
             exit_if  # if_1
           }
         }
@@ -2192,20 +2192,20 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverLoop) {
             ^^^^^^^
 
 :6:11 note: In block
-          %b3 = block {  # body
-          ^^^^^^^^^^^
+          $B3: {  # body
+          ^^^
 
 :5:9 note: first control instruction jumped
-        loop [b: %b3] {  # loop_1
+        loop [b: $B3] {  # loop_1
         ^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
-        loop [b: %b3] {  # loop_1
-          %b3 = block {  # body
+  $B1: {
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        loop [b: $B3] {  # loop_1
+          $B3: {  # body
             exit_if  # if_1
           }
         }
@@ -2251,14 +2251,14 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NullSwitch) {
         ^^^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # case
-      ^^^^^^^^^^^
+      $B2: {  # case
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    switch true [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    switch true [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         exit_switch  # undef
       }
     }
@@ -2292,18 +2292,18 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
         ^^^^^^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # case
-      ^^^^^^^^^^^
+      $B2: {  # case
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
+    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         exit_switch 1i  # switch_1
       }
     }
@@ -2336,18 +2336,18 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # case
-      ^^^^^^^^^^^
+      $B2: {  # case
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
+    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         exit_switch 1i, 2.0f, 3i  # switch_1
       }
     }
@@ -2398,18 +2398,18 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
                         ^^
 
 :4:7 note: In block
-      %b2 = block {  # case
-      ^^^^^^^^^^^
+      $B2: {  # case
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
+    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = switch true [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         exit_switch 1i, 2i  # switch_1
       }
     }
@@ -2442,19 +2442,19 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
         ^^^^^^^^^^^
 
 :9:7 note: In block
-      %b3 = block {  # true
-      ^^^^^^^^^^^
+      $B3: {  # true
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    switch true [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    switch true [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         ret
       }
     }
-    if true [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if true [t: $B3] {  # if_1
+      $B3: {  # true
         exit_switch  # switch_1
       }
     }
@@ -2523,20 +2523,20 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
             ^^^^^^^^^^^
 
 :6:11 note: In block
-          %b3 = block {  # case
-          ^^^^^^^^^^^
+          $B3: {  # case
+          ^^^
 
 :5:9 note: first control instruction jumped
-        switch false [c: (default, %b3)] {  # switch_2
+        switch false [c: (default, $B3)] {  # switch_2
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    switch true [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
-        switch false [c: (default, %b3)] {  # switch_2
-          %b3 = block {  # case
+  $B1: {
+    switch true [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
+        switch false [c: (default, $B3)] {  # switch_2
+          $B3: {  # case
             exit_switch  # switch_1
           }
         }
@@ -2574,20 +2574,20 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
             ^^^^^^^^^^^
 
 :6:11 note: In block
-          %b3 = block {  # body
-          ^^^^^^^^^^^
+          $B3: {  # body
+          ^^^
 
 :5:9 note: first control instruction jumped
-        loop [b: %b3] {  # loop_1
+        loop [b: $B3] {  # loop_1
         ^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    switch true [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
-        loop [b: %b3] {  # loop_1
-          %b3 = block {  # body
+  $B1: {
+    switch true [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
+        loop [b: $B3] {  # loop_1
+          $B3: {  # body
             exit_switch  # switch_1
           }
         }
@@ -2631,18 +2631,18 @@ TEST_F(IR_ValidatorTest, ExitLoop_NullLoop) {
         ^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # body
-      ^^^^^^^^^^^
+      $B2: {  # body
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         exit_loop  # undef
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -2674,22 +2674,22 @@ TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
         ^^^^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # body
-      ^^^^^^^^^^^
+      $B2: {  # body
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = loop [b: %b2, c: %b3] {  # loop_1
+    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         exit_loop 1i  # loop_1
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -2721,22 +2721,22 @@ TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
         ^^^^^^^^^^^^^^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # body
-      ^^^^^^^^^^^
+      $B2: {  # body
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = loop [b: %b2, c: %b3] {  # loop_1
+    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         exit_loop 1i, 2.0f, 3i  # loop_1
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -2786,22 +2786,22 @@ TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
                       ^^
 
 :4:7 note: In block
-      %b2 = block {  # body
-      ^^^^^^^^^^^
+      $B2: {  # body
+      ^^^
 
 :3:5 note: control instruction
-    %2:i32, %3:f32 = loop [b: %b2, c: %b3] {  # loop_1
+    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    %2:i32, %3:f32 = loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         exit_loop 1i, 2i  # loop_1
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -2832,22 +2832,22 @@ TEST_F(IR_ValidatorTest, ExitLoop_NotInParentLoop) {
         ^^^^^^^^^
 
 :12:7 note: In block
-      %b4 = block {  # true
-      ^^^^^^^^^^^
+      $B4: {  # true
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         ret
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
-    if true [t: %b4] {  # if_1
-      %b4 = block {  # true
+    if true [t: $B4] {  # if_1
+      $B4: {  # true
         exit_loop  # loop_1
       }
     }
@@ -2915,27 +2915,27 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverSwitch) {
             ^^^^^^^^^
 
 :6:11 note: In block
-          %b4 = block {  # case
-          ^^^^^^^^^^^
+          $B4: {  # case
+          ^^^
 
 :5:9 note: first control instruction jumped
-        switch false [c: (default, %b4)] {  # switch_1
+        switch false [c: (default, $B4)] {  # switch_1
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        switch false [c: (default, %b4)] {  # switch_1
-          %b4 = block {  # case
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        switch false [c: (default, $B4)] {  # switch_1
+          $B4: {  # case
             exit_loop  # loop_1
           }
         }
         exit_loop  # loop_1
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -2970,27 +2970,27 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverLoop) {
             ^^^^^^^^^
 
 :6:11 note: In block
-          %b4 = block {  # body
-          ^^^^^^^^^^^
+          $B4: {  # body
+          ^^^
 
 :5:9 note: first control instruction jumped
-        loop [b: %b4] {  # loop_2
+        loop [b: $B4] {  # loop_2
         ^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        loop [b: %b4] {  # loop_2
-          %b4 = block {  # body
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        loop [b: $B4] {  # loop_2
+          $B4: {  # body
             exit_loop  # loop_1
           }
         }
         exit_loop  # loop_1
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -3020,17 +3020,17 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuing) {
         ^^^^^^^^^
 
 :7:7 note: In block
-      %b3 = block {  # continuing
-      ^^^^^^^^^^^
+      $B3: {  # continuing
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        continue %b3
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         exit_loop  # loop_1
       }
     }
@@ -3066,27 +3066,27 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuingNested) {
             ^^^^^^^^^
 
 :9:11 note: In block
-          %b4 = block {  # true
-          ^^^^^^^^^^^
+          $B4: {  # true
+          ^^^
 
 :7:7 note: in continuing block
-      %b3 = block {  # continuing
-      ^^^^^^^^^^^
+      $B3: {  # continuing
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        continue %b3
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue $B3
       }
-      %b3 = block {  # continuing
-        if true [t: %b4] {  # if_1
-          %b4 = block {  # true
+      $B3: {  # continuing
+        if true [t: $B4] {  # if_1
+          $B4: {  # true
             exit_loop  # loop_1
           }
         }
-        next_iteration %b2
+        next_iteration $B2
       }
     }
     ret
@@ -3118,21 +3118,21 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializer) {
         ^^^^^^^^^
 
 :4:7 note: In block
-      %b2 = block {  # initializer
-      ^^^^^^^^^^^
+      $B2: {  # initializer
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
-      %b2 = block {  # initializer
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
         exit_loop  # loop_1
       }
-      %b3 = block {  # body
-        continue %b4
+      $B3: {  # body
+        continue $B4
       }
-      %b4 = block {  # continuing
-        next_iteration %b3
+      $B4: {  # continuing
+        next_iteration $B3
       }
     }
     ret
@@ -3168,30 +3168,30 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializerNested) {
             ^^^^^^^^^
 
 :6:11 note: In block
-          %b5 = block {  # true
-          ^^^^^^^^^^^
+          $B5: {  # true
+          ^^^
 
 :4:7 note: in initializer block
-      %b2 = block {  # initializer
-      ^^^^^^^^^^^
+      $B2: {  # initializer
+      ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
-    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
-      %b2 = block {  # initializer
-        if true [t: %b5] {  # if_1
-          %b5 = block {  # true
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        if true [t: $B5] {  # if_1
+          $B5: {  # true
             exit_loop  # loop_1
           }
         }
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
-        continue %b4
+      $B3: {  # body
+        continue $B4
       }
-      %b4 = block {  # continuing
-        next_iteration %b3
+      $B4: {  # continuing
+        next_iteration $B3
       }
     }
     ret
@@ -3231,12 +3231,12 @@ TEST_F(IR_ValidatorTest, Return_NullFunction) {
     ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -3256,12 +3256,12 @@ TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
     ^^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     ret 42i
   }
 }
@@ -3281,12 +3281,12 @@ TEST_F(IR_ValidatorTest, Return_MissingValue) {
     ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():i32 {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -3307,12 +3307,12 @@ TEST_F(IR_ValidatorTest, Return_WrongValueType) {
     ^^^^^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 42.0f
   }
 }
@@ -3335,12 +3335,12 @@ TEST_F(IR_ValidatorTest, Load_NullFrom) {
                   ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:i32 = load undef
     ret
   }
@@ -3366,12 +3366,12 @@ TEST_F(IR_ValidatorTest, Load_SourceNotMemoryView) {
                   ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %l:i32 = let 1i
     %3:f32 = load %l
     ret
@@ -3398,12 +3398,12 @@ TEST_F(IR_ValidatorTest, Load_TypeMismatch) {
                   ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     %3:f32 = load %2
     ret
@@ -3427,12 +3427,12 @@ TEST_F(IR_ValidatorTest, Store_NullTo) {
           ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     store undef, 42i
     ret
   }
@@ -3456,12 +3456,12 @@ TEST_F(IR_ValidatorTest, Store_NullFrom) {
               ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, undef
     ret
@@ -3487,12 +3487,12 @@ TEST_F(IR_ValidatorTest, Store_TargetNotMemoryView) {
               ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %l:i32 = let 1i
     store %l, 42u
     ret
@@ -3518,12 +3518,12 @@ TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
               ^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, i32, read_write> = var
     store %2, 42u
     ret
@@ -3550,12 +3550,12 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, vec3<f32>, read_write> = var
     undef = load_vector_element %2, 1i
     ret
@@ -3580,12 +3580,12 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullFrom) {
                                  ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:f32 = load_vector_element undef, 1i
     ret
   }
@@ -3610,12 +3610,12 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullIndex) {
                                      ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, vec3<f32>, read_write> = var
     %3:f32 = load_vector_element %2, undef
     ret
@@ -3640,12 +3640,12 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
                          ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     store_vector_element undef, 1i, 2i
     ret
   }
@@ -3670,20 +3670,20 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
                              ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 :4:37 error: store_vector_element: value type does not match vector pointer element type
     store_vector_element %2, undef, 2i
                                     ^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, vec3<f32>, read_write> = var
     store_vector_element %2, undef, 2i
     ret
@@ -3709,12 +3709,12 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullValue) {
                                  ^^^^^
 
 :2:3 note: In block
-  %b1 = block {
-  ^^^^^^^^^^^
+  $B1: {
+  ^^^
 
 note: # Disassembly
 %my_func = func():void {
-  %b1 = block {
+  $B1: {
     %2:ptr<function, vec3<f32>, read_write> = var
     store_vector_element %2, 1i, undef
     ret

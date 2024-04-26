@@ -64,7 +64,7 @@ fn f() -> i32 {
 }
 
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %S:ptr<function, S, read_write> = var, S(0i)
     %3:ptr<function, i32, read_write> = access %S, 0u
     %4:i32 = load %3
@@ -92,7 +92,7 @@ fn f(S : S) -> i32 {
 }
 
 %f = func(%S:S):i32 {
-  %b1 = block {
+  $B1: {
     %3:i32 = access %S, 0u
     ret %3
   }
@@ -113,12 +113,12 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
+    EXPECT_EQ(Disassemble(m.Get()), R"($B1: {  # root
   %i:ptr<private, i32, read_write> = var, 1i
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:i32 = load %i
     %4:i32 = add %3, 1i
     store %i, %4
@@ -145,12 +145,12 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
+    EXPECT_EQ(Disassemble(m.Get()), R"($B1: {  # root
   %i:ptr<private, i32, read_write> = var, 1i
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:i32 = load %i
     %4:i32 = add %3, 1i
     store %i, %4
@@ -179,10 +179,10 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         %3:i32 = load %i
         %4:i32 = add %3, 1i
         store %i, %4
@@ -218,10 +218,10 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         %3:i32 = load %i
         %4:i32 = add %3, 1i
         store %i, %4
@@ -253,17 +253,17 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %3:i32 = load %i
         %4:bool = lt %3, 4i
-        if %4 [t: %b4, f: %b5] {  # if_1
-          %b4 = block {  # true
+        if %4 [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
             exit_if  # if_1
           }
-          %b5 = block {  # false
+          $B5: {  # false
             exit_loop  # loop_1
           }
         }
@@ -273,8 +273,8 @@ fn f() -> i32 {
         %8:i32 = load %i_1
         ret %8
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     %9:i32 = load %i
@@ -299,17 +299,17 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %3:i32 = load %i
         %4:bool = lt %3, 4i
-        if %4 [t: %b4, f: %b5] {  # if_1
-          %b4 = block {  # true
+        if %4 [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
             exit_if  # if_1
           }
-          %b5 = block {  # false
+          $B5: {  # false
             exit_loop  # loop_1
           }
         }
@@ -318,8 +318,8 @@ fn f() -> i32 {
         %i_1:i32 = let %6  # %i_1: 'i'
         ret %i_1
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     %8:i32 = load %i
@@ -343,27 +343,27 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %i_1:ptr<function, f32, read_write> = var, 0.0f  # %i_1: 'i'
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %4:f32 = load %i_1
         %5:bool = lt %4, 4.0f
-        if %5 [t: %b4, f: %b5] {  # if_1
-          %b4 = block {  # true
+        if %5 [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
             exit_if  # if_1
           }
-          %b5 = block {  # false
+          $B5: {  # false
             exit_loop  # loop_1
           }
         }
         %6:f32 = load %i_1
         %j:f32 = let %6
-        continue %b6
+        continue $B6
       }
     }
     %8:i32 = load %i
@@ -387,25 +387,25 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %i_1:f32 = let 0.0f  # %i_1: 'i'
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %4:bool = lt %i_1, 4.0f
-        if %4 [t: %b4, f: %b5] {  # if_1
-          %b4 = block {  # true
+        if %4 [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
             exit_if  # if_1
           }
-          %b5 = block {  # false
+          $B5: {  # false
             exit_loop  # loop_1
           }
         }
         %j:f32 = let %i_1
-        continue %b6
+        continue $B6
       }
     }
     %6:i32 = load %i
@@ -430,21 +430,21 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %x:ptr<function, i32, read_write> = var, 0i
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %4:i32 = load %i
         %5:bool = lt %4, 4i
-        if %5 [t: %b4, f: %b5] {  # if_1
-          %b4 = block {  # true
+        if %5 [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
             exit_if  # if_1
           }
-          %b5 = block {  # false
+          $B5: {  # false
             exit_loop  # loop_1
           }
         }
@@ -477,21 +477,21 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %x:ptr<function, i32, read_write> = var, 0i
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %4:i32 = load %i
         %5:bool = lt %4, 4i
-        if %5 [t: %b4, f: %b5] {  # if_1
-          %b4 = block {  # true
+        if %5 [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
             exit_if  # if_1
           }
-          %b5 = block {  # false
+          $B5: {  # false
             exit_loop  # loop_1
           }
         }
@@ -528,14 +528,14 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %3:i32 = load %i
         %4:bool = eq %3, 2i
-        if %4 [t: %b4] {  # if_1
-          %b4 = block {  # true
+        if %4 [t: $B4] {  # if_1
+          $B4: {  # true
             exit_loop  # loop_1
           }
         }
@@ -544,15 +544,15 @@ fn f() -> i32 {
         %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         %9:bool = eq %8, 3i
-        if %9 [t: %b5] {  # if_2
-          %b5 = block {  # true
+        if %9 [t: $B5] {  # if_2
+          $B5: {  # true
             exit_loop  # loop_1
           }
         }
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     %10:i32 = load %i
@@ -582,14 +582,14 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %3:i32 = load %i
         %4:bool = eq %3, 2i
-        if %4 [t: %b4] {  # if_1
-          %b4 = block {  # true
+        if %4 [t: $B4] {  # if_1
+          $B4: {  # true
             exit_loop  # loop_1
           }
         }
@@ -597,15 +597,15 @@ fn f() -> i32 {
         %6:i32 = add %5, 1i
         %i_1:i32 = let %6  # %i_1: 'i'
         %8:bool = eq %i_1, 3i
-        if %8 [t: %b5] {  # if_2
-          %b5 = block {  # true
+        if %8 [t: $B5] {  # if_2
+          $B5: {  # true
             exit_loop  # loop_1
           }
         }
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     %9:i32 = load %i
@@ -636,26 +636,26 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %3:i32 = load %i
         %4:bool = eq %3, 2i
-        if %4 [t: %b4] {  # if_1
-          %b4 = block {  # true
+        if %4 [t: $B4] {  # if_1
+          $B4: {  # true
             exit_loop  # loop_1
           }
         }
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         %5:i32 = load %i
         %6:i32 = add %5, 1i
         %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         %9:bool = gt %8, 2i
-        break_if %9 %b2
+        break_if %9 $B2
       }
     }
     %10:i32 = load %i
@@ -686,25 +686,25 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %3:i32 = load %i
         %4:bool = eq %3, 2i
-        if %4 [t: %b4] {  # if_1
-          %b4 = block {  # true
+        if %4 [t: $B4] {  # if_1
+          $B4: {  # true
             exit_loop  # loop_1
           }
         }
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
+      $B3: {  # continuing
         %5:i32 = load %i
         %6:i32 = add %5, 1i
         %i_1:i32 = let %6  # %i_1: 'i'
         %8:bool = gt %i_1, 2i
-        break_if %8 %b2
+        break_if %8 $B2
       }
     }
     %9:i32 = load %i
@@ -736,22 +736,22 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
     %3:i32 = load %i
-    switch %3 [c: (0i, %b2), c: (1i, %b3), c: (default, %b4)] {  # switch_1
-      %b2 = block {  # case
+    switch %3 [c: (0i, $B2), c: (1i, $B3), c: (default, $B4)] {  # switch_1
+      $B2: {  # case
         %4:i32 = load %i
         ret %4
       }
-      %b3 = block {  # case
+      $B3: {  # case
         %5:i32 = load %i
         %6:i32 = add %5, 1i
         %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         ret %8
       }
-      %b4 = block {  # case
+      $B4: {  # case
         %9:i32 = load %i
         ret %9
       }
@@ -784,21 +784,21 @@ fn f() -> i32 {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i:ptr<function, i32, read_write> = var
     %3:i32 = load %i
-    switch %3 [c: (0i, %b2), c: (1i, %b3), c: (default, %b4)] {  # switch_1
-      %b2 = block {  # case
+    switch %3 [c: (0i, $B2), c: (1i, $B3), c: (default, $B4)] {  # switch_1
+      $B2: {  # case
         %4:i32 = load %i
         ret %4
       }
-      %b3 = block {  # case
+      $B3: {  # case
         %5:i32 = load %i
         %6:i32 = add %5, 1i
         %i_1:i32 = let %6  # %i_1: 'i'
         ret %i_1
       }
-      %b4 = block {  # case
+      $B4: {  # case
         %8:i32 = load %i
         ret %8
       }

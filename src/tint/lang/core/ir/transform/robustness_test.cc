@@ -67,7 +67,7 @@ TEST_P(IR_RobustnessTest, VectorLoad_ConstIndex) {
 
     auto* src = R"(
 %foo = func():u32 {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %3:u32 = load_vector_element %vec, 5u
     ret %3
@@ -78,7 +78,7 @@ TEST_P(IR_RobustnessTest, VectorLoad_ConstIndex) {
 
     auto* expect = R"(
 %foo = func():u32 {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %3:u32 = load_vector_element %vec, 3u
     ret %3
@@ -104,7 +104,7 @@ TEST_P(IR_RobustnessTest, VectorLoad_ConstIndexViaLet) {
 
     auto* src = R"(
 %foo = func():u32 {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %idx:u32 = let 5u
     %4:u32 = load_vector_element %vec, %idx
@@ -116,7 +116,7 @@ TEST_P(IR_RobustnessTest, VectorLoad_ConstIndexViaLet) {
 
     auto* expect = R"(
 %foo = func():u32 {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %idx:u32 = let 5u
     %4:u32 = min %idx, 3u
@@ -145,7 +145,7 @@ TEST_P(IR_RobustnessTest, VectorLoad_DynamicIndex) {
 
     auto* src = R"(
 %foo = func(%idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %4:u32 = load_vector_element %vec, %idx
     ret %4
@@ -156,7 +156,7 @@ TEST_P(IR_RobustnessTest, VectorLoad_DynamicIndex) {
 
     auto* expect = R"(
 %foo = func(%idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %4:u32 = min %idx, 3u
     %5:u32 = load_vector_element %vec, %4
@@ -184,7 +184,7 @@ TEST_P(IR_RobustnessTest, VectorLoad_DynamicIndex_Signed) {
 
     auto* src = R"(
 %foo = func(%idx:i32):u32 {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %4:u32 = load_vector_element %vec, %idx
     ret %4
@@ -195,7 +195,7 @@ TEST_P(IR_RobustnessTest, VectorLoad_DynamicIndex_Signed) {
 
     auto* expect = R"(
 %foo = func(%idx:i32):u32 {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %4:u32 = convert %idx
     %5:u32 = min %4, 3u
@@ -222,7 +222,7 @@ TEST_P(IR_RobustnessTest, VectorStore_ConstIndex) {
 
     auto* src = R"(
 %foo = func():void {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     store_vector_element %vec, 5u, 0u
     ret
@@ -233,7 +233,7 @@ TEST_P(IR_RobustnessTest, VectorStore_ConstIndex) {
 
     auto* expect = R"(
 %foo = func():void {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     store_vector_element %vec, 3u, 0u
     ret
@@ -259,7 +259,7 @@ TEST_P(IR_RobustnessTest, VectorStore_ConstIndexViaLet) {
 
     auto* src = R"(
 %foo = func():void {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %idx:u32 = let 5u
     store_vector_element %vec, %idx, 0u
@@ -271,7 +271,7 @@ TEST_P(IR_RobustnessTest, VectorStore_ConstIndexViaLet) {
 
     auto* expect = R"(
 %foo = func():void {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %idx:u32 = let 5u
     %4:u32 = min %idx, 3u
@@ -300,7 +300,7 @@ TEST_P(IR_RobustnessTest, VectorStore_DynamicIndex) {
 
     auto* src = R"(
 %foo = func(%idx:u32):void {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     store_vector_element %vec, %idx, 0u
     ret
@@ -311,7 +311,7 @@ TEST_P(IR_RobustnessTest, VectorStore_DynamicIndex) {
 
     auto* expect = R"(
 %foo = func(%idx:u32):void {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %4:u32 = min %idx, 3u
     store_vector_element %vec, %4, 0u
@@ -339,7 +339,7 @@ TEST_P(IR_RobustnessTest, VectorStore_DynamicIndex_Signed) {
 
     auto* src = R"(
 %foo = func(%idx:i32):void {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     store_vector_element %vec, %idx, 0u
     ret
@@ -350,7 +350,7 @@ TEST_P(IR_RobustnessTest, VectorStore_DynamicIndex_Signed) {
 
     auto* expect = R"(
 %foo = func(%idx:i32):void {
-  %b1 = block {
+  $B1: {
     %vec:ptr<function, vec4<u32>, read_write> = var
     %4:u32 = convert %idx
     %5:u32 = min %4, 3u
@@ -378,7 +378,7 @@ TEST_P(IR_RobustnessTest, Matrix_ConstIndex) {
 
     auto* src = R"(
 %foo = func():vec4<f32> {
-  %b1 = block {
+  $B1: {
     %mat:ptr<function, mat4x4<f32>, read_write> = var
     %3:ptr<function, vec4<f32>, read_write> = access %mat, 2u
     %4:vec4<f32> = load %3
@@ -409,7 +409,7 @@ TEST_P(IR_RobustnessTest, Matrix_ConstIndexViaLet) {
 
     auto* src = R"(
 %foo = func():vec4<f32> {
-  %b1 = block {
+  $B1: {
     %mat:ptr<function, mat4x4<f32>, read_write> = var
     %idx:u32 = let 2u
     %4:ptr<function, vec4<f32>, read_write> = access %mat, %idx
@@ -422,7 +422,7 @@ TEST_P(IR_RobustnessTest, Matrix_ConstIndexViaLet) {
 
     auto* expect = R"(
 %foo = func():vec4<f32> {
-  %b1 = block {
+  $B1: {
     %mat:ptr<function, mat4x4<f32>, read_write> = var
     %idx:u32 = let 2u
     %4:u32 = min %idx, 3u
@@ -453,7 +453,7 @@ TEST_P(IR_RobustnessTest, Matrix_DynamicIndex) {
 
     auto* src = R"(
 %foo = func(%idx:u32):vec4<f32> {
-  %b1 = block {
+  $B1: {
     %mat:ptr<function, mat4x4<f32>, read_write> = var
     %4:ptr<function, vec4<f32>, read_write> = access %mat, %idx
     %5:vec4<f32> = load %4
@@ -465,7 +465,7 @@ TEST_P(IR_RobustnessTest, Matrix_DynamicIndex) {
 
     auto* expect = R"(
 %foo = func(%idx:u32):vec4<f32> {
-  %b1 = block {
+  $B1: {
     %mat:ptr<function, mat4x4<f32>, read_write> = var
     %4:u32 = min %idx, 3u
     %5:ptr<function, vec4<f32>, read_write> = access %mat, %4
@@ -495,7 +495,7 @@ TEST_P(IR_RobustnessTest, Matrix_DynamicIndex_Signed) {
 
     auto* src = R"(
 %foo = func(%idx:i32):vec4<f32> {
-  %b1 = block {
+  $B1: {
     %mat:ptr<function, mat4x4<f32>, read_write> = var
     %4:ptr<function, vec4<f32>, read_write> = access %mat, %idx
     %5:vec4<f32> = load %4
@@ -507,7 +507,7 @@ TEST_P(IR_RobustnessTest, Matrix_DynamicIndex_Signed) {
 
     auto* expect = R"(
 %foo = func(%idx:i32):vec4<f32> {
-  %b1 = block {
+  $B1: {
     %mat:ptr<function, mat4x4<f32>, read_write> = var
     %4:u32 = convert %idx
     %5:u32 = min %4, 3u
@@ -536,7 +536,7 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_ConstIndex) {
 
     auto* src = R"(
 %foo = func():u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<u32, 4>, read_write> = var
     %3:ptr<function, u32, read_write> = access %arr, 2u
     %4:u32 = load %3
@@ -567,7 +567,7 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_ConstIndexViaLet) {
 
     auto* src = R"(
 %foo = func():u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<u32, 4>, read_write> = var
     %idx:u32 = let 2u
     %4:ptr<function, u32, read_write> = access %arr, %idx
@@ -580,7 +580,7 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_ConstIndexViaLet) {
 
     auto* expect = R"(
 %foo = func():u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<u32, 4>, read_write> = var
     %idx:u32 = let 2u
     %4:u32 = min %idx, 3u
@@ -611,7 +611,7 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_DynamicIndex) {
 
     auto* src = R"(
 %foo = func(%idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<u32, 4>, read_write> = var
     %4:ptr<function, u32, read_write> = access %arr, %idx
     %5:u32 = load %4
@@ -623,7 +623,7 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_DynamicIndex) {
 
     auto* expect = R"(
 %foo = func(%idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<u32, 4>, read_write> = var
     %4:u32 = min %idx, 3u
     %5:ptr<function, u32, read_write> = access %arr, %4
@@ -653,7 +653,7 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_DynamicIndex_Signed) {
 
     auto* src = R"(
 %foo = func(%idx:i32):u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<u32, 4>, read_write> = var
     %4:ptr<function, u32, read_write> = access %arr, %idx
     %5:u32 = load %4
@@ -665,7 +665,7 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_DynamicIndex_Signed) {
 
     auto* expect = R"(
 %foo = func(%idx:i32):u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<u32, 4>, read_write> = var
     %4:u32 = convert %idx
     %5:u32 = min %4, 3u
@@ -700,7 +700,7 @@ TEST_P(IR_RobustnessTest, NestedArrays) {
 
     auto* src = R"(
 %foo = func(%idx1:u32, %idx2:u32, %idx3:u32, %idx4:u32):u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<array<array<array<u32, 4>, 5>, 6>, 7>, read_write> = var
     %7:ptr<function, u32, read_write> = access %arr, %idx1, %idx2, %idx3, %idx4
     %8:u32 = load %7
@@ -712,7 +712,7 @@ TEST_P(IR_RobustnessTest, NestedArrays) {
 
     auto* expect = R"(
 %foo = func(%idx1:u32, %idx2:u32, %idx3:u32, %idx4:u32):u32 {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<array<array<array<u32, 4>, 5>, 6>, 7>, read_write> = var
     %7:u32 = min %idx1, 6u
     %8:u32 = min %idx2, 5u
@@ -756,7 +756,7 @@ structure = struct @align(16) {
 }
 
 %foo = func(%idx1:u32, %idx2:u32, %idx3:u32):vec4<f32> {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<structure, 8>, read_write> = var
     %6:ptr<function, vec4<f32>, read_write> = access %arr, %idx1, 0u, %idx2, %idx3
     %7:vec4<f32> = load %6
@@ -772,7 +772,7 @@ structure = struct @align(16) {
 }
 
 %foo = func(%idx1:u32, %idx2:u32, %idx3:u32):vec4<f32> {
-  %b1 = block {
+  $B1: {
     %arr:ptr<function, array<structure, 8>, read_write> = var
     %6:u32 = min %idx1, 7u
     %7:u32 = min %idx2, 3u
@@ -808,12 +808,12 @@ TEST_P(IR_RobustnessTest, Private_LoadVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<private, vec4<u32>, read_write> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = load_vector_element %vec, %idx
     ret %4
   }
@@ -822,12 +822,12 @@ TEST_P(IR_RobustnessTest, Private_LoadVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<private, vec4<u32>, read_write> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:u32 = load_vector_element %vec, %4
     ret %5
@@ -855,12 +855,12 @@ TEST_P(IR_RobustnessTest, Private_StoreVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<private, vec4<u32>, read_write> = var
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     store_vector_element %vec, %idx, 0u
     ret
   }
@@ -869,12 +869,12 @@ TEST_P(IR_RobustnessTest, Private_StoreVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<private, vec4<u32>, read_write> = var
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     store_vector_element %vec, %4, 0u
     ret
@@ -903,12 +903,12 @@ TEST_P(IR_RobustnessTest, Private_Access) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<private, array<u32, 4>, read_write> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<private, u32, read_write> = access %arr, %idx
     %5:u32 = load %4
     ret %5
@@ -918,12 +918,12 @@ TEST_P(IR_RobustnessTest, Private_Access) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<private, array<u32, 4>, read_write> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:ptr<private, u32, read_write> = access %arr, %4
     %6:u32 = load %5
@@ -952,12 +952,12 @@ TEST_P(IR_RobustnessTest, PushConstant_LoadVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<push_constant, vec4<u32>, read> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = load_vector_element %vec, %idx
     ret %4
   }
@@ -966,12 +966,12 @@ TEST_P(IR_RobustnessTest, PushConstant_LoadVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<push_constant, vec4<u32>, read> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:u32 = load_vector_element %vec, %4
     ret %5
@@ -999,12 +999,12 @@ TEST_P(IR_RobustnessTest, PushConstant_StoreVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<push_constant, vec4<u32>, read> = var
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     store_vector_element %vec, %idx, 0u
     ret
   }
@@ -1013,12 +1013,12 @@ TEST_P(IR_RobustnessTest, PushConstant_StoreVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<push_constant, vec4<u32>, read> = var
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     store_vector_element %vec, %4, 0u
     ret
@@ -1047,12 +1047,12 @@ TEST_P(IR_RobustnessTest, PushConstant_Access) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<push_constant, array<u32, 4>, read> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<push_constant, u32, read> = access %arr, %idx
     %5:u32 = load %4
     ret %5
@@ -1062,12 +1062,12 @@ TEST_P(IR_RobustnessTest, PushConstant_Access) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<push_constant, array<u32, 4>, read> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:ptr<push_constant, u32, read> = access %arr, %4
     %6:u32 = load %5
@@ -1097,12 +1097,12 @@ TEST_P(IR_RobustnessTest, Storage_LoadVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<storage, vec4<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = load_vector_element %vec, %idx
     ret %4
   }
@@ -1111,12 +1111,12 @@ TEST_P(IR_RobustnessTest, Storage_LoadVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<storage, vec4<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:u32 = load_vector_element %vec, %4
     ret %5
@@ -1145,12 +1145,12 @@ TEST_P(IR_RobustnessTest, Storage_StoreVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<storage, vec4<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     store_vector_element %vec, %idx, 0u
     ret
   }
@@ -1159,12 +1159,12 @@ TEST_P(IR_RobustnessTest, Storage_StoreVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<storage, vec4<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     store_vector_element %vec, %4, 0u
     ret
@@ -1194,12 +1194,12 @@ TEST_P(IR_RobustnessTest, Storage_Access) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<storage, u32, read_write> = access %arr, %idx
     %5:u32 = load %4
     ret %5
@@ -1209,12 +1209,12 @@ TEST_P(IR_RobustnessTest, Storage_Access) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<storage, array<u32, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:ptr<storage, u32, read_write> = access %arr, %4
     %6:u32 = load %5
@@ -1244,12 +1244,12 @@ TEST_P(IR_RobustnessTest, Unifom_LoadVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<uniform, vec4<u32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = load_vector_element %vec, %idx
     ret %4
   }
@@ -1258,12 +1258,12 @@ TEST_P(IR_RobustnessTest, Unifom_LoadVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<uniform, vec4<u32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:u32 = load_vector_element %vec, %4
     ret %5
@@ -1292,12 +1292,12 @@ TEST_P(IR_RobustnessTest, Unifom_StoreVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<uniform, vec4<u32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     store_vector_element %vec, %idx, 0u
     ret
   }
@@ -1306,12 +1306,12 @@ TEST_P(IR_RobustnessTest, Unifom_StoreVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<uniform, vec4<u32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     store_vector_element %vec, %4, 0u
     ret
@@ -1341,12 +1341,12 @@ TEST_P(IR_RobustnessTest, Uniform_Access) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<uniform, array<u32, 4>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<uniform, u32, read> = access %arr, %idx
     %5:u32 = load %4
     ret %5
@@ -1356,12 +1356,12 @@ TEST_P(IR_RobustnessTest, Uniform_Access) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<uniform, array<u32, 4>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:ptr<uniform, u32, read> = access %arr, %4
     %6:u32 = load %5
@@ -1390,12 +1390,12 @@ TEST_P(IR_RobustnessTest, Workgroup_LoadVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<workgroup, vec4<u32>, read_write> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = load_vector_element %vec, %idx
     ret %4
   }
@@ -1404,12 +1404,12 @@ TEST_P(IR_RobustnessTest, Workgroup_LoadVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<workgroup, vec4<u32>, read_write> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:u32 = load_vector_element %vec, %4
     ret %5
@@ -1437,12 +1437,12 @@ TEST_P(IR_RobustnessTest, Workgroup_StoreVectorElement) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<workgroup, vec4<u32>, read_write> = var
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     store_vector_element %vec, %idx, 0u
     ret
   }
@@ -1451,12 +1451,12 @@ TEST_P(IR_RobustnessTest, Workgroup_StoreVectorElement) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %vec:ptr<workgroup, vec4<u32>, read_write> = var
 }
 
 %foo = func(%idx:u32):void {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     store_vector_element %vec, %4, 0u
     ret
@@ -1485,12 +1485,12 @@ TEST_P(IR_RobustnessTest, Workgroup_Access) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<workgroup, u32, read_write> = access %arr, %idx
     %5:u32 = load %4
     ret %5
@@ -1500,12 +1500,12 @@ TEST_P(IR_RobustnessTest, Workgroup_Access) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<workgroup, array<u32, 4>, read_write> = var
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = min %idx, 3u
     %5:ptr<workgroup, u32, read_write> = access %arr, %4
     %6:u32 = load %5
@@ -1542,7 +1542,7 @@ TEST_P(IR_RobustnessTest, ConstantVector_DynamicIndex) {
 
     auto* src = R"(
 %foo = func(%idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %3:u32 = access vec4<u32>(1u, 2u, 3u, 4u), %idx
     ret %3
   }
@@ -1552,7 +1552,7 @@ TEST_P(IR_RobustnessTest, ConstantVector_DynamicIndex) {
 
     auto* expect = R"(
 %foo = func(%idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %3:u32 = min %idx, 3u
     %4:u32 = access vec4<u32>(1u, 2u, 3u, 4u), %3
     ret %4
@@ -1585,7 +1585,7 @@ TEST_P(IR_RobustnessTest, ConstantArray_DynamicIndex) {
 
     auto* src = R"(
 %foo = func(%idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %3:u32 = access array<u32, 4>(1u, 2u, 3u, 4u), %idx
     ret %3
   }
@@ -1595,7 +1595,7 @@ TEST_P(IR_RobustnessTest, ConstantArray_DynamicIndex) {
 
     auto* expect = R"(
 %foo = func(%idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %3:u32 = min %idx, 3u
     %4:u32 = access array<u32, 4>(1u, 2u, 3u, 4u), %3
     ret %4
@@ -1622,7 +1622,7 @@ TEST_P(IR_RobustnessTest, ParamValueArray_DynamicIndex) {
 
     auto* src = R"(
 %foo = func(%arr:array<u32, 4>, %idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %4:u32 = access %arr, %idx
     ret %4
   }
@@ -1632,7 +1632,7 @@ TEST_P(IR_RobustnessTest, ParamValueArray_DynamicIndex) {
 
     auto* expect = R"(
 %foo = func(%arr:array<u32, 4>, %idx:u32):u32 {
-  %b1 = block {
+  $B1: {
     %4:u32 = min %idx, 3u
     %5:u32 = access %arr, %4
     ret %5
@@ -1666,12 +1666,12 @@ TEST_P(IR_RobustnessTest, RuntimeSizedArray_ConstIndex) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<storage, u32, read_write> = access %arr, 42u
     %4:u32 = load %3
     ret %4
@@ -1681,12 +1681,12 @@ TEST_P(IR_RobustnessTest, RuntimeSizedArray_ConstIndex) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
-  %b2 = block {
+  $B2: {
     %3:u32 = arrayLength %arr
     %4:u32 = sub %3, 1u
     %5:u32 = min 42u, %4
@@ -1719,12 +1719,12 @@ TEST_P(IR_RobustnessTest, RuntimeSizedArray_DynamicIndex) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<storage, u32, read_write> = access %arr, %idx
     %5:u32 = load %4
     ret %5
@@ -1734,12 +1734,12 @@ TEST_P(IR_RobustnessTest, RuntimeSizedArray_DynamicIndex) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = arrayLength %arr
     %5:u32 = sub %4, 1u
     %6:u32 = min %idx, %5
@@ -1779,12 +1779,12 @@ structure = struct @align(4) {
   arr:array<u32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, structure, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<storage, u32, read_write> = access %buffer, 0u, 42u
     %4:u32 = load %3
     ret %4
@@ -1798,12 +1798,12 @@ structure = struct @align(4) {
   arr:array<u32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, structure, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<storage, array<u32>, read_write> = access %buffer, 0u
     %4:u32 = arrayLength %3
     %5:u32 = sub %4, 1u
@@ -1846,12 +1846,12 @@ structure = struct @align(4) {
   arr:array<u32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, structure, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<storage, u32, read_write> = access %buffer, 0u, %idx
     %5:u32 = load %4
     ret %5
@@ -1865,12 +1865,12 @@ structure = struct @align(4) {
   arr:array<u32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<storage, structure, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<storage, array<u32>, read_write> = access %buffer, 0u
     %5:u32 = arrayLength %4
     %6:u32 = sub %5, 1u
@@ -1904,12 +1904,12 @@ TEST_P(IR_RobustnessTest, RuntimeSizedArray_DisableClamping) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:ptr<storage, u32, read_write> = access %arr, %idx
     %5:u32 = load %4
     ret %5
@@ -1919,12 +1919,12 @@ TEST_P(IR_RobustnessTest, RuntimeSizedArray_DisableClamping) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func(%idx:u32):u32 {
-  %b2 = block {
+  $B2: {
     %4:u32 = arrayLength %arr
     %5:u32 = sub %4, 1u
     %6:u32 = min %idx, %5
@@ -1962,12 +1962,12 @@ TEST_P(IR_RobustnessTest, TextureDimensions) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func():vec2<u32> {
-  %b2 = block {
+  $B2: {
     %3:texture_2d<f32> = load %texture
     %4:vec2<u32> = textureDimensions %3
     ret %4
@@ -2002,12 +2002,12 @@ TEST_P(IR_RobustnessTest, TextureDimensions_WithLevel) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%level:u32):vec2<u32> {
-  %b2 = block {
+  $B2: {
     %4:texture_2d<f32> = load %texture
     %5:vec2<u32> = textureDimensions %4, %level
     ret %5
@@ -2017,12 +2017,12 @@ TEST_P(IR_RobustnessTest, TextureDimensions_WithLevel) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %foo = func(%level:u32):vec2<u32> {
-  %b2 = block {
+  $B2: {
     %4:texture_2d<f32> = load %texture
     %5:u32 = textureNumLevels %4
     %6:u32 = sub %5, 1u
@@ -2074,19 +2074,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled1D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:i32, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_1d<f32> = load %texture
     %6:vec4<f32> = textureLoad %5, %coords, %level
     ret %6
   }
 }
 %load_unsigned = func(%coords_1:u32, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %10:texture_1d<f32> = load %texture
     %11:vec4<f32> = textureLoad %10, %coords_1, %level_1
     ret %11
@@ -2096,12 +2096,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled1D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:i32, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_1d<f32> = load %texture
     %6:u32 = textureDimensions %5
     %7:u32 = sub %6, 1u
@@ -2116,7 +2116,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled1D) {
   }
 }
 %load_unsigned = func(%coords_1:u32, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %18:texture_1d<f32> = load %texture
     %19:u32 = textureDimensions %18
     %20:u32 = sub %19, 1u
@@ -2171,19 +2171,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_2d<f32> = load %texture
     %6:vec4<f32> = textureLoad %5, %coords, %level
     ret %6
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %10:texture_2d<f32> = load %texture
     %11:vec4<f32> = textureLoad %10, %coords_1, %level_1
     ret %11
@@ -2193,12 +2193,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_2d<f32> = load %texture
     %6:vec2<u32> = textureDimensions %5
     %7:vec2<u32> = sub %6, vec2<u32>(1u)
@@ -2213,7 +2213,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2D) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %18:texture_2d<f32> = load %texture
     %19:vec2<u32> = textureDimensions %18
     %20:vec2<u32> = sub %19, vec2<u32>(1u)
@@ -2271,19 +2271,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2DArray) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %layer:i32, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %6:texture_2d_array<f32> = load %texture
     %7:vec4<f32> = textureLoad %6, %coords, %layer, %level
     ret %7
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %layer_1: 'layer', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %12:texture_2d_array<f32> = load %texture
     %13:vec4<f32> = textureLoad %12, %coords_1, %layer_1, %level_1
     ret %13
@@ -2293,12 +2293,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2DArray) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %layer:i32, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %6:texture_2d_array<f32> = load %texture
     %7:vec2<u32> = textureDimensions %6
     %8:vec2<u32> = sub %7, vec2<u32>(1u)
@@ -2317,7 +2317,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2DArray) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %layer_1: 'layer', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %24:texture_2d_array<f32> = load %texture
     %25:vec2<u32> = textureDimensions %24
     %26:vec2<u32> = sub %25, vec2<u32>(1u)
@@ -2375,19 +2375,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled3D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec3<i32>, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_3d<f32> = load %texture
     %6:vec4<f32> = textureLoad %5, %coords, %level
     ret %6
   }
 }
 %load_unsigned = func(%coords_1:vec3<u32>, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %10:texture_3d<f32> = load %texture
     %11:vec4<f32> = textureLoad %10, %coords_1, %level_1
     ret %11
@@ -2397,12 +2397,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled3D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec3<i32>, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_3d<f32> = load %texture
     %6:vec3<u32> = textureDimensions %5
     %7:vec3<u32> = sub %6, vec3<u32>(1u)
@@ -2417,7 +2417,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled3D) {
   }
 }
 %load_unsigned = func(%coords_1:vec3<u32>, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %18:texture_3d<f32> = load %texture
     %19:vec3<u32> = textureDimensions %18
     %20:vec3<u32> = sub %19, vec3<u32>(1u)
@@ -2473,19 +2473,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Multisampled2D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_multisampled_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_multisampled_2d<f32> = load %texture
     %6:vec4<f32> = textureLoad %5, %coords, %level
     ret %6
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %10:texture_multisampled_2d<f32> = load %texture
     %11:vec4<f32> = textureLoad %10, %coords_1, %level_1
     ret %11
@@ -2495,12 +2495,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Multisampled2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_multisampled_2d<f32>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_multisampled_2d<f32> = load %texture
     %6:vec2<u32> = textureDimensions %5
     %7:vec2<u32> = sub %6, vec2<u32>(1u)
@@ -2511,7 +2511,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Multisampled2D) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %14:texture_multisampled_2d<f32> = load %texture
     %15:vec2<u32> = textureDimensions %14
     %16:vec2<u32> = sub %15, vec2<u32>(1u)
@@ -2560,19 +2560,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %level:i32):f32 {
-  %b2 = block {
+  $B2: {
     %5:texture_depth_2d = load %texture
     %6:f32 = textureLoad %5, %coords, %level
     ret %6
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):f32 {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %10:texture_depth_2d = load %texture
     %11:f32 = textureLoad %10, %coords_1, %level_1
     ret %11
@@ -2582,12 +2582,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %level:i32):f32 {
-  %b2 = block {
+  $B2: {
     %5:texture_depth_2d = load %texture
     %6:vec2<u32> = textureDimensions %5
     %7:vec2<u32> = sub %6, vec2<u32>(1u)
@@ -2602,7 +2602,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2D) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):f32 {  # %coords_1: 'coords', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %18:texture_depth_2d = load %texture
     %19:vec2<u32> = textureDimensions %18
     %20:vec2<u32> = sub %19, vec2<u32>(1u)
@@ -2659,19 +2659,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2DArray) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %layer:i32, %level:i32):f32 {
-  %b2 = block {
+  $B2: {
     %6:texture_depth_2d_array = load %texture
     %7:f32 = textureLoad %6, %coords, %layer, %level
     ret %7
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %level_1:u32):f32 {  # %coords_1: 'coords', %layer_1: 'layer', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %12:texture_depth_2d_array = load %texture
     %13:f32 = textureLoad %12, %coords_1, %layer_1, %level_1
     ret %13
@@ -2681,12 +2681,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2DArray) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %layer:i32, %level:i32):f32 {
-  %b2 = block {
+  $B2: {
     %6:texture_depth_2d_array = load %texture
     %7:vec2<u32> = textureDimensions %6
     %8:vec2<u32> = sub %7, vec2<u32>(1u)
@@ -2705,7 +2705,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2DArray) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %level_1:u32):f32 {  # %coords_1: 'coords', %layer_1: 'layer', %level_1: 'level'
-  %b3 = block {
+  $B3: {
     %24:texture_depth_2d_array = load %texture
     %25:vec2<u32> = textureDimensions %24
     %26:vec2<u32> = sub %25, vec2<u32>(1u)
@@ -2761,19 +2761,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_DepthMultisampled2D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %index:i32):f32 {
-  %b2 = block {
+  $B2: {
     %5:texture_depth_multisampled_2d = load %texture
     %6:f32 = textureLoad %5, %coords, %index
     ret %6
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %index_1:u32):f32 {  # %coords_1: 'coords', %index_1: 'index'
-  %b3 = block {
+  $B3: {
     %10:texture_depth_multisampled_2d = load %texture
     %11:f32 = textureLoad %10, %coords_1, %index_1
     ret %11
@@ -2783,12 +2783,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_DepthMultisampled2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %index:i32):f32 {
-  %b2 = block {
+  $B2: {
     %5:texture_depth_multisampled_2d = load %texture
     %6:vec2<u32> = textureDimensions %5
     %7:vec2<u32> = sub %6, vec2<u32>(1u)
@@ -2799,7 +2799,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_DepthMultisampled2D) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %index_1:u32):f32 {  # %coords_1: 'coords', %index_1: 'index'
-  %b3 = block {
+  $B3: {
     %14:texture_depth_multisampled_2d = load %texture
     %15:vec2<u32> = textureDimensions %14
     %16:vec2<u32> = sub %15, vec2<u32>(1u)
@@ -2845,19 +2845,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_External) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_external = load %texture
     %5:vec4<f32> = textureLoad %4, %coords
     ret %5
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %8:texture_external = load %texture
     %9:vec4<f32> = textureLoad %8, %coords_1
     ret %9
@@ -2867,12 +2867,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_External) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_external = load %texture
     %5:vec2<u32> = textureDimensions %4
     %6:vec2<u32> = sub %5, vec2<u32>(1u)
@@ -2883,7 +2883,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_External) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %12:texture_external = load %texture
     %13:vec2<u32> = textureDimensions %12
     %14:vec2<u32> = sub %13, vec2<u32>(1u)
@@ -2935,19 +2935,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage1D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_1d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_storage_1d<rgba8unorm, read_write> = load %texture
     %5:vec4<f32> = textureLoad %4, %coords
     ret %5
   }
 }
 %load_unsigned = func(%coords_1:u32):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %8:texture_storage_1d<rgba8unorm, read_write> = load %texture
     %9:vec4<f32> = textureLoad %8, %coords_1
     ret %9
@@ -2957,12 +2957,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage1D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_1d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_storage_1d<rgba8unorm, read_write> = load %texture
     %5:u32 = textureDimensions %4
     %6:u32 = sub %5, 1u
@@ -2973,7 +2973,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage1D) {
   }
 }
 %load_unsigned = func(%coords_1:u32):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %12:texture_storage_1d<rgba8unorm, read_write> = load %texture
     %13:u32 = textureDimensions %12
     %14:u32 = sub %13, 1u
@@ -3025,19 +3025,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_storage_2d<rgba8unorm, read_write> = load %texture
     %5:vec4<f32> = textureLoad %4, %coords
     ret %5
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %8:texture_storage_2d<rgba8unorm, read_write> = load %texture
     %9:vec4<f32> = textureLoad %8, %coords_1
     ret %9
@@ -3047,12 +3047,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_storage_2d<rgba8unorm, read_write> = load %texture
     %5:vec2<u32> = textureDimensions %4
     %6:vec2<u32> = sub %5, vec2<u32>(1u)
@@ -3063,7 +3063,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2D) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %12:texture_storage_2d<rgba8unorm, read_write> = load %texture
     %13:vec2<u32> = textureDimensions %12
     %14:vec2<u32> = sub %13, vec2<u32>(1u)
@@ -3119,19 +3119,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2DArray) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %layer:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_storage_2d_array<rgba8unorm, read_write> = load %texture
     %6:vec4<f32> = textureLoad %5, %coords, %layer
     ret %6
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32):vec4<f32> {  # %coords_1: 'coords', %layer_1: 'layer'
-  %b3 = block {
+  $B3: {
     %10:texture_storage_2d_array<rgba8unorm, read_write> = load %texture
     %11:vec4<f32> = textureLoad %10, %coords_1, %layer_1
     ret %11
@@ -3141,12 +3141,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2DArray) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %layer:i32):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_storage_2d_array<rgba8unorm, read_write> = load %texture
     %6:vec2<u32> = textureDimensions %5
     %7:vec2<u32> = sub %6, vec2<u32>(1u)
@@ -3161,7 +3161,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2DArray) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32):vec4<f32> {  # %coords_1: 'coords', %layer_1: 'layer'
-  %b3 = block {
+  $B3: {
     %18:texture_storage_2d_array<rgba8unorm, read_write> = load %texture
     %19:vec2<u32> = textureDimensions %18
     %20:vec2<u32> = sub %19, vec2<u32>(1u)
@@ -3216,19 +3216,19 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage3D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_3d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec3<i32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_storage_3d<rgba8unorm, read_write> = load %texture
     %5:vec4<f32> = textureLoad %4, %coords
     ret %5
   }
 }
 %load_unsigned = func(%coords_1:vec3<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %8:texture_storage_3d<rgba8unorm, read_write> = load %texture
     %9:vec4<f32> = textureLoad %8, %coords_1
     ret %9
@@ -3238,12 +3238,12 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage3D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_3d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec3<i32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_storage_3d<rgba8unorm, read_write> = load %texture
     %5:vec3<u32> = textureDimensions %4
     %6:vec3<u32> = sub %5, vec3<u32>(1u)
@@ -3254,7 +3254,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage3D) {
   }
 }
 %load_unsigned = func(%coords_1:vec3<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %12:texture_storage_3d<rgba8unorm, read_write> = load %texture
     %13:vec3<u32> = textureDimensions %12
     %14:vec3<u32> = sub %13, vec3<u32>(1u)
@@ -3308,19 +3308,19 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage1D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_1d<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:i32, %value:vec4<f32>):void {
-  %b2 = block {
+  $B2: {
     %5:texture_storage_1d<rgba8unorm, write> = load %texture
     %6:void = textureStore %5, %coords, %value
     ret
   }
 }
 %load_unsigned = func(%coords_1:u32, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  %b3 = block {
+  $B3: {
     %10:texture_storage_1d<rgba8unorm, write> = load %texture
     %11:void = textureStore %10, %coords_1, %value_1
     ret
@@ -3330,12 +3330,12 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage1D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_1d<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:i32, %value:vec4<f32>):void {
-  %b2 = block {
+  $B2: {
     %5:texture_storage_1d<rgba8unorm, write> = load %texture
     %6:u32 = textureDimensions %5
     %7:u32 = sub %6, 1u
@@ -3346,7 +3346,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage1D) {
   }
 }
 %load_unsigned = func(%coords_1:u32, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  %b3 = block {
+  $B3: {
     %14:texture_storage_1d<rgba8unorm, write> = load %texture
     %15:u32 = textureDimensions %14
     %16:u32 = sub %15, 1u
@@ -3400,19 +3400,19 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %value:vec4<f32>):void {
-  %b2 = block {
+  $B2: {
     %5:texture_storage_2d<rgba8unorm, write> = load %texture
     %6:void = textureStore %5, %coords, %value
     ret
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  %b3 = block {
+  $B3: {
     %10:texture_storage_2d<rgba8unorm, write> = load %texture
     %11:void = textureStore %10, %coords_1, %value_1
     ret
@@ -3422,12 +3422,12 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %value:vec4<f32>):void {
-  %b2 = block {
+  $B2: {
     %5:texture_storage_2d<rgba8unorm, write> = load %texture
     %6:vec2<u32> = textureDimensions %5
     %7:vec2<u32> = sub %6, vec2<u32>(1u)
@@ -3438,7 +3438,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2D) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  %b3 = block {
+  $B3: {
     %14:texture_storage_2d<rgba8unorm, write> = load %texture
     %15:vec2<u32> = textureDimensions %14
     %16:vec2<u32> = sub %15, vec2<u32>(1u)
@@ -3494,19 +3494,19 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2DArray) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %layer:i32, %value:vec4<f32>):void {
-  %b2 = block {
+  $B2: {
     %6:texture_storage_2d_array<rgba8unorm, write> = load %texture
     %7:void = textureStore %6, %coords, %layer, %value
     ret
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %layer_1: 'layer', %value_1: 'value'
-  %b3 = block {
+  $B3: {
     %12:texture_storage_2d_array<rgba8unorm, write> = load %texture
     %13:void = textureStore %12, %coords_1, %layer_1, %value_1
     ret
@@ -3516,12 +3516,12 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2DArray) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec2<i32>, %layer:i32, %value:vec4<f32>):void {
-  %b2 = block {
+  $B2: {
     %6:texture_storage_2d_array<rgba8unorm, write> = load %texture
     %7:vec2<u32> = textureDimensions %6
     %8:vec2<u32> = sub %7, vec2<u32>(1u)
@@ -3536,7 +3536,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2DArray) {
   }
 }
 %load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %layer_1: 'layer', %value_1: 'value'
-  %b3 = block {
+  $B3: {
     %20:texture_storage_2d_array<rgba8unorm, write> = load %texture
     %21:vec2<u32> = textureDimensions %20
     %22:vec2<u32> = sub %21, vec2<u32>(1u)
@@ -3593,19 +3593,19 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage3D) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_3d<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec3<i32>, %value:vec4<f32>):void {
-  %b2 = block {
+  $B2: {
     %5:texture_storage_3d<rgba8unorm, write> = load %texture
     %6:void = textureStore %5, %coords, %value
     ret
   }
 }
 %load_unsigned = func(%coords_1:vec3<u32>, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  %b3 = block {
+  $B3: {
     %10:texture_storage_3d<rgba8unorm, write> = load %texture
     %11:void = textureStore %10, %coords_1, %value_1
     ret
@@ -3615,12 +3615,12 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage3D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_storage_3d<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
 %load_signed = func(%coords:vec3<i32>, %value:vec4<f32>):void {
-  %b2 = block {
+  $B2: {
     %5:texture_storage_3d<rgba8unorm, write> = load %texture
     %6:vec3<u32> = textureDimensions %5
     %7:vec3<u32> = sub %6, vec3<u32>(1u)
@@ -3631,7 +3631,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage3D) {
   }
 }
 %load_unsigned = func(%coords_1:vec3<u32>, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  %b3 = block {
+  $B3: {
     %14:texture_storage_3d<rgba8unorm, write> = load %texture
     %15:vec3<u32> = textureDimensions %14
     %16:vec3<u32> = sub %15, vec3<u32>(1u)

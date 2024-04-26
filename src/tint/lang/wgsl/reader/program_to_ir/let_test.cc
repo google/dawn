@@ -46,7 +46,7 @@ TEST_F(ProgramToIRLetTest, Constant) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
+  $B1: {
     %a:i32 = let 42i
     ret
   }
@@ -62,7 +62,7 @@ TEST_F(ProgramToIRLetTest, BinaryOp) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
+  $B1: {
     %a:i32 = let 3i
     ret
   }
@@ -80,7 +80,7 @@ TEST_F(ProgramToIRLetTest, Chain) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
+  $B1: {
     %a:i32 = let 1i
     %b:i32 = let %a
     %c:i32 = let %b

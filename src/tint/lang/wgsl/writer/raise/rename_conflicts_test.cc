@@ -83,7 +83,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_SingleNamedRootBlockVar) {
     b.Append(mod.root_block, [&] { b.ir.SetName(b.Var(ty.ptr<private_, i32>()), "v"); });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<private, i32, read_write> = var
 }
 
@@ -104,7 +104,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_TwoRootBlockVarsWithSameName) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<private, i32, read_write> = var
   %v_1:ptr<private, u32, read_write> = var  # %v_1: 'v'
 }
@@ -113,7 +113,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_TwoRootBlockVarsWithSameName) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<private, i32, read_write> = var
   %v_1:ptr<private, u32, read_write> = var
 }
@@ -134,7 +134,7 @@ v = struct @align(4) {
   x:i32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<function, v, read_write> = var
 }
 
@@ -146,7 +146,7 @@ v = struct @align(4) {
   x:i32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %v_1:ptr<function, v, read_write> = var
 }
 
@@ -164,12 +164,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVarAndFnWithSameName) {
     b.Append(fn->Block(), [&] { b.Return(fn); });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<private, i32, read_write> = var
 }
 
 %v_1 = func():void {  # %v_1: 'v'
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -177,12 +177,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVarAndFnWithSameName) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<private, i32, read_write> = var
 }
 
 %v_1 = func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -211,12 +211,12 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_RootBlockVar_ShadowedBy_FnVar) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:i32 = load %v
     %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
     %5:i32 = load %v_1
@@ -251,12 +251,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
     %4:i32 = load %v
     %5:i32 = load %v_1
@@ -268,12 +268,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %v:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %v_1:ptr<function, i32, read_write> = var
     %4:i32 = load %v
     %5:i32 = load %v_1
@@ -310,10 +310,10 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_FnVar_ShadowedBy_IfVar) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %v:ptr<function, i32, read_write> = var
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         %3:i32 = load %v
         %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %5:i32 = load %v_1
@@ -355,10 +355,10 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %v:ptr<function, i32, read_write> = var
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %4:i32 = load %v
         %5:i32 = load %v_1
@@ -374,10 +374,10 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %v:ptr<function, i32, read_write> = var
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         %v_1:ptr<function, i32, read_write> = var
         %4:i32 = load %v
         %5:i32 = load %v_1
@@ -420,13 +420,13 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopInitVar_ShadowedBy_LoopBodyV
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %v:ptr<function, i32, read_write> = var
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %3:i32 = load %v
         %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %5:i32 = load %v_1
@@ -471,13 +471,13 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyV
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %v:ptr<function, i32, read_write> = var
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %4:i32 = load %v
         %5:i32 = load %v_1
@@ -493,13 +493,13 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyV
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %v:ptr<function, i32, read_write> = var
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %v_1:ptr<function, i32, read_write> = var
         %4:i32 = load %v
         %5:i32 = load %v_1
@@ -543,16 +543,16 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopBodyVar_ShadowedBy_LoopContV
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
-    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
-      %b2 = block {  # initializer
-        next_iteration %b3
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %v:ptr<function, i32, read_write> = var
-        continue %b4
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %3:i32 = load %v
         %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %5:i32 = load %v_1
@@ -598,16 +598,16 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopBodyVar_ShadowedBy_LoopContV
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
-    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
-      %b2 = block {  # initializer
-        next_iteration %b3
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %v:ptr<function, i32, read_write> = var
-        continue %b4
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
         %4:i32 = load %v
         %5:i32 = load %v_1
@@ -623,16 +623,16 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopBodyVar_ShadowedBy_LoopContV
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
-    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
-      %b2 = block {  # initializer
-        next_iteration %b3
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %v:ptr<function, i32, read_write> = var
-        continue %b4
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %v_1:ptr<function, i32, read_write> = var
         %4:i32 = load %v
         %5:i32 = load %v_1
@@ -663,7 +663,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_Param) 
 
     auto* src = R"(
 %f = func(%i32:i32):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<function, i32, read_write> = var
     ret
   }
@@ -673,7 +673,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_Param) 
 
     auto* expect = R"(
 %f = func(%i32_1:i32):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<function, i32, read_write> = var
     ret
   }
@@ -698,7 +698,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinVector_ShadowedBy_Param) 
 
     auto* src = R"(
 %f = func(%vec2:i32):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<function, vec3<i32>, read_write> = var
     ret
   }
@@ -726,7 +726,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinVector_ShadowedBy_Param) 
 
     auto* src = R"(
 %f = func(%vec3:i32):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<function, vec3<i32>, read_write> = var
     ret
   }
@@ -736,7 +736,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinVector_ShadowedBy_Param) 
 
     auto* expect = R"(
 %f = func(%vec3_1:i32):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<function, vec3<i32>, read_write> = var
     ret
   }
@@ -761,7 +761,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinMatrix_ShadowedBy_Param) 
 
     auto* src = R"(
 %f = func(%mat3x2:i32):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<function, mat2x4<f32>, read_write> = var
     ret
   }
@@ -789,7 +789,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinMatrix_ShadowedBy_Param) 
 
     auto* src = R"(
 %f = func(%mat2x4:i32):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<function, mat2x4<f32>, read_write> = var
     ret
   }
@@ -799,7 +799,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinMatrix_ShadowedBy_Param) 
 
     auto* expect = R"(
 %f = func(%mat2x4_1:i32):void {
-  %b1 = block {
+  $B1: {
     %3:ptr<function, mat2x4<f32>, read_write> = var
     ret
   }
@@ -822,7 +822,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinScalar_ShadowedBy_FnVar) 
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %f32:ptr<function, i32, read_write> = var
     %3:i32 = construct
     ret %3
@@ -849,7 +849,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) 
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i32:ptr<function, i32, read_write> = var
     %3:i32 = construct
     ret %3
@@ -860,7 +860,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) 
 
     auto* expect = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i32_1:ptr<function, i32, read_write> = var
     %3:i32 = construct
     ret %3
@@ -884,7 +884,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinScalar_ShadowedBy_NamedIn
 
     auto* src = R"(
 %f = func():i32 {
-  %b1 = block {
+  $B1: {
     %i32:i32 = add 1i, 2i
     ret %i32
   }
@@ -910,7 +910,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_NamedIn
 
     auto* src = R"(
 %f = func():f32 {
-  %b1 = block {
+  $B1: {
     %f32:i32 = add 1i, 2i
     %3:f32 = construct %f32
     ret %3
@@ -921,7 +921,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_NamedIn
 
     auto* expect = R"(
 %f = func():f32 {
-  %b1 = block {
+  $B1: {
     %f32_1:i32 = add 1i, 2i
     %3:f32 = construct %f32_1
     ret %3
@@ -940,7 +940,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinAddressSpace_ShadowedBy_R
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %function:ptr<private, i32, read_write> = var
 }
 
@@ -960,7 +960,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinAddressSpace_ShadowedBy_R
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %private:ptr<private, i32, read_write> = var
 }
 
@@ -968,7 +968,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinAddressSpace_ShadowedBy_R
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %private_1:ptr<private, i32, read_write> = var
 }
 
@@ -985,7 +985,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinAccess_ShadowedBy_RootBlo
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %read:ptr<private, i32, read_write> = var
 }
 
@@ -1005,7 +1005,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinAccess_ShadowedBy_RootBlo
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %read_write:ptr<private, i32, read_write> = var
 }
 
@@ -1013,7 +1013,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinAccess_ShadowedBy_RootBlo
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %read_write_1:ptr<private, i32, read_write> = var
 }
 
@@ -1037,12 +1037,12 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinFn_ShadowedBy_RootBlockVa
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %min:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:i32 = max 1i, 2i
     ret %3
   }
@@ -1070,12 +1070,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVa
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %max:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:i32 = max 1i, 2i
     ret %3
   }
@@ -1084,12 +1084,12 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVa
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %max_1:ptr<private, i32, read_write> = var
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:i32 = max 1i, 2i
     ret %3
   }
@@ -1118,12 +1118,12 @@ s = struct @align(4) {
   f:f32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<private, s, read_write> = var
 }
 
 %f32 = func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -1135,12 +1135,12 @@ s = struct @align(4) {
   f:f32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<private, s, read_write> = var
 }
 
 %f32_1 = func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }

@@ -66,7 +66,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_NoPolyfill) {
     Build(BinaryOp::kShiftLeft, ty.i32(), ty.i32(), ty.u32());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:u32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = shl %lhs, %rhs
     ret %result
   }
@@ -86,7 +86,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_NoPolyfill) {
     Build(BinaryOp::kShiftRight, ty.i32(), ty.i32(), ty.u32());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:u32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = shr %lhs, %rhs
     ret %result
   }
@@ -106,7 +106,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_I32) {
     Build(BinaryOp::kShiftLeft, ty.i32(), ty.i32(), ty.u32());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:u32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = shl %lhs, %rhs
     ret %result
   }
@@ -114,7 +114,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_I32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:u32):i32 {
-  %b1 = block {
+  $B1: {
     %4:u32 = and %rhs, 31u
     %result:i32 = shl %lhs, %4
     ret %result
@@ -134,7 +134,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_U32) {
     Build(BinaryOp::kShiftLeft, ty.u32(), ty.u32(), ty.u32());
     auto* src = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = shl %lhs, %rhs
     ret %result
   }
@@ -142,7 +142,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_U32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 {
-  %b1 = block {
+  $B1: {
     %4:u32 = and %rhs, 31u
     %result:u32 = shl %lhs, %4
     ret %result
@@ -162,7 +162,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec2I32) {
     Build(BinaryOp::kShiftLeft, ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<u32>());
     auto* src = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<u32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = shl %lhs, %rhs
     ret %result
   }
@@ -170,7 +170,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec2I32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<u32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %4:vec2<u32> = and %rhs, vec2<u32>(31u)
     %result:vec2<i32> = shl %lhs, %4
     ret %result
@@ -190,7 +190,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec3U32) {
     Build(BinaryOp::kShiftLeft, ty.vec3<u32>(), ty.vec3<u32>(), ty.vec3<u32>());
     auto* src = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec3<u32> = shl %lhs, %rhs
     ret %result
   }
@@ -198,7 +198,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftLeft_Vec3U32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> {
-  %b1 = block {
+  $B1: {
     %4:vec3<u32> = and %rhs, vec3<u32>(31u)
     %result:vec3<u32> = shl %lhs, %4
     ret %result
@@ -218,7 +218,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_I32) {
     Build(BinaryOp::kShiftRight, ty.i32(), ty.i32(), ty.u32());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:u32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = shr %lhs, %rhs
     ret %result
   }
@@ -226,7 +226,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_I32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:u32):i32 {
-  %b1 = block {
+  $B1: {
     %4:u32 = and %rhs, 31u
     %result:i32 = shr %lhs, %4
     ret %result
@@ -246,7 +246,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_U32) {
     Build(BinaryOp::kShiftRight, ty.u32(), ty.u32(), ty.u32());
     auto* src = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = shr %lhs, %rhs
     ret %result
   }
@@ -254,7 +254,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_U32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 {
-  %b1 = block {
+  $B1: {
     %4:u32 = and %rhs, 31u
     %result:u32 = shr %lhs, %4
     ret %result
@@ -274,7 +274,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec2I32) {
     Build(BinaryOp::kShiftRight, ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<u32>());
     auto* src = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<u32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = shr %lhs, %rhs
     ret %result
   }
@@ -282,7 +282,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec2I32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<u32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %4:vec2<u32> = and %rhs, vec2<u32>(31u)
     %result:vec2<i32> = shr %lhs, %4
     ret %result
@@ -302,7 +302,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec3U32) {
     Build(BinaryOp::kShiftRight, ty.vec3<u32>(), ty.vec3<u32>(), ty.vec3<u32>());
     auto* src = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec3<u32> = shr %lhs, %rhs
     ret %result
   }
@@ -310,7 +310,7 @@ TEST_F(IR_BinaryPolyfillTest, ShiftRight_Vec3U32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> {
-  %b1 = block {
+  $B1: {
     %4:vec3<u32> = and %rhs, vec3<u32>(31u)
     %result:vec3<u32> = shr %lhs, %4
     ret %result
@@ -330,7 +330,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_NoPolyfill) {
     Build(BinaryOp::kDivide, ty.i32(), ty.i32(), ty.i32());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = div %lhs, %rhs
     ret %result
   }
@@ -350,7 +350,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_NoPolyfill) {
     Build(BinaryOp::kModulo, ty.i32(), ty.i32(), ty.i32());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = mod %lhs, %rhs
     ret %result
   }
@@ -370,7 +370,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_I32) {
     Build(BinaryOp::kDivide, ty.i32(), ty.i32(), ty.i32());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = div %lhs, %rhs
     ret %result
   }
@@ -378,13 +378,13 @@ TEST_F(IR_BinaryPolyfillTest, Divide_I32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = call %tint_div_i32, %lhs, %rhs
     ret %result
   }
 }
 %tint_div_i32 = func(%lhs_1:i32, %rhs_1:i32):i32 {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %8:bool = eq %rhs_1, 0i
     %9:bool = eq %lhs_1, -2147483648i
     %10:bool = eq %rhs_1, -1i
@@ -409,7 +409,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_U32) {
     Build(BinaryOp::kDivide, ty.u32(), ty.u32(), ty.u32());
     auto* src = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = div %lhs, %rhs
     ret %result
   }
@@ -417,13 +417,13 @@ TEST_F(IR_BinaryPolyfillTest, Divide_U32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = call %tint_div_u32, %lhs, %rhs
     ret %result
   }
 }
 %tint_div_u32 = func(%lhs_1:u32, %rhs_1:u32):u32 {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %8:bool = eq %rhs_1, 0u
     %9:u32 = select %rhs_1, 1u, %8
     %10:u32 = div %lhs_1, %9
@@ -444,7 +444,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Vec2I32) {
     Build(BinaryOp::kDivide, ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<i32>());
     auto* src = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = div %lhs, %rhs
     ret %result
   }
@@ -452,13 +452,13 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Vec2I32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = call %tint_div_v2i32, %lhs, %rhs
     ret %result
   }
 }
 %tint_div_v2i32 = func(%lhs_1:vec2<i32>, %rhs_1:vec2<i32>):vec2<i32> {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %8:vec2<bool> = eq %rhs_1, vec2<i32>(0i)
     %9:vec2<bool> = eq %lhs_1, vec2<i32>(-2147483648i)
     %10:vec2<bool> = eq %rhs_1, vec2<i32>(-1i)
@@ -483,7 +483,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Vec3U32) {
     Build(BinaryOp::kDivide, ty.vec3<u32>(), ty.vec3<u32>(), ty.vec3<u32>());
     auto* src = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec3<u32> = div %lhs, %rhs
     ret %result
   }
@@ -491,13 +491,13 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Vec3U32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec3<u32> = call %tint_div_v3u32, %lhs, %rhs
     ret %result
   }
 }
 %tint_div_v3u32 = func(%lhs_1:vec3<u32>, %rhs_1:vec3<u32>):vec3<u32> {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %8:vec3<bool> = eq %rhs_1, vec3<u32>(0u)
     %9:vec3<u32> = select %rhs_1, vec3<u32>(1u), %8
     %10:vec3<u32> = div %lhs_1, %9
@@ -518,7 +518,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_I32) {
     Build(BinaryOp::kModulo, ty.i32(), ty.i32(), ty.i32());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = mod %lhs, %rhs
     ret %result
   }
@@ -526,13 +526,13 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_I32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:i32):i32 {
-  %b1 = block {
+  $B1: {
     %result:i32 = call %tint_mod_i32, %lhs, %rhs
     ret %result
   }
 }
 %tint_mod_i32 = func(%lhs_1:i32, %rhs_1:i32):i32 {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %8:bool = eq %rhs_1, 0i
     %9:bool = eq %lhs_1, -2147483648i
     %10:bool = eq %rhs_1, -1i
@@ -559,7 +559,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_U32) {
     Build(BinaryOp::kModulo, ty.u32(), ty.u32(), ty.u32());
     auto* src = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = mod %lhs, %rhs
     ret %result
   }
@@ -567,13 +567,13 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_U32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:u32, %rhs:u32):u32 {
-  %b1 = block {
+  $B1: {
     %result:u32 = call %tint_mod_u32, %lhs, %rhs
     ret %result
   }
 }
 %tint_mod_u32 = func(%lhs_1:u32, %rhs_1:u32):u32 {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %8:bool = eq %rhs_1, 0u
     %9:u32 = select %rhs_1, 1u, %8
     %10:u32 = div %lhs_1, %9
@@ -596,7 +596,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Vec2I32) {
     Build(BinaryOp::kModulo, ty.vec2<i32>(), ty.vec2<i32>(), ty.vec2<i32>());
     auto* src = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = mod %lhs, %rhs
     ret %result
   }
@@ -604,13 +604,13 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Vec2I32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec2<i32>, %rhs:vec2<i32>):vec2<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec2<i32> = call %tint_mod_v2i32, %lhs, %rhs
     ret %result
   }
 }
 %tint_mod_v2i32 = func(%lhs_1:vec2<i32>, %rhs_1:vec2<i32>):vec2<i32> {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %8:vec2<bool> = eq %rhs_1, vec2<i32>(0i)
     %9:vec2<bool> = eq %lhs_1, vec2<i32>(-2147483648i)
     %10:vec2<bool> = eq %rhs_1, vec2<i32>(-1i)
@@ -637,7 +637,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Vec3U32) {
     Build(BinaryOp::kModulo, ty.vec3<u32>(), ty.vec3<u32>(), ty.vec3<u32>());
     auto* src = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec3<u32> = mod %lhs, %rhs
     ret %result
   }
@@ -645,13 +645,13 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Vec3U32) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec3<u32>, %rhs:vec3<u32>):vec3<u32> {
-  %b1 = block {
+  $B1: {
     %result:vec3<u32> = call %tint_mod_v3u32, %lhs, %rhs
     ret %result
   }
 }
 %tint_mod_v3u32 = func(%lhs_1:vec3<u32>, %rhs_1:vec3<u32>):vec3<u32> {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %8:vec3<bool> = eq %rhs_1, vec3<u32>(0u)
     %9:vec3<u32> = select %rhs_1, vec3<u32>(1u), %8
     %10:vec3<u32> = div %lhs_1, %9
@@ -674,7 +674,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Scalar_Vector) {
     Build(BinaryOp::kDivide, ty.vec4<i32>(), ty.i32(), ty.vec4<i32>());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec4<i32> = div %lhs, %rhs
     ret %result
   }
@@ -682,14 +682,14 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Scalar_Vector) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> {
-  %b1 = block {
+  $B1: {
     %4:vec4<i32> = construct %lhs
     %result:vec4<i32> = call %tint_div_v4i32, %4, %rhs
     ret %result
   }
 }
 %tint_div_v4i32 = func(%lhs_1:vec4<i32>, %rhs_1:vec4<i32>):vec4<i32> {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %9:vec4<bool> = eq %rhs_1, vec4<i32>(0i)
     %10:vec4<bool> = eq %lhs_1, vec4<i32>(-2147483648i)
     %11:vec4<bool> = eq %rhs_1, vec4<i32>(-1i)
@@ -714,7 +714,7 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Vector_Scalar) {
     Build(BinaryOp::kDivide, ty.vec4<i32>(), ty.vec4<i32>(), ty.i32());
     auto* src = R"(
 %foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec4<i32> = div %lhs, %rhs
     ret %result
   }
@@ -722,14 +722,14 @@ TEST_F(IR_BinaryPolyfillTest, Divide_Vector_Scalar) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> {
-  %b1 = block {
+  $B1: {
     %4:vec4<i32> = construct %rhs
     %result:vec4<i32> = call %tint_div_v4i32, %lhs, %4
     ret %result
   }
 }
 %tint_div_v4i32 = func(%lhs_1:vec4<i32>, %rhs_1:vec4<i32>):vec4<i32> {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %9:vec4<bool> = eq %rhs_1, vec4<i32>(0i)
     %10:vec4<bool> = eq %lhs_1, vec4<i32>(-2147483648i)
     %11:vec4<bool> = eq %rhs_1, vec4<i32>(-1i)
@@ -754,7 +754,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Scalar_Vector) {
     Build(BinaryOp::kModulo, ty.vec4<i32>(), ty.i32(), ty.vec4<i32>());
     auto* src = R"(
 %foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec4<i32> = mod %lhs, %rhs
     ret %result
   }
@@ -762,14 +762,14 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Scalar_Vector) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:i32, %rhs:vec4<i32>):vec4<i32> {
-  %b1 = block {
+  $B1: {
     %4:vec4<i32> = construct %lhs
     %result:vec4<i32> = call %tint_mod_v4i32, %4, %rhs
     ret %result
   }
 }
 %tint_mod_v4i32 = func(%lhs_1:vec4<i32>, %rhs_1:vec4<i32>):vec4<i32> {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %9:vec4<bool> = eq %rhs_1, vec4<i32>(0i)
     %10:vec4<bool> = eq %lhs_1, vec4<i32>(-2147483648i)
     %11:vec4<bool> = eq %rhs_1, vec4<i32>(-1i)
@@ -796,7 +796,7 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Vector_Scalar) {
     Build(BinaryOp::kModulo, ty.vec4<i32>(), ty.vec4<i32>(), ty.i32());
     auto* src = R"(
 %foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> {
-  %b1 = block {
+  $B1: {
     %result:vec4<i32> = mod %lhs, %rhs
     ret %result
   }
@@ -804,14 +804,14 @@ TEST_F(IR_BinaryPolyfillTest, Modulo_Vector_Scalar) {
 )";
     auto* expect = R"(
 %foo = func(%lhs:vec4<i32>, %rhs:i32):vec4<i32> {
-  %b1 = block {
+  $B1: {
     %4:vec4<i32> = construct %rhs
     %result:vec4<i32> = call %tint_mod_v4i32, %lhs, %4
     ret %result
   }
 }
 %tint_mod_v4i32 = func(%lhs_1:vec4<i32>, %rhs_1:vec4<i32>):vec4<i32> {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %9:vec4<bool> = eq %rhs_1, vec4<i32>(0i)
     %10:vec4<bool> = eq %lhs_1, vec4<i32>(-2147483648i)
     %11:vec4<bool> = eq %rhs_1, vec4<i32>(-1i)
@@ -894,7 +894,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
 
     auto* src = R"(
 %foo_i32 = func(%lhs:i32, %rhs:i32):void {
-  %b1 = block {
+  $B1: {
     %4:i32 = div %lhs, %rhs
     %5:i32 = div %lhs, %rhs
     %6:i32 = mod %lhs, %rhs
@@ -903,7 +903,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %foo_u32 = func(%lhs_1:u32, %rhs_1:u32):void {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %11:u32 = div %lhs_1, %rhs_1
     %12:u32 = div %lhs_1, %rhs_1
     %13:u32 = mod %lhs_1, %rhs_1
@@ -912,7 +912,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %foo_vec4i = func(%lhs_2:vec4<i32>, %rhs_2:vec4<i32>):void {  # %lhs_2: 'lhs', %rhs_2: 'rhs'
-  %b3 = block {
+  $B3: {
     %18:vec4<i32> = div %lhs_2, %rhs_2
     %19:vec4<i32> = div %lhs_2, %rhs_2
     %20:vec4<i32> = mod %lhs_2, %rhs_2
@@ -921,7 +921,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %foo_vec4u = func(%lhs_3:vec4<u32>, %rhs_3:vec4<u32>):void {  # %lhs_3: 'lhs', %rhs_3: 'rhs'
-  %b4 = block {
+  $B4: {
     %25:vec4<u32> = div %lhs_3, %rhs_3
     %26:vec4<u32> = div %lhs_3, %rhs_3
     %27:vec4<u32> = mod %lhs_3, %rhs_3
@@ -932,7 +932,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
 )";
     auto* expect = R"(
 %foo_i32 = func(%lhs:i32, %rhs:i32):void {
-  %b1 = block {
+  $B1: {
     %4:i32 = call %tint_div_i32, %lhs, %rhs
     %6:i32 = call %tint_div_i32, %lhs, %rhs
     %7:i32 = call %tint_mod_i32, %lhs, %rhs
@@ -941,7 +941,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %foo_u32 = func(%lhs_1:u32, %rhs_1:u32):void {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  %b2 = block {
+  $B2: {
     %13:u32 = call %tint_div_u32, %lhs_1, %rhs_1
     %15:u32 = call %tint_div_u32, %lhs_1, %rhs_1
     %16:u32 = call %tint_mod_u32, %lhs_1, %rhs_1
@@ -950,7 +950,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %foo_vec4i = func(%lhs_2:vec4<i32>, %rhs_2:vec4<i32>):void {  # %lhs_2: 'lhs', %rhs_2: 'rhs'
-  %b3 = block {
+  $B3: {
     %22:vec4<i32> = call %tint_div_v4i32, %lhs_2, %rhs_2
     %24:vec4<i32> = call %tint_div_v4i32, %lhs_2, %rhs_2
     %25:vec4<i32> = call %tint_mod_v4i32, %lhs_2, %rhs_2
@@ -959,7 +959,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %foo_vec4u = func(%lhs_3:vec4<u32>, %rhs_3:vec4<u32>):void {  # %lhs_3: 'lhs', %rhs_3: 'rhs'
-  %b4 = block {
+  $B4: {
     %31:vec4<u32> = call %tint_div_v4u32, %lhs_3, %rhs_3
     %33:vec4<u32> = call %tint_div_v4u32, %lhs_3, %rhs_3
     %34:vec4<u32> = call %tint_mod_v4u32, %lhs_3, %rhs_3
@@ -968,7 +968,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %tint_div_i32 = func(%lhs_4:i32, %rhs_4:i32):i32 {  # %lhs_4: 'lhs', %rhs_4: 'rhs'
-  %b5 = block {
+  $B5: {
     %39:bool = eq %rhs_4, 0i
     %40:bool = eq %lhs_4, -2147483648i
     %41:bool = eq %rhs_4, -1i
@@ -980,7 +980,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %tint_mod_i32 = func(%lhs_5:i32, %rhs_5:i32):i32 {  # %lhs_5: 'lhs', %rhs_5: 'rhs'
-  %b6 = block {
+  $B6: {
     %48:bool = eq %rhs_5, 0i
     %49:bool = eq %lhs_5, -2147483648i
     %50:bool = eq %rhs_5, -1i
@@ -994,7 +994,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %tint_div_u32 = func(%lhs_6:u32, %rhs_6:u32):u32 {  # %lhs_6: 'lhs', %rhs_6: 'rhs'
-  %b7 = block {
+  $B7: {
     %59:bool = eq %rhs_6, 0u
     %60:u32 = select %rhs_6, 1u, %59
     %61:u32 = div %lhs_6, %60
@@ -1002,7 +1002,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %tint_mod_u32 = func(%lhs_7:u32, %rhs_7:u32):u32 {  # %lhs_7: 'lhs', %rhs_7: 'rhs'
-  %b8 = block {
+  $B8: {
     %64:bool = eq %rhs_7, 0u
     %65:u32 = select %rhs_7, 1u, %64
     %66:u32 = div %lhs_7, %65
@@ -1012,7 +1012,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %tint_div_v4i32 = func(%lhs_8:vec4<i32>, %rhs_8:vec4<i32>):vec4<i32> {  # %lhs_8: 'lhs', %rhs_8: 'rhs'
-  %b9 = block {
+  $B9: {
     %71:vec4<bool> = eq %rhs_8, vec4<i32>(0i)
     %72:vec4<bool> = eq %lhs_8, vec4<i32>(-2147483648i)
     %73:vec4<bool> = eq %rhs_8, vec4<i32>(-1i)
@@ -1024,7 +1024,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %tint_mod_v4i32 = func(%lhs_9:vec4<i32>, %rhs_9:vec4<i32>):vec4<i32> {  # %lhs_9: 'lhs', %rhs_9: 'rhs'
-  %b10 = block {
+  $B10: {
     %80:vec4<bool> = eq %rhs_9, vec4<i32>(0i)
     %81:vec4<bool> = eq %lhs_9, vec4<i32>(-2147483648i)
     %82:vec4<bool> = eq %rhs_9, vec4<i32>(-1i)
@@ -1038,7 +1038,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %tint_div_v4u32 = func(%lhs_10:vec4<u32>, %rhs_10:vec4<u32>):vec4<u32> {  # %lhs_10: 'lhs', %rhs_10: 'rhs'
-  %b11 = block {
+  $B11: {
     %91:vec4<bool> = eq %rhs_10, vec4<u32>(0u)
     %92:vec4<u32> = select %rhs_10, vec4<u32>(1u), %91
     %93:vec4<u32> = div %lhs_10, %92
@@ -1046,7 +1046,7 @@ TEST_F(IR_BinaryPolyfillTest, DivMod_MultipleUses) {
   }
 }
 %tint_mod_v4u32 = func(%lhs_11:vec4<u32>, %rhs_11:vec4<u32>):vec4<u32> {  # %lhs_11: 'lhs', %rhs_11: 'rhs'
-  %b12 = block {
+  $B12: {
     %96:vec4<bool> = eq %rhs_11, vec4<u32>(0u)
     %97:vec4<u32> = select %rhs_11, vec4<u32>(1u), %96
     %98:vec4<u32> = div %lhs_11, %97

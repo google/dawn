@@ -45,7 +45,7 @@ TEST_F(IR_BindingRemapperTest, NoModify_NoRemappings) {
     mod.root_block->Append(buffer);
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
@@ -66,7 +66,7 @@ TEST_F(IR_BindingRemapperTest, NoModify_RemappingDifferentBindingPoint) {
     mod.root_block->Append(buffer);
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
@@ -88,7 +88,7 @@ TEST_F(IR_BindingRemapperTest, RemappingGroup) {
     mod.root_block->Append(buffer);
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<uniform, i32, read> = var @binding_point(1, 2)
 }
 
@@ -96,7 +96,7 @@ TEST_F(IR_BindingRemapperTest, RemappingGroup) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<uniform, i32, read> = var @binding_point(3, 2)
 }
 
@@ -115,7 +115,7 @@ TEST_F(IR_BindingRemapperTest, RemappingBindingIndex) {
     mod.root_block->Append(buffer);
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<uniform, i32, read> = var @binding_point(1, 2)
 }
 
@@ -123,7 +123,7 @@ TEST_F(IR_BindingRemapperTest, RemappingBindingIndex) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<uniform, i32, read> = var @binding_point(1, 3)
 }
 
@@ -142,7 +142,7 @@ TEST_F(IR_BindingRemapperTest, RemappingGroupAndBindingIndex) {
     mod.root_block->Append(buffer);
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<uniform, i32, read> = var @binding_point(1, 2)
 }
 
@@ -150,7 +150,7 @@ TEST_F(IR_BindingRemapperTest, RemappingGroupAndBindingIndex) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer:ptr<uniform, i32, read> = var @binding_point(3, 4)
 }
 
@@ -172,7 +172,7 @@ TEST_F(IR_BindingRemapperTest, SwapTwoBindingPoints) {
     mod.root_block->Append(buffer_b);
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer_a:ptr<uniform, i32, read> = var @binding_point(1, 2)
   %buffer_b:ptr<uniform, i32, read> = var @binding_point(3, 4)
 }
@@ -181,7 +181,7 @@ TEST_F(IR_BindingRemapperTest, SwapTwoBindingPoints) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer_a:ptr<uniform, i32, read> = var @binding_point(3, 4)
   %buffer_b:ptr<uniform, i32, read> = var @binding_point(1, 2)
 }
@@ -212,13 +212,13 @@ TEST_F(IR_BindingRemapperTest, BindingPointCollisionSameEntryPoint) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer_a:ptr<uniform, i32, read> = var @binding_point(1, 2)
   %buffer_b:ptr<uniform, i32, read> = var @binding_point(3, 4)
 }
 
 %main = @fragment func():void {
-  %b2 = block {
+  $B2: {
     %4:i32 = load %buffer_a
     %5:i32 = load %buffer_b
     ret
@@ -228,13 +228,13 @@ TEST_F(IR_BindingRemapperTest, BindingPointCollisionSameEntryPoint) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %buffer_a:ptr<uniform, i32, read> = var @binding_point(0, 1)
   %buffer_b:ptr<uniform, i32, read> = var @binding_point(0, 1)
 }
 
 %main = @fragment func():void {
-  %b2 = block {
+  $B2: {
     %4:i32 = load %buffer_a
     %5:i32 = load %buffer_b
     ret

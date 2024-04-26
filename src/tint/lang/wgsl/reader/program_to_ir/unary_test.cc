@@ -47,12 +47,12 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():bool {
-  %b1 = block {
+  $B1: {
     ret false
   }
 }
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:bool = call %my_func
     %4:bool = eq %3, false
     %tint_symbol:bool = let %4
@@ -71,12 +71,12 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not_Vector) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():vec4<bool> {
-  %b1 = block {
+  $B1: {
     ret vec4<bool>(false)
   }
 }
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:vec4<bool> = call %my_func
     %4:vec4<bool> = eq %3, vec4<bool>(false)
     %tint_symbol:vec4<bool> = let %4
@@ -95,12 +95,12 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Complement) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 {
-  %b1 = block {
+  $B1: {
     ret 1u
   }
 }
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:u32 = call %my_func
     %4:u32 = complement %3
     %tint_symbol:u32 = let %4
@@ -119,12 +119,12 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Negation) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:i32 = call %my_func
     %4:i32 = negation %3
     %tint_symbol:i32 = let %4
@@ -143,12 +143,12 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
+    EXPECT_EQ(Disassemble(m.Get()), R"($B1: {  # root
   %v1:ptr<private, i32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %v2:ptr<private, i32, read_write> = let %v1
     ret
   }
@@ -167,12 +167,12 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
+    EXPECT_EQ(Disassemble(m.Get()), R"($B1: {  # root
   %v1:ptr<private, i32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %v3:ptr<private, i32, read_write> = let %v1
     store %v3, 42i
     ret

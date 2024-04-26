@@ -47,12 +47,12 @@ TEST_F(ProgramToIRStoreTest, EmitStatement_Assign) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
+    EXPECT_EQ(Disassemble(m.Get()), R"($B1: {  # root
   %a:ptr<private, u32, read_write> = var
 }
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     store %a, 4u
     ret
   }

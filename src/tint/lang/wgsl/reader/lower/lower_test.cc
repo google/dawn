@@ -56,7 +56,7 @@ TEST_F(Wgslreader_LowerTest, BuiltinConversion) {
 
     auto* src = R"(
 %f = func():void {
-  %b1 = block {
+  $B1: {
     %2:i32 = wgsl.max 1i, 2i
     ret
   }
@@ -66,7 +66,7 @@ TEST_F(Wgslreader_LowerTest, BuiltinConversion) {
 
     auto* expect = R"(
 %f = func():void {
-  %b1 = block {
+  $B1: {
     %2:i32 = max 1i, 2i
     ret
   }
@@ -91,12 +91,12 @@ TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoad) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:i32 = wgsl.workgroupUniformLoad %wgvar
     ret %3
   }
@@ -105,12 +105,12 @@ TEST_F(Wgslreader_LowerTest, WorkgroupUniformLoad) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%b1 = block {  # root
+$B1: {  # root
   %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
 %f = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:void = workgroupBarrier
     %4:i32 = load %wgvar
     %5:void = workgroupBarrier

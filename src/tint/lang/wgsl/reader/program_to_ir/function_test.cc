@@ -48,7 +48,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_Vertex) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @vertex func():vec4<f32> [@position] {
-  %b1 = block {
+  $B1: {
     ret vec4<f32>(0.0f)
   }
 }
@@ -63,7 +63,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_Fragment) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @fragment func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -79,7 +79,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_Compute) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = @compute @workgroup_size(8, 4, 2) func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -94,7 +94,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_Return) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():vec3<f32> {
-  %b1 = block {
+  $B1: {
     ret vec3<f32>(0.0f)
   }
 }
@@ -109,12 +109,12 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_UnreachableEnd_ReturnValue) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():f32 {
-  %b1 = block {
-    if true [t: %b2, f: %b3] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
         ret 0.0f
       }
-      %b3 = block {  # false
+      $B3: {  # false
         ret 1.0f
       }
     }
@@ -133,7 +133,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnPosition) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @vertex func():vec4<f32> [@position] {
-  %b1 = block {
+  $B1: {
     ret vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
   }
 }
@@ -150,7 +150,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnPositionInvariant) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = @vertex func():vec4<f32> [@invariant, @position] {
-  %b1 = block {
+  $B1: {
     ret vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
   }
 }
@@ -166,7 +166,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnLocation) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = @fragment func():vec4<f32> [@location(1)] {
-  %b1 = block {
+  $B1: {
     ret vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
   }
 }
@@ -184,7 +184,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnLocation_Interpolate) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = @fragment func():vec4<f32> [@location(1), @interpolate(linear, centroid)] {
-  %b1 = block {
+  $B1: {
     ret vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
   }
 }
@@ -200,7 +200,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnFragDepth) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @fragment func():f32 [@frag_depth] {
-  %b1 = block {
+  $B1: {
     ret 1.0f
   }
 }
@@ -216,7 +216,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnSampleMask) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @fragment func():u32 [@sample_mask] {
-  %b1 = block {
+  $B1: {
     ret 1u
   }
 }

@@ -48,7 +48,7 @@ TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
 
     auto* expect = R"(
 %foo = func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -75,12 +75,12 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:i32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(0, 0)
 }
 
 %foo = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<uniform, i32, read> = access %1, 0u
     %4:i32 = load %3
     ret %4
@@ -107,12 +107,12 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:i32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     %3:ptr<storage, i32, read_write> = access %1, 0u
     store %3, 42i
     ret
@@ -139,12 +139,12 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:i32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<push_constant, tint_symbol_1, read> = var
 }
 
 %foo = func():i32 {
-  %b2 = block {
+  $B2: {
     %3:ptr<push_constant, i32, read> = access %1, 0u
     %4:i32 = load %3
     ret %4
@@ -175,12 +175,12 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:array<i32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     %3:ptr<storage, array<i32>, read_write> = access %1, 0u
     %4:ptr<storage, i32, read_write> = access %3, 1u
     store %4, 42i
@@ -223,12 +223,12 @@ MyStruct = struct @align(4), @block {
   arr:array<i32> @offset(4)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     %3:ptr<storage, i32, read_write> = access %1, 0u
     %4:i32 = load %3
     %5:ptr<storage, i32, read_write> = access %1, 1u, 3u
@@ -268,12 +268,12 @@ MyStruct = struct @align(4), @block {
   arr:array<i32> @offset(4)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
 %foo = func():u32 {
-  %b2 = block {
+  $B2: {
     %root:ptr<storage, MyStruct, read_write> = let %1
     %4:ptr<storage, array<i32>, read_write> = access %root, 1u
     %arr:ptr<storage, array<i32>, read_write> = let %4
@@ -316,13 +316,13 @@ tint_symbol_1 = struct @align(4), @block {
   tint_symbol:MyStruct @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
   %2:ptr<private, MyStruct, read_write> = var
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     %4:MyStruct = load %2
     %5:ptr<storage, MyStruct, read_write> = access %1, 0u
     store %5, %4
@@ -369,14 +369,14 @@ tint_symbol_5 = struct @align(4), @block {
   tint_symbol_4:i32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
   %2:ptr<storage, tint_symbol_3, read_write> = var @binding_point(0, 1)
   %3:ptr<storage, tint_symbol_5, read_write> = var @binding_point(0, 2)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     %5:ptr<storage, i32, read_write> = access %2, 0u
     %6:i32 = load %5
     %7:ptr<storage, i32, read_write> = access %3, 0u

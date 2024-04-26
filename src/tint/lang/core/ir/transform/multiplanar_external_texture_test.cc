@@ -46,7 +46,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, NoRootBlock) {
 
     auto* expect = R"(
 %foo = func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -68,12 +68,12 @@ TEST_F(IR_MultiplanarExternalTextureTest, DeclWithNoUses) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -100,14 +100,14 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     ret
   }
 }
@@ -133,12 +133,12 @@ TEST_F(IR_MultiplanarExternalTextureTest, LoadWithNoUses) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     %3:texture_external = load %texture
     ret
   }
@@ -166,14 +166,14 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func():void {
-  %b2 = block {
+  $B2: {
     %5:texture_2d<f32> = load %texture_plane0
     %6:texture_2d<f32> = load %texture_plane1
     %7:tint_ExternalTextureParams = load %texture_params
@@ -204,12 +204,12 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureDimensions) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func():vec2<u32> {
-  %b2 = block {
+  $B2: {
     %3:texture_external = load %texture
     %result:vec2<u32> = textureDimensions %3
     ret %result
@@ -238,14 +238,14 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func():vec2<u32> {
-  %b2 = block {
+  $B2: {
     %5:texture_2d<f32> = load %texture_plane0
     %6:texture_2d<f32> = load %texture_plane1
     %7:tint_ExternalTextureParams = load %texture_params
@@ -279,12 +279,12 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_external = load %texture
     %result:vec4<f32> = textureLoad %4, %coords
     ret %result
@@ -313,14 +313,14 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %6:texture_2d<f32> = load %texture_plane0
     %7:texture_2d<f32> = load %texture_plane1
     %8:tint_ExternalTextureParams = load %texture_params
@@ -329,19 +329,19 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_TextureLoadExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %15:u32 = access %params, 1u
     %16:mat3x4<f32> = access %params, 2u
     %17:u32 = access %params, 0u
     %18:bool = eq %17, 1u
-    %19:vec3<f32>, %20:f32 = if %18 [t: %b4, f: %b5] {  # if_1
-      %b4 = block {  # true
+    %19:vec3<f32>, %20:f32 = if %18 [t: $B4, f: $B5] {  # if_1
+      $B4: {  # true
         %21:vec4<f32> = textureLoad %plane_0, %coords_1, 0u
         %22:vec3<f32> = swizzle %21, xyz
         %23:f32 = access %21, 3u
         exit_if %22, %23  # if_1
       }
-      %b5 = block {  # false
+      $B5: {  # false
         %24:vec4<f32> = textureLoad %plane_0, %coords_1, 0u
         %25:f32 = access %24, 0u
         %26:vec2<u32> = shr %coords_1, vec2<u32>(1u)
@@ -353,8 +353,8 @@ tint_ExternalTextureParams = struct @align(16) {
       }
     }
     %31:bool = eq %15, 0u
-    %32:vec3<f32> = if %31 [t: %b6, f: %b7] {  # if_2
-      %b6 = block {  # true
+    %32:vec3<f32> = if %31 [t: $B6, f: $B7] {  # if_2
+      $B6: {  # true
         %33:tint_GammaTransferParams = access %params, 3u
         %34:tint_GammaTransferParams = access %params, 4u
         %35:mat3x3<f32> = access %params, 5u
@@ -363,7 +363,7 @@ tint_ExternalTextureParams = struct @align(16) {
         %39:vec3<f32> = call %tint_GammaCorrection, %38, %34
         exit_if %39  # if_2
       }
-      %b7 = block {  # false
+      $B7: {  # false
         exit_if %19  # if_2
       }
     }
@@ -372,7 +372,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_GammaCorrection = func(%v:vec3<f32>, %params_1:tint_GammaTransferParams):vec3<f32> {  # %params_1: 'params'
-  %b8 = block {
+  $B8: {
     %43:f32 = access %params_1, 0u
     %44:f32 = access %params_1, 1u
     %45:f32 = access %params_1, 2u
@@ -423,12 +423,12 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad_SignedCoords) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<i32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %4:texture_external = load %texture
     %result:vec4<f32> = textureLoad %4, %coords
     ret %result
@@ -457,14 +457,14 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%coords:vec2<i32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %6:texture_2d<f32> = load %texture_plane0
     %7:texture_2d<f32> = load %texture_plane1
     %8:tint_ExternalTextureParams = load %texture_params
@@ -474,19 +474,19 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_TextureLoadExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %16:u32 = access %params, 1u
     %17:mat3x4<f32> = access %params, 2u
     %18:u32 = access %params, 0u
     %19:bool = eq %18, 1u
-    %20:vec3<f32>, %21:f32 = if %19 [t: %b4, f: %b5] {  # if_1
-      %b4 = block {  # true
+    %20:vec3<f32>, %21:f32 = if %19 [t: $B4, f: $B5] {  # if_1
+      $B4: {  # true
         %22:vec4<f32> = textureLoad %plane_0, %coords_1, 0u
         %23:vec3<f32> = swizzle %22, xyz
         %24:f32 = access %22, 3u
         exit_if %23, %24  # if_1
       }
-      %b5 = block {  # false
+      $B5: {  # false
         %25:vec4<f32> = textureLoad %plane_0, %coords_1, 0u
         %26:f32 = access %25, 0u
         %27:vec2<u32> = shr %coords_1, vec2<u32>(1u)
@@ -498,8 +498,8 @@ tint_ExternalTextureParams = struct @align(16) {
       }
     }
     %32:bool = eq %16, 0u
-    %33:vec3<f32> = if %32 [t: %b6, f: %b7] {  # if_2
-      %b6 = block {  # true
+    %33:vec3<f32> = if %32 [t: $B6, f: $B7] {  # if_2
+      $B6: {  # true
         %34:tint_GammaTransferParams = access %params, 3u
         %35:tint_GammaTransferParams = access %params, 4u
         %36:mat3x3<f32> = access %params, 5u
@@ -508,7 +508,7 @@ tint_ExternalTextureParams = struct @align(16) {
         %40:vec3<f32> = call %tint_GammaCorrection, %39, %35
         exit_if %40  # if_2
       }
-      %b7 = block {  # false
+      $B7: {  # false
         exit_if %20  # if_2
       }
     }
@@ -517,7 +517,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_GammaCorrection = func(%v:vec3<f32>, %params_1:tint_GammaTransferParams):vec3<f32> {  # %params_1: 'params'
-  %b8 = block {
+  $B8: {
     %44:f32 = access %params_1, 0u
     %45:f32 = access %params_1, 1u
     %46:f32 = access %params_1, 2u
@@ -570,12 +570,12 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureSampleBaseClampToEdge) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%sampler:sampler, %coords:vec2<f32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %5:texture_external = load %texture
     %result:vec4<f32> = textureSampleBaseClampToEdge %5, %sampler, %coords
     ret %result
@@ -604,14 +604,14 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%sampler:sampler, %coords:vec2<f32>):vec4<f32> {
-  %b2 = block {
+  $B2: {
     %7:texture_2d<f32> = load %texture_plane0
     %8:texture_2d<f32> = load %texture_plane1
     %9:tint_ExternalTextureParams = load %texture_params
@@ -620,7 +620,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %17:u32 = access %params, 1u
     %18:mat3x4<f32> = access %params, 2u
     %19:mat3x2<f32> = access %params, 6u
@@ -638,14 +638,14 @@ tint_ExternalTextureParams = struct @align(16) {
     %31:vec2<f32> = clamp %21, %29, %30
     %32:u32 = access %params, 0u
     %33:bool = eq %32, 1u
-    %34:vec3<f32>, %35:f32 = if %33 [t: %b4, f: %b5] {  # if_1
-      %b4 = block {  # true
+    %34:vec3<f32>, %35:f32 = if %33 [t: $B4, f: $B5] {  # if_1
+      $B4: {  # true
         %36:vec4<f32> = textureSampleLevel %plane_0, %sampler_1, %26, 0.0f
         %37:vec3<f32> = swizzle %36, xyz
         %38:f32 = access %36, 3u
         exit_if %37, %38  # if_1
       }
-      %b5 = block {  # false
+      $B5: {  # false
         %39:vec4<f32> = textureSampleLevel %plane_0, %sampler_1, %26, 0.0f
         %40:f32 = access %39, 0u
         %41:vec4<f32> = textureSampleLevel %plane_1, %sampler_1, %31, 0.0f
@@ -656,8 +656,8 @@ tint_ExternalTextureParams = struct @align(16) {
       }
     }
     %45:bool = eq %17, 0u
-    %46:vec3<f32> = if %45 [t: %b6, f: %b7] {  # if_2
-      %b6 = block {  # true
+    %46:vec3<f32> = if %45 [t: $B6, f: $B7] {  # if_2
+      $B6: {  # true
         %47:tint_GammaTransferParams = access %params, 3u
         %48:tint_GammaTransferParams = access %params, 4u
         %49:mat3x3<f32> = access %params, 5u
@@ -666,7 +666,7 @@ tint_ExternalTextureParams = struct @align(16) {
         %53:vec3<f32> = call %tint_GammaCorrection, %52, %48
         exit_if %53  # if_2
       }
-      %b7 = block {  # false
+      $B7: {  # false
         exit_if %34  # if_2
       }
     }
@@ -675,7 +675,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_GammaCorrection = func(%v:vec3<f32>, %params_1:tint_GammaTransferParams):vec3<f32> {  # %params_1: 'params'
-  %b8 = block {
+  $B8: {
     %57:f32 = access %params_1, 0u
     %58:f32 = access %params_1, 1u
     %59:f32 = access %params_1, 2u
@@ -743,18 +743,18 @@ TEST_F(IR_MultiplanarExternalTextureTest, ViaUserFunctionParameter) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%texture_1:texture_external, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_1: 'texture'
-  %b2 = block {
+  $B2: {
     %result:vec4<f32> = textureSampleBaseClampToEdge %texture_1, %sampler, %coords
     ret %result
   }
 }
 %bar = func(%sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %10:texture_external = load %texture
     %result_1:vec4<f32> = call %foo, %10, %sampler_1, %coords_1  # %result_1: 'result'
     ret %result_1
@@ -783,20 +783,20 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%texture_plane0_1:texture_2d<f32>, %texture_plane1_1:texture_2d<f32>, %texture_params_1:tint_ExternalTextureParams, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_plane0_1: 'texture_plane0', %texture_plane1_1: 'texture_plane1', %texture_params_1: 'texture_params'
-  %b2 = block {
+  $B2: {
     %10:vec4<f32> = call %tint_TextureSampleExternal, %texture_plane0_1, %texture_plane1_1, %texture_params_1, %sampler, %coords
     ret %10
   }
 }
 %bar = func(%sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %15:texture_2d<f32> = load %texture_plane0
     %16:texture_2d<f32> = load %texture_plane1
     %17:tint_ExternalTextureParams = load %texture_params
@@ -805,7 +805,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_2:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %sampler_2: 'sampler', %coords_2: 'coords'
-  %b4 = block {
+  $B4: {
     %24:u32 = access %params, 1u
     %25:mat3x4<f32> = access %params, 2u
     %26:mat3x2<f32> = access %params, 6u
@@ -823,14 +823,14 @@ tint_ExternalTextureParams = struct @align(16) {
     %38:vec2<f32> = clamp %28, %36, %37
     %39:u32 = access %params, 0u
     %40:bool = eq %39, 1u
-    %41:vec3<f32>, %42:f32 = if %40 [t: %b5, f: %b6] {  # if_1
-      %b5 = block {  # true
+    %41:vec3<f32>, %42:f32 = if %40 [t: $B5, f: $B6] {  # if_1
+      $B5: {  # true
         %43:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %33, 0.0f
         %44:vec3<f32> = swizzle %43, xyz
         %45:f32 = access %43, 3u
         exit_if %44, %45  # if_1
       }
-      %b6 = block {  # false
+      $B6: {  # false
         %46:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %33, 0.0f
         %47:f32 = access %46, 0u
         %48:vec4<f32> = textureSampleLevel %plane_1, %sampler_2, %38, 0.0f
@@ -841,8 +841,8 @@ tint_ExternalTextureParams = struct @align(16) {
       }
     }
     %52:bool = eq %24, 0u
-    %53:vec3<f32> = if %52 [t: %b7, f: %b8] {  # if_2
-      %b7 = block {  # true
+    %53:vec3<f32> = if %52 [t: $B7, f: $B8] {  # if_2
+      $B7: {  # true
         %54:tint_GammaTransferParams = access %params, 3u
         %55:tint_GammaTransferParams = access %params, 4u
         %56:mat3x3<f32> = access %params, 5u
@@ -851,7 +851,7 @@ tint_ExternalTextureParams = struct @align(16) {
         %60:vec3<f32> = call %tint_GammaCorrection, %59, %55
         exit_if %60  # if_2
       }
-      %b8 = block {  # false
+      $B8: {  # false
         exit_if %41  # if_2
       }
     }
@@ -860,7 +860,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_GammaCorrection = func(%v:vec3<f32>, %params_1:tint_GammaTransferParams):vec3<f32> {  # %params_1: 'params'
-  %b9 = block {
+  $B9: {
     %64:f32 = access %params_1, 0u
     %65:f32 = access %params_1, 1u
     %66:f32 = access %params_1, 2u
@@ -938,18 +938,18 @@ TEST_F(IR_MultiplanarExternalTextureTest, MultipleUses) {
     }
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%texture_1:texture_external, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_1: 'texture'
-  %b2 = block {
+  $B2: {
     %result:vec4<f32> = textureSampleBaseClampToEdge %texture_1, %sampler, %coords
     ret %result
   }
 }
 %bar = func(%sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %10:texture_external = load %texture
     %11:vec2<u32> = textureDimensions %10
     %12:texture_external = load %texture
@@ -986,20 +986,20 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
 }
 
 %foo = func(%texture_plane0_1:texture_2d<f32>, %texture_plane1_1:texture_2d<f32>, %texture_params_1:tint_ExternalTextureParams, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_plane0_1: 'texture_plane0', %texture_plane1_1: 'texture_plane1', %texture_params_1: 'texture_params'
-  %b2 = block {
+  $B2: {
     %10:vec4<f32> = call %tint_TextureSampleExternal, %texture_plane0_1, %texture_plane1_1, %texture_params_1, %sampler, %coords
     ret %10
   }
 }
 %bar = func(%sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %15:texture_2d<f32> = load %texture_plane0
     %16:texture_2d<f32> = load %texture_plane1
     %17:tint_ExternalTextureParams = load %texture_params
@@ -1022,7 +1022,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_2:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %sampler_2: 'sampler', %coords_2: 'coords'
-  %b4 = block {
+  $B4: {
     %38:u32 = access %params, 1u
     %39:mat3x4<f32> = access %params, 2u
     %40:mat3x2<f32> = access %params, 6u
@@ -1040,14 +1040,14 @@ tint_ExternalTextureParams = struct @align(16) {
     %52:vec2<f32> = clamp %42, %50, %51
     %53:u32 = access %params, 0u
     %54:bool = eq %53, 1u
-    %55:vec3<f32>, %56:f32 = if %54 [t: %b5, f: %b6] {  # if_1
-      %b5 = block {  # true
+    %55:vec3<f32>, %56:f32 = if %54 [t: $B5, f: $B6] {  # if_1
+      $B5: {  # true
         %57:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %47, 0.0f
         %58:vec3<f32> = swizzle %57, xyz
         %59:f32 = access %57, 3u
         exit_if %58, %59  # if_1
       }
-      %b6 = block {  # false
+      $B6: {  # false
         %60:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %47, 0.0f
         %61:f32 = access %60, 0u
         %62:vec4<f32> = textureSampleLevel %plane_1, %sampler_2, %52, 0.0f
@@ -1058,8 +1058,8 @@ tint_ExternalTextureParams = struct @align(16) {
       }
     }
     %66:bool = eq %38, 0u
-    %67:vec3<f32> = if %66 [t: %b7, f: %b8] {  # if_2
-      %b7 = block {  # true
+    %67:vec3<f32> = if %66 [t: $B7, f: $B8] {  # if_2
+      $B7: {  # true
         %68:tint_GammaTransferParams = access %params, 3u
         %69:tint_GammaTransferParams = access %params, 4u
         %70:mat3x3<f32> = access %params, 5u
@@ -1068,7 +1068,7 @@ tint_ExternalTextureParams = struct @align(16) {
         %74:vec3<f32> = call %tint_GammaCorrection, %73, %69
         exit_if %74  # if_2
       }
-      %b8 = block {  # false
+      $B8: {  # false
         exit_if %55  # if_2
       }
     }
@@ -1077,7 +1077,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_GammaCorrection = func(%v:vec3<f32>, %params_1:tint_GammaTransferParams):vec3<f32> {  # %params_1: 'params'
-  %b9 = block {
+  $B9: {
     %78:f32 = access %params_1, 0u
     %79:f32 = access %params_1, 1u
     %80:f32 = access %params_1, 2u
@@ -1139,14 +1139,14 @@ TEST_F(IR_MultiplanarExternalTextureTest, MultipleTextures) {
     });
 
     auto* src = R"(
-%b1 = block {  # root
+$B1: {  # root
   %texture_a:ptr<handle, texture_external, read> = var @binding_point(1, 2)
   %texture_b:ptr<handle, texture_external, read> = var @binding_point(2, 2)
   %texture_c:ptr<handle, texture_external, read> = var @binding_point(3, 2)
 }
 
 %foo = func(%coords:vec2<u32>):void {
-  %b2 = block {
+  $B2: {
     %6:texture_external = load %texture_a
     %7:vec4<f32> = textureLoad %6, %coords
     %8:texture_external = load %texture_b
@@ -1179,7 +1179,7 @@ tint_ExternalTextureParams = struct @align(16) {
   coordTransformationMatrix:mat3x2<f32> @offset(176)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %texture_a_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
   %texture_a_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
   %texture_a_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
@@ -1192,7 +1192,7 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 %foo = func(%coords:vec2<u32>):void {
-  %b2 = block {
+  $B2: {
     %12:texture_2d<f32> = load %texture_a_plane0
     %13:texture_2d<f32> = load %texture_a_plane1
     %14:tint_ExternalTextureParams = load %texture_a_params
@@ -1209,19 +1209,19 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_TextureLoadExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
-  %b3 = block {
+  $B3: {
     %29:u32 = access %params, 1u
     %30:mat3x4<f32> = access %params, 2u
     %31:u32 = access %params, 0u
     %32:bool = eq %31, 1u
-    %33:vec3<f32>, %34:f32 = if %32 [t: %b4, f: %b5] {  # if_1
-      %b4 = block {  # true
+    %33:vec3<f32>, %34:f32 = if %32 [t: $B4, f: $B5] {  # if_1
+      $B4: {  # true
         %35:vec4<f32> = textureLoad %plane_0, %coords_1, 0u
         %36:vec3<f32> = swizzle %35, xyz
         %37:f32 = access %35, 3u
         exit_if %36, %37  # if_1
       }
-      %b5 = block {  # false
+      $B5: {  # false
         %38:vec4<f32> = textureLoad %plane_0, %coords_1, 0u
         %39:f32 = access %38, 0u
         %40:vec2<u32> = shr %coords_1, vec2<u32>(1u)
@@ -1233,8 +1233,8 @@ tint_ExternalTextureParams = struct @align(16) {
       }
     }
     %45:bool = eq %29, 0u
-    %46:vec3<f32> = if %45 [t: %b6, f: %b7] {  # if_2
-      %b6 = block {  # true
+    %46:vec3<f32> = if %45 [t: $B6, f: $B7] {  # if_2
+      $B6: {  # true
         %47:tint_GammaTransferParams = access %params, 3u
         %48:tint_GammaTransferParams = access %params, 4u
         %49:mat3x3<f32> = access %params, 5u
@@ -1243,7 +1243,7 @@ tint_ExternalTextureParams = struct @align(16) {
         %53:vec3<f32> = call %tint_GammaCorrection, %52, %48
         exit_if %53  # if_2
       }
-      %b7 = block {  # false
+      $B7: {  # false
         exit_if %33  # if_2
       }
     }
@@ -1252,7 +1252,7 @@ tint_ExternalTextureParams = struct @align(16) {
   }
 }
 %tint_GammaCorrection = func(%v:vec3<f32>, %params_1:tint_GammaTransferParams):vec3<f32> {  # %params_1: 'params'
-  %b8 = block {
+  $B8: {
     %57:f32 = access %params_1, 0u
     %58:f32 = access %params_1, 1u
     %59:f32 = access %params_1, 2u

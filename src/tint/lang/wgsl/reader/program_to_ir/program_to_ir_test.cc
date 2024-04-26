@@ -84,7 +84,7 @@ TEST_F(IR_FromProgramTest, Func) {
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -105,7 +105,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam) {
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func(%a:u32):u32 {
-  %b1 = block {
+  $B1: {
     ret %a
   }
 }
@@ -127,7 +127,7 @@ TEST_F(IR_FromProgramTest, Func_WithMultipleParam) {
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func(%a:u32, %b:i32, %c:bool):void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -156,12 +156,12 @@ TEST_F(IR_FromProgramTest, IfStatement) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    if true [t: %b2, f: %b3] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
         exit_if  # if_1
       }
-      %b3 = block {  # false
+      $B3: {  # false
         exit_if  # if_1
       }
     }
@@ -184,9 +184,9 @@ TEST_F(IR_FromProgramTest, IfStatement_TrueReturns) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
         ret
       }
     }
@@ -209,12 +209,12 @@ TEST_F(IR_FromProgramTest, IfStatement_FalseReturns) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    if true [t: %b2, f: %b3] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
         exit_if  # if_1
       }
-      %b3 = block {  # false
+      $B3: {  # false
         ret
       }
     }
@@ -237,12 +237,12 @@ TEST_F(IR_FromProgramTest, IfStatement_BothReturn) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    if true [t: %b2, f: %b3] {  # if_1
-      %b2 = block {  # true
+  $B1: {
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
         ret
       }
-      %b3 = block {  # false
+      $B3: {  # false
         ret
       }
     }
@@ -264,11 +264,11 @@ TEST_F(IR_FromProgramTest, IfStatement_JumpChainToMerge) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    if true [t: %b2] {  # if_1
-      %b2 = block {  # true
-        loop [b: %b3] {  # loop_1
-          %b3 = block {  # body
+  $B1: {
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        loop [b: $B3] {  # loop_1
+          $B3: {  # body
             exit_loop  # loop_1
           }
         }
@@ -298,9 +298,9 @@ TEST_F(IR_FromProgramTest, Loop_WithBreak) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         exit_loop  # loop_1
       }
     }
@@ -328,18 +328,18 @@ TEST_F(IR_FromProgramTest, Loop_WithContinue) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        if true [t: %b4] {  # if_1
-          %b4 = block {  # true
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4] {  # if_1
+          $B4: {  # true
             exit_loop  # loop_1
           }
         }
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -366,13 +366,13 @@ TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        continue %b3
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        continue $B3
       }
-      %b3 = block {  # continuing
-        break_if true %b2
+      $B3: {  # continuing
+        break_if true $B2
       }
     }
     ret
@@ -393,14 +393,14 @@ TEST_F(IR_FromProgramTest, Loop_Continuing_Body_Scope) {
     auto m = res.Move();
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
         %a:bool = let true
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
-        break_if %a %b2
+      $B3: {  # continuing
+        break_if %a $B2
       }
     }
     ret
@@ -427,18 +427,18 @@ TEST_F(IR_FromProgramTest, Loop_WithReturn) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        if true [t: %b4] {  # if_1
-          %b4 = block {  # true
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4] {  # if_1
+          $B4: {  # true
             ret
           }
         }
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     unreachable
@@ -464,9 +464,9 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         ret
       }
     }
@@ -502,14 +502,14 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         ret
       }
     }
-    if true [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if true [t: $B3] {  # if_1
+      $B3: {  # true
         ret
       }
     }
@@ -537,14 +537,14 @@ TEST_F(IR_FromProgramTest, Loop_WithIf_BothBranchesBreak) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
-        if true [t: %b3, f: %b4] {  # if_1
-          %b3 = block {  # true
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
+        if true [t: $B3, f: $B4] {  # if_1
+          $B3: {  # true
             exit_loop  # loop_1
           }
-          %b4 = block {  # false
+          $B4: {  # false
             exit_loop  # loop_1
           }
         }
@@ -576,49 +576,49 @@ TEST_F(IR_FromProgramTest, Loop_Nested) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        loop [b: %b4, c: %b5] {  # loop_2
-          %b4 = block {  # body
-            if true [t: %b6] {  # if_1
-              %b6 = block {  # true
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        loop [b: $B4, c: $B5] {  # loop_2
+          $B4: {  # body
+            if true [t: $B6] {  # if_1
+              $B6: {  # true
                 exit_loop  # loop_2
               }
             }
-            if true [t: %b7] {  # if_2
-              %b7 = block {  # true
-                continue %b5
+            if true [t: $B7] {  # if_2
+              $B7: {  # true
+                continue $B5
               }
             }
-            continue %b5
+            continue $B5
           }
-          %b5 = block {  # continuing
-            loop [b: %b8] {  # loop_3
-              %b8 = block {  # body
+          $B5: {  # continuing
+            loop [b: $B8] {  # loop_3
+              $B8: {  # body
                 exit_loop  # loop_3
               }
             }
-            loop [b: %b9, c: %b10] {  # loop_4
-              %b9 = block {  # body
-                continue %b10
+            loop [b: $B9, c: $B10] {  # loop_4
+              $B9: {  # body
+                continue $B10
               }
-              %b10 = block {  # continuing
-                break_if true %b9
+              $B10: {  # continuing
+                break_if true $B9
               }
             }
-            next_iteration %b4
+            next_iteration $B4
           }
         }
-        if true [t: %b11] {  # if_3
-          %b11 = block {  # true
+        if true [t: $B11] {  # if_3
+          $B11: {  # true
             exit_loop  # loop_1
           }
         }
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -644,21 +644,21 @@ TEST_F(IR_FromProgramTest, While) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        if false [t: %b4, f: %b5] {  # if_1
-          %b4 = block {  # true
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if false [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
             exit_if  # if_1
           }
-          %b5 = block {  # false
+          $B5: {  # false
             exit_loop  # loop_1
           }
         }
-        continue %b3
+        continue $B3
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -684,21 +684,21 @@ TEST_F(IR_FromProgramTest, While_Return) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2, c: %b3] {  # loop_1
-      %b2 = block {  # body
-        if true [t: %b4, f: %b5] {  # if_1
-          %b4 = block {  # true
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if true [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
             exit_if  # if_1
           }
-          %b5 = block {  # false
+          $B5: {  # false
             exit_loop  # loop_1
           }
         }
         ret
       }
-      %b3 = block {  # continuing
-        next_iteration %b2
+      $B3: {  # continuing
+        next_iteration $B2
       }
     }
     ret
@@ -724,30 +724,30 @@ TEST_F(IR_FromProgramTest, For) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [i: %b2, b: %b3, c: %b4] {  # loop_1
-      %b2 = block {  # initializer
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
         %i:ptr<function, i32, read_write> = var
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         %3:i32 = load %i
         %4:bool = lt %3, 10i
-        if %4 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+        if %4 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
-        continue %b4
+        continue $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %5:i32 = load %i
         %6:i32 = add %5, 1i
         store %i, %6
-        next_iteration %b3
+        next_iteration $B3
       }
     }
     ret
@@ -773,13 +773,13 @@ TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [i: %b2, b: %b3] {  # loop_1
-      %b2 = block {  # initializer
+  $B1: {
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
         %i:ptr<function, i32, read_write> = var
-        next_iteration %b3
+        next_iteration $B3
       }
-      %b3 = block {  # body
+      $B3: {  # body
         exit_loop  # loop_1
       }
     }
@@ -806,9 +806,9 @@ TEST_F(IR_FromProgramTest, For_NoInitCondOrContinuing) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    loop [b: %b2] {  # loop_1
-      %b2 = block {  # body
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
         exit_loop  # loop_1
       }
     }
@@ -851,15 +851,15 @@ TEST_F(IR_FromProgramTest, Switch) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    switch 1i [c: (0i, %b2), c: (1i, %b3), c: (default, %b4)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    switch 1i [c: (0i, $B2), c: (1i, $B3), c: (default, $B4)] {  # switch_1
+      $B2: {  # case
         exit_switch  # switch_1
       }
-      %b3 = block {  # case
+      $B3: {  # case
         exit_switch  # switch_1
       }
-      %b4 = block {  # case
+      $B4: {  # case
         exit_switch  # switch_1
       }
     }
@@ -899,9 +899,9 @@ TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    switch 1i [c: (0i 1i default, %b2)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    switch 1i [c: (0i 1i default, $B2)] {  # switch_1
+      $B2: {  # case
         exit_switch  # switch_1
       }
     }
@@ -930,9 +930,9 @@ TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    switch 1i [c: (default, %b2)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    switch 1i [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
         exit_switch  # switch_1
       }
     }
@@ -970,12 +970,12 @@ TEST_F(IR_FromProgramTest, Switch_WithBreak) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    switch 1i [c: (0i, %b2), c: (default, %b3)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    switch 1i [c: (0i, $B2), c: (default, $B3)] {  # switch_1
+      $B2: {  # case
         exit_switch  # switch_1
       }
-      %b3 = block {  # case
+      $B3: {  # case
         exit_switch  # switch_1
       }
     }
@@ -1012,12 +1012,12 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
 
     EXPECT_EQ(Disassemble(m),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b1 = block {
-    switch 1i [c: (0i, %b2), c: (default, %b3)] {  # switch_1
-      %b2 = block {  # case
+  $B1: {
+    switch 1i [c: (0i, $B2), c: (default, $B3)] {  # switch_1
+      $B2: {  # case
         ret
       }
-      %b3 = block {  # case
+      $B3: {  # case
         ret
       }
     }
@@ -1036,12 +1036,12 @@ TEST_F(IR_FromProgramTest, Emit_Phony) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%b = func():i32 {
-  %b1 = block {
+  $B1: {
     ret 1i
   }
 }
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
-  %b2 = block {
+  $B2: {
     %3:i32 = call %b
     ret
   }
@@ -1061,7 +1061,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Invariant) {
     EXPECT_EQ(
         Disassemble(m.Get()),
         R"(%f = @fragment func(%a:vec4<f32> [@invariant, @position]):vec4<f32> [@location(1)] {
-  %b1 = block {
+  $B1: {
     ret %a
   }
 }
@@ -1077,7 +1077,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%f = @fragment func(%a:f32 [@location(2)]):f32 [@location(1)] {
-  %b1 = block {
+  $B1: {
     ret %a
   }
 }
@@ -1098,7 +1098,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolati
     EXPECT_EQ(
         Disassemble(m.Get()),
         R"(%f = @fragment func(%a:f32 [@location(2), @interpolate(linear, centroid)]):f32 [@location(1)] {
-  %b1 = block {
+  $B1: {
     ret %a
   }
 }
@@ -1117,7 +1117,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolati
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%f = @fragment func(%a:f32 [@location(2), @interpolate(flat)]):f32 [@location(1)] {
-  %b1 = block {
+  $B1: {
     ret %a
   }
 }
@@ -1139,7 +1139,7 @@ TEST_F(IR_FromProgramTest, Requires) {
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
@@ -1161,7 +1161,7 @@ TEST_F(IR_FromProgramTest, BugChromium324466107) {
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%f = func():void {
-  %b1 = block {
+  $B1: {
     ret
   }
 }
