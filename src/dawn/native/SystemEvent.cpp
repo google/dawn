@@ -60,6 +60,10 @@ SystemEventReceiver SystemEventReceiver::CreateAlreadySignaled() {
     return receiver;
 }
 
+const SystemHandle& SystemEventReceiver::GetPrimitive() const {
+    return mPrimitive;
+}
+
 // SystemEventPipeSender
 
 SystemEventPipeSender::~SystemEventPipeSender() {
