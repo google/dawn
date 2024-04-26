@@ -658,7 +658,7 @@ $B1: {  # root
   $B3: {
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration $B5 0u
+        next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
         %9:bool = gte %idx:u32, 4u
@@ -670,11 +670,11 @@ $B1: {  # root
         %10:ptr<storage, MyStruct, read_write> = access %target, %idx:u32
         %11:MyStruct = access %value_param, %idx:u32
         %12:void = call %tint_store_and_preserve_padding_1, %10, %11
-        continue $B6
+        continue  # -> $B6
       }
       $B6: {  # continuing
         %14:u32 = add %idx:u32, 1u
-        next_iteration $B5 %14
+        next_iteration %14  # -> $B5
       }
     }
     ret
@@ -890,7 +890,7 @@ $B1: {  # root
   $B3: {
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration $B5 0u
+        next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
         %9:bool = gte %idx:u32, 4u
@@ -902,11 +902,11 @@ $B1: {  # root
         %10:ptr<storage, mat3x3<f32>, read_write> = access %target, %idx:u32
         %11:mat3x3<f32> = access %value_param, %idx:u32
         %12:void = call %tint_store_and_preserve_padding_1, %10, %11
-        continue $B6
+        continue  # -> $B6
       }
       $B6: {  # continuing
         %14:u32 = add %idx:u32, 1u
-        next_iteration $B5 %14
+        next_iteration %14  # -> $B5
       }
     }
     ret
@@ -977,7 +977,7 @@ $B1: {  # root
   $B3: {
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration $B5 0u
+        next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
         %9:bool = gte %idx:u32, 4u
@@ -989,11 +989,11 @@ $B1: {  # root
         %10:ptr<storage, vec3<f32>, read_write> = access %target, %idx:u32
         %11:vec3<f32> = access %value_param, %idx:u32
         store %10, %11
-        continue $B6
+        continue  # -> $B6
       }
       $B6: {  # continuing
         %12:u32 = add %idx:u32, 1u
-        next_iteration $B5 %12
+        next_iteration %12  # -> $B5
       }
     }
     ret
@@ -1092,7 +1092,7 @@ $B1: {  # root
   $B3: {
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration $B5 0u
+        next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
         %9:bool = gte %idx:u32, 3u
@@ -1104,11 +1104,11 @@ $B1: {  # root
         %10:ptr<storage, Outer, read_write> = access %target, %idx:u32
         %11:Outer = access %value_param, %idx:u32
         %12:void = call %tint_store_and_preserve_padding_1, %10, %11
-        continue $B6
+        continue  # -> $B6
       }
       $B6: {  # continuing
         %14:u32 = add %idx:u32, 1u
-        next_iteration $B5 %14
+        next_iteration %14  # -> $B5
       }
     }
     ret
@@ -1152,7 +1152,7 @@ $B1: {  # root
   $B10: {
     loop [i: $B11, b: $B12, c: $B13] {  # loop_2
       $B11: {  # initializer
-        next_iteration $B12 0u
+        next_iteration 0u  # -> $B12
       }
       $B12 (%idx_1:u32): {  # body
         %46:bool = gte %idx_1:u32, 4u
@@ -1164,11 +1164,11 @@ $B1: {  # root
         %47:ptr<storage, vec3<f32>, read_write> = access %target_3, %idx_1:u32
         %48:vec3<f32> = access %value_param_3, %idx_1:u32
         store %47, %48
-        continue $B13
+        continue  # -> $B13
       }
       $B13: {  # continuing
         %49:u32 = add %idx_1:u32, 1u
-        next_iteration $B12 %49
+        next_iteration %49  # -> $B12
       }
     }
     ret
@@ -1192,7 +1192,7 @@ $B1: {  # root
   $B16: {
     loop [i: $B17, b: $B18, c: $B19] {  # loop_3
       $B17: {  # initializer
-        next_iteration $B18 0u
+        next_iteration 0u  # -> $B18
       }
       $B18 (%idx_2:u32): {  # body
         %61:bool = gte %idx_2:u32, 4u
@@ -1204,11 +1204,11 @@ $B1: {  # root
         %62:ptr<storage, Inner, read_write> = access %target_5, %idx_2:u32
         %63:Inner = access %value_param_5, %idx_2:u32
         %64:void = call %tint_store_and_preserve_padding_2, %62, %63
-        continue $B19
+        continue  # -> $B19
       }
       $B19: {  # continuing
         %65:u32 = add %idx_2:u32, 1u
-        next_iteration $B18 %65
+        next_iteration %65  # -> $B18
       }
     }
     ret

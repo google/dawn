@@ -2035,7 +2035,7 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedOutsideLoopInitializer) {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         store %2, %3
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         exit_loop  # loop_1
@@ -2079,7 +2079,7 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopInitializer) {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         store %2, %4
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         exit_loop  # loop_1
@@ -2102,7 +2102,7 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopInitializer) {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         store %2, %5
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         exit_loop  # loop_1
@@ -2142,7 +2142,7 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopInitializer_ThenUs
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         store %2, 2i
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         exit_loop  # loop_1
@@ -2165,7 +2165,7 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopInitializer_ThenUs
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         store %2, 2i
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         exit_loop  # loop_1
@@ -2336,11 +2336,11 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedOutsideLoopContinuing) {
     %2:i32 = add 1i, 2i
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         %3:bool = eq %2, 3i
-        break_if %3 $B2
+        break_if %3  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret 0i
@@ -2377,11 +2377,11 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopContinuing) {
     %4:i32 = add %3, 2i
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         %5:bool = eq %4, 3i
-        break_if %5 $B2
+        break_if %5  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret 0i
@@ -2402,11 +2402,11 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopContinuing) {
     %5:i32 = let %4
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         %6:bool = eq %5, 3i
-        break_if %6 $B2
+        break_if %6  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret 0i
@@ -2440,11 +2440,11 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopContinuing_ThenUse
     %3:i32 = load %2
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         store %2, 2i
-        break_if true $B2
+        break_if true  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret %3
@@ -2463,11 +2463,11 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVar_ThenWriteToVarInLoopContinuing_ThenUse
     %4:i32 = let %3
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         store %2, 2i
-        break_if true $B2
+        break_if true  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret %4
@@ -2505,7 +2505,7 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopInitializer_ThenReadAndWriteToVar
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %3:i32 = load %2
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %4:i32 = add %3, 1i
@@ -2529,7 +2529,7 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopInitializer_ThenReadAndWriteToVar
       $B2: {  # initializer
         %3:i32 = load %2
         %4:i32 = let %3
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %5:i32 = add %4, 1i
@@ -2573,15 +2573,15 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopInitializer_ThenReadAndWriteToVar
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
         %3:i32 = load %2
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %4:i32 = add %3, 1i
         store %2, %4
-        break_if true $B3
+        break_if true  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret 3i
@@ -2600,15 +2600,15 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopInitializer_ThenReadAndWriteToVar
       $B2: {  # initializer
         %3:i32 = load %2
         %4:i32 = let %3
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %5:i32 = add %4, 1i
         store %2, %5
-        break_if true $B3
+        break_if true  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret 3i
@@ -2647,12 +2647,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopBody_ThenReadAndWriteToVarInLoopC
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         %3:i32 = load %2
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         %4:i32 = add %3, 1i
         store %2, %4
-        break_if true $B2
+        break_if true  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret 3i
@@ -2671,12 +2671,12 @@ TEST_F(WgslWriter_ValueToLetTest, LoadVarInLoopBody_ThenReadAndWriteToVarInLoopC
       $B2: {  # body
         %3:i32 = load %2
         %4:i32 = let %3
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         %5:i32 = add %4, 1i
         store %2, %5
-        break_if true $B2
+        break_if true  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret 3i

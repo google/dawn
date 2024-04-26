@@ -562,7 +562,7 @@ $B1: {  # root
     %8:ptr<function, array<Inner, 4>, read_write> = var
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration $B5 0u
+        next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
         %10:bool = gte %idx:u32, 4u
@@ -575,11 +575,11 @@ $B1: {  # root
         %12:Inner_std140 = access %7, %idx:u32
         %13:Inner = call %convert_Inner, %12
         store %11, %13
-        continue $B6
+        continue  # -> $B6
       }
       $B6: {  # continuing
         %15:u32 = add %idx:u32, 1u
-        next_iteration $B5 %15
+        next_iteration %15  # -> $B5
       }
     }
     %16:array<Inner, 4> = load %8
@@ -903,7 +903,7 @@ $B1: {  # root
     %14:ptr<function, array<Inner, 4>, read_write> = var
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 0u
+        next_iteration 0u  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %16:bool = gte %idx:u32, 4u
@@ -916,11 +916,11 @@ $B1: {  # root
         %18:Inner_std140 = access %13, %idx:u32
         %19:Inner = call %convert_Inner, %18
         store %17, %19
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %21:u32 = add %idx:u32, 1u
-        next_iteration $B4 %21
+        next_iteration %21  # -> $B4
       }
     }
     %22:array<Inner, 4> = load %14
@@ -1078,7 +1078,7 @@ $B1: {  # root
     %14:ptr<function, array<Inner, 4>, read_write> = var
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 0u
+        next_iteration 0u  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %16:bool = gte %idx:u32, 4u
@@ -1091,11 +1091,11 @@ $B1: {  # root
         %18:Inner_std140 = access %13, %idx:u32
         %19:Inner = call %convert_Inner, %18
         store %17, %19
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %21:u32 = add %idx:u32, 1u
-        next_iteration $B4 %21
+        next_iteration %21  # -> $B4
       }
     }
     %22:array<Inner, 4> = load %14
@@ -1252,7 +1252,7 @@ $B1: {  # root
     %17:ptr<function, array<Inner, 4>, read_write> = var
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 0u
+        next_iteration 0u  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %19:bool = gte %idx:u32, 4u
@@ -1265,11 +1265,11 @@ $B1: {  # root
         %21:Inner_std140 = access %16, %idx:u32
         %22:Inner = call %convert_Inner, %21
         store %20, %22
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %24:u32 = add %idx:u32, 1u
-        next_iteration $B4 %24
+        next_iteration %24  # -> $B4
       }
     }
     %25:array<Inner, 4> = load %17

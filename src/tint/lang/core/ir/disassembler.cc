@@ -760,8 +760,8 @@ void Disassembler::EmitTerminator(const Terminator* b) {
             out_ << "ret";
             args_offset = ir::Return::kArgsOperandOffset;
         },
-        [&](const ir::Continue* cont) {
-            out_ << "continue $B" << IdOf(cont->Loop()->Continuing());
+        [&](const ir::Continue*) {
+            out_ << "continue";
             args_offset = ir::Continue::kArgsOperandOffset;
         },
         [&](const ir::ExitIf*) {
@@ -776,15 +776,14 @@ void Disassembler::EmitTerminator(const Terminator* b) {
             out_ << "exit_loop";
             args_offset = ir::ExitLoop::kArgsOperandOffset;
         },
-        [&](const ir::NextIteration* ni) {
-            out_ << "next_iteration $B" << IdOf(ni->Loop()->Body());
+        [&](const ir::NextIteration*) {
+            out_ << "next_iteration";
             args_offset = ir::NextIteration::kArgsOperandOffset;
         },
         [&](const ir::Unreachable*) { out_ << "unreachable"; },
         [&](const ir::BreakIf* bi) {
             out_ << "break_if ";
             EmitValue(bi->Condition());
-            out_ << " $B" << IdOf(bi->Loop()->Body());
             args_offset = ir::BreakIf::kArgsOperandOffset;
         },
         [&](const ir::TerminateInvocation*) { out_ << "terminate_invocation"; },
@@ -797,10 +796,16 @@ void Disassembler::EmitTerminator(const Terminator* b) {
     sm.Store(b);
 
     tint::Switch(
-        b,                                                                        //
-        [&](const ir::ExitIf* e) { out_ << "  # " << NameOf(e->If()); },          //
-        [&](const ir::ExitSwitch* e) { out_ << "  # " << NameOf(e->Switch()); },  //
-        [&](const ir::ExitLoop* e) { out_ << "  # " << NameOf(e->Loop()); }       //
+        b,  //
+        [&](const ir::BreakIf* bi) {
+            out_ << "  # -> [t: exit_loop " << NameOf(bi->Loop()) << ", f: $B"
+                 << IdOf(bi->Loop()->Body()) << "]";
+        },                                                                                     //
+        [&](const ir::Continue* c) { out_ << "  # -> $B" << IdOf(c->Loop()->Continuing()); },  //
+        [&](const ir::ExitIf* e) { out_ << "  # " << NameOf(e->If()); },                       //
+        [&](const ir::ExitSwitch* e) { out_ << "  # " << NameOf(e->Switch()); },               //
+        [&](const ir::ExitLoop* e) { out_ << "  # " << NameOf(e->Loop()); },                   //
+        [&](const ir::NextIteration* ni) { out_ << "  # -> $B" << IdOf(ni->Loop()->Body()); }  //
     );
 }
 

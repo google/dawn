@@ -836,12 +836,12 @@ $B1: {  # root
       $B3: {  # body
         %4:ptr<uniform, mat3x3<f32>, read> = access %3, 2u
         %5:mat3x3<f32> = load %4
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %6:ptr<uniform, mat3x3<f32>, read> = access %3, 3u
         %7:mat3x3<f32> = load %6
-        break_if true $B3
+        break_if true  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret
@@ -865,12 +865,12 @@ $B1: {  # root
       $B3: {  # body
         %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 2u
         %4:mat3x3<f32> = load %3
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %5:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 3u
         %6:mat3x3<f32> = load %5
-        break_if true $B3
+        break_if true  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret

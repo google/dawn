@@ -477,7 +477,7 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 %tint_local_index
+        next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 4u
@@ -488,11 +488,11 @@ $B1: {  # root
         }
         %6:ptr<workgroup, i32, read_write> = access %wgvar, %idx:u32
         store %6, 0i
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %7:u32 = add %idx:u32, 66u
-        next_iteration $B4 %7
+        next_iteration %7  # -> $B4
       }
     }
     %8:void = workgroupBarrier
@@ -539,7 +539,7 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 %tint_local_index
+        next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 35u
@@ -552,11 +552,11 @@ $B1: {  # root
         %7:u32 = div %idx:u32, 5u
         %8:ptr<workgroup, u32, read_write> = access %wgvar, %7, %6
         store %8, 0u
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %9:u32 = add %idx:u32, 66u
-        next_iteration $B4 %9
+        next_iteration %9  # -> $B4
       }
     }
     %10:void = workgroupBarrier
@@ -603,7 +603,7 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 %tint_local_index
+        next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 105u
@@ -618,11 +618,11 @@ $B1: {  # root
         %9:u32 = div %idx:u32, 35u
         %10:ptr<workgroup, i32, read_write> = access %wgvar, %9, %8, %6
         store %10, 0i
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %11:u32 = add %idx:u32, 1u
-        next_iteration $B4 %11
+        next_iteration %11  # -> $B4
       }
     }
     %12:void = workgroupBarrier
@@ -669,7 +669,7 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 %tint_local_index
+        next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 15u
@@ -682,11 +682,11 @@ $B1: {  # root
         %7:u32 = div %idx:u32, 5u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, %6, 0u
         store %8, 0i
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %9:u32 = add %idx:u32, 1u
-        next_iteration $B4 %9
+        next_iteration %9  # -> $B4
       }
     }
     %10:void = workgroupBarrier
@@ -733,7 +733,7 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 %tint_local_index
+        next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 15u
@@ -746,11 +746,11 @@ $B1: {  # root
         %7:u32 = div %idx:u32, 3u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, 0u, %6
         store %8, 0i
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %9:u32 = add %idx:u32, 1u
-        next_iteration $B4 %9
+        next_iteration %9  # -> $B4
       }
     }
     %10:void = workgroupBarrier
@@ -797,7 +797,7 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 %tint_local_index
+        next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 15u
@@ -810,11 +810,11 @@ $B1: {  # root
         %7:u32 = div %idx:u32, 3u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, 0u, %7, %6
         store %8, 0i
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %9:u32 = add %idx:u32, 1u
-        next_iteration $B4 %9
+        next_iteration %9  # -> $B4
       }
     }
     %10:void = workgroupBarrier
@@ -1176,7 +1176,7 @@ $B1: {  # root
   $B2: {
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
-        next_iteration $B4 %tint_local_index
+        next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
         %5:bool = gte %idx:u32, 7u
@@ -1189,16 +1189,16 @@ $B1: {  # root
         store %6, 0.0f
         %7:ptr<workgroup, bool, read_write> = access %wgvar, %idx:u32, 2u
         store %7, false
-        continue $B5
+        continue  # -> $B5
       }
       $B5: {  # continuing
         %8:u32 = add %idx:u32, 42u
-        next_iteration $B4 %8
+        next_iteration %8  # -> $B4
       }
     }
     loop [i: $B7, b: $B8, c: $B9] {  # loop_2
       $B7: {  # initializer
-        next_iteration $B8 %tint_local_index
+        next_iteration %tint_local_index  # -> $B8
       }
       $B8 (%idx_1:u32): {  # body
         %10:bool = gte %idx_1:u32, 91u
@@ -1215,11 +1215,11 @@ $B1: {  # root
         %15:u32 = div %idx_1:u32, 13u
         %16:ptr<workgroup, atomic<u32>, read_write> = access %wgvar, %15, 1u, %14, 1u
         %17:void = atomicStore %16, 0u
-        continue $B9
+        continue  # -> $B9
       }
       $B9: {  # continuing
         %18:u32 = add %idx_1:u32, 42u
-        next_iteration $B8 %18
+        next_iteration %18  # -> $B8
       }
     }
     %19:void = workgroupBarrier
@@ -1283,7 +1283,7 @@ $B1: {  # root
     }
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration $B5 %tint_local_index
+        next_iteration %tint_local_index  # -> $B5
       }
       $B5 (%idx:u32): {  # body
         %8:bool = gte %idx:u32, 4u
@@ -1294,16 +1294,16 @@ $B1: {  # root
         }
         %9:ptr<workgroup, i32, read_write> = access %var_b, %idx:u32
         store %9, 0i
-        continue $B6
+        continue  # -> $B6
       }
       $B6: {  # continuing
         %10:u32 = add %idx:u32, 66u
-        next_iteration $B5 %10
+        next_iteration %10  # -> $B5
       }
     }
     loop [i: $B8, b: $B9, c: $B10] {  # loop_2
       $B8: {  # initializer
-        next_iteration $B9 %tint_local_index
+        next_iteration %tint_local_index  # -> $B9
       }
       $B9 (%idx_1:u32): {  # body
         %12:bool = gte %idx_1:u32, 35u
@@ -1316,11 +1316,11 @@ $B1: {  # root
         %14:u32 = div %idx_1:u32, 5u
         %15:ptr<workgroup, u32, read_write> = access %var_c, %14, %13
         store %15, 0u
-        continue $B10
+        continue  # -> $B10
       }
       $B10: {  # continuing
         %16:u32 = add %idx_1:u32, 66u
-        next_iteration $B9 %16
+        next_iteration %16  # -> $B9
       }
     }
     %17:void = workgroupBarrier
@@ -1392,7 +1392,7 @@ $B1: {  # root
     }
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
-        next_iteration $B5 %tint_local_index
+        next_iteration %tint_local_index  # -> $B5
       }
       $B5 (%idx:u32): {  # body
         %9:bool = gte %idx:u32, 42u
@@ -1407,11 +1407,11 @@ $B1: {  # root
         %12:u32 = div %idx:u32, 6u
         %13:ptr<workgroup, u32, read_write> = access %var_d, %12, %11
         store %13, 0u
-        continue $B6
+        continue  # -> $B6
       }
       $B6: {  # continuing
         %14:u32 = add %idx:u32, 66u
-        next_iteration $B5 %14
+        next_iteration %14  # -> $B5
       }
     }
     %15:void = workgroupBarrier
@@ -1609,11 +1609,11 @@ $B1: {  # root
           $B4: {  # case
             loop [b: $B5, c: $B6] {  # loop_1
               $B5: {  # body
-                continue $B6
+                continue  # -> $B6
               }
               $B6: {  # continuing
                 %3:bool = load %wgvar
-                break_if %3 $B5
+                break_if %3  # -> [t: exit_loop loop_1, f: $B5]
               }
             }
             exit_switch  # switch_1
@@ -1649,11 +1649,11 @@ $B1: {  # root
           $B5: {  # case
             loop [b: $B6, c: $B7] {  # loop_1
               $B6: {  # body
-                continue $B7
+                continue  # -> $B7
               }
               $B7: {  # continuing
                 %6:bool = load %wgvar
-                break_if %6 $B6
+                break_if %6  # -> [t: exit_loop loop_1, f: $B6]
               }
             }
             exit_switch  # switch_1
@@ -1729,11 +1729,11 @@ $B1: {  # root
   $B2: {
     loop [b: $B3, c: $B4] {  # loop_1
       $B3: {  # body
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %3:bool = load %wgvar
-        break_if %3 $B3
+        break_if %3  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret
@@ -1758,11 +1758,11 @@ $B1: {  # root
           $B9: {  # case
             loop [b: $B10, c: $B11] {  # loop_2
               $B10: {  # body
-                continue $B11
+                continue  # -> $B11
               }
               $B11: {  # continuing
                 %7:void = call %foo_1
-                break_if true $B10
+                break_if true  # -> [t: exit_loop loop_2, f: $B10]
               }
             }
             exit_switch  # switch_1
@@ -1786,11 +1786,11 @@ $B1: {  # root
   $B2: {
     loop [b: $B3, c: $B4] {  # loop_1
       $B3: {  # body
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %3:bool = load %wgvar
-        break_if %3 $B3
+        break_if %3  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret
@@ -1823,11 +1823,11 @@ $B1: {  # root
           $B10: {  # case
             loop [b: $B11, c: $B12] {  # loop_2
               $B11: {  # body
-                continue $B12
+                continue  # -> $B12
               }
               $B12: {  # continuing
                 %10:void = call %foo_1
-                break_if true $B11
+                break_if true  # -> [t: exit_loop loop_2, f: $B11]
               }
             }
             exit_switch  # switch_1
@@ -1883,11 +1883,11 @@ $B1: {  # root
   $B2: {
     loop [b: $B3, c: $B4] {  # loop_1
       $B3: {  # body
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %3:bool = load %wgvar
-        break_if %3 $B3
+        break_if %3  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret
@@ -1917,11 +1917,11 @@ $B1: {  # root
   $B2: {
     loop [b: $B3, c: $B4] {  # loop_1
       $B3: {  # body
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %3:bool = load %wgvar
-        break_if %3 $B3
+        break_if %3  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret

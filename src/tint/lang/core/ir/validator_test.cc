@@ -79,7 +79,7 @@ note: # Disassembly
 $B1: {  # root
   loop [b: $B2] {  # loop_1
     $B2: {  # body
-      continue $B3
+      continue  # -> $B3
     }
   }
 }
@@ -575,10 +575,10 @@ note: # Disassembly
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2 (%my_param:f32): {  # body
-        continue $B3 %my_param:f32
+        continue %my_param:f32  # -> $B3
       }
       $B3 (%my_param:f32): {  # continuing
-        next_iteration $B2 %my_param:f32
+        next_iteration %my_param:f32  # -> $B2
       }
     }
     ret
@@ -2642,7 +2642,7 @@ note: # Disassembly
         exit_loop  # undef
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -2689,7 +2689,7 @@ note: # Disassembly
         exit_loop 1i  # loop_1
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -2736,7 +2736,7 @@ note: # Disassembly
         exit_loop 1i, 2.0f, 3i  # loop_1
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -2801,7 +2801,7 @@ note: # Disassembly
         exit_loop 1i, 2i  # loop_1
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -2843,7 +2843,7 @@ note: # Disassembly
         ret
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     if true [t: $B4] {  # if_1
@@ -2935,7 +2935,7 @@ note: # Disassembly
         exit_loop  # loop_1
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -2990,7 +2990,7 @@ note: # Disassembly
         exit_loop  # loop_1
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -3028,7 +3028,7 @@ note: # Disassembly
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         exit_loop  # loop_1
@@ -3078,7 +3078,7 @@ note: # Disassembly
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         if true [t: $B4] {  # if_1
@@ -3086,7 +3086,7 @@ note: # Disassembly
             exit_loop  # loop_1
           }
         }
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -3129,10 +3129,10 @@ note: # Disassembly
         exit_loop  # loop_1
       }
       $B3: {  # body
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
     }
     ret
@@ -3185,13 +3185,13 @@ note: # Disassembly
             exit_loop  # loop_1
           }
         }
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
     }
     ret

@@ -336,10 +336,10 @@ TEST_F(IR_FromProgramTest, Loop_WithContinue) {
             exit_loop  # loop_1
           }
         }
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -369,10 +369,10 @@ TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
-        break_if true $B2
+        break_if true  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret
@@ -397,10 +397,10 @@ TEST_F(IR_FromProgramTest, Loop_Continuing_Body_Scope) {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
         %a:bool = let true
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
-        break_if %a $B2
+        break_if %a  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret
@@ -435,10 +435,10 @@ TEST_F(IR_FromProgramTest, Loop_WithReturn) {
             ret
           }
         }
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     unreachable
@@ -588,10 +588,10 @@ TEST_F(IR_FromProgramTest, Loop_Nested) {
             }
             if true [t: $B7] {  # if_2
               $B7: {  # true
-                continue $B5
+                continue  # -> $B5
               }
             }
-            continue $B5
+            continue  # -> $B5
           }
           $B5: {  # continuing
             loop [b: $B8] {  # loop_3
@@ -601,13 +601,13 @@ TEST_F(IR_FromProgramTest, Loop_Nested) {
             }
             loop [b: $B9, c: $B10] {  # loop_4
               $B9: {  # body
-                continue $B10
+                continue  # -> $B10
               }
               $B10: {  # continuing
-                break_if true $B9
+                break_if true  # -> [t: exit_loop loop_4, f: $B9]
               }
             }
-            next_iteration $B4
+            next_iteration  # -> $B4
           }
         }
         if true [t: $B11] {  # if_3
@@ -615,10 +615,10 @@ TEST_F(IR_FromProgramTest, Loop_Nested) {
             exit_loop  # loop_1
           }
         }
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -655,10 +655,10 @@ TEST_F(IR_FromProgramTest, While) {
             exit_loop  # loop_1
           }
         }
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -698,7 +698,7 @@ TEST_F(IR_FromProgramTest, While_Return) {
         ret
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     ret
@@ -728,7 +728,7 @@ TEST_F(IR_FromProgramTest, For) {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
         %i:ptr<function, i32, read_write> = var
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %3:i32 = load %i
@@ -741,13 +741,13 @@ TEST_F(IR_FromProgramTest, For) {
             exit_loop  # loop_1
           }
         }
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %5:i32 = load %i
         %6:i32 = add %5, 1i
         store %i, %6
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
     }
     ret
@@ -777,7 +777,7 @@ TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %i:ptr<function, i32, read_write> = var
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         exit_loop  # loop_1

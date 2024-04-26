@@ -274,7 +274,7 @@ fn f() -> i32 {
         ret %8
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     %9:i32 = load %i
@@ -319,7 +319,7 @@ fn f() -> i32 {
         ret %i_1
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     %8:i32 = load %i
@@ -348,7 +348,7 @@ fn f() -> i32 {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %i_1:ptr<function, f32, read_write> = var, 0.0f  # %i_1: 'i'
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %4:f32 = load %i_1
@@ -363,7 +363,7 @@ fn f() -> i32 {
         }
         %6:f32 = load %i_1
         %j:f32 = let %6
-        continue $B6
+        continue  # -> $B6
       }
     }
     %8:i32 = load %i
@@ -392,7 +392,7 @@ fn f() -> i32 {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %i_1:f32 = let 0.0f  # %i_1: 'i'
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %4:bool = lt %i_1, 4.0f
@@ -405,7 +405,7 @@ fn f() -> i32 {
           }
         }
         %j:f32 = let %i_1
-        continue $B6
+        continue  # -> $B6
       }
     }
     %6:i32 = load %i
@@ -435,7 +435,7 @@ fn f() -> i32 {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %x:ptr<function, i32, read_write> = var, 0i
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %4:i32 = load %i
@@ -482,7 +482,7 @@ fn f() -> i32 {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %x:ptr<function, i32, read_write> = var, 0i
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %4:i32 = load %i
@@ -549,10 +549,10 @@ fn f() -> i32 {
             exit_loop  # loop_1
           }
         }
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     %10:i32 = load %i
@@ -602,10 +602,10 @@ fn f() -> i32 {
             exit_loop  # loop_1
           }
         }
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
-        next_iteration $B2
+        next_iteration  # -> $B2
       }
     }
     %9:i32 = load %i
@@ -647,7 +647,7 @@ fn f() -> i32 {
             exit_loop  # loop_1
           }
         }
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         %5:i32 = load %i
@@ -655,7 +655,7 @@ fn f() -> i32 {
         %i_1:ptr<function, i32, read_write> = var, %6  # %i_1: 'i'
         %8:i32 = load %i_1
         %9:bool = gt %8, 2i
-        break_if %9 $B2
+        break_if %9  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     %10:i32 = load %i
@@ -697,14 +697,14 @@ fn f() -> i32 {
             exit_loop  # loop_1
           }
         }
-        continue $B3
+        continue  # -> $B3
       }
       $B3: {  # continuing
         %5:i32 = load %i
         %6:i32 = add %5, 1i
         %i_1:i32 = let %6  # %i_1: 'i'
         %8:bool = gt %i_1, 2i
-        break_if %8 $B2
+        break_if %8  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     %9:i32 = load %i

@@ -1503,11 +1503,11 @@ $B1: {  # root
           }
         }
         store %1, 2i
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         store %1, 1i
-        break_if true $B3
+        break_if true  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     store %1, 3i
@@ -1542,14 +1542,14 @@ $B1: {  # root
         if %6 [t: $B7] {  # if_2
           $B7: {  # true
             store %1, 2i
-            continue $B4
+            continue  # -> $B4
           }
         }
         exit_loop  # loop_1
       }
       $B4: {  # continuing
         store %1, 1i
-        break_if true $B3
+        break_if true  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     %7:bool = load %continue_execution
@@ -1617,11 +1617,11 @@ $B1: {  # root
           }
         }
         store %1, 2i
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         store %1, 1i
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
     }
     unreachable
@@ -1655,14 +1655,14 @@ $B1: {  # root
         if %6 [t: $B7] {  # if_2
           $B7: {  # true
             store %1, 2i
-            continue $B4
+            continue  # -> $B4
           }
         }
         exit_loop  # loop_1
       }
       $B4: {  # continuing
         store %1, 1i
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
     }
     %7:i32 = load %return_value
@@ -2064,7 +2064,7 @@ TEST_F(SpirvWriter_MergeReturnTest, LoopIfReturnThenContinue) {
             ret
           }
         }
-        continue $B4
+        continue  # -> $B4
       }
     }
     unreachable
@@ -2088,7 +2088,7 @@ TEST_F(SpirvWriter_MergeReturnTest, LoopIfReturnThenContinue) {
         %3:bool = load %continue_execution
         if %3 [t: $B4] {  # if_2
           $B4: {  # true
-            continue $B5
+            continue  # -> $B5
           }
         }
         exit_loop  # loop_1

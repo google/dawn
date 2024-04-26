@@ -424,7 +424,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopInitVar_ShadowedBy_LoopBodyV
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %v:ptr<function, i32, read_write> = var
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %3:i32 = load %v
@@ -475,7 +475,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyV
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %v:ptr<function, i32, read_write> = var
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
@@ -497,7 +497,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyV
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
         %v:ptr<function, i32, read_write> = var
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %v_1:ptr<function, i32, read_write> = var
@@ -546,11 +546,11 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopBodyVar_ShadowedBy_LoopContV
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %v:ptr<function, i32, read_write> = var
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %3:i32 = load %v
@@ -601,11 +601,11 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopBodyVar_ShadowedBy_LoopContV
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %v:ptr<function, i32, read_write> = var
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %v_1:ptr<function, i32, read_write> = var  # %v_1: 'v'
@@ -626,11 +626,11 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopBodyVar_ShadowedBy_LoopContV
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
-        next_iteration $B3
+        next_iteration  # -> $B3
       }
       $B3: {  # body
         %v:ptr<function, i32, read_write> = var
-        continue $B4
+        continue  # -> $B4
       }
       $B4: {  # continuing
         %v_1:ptr<function, i32, read_write> = var
