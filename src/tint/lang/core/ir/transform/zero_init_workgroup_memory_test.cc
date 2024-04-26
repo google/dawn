@@ -62,7 +62,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NoRootBlock) {
     });
 
     auto* expect = R"(
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b1 = block {
     ret
   }
@@ -87,7 +87,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, WorkgroupVarUnused) {
   %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     ret
   }
@@ -116,7 +116,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarBool) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:bool = load %wgvar
     ret
@@ -130,7 +130,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarBool) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -165,7 +165,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarI32) {
   %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:i32 = load %wgvar
     ret
@@ -179,7 +179,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarI32) {
   %wgvar:ptr<workgroup, i32, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -214,7 +214,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarU32) {
   %wgvar:ptr<workgroup, u32, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:u32 = load %wgvar
     ret
@@ -228,7 +228,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarU32) {
   %wgvar:ptr<workgroup, u32, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -263,7 +263,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarF32) {
   %wgvar:ptr<workgroup, f32, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:f32 = load %wgvar
     ret
@@ -277,7 +277,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarF32) {
   %wgvar:ptr<workgroup, f32, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -312,7 +312,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarF16) {
   %wgvar:ptr<workgroup, f16, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:f16 = load %wgvar
     ret
@@ -326,7 +326,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ScalarF16) {
   %wgvar:ptr<workgroup, f16, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -361,7 +361,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, AtomicI32) {
   %wgvar:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:i32 = atomicLoad %wgvar
     ret
@@ -375,7 +375,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, AtomicI32) {
   %wgvar:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -410,7 +410,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, AtomicU32) {
   %wgvar:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:u32 = atomicLoad %wgvar
     ret
@@ -424,7 +424,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, AtomicU32) {
   %wgvar:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -459,7 +459,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfI32) {
   %wgvar:ptr<workgroup, array<i32, 4>, read_write> = var
 }
 
-%main = @compute @workgroup_size(11, 2, 3) func():void -> %b2 {
+%main = @compute @workgroup_size(11, 2, 3) func():void {
   %b2 = block {
     %3:array<i32, 4> = load %wgvar
     ret
@@ -473,7 +473,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfI32) {
   %wgvar:ptr<workgroup, array<i32, 4>, read_write> = var
 }
 
-%main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     loop [i: %b3, b: %b4, c: %b5] {  # loop_1
       %b3 = block {  # initializer
@@ -521,7 +521,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfU32) {
   %wgvar:ptr<workgroup, array<array<u32, 5>, 7>, read_write> = var
 }
 
-%main = @compute @workgroup_size(11, 2, 3) func():void -> %b2 {
+%main = @compute @workgroup_size(11, 2, 3) func():void {
   %b2 = block {
     %3:array<array<u32, 5>, 7> = load %wgvar
     ret
@@ -535,7 +535,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfU32) {
   %wgvar:ptr<workgroup, array<array<u32, 5>, 7>, read_write> = var
 }
 
-%main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     loop [i: %b3, b: %b4, c: %b5] {  # loop_1
       %b3 = block {  # initializer
@@ -585,7 +585,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfArray) {
   %wgvar:ptr<workgroup, array<array<array<i32, 7>, 5>, 3>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:array<array<array<i32, 7>, 5>, 3> = load %wgvar
     ret
@@ -599,7 +599,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ArrayOfArrayOfArray) {
   %wgvar:ptr<workgroup, array<array<array<i32, 7>, 5>, 3>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     loop [i: %b3, b: %b4, c: %b5] {  # loop_1
       %b3 = block {  # initializer
@@ -651,7 +651,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayInnerSizeOne) {
   %wgvar:ptr<workgroup, array<array<array<i32, 1>, 5>, 3>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:array<array<array<i32, 1>, 5>, 3> = load %wgvar
     ret
@@ -665,7 +665,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayInnerSizeOne) {
   %wgvar:ptr<workgroup, array<array<array<i32, 1>, 5>, 3>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     loop [i: %b3, b: %b4, c: %b5] {  # loop_1
       %b3 = block {  # initializer
@@ -715,7 +715,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayMiddleSizeOne) {
   %wgvar:ptr<workgroup, array<array<array<i32, 3>, 1>, 5>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:array<array<array<i32, 3>, 1>, 5> = load %wgvar
     ret
@@ -729,7 +729,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayMiddleSizeOne) {
   %wgvar:ptr<workgroup, array<array<array<i32, 3>, 1>, 5>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     loop [i: %b3, b: %b4, c: %b5] {  # loop_1
       %b3 = block {  # initializer
@@ -779,7 +779,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayOuterSizeOne) {
   %wgvar:ptr<workgroup, array<array<array<i32, 3>, 5>, 1>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:array<array<array<i32, 3>, 5>, 1> = load %wgvar
     ret
@@ -793,7 +793,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayOuterSizeOne) {
   %wgvar:ptr<workgroup, array<array<array<i32, 3>, 5>, 1>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     loop [i: %b3, b: %b4, c: %b5] {  # loop_1
       %b3 = block {  # initializer
@@ -843,7 +843,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayTotalSizeOne) {
   %wgvar:ptr<workgroup, array<array<i32, 1>, 1>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:array<array<i32, 1>, 1> = load %wgvar
     ret
@@ -857,7 +857,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, NestedArrayTotalSizeOne) {
   %wgvar:ptr<workgroup, array<array<i32, 1>, 1>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -904,7 +904,7 @@ MyStruct = struct @align(4) {
   %wgvar:ptr<workgroup, MyStruct, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:MyStruct = load %wgvar
     ret
@@ -924,7 +924,7 @@ MyStruct = struct @align(4) {
   %wgvar:ptr<workgroup, MyStruct, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -979,7 +979,7 @@ Outer = struct @align(4) {
   %wgvar:ptr<workgroup, Outer, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:Outer = load %wgvar
     ret
@@ -1004,7 +1004,7 @@ Outer = struct @align(4) {
   %wgvar:ptr<workgroup, Outer, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -1059,7 +1059,7 @@ Outer = struct @align(4) {
   %wgvar:ptr<workgroup, Outer, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:Outer = load %wgvar
     ret
@@ -1084,7 +1084,7 @@ Outer = struct @align(4) {
   %wgvar:ptr<workgroup, Outer, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -1147,7 +1147,7 @@ Outer = struct @align(4) {
   %wgvar:ptr<workgroup, array<Outer, 7>, read_write> = var
 }
 
-%main = @compute @workgroup_size(7, 3, 2) func():void -> %b2 {
+%main = @compute @workgroup_size(7, 3, 2) func():void {
   %b2 = block {
     %3:array<Outer, 7> = load %wgvar
     ret
@@ -1172,7 +1172,7 @@ Outer = struct @align(4) {
   %wgvar:ptr<workgroup, array<Outer, 7>, read_write> = var
 }
 
-%main = @compute @workgroup_size(7, 3, 2) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(7, 3, 2) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     loop [i: %b3, b: %b4, c: %b5] {  # loop_1
       %b3 = block {  # initializer
@@ -1254,7 +1254,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_DifferentIterationCount
   %var_c:ptr<workgroup, array<array<u32, 5>, 7>, read_write> = var
 }
 
-%main = @compute @workgroup_size(11, 2, 3) func():void -> %b2 {
+%main = @compute @workgroup_size(11, 2, 3) func():void {
   %b2 = block {
     %5:bool = load %var_a
     %6:array<i32, 4> = load %var_b
@@ -1272,7 +1272,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_DifferentIterationCount
   %var_c:ptr<workgroup, array<array<u32, 5>, 7>, read_write> = var
 }
 
-%main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %6:bool = eq %tint_local_index, 0u
     if %6 [t: %b3] {  # if_1
@@ -1360,7 +1360,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_SharedIterationCounts) 
   %var_d:ptr<workgroup, array<array<u32, 6>, 7>, read_write> = var
 }
 
-%main = @compute @workgroup_size(11, 2, 3) func():void -> %b2 {
+%main = @compute @workgroup_size(11, 2, 3) func():void {
   %b2 = block {
     %6:bool = load %var_a
     %7:i32 = load %var_b
@@ -1380,7 +1380,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleVariables_SharedIterationCounts) 
   %var_d:ptr<workgroup, array<array<u32, 6>, 7>, read_write> = var
 }
 
-%main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(11, 2, 3) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %7:bool = eq %tint_local_index, 0u
     if %7 [t: %b3] {  # if_1
@@ -1448,7 +1448,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndex) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec4<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec4<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %5:bool = load %wgvar
     ret
@@ -1462,7 +1462,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndex) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec4<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec4<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %5:bool = eq %index, 0u
     if %5 [t: %b3] {  # if_1
@@ -1530,7 +1530,7 @@ MyStruct = struct @align(16) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%params:MyStruct):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%params:MyStruct):void {
   %b2 = block {
     %4:bool = load %wgvar
     ret
@@ -1549,7 +1549,7 @@ MyStruct = struct @align(16) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%params:MyStruct):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%params:MyStruct):void {
   %b2 = block {
     %4:u32 = access %params, 1u
     %5:bool = eq %4, 0u
@@ -1601,7 +1601,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideNestedBlock) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     if true [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -1633,7 +1633,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideNestedBlock) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b2 = block {
     %4:bool = eq %tint_local_index, 0u
     if %4 [t: %b3] {  # if_1
@@ -1725,7 +1725,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     loop [b: %b3, c: %b4] {  # loop_1
       %b3 = block {  # body
@@ -1739,7 +1739,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
     ret
   }
 }
-%foo_1 = func():void -> %b5 {  # %foo_1: 'foo'
+%foo_1 = func():void {  # %foo_1: 'foo'
   %b5 = block {
     if true [t: %b6] {  # if_1
       %b6 = block {  # true
@@ -1750,7 +1750,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
     ret
   }
 }
-%func = @compute @workgroup_size(1, 1, 1) func():void -> %b7 {
+%func = @compute @workgroup_size(1, 1, 1) func():void {
   %b7 = block {
     if true [t: %b8] {  # if_2
       %b8 = block {  # true
@@ -1782,7 +1782,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     loop [b: %b3, c: %b4] {  # loop_1
       %b3 = block {  # body
@@ -1796,7 +1796,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
     ret
   }
 }
-%foo_1 = func():void -> %b5 {  # %foo_1: 'foo'
+%foo_1 = func():void {  # %foo_1: 'foo'
   %b5 = block {
     if true [t: %b6] {  # if_1
       %b6 = block {  # true
@@ -1807,7 +1807,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, UseInsideIndirectFunctionCall) {
     ret
   }
 }
-%func = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b7 {
+%func = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b7 = block {
     %8:bool = eq %tint_local_index, 0u
     if %8 [t: %b8] {  # if_2
@@ -1879,7 +1879,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleEntryPoints_SameVarViaHelper) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     loop [b: %b3, c: %b4] {  # loop_1
       %b3 = block {  # body
@@ -1893,13 +1893,13 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleEntryPoints_SameVarViaHelper) {
     ret
   }
 }
-%ep1 = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
+%ep1 = @compute @workgroup_size(1, 1, 1) func():void {
   %b5 = block {
     %5:void = call %foo
     ret
   }
 }
-%ep2 = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
+%ep2 = @compute @workgroup_size(1, 1, 1) func():void {
   %b6 = block {
     %7:void = call %foo
     ret
@@ -1913,7 +1913,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleEntryPoints_SameVarViaHelper) {
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     loop [b: %b3, c: %b4] {  # loop_1
       %b3 = block {  # body
@@ -1927,7 +1927,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleEntryPoints_SameVarViaHelper) {
     ret
   }
 }
-%ep1 = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b5 {
+%ep1 = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
   %b5 = block {
     %6:bool = eq %tint_local_index, 0u
     if %6 [t: %b6] {  # if_1
@@ -1941,7 +1941,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, MultipleEntryPoints_SameVarViaHelper) {
     ret
   }
 }
-%ep2 = @compute @workgroup_size(1, 1, 1) func(%tint_local_index_1:u32 [@local_invocation_index]):void -> %b7 {  # %tint_local_index_1: 'tint_local_index'
+%ep2 = @compute @workgroup_size(1, 1, 1) func(%tint_local_index_1:u32 [@local_invocation_index]):void {  # %tint_local_index_1: 'tint_local_index'
   %b7 = block {
     %11:bool = eq %tint_local_index_1, 0u
     if %11 [t: %b8] {  # if_2

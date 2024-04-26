@@ -53,7 +53,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Blah) {
     b.Append(func->Block(), [&] { b.Return(func); });
 
     auto* src = R"(
-%F = func():void -> %b1 {
+%F = func():void {
   %b1 = block {
     ret
   }
@@ -78,7 +78,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Unsequenced) {
     });
 
     auto* src = R"(
-%F = func():i32 -> %b1 {
+%F = func():i32 {
   %b1 = block {
     %x:i32 = let 1i
     %y:i32 = let 2i
@@ -122,7 +122,7 @@ TEST_F(IR_ValueToLetTest, NoModify_SequencedValueUsedWithNonSequenced) {
   %i:ptr<private, i32, read_write> = var
 }
 
-%rmw = func(%p:i32):i32 -> %b2 {
+%rmw = func(%p:i32):i32 {
   %b2 = block {
     %4:i32 = load %i
     %5:i32 = add %4, %p
@@ -131,7 +131,7 @@ TEST_F(IR_ValueToLetTest, NoModify_SequencedValueUsedWithNonSequenced) {
     ret %v
   }
 }
-%F = func():i32 -> %b3 {
+%F = func():i32 {
   %b3 = block {
     %x:i32 = call %rmw, 1i
     %y:i32 = select 2i, %x, false
@@ -174,7 +174,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Inlinable_NestedCalls) {
   %i:ptr<private, i32, read_write> = var
 }
 
-%rmw = func(%p:i32):i32 -> %b2 {
+%rmw = func(%p:i32):i32 {
   %b2 = block {
     %4:i32 = load %i
     %5:i32 = add %4, %p
@@ -183,7 +183,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Inlinable_NestedCalls) {
     ret %v
   }
 }
-%F = func():i32 -> %b3 {
+%F = func():i32 {
   %b3 = block {
     %x:i32 = call %rmw, 1i
     %y:i32 = call %rmw, %x
@@ -227,7 +227,7 @@ TEST_F(IR_ValueToLetTest, NoModify_LetUsedTwice) {
   %i:ptr<private, i32, read_write> = var
 }
 
-%rmw = func(%p:i32):i32 -> %b2 {
+%rmw = func(%p:i32):i32 {
   %b2 = block {
     %4:i32 = load %i
     %5:i32 = add %4, %p
@@ -236,7 +236,7 @@ TEST_F(IR_ValueToLetTest, NoModify_LetUsedTwice) {
     ret %v
   }
 }
-%F = func():i32 -> %b3 {
+%F = func():i32 {
   %b3 = block {
     %8:i32 = call %rmw, 1i
     %x:i32 = let %8
@@ -269,13 +269,13 @@ TEST_F(IR_ValueToLetTest, NoModify_VarUsedTwice) {
     });
 
     auto* src = R"(
-%g = func(%p:ptr<function, i32, read_write>):i32 -> %b1 {
+%g = func(%p:ptr<function, i32, read_write>):i32 {
   %b1 = block {
     %3:i32 = load %p
     ret %3
   }
 }
-%F = func():i32 -> %b2 {
+%F = func():i32 {
   %b2 = block {
     %v:ptr<function, i32, read_write> = var
     %6:i32 = call %g, %v
@@ -305,7 +305,7 @@ TEST_F(IR_ValueToLetTest, VarLoadUsedTwice) {
     });
 
     auto* src = R"(
-%F = func():i32 -> %b1 {
+%F = func():i32 {
   %b1 = block {
     %v:ptr<function, i32, read_write> = var
     %l:i32 = load %v
@@ -317,7 +317,7 @@ TEST_F(IR_ValueToLetTest, VarLoadUsedTwice) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%F = func():i32 -> %b1 {
+%F = func():i32 {
   %b1 = block {
     %v:ptr<function, i32, read_write> = var
     %3:i32 = load %v
@@ -343,7 +343,7 @@ TEST_F(IR_ValueToLetTest, VarLoad_ThenStore_ThenUse) {
     });
 
     auto* src = R"(
-%F = func():i32 -> %b1 {
+%F = func():i32 {
   %b1 = block {
     %v:ptr<function, i32, read_write> = var
     %l:i32 = load %v
@@ -355,7 +355,7 @@ TEST_F(IR_ValueToLetTest, VarLoad_ThenStore_ThenUse) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%F = func():i32 -> %b1 {
+%F = func():i32 {
   %b1 = block {
     %v:ptr<function, i32, read_write> = var
     %3:i32 = load %v
@@ -397,7 +397,7 @@ TEST_F(IR_ValueToLetTest, TwoCalls_ThenUseReturnValues) {
   %i:ptr<private, i32, read_write> = var
 }
 
-%rmw = func(%p:i32):i32 -> %b2 {
+%rmw = func(%p:i32):i32 {
   %b2 = block {
     %4:i32 = load %i
     %5:i32 = add %4, %p
@@ -406,7 +406,7 @@ TEST_F(IR_ValueToLetTest, TwoCalls_ThenUseReturnValues) {
     ret %v
   }
 }
-%F = func():i32 -> %b3 {
+%F = func():i32 {
   %b3 = block {
     %x:i32 = call %rmw, 1i
     %y:i32 = call %rmw, 2i
@@ -422,7 +422,7 @@ TEST_F(IR_ValueToLetTest, TwoCalls_ThenUseReturnValues) {
   %i:ptr<private, i32, read_write> = var
 }
 
-%rmw = func(%p:i32):i32 -> %b2 {
+%rmw = func(%p:i32):i32 {
   %b2 = block {
     %4:i32 = load %i
     %5:i32 = add %4, %p
@@ -431,7 +431,7 @@ TEST_F(IR_ValueToLetTest, TwoCalls_ThenUseReturnValues) {
     ret %v
   }
 }
-%F = func():i32 -> %b3 {
+%F = func():i32 {
   %b3 = block {
     %8:i32 = call %rmw, 1i
     %x:i32 = let %8
@@ -479,7 +479,7 @@ TEST_F(IR_ValueToLetTest, SequencedUsedInDifferentBlock) {
   %i:ptr<private, i32, read_write> = var
 }
 
-%rmw = func(%p:i32):i32 -> %b2 {
+%rmw = func(%p:i32):i32 {
   %b2 = block {
     %4:i32 = load %i
     %5:i32 = add %4, %p
@@ -488,7 +488,7 @@ TEST_F(IR_ValueToLetTest, SequencedUsedInDifferentBlock) {
     ret %v
   }
 }
-%F = func():i32 -> %b3 {
+%F = func():i32 {
   %b3 = block {
     %x:i32 = call %rmw, 1i
     if true [t: %b4] {  # if_1
@@ -507,7 +507,7 @@ TEST_F(IR_ValueToLetTest, SequencedUsedInDifferentBlock) {
   %i:ptr<private, i32, read_write> = var
 }
 
-%rmw = func(%p:i32):i32 -> %b2 {
+%rmw = func(%p:i32):i32 {
   %b2 = block {
     %4:i32 = load %i
     %5:i32 = add %4, %p
@@ -516,7 +516,7 @@ TEST_F(IR_ValueToLetTest, SequencedUsedInDifferentBlock) {
     ret %v
   }
 }
-%F = func():i32 -> %b3 {
+%F = func():i32 {
   %b3 = block {
     %8:i32 = call %rmw, 1i
     %x:i32 = let %8
@@ -550,7 +550,7 @@ TEST_F(IR_ValueToLetTest, NameMe1) {
     });
 
     auto* src = R"(
-%F = func():i32 -> %b1 {
+%F = func():i32 {
   %b1 = block {
     %v:ptr<function, i32, read_write> = var
     %3:i32 = load %v
@@ -563,7 +563,7 @@ TEST_F(IR_ValueToLetTest, NameMe1) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%F = func():i32 -> %b1 {
+%F = func():i32 {
   %b1 = block {
     %v:ptr<function, i32, read_write> = var
     %3:i32 = load %v
@@ -597,7 +597,7 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
     });
 
     auto* src = R"(
-%F = func():void -> %b1 {
+%F = func():void {
   %b1 = block {
     %i:i32 = max 1i, 2i
     %v:ptr<function, i32, read_write> = var, %i
@@ -612,7 +612,7 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%F = func():void -> %b1 {
+%F = func():void {
   %b1 = block {
     %i:i32 = max 1i, 2i
     %v:ptr<function, i32, read_write> = var, %i

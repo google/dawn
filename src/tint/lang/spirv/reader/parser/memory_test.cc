@@ -802,7 +802,7 @@ tint_symbol_1 = struct @align(4) {
   %2:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 3)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %4:ptr<storage, u32, read> = access %1, 0u
     %5:ptr<storage, u32, read_write> = access %2, 0u

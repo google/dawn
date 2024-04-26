@@ -85,7 +85,7 @@ TEST_F(WgslWriter_PtrToRefTest, PtrParam_NoChange) {
     b.Append(fn->Block(), [&] { b.Return(fn); });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, i32, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):void {
   %b1 = block {
     ret
   }
@@ -131,7 +131,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVar) {
     });
 
     auto* src = R"(
-%1 = func():i32 -> %b1 {
+%1 = func():i32 {
   %b1 = block {
     %2:ptr<function, i32, read_write> = var
     %3:i32 = load %2
@@ -142,7 +142,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVar) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func():i32 -> %b1 {
+%1 = func():i32 {
   %b1 = block {
     %2:ref<function, i32, read_write> = var
     %3:i32 = load %2
@@ -165,7 +165,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVar) {
     });
 
     auto* src = R"(
-%1 = func():void -> %b1 {
+%1 = func():void {
   %b1 = block {
     %2:ptr<function, i32, read_write> = var
     store %2, 42i
@@ -176,7 +176,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVar) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func():void -> %b1 {
+%1 = func():void {
   %b1 = block {
     %2:ref<function, i32, read_write> = var
     store %2, 42i
@@ -197,7 +197,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadPtrParam) {
     b.Append(fn->Block(), [&] { b.Return(fn, b.Load(ptr)); });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, i32, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):i32 {
   %b1 = block {
     %3:i32 = load %2
     ret %3
@@ -207,7 +207,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadPtrParam) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, i32, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):i32 {
   %b1 = block {
     %3:ref<function, i32, read_write> = ptr-to-ref %2
     %4:i32 = load %3
@@ -231,7 +231,7 @@ TEST_F(WgslWriter_PtrToRefTest, StorePtrParam) {
     });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, i32, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):void {
   %b1 = block {
     store %2, 42i
     ret
@@ -241,7 +241,7 @@ TEST_F(WgslWriter_PtrToRefTest, StorePtrParam) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, i32, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):void {
   %b1 = block {
     %3:ref<function, i32, read_write> = ptr-to-ref %2
     store %3, 42i
@@ -267,12 +267,12 @@ TEST_F(WgslWriter_PtrToRefTest, VarUsedAsPtrArg) {
     });
 
     auto* src = R"(
-%1 = func(%p:ptr<function, i32, read_write>):void -> %b1 {
+%1 = func(%p:ptr<function, i32, read_write>):void {
   %b1 = block {
     ret
   }
 }
-%3 = func():void -> %b2 {
+%3 = func():void {
   %b2 = block {
     %4:ptr<function, i32, read_write> = var
     %5:void = call %1, %4
@@ -283,12 +283,12 @@ TEST_F(WgslWriter_PtrToRefTest, VarUsedAsPtrArg) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%p:ptr<function, i32, read_write>):void -> %b1 {
+%1 = func(%p:ptr<function, i32, read_write>):void {
   %b1 = block {
     ret
   }
 }
-%3 = func():void -> %b2 {
+%3 = func():void {
   %b2 = block {
     %4:ref<function, i32, read_write> = var
     %5:ptr<function, i32, read_write> = ref-to-ptr %4
@@ -313,7 +313,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadPtrParamViaLet) {
     });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, i32, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):i32 {
   %b1 = block {
     %l:ptr<function, i32, read_write> = let %2
     %4:i32 = load %l
@@ -324,7 +324,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadPtrParamViaLet) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, i32, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):i32 {
   %b1 = block {
     %l:ptr<function, i32, read_write> = let %2
     %4:ref<function, i32, read_write> = ptr-to-ref %l
@@ -350,7 +350,7 @@ TEST_F(WgslWriter_PtrToRefTest, StorePtrParamViaLet) {
     });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, i32, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):void {
   %b1 = block {
     %l:ptr<function, i32, read_write> = let %2
     store %l, 42i
@@ -361,7 +361,7 @@ TEST_F(WgslWriter_PtrToRefTest, StorePtrParamViaLet) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, i32, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, i32, read_write>):void {
   %b1 = block {
     %l:ptr<function, i32, read_write> = let %2
     %4:ref<function, i32, read_write> = ptr-to-ref %l
@@ -386,7 +386,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadAccessFromPtrArrayParam) {
     });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, array<i32, 4>, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, array<i32, 4>, read_write>):i32 {
   %b1 = block {
     %3:ptr<function, i32, read_write> = access %2, 2i
     %4:i32 = load %3
@@ -397,7 +397,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadAccessFromPtrArrayParam) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, array<i32, 4>, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, array<i32, 4>, read_write>):i32 {
   %b1 = block {
     %3:ref<function, array<i32, 4>, read_write> = ptr-to-ref %2
     %4:ref<function, i32, read_write> = access %3, 2i
@@ -423,7 +423,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreAccessFromPtrArrayParam) {
     });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, array<i32, 4>, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, array<i32, 4>, read_write>):void {
   %b1 = block {
     %3:ptr<function, i32, read_write> = access %2, 2i
     store %3, 42i
@@ -434,7 +434,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreAccessFromPtrArrayParam) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, array<i32, 4>, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, array<i32, 4>, read_write>):void {
   %b1 = block {
     %3:ref<function, array<i32, 4>, read_write> = ptr-to-ref %2
     %4:ref<function, i32, read_write> = access %3, 2i
@@ -460,7 +460,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadAccessFromPtrArrayParamViaLet) {
     });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, array<i32, 4>, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, array<i32, 4>, read_write>):i32 {
   %b1 = block {
     %3:ptr<function, i32, read_write> = access %2, 2i
     %l:ptr<function, i32, read_write> = let %3
@@ -472,7 +472,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadAccessFromPtrArrayParamViaLet) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, array<i32, 4>, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, array<i32, 4>, read_write>):i32 {
   %b1 = block {
     %3:ref<function, array<i32, 4>, read_write> = ptr-to-ref %2
     %4:ref<function, i32, read_write> = access %3, 2i
@@ -502,7 +502,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreAccessFromPtrArrayParamViaLet) {
     });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, array<i32, 4>, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, array<i32, 4>, read_write>):void {
   %b1 = block {
     %3:ptr<function, i32, read_write> = access %2, 2i
     %l:ptr<function, i32, read_write> = let %3
@@ -514,7 +514,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreAccessFromPtrArrayParamViaLet) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, array<i32, 4>, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, array<i32, 4>, read_write>):void {
   %b1 = block {
     %3:ref<function, array<i32, 4>, read_write> = ptr-to-ref %2
     %4:ref<function, i32, read_write> = access %3, 2i
@@ -539,7 +539,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVectorElementFromPtrParam) {
     b.Append(fn->Block(), [&] { b.Return(fn, b.LoadVectorElement(param, 2_i)); });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, vec3<i32>, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, vec3<i32>, read_write>):i32 {
   %b1 = block {
     %3:i32 = load_vector_element %2, 2i
     ret %3
@@ -549,7 +549,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVectorElementFromPtrParam) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, vec3<i32>, read_write>):i32 -> %b1 {
+%1 = func(%2:ptr<function, vec3<i32>, read_write>):i32 {
   %b1 = block {
     %3:ref<function, vec3<i32>, read_write> = ptr-to-ref %2
     %4:i32 = load_vector_element %3, 2i
@@ -573,7 +573,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVectorElementFromPtrParam) {
     });
 
     auto* src = R"(
-%1 = func(%2:ptr<function, vec3<i32>, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, vec3<i32>, read_write>):void {
   %b1 = block {
     store_vector_element %2, 2i, 42i
     ret
@@ -583,7 +583,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVectorElementFromPtrParam) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%1 = func(%2:ptr<function, vec3<i32>, read_write>):void -> %b1 {
+%1 = func(%2:ptr<function, vec3<i32>, read_write>):void {
   %b1 = block {
     %3:ref<function, vec3<i32>, read_write> = ptr-to-ref %2
     store_vector_element %3, 2i, 42i

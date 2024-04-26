@@ -47,7 +47,7 @@ TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
     func->Block()->Append(b.Return(func));
 
     auto* expect = R"(
-%foo = func():void -> %b1 {
+%foo = func():void {
   %b1 = block {
     ret
   }
@@ -79,7 +79,7 @@ tint_symbol_1 = struct @align(4), @block {
   %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(0, 0)
 }
 
-%foo = func():i32 -> %b2 {
+%foo = func():i32 {
   %b2 = block {
     %3:ptr<uniform, i32, read> = access %1, 0u
     %4:i32 = load %3
@@ -111,7 +111,7 @@ tint_symbol_1 = struct @align(4), @block {
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<storage, i32, read_write> = access %1, 0u
     store %3, 42i
@@ -143,7 +143,7 @@ tint_symbol_1 = struct @align(4), @block {
   %1:ptr<push_constant, tint_symbol_1, read> = var
 }
 
-%foo = func():i32 -> %b2 {
+%foo = func():i32 {
   %b2 = block {
     %3:ptr<push_constant, i32, read> = access %1, 0u
     %4:i32 = load %3
@@ -179,7 +179,7 @@ tint_symbol_1 = struct @align(4), @block {
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<storage, array<i32>, read_write> = access %1, 0u
     %4:ptr<storage, i32, read_write> = access %3, 1u
@@ -227,7 +227,7 @@ MyStruct = struct @align(4), @block {
   %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<storage, i32, read_write> = access %1, 0u
     %4:i32 = load %3
@@ -272,7 +272,7 @@ MyStruct = struct @align(4), @block {
   %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func():u32 -> %b2 {
+%foo = func():u32 {
   %b2 = block {
     %root:ptr<storage, MyStruct, read_write> = let %1
     %4:ptr<storage, array<i32>, read_write> = access %root, 1u
@@ -321,7 +321,7 @@ tint_symbol_1 = struct @align(4), @block {
   %2:ptr<private, MyStruct, read_write> = var
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %4:MyStruct = load %2
     %5:ptr<storage, MyStruct, read_write> = access %1, 0u
@@ -375,7 +375,7 @@ tint_symbol_5 = struct @align(4), @block {
   %3:ptr<storage, tint_symbol_5, read_write> = var @binding_point(0, 2)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %5:ptr<storage, i32, read_write> = access %2, 0u
     %6:i32 = load %5

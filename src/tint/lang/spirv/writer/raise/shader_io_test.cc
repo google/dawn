@@ -48,7 +48,7 @@ TEST_F(SpirvWriter_ShaderIOTest, NoInputsOrOutputs) {
     });
 
     auto* src = R"(
-%foo = @compute func():void -> %b1 {
+%foo = @compute func():void {
   %b1 = block {
     ret
   }
@@ -91,7 +91,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct) {
     });
 
     auto* src = R"(
-%foo = @fragment func(%front_facing:bool [@front_facing], %position:vec4<f32> [@invariant, @position], %color1:f32 [@location(0)], %color2:f32 [@location(1), @interpolate(linear, sample)]):void -> %b1 {
+%foo = @fragment func(%front_facing:bool [@front_facing], %position:vec4<f32> [@invariant, @position], %color1:f32 [@location(0)], %color2:f32 [@location(1), @interpolate(linear, sample)]):void {
   %b1 = block {
     if %front_facing [t: %b2] {  # if_1
       %b2 = block {  # true
@@ -114,7 +114,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct) {
   %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
-%foo_inner = func(%front_facing:bool, %position:vec4<f32>, %color1:f32, %color2:f32):void -> %b2 {
+%foo_inner = func(%front_facing:bool, %position:vec4<f32>, %color1:f32, %color2:f32):void {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -126,7 +126,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct) {
     ret
   }
 }
-%foo = @fragment func():void -> %b4 {
+%foo = @fragment func():void {
   %b4 = block {
     %13:bool = load %foo_front_facing_Input
     %14:vec4<f32> = load %foo_position_Input
@@ -227,7 +227,7 @@ Inputs = struct @align(16) {
   color2:f32 @offset(36), @location(1), @interpolate(linear, sample)
 }
 
-%foo = @fragment func(%inputs:Inputs):void -> %b1 {
+%foo = @fragment func(%inputs:Inputs):void {
   %b1 = block {
     %3:bool = access %inputs, 0i
     if %3 [t: %b2] {  # if_1
@@ -261,7 +261,7 @@ Inputs = struct @align(16) {
   %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
-%foo_inner = func(%inputs:Inputs):void -> %b2 {
+%foo_inner = func(%inputs:Inputs):void {
   %b2 = block {
     %7:bool = access %inputs, 0i
     if %7 [t: %b3] {  # if_1
@@ -277,7 +277,7 @@ Inputs = struct @align(16) {
     ret
   }
 }
-%foo = @fragment func():void -> %b4 {
+%foo = @fragment func():void {
   %b4 = block {
     %14:bool = load %foo_front_facing_Input
     %15:vec4<f32> = load %foo_position_Input
@@ -354,7 +354,7 @@ Inputs = struct @align(16) {
   color1:f32 @offset(16), @location(0)
 }
 
-%foo = @fragment func(%front_facing:bool [@front_facing], %inputs:Inputs, %color2:f32 [@location(1), @interpolate(linear, sample)]):void -> %b1 {
+%foo = @fragment func(%front_facing:bool [@front_facing], %inputs:Inputs, %color2:f32 [@location(1), @interpolate(linear, sample)]):void {
   %b1 = block {
     if %front_facing [t: %b2] {  # if_1
       %b2 = block {  # true
@@ -384,7 +384,7 @@ Inputs = struct @align(16) {
   %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
-%foo_inner = func(%front_facing:bool, %inputs:Inputs, %color2:f32):void -> %b2 {
+%foo_inner = func(%front_facing:bool, %inputs:Inputs, %color2:f32):void {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -398,7 +398,7 @@ Inputs = struct @align(16) {
     ret
   }
 }
-%foo = @fragment func():void -> %b4 {
+%foo = @fragment func():void {
   %b4 = block {
     %14:bool = load %foo_front_facing_Input
     %15:vec4<f32> = load %foo_position_Input
@@ -429,7 +429,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
     });
 
     auto* src = R"(
-%foo = @vertex func():vec4<f32> [@invariant, @position] -> %b1 {
+%foo = @vertex func():vec4<f32> [@invariant, @position] {
   %b1 = block {
     %2:vec4<f32> = construct 0.5f
     ret %2
@@ -443,13 +443,13 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
   %foo_position_Output:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
 }
 
-%foo_inner = func():vec4<f32> -> %b2 {
+%foo_inner = func():vec4<f32> {
   %b2 = block {
     %3:vec4<f32> = construct 0.5f
     ret %3
   }
 }
-%foo = @vertex func():void -> %b3 {
+%foo = @vertex func():void {
   %b3 = block {
     %5:vec4<f32> = call %foo_inner
     store %foo_position_Output, %5
@@ -475,7 +475,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
     });
 
     auto* src = R"(
-%foo = @fragment func():vec4<f32> [@location(1)] -> %b1 {
+%foo = @fragment func():vec4<f32> [@location(1)] {
   %b1 = block {
     %2:vec4<f32> = construct 0.5f
     ret %2
@@ -489,13 +489,13 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
   %foo_loc1_Output:ptr<__out, vec4<f32>, write> = var @location(1)
 }
 
-%foo_inner = func():vec4<f32> -> %b2 {
+%foo_inner = func():vec4<f32> {
   %b2 = block {
     %3:vec4<f32> = construct 0.5f
     ret %3
   }
 }
-%foo = @fragment func():void -> %b3 {
+%foo = @fragment func():void {
   %b3 = block {
     %5:vec4<f32> = call %foo_inner
     store %foo_loc1_Output, %5
@@ -570,7 +570,7 @@ Outputs = struct @align(16) {
   color2:f32 @offset(20), @location(1), @interpolate(linear, sample)
 }
 
-%foo = @vertex func():Outputs -> %b1 {
+%foo = @vertex func():Outputs {
   %b1 = block {
     %2:vec4<f32> = construct 0.0f
     %3:Outputs = construct %2, 0.25f, 0.75f
@@ -593,14 +593,14 @@ Outputs = struct @align(16) {
   %foo_loc1_Output:ptr<__out, f32, write> = var @location(1) @interpolate(linear, sample)
 }
 
-%foo_inner = func():Outputs -> %b2 {
+%foo_inner = func():Outputs {
   %b2 = block {
     %5:vec4<f32> = construct 0.0f
     %6:Outputs = construct %5, 0.25f, 0.75f
     ret %6
   }
 }
-%foo = @vertex func():void -> %b3 {
+%foo = @vertex func():void {
   %b3 = block {
     %8:Outputs = call %foo_inner
     %9:vec4<f32> = access %8, 0u
@@ -663,7 +663,7 @@ Output = struct @align(4) {
   color2:f32 @offset(4), @location(0)
 }
 
-%foo = @fragment func():Output -> %b1 {
+%foo = @fragment func():Output {
   %b1 = block {
     %2:Output = construct 0.25f, 0.75f
     ret %2
@@ -683,13 +683,13 @@ Output = struct @align(4) {
   %foo_loc0_idx1_Output:ptr<__out, f32, write> = var @location(0) @blend_src(1)
 }
 
-%foo_inner = func():Output -> %b2 {
+%foo_inner = func():Output {
   %b2 = block {
     %4:Output = construct 0.25f, 0.75f
     ret %4
   }
 }
-%foo = @fragment func():void -> %b3 {
+%foo = @fragment func():void {
   %b3 = block {
     %6:Output = call %foo_inner
     %7:f32 = access %6, 0u
@@ -771,7 +771,7 @@ Interface = struct @align(16) {
   color:vec4<f32> @offset(16), @location(0)
 }
 
-%vert = @vertex func():Interface -> %b1 {
+%vert = @vertex func():Interface {
   %b1 = block {
     %2:vec4<f32> = construct 0.0f
     %3:vec4<f32> = construct 1.0f
@@ -779,7 +779,7 @@ Interface = struct @align(16) {
     ret %4
   }
 }
-%frag = @fragment func(%inputs:Interface):vec4<f32> [@location(0)] -> %b2 {
+%frag = @fragment func(%inputs:Interface):vec4<f32> [@location(0)] {
   %b2 = block {
     %7:vec4<f32> = access %inputs, 0u
     %8:vec4<f32> = access %inputs, 1u
@@ -804,7 +804,7 @@ Interface = struct @align(16) {
   %frag_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
 }
 
-%vert_inner = func():Interface -> %b2 {
+%vert_inner = func():Interface {
   %b2 = block {
     %7:vec4<f32> = construct 0.0f
     %8:vec4<f32> = construct 1.0f
@@ -812,7 +812,7 @@ Interface = struct @align(16) {
     ret %9
   }
 }
-%frag_inner = func(%inputs:Interface):vec4<f32> -> %b3 {
+%frag_inner = func(%inputs:Interface):vec4<f32> {
   %b3 = block {
     %12:vec4<f32> = access %inputs, 0u
     %13:vec4<f32> = access %inputs, 1u
@@ -820,7 +820,7 @@ Interface = struct @align(16) {
     ret %14
   }
 }
-%vert = @vertex func():void -> %b4 {
+%vert = @vertex func():void {
   %b4 = block {
     %16:Interface = call %vert_inner
     %17:vec4<f32> = access %16, 0u
@@ -830,7 +830,7 @@ Interface = struct @align(16) {
     ret
   }
 }
-%frag = @fragment func():void -> %b5 {
+%frag = @fragment func():void {
   %b5 = block {
     %20:vec4<f32> = load %frag_position_Input
     %21:vec4<f32> = load %frag_loc0_Input
@@ -898,7 +898,7 @@ Outputs = struct @align(16) {
   %1:ptr<storage, Outputs, read> = var
 }
 
-%vert = @vertex func():Outputs -> %b2 {
+%vert = @vertex func():Outputs {
   %b2 = block {
     %3:Outputs = load %1
     ret %3
@@ -919,13 +919,13 @@ Outputs = struct @align(16) {
   %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
 }
 
-%vert_inner = func():Outputs -> %b2 {
+%vert_inner = func():Outputs {
   %b2 = block {
     %5:Outputs = load %1
     ret %5
   }
 }
-%vert = @vertex func():void -> %b3 {
+%vert = @vertex func():void {
   %b3 = block {
     %7:Outputs = call %vert_inner
     %8:vec4<f32> = access %7, 0u
@@ -991,7 +991,7 @@ Outputs = struct @align(4) {
   mask:u32 @offset(4), @builtin(sample_mask)
 }
 
-%foo = @fragment func(%mask_in:u32 [@sample_mask]):Outputs -> %b1 {
+%foo = @fragment func(%mask_in:u32 [@sample_mask]):Outputs {
   %b1 = block {
     %3:Outputs = construct 0.5f, %mask_in
     ret %3
@@ -1012,13 +1012,13 @@ Outputs = struct @align(4) {
   %foo_sample_mask_Output:ptr<__out, array<u32, 1>, write> = var @builtin(sample_mask)
 }
 
-%foo_inner = func(%mask_in:u32):Outputs -> %b2 {
+%foo_inner = func(%mask_in:u32):Outputs {
   %b2 = block {
     %6:Outputs = construct 0.5f, %mask_in
     ret %6
   }
 }
-%foo = @fragment func():void -> %b3 {
+%foo = @fragment func():void {
   %b3 = block {
     %8:ptr<__in, u32, read> = access %foo_sample_mask_Input, 0u
     %9:u32 = load %8
@@ -1105,19 +1105,19 @@ MyStruct = struct @align(4) {
   color:f32 @offset(0), @location(1), @interpolate(linear, sample)
 }
 
-%vert = @vertex func(%input:MyStruct, %ival:i32 [@location(1), @interpolate(flat)]):vec4<f32> [@invariant, @position] -> %b1 {
+%vert = @vertex func(%input:MyStruct, %ival:i32 [@location(1), @interpolate(flat)]):vec4<f32> [@invariant, @position] {
   %b1 = block {
     %4:vec4<f32> = construct 0.5f
     ret %4
   }
 }
-%frag1 = @fragment func():MyStruct -> %b2 {
+%frag1 = @fragment func():MyStruct {
   %b2 = block {
     %6:MyStruct = construct 0.5f
     ret %6
   }
 }
-%frag2 = @fragment func():i32 [@location(0), @interpolate(flat)] -> %b3 {
+%frag2 = @fragment func():i32 [@location(0), @interpolate(flat)] {
   %b3 = block {
     ret 42i
   }
@@ -1138,24 +1138,24 @@ MyStruct = struct @align(4) {
   %frag2_loc0_Output:ptr<__out, i32, write> = var @location(0)
 }
 
-%vert_inner = func(%input:MyStruct, %ival:i32):vec4<f32> -> %b2 {
+%vert_inner = func(%input:MyStruct, %ival:i32):vec4<f32> {
   %b2 = block {
     %9:vec4<f32> = construct 0.5f
     ret %9
   }
 }
-%frag1_inner = func():MyStruct -> %b3 {
+%frag1_inner = func():MyStruct {
   %b3 = block {
     %11:MyStruct = construct 0.5f
     ret %11
   }
 }
-%frag2_inner = func():i32 -> %b4 {
+%frag2_inner = func():i32 {
   %b4 = block {
     ret 42i
   }
 }
-%vert = @vertex func():void -> %b5 {
+%vert = @vertex func():void {
   %b5 = block {
     %14:f32 = load %vert_loc1_Input
     %15:MyStruct = construct %14
@@ -1165,7 +1165,7 @@ MyStruct = struct @align(4) {
     ret
   }
 }
-%frag1 = @fragment func():void -> %b6 {
+%frag1 = @fragment func():void {
   %b6 = block {
     %19:MyStruct = call %frag1_inner
     %20:f32 = access %19, 0u
@@ -1173,7 +1173,7 @@ MyStruct = struct @align(4) {
     ret
   }
 }
-%frag2 = @fragment func():void -> %b7 {
+%frag2 = @fragment func():void {
   %b7 = block {
     %22:i32 = call %frag2_inner
     store %frag2_loc0_Output, %22
@@ -1231,7 +1231,7 @@ Outputs = struct @align(4) {
   depth:f32 @offset(4), @builtin(frag_depth)
 }
 
-%foo = @fragment func():Outputs -> %b1 {
+%foo = @fragment func():Outputs {
   %b1 = block {
     %2:Outputs = construct 0.5f, 2.0f
     ret %2
@@ -1257,13 +1257,13 @@ FragDepthClampArgs = struct @align(4), @block {
   %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read> = var
 }
 
-%foo_inner = func():Outputs -> %b2 {
+%foo_inner = func():Outputs {
   %b2 = block {
     %5:Outputs = construct 0.5f, 2.0f
     ret %5
   }
 }
-%foo = @fragment func():void -> %b3 {
+%foo = @fragment func():void {
   %b3 = block {
     %7:Outputs = call %foo_inner
     %8:f32 = access %7, 0u
@@ -1332,19 +1332,19 @@ Outputs = struct @align(4) {
   depth:f32 @offset(4), @builtin(frag_depth)
 }
 
-%ep1 = @fragment func():Outputs -> %b1 {
+%ep1 = @fragment func():Outputs {
   %b1 = block {
     %2:Outputs = construct 0.5f, 2.0f
     ret %2
   }
 }
-%ep2 = @fragment func():Outputs -> %b2 {
+%ep2 = @fragment func():Outputs {
   %b2 = block {
     %4:Outputs = construct 0.5f, 2.0f
     ret %4
   }
 }
-%ep3 = @fragment func():Outputs -> %b3 {
+%ep3 = @fragment func():Outputs {
   %b3 = block {
     %6:Outputs = construct 0.5f, 2.0f
     ret %6
@@ -1374,25 +1374,25 @@ FragDepthClampArgs = struct @align(4), @block {
   %ep3_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
 }
 
-%ep1_inner = func():Outputs -> %b2 {
+%ep1_inner = func():Outputs {
   %b2 = block {
     %9:Outputs = construct 0.5f, 2.0f
     ret %9
   }
 }
-%ep2_inner = func():Outputs -> %b3 {
+%ep2_inner = func():Outputs {
   %b3 = block {
     %11:Outputs = construct 0.5f, 2.0f
     ret %11
   }
 }
-%ep3_inner = func():Outputs -> %b4 {
+%ep3_inner = func():Outputs {
   %b4 = block {
     %13:Outputs = construct 0.5f, 2.0f
     ret %13
   }
 }
-%ep1 = @fragment func():void -> %b5 {
+%ep1 = @fragment func():void {
   %b5 = block {
     %15:Outputs = call %ep1_inner
     %16:f32 = access %15, 0u
@@ -1406,7 +1406,7 @@ FragDepthClampArgs = struct @align(4), @block {
     ret
   }
 }
-%ep2 = @fragment func():void -> %b6 {
+%ep2 = @fragment func():void {
   %b6 = block {
     %23:Outputs = call %ep2_inner
     %24:f32 = access %23, 0u
@@ -1420,7 +1420,7 @@ FragDepthClampArgs = struct @align(4), @block {
     ret
   }
 }
-%ep3 = @fragment func():void -> %b7 {
+%ep3 = @fragment func():void {
   %b7 = block {
     %31:Outputs = call %ep3_inner
     %32:f32 = access %31, 0u
@@ -1453,7 +1453,7 @@ TEST_F(SpirvWriter_ShaderIOTest, EmitVertexPointSize) {
     });
 
     auto* src = R"(
-%foo = @vertex func():vec4<f32> [@position] -> %b1 {
+%foo = @vertex func():vec4<f32> [@position] {
   %b1 = block {
     %2:vec4<f32> = construct 0.5f
     ret %2
@@ -1468,13 +1468,13 @@ TEST_F(SpirvWriter_ShaderIOTest, EmitVertexPointSize) {
   %foo___point_size_Output:ptr<__out, f32, write> = var @builtin(__point_size)
 }
 
-%foo_inner = func():vec4<f32> -> %b2 {
+%foo_inner = func():vec4<f32> {
   %b2 = block {
     %4:vec4<f32> = construct 0.5f
     ret %4
   }
 }
-%foo = @vertex func():void -> %b3 {
+%foo = @vertex func():void {
   %b3 = block {
     %6:vec4<f32> = call %foo_inner
     store %foo_position_Output, %6
@@ -1536,7 +1536,7 @@ Outputs = struct @align(8) {
   out2:vec4<f16> @offset(8), @location(2)
 }
 
-%main = @fragment func(%in1:f16 [@location(2)], %in2:vec4<f16>):Outputs -> %b1 {
+%main = @fragment func(%in1:f16 [@location(2)], %in2:vec4<f16>):Outputs {
   %b1 = block {
     %4:Outputs = construct %in1, %in2
     ret %4
@@ -1558,13 +1558,13 @@ Outputs = struct @align(8) {
   %main_loc2_Output:ptr<__out, vec4<f16>, write> = var @location(2)
 }
 
-%main_inner = func(%in1:f16, %in2:vec4<f16>):Outputs -> %b2 {
+%main_inner = func(%in1:f16, %in2:vec4<f16>):Outputs {
   %b2 = block {
     %8:Outputs = construct %in1, %in2
     ret %8
   }
 }
-%main = @fragment func():void -> %b3 {
+%main = @fragment func():void {
   %b3 = block {
     %10:f16 = load %main_loc2_Input
     %11:vec4<f16> = load %main_Input
@@ -1630,7 +1630,7 @@ Outputs = struct @align(8) {
   out2:vec4<f16> @offset(8), @location(2)
 }
 
-%main = @fragment func(%in1:f16 [@location(2)], %in2:vec4<f16>):Outputs -> %b1 {
+%main = @fragment func(%in1:f16 [@location(2)], %in2:vec4<f16>):Outputs {
   %b1 = block {
     %4:Outputs = construct %in1, %in2
     ret %4
@@ -1652,13 +1652,13 @@ Outputs = struct @align(8) {
   %main_loc2_Output:ptr<__out, vec4<f32>, write> = var @location(2)
 }
 
-%main_inner = func(%in1:f16, %in2:vec4<f16>):Outputs -> %b2 {
+%main_inner = func(%in1:f16, %in2:vec4<f16>):Outputs {
   %b2 = block {
     %8:Outputs = construct %in1, %in2
     ret %8
   }
 }
-%main = @fragment func():void -> %b3 {
+%main = @fragment func():void {
   %b3 = block {
     %10:f32 = load %main_loc2_Input
     %11:f16 = convert %10

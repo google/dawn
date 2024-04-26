@@ -63,7 +63,7 @@ fn f() -> i32 {
   i:i32 @offset(0)
 }
 
-%f = func():i32 -> %b1 {
+%f = func():i32 {
   %b1 = block {
     %S:ptr<function, S, read_write> = var, S(0i)
     %3:ptr<function, i32, read_write> = access %S, 0u
@@ -91,7 +91,7 @@ fn f(S : S) -> i32 {
   i:i32 @offset(0)
 }
 
-%f = func(%S:S):i32 -> %b1 {
+%f = func(%S:S):i32 {
   %b1 = block {
     %3:i32 = access %S, 0u
     ret %3
@@ -117,7 +117,7 @@ fn f() -> i32 {
   %i:ptr<private, i32, read_write> = var, 1i
 }
 
-%f = func():i32 -> %b2 {
+%f = func():i32 {
   %b2 = block {
     %3:i32 = load %i
     %4:i32 = add %3, 1i
@@ -149,7 +149,7 @@ fn f() -> i32 {
   %i:ptr<private, i32, read_write> = var, 1i
 }
 
-%f = func():i32 -> %b2 {
+%f = func():i32 {
   %b2 = block {
     %3:i32 = load %i
     %4:i32 = add %3, 1i
@@ -178,7 +178,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     if true [t: %b2] {  # if_1
@@ -217,7 +217,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     if true [t: %b2] {  # if_1
@@ -252,7 +252,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [b: %b2, c: %b3] {  # loop_1
@@ -298,7 +298,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [b: %b2, c: %b3] {  # loop_1
@@ -342,7 +342,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [i: %b2, b: %b3] {  # loop_1
@@ -386,7 +386,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [i: %b2, b: %b3] {  # loop_1
@@ -429,7 +429,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [i: %b2, b: %b3] {  # loop_1
@@ -476,7 +476,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [i: %b2, b: %b3] {  # loop_1
@@ -527,7 +527,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [b: %b2, c: %b3] {  # loop_1
@@ -581,7 +581,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [b: %b2, c: %b3] {  # loop_1
@@ -635,7 +635,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [b: %b2, c: %b3] {  # loop_1
@@ -685,7 +685,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     loop [b: %b2, c: %b3] {  # loop_1
@@ -735,7 +735,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     %3:i32 = load %i
@@ -783,7 +783,7 @@ fn f() -> i32 {
 
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():i32 {
   %b1 = block {
     %i:ptr<function, i32, read_write> = var
     %3:i32 = load %i

@@ -222,12 +222,12 @@ tint_symbol_3 = struct @align(16) {
   tint_symbol_2:array<vec4<u32>, 2> @offset(32)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b1 = block {
     ret
   }
 }
-%2 = func():tint_symbol_3 -> %b2 {
+%2 = func():tint_symbol_3 {
   %b2 = block {
     %3:vec4<u32> = construct 1u, 2u, 3u, 4u
     %4:vec4<u32> = construct 2u, 3u, 4u, 1u
@@ -264,7 +264,7 @@ TEST_F(SpirvParserTest, CompositeExtract_Vector) {
                OpFunctionEnd
 )",
               R"(
-%2 = func(%3:vec4<u32>):u32 -> %b2 {
+%2 = func(%3:vec4<u32>):u32 {
   %b2 = block {
     %4:u32 = access %3, 2u
     ret %4
@@ -299,7 +299,7 @@ TEST_F(SpirvParserTest, CompositeExtract_MatrixColumn) {
                OpFunctionEnd
 )",
               R"(
-%2 = func(%3:mat4x3<f32>):vec3<f32> -> %b2 {
+%2 = func(%3:mat4x3<f32>):vec3<f32> {
   %b2 = block {
     %4:vec3<f32> = access %3, 2u
     ret %4
@@ -334,7 +334,7 @@ TEST_F(SpirvParserTest, CompositeExtract_MatrixElement) {
                OpFunctionEnd
 )",
               R"(
-%2 = func(%3:mat4x3<f32>):f32 -> %b2 {
+%2 = func(%3:mat4x3<f32>):f32 {
   %b2 = block {
     %4:f32 = access %3, 2u, 1u
     ret %4
@@ -368,7 +368,7 @@ TEST_F(SpirvParserTest, CompositeExtract_Array) {
                OpFunctionEnd
 )",
               R"(
-%2 = func(%3:array<u32, 4>):u32 -> %b2 {
+%2 = func(%3:array<u32, 4>):u32 {
   %b2 = block {
     %4:u32 = access %3, 2u
     ret %4
@@ -403,7 +403,7 @@ TEST_F(SpirvParserTest, CompositeExtract_ArrayOfVec) {
                OpFunctionEnd
 )",
               R"(
-%2 = func(%3:array<vec3<u32>, 4>):u32 -> %b2 {
+%2 = func(%3:array<vec3<u32>, 4>):u32 {
   %b2 = block {
     %4:u32 = access %3, 1u, 2u
     ret %4
@@ -441,12 +441,12 @@ tint_symbol_2 = struct @align(4) {
   tint_symbol_1:u32 @offset(4)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
+%main = @compute @workgroup_size(1, 1, 1) func():void {
   %b1 = block {
     ret
   }
 }
-%2 = func(%3:tint_symbol_2):u32 -> %b2 {
+%2 = func(%3:tint_symbol_2):u32 {
   %b2 = block {
     %4:u32 = access %3, 1u
     ret %4

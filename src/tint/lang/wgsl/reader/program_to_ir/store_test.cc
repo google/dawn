@@ -51,7 +51,7 @@ TEST_F(ProgramToIRStoreTest, EmitStatement_Assign) {
   %a:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     store %a, 4u
     ret

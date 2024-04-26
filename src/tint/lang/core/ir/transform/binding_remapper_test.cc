@@ -217,7 +217,7 @@ TEST_F(IR_BindingRemapperTest, BindingPointCollisionSameEntryPoint) {
   %buffer_b:ptr<uniform, i32, read> = var @binding_point(3, 4)
 }
 
-%main = @fragment func():void -> %b2 {
+%main = @fragment func():void {
   %b2 = block {
     %4:i32 = load %buffer_a
     %5:i32 = load %buffer_b
@@ -233,7 +233,7 @@ TEST_F(IR_BindingRemapperTest, BindingPointCollisionSameEntryPoint) {
   %buffer_b:ptr<uniform, i32, read> = var @binding_point(0, 1)
 }
 
-%main = @fragment func():void -> %b2 {
+%main = @fragment func():void {
   %b2 = block {
     %4:i32 = load %buffer_a
     %5:i32 = load %buffer_b

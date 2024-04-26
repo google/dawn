@@ -64,7 +64,7 @@ TEST_F(SpirvParserTest, Constant_Bool) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:void = call %2, true
     %6:void = call %2, false
@@ -115,7 +115,7 @@ TEST_F(SpirvParserTest, Constant_I32) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:void = call %2, 0i
     %6:void = call %2, 1i
@@ -165,7 +165,7 @@ TEST_F(SpirvParserTest, Constant_U32) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:void = call %2, 0u
     %6:void = call %2, 1u
@@ -218,7 +218,7 @@ TEST_F(SpirvParserTest, Constant_F16) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:void = call %2, 0.0h
     %6:void = call %2, 1.0h
@@ -272,7 +272,7 @@ TEST_F(SpirvParserTest, Constant_F32) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:void = call %2, 0.0f
     %6:void = call %2, 1.0f
@@ -321,7 +321,7 @@ TEST_F(SpirvParserTest, Constant_Vec2Bool) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:vec2<bool> = call %2, vec2<bool>(true, false)
     %6:vec2<bool> = call %2, vec2<bool>(false)
@@ -367,7 +367,7 @@ TEST_F(SpirvParserTest, Constant_Vec3I32) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:vec3<i32> = call %2, vec3<i32>(0i, 1i, -1i)
     %6:vec3<i32> = call %2, vec3<i32>(0i)
@@ -414,7 +414,7 @@ TEST_F(SpirvParserTest, Constant_Vec4F32) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:vec4<f32> = call %2, vec4<f32>(0.0f, 1.0f, 340282346638528859811704183484516925440.0f, -340282346638528859811704183484516925440.0f)
     %6:vec4<f32> = call %2, vec4<f32>(0.0f)
@@ -462,7 +462,7 @@ TEST_F(SpirvParserTest, Constant_Mat2x4F32) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:mat2x4<f32> = call %2, mat2x4<f32>(vec4<f32>(0.0f), vec4<f32>(1.0f))
     %6:mat2x4<f32> = call %2, mat2x4<f32>(vec4<f32>(0.0f))
@@ -513,7 +513,7 @@ TEST_F(SpirvParserTest, Constant_Mat3x2F16) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:mat3x2<f16> = call %2, mat3x2<f16>(vec2<f16>(0.0h), vec2<f16>(1.0h), vec2<f16>(65504.0h))
     %6:mat3x2<f16> = call %2, mat3x2<f16>(vec2<f16>(0.0h))
@@ -561,7 +561,7 @@ TEST_F(SpirvParserTest, Constant_Array_I32_4) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:array<i32, 4> = call %2, array<i32, 4>(0i, 1i, -1i, 2147483647i)
     %6:array<i32, 4> = call %2, array<i32, 4>(0i)
@@ -614,7 +614,7 @@ TEST_F(SpirvParserTest, Constant_Array_Array_F32) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:array<array<f32, 4>, 2> = call %2, array<array<f32, 4>, 2>(array<f32, 4>(0.0f, 1.0f, 340282346638528859811704183484516925440.0f, -340282346638528859811704183484516925440.0f), array<f32, 4>(-340282346638528859811704183484516925440.0f, 340282346638528859811704183484516925440.0f, 1.0f, 0.0f))
     %6:array<array<f32, 4>, 2> = call %2, array<array<f32, 4>, 2>(array<f32, 4>(0.0f))
@@ -660,7 +660,7 @@ TEST_F(SpirvParserTest, Constant_Struct) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:tint_symbol_2 = call %2, tint_symbol_2(42i, -1.0f)
     %6:tint_symbol_2 = call %2, tint_symbol_2(0i, 0.0f)
@@ -715,7 +715,7 @@ TEST_F(SpirvParserTest, Constant_Struct_Nested) {
                OpFunctionEnd
 )",
               R"(
-%4 = func():void -> %b3 {
+%4 = func():void {
   %b3 = block {
     %5:tint_symbol_5 = call %2, tint_symbol_5(array<tint_symbol_2, 2>(tint_symbol_2(42i, -1.0f), tint_symbol_2(-1i, 42.0f)), array<tint_symbol_2, 2>(tint_symbol_2(-1i, 42.0f), tint_symbol_2(42i, -1.0f)))
     %6:tint_symbol_5 = call %2, tint_symbol_5(array<tint_symbol_2, 2>(tint_symbol_2(0i, 0.0f)))

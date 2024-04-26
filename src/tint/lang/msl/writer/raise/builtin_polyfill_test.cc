@@ -52,7 +52,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, WorkgroupBarrier) {
     });
 
     auto* src = R"(
-%foo = @compute func():void -> %b1 {
+%foo = @compute func():void {
   %b1 = block {
     %2:void = workgroupBarrier
     ret
@@ -62,7 +62,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, WorkgroupBarrier) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = @compute func():void -> %b1 {
+%foo = @compute func():void {
   %b1 = block {
     %2:void = msl.threadgroup_barrier 4u
     ret
@@ -84,7 +84,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, StorageBarrier) {
     });
 
     auto* src = R"(
-%foo = @compute func():void -> %b1 {
+%foo = @compute func():void {
   %b1 = block {
     %2:void = storageBarrier
     ret
@@ -94,7 +94,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, StorageBarrier) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = @compute func():void -> %b1 {
+%foo = @compute func():void {
   %b1 = block {
     %2:void = msl.threadgroup_barrier 1u
     ret
@@ -116,7 +116,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureBarrier) {
     });
 
     auto* src = R"(
-%foo = @compute func():void -> %b1 {
+%foo = @compute func():void {
   %b1 = block {
     %2:void = textureBarrier
     ret
@@ -126,7 +126,7 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureBarrier) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = @compute func():void -> %b1 {
+%foo = @compute func():void {
   %b1 = block {
     %2:void = msl.threadgroup_barrier 2u
     ret

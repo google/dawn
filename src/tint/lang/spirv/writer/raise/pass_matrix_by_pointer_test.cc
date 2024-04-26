@@ -62,13 +62,13 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, NoModify_ArrayValue) {
   %var:ptr<private, array<f32, 4>, read_write> = var
 }
 
-%target = func(%value:array<f32, 4>):f32 -> %b2 {
+%target = func(%value:array<f32, 4>):f32 {
   %b2 = block {
     %4:f32 = access %value, 1i
     ret %4
   }
 }
-%caller = func():f32 -> %b3 {
+%caller = func():f32 {
   %b3 = block {
     %6:array<f32, 4> = load %var
     %7:f32 = call %target, %6
@@ -108,14 +108,14 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, NoModify_MatrixPointer) {
   %var:ptr<private, mat3x3<f32>, read_write> = var
 }
 
-%target = func(%value:ptr<private, mat3x3<f32>, read_write>):vec3<f32> -> %b2 {
+%target = func(%value:ptr<private, mat3x3<f32>, read_write>):vec3<f32> {
   %b2 = block {
     %4:ptr<private, vec3<f32>, read_write> = access %value, 1i
     %5:vec3<f32> = load %4
     ret %5
   }
 }
-%caller = func():vec3<f32> -> %b3 {
+%caller = func():vec3<f32> {
   %b3 = block {
     %7:vec3<f32> = call %target, %var
     ret %7
@@ -146,7 +146,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixValuePassedToBuiltin) {
   %var:ptr<private, mat3x3<f32>, read_write> = var
 }
 
-%caller = func():f32 -> %b2 {
+%caller = func():f32 {
   %b2 = block {
     %3:mat3x3<f32> = load %var
     %4:f32 = determinant %3
@@ -186,13 +186,13 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, SingleMatrixValue) {
   %var:ptr<private, mat3x3<f32>, read_write> = var
 }
 
-%target = func(%value:mat3x3<f32>):mat3x3<f32> -> %b2 {
+%target = func(%value:mat3x3<f32>):mat3x3<f32> {
   %b2 = block {
     %4:mat3x3<f32> = mul %value, 2.0f
     ret %4
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %6:mat3x3<f32> = load %var
     %7:mat3x3<f32> = call %target, %6
@@ -207,14 +207,14 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, SingleMatrixValue) {
   %var:ptr<private, mat3x3<f32>, read_write> = var
 }
 
-%target = func(%3:ptr<function, mat3x3<f32>, read_write>):mat3x3<f32> -> %b2 {
+%target = func(%3:ptr<function, mat3x3<f32>, read_write>):mat3x3<f32> {
   %b2 = block {
     %4:mat3x3<f32> = load %3
     %5:mat3x3<f32> = mul %4, 2.0f
     ret %5
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %7:mat3x3<f32> = load %var
     %8:ptr<function, mat3x3<f32>, read_write> = var, %7
@@ -258,14 +258,14 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleMatrixValues) {
   %var:ptr<private, array<mat3x3<f32>, 4>, read_write> = var
 }
 
-%target = func(%value_a:mat3x3<f32>, %scalar:f32, %value_b:mat3x3<f32>):mat3x3<f32> -> %b2 {
+%target = func(%value_a:mat3x3<f32>, %scalar:f32, %value_b:mat3x3<f32>):mat3x3<f32> {
   %b2 = block {
     %6:mat3x3<f32> = mul %value_a, %scalar
     %7:mat3x3<f32> = add %6, %value_b
     ret %7
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %9:ptr<private, mat3x3<f32>, read_write> = access %var, 0u
     %10:mat3x3<f32> = load %9
@@ -283,7 +283,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleMatrixValues) {
   %var:ptr<private, array<mat3x3<f32>, 4>, read_write> = var
 }
 
-%target = func(%3:ptr<function, mat3x3<f32>, read_write>, %scalar:f32, %5:ptr<function, mat3x3<f32>, read_write>):mat3x3<f32> -> %b2 {
+%target = func(%3:ptr<function, mat3x3<f32>, read_write>, %scalar:f32, %5:ptr<function, mat3x3<f32>, read_write>):mat3x3<f32> {
   %b2 = block {
     %6:mat3x3<f32> = load %5
     %7:mat3x3<f32> = load %3
@@ -292,7 +292,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleMatrixValues) {
     ret %9
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %11:ptr<private, mat3x3<f32>, read_write> = access %var, 0u
     %12:mat3x3<f32> = load %11
@@ -335,14 +335,14 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleParamUses) {
   %var:ptr<private, mat3x3<f32>, read_write> = var
 }
 
-%target = func(%value:mat3x3<f32>):mat3x3<f32> -> %b2 {
+%target = func(%value:mat3x3<f32>):mat3x3<f32> {
   %b2 = block {
     %4:mat3x3<f32> = add %value, %value
     %5:mat3x3<f32> = mul %4, %value
     ret %5
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %7:mat3x3<f32> = load %var
     %8:mat3x3<f32> = call %target, %7
@@ -357,7 +357,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleParamUses) {
   %var:ptr<private, mat3x3<f32>, read_write> = var
 }
 
-%target = func(%3:ptr<function, mat3x3<f32>, read_write>):mat3x3<f32> -> %b2 {
+%target = func(%3:ptr<function, mat3x3<f32>, read_write>):mat3x3<f32> {
   %b2 = block {
     %4:mat3x3<f32> = load %3
     %5:mat3x3<f32> = add %4, %4
@@ -365,7 +365,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleParamUses) {
     ret %6
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %8:mat3x3<f32> = load %var
     %9:ptr<function, mat3x3<f32>, read_write> = var, %8
@@ -416,27 +416,27 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleCallsites) {
   %var:ptr<private, mat3x3<f32>, read_write> = var
 }
 
-%target = func(%value:mat3x3<f32>, %scalar:f32):mat3x3<f32> -> %b2 {
+%target = func(%value:mat3x3<f32>, %scalar:f32):mat3x3<f32> {
   %b2 = block {
     %5:mat3x3<f32> = mul %value, %scalar
     ret %5
   }
 }
-%caller_a = func():mat3x3<f32> -> %b3 {
+%caller_a = func():mat3x3<f32> {
   %b3 = block {
     %7:mat3x3<f32> = load %var
     %8:mat3x3<f32> = call %target, %7, 2.0f
     ret %8
   }
 }
-%caller_b = func():mat3x3<f32> -> %b4 {
+%caller_b = func():mat3x3<f32> {
   %b4 = block {
     %10:mat3x3<f32> = load %var
     %11:mat3x3<f32> = call %target, %10, 3.0f
     ret %11
   }
 }
-%caller_c = func():mat3x3<f32> -> %b5 {
+%caller_c = func():mat3x3<f32> {
   %b5 = block {
     %13:mat3x3<f32> = load %var
     %14:mat3x3<f32> = call %target, %13, 4.0f
@@ -451,14 +451,14 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleCallsites) {
   %var:ptr<private, mat3x3<f32>, read_write> = var
 }
 
-%target = func(%3:ptr<function, mat3x3<f32>, read_write>, %scalar:f32):mat3x3<f32> -> %b2 {
+%target = func(%3:ptr<function, mat3x3<f32>, read_write>, %scalar:f32):mat3x3<f32> {
   %b2 = block {
     %5:mat3x3<f32> = load %3
     %6:mat3x3<f32> = mul %5, %scalar
     ret %6
   }
 }
-%caller_a = func():mat3x3<f32> -> %b3 {
+%caller_a = func():mat3x3<f32> {
   %b3 = block {
     %8:mat3x3<f32> = load %var
     %9:ptr<function, mat3x3<f32>, read_write> = var, %8
@@ -466,7 +466,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleCallsites) {
     ret %10
   }
 }
-%caller_b = func():mat3x3<f32> -> %b4 {
+%caller_b = func():mat3x3<f32> {
   %b4 = block {
     %12:mat3x3<f32> = load %var
     %13:ptr<function, mat3x3<f32>, read_write> = var, %12
@@ -474,7 +474,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MultipleCallsites) {
     ret %14
   }
 }
-%caller_c = func():mat3x3<f32> -> %b5 {
+%caller_c = func():mat3x3<f32> {
   %b5 = block {
     %16:mat3x3<f32> = load %var
     %17:ptr<function, mat3x3<f32>, read_write> = var, %16
@@ -515,7 +515,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixInArray) {
   %var:ptr<private, array<mat3x3<f32>, 2>, read_write> = var
 }
 
-%target = func(%value:array<mat3x3<f32>, 2>):mat3x3<f32> -> %b2 {
+%target = func(%value:array<mat3x3<f32>, 2>):mat3x3<f32> {
   %b2 = block {
     %4:mat3x3<f32> = access %value, 0u
     %5:mat3x3<f32> = access %value, 1u
@@ -523,7 +523,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixInArray) {
     ret %6
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %8:array<mat3x3<f32>, 2> = load %var
     %9:mat3x3<f32> = call %target, %8
@@ -538,7 +538,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixInArray) {
   %var:ptr<private, array<mat3x3<f32>, 2>, read_write> = var
 }
 
-%target = func(%3:ptr<function, array<mat3x3<f32>, 2>, read_write>):mat3x3<f32> -> %b2 {
+%target = func(%3:ptr<function, array<mat3x3<f32>, 2>, read_write>):mat3x3<f32> {
   %b2 = block {
     %4:array<mat3x3<f32>, 2> = load %3
     %5:mat3x3<f32> = access %4, 0u
@@ -547,7 +547,7 @@ TEST_F(SpirvWriter_PassMatrixByPointerTest, MatrixInArray) {
     ret %7
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %9:array<mat3x3<f32>, 2> = load %var
     %10:ptr<function, array<mat3x3<f32>, 2>, read_write> = var, %9
@@ -596,7 +596,7 @@ MyStruct = struct @align(16) {
   %var:ptr<private, MyStruct, read_write> = var
 }
 
-%target = func(%value:MyStruct):mat3x3<f32> -> %b2 {
+%target = func(%value:MyStruct):mat3x3<f32> {
   %b2 = block {
     %4:mat3x3<f32> = access %value, 0u
     %5:f32 = access %value, 1u
@@ -604,7 +604,7 @@ MyStruct = struct @align(16) {
     ret %6
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %8:MyStruct = load %var
     %9:mat3x3<f32> = call %target, %8
@@ -624,7 +624,7 @@ MyStruct = struct @align(16) {
   %var:ptr<private, MyStruct, read_write> = var
 }
 
-%target = func(%3:ptr<function, MyStruct, read_write>):mat3x3<f32> -> %b2 {
+%target = func(%3:ptr<function, MyStruct, read_write>):mat3x3<f32> {
   %b2 = block {
     %4:MyStruct = load %3
     %5:mat3x3<f32> = access %4, 0u
@@ -633,7 +633,7 @@ MyStruct = struct @align(16) {
     ret %7
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %9:MyStruct = load %var
     %10:ptr<function, MyStruct, read_write> = var, %9
@@ -686,7 +686,7 @@ MyStruct = struct @align(16) {
   %var:ptr<private, array<MyStruct, 4>, read_write> = var
 }
 
-%target = func(%value:array<MyStruct, 4>):mat3x3<f32> -> %b2 {
+%target = func(%value:array<MyStruct, 4>):mat3x3<f32> {
   %b2 = block {
     %4:mat3x3<f32> = access %value, 2u, 0u, 0u
     %5:mat3x3<f32> = access %value, 2u, 0u, 1u
@@ -696,7 +696,7 @@ MyStruct = struct @align(16) {
     ret %8
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %10:array<MyStruct, 4> = load %var
     %11:mat3x3<f32> = call %target, %10
@@ -716,7 +716,7 @@ MyStruct = struct @align(16) {
   %var:ptr<private, array<MyStruct, 4>, read_write> = var
 }
 
-%target = func(%3:ptr<function, array<MyStruct, 4>, read_write>):mat3x3<f32> -> %b2 {
+%target = func(%3:ptr<function, array<MyStruct, 4>, read_write>):mat3x3<f32> {
   %b2 = block {
     %4:array<MyStruct, 4> = load %3
     %5:mat3x3<f32> = access %4, 2u, 0u, 0u
@@ -727,7 +727,7 @@ MyStruct = struct @align(16) {
     ret %9
   }
 }
-%caller = func():mat3x3<f32> -> %b3 {
+%caller = func():mat3x3<f32> {
   %b3 = block {
     %11:array<MyStruct, 4> = load %var
     %12:ptr<function, array<MyStruct, 4>, read_write> = var, %11

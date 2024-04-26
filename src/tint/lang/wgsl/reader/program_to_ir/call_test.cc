@@ -48,12 +48,12 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Bitcast) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():f32 -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():f32 {
   %b1 = block {
     ret 0.0f
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:f32 = call %my_func
     %4:f32 = bitcast %3
@@ -74,7 +74,7 @@ TEST_F(ProgramToIRCallTest, EmitStatement_Discard) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%test_function = @fragment func():void -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%test_function = @fragment func():void {
   %b1 = block {
     discard
     ret
@@ -91,12 +91,12 @@ TEST_F(ProgramToIRCallTest, EmitStatement_UserFunction) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func(%p:f32):void -> %b1 {
+    EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func(%p:f32):void {
   %b1 = block {
     ret
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %4:void = call %my_func, 6.0f
     ret
@@ -117,7 +117,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Convert) {
   %i:ptr<private, i32, read_write> = var, 1i
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:i32 = load %i
     %4:f32 = convert %3
@@ -154,7 +154,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Construct) {
   %i:ptr<private, f32, read_write> = var, 1.0f
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
+%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   %b2 = block {
     %3:f32 = load %i
     %4:vec3<f32> = construct 2.0f, 3.0f, %3

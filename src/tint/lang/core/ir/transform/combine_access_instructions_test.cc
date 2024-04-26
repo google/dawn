@@ -77,7 +77,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, MyStruct, read> = access %buffer
     %4:MyStruct = load %3
@@ -131,7 +131,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
@@ -152,7 +152,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %4:vec3<f32> = load %3
@@ -195,7 +195,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, MyStruct, read> = access %buffer
     %4:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %3, 0u
@@ -215,7 +215,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:array<mat3x3<f32>, 4> = load %3
@@ -259,7 +259,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %3
@@ -280,7 +280,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 1u
     %4:mat3x3<f32> = load %3
@@ -324,7 +324,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
@@ -345,7 +345,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 1u
     %4:mat3x3<f32> = load %3
@@ -403,7 +403,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
@@ -430,7 +430,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %4:vec3<f32> = load %3
@@ -490,7 +490,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
@@ -515,7 +515,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, vec3<f32>, read> = access %buffer, 0u, 1u, 2u
     %4:vec3<f32> = load %3
@@ -565,7 +565,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:array<mat3x3<f32>, 4> = load %3
@@ -587,7 +587,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:array<mat3x3<f32>, 4> = load %3
@@ -635,7 +635,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     %4:ptr<uniform, mat3x3<f32>, read> = access %3, 1u
@@ -657,7 +657,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, mat3x3<f32>, read> = access %buffer, 0u, 1u
     %4:mat3x3<f32> = load %3
@@ -684,7 +684,7 @@ TEST_F(IR_CombineAccessInstructionsTest, AccessResultUsesAsAccessIndex) {
     });
 
     auto* src = R"(
-%foo = func():f32 -> %b1 {
+%foo = func():f32 {
   %b1 = block {
     %2:u32 = access %indices, 1u
     %4:f32 = access %values, %2
@@ -738,7 +738,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     if true [t: %b3, f: %b4] {  # if_1
@@ -768,7 +768,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     if true [t: %b3, f: %b4] {  # if_1
       %b3 = block {  # true
@@ -829,7 +829,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %3:ptr<uniform, array<mat3x3<f32>, 4>, read> = access %buffer, 0u
     loop [b: %b3, c: %b4] {  # loop_1
@@ -859,7 +859,7 @@ MyStruct = struct @align(16) {
   %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     loop [b: %b3, c: %b4] {  # loop_1
       %b3 = block {  # body

@@ -340,7 +340,7 @@ void Disassembler::EmitFunction(const Function* func) {
 
     EmitReturnAttributes(func);
 
-    out_ << " -> %b" << IdOf(func->Block()) << " {";
+    out_ << " {";
 
     {  // Add a comment if the function IDs or parameter IDs doesn't match their name
         Vector<std::string, 4> names;

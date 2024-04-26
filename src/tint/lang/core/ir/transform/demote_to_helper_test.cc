@@ -60,7 +60,7 @@ TEST_F(IR_DemoteToHelperTest, NoModify_NoDiscard) {
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
-%ep = @fragment func():f32 [@location(0)] -> %b2 {
+%ep = @fragment func():f32 [@location(0)] {
   %b2 = block {
     store %buffer, 42i
     ret 0.5f
@@ -102,7 +102,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInEntryPoint) {
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -123,7 +123,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInEntryPoint) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -187,13 +187,13 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     store %buffer, 42i
     ret
   }
 }
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b3 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b3 = block {
     if %front_facing [t: %b4] {  # if_1
       %b4 = block {  # true
@@ -214,7 +214,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     %4:bool = load %continue_execution
     if %4 [t: %b3] {  # if_1
@@ -226,7 +226,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
     ret
   }
 }
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b4 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b4 = block {
     if %front_facing [t: %b5] {  # if_2
       %b5 = block {  # true
@@ -286,7 +286,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func(%cond:bool):void -> %b2 {
+%foo = func(%cond:bool):void {
   %b2 = block {
     if %cond [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -297,7 +297,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
     ret
   }
 }
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b4 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b4 = block {
     %6:void = call %foo, %front_facing
     store %buffer, 42i
@@ -313,7 +313,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%foo = func(%cond:bool):void -> %b2 {
+%foo = func(%cond:bool):void {
   %b2 = block {
     if %cond [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -324,7 +324,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
     ret
   }
 }
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b4 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b4 = block {
     %7:void = call %foo, %front_facing
     %8:bool = load %continue_execution
@@ -385,7 +385,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
   %buffer:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func(%cond:bool):void -> %b2 {
+%foo = func(%cond:bool):void {
   %b2 = block {
     if %cond [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -397,7 +397,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
     ret
   }
 }
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b4 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b4 = block {
     %6:void = call %foo, %front_facing
     ret 0.5f
@@ -412,7 +412,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%foo = func(%cond:bool):void -> %b2 {
+%foo = func(%cond:bool):void {
   %b2 = block {
     if %cond [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -430,7 +430,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
     ret
   }
 }
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b5 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b5 = block {
     %8:void = call %foo, %front_facing
     %9:bool = load %continue_execution
@@ -475,7 +475,7 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
   %priv:ptr<private, i32, read_write> = var
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     %func:ptr<function, i32, read_write> = var
     if %front_facing [t: %b3] {  # if_1
@@ -498,7 +498,7 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     %func:ptr<function, i32, read_write> = var
     if %front_facing [t: %b3] {  # if_1
@@ -559,7 +559,7 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
   %texture:ptr<handle, texture_storage_2d<r32float, write>, read> = var @binding_point(0, 0)
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32>):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32>):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -581,7 +581,7 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32>):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32>):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -640,7 +640,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -661,7 +661,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -720,7 +720,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -742,7 +742,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -810,7 +810,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
   %buffer:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -838,7 +838,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] -> %b2 {
+%ep = @fragment func(%front_facing:bool [@front_facing]):f32 [@location(0)] {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
@@ -882,7 +882,7 @@ TEST_F(IR_DemoteToHelperTest, UnreachableHelperThatDiscards) {
     });
 
     auto* src = R"(
-%foo = func():void -> %b1 {
+%foo = func():void {
   %b1 = block {
     discard
     ret
@@ -896,7 +896,7 @@ TEST_F(IR_DemoteToHelperTest, UnreachableHelperThatDiscards) {
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%foo = func():void -> %b2 {
+%foo = func():void {
   %b2 = block {
     store %continue_execution, false
     ret

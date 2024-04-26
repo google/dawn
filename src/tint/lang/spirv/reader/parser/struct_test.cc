@@ -90,7 +90,7 @@ tint_symbol_2 = struct @align(4) {
   tint_symbol_1:i32 @offset(4)
 }
 
-%1 = func(%2:tint_symbol_2):void -> %b1 {
+%1 = func(%2:tint_symbol_2):void {
   %b1 = block {
     ret
   }
@@ -128,7 +128,7 @@ tint_symbol_2 = struct @align(4) {
   tint_symbol_1:i32 @offset(4)
 }
 
-%1 = func(%2:tint_symbol_2, %3:tint_symbol_2):tint_symbol_2 -> %b1 {
+%1 = func(%2:tint_symbol_2, %3:tint_symbol_2):tint_symbol_2 {
   %b1 = block {
     ret %2
   }
@@ -178,7 +178,7 @@ tint_symbol_9 = struct @align(4) {
   tint_symbol_8:tint_symbol_2 @offset(24)
 }
 
-%1 = func(%2:tint_symbol_9):void -> %b1 {
+%1 = func(%2:tint_symbol_9):void {
   %b1 = block {
     ret
   }
@@ -221,7 +221,7 @@ tint_symbol_4 = struct @align(4) {
   tint_symbol_3:i32 @offset(64)
 }
 
-%1 = func(%2:tint_symbol_4):void -> %b1 {
+%1 = func(%2:tint_symbol_4):void {
   %b1 = block {
     ret
   }
