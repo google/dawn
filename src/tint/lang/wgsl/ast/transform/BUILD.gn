@@ -259,6 +259,7 @@ if (tint_build_wgsl_reader) {
       "remove_continue_in_switch_fuzz.cc",
       "remove_phonies_fuzz.cc",
       "remove_unreachable_statements_fuzz.cc",
+      "single_entry_point_fuzz.cc",
       "std140_fuzz.cc",
       "unshadow_fuzz.cc",
       "vectorize_scalar_matrix_initializers_fuzz.cc",
