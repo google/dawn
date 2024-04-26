@@ -156,6 +156,8 @@ Transform::ApplyResult OffsetFirstIndex::Apply(const Program& src,
     return resolver::Resolve(b);
 }
 
+OffsetFirstIndex::Config::Config() = default;
+
 OffsetFirstIndex::Config::Config(std::optional<int32_t> first_vertex_off,
                                  std::optional<int32_t> first_instance_off)
     : first_vertex_offset(first_vertex_off), first_instance_offset(first_instance_off) {}

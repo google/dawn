@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_WGSL_AST_TRANSFORM_OFFSET_FIRST_INDEX_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::ast::transform {
 
@@ -47,7 +48,7 @@ namespace tint::ast::transform {
 /// For D3D, this affects both firstVertex and firstInstance. For OpenGL,
 /// it applies to only firstInstance. For this reason, the first_vertex_offset
 /// and first_instance_offset are optional, where std::nullopt indicates that
-/// no subsitution is to be performed.
+/// no substitution is to be performed.
 ///
 /// Before:
 /// ```
@@ -80,6 +81,9 @@ class OffsetFirstIndex final : public Castable<OffsetFirstIndex, Transform> {
     /// Transform configuration options
     struct Config final : public Castable<Config, ast::transform::Data> {
         /// Constructor
+        Config();
+
+        /// Constructor
         /// @param first_vertex_off Offset of the firstVertex push constant
         /// @param first_instance_off Location of the firstInstance push constant
         Config(std::optional<int32_t> first_vertex_off, std::optional<int32_t> first_instance_off);
@@ -88,10 +92,13 @@ class OffsetFirstIndex final : public Castable<OffsetFirstIndex, Transform> {
         ~Config() override;
 
         /// Offset of the firstVertex push constant
-        const std::optional<uint32_t> first_vertex_offset;
+        std::optional<uint32_t> first_vertex_offset;
 
         /// Offset of the firstInstance push constant
-        const std::optional<uint32_t> first_instance_offset;
+        std::optional<uint32_t> first_instance_offset;
+
+        /// Reflection for this struct
+        TINT_REFLECT(Config, first_vertex_offset, first_instance_offset);
     };
 
     /// Constructor
