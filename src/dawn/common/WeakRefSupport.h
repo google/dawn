@@ -78,10 +78,11 @@ template <typename T>
 class WeakRefSupport : public detail::WeakRefSupportBase {
   public:
 #if DAWN_COMPILER_IS(CLANG)
-    // Note that the static cast below fails CFI builds due to the cast. The cast itself is
+    // Note that the static cast below fails CFI/UBSAN builds due to the cast. The cast itself is
     // safe so we suppress the failure. See the following link regarding the cast:
     // https://stackoverflow.com/questions/73172193/can-you-static-cast-this-to-a-derived-class-in-a-base-class-constructor-then-u,
     DAWN_NO_SANITIZE("cfi-derived-cast")
+    DAWN_NO_SANITIZE("vptr")
 #endif
     WeakRefSupport()
         : WeakRefSupportBase(AcquireRef(new detail::WeakRefData(static_cast<T*>(this)))) {}
