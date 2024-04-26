@@ -254,6 +254,7 @@ if (tint_build_wgsl_reader) {
       "multiplanar_external_texture_fuzz.cc",
       "offset_first_index_fuzz.cc",
       "preserve_padding_fuzz.cc",
+      "promote_initializers_to_let_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [

@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,33 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_PROMOTE_INITIALIZERS_TO_LET_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_PROMOTE_INITIALIZERS_TO_LET_H_
-
-#include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
 
 namespace tint::ast::transform {
+namespace {
 
-/// A transform that hoists array and structure initializers, and identifiers resolving to a
-/// 'const' array to a 'let' variable, declared just before the statement of usage.
-/// This transform is used by backends that do not support expressions that operate on an immediate
-/// array or structure. For example, the following is not immediately expressible for HLSL:
-///   `array<i32, 2>(1, 2)[0]`
-/// @see crbug.com/tint/406
-class PromoteInitializersToLet final : public Castable<PromoteInitializersToLet, Transform> {
-  public:
-    /// Constructor
-    PromoteInitializersToLet();
+bool CanRun() {
+    return false;  // TODO(crbug.com/tint/2241)
+}
 
-    /// Destructor
-    ~PromoteInitializersToLet() override;
+void PromoteInitializersToLetFuzzer(const Program& program) {
+    if (!CanRun()) {
+        return;
+    }
 
-    /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program& program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
-};
+    DataMap outputs;
+    if (auto result = PromoteInitializersToLet{}.Apply(program, DataMap{}, outputs)) {
+        if (!result->IsValid()) {
+            TINT_ICE() << "PromoteInitializersToLet returned invalid program:\n"
+                       << result->Diagnostics();
+        }
+    }
+}
 
+}  // namespace
 }  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_PROMOTE_INITIALIZERS_TO_LET_H_
+TINT_WGSL_PROGRAM_FUZZER(tint::ast::transform::PromoteInitializersToLetFuzzer);

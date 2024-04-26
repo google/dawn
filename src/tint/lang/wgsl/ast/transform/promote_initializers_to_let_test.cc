@@ -1397,5 +1397,15 @@ fn f() {
     EXPECT_FALSE(ShouldRun<PromoteInitializersToLet>(src));
 }
 
+// TODO(crbug.com/tint/2241)
+TEST_F(PromoteInitializersToLetTest, DISABLED_Bug2241) {
+    auto* src = R"(
+fn f () {
+  let v = false && array<i32, array(array(6))[0][0]>()[0] == 0;
+}
+)";
+    EXPECT_FALSE(ShouldRun<PromoteInitializersToLet>(src));
+}
+
 }  // namespace
 }  // namespace tint::ast::transform
