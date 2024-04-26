@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -562,9 +563,15 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
     TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "Queue::ValidateSubmit");
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
+    std::set<CommandBufferBase*> uniqueCommandBuffers;
+
     for (uint32_t i = 0; i < commandCount; ++i) {
         DAWN_TRY(GetDevice()->ValidateObject(commands[i]));
         DAWN_TRY(commands[i]->ValidateCanUseInSubmitNow());
+
+        auto insertResult = uniqueCommandBuffers.insert(commands[i]);
+        DAWN_INVALID_IF(!insertResult.second, "Submit contains duplicates of %s.", commands[i]);
+
         const CommandBufferResourceUsage& usages = commands[i]->GetResourceUsages();
 
         for (const BufferBase* buffer : usages.topLevelBuffers) {
