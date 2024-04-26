@@ -260,6 +260,7 @@ if (tint_build_wgsl_reader) {
       "remove_phonies_fuzz.cc",
       "remove_unreachable_statements_fuzz.cc",
       "std140_fuzz.cc",
+      "unshadow_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [
