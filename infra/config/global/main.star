@@ -150,7 +150,7 @@ os = struct(
 def get_dimension(os, builder_name = None):
     """Returns the dimension to use for the input os and optional builder name"""
     if os.category == os_category.LINUX:
-        return "Ubuntu-22.04"
+        return "Ubuntu-18.04"
     elif os.category == os_category.MAC:
         if "cmake" in builder_name:
             # CMake build runs Tint e2e tests, which must run on 11+ where the metal
