@@ -665,20 +665,11 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         dedicatedAllocateInfo.image = sharedTextureMemory->mVkImage->Get();
         dedicatedAllocateInfo.buffer = VkBuffer{};
 
-        // Add a reference because we will transfer ownership to the
-        // VkDeviceMemory.
-        ahbFunctions->Acquire(aHardwareBuffer);
-
         // Import the AHardwareBuffer as VkDeviceMemory
         VkDeviceMemory vkDeviceMemory;
-        DAWN_TRY_ASSIGN_WITH_CLEANUP(
-            vkDeviceMemory,
-            AllocateDeviceMemory(device, &memoryAllocateInfo, &dedicatedAllocateInfo,
-                                 &importMemoryAHBInfo),
-            {
-                // Release the reference because the VkDeviceMemory did not take ownership of it.
-                ahbFunctions->Release(aHardwareBuffer);
-            });
+        DAWN_TRY_ASSIGN(vkDeviceMemory,
+                        AllocateDeviceMemory(device, &memoryAllocateInfo, &dedicatedAllocateInfo,
+                                             &importMemoryAHBInfo));
 
         sharedTextureMemory->mVkDeviceMemory =
             AcquireRef(new RefCountedVkHandle<VkDeviceMemory>(device, vkDeviceMemory));
