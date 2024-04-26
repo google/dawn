@@ -257,6 +257,7 @@ if (tint_build_wgsl_reader) {
       "promote_initializers_to_let_fuzz.cc",
       "promote_side_effects_to_decl_fuzz.cc",
       "remove_continue_in_switch_fuzz.cc",
+      "remove_phonies_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [
