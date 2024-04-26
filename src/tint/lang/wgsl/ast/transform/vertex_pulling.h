@@ -71,13 +71,11 @@ enum class VertexFormat {
     kSint32x3,         // sint32x3
     kSint32x4,         // sint32x4
     kUnorm10_10_10_2,  // unorm10-10-10-2
-
-    kLastEntry = kSint32x4,
 };
 
 /// Describes if a vertex attributes increments with vertex index or instance
 /// index
-enum class VertexStepMode { kVertex, kInstance, kLastEntry = kInstance };
+enum class VertexStepMode { kVertex, kInstance };
 
 /// Describes a vertex attribute within a buffer
 struct VertexAttributeDescriptor {
@@ -197,5 +195,15 @@ class VertexPulling final : public Castable<VertexPulling, Transform> {
 };
 
 }  // namespace tint::ast::transform
+
+namespace tint {
+
+/// Reflection for VertexFormat
+TINT_REFLECT_ENUM_RANGE(tint::ast::transform::VertexFormat, kUint8x2, kUnorm10_10_10_2);
+
+/// Reflection for VertexStepMode
+TINT_REFLECT_ENUM_RANGE(tint::ast::transform::VertexStepMode, kVertex, kInstance);
+
+}  // namespace tint
 
 #endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_VERTEX_PULLING_H_

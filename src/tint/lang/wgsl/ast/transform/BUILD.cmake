@@ -273,6 +273,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/std140_fuzz.cc
   lang/wgsl/ast/transform/unshadow_fuzz.cc
   lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers_fuzz.cc
+  lang/wgsl/ast/transform/vertex_pulling_fuzz.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
 )
 

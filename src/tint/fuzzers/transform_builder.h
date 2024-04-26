@@ -208,7 +208,7 @@ struct TransformBuilder::AddTransformImpl<ast::transform::VertexPulling> {
         DataBuilder* b) {
         ast::transform::VertexAttributeDescriptor desc{};
         desc.format = b->enum_class<ast::transform::VertexFormat>(
-            static_cast<uint8_t>(ast::transform::VertexFormat::kLastEntry) + 1);
+            static_cast<uint8_t>(ast::transform::VertexFormat::kUnorm10_10_10_2) + 1);
         desc.offset = b->build<uint32_t>();
         desc.shader_location = b->build<uint32_t>();
         return desc;
@@ -221,7 +221,7 @@ struct TransformBuilder::AddTransformImpl<ast::transform::VertexPulling> {
         ast::transform::VertexBufferLayoutDescriptor desc;
         desc.array_stride = b->build<uint32_t>();
         desc.step_mode = b->enum_class<ast::transform::VertexStepMode>(
-            static_cast<uint8_t>(ast::transform::VertexStepMode::kLastEntry) + 1);
+            static_cast<uint8_t>(ast::transform::VertexStepMode::kInstance) + 1);
         desc.attributes =
             b->vector<ast::transform::VertexAttributeDescriptor>(GenerateVertexAttributeDescriptor);
         return desc;

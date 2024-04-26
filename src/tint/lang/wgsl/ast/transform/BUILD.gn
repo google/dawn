@@ -263,6 +263,7 @@ if (tint_build_wgsl_reader) {
       "std140_fuzz.cc",
       "unshadow_fuzz.cc",
       "vectorize_scalar_matrix_initializers_fuzz.cc",
+      "vertex_pulling_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [
