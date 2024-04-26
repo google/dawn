@@ -269,6 +269,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/remove_continue_in_switch_fuzz.cc
   lang/wgsl/ast/transform/remove_phonies_fuzz.cc
   lang/wgsl/ast/transform/remove_unreachable_statements_fuzz.cc
+  lang/wgsl/ast/transform/renamer_fuzz.cc
   lang/wgsl/ast/transform/single_entry_point_fuzz.cc
   lang/wgsl/ast/transform/std140_fuzz.cc
   lang/wgsl/ast/transform/unshadow_fuzz.cc

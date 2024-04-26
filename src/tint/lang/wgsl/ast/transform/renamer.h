@@ -32,6 +32,7 @@
 #include <unordered_map>
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::ast::transform {
 
@@ -74,6 +75,9 @@ class Renamer final : public Castable<Renamer, Transform> {
     /// If omitted, then the renamer will use Target::kAll.
     struct Config final : public Castable<Config, transform::Data> {
         /// Constructor
+        Config();
+
+        /// Constructor
         /// @param tgt the targets to rename
         /// @param keep_unicode if false, symbols with non-ascii code-points are
         /// renamed
@@ -92,13 +96,16 @@ class Renamer final : public Castable<Renamer, Transform> {
         ~Config() override;
 
         /// The targets to rename
-        Target const target = Target::kAll;
+        Target target = Target::kAll;
 
         /// If false, symbols with non-ascii code-points are renamed.
         bool preserve_unicode = false;
 
         /// Requested renaming rules
-        const Remappings requested_names = {};
+        Remappings requested_names = {};
+
+        /// Reflection for this class
+        TINT_REFLECT(Config, target, preserve_unicode, requested_names);
     };
 
     /// Constructor using a the configuration provided in the input Data
@@ -114,5 +121,12 @@ class Renamer final : public Castable<Renamer, Transform> {
 };
 
 }  // namespace tint::ast::transform
+
+namespace tint {
+
+/// Reflection for Target
+TINT_REFLECT_ENUM_RANGE(tint::ast::transform::Renamer::Target, kAll, kMslKeywords);
+
+}  // namespace tint
 
 #endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_RENAMER_H_

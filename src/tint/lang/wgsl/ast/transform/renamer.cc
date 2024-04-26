@@ -1264,6 +1264,7 @@ Renamer::Data::Data(Remappings&& r) : remappings(std::move(r)) {}
 Renamer::Data::Data(const Data&) = default;
 Renamer::Data::~Data() = default;
 
+Renamer::Config::Config() = default;
 Renamer::Config::Config(Target t, bool pu) : target(t), preserve_unicode(pu) {}
 Renamer::Config::Config(Target t, bool pu, Remappings&& remappings)
     : target(t), preserve_unicode(pu), requested_names(std::move(remappings)) {}
