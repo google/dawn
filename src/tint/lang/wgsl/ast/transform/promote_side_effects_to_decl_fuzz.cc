@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,33 +25,41 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_PROMOTE_SIDE_EFFECTS_TO_DECL_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_PROMOTE_SIDE_EFFECTS_TO_DECL_H_
-
-#include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/ast/transform/promote_side_effects_to_decl.h"
+#include "src/tint/lang/wgsl/extension.h"
+#include "src/tint/lang/wgsl/sem/module.h"
 
 namespace tint::ast::transform {
+namespace {
 
-/// A transform that hoists expressions with side-effects to variable
-/// declarations before the statement of usage with the goal of ensuring
-/// left-to-right order of evaluation, while respecting short-circuit
-/// evaluation.
-/// As `@diagnostic` statements can be decomposed, this transform requires that the
-/// DisableUniformityAnalysis transform is run first.
-class PromoteSideEffectsToDecl final : public Castable<PromoteSideEffectsToDecl, Transform> {
-  public:
-    /// Constructor
-    PromoteSideEffectsToDecl();
+bool CanRun(const Program& program) {
+    if (!program.Sem().Module()->Extensions().Contains(
+            wgsl::Extension::kChromiumDisableUniformityAnalysis)) {
+        return false;  // Requires 'chromium_disable_uniformity_analysis'
+    }
+    if (program.AST().HasOverrides()) {
+        return false;  // Overrides are not supported.
+    }
+    return true;
+}
 
-    /// Destructor
-    ~PromoteSideEffectsToDecl() override;
+void PromoteSideEffectsToDeclFuzzer(const Program& program) {
+    if (!CanRun(program)) {
+        return;
+    }
 
-    /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program& program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
-};
+    DataMap outputs;
+    if (auto result = PromoteSideEffectsToDecl{}.Apply(program, DataMap{}, outputs)) {
+        if (!result->IsValid()) {
+            TINT_ICE() << "PromoteSideEffectsToDecl returned invalid program:\n"
+                       << result->Diagnostics();
+        }
+    }
+}
 
+}  // namespace
 }  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_PROMOTE_SIDE_EFFECTS_TO_DECL_H_
+TINT_WGSL_PROGRAM_FUZZER(tint::ast::transform::PromoteSideEffectsToDeclFuzzer);

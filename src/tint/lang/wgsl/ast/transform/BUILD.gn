@@ -255,6 +255,7 @@ if (tint_build_wgsl_reader) {
       "offset_first_index_fuzz.cc",
       "preserve_padding_fuzz.cc",
       "promote_initializers_to_let_fuzz.cc",
+      "promote_side_effects_to_decl_fuzz.cc",
       "zero_init_workgroup_memory_fuzz.cc",
     ]
     deps = [

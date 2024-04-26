@@ -265,6 +265,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_fuzz fuzz
   lang/wgsl/ast/transform/offset_first_index_fuzz.cc
   lang/wgsl/ast/transform/preserve_padding_fuzz.cc
   lang/wgsl/ast/transform/promote_initializers_to_let_fuzz.cc
+  lang/wgsl/ast/transform/promote_side_effects_to_decl_fuzz.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_fuzz.cc
 )
 
