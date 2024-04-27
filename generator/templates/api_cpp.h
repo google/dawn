@@ -336,6 +336,8 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
             inline {{as_cppType(type.name)}}({{as_cppType(type.name)}}&&);
             inline {{as_cppType(type.name)}}& operator=({{as_cppType(type.name)}}&&);
         {% endif %}
+        inline operator const {{as_cType(type.name)}}&() const noexcept;
+
         {% if type.extensible %}
             ChainedStruct{{Out}} {{const}} * nextInChain = nullptr;
         {% endif %}
@@ -410,6 +412,10 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
             {% endfor %}
         }
     {% endif %}
+
+    {{CppType}}::operator const {{as_cType(type.name)}}&() const noexcept {
+        return *reinterpret_cast<const {{as_cType(type.name)}}*>(this);
+    }
 
     static_assert(sizeof({{CppType}}) == sizeof({{CType}}), "sizeof mismatch for {{CppType}}");
     static_assert(alignof({{CppType}}) == alignof({{CType}}), "alignof mismatch for {{CppType}}");
