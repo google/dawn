@@ -83,7 +83,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-04-26 07:28:21AM
+# Last rolled: 2024-04-29 09:31:39AM
 
 ################################################################################
 # SharedImage interop failures on Linux
@@ -1620,11 +1620,14 @@ crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 w
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default webgpu-dedicated-worker ] webgpu:api,operation,rendering,basic:large_draw:indexed=true;indirect=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default webgpu-service-worker ] webgpu:api,operation,rendering,basic:large_draw:indexed=true;indirect=true [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,log2:f16:inputSource="uniform";vectorize="_undef_" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:shader,execution,expression,unary,i32_conversion:f32:inputSource="const";vectorize="_undef_" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";workgroupSize=[64,1,1];batch__=0 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=29 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba32float" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:shader,execution,expression,unary,i32_conversion:f32:inputSource="const";vectorize="_undef_" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:shader,validation,expression,call,builtin,abs:parameters:test="sampler" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=29 [ RetryOnFailure ]
 
 ################################################################################
 # New failures. Please triage:
@@ -1934,7 +1937,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu 
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=1;rasterizationMask=1 [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,storage_texture,read_only:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:* [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_load_store:accessValueType="u32";memType="non_atomic_workgroup";accessPair="rw";normalBarrier=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="private";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="";trailing_comma=true [ Failure ]
@@ -2229,7 +2231,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 web
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="workgroup";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:shader,execution,statement,discard:derivatives: [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=29 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="private";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="";trailing_comma=true [ Failure ]
