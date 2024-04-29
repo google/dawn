@@ -44,9 +44,19 @@
 #include "dawn/common/windows_with_undefs.h"
 #endif
 
-using EGLImage = void*;
-
 namespace dawn::native::opengl {
+
+struct EGLFunctions;
+
+enum class EGLExtension {
+    DisplayTextureShareGroupANGLE,
+    CreateContextRobustnessEXT,
+    FenceSyncKHR,
+    ReusableSyncKHR,
+
+    EnumCount,
+};
+using EGLExtensionSet = ityp::bitset<EGLExtension, static_cast<size_t>(EGLExtension::EnumCount)>;
 
 class Device final : public DeviceBase {
   public:
@@ -64,6 +74,9 @@ class Device final : public DeviceBase {
     // Returns all the OpenGL entry points and ensures that the associated
     // Context is current.
     const OpenGLFunctions& GetGL() const;
+    const EGLFunctions& GetEGL(bool makeCurrent) const;
+    const EGLExtensionSet& GetEGLExtensions() const;
+    EGLDisplay GetEGLDisplay() const;
 
     const GLFormat& GetGLFormat(const Format& format);
 
@@ -104,6 +117,10 @@ class Device final : public DeviceBase {
       public:
         virtual ~Context() {}
         virtual void MakeCurrent() = 0;
+        // TODO(dawn:2544) Abstract EGL-isms for use with desktop GL.
+        virtual EGLDisplay GetEGLDisplay() const = 0;
+        virtual const EGLFunctions& GetEGL() const = 0;
+        virtual const EGLExtensionSet& GetExtensions() const = 0;
     };
 
   private:

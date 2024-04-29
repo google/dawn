@@ -30,4 +30,8 @@
 
 #include "dawn/native/opengl/opengl_platform_autogen.h"
 
+typedef void* EGLDisplay;
+typedef void* EGLImage;
+typedef void* EGLSyncKHR;
+
 #endif  // SRC_DAWN_NATIVE_OPENGL_OPENGL_PLATFORM_H_

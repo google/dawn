@@ -59,7 +59,7 @@ class Queue final : public QueueBase {
                                 const TextureDataLayout& dataLayout,
                                 const Extent3D& writeSizePixel) override;
 
-    GLenum ClientWaitSync(GLsync sync, Nanoseconds timeout);
+    GLenum ClientWaitSync(EGLSyncKHR sync, Nanoseconds timeout);
 
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
 
@@ -69,7 +69,8 @@ class Queue final : public QueueBase {
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
 
-    std::deque<std::pair<GLsync, ExecutionSerial>> mFencesInFlight;
+    const uint32_t mEGLSyncType;
+    MutexProtected<std::deque<std::pair<EGLSyncKHR, ExecutionSerial>>> mFencesInFlight;
 
     // Has pending GL commands which are not associated with a fence.
     bool mHasPendingCommands = false;

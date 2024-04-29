@@ -75,8 +75,22 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
     }
 
     const char* extensions = egl.QueryString(display, EGL_EXTENSIONS);
-    if (strstr(extensions, "EGL_EXT_create_context_robustness") == nullptr) {
+
+    EGLExtensionSet extensionSet;
+    extensionSet[EGLExtension::DisplayTextureShareGroupANGLE] =
+        strstr(extensions, "EGL_ANGLE_display_texture_share_group") != nullptr;
+    extensionSet[EGLExtension::CreateContextRobustnessEXT] =
+        strstr(extensions, "EGL_EXT_create_context_robustness") != nullptr;
+    extensionSet[EGLExtension::FenceSyncKHR] = strstr(extensions, "EGL_KHR_fence_sync") != nullptr;
+    extensionSet[EGLExtension::ReusableSyncKHR] =
+        strstr(extensions, "EGL_KHR_reusable_sync") != nullptr;
+
+    if (!extensionSet[EGLExtension::CreateContextRobustnessEXT]) {
         return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness must be supported");
+    }
+
+    if (!extensionSet[EGLExtension::FenceSyncKHR] && !extensionSet[EGLExtension::ReusableSyncKHR]) {
+        return DAWN_INTERNAL_ERROR("EGL_KHR_fence_sync or EGL_KHR_reusable_sync must be supported");
     }
 
     std::vector<EGLint> attrib_list{
@@ -88,9 +102,10 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
         EGL_TRUE,
     };
     if (useANGLETextureSharing) {
-        if (strstr(extensions, "EGL_ANGLE_display_texture_share_group") == nullptr) {
+        if (!extensionSet[EGLExtension::DisplayTextureShareGroupANGLE]) {
             return DAWN_INTERNAL_ERROR(
-                "GL_ANGLE_display_texture_share_group must be supported to use GL texture sharing");
+                "EGL_GL_ANGLE_display_texture_share_group must be supported to use GL texture "
+                "sharing");
         }
         attrib_list.push_back(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE);
         attrib_list.push_back(EGL_TRUE);
@@ -100,15 +115,34 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
     EGLContext context = egl.CreateContext(display, config, EGL_NO_CONTEXT, attrib_list.data());
     DAWN_TRY(CheckEGL(egl, context != EGL_NO_CONTEXT, "eglCreateContext"));
 
-    return std::unique_ptr<ContextEGL>(new ContextEGL(egl, display, context));
+    return std::unique_ptr<ContextEGL>(new ContextEGL(egl, display, context, extensionSet));
 }
 
+ContextEGL::ContextEGL(const EGLFunctions& functions,
+                       EGLDisplay display,
+                       EGLContext context,
+                       EGLExtensionSet extensions)
+    : mEgl(functions), mDisplay(display), mContext(context), mExtensions(extensions) {}
+
 void ContextEGL::MakeCurrent() {
-    egl.MakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mContext);
+    EGLBoolean success = mEgl.MakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mContext);
+    DAWN_ASSERT(success == EGL_TRUE);
+}
+
+EGLDisplay ContextEGL::GetEGLDisplay() const {
+    return mDisplay;
+}
+
+const EGLFunctions& ContextEGL::GetEGL() const {
+    return mEgl;
+}
+
+const EGLExtensionSet& ContextEGL::GetExtensions() const {
+    return mExtensions;
 }
 
 ContextEGL::~ContextEGL() {
-    egl.DestroyContext(mDisplay, mContext);
+    mEgl.DestroyContext(mDisplay, mContext);
 }
 
 }  // namespace dawn::native::opengl
