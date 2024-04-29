@@ -320,13 +320,14 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
             // Can be chained in {{as_cppType(root.name)}}
         {% endfor %}
         struct {{as_cppType(type.name)}} : ChainedStruct{{Out}} {
-            {{as_cppType(type.name)}}() {
-                sType = SType::{{type.name.CamelCase()}};
-            }
+            inline {{as_cppType(type.name)}}();
+
+            struct Init;
+            inline {{as_cppType(type.name)}}(Init&& init);
     {% else %}
         struct {{as_cppType(type.name)}} {
             {% if type.has_free_members_function %}
-                {{as_cppType(type.name)}}() = default;
+                inline {{as_cppType(type.name)}}();
             {% endif %}
     {% endif %}
         {% if type.has_free_members_function %}
@@ -370,6 +371,27 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
     {% set CppType = as_cppType(type.name) %}
     {% set CType = as_cType(type.name) %}
     // {{CppType}} implementation
+    {% if type.chained %}
+        {% set Out = "Out" if type.output else "" %}
+        {% set const = "const" if not type.output else "" %}
+        {{CppType}}::{{CppType}}()
+          : ChainedStruct{{Out}} { nullptr, SType::{{type.name.CamelCase()}} } {}
+        struct {{CppType}}::Init {
+            ChainedStruct{{Out}} * {{const}} nextInChain;
+            {% for member in type.members %}
+                {% set member_declaration = as_annotated_cppType(member, type.has_free_members_function) + render_cpp_default_value(member, True, type.has_free_members_function) %}
+                {{member_declaration}};
+            {% endfor %}
+        };
+        {{CppType}}::{{CppType}}({{CppType}}::Init&& init)
+          : ChainedStruct{{Out}} { init.nextInChain, SType::{{type.name.CamelCase()}} }
+            {%- for member in type.members -%},{{" "}}
+                {{as_varName(member.name)}}(std::move(init.{{as_varName(member.name)}}))
+            {%- endfor -%}
+            {}
+    {% elif type.has_free_members_function %}
+        {{CppType}}::{{CppType}}() = default;
+    {% endif %}
     {% if type.has_free_members_function %}
         {{CppType}}::~{{CppType}}() {
             if (
