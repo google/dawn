@@ -37,35 +37,40 @@
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/utils/ice/ice.h"
 
-using namespace tint::core::number_suffixes;  // NOLINT
-using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::spirv::writer::raise {
 
 namespace {
 
-void Run(core::ir::Module& ir) {
+/// PIMPL state for the transform.
+struct State {
+    /// The IR module.
+    core::ir::Module& ir;
+
+    /// The IR builder.
     core::ir::Builder b{ir};
 
-    // Find the instructions that need to be modified.
-    Vector<core::ir::CoreBinary*, 4> binary_worklist;
-    Vector<core::ir::Convert*, 4> convert_worklist;
-    for (auto* inst : ir.Instructions()) {
-        if (auto* binary = inst->As<core::ir::CoreBinary>()) {
-            TINT_ASSERT(binary->Operands().Length() == 2);
-            if (binary->LHS()->Type()->Is<core::type::Matrix>() ||
-                binary->RHS()->Type()->Is<core::type::Matrix>()) {
-                binary_worklist.Push(binary);
-            }
-        } else if (auto* convert = inst->As<core::ir::Convert>()) {
-            if (convert->Result(0)->Type()->Is<core::type::Matrix>()) {
-                convert_worklist.Push(convert);
+    /// Process the module.
+    void Process() {
+        // Find and replace the instructions that need to be modified.
+        for (auto* inst : ir.Instructions()) {
+            if (auto* binary = inst->As<core::ir::CoreBinary>()) {
+                if (binary->LHS()->Type()->Is<core::type::Matrix>() ||
+                    binary->RHS()->Type()->Is<core::type::Matrix>()) {
+                    ReplaceBinary(binary);
+                }
+            } else if (auto* convert = inst->As<core::ir::Convert>()) {
+                if (convert->Result(0)->Type()->Is<core::type::Matrix>()) {
+                    ReplaceConvert(convert);
+                }
             }
         }
     }
 
-    // Replace the matrix arithmetic instructions that we found.
-    for (auto* binary : binary_worklist) {
+    /// Replace a binary matrix arithmetic instruction.
+    /// @param binary the instruction to replace
+    void ReplaceBinary(core::ir::Binary* binary) {
         auto* lhs = binary->LHS();
         auto* rhs = binary->RHS();
         auto* lhs_ty = lhs->Type();
@@ -134,8 +139,9 @@ void Run(core::ir::Module& ir) {
         }
     }
 
-    // Replace the matrix convert instructions that we found.
-    for (auto* convert : convert_worklist) {
+    /// Replace a matrix convert instruction.
+    /// @param convert the instruction to replace
+    void ReplaceConvert(core::ir::Convert* convert) {
         auto* arg = convert->Args()[core::ir::Convert::kValueOperandOffset];
         auto* in_mat = arg->Type()->As<core::type::Matrix>();
         auto* out_mat = convert->Result(0)->Type()->As<core::type::Matrix>();
@@ -159,7 +165,7 @@ void Run(core::ir::Module& ir) {
         convert->ReplaceWith(construct);
         convert->Destroy();
     }
-}
+};
 
 }  // namespace
 
@@ -169,7 +175,7 @@ Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& ir) {
         return result.Failure();
     }
 
-    Run(ir);
+    State{ir}.Process();
 
     return Success;
 }
