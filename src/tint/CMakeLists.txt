@@ -631,7 +631,6 @@ if(TINT_BUILD_FUZZERS)
   set(TINT_BUILD_TESTS FALSE)
   set(TINT_BUILD_BENCHMARKS FALSE)
   include("BUILD.cmake")
-  add_subdirectory(fuzzers)
 
   # Restore the build flags
   set(TINT_BUILD_CMD_TOOLS ${SAVE_TINT_BUILD_CMD_TOOLS})
@@ -683,29 +682,22 @@ endif()
 
 
 ################################################################################
-# Additional fuzzer tests
+# Unit tests
 ################################################################################
 if(TINT_BUILD_TESTS)
-  if(${TINT_BUILD_FUZZERS})
-    target_sources(tint_cmd_test_test_cmd PRIVATE
-      fuzzers/mersenne_twister_engine.cc
-      fuzzers/mersenne_twister_engine.h
-      fuzzers/random_generator.cc
-      fuzzers/random_generator.h
-      fuzzers/random_generator_engine.cc
-      fuzzers/random_generator_engine.h
-      fuzzers/random_generator_test.cc
-    )
-  endif()
-
   add_test(NAME tint_unittests COMMAND tint_cmd_test_test_cmd)
 endif(TINT_BUILD_TESTS)
+
 
 ################################################################################
 # Target aliases
 ################################################################################
 add_library(libtint ALIAS tint_api)
 
+
+################################################################################
+# Install rules
+################################################################################
 if (TINT_ENABLE_INSTALL)
   # We need to recurse all folders and include all headers because tint.h includes most headers from src/tint
   file(GLOB TINT_HEADERS "${DAWN_INCLUDE_DIR}/tint/*.h")

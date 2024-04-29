@@ -293,10 +293,7 @@ group("fuzzers") {
   testonly = true
   deps = []
   if (tint_has_fuzzers) {
-    deps += [
-      "${tint_src_dir}/cmd/fuzz/wgsl",
-      "${tint_src_dir}/fuzzers",
-    ]
+    deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
   }
 }
 
