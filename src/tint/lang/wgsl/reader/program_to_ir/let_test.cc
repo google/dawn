@@ -44,7 +44,7 @@ TEST_F(ProgramToIRLetTest, Constant) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:i32 = let 42i
@@ -60,7 +60,7 @@ TEST_F(ProgramToIRLetTest, BinaryOp) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:i32 = let 3i
@@ -78,7 +78,7 @@ TEST_F(ProgramToIRLetTest, Chain) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:i32 = let 1i

@@ -73,14 +73,14 @@ class IRToProgramRoundtripTest : public testing::Test {
             return result;
         }
 
-        result.ir_pre_raise = core::ir::Disassemble(ir_module.Get());
+        result.ir_pre_raise = core::ir::Disassemble(ir_module.Get()).Plain();
 
         if (auto res = tint::wgsl::writer::Raise(ir_module.Get()); res != Success) {
             result.err = res.Failure().reason.Str();
             return result;
         }
 
-        result.ir_post_raise = core::ir::Disassemble(ir_module.Get());
+        result.ir_post_raise = core::ir::Disassemble(ir_module.Get()).Plain();
 
         writer::ProgramOptions program_options;
         program_options.allowed_features = AllowedFeatures::Everything();

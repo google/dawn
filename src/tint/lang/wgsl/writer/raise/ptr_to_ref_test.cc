@@ -67,7 +67,7 @@ class WgslWriter_PtrToRefTest : public testing::Test {
     /// @returns the transformed module as a disassembled string
     std::string str() {
         core::ir::Disassembler dis(mod);
-        return "\n" + dis.Disassemble();
+        return "\n" + dis.Disassemble().Plain();
     }
 
   protected:

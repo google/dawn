@@ -50,7 +50,7 @@ void IRRoundtripFuzzer(core::ir::Module& ir) {
     program_options.allowed_features = AllowedFeatures::Everything();
     auto dst = tint::wgsl::writer::IRToProgram(ir, program_options);
     if (!dst.IsValid()) {
-        std::cerr << "IR:\n" << core::ir::Disassemble(ir) << std::endl;
+        std::cerr << "IR:\n" << core::ir::Disassemble(ir).Plain() << std::endl;
         if (auto result = tint::wgsl::writer::Generate(dst, {}); result == Success) {
             std::cerr << "WGSL:\n" << result->wgsl << std::endl << std::endl;
         }

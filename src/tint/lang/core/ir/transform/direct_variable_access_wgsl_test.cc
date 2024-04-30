@@ -38,6 +38,7 @@
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/raise/raise.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
+#include "src/tint/utils/text/styled_text.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -80,7 +81,7 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
             return "DirectVariableAccess failed:\n" + res.Failure().reason.Str();
         }
 
-        auto pre_raise = ir::Disassemble(module.Get());
+        auto pre_raise = ir::Disassemble(module.Get()).Plain();
 
         if (auto raise = wgsl::writer::Raise(module.Get()); raise != Success) {
             return "wgsl::writer::Raise failed:\n" + res.Failure().reason.Str();
@@ -89,15 +90,15 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
         auto program_out = wgsl::writer::IRToProgram(module.Get(), program_options);
         if (!program_out.IsValid()) {
             return "wgsl::writer::IRToProgram() failed: \n" + program_out.Diagnostics().Str() +
-                   "\n\nIR (pre):\n" + pre_raise +                       //
-                   "\n\nIR (post):\n" + ir::Disassemble(module.Get()) +  //
+                   "\n\nIR (pre):\n" + pre_raise +                               //
+                   "\n\nIR (post):\n" + ir::Disassemble(module.Get()).Plain() +  //
                    "\n\nAST:\n" + Program::printer(program_out);
         }
 
         auto output = wgsl::writer::Generate(program_out, wgsl::writer::Options{});
         if (output != Success) {
             return "wgsl::writer::IRToProgram() failed: \n" + output.Failure().reason.Str() +
-                   "\n\nIR:\n" + ir::Disassemble(module.Get());
+                   "\n\nIR:\n" + ir::Disassemble(module.Get()).Plain();
         }
 
         return "\n" + output->wgsl;

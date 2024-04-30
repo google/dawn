@@ -65,14 +65,14 @@ class WgslIRWriterTest : public core::ir::IRTestHelper {
     Result Run(std::string_view expected_wgsl) {
         Result result;
 
-        result.ir_pre_raise = core::ir::Disassemble(mod);
+        result.ir_pre_raise = core::ir::Disassemble(mod).Plain();
 
         if (auto res = tint::wgsl::writer::Raise(mod); res != Success) {
             result.err = res.Failure().reason.Str();
             return result;
         }
 
-        result.ir_post_raise = core::ir::Disassemble(mod);
+        result.ir_post_raise = core::ir::Disassemble(mod).Plain();
 
         writer::ProgramOptions program_options;
         program_options.allowed_features = AllowedFeatures::Everything();

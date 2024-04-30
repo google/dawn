@@ -197,8 +197,8 @@ class StringStream {
         return *this;
     }
 
-    /// @returns the current location in the output stream
-    uint32_t tellp() { return static_cast<uint32_t>(sstream_.tellp()); }
+    /// @returns the number of UTF-8 code units (bytes) have been written to the string.
+    size_t Length() { return static_cast<size_t>(sstream_.tellp()); }
 
     /// @returns the string contents of the stream
     std::string str() const { return sstream_.str(); }

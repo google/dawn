@@ -357,7 +357,7 @@ void Validator::DisassembleIfNeeded() {
     if (disassembly_file) {
         return;
     }
-    disassembly_file = std::make_unique<Source::File>("", dis_.Disassemble());
+    disassembly_file = std::make_unique<Source::File>("", dis_.Disassemble().Plain());
 }
 
 Result<SuccessType> Validator::Run() {

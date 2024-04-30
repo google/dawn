@@ -53,7 +53,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, array<u32, 3>, read_write> = var
@@ -79,7 +79,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex_ViaDerefPointerInd
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, array<u32, 3>, read_write> = var
@@ -106,7 +106,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex_ViaPointerIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, array<u32, 3>, read_write> = var
@@ -134,7 +134,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Multiple) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:vec3<u32> = let vec3<u32>(0u)
@@ -159,7 +159,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, vec3<u32>, read_write> = var
@@ -184,7 +184,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex_ViaDerefPointerIn
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, vec3<u32>, read_write> = var
@@ -210,7 +210,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex_ViaPointerIndex) 
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, vec3<u32>, read_write> = var
@@ -234,7 +234,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, array<array<f32, 4>, 3>, read_write> = var
@@ -260,7 +260,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex_ViaDerefPointerInd
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, array<array<f32, 4>, 3>, read_write> = var
@@ -287,7 +287,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex_ViaPointerIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, array<array<f32, 4>, 3>, read_write> = var
@@ -312,7 +312,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MatrixMultiIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, mat3x4<f32>, read_write> = var
@@ -340,7 +340,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(MyStruct = struct @align(4) {
   foo:i32 @offset(0)
 }
@@ -374,7 +374,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember_ViaDerefPointerIndex) 
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(MyStruct = struct @align(4) {
   foo:i32 @offset(0)
 }
@@ -409,7 +409,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember_ViaPointerIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(MyStruct = struct @align(4) {
   foo:i32 @offset(0)
 }
@@ -447,7 +447,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiMember) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(Inner = struct @align(4) {
   bar:f32 @offset(0)
 }
@@ -493,7 +493,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_Mixed) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(Inner = struct @align(16) {
   b:i32 @offset(0)
   c:f32 @offset(4)
@@ -528,7 +528,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_AssignmentLHS) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, array<u32, 4>, read_write> = var
@@ -551,7 +551,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, vec2<f32>, read_write> = var
@@ -576,7 +576,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle_ViaDerefPointe
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, vec2<f32>, read_write> = var
@@ -602,7 +602,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle_ViaPointerInde
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, vec2<f32>, read_write> = var
@@ -626,7 +626,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, vec3<f32>, read_write> = var
@@ -650,7 +650,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, vec3<f32>, read_write> = var
@@ -682,7 +682,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) 
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(MyStruct = struct @align(16) {
   a:i32 @offset(0)
   foo:vec4<f32> @offset(16)
@@ -713,7 +713,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:vec3<u32> = let vec3<u32>(0u)
@@ -736,7 +736,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:mat3x4<f32> = let mat3x4<f32>(vec4<f32>(0.0f))
@@ -763,7 +763,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleMember) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(MyStruct = struct @align(4) {
   foo:i32 @offset(0)
 }
@@ -799,7 +799,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiMember) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(Inner = struct @align(4) {
   bar:f32 @offset(0)
 }
@@ -844,7 +844,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_Mixed) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(Inner = struct @align(16) {
   b:i32 @offset(0)
   c:f32 @offset(4)
@@ -878,7 +878,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleElement) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:vec2<f32> = let vec2<f32>(0.0f)
@@ -901,7 +901,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:vec3<f32> = let vec3<f32>(0.0f)
@@ -924,7 +924,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:vec3<f32> = let vec3<f32>(0.0f)
@@ -955,7 +955,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChain) 
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(MyStruct = struct @align(16) {
   a:i32 @offset(0)
   foo:vec4<f32> @offset(16)
@@ -988,7 +988,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %i:i32 = let 1i
@@ -1013,7 +1013,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIndex
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %i:i32 = let 1i
@@ -1038,7 +1038,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_ExpressionIndex) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()),
+    EXPECT_EQ(Disassemble(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %i:i32 = let 1i

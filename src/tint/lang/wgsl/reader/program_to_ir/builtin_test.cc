@@ -46,7 +46,7 @@ TEST_F(ProgramToIRBuiltinTest, EmitExpression_Builtin) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"($B1: {  # root
+    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"($B1: {  # root
   %i:ptr<private, f32, read_write> = var, 1.0f
 }
 

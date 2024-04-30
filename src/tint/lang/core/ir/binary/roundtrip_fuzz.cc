@@ -46,8 +46,8 @@ void IRBinaryRoundtripFuzzer(core::ir::Module& module) {
         return;
     }
 
-    auto in = Disassemble(module);
-    auto out = Disassemble(decoded.Get());
+    auto in = Disassemble(module).Plain();
+    auto out = Disassemble(decoded.Get()).Plain();
     if (in != out) {
         TINT_ICE() << "Roundtrip produced different disassembly\n"
                    << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"

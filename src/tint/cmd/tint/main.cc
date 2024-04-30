@@ -1209,8 +1209,10 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 
 /// Generate IR code for a program.
 /// @param program the program to generate
+/// @param options the options that Tint was invoked with
 /// @returns true on success
-bool GenerateIr([[maybe_unused]] const tint::Program& program) {
+bool GenerateIr([[maybe_unused]] const tint::Program& program,
+                [[maybe_unused]] const Options& options) {
 #if !TINT_BUILD_WGSL_READER
     std::cerr << "WGSL reader not enabled in tint build" << std::endl;
     return false;
@@ -1220,7 +1222,8 @@ bool GenerateIr([[maybe_unused]] const tint::Program& program) {
         std::cerr << "Failed to build IR from program: " << result.Failure() << "\n";
         return false;
     }
-    std::cout << tint::core::ir::Disassemble(result.Get()) << "\n";
+    options.printer->Print(tint::core::ir::Disassemble(result.Get()));
+    options.printer->Print(tint::StyledText{} << "\n");
     return true;
 #endif
 }
@@ -1362,7 +1365,7 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_WGSL_READER
     if (options.dump_ir) {
-        GenerateIr(info.program);
+        GenerateIr(info.program, options);
     }
 #endif  // TINT_BUILD_WGSL_READER
 
@@ -1474,7 +1477,7 @@ int main(int argc, const char** argv) {
             success = GenerateGlsl(program, options);
             break;
         case Format::kIr:
-            success = GenerateIr(program);
+            success = GenerateIr(program, options);
             break;
         case Format::kNone:
             break;

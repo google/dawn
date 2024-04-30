@@ -51,7 +51,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 IRToProgramTest::Result IRToProgramTest::Run() {
     Result result;
 
-    result.ir = tint::core::ir::Disassemble(mod);
+    result.ir = tint::core::ir::Disassemble(mod).Plain();
 
     ProgramOptions options;
     options.allowed_features = AllowedFeatures::Everything();

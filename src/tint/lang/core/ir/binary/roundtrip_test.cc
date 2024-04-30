@@ -47,7 +47,7 @@ template <typename T = testing::Test>
 class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
   public:
     std::pair<std::string, std::string> Roundtrip() {
-        auto pre = Disassemble(this->mod);
+        auto pre = Disassemble(this->mod).Plain();
         auto encoded = Encode(this->mod);
         if (encoded != Success) {
             return {pre, encoded.Failure().reason.Str()};
@@ -56,7 +56,7 @@ class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
         if (decoded != Success) {
             return {pre, decoded.Failure().reason.Str()};
         }
-        auto post = Disassemble(decoded.Get());
+        auto post = Disassemble(decoded.Get()).Plain();
         return {pre, post};
     }
 };

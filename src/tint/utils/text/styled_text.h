@@ -117,9 +117,9 @@ class StyledText {
                        value.values);
             *this << old_style;
         } else {
-            uint32_t offset = stream_.tellp();
+            size_t offset = stream_.Length();
             stream_ << value;
-            spans_.Back().length += stream_.tellp() - offset;
+            spans_.Back().length += stream_.Length() - offset;
         }
         return *this;
     }
@@ -135,6 +135,9 @@ class StyledText {
             offset += span.length;
         }
     }
+
+    /// @returns the number of UTF-8 code units (bytes) have been written to the string.
+    size_t Length() { return stream_.Length(); }
 
   private:
     struct Span {

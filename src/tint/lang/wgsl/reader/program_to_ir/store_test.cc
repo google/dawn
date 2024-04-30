@@ -47,7 +47,7 @@ TEST_F(ProgramToIRStoreTest, EmitStatement_Assign) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()), R"($B1: {  # root
+    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"($B1: {  # root
   %a:ptr<private, u32, read_write> = var
 }
 

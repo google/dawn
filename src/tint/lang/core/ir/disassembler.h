@@ -33,7 +33,6 @@
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/block_param.h"
-#include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -42,6 +41,7 @@
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text/styled_text.h"
 
 // Forward declarations.
 namespace tint::core::type {
@@ -52,7 +52,7 @@ namespace tint::core::ir {
 
 /// @returns the disassembly for the module @p mod
 /// @param mod the module to disassemble
-std::string Disassemble(const Module& mod);
+StyledText Disassemble(const Module& mod);
 
 /// Helper class to disassemble the IR
 class Disassembler {
@@ -80,12 +80,9 @@ class Disassembler {
     explicit Disassembler(const Module& mod);
     ~Disassembler();
 
-    /// Returns the module as a string
+    /// Returns the module as a styled text string
     /// @returns the string representation of the module
-    std::string Disassemble();
-
-    /// @returns the string representation
-    std::string AsString() const { return out_.str(); }
+    const StyledText& Disassemble();
 
     /// @param inst the instruction to retrieve
     /// @returns the source for the instruction
@@ -190,7 +187,7 @@ class Disassembler {
         Source::Location begin_;
     };
 
-    StringStream& Indent();
+    StyledText& Indent();
 
     size_t IdOf(const Block* blk);
     std::string IdOf(const Value* node);
@@ -221,7 +218,7 @@ class Disassembler {
     void EmitInstructionName(const Instruction* inst);
 
     const Module& mod_;
-    StringStream out_;
+    StyledText out_;
     Hashmap<const Block*, size_t, 32> block_ids_;
     Hashmap<const Value*, std::string, 32> value_ids_;
     Hashset<std::string, 32> ids_;

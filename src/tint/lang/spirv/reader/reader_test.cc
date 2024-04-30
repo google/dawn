@@ -64,7 +64,7 @@ class SpirvReaderTest : public testing::Test {
         }
 
         // Return the disassembled IR module.
-        return "\n" + core::ir::Disassemble(ir.Get());
+        return "\n" + core::ir::Disassemble(ir.Get()).Plain();
     }
 };
 

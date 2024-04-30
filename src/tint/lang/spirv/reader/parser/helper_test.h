@@ -82,7 +82,7 @@ class SpirvParserTestHelperBase : public BASE {
         }
 
         // Return the disassembled IR module.
-        return core::ir::Disassemble(parsed.Get());
+        return core::ir::Disassemble(parsed.Get()).Plain();
     }
 };
 

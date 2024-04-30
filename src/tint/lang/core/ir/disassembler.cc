@@ -69,6 +69,7 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/styled_text.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
@@ -87,7 +88,7 @@ class ScopedIndent {
 
 }  // namespace
 
-std::string Disassemble(const Module& mod) {
+StyledText Disassemble(const Module& mod) {
     return Disassembler{mod}.Disassemble();
 }
 
@@ -95,7 +96,7 @@ Disassembler::Disassembler(const Module& mod) : mod_(mod) {}
 
 Disassembler::~Disassembler() = default;
 
-StringStream& Disassembler::Indent() {
+StyledText& Disassembler::Indent() {
     for (uint32_t i = 0; i < indent_size_; i++) {
         out_ << " ";
     }
@@ -103,9 +104,9 @@ StringStream& Disassembler::Indent() {
 }
 
 void Disassembler::EmitLine() {
-    out_ << std::endl;
+    out_ << "\n";
     current_output_line_ += 1;
-    current_output_start_pos_ = out_.tellp();
+    current_output_start_pos_ = static_cast<uint32_t>(out_.Length());
 }
 
 size_t Disassembler::IdOf(const Block* node) {
@@ -159,10 +160,15 @@ std::string Disassembler::NameOf(const Switch* inst) {
 }
 
 Source::Location Disassembler::MakeCurrentLocation() {
-    return Source::Location{current_output_line_, out_.tellp() - current_output_start_pos_ + 1};
+    return Source::Location{
+        current_output_line_,
+        static_cast<uint32_t>(out_.Length()) - current_output_start_pos_ + 1,
+    };
 }
 
-std::string Disassembler::Disassemble() {
+const StyledText& Disassembler::Disassemble() {
+    out_.Clear();
+
     for (auto* ty : mod_.Types()) {
         if (auto* str = ty->As<core::type::Struct>()) {
             EmitStructDecl(str);
@@ -177,7 +183,7 @@ std::string Disassembler::Disassemble() {
     for (auto& func : mod_.functions) {
         EmitFunction(func);
     }
-    return out_.str();
+    return out_;
 }
 
 void Disassembler::EmitBlock(const Block* blk, std::string_view comment /* = "" */) {
