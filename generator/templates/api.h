@@ -75,6 +75,18 @@
 
 #define WGPU_BREAKING_REFERENCE_ADDREF
 
+#if defined(__cplusplus)
+#  if __cplusplus >= 201103L
+#    define {{API}}_MAKE_INIT_STRUCT(type, value) (type value)
+#  else
+#    define {{API}}_MAKE_INIT_STRUCT(type, value) value
+#  endif
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#  define {{API}}_MAKE_INIT_STRUCT(type, value) ((type) value)
+#else
+#  define {{API}}_MAKE_INIT_STRUCT(type, value) value
+#endif
+
 {% for constant in by_category["constant"] %}
     #define {{API}}_{{constant.name.SNAKE_CASE()}} {{constant.value}}
 {% endfor %}
@@ -126,6 +138,26 @@ typedef struct {{API}}ChainedStructOut {
     {{API}}SType sType;
 } {{API}}ChainedStructOut {{API}}_STRUCTURE_ATTRIBUTE;
 
+{% macro render_c_default_value(member) -%}
+    {%- if member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
+        nullptr
+    {%- elif member.type.category == "object" and member.optional -%}
+        nullptr
+    {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
+        {{as_cEnum(member.type.name, Name(member.default_value))}}
+    {%- elif member.default_value != None -%}
+        {{member.default_value}}
+    {%- elif member.type.category == "structure" and member.annotation == "value" -%}
+        {{API}}_{{member.type.name.SNAKE_CASE()}}_INIT
+    {%- else -%}
+        {{- assert(member.json_data.get("no_default", false) == false) -}}
+        {{- assert(member.default_value == None) -}}
+        {}
+    {%- endif -%}
+{% endmacro %}
+
+#define {{API}}_COMMA ,
+
 {% for type in by_category["structure"] %}
     {% for root in type.chain_roots %}
         // Can be chained in {{as_cType(root.name)}}
@@ -147,6 +179,18 @@ typedef struct {{API}}ChainedStructOut {
             {% endif-%}
         {% endfor %}
     } {{as_cType(type.name)}} {{API}}_STRUCTURE_ATTRIBUTE;
+
+    #define {{API}}_{{type.name.SNAKE_CASE()}}_INIT {{API}}_MAKE_INIT_STRUCT({{as_cType(type.name)}}, { \
+        {% if type.extensible %}
+            /*.nextInChain=*/nullptr {{API}}_COMMA \
+        {% endif %}
+        {% if type.chained %}
+            /*.chain=*/{} {{API}}_COMMA \
+        {% endif %}
+        {% for member in type.members %}
+            /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} {{API}}_COMMA \
+        {% endfor %}
+    })
 
 {% endfor %}
 {% for typeDef in by_category["typedef"] %}
