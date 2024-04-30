@@ -74,10 +74,10 @@ std::string StyledText::Plain() const {
     StringStream ss;
     bool is_code_no_quote = false;
     Walk([&](std::string_view text, TextStyle style) {
-        if (is_code_no_quote != (style.IsCode() && !style.IsCodeNoQuote())) {
+        if (is_code_no_quote != (style.IsCode() && !style.IsNoQuote())) {
             ss << "'";
         }
-        is_code_no_quote = style.IsCode() && !style.IsCodeNoQuote();
+        is_code_no_quote = style.IsCode() && !style.IsNoQuote();
 
         ss << text;
     });

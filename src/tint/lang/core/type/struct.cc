@@ -119,11 +119,11 @@ std::string Struct::FriendlyName() const {
 }
 
 StyledText Struct::Layout() const {
-    static constexpr auto Code = style::CodeNoQuote;
-    static constexpr auto Comment = style::Comment + style::CodeNoQuote;
-    static constexpr auto Keyword = style::Keyword + style::CodeNoQuote;
-    static constexpr auto Type = style::Type + style::CodeNoQuote;
-    static constexpr auto Variable = style::Variable + style::CodeNoQuote;
+    static constexpr auto Code = style::Code + style::NoQuote;
+    static constexpr auto Comment = style::Comment + style::NoQuote;
+    static constexpr auto Keyword = style::Keyword + style::NoQuote;
+    static constexpr auto Type = style::Type + style::NoQuote;
+    static constexpr auto Variable = style::Variable + style::NoQuote;
     static constexpr auto Plain = style::Plain;
 
     StyledText out;

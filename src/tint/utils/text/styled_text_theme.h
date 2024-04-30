@@ -105,6 +105,10 @@ struct StyledTextTheme {
     Attributes kind_attribute;
     /// The theme's attributes for a comment token. This is applied on top #kind_code.
     Attributes kind_comment;
+    /// The theme's attributes for a label token. This is applied on top #kind_code.
+    Attributes kind_label;
+    /// The theme's attributes for a instruction token. This is applied on top #kind_code.
+    Attributes kind_instruction;
 
     /// The theme's attributes for a squiggle-highlight.
     Attributes kind_squiggle;

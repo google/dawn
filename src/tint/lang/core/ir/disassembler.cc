@@ -66,15 +66,31 @@
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/ice/ice.h"
+#include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/styled_text.h"
+#include "src/tint/utils/text/text_style.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::core::ir {
 namespace {
+
+static constexpr auto StylePlain = style::Plain;
+static constexpr auto StyleAttribute = style::Attribute + style::NoQuote;
+static constexpr auto StyleCode = style::Code + style::NoQuote;
+static constexpr auto StyleComment = style::Comment + style::NoQuote;
+static constexpr auto StyleEnum = style::Enum + style::NoQuote;
+static constexpr auto StyleError = style::Error + style::NoQuote;
+static constexpr auto StyleFunction = style::Function + style::NoQuote;
+static constexpr auto StyleInstruction = style::Instruction + style::NoQuote;
+static constexpr auto StyleKeyword = style::Keyword + style::NoQuote;
+static constexpr auto StyleLabel = style::Label + style::NoQuote;
+static constexpr auto StyleLiteral = style::Literal + style::NoQuote;
+static constexpr auto StyleType = style::Type + style::NoQuote;
+static constexpr auto StyleVariable = style::Variable + style::NoQuote;
 
 class ScopedIndent {
   public:
@@ -167,7 +183,9 @@ Source::Location Disassembler::MakeCurrentLocation() {
 }
 
 const StyledText& Disassembler::Disassemble() {
+    TINT_DEFER(out_ << StylePlain);
     out_.Clear();
+    out_ << StyleCode;
 
     for (auto* ty : mod_.Types()) {
         if (auto* str = ty->As<core::type::Struct>()) {
@@ -190,7 +208,7 @@ void Disassembler::EmitBlock(const Block* blk, std::string_view comment /* = "" 
     Indent();
 
     SourceMarker sm(this);
-    out_ << "$B" << IdOf(blk);
+    out_ << StyleLabel("$B", IdOf(blk));
     if (auto* merge = blk->As<MultiInBlock>()) {
         if (!merge->Params().IsEmpty()) {
             out_ << " (";
@@ -209,7 +227,7 @@ void Disassembler::EmitBlock(const Block* blk, std::string_view comment /* = "" 
 
     out_ << ": {";
     if (!comment.empty()) {
-        out_ << "  # " << comment;
+        out_ << "  " << StyleComment("# ", comment);
     }
 
     EmitLine();
@@ -226,17 +244,18 @@ void Disassembler::EmitBlock(const Block* blk, std::string_view comment /* = "" 
 }
 
 void Disassembler::EmitBindingPoint(BindingPoint p) {
-    out_ << "@binding_point(" << p.group << ", " << p.binding << ")";
+    out_ << StyleAttribute("@binding_point") << "(" << StyleLiteral(p.group) << ", "
+         << StyleLiteral(p.binding) << ")";
 }
 
 void Disassembler::EmitLocation(Location loc) {
-    out_ << "@location(" << loc.value << ")";
+    out_ << StyleAttribute("@location") << "(" << loc.value << ")";
     if (loc.interpolation.has_value()) {
-        out_ << ", @interpolate(";
-        out_ << loc.interpolation->type;
+        out_ << ", " << StyleAttribute("@interpolate") << "(";
+        out_ << StyleEnum(loc.interpolation->type);
         if (loc.interpolation->sampling != core::InterpolationSampling::kUndefined) {
             out_ << ", ";
-            out_ << loc.interpolation->sampling;
+            out_ << StyleEnum(loc.interpolation->sampling);
         }
         out_ << ")";
     }
@@ -259,7 +278,7 @@ void Disassembler::EmitParamAttributes(const FunctionParam* p) {
 
     if (p->Invariant()) {
         comma();
-        out_ << "@invariant";
+        out_ << StyleAttribute("@invariant");
         need_comma = true;
     }
     if (p->Location().has_value()) {
@@ -273,7 +292,7 @@ void Disassembler::EmitParamAttributes(const FunctionParam* p) {
     }
     if (p->Builtin().has_value()) {
         comma();
-        out_ << "@" << p->Builtin().value();
+        out_ << StyleAttribute("@", p->Builtin().value());
         need_comma = true;
     }
     out_ << "]";
@@ -295,7 +314,7 @@ void Disassembler::EmitReturnAttributes(const Function* func) {
     };
     if (func->ReturnInvariant()) {
         comma();
-        out_ << "@invariant";
+        out_ << StyleAttribute("@invariant");
         need_comma = true;
     }
     if (func->ReturnLocation().has_value()) {
@@ -305,7 +324,7 @@ void Disassembler::EmitReturnAttributes(const Function* func) {
     }
     if (func->ReturnBuiltin().has_value()) {
         comma();
-        out_ << "@" << func->ReturnBuiltin().value();
+        out_ << StyleAttribute("@", func->ReturnBuiltin().value());
         need_comma = true;
     }
     out_ << "]";
@@ -317,32 +336,33 @@ void Disassembler::EmitFunction(const Function* func) {
     std::string fn_id = IdOf(func);
     {
         SourceMarker sm(this);
-        Indent() << "%" << fn_id;
+        Indent() << StyleFunction("%", fn_id);
         sm.Store(func);
     }
     out_ << " =";
 
     if (func->Stage() != Function::PipelineStage::kUndefined) {
-        out_ << " @" << func->Stage();
+        out_ << " " << StyleAttribute("@", func->Stage());
     }
     if (func->WorkgroupSize()) {
         auto arr = func->WorkgroupSize().value();
-        out_ << " @workgroup_size(" << arr[0] << ", " << arr[1] << ", " << arr[2] << ")";
+        out_ << " " << StyleAttribute("@workgroup_size") << "(" << StyleLiteral(arr[0]) << ", "
+             << StyleLiteral(arr[1]) << ", " << StyleLiteral(arr[2]) << ")";
     }
 
-    out_ << " func(";
+    out_ << " " << StyleKeyword("func") << "(";
 
     for (auto* p : func->Params()) {
         if (p != func->Params().Front()) {
             out_ << ", ";
         }
         SourceMarker sm(this);
-        out_ << "%" << IdOf(p) << ":" << p->Type()->FriendlyName();
+        out_ << StyleVariable("%", IdOf(p)) << ":" << StyleType(p->Type()->FriendlyName());
         sm.Store(p);
 
         EmitParamAttributes(p);
     }
-    out_ << "):" << func->ReturnType()->FriendlyName();
+    out_ << "):" << StyleType(func->ReturnType()->FriendlyName());
 
     EmitReturnAttributes(func);
 
@@ -364,7 +384,7 @@ void Disassembler::EmitFunction(const Function* func) {
             }
         }
         if (!names.IsEmpty()) {
-            out_ << "  # " << tint::Join(names, ", ");
+            out_ << "  " << StyleComment("# ", tint::Join(names, ", "));
         }
     }
 
@@ -395,7 +415,7 @@ void Disassembler::EmitValueWithType(const Value* val) {
     }
 
     EmitValue(val);
-    out_ << ":" << val->Type()->FriendlyName();
+    out_ << ":" << StyleType(val->Type()->FriendlyName());
 }
 
 void Disassembler::EmitValue(const Value* val) {
@@ -407,33 +427,33 @@ void Disassembler::EmitValue(const Value* val) {
                     tint::Switch(
                         c,
                         [&](const core::constant::Scalar<AFloat>* scalar) {
-                            out_ << scalar->ValueAs<AFloat>().value;
+                            out_ << StyleLiteral(scalar->ValueAs<AFloat>().value);
                         },
                         [&](const core::constant::Scalar<AInt>* scalar) {
-                            out_ << scalar->ValueAs<AInt>().value;
+                            out_ << StyleLiteral(scalar->ValueAs<AInt>().value);
                         },
                         [&](const core::constant::Scalar<i32>* scalar) {
-                            out_ << scalar->ValueAs<i32>().value << "i";
+                            out_ << StyleLiteral(scalar->ValueAs<i32>().value, "i");
                         },
                         [&](const core::constant::Scalar<u32>* scalar) {
-                            out_ << scalar->ValueAs<u32>().value << "u";
+                            out_ << StyleLiteral(scalar->ValueAs<u32>().value, "u");
                         },
                         [&](const core::constant::Scalar<f32>* scalar) {
-                            out_ << scalar->ValueAs<f32>().value << "f";
+                            out_ << StyleLiteral(scalar->ValueAs<f32>().value, "f");
                         },
                         [&](const core::constant::Scalar<f16>* scalar) {
-                            out_ << scalar->ValueAs<f16>().value << "h";
+                            out_ << StyleLiteral(scalar->ValueAs<f16>().value, "h");
                         },
                         [&](const core::constant::Scalar<bool>* scalar) {
-                            out_ << (scalar->ValueAs<bool>() ? "true" : "false");
+                            out_ << StyleLiteral((scalar->ValueAs<bool>() ? "true" : "false"));
                         },
                         [&](const core::constant::Splat* splat) {
-                            out_ << splat->Type()->FriendlyName() << "(";
+                            out_ << StyleType(splat->Type()->FriendlyName()) << "(";
                             emit(splat->Index(0));
                             out_ << ")";
                         },
                         [&](const core::constant::Composite* composite) {
-                            out_ << composite->Type()->FriendlyName() << "(";
+                            out_ << StyleType(composite->Type()->FriendlyName()) << "(";
                             bool need_comma = false;
                             for (const auto* elem : composite->elements) {
                                 if (need_comma) {
@@ -447,24 +467,24 @@ void Disassembler::EmitValue(const Value* val) {
                 };
             emit(constant->Value());
         },
-        [&](const ir::InstructionResult* rv) { out_ << "%" << IdOf(rv); },
+        [&](const ir::InstructionResult* rv) { out_ << StyleVariable("%", IdOf(rv)); },
         [&](const ir::BlockParam* p) {
-            out_ << "%" << IdOf(p) << ":" << p->Type()->FriendlyName();
+            out_ << StyleVariable("%", IdOf(p)) << ":" << StyleType(p->Type()->FriendlyName());
         },
-        [&](const ir::FunctionParam* p) { out_ << "%" << IdOf(p); },
-        [&](const ir::Function* f) { out_ << "%" << IdOf(f); },
+        [&](const ir::FunctionParam* p) { out_ << StyleVariable("%", IdOf(p)); },
+        [&](const ir::Function* f) { out_ << StyleVariable("%", IdOf(f)); },
         [&](Default) {
             if (val == nullptr) {
-                out_ << "undef";
+                out_ << StyleVariable("undef");
             } else {
-                out_ << "Unknown value: " << val->TypeInfo().name;
+                out_ << StyleError("unknown value: ", val->TypeInfo().name);
             }
         });
 }
 
 void Disassembler::EmitInstructionName(const Instruction* inst) {
     SourceMarker sm(this);
-    out_ << inst->FriendlyName();
+    out_ << StyleInstruction(inst->FriendlyName());
     sm.Store(inst);
 }
 
@@ -473,7 +493,7 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
 
     if (!inst->Alive()) {
         SourceMarker sm(this);
-        out_ << "<destroyed " << inst->TypeInfo().name << " " << tint::ToString(inst) << ">";
+        out_ << StyleError("<destroyed ", inst->TypeInfo().name, " ", inst, ">");
         sm.Store(inst);
         return;
     }
@@ -521,24 +541,27 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                 EmitBindingPoint(v->BindingPoint().value());
             }
             if (v->Attributes().invariant) {
-                out_ << " @invariant";
+                out_ << " " << StyleAttribute("@invariant");
             }
             if (v->Attributes().location.has_value()) {
-                out_ << " @location(" << v->Attributes().location.value() << ")";
+                out_ << " " << StyleAttribute("@location") << "("
+                     << v->Attributes().location.value() << ")";
             }
             if (v->Attributes().blend_src.has_value()) {
-                out_ << " @blend_src(" << v->Attributes().blend_src.value() << ")";
+                out_ << " " << StyleAttribute("@blend_src") << "("
+                     << v->Attributes().blend_src.value() << ")";
             }
             if (v->Attributes().interpolation.has_value()) {
                 auto& interp = v->Attributes().interpolation.value();
-                out_ << " @interpolate(" << interp.type;
+                out_ << " " << StyleAttribute("@interpolate") << "(" << interp.type;
                 if (interp.sampling != core::InterpolationSampling::kUndefined) {
                     out_ << ", " << interp.sampling;
                 }
                 out_ << ")";
             }
             if (v->Attributes().builtin.has_value()) {
-                out_ << " @builtin(" << v->Attributes().builtin.value() << ")";
+                out_ << " " << StyleAttribute("@builtin") << "(" << v->Attributes().builtin.value()
+                     << ")";
             }
         },
         [&](const Swizzle* s) {
@@ -622,19 +645,19 @@ void Disassembler::EmitIf(const If* if_) {
         }
         out_ << " = ";
     }
-    out_ << "if ";
+    out_ << StyleInstruction("if") << " ";
     EmitOperand(if_, If::kConditionOperandOffset);
 
     bool has_false = !if_->False()->IsEmpty();
 
-    out_ << " [t: $B" << IdOf(if_->True());
+    out_ << " [" << StyleKeyword("t") << ": " << StyleLabel("$B", IdOf(if_->True()));
     if (has_false) {
-        out_ << ", f: $B" << IdOf(if_->False());
+        out_ << ", " << StyleKeyword("f") << ": " << StyleLabel("$B", IdOf(if_->False()));
     }
     out_ << "]";
     sm.Store(if_);
 
-    out_ << " {  # " << NameOf(if_);
+    out_ << " {  " << StyleComment("# ", NameOf(if_));
     EmitLine();
 
     // True block is assumed to have instructions
@@ -649,9 +672,9 @@ void Disassembler::EmitIf(const If* if_) {
     } else if (auto results = if_->Results(); !results.IsEmpty()) {
         ScopedIndent si(indent_size_);
         Indent();
-        out_ << "# implicit false block: exit_if undef";
+        out_ << StyleComment("# implicit false block: exit_if undef");
         for (size_t v = 1; v < if_->Results().Length(); v++) {
-            out_ << ", undef";
+            out_ << StyleComment(", undef");
         }
         EmitLine();
     }
@@ -661,15 +684,6 @@ void Disassembler::EmitIf(const If* if_) {
 }
 
 void Disassembler::EmitLoop(const Loop* l) {
-    Vector<std::string, 3> parts;
-    if (!l->Initializer()->IsEmpty()) {
-        parts.Push("i: $B" + std::to_string(IdOf(l->Initializer())));
-    }
-    parts.Push("b: $B" + std::to_string(IdOf(l->Body())));
-
-    if (!l->Continuing()->IsEmpty()) {
-        parts.Push("c: $B" + std::to_string(IdOf(l->Continuing())));
-    }
     SourceMarker sm(this);
     if (auto results = l->Results(); !results.IsEmpty()) {
         for (size_t i = 0; i < results.Length(); ++i) {
@@ -682,10 +696,26 @@ void Disassembler::EmitLoop(const Loop* l) {
         }
         out_ << " = ";
     }
-    out_ << "loop [" << tint::Join(parts, ", ") << "]";
+    out_ << StyleInstruction("loop") << " [";
+
+    if (!l->Initializer()->IsEmpty()) {
+        out_ << StyleKeyword("i") << ": "
+             << StyleLabel("$B", std::to_string(IdOf(l->Initializer())));
+        out_ << ", ";
+    }
+
+    out_ << StyleKeyword("b") << ": " << StyleLabel("$B", std::to_string(IdOf(l->Body())));
+
+    if (!l->Continuing()->IsEmpty()) {
+        out_ << ", ";
+        out_ << StyleKeyword("c") << ": "
+             << StyleLabel("$B", std::to_string(IdOf(l->Continuing())));
+    }
+
+    out_ << "]";
     sm.Store(l);
 
-    out_ << " {  # " << NameOf(l);
+    out_ << " {  " << StyleComment("# ", NameOf(l));
     EmitLine();
 
     if (!l->Initializer()->IsEmpty()) {
@@ -721,7 +751,7 @@ void Disassembler::EmitSwitch(const Switch* s) {
         }
         out_ << " = ";
     }
-    out_ << "switch ";
+    out_ << StyleInstruction("switch") << " ";
     EmitValue(s->Condition());
     out_ << " [";
     for (auto& c : s->Cases()) {
@@ -735,17 +765,17 @@ void Disassembler::EmitSwitch(const Switch* s) {
             }
 
             if (selector.IsDefault()) {
-                out_ << "default";
+                out_ << StyleKeyword("default");
             } else {
                 EmitValue(selector.val);
             }
         }
-        out_ << ", $B" << IdOf(c.block) << ")";
+        out_ << ", " << StyleLabel("$B", IdOf(c.block)) << ")";
     }
     out_ << "]";
     sm.Store(s);
 
-    out_ << " {  # " << NameOf(s);
+    out_ << " {  " << StyleComment("# ", NameOf(s));
     EmitLine();
 
     for (auto& c : s->Cases()) {
@@ -763,37 +793,37 @@ void Disassembler::EmitTerminator(const Terminator* b) {
     tint::Switch(
         b,
         [&](const ir::Return*) {
-            out_ << "ret";
+            out_ << StyleInstruction("ret");
             args_offset = ir::Return::kArgsOperandOffset;
         },
         [&](const ir::Continue*) {
-            out_ << "continue";
+            out_ << StyleInstruction("continue");
             args_offset = ir::Continue::kArgsOperandOffset;
         },
         [&](const ir::ExitIf*) {
-            out_ << "exit_if";
+            out_ << StyleInstruction("exit_if");
             args_offset = ir::ExitIf::kArgsOperandOffset;
         },
         [&](const ir::ExitSwitch*) {
-            out_ << "exit_switch";
+            out_ << StyleInstruction("exit_switch");
             args_offset = ir::ExitSwitch::kArgsOperandOffset;
         },
         [&](const ir::ExitLoop*) {
-            out_ << "exit_loop";
+            out_ << StyleInstruction("exit_loop");
             args_offset = ir::ExitLoop::kArgsOperandOffset;
         },
         [&](const ir::NextIteration*) {
-            out_ << "next_iteration";
+            out_ << StyleInstruction("next_iteration");
             args_offset = ir::NextIteration::kArgsOperandOffset;
         },
-        [&](const ir::Unreachable*) { out_ << "unreachable"; },
+        [&](const ir::Unreachable*) { out_ << StyleInstruction("unreachable"); },
         [&](const ir::BreakIf* bi) {
-            out_ << "break_if ";
+            out_ << StyleInstruction("break_if") << " ";
             EmitValue(bi->Condition());
             args_offset = ir::BreakIf::kArgsOperandOffset;
         },
-        [&](const ir::TerminateInvocation*) { out_ << "terminate_invocation"; },
-        [&](Default) { out_ << "unknown terminator " << b->TypeInfo().name; });
+        [&](const ir::TerminateInvocation*) { out_ << StyleInstruction("terminate_invocation"); },
+        [&](Default) { out_ << StyleError("unknown terminator ", b->TypeInfo().name); });
 
     if (!b->Args().IsEmpty()) {
         out_ << " ";
@@ -804,15 +834,21 @@ void Disassembler::EmitTerminator(const Terminator* b) {
     tint::Switch(
         b,  //
         [&](const ir::BreakIf* bi) {
-            out_ << "  # -> [t: exit_loop " << NameOf(bi->Loop()) << ", f: $B"
-                 << IdOf(bi->Loop()->Body()) << "]";
-        },                                                                                     //
-        [&](const ir::Continue* c) { out_ << "  # -> $B" << IdOf(c->Loop()->Continuing()); },  //
-        [&](const ir::ExitIf* e) { out_ << "  # " << NameOf(e->If()); },                       //
-        [&](const ir::ExitSwitch* e) { out_ << "  # " << NameOf(e->Switch()); },               //
-        [&](const ir::ExitLoop* e) { out_ << "  # " << NameOf(e->Loop()); },                   //
-        [&](const ir::NextIteration* ni) { out_ << "  # -> $B" << IdOf(ni->Loop()->Body()); }  //
-    );
+            out_ << "  "
+                 << StyleComment("# -> [t: exit_loop ", NameOf(bi->Loop()), ", f: $B",
+                                 IdOf(bi->Loop()->Body()), "]");
+        },
+        [&](const ir::Continue* c) {
+            out_ << "  " << StyleComment("# -> $B", IdOf(c->Loop()->Continuing()));
+        },                                                                                  //
+        [&](const ir::ExitIf* e) { out_ << "  " << StyleComment("# ", NameOf(e->If())); },  //
+        [&](const ir::ExitSwitch* e) {
+            out_ << "  " << StyleComment("# ", NameOf(e->Switch()));
+        },                                                                                      //
+        [&](const ir::ExitLoop* e) { out_ << "  " << StyleComment("# ", NameOf(e->Loop())); },  //
+        [&](const ir::NextIteration* ni) {
+            out_ << "  " << StyleComment("# -> $B", IdOf(ni->Loop()->Body()));
+        });
 }
 
 void Disassembler::EmitBinary(const Binary* b) {
@@ -821,58 +857,58 @@ void Disassembler::EmitBinary(const Binary* b) {
     out_ << " = ";
     switch (b->Op()) {
         case BinaryOp::kAdd:
-            out_ << "add";
+            out_ << StyleInstruction("add");
             break;
         case BinaryOp::kSubtract:
-            out_ << "sub";
+            out_ << StyleInstruction("sub");
             break;
         case BinaryOp::kMultiply:
-            out_ << "mul";
+            out_ << StyleInstruction("mul");
             break;
         case BinaryOp::kDivide:
-            out_ << "div";
+            out_ << StyleInstruction("div");
             break;
         case BinaryOp::kModulo:
-            out_ << "mod";
+            out_ << StyleInstruction("mod");
             break;
         case BinaryOp::kAnd:
-            out_ << "and";
+            out_ << StyleInstruction("and");
             break;
         case BinaryOp::kOr:
-            out_ << "or";
+            out_ << StyleInstruction("or");
             break;
         case BinaryOp::kXor:
-            out_ << "xor";
+            out_ << StyleInstruction("xor");
             break;
         case BinaryOp::kEqual:
-            out_ << "eq";
+            out_ << StyleInstruction("eq");
             break;
         case BinaryOp::kNotEqual:
-            out_ << "neq";
+            out_ << StyleInstruction("neq");
             break;
         case BinaryOp::kLessThan:
-            out_ << "lt";
+            out_ << StyleInstruction("lt");
             break;
         case BinaryOp::kGreaterThan:
-            out_ << "gt";
+            out_ << StyleInstruction("gt");
             break;
         case BinaryOp::kLessThanEqual:
-            out_ << "lte";
+            out_ << StyleInstruction("lte");
             break;
         case BinaryOp::kGreaterThanEqual:
-            out_ << "gte";
+            out_ << StyleInstruction("gte");
             break;
         case BinaryOp::kShiftLeft:
-            out_ << "shl";
+            out_ << StyleInstruction("shl");
             break;
         case BinaryOp::kShiftRight:
-            out_ << "shr";
+            out_ << StyleInstruction("shr");
             break;
         case BinaryOp::kLogicalAnd:
-            out_ << "logical-and";
+            out_ << StyleInstruction("logical-and");
             break;
         case BinaryOp::kLogicalOr:
-            out_ << "logical-or";
+            out_ << StyleInstruction("logical-or");
             break;
     }
     out_ << " ";
@@ -887,19 +923,19 @@ void Disassembler::EmitUnary(const Unary* u) {
     out_ << " = ";
     switch (u->Op()) {
         case UnaryOp::kComplement:
-            out_ << "complement";
+            out_ << StyleInstruction("complement");
             break;
         case UnaryOp::kNegation:
-            out_ << "negation";
+            out_ << StyleInstruction("negation");
             break;
         case UnaryOp::kAddressOf:
-            out_ << "ref-to-ptr";
+            out_ << StyleInstruction("ref-to-ptr");
             break;
         case UnaryOp::kIndirection:
-            out_ << "ptr-to-ref";
+            out_ << StyleInstruction("ptr-to-ref");
             break;
         case UnaryOp::kNot:
-            out_ << "not";
+            out_ << StyleInstruction("not");
             break;
     }
     out_ << " ";
@@ -909,31 +945,35 @@ void Disassembler::EmitUnary(const Unary* u) {
 }
 
 void Disassembler::EmitStructDecl(const core::type::Struct* str) {
-    out_ << str->Name().Name() << " = struct @align(" << str->Align() << ")";
+    out_ << StyleType(str->Name().Name()) << " = " << StyleKeyword("struct") << " "
+         << StyleAttribute("@align") << "(" << StyleLiteral(str->Align()) << ")";
     if (str->StructFlags().Contains(core::type::StructFlag::kBlock)) {
-        out_ << ", @block";
+        out_ << ", " << StyleAttribute("@block");
     }
     out_ << " {";
     EmitLine();
     for (auto* member : str->Members()) {
-        out_ << "  " << member->Name().Name() << ":" << member->Type()->FriendlyName();
-        out_ << " @offset(" << member->Offset() << ")";
+        out_ << "  " << StyleVariable(member->Name().Name()) << ":"
+             << StyleType(member->Type()->FriendlyName());
+        out_ << " " << StyleAttribute("@offset") << "(" << StyleLiteral(member->Offset()) << ")";
         if (member->Attributes().invariant) {
-            out_ << ", @invariant";
+            out_ << ", " << StyleAttribute("@invariant");
         }
         if (member->Attributes().location.has_value()) {
-            out_ << ", @location(" << member->Attributes().location.value() << ")";
+            out_ << ", " << StyleAttribute("@location") << "("
+                 << StyleLiteral(member->Attributes().location.value()) << ")";
         }
         if (member->Attributes().interpolation.has_value()) {
             auto& interp = member->Attributes().interpolation.value();
-            out_ << ", @interpolate(" << interp.type;
+            out_ << ", " << StyleAttribute("@interpolate") << "(" << StyleEnum(interp.type);
             if (interp.sampling != core::InterpolationSampling::kUndefined) {
-                out_ << ", " << interp.sampling;
+                out_ << ", " << StyleEnum(interp.sampling);
             }
             out_ << ")";
         }
         if (member->Attributes().builtin.has_value()) {
-            out_ << ", @builtin(" << member->Attributes().builtin.value() << ")";
+            out_ << ", " << StyleAttribute("@builtin") << "("
+                 << StyleLiteral(member->Attributes().builtin.value()) << ")";
         }
         EmitLine();
     }
