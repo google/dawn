@@ -54,7 +54,6 @@ struct State {
     /// Process the module.
     void Process() {
         // Find and replace matrix constructors that take scalar operands.
-        Vector<Construct*, 8> worklist;
         for (auto inst : ir.Instructions()) {
             if (auto* construct = inst->As<Construct>()) {
                 if (construct->Result(0)->Type()->As<type::Matrix>()) {
