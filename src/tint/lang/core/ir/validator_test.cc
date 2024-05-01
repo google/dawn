@@ -139,7 +139,7 @@ TEST_F(IR_ValidatorTest, Function_Duplicate) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: function 'my_func' added to module multiple times
+              R"(:1:1 error: function %my_func added to module multiple times
 %my_func = func(%2:i32, %3:f32):void {
 ^^^^^^^^
 

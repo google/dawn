@@ -140,7 +140,10 @@ class Validator {
     /// @returns success or failure
     Result<SuccessType> Run();
 
-  protected:
+  private:
+    /// @returns the IR disassembly, performing a disassemble if this is the first call.
+    ir::Disassembly& Disassembly();
+
     /// Adds an error for the @p inst and highlights the instruction in the disassembly
     /// @param inst the instruction
     /// @returns the diagnostic
@@ -208,7 +211,7 @@ class Validator {
 
     /// @param v the value to get the name for
     /// @returns the name for the given value
-    std::string Name(const Value* v);
+    StyledText NameOf(const Value* v);
 
     /// Checks the given operand is not null
     /// @param inst the instruction
@@ -338,14 +341,12 @@ class Validator {
   private:
     const Module& mod_;
     Capabilities capabilities_;
-    std::optional<Disassembly> disassembly_;
+    std::optional<ir::Disassembly> disassembly_;  // Use Disassembly()
     diag::List diagnostics_;
     const Block* current_block_ = nullptr;
     Hashset<const Function*, 4> all_functions_;
     Hashset<const Instruction*, 4> visited_instructions_;
     Vector<const ControlInstruction*, 8> control_stack_;
-
-    void DisassembleIfNeeded();
 };
 
 Validator::Validator(const Module& mod, Capabilities capabilities)
@@ -353,10 +354,11 @@ Validator::Validator(const Module& mod, Capabilities capabilities)
 
 Validator::~Validator() = default;
 
-void Validator::DisassembleIfNeeded() {
+ir::Disassembly& Validator::Disassembly() {
     if (!disassembly_) {
         disassembly_.emplace(Disassemble(mod_));
     }
+    return *disassembly_;
 }
 
 Result<SuccessType> Validator::Run() {
@@ -364,7 +366,7 @@ Result<SuccessType> Validator::Run() {
 
     for (auto& func : mod_.functions) {
         if (!all_functions_.Add(func.Get())) {
-            AddError(func) << "function " << style::Function(Name(func.Get()))
+            AddError(func) << "function " << NameOf(func.Get())
                            << " added to module multiple times";
         }
     }
@@ -383,17 +385,15 @@ Result<SuccessType> Validator::Run() {
     }
 
     if (diagnostics_.ContainsErrors()) {
-        DisassembleIfNeeded();
         diagnostics_.AddNote(tint::diag::System::IR, Source{}) << "# Disassembly\n"
-                                                               << disassembly_->Text();
+                                                               << Disassembly().Text();
         return Failure{std::move(diagnostics_)};
     }
     return Success;
 }
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst) {
-    DisassembleIfNeeded();
-    auto src = disassembly_->InstructionSource(inst);
+    auto src = Disassembly().InstructionSource(inst);
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
@@ -403,9 +403,8 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst) {
 }
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
-    DisassembleIfNeeded();
     auto src =
-        disassembly_->OperandSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
+        Disassembly().OperandSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
@@ -416,9 +415,8 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
 }
 
 diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
-    DisassembleIfNeeded();
     auto src =
-        disassembly_->ResultSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
+        Disassembly().ResultSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
@@ -428,60 +426,51 @@ diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx)
 }
 
 diag::Diagnostic& Validator::AddError(const Block* blk) {
-    DisassembleIfNeeded();
-    auto src = disassembly_->BlockSource(blk);
+    auto src = Disassembly().BlockSource(blk);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const BlockParam* param) {
-    DisassembleIfNeeded();
-    auto src = disassembly_->BlockParamSource(param);
+    auto src = Disassembly().BlockParamSource(param);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const Function* func) {
-    DisassembleIfNeeded();
-    auto src = disassembly_->FunctionSource(func);
+    auto src = Disassembly().FunctionSource(func);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const FunctionParam* param) {
-    DisassembleIfNeeded();
-    auto src = disassembly_->FunctionParamSource(param);
+    auto src = Disassembly().FunctionParamSource(param);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
-    DisassembleIfNeeded();
-    auto src = disassembly_->InstructionSource(inst);
+    auto src = Disassembly().InstructionSource(inst);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Function* func) {
-    DisassembleIfNeeded();
-    auto src = disassembly_->FunctionSource(func);
+    auto src = Disassembly().FunctionSource(func);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Instruction* inst, size_t idx) {
-    DisassembleIfNeeded();
     auto src =
-        disassembly_->OperandSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
+        Disassembly().OperandSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Block* blk) {
-    DisassembleIfNeeded();
-    auto src = disassembly_->BlockSource(blk);
+    auto src = Disassembly().BlockSource(blk);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddError(Source src) {
     auto& diag = diagnostics_.AddError(tint::diag::System::IR, src);
     if (src.range != Source::Range{{}}) {
-        DisassembleIfNeeded();
-        diag.source.file = disassembly_->File().get();
-        diag.owned_file = disassembly_->File();
+        diag.source.file = Disassembly().File().get();
+        diag.owned_file = Disassembly().File();
     }
     return diag;
 }
@@ -489,15 +478,14 @@ diag::Diagnostic& Validator::AddError(Source src) {
 diag::Diagnostic& Validator::AddNote(Source src) {
     auto& diag = diagnostics_.AddNote(tint::diag::System::IR, src);
     if (src.range != Source::Range{{}}) {
-        DisassembleIfNeeded();
-        diag.source.file = disassembly_->File().get();
-        diag.owned_file = disassembly_->File();
+        diag.source.file = Disassembly().File().get();
+        diag.owned_file = Disassembly().File();
     }
     return diag;
 }
 
-std::string Validator::Name(const Value* v) {
-    return mod_.NameOf(v).Name();
+StyledText Validator::NameOf(const Value* value) {
+    return Disassembly().NameOf(value);
 }
 
 void Validator::CheckOperandNotNull(const Instruction* inst, const ir::Value* operand, size_t idx) {
