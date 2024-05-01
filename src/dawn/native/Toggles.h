@@ -141,6 +141,8 @@ enum class Toggle {
     ClearColorWithDraw,
     VulkanSkipDraw,
 
+    D3D11UseUnmonitoredFence,
+
     EnumCount,
     InvalidEnum = EnumCount,
 };

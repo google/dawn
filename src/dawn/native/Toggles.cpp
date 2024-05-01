@@ -568,7 +568,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Some chrome tests run with swiftshader, they don't care about the pixel output. This toggle "
       "allows skipping expensive draw operations for them.",
       "https://crbug.com/chromium/331688266", ToggleStage::Device}},
-
+    {Toggle::D3D11UseUnmonitoredFence,
+     {"d3d11_use_unmonitored_fence", "Use d3d11 unmonitored fence.",
+      "https://crbug.com/chromium/335553337", ToggleStage::Device}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

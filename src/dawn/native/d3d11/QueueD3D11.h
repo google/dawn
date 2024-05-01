@@ -30,9 +30,7 @@
 
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialMap.h"
-#include "dawn/native/SystemEvent.h"
 #include "dawn/native/d3d/QueueD3D.h"
-
 #include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
 
@@ -41,7 +39,7 @@ namespace dawn::native::d3d11 {
 class Device;
 class SharedFence;
 
-class Queue final : public d3d::Queue {
+class Queue : public d3d::Queue {
   public:
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
@@ -49,7 +47,7 @@ class Queue final : public d3d::Queue {
     ScopedSwapStateCommandRecordingContext GetScopedSwapStatePendingCommandContext(
         SubmitMode submitMode);
     MaybeError SubmitPendingCommands() override;
-    MaybeError NextSerial();
+    virtual MaybeError NextSerial() = 0;
 
     // Separated from creation because it creates resources, which is not valid before the
     // DeviceBase is fully created.
@@ -58,12 +56,12 @@ class Queue final : public d3d::Queue {
     // Register the pending map buffer to be checked.
     void TrackPendingMapBuffer(Ref<Buffer>&& buffer, ExecutionSerial readySerial);
 
-  private:
+  protected:
     using d3d::Queue::Queue;
 
     ~Queue() override = default;
 
-    MaybeError Initialize();
+    MaybeError Initialize(bool isMonitored);
 
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     MaybeError WriteBufferImpl(BufferBase* buffer,
@@ -78,12 +76,10 @@ class Queue final : public d3d::Queue {
 
     void DestroyImpl() override;
     bool HasPendingCommands() const override;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
 
     ResultOrError<Ref<d3d::SharedFence>> GetOrCreateSharedFence() override;
-    void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) override;
 
     // Check all pending map buffers, and actually map the ready ones.
     MaybeError CheckAndMapReadyBuffers(ExecutionSerial completedSerial);

@@ -113,6 +113,10 @@ HRESULT ScopedCommandRecordingContext::Wait(ID3D11Fence* pFence, UINT64 Value) c
     return Get()->mD3D11DeviceContext4->Wait(pFence, Value);
 }
 
+void ScopedCommandRecordingContext::Flush1(D3D11_CONTEXT_TYPE ContextType, HANDLE hEvent) const {
+    return Get()->mD3D11DeviceContext4->Flush1(ContextType, hEvent);
+}
+
 void ScopedCommandRecordingContext::WriteUniformBuffer(uint32_t offset, uint32_t element) const {
     DAWN_ASSERT(offset < CommandRecordingContext::kMaxNumBuiltinElements);
     if (Get()->mUniformBufferData[offset] != element) {
