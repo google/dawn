@@ -64,6 +64,7 @@ cache/webgpu/shader/execution/floor.bin
 cache/webgpu/shader/execution/fma.bin
 cache/webgpu/shader/execution/fract.bin
 cache/webgpu/shader/execution/frexp.bin
+cache/webgpu/shader/execution/fwidth.bin
 cache/webgpu/shader/execution/inverseSqrt.bin
 cache/webgpu/shader/execution/ldexp.bin
 cache/webgpu/shader/execution/length.bin
