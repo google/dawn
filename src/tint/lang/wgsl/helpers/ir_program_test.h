@@ -35,7 +35,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"

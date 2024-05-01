@@ -30,7 +30,7 @@
 #include <iostream>
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"
 #include "src/tint/lang/wgsl/reader/parser/parser.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"

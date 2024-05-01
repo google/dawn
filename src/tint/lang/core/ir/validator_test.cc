@@ -496,7 +496,7 @@ TEST_F(IR_ValidatorTest, Block_DeadParameter) {
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:12 error: destroyed parameter found in block parameter list
       $B2 (%my_param:f32): {  # body
-           ^^^^^^^^^^^^^
+           ^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
@@ -530,7 +530,7 @@ TEST_F(IR_ValidatorTest, Block_ParameterWithNullBlock) {
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:12 error: block parameter has nullptr parent block
       $B2 (%my_param:f32): {  # body
-           ^^^^^^^^^^^^^
+           ^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
@@ -564,7 +564,7 @@ TEST_F(IR_ValidatorTest, Block_ParameterUsedInMultipleBlocks) {
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:12 error: block parameter has incorrect parent block
       $B2 (%my_param:f32): {  # body
-           ^^^^^^^^^^^^^
+           ^^^^^^^^^
 
 :7:7 note: parent block declared here
       $B3 (%my_param:f32): {  # continuing
@@ -575,10 +575,10 @@ note: # Disassembly
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2 (%my_param:f32): {  # body
-        continue %my_param:f32  # -> $B3
+        continue %my_param  # -> $B3
       }
       $B3 (%my_param:f32): {  # continuing
-        next_iteration %my_param:f32  # -> $B2
+        next_iteration %my_param  # -> $B2
       }
     }
     ret

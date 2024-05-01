@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::wgsl::writer::raise {
@@ -65,10 +65,7 @@ class WgslWriter_PtrToRefTest : public testing::Test {
     }
 
     /// @returns the transformed module as a disassembled string
-    std::string str() {
-        core::ir::Disassembler dis(mod);
-        return "\n" + dis.Disassemble().Plain();
-    }
+    std::string str() { return "\n" + core::ir::Disassemble(mod).Plain(); }
 
   protected:
     /// The test IR module.

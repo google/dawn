@@ -28,10 +28,9 @@
 #ifndef SRC_TINT_LANG_CORE_IR_ICE_H_
 #define SRC_TINT_LANG_CORE_IR_ICE_H_
 
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 
 /// Emit an ICE message with the disassembly of `mod` attached.
-#define TINT_IR_ICE(mod) \
-    TINT_ICE() << tint::core::ir::Disassembler{mod}.Disassemble().Plain() << "\n"
+#define TINT_IR_ICE(mod) TINT_ICE() << tint::core::ir::Disassemble(mod).Plain() << "\n"
 
 #endif  // SRC_TINT_LANG_CORE_IR_ICE_H_

@@ -661,19 +661,19 @@ $B1: {  # root
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %9:bool = gte %idx:u32, 4u
+        %9:bool = gte %idx, 4u
         if %9 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %10:ptr<storage, MyStruct, read_write> = access %target, %idx:u32
-        %11:MyStruct = access %value_param, %idx:u32
+        %10:ptr<storage, MyStruct, read_write> = access %target, %idx
+        %11:MyStruct = access %value_param, %idx
         %12:void = call %tint_store_and_preserve_padding_1, %10, %11
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %14:u32 = add %idx:u32, 1u
+        %14:u32 = add %idx, 1u
         next_iteration %14  # -> $B5
       }
     }
@@ -893,19 +893,19 @@ $B1: {  # root
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %9:bool = gte %idx:u32, 4u
+        %9:bool = gte %idx, 4u
         if %9 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %10:ptr<storage, mat3x3<f32>, read_write> = access %target, %idx:u32
-        %11:mat3x3<f32> = access %value_param, %idx:u32
+        %10:ptr<storage, mat3x3<f32>, read_write> = access %target, %idx
+        %11:mat3x3<f32> = access %value_param, %idx
         %12:void = call %tint_store_and_preserve_padding_1, %10, %11
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %14:u32 = add %idx:u32, 1u
+        %14:u32 = add %idx, 1u
         next_iteration %14  # -> $B5
       }
     }
@@ -980,19 +980,19 @@ $B1: {  # root
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %9:bool = gte %idx:u32, 4u
+        %9:bool = gte %idx, 4u
         if %9 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %10:ptr<storage, vec3<f32>, read_write> = access %target, %idx:u32
-        %11:vec3<f32> = access %value_param, %idx:u32
+        %10:ptr<storage, vec3<f32>, read_write> = access %target, %idx
+        %11:vec3<f32> = access %value_param, %idx
         store %10, %11
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %12:u32 = add %idx:u32, 1u
+        %12:u32 = add %idx, 1u
         next_iteration %12  # -> $B5
       }
     }
@@ -1095,19 +1095,19 @@ $B1: {  # root
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %9:bool = gte %idx:u32, 3u
+        %9:bool = gte %idx, 3u
         if %9 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %10:ptr<storage, Outer, read_write> = access %target, %idx:u32
-        %11:Outer = access %value_param, %idx:u32
+        %10:ptr<storage, Outer, read_write> = access %target, %idx
+        %11:Outer = access %value_param, %idx
         %12:void = call %tint_store_and_preserve_padding_1, %10, %11
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %14:u32 = add %idx:u32, 1u
+        %14:u32 = add %idx, 1u
         next_iteration %14  # -> $B5
       }
     }
@@ -1155,19 +1155,19 @@ $B1: {  # root
         next_iteration 0u  # -> $B12
       }
       $B12 (%idx_1:u32): {  # body
-        %46:bool = gte %idx_1:u32, 4u
+        %46:bool = gte %idx_1, 4u
         if %46 [t: $B14] {  # if_2
           $B14: {  # true
             exit_loop  # loop_2
           }
         }
-        %47:ptr<storage, vec3<f32>, read_write> = access %target_3, %idx_1:u32
-        %48:vec3<f32> = access %value_param_3, %idx_1:u32
+        %47:ptr<storage, vec3<f32>, read_write> = access %target_3, %idx_1
+        %48:vec3<f32> = access %value_param_3, %idx_1
         store %47, %48
         continue  # -> $B13
       }
       $B13: {  # continuing
-        %49:u32 = add %idx_1:u32, 1u
+        %49:u32 = add %idx_1, 1u
         next_iteration %49  # -> $B12
       }
     }
@@ -1195,19 +1195,19 @@ $B1: {  # root
         next_iteration 0u  # -> $B18
       }
       $B18 (%idx_2:u32): {  # body
-        %61:bool = gte %idx_2:u32, 4u
+        %61:bool = gte %idx_2, 4u
         if %61 [t: $B20] {  # if_3
           $B20: {  # true
             exit_loop  # loop_3
           }
         }
-        %62:ptr<storage, Inner, read_write> = access %target_5, %idx_2:u32
-        %63:Inner = access %value_param_5, %idx_2:u32
+        %62:ptr<storage, Inner, read_write> = access %target_5, %idx_2
+        %63:Inner = access %value_param_5, %idx_2
         %64:void = call %tint_store_and_preserve_padding_2, %62, %63
         continue  # -> $B19
       }
       $B19: {  # continuing
-        %65:u32 = add %idx_2:u32, 1u
+        %65:u32 = add %idx_2, 1u
         next_iteration %65  # -> $B18
       }
     }

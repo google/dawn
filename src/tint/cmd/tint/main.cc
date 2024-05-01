@@ -43,7 +43,7 @@
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/generate_external_texture_bindings.h"
 #include "src/tint/cmd/common/helper.h"
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
@@ -1223,7 +1223,7 @@ bool GenerateIr([[maybe_unused]] const tint::Program& program,
         std::cerr << "Failed to build IR from program: " << result.Failure() << "\n";
         return false;
     }
-    options.printer->Print(tint::core::ir::Disassemble(result.Get()));
+    options.printer->Print(tint::core::ir::Disassemble(result.Get()).Text());
     options.printer->Print(tint::StyledText{} << "\n");
     return true;
 #endif

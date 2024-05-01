@@ -480,18 +480,18 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx:u32, 4u
+        %5:bool = gte %idx, 4u
         if %5 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:ptr<workgroup, i32, read_write> = access %wgvar, %idx:u32
+        %6:ptr<workgroup, i32, read_write> = access %wgvar, %idx
         store %6, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %7:u32 = add %idx:u32, 66u
+        %7:u32 = add %idx, 66u
         next_iteration %7  # -> $B4
       }
     }
@@ -542,20 +542,20 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx:u32, 35u
+        %5:bool = gte %idx, 35u
         if %5 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx:u32, 5u
-        %7:u32 = div %idx:u32, 5u
+        %6:u32 = mod %idx, 5u
+        %7:u32 = div %idx, 5u
         %8:ptr<workgroup, u32, read_write> = access %wgvar, %7, %6
         store %8, 0u
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %9:u32 = add %idx:u32, 66u
+        %9:u32 = add %idx, 66u
         next_iteration %9  # -> $B4
       }
     }
@@ -606,22 +606,22 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx:u32, 105u
+        %5:bool = gte %idx, 105u
         if %5 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx:u32, 7u
-        %7:u32 = div %idx:u32, 7u
+        %6:u32 = mod %idx, 7u
+        %7:u32 = div %idx, 7u
         %8:u32 = mod %7, 5u
-        %9:u32 = div %idx:u32, 35u
+        %9:u32 = div %idx, 35u
         %10:ptr<workgroup, i32, read_write> = access %wgvar, %9, %8, %6
         store %10, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %11:u32 = add %idx:u32, 1u
+        %11:u32 = add %idx, 1u
         next_iteration %11  # -> $B4
       }
     }
@@ -672,20 +672,20 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx:u32, 15u
+        %5:bool = gte %idx, 15u
         if %5 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx:u32, 5u
-        %7:u32 = div %idx:u32, 5u
+        %6:u32 = mod %idx, 5u
+        %7:u32 = div %idx, 5u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, %6, 0u
         store %8, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %9:u32 = add %idx:u32, 1u
+        %9:u32 = add %idx, 1u
         next_iteration %9  # -> $B4
       }
     }
@@ -736,20 +736,20 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx:u32, 15u
+        %5:bool = gte %idx, 15u
         if %5 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx:u32, 3u
-        %7:u32 = div %idx:u32, 3u
+        %6:u32 = mod %idx, 3u
+        %7:u32 = div %idx, 3u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, %7, 0u, %6
         store %8, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %9:u32 = add %idx:u32, 1u
+        %9:u32 = add %idx, 1u
         next_iteration %9  # -> $B4
       }
     }
@@ -800,20 +800,20 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx:u32, 15u
+        %5:bool = gte %idx, 15u
         if %5 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:u32 = mod %idx:u32, 3u
-        %7:u32 = div %idx:u32, 3u
+        %6:u32 = mod %idx, 3u
+        %7:u32 = div %idx, 3u
         %8:ptr<workgroup, i32, read_write> = access %wgvar, 0u, %7, %6
         store %8, 0i
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %9:u32 = add %idx:u32, 1u
+        %9:u32 = add %idx, 1u
         next_iteration %9  # -> $B4
       }
     }
@@ -1179,20 +1179,20 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %5:bool = gte %idx:u32, 7u
+        %5:bool = gte %idx, 7u
         if %5 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %6:ptr<workgroup, f32, read_write> = access %wgvar, %idx:u32, 0u
+        %6:ptr<workgroup, f32, read_write> = access %wgvar, %idx, 0u
         store %6, 0.0f
-        %7:ptr<workgroup, bool, read_write> = access %wgvar, %idx:u32, 2u
+        %7:ptr<workgroup, bool, read_write> = access %wgvar, %idx, 2u
         store %7, false
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %8:u32 = add %idx:u32, 42u
+        %8:u32 = add %idx, 42u
         next_iteration %8  # -> $B4
       }
     }
@@ -1201,24 +1201,24 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B8
       }
       $B8 (%idx_1:u32): {  # body
-        %10:bool = gte %idx_1:u32, 91u
+        %10:bool = gte %idx_1, 91u
         if %10 [t: $B10] {  # if_2
           $B10: {  # true
             exit_loop  # loop_2
           }
         }
-        %11:u32 = mod %idx_1:u32, 13u
-        %12:u32 = div %idx_1:u32, 13u
+        %11:u32 = mod %idx_1, 13u
+        %12:u32 = div %idx_1, 13u
         %13:ptr<workgroup, i32, read_write> = access %wgvar, %12, 1u, %11, 0u
         store %13, 0i
-        %14:u32 = mod %idx_1:u32, 13u
-        %15:u32 = div %idx_1:u32, 13u
+        %14:u32 = mod %idx_1, 13u
+        %15:u32 = div %idx_1, 13u
         %16:ptr<workgroup, atomic<u32>, read_write> = access %wgvar, %15, 1u, %14, 1u
         %17:void = atomicStore %16, 0u
         continue  # -> $B9
       }
       $B9: {  # continuing
-        %18:u32 = add %idx_1:u32, 42u
+        %18:u32 = add %idx_1, 42u
         next_iteration %18  # -> $B8
       }
     }
@@ -1286,18 +1286,18 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %8:bool = gte %idx:u32, 4u
+        %8:bool = gte %idx, 4u
         if %8 [t: $B7] {  # if_2
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %9:ptr<workgroup, i32, read_write> = access %var_b, %idx:u32
+        %9:ptr<workgroup, i32, read_write> = access %var_b, %idx
         store %9, 0i
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %10:u32 = add %idx:u32, 66u
+        %10:u32 = add %idx, 66u
         next_iteration %10  # -> $B5
       }
     }
@@ -1306,20 +1306,20 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B9
       }
       $B9 (%idx_1:u32): {  # body
-        %12:bool = gte %idx_1:u32, 35u
+        %12:bool = gte %idx_1, 35u
         if %12 [t: $B11] {  # if_3
           $B11: {  # true
             exit_loop  # loop_2
           }
         }
-        %13:u32 = mod %idx_1:u32, 5u
-        %14:u32 = div %idx_1:u32, 5u
+        %13:u32 = mod %idx_1, 5u
+        %14:u32 = div %idx_1, 5u
         %15:ptr<workgroup, u32, read_write> = access %var_c, %14, %13
         store %15, 0u
         continue  # -> $B10
       }
       $B10: {  # continuing
-        %16:u32 = add %idx_1:u32, 66u
+        %16:u32 = add %idx_1, 66u
         next_iteration %16  # -> $B9
       }
     }
@@ -1395,22 +1395,22 @@ $B1: {  # root
         next_iteration %tint_local_index  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %9:bool = gte %idx:u32, 42u
+        %9:bool = gte %idx, 42u
         if %9 [t: $B7] {  # if_2
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %10:ptr<workgroup, i32, read_write> = access %var_c, %idx:u32
+        %10:ptr<workgroup, i32, read_write> = access %var_c, %idx
         store %10, 0i
-        %11:u32 = mod %idx:u32, 6u
-        %12:u32 = div %idx:u32, 6u
+        %11:u32 = mod %idx, 6u
+        %12:u32 = div %idx, 6u
         %13:ptr<workgroup, u32, read_write> = access %var_d, %12, %11
         store %13, 0u
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %14:u32 = add %idx:u32, 66u
+        %14:u32 = add %idx, 66u
         next_iteration %14  # -> $B5
       }
     }

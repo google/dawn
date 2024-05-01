@@ -35,7 +35,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/enum_set.h"
 

@@ -42,7 +42,7 @@
 #include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
@@ -336,16 +336,10 @@ class Validator {
     const core::type::Type* GetVectorPtrElementType(const Instruction* inst, size_t idx);
 
   private:
-    struct Disassembly {
-        std::shared_ptr<Source::File> file;
-        StyledText text;
-    };
-
     const Module& mod_;
     Capabilities capabilities_;
     std::optional<Disassembly> disassembly_;
     diag::List diagnostics_;
-    Disassembler dis_{mod_};
     const Block* current_block_ = nullptr;
     Hashset<const Function*, 4> all_functions_;
     Hashset<const Instruction*, 4> visited_instructions_;
@@ -360,14 +354,9 @@ Validator::Validator(const Module& mod, Capabilities capabilities)
 Validator::~Validator() = default;
 
 void Validator::DisassembleIfNeeded() {
-    if (disassembly_) {
-        return;
+    if (!disassembly_) {
+        disassembly_.emplace(Disassemble(mod_));
     }
-    auto text = dis_.Disassemble();
-    disassembly_ = Disassembly{
-        std::make_unique<Source::File>("", text.Plain()),
-        text,
-    };
 }
 
 Result<SuccessType> Validator::Run() {
@@ -396,7 +385,7 @@ Result<SuccessType> Validator::Run() {
     if (diagnostics_.ContainsErrors()) {
         DisassembleIfNeeded();
         diagnostics_.AddNote(tint::diag::System::IR, Source{}) << "# Disassembly\n"
-                                                               << disassembly_->text;
+                                                               << disassembly_->Text();
         return Failure{std::move(diagnostics_)};
     }
     return Success;
@@ -404,7 +393,7 @@ Result<SuccessType> Validator::Run() {
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst) {
     DisassembleIfNeeded();
-    auto src = dis_.InstructionSource(inst);
+    auto src = disassembly_->InstructionSource(inst);
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
@@ -415,7 +404,8 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst) {
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
     DisassembleIfNeeded();
-    auto src = dis_.OperandSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
+    auto src =
+        disassembly_->OperandSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
@@ -427,7 +417,8 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
 
 diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
     DisassembleIfNeeded();
-    auto src = dis_.ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
+    auto src =
+        disassembly_->ResultSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
@@ -438,49 +429,50 @@ diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx)
 
 diag::Diagnostic& Validator::AddError(const Block* blk) {
     DisassembleIfNeeded();
-    auto src = dis_.BlockSource(blk);
+    auto src = disassembly_->BlockSource(blk);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const BlockParam* param) {
     DisassembleIfNeeded();
-    auto src = dis_.BlockParamSource(param);
+    auto src = disassembly_->BlockParamSource(param);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const Function* func) {
     DisassembleIfNeeded();
-    auto src = dis_.FunctionSource(func);
+    auto src = disassembly_->FunctionSource(func);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const FunctionParam* param) {
     DisassembleIfNeeded();
-    auto src = dis_.FunctionParamSource(param);
+    auto src = disassembly_->FunctionParamSource(param);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
     DisassembleIfNeeded();
-    auto src = dis_.InstructionSource(inst);
+    auto src = disassembly_->InstructionSource(inst);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Function* func) {
     DisassembleIfNeeded();
-    auto src = dis_.FunctionSource(func);
+    auto src = disassembly_->FunctionSource(func);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Instruction* inst, size_t idx) {
     DisassembleIfNeeded();
-    auto src = dis_.OperandSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
+    auto src =
+        disassembly_->OperandSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Block* blk) {
     DisassembleIfNeeded();
-    auto src = dis_.BlockSource(blk);
+    auto src = disassembly_->BlockSource(blk);
     return AddNote(src);
 }
 
@@ -488,8 +480,8 @@ diag::Diagnostic& Validator::AddError(Source src) {
     auto& diag = diagnostics_.AddError(tint::diag::System::IR, src);
     if (src.range != Source::Range{{}}) {
         DisassembleIfNeeded();
-        diag.source.file = disassembly_->file.get();
-        diag.owned_file = disassembly_->file;
+        diag.source.file = disassembly_->File().get();
+        diag.owned_file = disassembly_->File();
     }
     return diag;
 }
@@ -498,8 +490,8 @@ diag::Diagnostic& Validator::AddNote(Source src) {
     auto& diag = diagnostics_.AddNote(tint::diag::System::IR, src);
     if (src.range != Source::Range{{}}) {
         DisassembleIfNeeded();
-        diag.source.file = disassembly_->file.get();
-        diag.owned_file = disassembly_->file;
+        diag.source.file = disassembly_->File().get();
+        diag.owned_file = disassembly_->File();
     }
     return diag;
 }

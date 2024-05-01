@@ -25,10 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_DISASSEMBLER_H_
-#define SRC_TINT_LANG_CORE_IR_DISASSEMBLER_H_
+#ifndef SRC_TINT_LANG_CORE_IR_DISASSEMBLY_H_
+#define SRC_TINT_LANG_CORE_IR_DISASSEMBLY_H_
 
+#include <memory>
 #include <string>
+#include <string_view>
 
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
@@ -40,7 +42,6 @@
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
-#include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/styled_text.h"
 
 // Forward declarations.
@@ -50,12 +51,8 @@ class Struct;
 
 namespace tint::core::ir {
 
-/// @returns the disassembly for the module @p mod
-/// @param mod the module to disassemble
-StyledText Disassemble(const Module& mod);
-
-/// Helper class to disassemble the IR
-class Disassembler {
+/// Disassembly holds the disassembly of an IR module.
+class Disassembly {
   public:
     /// A reference to an instruction's operand or result.
     struct IndexedValue {
@@ -75,32 +72,63 @@ class Disassembler {
         }
     };
 
-    /// Constructor
-    /// @param mod the module
-    explicit Disassembler(const Module& mod);
-    ~Disassembler();
+    /// Constructor.
+    /// Performs the disassembly of the module @p mod, constructing a Source::File with the name @p
+    /// file_name.
+    /// @param mod the module to disassemble
+    Disassembly(const Module& mod, std::string_view file_name);
 
-    /// Returns the module as a styled text string
+    /// Move constructor
+    Disassembly(Disassembly&&);
+
+    /// Destructor
+    ~Disassembly();
+
     /// @returns the string representation of the module
-    const StyledText& Disassemble();
+    const StyledText& Text() const { return out_; }
+
+    /// @returns the string representation of the module as plain-text
+    std::string Plain() const { return out_.Plain(); }
+
+    /// @returns the disassembly file
+    const std::shared_ptr<Source::File>& File() const { return file_; }
+
+    /// @returns the disassembled name for the Block @p blk
+    StyledText NameOf(const Block* blk);
+
+    /// @returns the disassembled name for the Value @p node
+    StyledText NameOf(const Value* node);
+
+    /// @returns the disassembled name for the If @p inst
+    StyledText NameOf(const If* inst);
+
+    /// @returns the disassembled name for the Loop @p inst
+    StyledText NameOf(const Loop* inst);
+
+    /// @returns the disassembled name for the Switch @p inst
+    StyledText NameOf(const Switch* inst);
 
     /// @param inst the instruction to retrieve
     /// @returns the source for the instruction
-    Source InstructionSource(const Instruction* inst) {
+    Source InstructionSource(const Instruction* inst) const {
         return instruction_to_src_.GetOr(inst, Source{});
     }
 
     /// @param operand the operand to retrieve
     /// @returns the source for the operand
-    Source OperandSource(IndexedValue operand) { return operand_to_src_.GetOr(operand, Source{}); }
+    Source OperandSource(IndexedValue operand) const {
+        return operand_to_src_.GetOr(operand, Source{});
+    }
 
     /// @param result the result to retrieve
     /// @returns the source for the result
-    Source ResultSource(IndexedValue result) { return result_to_src_.GetOr(result, Source{}); }
+    Source ResultSource(IndexedValue result) const {
+        return result_to_src_.GetOr(result, Source{});
+    }
 
     /// @param blk the block to retrieve
     /// @returns the source for the block
-    Source BlockSource(const Block* blk) { return block_to_src_.GetOr(blk, Source{}); }
+    Source BlockSource(const Block* blk) const { return block_to_src_.GetOr(blk, Source{}); }
 
     /// @param param the block parameter to retrieve
     /// @returns the source for the parameter
@@ -117,6 +145,10 @@ class Disassembler {
     Source FunctionParamSource(const FunctionParam* param) {
         return function_param_to_src_.GetOr(param, Source{});
     }
+
+  private:
+    /// Performs the disassembling of the module.
+    void Disassemble();
 
     /// Stores the given @p src location for @p inst instruction
     /// @param inst the instruction to store
@@ -158,10 +190,9 @@ class Disassembler {
     /// @returns the source location for the current emission location
     Source::Location MakeCurrentLocation();
 
-  private:
     class SourceMarker {
       public:
-        explicit SourceMarker(Disassembler* d) : dis_(d), begin_(dis_->MakeCurrentLocation()) {}
+        explicit SourceMarker(Disassembly* d) : dis_(d), begin_(dis_->MakeCurrentLocation()) {}
         ~SourceMarker() = default;
 
         void Store(const Instruction* inst) { dis_->SetSource(inst, MakeSource()); }
@@ -183,17 +214,11 @@ class Disassembler {
         }
 
       private:
-        Disassembler* dis_ = nullptr;
+        Disassembly* dis_ = nullptr;
         Source::Location begin_;
     };
 
     StyledText& Indent();
-
-    size_t IdOf(const Block* blk);
-    std::string IdOf(const Value* node);
-    std::string NameOf(const If* inst);
-    std::string NameOf(const Loop* inst);
-    std::string NameOf(const Switch* inst);
 
     void EmitBlock(const Block* blk, std::string_view comment = "");
     void EmitFunction(const Function* func);
@@ -219,9 +244,7 @@ class Disassembler {
 
     const Module& mod_;
     StyledText out_;
-    Hashmap<const Block*, size_t, 32> block_ids_;
-    Hashmap<const Value*, std::string, 32> value_ids_;
-    Hashset<std::string, 32> ids_;
+    std::shared_ptr<Source::File> file_;
     uint32_t indent_size_ = 0;
     bool in_function_ = false;
 
@@ -235,11 +258,21 @@ class Disassembler {
     Hashmap<IndexedValue, Source, 8> result_to_src_;
     Hashmap<const Function*, Source, 8> function_to_src_;
     Hashmap<const FunctionParam*, Source, 8> function_param_to_src_;
+
+    // Names / IDs
+    Hashmap<const Block*, size_t, 32> block_ids_;
+    Hashmap<const Value*, std::string, 32> value_ids_;
     Hashmap<const If*, std::string, 8> if_names_;
     Hashmap<const Loop*, std::string, 8> loop_names_;
     Hashmap<const Switch*, std::string, 8> switch_names_;
+    Hashset<std::string, 32> ids_;
 };
+
+/// @returns the disassembly for the module @p mod, using the file name @p file_name
+inline Disassembly Disassemble(const Module& mod, std::string_view file_name = "") {
+    return Disassembly(mod, file_name);
+}
 
 }  // namespace tint::core::ir
 
-#endif  // SRC_TINT_LANG_CORE_IR_DISASSEMBLER_H_
+#endif  // SRC_TINT_LANG_CORE_IR_DISASSEMBLY_H_

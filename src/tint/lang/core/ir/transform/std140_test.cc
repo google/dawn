@@ -565,20 +565,20 @@ $B1: {  # root
         next_iteration 0u  # -> $B5
       }
       $B5 (%idx:u32): {  # body
-        %10:bool = gte %idx:u32, 4u
+        %10:bool = gte %idx, 4u
         if %10 [t: $B7] {  # if_1
           $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %11:ptr<function, Inner, read_write> = access %8, %idx:u32
-        %12:Inner_std140 = access %7, %idx:u32
+        %11:ptr<function, Inner, read_write> = access %8, %idx
+        %12:Inner_std140 = access %7, %idx
         %13:Inner = call %convert_Inner, %12
         store %11, %13
         continue  # -> $B6
       }
       $B6: {  # continuing
-        %15:u32 = add %idx:u32, 1u
+        %15:u32 = add %idx, 1u
         next_iteration %15  # -> $B5
       }
     }
@@ -906,20 +906,20 @@ $B1: {  # root
         next_iteration 0u  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %16:bool = gte %idx:u32, 4u
+        %16:bool = gte %idx, 4u
         if %16 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %17:ptr<function, Inner, read_write> = access %14, %idx:u32
-        %18:Inner_std140 = access %13, %idx:u32
+        %17:ptr<function, Inner, read_write> = access %14, %idx
+        %18:Inner_std140 = access %13, %idx
         %19:Inner = call %convert_Inner, %18
         store %17, %19
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %21:u32 = add %idx:u32, 1u
+        %21:u32 = add %idx, 1u
         next_iteration %21  # -> $B4
       }
     }
@@ -1081,20 +1081,20 @@ $B1: {  # root
         next_iteration 0u  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %16:bool = gte %idx:u32, 4u
+        %16:bool = gte %idx, 4u
         if %16 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %17:ptr<function, Inner, read_write> = access %14, %idx:u32
-        %18:Inner_std140 = access %13, %idx:u32
+        %17:ptr<function, Inner, read_write> = access %14, %idx
+        %18:Inner_std140 = access %13, %idx
         %19:Inner = call %convert_Inner, %18
         store %17, %19
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %21:u32 = add %idx:u32, 1u
+        %21:u32 = add %idx, 1u
         next_iteration %21  # -> $B4
       }
     }
@@ -1255,20 +1255,20 @@ $B1: {  # root
         next_iteration 0u  # -> $B4
       }
       $B4 (%idx:u32): {  # body
-        %19:bool = gte %idx:u32, 4u
+        %19:bool = gte %idx, 4u
         if %19 [t: $B6] {  # if_1
           $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        %20:ptr<function, Inner, read_write> = access %17, %idx:u32
-        %21:Inner_std140 = access %16, %idx:u32
+        %20:ptr<function, Inner, read_write> = access %17, %idx
+        %21:Inner_std140 = access %16, %idx
         %22:Inner = call %convert_Inner, %21
         store %20, %22
         continue  # -> $B5
       }
       $B5: {  # continuing
-        %24:u32 = add %idx:u32, 1u
+        %24:u32 = add %idx, 1u
         next_iteration %24  # -> $B4
       }
     }

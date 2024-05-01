@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"

@@ -31,7 +31,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/reader/common/helper_test.h"

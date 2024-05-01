@@ -587,11 +587,11 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesToBlockParam_FromDiff
       $B2 (%5:array<i32, 4>): {  # body
         if %2 [t: $B3, f: $B4] {  # if_1
           $B3: {  # true
-            %6:i32 = access %5:array<i32, 4>, %3
+            %6:i32 = access %5, %3
             ret %6
           }
           $B4: {  # false
-            %7:i32 = access %5:array<i32, 4>, %4
+            %7:i32 = access %5, %4
             ret %7
           }
         }
@@ -609,7 +609,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesToBlockParam_FromDiff
   $B1: {
     loop [b: $B2] {  # loop_1
       $B2 (%5:array<i32, 4>): {  # body
-        %6:ptr<function, array<i32, 4>, read_write> = var, %5:array<i32, 4>
+        %6:ptr<function, array<i32, 4>, read_write> = var, %5
         if %2 [t: $B3, f: $B4] {  # if_1
           $B3: {  # true
             %7:ptr<function, i32, read_write> = access %6, %3
@@ -666,11 +666,11 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest,
       $B2 (%5:array<array<i32, 4>, 4>): {  # body
         if %2 [t: $B3, f: $B4] {  # if_1
           $B3: {  # true
-            %6:i32 = access %5:array<array<i32, 4>, 4>, 0u, %3
+            %6:i32 = access %5, 0u, %3
             ret %6
           }
           $B4: {  # false
-            %7:i32 = access %5:array<array<i32, 4>, 4>, 0u, %4
+            %7:i32 = access %5, 0u, %4
             ret %7
           }
         }
@@ -688,7 +688,7 @@ TEST_F(SpirvWriter_VarForDynamicIndexTest,
   $B1: {
     loop [b: $B2] {  # loop_1
       $B2 (%5:array<array<i32, 4>, 4>): {  # body
-        %6:array<i32, 4> = access %5:array<array<i32, 4>, 4>, 0u
+        %6:array<i32, 4> = access %5, 0u
         %7:ptr<function, array<i32, 4>, read_write> = var, %6
         if %2 [t: $B3, f: $B4] {  # if_1
           $B3: {  # true

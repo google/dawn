@@ -78,8 +78,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/core_builtin_call.h
   lang/core/ir/core_unary.cc
   lang/core/ir/core_unary.h
-  lang/core/ir/disassembler.cc
-  lang/core/ir/disassembler.h
+  lang/core/ir/disassembly.cc
+  lang/core/ir/disassembly.h
   lang/core/ir/discard.cc
   lang/core/ir/discard.h
   lang/core/ir/exit.cc
