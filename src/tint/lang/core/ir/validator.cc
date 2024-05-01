@@ -397,7 +397,7 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst) {
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
-        AddNote(current_block_) << "In block";
+        AddNote(current_block_) << "in block";
     }
     return diag;
 }
@@ -408,7 +408,7 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
-        AddNote(current_block_) << "In block";
+        AddNote(current_block_) << "in block";
     }
 
     return diag;
@@ -420,7 +420,7 @@ diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx)
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (current_block_) {
-        AddNote(current_block_) << "In block";
+        AddNote(current_block_) << "in block";
     }
     return diag;
 }
@@ -574,7 +574,7 @@ void Validator::CheckBlock(const Block* blk) {
     for (auto* inst : *blk) {
         if (inst->Block() != blk) {
             AddError(inst) << "block instruction does not have same block as parent";
-            AddNote(current_block_) << "In block";
+            AddNote(current_block_) << "in block";
             continue;
         }
         if (inst->Is<ir::Terminator>() && inst != blk->Terminator()) {
