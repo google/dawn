@@ -253,7 +253,7 @@ TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:20 error: call: call target is not part of the module
+              R"(:3:20 error: call: %g is not part of the module
     %2:void = call %g
                    ^^
 
@@ -424,7 +424,7 @@ TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:3 error: block: does not end in a terminator instruction
+              R"(:2:3 error: block does not end in a terminator instruction
   $B1: {
   ^^^
 
@@ -1123,7 +1123,7 @@ TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: return: block: terminator which isn't the final instruction
+              R"(:3:5 error: return: block terminator which isn't the final instruction
     ret
     ^^^
 
@@ -1165,7 +1165,7 @@ TEST_F(IR_ValidatorTest, If_EmptyTrue) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:7 error: block: does not end in a terminator instruction
+              R"(:4:7 error: block does not end in a terminator instruction
       $B2: {  # true
       ^^^
 
@@ -1321,7 +1321,7 @@ TEST_F(IR_ValidatorTest, Loop_EmptyBody) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:7 error: block: does not end in a terminator instruction
+              R"(:4:7 error: block does not end in a terminator instruction
       $B2: {  # body
       ^^^
 
