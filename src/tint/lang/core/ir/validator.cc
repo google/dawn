@@ -76,6 +76,7 @@
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/text_style.h"
 
 /// If set to 1 then the Tint will dump the IR when validating.
@@ -147,7 +148,7 @@ class Validator {
 
     /// Adds an error for the @p inst operand at @p idx and highlights the operand in the
     /// disassembly
-    /// @param inst the instaruction
+    /// @param inst the instruction
     /// @param idx the operand index
     /// @returns the diagnostic
     diag::Diagnostic& AddError(const Instruction* inst, size_t idx);
@@ -335,9 +336,14 @@ class Validator {
     const core::type::Type* GetVectorPtrElementType(const Instruction* inst, size_t idx);
 
   private:
+    struct Disassembly {
+        std::shared_ptr<Source::File> file;
+        StyledText text;
+    };
+
     const Module& mod_;
     Capabilities capabilities_;
-    std::shared_ptr<Source::File> disassembly_file;
+    std::optional<Disassembly> disassembly_;
     diag::List diagnostics_;
     Disassembler dis_{mod_};
     const Block* current_block_ = nullptr;
@@ -354,10 +360,14 @@ Validator::Validator(const Module& mod, Capabilities capabilities)
 Validator::~Validator() = default;
 
 void Validator::DisassembleIfNeeded() {
-    if (disassembly_file) {
+    if (disassembly_) {
         return;
     }
-    disassembly_file = std::make_unique<Source::File>("", dis_.Disassemble().Plain());
+    auto text = dis_.Disassemble();
+    disassembly_ = Disassembly{
+        std::make_unique<Source::File>("", text.Plain()),
+        text,
+    };
 }
 
 Result<SuccessType> Validator::Run() {
@@ -386,7 +396,7 @@ Result<SuccessType> Validator::Run() {
     if (diagnostics_.ContainsErrors()) {
         DisassembleIfNeeded();
         diagnostics_.AddNote(tint::diag::System::IR, Source{}) << "# Disassembly\n"
-                                                               << disassembly_file->content.data;
+                                                               << disassembly_->text;
         return Failure{std::move(diagnostics_)};
     }
     return Success;
@@ -477,8 +487,9 @@ diag::Diagnostic& Validator::AddNote(const Block* blk) {
 diag::Diagnostic& Validator::AddError(Source src) {
     auto& diag = diagnostics_.AddError(tint::diag::System::IR, src);
     if (src.range != Source::Range{{}}) {
-        diag.source.file = disassembly_file.get();
-        diag.owned_file = disassembly_file;
+        DisassembleIfNeeded();
+        diag.source.file = disassembly_->file.get();
+        diag.owned_file = disassembly_->file;
     }
     return diag;
 }
@@ -486,8 +497,9 @@ diag::Diagnostic& Validator::AddError(Source src) {
 diag::Diagnostic& Validator::AddNote(Source src) {
     auto& diag = diagnostics_.AddNote(tint::diag::System::IR, src);
     if (src.range != Source::Range{{}}) {
-        diag.source.file = disassembly_file.get();
-        diag.owned_file = disassembly_file;
+        DisassembleIfNeeded();
+        diag.source.file = disassembly_->file.get();
+        diag.owned_file = disassembly_->file;
     }
     return diag;
 }
