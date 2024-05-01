@@ -252,6 +252,13 @@ source_set("winsock") {
   libs = [ "ws2_32.lib" ]
 }
 
+config("dxc-include-config") {
+  include_dirs = [ "${dawn_dxc_dir}/include" ]
+}
+source_set("dxc-include") {
+  public_configs = [ ":dxc-include-config" ]
+}
+
 ###############################################################################
 # Fuzzers
 ###############################################################################

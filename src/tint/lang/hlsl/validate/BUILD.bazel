@@ -56,7 +56,12 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
-  ],
+  ] + select({
+    ":tint_build_hlsl_writer": [
+      
+    ],
+    "//conditions:default": [],
+  }),
   copts = COPTS,
   visibility = ["//visibility:public"],
 )

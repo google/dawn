@@ -1009,8 +1009,9 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
         tint::hlsl::validate::Result dxc_res;
         bool dxc_found = false;
         if (options.validate || must_validate_dxc) {
-            auto dxc = tint::Command::LookPath(
-                options.dxc_path.empty() ? "dxc" : std::string(options.dxc_path));
+            auto dxc =
+                tint::Command::LookPath(options.dxc_path.empty() ? tint::hlsl::validate::kDxcDLLName
+                                                                 : std::string(options.dxc_path));
             if (dxc.Found()) {
                 dxc_found = true;
 
@@ -1053,7 +1054,7 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
                 fxc_res.output = "FXC DLL '" + options.fxc_path + "' not found. Cannot validate";
             }
 #else
-            if (must_validate_dxc) {
+            if (must_validate_fxc) {
                 fxc_res.failed = true;
                 fxc_res.output = "FXC can only be used on Windows.";
             }

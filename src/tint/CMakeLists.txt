@@ -501,6 +501,8 @@ function(tint_target_add_external_dependencies TARGET KIND)
       target_link_libraries(${TARGET} PRIVATE
         absl_strings
       )
+    elseif(${DEPENDENCY} STREQUAL "dxc-include")
+      target_include_directories(${TARGET} PRIVATE "${DAWN_THIRD_PARTY_DIR}/dxc/include")
     elseif(${DEPENDENCY} STREQUAL "jsoncpp")
       target_link_libraries(${TARGET} PRIVATE jsoncpp_static)
     elseif(${DEPENDENCY} STREQUAL "langsvr")

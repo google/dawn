@@ -54,6 +54,10 @@
 #define TINT_DISABLE_WARNING_ZERO_AS_NULLPTR             /* currently no-op */
 #define TINT_DISABLE_WARNING_MISSING_DESTRUCTOR_OVERRIDE /* currently no-op */
 
+#define TINT_BEGIN_DISABLE_ALL_WARNINGS() __pragma(warning(push, 0)) TINT_REQUIRE_SEMICOLON
+
+#define TINT_END_DISABLE_ALL_WARNINGS() __pragma(warning(pop)) TINT_REQUIRE_SEMICOLON
+
 // clang-format off
 #define TINT_BEGIN_DISABLE_WARNING(name)     \
     __pragma(warning(push))                  \
@@ -70,6 +74,10 @@
 
 #define TINT_UNLIKELY(x) x /* currently no-op */
 #define TINT_LIKELY(x) x   /* currently no-op */
+
+#if defined(__SANITIZE_ADDRESS__)
+#define TINT_ASAN_ENABLED
+#endif
 
 #elif defined(__clang__)
 ////////////////////////////////////////////////////////////////////////////////
@@ -123,6 +131,15 @@
     _Pragma("clang diagnostic pop")          \
     TINT_REQUIRE_SEMICOLON
 
+#define TINT_BEGIN_DISABLE_ALL_WARNINGS() \
+    _Pragma("clang diagnostic push")      \
+    _Pragma("clang diagnostic ignored \"-Weverything\"")       \
+    TINT_REQUIRE_SEMICOLON
+
+#define TINT_END_DISABLE_ALL_WARNINGS() \
+    _Pragma("clang diagnostic pop")     \
+    TINT_REQUIRE_SEMICOLON
+
 #define TINT_BEGIN_DISABLE_WARNING(name)     \
     _Pragma("clang diagnostic push")         \
     TINT_CONCAT(TINT_DISABLE_WARNING_, name) \
@@ -135,6 +152,11 @@
 
 #define TINT_UNLIKELY(x) __builtin_expect(!!(x), false)
 #define TINT_LIKELY(x) __builtin_expect(!!(x), true)
+
+#if __has_feature(address_sanitizer)
+#define TINT_ASAN_ENABLED
+#endif
+
 #elif defined(__GNUC__)
 ////////////////////////////////////////////////////////////////////////////////
 // GCC
@@ -163,6 +185,12 @@
     _Pragma("GCC diagnostic push") TINT_DISABLE_WARNING_UNUSED_PARAMETER TINT_REQUIRE_SEMICOLON
 #define TINT_END_DISABLE_PROTOBUF_WARNINGS() _Pragma("GCC diagnostic pop") TINT_REQUIRE_SEMICOLON
 
+#define TINT_BEGIN_DISABLE_ALL_WARNINGS()                                      \
+    _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wall\"") \
+        _Pragma("GCC diagnostic ignored \"-Wextra\"") TINT_REQUIRE_SEMICOLON
+
+#define TINT_END_DISABLE_ALL_WARNINGS() _Pragma("GCC diagnostic pop") TINT_REQUIRE_SEMICOLON
+
 // clang-format off
 #define TINT_BEGIN_DISABLE_WARNING(name)     \
     _Pragma("GCC diagnostic push")           \
@@ -175,10 +203,17 @@
 
 #define TINT_UNLIKELY(x) __builtin_expect(!!(x), false)
 #define TINT_LIKELY(x) __builtin_expect(!!(x), true)
+
+#if defined(__SANITIZE_ADDRESS__)
+#define TINT_ASAN_ENABLED
+#endif
+
 #else
 ////////////////////////////////////////////////////////////////////////////////
 // Other
 ////////////////////////////////////////////////////////////////////////////////
+#define TINT_BEGIN_DISABLE_ALL_WARNINGS() TINT_REQUIRE_SEMICOLON
+#define TINT_END_DISABLE_ALL_WARNINGS TINT_REQUIRE_SEMICOLON
 #define TINT_BEGIN_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
 #define TINT_END_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
 #define TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS() TINT_REQUIRE_SEMICOLON

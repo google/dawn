@@ -138,7 +138,7 @@ func run() error {
 	verbose, useIr, generateExpected, generateSkip := false, false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, hlsl-dxc, hlsl-fxc, glsl")
 	flag.StringVar(&ignore, "ignore", "**.expected.*", "files to ignore in globs")
-	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
+	flag.StringVar(&dxcPath, "dxcompiler", "", "path to DXC DLL for validating HLSL output")
 	flag.StringVar(&fxcPath, "fxc", "", "path to FXC DLL for validating HLSL output")
 	flag.StringVar(&tintPath, "tint", defaultTintPath(), "path to the tint executable")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
@@ -240,6 +240,13 @@ func run() error {
 		defaultMSLExe = "metal.exe"
 	}
 
+	defaultDXCDll := "libdxcompiler.so"
+	if runtime.GOOS == "windows" {
+		defaultDXCDll = "dxcompiler.dll"
+	} else if runtime.GOOS == "darwin" {
+		defaultDXCDll = "libdxcompiler.dylib"
+	}
+
 	toolchainHash := sha256.New()
 
 	// If explicit verification compilers have been specified, check they exist.
@@ -249,7 +256,7 @@ func run() error {
 		lang string
 		path *string
 	}{
-		{"dxc", "hlsl-dxc", &dxcPath},
+		{defaultDXCDll, "hlsl-dxc", &dxcPath},
 		{"d3dcompiler_47.dll", "hlsl-fxc", &fxcPath},
 		{defaultMSLExe, "msl", &xcrunPath},
 	} {

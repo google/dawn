@@ -6,7 +6,13 @@
     "abseil": {
         "IncludePatterns": [
             "absl/**"
+        ]
+    },
+    "dxc-include": {
+        "IncludePatterns": [
+            "dxc/**"
         ],
+        "Condition": "tint_build_hlsl_writer"
     },
     "google-benchmark": {
         "IncludePatterns": [

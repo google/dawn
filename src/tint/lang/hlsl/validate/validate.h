@@ -46,6 +46,16 @@ using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
 /// Name of the FXC compiler DLL
 static constexpr const char kFxcDLLName[] = "d3dcompiler_47.dll";
 
+#if TINT_BUILD_IS_WIN
+static constexpr const char* kDxcDLLName = "dxcompiler.dll";
+#elif TINT_BUILD_IS_LINUX
+static constexpr const char* kDxcDLLName = "libdxcompiler.so";
+#elif TINT_BUILD_IS_MAC
+static constexpr const char* kDxcDLLName = "libdxcompiler.dylib";
+#else
+static constexpr const char* kDxcDLLName = "Invalid";
+#endif
+
 /// The return structure of Validate()
 struct Result {
     /// True if validation passed
