@@ -64,7 +64,8 @@ bool IsUnsupported(const ast::Enable* enable) {
 void Register(const IRFuzzer& fuzzer) {
     wgsl::Register({
         fuzzer.name,
-        [fn = fuzzer.fn](const Program& program, Slice<const std::byte> data) {
+        [fn = fuzzer.fn](const Program& program, const fuzz::wgsl::Options& options,
+                         Slice<const std::byte> data) {
             if (program.AST().Enables().Any(IsUnsupported)) {
                 return;
             }

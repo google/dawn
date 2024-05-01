@@ -67,7 +67,7 @@ void Register(const ProgramFuzzer& fuzzer) {
     Fuzzers().Push(fuzzer);
 }
 
-void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& options) {
+void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> data) {
     tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
 #if TINT_BUILD_WGSL_WRITER
@@ -116,7 +116,7 @@ void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& opti
                 if (options.verbose) {
                     std::cout << " • [" << i << "] Running: " << currently_running << std::endl;
                 }
-                fuzzer.fn(program, data);
+                fuzzer.fn(program, options, data);
             }));
         }
         for (auto& thread : threads) {
@@ -133,7 +133,7 @@ void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& opti
             if (options.verbose) {
                 std::cout << " • Running: " << currently_running << std::endl;
             }
-            fuzzer.fn(program, data);
+            fuzzer.fn(program, options, data);
         }
     }
 }

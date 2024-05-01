@@ -37,20 +37,63 @@
 #include "src/tint/utils/bytes/decoder.h"
 #include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/macros/static_init.h"
-#include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::fuzz::wgsl {
+
+/// Options for Run()
+struct Options {
+    /// If not empty, only run the fuzzers with the given substring.
+    std::string filter;
+    /// If true, the fuzzers will be run concurrently on separate threads.
+    bool run_concurrently = false;
+    /// If true, print the fuzzer name to stdout before running.
+    bool verbose = false;
+};
 
 /// ProgramFuzzer describes a fuzzer function that takes a WGSL program as input
 struct ProgramFuzzer {
     /// @param name the name of the fuzzer
-    /// @param fn the fuzzer function
-    /// @returns a ProgramFuzzer that invokes the function @p fn with the Program, along with any
-    /// additional arguments which are deserialized from the fuzzer input.
+    /// @param fn the fuzzer function with the signature `void(const Program&, const Options&, ...)`
+    /// @returns a ProgramFuzzer that invokes the function @p fn with the Program, Options, along
+    /// with any additional arguments which are deserialized from the fuzzer input.
+    template <typename... ARGS>
+    static ProgramFuzzer Create(std::string_view name,
+                                void (*fn)(const Program&, const Options&, ARGS...)) {
+        if constexpr (sizeof...(ARGS) > 0) {
+            auto fn_with_decode = [fn](const Program& program, const Options& options,
+                                       Slice<const std::byte> data) {
+                if (!data.data) {
+                    return;
+                }
+                bytes::BufferReader reader{data};
+                auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader);
+                if (data_args == Success) {
+                    auto all_args =
+                        std::tuple_cat(std::tuple<const Program&, const Options&>{program, options},
+                                       data_args.Get());
+                    std::apply(*fn, all_args);
+                }
+            };
+            return ProgramFuzzer{name, std::move(fn_with_decode)};
+        } else {
+            return ProgramFuzzer{
+                name,
+                [fn](const Program& program, const Options& options, Slice<const std::byte>) {
+                    fn(program, options);
+                },
+            };
+        }
+    }
+
+    /// @param name the name of the fuzzer
+    /// @param fn the fuzzer function with the signature `void(const Program&, ...)`
+    /// @returns a ProgramFuzzer that invokes the function @p fn with the Program, along
+    /// with any additional arguments which are deserialized from the fuzzer input.
     template <typename... ARGS>
     static ProgramFuzzer Create(std::string_view name, void (*fn)(const Program&, ARGS...)) {
         if constexpr (sizeof...(ARGS) > 0) {
-            auto fn_with_decode = [fn](const Program& program, Slice<const std::byte> data) {
+            auto fn_with_decode = [fn](const Program& program, const Options&,
+                                       Slice<const std::byte> data) {
                 if (!data.data) {
                     return;
                 }
@@ -66,7 +109,9 @@ struct ProgramFuzzer {
         } else {
             return ProgramFuzzer{
                 name,
-                [fn](const Program& program, Slice<const std::byte>) { fn(program); },
+                [fn](const Program& program, const Options&, Slice<const std::byte>) {
+                    fn(program);
+                },
             };
         }
     }
@@ -74,30 +119,26 @@ struct ProgramFuzzer {
     /// Name of the fuzzer function
     std::string_view name;
     /// The fuzzer function
-    std::function<void(const Program&, Slice<const std::byte> data)> fn;
-};
-
-/// Options for Run()
-struct Options {
-    /// If not empty, only run the fuzzers with the given substring.
-    std::string filter;
-    /// If true, the fuzzers will be run concurrently on separate threads.
-    bool run_concurrently = false;
-    /// If true, print the fuzzer name to stdout before running.
-    bool verbose = false;
+    std::function<void(const Program&, const Options&, Slice<const std::byte> data)> fn;
 };
 
 /// Runs all the registered WGSL fuzzers with the supplied WGSL
 /// @param wgsl the input WGSL
-/// @param data additional data used for fuzzing
 /// @param options the options for running the fuzzers
-void Run(std::string_view wgsl, Slice<const std::byte> data, const Options& options);
+/// @param data additional data used for fuzzing
+void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> data);
 
 /// Registers the fuzzer function with the WGSL fuzzer executable.
 /// @param fuzzer the fuzzer
 void Register(const ProgramFuzzer& fuzzer);
 
 /// TINT_WGSL_PROGRAM_FUZZER registers the fuzzer function to run as part of `tint_wgsl_fuzzer`
+/// The function must have one of the signatures:
+/// • `void(const Program&, ...)`
+/// • `void(const Program&, const Options&, ...)`
+/// Where `...` is any number of deserializable parameters which are decoded from the base64
+/// content of the WGSL comments.
+/// @see bytes::Decode()
 #define TINT_WGSL_PROGRAM_FUZZER(FUNCTION)         \
     TINT_STATIC_INIT(::tint::fuzz::wgsl::Register( \
         ::tint::fuzz::wgsl::ProgramFuzzer::Create(#FUNCTION, FUNCTION)))
