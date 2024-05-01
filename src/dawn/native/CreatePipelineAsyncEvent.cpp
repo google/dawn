@@ -132,14 +132,14 @@ template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::InitializeImpl(
     bool isAsync) {
     DeviceBase* device = mPipeline->GetDevice();
+    const char* eventLabel = utils::GetLabelForTrace(mPipeline->GetLabel().c_str());
     if (isAsync) {
-        const char* eventLabel = utils::GetLabelForTrace(mPipeline->GetLabel().c_str());
         TRACE_EVENT_FLOW_END1(device->GetPlatform(), General,
                               "CreatePipelineAsyncEvent::InitializeAsync", this, "label",
                               eventLabel);
-        TRACE_EVENT1(device->GetPlatform(), General, "CreatePipelineAsyncEvent::Initialize",
-                     "label", eventLabel);
     }
+    TRACE_EVENT1(device->GetPlatform(), General, "CreatePipelineAsyncEvent::InitializeImpl",
+                 "label", eventLabel);
 
     MaybeError maybeError;
     {
