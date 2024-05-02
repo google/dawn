@@ -28,8 +28,8 @@
 #ifndef SRC_TINT_UTILS_DIAGNOSTIC_DIAGNOSTIC_H_
 #define SRC_TINT_UTILS_DIAGNOSTIC_DIAGNOSTIC_H_
 
+#include <cstdint>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <utility>
 
@@ -41,7 +41,7 @@
 namespace tint::diag {
 
 /// Severity is an enumerator of diagnostic severities.
-enum class Severity { Note, Warning, Error, InternalCompilerError, Fatal };
+enum class Severity : uint8_t { Note, Warning, Error };
 
 /// @return true iff `a` is more than, or of equal severity to `b`
 inline bool operator>=(Severity a, Severity b) {
@@ -214,23 +214,6 @@ class List {
         error.system = system;
         error.source = source;
         return Add(std::move(error));
-    }
-
-    /// Adds an internal compiler error message to the end of this list.
-    /// @param system the system raising the error message
-    /// @param source the source of the internal compiler error
-    /// @param file the Source::File owned by this diagnostic
-    /// @returns a reference to the new diagnostic.
-    /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& AddIce(System system,
-                             const Source& source,
-                             std::shared_ptr<Source::File> file) {
-        diag::Diagnostic ice{};
-        ice.severity = diag::Severity::InternalCompilerError;
-        ice.system = system;
-        ice.source = source;
-        ice.owned_file = std::move(file);
-        return Add(std::move(ice));
     }
 
     /// @returns true iff the diagnostic list contains errors diagnostics (or of

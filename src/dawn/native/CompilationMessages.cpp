@@ -237,19 +237,17 @@ void OwnedCompilationMessages::AddFormattedTintMessages(const tint::diag::List& 
     size_t errorCount = 0;
     for (auto& diag : diagnostics) {
         switch (diag.severity) {
-            case (tint::diag::Severity::Fatal):
-            case (tint::diag::Severity::Error):
-            case (tint::diag::Severity::InternalCompilerError): {
+            case tint::diag::Severity::Error: {
                 errorCount++;
                 messageList.Add(diag);
                 break;
             }
-            case (tint::diag::Severity::Warning): {
+            case tint::diag::Severity::Warning: {
                 warningCount++;
                 messageList.Add(diag);
                 break;
             }
-            case (tint::diag::Severity::Note): {
+            case tint::diag::Severity::Note: {
                 messageList.Add(diag);
                 break;
             }

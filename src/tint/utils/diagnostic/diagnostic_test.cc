@@ -36,7 +36,7 @@ namespace {
 TEST(DiagListTest, CtorInitializerList) {
     Diagnostic err_a, err_b;
     err_a.severity = Severity::Error;
-    err_b.severity = Severity::Fatal;
+    err_b.severity = Severity::Warning;
     List list{err_a, err_b};
     EXPECT_EQ(list.Count(), 2u);
 }
@@ -44,7 +44,7 @@ TEST(DiagListTest, CtorInitializerList) {
 TEST(DiagListTest, CtorVectorRef) {
     Diagnostic err_a, err_b;
     err_a.severity = Severity::Error;
-    err_b.severity = Severity::Fatal;
+    err_b.severity = Severity::Warning;
     List list{Vector{err_a, err_b}};
     EXPECT_EQ(list.Count(), 2u);
 }

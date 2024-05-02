@@ -50,10 +50,6 @@ const char* ToString(Severity severity) {
             return "warning";
         case Severity::Error:
             return "error";
-        case Severity::InternalCompilerError:
-            return "internal compiler error";
-        case Severity::Fatal:
-            return "fatal";
     }
     return "";
 }
@@ -126,10 +122,6 @@ void Formatter::Format(const Diagnostic& diag, StyledText& text) const {
                 break;
             case Severity::Error:
                 style = style::Error + style::Bold;
-                break;
-            case Severity::Fatal:
-            case Severity::InternalCompilerError:
-                style = style::Fatal + style::Bold;
                 break;
         }
         prefix.Push(TextAndStyle{ToString(diag.severity), style});

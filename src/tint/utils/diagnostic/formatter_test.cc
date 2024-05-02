@@ -74,14 +74,6 @@ class DiagFormatterTest : public testing::Test {
                                      Source{Source::Range{{3, 16}, {3, 21}}, &ascii_file},
                                      "hiss",
                                      System::Test);
-    Diagnostic ascii_diag_ice = Diag(Severity::InternalCompilerError,
-                                     Source{Source::Range{{4, 16}, {4, 19}}, &ascii_file},
-                                     "unreachable",
-                                     System::Test);
-    Diagnostic ascii_diag_fatal = Diag(Severity::Fatal,
-                                       Source{Source::Range{{4, 16}, {4, 19}}, &ascii_file},
-                                       "nothing",
-                                       System::Test);
 
     Diagnostic utf8_diag_note = Diag(Severity::Note,
                                      Source{Source::Range{Source::Location{1, 15}}, &utf8_file},
@@ -95,14 +87,6 @@ class DiagFormatterTest : public testing::Test {
                                     Source{Source::Range{{3, 15}, {3, 20}}, &utf8_file},
                                     "hiss",
                                     System::Test);
-    Diagnostic utf8_diag_ice = Diag(Severity::InternalCompilerError,
-                                    Source{Source::Range{{4, 15}, {4, 18}}, &utf8_file},
-                                    "unreachable",
-                                    System::Test);
-    Diagnostic utf8_diag_fatal = Diag(Severity::Fatal,
-                                      Source{Source::Range{{4, 15}, {4, 18}}, &utf8_file},
-                                      "nothing",
-                                      System::Test);
 };
 
 TEST_F(DiagFormatterTest, Simple) {
@@ -260,28 +244,6 @@ the    snake    says    quack
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 the    snail    says    ???
 ^^^^^^^^^^^^^^^^^^^^
-)";
-    ASSERT_EQ(expect, got);
-}
-
-TEST_F(DiagFormatterTest, ICE) {
-    Formatter fmt{{}};
-    auto got = fmt.Format(List{ascii_diag_ice}).Plain();
-    auto* expect = R"(file.name:4:16 internal compiler error: unreachable
-the  snail  says  ???
-                  ^^^
-
-)";
-    ASSERT_EQ(expect, got);
-}
-
-TEST_F(DiagFormatterTest, Fatal) {
-    Formatter fmt{{}};
-    auto got = fmt.Format(List{ascii_diag_fatal}).Plain();
-    auto* expect = R"(file.name:4:16 fatal: nothing
-the  snail  says  ???
-                  ^^^
-
 )";
     ASSERT_EQ(expect, got);
 }

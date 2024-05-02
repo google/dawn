@@ -49,7 +49,7 @@ diag::Severity ToSeverity(DiagnosticSeverity sc) {
         case DiagnosticSeverity::kInfo:
             return diag::Severity::Note;
         default:
-            return diag::Severity::InternalCompilerError;
+            return diag::Severity::Error;
     }
 }
 

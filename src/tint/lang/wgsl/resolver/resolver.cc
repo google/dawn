@@ -5048,7 +5048,7 @@ void Resolver::AddICE(std::string_view msg, const Source& source) const {
         TINT_ICE() << msg;
     }
     diag::Diagnostic err{};
-    err.severity = diag::Severity::InternalCompilerError;
+    err.severity = diag::Severity::Error;
     err.system = diag::System::Resolver;
     err.source = source;
     diagnostics_.Add(std::move(err)) << msg;

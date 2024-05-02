@@ -49,8 +49,6 @@ langsvr::Result<langsvr::SuccessType> Server::PublishDiagnostics(File& file) {
                 d.severity = lsp::DiagnosticSeverity::kWarning;
                 break;
             case diag::Severity::Error:
-            case diag::Severity::InternalCompilerError:
-            case diag::Severity::Fatal:
                 d.severity = lsp::DiagnosticSeverity::kError;
                 break;
         }
