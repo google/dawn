@@ -89,6 +89,13 @@ config("vulkan_rpath") {
   }
 }
 
+# Config that adds delayloads when built as a shared library or component,
+# useful as we're linking user32.lib which can't always be loaded in the
+# chromium sandbox under win32k lockdown.
+config("win_delayload") {
+  ldflags = [ "/DELAYLOAD:user32.dll" ]
+}
+
 # Config that adds include directory for vulkan-utility-libraries.
 config("vulkan_utility_libraries_include") {
   include_dirs = [ "${dawn_vulkan_utility_libraries_dir}/include" ]
@@ -413,6 +420,7 @@ source_set("sources") {
   # In UWP, all availiable APIs are defined in WindowsApp.lib
   if (is_win && !dawn_is_winuwp) {
     libs += [ "user32.lib" ]
+    public_configs = [ ":win_delayload" ]
   }
 
   if (dawn_is_winuwp && is_debug) {
