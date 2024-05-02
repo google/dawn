@@ -36,7 +36,7 @@
 namespace dawn::native::d3d {
 
 PhysicalDevice::PhysicalDevice(Backend* backend,
-                               ComPtr<IDXGIAdapter3> hardwareAdapter,
+                               ComPtr<IDXGIAdapter4> hardwareAdapter,
                                wgpu::BackendType backendType)
     : PhysicalDeviceBase(backend->GetInstance(), backendType),
       mHardwareAdapter(std::move(hardwareAdapter)),
@@ -44,7 +44,7 @@ PhysicalDevice::PhysicalDevice(Backend* backend,
 
 PhysicalDevice::~PhysicalDevice() = default;
 
-IDXGIAdapter3* PhysicalDevice::GetHardwareAdapter() const {
+IDXGIAdapter4* PhysicalDevice::GetHardwareAdapter() const {
     return mHardwareAdapter.Get();
 }
 

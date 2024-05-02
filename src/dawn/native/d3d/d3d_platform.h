@@ -36,7 +36,7 @@
 
 #include <d3d11_4.h>  // NOLINT(build/include_order)
 #include <dxcapi.h>   // NOLINT(build/include_order)
-#include <dxgi1_4.h>  // NOLINT(build/include_order)
+#include <dxgi1_6.h>  // NOLINT(build/include_order)
 #include <wrl.h>      // NOLINT(build/include_order)
 
 // DXProgrammableCapture.h takes a dependency on other platform header

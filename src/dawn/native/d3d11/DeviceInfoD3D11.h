@@ -47,10 +47,13 @@ struct DeviceInfo {
     bool supportsROV;
     size_t dedicatedVideoMemory;
     size_t sharedSystemMemory;
+    bool supportsMonitoredFence;
+    bool supportsNonMonitoredFence;
 };
 
-ResultOrError<DeviceInfo> GatherDeviceInfo(IDXGIAdapter3* adapter,
+ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<IDXGIAdapter4>& adapter,
                                            const ComPtr<ID3D11Device>& device);
+
 }  // namespace dawn::native::d3d11
 
 #endif  // SRC_DAWN_NATIVE_D3D11_DEVICEINFOD3D11_H_

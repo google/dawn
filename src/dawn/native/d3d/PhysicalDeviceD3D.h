@@ -40,11 +40,11 @@ class Backend;
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
     PhysicalDevice(Backend* backend,
-                   ComPtr<IDXGIAdapter3> hardwareAdapter,
+                   ComPtr<IDXGIAdapter4> hardwareAdapter,
                    wgpu::BackendType backendType);
     ~PhysicalDevice() override;
 
-    IDXGIAdapter3* GetHardwareAdapter() const;
+    IDXGIAdapter4* GetHardwareAdapter() const;
     Backend* GetBackend() const;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
@@ -54,7 +54,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     MaybeError InitializeImpl() override;
 
   private:
-    ComPtr<IDXGIAdapter3> mHardwareAdapter;
+    ComPtr<IDXGIAdapter4> mHardwareAdapter;
     raw_ptr<Backend> mBackend;
 };
 

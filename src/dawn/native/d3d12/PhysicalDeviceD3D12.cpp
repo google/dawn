@@ -45,7 +45,7 @@
 
 namespace dawn::native::d3d12 {
 
-PhysicalDevice::PhysicalDevice(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
+PhysicalDevice::PhysicalDevice(Backend* backend, ComPtr<IDXGIAdapter4> hardwareAdapter)
     : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D12) {}
 
 PhysicalDevice::~PhysicalDevice() {
