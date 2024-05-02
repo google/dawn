@@ -94,7 +94,7 @@ void AppendDebugLayerMessagesToError(ID3D11InfoQueue* infoQueue,
             continue;
         }
 
-        messageStream << message->pDescription << " (" << message->ID << ")";
+        messageStream << "(" << message->ID << ") " << message->pDescription;
         error->AppendBackendMessage(messageStream.str());
     }
     if (errorsToPrint < totalErrors) {
