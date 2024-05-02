@@ -515,6 +515,9 @@ class Parser {
                 case spv::Op::OpFAdd:
                     EmitBinary(inst, core::BinaryOp::kAdd);
                     break;
+                case spv::Op::OpFMul:
+                    EmitBinary(inst, core::BinaryOp::kMultiply);
+                    break;
                 case spv::Op::OpFunctionCall:
                     EmitFunctionCall(inst);
                     break;

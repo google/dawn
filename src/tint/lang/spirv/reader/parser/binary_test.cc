@@ -106,6 +106,28 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                                  "vec4f",
                                  "OpFAdd",
                                  "%5:vec4<f32> = add %3, %4",
+                             },
+
+                             // OpFMul
+                             BinaryCase{
+                                 "f16",
+                                 "OpFMul",
+                                 "%5:f16 = mul %3, %4",
+                             },
+                             BinaryCase{
+                                 "f32",
+                                 "OpFMul",
+                                 "%5:f32 = mul %3, %4",
+                             },
+                             BinaryCase{
+                                 "vec3h",
+                                 "OpFMul",
+                                 "%5:vec3<f16> = mul %3, %4",
+                             },
+                             BinaryCase{
+                                 "vec4f",
+                                 "OpFMul",
+                                 "%5:vec4<f32> = mul %3, %4",
                              }),
                          PrintBuiltinCase);
 
