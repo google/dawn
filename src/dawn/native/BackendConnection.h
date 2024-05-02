@@ -31,7 +31,7 @@
 #include <memory>
 #include <vector>
 
-#include "dawn/common/NonCopyable.h"
+#include "dawn/common/NonMovable.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Toggles.h"

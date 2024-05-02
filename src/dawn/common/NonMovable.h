@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,63 +25,24 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_MUTEX_H_
-#define SRC_DAWN_COMMON_MUTEX_H_
+#ifndef SRC_DAWN_COMMON_NONMOVABLE_H_
+#define SRC_DAWN_COMMON_NONMOVABLE_H_
 
-#include <atomic>
-#include <mutex>
-#include <thread>
-#include <utility>
-
-#include "dawn/common/Assert.h"
 #include "dawn/common/NonCopyable.h"
-#include "dawn/common/NonMovable.h"
-#include "dawn/common/Ref.h"
-#include "dawn/common/RefCounted.h"
 
 namespace dawn {
-class Mutex : public RefCounted, NonCopyable {
-  public:
-    template <typename MutexRef>
-    struct AutoLockBase : NonMovable {
-        AutoLockBase() : mMutex(nullptr) {}
-        explicit AutoLockBase(MutexRef mutex) : mMutex(std::move(mutex)) {
-            if (mMutex != nullptr) {
-                mMutex->Lock();
-            }
-        }
-        ~AutoLockBase() {
-            if (mMutex != nullptr) {
-                mMutex->Unlock();
-            }
-        }
 
-      private:
-        MutexRef mMutex;
-    };
-
-    // This scoped lock won't keep the mutex alive.
-    using AutoLock = AutoLockBase<Mutex*>;
-    // This scoped lock will keep the mutex alive until out of scope.
-    using AutoLockAndHoldRef = AutoLockBase<Ref<Mutex>>;
-
-    ~Mutex() override;
-
-    void Lock();
-    void Unlock();
-
-    // This method is only enabled when DAWN_ENABLE_ASSERTS is turned on.
-    // Thus it should only be wrapped inside DAWN_ASSERT() macro.
-    // i.e. DAWN_ASSERT(mutex.IsLockedByCurrentThread())
-    bool IsLockedByCurrentThread();
+// A base class to make a class non-movable.
+class NonMovable : NonCopyable {
+  protected:
+    constexpr NonMovable() = default;
+    ~NonMovable() = default;
 
   private:
-#if defined(DAWN_ENABLE_ASSERTS)
-    std::atomic<std::thread::id> mOwner;
-#endif  // DAWN_ENABLE_ASSERTS
-    std::mutex mNativeMutex;
+    NonMovable(NonMovable&&) = delete;
+    void operator=(NonMovable&&) = delete;
 };
 
 }  // namespace dawn
 
-#endif
+#endif  // SRC_DAWN_COMMON_NONMOVABLE_H_

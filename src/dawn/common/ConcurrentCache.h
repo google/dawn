@@ -32,7 +32,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "dawn/common/NonCopyable.h"
+#include "dawn/common/NonMovable.h"
 
 namespace dawn {
 

@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_UTILS_OBJCUTILS_H_
 #define SRC_DAWN_UTILS_OBJCUTILS_H_
 
-#include "dawn/common/NonCopyable.h"
+#include "dawn/common/NonMovable.h"
 
 // Contains helper function to manipulate ObjC objects. This helps having C++ files do a little bit
 // of ObjectiveC calls, when they cannot be converted to ObjectiveC++ because they are used on

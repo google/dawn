@@ -28,7 +28,7 @@
 #define SRC_DAWN_NATIVE_METAL_COMMANDRECORDINGCONTEXT_H_
 
 #include "dawn/common/NSRef.h"
-#include "dawn/common/NonCopyable.h"
+#include "dawn/common/NonMovable.h"
 #include "dawn/native/Error.h"
 
 #import <Metal/Metal.h>
