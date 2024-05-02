@@ -81,7 +81,7 @@ Program::Program(ProgramBuilder&& builder) {
         // If the builder claims to be invalid, then we really should have an error
         // message generated. If we find a situation where the program is not valid
         // and there are no errors reported, add one here.
-        diagnostics_.AddError(diag::System::Program, Source{}) << "invalid program generated";
+        diagnostics_.AddError(Source{}) << "invalid program generated";
     }
 }
 

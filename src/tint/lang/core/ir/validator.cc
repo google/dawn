@@ -440,8 +440,7 @@ Result<SuccessType> Validator::Run() {
     }
 
     if (diagnostics_.ContainsErrors()) {
-        diagnostics_.AddNote(tint::diag::System::IR, Source{}) << "# Disassembly\n"
-                                                               << Disassembly().Text();
+        diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassembly().Text();
         return Failure{std::move(diagnostics_)};
     }
     return Success;
@@ -527,13 +526,13 @@ diag::Diagnostic& Validator::AddNote(const Block* blk) {
 }
 
 diag::Diagnostic& Validator::AddError(Source src) {
-    auto& diag = diagnostics_.AddError(tint::diag::System::IR, src);
+    auto& diag = diagnostics_.AddError(src);
     diag.owned_file = Disassembly().File();
     return diag;
 }
 
 diag::Diagnostic& Validator::AddNote(Source src) {
-    auto& diag = diagnostics_.AddNote(tint::diag::System::IR, src);
+    auto& diag = diagnostics_.AddNote(src);
     diag.owned_file = Disassembly().File();
     return diag;
 }

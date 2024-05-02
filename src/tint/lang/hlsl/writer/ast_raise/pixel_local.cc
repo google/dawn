@@ -469,7 +469,7 @@ struct PixelLocal::State {
     uint32_t ROVRegisterIndex(uint32_t field_index) {
         auto idx = cfg.pls_member_to_rov_reg.Get(field_index);
         if (TINT_UNLIKELY(!idx)) {
-            b.Diagnostics().AddError(diag::System::Transform, Source{})
+            b.Diagnostics().AddError(Source{})
                 << "PixelLocal::Config::attachments missing entry for field " << field_index;
             return 0;
         }
@@ -501,8 +501,7 @@ ast::transform::Transform::ApplyResult PixelLocal::Apply(const Program& src,
     auto* cfg = inputs.Get<Config>();
     if (!cfg) {
         ProgramBuilder b;
-        b.Diagnostics().AddError(diag::System::Transform, Source{})
-            << "missing transform data for " << TypeInfo().name;
+        b.Diagnostics().AddError(Source{}) << "missing transform data for " << TypeInfo().name;
         return resolver::Resolve(b);
     }
 

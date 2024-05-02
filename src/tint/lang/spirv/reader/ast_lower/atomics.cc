@@ -224,7 +224,7 @@ struct Atomics::State {
                 }
                 auto count = arr->ConstantCount();
                 if (!count) {
-                    ctx.dst->Diagnostics().AddError(diag::System::Transform, Source{})
+                    ctx.dst->Diagnostics().AddError(Source{})
                         << "the Atomics transform does not currently support array counts that use "
                            "override values";
                     count = 1;

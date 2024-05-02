@@ -34,7 +34,7 @@ namespace {
 using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, InvalidProgram) {
-    Diagnostics().AddError(diag::System::Writer, Source{}) << "make the program invalid";
+    Diagnostics().AddError(Source{}) << "make the program invalid";
     ASSERT_FALSE(IsValid());
     auto program = resolver::Resolve(*this);
     ASSERT_FALSE(program.IsValid());

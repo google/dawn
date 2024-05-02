@@ -48,29 +48,6 @@ inline bool operator>=(Severity a, Severity b) {
     return static_cast<int>(a) >= static_cast<int>(b);
 }
 
-/// System is an enumerator of Tint systems that can be the originator of a diagnostic message.
-enum class System {
-    AST,
-    Builtin,
-    Clone,
-    Constant,
-    Inspector,
-    Intrinsics,
-    IR,
-    Program,
-    ProgramBuilder,
-    Reader,
-    Resolver,
-    Semantic,
-    Symbol,
-    Test,
-    Transform,
-    Type,
-    Utils,
-    Writer,
-    Unknown,
-};
-
 /// Diagnostic holds all the information for a single compiler diagnostic
 /// message.
 class Diagnostic {
@@ -99,8 +76,6 @@ class Diagnostic {
     Source source;
     /// message is the text associated with the diagnostic.
     StyledText message;
-    /// system is the Tint system that raised the diagnostic.
-    System system;
     /// A shared pointer to a Source::File. Only used if the diagnostic Source
     /// points to a file that was created specifically for this diagnostic
     /// (usually an ICE).
@@ -178,40 +153,34 @@ class List {
     }
 
     /// Adds the note message with the given Source to the end of this list.
-    /// @param system the system raising the note message
     /// @param source the source of the note diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& AddNote(System system, const Source& source) {
+    diag::Diagnostic& AddNote(const Source& source) {
         diag::Diagnostic note{};
         note.severity = diag::Severity::Note;
-        note.system = system;
         note.source = source;
         return Add(std::move(note));
     }
 
     /// Adds the warning message with the given Source to the end of this list.
-    /// @param system the system raising the warning message
     /// @param source the source of the warning diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& AddWarning(System system, const Source& source) {
+    diag::Diagnostic& AddWarning(const Source& source) {
         diag::Diagnostic warning{};
         warning.severity = diag::Severity::Warning;
-        warning.system = system;
         warning.source = source;
         return Add(std::move(warning));
     }
 
     /// Adds the error message with the given Source to the end of this list.
-    /// @param system the system raising the error message
     /// @param source the source of the error diagnostic
     /// @returns a reference to the new diagnostic.
     /// @note The returned reference must not be used after the list is mutated again.
-    diag::Diagnostic& AddError(System system, const Source& source) {
+    diag::Diagnostic& AddError(const Source& source) {
         diag::Diagnostic error{};
         error.severity = diag::Severity::Error;
-        error.system = system;
         error.source = source;
         return Add(std::move(error));
     }

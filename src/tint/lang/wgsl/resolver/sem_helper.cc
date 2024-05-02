@@ -228,14 +228,14 @@ void SemHelper::NoteDeclarationSource(const ast::Node* node) const {
 }
 
 diag::Diagnostic& SemHelper::AddError(const Source& source) const {
-    return builder_->Diagnostics().AddError(diag::System::Resolver, source);
+    return builder_->Diagnostics().AddError(source);
 }
 
 diag::Diagnostic& SemHelper::AddWarning(const Source& source) const {
-    return builder_->Diagnostics().AddWarning(diag::System::Resolver, source);
+    return builder_->Diagnostics().AddWarning(source);
 }
 
 diag::Diagnostic& SemHelper::AddNote(const Source& source) const {
-    return builder_->Diagnostics().AddNote(diag::System::Resolver, source);
+    return builder_->Diagnostics().AddNote(source);
 }
 }  // namespace tint::resolver

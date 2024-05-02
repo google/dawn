@@ -397,7 +397,7 @@ void ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
     auto* dst_type = TypeOf(call);
 
     if (!dst_type->is_integer_scalar_or_vector() && !dst_type->is_float_scalar_or_vector()) {
-        diagnostics_.AddError(diag::System::Writer, Source{})
+        diagnostics_.AddError(Source{})
             << "Unable to do bitcast to type " << dst_type->FriendlyName();
         return;
     }
@@ -1744,8 +1744,7 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
         case wgsl::BuiltinFn::kUnpack4X8Unorm:
             return "unpackUnorm4x8";
         default:
-            diagnostics_.AddError(diag::System::Writer, Source{})
-                << "Unknown builtin method: " << builtin;
+            diagnostics_.AddError(Source{}) << "Unknown builtin method: " << builtin;
     }
 
     return "";
@@ -1923,7 +1922,7 @@ void ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
         [&](const ast::Let* let) { EmitProgramConstVariable(let); },
         [&](const ast::Override*) {
             // Override is removed with SubstituteOverride
-            diagnostics_.AddError(diag::System::Writer, Source{})
+            diagnostics_.AddError(Source{})
                 << "override-expressions should have been removed with the "
                    "SubstituteOverride transform";
         },
@@ -2192,7 +2191,7 @@ void ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
             out << "local_size_" << (i == 0 ? "x" : i == 1 ? "y" : "z") << " = ";
 
             if (!wgsize[i].has_value()) {
-                diagnostics_.AddError(diag::System::Writer, Source{})
+                diagnostics_.AddError(Source{})
                     << "override-expressions should have been removed with the SubstituteOverride "
                        "transform";
                 return;
@@ -2295,8 +2294,7 @@ void ASTPrinter::EmitConstant(StringStream& out, const core::constant::Value* co
 
             auto count = a->ConstantCount();
             if (!count) {
-                diagnostics_.AddError(diag::System::Writer, Source{})
-                    << core::type::Array::kErrExpectedConstantCount;
+                diagnostics_.AddError(Source{}) << core::type::Array::kErrExpectedConstantCount;
                 return;
             }
 
@@ -2347,8 +2345,7 @@ void ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* li
                     return;
                 }
             }
-            diagnostics_.AddError(diag::System::Writer, Source{})
-                << "unknown integer literal suffix type";
+            diagnostics_.AddError(Source{}) << "unknown integer literal suffix type";
         },  //
         TINT_ICE_ON_NO_MATCH);
 }
@@ -2400,8 +2397,7 @@ void ASTPrinter::EmitZeroValue(StringStream& out, const core::type::Type* type) 
 
         auto count = arr->ConstantCount();
         if (!count) {
-            diagnostics_.AddError(diag::System::Writer, Source{})
-                << core::type::Array::kErrExpectedConstantCount;
+            diagnostics_.AddError(Source{}) << core::type::Array::kErrExpectedConstantCount;
             return;
         }
 
@@ -2412,7 +2408,7 @@ void ASTPrinter::EmitZeroValue(StringStream& out, const core::type::Type* type) 
             EmitZeroValue(out, arr->ElemType());
         }
     } else {
-        diagnostics_.AddError(diag::System::Writer, Source{})
+        diagnostics_.AddError(Source{})
             << "Invalid type for zero emission: " << type->FriendlyName();
     }
 }
@@ -2688,8 +2684,7 @@ void ASTPrinter::EmitType(StringStream& out,
             } else {
                 auto count = arr->ConstantCount();
                 if (!count) {
-                    diagnostics_.AddError(diag::System::Writer, Source{})
-                        << core::type::Array::kErrExpectedConstantCount;
+                    diagnostics_.AddError(Source{}) << core::type::Array::kErrExpectedConstantCount;
                     return;
                 }
                 sizes.push_back(count.value());
@@ -2844,7 +2839,7 @@ void ASTPrinter::EmitType(StringStream& out,
     } else if (type->Is<core::type::Void>()) {
         out << "void";
     } else {
-        diagnostics_.AddError(diag::System::Writer, Source{}) << "unknown type in EmitType";
+        diagnostics_.AddError(Source{}) << "unknown type in EmitType";
     }
 }
 

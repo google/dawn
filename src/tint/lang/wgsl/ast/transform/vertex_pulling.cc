@@ -260,7 +260,7 @@ struct VertexPulling::State {
         for (auto* fn : src.AST().Functions()) {
             if (fn->PipelineStage() == PipelineStage::kVertex) {
                 if (func != nullptr) {
-                    b.Diagnostics().AddError(diag::System::Transform, Source{})
+                    b.Diagnostics().AddError(Source{})
                         << "VertexPulling found more than one vertex entry point";
                     return resolver::Resolve(b);
                 }
@@ -268,8 +268,7 @@ struct VertexPulling::State {
             }
         }
         if (func == nullptr) {
-            b.Diagnostics().AddError(diag::System::Transform, Source{})
-                << "Vertex stage entry point not found";
+            b.Diagnostics().AddError(Source{}) << "Vertex stage entry point not found";
             return resolver::Resolve(b);
         }
 
@@ -357,7 +356,7 @@ struct VertexPulling::State {
             const VertexBufferLayoutDescriptor& buffer_layout = cfg.vertex_state[buffer_idx];
 
             if ((buffer_layout.array_stride & 3) != 0) {
-                b.Diagnostics().AddError(diag::System::Transform, Source{})
+                b.Diagnostics().AddError(Source{})
                     << "WebGPU requires that vertex stride must be a multiple of 4 bytes, "
                        "but VertexPulling array stride for buffer "
                     << buffer_idx << " was " << buffer_layout.array_stride << " bytes";
@@ -395,7 +394,7 @@ struct VertexPulling::State {
 
                 // Base types must match between the vertex stream and the WGSL variable
                 if (!IsTypeCompatible(var_dt, fmt_dt)) {
-                    b.Diagnostics().AddError(diag::System::Transform, Source{})
+                    b.Diagnostics().AddError(Source{})
                         << "VertexAttributeDescriptor for location "
                         << attribute_desc.shader_location << " has format " << attribute_desc.format
                         << " but shader expects " << var.type->FriendlyName();

@@ -55,8 +55,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program& src,
 
     auto* cfg = inputs.Get<Config>();
     if (cfg == nullptr) {
-        b.Diagnostics().AddError(diag::System::Transform, Source{})
-            << "missing transform data for " << TypeInfo().name;
+        b.Diagnostics().AddError(Source{}) << "missing transform data for " << TypeInfo().name;
         return resolver::Resolve(b);
     }
 
@@ -72,7 +71,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program& src,
         }
     }
     if (entry_point == nullptr) {
-        b.Diagnostics().AddError(diag::System::Transform, Source{})
+        b.Diagnostics().AddError(Source{})
             << "entry point '" << cfg->entry_point_name << "' not found";
         return resolver::Resolve(b);
     }

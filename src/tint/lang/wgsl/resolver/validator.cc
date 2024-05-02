@@ -180,15 +180,15 @@ Validator::Validator(
 Validator::~Validator() = default;
 
 diag::Diagnostic& Validator::AddError(const Source& source) const {
-    return diagnostics_.AddError(diag::System::Resolver, source);
+    return diagnostics_.AddError(source);
 }
 
 diag::Diagnostic& Validator::AddWarning(const Source& source) const {
-    return diagnostics_.AddWarning(diag::System::Resolver, source);
+    return diagnostics_.AddWarning(source);
 }
 
 diag::Diagnostic& Validator::AddNote(const Source& source) const {
-    return diagnostics_.AddNote(diag::System::Resolver, source);
+    return diagnostics_.AddNote(source);
 }
 
 diag::Diagnostic* Validator::MaybeAddDiagnostic(wgsl::DiagnosticRule rule,
@@ -197,7 +197,6 @@ diag::Diagnostic* Validator::MaybeAddDiagnostic(wgsl::DiagnosticRule rule,
     if (severity != wgsl::DiagnosticSeverity::kOff) {
         diag::Diagnostic d{};
         d.severity = ToSeverity(severity);
-        d.system = diag::System::Resolver;
         d.source = source;
         return &diagnostics_.Add(std::move(d));
     }

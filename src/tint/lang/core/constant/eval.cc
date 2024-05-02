@@ -281,7 +281,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
             // [abstract-numeric -> x] - materialization failure
             auto msg = OverflowErrorMessage(scalar->value, target_ty->FriendlyName());
             if (ctx.use_runtime_semantics) {
-                ctx.diags.AddWarning(tint::diag::System::Resolver, ctx.source) << msg;
+                ctx.diags.AddWarning(ctx.source) << msg;
                 switch (conv.Failure()) {
                     case ConversionFailure::kExceedsNegativeLimit:
                         return ctx.mgr.Get<Scalar<TO>>(target_ty, TO::Lowest());
@@ -289,7 +289,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
                         return ctx.mgr.Get<Scalar<TO>>(target_ty, TO::Highest());
                 }
             } else {
-                ctx.diags.AddError(tint::diag::System::Resolver, ctx.source) << msg;
+                ctx.diags.AddError(ctx.source) << msg;
                 return nullptr;
             }
         } else if constexpr (IsFloatingPoint<TO>) {
@@ -297,7 +297,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
             // https://www.w3.org/TR/WGSL/#floating-point-conversion
             auto msg = OverflowErrorMessage(scalar->value, target_ty->FriendlyName());
             if (ctx.use_runtime_semantics) {
-                ctx.diags.AddWarning(tint::diag::System::Resolver, ctx.source) << msg;
+                ctx.diags.AddWarning(ctx.source) << msg;
                 switch (conv.Failure()) {
                     case ConversionFailure::kExceedsNegativeLimit:
                         return ctx.mgr.Get<Scalar<TO>>(target_ty, TO::Lowest());
@@ -305,7 +305,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
                         return ctx.mgr.Get<Scalar<TO>>(target_ty, TO::Highest());
                 }
             } else {
-                ctx.diags.AddError(tint::diag::System::Resolver, ctx.source) << msg;
+                ctx.diags.AddError(ctx.source) << msg;
                 return nullptr;
             }
         } else if constexpr (IsFloatingPoint<FROM>) {
@@ -4014,18 +4014,18 @@ Eval::Result Eval::Convert(const core::type::Type* target_ty,
 
 diag::Diagnostic& Eval::AddError(const Source& source) const {
     if (use_runtime_semantics_) {
-        return diags.AddWarning(diag::System::Constant, source);
+        return diags.AddWarning(source);
     } else {
-        return diags.AddError(diag::System::Constant, source);
+        return diags.AddError(source);
     }
 }
 
 diag::Diagnostic& Eval::AddWarning(const Source& source) const {
-    return diags.AddWarning(diag::System::Constant, source);
+    return diags.AddWarning(source);
 }
 
 diag::Diagnostic& Eval::AddNote(const Source& source) const {
-    return diags.AddNote(diag::System::Constant, source);
+    return diags.AddNote(source);
 }
 
 }  // namespace tint::core::constant

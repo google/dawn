@@ -71,8 +71,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program& src,
 
     const auto* data = config.Get<Config>();
     if (!data) {
-        b.Diagnostics().AddError(diag::System::Transform, Source{})
-            << "Missing override substitution data";
+        b.Diagnostics().AddError(Source{}) << "Missing override substitution data";
         return resolver::Resolve(b);
     }
 
@@ -91,7 +90,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program& src,
         auto iter = data->map.find(sem->Attributes().override_id.value());
         if (iter == data->map.end()) {
             if (!w->initializer) {
-                b.Diagnostics().AddError(diag::System::Transform, Source{})
+                b.Diagnostics().AddError(Source{})
                     << "Initializer not provided for override, and override not overridden.";
                 return nullptr;
             }
@@ -108,8 +107,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program& src,
             [&](const core::type::F16*) { return b.Expr(f16(value)); });
 
         if (!ctor) {
-            b.Diagnostics().AddError(diag::System::Transform, Source{})
-                << "Failed to create override-expression";
+            b.Diagnostics().AddError(Source{}) << "Failed to create override-expression";
             return nullptr;
         }
 

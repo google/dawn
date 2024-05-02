@@ -36,12 +36,11 @@
 namespace tint::diag {
 namespace {
 
-Diagnostic Diag(Severity severity, Source source, std::string message, System system) {
+Diagnostic Diag(Severity severity, Source source, std::string message) {
     Diagnostic d;
     d.severity = severity;
     d.source = source;
     d.message = std::move(message);
-    d.system = system;
     return d;
 }
 
@@ -62,31 +61,19 @@ class DiagFormatterTest : public testing::Test {
   public:
     Source::File ascii_file{"file.name", ascii_content};
     Source::File utf8_file{"file.name", utf8_content};
-    Diagnostic ascii_diag_note = Diag(Severity::Note,
-                                      Source{Source::Range{Source::Location{1, 14}}, &ascii_file},
-                                      "purr",
-                                      System::Test);
-    Diagnostic ascii_diag_warn = Diag(Severity::Warning,
-                                      Source{Source::Range{{2, 14}, {2, 18}}, &ascii_file},
-                                      "grrr",
-                                      System::Test);
-    Diagnostic ascii_diag_err = Diag(Severity::Error,
-                                     Source{Source::Range{{3, 16}, {3, 21}}, &ascii_file},
-                                     "hiss",
-                                     System::Test);
+    Diagnostic ascii_diag_note =
+        Diag(Severity::Note, Source{Source::Range{Source::Location{1, 14}}, &ascii_file}, "purr");
+    Diagnostic ascii_diag_warn =
+        Diag(Severity::Warning, Source{Source::Range{{2, 14}, {2, 18}}, &ascii_file}, "grrr");
+    Diagnostic ascii_diag_err =
+        Diag(Severity::Error, Source{Source::Range{{3, 16}, {3, 21}}, &ascii_file}, "hiss");
 
-    Diagnostic utf8_diag_note = Diag(Severity::Note,
-                                     Source{Source::Range{Source::Location{1, 15}}, &utf8_file},
-                                     "purr",
-                                     System::Test);
-    Diagnostic utf8_diag_warn = Diag(Severity::Warning,
-                                     Source{Source::Range{{2, 15}, {2, 19}}, &utf8_file},
-                                     "grrr",
-                                     System::Test);
-    Diagnostic utf8_diag_err = Diag(Severity::Error,
-                                    Source{Source::Range{{3, 15}, {3, 20}}, &utf8_file},
-                                    "hiss",
-                                    System::Test);
+    Diagnostic utf8_diag_note =
+        Diag(Severity::Note, Source{Source::Range{Source::Location{1, 15}}, &utf8_file}, "purr");
+    Diagnostic utf8_diag_warn =
+        Diag(Severity::Warning, Source{Source::Range{{2, 15}, {2, 19}}, &utf8_file}, "grrr");
+    Diagnostic utf8_diag_err =
+        Diag(Severity::Error, Source{Source::Range{{3, 15}, {3, 20}}, &utf8_file}, "hiss");
 };
 
 TEST_F(DiagFormatterTest, Simple) {
@@ -110,7 +97,7 @@ TEST_F(DiagFormatterTest, SimpleNewlineAtEnd) {
 
 TEST_F(DiagFormatterTest, SimpleNoSource) {
     Formatter fmt{{false, false, false, false}};
-    auto diag = Diag(Severity::Note, Source{}, "no source!", System::Test);
+    auto diag = Diag(Severity::Note, Source{}, "no source!");
     auto got = fmt.Format(List{diag}).Plain();
     auto* expect = "no source!";
     ASSERT_EQ(expect, got);
@@ -186,8 +173,8 @@ the  snake  says  quack
 }
 
 TEST_F(DiagFormatterTest, BasicWithMultiLine) {
-    auto multiline = Diag(Severity::Warning, Source{Source::Range{{2, 9}, {4, 15}}, &ascii_file},
-                          "multiline", System::Test);
+    auto multiline =
+        Diag(Severity::Warning, Source{Source::Range{{2, 9}, {4, 15}}, &ascii_file}, "multiline");
     Formatter fmt{{false, false, true, false}};
     auto got = fmt.Format(List{multiline}).Plain();
     auto* expect = R"(2:9: multiline
@@ -202,8 +189,8 @@ the  snail  says  ???
 }
 
 TEST_F(DiagFormatterTest, UnicodeWithMultiLine) {
-    auto multiline = Diag(Severity::Warning, Source{Source::Range{{2, 9}, {4, 15}}, &utf8_file},
-                          "multiline", System::Test);
+    auto multiline =
+        Diag(Severity::Warning, Source{Source::Range{{2, 9}, {4, 15}}, &utf8_file}, "multiline");
     Formatter fmt{{false, false, true, false}};
     auto got = fmt.Format(List{multiline}).Plain();
     auto* expect =
@@ -233,8 +220,8 @@ the    snake    says    quack
 }
 
 TEST_F(DiagFormatterTest, BasicWithMultiLineTab4) {
-    auto multiline = Diag(Severity::Warning, Source{Source::Range{{2, 9}, {4, 15}}, &ascii_file},
-                          "multiline", System::Test);
+    auto multiline =
+        Diag(Severity::Warning, Source{Source::Range{{2, 9}, {4, 15}}, &ascii_file}, "multiline");
     Formatter fmt{{false, false, true, false, 4u}};
     auto got = fmt.Format(List{multiline}).Plain();
     auto* expect = R"(2:9: multiline
@@ -251,7 +238,7 @@ the    snail    says    ???
 TEST_F(DiagFormatterTest, RangeOOB) {
     Formatter fmt{{true, true, true, true}};
     diag::List list;
-    list.AddError(System::Test, Source{{{10, 20}, {30, 20}}, &ascii_file}) << "oob";
+    list.AddError(Source{{{10, 20}, {30, 20}}, &ascii_file}) << "oob";
     auto got = fmt.Format(list).Plain();
     auto* expect = R"(file.name:10:20 error: oob
 

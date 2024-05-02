@@ -5049,21 +5049,20 @@ void Resolver::AddICE(std::string_view msg, const Source& source) const {
     }
     diag::Diagnostic err{};
     err.severity = diag::Severity::Error;
-    err.system = diag::System::Resolver;
     err.source = source;
     diagnostics_.Add(std::move(err)) << msg;
 }
 
 diag::Diagnostic& Resolver::AddError(const Source& source) const {
-    return diagnostics_.AddError(diag::System::Resolver, source);
+    return diagnostics_.AddError(source);
 }
 
 diag::Diagnostic& Resolver::AddWarning(const Source& source) const {
-    return diagnostics_.AddWarning(diag::System::Resolver, source);
+    return diagnostics_.AddWarning(source);
 }
 
 diag::Diagnostic& Resolver::AddNote(const Source& source) const {
-    return diagnostics_.AddNote(diag::System::Resolver, source);
+    return diagnostics_.AddNote(source);
 }
 
 }  // namespace tint::resolver

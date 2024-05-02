@@ -97,9 +97,8 @@ struct ArrayLengthFromUniform::State {
     /// @returns the new program or SkipTransform if the transform is not required
     ApplyResult Run() {
         if (cfg == nullptr) {
-            b.Diagnostics().AddError(diag::System::Transform, Source{})
-                << "missing transform data for "
-                << tint::TypeInfo::Of<ArrayLengthFromUniform>().name;
+            b.Diagnostics().AddError(Source{}) << "missing transform data for "
+                                               << tint::TypeInfo::Of<ArrayLengthFromUniform>().name;
             return resolver::Resolve(b);
         }
 

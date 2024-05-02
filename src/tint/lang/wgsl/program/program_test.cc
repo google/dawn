@@ -93,7 +93,7 @@ TEST_F(ProgramTest, Assert_Null_Function) {
 }
 
 TEST_F(ProgramTest, DiagnosticsMove) {
-    Diagnostics().AddError(diag::System::Program, Source{}) << "an error message";
+    Diagnostics().AddError(Source{}) << "an error message";
 
     Program program_a(std::move(*this));
     EXPECT_FALSE(program_a.IsValid());

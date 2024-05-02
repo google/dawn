@@ -709,7 +709,7 @@ bool ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
     auto* dst_el_type = dst_type->DeepestElement();
 
     if (!dst_el_type->is_integer_scalar() && !dst_el_type->is_float_scalar()) {
-        diagnostics_.AddError(diag::System::Writer, Source{})
+        diagnostics_.AddError(Source{})
             << "Unable to do bitcast to type " << dst_el_type->FriendlyName();
         return false;
     }
@@ -3122,8 +3122,7 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
         case wgsl::BuiltinFn::kSubgroupBroadcast:
             return "WaveReadLaneAt";
         default:
-            diagnostics_.AddError(diag::System::Writer, Source{})
-                << "Unknown builtin method: " << builtin->str();
+            diagnostics_.AddError(Source{}) << "Unknown builtin method: " << builtin->str();
     }
 
     return "";
@@ -3394,7 +3393,7 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
                 case core::AddressSpace::kWorkgroup:
                     return EmitWorkgroupVariable(sem);
                 case core::AddressSpace::kPushConstant:
-                    diagnostics_.AddError(diag::System::Writer, Source{})
+                    diagnostics_.AddError(Source{})
                         << "unhandled address space " << sem->AddressSpace();
                     return false;
                 default: {
@@ -3405,7 +3404,7 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
         },
         [&](const ast::Override*) {
             // Override is removed with SubstituteOverride
-            diagnostics_.AddError(diag::System::Writer, Source{})
+            diagnostics_.AddError(Source{})
                 << "override-expressions should have been removed with the SubstituteOverride "
                    "transform";
             return false;
@@ -3630,7 +3629,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                     out << ", ";
                 }
                 if (!wgsize[i].has_value()) {
-                    diagnostics_.AddError(diag::System::Writer, Source{})
+                    diagnostics_.AddError(Source{})
                         << "override-expressions should have been removed with the "
                            "SubstituteOverride transform";
                     return false;
@@ -3784,8 +3783,7 @@ bool ASTPrinter::EmitConstant(StringStream& out,
 
             auto count = a->ConstantCount();
             if (!count) {
-                diagnostics_.AddError(diag::System::Writer, Source{})
-                    << core::type::Array::kErrExpectedConstantCount;
+                diagnostics_.AddError(Source{}) << core::type::Array::kErrExpectedConstantCount;
                 return false;
             }
 
@@ -3880,8 +3878,7 @@ bool ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* li
                     out << "u";
                     return true;
             }
-            diagnostics_.AddError(diag::System::Writer, Source{})
-                << "unknown integer literal suffix type";
+            diagnostics_.AddError(Source{}) << "unknown integer literal suffix type";
             return false;
         },  //
         TINT_ICE_ON_NO_MATCH);
@@ -4348,8 +4345,7 @@ bool ASTPrinter::EmitType(StringStream& out,
                 }
                 const auto count = arr->ConstantCount();
                 if (!count) {
-                    diagnostics_.AddError(diag::System::Writer, Source{})
-                        << core::type::Array::kErrExpectedConstantCount;
+                    diagnostics_.AddError(Source{}) << core::type::Array::kErrExpectedConstantCount;
                     return false;
                 }
 
@@ -4588,7 +4584,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
             if (auto builtin = attributes.builtin) {
                 auto name = builtin_to_attribute(builtin.value());
                 if (name.empty()) {
-                    diagnostics_.AddError(diag::System::Writer, Source{}) << "unsupported builtin";
+                    diagnostics_.AddError(Source{}) << "unsupported builtin";
                     return false;
                 }
                 post += " : " + name;
@@ -4596,8 +4592,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
             if (auto interpolation = attributes.interpolation) {
                 auto mod = interpolation_to_modifiers(interpolation->type, interpolation->sampling);
                 if (mod.empty()) {
-                    diagnostics_.AddError(diag::System::Writer, Source{})
-                        << "unsupported interpolation";
+                    diagnostics_.AddError(Source{}) << "unsupported interpolation";
                     return false;
                 }
                 pre += mod;

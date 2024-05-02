@@ -200,9 +200,7 @@ class Impl {
         ~ControlStackScope() { impl_->control_stack_.Pop(); }
     };
 
-    diag::Diagnostic& AddError(const Source& source) {
-        return diagnostics_.AddError(tint::diag::System::IR, source);
-    }
+    diag::Diagnostic& AddError(const Source& source) { return diagnostics_.AddError(source); }
 
     bool NeedTerminator() { return current_block_ && !current_block_->Terminator(); }
 
@@ -1353,7 +1351,7 @@ tint::Result<core::ir::Module> ProgramToIR(const Program& program) {
     auto r = b.Build();
     if (r != Success) {
         diag::List err = std::move(r.Failure().reason);
-        err.AddNote(diag::System::IR, Source{}) << "AST:\n" + Program::printer(program);
+        err.AddNote(Source{}) << "AST:\n" + Program::printer(program);
         return Failure{err};
     }
 

@@ -64,8 +64,7 @@ PushConstantHelper::PushConstantHelper(program::CloneContext& c) : ctx(c) {
 void PushConstantHelper::InsertMember(const char* name, ast::Type type, uint32_t offset) {
     auto& member = member_map[offset];
     if (TINT_UNLIKELY(member != nullptr)) {
-        ctx.dst->Diagnostics().AddError(diag::System::Transform, Source{})
-            << "struct member offset collision";
+        ctx.dst->Diagnostics().AddError(Source{}) << "struct member offset collision";
     }
     member = ctx.dst->Member(name, type, Vector{ctx.dst->MemberOffset(core::AInt(offset))});
 }
