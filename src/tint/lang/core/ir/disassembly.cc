@@ -102,6 +102,19 @@ Disassembly::Disassembly(Disassembly&&) = default;
 Disassembly::Disassembly(const Module& mod, std::string_view file_name) : mod_(mod) {
     Disassemble();
     file_ = std::make_shared<Source::File>(std::string(file_name), Plain());
+
+    auto set_source_file = [&](auto& map) {
+        for (auto& it : map) {
+            it.value.file = file_.get();
+        }
+    };
+    set_source_file(block_to_src_);
+    set_source_file(block_param_to_src_);
+    set_source_file(instruction_to_src_);
+    set_source_file(operand_to_src_);
+    set_source_file(result_to_src_);
+    set_source_file(function_to_src_);
+    set_source_file(function_param_to_src_);
 }
 
 Disassembly::~Disassembly() = default;

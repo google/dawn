@@ -528,19 +528,13 @@ diag::Diagnostic& Validator::AddNote(const Block* blk) {
 
 diag::Diagnostic& Validator::AddError(Source src) {
     auto& diag = diagnostics_.AddError(tint::diag::System::IR, src);
-    if (src.range != Source::Range{{}}) {
-        diag.source.file = Disassembly().File().get();
-        diag.owned_file = Disassembly().File();
-    }
+    diag.owned_file = Disassembly().File();
     return diag;
 }
 
 diag::Diagnostic& Validator::AddNote(Source src) {
     auto& diag = diagnostics_.AddNote(tint::diag::System::IR, src);
-    if (src.range != Source::Range{{}}) {
-        diag.source.file = Disassembly().File().get();
-        diag.owned_file = Disassembly().File();
-    }
+    diag.owned_file = Disassembly().File();
     return diag;
 }
 
