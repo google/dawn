@@ -48,6 +48,9 @@ struct Options {
     bool run_concurrently = false;
     /// If true, print the fuzzer name to stdout before running.
     bool verbose = false;
+    /// If not empty, load DXC from this path when fuzzing HLSL generation, and fail the fuzzer if
+    /// not found, or if DXC fails to compile.
+    std::string dxc;
 };
 
 /// ProgramFuzzer describes a fuzzer function that takes a WGSL program as input

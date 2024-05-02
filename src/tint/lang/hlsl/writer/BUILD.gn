@@ -140,6 +140,7 @@ if (tint_build_hlsl_writer) {
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/bytes",
+      "${tint_src_dir}/utils/command",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
@@ -156,7 +157,10 @@ if (tint_build_hlsl_writer) {
     ]
 
     if (tint_build_hlsl_writer) {
-      deps += [ "${tint_src_dir}/lang/hlsl/writer" ]
+      deps += [
+        "${tint_src_dir}/lang/hlsl/validate",
+        "${tint_src_dir}/lang/hlsl/writer",
+      ]
     }
 
     if (tint_build_wgsl_reader) {

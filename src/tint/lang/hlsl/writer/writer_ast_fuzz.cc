@@ -27,19 +27,58 @@
 
 // GEN_BUILD:CONDITION(tint_build_wgsl_reader)
 
+#include <string>
+#include <unordered_map>
+
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/hlsl/validate/validate.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/utils/command/command.h"
 
 namespace tint::hlsl::writer {
 namespace {
 
-void ASTFuzzer(const tint::Program& program, Options options) {
+void ASTFuzzer(const tint::Program& program,
+               const fuzz::wgsl::Options& fuzz_options,
+               Options options) {
     if (program.AST().HasOverrides()) {
         return;
     }
 
-    [[maybe_unused]] auto res = tint::hlsl::writer::Generate(program, options);
+    auto res = tint::hlsl::writer::Generate(program, options);
+    if (res == Success) {
+        const char* dxc_path = validate::kDxcDLLName;
+        bool must_validate = false;
+        if (!fuzz_options.dxc.empty()) {
+            must_validate = true;
+            dxc_path = fuzz_options.dxc.c_str();
+        }
+
+        auto dxc = tint::Command::LookPath(dxc_path);
+        if (dxc.Found()) {
+            uint32_t hlsl_shader_model = 60;
+            bool require_16bit_types = false;
+            auto enable_list = program.AST().Enables();
+            for (auto* enable : enable_list) {
+                if (enable->HasExtension(tint::wgsl::Extension::kF16)) {
+                    hlsl_shader_model = 62;
+                    require_16bit_types = true;
+                    break;
+                }
+            }
+
+            auto validate_res = validate::ValidateUsingDXC(dxc.Path(), res->hlsl, res->entry_points,
+                                                           require_16bit_types, hlsl_shader_model);
+
+            if (must_validate && validate_res.failed) {
+                TINT_ICE() << "DXC was expected to succeed, but failed: " << validate_res.output;
+            }
+
+        } else if (must_validate) {
+            TINT_ICE() << "DXC path was explicitly specified, but was not found: " << dxc_path;
+        }
+    }
 }
 
 }  // namespace

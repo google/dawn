@@ -26,6 +26,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
+#include <string>
+#include <unordered_map>
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/utils/cli/cli.h"
@@ -76,6 +78,7 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
         opts.Add<tint::cli::BoolOption>("concurrent", "runs the fuzzers concurrently");
     auto& opt_verbose =
         opts.Add<tint::cli::BoolOption>("verbose", "prints the name of each fuzzer before running");
+    auto& opt_dxc = opts.Add<tint::cli::StringOption>("dxc", "path to DXC DLL");
 
     tint::cli::ParseOptions parse_opts;
     parse_opts.ignore_unknown = true;
@@ -93,5 +96,6 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     options.filter = opt_filter.value.value_or("");
     options.run_concurrently = opt_concurrent.value.value_or(false);
     options.verbose = opt_verbose.value.value_or(false);
+    options.dxc = opt_dxc.value.value_or("");
     return 0;
 }
