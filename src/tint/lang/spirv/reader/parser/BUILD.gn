@@ -86,6 +86,7 @@ if (tint_build_unittests) {
   if (tint_build_spv_reader) {
     tint_unittests_source_set("unittests") {
       sources = [
+        "binary_test.cc",
         "composite_test.cc",
         "constant_test.cc",
         "function_test.cc",
