@@ -44,58 +44,31 @@ namespace dawn::native::opengl {
 
 namespace {
 
-GLenum TargetForTexture(const UnpackedPtr<TextureDescriptor>& descriptor) {
-    switch (descriptor->dimension) {
-        case wgpu::TextureDimension::Undefined:
-            DAWN_UNREACHABLE();
-        case wgpu::TextureDimension::e1D:
-        case wgpu::TextureDimension::e2D:
-            if (descriptor->size.depthOrArrayLayers > 1) {
-                DAWN_ASSERT(descriptor->sampleCount == 1);
-                return GL_TEXTURE_2D_ARRAY;
-            } else {
-                if (descriptor->sampleCount > 1) {
-                    return GL_TEXTURE_2D_MULTISAMPLE;
-                } else {
-                    return GL_TEXTURE_2D;
-                }
-            }
-        case wgpu::TextureDimension::e3D:
-            DAWN_ASSERT(descriptor->sampleCount == 1);
-            return GL_TEXTURE_3D;
-    }
-    DAWN_UNREACHABLE();
-}
-
-GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
-                                     uint32_t arrayLayerCount,
-                                     uint32_t sampleCount) {
+GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension, uint32_t sampleCount) {
     switch (dimension) {
         case wgpu::TextureViewDimension::e1D:
         case wgpu::TextureViewDimension::e2D:
             return (sampleCount > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
         case wgpu::TextureViewDimension::e2DArray:
             if (sampleCount > 1) {
-                DAWN_ASSERT(arrayLayerCount == 1);
                 return GL_TEXTURE_2D_MULTISAMPLE;
             }
             DAWN_ASSERT(sampleCount == 1);
             return GL_TEXTURE_2D_ARRAY;
         case wgpu::TextureViewDimension::Cube:
             DAWN_ASSERT(sampleCount == 1);
-            DAWN_ASSERT(arrayLayerCount == 6);
             return GL_TEXTURE_CUBE_MAP;
         case wgpu::TextureViewDimension::CubeArray:
             DAWN_ASSERT(sampleCount == 1);
-            DAWN_ASSERT(arrayLayerCount % 6 == 0);
             return GL_TEXTURE_CUBE_MAP_ARRAY;
         case wgpu::TextureViewDimension::e3D:
+            DAWN_ASSERT(sampleCount == 1);
             return GL_TEXTURE_3D;
 
         case wgpu::TextureViewDimension::Undefined:
-            break;
+        default:
+            DAWN_UNREACHABLE();
     }
-    DAWN_UNREACHABLE();
 }
 
 bool RequiresCreatingNewTextureView(
@@ -141,16 +114,6 @@ bool RequiresCreatingNewTextureView(
         return true;
     }
 
-    // TODO(dawn:2131): remove once compatibility texture binding view dimension is fully
-    // implemented.
-    switch (textureViewDescriptor->dimension) {
-        case wgpu::TextureViewDimension::Cube:
-        case wgpu::TextureViewDimension::CubeArray:
-            return true;
-        default:
-            break;
-    }
-
     return false;
 }
 
@@ -165,6 +128,7 @@ void AllocateTexture(const OpenGLFunctions& gl,
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTextureView.xhtml
     switch (target) {
         case GL_TEXTURE_2D_ARRAY:
+        case GL_TEXTURE_CUBE_MAP_ARRAY:
         case GL_TEXTURE_3D:
             gl.TexStorage3D(target, levels, internalFormat, size.width, size.height,
                             size.depthOrArrayLayers);
@@ -226,7 +190,8 @@ uint32_t Texture::GetGenID() const {
 
 Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, GLuint handle)
     : TextureBase(device, descriptor), mHandle(handle) {
-    mTarget = TargetForTexture(descriptor);
+    mTarget = TargetForTextureViewDimension(GetCompatibilityTextureBindingViewDimension(),
+                                            descriptor->sampleCount);
 }
 
 Texture::~Texture() {}
@@ -570,8 +535,7 @@ MaybeError Texture::EnsureSubresourceContentInitialized(const SubresourceRange& 
 
 TextureView::TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor)
     : TextureViewBase(texture, descriptor), mOwnsHandle(false) {
-    mTarget = TargetForTextureViewDimension(descriptor->dimension, descriptor->arrayLayerCount,
-                                            texture->GetSampleCount());
+    mTarget = TargetForTextureViewDimension(descriptor->dimension, texture->GetSampleCount());
 
     // Texture could be destroyed by the time we make a view.
     if (GetTexture()->IsDestroyed()) {
@@ -648,10 +612,21 @@ void TextureView::BindToFramebuffer(GLenum target, GLenum attachment, GLuint dep
     }
 
     DAWN_ASSERT(handle != 0);
-    if (textarget == GL_TEXTURE_2D_ARRAY || textarget == GL_TEXTURE_3D) {
-        gl.FramebufferTextureLayer(target, attachment, handle, mipLevel, arrayLayer);
-    } else {
-        gl.FramebufferTexture2D(target, attachment, textarget, handle, mipLevel);
+
+    switch (textarget) {
+        case GL_TEXTURE_2D_ARRAY:
+        case GL_TEXTURE_CUBE_MAP_ARRAY:
+        case GL_TEXTURE_3D:
+            gl.FramebufferTextureLayer(target, attachment, handle, mipLevel, arrayLayer);
+            break;
+        case GL_TEXTURE_CUBE_MAP: {
+            GLenum cubeTexTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X + arrayLayer;
+            gl.FramebufferTexture2D(target, attachment, cubeTexTarget, handle, mipLevel);
+            break;
+        }
+        default:
+            gl.FramebufferTexture2D(target, attachment, textarget, handle, mipLevel);
+            break;
     }
 }
 

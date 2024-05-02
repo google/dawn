@@ -300,13 +300,21 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
 
     void DoTest(const TextureSpec& textureSpec,
                 const DataSpec& dataSpec,
-                const wgpu::Extent3D& copySize) {
+                const wgpu::Extent3D& copySize,
+                const wgpu::TextureViewDimension bindingViewDimension =
+                    wgpu::TextureViewDimension::Undefined) {
         // Create data of size `size` and populate it
         std::vector<uint8_t> data(dataSpec.size);
         FillData(data.data(), data.size());
 
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         wgpu::TextureDescriptor descriptor = {};
+        wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+        if (IsCompatibilityMode() &&
+            bindingViewDimension != wgpu::TextureViewDimension::Undefined) {
+            textureBindingViewDimensionDesc.textureBindingViewDimension = bindingViewDimension;
+            descriptor.nextInChain = &textureBindingViewDimensionDesc;
+        }
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size = textureSpec.textureSize;
         descriptor.format = GetParam().mTextureFormat;
@@ -603,6 +611,43 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRow) {
     }
 
     TestBody({1, 2, 0}, {17, 19, 1});
+}
+
+// Test with bytesPerRow greater than needed for cube textures.
+// Made for testing compat behavior.
+TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    // TODO(crbug.com/dawn/2131): diagnose this failure on Win Angle D3D11
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
+    constexpr uint32_t kWidth = 257;
+    constexpr uint32_t kHeight = 257;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, 6};
+    textureSpec.level = 0;
+
+    auto TestBody = [&](wgpu::Origin3D copyOrigin, wgpu::Extent3D copyExtent) {
+        textureSpec.copyOrigin = copyOrigin;
+        for (unsigned int b : {1, 2, 3, 4}) {
+            uint32_t bytesPerRow =
+                copyExtent.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat) + b;
+            DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow), copyExtent,
+                   wgpu::TextureViewDimension::Cube);
+        }
+    };
+
+    TestBody({0, 0, 0}, textureSpec.textureSize);
+
+    if (utils::IsDepthOrStencilFormat(GetParam().mTextureFormat)) {
+        // The entire subresource must be copied when the format is a depth/stencil format.
+        return;
+    }
+
+    TestBody({1, 2, 0}, {17, 17, 1});
 }
 
 // Test that writing with bytesPerRow = 0 and bytesPerRow < bytesInACompleteRow works

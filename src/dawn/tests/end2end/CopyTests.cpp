@@ -1722,9 +1722,6 @@ class CopyTests_T2B_Compat : public CopyTests_T2B {
         CopyTests_T2B::SetUp();
         DAWN_SUPPRESS_TEST_IF(!IsCompatibilityMode());
         DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-        // TODO(dawn:2131): remove once fully implemented, so cube texture doesn't require a copy.
-        DAWN_SUPPRESS_TEST_IF((IsOpenGL() || IsOpenGLES()) &&
-                              (GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat));
     }
 };
 

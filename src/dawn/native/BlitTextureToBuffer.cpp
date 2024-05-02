@@ -133,11 +133,15 @@ fn textureLoadGeneral(tex: texture_2d_array<u32>, coords: vec3u, level: u32) -> 
 @group(0) @binding(0) var src_tex : texture_2d_array<u32>;
 )";
 
+// textureSampleLevel doesn't support texture_cube<u32>
+// Use textureGather as a workaround.
+// Always choose the texel with the smallest coord (stored in w component).
+// Since this is only used for Stencil8 (1 channel), we only care component idx == 0.
 constexpr std::string_view kUintTextureCube = R"(
 @group(1) @binding(0) var default_sampler: sampler;
 fn textureLoadGeneral(tex: texture_cube<u32>, coords: vec3u, level: u32) -> vec4<u32> {
     let sample_coords = coordToCubeSampleST(coords, params.levelSize);
-    return textureSampleLevel(tex, default_sampler, sample_coords, f32(level));
+    return vec4<u32>(textureGather(0, tex, default_sampler, sample_coords).w);
 }
 @group(0) @binding(0) var src_tex : texture_cube<u32>;
 )";

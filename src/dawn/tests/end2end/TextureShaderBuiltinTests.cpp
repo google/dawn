@@ -207,10 +207,10 @@ TEST_P(TextureShaderBuiltinTests, Basic) {
 TEST_P(TextureShaderBuiltinTests, BaseMipLevelTextureView) {
     // TODO(dawn:2538): failing on OpenGLES Angle backed by D3D11.
     DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-    constexpr uint32_t kCubeLayers = 1;
+    constexpr uint32_t kLayers = 1;
     constexpr uint32_t kMipLevels = 3;
     wgpu::Texture tex =
-        CreateTexture("tex", kCubeLayers, kMipLevels, 1, wgpu::TextureViewDimension::e2D);
+        CreateTexture("tex", kLayers, kMipLevels, 1, wgpu::TextureViewDimension::e2D);
 
     constexpr uint32_t kBaseMipLevel = 1;
     constexpr uint32_t kViewMipLevelCount = 2;
@@ -271,8 +271,9 @@ TEST_P(TextureShaderBuiltinTests, BaseMipLevelTextureView) {
 
 // Testing that baseMipLevel is handled correctly for texture_cube.
 TEST_P(TextureShaderBuiltinTests, BaseMipLevelTextureViewCube) {
-    // TODO(dawn:2442): fix texture_cube base mip level bug.
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode());
+    // TODO(crbug.com/dawn/2442): diagnose this failure on Win Angle D3D11
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
     constexpr uint32_t kCubeLayers = 6;
     constexpr uint32_t kMipLevels = 3;
     wgpu::Texture texCube =
@@ -288,11 +289,8 @@ TEST_P(TextureShaderBuiltinTests, BaseMipLevelTextureViewCube) {
     const uint32_t textureWidthLevel0 = 1 << kMipLevels;
     const uint32_t textureWidthLevel1 = textureWidthLevel0 >> 1;
     const uint32_t textureWidthLevel2 = textureWidthLevel1 >> 1;
-    const uint32_t expected[] = {
-        textureWidthLevel1,
-        textureWidthLevel1,
-        textureWidthLevel2,
-    };
+    const uint32_t expected[] = {textureWidthLevel1, textureWidthLevel1, textureWidthLevel2,
+                                 kViewMipLevelCount};
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = sizeof(expected);
@@ -309,6 +307,7 @@ TEST_P(TextureShaderBuiltinTests, BaseMipLevelTextureViewCube) {
         dstBuf[0] = textureDimensions(tex_cube).x;
         dstBuf[1] = textureDimensions(tex_cube, 0).x;
         dstBuf[2] = textureDimensions(tex_cube, 1).x;
+        dstBuf[3] = textureNumLevels(tex_cube);
     }
     )";
     // clang-format on
