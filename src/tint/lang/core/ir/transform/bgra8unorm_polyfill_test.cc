@@ -525,7 +525,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ArrayedImage) {
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
     auto* index = b.FunctionParam("index", ty.u32());
     auto* value = b.FunctionParam("value", ty.vec4<f32>());
-    func->SetParams({value, coords});
+    func->SetParams({value, coords, index, value});
     b.Append(func->Block(), [&] {
         auto* load = b.Load(var->Result(0));
         b.Call(ty.void_(), core::BuiltinFn::kTextureStore, load, coords, index, value);
@@ -537,10 +537,10 @@ $B1: {  # root
   %texture:ptr<handle, texture_storage_2d_array<bgra8unorm, write>, read> = var @binding_point(1, 2)
 }
 
-%foo = func(%value:vec4<f32>, %coords:vec2<u32>):void {
+%foo = func(%value:vec4<f32>, %coords:vec2<u32>, %index:u32%value:vec4<f32>):void {
   $B2: {
-    %5:texture_storage_2d_array<bgra8unorm, write> = load %texture
-    %6:void = textureStore %5, %coords, %index, %value
+    %6:texture_storage_2d_array<bgra8unorm, write> = load %texture
+    %7:void = textureStore %6, %coords, %index, %value
     ret
   }
 }
@@ -550,11 +550,11 @@ $B1: {  # root
   %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(1, 2)
 }
 
-%foo = func(%value:vec4<f32>, %coords:vec2<u32>):void {
+%foo = func(%value:vec4<f32>, %coords:vec2<u32>, %index:u32%value:vec4<f32>):void {
   $B2: {
-    %5:texture_storage_2d_array<rgba8unorm, write> = load %texture
-    %6:vec4<f32> = swizzle %value, zyxw
-    %7:void = textureStore %5, %coords, %index, %6
+    %6:texture_storage_2d_array<rgba8unorm, write> = load %texture
+    %7:vec4<f32> = swizzle %value, zyxw
+    %8:void = textureStore %6, %coords, %index, %7
     ret
   }
 }

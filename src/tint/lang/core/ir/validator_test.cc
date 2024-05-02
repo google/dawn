@@ -1392,17 +1392,16 @@ note: # Disassembly
 TEST_F(IR_ValidatorTest, Var_Init_WrongType) {
     auto* f = b.Function("my_func", ty.void_());
 
-    auto sb = b.Append(f->Block());
-    auto* v = sb.Var(ty.ptr<function, f32>());
-    sb.Return(f);
-
-    auto* result = sb.InstructionResult(ty.i32());
-    v->SetInitializer(result);
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<function, f32>();
+        v->SetInitializer(b.Constant(1_i));
+        b.Return(f);
+    });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:3:41 error: var: initializer has incorrect type
-    %2:ptr<function, f32, read_write> = var, %3
+    %2:ptr<function, f32, read_write> = var, 1i
                                         ^^^
 
 :2:3 note: in block
@@ -1412,7 +1411,7 @@ TEST_F(IR_ValidatorTest, Var_Init_WrongType) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    %2:ptr<function, f32, read_write> = var, %3
+    %2:ptr<function, f32, read_write> = var, 1i
     ret
   }
 }
@@ -3717,6 +3716,42 @@ note: # Disassembly
   $B1: {
     %2:ptr<function, vec3<f32>, read_write> = var
     store_vector_element %2, 1i, undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Scoping_UseBeforeDecl) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* y = b.Add<i32>(2_i, 3_i);
+    auto* x = b.Add<i32>(y, 1_i);
+
+    f->Block()->Append(x);
+    f->Block()->Append(y);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:18 error: binary: %3 is not in scope
+    %2:i32 = add %3, 1i
+                 ^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:4:5 note: %3 declared here
+    %3:i32 = add 2i, 3i
+    ^^^^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:i32 = add %3, 1i
+    %3:i32 = add 2i, 3i
     ret
   }
 }

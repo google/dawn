@@ -67,7 +67,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
     auto* in = b.FunctionParam(ty.i32());
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams({in});
+    func->SetParams({in, cond});
 
     b.Append(func->Block(), [&] {
         auto* ifelse = b.If(cond);
@@ -78,9 +78,9 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
         b.Return(func, ifelse->Result(0));
     });
     auto* src = R"(
-%foo = func(%2:i32):i32 {
+%foo = func(%2:i32, %3:bool):i32 {
   $B1: {
-    %3:i32 = if %4 [t: $B2, f: $B3] {  # if_1
+    %4:i32 = if %3 [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
         %5:i32 = add %2, 1i
         exit_if %5  # if_1
@@ -90,7 +90,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
         exit_if %6  # if_1
       }
     }
-    ret %3
+    ret %4
   }
 }
 )";
@@ -107,7 +107,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
     auto* in = b.FunctionParam(ty.i32());
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
-    func->SetParams({in});
+    func->SetParams({in, cond});
 
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(in);
@@ -125,7 +125,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
     });
 
     auto* src = R"(
-%foo = func(%2:i32):i32 {
+%foo = func(%2:i32, %3:bool):i32 {
   $B1: {
     switch %2 [c: (default, $B2)] {  # switch_1
       $B2: {  # case
@@ -137,7 +137,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
         exit_loop  # loop_1
       }
     }
-    %3:i32 = if %4 [t: $B4, f: $B5] {  # if_1
+    %4:i32 = if %3 [t: $B4, f: $B5] {  # if_1
       $B4: {  # true
         %5:i32 = add %2, 1i
         exit_if %5  # if_1
@@ -147,7 +147,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
         exit_if %6  # if_1
       }
     }
-    ret %3
+    ret %4
   }
 }
 )";

@@ -677,6 +677,7 @@ TEST_F(IR_CombineAccessInstructionsTest, AccessResultUsesAsAccessIndex) {
     auto* func = b.Function("foo", ty.f32());
     auto* indices = b.FunctionParam("indices", ty.array<u32, 4>());
     auto* values = b.FunctionParam("values", ty.array<f32, 4>());
+    func->SetParams({indices, values});
     b.Append(func->Block(), [&] {
         auto* access_index = b.Access(ty.u32(), indices, 1_u);
         auto* access_value = b.Access(ty.f32(), values, access_index);
@@ -684,11 +685,11 @@ TEST_F(IR_CombineAccessInstructionsTest, AccessResultUsesAsAccessIndex) {
     });
 
     auto* src = R"(
-%foo = func():f32 {
+%foo = func(%indices:array<u32, 4>, %values:array<f32, 4>):f32 {
   $B1: {
-    %2:u32 = access %indices, 1u
-    %4:f32 = access %values, %2
-    ret %4
+    %4:u32 = access %indices, 1u
+    %5:f32 = access %values, %4
+    ret %5
   }
 }
 )";

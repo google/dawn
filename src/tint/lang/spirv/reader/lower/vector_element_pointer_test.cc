@@ -42,16 +42,17 @@ using SpirvReader_VectorElementPointerTest = core::ir::transform::TransformTest;
 TEST_F(SpirvReader_VectorElementPointerTest, NonPointerAccess) {
     auto* vec = b.FunctionParam("vec", ty.vec4<u32>());
     auto* foo = b.Function("foo", ty.u32());
+    foo->SetParams({vec});
     b.Append(foo->Block(), [&] {
         auto* access = b.Access<u32>(vec, 2_u);
         b.Return(foo, access);
     });
 
     auto* src = R"(
-%foo = func():u32 {
+%foo = func(%vec:vec4<u32>):u32 {
   $B1: {
-    %2:u32 = access %vec, 2u
-    ret %2
+    %3:u32 = access %vec, 2u
+    ret %3
   }
 }
 )";
