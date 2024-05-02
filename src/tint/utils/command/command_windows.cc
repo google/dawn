@@ -145,7 +145,20 @@ bool ExecutableExists(const std::string& path) {
     return false;
 }
 
+std::string GetCWD() {
+    char cwd[MAX_PATH] = "";
+    GetCurrentDirectoryA(sizeof(cwd), cwd);
+    return cwd;
+}
+
 std::string FindExecutable(const std::string& name) {
+    auto in_cwd = GetCWD() + "/" + name;
+    if (ExecutableExists(in_cwd)) {
+        return in_cwd;
+    }
+    if (ExecutableExists(in_cwd + ".exe")) {
+        return in_cwd + ".exe";
+    }
     if (ExecutableExists(name)) {
         return name;
     }

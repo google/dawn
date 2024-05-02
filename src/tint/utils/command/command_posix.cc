@@ -29,6 +29,7 @@
 
 #include "src/tint/utils/command/command.h"
 
+#include <limits.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -119,7 +120,19 @@ bool ExecutableExists(const std::string& path) {
     return s.st_mode & S_IXUSR;
 }
 
+std::string GetCWD() {
+    char cwd[PATH_MAX] = "";
+    [[maybe_unused]] auto res = getcwd(cwd, sizeof(cwd));
+    return cwd;
+}
+
 std::string FindExecutable(const std::string& name) {
+    if (name.length() >= 1 && name[0] != '/') {
+        auto in_cwd = GetCWD() + "/" + name;
+        if (ExecutableExists(in_cwd)) {
+            return in_cwd;
+        }
+    }
     if (ExecutableExists(name)) {
         return name;
     }
