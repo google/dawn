@@ -337,11 +337,12 @@ MaybeError UnmonitoredQueue::NextSerial() {
 
     IncrementLastSubmittedCommandSerial();
     ExecutionSerial lastSubmittedSerial = GetLastSubmittedCommandSerial();
-    // TODO(crbug.com/335553337): only signal fence when it is needed.
-    TRACE_EVENT1(GetDevice()->GetPlatform(), General, "D3D11Device::SignalFence", "serial",
-                 uint64_t(lastSubmittedSerial));
-    DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(lastSubmittedSerial)),
-                          "D3D11 command queue signal fence"));
+    if (commandContext->AcquireNeedsFence()) {
+        TRACE_EVENT1(GetDevice()->GetPlatform(), General, "D3D11Device::SignalFence", "serial",
+                     uint64_t(lastSubmittedSerial));
+        DAWN_TRY(CheckHRESULT(commandContext.Signal(mFence.Get(), uint64_t(lastSubmittedSerial)),
+                              "D3D11 command queue signal fence"));
+    }
 
     SystemEventReceiver receiver;
     DAWN_TRY_ASSIGN(receiver, GetSystemEventReceiver());

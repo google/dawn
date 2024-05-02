@@ -511,6 +511,7 @@ MaybeError Texture::SynchronizeTextureBeforeUse(
                 commandContext->Wait(ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),
                 "ID3D11DeviceContext4::Wait"));
         }
+        commandContext->SetNeedsFence();
     }
     if (mKeyedMutex != nullptr) {
         DAWN_TRY(commandContext->AcquireKeyedMutex(mKeyedMutex));
