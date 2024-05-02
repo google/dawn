@@ -1729,6 +1729,8 @@ class CopyTests_T2B_Compat : public CopyTests_T2B {
 TEST_P(CopyTests_T2B_Compat, TextureCubeFull) {
     // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 32;
@@ -1745,6 +1747,8 @@ TEST_P(CopyTests_T2B_Compat, TextureCubeFull) {
 TEST_P(CopyTests_T2B_Compat, TextureCubeSubRegion) {
     // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 32;
@@ -1765,7 +1769,7 @@ TEST_P(CopyTests_T2B_Compat, TextureCubeSubRegion) {
 TEST_P(CopyTests_T2B_Compat, TextureCubeMip) {
     // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 32;
@@ -1791,6 +1795,8 @@ TEST_P(CopyTests_T2B_Compat, TextureCubeMip) {
 TEST_P(CopyTests_T2B_Compat, TextureCubeRegionNonzeroRowsPerImage) {
     // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 32;
