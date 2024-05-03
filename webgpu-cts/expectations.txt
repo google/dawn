@@ -83,7 +83,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-05-02 07:52:27AM
+# Last rolled: 2024-05-03 07:34:56AM
 
 ################################################################################
 # SharedImage interop failures on Linux
@@ -465,9 +465,6 @@ crbug.com/41487285 [ webgpu-adapter-swiftshader win10 ] webgpu:web_platform,exte
 # The keep can be removed once this config is promoted to stable.
 # KEEP
 ################################################################################
-crbug.com/dawn/2408 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
-crbug.com/dawn/2428 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
-crbug.com/dawn/2439 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:* [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rgba8unorm-srgb";dstPremultiplied=true [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rgba8unorm";dstPremultiplied=true [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="bgra8unorm";dstPremultiplied=false [ Failure ]
@@ -505,10 +502,10 @@ crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.460
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="bgra8unorm-srgb";dstPremultiplied=true [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="r16float";dstPremultiplied=false [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="r16float";dstPremultiplied=true [ Failure ]
-crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="r8unorm";dstPremultiplied=false [ Failure ]
-crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="r8unorm";dstPremultiplied=true [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="r32float";dstPremultiplied=false [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="r32float";dstPremultiplied=true [ Failure ]
+crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="r8unorm";dstPremultiplied=false [ Failure ]
+crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="r8unorm";dstPremultiplied=true [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rg16float";dstPremultiplied=true [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rg32float";dstPremultiplied=false [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rg32float";dstPremultiplied=true [ Failure ]
@@ -617,6 +614,9 @@ crbug.com/42241502 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-swiftsh
 crbug.com/42241502 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-vp9-bt709.webm";sourceType="VideoElement";dstColorSpace="srgb" [ Failure ]
 crbug.com/42241502 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-vp9-bt709.webm";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
 crbug.com/42241502 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-vp9-bt709.webm";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
+crbug.com/dawn/2408 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
+crbug.com/dawn/2428 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
+crbug.com/dawn/2439 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:* [ Failure ]
 
 ################################################################################
 # Failures on Android U. These fail on Android T as well, but need to be "keep"
@@ -863,16 +863,11 @@ crbug.com/dawn/2479 [ webgpu-no-worker ] webgpu:api,validation,buffer,mapping:ma
 # video tests fail on SwiftShader. Due to multiplanar formatted textures not
 # being handled properly in Chrome's WebGPU decoder.
 ################################################################################
-crbug.com/1467566 [ amd-0x67ef dawn-backend-validation mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ amd-0x67ef dawn-no-backend-validation mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+crbug.com/1467566 [ amd-0x67ef mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/1467566 [ android-14 arm webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ android-r dawn-backend-validation qualcomm webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601-rotate-180.mp4";sourceType="VideoElement";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
-crbug.com/1467566 [ apple-angle-metal-renderer:-apple-m2 dawn-backend-validation mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ apple-angle-metal-renderer:-apple-m2 dawn-no-backend-validation mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ dawn-backend-validation intel-0x3e9b mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ dawn-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ dawn-no-backend-validation intel-0x3e9b mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ dawn-no-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+crbug.com/1467566 [ apple-angle-metal-renderer:-apple-m2 mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+crbug.com/1467566 [ intel-0x3e9b mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+crbug.com/1467566 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 
 ################################################################################
 # ETC2 failures on Apple GPUS
@@ -1952,6 +1947,7 @@ crbug.com/dawn/0000 [ dawn-backend-validation intel-0x3e9b mac target-cpu-64 web
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=false;sampleCount=1;rasterizationMask=1 [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=1;rasterizationMask=1 [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,storage_texture,read_only:* [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,shader_module:invalid,fragment:isAsync=true;isFragmentShaderValid=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,validation,decl,var:address_space_access_mode:address_space="private";access_mode="";trailing_comma=true [ Failure ]
