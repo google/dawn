@@ -135,6 +135,89 @@ deps = {
     'dep_type': 'cipd',
   },
 
+  # Linux sysroots for hermetic builds instead of relying on whatever is
+  # available from the system used for compilation. Only applicable to
+  # dawn_standalone since Chromium has its own sysroot copy.
+  'build/linux/debian_bullseye_armhf-sysroot': {
+    'bucket': 'chrome-linux-sysroot',
+    'condition': 'dawn_standalone and checkout_linux and checkout_arm',
+    'dep_type': 'gcs',
+    'objects': [
+      {
+        'object_name': 'e1ace9eea7f5f8906a5de665022abb745efb47ce4931ae774b58005adaf907e9',
+        'sha256sum': 'e1ace9eea7f5f8906a5de665022abb745efb47ce4931ae774b58005adaf907e9',
+        'size_bytes': 96825360,
+        'generation': 1714159610727506,
+      },
+    ],
+  },
+  'build/linux/debian_bullseye_arm64-sysroot': {
+    'bucket': 'chrome-linux-sysroot',
+    'condition': 'dawn_standalone and checkout_linux and checkout_arm64',
+    'dep_type': 'gcs',
+    'objects': [
+      {
+        'object_name': 'd303cf3faf7804c9dd24c9b6b167d0345d41d7fe4bfb7d34add3ab342f6a236c',
+        'sha256sum': 'd303cf3faf7804c9dd24c9b6b167d0345d41d7fe4bfb7d34add3ab342f6a236c',
+        'size_bytes': 103556332,
+        'generation': 1714159596952688,
+      },
+    ],
+  },
+  'build/linux/debian_bullseye_i386-sysroot': {
+    'bucket': 'chrome-linux-sysroot',
+    'condition': 'dawn_standalone and checkout_linux and (checkout_x86 or checkout_x64)',
+    'dep_type': 'gcs',
+    'objects': [
+      {
+        'object_name': '4300851707ad38b204e7f4912950c05ad51da0251ecc4e410de9b9fb94f7decf',
+        'sha256sum': '4300851707ad38b204e7f4912950c05ad51da0251ecc4e410de9b9fb94f7decf',
+        'size_bytes': 116515924,
+        'generation': 1714159579525878,
+      },
+    ],
+  },
+  'build/linux/debian_bullseye_mipsel-sysroot': {
+    'bucket': 'chrome-linux-sysroot',
+    'condition': 'dawn_standalone and checkout_linux and checkout_mips',
+    'dep_type': 'gcs',
+    'objects': [
+      {
+        'object_name': 'cc3202718a58541488e79b0333ce936a32227e07228f6b3c122d99ee45f83270',
+        'sha256sum': 'cc3202718a58541488e79b0333ce936a32227e07228f6b3c122d99ee45f83270',
+        'size_bytes': 93412776,
+        'generation': 1714159559897107,
+      },
+    ],
+  },
+  'build/linux/debian_bullseye_mips64el-sysroot': {
+    'bucket': 'chrome-linux-sysroot',
+    'condition': 'dawn_standalone and checkout_linux and checkout_mips64',
+    'dep_type': 'gcs',
+    'objects': [
+      {
+        'object_name': 'ee94d723b36d1e643820fe7ee2a8f45b3664b4c5d3c3379ebab39e474a2c9f86',
+        'sha256sum': 'ee94d723b36d1e643820fe7ee2a8f45b3664b4c5d3c3379ebab39e474a2c9f86',
+        'size_bytes': 97911708,
+        'generation': 1714159538956875,
+      },
+    ],
+  },
+  'build/linux/debian_bullseye_amd64-sysroot': {
+    'bucket': 'chrome-linux-sysroot',
+    'condition': 'dawn_standalone and checkout_linux and checkout_x64',
+    'dep_type': 'gcs',
+    'objects': [
+      {
+        'object_name': '5df5be9357b425cdd70d92d4697d07e7d55d7a923f037c22dc80a78e85842d2c',
+        'sha256sum': '5df5be9357b425cdd70d92d4697d07e7d55d7a923f037c22dc80a78e85842d2c',
+        'size_bytes': 123084324,
+        'generation': 1714159395960299,
+      },
+    ],
+  },
+
+
   # Testing, GTest and GMock
   'testing': {
     'url': '{chromium_git}/chromium/src/testing@035a9b18047370df7403758b006e6c9696d6b84d',

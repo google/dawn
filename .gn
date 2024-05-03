@@ -46,4 +46,5 @@ default_args = {
       "//third_party/vulkan-deps/vulkan-validation-layers/src"
 
   vma_vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
+  use_sysroot = true
 }
