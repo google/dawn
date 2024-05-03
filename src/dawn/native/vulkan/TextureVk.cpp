@@ -484,8 +484,14 @@ Aspect ComputeCombinedAspect(Device* device, const Format& format) {
     X(wgpu::TextureFormat::ASTC12x12UnormSrgb, VK_FORMAT_ASTC_12x12_SRGB_BLOCK)       \
                                                                                       \
     X(wgpu::TextureFormat::R8BG8Biplanar420Unorm, VK_FORMAT_G8_B8R8_2PLANE_420_UNORM) \
+    X(wgpu::TextureFormat::R8BG8Biplanar422Unorm, VK_FORMAT_G8_B8R8_2PLANE_422_UNORM) \
+    X(wgpu::TextureFormat::R8BG8Biplanar444Unorm, VK_FORMAT_G8_B8R8_2PLANE_444_UNORM) \
     X(wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm,                               \
-      VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16)
+      VK_FORMAT_G10X6_B10X6R10X6_2PLANE_420_UNORM_3PACK16)                            \
+    X(wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm,                               \
+      VK_FORMAT_G10X6_B10X6R10X6_2PLANE_422_UNORM_3PACK16)                            \
+    X(wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm,                               \
+      VK_FORMAT_G10X6_B10X6R10X6_2PLANE_444_UNORM_3PACK16)
 
 // Converts Dawn texture format to Vulkan formats.
 VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {

@@ -39,6 +39,7 @@
 #include "VideoViewsTests.h"
 #include "dawn/common/Assert.h"
 #include "dawn/native/D3D12Backend.h"
+#include "dawn/utils/TextureUtils.h"
 
 namespace dawn {
 namespace {
@@ -150,15 +151,14 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         subres.SysMemPitch = VideoViewsTestsBase::kYUVAImageDataWidthInTexels;
 
         std::variant<std::vector<uint8_t>, std::vector<uint16_t>> initialData;
-        if (format == wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm) {
-            initialData = VideoViewsTestsBase::GetTestTextureData<uint16_t>(
-                /*isMultiPlane*/ true, isCheckerboard, /*hasAlpha*/ false);
+        if (utils::GetMultiPlaneTextureBitDepth(format) == 16) {
+            initialData = VideoViewsTestsBase::GetTestTextureData<uint16_t>(format, isCheckerboard,
+                                                                            /*hasAlpha=*/false);
             subres.pSysMem = std::get<1>(initialData).data();
             subres.SysMemPitch *= 2;
         } else {
-            initialData = VideoViewsTestsBase::GetTestTextureData<uint8_t>(
-                /*isMultiPlane*/ true, isCheckerboard,
-                /*hasAlpha*/ false);
+            initialData = VideoViewsTestsBase::GetTestTextureData<uint8_t>(format, isCheckerboard,
+                                                                           /*hasAlpha=*/false);
             subres.pSysMem = std::get<0>(initialData).data();
         }
 

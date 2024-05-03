@@ -88,6 +88,13 @@ enum class TextureComponentType {
     Uint,
 };
 
+enum class TextureSubsampling {
+    Undefined,
+    e420,
+    e422,
+    e444,
+};
+
 struct RequiresFeature {
     wgpu::FeatureName feature;
 };
@@ -106,7 +113,7 @@ struct AspectInfo {
 
 // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
 // exact number of known format.
-static constexpr uint32_t kKnownFormatCount = 104;
+static constexpr uint32_t kKnownFormatCount = 108;
 
 using FormatIndex = TypedInteger<struct FormatIndexT, uint32_t>;
 
@@ -162,6 +169,9 @@ struct Format {
     // formats. Only stores a single view format because Dawn currently only supports sRGB format
     // reinterpretation.
     wgpu::TextureFormat baseViewFormat = wgpu::TextureFormat::Undefined;
+    // Chroma subsampling used by multi-planar formats (e.g. 4:2:0 is 1/2 horizontal and 1/2
+    // vertical resolution for UV plane, 4:2:2 is 1/2 horizontal and 1/1 vertical resolution).
+    TextureSubsampling subSampling = TextureSubsampling::Undefined;
 
     // Returns true if the formats are copy compatible.
     // Currently means they differ only in sRGB-ness.

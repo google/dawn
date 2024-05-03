@@ -599,8 +599,18 @@ class PhysicalDevice : public PhysicalDeviceBase {
             EnableFeature(Feature::MultiPlanarFormatExtendedUsages);
         }
 
+        if (@available(macOS 10.13, iOS 11.0, *)) {
+            EnableFeature(Feature::MultiPlanarFormatP210);
+            EnableFeature(Feature::MultiPlanarFormatP410);
+        }
+
         if (@available(macOS 10.15, iOS 13.0, *)) {
             EnableFeature(Feature::MultiPlanarFormatNv12a);
+        }
+
+        if (@available(macOS 11.0, iOS 14.0, *)) {
+            EnableFeature(Feature::MultiPlanarFormatNv16);
+            EnableFeature(Feature::MultiPlanarFormatNv24);
         }
 
         if (@available(macOS 11.0, iOS 10.0, *)) {

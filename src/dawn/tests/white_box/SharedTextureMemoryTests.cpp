@@ -798,9 +798,7 @@ TEST_P(SharedTextureMemoryTests, ImportSharedFenceDeviceDestroyed) {
     memory.GetProperties(&properties);
     if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
         UseInRenderPass(device, texture);
-    } else if (properties.format != wgpu::TextureFormat::R8BG8Biplanar420Unorm &&
-               properties.format != wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm &&
-               properties.format != wgpu::TextureFormat::R8BG8A8Triplanar420Unorm) {
+    } else if (!utils::IsMultiPlanarFormat(properties.format)) {
         if (properties.usage & wgpu::TextureUsage::CopySrc) {
             UseInCopy(device, texture);
         } else if (properties.usage & wgpu::TextureUsage::CopyDst) {
@@ -1344,9 +1342,7 @@ TEST_P(SharedTextureMemoryTests, UseWithoutBegin) {
     if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
         ASSERT_DEVICE_ERROR_MSG(UseInRenderPass(device, texture),
                                 HasSubstr("without current access"));
-    } else if (properties.format != wgpu::TextureFormat::R8BG8Biplanar420Unorm &&
-               properties.format != wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm &&
-               properties.format != wgpu::TextureFormat::R8BG8A8Triplanar420Unorm) {
+    } else if (!utils::IsMultiPlanarFormat(properties.format)) {
         if (properties.usage & wgpu::TextureUsage::CopySrc) {
             ASSERT_DEVICE_ERROR_MSG(UseInCopy(device, texture),
                                     HasSubstr("without current access"));

@@ -2252,6 +2252,10 @@
             {"value": 1032, "name": "format capabilities", "tags": ["dawn"]},
             {"value": 1033, "name": "drm format capabilities", "tags": ["dawn"]},
             {"value": 1034, "name": "norm16 texture formats", "tags": ["dawn"]},
+            {"value": 1035, "name": "multi planar format nv16", "tags": ["dawn"]},
+            {"value": 1036, "name": "multi planar format nv24", "tags": ["dawn"]},
+            {"value": 1037, "name": "multi planar format p210", "tags": ["dawn"]},
+            {"value": 1038, "name": "multi planar format p410", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -3996,7 +4000,11 @@
 
             {"value": 102, "name": "R8 BG8 Biplanar 420 unorm", "tags": ["dawn"]},
             {"value": 103, "name": "R10X6 BG10X6 Biplanar 420 unorm", "tags": ["dawn"]},
-            {"value": 104, "name": "R8 BG8 A8 Triplanar 420 unorm", "tags": ["dawn"]}
+            {"value": 104, "name": "R8 BG8 A8 Triplanar 420 unorm", "tags": ["dawn"]},
+            {"value": 105, "name": "R8 BG8 Biplanar 422 unorm", "tags": ["dawn"]},
+            {"value": 106, "name": "R8 BG8 Biplanar 444 unorm", "tags": ["dawn"]},
+            {"value": 107, "name": "R10X6 BG10X6 Biplanar 422 unorm", "tags": ["dawn"]},
+            {"value": 108, "name": "R10X6 BG10X6 Biplanar 444 unorm", "tags": ["dawn"]}
         ]
     },
     "texture usage": {

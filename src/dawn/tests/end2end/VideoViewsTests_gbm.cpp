@@ -177,9 +177,9 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
                                     VideoViewsTestsBase::kYUVAImageDataHeightInTexels,
                                     GBM_BO_TRANSFER_WRITE, &strideBytes, &mapHandle);
             EXPECT_NE(addr, nullptr);
-            std::vector<uint8_t> initialData = VideoViewsTestsBase::GetTestTextureData<uint8_t>(
-                /*isMultiPlane*/ true, isCheckerboard,
-                /*hasAlpha*/ false);
+            std::vector<uint8_t> initialData =
+                VideoViewsTestsBase::GetTestTextureData<uint8_t>(format, isCheckerboard,
+                                                                 /*hasAlpha=*/false);
             uint8_t* srcBegin = initialData.data();
             uint8_t* srcEnd = srcBegin + initialData.size();
             uint8_t* dstBegin = static_cast<uint8_t*>(addr);

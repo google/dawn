@@ -35,6 +35,7 @@
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/IOSurfaceUtils.h"
 #include "dawn/native/MetalBackend.h"
+#include "dawn/utils/TextureUtils.h"
 
 namespace dawn {
 namespace {
@@ -68,25 +69,25 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
                                        VideoViewsTestsBase::kYUVAImageDataHeightInTexels);
 
         if (initialized) {
-            const size_t numPlanes = VideoViewsTestsBase::NumPlanes(format);
+            const size_t numPlanes = utils::GetMultiPlaneTextureNumPlanes(format);
 
             IOSurfaceLock(surface, 0, nullptr);
 
             for (size_t plane = 0; plane < numPlanes; ++plane) {
                 void* pointer = IOSurfaceGetBaseAddressOfPlane(surface, plane);
-                if (format == wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm) {
+                if (utils::GetMultiPlaneTextureBitDepth(format) == 16) {
                     std::vector<uint16_t> data =
                         VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint16_t>(
-                            plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
+                            format, plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
                             IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard,
-                            /*hasAlpha*/ false);
+                            /*hasAlpha=*/false);
                     memcpy(pointer, data.data(), data.size() * 2);
                 } else {
                     std::vector<uint8_t> data =
                         VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint8_t>(
-                            plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
+                            format, plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
                             IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard,
-                            /*hasAlpha*/ format == wgpu::TextureFormat::R8BG8A8Triplanar420Unorm);
+                            /*hasAlpha=*/format == wgpu::TextureFormat::R8BG8A8Triplanar420Unorm);
                     memcpy(pointer, data.data(), data.size());
                 }
             }
@@ -166,7 +167,11 @@ std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
 // static
 std::vector<Format> VideoViewsTestBackend::Formats() {
     return {wgpu::TextureFormat::R8BG8Biplanar420Unorm,
+            wgpu::TextureFormat::R8BG8Biplanar422Unorm,
+            wgpu::TextureFormat::R8BG8Biplanar444Unorm,
             wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm,
+            wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm,
+            wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm,
             wgpu::TextureFormat::R8BG8A8Triplanar420Unorm};
 }
 

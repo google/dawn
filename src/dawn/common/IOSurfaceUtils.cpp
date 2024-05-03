@@ -46,8 +46,16 @@ OSType ToCVFormat(wgpu::TextureFormat format) {
     switch (format) {
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
             return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+        case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
+            return kCVPixelFormatType_422YpCbCr8BiPlanarVideoRange;
+        case wgpu::TextureFormat::R8BG8Biplanar444Unorm:
+            return kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange;
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
             return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange;
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
+            return kCVPixelFormatType_422YpCbCr10BiPlanarVideoRange;
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
+            return kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange;
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
             return kCVPixelFormatType_420YpCbCr8VideoRange_8A_TriPlanar;
         default:
@@ -59,7 +67,11 @@ OSType ToCVFormat(wgpu::TextureFormat format) {
 uint32_t NumPlanes(wgpu::TextureFormat format) {
     switch (format) {
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+        case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
+        case wgpu::TextureFormat::R8BG8Biplanar444Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
             return 2;
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
             return 3;
@@ -69,12 +81,18 @@ uint32_t NumPlanes(wgpu::TextureFormat format) {
     }
 }
 
-size_t GetSubSamplingFactorPerPlane(wgpu::TextureFormat format, size_t plane) {
+size_t GetSubSamplingFactorPerPlane(wgpu::TextureFormat format, size_t plane, bool isHorizontal) {
     switch (format) {
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-        case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
             return plane == 1 ? 2 : 1;
+        case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
+            return plane == 1 && isHorizontal ? 2 : 1;
+        case wgpu::TextureFormat::R8BG8Biplanar444Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
+            return 1;
         default:
             DAWN_UNREACHABLE();
             return 0;
@@ -84,9 +102,13 @@ size_t GetSubSamplingFactorPerPlane(wgpu::TextureFormat format, size_t plane) {
 size_t BytesPerElement(wgpu::TextureFormat format, size_t plane) {
     switch (format) {
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+        case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
+        case wgpu::TextureFormat::R8BG8Biplanar444Unorm:
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
             return plane == 1 ? 2 : 1;
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
             return plane == 1 ? 4 : 2;
         default:
             DAWN_UNREACHABLE();
@@ -111,9 +133,10 @@ IOSurfaceRef CreateMultiPlanarIOSurface(wgpu::TextureFormat format,
         AcquireCFRef(CFArrayCreateMutable(kCFAllocatorDefault, numPlanes, &kCFTypeArrayCallBacks));
     size_t totalBytesAlloc = 0;
     for (size_t plane = 0; plane < numPlanes; ++plane) {
-        const size_t factor = GetSubSamplingFactorPerPlane(format, plane);
-        const size_t planeWidth = width / factor;
-        const size_t planeHeight = height / factor;
+        const size_t planeWidth =
+            width / GetSubSamplingFactorPerPlane(format, plane, /*isHorizontal=*/true);
+        const size_t planeHeight =
+            height / GetSubSamplingFactorPerPlane(format, plane, /*isHorizontal=*/false);
         const size_t planeBytesPerElement = BytesPerElement(format, plane);
         const size_t planeBytesPerRow =
             IOSurfaceAlignProperty(kIOSurfacePlaneBytesPerRow, planeWidth * planeBytesPerElement);
