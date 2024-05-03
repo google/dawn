@@ -104,7 +104,7 @@
     X(Maximum,                       maxTextureDimension1D,      4096,      8192,      16384) \
     X(Maximum,                       maxTextureDimension2D,      4096,      8192,      16384) \
     X(Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
-    X(Maximum,                       maxTextureArrayLayers,       256,       256,        256)
+    X(Maximum,                       maxTextureArrayLayers,       256,       256,       2048)
 
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
