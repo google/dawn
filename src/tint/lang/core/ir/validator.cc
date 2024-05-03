@@ -89,6 +89,7 @@
 #define TINT_DUMP_IR_WHEN_VALIDATING 0
 #if TINT_DUMP_IR_WHEN_VALIDATING
 #include <iostream>
+#include "src/tint/utils/text/styled_text_printer.h"
 #endif
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -1299,10 +1300,11 @@ Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
                                             [[maybe_unused]] const char* msg,
                                             [[maybe_unused]] Capabilities capabilities) {
 #if TINT_DUMP_IR_WHEN_VALIDATING
+    auto printer = StyledTextPrinter::Create(stdout);
     std::cout << "=========================================================" << std::endl;
     std::cout << "== IR dump before " << msg << ":" << std::endl;
     std::cout << "=========================================================" << std::endl;
-    std::cout << Disassemble(ir);
+    printer->Print(Disassemble(ir).Text());
 #endif
 
 #ifndef NDEBUG
