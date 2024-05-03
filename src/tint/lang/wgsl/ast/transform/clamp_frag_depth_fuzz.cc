@@ -31,7 +31,18 @@
 namespace tint::ast::transform {
 namespace {
 
+bool CanRun(const ClampFragDepth::Config& config) {
+    if (config.offsets && config.offsets->min == config.offsets->max) {
+        return false;  // member offset collision
+    }
+    return true;
+}
+
 void ClampFragDepthFuzzer(const Program& program, const ClampFragDepth::Config& config) {
+    if (!CanRun(config)) {
+        return;
+    }
+
     DataMap inputs;
     inputs.Add<ClampFragDepth::Config>(std::move(config));
 
