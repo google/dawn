@@ -1830,9 +1830,11 @@ class DawnLoadResolveTextureValidationTest : public MultisampledRenderPassDescri
   protected:
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DawnLoadResolveTexture};
+        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::DawnLoadResolveTexture,
+                                                 wgpu::FeatureName::TransientAttachments};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
+        descriptor.requiredFeatureCount = 2;
+
         return dawnAdapter.CreateDevice(&descriptor);
     }
 
@@ -1859,6 +1861,25 @@ TEST_F(DawnLoadResolveTextureValidationTest, ResolveTargetValid) {
     renderPass.cColorAttachments[0].view = multisampledColorTextureView;
     renderPass.cColorAttachments[0].resolveTarget = resolveTarget;
     renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    AssertBeginRenderPassSuccess(&renderPass);
+}
+
+// Test that LoadOp::ExpandResolveTexture can be used even if the MSAA attachment is transient.
+TEST_F(DawnLoadResolveTextureValidationTest, CompatibleWithTransientMSAATexture) {
+    auto multisampledColorTexture = CreateTexture(
+        device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers, kLevelCount,
+        /*sampleCount=*/kSampleCount,
+        wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment);
+    auto multisampledColorTextureView = multisampledColorTexture.CreateView();
+
+    // Create a resolve texture with sample count = 1.
+    auto resolveTarget = CreateCompatibleResolveTextureView();
+
+    auto renderPass = CreateMultisampledRenderPass();
+    renderPass.cColorAttachments[0].view = multisampledColorTextureView;
+    renderPass.cColorAttachments[0].resolveTarget = resolveTarget;
+    renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
     AssertBeginRenderPassSuccess(&renderPass);
 }
 

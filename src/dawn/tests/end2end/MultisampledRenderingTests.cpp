@@ -1530,6 +1530,9 @@ class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
         if (SupportsFeatures({wgpu::FeatureName::DawnLoadResolveTexture})) {
             requiredFeatures.push_back(wgpu::FeatureName::DawnLoadResolveTexture);
         }
+        if (SupportsFeatures({wgpu::FeatureName::TransientAttachments})) {
+            requiredFeatures.push_back(wgpu::FeatureName::TransientAttachments);
+        }
         return requiredFeatures;
     }
 };
@@ -1538,9 +1541,10 @@ class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
 // LoadOp::ExpandResolveTexture. The resolve texture will have its content preserved between
 // passes.
 TEST_P(DawnLoadResolveTextureTest, DrawThenLoad) {
-    auto multiSampledTexture =
-        CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1, /*transientAttachment=*/false,
-                                         /*supportsTextureBinding=*/false);
+    auto multiSampledTexture = CreateTextureForRenderAttachment(
+        kColorFormat, 4, 1, 1,
+        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
+        /*supportsTextureBinding=*/false);
     auto multiSampledTextureView = multiSampledTexture.CreateView();
 
     auto singleSampledTexture =
@@ -1572,6 +1576,7 @@ TEST_P(DawnLoadResolveTextureTest, DrawThenLoad) {
             {multiSampledTextureView}, {singleSampledTextureView},
             wgpu::LoadOp::ExpandResolveTexture, wgpu::LoadOp::Load,
             /*testDepth=*/false);
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
         renderPassEncoder.End();
     }

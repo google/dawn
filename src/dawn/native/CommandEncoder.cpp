@@ -552,10 +552,11 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     DAWN_INVALID_IF(colorAttachment.loadOp == wgpu::LoadOp::Undefined, "loadOp must be set.");
     DAWN_INVALID_IF(colorAttachment.storeOp == wgpu::StoreOp::Undefined, "storeOp must be set.");
     if (attachment->GetTexture()->GetUsage() & wgpu::TextureUsage::TransientAttachment) {
-        DAWN_INVALID_IF(colorAttachment.loadOp != wgpu::LoadOp::Clear,
+        DAWN_INVALID_IF(colorAttachment.loadOp != wgpu::LoadOp::Clear &&
+                            colorAttachment.loadOp != wgpu::LoadOp::ExpandResolveTexture,
                         "The color attachment %s has the load op set to %s while its usage (%s) "
                         "has the transient attachment bit set.",
-                        attachment, wgpu::LoadOp::Load, attachment->GetTexture()->GetUsage());
+                        attachment, colorAttachment.loadOp, attachment->GetTexture()->GetUsage());
         DAWN_INVALID_IF(colorAttachment.storeOp != wgpu::StoreOp::Discard,
                         "The color attachment %s has the store op set to %s while its usage (%s) "
                         "has the transient attachment bit set.",
