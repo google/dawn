@@ -1531,9 +1531,10 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "destroyed"},
-            {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "failed creation"}
+            {"value": 1, "name": "unknown"},
+            {"value": 2, "name": "destroyed"},
+            {"value": 3, "name": "instance dropped"},
+            {"value": 4, "name": "failed creation"}
         ]
     },
     "double": {
