@@ -523,6 +523,9 @@ class Parser {
                 case spv::Op::OpFunctionCall:
                     EmitFunctionCall(inst);
                     break;
+                case spv::Op::OpIAdd:
+                    EmitBinary(inst, core::BinaryOp::kAdd);
+                    break;
                 case spv::Op::OpLoad:
                     Emit(b_.Load(Value(inst.GetSingleWordOperand(2))), inst.result_id());
                     break;

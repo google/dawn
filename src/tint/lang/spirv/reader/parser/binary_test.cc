@@ -50,8 +50,12 @@ TEST_P(BinaryTest, All) {
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
        %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+        %u32 = OpTypeInt 32 0
         %f16 = OpTypeFloat 16
         %f32 = OpTypeFloat 32
+      %vec3i = OpTypeVector %i32 3
+      %vec4u = OpTypeVector %u32 4
       %vec3h = OpTypeVector %f16 3
       %vec4f = OpTypeVector %f32 4
     %ep_type = OpTypeFunction %void
@@ -128,6 +132,28 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                                  "vec4f",
                                  "OpFMul",
                                  "%5:vec4<f32> = mul %3, %4",
+                             },
+
+                             // OpIAdd
+                             BinaryCase{
+                                 "i32",
+                                 "OpIAdd",
+                                 "%5:i32 = add %3, %4",
+                             },
+                             BinaryCase{
+                                 "u32",
+                                 "OpIAdd",
+                                 "%5:u32 = add %3, %4",
+                             },
+                             BinaryCase{
+                                 "vec3i",
+                                 "OpIAdd",
+                                 "%5:vec3<i32> = add %3, %4",
+                             },
+                             BinaryCase{
+                                 "vec4u",
+                                 "OpIAdd",
+                                 "%5:vec4<u32> = add %3, %4",
                              }),
                          PrintBuiltinCase);
 
