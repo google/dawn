@@ -96,6 +96,40 @@ TEST_F(SpirvParserTest, FragmentShader) {
 )");
 }
 
+TEST_F(SpirvParserTest, FragmentShader_DepthReplacing) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %depth
+               OpExecutionMode %main OriginUpperLeft
+               OpExecutionMode %main DepthReplacing
+               OpDecorate %depth BuiltIn FragDepth
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+     %f32_42 = OpConstant %f32 42.0
+%_ptr_Output_f32 = OpTypePointer Output %f32
+      %depth = OpVariable %_ptr_Output_f32 Output
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpStore %depth %f32_42
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<__out, f32, read_write> = var @builtin(frag_depth)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    store %1, 42.0f
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, VertexShader) {
     EXPECT_IR(R"(
                OpCapability Shader
