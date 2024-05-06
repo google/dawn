@@ -76,13 +76,13 @@ struct State {
             core::ir::Value* replacement = nullptr;
             switch (builtin->Func()) {
                 case core::BuiltinFn::kStorageBarrier:
-                    replacement = StorageBarrier(builtin);
+                    replacement = ThreadgroupBarrier(builtin, BarrierType::kDevice);
                     break;
                 case core::BuiltinFn::kWorkgroupBarrier:
-                    replacement = WorkgroupBarrier(builtin);
+                    replacement = ThreadgroupBarrier(builtin, BarrierType::kThreadGroup);
                     break;
                 case core::BuiltinFn::kTextureBarrier:
-                    replacement = TextureBarrier(builtin);
+                    replacement = ThreadgroupBarrier(builtin, BarrierType::kTexture);
                     break;
                 default:
                     break;
@@ -98,39 +98,13 @@ struct State {
         }
     }
 
-    /// Handle a `workgroupBarrier()` builtin.
+    /// Replace a barrier builtin with the `threadgroupBarrier()` intrinsic.
     /// @param builtin the builtin call instruction
+    /// @param type the barrier type
     /// @returns the replacement value
-    core::ir::Value* WorkgroupBarrier(core::ir::CoreBuiltinCall* builtin) {
+    core::ir::Value* ThreadgroupBarrier(core::ir::CoreBuiltinCall* builtin, BarrierType type) {
         // Replace the builtin call with a call to the msl.threadgroup_barrier intrinsic.
-        auto args = Vector<core::ir::Value*, 4>{b.Constant(u32(BarrierType::kThreadGroup))};
-
-        auto* call = b.Call<msl::ir::BuiltinCall>(
-            builtin->Result(0)->Type(), msl::BuiltinFn::kThreadgroupBarrier, std::move(args));
-        call->InsertBefore(builtin);
-        return call->Result(0);
-    }
-
-    /// Handle a `storageBarrier()` builtin.
-    /// @param builtin the builtin call instruction
-    /// @returns the replacement value
-    core::ir::Value* StorageBarrier(core::ir::CoreBuiltinCall* builtin) {
-        // Replace the builtin call with a call to the msl.threadgroup_barrier intrinsic.
-        auto args = Vector<core::ir::Value*, 4>{b.Constant(u32(BarrierType::kDevice))};
-
-        auto* call = b.Call<msl::ir::BuiltinCall>(
-            builtin->Result(0)->Type(), msl::BuiltinFn::kThreadgroupBarrier, std::move(args));
-        call->InsertBefore(builtin);
-        return call->Result(0);
-    }
-
-    /// Handle a `textureBarrier()` builtin.
-    /// @param builtin the builtin call instruction
-    /// @returns the replacement value
-    core::ir::Value* TextureBarrier(core::ir::CoreBuiltinCall* builtin) {
-        // Replace the builtin call with a call to the msl.threadgroup_barrier intrinsic.
-        auto args = Vector<core::ir::Value*, 4>{b.Constant(u32(BarrierType::kTexture))};
-
+        auto args = Vector<core::ir::Value*, 1>{b.Constant(u32(type))};
         auto* call = b.Call<msl::ir::BuiltinCall>(
             builtin->Result(0)->Type(), msl::BuiltinFn::kThreadgroupBarrier, std::move(args));
         call->InsertBefore(builtin);
