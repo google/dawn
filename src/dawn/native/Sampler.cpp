@@ -36,10 +36,6 @@
 
 namespace dawn::native {
 
-namespace vulkan {
-struct YCbCrVulkanDescriptor;
-}
-
 MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor) {
     DAWN_INVALID_IF(std::isnan(descriptor->lodMinClamp) || std::isnan(descriptor->lodMaxClamp),
                     "LOD clamp bounds [%f, %f] contain a NaN.", descriptor->lodMinClamp,
@@ -75,8 +71,7 @@ MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor
     DAWN_TRY(ValidateCompareFunction(descriptor->compare));
 
     UnpackedPtr<SamplerDescriptor> unpacked = Unpack(descriptor);
-
-    if (unpacked.Get<vulkan::YCbCrVulkanDescriptor>()) {
+    if (unpacked.Get<YCbCrVkDescriptor>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::YCbCrVulkanSamplers), "%s is not enabled.",
                         wgpu::FeatureName::YCbCrVulkanSamplers);
     }
@@ -100,7 +95,7 @@ SamplerBase::SamplerBase(DeviceBase* device,
       mLodMaxClamp(descriptor->lodMaxClamp),
       mCompareFunction(descriptor->compare),
       mMaxAnisotropy(descriptor->maxAnisotropy) {
-    if (Unpack(descriptor).Get<vulkan::YCbCrVulkanDescriptor>()) {
+    if (Unpack(descriptor).Get<YCbCrVkDescriptor>()) {
         mIsYCbCr = true;
     }
 }

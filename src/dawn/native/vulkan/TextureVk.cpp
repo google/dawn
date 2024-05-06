@@ -1767,14 +1767,26 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
     createInfo.pNext = &usageInfo;
 
     VkSamplerYcbcrConversionInfo samplerYCbCrInfo = {};
-    if (auto* vulkanYCbCrDescriptor = descriptor.Get<vulkan::YCbCrVulkanDescriptor>()) {
-        // TODO(crbug.com/dawn/2476): Validate mSamplerYcbcrConversionCreateInfo matches with that
-        // in SamplerDescriptor.
-        mSamplerYcbcrConversionCreateInfo = vulkanYCbCrDescriptor->vulkanYCbCrInfo;
-        DAWN_TRY(ValidateCanCreateSamplerYCbCrConversion(mSamplerYcbcrConversionCreateInfo));
+    if (auto* yCbCrDescriptor = descriptor.Get<YCbCrVkDescriptor>()) {
+        DAWN_TRY_ASSIGN(mYcbcrConversionCreateInfo,
+                        CreateSamplerYCbCrConversionCreateInfo(yCbCrDescriptor));
+
+        mExternalFormat = yCbCrDescriptor->externalFormat;
+#if DAWN_PLATFORM_IS(ANDROID)
+        VkExternalFormatANDROID vulkanExternalFormat;
+        // Chain VkExternalFormatANDROID only if needed.
+        if (mExternalFormat != 0) {
+            vulkanExternalFormat.sType = VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_ANDROID;
+            vulkanExternalFormat.pNext = nullptr;
+            vulkanExternalFormat.externalFormat = mExternalFormat;
+
+            mYcbcrConversionCreateInfo.pNext = &vulkanExternalFormat;
+        }
+#endif  // DAWN_PLATFORM_IS(ANDROID)
+
         DAWN_TRY(CheckVkSuccess(device->fn.CreateSamplerYcbcrConversion(
-                                    device->GetVkDevice(), &mSamplerYcbcrConversionCreateInfo,
-                                    nullptr, &*mSamplerYCbCrConversion),
+                                    device->GetVkDevice(), &mYcbcrConversionCreateInfo, nullptr,
+                                    &*mSamplerYCbCrConversion),
                                 "CreateSamplerYcbcrConversion for vkImageView"));
 
         samplerYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO;

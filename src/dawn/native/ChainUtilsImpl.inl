@@ -103,22 +103,6 @@ struct AdditionalExtensions<SharedBufferMemoryDescriptor> {
         AdditionalExtensionsList<const d3d12::SharedBufferMemoryD3D12ResourceDescriptor*>;
 };
 
-template <>
-constexpr inline wgpu::SType STypeForImpl<vulkan::YCbCrVulkanDescriptor> =
-    wgpu::SType(WGPUSType_YCbCrVulkanDescriptor);
-
-template <>
-struct AdditionalExtensions<SamplerDescriptor> {
-    using List =
-        AdditionalExtensionsList<const vulkan::YCbCrVulkanDescriptor*>;
-};
-
-template <>
-struct AdditionalExtensions<TextureViewDescriptor> {
-    using List =
-        AdditionalExtensionsList<const vulkan::YCbCrVulkanDescriptor*>;
-};
-
 }  // namespace detail
 }  // namespace dawn::native
 

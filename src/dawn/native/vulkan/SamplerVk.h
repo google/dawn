@@ -54,6 +54,8 @@ class Sampler final : public SamplerBase {
 
     VkSampler mHandle = VK_NULL_HANDLE;
     VkSamplerYcbcrConversion mSamplerYCbCrConversion = VK_NULL_HANDLE;
+    VkSamplerYcbcrConversionCreateInfo mYcbcrConversionCreateInfo = {};
+    uint64_t mExternalFormat = 0u;
 };
 
 }  // namespace dawn::native::vulkan

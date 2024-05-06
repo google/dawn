@@ -47,10 +47,6 @@
 
 namespace dawn::native {
 
-namespace vulkan {
-struct YCbCrVulkanDescriptor;
-}
-
 namespace {
 
 MaybeError ValidateTextureViewFormatCompatibility(const DeviceBase* device,
@@ -635,7 +631,7 @@ MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
     DAWN_TRY(ValidateCanViewTextureAs(device, texture, *viewFormat, descriptor->aspect));
     DAWN_TRY(ValidateTextureViewDimensionCompatibility(device, texture, descriptor));
 
-    if (descriptor.Get<vulkan::YCbCrVulkanDescriptor>()) {
+    if (descriptor.Get<YCbCrVkDescriptor>()) {
         DAWN_INVALID_IF(!device->HasFeature(Feature::YCbCrVulkanSamplers), "%s is not enabled.",
                         wgpu::FeatureName::YCbCrVulkanSamplers);
     }

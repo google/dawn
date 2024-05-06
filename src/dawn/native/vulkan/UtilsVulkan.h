@@ -179,8 +179,8 @@ ResultOrError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
     VkFormat format,
     uint64_t modifier);
 
-MaybeError ValidateCanCreateSamplerYCbCrConversion(
-    const VkSamplerYcbcrConversionCreateInfo& vulkanYCbCrInfo);
+ResultOrError<VkSamplerYcbcrConversionCreateInfo> CreateSamplerYCbCrConversionCreateInfo(
+    const YCbCrVkDescriptor* yCbCrDescriptor);
 
 }  // namespace dawn::native::vulkan
 

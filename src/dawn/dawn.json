@@ -3753,7 +3753,7 @@
             {"value": 1214, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]},
             {"value": 1215, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 1216, "name": "static sampler binding layout", "tags": ["dawn"]},
-            {"value": 1217, "name": "y cb cr vulkan descriptor", "tags": ["dawn", "native"]}
+            {"value": 1217, "name": "y cb cr vk descriptor", "tags": ["dawn"]}
         ]
     },
     "texture": {
@@ -4056,6 +4056,26 @@
             {"value": 4, "name": "cube"},
             {"value": 5, "name": "cube array"},
             {"value": 6, "name": "3D"}
+        ]
+    },
+    "y cb cr vk descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["sampler descriptor", "texture view descriptor"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "vk format", "type": "uint32_t", "default": "0"},
+            {"name": "vk y cb cr model", "type": "uint32_t", "default": "0"},
+            {"name": "vk y cb cr range", "type": "uint32_t", "default": "0"},
+            {"name": "vk component swizzle red", "type": "uint32_t", "default": "0"},
+            {"name": "vk component swizzle green", "type": "uint32_t", "default": "0"},
+            {"name": "vk component swizzle blue", "type": "uint32_t", "default": "0"},
+            {"name": "vk component swizzle alpha", "type": "uint32_t", "default": "0"},
+            {"name": "vk x chroma offset", "type": "uint32_t", "default": "0"},
+            {"name": "vk y chroma offset", "type": "uint32_t", "default": "0"},
+            {"name": "vk chroma filter", "type": "uint32_t", "default": "0"},
+            {"name": "force explicit reconstruction", "type": "bool", "default": "false"},
+            {"name": "external format", "type": "uint64_t", "default": "0"}
         ]
     },
     "vertex format": {
