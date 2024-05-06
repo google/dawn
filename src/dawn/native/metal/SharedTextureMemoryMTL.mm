@@ -203,24 +203,11 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceMTLSharedEvent),
                     "Required feature (%s) is missing.",
                     wgpu::FeatureName::SharedFenceMTLSharedEvent);
-
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        ExternalImageIOSurfaceEndAccessDescriptor oldEndAccessDesc;
-        ToBackend(GetDevice()->GetQueue())->ExportLastSignaledEvent(&oldEndAccessDesc);
-
-        SharedFenceMTLSharedEventDescriptor newDesc;
-        newDesc.sharedEvent = oldEndAccessDesc.sharedEvent;
-
-        Ref<SharedFence> fence;
-        DAWN_TRY_ASSIGN(fence, SharedFence::Create(ToBackend(GetDevice()),
-                                                   "Internal MTLSharedEvent", &newDesc));
-
-        return FenceAndSignalValue{
-            std::move(fence),
-            static_cast<uint64_t>(
-                texture->GetSharedResourceMemoryContents()->GetLastUsageSerial())};
-    }
-    DAWN_UNREACHABLE();
+    Ref<SharedFence> fence;
+    DAWN_TRY_ASSIGN(fence, ToBackend(GetDevice()->GetQueue())->GetOrCreateSharedFence());
+    return FenceAndSignalValue{
+        std::move(fence),
+        static_cast<uint64_t>(texture->GetSharedResourceMemoryContents()->GetLastUsageSerial())};
 }
 
 MaybeError SharedTextureMemory::CreateMtlTextures() {

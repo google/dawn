@@ -441,14 +441,6 @@ void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContex
     }
 }
 
-void Texture::IOSurfaceEndAccess(ExternalImageIOSurfaceEndAccessDescriptor* descriptor) {
-    DAWN_ASSERT(descriptor);
-    ToBackend(GetDevice()->GetQueue())->ExportLastSignaledEvent(descriptor);
-    descriptor->isInitialized = IsSubresourceContentInitialized(GetAllSubresources());
-    // Destroy the texture as it should not longer be used after EndAccess.
-    Destroy();
-}
-
 Texture::Texture(DeviceBase* dev, const UnpackedPtr<TextureDescriptor>& desc)
     : TextureBase(dev, desc) {}
 

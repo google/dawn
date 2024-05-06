@@ -37,11 +37,11 @@
 #include "dawn/native/Queue.h"
 #include "dawn/native/SystemEvent.h"
 #include "dawn/native/metal/CommandRecordingContext.h"
+#include "dawn/native/metal/SharedFenceMTL.h"
 
 namespace dawn::native::metal {
 
 class Device;
-struct ExternalImageMTLSharedEventDescriptor;
 
 class Queue final : public QueueBase {
   public:
@@ -50,7 +50,7 @@ class Queue final : public QueueBase {
     CommandRecordingContext* GetPendingCommandContext(SubmitMode submitMode = SubmitMode::Normal);
     MaybeError SubmitPendingCommandBuffer();
     void WaitForCommandsToBeScheduled();
-    void ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc);
+    ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence();
 
     Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial);
     ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
@@ -91,7 +91,9 @@ class Queue final : public QueueBase {
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.
-    NSPRef<id> mMtlSharedEvent = nullptr;
+    NSPRef<id> mMtlSharedEvent;
+    // The shared event wrapped as a SharedFence object.
+    Ref<SharedFence> mSharedFence;
 };
 
 }  // namespace dawn::native::metal

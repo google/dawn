@@ -59,10 +59,9 @@ void Queue::DestroyImpl() {
     mCommandQueue = nullptr;
     mLastSubmittedCommands = nullptr;
 
+    mSharedFence = nullptr;
     // Don't free mMtlSharedEvent because it can be queried after device destruction for
     // synchronization needs.
-
-    QueueBase::DestroyImpl();
 }
 
 MaybeError Queue::Initialize() {
@@ -74,7 +73,7 @@ MaybeError Queue::Initialize() {
     }
 
     if (@available(macOS 10.14, iOS 12.0, *)) {
-        mMtlSharedEvent.Acquire([mtlDevice newSharedEvent]);
+        DAWN_TRY_ASSIGN(mSharedFence, GetOrCreateSharedFence());
     }
 
     return mCommandContext.PrepareNextCommandBuffer(*mCommandQueue);
@@ -183,18 +182,25 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     TRACE_EVENT_ASYNC_BEGIN0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                              uint64_t(pendingSerial));
     if (@available(macOS 10.14, iOS 12.0, *)) {
-        id rawEvent = *mMtlSharedEvent;
-        id<MTLSharedEvent> sharedEvent = static_cast<id<MTLSharedEvent>>(rawEvent);
-        [*pendingCommands encodeSignalEvent:sharedEvent value:static_cast<uint64_t>(pendingSerial)];
+        DAWN_ASSERT(mSharedFence);
+        [*pendingCommands encodeSignalEvent:mSharedFence->GetMTLSharedEvent()
+                                      value:static_cast<uint64_t>(pendingSerial)];
     }
     [*pendingCommands commit];
 
     return mCommandContext.PrepareNextCommandBuffer(*mCommandQueue);
 }
 
-void Queue::ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc) {
-    desc->sharedEvent = *mMtlSharedEvent;
-    desc->signaledValue = static_cast<uint64_t>(GetLastSubmittedCommandSerial());
+ResultOrError<Ref<SharedFence>> Queue::GetOrCreateSharedFence() {
+    if (mSharedFence) {
+        return mSharedFence;
+    }
+    if (!mMtlSharedEvent) {
+        mMtlSharedEvent.Acquire([ToBackend(GetDevice())->GetMTLDevice() newSharedEvent]);
+    }
+    SharedFenceMTLSharedEventDescriptor desc;
+    desc.sharedEvent = mMtlSharedEvent.Get();
+    return SharedFence::Create(ToBackend(GetDevice()), "Internal MTLSharedEvent", &desc);
 }
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {

@@ -73,7 +73,6 @@ class Texture final : public TextureBase {
                                                    const SubresourceRange& range);
 
     void SynchronizeTextureBeforeUse(CommandRecordingContext* commandContext);
-    void IOSurfaceEndAccess(ExternalImageIOSurfaceEndAccessDescriptor* descriptor);
 
   private:
     using TextureBase::TextureBase;
