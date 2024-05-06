@@ -28,6 +28,7 @@
 #include "dawn/native/CommandValidation.h"
 
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -51,6 +52,78 @@
 
 namespace dawn::native {
 
+namespace {
+
+std::string ToBufferSyncScopeResourceUsage(wgpu::BufferUsage syncScopeBufferUsage) {
+    constexpr std::array kUsageInfoList = {
+        std::make_pair(wgpu::BufferUsage::Index, "Index"),
+        std::make_pair(wgpu::BufferUsage::Vertex, "Vertex"),
+        std::make_pair(wgpu::BufferUsage::Indirect, "Indirect"),
+        std::make_pair(wgpu::BufferUsage::Uniform, "Uniform"),
+        std::make_pair(wgpu::BufferUsage::Storage, "Storage(read-write)"),
+        std::make_pair(kReadOnlyStorageBuffer, "Storage(read-only)")};
+
+    std::stringstream stream;
+    bool first = true;
+    for (const auto& [usage, info] : kUsageInfoList) {
+        if (syncScopeBufferUsage & usage) {
+            if (!first) {
+                stream << "|";
+            }
+            first = false;
+            stream << info;
+            syncScopeBufferUsage &= ~usage;
+        }
+    }
+
+    if (static_cast<bool>(syncScopeBufferUsage)) {
+        if (!first) {
+            stream << "|";
+        }
+        stream << "BufferUsage::0x" << std::hex
+               << static_cast<typename std::underlying_type<wgpu::BufferUsage>::type>(
+                      syncScopeBufferUsage);
+    }
+
+    return stream.str();
+}
+
+std::string ToTextureSyncScopeResourceUsage(wgpu::TextureUsage syncScopeTextureUsage) {
+    constexpr std::array kUsageInfoList = {
+        std::make_pair(wgpu::TextureUsage::TextureBinding, "TextureBinding"),
+        std::make_pair(wgpu::TextureUsage::StorageBinding, "Storage(read-write)"),
+        std::make_pair(kWriteOnlyStorageTexture, "Storage(write-only)"),
+        std::make_pair(kReadOnlyStorageTexture, "Storage(read-only)"),
+        std::make_pair(wgpu::TextureUsage::RenderAttachment, "RenderAttachment"),
+        std::make_pair(kReadOnlyRenderAttachment, "RenderAttachment(read-only)")};
+
+    std::stringstream stream;
+    bool first = true;
+    for (const auto& [usage, info] : kUsageInfoList) {
+        if (syncScopeTextureUsage & usage) {
+            if (!first) {
+                stream << "|";
+            }
+            first = false;
+            stream << info;
+            syncScopeTextureUsage &= ~usage;
+        }
+    }
+
+    if (static_cast<bool>(syncScopeTextureUsage)) {
+        if (!first) {
+            stream << "|";
+        }
+        stream << "TextureUsage::0x" << std::hex
+               << static_cast<typename std::underlying_type<wgpu::TextureUsage>::type>(
+                      syncScopeTextureUsage);
+    }
+
+    return stream.str();
+}
+
+}  // namespace
+
 // Performs validation of the "synchronization scope" rules of WebGPU.
 MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
     // Buffers can only be used as single-write or multiple read.
@@ -62,7 +135,7 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
         DAWN_INVALID_IF(!readOnly && !singleUse,
                         "%s usage (%s) includes writable usage and another usage in the same "
                         "synchronization scope.",
-                        scope.buffers[i], usage);
+                        scope.buffers[i], ToBufferSyncScopeResourceUsage(usage));
     }
 
     // Check that every single subresource is used as either a single-write usage or a
@@ -87,7 +160,7 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
                 return DAWN_VALIDATION_ERROR(
                     "%s usage (%s) includes writable usage and another usage in the same "
                     "synchronization scope.",
-                    scope.textures[i], syncInfo.usage);
+                    scope.textures[i], ToTextureSyncScopeResourceUsage(syncInfo.usage));
             }));
     }
     return {};
