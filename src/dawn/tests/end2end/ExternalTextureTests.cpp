@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
@@ -51,12 +52,13 @@ wgpu::Texture Create2DTexture(wgpu::Device device,
     return device.CreateTexture(&descriptor);
 }
 
-class ExternalTextureTests : public DawnTest {
+template <typename Parent>
+class ExternalTextureTestsBase : public Parent {
   protected:
     void SetUp() override {
-        DawnTest::SetUp();
+        Parent::SetUp();
 
-        vsModule = utils::CreateShaderModule(device, R"(
+        vsModule = utils::CreateShaderModule(this->device, R"(
             @vertex fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
                 var positions = array(
                     vec4f(-1.0, 1.0, 0.0, 1.0),
@@ -69,7 +71,7 @@ class ExternalTextureTests : public DawnTest {
                 return positions[VertexIndex];
             })");
 
-        fsSampleExternalTextureModule = utils::CreateShaderModule(device, R"(
+        fsSampleExternalTextureModule = utils::CreateShaderModule(this->device, R"(
             @group(0) @binding(0) var s : sampler;
             @group(0) @binding(1) var t : texture_external;
 
@@ -95,11 +97,11 @@ class ExternalTextureTests : public DawnTest {
             descriptor.vertex.module = vsModule;
             descriptor.cFragment.module = fragmentShader;
             descriptor.cTargets[0].format = texture.GetFormat();
-            wgpu::RenderPipeline pipeline1 = device.CreateRenderPipeline(&descriptor);
+            wgpu::RenderPipeline pipeline1 = this->device.CreateRenderPipeline(&descriptor);
 
-            wgpu::Sampler sampler = device.CreateSampler();
+            wgpu::Sampler sampler = this->device.CreateSampler();
 
-            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::CommandEncoder encoder = this->device.CreateCommandEncoder();
             wgpu::TextureView renderView = texture.CreateView();
             utils::ComboRenderPassDescriptor renderPass({renderView}, nullptr);
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
@@ -109,20 +111,9 @@ class ExternalTextureTests : public DawnTest {
                 pass.End();
             }
             wgpu::CommandBuffer copy = encoder.Finish();
-            queue.Submit(1, &copy);
+            this->queue.Submit(1, &copy);
         }
     }
-
-    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        std::vector<wgpu::FeatureName> requiredFeatures = {};
-        if (SupportsFeatures({wgpu::FeatureName::Unorm16TextureFormats})) {
-            mIsUnorm16TextureFormatsSupported = true;
-            requiredFeatures.push_back(wgpu::FeatureName::Unorm16TextureFormats);
-        }
-        return requiredFeatures;
-    }
-
-    bool IsUnorm16TextureFormatsSupported() { return mIsUnorm16TextureFormatsSupported; }
 
     static constexpr uint32_t kWidth = 4;
     static constexpr uint32_t kHeight = 4;
@@ -133,6 +124,20 @@ class ExternalTextureTests : public DawnTest {
 
     wgpu::ShaderModule vsModule;
     wgpu::ShaderModule fsSampleExternalTextureModule;
+};
+
+class ExternalTextureTests : public ExternalTextureTestsBase<DawnTest> {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::Unorm16TextureFormats})) {
+            mIsUnorm16TextureFormatsSupported = true;
+            requiredFeatures.push_back(wgpu::FeatureName::Unorm16TextureFormats);
+        }
+        return requiredFeatures;
+    }
+
+    bool IsUnorm16TextureFormatsSupported() { return mIsUnorm16TextureFormatsSupported; }
 
     bool mIsUnorm16TextureFormatsSupported = false;
 };
@@ -657,6 +662,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
 // square in the lower left and a blue square in the lower right. The image is then sampled as an
 // external texture and rotated 0, 90, 180, and 270 degrees with and without the y-axis flipped.
 TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
@@ -841,6 +847,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
 // This test draws a 2x2 multi-colored square surrounded by a 1px black border. We test the external
 // texture crop functionality by cropping to specific ranges inside the texture.
 TEST_P(ExternalTextureTests, CropSinglePlane) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
@@ -1003,6 +1010,7 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
 // This test draws a 2x2 multi-colored square surrounded by a 1px black border. We test the external
 // texture crop functionality by cropping to specific ranges inside the texture.
 TEST_P(ExternalTextureTests, CropMultiplanar) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
@@ -1192,6 +1200,7 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
 
 // Test that sampling an external texture with non-one alpha preserves the alpha channel.
 TEST_P(ExternalTextureTests, SampleExternalTextureAlpha) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
     wgpu::Texture sampledTexture =
@@ -1293,6 +1302,283 @@ DAWN_INSTANTIATE_TEST(ExternalTextureTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+enum class AccessMode { Sample, Load };
+enum class OOBAccess { BelowBottomLeft, OverTopRight };
+enum class Flip { None, Mirrored };
+
+using Rotation = wgpu::ExternalTextureRotation;
+
+std::ostream& operator<<(std::ostream& o, Flip flip) {
+    switch (flip) {
+        case Flip::None:
+            o << "no flip ";
+            break;
+        case Flip::Mirrored:
+            o << "mirrored ";
+            break;
+        default:
+            DAWN_UNREACHABLE();
+            break;
+    }
+
+    return o;
+}
+
+std::ostream& operator<<(std::ostream& o, AccessMode mode) {
+    switch (mode) {
+        case AccessMode::Sample:
+            o << "sample ";
+            break;
+        case AccessMode::Load:
+            o << "load ";
+            break;
+        default:
+            DAWN_UNREACHABLE();
+            break;
+    }
+
+    return o;
+}
+
+std::ostream& operator<<(std::ostream& o, OOBAccess rect) {
+    switch (rect) {
+        case OOBAccess::BelowBottomLeft:
+            o << "below bottom left ";
+            break;
+        case OOBAccess::OverTopRight:
+            o << "over top right";
+            break;
+        default:
+            DAWN_UNREACHABLE();
+            break;
+    }
+
+    return o;
+}
+
+DAWN_TEST_PARAM_STRUCT(OOBTestParams, Rotation, Flip, AccessMode, OOBAccess);
+
+class ExternalTextureOOBTests : public ExternalTextureTestsBase<DawnTestWithParams<OOBTestParams>> {
+  protected:
+    void SetUp() override {
+        ExternalTextureTestsBase<DawnTestWithParams<OOBTestParams>>::SetUp();
+        wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
+         @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
+            if (any(clamp(FragCoord.xy, vec2f(1.0), vec2f(3.0)) != FragCoord.xy)) {
+                return vec4f(0.0, 0.0, 0.0, 0.0);
+            }
+
+            if (FragCoord.y < 2.0 && FragCoord.x < 2.0) {
+                return vec4f(0.7152, 0.0, 0.0, 0.0);
+            }
+
+            if (FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
+                return vec4f(1.0, 0.0, 0.0, 0.0);
+            }
+
+            if (FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
+                return vec4f(0.2126, 0.0, 0.0, 0.0);
+            }
+
+            if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
+                return vec4f(0.0722, 0.0, 1.0, 1.0);
+            }
+
+            // Not reached
+            return vec4f(0.0, 0.0, 0.0, 0.0);
+        })");
+
+        wgpu::ShaderModule sourceTexturePlane1FsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
+            if (any(clamp(FragCoord.xy, vec2f(1.0), vec2f(3.0)) != FragCoord.xy)) {
+                return vec4f(0.5, 0.5, 0.0, 0.0);
+            }
+
+            if (FragCoord.y < 2.0 && FragCoord.x < 2.0) {
+                return vec4f(0.1402, 0.0175, 0.0, 0.0);
+            }
+
+            if (FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
+                return vec4f(0.5, 0.5, 0.0, 0.0);
+            }
+
+            if (FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
+                return vec4f(0.4172, 1.0, 0.0, 0.0);
+            }
+
+            if (FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
+                return vec4f(1.0, 0.4937, 0.0, 0.0);
+            }
+
+            // Not reached
+            return vec4f(0.0, 0.0, 0.0, 0.0);
+
+        })");
+
+        sourceTexturePlane0 = Create2DTexture(
+            device, kPlaneWidth, kPlaneHeight, wgpu::TextureFormat::R8Unorm,
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+        sourceTexturePlane1 = Create2DTexture(
+            device, kPlaneWidth, kPlaneHeight, wgpu::TextureFormat::RG8Unorm,
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+
+        RenderToSourceTexture(sourceTexturePlane0FsModule, sourceTexturePlane0);
+        RenderToSourceTexture(sourceTexturePlane1FsModule, sourceTexturePlane1);
+
+        renderTexture =
+            Create2DTexture(device, kPlaneWidth, kPlaneHeight, kFormat,
+                            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+
+        oobTestShaderModule = utils::CreateShaderModule(device, R"(
+        @vertex fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var positions = array(
+                    vec4f(-1.0, 1.0, 0.0, 1.0),
+                    vec4f(-1.0, -1.0, 0.0, 1.0),
+                    vec4f(1.0, 1.0, 0.0, 1.0),
+                    vec4f(1.0, -1.0, 0.0, 1.0),
+                    vec4f(-1.0, -1.0, 0.0, 1.0),
+                    vec4f(1.0, 1.0, 0.0, 1.0)
+                );
+                return positions[VertexIndex];
+        }
+
+        @group(0) @binding(0) var s : sampler;
+        @group(0) @binding(1) var t : texture_external;
+
+        @fragment fn sampleOverTopRight() -> @location(0) vec4f {
+            return textureSampleBaseClampToEdge(t, s, vec2f(1.1, 1.1));
+        }
+
+        @fragment fn sampleBelowBottomLeft() -> @location(0) vec4f {
+            return textureSampleBaseClampToEdge(t, s, vec2f(-0.1, -0.1));
+        }
+
+        @fragment fn loadOverTopRight() -> @location(0) vec4f {
+            _ = textureSampleBaseClampToEdge(t, s, vec2f(0.0, 0.0));
+            return textureLoad(t, vec2<i32>(5, 5));
+        }
+
+        @fragment fn loadBelowBottomLeft() -> @location(0) vec4f {
+            _ = textureSampleBaseClampToEdge(t, s, vec2f(0.0, 0.0));
+            return textureLoad(t, vec2<i32>(-1, -1));
+        }
+
+        )");
+    }
+
+    std::string GetEntryPoint(AccessMode mode, OOBAccess access) {
+        switch (mode) {
+            case AccessMode::Sample:
+                switch (access) {
+                    case OOBAccess::BelowBottomLeft:
+                        return "sampleBelowBottomLeft";
+                    case OOBAccess::OverTopRight:
+                        return "sampleOverTopRight";
+                    default:
+                        DAWN_UNREACHABLE();
+                }
+                break;
+            case AccessMode::Load:
+                switch (access) {
+                    case OOBAccess::BelowBottomLeft:
+                        return "loadBelowBottomLeft";
+                    case OOBAccess::OverTopRight:
+                        return "loadOverTopRight";
+                    default:
+                        DAWN_UNREACHABLE();
+                }
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    }
+
+    void DoTest() {
+        wgpu::ExternalTextureRotation rotation = GetParam().mRotation;
+        OOBAccess oobAccess = GetParam().mOOBAccess;
+        AccessMode accessMode = GetParam().mAccessMode;
+        Flip flip = GetParam().mFlip;
+
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = oobTestShaderModule;
+        descriptor.vertex.entryPoint = "main";
+        descriptor.cFragment.module = oobTestShaderModule;
+        std::string fragmentEntryPoint = GetEntryPoint(accessMode, oobAccess);
+
+        descriptor.cFragment.entryPoint = fragmentEntryPoint.c_str();
+        descriptor.cTargets[0].format = kFormat;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+        // Create an ExternalTextureDescriptor from the texture view
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+        externalDesc.plane0 = sourceTexturePlane0.CreateView();
+        externalDesc.plane1 = sourceTexturePlane1.CreateView();
+        externalDesc.rotation = rotation;
+        externalDesc.mirrored = flip == Flip::Mirrored;
+
+        // Visible rect excludes border region.
+        externalDesc.visibleOrigin = {0, 0};
+        externalDesc.visibleSize = {kPlaneWidth, kPlaneHeight};
+
+        // Import the external texture
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+        // Create a sampler and bind group
+        wgpu::Sampler sampler = device.CreateSampler();
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, sampler}, {1, externalTexture}});
+
+        // Run the shader, which should sample from the external texture and draw a triangle into
+        // the upper left corner of the render texture.
+        wgpu::TextureView renderView = renderTexture.CreateView();
+        utils::ComboRenderPassDescriptor renderPass({renderView}, nullptr);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        {
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.Draw(6);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Border color is black.
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kBlack, renderTexture, 0, 0);
+    }
+
+    static constexpr uint32_t kPlaneWidth = 5;
+    static constexpr uint32_t kPlaneHeight = 5;
+    wgpu::ShaderModule oobTestShaderModule;
+    wgpu::Texture sourceTexturePlane0;
+    wgpu::Texture sourceTexturePlane1;
+    wgpu::Texture renderTexture;
+};
+
+// Test for OOB access
+TEST_P(ExternalTextureOOBTests, ExternalTextureOOB) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    DoTest();
+}
+
+DAWN_INSTANTIATE_TEST_P(
+    ExternalTextureOOBTests,
+    {D3D11Backend(), D3D12Backend(), D3D12Backend({}, {"d3d12_use_root_signature_version_1_1"}),
+     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    std::vector<wgpu::ExternalTextureRotation>({wgpu::ExternalTextureRotation::Rotate0Degrees,
+                                                wgpu::ExternalTextureRotation::Rotate90Degrees,
+                                                wgpu::ExternalTextureRotation::Rotate180Degrees,
+                                                wgpu::ExternalTextureRotation::Rotate270Degrees}),
+    std::vector<Flip>({Flip::None, Flip::Mirrored}),
+    std::vector<AccessMode>({AccessMode::Sample, AccessMode::Load}),
+    std::vector<OOBAccess>({OOBAccess::BelowBottomLeft, OOBAccess::OverTopRight}));
 
 }  // anonymous namespace
 }  // namespace dawn

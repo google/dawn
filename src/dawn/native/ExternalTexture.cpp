@@ -265,6 +265,13 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
         0, 1, 0,  //
     };
 
+    Extent3D frameSize = descriptor->plane0->GetSingleSubresourceVirtualSize();
+    Extent3D plane1Size = {1, 1, 1};
+
+    if (params.numPlanes == 2) {
+        plane1Size = descriptor->plane1->GetSingleSubresourceVirtualSize();
+    }
+
     // Offset the coordinates so the center texel is at the origin, so we can apply rotations and
     // y-flips. After translation, coordinates range from [-0.5 .. +0.5] in both U and V.
     coordTransformMatrix = Translate(coordTransformMatrix, -0.5, -0.5);
@@ -307,22 +314,34 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     coordTransformMatrix = Translate(coordTransformMatrix, 0.5, 0.5);
 
     // Calculate scale factors and offsets from the specified visibleSize.
-    DAWN_ASSERT(descriptor->visibleSize.width > 0);
-    DAWN_ASSERT(descriptor->visibleSize.height > 0);
-    uint32_t frameWidth = descriptor->plane0->GetSingleSubresourceVirtualSize().width;
-    uint32_t frameHeight = descriptor->plane0->GetSingleSubresourceVirtualSize().height;
-    float xScale =
-        static_cast<float>(descriptor->visibleSize.width) / static_cast<float>(frameWidth);
-    float yScale =
-        static_cast<float>(descriptor->visibleSize.height) / static_cast<float>(frameHeight);
-    float xOffset =
-        static_cast<float>(descriptor->visibleOrigin.x) / static_cast<float>(frameWidth);
-    float yOffset =
-        static_cast<float>(descriptor->visibleOrigin.y) / static_cast<float>(frameHeight);
+    DAWN_ASSERT(mVisibleSize.width > 0);
+    DAWN_ASSERT(mVisibleSize.height > 0);
+    float xScale = static_cast<float>(mVisibleSize.width) / static_cast<float>(frameSize.width);
+    float yScale = static_cast<float>(mVisibleSize.height) / static_cast<float>(frameSize.height);
+    float xOffset = static_cast<float>(mVisibleOrigin.x) / static_cast<float>(frameSize.width);
+    float yOffset = static_cast<float>(mVisibleOrigin.y) / static_cast<float>(frameSize.height);
 
     // Finally, scale and translate based on the visible rect. This applies cropping.
     coordTransformMatrix = Scale(coordTransformMatrix, xScale, yScale);
     coordTransformMatrix = Translate(coordTransformMatrix, xOffset, yOffset);
+
+    // Calculate load transformation matrix by using
+    // toTexels * coordTransformMatrix * toNormalized
+    // Note that coords starts from 0 so the max value is size - 1.
+    mat2x3 toTexels = {static_cast<float>(frameSize.width - 1),  0, 0, 0,
+                       static_cast<float>(frameSize.height - 1), 0};
+
+    bool orientationChanged =
+        descriptor->rotation == wgpu::ExternalTextureRotation::Rotate90Degrees ||
+        descriptor->rotation == wgpu::ExternalTextureRotation::Rotate270Degrees;
+
+    uint32_t displayVisibleWidth = orientationChanged ? mVisibleSize.height : mVisibleSize.width;
+    uint32_t displayVisibleHeight = orientationChanged ? mVisibleSize.width : mVisibleSize.height;
+
+    mat2x3 toNormalized = {1.0f / static_cast<float>(displayVisibleWidth - 1),  0, 0, 0,
+                           1.0f / static_cast<float>(displayVisibleHeight - 1), 0};
+
+    mat2x3 loadTransformMatrix = Mul(toTexels, Mul(coordTransformMatrix, toNormalized));
 
     // Transpose the mat2x3 into column vectors for use by WGSL.
     params.coordTransformMatrix[0] = coordTransformMatrix[0];
@@ -331,6 +350,41 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     params.coordTransformMatrix[3] = coordTransformMatrix[4];
     params.coordTransformMatrix[4] = coordTransformMatrix[2];
     params.coordTransformMatrix[5] = coordTransformMatrix[5];
+
+    params.loadTransformMatrix[0] = loadTransformMatrix[0];
+    params.loadTransformMatrix[1] = loadTransformMatrix[3];
+    params.loadTransformMatrix[2] = loadTransformMatrix[1];
+    params.loadTransformMatrix[3] = loadTransformMatrix[4];
+    params.loadTransformMatrix[4] = loadTransformMatrix[2];
+    params.loadTransformMatrix[5] = loadTransformMatrix[5];
+
+    // clamped rect for sample and load
+    float plane0HalfTexelX = 0.5 / static_cast<float>(frameSize.width);
+    float plane0HalfTexelY = 0.5 / static_cast<float>(frameSize.height);
+    float plane1HalfTexelX = 0.5 / static_cast<float>(plane1Size.width);
+    float plane1HalfTexelY = 0.5 / static_cast<float>(plane1Size.height);
+
+    float normVisibleRectMinX = xOffset;
+    float normVisibleRectMinY = yOffset;
+    float normVisibleRectMaxX = xOffset + xScale;
+    float normVisibleRectMaxY = yOffset + yScale;
+
+    params.samplePlane0RectMin[0] = normVisibleRectMinX + plane0HalfTexelX;
+    params.samplePlane0RectMin[1] = normVisibleRectMinY + plane0HalfTexelY;
+    params.samplePlane0RectMax[0] = normVisibleRectMaxX - plane0HalfTexelX;
+    params.samplePlane0RectMax[1] = normVisibleRectMaxY - plane0HalfTexelY;
+    params.samplePlane1RectMin[0] = normVisibleRectMinX + plane1HalfTexelX;
+    params.samplePlane1RectMin[1] = normVisibleRectMinY + plane1HalfTexelY;
+    params.samplePlane1RectMax[0] = normVisibleRectMaxX - plane1HalfTexelX;
+    params.samplePlane1RectMax[1] = normVisibleRectMaxY - plane1HalfTexelY;
+
+    params.displayVisibleRectMax[0] = displayVisibleWidth - 1;
+    params.displayVisibleRectMax[1] = displayVisibleHeight - 1;
+
+    params.plane1CoordFactor[0] =
+        static_cast<float>(plane1Size.width) / static_cast<float>(frameSize.width);
+    params.plane1CoordFactor[1] =
+        static_cast<float>(plane1Size.height) / static_cast<float>(frameSize.height);
 
     DAWN_TRY(device->GetQueue()->WriteBuffer(mParamsBuffer.Get(), 0, &params,
                                              sizeof(ExternalTextureParams)));

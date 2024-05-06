@@ -35,6 +35,15 @@
                OpMemberName %ExternalTextureParams_std140 6 "coordTransformationMatrix_0"
                OpMemberName %ExternalTextureParams_std140 7 "coordTransformationMatrix_1"
                OpMemberName %ExternalTextureParams_std140 8 "coordTransformationMatrix_2"
+               OpMemberName %ExternalTextureParams_std140 9 "loadTransformationMatrix_0"
+               OpMemberName %ExternalTextureParams_std140 10 "loadTransformationMatrix_1"
+               OpMemberName %ExternalTextureParams_std140 11 "loadTransformationMatrix_2"
+               OpMemberName %ExternalTextureParams_std140 12 "samplePlane0RectMin"
+               OpMemberName %ExternalTextureParams_std140 13 "samplePlane0RectMax"
+               OpMemberName %ExternalTextureParams_std140 14 "samplePlane1RectMin"
+               OpMemberName %ExternalTextureParams_std140 15 "samplePlane1RectMax"
+               OpMemberName %ExternalTextureParams_std140 16 "displayVisibleRectMax"
+               OpMemberName %ExternalTextureParams_std140 17 "plane1CoordFactor"
                OpName %ext_tex_params "ext_tex_params"
                OpName %arg_0 "arg_0"
                OpName %prevent_dce_block "prevent_dce_block"
@@ -73,6 +82,15 @@
                OpMemberDecorate %ExternalTextureParams_std140 6 Offset 176
                OpMemberDecorate %ExternalTextureParams_std140 7 Offset 184
                OpMemberDecorate %ExternalTextureParams_std140 8 Offset 192
+               OpMemberDecorate %ExternalTextureParams_std140 9 Offset 200
+               OpMemberDecorate %ExternalTextureParams_std140 10 Offset 208
+               OpMemberDecorate %ExternalTextureParams_std140 11 Offset 216
+               OpMemberDecorate %ExternalTextureParams_std140 12 Offset 224
+               OpMemberDecorate %ExternalTextureParams_std140 13 Offset 232
+               OpMemberDecorate %ExternalTextureParams_std140 14 Offset 240
+               OpMemberDecorate %ExternalTextureParams_std140 15 Offset 248
+               OpMemberDecorate %ExternalTextureParams_std140 16 Offset 256
+               OpMemberDecorate %ExternalTextureParams_std140 17 Offset 264
                OpDecorate %ext_tex_params NonWritable
                OpDecorate %ext_tex_params DescriptorSet 1
                OpDecorate %ext_tex_params Binding 2
@@ -99,12 +117,12 @@
     %v3float = OpTypeVector %float 3
 %mat3v3float = OpTypeMatrix %v3float 3
     %v2float = OpTypeVector %float 2
-%ExternalTextureParams_std140 = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %v2float %v2float %v2float
+     %v2uint = OpTypeVector %uint 2
+%ExternalTextureParams_std140 = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2uint %v2float
 %ext_tex_params_block_std140 = OpTypeStruct %ExternalTextureParams_std140
 %_ptr_Uniform_ext_tex_params_block_std140 = OpTypePointer Uniform %ext_tex_params_block_std140
 %ext_tex_params = OpVariable %_ptr_Uniform_ext_tex_params_block_std140 Uniform
       %arg_0 = OpVariable %_ptr_UniformConstant_11 UniformConstant
-     %v2uint = OpTypeVector %uint 2
 %prevent_dce_block = OpTypeStruct %v2uint
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer

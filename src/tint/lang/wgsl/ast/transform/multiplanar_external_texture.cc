@@ -295,7 +295,13 @@ struct MultiplanarExternalTexture::State {
             b.Member("gammaEncodeParams", b.ty("GammaTransferParams")),
             b.Member("gamutConversionMatrix", b.ty.mat3x3<f32>()),
             b.Member("coordTransformationMatrix", b.ty.mat3x2<f32>()),
-        };
+            b.Member("loadTransformationMatrix", b.ty.mat3x2<f32>()),
+            b.Member("samplePlane0RectMin", b.ty.vec2<f32>()),
+            b.Member("samplePlane0RectMax", b.ty.vec2<f32>()),
+            b.Member("samplePlane1RectMin", b.ty.vec2<f32>()),
+            b.Member("samplePlane1RectMax", b.ty.vec2<f32>()),
+            b.Member("displayVisibleRectMax", b.ty.vec2<u32>()),
+            b.Member("plane1CoordFactor", b.ty.vec2<f32>())};
 
         params_struct_sym = b.Symbols().New("ExternalTextureParams");
 
@@ -344,72 +350,90 @@ struct MultiplanarExternalTexture::State {
     /// @returns a statement list that makes of the body of the chosen function
     auto buildTextureBuiltinBody(wgsl::BuiltinFn call_type) {
         tint::Vector<const Statement*, 16> stmts;
-        const CallExpression* single_plane_call = nullptr;
-        const CallExpression* plane_0_call = nullptr;
-        const CallExpression* plane_1_call = nullptr;
+        const BlockStatement* single_plane_block = nullptr;
+        const BlockStatement* multi_plane_block = nullptr;
         switch (call_type) {
             case wgsl::BuiltinFn::kTextureSampleBaseClampToEdge:
                 stmts.Push(b.Decl(b.Let(
                     "modifiedCoords", b.Mul(b.MemberAccessor("params", "coordTransformationMatrix"),
                                             b.Call<vec3<f32>>("coord", 1_a)))));
 
-                stmts.Push(b.Decl(
-                    b.Let("plane0_dims",
-                          b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane0", 0_a)))));
-                stmts.Push(b.Decl(
-                    b.Let("plane0_half_texel", b.Div(b.Call<vec2<f32>>(0.5_a), "plane0_dims"))));
-                stmts.Push(b.Decl(
-                    b.Let("plane0_clamped", b.Call("clamp", "modifiedCoords", "plane0_half_texel",
-                                                   b.Sub(1_a, "plane0_half_texel")))));
-                stmts.Push(b.Decl(
-                    b.Let("plane1_dims",
-                          b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "plane1", 0_a)))));
-                stmts.Push(b.Decl(
-                    b.Let("plane1_half_texel", b.Div(b.Call<vec2<f32>>(0.5_a), "plane1_dims"))));
-                stmts.Push(b.Decl(
-                    b.Let("plane1_clamped", b.Call("clamp", "modifiedCoords", "plane1_half_texel",
-                                                   b.Sub(1_a, "plane1_half_texel")))));
+                stmts.Push(b.Decl(b.Let(
+                    "plane0_clamped", b.Call("clamp", "modifiedCoords",
+                                             b.MemberAccessor("params", "samplePlane0RectMin"),
+                                             b.MemberAccessor("params", "samplePlane0RectMax")))));
 
-                // textureSampleLevel(plane0, smp, plane0_clamped, 0.0);
-                single_plane_call =
-                    b.Call("textureSampleLevel", "plane0", "smp", "plane0_clamped", 0_a);
-                // textureSampleLevel(plane0, smp, plane0_clamped, 0.0);
-                plane_0_call = b.Call("textureSampleLevel", "plane0", "smp", "plane0_clamped", 0_a);
-                // textureSampleLevel(plane1, smp, plane1_clamped, 0.0);
-                plane_1_call = b.Call("textureSampleLevel", "plane1", "smp", "plane1_clamped", 0_a);
+                // var color: vec4<f32>;
+                stmts.Push(b.Decl(b.Var("color", b.ty.vec4(b.ty.f32()))));
+
+                single_plane_block = b.Block(
+                    b.Assign("color", b.MemberAccessor(b.Call("textureSampleLevel", "plane0", "smp",
+                                                              "plane0_clamped", 0_a),
+                                                       "rgba")));
+
+                multi_plane_block = b.Block(
+                    b.Decl(b.Let("plane1_clamped",
+                                 b.Call("clamp", "modifiedCoords",
+                                        b.MemberAccessor("params", "samplePlane1RectMin"),
+                                        b.MemberAccessor("params", "samplePlane1RectMax")))),
+
+                    b.Assign("color",
+                             b.Call<vec4<f32>>(
+                                 b.Mul(b.Call<vec4<f32>>(
+                                           b.MemberAccessor(b.Call("textureSampleLevel", "plane0",
+                                                                   "smp", "plane0_clamped", 0_a),
+                                                            "r"),
+                                           b.MemberAccessor(b.Call("textureSampleLevel", "plane1",
+                                                                   "smp", "plane1_clamped", 0_a),
+                                                            "rg"),
+                                           1_a),
+                                       b.MemberAccessor("params", "yuvToRgbConversionMatrix")),
+                                 1_a)));
                 break;
             case wgsl::BuiltinFn::kTextureLoad:
-                // textureLoad(plane0, coord, 0);
-                single_plane_call = b.Call("textureLoad", "plane0", "coord", 0_a);
-                // textureLoad(plane0, coord, 0);
-                plane_0_call = b.Call("textureLoad", "plane0", "coord", 0_a);
-                // let coord1 = coord >> 1;
-                stmts.Push(b.Decl(b.Let("coord1", b.Shr("coord", b.Call<vec2<u32>>(1_a)))));
-                // textureLoad(plane1, coord1, 0);
-                plane_1_call = b.Call("textureLoad", "plane1", "coord1", 0_a);
+                stmts.Push(b.Decl(b.Let(
+                    "clampedCoords", b.Call("min", b.Call<vec2<u32>>("coord"),
+                                            b.MemberAccessor("params", "displayVisibleRectMax")))));
+                stmts.Push(b.Decl(b.Let(
+                    "plane0_clamped",
+                    b.Call<vec2<u32>>(b.Call(
+                        "round",
+                        b.Mul(b.MemberAccessor("params", "loadTransformationMatrix"),
+                              b.Call<vec3<f32>>(b.Call<vec2<f32>>("clampedCoords"), 1_a)))))));
+
+                // var color: vec4<f32>;
+                stmts.Push(b.Decl(b.Var("color", b.ty.vec4(b.ty.f32()))));
+
+                single_plane_block = b.Block(b.Assign(
+                    "color", b.MemberAccessor(
+                                 b.Call("textureLoad", "plane0", "plane0_clamped", 0_a), "rgba")));
+
+                multi_plane_block = b.Block(
+                    b.Decl(b.Let(
+                        "plane1_clamped",
+                        b.Call<vec2<u32>>(b.Mul(b.Call<vec2<f32>>("plane0_clamped"),
+                                                b.MemberAccessor("params", "plane1CoordFactor"))))),
+
+                    b.Assign("color",
+                             b.Call<vec4<f32>>(
+                                 b.Mul(b.Call<vec4<f32>>(
+                                           b.MemberAccessor(b.Call("textureLoad", "plane0",
+                                                                   "plane0_clamped", 0_a),
+                                                            "r"),
+                                           b.MemberAccessor(b.Call("textureLoad", "plane1",
+                                                                   "plane1_clamped", 0_a),
+                                                            "rg"),
+                                           1_a),
+                                       b.MemberAccessor("params", "yuvToRgbConversionMatrix")),
+                                 1_a)));
                 break;
             default:
                 TINT_ICE() << "unhandled builtin: " << call_type;
         }
 
-        // var color: vec4<f32>;
-        stmts.Push(b.Decl(b.Var("color", b.ty.vec4(b.ty.f32()))));
-
         // if ((params.numPlanes == 1u))
-        stmts.Push(b.If(
-            b.Equal(b.MemberAccessor("params", "numPlanes"), b.Expr(1_a)),
-            b.Block(
-                // color = textureLoad(plane0, coord, 0).rgba;
-                b.Assign("color", b.MemberAccessor(single_plane_call, "rgba"))),
-            b.Else(b.Block(
-                // color = vec4<f32>(vec4<f32>(plane_0_call.r, plane_1_call.rg, 1.0) *
-                //         params.yuvToRgbConversionMatrix));
-                b.Assign("color",
-                         b.Call<vec4<f32>>(
-                             b.Mul(b.Call<vec4<f32>>(b.MemberAccessor(plane_0_call, "r"),
-                                                     b.MemberAccessor(plane_1_call, "rg"), 1_a),
-                                   b.MemberAccessor("params", "yuvToRgbConversionMatrix")),
-                             1_a))))));
+        stmts.Push(b.If(b.Equal(b.MemberAccessor("params", "numPlanes"), b.Expr(1_a)),
+                        single_plane_block, b.Else(multi_plane_block)));
 
         // if (params.doYuvToRgbConversionOnly == 0u)
         stmts.Push(b.If(

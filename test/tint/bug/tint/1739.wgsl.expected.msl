@@ -39,7 +39,13 @@ struct ExternalTextureParams_tint_packed_vec3 {
   /* 0x0060 */ GammaTransferParams gammaEncodeParams;
   /* 0x0080 */ tint_array<tint_packed_vec3_f32_array_element, 3> gamutConversionMatrix;
   /* 0x00b0 */ float3x2 coordTransformationMatrix;
-  /* 0x00c8 */ tint_array<int8_t, 8> tint_pad_2;
+  /* 0x00c8 */ float3x2 loadTransformationMatrix;
+  /* 0x00e0 */ float2 samplePlane0RectMin;
+  /* 0x00e8 */ float2 samplePlane0RectMax;
+  /* 0x00f0 */ float2 samplePlane1RectMin;
+  /* 0x00f8 */ float2 samplePlane1RectMax;
+  /* 0x0100 */ uint2 displayVisibleRectMax;
+  /* 0x0108 */ float2 plane1CoordFactor;
 };
 
 float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
@@ -55,6 +61,13 @@ struct ExternalTextureParams {
   GammaTransferParams gammaEncodeParams;
   float3x3 gamutConversionMatrix;
   float3x2 coordTransformationMatrix;
+  float3x2 loadTransformationMatrix;
+  float2 samplePlane0RectMin;
+  float2 samplePlane0RectMax;
+  float2 samplePlane1RectMin;
+  float2 samplePlane1RectMax;
+  uint2 displayVisibleRectMax;
+  float2 plane1CoordFactor;
 };
 
 ExternalTextureParams tint_unpack_vec3_in_composite_1(ExternalTextureParams_tint_packed_vec3 in) {
@@ -66,6 +79,13 @@ ExternalTextureParams tint_unpack_vec3_in_composite_1(ExternalTextureParams_tint
   result.gammaEncodeParams = in.gammaEncodeParams;
   result.gamutConversionMatrix = tint_unpack_vec3_in_composite(in.gamutConversionMatrix);
   result.coordTransformationMatrix = in.coordTransformationMatrix;
+  result.loadTransformationMatrix = in.loadTransformationMatrix;
+  result.samplePlane0RectMin = in.samplePlane0RectMin;
+  result.samplePlane0RectMax = in.samplePlane0RectMax;
+  result.samplePlane1RectMin = in.samplePlane1RectMin;
+  result.samplePlane1RectMax = in.samplePlane1RectMax;
+  result.displayVisibleRectMax = in.displayVisibleRectMax;
+  result.plane1CoordFactor = in.plane1CoordFactor;
   return result;
 }
 
@@ -81,12 +101,14 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<float, access::sample> plane1, int2 coord, ExternalTextureParams params) {
-  int2 const coord1 = (coord >> uint2(1u));
+  uint2 const clampedCoords = min(uint2(coord), params.displayVisibleRectMax);
+  uint2 const plane0_clamped = uint2(rint((params.loadTransformationMatrix * float3(float2(clampedCoords), 1.0f))));
   float4 color = 0.0f;
   if ((params.numPlanes == 1u)) {
-    color = plane0.read(uint2(coord), 0).rgba;
+    color = plane0.read(uint2(plane0_clamped), 0).rgba;
   } else {
-    color = float4((float4(plane0.read(uint2(coord), 0)[0], plane1.read(uint2(coord1), 0).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
+    uint2 const plane1_clamped = uint2((float2(plane0_clamped) * params.plane1CoordFactor));
+    color = float4((float4(plane0.read(uint2(plane0_clamped), 0)[0], plane1.read(uint2(plane1_clamped), 0).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
     color = float4(gammaCorrection(color.rgb, params.gammaDecodeParams), color[3]);

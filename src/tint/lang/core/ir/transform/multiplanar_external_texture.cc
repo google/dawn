@@ -299,15 +299,20 @@ struct State {
         if (!external_texture_params_struct) {
             external_texture_params_struct =
                 ty.Struct(sym.Register("tint_ExternalTextureParams"),
-                          {
-                              {sym.Register("numPlanes"), ty.u32()},
-                              {sym.Register("doYuvToRgbConversionOnly"), ty.u32()},
-                              {sym.Register("yuvToRgbConversionMatrix"), ty.mat3x4<f32>()},
-                              {sym.Register("gammaDecodeParams"), GammaTransferParams()},
-                              {sym.Register("gammaEncodeParams"), GammaTransferParams()},
-                              {sym.Register("gamutConversionMatrix"), ty.mat3x3<f32>()},
-                              {sym.Register("coordTransformationMatrix"), ty.mat3x2<f32>()},
-                          });
+                          {{sym.Register("numPlanes"), ty.u32()},
+                           {sym.Register("doYuvToRgbConversionOnly"), ty.u32()},
+                           {sym.Register("yuvToRgbConversionMatrix"), ty.mat3x4<f32>()},
+                           {sym.Register("gammaDecodeParams"), GammaTransferParams()},
+                           {sym.Register("gammaEncodeParams"), GammaTransferParams()},
+                           {sym.Register("gamutConversionMatrix"), ty.mat3x3<f32>()},
+                           {sym.Register("coordTransformationMatrix"), ty.mat3x2<f32>()},
+                           {sym.Register("loadTransformationMatrix"), ty.mat3x2<f32>()},
+                           {sym.Register("samplePlane0RectMin"), ty.vec2<f32>()},
+                           {sym.Register("samplePlane0RectMax"), ty.vec2<f32>()},
+                           {sym.Register("samplePlane1RectMin"), ty.vec2<f32>()},
+                           {sym.Register("samplePlane1RectMax"), ty.vec2<f32>()},
+                           {sym.Register("displayVisibleRectMax"), ty.vec2<u32>()},
+                           {sym.Register("plane1CoordFactor"), ty.vec2<f32>()}});
         }
         return external_texture_params_struct;
     }
@@ -367,32 +372,31 @@ struct State {
         }
 
         // The helper function implements the following:
-        //   fn tint_TextureLoadExternal(plane0 : texture_2d<f32>,
-        //                               plane1 : texture_2d<f32>,
-        //                               coords : vec2i,
-        //                               params : ExternalTextureParams) -> vec4f {
-        //     var rgb : vec3f;
-        //     var alpha : f32;
+        // fn tint_TextureLoadExternal(plane0 : texture_2d<f32>,
+        //                             plane1 : texture_2d<f32>,
+        //                             coords : vec2<u32>,
+        //                             params : ExternalTextureParams) ->vec4f {
+        //     let clampedCoords = min(coords, params.displayVisibleRectMax);
+        //     let plane0_clamped = vec2<u32>(
+        //         round(params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1)));
+        //     var color : vec4<f32>;
         //     if ((params.numPlanes == 1)) {
-        //       let texel = textureLoad(plane0, coord, 0);
-        //       rgb = texel.rgb;
-        //       alpha = texel.a;
+        //         color = textureLoad(plane0, plane0_clamped, 0).rgba;
         //     } else {
-        //       let y = textureLoad(plane0, coord, 0).r;
-        //       let coord_uv = (coord >> vec2u(1));
-        //       let uv = textureLoad(plane1, coord_uv, 0).rg;
-        //       rgb = vec4f(y, uv, 1) * params.yuvToRgbConversionMatrix;
-        //       alpha = 1.0;
-        //     }
+        //         let plane1_clamped = vec2<f32>(plane0_clamped) * params.plane1CoordFactor;
         //
-        //     if (params.doYuvToRgbConversionOnly == 0) {
-        //       rgb = gammaCorrection(rgb, params.gammaDecodeParams);
-        //       rgb = params.gamutConversionMatrix * rgb;
-        //       rgb = gammaCorrection(rgb, params.gammaEncodeParams);
+        //         color = vec4<f32>((vec4<f32>(textureLoad(plane0, plane0_clamped, 0).r,
+        //                                      textureLoad(plane1, plane1_clamped, 0).rg, 1) *
+        //                            params.yuvToRgbConversionMatrix),
+        //                           1);
         //     }
-        //
-        //     return vec4f(rgb, alpha);
-        //   }
+        //     if ((params.doYuvToRgbConversionOnly == 0)) {
+        //         color = vec4<f32>(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+        //         color = vec4<f32>((params.gamutConversionMatrix * color.rgb), color.a);
+        //         color = vec4<f32>(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
+        //     }
+        //     return color;
+        // }
         texture_load_external = b.Function("tint_TextureLoadExternal", ty.vec4<f32>());
         auto* plane_0 = b.FunctionParam("plane_0", SampledTexture());
         auto* plane_1 = b.FunctionParam("plane_1", SampledTexture());
@@ -403,8 +407,21 @@ struct State {
             auto* vec2f = ty.vec2<f32>();
             auto* vec3f = ty.vec3<f32>();
             auto* vec4f = ty.vec4<f32>();
+            auto* vec2u = ty.vec2<u32>();
             auto* yuv_to_rgb_conversion_only = b.Access(ty.u32(), params, 1_u);
             auto* yuv_to_rgb_conversion = b.Access(ty.mat3x4<f32>(), params, 2_u);
+            auto* load_transform_matrix = b.Access(ty.mat3x2<f32>(), params, 7_u);
+            auto* display_visible_rect_max = b.Access(ty.vec2<u32>(), params, 12_u);
+            auto* plane1_coord_factor = b.Access(ty.vec2<f32>(), params, 13_u);
+
+            auto* clamped_coords =
+                b.Call(vec2u, core::BuiltinFn::kMin, coords, display_visible_rect_max);
+            auto* clamped_coords_f = b.Convert(vec2f, clamped_coords);
+            auto* modified_coords =
+                b.Multiply(vec2f, load_transform_matrix, b.Construct(vec3f, clamped_coords_f, 1_f));
+            auto* plane0_clamped_f = b.Call(vec2f, core::BuiltinFn::kRound, modified_coords);
+
+            auto* plane0_clamped = b.Convert(vec2u, plane0_clamped_f);
 
             auto* rgb_result = b.InstructionResult(vec3f);
             auto* alpha_result = b.InstructionResult(ty.f32());
@@ -413,7 +430,8 @@ struct State {
             if_planes_eq_1->SetResults(rgb_result, alpha_result);
             b.Append(if_planes_eq_1->True(), [&] {
                 // Load the texel from the first plane and split into separate rgb and a values.
-                auto* texel = b.Call(vec4f, core::BuiltinFn::kTextureLoad, plane_0, coords, 0_u);
+                auto* texel =
+                    b.Call(vec4f, core::BuiltinFn::kTextureLoad, plane_0, plane0_clamped, 0_u);
                 auto* rgb = b.Swizzle(vec3f, texel, {0u, 1u, 2u});
                 auto* a = b.Access(ty.f32(), texel, 3_u);
                 b.ExitIf(if_planes_eq_1, rgb, a);
@@ -421,14 +439,17 @@ struct State {
             b.Append(if_planes_eq_1->False(), [&] {
                 // Load the y value from the first plane.
                 auto* y = b.Access(
-                    ty.f32(), b.Call(vec4f, core::BuiltinFn::kTextureLoad, plane_0, coords, 0_u),
+                    ty.f32(),
+                    b.Call(vec4f, core::BuiltinFn::kTextureLoad, plane_0, plane0_clamped, 0_u),
                     0_u);
 
                 // Load the uv value from the second plane.
-                auto* coord_uv =
-                    b.ShiftRight(ty.vec2<u32>(), coords, b.Splat(ty.vec2<u32>(), 1_u, 2u));
+                auto* plane1_clamped_f = b.Multiply(vec2f, plane0_clamped_f, plane1_coord_factor);
+
+                auto* plane1_clamped = b.Convert(vec2u, plane1_clamped_f);
                 auto* uv = b.Swizzle(
-                    vec2f, b.Call(vec4f, core::BuiltinFn::kTextureLoad, plane_1, coord_uv, 0_u),
+                    vec2f,
+                    b.Call(vec4f, core::BuiltinFn::kTextureLoad, plane_1, plane1_clamped, 0_u),
                     {0u, 1u});
 
                 // Convert the combined yuv value into rgb and set the alpha to 1.0.
@@ -468,41 +489,36 @@ struct State {
         }
 
         // The helper function implements the following:
-        //   fn textureSampleExternal(plane0 : texture_2d<f32>,
-        //                            plane1 : texture_2d<f32>,
-        //                            smp : sampler,
-        //                            coord : vec2f,
-        //                            params : ExternalTextureParams) -> vec4f {
-        //     let modified_coords = params.coordTransformationMatrix * vec3f(coord, 1);
-        //     let plane0_dims = vec2f(textureDimensions(plane0));
-        //     let plane0_half_texel = vec2f(0.5) / plane0_dims;
-        //     let plane0_clamped = clamp(modified_coords, plane0_half_texel,
-        //                                (1 - plane0_half_texel));
-        //     let plane1_dims = vec2f(textureDimensions(plane1));
-        //     let plane1_half_texel = vec2f(0.5) / plane1_dims;
-        //     let plane1_clamped = clamp(modified_coords, plane1_half_texel,
-        //                          (1 - plane1_half_texel));
-        //     var rgb : vec3f;
-        //     var alpha : f32;
+        // fn textureSampleExternal(plane0 : texture_2d<f32>,
+        //                          plane1 : texture_2d<f32>,
+        //                          smp    : sampler,
+        //                          coord  : vec2f,
+        //                          params : ExternalTextureParams) ->vec4f {
+        //     let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+        //     let plane0_clamped =
+        //         clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
+        //     var color : vec4<f32>;
+        //
         //     if ((params.numPlanes == 1)) {
-        //       let texel = textureSampleLevel(plane0, smp, plane0_clamped, 0);
-        //       rgb = texel.rgb;
-        //       alpha = texel.a;
+        //         color = textureSampleLevel(plane0, smp, plane0_clamped, 0).rgba;
         //     } else {
-        //       let y = textureSampleLevel(plane0, smp, plane0_clamped, 0).r;
-        //       let uv = textureSampleLevel(plane1, smp, plane1_clamped, 0).rg;
-        //       rgb = vec4f(y, uv, 1.0) * params.yuvToRgbConversionMatrix;
-        //       alpha = 1.0;
+        //         let plane1_clamped =
+        //             clamp(modifiedCoords, params.samplePlane1RectMin,
+        //             params.samplePlane1RectMax);
+        //        color = vec4<f32>(
+        //                   vec4<f32>(textureSampleLevel(plane0, smp, plane0_clamped, 0).r,
+        //                             textureSampleLevel(plane1, smp, plane1_clamped, 0).rg, 1) *
+        //                   params.yuvToRgbConversionMatrix), 1);
         //     }
         //
-        //     if (params.doYuvToRgbConversionOnly == 0) {
-        //       rgb = gammaCorrection(rgb, params.gammaDecodeParams);
-        //       rgb = params.gamutConversionMatrix * rgb;
-        //       rgb = gammaCorrection(rgb, params.gammaEncodeParams);
+        //     if ((params.doYuvToRgbConversionOnly == 0)) {
+        //         color = vec4<f32>(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+        //         color = vec4<f32>((params.gamutConversionMatrix * color.rgb), color.a);
+        //         color = vec4<f32>(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
         //     }
         //
-        //     return vec4f(rgb, alpha);
-        //   }
+        //     return color;
+        // }
         texture_sample_external = b.Function("tint_TextureSampleExternal", ty.vec4<f32>());
         auto* plane_0 = b.FunctionParam("plane_0", SampledTexture());
         auto* plane_1 = b.FunctionParam("plane_1", SampledTexture());
@@ -517,21 +533,15 @@ struct State {
             auto* yuv_to_rgb_conversion_only = b.Access(ty.u32(), params, 1_u);
             auto* yuv_to_rgb_conversion = b.Access(ty.mat3x4<f32>(), params, 2_u);
             auto* transformation_matrix = b.Access(ty.mat3x2<f32>(), params, 6_u);
+            auto* sample_plane0_rect_min = b.Access(ty.vec2<f32>(), params, 8_u);
+            auto* sample_plane0_rect_max = b.Access(ty.vec2<f32>(), params, 9_u);
+            auto* sample_plane1_rect_min = b.Access(ty.vec2<f32>(), params, 10_u);
+            auto* sample_plane1_rect_max = b.Access(ty.vec2<f32>(), params, 11_u);
 
             auto* modified_coords =
                 b.Multiply(vec2f, transformation_matrix, b.Construct(vec3f, coords, 1_f));
-            auto* plane0_dims = b.Convert(
-                vec2f, b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, plane_0));
-            auto* plane0_half_texel = b.Divide(vec2f, b.Splat(vec2f, 0.5_f, 2u), plane0_dims);
-            auto* plane0_clamped =
-                b.Call(vec2f, core::BuiltinFn::kClamp, modified_coords, plane0_half_texel,
-                       b.Subtract(vec2f, 1_f, plane0_half_texel));
-            auto* plane1_dims = b.Convert(
-                vec2f, b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, plane_1));
-            auto* plane1_half_texel = b.Divide(vec2f, b.Splat(vec2f, 0.5_f, 2u), plane1_dims);
-            auto* plane1_clamped =
-                b.Call(vec2f, core::BuiltinFn::kClamp, modified_coords, plane1_half_texel,
-                       b.Subtract(vec2f, 1_f, plane1_half_texel));
+            auto* plane0_clamped = b.Call(vec2f, core::BuiltinFn::kClamp, modified_coords,
+                                          sample_plane0_rect_min, sample_plane0_rect_max);
 
             auto* rgb_result = b.InstructionResult(vec3f);
             auto* alpha_result = b.InstructionResult(ty.f32());
@@ -552,6 +562,8 @@ struct State {
                                    b.Call(vec4f, core::BuiltinFn::kTextureSampleLevel, plane_0,
                                           sampler, plane0_clamped, 0_f),
                                    0_u);
+                auto* plane1_clamped = b.Call(vec2f, core::BuiltinFn::kClamp, modified_coords,
+                                              sample_plane1_rect_min, sample_plane1_rect_max);
 
                 // Sample the uv value from the second plane.
                 auto* uv = b.Swizzle(vec2f,

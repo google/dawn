@@ -1,3 +1,7 @@
+uint2 tint_ftou(float2 v) {
+  return ((v < (4294967040.0f).xx) ? ((v < (0.0f).xx) ? (0u).xx : uint2(v)) : (4294967295u).xx);
+}
+
 struct GammaTransferParams {
   float G;
   float A;
@@ -16,11 +20,18 @@ struct ExternalTextureParams {
   GammaTransferParams gammaEncodeParams;
   float3x3 gamutConversionMatrix;
   float3x2 coordTransformationMatrix;
+  float3x2 loadTransformationMatrix;
+  float2 samplePlane0RectMin;
+  float2 samplePlane0RectMax;
+  float2 samplePlane1RectMin;
+  float2 samplePlane1RectMax;
+  uint2 displayVisibleRectMax;
+  float2 plane1CoordFactor;
 };
 
 Texture2D<float4> ext_tex_plane_1 : register(t1, space1);
 cbuffer cbuffer_ext_tex_params : register(b2, space1) {
-  uint4 ext_tex_params[13];
+  uint4 ext_tex_params[17];
 };
 Texture2D<float4> arg_0 : register(t0, space1);
 
@@ -32,12 +43,14 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureLoadExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, int2 coord, ExternalTextureParams params) {
-  int2 coord1 = (coord >> (1u).xx);
+  uint2 clampedCoords = min(uint2(coord), params.displayVisibleRectMax);
+  uint2 plane0_clamped = tint_ftou(round(mul(float3(float2(clampedCoords), 1.0f), params.loadTransformationMatrix)));
   float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = plane0.Load(int3(coord, 0)).rgba;
+    color = plane0.Load(uint3(plane0_clamped, uint(0))).rgba;
   } else {
-    color = float4(mul(params.yuvToRgbConversionMatrix, float4(plane0.Load(int3(coord, 0)).r, plane1.Load(int3(coord1, 0)).rg, 1.0f)), 1.0f);
+    uint2 plane1_clamped = tint_ftou((float2(plane0_clamped) * params.plane1CoordFactor));
+    color = float4(mul(params.yuvToRgbConversionMatrix, float4(plane0.Load(uint3(plane0_clamped, uint(0))).r, plane1.Load(uint3(plane1_clamped, uint(0))).rg, 1.0f)), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
     color = float4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
@@ -87,7 +100,19 @@ float3x2 ext_tex_params_load_8(uint offset) {
 ExternalTextureParams ext_tex_params_load(uint offset) {
   const uint scalar_offset_17 = ((offset + 0u)) / 4;
   const uint scalar_offset_18 = ((offset + 4u)) / 4;
-  ExternalTextureParams tint_symbol_2 = {ext_tex_params[scalar_offset_17 / 4][scalar_offset_17 % 4], ext_tex_params[scalar_offset_18 / 4][scalar_offset_18 % 4], ext_tex_params_load_2((offset + 16u)), ext_tex_params_load_4((offset + 64u)), ext_tex_params_load_4((offset + 96u)), ext_tex_params_load_6((offset + 128u)), ext_tex_params_load_8((offset + 176u))};
+  const uint scalar_offset_19 = ((offset + 224u)) / 4;
+  uint4 ubo_load_3 = ext_tex_params[scalar_offset_19 / 4];
+  const uint scalar_offset_20 = ((offset + 232u)) / 4;
+  uint4 ubo_load_4 = ext_tex_params[scalar_offset_20 / 4];
+  const uint scalar_offset_21 = ((offset + 240u)) / 4;
+  uint4 ubo_load_5 = ext_tex_params[scalar_offset_21 / 4];
+  const uint scalar_offset_22 = ((offset + 248u)) / 4;
+  uint4 ubo_load_6 = ext_tex_params[scalar_offset_22 / 4];
+  const uint scalar_offset_23 = ((offset + 256u)) / 4;
+  uint4 ubo_load_7 = ext_tex_params[scalar_offset_23 / 4];
+  const uint scalar_offset_24 = ((offset + 264u)) / 4;
+  uint4 ubo_load_8 = ext_tex_params[scalar_offset_24 / 4];
+  ExternalTextureParams tint_symbol_2 = {ext_tex_params[scalar_offset_17 / 4][scalar_offset_17 % 4], ext_tex_params[scalar_offset_18 / 4][scalar_offset_18 % 4], ext_tex_params_load_2((offset + 16u)), ext_tex_params_load_4((offset + 64u)), ext_tex_params_load_4((offset + 96u)), ext_tex_params_load_6((offset + 128u)), ext_tex_params_load_8((offset + 176u)), ext_tex_params_load_8((offset + 200u)), asfloat(((scalar_offset_19 & 2) ? ubo_load_3.zw : ubo_load_3.xy)), asfloat(((scalar_offset_20 & 2) ? ubo_load_4.zw : ubo_load_4.xy)), asfloat(((scalar_offset_21 & 2) ? ubo_load_5.zw : ubo_load_5.xy)), asfloat(((scalar_offset_22 & 2) ? ubo_load_6.zw : ubo_load_6.xy)), ((scalar_offset_23 & 2) ? ubo_load_7.zw : ubo_load_7.xy), asfloat(((scalar_offset_24 & 2) ? ubo_load_8.zw : ubo_load_8.xy))};
   return tint_symbol_2;
 }
 
