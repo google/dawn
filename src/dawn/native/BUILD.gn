@@ -419,7 +419,10 @@ source_set("sources") {
   # Only win32 app needs to link with user32.lib
   # In UWP, all availiable APIs are defined in WindowsApp.lib
   if (is_win && !dawn_is_winuwp) {
-    libs += [ "user32.lib" ]
+    libs += [
+      "user32.lib",
+      "delayimp.lib",
+    ]
     public_configs = [ ":win_delayload" ]
   }
 
