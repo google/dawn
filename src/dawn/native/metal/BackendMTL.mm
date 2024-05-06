@@ -306,8 +306,14 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
         // Formats
 
-        // This is the only supported format in native mode (see crbug.com/dawn/160).
-        capabilities.formats.push_back(wgpu::TextureFormat::BGRA8Unorm);
+        capabilities.formats = {
+            wgpu::TextureFormat::BGRA8Unorm,
+            wgpu::TextureFormat::BGRA8UnormSrgb,
+            wgpu::TextureFormat::RGBA16Float,
+        };
+#if DAWN_PLATFORM_IS(MACOS)
+        capabilities.formats.push_back(wgpu::TextureFormat::RGB10A2Unorm);
+#endif  // DAWN_PLATFORM_IS(MACOS)
 
         // Present Modes
 
