@@ -171,8 +171,8 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
         return utils::MakeBindGroup(device, bindGroupLayout, {{0, sampler}, {1, textureView}});
     }
 
-    // Create a render pipeline for sampling from a texture and rendering into the render target.
-    wgpu::RenderPipeline CreateRenderPipelineForTest() {
+    // Create a render pipeline for sampling from a texture 2d and rendering into the render target.
+    wgpu::RenderPipeline CreateRenderPipelineForTestTex2D() {
         DAWN_ASSERT(IsFormatSupported());
 
         utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
@@ -201,6 +201,57 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
             @fragment
             fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
                 return textureSample(texture0, sampler0, texCoord);
+            })");
+        renderPipelineDescriptor.vertex.module = vsModule;
+        renderPipelineDescriptor.cFragment.module = fsModule;
+        renderPipelineDescriptor.cTargets[0].format = utils::BasicRenderPass::kDefaultColorFormat;
+
+        return device.CreateRenderPipeline(&renderPipelineDescriptor);
+    }
+
+    // Create a render pipeline for sampling from a texture cube and rendering into the render
+    // target. Used for compatibility mode as cube texture cannot be bound as texture_2d_array.
+    wgpu::RenderPipeline CreateRenderPipelineForTestCube() {
+        utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+            struct VertexOut {
+                @location(0) texCoord : vec2 <f32>,
+                @builtin(position) position : vec4f,
+            }
+
+            @vertex
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
+                var pos = array(
+                    vec2f(-3.0,  1.0),
+                    vec2f( 3.0,  1.0),
+                    vec2f( 0.0, -2.0)
+                );
+                var output : VertexOut;
+                output.position = vec4f(pos[VertexIndex], 0.0, 1.0);
+                output.texCoord = vec2f(output.position.x / 2.0, -output.position.y / 2.0) + vec2f(0.5, 0.5);
+                return output;
+            })");
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture0 : texture_cube<f32>;
+            @group(0) @binding(2) var<uniform> layer : u32;
+
+            @fragment
+            fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
+                var st: vec2f = texCoord;
+                st.y = 1. - st.y;
+                st = st * 2. - 1.;
+                var coords: vec3f;
+                switch(layer) {
+                    case 0u: { coords = vec3f(1., st.y, -st.x); } // Positive X
+                    case 1u: { coords = vec3f(-1., st.y, st.x); } // Negative X
+                    case 2u: { coords = vec3f(st.x, 1., -st.y); } // Positive Y
+                    case 3u: { coords = vec3f(st.x, -1., st.y); } // Negative Y
+                    case 4u: { coords = vec3f(st.x, st.y, 1.); }  // Positive Z
+                    case 5u: { coords = vec3f(-st.x, st.y, -1.);} // Negative Z
+                    default: { return vec4f(0.); } // Unreachable
+                }
+                return textureSample(texture0, sampler0, coords);
             })");
         renderPipelineDescriptor.vertex.module = vsModule;
         renderPipelineDescriptor.cFragment.module = fsModule;
@@ -253,7 +304,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     }
 
     void VerifyTexture(const CopyConfig& config, wgpu::Texture texture) {
-        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTestTex2D();
 
         wgpu::Extent3D virtualSizeAtLevel = GetVirtualSizeAtLevel(config);
 
@@ -695,6 +746,81 @@ TEST_P(CompressedTextureFormatTest, Basic) {
     TestCopyRegionIntoFormatTextures(config);
 }
 
+// Test copying into the whole cube texture with 2x2 blocks and sampling from it.
+// Made for compatibility mode.
+TEST_P(CompressedTextureFormatTest, Cube) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
+    // TODO(crbug.com/dawn/2131): diagnose this failure on Win Angle D3D11
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
+    const wgpu::TextureFormat format = GetParam().mTextureFormat;
+
+    constexpr uint32_t kLayers = 6;
+    CopyConfig config = GetDefaultSmallConfig(kLayers);
+    config.copyExtent3D = config.textureDescriptor.size;
+    config.bytesPerRowAlignment = Align(
+        config.copyExtent3D.width / BlockWidthInTexels() * utils::GetTexelBlockSizeInBytes(format),
+        kTextureBytesPerRowAlignment);
+    config.rowsPerImage = kLayers;
+    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+    if (IsCompatibilityMode()) {
+        textureBindingViewDimensionDesc.textureBindingViewDimension =
+            wgpu::TextureViewDimension::Cube;
+        config.textureDescriptor.nextInChain = &textureBindingViewDimensionDesc;
+
+        wgpu::Texture texture = CreateTextureWithCompressedData(config);
+        wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTestCube();
+
+        wgpu::Extent3D virtualSizeAtLevel = GetVirtualSizeAtLevel(config);
+
+        // The copy region may exceed the subresource size because of the required paddings, so we
+        // should limit the size of the expectedData to make it match the real size of the render
+        // target.
+        wgpu::Extent3D noPaddingExtent3D = config.copyExtent3D;
+        if (config.copyOrigin3D.x + config.copyExtent3D.width > virtualSizeAtLevel.width) {
+            noPaddingExtent3D.width = virtualSizeAtLevel.width - config.copyOrigin3D.x;
+        }
+        if (config.copyOrigin3D.y + config.copyExtent3D.height > virtualSizeAtLevel.height) {
+            noPaddingExtent3D.height = virtualSizeAtLevel.height - config.copyOrigin3D.y;
+        }
+        noPaddingExtent3D.depthOrArrayLayers = 1u;
+
+        std::vector<utils::RGBA8> expectedData = GetExpectedData(noPaddingExtent3D);
+
+        wgpu::Origin3D firstLayerCopyOrigin = {config.copyOrigin3D.x, config.copyOrigin3D.y, 0};
+
+        wgpu::SamplerDescriptor samplerDesc = {};
+        wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+        wgpu::TextureViewDescriptor textureViewDescriptor = {};
+        textureViewDescriptor.format = GetParam().mTextureFormat;
+        textureViewDescriptor.dimension = wgpu::TextureViewDimension::Cube;
+        textureViewDescriptor.baseMipLevel = config.viewMipmapLevel;
+        textureViewDescriptor.mipLevelCount = 1;
+        wgpu::TextureView textureView = texture.CreateView(&textureViewDescriptor);
+
+        for (uint32_t layer = config.copyOrigin3D.z;
+             layer < config.copyOrigin3D.z + config.copyExtent3D.depthOrArrayLayers; ++layer) {
+            wgpu::Buffer uniformBuffer = utils::CreateBufferFromData(
+                device, &layer, sizeof(uint32_t), wgpu::BufferUsage::Uniform);
+
+            wgpu::BindGroup bindGroup =
+                utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
+                                     {
+                                         {0, sampler},
+                                         {1, textureView},
+                                         {2, uniformBuffer},
+                                     });
+
+            VerifyCompressedTexturePixelValues(renderPipeline, bindGroup, virtualSizeAtLevel,
+                                               firstLayerCopyOrigin, noPaddingExtent3D,
+                                               expectedData);
+        }
+    } else {
+        TestCopyRegionIntoFormatTextures(config);
+    }
+}
+
 // Test copying into a sub-region of a texture works correctly.
 TEST_P(CompressedTextureFormatTest, CopyIntoSubRegion) {
     // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
@@ -769,7 +895,7 @@ TEST_P(CompressedTextureFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmap
     wgpu::Texture textureDst = CreateTextureFromTexture(textureSrc, config, config);
 
     // Verify if we can use texture as sampled textures correctly.
-    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
+    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTestTex2D();
     wgpu::BindGroup bindGroup =
         CreateBindGroupForTest(renderPipeline.GetBindGroupLayout(0), textureDst,
                                config.copyOrigin3D.z, config.viewMipmapLevel);
@@ -809,7 +935,7 @@ TEST_P(CompressedTextureFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqualT
     wgpu::Texture textureDst = CreateTextureFromTexture(textureSrc, srcConfig, dstConfig);
 
     // Verify if we can use texture as sampled textures correctly.
-    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
+    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTestTex2D();
     wgpu::BindGroup bindGroup =
         CreateBindGroupForTest(renderPipeline.GetBindGroupLayout(0), textureDst,
                                dstConfig.copyOrigin3D.z, dstConfig.viewMipmapLevel);
@@ -850,7 +976,7 @@ TEST_P(CompressedTextureFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqualT
     wgpu::Texture textureDst = CreateTextureFromTexture(textureSrc, srcConfig, dstConfig);
 
     // Verify if we can use texture as sampled textures correctly.
-    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
+    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTestTex2D();
     wgpu::BindGroup bindGroup =
         CreateBindGroupForTest(renderPipeline.GetBindGroupLayout(0), textureDst,
                                dstConfig.copyOrigin3D.z, dstConfig.viewMipmapLevel);
@@ -906,7 +1032,7 @@ TEST_P(CompressedTextureFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVirt
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
+    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTestTex2D();
 
     for (uint32_t i = 0; i < kTotalCopyCount; ++i) {
         // Verify if we can use dstTextures as sampled textures correctly.
@@ -964,7 +1090,7 @@ TEST_P(CompressedTextureFormatTest, CopyWithMultipleLayerAndPhysicalSizeNotEqual
 
     // We use the render pipeline to test if each layer can be correctly sampled with the
     // expected data.
-    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest();
+    wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTestTex2D();
 
     const wgpu::Extent3D kExpectedDataRegionPerLayer = {kDstVirtualSize.width,
                                                         kDstVirtualSize.height, 1u};

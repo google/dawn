@@ -1440,6 +1440,16 @@ void DoTexSubImage(const OpenGLFunctions& gl,
             if (target == GL_TEXTURE_2D) {
                 gl.CompressedTexSubImage2D(target, destination.mipLevel, x, y, width, height,
                                            format.internalFormat, imageSize, data);
+            } else if (target == GL_TEXTURE_CUBE_MAP) {
+                DAWN_ASSERT(texture->GetArrayLayers() == 6);
+                const uint8_t* pointer = static_cast<const uint8_t*>(data);
+                uint32_t baseLayer = destination.origin.z;
+                for (uint32_t l = 0; l < copySize.depthOrArrayLayers; ++l) {
+                    GLenum cubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X + baseLayer + l;
+                    gl.CompressedTexSubImage2D(cubeMapTarget, destination.mipLevel, x, y, width,
+                                               height, format.internalFormat, imageSize, pointer);
+                    pointer += dataLayout.rowsPerImage * dataLayout.bytesPerRow;
+                }
             } else {
                 gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, dataLayout.rowsPerImage * blockInfo.height);
                 gl.CompressedTexSubImage3D(target, destination.mipLevel, x, y, z, width, height,
@@ -1463,7 +1473,25 @@ void DoTexSubImage(const OpenGLFunctions& gl,
                                                format.internalFormat, rowSize, d);
                     d += dataLayout.bytesPerRow;
                 }
+            } else if (target == GL_TEXTURE_CUBE_MAP) {
+                DAWN_ASSERT(texture->GetArrayLayers() == 6);
+                const uint8_t* pointer = static_cast<const uint8_t*>(data);
+                uint32_t baseLayer = destination.origin.z;
+                for (uint32_t l = 0; l < copySize.depthOrArrayLayers; ++l) {
+                    const uint8_t* d =
+                        pointer + l * dataLayout.rowsPerImage * dataLayout.bytesPerRow;
+                    GLenum cubeMapTarget = GL_TEXTURE_CUBE_MAP_POSITIVE_X + baseLayer + l;
+                    for (y = destination.origin.y; y < destination.origin.y + copySize.height;
+                         y += blockInfo.height) {
+                        uint32_t height = std::min(blockInfo.height, virtSize.height - y);
+                        gl.CompressedTexSubImage2D(cubeMapTarget, destination.mipLevel, x, y, width,
+                                                   height, format.internalFormat, rowSize, d);
+                        d += dataLayout.bytesPerRow;
+                    }
+                }
             } else {
+                DAWN_ASSERT(target == GL_TEXTURE_3D || target == GL_TEXTURE_2D_ARRAY ||
+                            target == GL_TEXTURE_CUBE_MAP_ARRAY);
                 const uint8_t* slice = static_cast<const uint8_t*>(data);
 
                 for (; z < destination.origin.z + copySize.depthOrArrayLayers; ++z) {
