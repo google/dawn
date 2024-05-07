@@ -49,11 +49,11 @@ bool GetFormatModifierProps(const VulkanFunctions& fn,
     std::vector<VkDrmFormatModifierPropertiesEXT> formatModifierPropsVector;
     VkFormatProperties2 formatProps = {};
     formatProps.sType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_2;
-    PNextChainBuilder formatPropsChain(&formatProps);
-
     VkDrmFormatModifierPropertiesListEXT formatModifierPropsList = {};
     formatModifierPropsList.drmFormatModifierCount = 0;
     formatModifierPropsList.pDrmFormatModifierProperties = nullptr;
+
+    PNextChainBuilder formatPropsChain(&formatProps);
     formatPropsChain.Add(&formatModifierPropsList,
                          VK_STRUCTURE_TYPE_DRM_FORMAT_MODIFIER_PROPERTIES_LIST_EXT);
 

@@ -135,17 +135,18 @@ class ServiceImplementationOpaqueFD : public ServiceImplementation {
         allocateInfo.pNext = nullptr;
         allocateInfo.allocationSize = importParams.allocationSize;
         allocateInfo.memoryTypeIndex = importParams.memoryTypeIndex;
-        PNextChainBuilder allocateInfoChain(&allocateInfo);
 
         VkImportMemoryFdInfoKHR importMemoryFdInfo;
         importMemoryFdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
         importMemoryFdInfo.fd = handle;
-        allocateInfoChain.Add(&importMemoryFdInfo, VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR);
 
         VkMemoryDedicatedAllocateInfo dedicatedAllocateInfo;
+        dedicatedAllocateInfo.image = image;
+        dedicatedAllocateInfo.buffer = VkBuffer{};
+
+        PNextChainBuilder allocateInfoChain(&allocateInfo);
+        allocateInfoChain.Add(&importMemoryFdInfo, VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR);
         if (importParams.dedicatedAllocation) {
-            dedicatedAllocateInfo.image = image;
-            dedicatedAllocateInfo.buffer = VkBuffer{};
             allocateInfoChain.Add(&dedicatedAllocateInfo,
                                   VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
         }

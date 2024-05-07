@@ -831,9 +831,6 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     // frontend already based on the minimum supported formats in the Vulkan spec
     VkImageCreateInfo createInfo = {};
     FillVulkanCreateInfoSizesAndType(*this, &createInfo);
-
-    PNextChainBuilder createInfoChain(&createInfo);
-
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     createInfo.format = VulkanImageFormat(device, GetFormat().format);
     createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -841,7 +838,6 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-    VkImageFormatListCreateInfo imageFormatListInfo = {};
     std::vector<VkFormat> viewFormats;
     bool requiresViewFormatsList = GetViewFormats().any();
     // As current SPIR-V SPEC doesn't support 'bgra8' as a valid image format, to support the
@@ -866,6 +862,8 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     // Add the view format list only when the usage does not have storage. Otherwise, the VVL will
     // say creation of the texture is invalid.
     // See https://github.com/gpuweb/gpuweb/issues/4426.
+    VkImageFormatListCreateInfo imageFormatListInfo = {};
+    PNextChainBuilder createInfoChain(&createInfo);
     if (requiresViewFormatsList && device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList) &&
         !(createInfo.usage & VK_IMAGE_USAGE_STORAGE_BIT)) {
         createInfoChain.Add(&imageFormatListInfo, VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO);
@@ -976,9 +974,6 @@ MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* desc
 
     VkImageCreateInfo baseCreateInfo = {};
     FillVulkanCreateInfoSizesAndType(*this, &baseCreateInfo);
-
-    PNextChainBuilder createInfoChain(&baseCreateInfo);
-
     baseCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     baseCreateInfo.format = format;
     baseCreateInfo.usage = usage;
@@ -992,6 +987,7 @@ MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* desc
     baseCreateInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
     VkImageFormatListCreateInfo imageFormatListInfo = {};
+    PNextChainBuilder createInfoChain(&baseCreateInfo);
     std::vector<VkFormat> viewFormats;
     if (GetViewFormats().any()) {
         baseCreateInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;

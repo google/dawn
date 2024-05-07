@@ -67,11 +67,11 @@ class ServiceImplementationAHardwareBuffer : public ServiceImplementation {
             .flags = flags,
         };
 
-        PNextChainBuilder formatInfoChain(&formatInfo);
-
         VkPhysicalDeviceExternalImageFormatInfo externalFormatInfo = {
             .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
         };
+
+        PNextChainBuilder formatInfoChain(&formatInfo);
         formatInfoChain.Add(&externalFormatInfo,
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO_KHR);
 
@@ -80,9 +80,8 @@ class ServiceImplementationAHardwareBuffer : public ServiceImplementation {
             .pNext = nullptr,
         };
 
-        PNextChainBuilder formatPropertiesChain(&formatProperties);
-
         VkExternalImageFormatProperties externalFormatProperties;
+        PNextChainBuilder formatPropertiesChain(&formatProperties);
         formatPropertiesChain.Add(&externalFormatProperties,
                                   VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES_KHR);
 

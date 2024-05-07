@@ -99,9 +99,9 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     createInfo.stage.pSpecializationInfo = nullptr;
 
+    VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
     PNextChainBuilder stageExtChain(&createInfo.stage);
 
-    VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
     uint32_t computeSubgroupSize = device->GetComputeSubgroupSize();
     // If experimental full subgroups is required, pipeline is created with varying subgroup size
     // enabled, and thus do not use explicit subgroup size control.

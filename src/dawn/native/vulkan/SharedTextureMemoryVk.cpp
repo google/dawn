@@ -134,10 +134,10 @@ ResultOrError<VkImage> CreateExternalVkImage(
     createInfo.pQueueFamilyIndices = nullptr;
     createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-    PNextChainBuilder createInfoChain(&createInfo);
-
     VkExternalMemoryImageCreateInfo externalMemoryImageCreateInfo = {};
     externalMemoryImageCreateInfo.handleTypes = externalMemoryHandleTypeFlagBits;
+
+    PNextChainBuilder createInfoChain(&createInfo);
     createInfoChain.Add(&externalMemoryImageCreateInfo,
                         VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO);
 
@@ -160,20 +160,20 @@ MaybeError CheckExternalImageFormatSupport(
     VkPhysicalDeviceImageFormatInfo2* imageFormatInfo,
     VkExternalMemoryHandleTypeFlagBits externalMemoryHandleTypeFlagBits,
     AdditionalChains*... additionalChains) {
-    PNextChainBuilder imageFormatInfoChain(imageFormatInfo);
-
     VkPhysicalDeviceExternalImageFormatInfo externalImageFormatInfo = {};
     externalImageFormatInfo.handleType = externalMemoryHandleTypeFlagBits;
+
+    PNextChainBuilder imageFormatInfoChain(imageFormatInfo);
     imageFormatInfoChain.Add(&externalImageFormatInfo,
                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO);
-
     (imageFormatInfoChain.Add(additionalChains), ...);
 
     VkImageFormatProperties2 imageFormatProps = {};
     imageFormatProps.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2;
-    PNextChainBuilder imageFormatPropsChain(&imageFormatProps);
 
     VkExternalImageFormatProperties externalImageFormatProps = {};
+
+    PNextChainBuilder imageFormatPropsChain(&imageFormatProps);
     imageFormatPropsChain.Add(&externalImageFormatProps,
                               VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES);
 
@@ -517,9 +517,8 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 
     // Query the properties to find the appropriate VkFormat and memory type.
     {
-        PNextChainBuilder bufferPropertiesChain(&bufferProperties);
-
         VkAndroidHardwareBufferFormatPropertiesANDROID bufferFormatProperties;
+        PNextChainBuilder bufferPropertiesChain(&bufferProperties);
         bufferPropertiesChain.Add(
             &bufferFormatProperties,
             VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_ANDROID);
