@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_COMMON_STACKALLOCATED_H_
 #define SRC_DAWN_COMMON_STACKALLOCATED_H_
 
+#include <cstddef>
+
 namespace dawn {
 
 // If a class depends on the StackAllocated base class, then instances may not be allocated on the
