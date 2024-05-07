@@ -99,6 +99,16 @@ void Client::DestroyAllObjects() {
     }
 }
 
+ReservedBuffer Client::ReserveBuffer(WGPUDevice device, const WGPUBufferDescriptor* descriptor) {
+    Buffer* buffer = Make<Buffer>(FromAPI(device)->GetEventManagerHandle(), descriptor);
+
+    ReservedBuffer result;
+    result.buffer = ToAPI(buffer);
+    result.handle = buffer->GetWireHandle();
+    result.deviceHandle = FromAPI(device)->GetWireHandle();
+    return result;
+}
+
 ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor) {
     Texture* texture = Make<Texture>(descriptor);
 
@@ -135,6 +145,10 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
     result.instance = ToAPI(instance);
     result.handle = instance->GetWireHandle();
     return result;
+}
+
+void Client::ReclaimBufferReservation(const ReservedBuffer& reservation) {
+    Free(FromAPI(reservation.buffer));
 }
 
 void Client::ReclaimTextureReservation(const ReservedTexture& reservation) {

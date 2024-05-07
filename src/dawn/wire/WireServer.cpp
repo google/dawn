@@ -43,6 +43,10 @@ const volatile char* WireServer::HandleCommands(const volatile char* commands, s
     return mImpl->HandleCommands(commands, size);
 }
 
+bool WireServer::InjectBuffer(WGPUBuffer buffer, const Handle& handle, const Handle& deviceHandle) {
+    return mImpl->InjectBuffer(buffer, handle, deviceHandle) == WireResult::Success;
+}
+
 bool WireServer::InjectTexture(WGPUTexture texture,
                                const Handle& handle,
                                const Handle& deviceHandle) {

@@ -54,6 +54,7 @@ class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
 
     const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
 
+    bool InjectBuffer(WGPUBuffer buffer, const Handle& handle, const Handle& deviceHandle);
     bool InjectTexture(WGPUTexture texture, const Handle& handle, const Handle& deviceHandle);
     bool InjectSwapChain(WGPUSwapChain swapchain, const Handle& handle, const Handle& deviceHandle);
     bool InjectInstance(WGPUInstance instance, const Handle& handle);

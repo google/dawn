@@ -180,6 +180,7 @@ class Server : public ServerBase {
     // ChunkedCommandHandler implementation
     const volatile char* HandleCommandsImpl(const volatile char* commands, size_t size) override;
 
+    WireResult InjectBuffer(WGPUBuffer buffer, const Handle& handle, const Handle& deviceHandle);
     WireResult InjectTexture(WGPUTexture texture, const Handle& handle, const Handle& deviceHandle);
     WireResult InjectSwapChain(WGPUSwapChain swapchain,
                                const Handle& handle,
