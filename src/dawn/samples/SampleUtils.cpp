@@ -241,7 +241,7 @@ wgpu::Device CreateCppDawnDevice() {
 
     // Create the swapchain
     auto surfaceChainedDesc = wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
-    WGPUSurfaceDescriptor surfaceDesc;
+    WGPUSurfaceDescriptor surfaceDesc = {};
     surfaceDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(surfaceChainedDesc.get());
     WGPUSurface surface = backendProcs.instanceCreateSurface(backendInstance->Get(), &surfaceDesc);
 
@@ -263,20 +263,6 @@ wgpu::TextureFormat GetPreferredSwapChainTextureFormat() {
 
 wgpu::SwapChain GetSwapChain() {
     return swapChain;
-}
-
-wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device) {
-    wgpu::TextureDescriptor descriptor;
-    descriptor.dimension = wgpu::TextureDimension::e2D;
-    descriptor.size.width = kWidth;
-    descriptor.size.height = kHeight;
-    descriptor.size.depthOrArrayLayers = 1;
-    descriptor.sampleCount = 1;
-    descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
-    descriptor.mipLevelCount = 1;
-    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
-    auto depthStencilTexture = device.CreateTexture(&descriptor);
-    return depthStencilTexture.CreateView();
 }
 
 bool InitSample(int argc, const char** argv) {

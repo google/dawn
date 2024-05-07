@@ -31,8 +31,8 @@ group("samples") {
   deps = [
     ":Animometer",
     ":ComputeBoids",
-    ":CppHelloTriangle",
     ":DawnInfo",
+    ":HelloTriangle",
     ":ManualSwapChainTest",
   ]
 }
@@ -68,8 +68,8 @@ template("sample") {
   }
 }
 
-sample("CppHelloTriangle") {
-  sources = [ "CppHelloTriangle.cpp" ]
+sample("HelloTriangle") {
+  sources = [ "HelloTriangle.cpp" ]
 }
 
 sample("ComputeBoids") {

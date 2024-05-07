@@ -43,9 +43,9 @@ target_link_libraries(dawn_sample_utils PUBLIC
     glfw
 )
 
-add_executable(CppHelloTriangle "CppHelloTriangle.cpp")
-common_compile_options(CppHelloTriangle)
-target_link_libraries(CppHelloTriangle dawn_sample_utils)
+add_executable(HelloTriangle "HelloTriangle.cpp")
+common_compile_options(HelloTriangle)
+target_link_libraries(HelloTriangle dawn_sample_utils)
 
 add_executable(ComputeBoids "ComputeBoids.cpp")
 common_compile_options(ComputeBoids)

@@ -39,7 +39,6 @@
 wgpu::Device device;
 wgpu::Queue queue;
 wgpu::SwapChain swapchain;
-wgpu::TextureView depthStencilView;
 
 wgpu::Buffer modelBuffer;
 std::array<wgpu::Buffer, 2> particleBuffers;
@@ -74,7 +73,6 @@ void destroyAllObjects() {
     device = nullptr;
     queue = nullptr;
     swapchain = nullptr;
-    depthStencilView = nullptr;
     modelBuffer = nullptr;
     particleBuffers.fill(nullptr);
     renderPipeline = nullptr;
@@ -143,8 +141,6 @@ void initRender() {
             return vec4f(1.0, 1.0, 1.0, 1.0);
         }
     )");
-
-    depthStencilView = CreateDefaultDepthStencilView(device);
 
     dawn::utils::ComboRenderPipelineDescriptor descriptor;
 
@@ -306,7 +302,7 @@ wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, 
     }
 
     {
-        dawn::utils::ComboRenderPassDescriptor renderPass({backbufferView}, depthStencilView);
+        dawn::utils::ComboRenderPassDescriptor renderPass({backbufferView});
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(renderPipeline);
         pass.SetVertexBuffer(0, bufferDst);
