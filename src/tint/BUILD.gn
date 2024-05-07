@@ -139,6 +139,10 @@ config("tint_config") {
   }
 }
 
+source_set("dl") {
+  # GN doesn't appear to need to depend on any dl libraries.
+}
+
 source_set("thread") {
   # GN doesn't appear to need to depend on any thread libraries.
 }

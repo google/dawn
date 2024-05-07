@@ -165,6 +165,7 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 */ -}}
 {{- define "ExternalDependencyTargets"}}
 {{-        if eq $.Name "abseil"             -}}"${tint_src_dir}:abseil",
+{{-   else if eq $.Name "dl"                 -}}"${tint_src_dir}:dl",
 {{-   else if eq $.Name "dxc-include"        -}}"${tint_src_dir}:dxc-include",
 {{-   else if eq $.Name "glslang-res-limits" -}}"${tint_glslang_dir}:glslang_default_resource_limits_sources",
 {{-   else if eq $.Name "glslang"            -}}"${tint_glslang_dir}:glslang_lib_sources",
