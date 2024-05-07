@@ -196,14 +196,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-
 crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Failure ]
 
 ################################################################################
-# Abstract matrix by matrix operations
-# Skipped because they are very slow and cause general timeouts
-# KEEP
-################################################################################
-crbug.com/tint/2051 webgpu:shader,execution,expression,binary,af_matrix_addition:* [ Skip ]
-crbug.com/tint/2051 webgpu:shader,execution,expression,binary,af_matrix_subtraction:* [ Skip ]
-
-################################################################################
 # Interpolated fragment_output_mask failing on Android Arm (Pixel 6)
 # KEEP
 ################################################################################
