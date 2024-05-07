@@ -122,27 +122,11 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
     }
 
     VkSamplerYcbcrConversionInfo samplerYCbCrInfo = {};
-    if (auto* yCbCrDescriptor = Unpack(descriptor).Get<YCbCrVkDescriptor>()) {
-        DAWN_TRY_ASSIGN(mYcbcrConversionCreateInfo,
-                        CreateSamplerYCbCrConversionCreateInfo(yCbCrDescriptor));
-
-        mExternalFormat = yCbCrDescriptor->externalFormat;
-#if DAWN_PLATFORM_IS(ANDROID)
-        VkExternalFormatANDROID vulkanExternalFormat;
-        // Chain VkExternalFormatANDROID only if needed.
-        if (mExternalFormat != 0) {
-            vulkanExternalFormat.sType = VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_ANDROID;
-            vulkanExternalFormat.pNext = nullptr;
-            vulkanExternalFormat.externalFormat = mExternalFormat;
-
-            mYcbcrConversionCreateInfo.pNext = &vulkanExternalFormat;
-        }
-#endif  // DAWN_PLATFORM_IS(ANDROID)
-
-        DAWN_TRY(CheckVkSuccess(device->fn.CreateSamplerYcbcrConversion(
-                                    device->GetVkDevice(), &mYcbcrConversionCreateInfo, nullptr,
-                                    &*mSamplerYCbCrConversion),
-                                "CreateSamplerYcbcrConversion"));
+    if (auto* yCbCrVkDescriptor = Unpack(descriptor).Get<YCbCrVkDescriptor>()) {
+        mYCbCrVkDescriptor = *yCbCrVkDescriptor;
+        mYCbCrVkDescriptor.nextInChain = nullptr;
+        DAWN_TRY_ASSIGN(mSamplerYCbCrConversion,
+                        CreateSamplerYCbCrConversionCreateInfo(mYCbCrVkDescriptor, device));
 
         samplerYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO;
         samplerYCbCrInfo.pNext = nullptr;

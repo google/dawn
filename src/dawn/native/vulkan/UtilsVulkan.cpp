@@ -327,37 +327,56 @@ ResultOrError<VkDrmFormatModifierPropertiesEXT> GetFormatModifierProps(
     return DAWN_VALIDATION_ERROR("DRM format modifier %u not supported.", modifier);
 }
 
-ResultOrError<VkSamplerYcbcrConversionCreateInfo> CreateSamplerYCbCrConversionCreateInfo(
-    const YCbCrVkDescriptor* yCbCrDescriptor) {
-    uint64_t externalFormat = yCbCrDescriptor->externalFormat;
-    VkFormat vulkanFormat = static_cast<VkFormat>(yCbCrDescriptor->vkFormat);
+ResultOrError<VkSamplerYcbcrConversion> CreateSamplerYCbCrConversionCreateInfo(
+    YCbCrVkDescriptor yCbCrDescriptor,
+    Device* device) {
+    uint64_t externalFormat = yCbCrDescriptor.externalFormat;
+    VkFormat vulkanFormat = static_cast<VkFormat>(yCbCrDescriptor.vkFormat);
     DAWN_INVALID_IF((externalFormat == 0 && vulkanFormat == VK_FORMAT_UNDEFINED),
                     "Both VkFormat and VkExternalFormatANDROID are undefined.");
 
     VkComponentMapping vulkanComponent;
-    vulkanComponent.r = static_cast<VkComponentSwizzle>(yCbCrDescriptor->vkComponentSwizzleRed);
-    vulkanComponent.g = static_cast<VkComponentSwizzle>(yCbCrDescriptor->vkComponentSwizzleGreen);
-    vulkanComponent.b = static_cast<VkComponentSwizzle>(yCbCrDescriptor->vkComponentSwizzleBlue);
-    vulkanComponent.a = static_cast<VkComponentSwizzle>(yCbCrDescriptor->vkComponentSwizzleAlpha);
+    vulkanComponent.r = static_cast<VkComponentSwizzle>(yCbCrDescriptor.vkComponentSwizzleRed);
+    vulkanComponent.g = static_cast<VkComponentSwizzle>(yCbCrDescriptor.vkComponentSwizzleGreen);
+    vulkanComponent.b = static_cast<VkComponentSwizzle>(yCbCrDescriptor.vkComponentSwizzleBlue);
+    vulkanComponent.a = static_cast<VkComponentSwizzle>(yCbCrDescriptor.vkComponentSwizzleAlpha);
 
     VkSamplerYcbcrConversionCreateInfo vulkanYCbCrCreateInfo;
     vulkanYCbCrCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO;
     vulkanYCbCrCreateInfo.pNext = nullptr;
     vulkanYCbCrCreateInfo.format = vulkanFormat;
     vulkanYCbCrCreateInfo.ycbcrModel =
-        static_cast<VkSamplerYcbcrModelConversion>(yCbCrDescriptor->vkYCbCrModel);
+        static_cast<VkSamplerYcbcrModelConversion>(yCbCrDescriptor.vkYCbCrModel);
     vulkanYCbCrCreateInfo.ycbcrRange =
-        static_cast<VkSamplerYcbcrRange>(yCbCrDescriptor->vkYCbCrRange);
+        static_cast<VkSamplerYcbcrRange>(yCbCrDescriptor.vkYCbCrRange);
     vulkanYCbCrCreateInfo.components = vulkanComponent;
     vulkanYCbCrCreateInfo.xChromaOffset =
-        static_cast<VkChromaLocation>(yCbCrDescriptor->vkXChromaOffset);
+        static_cast<VkChromaLocation>(yCbCrDescriptor.vkXChromaOffset);
     vulkanYCbCrCreateInfo.yChromaOffset =
-        static_cast<VkChromaLocation>(yCbCrDescriptor->vkYChromaOffset);
-    vulkanYCbCrCreateInfo.chromaFilter = static_cast<VkFilter>(yCbCrDescriptor->vkChromaFilter);
+        static_cast<VkChromaLocation>(yCbCrDescriptor.vkYChromaOffset);
+    vulkanYCbCrCreateInfo.chromaFilter = static_cast<VkFilter>(yCbCrDescriptor.vkChromaFilter);
     vulkanYCbCrCreateInfo.forceExplicitReconstruction =
-        static_cast<VkBool32>(yCbCrDescriptor->forceExplicitReconstruction);
+        static_cast<VkBool32>(yCbCrDescriptor.forceExplicitReconstruction);
 
-    return vulkanYCbCrCreateInfo;
+#if DAWN_PLATFORM_IS(ANDROID)
+    VkExternalFormatANDROID vulkanExternalFormat;
+    // Chain VkExternalFormatANDROID only if needed.
+    if (externalFormat != 0) {
+        vulkanExternalFormat.sType = VK_STRUCTURE_TYPE_EXTERNAL_FORMAT_ANDROID;
+        vulkanExternalFormat.pNext = nullptr;
+        vulkanExternalFormat.externalFormat = externalFormat;
+
+        vulkanYCbCrCreateInfo.pNext = &vulkanExternalFormat;
+    }
+#endif  // DAWN_PLATFORM_IS(ANDROID)
+
+    VkSamplerYcbcrConversion samplerYCbCrConversion = VK_NULL_HANDLE;
+    DAWN_TRY(CheckVkSuccess(
+        device->fn.CreateSamplerYcbcrConversion(device->GetVkDevice(), &vulkanYCbCrCreateInfo,
+                                                nullptr, &*samplerYCbCrConversion),
+        "CreateSamplerYcbcrConversion"));
+
+    return samplerYCbCrConversion;
 }
 
 }  // namespace dawn::native::vulkan
