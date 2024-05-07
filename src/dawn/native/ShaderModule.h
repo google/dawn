@@ -155,13 +155,8 @@ ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transf
                                            tint::ast::transform::DataMap* outputs,
                                            OwnedCompilationMessages* messages);
 
-// Per-binding shader metadata contains some SPIRV specific information in addition to
-// most of the frontend per-binding information.
+// Shader metadata for a binding, very similar to information contained in a pipeline layout.
 struct ShaderBindingInfo {
-    // The SPIRV ID of the resource.
-    uint32_t id;
-    uint32_t base_type_id;
-
     BindingNumber binding;
 
     // The variable name of the binding resource.
@@ -198,8 +193,7 @@ struct EntryPointMetadata {
     // tries to use the entry point.
     std::vector<std::string> infringedLimitErrors;
 
-    // bindings[G][B] is the reflection data for the binding defined with
-    // @group(G) @binding(B) in WGSL / SPIRV.
+    // bindings[G][B] is the reflection data for the binding defined with @group(G) @binding(B)
     BindingInfoArray bindings;
 
     struct SamplerTexturePair {
