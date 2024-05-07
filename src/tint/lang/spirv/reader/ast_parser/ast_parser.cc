@@ -29,7 +29,7 @@
 
 #include <algorithm>
 #include <limits>
-#include <locale>
+#include <string_view>
 #include <utility>
 
 #include "source/opt/build_module.h"
@@ -775,11 +775,10 @@ bool ASTParser::RegisterUserAndStructMemberNames() {
     return true;
 }
 
-bool ASTParser::IsValidIdentifier(const std::string& str) {
+bool ASTParser::IsValidIdentifier(std::string_view str) {
     if (str.empty()) {
         return false;
     }
-    std::locale c_locale("C");
     if (str[0] == '_') {
         if (str.length() == 1u || str[1] == '_') {
             // https://www.w3.org/TR/WGSL/#identifiers
@@ -787,14 +786,28 @@ bool ASTParser::IsValidIdentifier(const std::string& str) {
             // must not start with two underscores
             return false;
         }
-    } else if (!std::isalpha(str[0], c_locale)) {
-        return false;
     }
-    for (const char& ch : str) {
-        if ((ch != '_') && !std::isalnum(ch, c_locale)) {
+
+    // Must begin with an XID_Source unicode character, or underscore
+    {
+        auto* utf8 = reinterpret_cast<const uint8_t*>(str.data());
+        auto [code_point, n] = tint::utf8::Decode(utf8, str.size());
+        if (code_point != tint::CodePoint('_') && !code_point.IsXIDStart()) {
             return false;
         }
+        str = str.substr(n);
     }
+
+    // Must continue with an XID_Continue unicode character
+    while (!str.empty()) {
+        auto* utf8 = reinterpret_cast<const uint8_t*>(str.data());
+        auto [code_point, n] = tint::utf8::Decode(utf8, str.size());
+        if (!code_point.IsXIDContinue()) {
+            return false;
+        }
+        str = str.substr(n);
+    }
+
     return true;
 }
 
