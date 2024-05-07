@@ -100,26 +100,28 @@ function(DawnGenerator)
         COMMENT "Dawn: Generating files for ${G_PRINT_NAME}."
     )
 
+    # Return the list of outputs.
+    set(${G_RESULT_VARIABLE} ${OUTPUTS} PARENT_SCOPE)
+
     # Prior to CMake 3.20 the GENERATED property is local to a directory which means that putting
     # generated headers in INTERFACE properties causes dependent targets to complain that they
     # cannot find the file. (because they don't see it as generated and want to check is is
     # actually on the filesystem).
-    # Work around this by creating empty files placeholder generated files so that the build
-    # configuration process can success.
+    # Work around this by generating the files once if they aren't present at configuration time.
+    set(needToGenerate OFF)
     foreach(path ${OUTPUTS})
         if (NOT EXISTS ${path})
-            string(FIND "${path}" "/" foundIndex REVERSE)
-            string(SUBSTRING "${path}" 0 ${foundIndex} dir)
-            file(MAKE_DIRECTORY ${dir})
-            file(TOUCH ${path})
-            # Also touch the generator script to make a dependency of the generated file dirty,
-            # ensuring that it gets generated and not used while it is an empty file.
-            file(TOUCH ${G_SCRIPT})
+            set(needToGenerate ON)
         endif()
     endforeach()
 
-    # Return the list of outputs.
-    set(${G_RESULT_VARIABLE} ${OUTPUTS} PARENT_SCOPE)
+    if (${needToGenerate})
+        message(STATUS "Dawn: Generating initial versions of files for ${G_PRINT_NAME}.")
+        execute_process(COMMAND ${BASE_ARGS} RESULT_VARIABLE RET)
+        if (NOT RET EQUAL 0)
+            message(FATAL_ERROR "Dawn: Failed to generate the initial version of files for ${G_PRINT_NAME}. Base args are '${BASE_ARGS}'.")
+        endif()
+    endif()
 endfunction()
 
 # Helper function to call dawn_generator.py:
