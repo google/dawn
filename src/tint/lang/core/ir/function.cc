@@ -87,6 +87,11 @@ void Function::SetParams(std::initializer_list<FunctionParam*> params) {
     }
 }
 
+void Function::AppendParam(FunctionParam* param) {
+    params_.Push(param);
+    param->SetFunction(this);
+}
+
 void Function::Destroy() {
     Base::Destroy();
     block_->Destroy();

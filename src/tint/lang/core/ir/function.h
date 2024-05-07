@@ -146,6 +146,10 @@ class Function : public Castable<Function, Value> {
     /// @param params the function parameters
     void SetParams(std::initializer_list<FunctionParam*> params);
 
+    /// Appends a new function parameter.
+    /// @param param the function parameter to append
+    void AppendParam(FunctionParam* param);
+
     /// @returns the function parameters
     const VectorRef<FunctionParam*> Params() { return params_; }
 

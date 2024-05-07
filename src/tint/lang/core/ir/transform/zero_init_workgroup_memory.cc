@@ -292,11 +292,9 @@ struct State {
         }
 
         // No local invocation index was found, so add one to the parameter list and use that.
-        Vector<FunctionParam*, 4> params = func->Params();
         auto* param = b.FunctionParam("tint_local_index", ty.u32());
+        func->AppendParam(param);
         param->SetBuiltin(BuiltinValue::kLocalInvocationIndex);
-        params.Push(param);
-        func->SetParams(params);
         return param;
     }
 

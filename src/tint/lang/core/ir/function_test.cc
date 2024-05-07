@@ -160,6 +160,11 @@ TEST_F(IR_FunctionTest, Parameters) {
     EXPECT_EQ(param1->Function(), f);
     EXPECT_EQ(param2->Function(), nullptr);
     EXPECT_EQ(param3->Function(), f);
+
+    f->AppendParam(param2);
+    EXPECT_EQ(param1->Function(), f);
+    EXPECT_EQ(param2->Function(), f);
+    EXPECT_EQ(param3->Function(), f);
 }
 
 }  // namespace
