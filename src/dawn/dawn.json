@@ -2324,7 +2324,6 @@
     },
     "image copy buffer": {
         "category": "structure",
-        "extensible": "in",
         "members": [
             {"name": "layout", "type": "texture data layout"},
             {"name": "buffer", "type": "buffer"}
@@ -2332,7 +2331,6 @@
     },
     "image copy texture": {
         "category": "structure",
-        "extensible": "in",
         "members": [
             {"name": "texture", "type": "texture"},
             {"name": "mip level", "type": "uint32_t", "default": "0"},
