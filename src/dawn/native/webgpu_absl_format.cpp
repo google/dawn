@@ -124,11 +124,11 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::Buffer, layout));
         },
-        [&](const SamplerBindingLayout& layout) {
+        [&](const SamplerBindingInfo& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::Sampler, layout));
         },
-        [&](const StaticSamplerHolderBindingLayout& layout) {
+        [&](const StaticSamplerBindingInfo& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::StaticSampler, layout));
         },
@@ -195,6 +195,30 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const SamplerBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append(absl::StrFormat("{type: %s}", value.type));
+    return {true};
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const SamplerBindingLayout& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    SamplerBindingInfo info(value);
+    return AbslFormatConvert(info, spec, s);
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const StaticSamplerBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append(absl::StrFormat("{sampler: %s}", value.sampler.Get()));
+    return {true};
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const ImageCopyTexture* value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
@@ -234,15 +258,6 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         s->Append(" (defaulted)");
     }
     s->Append("]");
-    return {true};
-}
-
-absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const StaticSamplerHolderBindingLayout& value,
-    const absl::FormatConversionSpec& spec,
-    absl::FormatSink* s) {
-    s->Append(
-        absl::StrFormat("{type: StaticSamplerBindingLayout, sampler: %s}", value.sampler.Get()));
     return {true};
 }
 

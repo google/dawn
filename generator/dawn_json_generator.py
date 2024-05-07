@@ -937,15 +937,6 @@ def as_wireType(metadata, typ):
         return as_cppType(typ.name)
 
 
-def as_formatType(typ):
-    # Unsigned integral types
-    if typ.json_data['type'] in ['bool', 'uint32_t', 'uint64_t']:
-        return 'u'
-
-    # Defaults everything else to strings.
-    return 's'
-
-
 def c_methods(params, typ):
     return typ.methods + [
         # TODO(dawn:2234): Deprecated. Remove when no longer used.
@@ -1024,7 +1015,6 @@ def make_base_render_params(metadata):
             'convert_cType_to_cppType': convert_cType_to_cppType,
             'as_varName': as_varName,
             'decorate': decorate,
-            'as_formatType': as_formatType,
             'as_ktName': as_ktName,
         }
 

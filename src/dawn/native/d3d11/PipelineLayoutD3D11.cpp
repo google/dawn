@@ -81,10 +81,10 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                             DAWN_UNREACHABLE();
                     }
                 },
-                [&](const SamplerBindingLayout&) {
+                [&](const SamplerBindingInfo&) {
                     mIndexInfo[group][bindingIndex] = samplerIndex++;
                 },
-                [&](const StaticSamplerHolderBindingLayout&) {
+                [&](const StaticSamplerBindingInfo&) {
                     // Static samplers are implemented in the frontend on
                     // D3D11.
                     DAWN_UNREACHABLE();

@@ -69,39 +69,6 @@ namespace {{native_namespace}} {
         {% endfor %}
     {% endfor %}
 
-    //
-    // Compatible with absl::StrFormat (Needs to be disjoint from having a 'label' for now.)
-    // Currently uses a hard-coded list to determine which structures are actually supported. If
-    // additional structures are added, be sure to update the header file's list as well.
-    //
-    using absl::ParsedFormat;
-
-    {% for type in by_category["structure"] %}
-        {% if type.name.get() in [
-             "sampler binding layout",
-           ]
-        %}
-        absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
-            AbslFormatConvert(const {{as_cppType(type.name)}}& value,
-                              const absl::FormatConversionSpec& spec,
-                              absl::FormatSink* s) {
-            {% set members = [] %}
-            {% set format = [] %}
-            {% set template = [] %}
-            {% for member in type.members %}
-                {% set memberName = member.name.camelCase() %}
-                {% do members.append("value." + memberName) %}
-                {% do format.append(memberName + ": %" + as_formatType(member)) %}
-                {% do template.append("'" + as_formatType(member) + "'") %}
-            {% endfor %}
-            static const auto* const fmt =
-                new ParsedFormat<{{template|join(",")}}>("{ {{format|join(", ")}} }");
-            s->Append(absl::StrFormat(*fmt, {{members|join(", ")}}));
-            return {true};
-        }
-        {% endif %}
-    {% endfor %}
-
 }  // namespace {{native_namespace}}
 
 {% set namespace = metadata.namespace %}

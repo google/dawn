@@ -53,14 +53,14 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                     DAWN_UNREACHABLE();
             }
         },
-        [](const StaticSamplerHolderBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+        [](const StaticSamplerBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             // Static samplers are handled in the frontend.
             // TODO(crbug.com/dawn/2483): Implement static samplers in the
             // D3D12 backend.
             DAWN_UNREACHABLE();
             return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
         },
-        [](const SamplerBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+        [](const SamplerBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
         },
         [](const TextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
@@ -127,14 +127,14 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
         // don't need to set DESCRIPTORS_VOLATILE for any binding types.
         range.Flags = MatchVariant(
             bindingInfo.bindingLayout,
-            [](const StaticSamplerHolderBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+            [](const StaticSamplerBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 // Static samplers are handled in the frontend.
                 // TODO(crbug.com/dawn/2483): Implement static samplers in the
                 // D3D12 backend.
                 DAWN_UNREACHABLE();
                 return D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
             },
-            [](const SamplerBindingLayout&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+            [](const SamplerBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 // Sampler descriptor ranges don't support DATA_* flags at all since samplers do not
                 // point to data.
                 return D3D12_DESCRIPTOR_RANGE_FLAG_NONE;

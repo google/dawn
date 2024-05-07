@@ -225,7 +225,7 @@ MaybeError ValidateStorageTextureBinding(DeviceBase* device,
 
 MaybeError ValidateSamplerBinding(const DeviceBase* device,
                                   const BindGroupEntry& entry,
-                                  const SamplerBindingLayout& layout) {
+                                  const SamplerBindingInfo& layout) {
     DAWN_INVALID_IF(entry.sampler == nullptr, "Binding entry sampler not set.");
 
     DAWN_INVALID_IF(entry.sampler->IsYCbCr(),
@@ -392,14 +392,14 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
                                  i, layout);
                 return {};
             },
-            [&](const SamplerBindingLayout& layout) -> MaybeError {
+            [&](const SamplerBindingInfo& layout) -> MaybeError {
                 DAWN_TRY_CONTEXT(ValidateSamplerBinding(device, entry, layout),
                                  "validating entries[%u] as a Sampler."
                                  "\nExpected entry layout: %s",
                                  i, layout);
                 return {};
             },
-            [&](const StaticSamplerHolderBindingLayout& layout) -> MaybeError {
+            [&](const StaticSamplerBindingInfo& layout) -> MaybeError {
                 return DAWN_VALIDATION_ERROR(
                     "entries[%u] is provided when the layout contains a static sampler for that "
                     "binding.",
@@ -583,7 +583,7 @@ SamplerBase* BindGroupBase::GetBindingAsSampler(BindingIndex bindingIndex) const
     DAWN_ASSERT(!IsError());
     const BindGroupLayoutInternalBase* layout = GetLayout();
     DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
-    DAWN_ASSERT(std::holds_alternative<SamplerBindingLayout>(
+    DAWN_ASSERT(std::holds_alternative<SamplerBindingInfo>(
         layout->GetBindingInfo(bindingIndex).bindingLayout));
     return static_cast<SamplerBase*>(mBindingData.bindings[bindingIndex].Get());
 }

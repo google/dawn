@@ -66,10 +66,6 @@ enum class BindingInfoType {
     StaticSampler
 };
 
-struct StaticSamplerHolderBindingLayout {
-    Ref<SamplerBase> sampler;
-};
-
 // A mirror of wgpu::BufferBindingLayout for use inside dawn::native.
 struct BufferBindingInfo {
     BufferBindingInfo();
@@ -104,6 +100,23 @@ struct StorageTextureBindingInfo {
     wgpu::StorageTextureAccess access;
 };
 
+// A mirror of wgpu::SamplerBindingLayout for use inside dawn::native.
+struct SamplerBindingInfo {
+    SamplerBindingInfo();
+    explicit SamplerBindingInfo(const SamplerBindingLayout& apiLayout);
+
+    // For shader reflection NonFiltering is never used and Filtering is used for any `sampler`.
+    wgpu::SamplerBindingType type;
+};
+
+// A mirror of wgpu::StaticSamplerBindingLayout for use inside dawn::native.
+struct StaticSamplerBindingInfo {
+    explicit StaticSamplerBindingInfo(const StaticSamplerBindingLayout& apiLayout);
+
+    // Holds a ref instead of an unowned pointer.
+    Ref<SamplerBase> sampler;
+};
+
 // A mirror of wgpu::ExternalTextureBindingLayout for use inside dawn::native.
 struct ExternalTextureBindingInfo {};
 
@@ -112,10 +125,10 @@ struct BindingInfo {
     wgpu::ShaderStage visibility;
 
     std::variant<BufferBindingInfo,
-                 SamplerBindingLayout,
+                 SamplerBindingInfo,
                  TextureBindingInfo,
                  StorageTextureBindingInfo,
-                 StaticSamplerHolderBindingLayout>
+                 StaticSamplerBindingInfo>
         bindingLayout;
 };
 

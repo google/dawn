@@ -98,13 +98,13 @@ BindGroup::BindGroup(Device* device,
                 write.pBufferInfo = &writeBufferInfo[numWrites];
                 return true;
             },
-            [&](const SamplerBindingLayout&) -> bool {
+            [&](const SamplerBindingInfo&) -> bool {
                 Sampler* sampler = ToBackend(GetBindingAsSampler(bindingIndex));
                 writeImageInfo[numWrites].sampler = sampler->GetHandle();
                 write.pImageInfo = &writeImageInfo[numWrites];
                 return true;
             },
-            [&](const StaticSamplerHolderBindingLayout& layout) -> bool {
+            [&](const StaticSamplerBindingInfo& layout) -> bool {
                 // Static samplers are bound into the Vulkan layout as immutable
                 // samplers at BindGroupLayout creation time. There is no work
                 // to be done at BindGroup creation time.

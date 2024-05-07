@@ -624,7 +624,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                                   withRange:NSMakeRange(computeIndex, 1)];
                     }
                 },
-                [&](const SamplerBindingLayout&) {
+                [&](const SamplerBindingInfo&) {
                     auto sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                     if (hasVertStage) {
                         [render setVertexSamplerState:sampler->GetMTLSamplerState()
@@ -639,7 +639,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                                          atIndex:computeIndex];
                     }
                 },
-                [&](const StaticSamplerHolderBindingLayout&) {
+                [&](const StaticSamplerBindingInfo&) {
                     // Static samplers are handled in the frontend.
                     // TODO(crbug.com/dawn/2482): Implement static samplers in the
                     // Metal backend.

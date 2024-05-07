@@ -67,7 +67,7 @@ PipelineLayout::PipelineLayout(Device* device,
                         mIndexInfo[stage][group][bindingIndex] = bufferIndex;
                         bufferIndex++;
                     },
-                    [&](const SamplerBindingLayout&) {
+                    [&](const SamplerBindingInfo&) {
                         mIndexInfo[stage][group][bindingIndex] = samplerIndex;
                         samplerIndex++;
                     },
@@ -79,7 +79,7 @@ PipelineLayout::PipelineLayout(Device* device,
                         mIndexInfo[stage][group][bindingIndex] = textureIndex;
                         textureIndex++;
                     },
-                    [&](const StaticSamplerHolderBindingLayout&) {
+                    [&](const StaticSamplerBindingInfo&) {
                         // Static samplers are handled in the frontend.
                         // TODO(crbug.com/dawn/2482): Implement static samplers in the
                         // Metal backend.

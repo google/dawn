@@ -120,6 +120,24 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+struct SamplerBindingInfo;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const SamplerBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
+struct SamplerBindingLayout;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const SamplerBindingLayout& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
+struct StaticSamplerBindingInfo;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const StaticSamplerBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 struct ImageCopyTexture;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const ImageCopyTexture* value,
@@ -135,12 +153,6 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 struct ShaderModuleEntryPoint;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const ShaderModuleEntryPoint* value,
-    const absl::FormatConversionSpec& spec,
-    absl::FormatSink* s);
-
-struct StaticSamplerHolderBindingLayout;
-absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const StaticSamplerHolderBindingLayout& value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 

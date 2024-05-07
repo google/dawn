@@ -160,8 +160,8 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                         DAWN_UNREACHABLE();
                 }
             },
-            [&](const SamplerBindingLayout&) {},  //
-            [&](const StaticSamplerHolderBindingLayout&) {});
+            [&](const SamplerBindingInfo&) {},  //
+            [&](const StaticSamplerBindingInfo&) {});
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
@@ -226,7 +226,7 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
                 mUsage.referencedTextures.insert(
                     group->GetBindingAsTextureView(index)->GetTexture());
             },
-            [](const SamplerBindingLayout&) {}, [](const StaticSamplerHolderBindingLayout&) {});
+            [](const SamplerBindingInfo&) {}, [](const StaticSamplerBindingInfo&) {});
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {

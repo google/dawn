@@ -228,8 +228,8 @@ MaybeError BindGroupTracker::Apply() {
                         return {};
                     },
                     [](const TextureBindingInfo&) -> MaybeError { return {}; },
-                    [](const SamplerBindingLayout&) -> MaybeError { return {}; },
-                    [](const StaticSamplerHolderBindingLayout&) -> MaybeError {
+                    [](const SamplerBindingInfo&) -> MaybeError { return {}; },
+                    [](const StaticSamplerBindingInfo&) -> MaybeError {
                         // Static samplers are implemented in the frontend on
                         // D3D11.
                         DAWN_UNREACHABLE();
@@ -374,13 +374,13 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                 }
                 return {};
             },
-            [&](const StaticSamplerHolderBindingLayout&) -> MaybeError {
+            [&](const StaticSamplerBindingInfo&) -> MaybeError {
                 // Static samplers are implemented in the frontend on
                 // D3D11.
                 DAWN_UNREACHABLE();
                 return {};
             },
-            [&](const SamplerBindingLayout&) -> MaybeError {
+            [&](const SamplerBindingInfo&) -> MaybeError {
                 Sampler* sampler = ToBackend(group->GetBindingAsSampler(bindingIndex));
                 ID3D11SamplerState* d3d11SamplerState = sampler->GetD3D11SamplerState();
                 if (bindingVisibility & wgpu::ShaderStage::Vertex) {
@@ -517,12 +517,12 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                         DAWN_UNREACHABLE();
                 }
             },
-            [&](const StaticSamplerHolderBindingLayout&) {
+            [&](const StaticSamplerBindingInfo&) {
                 // Static samplers are implemented in the frontend on
                 // D3D11.
                 DAWN_UNREACHABLE();
             },
-            [&](const SamplerBindingLayout&) {
+            [&](const SamplerBindingInfo&) {
                 ID3D11SamplerState* nullSampler = nullptr;
                 if (bindingVisibility & wgpu::ShaderStage::Vertex) {
                     deviceContext->VSSetSamplers(bindingSlot, 1, &nullSampler);

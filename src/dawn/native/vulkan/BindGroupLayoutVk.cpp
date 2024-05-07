@@ -85,8 +85,8 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             }
         },
-        [](const SamplerBindingLayout&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
-        [](const StaticSamplerHolderBindingLayout&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
+        [](const SamplerBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
+        [](const StaticSamplerBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
         [](const TextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; },
         [](const StorageTextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; });
 }
@@ -116,9 +116,8 @@ MaybeError BindGroupLayout::Initialize() {
         vkBinding.descriptorCount = 1;
         vkBinding.stageFlags = VulkanShaderStageFlags(bindingInfo.visibility);
 
-        if (std::holds_alternative<StaticSamplerHolderBindingLayout>(bindingInfo.bindingLayout)) {
-            auto samplerLayout =
-                std::get<StaticSamplerHolderBindingLayout>(bindingInfo.bindingLayout);
+        if (std::holds_alternative<StaticSamplerBindingInfo>(bindingInfo.bindingLayout)) {
+            auto samplerLayout = std::get<StaticSamplerBindingInfo>(bindingInfo.bindingLayout);
             auto sampler = ToBackend(samplerLayout.sampler);
             vkBinding.pImmutableSamplers = &sampler->GetHandle().GetHandle();
         } else {

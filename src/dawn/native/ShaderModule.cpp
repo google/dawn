@@ -572,14 +572,14 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             return {};
         },
         [&](const SamplerBindingInfo& bindingInfo) -> MaybeError {
-            const SamplerBindingLayout& bindingLayout =
-                std::get<SamplerBindingLayout>(layoutInfo.bindingLayout);
+            const SamplerBindingInfo& bindingLayout =
+                std::get<SamplerBindingInfo>(layoutInfo.bindingLayout);
             DAWN_INVALID_IF(
                 (bindingLayout.type == wgpu::SamplerBindingType::Comparison) !=
-                    bindingInfo.isComparison,
+                    (bindingInfo.type == wgpu::SamplerBindingType::Comparison),
                 "The sampler type in the shader (comparison: %u) doesn't match the type in "
                 "the layout (comparison: %u).",
-                bindingInfo.isComparison,
+                bindingInfo.type == wgpu::SamplerBindingType::Comparison,
                 bindingLayout.type == wgpu::SamplerBindingType::Comparison);
             return {};
         },
@@ -859,10 +859,10 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 SamplerBindingInfo bindingInfo = {};
                 switch (resource.resource_type) {
                     case tint::inspector::ResourceBinding::ResourceType::kSampler:
-                        bindingInfo.isComparison = false;
+                        bindingInfo.type = wgpu::SamplerBindingType::Filtering;
                         break;
                     case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
-                        bindingInfo.isComparison = true;
+                        bindingInfo.type = wgpu::SamplerBindingType::Comparison;
                         break;
                     default:
                         DAWN_UNREACHABLE();
@@ -1177,13 +1177,13 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
         const BindingInfo& samplerInfo =
             samplerBGL->GetBindingInfo(samplerBGL->GetBindingIndex(pair.sampler.binding));
         bool samplerIsFiltering = false;
-        if (std::holds_alternative<StaticSamplerHolderBindingLayout>(samplerInfo.bindingLayout)) {
-            const StaticSamplerHolderBindingLayout& samplerLayout =
-                std::get<StaticSamplerHolderBindingLayout>(samplerInfo.bindingLayout);
+        if (std::holds_alternative<StaticSamplerBindingInfo>(samplerInfo.bindingLayout)) {
+            const StaticSamplerBindingInfo& samplerLayout =
+                std::get<StaticSamplerBindingInfo>(samplerInfo.bindingLayout);
             samplerIsFiltering = samplerLayout.sampler->IsFiltering();
         } else {
-            const SamplerBindingLayout& samplerLayout =
-                std::get<SamplerBindingLayout>(samplerInfo.bindingLayout);
+            const SamplerBindingInfo& samplerLayout =
+                std::get<SamplerBindingInfo>(samplerInfo.bindingLayout);
             samplerIsFiltering = (samplerLayout.type == wgpu::SamplerBindingType::Filtering);
         }
         if (!samplerIsFiltering) {

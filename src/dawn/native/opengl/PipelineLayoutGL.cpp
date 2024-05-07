@@ -67,11 +67,11 @@ PipelineLayout::PipelineLayout(Device* device,
                             DAWN_UNREACHABLE();
                     }
                 },
-                [&](const StaticSamplerHolderBindingLayout&) {
+                [&](const StaticSamplerBindingInfo&) {
                     mIndexInfo[group][bindingIndex] = samplerIndex;
                     samplerIndex++;
                 },
-                [&](const SamplerBindingLayout&) {
+                [&](const SamplerBindingInfo&) {
                     mIndexInfo[group][bindingIndex] = samplerIndex;
                     samplerIndex++;
                 },

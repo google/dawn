@@ -30,6 +30,7 @@
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Limits.h"
+#include "dawn/native/Sampler.h"
 
 namespace dawn::native {
 
@@ -37,12 +38,12 @@ BindingInfoType GetBindingInfoType(const BindingInfo& info) {
     return MatchVariant(
         info.bindingLayout,
         [](const BufferBindingInfo&) -> BindingInfoType { return BindingInfoType::Buffer; },
-        [](const SamplerBindingLayout&) -> BindingInfoType { return BindingInfoType::Sampler; },
+        [](const SamplerBindingInfo&) -> BindingInfoType { return BindingInfoType::Sampler; },
         [](const TextureBindingInfo&) -> BindingInfoType { return BindingInfoType::Texture; },
         [](const StorageTextureBindingInfo&) -> BindingInfoType {
             return BindingInfoType::StorageTexture;
         },
-        [](const StaticSamplerHolderBindingLayout&) -> BindingInfoType {
+        [](const StaticSamplerBindingInfo&) -> BindingInfoType {
             return BindingInfoType::StaticSampler;
         });
 }
@@ -234,14 +235,24 @@ BufferBindingInfo::BufferBindingInfo(const BufferBindingLayout& apiLayout)
       minBindingSize(apiLayout.minBindingSize),
       hasDynamicOffset(apiLayout.hasDynamicOffset) {}
 
-StorageTextureBindingInfo::StorageTextureBindingInfo() = default;
-StorageTextureBindingInfo::StorageTextureBindingInfo(const StorageTextureBindingLayout& apiLayout)
-    : format(apiLayout.format), viewDimension(apiLayout.viewDimension), access(apiLayout.access) {}
-
 TextureBindingInfo::TextureBindingInfo() {}
 
 TextureBindingInfo::TextureBindingInfo(const TextureBindingLayout& apiLayout)
     : sampleType(apiLayout.sampleType),
       viewDimension(apiLayout.viewDimension),
       multisampled(apiLayout.multisampled) {}
+
+StorageTextureBindingInfo::StorageTextureBindingInfo() = default;
+
+StorageTextureBindingInfo::StorageTextureBindingInfo(const StorageTextureBindingLayout& apiLayout)
+    : format(apiLayout.format), viewDimension(apiLayout.viewDimension), access(apiLayout.access) {}
+
+SamplerBindingInfo::SamplerBindingInfo() = default;
+
+SamplerBindingInfo::SamplerBindingInfo(const SamplerBindingLayout& apiLayout)
+    : type(apiLayout.type) {}
+
+StaticSamplerBindingInfo::StaticSamplerBindingInfo(const StaticSamplerBindingLayout& apiLayout)
+    : sampler(apiLayout.sampler) {}
+
 }  // namespace dawn::native

@@ -240,13 +240,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
                 entry.buffer.type = bindingInfo.type;
                 entry.buffer.minBindingSize = bindingInfo.minBindingSize;
             },
-            [&](const SamplerBindingInfo& bindingInfo) {
-                if (bindingInfo.isComparison) {
-                    entry.sampler.type = wgpu::SamplerBindingType::Comparison;
-                } else {
-                    entry.sampler.type = wgpu::SamplerBindingType::Filtering;
-                }
-            },
+            [&](const SamplerBindingInfo& bindingInfo) { entry.sampler.type = bindingInfo.type; },
             [&](const TextureBindingInfo& bindingInfo) {
                 entry.texture.sampleType = bindingInfo.sampleType;
                 entry.texture.viewDimension = bindingInfo.viewDimension;

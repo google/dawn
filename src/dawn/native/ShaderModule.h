@@ -155,12 +155,6 @@ ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transf
                                            tint::ast::transform::DataMap* outputs,
                                            OwnedCompilationMessages* messages);
 
-// Mirrors wgpu::SamplerBindingLayout but instead stores a single boolean
-// for isComparison instead of a wgpu::SamplerBindingType enum.
-struct SamplerBindingInfo {
-    bool isComparison;
-};
-
 // Per-binding shader metadata contains some SPIRV specific information in addition to
 // most of the frontend per-binding information.
 struct ShaderBindingInfo {
