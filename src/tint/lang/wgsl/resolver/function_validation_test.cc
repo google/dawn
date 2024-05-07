@@ -255,12 +255,12 @@ TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
     auto* var = Var("a", ty.i32(), Expr(2_i));
 
     Func(Source{{12, 34}}, "func", tint::Empty, ty.i32(),
-         Vector{
-             Decl(var),
-         });
+         Block(Source{Source::Range{{45, 56}, {78, 90}}}, Vector{
+                                                              Decl(var),
+                                                          }));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: missing return at end of function)");
+    EXPECT_EQ(r()->error(), R"(78:89 error: missing return at end of function)");
 }
 
 TEST_F(ResolverFunctionValidationTest, VoidFunctionEndWithoutReturnStatementEmptyBody_Pass) {
@@ -274,10 +274,11 @@ TEST_F(ResolverFunctionValidationTest, VoidFunctionEndWithoutReturnStatementEmpt
 TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
     // fn func() -> int {}
 
-    Func(Source{{12, 34}}, "func", tint::Empty, ty.i32(), tint::Empty);
+    Func(Source{{12, 34}}, "func", tint::Empty, ty.i32(),
+         Block(Source{Source::Range{{45, 56}, {78, 90}}}, tint::Empty));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: missing return at end of function)");
+    EXPECT_EQ(r()->error(), R"(78:89 error: missing return at end of function)");
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementType_Pass) {
@@ -1022,7 +1023,7 @@ TEST_F(ResolverFunctionValidationTest, ParametersOverLimit) {
     for (int i = 0; i < 256; i++) {
         params.Push(Param("param_" + std::to_string(i), ty.i32()));
     }
-    Func(Source{{12, 34}}, "f", params, ty.void_(), tint::Empty);
+    Func(Ident(Source{{12, 34}}, "f"), params, ty.void_(), tint::Empty);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: function declares 256 parameters, maximum is 255)");

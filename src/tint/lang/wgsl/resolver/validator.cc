@@ -1096,8 +1096,8 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
     }
 
     if (decl->params.Length() > kMaxFunctionParameters) {
-        AddError(decl->source) << "function declares " << decl->params.Length()
-                               << " parameters, maximum is " << kMaxFunctionParameters;
+        AddError(decl->name->source) << "function declares " << decl->params.Length()
+                                     << " parameters, maximum is " << kMaxFunctionParameters;
         return false;
     }
 
@@ -1114,7 +1114,9 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                 behaviors = sem_.Get(last)->Behaviors();
             }
             if (behaviors.Contains(sem::Behavior::kNext)) {
-                AddError(decl->source) << "missing return at end of function";
+                auto end_source = decl->body->source.End();
+                end_source.range.begin.column--;
+                AddError(end_source) << "missing return at end of function";
                 return false;
             }
         } else if (TINT_UNLIKELY(IsValidationEnabled(

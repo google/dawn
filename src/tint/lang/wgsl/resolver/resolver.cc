@@ -1156,9 +1156,10 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
 
     if (auto* str = return_type->As<core::type::Struct>()) {
-        if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, str, decl->source)) {
-            AddNote(decl->source) << "while instantiating return type for "
-                                  << decl->name->symbol.NameView();
+        if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, str,
+                                          decl->return_type->source)) {
+            AddNote(decl->return_type->source)
+                << "while instantiating return type for " << decl->name->symbol.NameView();
             return nullptr;
         }
 
