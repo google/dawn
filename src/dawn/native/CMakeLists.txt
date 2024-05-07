@@ -581,6 +581,7 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/BindGroupGL.h"
         "opengl/BindGroupLayoutGL.cpp"
         "opengl/BindGroupLayoutGL.h"
+        "opengl/BindingPoint.h"
         "opengl/BufferGL.cpp"
         "opengl/BufferGL.h"
         "opengl/CommandBufferGL.cpp"

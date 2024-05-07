@@ -702,6 +702,7 @@ source_set("sources") {
   if (dawn_enable_opengl) {
     public_deps += [
       ":opengl_loader_gen",
+      "${dawn_root}/src/tint/api/common:common",
       "${dawn_root}/third_party/khronos:khronos_platform",
     ]
     sources += get_target_outputs(":opengl_loader_gen")
@@ -712,6 +713,7 @@ source_set("sources") {
       "opengl/BindGroupGL.h",
       "opengl/BindGroupLayoutGL.cpp",
       "opengl/BindGroupLayoutGL.h",
+      "opengl/BindingPoint.h",
       "opengl/BufferGL.cpp",
       "opengl/BufferGL.h",
       "opengl/CommandBufferGL.cpp",
