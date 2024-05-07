@@ -40,14 +40,6 @@ wgpu::SwapChain swapchain;
 wgpu::Buffer vertexBuffer;
 wgpu::RenderPipeline pipeline;
 
-void destroyAllObjects() {
-    device = nullptr;
-    vertexBuffer = nullptr;
-    queue = nullptr;
-    swapchain = nullptr;
-    pipeline = nullptr;
-}
-
 void init() {
     device = CreateCppDawnDevice();
     queue = device.GetQueue();
@@ -108,10 +100,7 @@ int main(int argc, const char* argv[]) {
     init();
 
     while (!ShouldQuit()) {
-        ProcessEvents();
         frame();
         dawn::utils::USleep(16000);
     }
-
-    destroyAllObjects();
 }

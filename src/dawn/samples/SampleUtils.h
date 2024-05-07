@@ -40,6 +40,5 @@ struct GLFWwindow* GetGLFWWindow();
 wgpu::Device CreateCppDawnDevice();
 wgpu::TextureFormat GetPreferredSwapChainTextureFormat();
 wgpu::SwapChain GetSwapChain();
-void ProcessEvents();
 
 #endif  // SRC_DAWN_SAMPLES_SAMPLEUTILS_H_
