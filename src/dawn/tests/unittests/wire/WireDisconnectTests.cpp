@@ -91,12 +91,12 @@ TEST_F(WireDisconnectTests, CallsDeviceLostCallback) {
 // Check that disconnecting the wire client after a device loss does not trigger the callback
 // again.
 TEST_F(WireDisconnectTests, ServerLostThenDisconnect) {
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
+    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
                                                 "some reason");
 
     // Flush the device lost return command.
     EXPECT_CALL(deviceLostCallback,
-                Call(_, WGPUDeviceLostReason_Undefined, StrEq("some reason"), this))
+                Call(_, WGPUDeviceLostReason_Unknown, StrEq("some reason"), this))
         .Times(Exactly(1));
     FlushServer();
 
@@ -112,13 +112,13 @@ TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
     wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
                                     mockDeviceLostCallback.MakeUserdata(this));
 
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
+    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
                                                 "lost reason");
 
     // Disconnect the client inside the lost callback. We should see the callback
     // only once.
     EXPECT_CALL(mockDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Undefined, StrEq("lost reason"), this))
+                Call(WGPUDeviceLostReason_Unknown, StrEq("lost reason"), this))
         .WillOnce(InvokeWithoutArgs([&] {
             EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
             GetWireClient()->Disconnect();
@@ -139,7 +139,7 @@ TEST_F(WireDisconnectTests, DisconnectThenServerLost) {
 
     // Lose the device on the server. The client callback shouldn't be
     // called again.
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
+    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
                                                 "lost reason");
     EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
     FlushServer();

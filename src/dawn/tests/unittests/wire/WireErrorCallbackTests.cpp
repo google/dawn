@@ -187,11 +187,11 @@ TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
 
     // Calling the callback on the server side will result in the callback being called on the
     // client side
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
+    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
                                                 "Some error message");
 
     EXPECT_CALL(*mockDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Undefined, StrEq("Some error message"), this))
+                Call(WGPUDeviceLostReason_Unknown, StrEq("Some error message"), this))
         .Times(1);
 
     FlushServer();

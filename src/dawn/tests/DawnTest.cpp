@@ -1225,8 +1225,8 @@ void DawnTestBase::LoseDeviceForTesting(wgpu::Device deviceToLose) {
         resolvedDevice = device;
     }
 
-    EXPECT_CALL(mDeviceLostCallback, Call(_, WGPUDeviceLostReason_Undefined, _, _)).Times(1);
-    resolvedDevice.ForceLoss(wgpu::DeviceLostReason::Undefined, "Device lost for testing");
+    EXPECT_CALL(mDeviceLostCallback, Call(_, WGPUDeviceLostReason_Unknown, _, _)).Times(1);
+    resolvedDevice.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing");
     resolvedDevice.Tick();
 }
 

@@ -187,7 +187,7 @@ void Client::Disconnect() {
         for (LinkNode<ObjectBase>* device = deviceList.head(); device != deviceList.end();
              device = device->next()) {
             static_cast<Device*>(device->value())
-                ->HandleDeviceLost(WGPUDeviceLostReason_Undefined, "GPU connection lost");
+                ->HandleDeviceLost(WGPUDeviceLostReason_Unknown, "GPU connection lost");
         }
     }
     for (auto& objectList : mObjects) {

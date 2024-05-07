@@ -94,7 +94,7 @@ TEST_F(AllowedErrorTests, QueueSubmit) {
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Undefined, HasSubstr(kOomErrorMessage), this))
+                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
         .Times(1);
 
     device.GetQueue().Submit(0, nullptr);
@@ -112,7 +112,7 @@ TEST_F(AllowedErrorTests, QueueWriteBuffer) {
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Undefined, HasSubstr(kOomErrorMessage), this))
+                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
         .Times(1);
 
     constexpr uint8_t data = 8;
@@ -133,7 +133,7 @@ TEST_F(AllowedErrorTests, QueueWriteTexture) {
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Undefined, HasSubstr(kOomErrorMessage), this))
+                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
         .Times(1);
 
     constexpr uint8_t data[] = {1, 2, 4, 8};
@@ -166,7 +166,7 @@ TEST_F(AllowedErrorTests, QueueCopyTextureForBrowserOomBuffer) {
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Undefined, HasSubstr(kOomErrorMessage), this))
+                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
         .Times(1);
     device.GetQueue().CopyTextureForBrowser(&src, &dst, &size, &options);
 }
@@ -207,7 +207,7 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Undefined, HasSubstr(kOomErrorMessage), this))
+                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
         .Times(1);
     device.GetQueue().CopyExternalTextureForBrowser(&src, &dst, &size, &options);
 }
@@ -227,7 +227,7 @@ TEST_F(AllowedErrorTests, CreateComputePipeline) {
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Undefined, HasSubstr(kOomErrorMessage), this))
+                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
         .Times(1);
     device.CreateComputePipeline(ToCppAPI(&desc));
 }
@@ -247,7 +247,7 @@ TEST_F(AllowedErrorTests, CreateRenderPipeline) {
 
     // Expect the device lost because of the error.
     EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Undefined, HasSubstr(kOomErrorMessage), this))
+                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
         .Times(1);
     device.CreateRenderPipeline(ToCppAPI(&desc));
 }

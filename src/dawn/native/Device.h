@@ -126,7 +126,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     // users as the respective error rather than causing a device loss instead.
     void HandleError(std::unique_ptr<ErrorData> error,
                      InternalErrorType additionalAllowedErrors = InternalErrorType::None,
-                     WGPUDeviceLostReason lost_reason = WGPUDeviceLostReason_Undefined);
+                     WGPUDeviceLostReason lost_reason = WGPUDeviceLostReason_Unknown);
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
