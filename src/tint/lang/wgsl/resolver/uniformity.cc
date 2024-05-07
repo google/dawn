@@ -130,6 +130,7 @@ struct Node {
         kFunctionCallArgumentContents,
         kFunctionCallPointerArgumentResult,
         kFunctionCallReturnValue,
+        kFunctionPointerParameterContents,
     };
 
     /// The type of the node.
@@ -214,13 +215,15 @@ struct FunctionInfo {
             parameters[i].sem = sem;
 
             parameters[i].value = CreateNode({"param_", param_name});
+            parameters[i].value->ast = param;
             if (sem->Type()->Is<core::type::Pointer>()) {
                 // Create extra nodes for a pointer parameter's initial contents and its contents
                 // when the function returns.
                 parameters[i].ptr_input_contents =
-                    CreateNode({"ptrparam_", param_name, "_input_contents"});
+                    CreateNode({"ptrparam_", param_name, "_input_contents"}, param);
                 parameters[i].ptr_output_contents =
                     CreateNode({"ptrparam_", param_name, "_output_contents"});
+                parameters[i].ptr_input_contents->type = Node::kFunctionPointerParameterContents;
                 variables.Set(sem, parameters[i].ptr_input_contents);
                 local_var_decls.Add(sem);
             } else {
@@ -1822,7 +1825,10 @@ class UniformityGraph {
         Traverse(required_to_be_uniform);
 
         // Get the source of the non-uniform value.
-        auto* non_uniform_source = may_be_non_uniform->visited_from;
+        auto* non_uniform_source = may_be_non_uniform;
+        if (non_uniform_source == function.may_be_non_uniform) {
+            non_uniform_source = non_uniform_source->visited_from;
+        }
         TINT_ASSERT(non_uniform_source);
 
         // Show where the non-uniform value results in non-uniform control flow.
@@ -1859,11 +1865,10 @@ class UniformityGraph {
                     return "";
             }
         };
-        auto param_type = [&](const sem::Parameter* param) {
-            if (ast::HasAttribute<ast::BuiltinAttribute>(param->Declaration()->attributes)) {
+        auto param_type = [&](const ast::Parameter* param) {
+            if (ast::HasAttribute<ast::BuiltinAttribute>(param->attributes)) {
                 return "builtin ";
-            } else if (ast::HasAttribute<ast::LocationAttribute>(
-                           param->Declaration()->attributes)) {
+            } else if (ast::HasAttribute<ast::LocationAttribute>(param->attributes)) {
                 return "user-defined input ";
             } else {
                 return "parameter ";
@@ -1878,12 +1883,25 @@ class UniformityGraph {
                 if (auto* param = var->As<sem::Parameter>()) {
                     auto* func = param->Owner()->As<sem::Function>();
                     diagnostics_.AddNote(ident->source)
-                        << param_type(param) << "'" << NameFor(ident) << "' of '" << NameFor(func)
-                        << "' may be non-uniform";
+                        << param_type(param->Declaration()) << "'" << NameFor(ident) << "' of '"
+                        << NameFor(func) << "' may be non-uniform";
                 } else {
                     diagnostics_.AddNote(ident->source)
                         << "reading from " << var_type(var) << "'" << NameFor(ident)
                         << "' may result in a non-uniform value";
+                }
+            },
+            [&](const ast::Parameter* p) {
+                auto* param = sem_.Get(p);
+                auto* func = param->Owner()->As<sem::Function>();
+                if (non_uniform_source->type == Node::kFunctionPointerParameterContents) {
+                    diagnostics_.AddNote(p->source)
+                        << "parameter '" << NameFor(p) << "' of '" << NameFor(func)
+                        << "' may point to a non-uniform value";
+                } else {
+                    diagnostics_.AddNote(p->source)
+                        << param_type(p) << "'" << NameFor(p) << "' of '" << NameFor(func)
+                        << "' may be non-uniform";
                 }
             },
             [&](const ast::Variable* v) {

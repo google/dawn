@@ -433,9 +433,9 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (i == 0) {
   ^^
 
-test:5:7 note: parameter 'i' of 'foo' may be non-uniform
-  if (i == 0) {
-      ^
+test:4:8 note: parameter 'i' of 'foo' may be non-uniform
+fn foo(i : i32) {
+       ^
 
 test:11:7 note: possibly non-uniform value passed here
   foo(rw);
@@ -3744,8 +3744,8 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:5:8 note: parameter 'p' of 'bar' may be non-uniform
-  if (*p == 0) {
+test:4:8 note: parameter 'p' of 'bar' may point to a non-uniform value
+fn bar(p : ptr<function, i32>) {
        ^
 
 test:12:7 note: possibly non-uniform value passed via pointer here
@@ -3875,8 +3875,8 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:5:8 note: parameter 'p' of 'bar' may be non-uniform
-  if (*p == 0) {
+test:4:8 note: parameter 'p' of 'bar' may point to a non-uniform value
+fn bar(p : ptr<function, i32>) {
        ^
 
 test:13:7 note: possibly non-uniform value passed via pointer here
@@ -3916,8 +3916,8 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:5:8 note: parameter 'p' of 'bar' may be non-uniform
-  if (*p == 0) {
+test:4:8 note: parameter 'p' of 'bar' may point to a non-uniform value
+fn bar(p : ptr<function, i32>) {
        ^
 
 test:12:7 note: possibly non-uniform value passed via pointer here
@@ -4074,8 +4074,8 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:5:8 note: parameter 'p' of 'zoo' may be non-uniform
-  if (*p == 0) {
+test:4:8 note: parameter 'p' of 'zoo' may point to a non-uniform value
+fn zoo(p : ptr<function, i32>) {
        ^
 
 test:11:7 note: possibly non-uniform value passed via pointer here
@@ -4162,8 +4162,8 @@ test:6:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:6:8 note: parameter 'p' of 'zoo' may be non-uniform
-  if (*p == 0) {
+test:5:8 note: parameter 'p' of 'zoo' may point to a non-uniform value
+fn zoo(p : ptr<function, i32>) {
        ^
 
 test:12:7 note: possibly non-uniform value passed via pointer here
@@ -8032,8 +8032,8 @@ test:7:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:7:8 note: parameter 'p' of 'bar' may be non-uniform
-  if (*p == 0) {
+test:6:8 note: parameter 'p' of 'bar' may point to a non-uniform value
+fn bar(p : ptr<function, i32>) -> i32 {
        ^
 
 test:15:9 note: possibly non-uniform value passed via pointer here
@@ -8108,8 +8108,8 @@ test:7:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:7:8 note: parameter 'p' of 'bar' may be non-uniform
-  if (*p == 0) {
+test:6:8 note: parameter 'p' of 'bar' may point to a non-uniform value
+fn bar(p : ptr<function, i32>) -> i32 {
        ^
 
 test:15:9 note: possibly non-uniform value passed via pointer here
@@ -8181,9 +8181,9 @@ test:10:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:10:8 note: parameter 'p' of 'b' may be non-uniform
-  if (*p == 0) {
-       ^
+test:9:6 note: parameter 'p' of 'b' may point to a non-uniform value
+fn b(p : ptr<function, i32>) -> i32 {
+     ^
 
 test:19:22 note: possibly non-uniform value passed via pointer here
   arr[a(&i)] = arr[b(&i)];
@@ -8222,9 +8222,9 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (cond == 0) {
   ^^
 
-test:5:7 note: parameter 'cond' of 'bar' may be non-uniform
-  if (cond == 0) {
-      ^^^^
+test:4:8 note: parameter 'cond' of 'bar' may be non-uniform
+fn bar(cond : i32) -> i32 {
+       ^^^^
 
 test:13:11 note: possibly non-uniform value passed here
   arr[bar(non_uniform)] = 0;
@@ -8263,9 +8263,9 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (cond == 0) {
   ^^
 
-test:5:7 note: parameter 'cond' of 'bar' may be non-uniform
-  if (cond == 0) {
-      ^^^^
+test:4:8 note: parameter 'cond' of 'bar' may be non-uniform
+fn bar(cond : i32) -> i32 {
+       ^^^^
 
 test:13:14 note: possibly non-uniform value passed here
   *&(arr[bar(non_uniform)]) = 0;
@@ -8304,9 +8304,9 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (cond == 0) {
   ^^
 
-test:5:7 note: parameter 'cond' of 'bar' may be non-uniform
-  if (cond == 0) {
-      ^^^^
+test:4:8 note: parameter 'cond' of 'bar' may be non-uniform
+fn bar(cond : i32) -> i32 {
+       ^^^^
 
 test:13:14 note: possibly non-uniform value passed here
   (&arr)[bar(non_uniform)] = 0;
@@ -8345,9 +8345,9 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (cond == 0) {
   ^^
 
-test:5:7 note: parameter 'cond' of 'bar' may be non-uniform
-  if (cond == 0) {
-      ^^^^
+test:4:8 note: parameter 'cond' of 'bar' may be non-uniform
+fn bar(cond : i32) -> i32 {
+       ^^^^
 
 test:13:14 note: possibly non-uniform value passed here
   (&(arr[bar(non_uniform)])).y = 0;
@@ -8418,9 +8418,9 @@ test:10:3 note: control flow depends on possibly non-uniform value
   if (*p == 0) {
   ^^
 
-test:10:8 note: parameter 'p' of 'b' may be non-uniform
-  if (*p == 0) {
-       ^
+test:9:6 note: parameter 'p' of 'b' may point to a non-uniform value
+fn b(p : ptr<function, i32>) -> i32 {
+     ^
 
 test:19:23 note: possibly non-uniform value passed via pointer here
   arr[a(&i)] += arr[b(&i)];
@@ -9988,9 +9988,9 @@ test:5:3 note: control flow depends on possibly non-uniform value
   if (a == 42) {
   ^^
 
-test:5:7 note: parameter 'a' of 'zoo' may be non-uniform
-  if (a == 42) {
-      ^
+test:4:8 note: parameter 'a' of 'zoo' may be non-uniform
+fn zoo(a : i32) {
+       ^
 
 test:11:7 note: possibly non-uniform value passed here
   zoo(b);
@@ -10093,6 +10093,53 @@ test:11:3 note: control flow depends on possibly non-uniform value
 test:11:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 42) {
       ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Error_PointerParameterContentsRequiresUniformity_AfterControlFlow) {
+    // Test that we can find the correct source of uniformity inside a function called with a
+    // pointer parameter, when the pointer contents is used after control flow that introduces extra
+    // nodes for merging the pointer contents.
+    std::string src = R"(
+var<private> non_uniform : i32;
+
+fn foo(p : ptr<function, i32>) {
+  for (var i = 0; i < 3; i++) {
+    continue;
+  }
+  if (*p == 0) {
+    return;
+  }
+  _ = dpdx(1.0);
+}
+
+fn main() {
+  var f = non_uniform;
+  foo(&f);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:11:7 error: 'dpdx' must only be called from uniform control flow
+  _ = dpdx(1.0);
+      ^^^^^^^^^
+
+test:8:3 note: control flow depends on possibly non-uniform value
+  if (*p == 0) {
+  ^^
+
+test:4:8 note: parameter 'p' of 'foo' may point to a non-uniform value
+fn foo(p : ptr<function, i32>) {
+       ^
+
+test:16:7 note: possibly non-uniform value passed via pointer here
+  foo(&f);
+      ^^
+
+test:15:11 note: reading from module-scope private variable 'non_uniform' may result in a non-uniform value
+  var f = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
