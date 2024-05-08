@@ -49,6 +49,8 @@ class Instance final : public ObjectWithEventsBase {
                         void* userdata);
     WGPUFuture RequestAdapterF(const WGPURequestAdapterOptions* options,
                                const WGPURequestAdapterCallbackInfo& callbackInfo);
+    WGPUFuture RequestAdapter2(const WGPURequestAdapterOptions* options,
+                               const WGPURequestAdapterCallbackInfo2& callbackInfo);
 
     void ProcessEvents();
     WGPUWaitStatus WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);

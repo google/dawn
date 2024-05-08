@@ -108,7 +108,8 @@
             { "name": "event manager handle", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "adapter object handle", "type": "ObjectHandle", "handle_type": "adapter"},
-            { "name": "options", "type": "request adapter options", "annotation": "const*", "optional": true }
+            { "name": "options", "type": "request adapter options", "annotation": "const*", "optional": true },
+            { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."}
         ],
         "adapter request device": [
             { "name": "adapter id", "type": "ObjectId", "id_type": "adapter" },
@@ -235,6 +236,7 @@
             "InstanceHasWGSLLanguageFeature",
             "InstanceRequestAdapter",
             "InstanceRequestAdapterF",
+            "InstanceRequestAdapter2",
             "ShaderModuleGetCompilationInfo",
             "ShaderModuleGetCompilationInfoF",
             "QuerySetGetType",

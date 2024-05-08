@@ -51,7 +51,14 @@ class RequestAdapterEvent : public TrackedEvent {
     RequestAdapterEvent(const WGPURequestAdapterCallbackInfo& callbackInfo, Adapter* adapter)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
-          mUserdata(callbackInfo.userdata),
+          mUserdata1(callbackInfo.userdata),
+          mAdapter(adapter) {}
+
+    RequestAdapterEvent(const WGPURequestAdapterCallbackInfo2& callbackInfo, Adapter* adapter)
+        : TrackedEvent(callbackInfo.mode),
+          mCallback2(callbackInfo.callback),
+          mUserdata1(callbackInfo.userdata1),
+          mUserdata2(callbackInfo.userdata2),
           mAdapter(adapter) {}
 
     EventType GetType() override { return kType; }
@@ -78,10 +85,11 @@ class RequestAdapterEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        if (mCallback == nullptr) {
+        if (mCallback == nullptr && mCallback2 == nullptr) {
             // If there's no callback, just clean up the resources.
             mAdapter.ExtractAsDangling()->Release();
-            mUserdata.ExtractAsDangling();
+            mUserdata1.ExtractAsDangling();
+            mUserdata2.ExtractAsDangling();
             return;
         }
 
@@ -91,12 +99,22 @@ class RequestAdapterEvent : public TrackedEvent {
         }
 
         Adapter* adapter = mAdapter.ExtractAsDangling();
-        mCallback(mStatus, ToAPI(mStatus == WGPURequestAdapterStatus_Success ? adapter : nullptr),
-                  mMessage ? mMessage->c_str() : nullptr, mUserdata.ExtractAsDangling());
+        if (mCallback) {
+            mCallback(mStatus,
+                      ToAPI(mStatus == WGPURequestAdapterStatus_Success ? adapter : nullptr),
+                      mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling());
+        } else {
+            mCallback2(mStatus,
+                       ToAPI(mStatus == WGPURequestAdapterStatus_Success ? adapter : nullptr),
+                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
+                       mUserdata2.ExtractAsDangling());
+        }
     }
 
-    WGPURequestAdapterCallback mCallback;
-    raw_ptr<void> mUserdata;
+    WGPURequestAdapterCallback mCallback = nullptr;
+    WGPURequestAdapterCallback2 mCallback2 = nullptr;
+    raw_ptr<void> mUserdata1;
+    raw_ptr<void> mUserdata2;
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
@@ -198,6 +216,29 @@ WGPUFuture Instance::RequestAdapterF(const WGPURequestAdapterOptions* options,
     cmd.future = {futureIDInternal};
     cmd.adapterObjectHandle = adapter->GetWireHandle();
     cmd.options = options;
+    cmd.userdataCount = 1;
+
+    client->SerializeCommand(cmd);
+    return {futureIDInternal};
+}
+
+WGPUFuture Instance::RequestAdapter2(const WGPURequestAdapterOptions* options,
+                                     const WGPURequestAdapterCallbackInfo2& callbackInfo) {
+    Client* client = GetClient();
+    Adapter* adapter = client->Make<Adapter>(GetEventManagerHandle());
+    auto [futureIDInternal, tracked] =
+        GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(callbackInfo, adapter));
+    if (!tracked) {
+        return {futureIDInternal};
+    }
+
+    InstanceRequestAdapterCmd cmd;
+    cmd.instanceId = GetWireId();
+    cmd.eventManagerHandle = GetEventManagerHandle();
+    cmd.future = {futureIDInternal};
+    cmd.adapterObjectHandle = adapter->GetWireHandle();
+    cmd.options = options;
+    cmd.userdataCount = 2;
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};

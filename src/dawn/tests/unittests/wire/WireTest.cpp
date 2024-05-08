@@ -91,10 +91,11 @@ void WireTest::SetUp() {
     // Create the adapter for testing.
     apiAdapter = api.GetNewAdapter();
     WGPURequestAdapterOptions adapterOpts = {};
-    MockCallback<WGPURequestAdapterCallback> adapterCb;
-    wgpuInstanceRequestAdapter(instance, &adapterOpts, adapterCb.Callback(),
-                               adapterCb.MakeUserdata(this));
-    EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _)).WillOnce([&]() {
+    MockCallback<WGPURequestAdapterCallback2> adapterCb;
+    wgpuInstanceRequestAdapter2(instance, &adapterOpts,
+                                {nullptr, WGPUCallbackMode_AllowSpontaneous, adapterCb.Callback(),
+                                 nullptr, adapterCb.MakeUserdata(this)});
+    EXPECT_CALL(api, OnInstanceRequestAdapter2(apiInstance, NotNull(), _)).WillOnce([&]() {
         EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
         EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
@@ -116,12 +117,13 @@ void WireTest::SetUp() {
             .WillOnce(Return(0))
             .WillOnce(Return(0));
 
-        api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
-                                               apiAdapter, nullptr);
+        api.CallInstanceRequestAdapter2Callback(apiInstance, WGPURequestAdapterStatus_Success,
+                                                apiAdapter, nullptr);
     });
     FlushClient();
     WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(adapterCb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, this))
+    EXPECT_CALL(adapterCb,
+                Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, nullptr, this))
         .WillOnce(SaveArg<1>(&cAdapter));
     FlushServer();
     EXPECT_NE(cAdapter, nullptr);

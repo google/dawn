@@ -106,21 +106,23 @@ ValidationTest::ValidationTest() {
 
     // Forward to dawn::native instanceRequestAdapter, but save the returned adapter in
     // gCurrentTest->mBackendAdapter.
-    procs.instanceRequestAdapter = [](WGPUInstance i, const WGPURequestAdapterOptions* options,
-                                      WGPURequestAdapterCallback callback, void* userdata) {
+    procs.instanceRequestAdapter2 = [](WGPUInstance i, const WGPURequestAdapterOptions* options,
+                                       WGPURequestAdapterCallbackInfo2 callbackInfo) -> WGPUFuture {
         DAWN_ASSERT(gCurrentTest);
-        dawn::native::GetProcs().instanceRequestAdapter(
-            i, options,
-            [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, char const* message,
-               void* userdata) {
-                gCurrentTest->mBackendAdapter = dawn::native::FromAPI(cAdapter);
+        DAWN_ASSERT(callbackInfo.mode == WGPUCallbackMode_AllowSpontaneous);
 
-                auto* callbackAndUserdata =
-                    static_cast<std::pair<WGPURequestAdapterCallback, void*>*>(userdata);
-                callbackAndUserdata->first(status, cAdapter, message, callbackAndUserdata->second);
-                delete callbackAndUserdata;
-            },
-            new std::pair<WGPURequestAdapterCallback, void*>(callback, userdata));
+        return dawn::native::GetProcs().instanceRequestAdapter2(
+            i, options,
+            {nullptr, WGPUCallbackMode_AllowSpontaneous,
+             [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, char const* message,
+                void* userdata, void*) {
+                 gCurrentTest->mBackendAdapter = dawn::native::FromAPI(cAdapter);
+
+                 auto* info = static_cast<WGPURequestAdapterCallbackInfo2*>(userdata);
+                 info->callback(status, cAdapter, message, info->userdata1, info->userdata2);
+                 delete info;
+             },
+             new WGPURequestAdapterCallbackInfo2(callbackInfo), nullptr});
     };
 
     procs.adapterRequestDevice = [](WGPUAdapter self, const WGPUDeviceDescriptor* descriptor,
@@ -284,10 +286,9 @@ dawn::native::Adapter& ValidationTest::GetBackendAdapter() {
 
 void ValidationTest::CreateTestAdapter(wgpu::RequestAdapterOptions options) {
     instance.RequestAdapter(
-        &options,
-        [](WGPURequestAdapterStatus, WGPUAdapter cAdapter, const char*, void* userdata) {
-            *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(cAdapter);
-        },
+        &options, wgpu::CallbackMode::AllowSpontaneous,
+        [](wgpu::RequestAdapterStatus status, wgpu::Adapter result, char const* message,
+           wgpu::Adapter* userdata) -> void { *userdata = std::move(result); },
         &adapter);
     FlushWire();
 }

@@ -84,8 +84,7 @@
         //* trusted boundary.
         {%- set Provider = ", provider" if member.type.may_have_dawn_object else "" -%}
         WIRE_TRY({{as_cType(member.type.name)}}Serialize({{in}}, &{{out}}, buffer{{Provider}}));
-    {%- elif member.type.category == "function pointer" or member.type.name.get() == "void *" -%}
-        //* Function pointers and explicit "void *" types (i.e. userdata) cannot be serialized.
+    {%- elif not is_wire_serializable(member.type) -%}
         if ({{in}} != nullptr) return WireResult::FatalError;
     {%- else -%}
         {{out}} = {{in}};
@@ -108,8 +107,7 @@
                 {%- endif -%}
             ));
         {%- endif -%}
-    {%- elif member.type.category == "function pointer" or member.type.name.get() == "void *" %}
-        //* Function pointers and explicit "void *" types (i.e. userdata) cannot be deserialized.
+    {%- elif not is_wire_serializable(member.type) %}
         {{out}} = nullptr;
     {%- elif member.type.name.get() == "size_t" -%}
         //* Deserializing into size_t requires check that the uint64_t used on the wire won't narrow.
@@ -146,8 +144,7 @@
         {% endif %}
 
         {% for member in members %}
-            //* Function pointers and explicit "void *" types (i.e. userdata) do not get serialized.
-            {% if member.type.category == "function pointer" or  member.type.name.get() == "void *" %}
+            {% if not is_wire_serializable(member.type) %}
                 {% continue %}
             {% endif %}
             //* Value types are directly in the command, objects being replaced with their IDs.

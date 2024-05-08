@@ -82,6 +82,8 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
                            void* userdata);
     Future APIRequestAdapterF(const RequestAdapterOptions* options,
                               const RequestAdapterCallbackInfo& callbackInfo);
+    Future APIRequestAdapter2(const RequestAdapterOptions* options,
+                              const WGPURequestAdapterCallbackInfo2& callbackInfo);
 
     // Discovers and returns a vector of adapters.
     // All systems adapters that can be found are returned if no options are passed.
