@@ -29,6 +29,9 @@ package {{ metadata.kotlin_package }}
 
 class {{ structure.name.CamelCase() }}(
     {% for member in structure.members %}
+        {%- if member.type.category in ['bitmask', 'enum'] -%}
+            @get:JvmName("get{{ member.name.CamelCase() }}")
+        {% endif %}
         var {{ member.name.camelCase() }}: {{ kotlin_declaration(member) }},
     {% endfor %}
     {% for structure in chain_children[structure.name.get()] %}

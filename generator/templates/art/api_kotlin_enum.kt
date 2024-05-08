@@ -26,8 +26,15 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package {{ metadata.kotlin_package }}
 
-object {{ enum.name.CamelCase() }} {
-    {% for value in enum.values %}
-        const val {{ as_ktName(value.name.CamelCase() ) }} = {{ '{:#010x}'.format(value.value) }};
-    {% endfor %}
+@JvmInline
+value class {{ enum.name.CamelCase() }}(val v: Int) {
+    {% if enum.category == 'bitmask' %}
+        infix fun or(b: {{ enum.name.CamelCase() }}) = {{ enum.name.CamelCase() }}(this.v or b.v)
+    {% endif %}
+    companion object {
+        {% for value in enum.values %}
+            val {{ as_ktName(value.name.CamelCase()) }} =
+                {{- enum.name.CamelCase() }}({{ '{:#010x}'.format(value.value) }})
+        {% endfor %}
+    }
 }
