@@ -52,7 +52,6 @@ std::string NamedOverrideArrayCount::FriendlyName() const {
 
 core::type::ArrayCount* NamedOverrideArrayCount::Clone(core::type::CloneContext&) const {
     TINT_UNREACHABLE() << "Named override array count clone not available";
-    return nullptr;
 }
 
 UnnamedOverrideArrayCount::UnnamedOverrideArrayCount(const ValueExpression* e)
@@ -72,7 +71,6 @@ std::string UnnamedOverrideArrayCount::FriendlyName() const {
 
 core::type::ArrayCount* UnnamedOverrideArrayCount::Clone(core::type::CloneContext&) const {
     TINT_UNREACHABLE() << "Unnamed override array count clone not available";
-    return nullptr;
 }
 
 }  // namespace tint::sem

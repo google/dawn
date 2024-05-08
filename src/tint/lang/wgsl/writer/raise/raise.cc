@@ -173,7 +173,6 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
             break;
     }
     TINT_ICE() << "unhandled builtin function: " << fn;
-    return wgsl::BuiltinFn::kNone;
 }
 
 void ReplaceBuiltinFnCall(core::ir::Module& mod, core::ir::CoreBuiltinCall* call) {

@@ -27,7 +27,6 @@
 
 #include <string>
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
@@ -38,7 +37,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_FunctionTest = IRTestHelper;
 
 TEST_F(IR_FunctionTest, Fail_NullReturnType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -48,7 +47,7 @@ TEST_F(IR_FunctionTest, Fail_NullReturnType) {
 }
 
 TEST_F(IR_FunctionTest, Fail_DoubleReturnBuiltin) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -60,7 +59,7 @@ TEST_F(IR_FunctionTest, Fail_DoubleReturnBuiltin) {
 }
 
 TEST_F(IR_FunctionTest, Fail_NullParam) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -71,7 +70,7 @@ TEST_F(IR_FunctionTest, Fail_NullParam) {
 }
 
 TEST_F(IR_FunctionTest, Fail_NullBlock) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

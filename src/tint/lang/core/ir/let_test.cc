@@ -28,7 +28,6 @@
 #include "src/tint/lang/core/ir/let.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
@@ -42,7 +41,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_LetTest = IRTestHelper;
 
 TEST_F(IR_LetTest, Fail_NullValue) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

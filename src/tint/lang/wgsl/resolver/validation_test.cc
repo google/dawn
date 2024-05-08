@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -134,13 +133,14 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
 }
 
 TEST_F(ResolverValidationTest, UnhandledStmt) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.WrapInFunction(b.create<FakeStmt>());
             resolver::Resolve(b);
         },
-        "internal compiler error: Switch() matched no cases. Type: tint::resolver::FakeStmt");
+        testing::HasSubstr(
+            "internal compiler error: Switch() matched no cases. Type: tint::resolver::FakeStmt"));
 }
 
 TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
@@ -164,13 +164,14 @@ TEST_F(ResolverValidationTest, Stmt_ElseIf_NonBool) {
 }
 
 TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.WrapInFunction(b.create<FakeExpr>());
             Resolver(&b, {}).Resolve();
         },
-        "internal compiler error: Switch() matched no cases. Type: tint::resolver::FakeExpr");
+        testing::HasSubstr(
+            "internal compiler error: Switch() matched no cases. Type: tint::resolver::FakeExpr"));
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {

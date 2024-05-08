@@ -248,7 +248,6 @@ std::string Namer::FindUnusedDerivedName(const std::string& base_name) {
         i++;
     }
     TINT_UNREACHABLE() << "FindUnusedDerivedName() overflowed u32";
-    return "<u32 overflow>";
 }
 
 std::string Namer::MakeDerivedName(const std::string& base_name) {

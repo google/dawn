@@ -28,7 +28,6 @@
 #include "src/tint/lang/core/ir/user_call.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {
@@ -59,7 +58,7 @@ TEST_F(IR_UserCallTest, Results) {
 }
 
 TEST_F(IR_UserCallTest, Fail_NullType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

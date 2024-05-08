@@ -188,7 +188,6 @@ struct LocalizeStructArrayAssignment::State {
                         TINT_ICE()
                             << "lhs of index accessor expression should not be a pointer. These "
                                "should have been removed by the SimplifyPointers transform";
-                        return ast::TraverseAction::Stop;
                     }
                     // That accesses an array?
                     if (ma_ty->UnwrapRef()->Is<core::type::Array>()) {
@@ -212,7 +211,6 @@ struct LocalizeStructArrayAssignment::State {
         if (TINT_UNLIKELY(!root_ident)) {
             TINT_ICE() << "Unable to determine originating variable for lhs of assignment "
                           "statement";
-            return {};
         }
 
         return Switch(

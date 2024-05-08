@@ -151,7 +151,6 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program& s
         }
 
         TINT_ICE() << "matrix initializer has unexpected number of arguments";
-        return nullptr;
     });
 
     ctx.Clone();

@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/instruction.h"
@@ -81,7 +80,7 @@ TEST_F(IR_UnaryTest, Result) {
 }
 
 TEST_F(IR_UnaryTest, Fail_NullType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

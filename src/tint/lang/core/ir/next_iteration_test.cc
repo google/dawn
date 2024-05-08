@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/next_iteration.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {
@@ -36,7 +35,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_NextIterationTest = IRTestHelper;
 
 TEST_F(IR_NextIterationTest, Fail_NullLoop) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
@@ -59,7 +58,7 @@ TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
 }
 
 TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<UnaryOpExpression>(core::UnaryOp::kNot, nullptr);
@@ -68,7 +67,7 @@ TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
 }
 
 TEST_F(UnaryOpExpressionTest, Assert_DifferentGenerationID_Expression) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

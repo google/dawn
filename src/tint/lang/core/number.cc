@@ -342,7 +342,6 @@ uint16_t f16::BitsRepresentation() const {
 
     // Neither zero, subnormal f16 or normal f16, shall never hit.
     TINT_UNREACHABLE();
-    return kF16Nan;
 }
 
 // static

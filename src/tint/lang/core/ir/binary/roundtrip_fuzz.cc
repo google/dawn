@@ -37,13 +37,11 @@ void IRBinaryRoundtripFuzzer(core::ir::Module& module) {
     auto encoded = Encode(module);
     if (encoded != Success) {
         TINT_ICE() << "Encode() failed\n" << encoded.Failure();
-        return;
     }
 
     auto decoded = Decode(encoded->Slice());
     if (decoded != Success) {
         TINT_ICE() << "Decode() failed\n" << decoded.Failure();
-        return;
     }
 
     auto in = Disassemble(module).Plain();
@@ -59,7 +57,6 @@ void IRBinaryRoundtripFuzzer(core::ir::Module& module) {
                    << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
                    << out << "\n"
                    << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n";
-        return;
     }
 }
 

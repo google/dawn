@@ -35,6 +35,14 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/reverse.h"
 
+#if TINT_BUILD_IS_MSVC
+#if _MSC_VER > 1930 && _MSC_VER < 1939
+// MSVC raises an internal compiler error in Vector::Sort(), when optimizations are enabled.
+// Later versions are fixed.
+TINT_BEGIN_DISABLE_OPTIMIZATIONS();
+#endif
+#endif
+
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 

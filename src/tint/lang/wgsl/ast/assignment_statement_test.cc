@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -65,7 +64,7 @@ TEST_F(AssignmentStatementTest, IsAssign) {
 }
 
 TEST_F(AssignmentStatementTest, Assert_Null_LHS) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<AssignmentStatement>(nullptr, b.Expr(1_i));
@@ -74,7 +73,7 @@ TEST_F(AssignmentStatementTest, Assert_Null_LHS) {
 }
 
 TEST_F(AssignmentStatementTest, Assert_Null_RHS) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<AssignmentStatement>(b.Expr(1_i), nullptr);
@@ -83,7 +82,7 @@ TEST_F(AssignmentStatementTest, Assert_Null_RHS) {
 }
 
 TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -93,7 +92,7 @@ TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
 }
 
 TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_RHS) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
@@ -113,11 +112,11 @@ TEST_F(IR_ConstantTest, bool) {
 }
 
 TEST_F(IR_ConstantTest, Fail_NullValue) {
-    EXPECT_FATAL_FAILURE({ Constant c(nullptr); }, "");
+    EXPECT_DEATH({ Constant c(nullptr); }, "");
 }
 
 TEST_F(IR_ConstantTest, Fail_Builder_NullValue) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

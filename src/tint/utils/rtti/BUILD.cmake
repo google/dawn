@@ -42,6 +42,7 @@ tint_add_target(tint_utils_rtti lib
   utils/rtti/castable.cc
   utils/rtti/castable.h
   utils/rtti/ignore.h
+  utils/rtti/switch.cc
   utils/rtti/switch.h
 )
 
@@ -63,7 +64,6 @@ tint_add_target(tint_utils_rtti_test test
 )
 
 tint_target_add_dependencies(tint_utils_rtti_test test
-  tint_utils_ice
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
@@ -84,7 +84,6 @@ tint_add_target(tint_utils_rtti_bench bench
 )
 
 tint_target_add_dependencies(tint_utils_rtti_bench bench
-  tint_utils_ice
   tint_utils_macros
   tint_utils_math
   tint_utils_memory

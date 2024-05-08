@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
@@ -74,7 +73,7 @@ TEST_F(ForLoopStatementTest, Creation_WithAttributes) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_Null_Body) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.For(nullptr, nullptr, nullptr, nullptr);
@@ -83,7 +82,7 @@ TEST_F(ForLoopStatementTest, Assert_Null_Body) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Initializer) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -93,7 +92,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Initializer) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -103,7 +102,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Condition) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Continuing) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -113,7 +112,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Continuing) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

@@ -28,7 +28,7 @@
 #include "src/tint/lang/core/ir/access.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -62,7 +62,7 @@ TEST_F(IR_AccessTest, Result) {
 }
 
 TEST_F(IR_AccessTest, Fail_NullType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

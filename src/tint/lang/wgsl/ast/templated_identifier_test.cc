@@ -25,8 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest-spi.h"
-
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
@@ -65,7 +63,7 @@ TEST_F(TemplatedIdentifierTest, Creation_WithSource) {
 }
 
 TEST_F(TemplatedIdentifierTest, Assert_InvalidSymbol) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.Expr("");
@@ -74,7 +72,7 @@ TEST_F(TemplatedIdentifierTest, Assert_InvalidSymbol) {
 }
 
 TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -84,7 +82,7 @@ TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_Symbol) {
 }
 
 TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_TemplateArg) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

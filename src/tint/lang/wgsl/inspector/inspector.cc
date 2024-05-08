@@ -119,8 +119,6 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
             }
             default: {
                 TINT_UNREACHABLE() << "unhandled composition type";
-                compositionType = CompositionType::kUnknown;
-                break;
             }
         }
     } else {
@@ -170,7 +168,6 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
         default: {
             TINT_UNREACHABLE() << "invalid pipeline stage for entry point '" << entry_point.name
                                << "'";
-            break;
         }
     }
 

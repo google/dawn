@@ -104,7 +104,7 @@ struct State {
                 default:
                     break;
             }
-            TINT_ASSERT_OR_RETURN(replacement);
+            TINT_ASSERT(replacement);
 
             if (replacement != binary->Result(0)) {
                 // Replace the old binary instruction result with the new value.

@@ -83,7 +83,6 @@ void Register(const IRFuzzer& fuzzer) {
 
             if (auto val = core::ir::Validate(ir.Get()); val != Success) {
                 TINT_ICE() << val.Failure();
-                return;
             }
 
             return fn(ir.Get(), data);

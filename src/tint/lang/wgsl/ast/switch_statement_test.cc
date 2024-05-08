@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -89,7 +88,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 
 TEST_F(SwitchStatementTest, Assert_Null_Condition) {
     using CaseStatementList = tint::Vector<const CaseStatement*, 2>;
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             CaseStatementList cases;
@@ -102,7 +101,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
 
 TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
     using CaseStatementList = tint::Vector<const CaseStatement*, 2>;
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<SwitchStatement>(b.Expr(true), CaseStatementList{nullptr}, tint::Empty,
@@ -112,7 +111,7 @@ TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
 }
 
 TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -130,7 +129,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_Condition) {
 }
 
 TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_CaseStatement) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

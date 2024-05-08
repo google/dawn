@@ -31,7 +31,6 @@
 #include <tuple>
 #include <utility>
 
-#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/rtti/castable.h"
@@ -70,9 +69,9 @@ struct SwitchMustMatchCase {
 ///     [&](TypeB*) { /* ... */ },
 ///     TINT_ICE_ON_NO_MATCH);
 /// ```
-#define TINT_ICE_ON_NO_MATCH    \
-    tint::SwitchMustMatchCase { \
-        __FILE__, __LINE__      \
+#define TINT_ICE_ON_NO_MATCH      \
+    ::tint::SwitchMustMatchCase { \
+        __FILE__, __LINE__        \
     }
 
 }  // namespace tint
@@ -120,7 +119,7 @@ constexpr int IndexOfSwitchMustMatchCase() {
 }
 /// Resolves to T if T is not nullptr_t, otherwise resolves to Ignore.
 template <typename T>
-using NullptrToIgnore = std::conditional_t<std::is_same_v<T, std::nullptr_t>, tint::Ignore, T>;
+using NullptrToIgnore = std::conditional_t<std::is_same_v<T, std::nullptr_t>, ::tint::Ignore, T>;
 
 /// Resolves to `const TYPE` if any of `CASE_RETURN_TYPES` are const or pointer-to-const, otherwise
 /// resolves to TYPE.
@@ -145,7 +144,7 @@ struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false, REQUESTED_TYPE, CASE_RETURN_T
 
 /// SwitchReturnTypeImpl specialization for non-castable case types and an inferred return type.
 template <typename... CASE_RETURN_TYPES>
-struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false, tint::detail::Infer, CASE_RETURN_TYPES...> {
+struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false, ::tint::detail::Infer, CASE_RETURN_TYPES...> {
     /// Resolves to the common type for all the cases return types.
     using type = std::common_type_t<CASE_RETURN_TYPES...>;
 };
@@ -161,7 +160,7 @@ struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, REQUESTED_TYPE, CASE_RETURN_TY
 
 /// SwitchReturnTypeImpl specialization for castable case types and an inferred return type.
 template <typename... CASE_RETURN_TYPES>
-struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, tint::detail::Infer, CASE_RETURN_TYPES...> {
+struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, ::tint::detail::Infer, CASE_RETURN_TYPES...> {
   private:
     using InferredType =
         CastableCommonBase<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>;
@@ -176,7 +175,7 @@ struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, tint::detail::Infer, CASE_RETU
 /// from the case return types.
 template <typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
 using SwitchReturnType = typename SwitchReturnTypeImpl<
-    tint::IsCastable<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>,
+    ::tint::IsCastable<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>,
     REQUESTED_TYPE,
     CASE_RETURN_TYPES...>::type;
 
@@ -188,22 +187,33 @@ struct SwitchCaseReturnTypeImpl;
 template <typename CASE>
 struct SwitchCaseReturnTypeImpl<CASE, /* is_flag */ false> {
     /// The case function's return type.
-    using type = tint::traits::ReturnType<CASE>;
+    using type = ::tint::traits::ReturnType<CASE>;
 };
 
 /// SwitchCaseReturnTypeImpl specialization for flags.
 template <typename CASE>
 struct SwitchCaseReturnTypeImpl<CASE, /* is_flag */ true> {
     /// These are not functions, they have no return type.
-    using type = tint::Ignore;
+    using type = ::tint::Ignore;
 };
 
 /// Resolves to the return type for a Switch() case.
-/// If CASE is a flag like SwitchMustMatchCase, then resolves to tint::Ignore
+/// If CASE is a flag like SwitchMustMatchCase, then resolves to ::tint::Ignore
 template <typename CASE>
 using SwitchCaseReturnType = typename SwitchCaseReturnTypeImpl<
     CASE,
     std::is_same_v<std::decay_t<CASE>, SwitchMustMatchCase>>::type;
+
+/// Raises an ICE error that a Switch() was passed a nullptr object and there was no default case
+[[noreturn]] void ICENoSwitchPassedNullptr(const char* file, unsigned int line);
+
+/// Raises an ICE error that a Switch() with a TINT_ICE_ON_NO_MATCH matched no cases.
+/// @param file the file holding the Switch()
+/// @param line the line of the TINT_ICE_ON_NO_MATCH
+/// @type_name the type name of the object passed to Switch()
+[[noreturn]] void ICENoSwitchCasesMatched(const char* file,
+                                          unsigned int line,
+                                          const char* type_name);
 
 }  // namespace tint::detail
 
@@ -248,18 +258,19 @@ namespace tint {
 /// @param args the switch cases followed by an optional TINT_ICE_ON_NO_MATCH
 /// @return the value returned by the called case. If no cases matched, then the zero value for the
 /// consistent case type.
-template <typename RETURN_TYPE = tint::detail::Infer, typename T = CastableBase, typename... ARGS>
+template <typename RETURN_TYPE = ::tint::detail::Infer, typename T = CastableBase, typename... ARGS>
 inline auto Switch(T* object, ARGS&&... args) {
     TINT_BEGIN_DISABLE_WARNING(UNUSED_VALUE);
 
     using ArgsTuple = std::tuple<ARGS...>;
     static constexpr int kMustMatchCaseIndex =
-        tint::detail::IndexOfSwitchMustMatchCase<ArgsTuple>();
+        ::tint::detail::IndexOfSwitchMustMatchCase<ArgsTuple>();
     static constexpr bool kHasMustMatchCase = kMustMatchCaseIndex >= 0;
-    static constexpr int kDefaultIndex = tint::detail::IndexOfDefaultCase<ArgsTuple>();
+    static constexpr int kDefaultIndex = ::tint::detail::IndexOfDefaultCase<ArgsTuple>();
     static constexpr bool kHasDefaultCase = kDefaultIndex >= 0;
     using ReturnType =
-        tint::detail::SwitchReturnType<RETURN_TYPE, tint::detail::SwitchCaseReturnType<ARGS>...>;
+        ::tint::detail::SwitchReturnType<RETURN_TYPE,
+                                         ::tint::detail::SwitchCaseReturnType<ARGS>...>;
     static constexpr bool kHasReturnType = !std::is_same_v<ReturnType, void>;
 
     // Static assertions
@@ -280,7 +291,7 @@ inline auto Switch(T* object, ARGS&&... args) {
     if (!object) {  // Object is nullptr, so no cases can match
         if constexpr (kHasMustMatchCase) {
             const SwitchMustMatchCase& info = (args, ...);
-            tint::InternalCompilerError(info.file, info.line) << "Switch() passed nullptr";
+            ::tint::detail::ICENoSwitchPassedNullptr(info.file, info.line);
             if constexpr (kHasReturnType) {
                 return ReturnType{};
             } else {
@@ -303,7 +314,7 @@ inline auto Switch(T* object, ARGS&&... args) {
     AlignedStorage<std::conditional_t<kHasReturnType, ReturnType, uint8_t>> return_storage;
     auto* result = &return_storage.Get();
 
-    const tint::TypeInfo& type_info = object->TypeInfo();
+    const ::tint::TypeInfo& type_info = object->TypeInfo();
 
     // Examines the parameter type of the case function.
     // If the parameter is a pointer type that `object` is of, or derives from, then that case
@@ -317,10 +328,9 @@ inline auto Switch(T* object, ARGS&&... args) {
         using CaseFunc = std::decay_t<decltype(case_fn)>;
         bool success = false;
         if constexpr (std::is_same_v<CaseFunc, SwitchMustMatchCase>) {
-            tint::InternalCompilerError(case_fn.file, case_fn.line)
-                << "Switch() matched no cases. Type: " << type_info.name;
+            ::tint::detail::ICENoSwitchCasesMatched(case_fn.file, case_fn.line, type_info.name);
         } else {
-            using CaseType = tint::detail::SwitchCaseType<CaseFunc>;
+            using CaseType = ::tint::detail::SwitchCaseType<CaseFunc>;
             if constexpr (std::is_same_v<CaseType, Default>) {
                 if constexpr (kHasReturnType) {
                     new (result) ReturnType(static_cast<ReturnType>(case_fn(Default{})));

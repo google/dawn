@@ -115,7 +115,6 @@ ast::transform::Transform::ApplyResult VectorizeMatrixConversions::Apply(
         if (TINT_UNLIKELY(!(src_type->rows() == dst_type->rows() &&
                             src_type->columns() == dst_type->columns()))) {
             TINT_ICE() << "source and destination matrix has different shape in matrix conversion";
-            return nullptr;
         }
 
         auto build_vectorized_conversion_expression = [&](auto&& src_expression_builder) {

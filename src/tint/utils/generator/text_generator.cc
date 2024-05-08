@@ -72,7 +72,6 @@ void TextGenerator::TextBuffer::Insert(const std::string& line, size_t before, u
         TINT_ICE() << "TextBuffer::Insert() called with before > lines.size()\n"
                    << "  before:" << before << "\n"
                    << "  lines.size(): " << lines.size();
-        return;
     }
     using DT = decltype(lines)::difference_type;
     lines.insert(lines.begin() + static_cast<DT>(before), LineInfo{indent, line});
@@ -90,7 +89,6 @@ void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint
         TINT_ICE() << "TextBuffer::Insert() called with before > lines.size()\n"
                    << "  before:" << before << "\n"
                    << "  lines.size(): " << lines.size();
-        return;
     }
     size_t idx = 0;
     for (auto& line : tb.lines) {

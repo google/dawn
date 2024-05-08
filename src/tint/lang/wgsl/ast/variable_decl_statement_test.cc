@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
@@ -59,7 +58,7 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
 }
 
 TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<VariableDeclStatement>(nullptr);
@@ -68,7 +67,7 @@ TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
 }
 
 TEST_F(VariableDeclStatementTest, Assert_DifferentGenerationID_Variable) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

@@ -405,7 +405,6 @@ struct ZeroInitWorkgroupMemory::State {
         }
 
         TINT_UNREACHABLE() << "could not zero workgroup type: " << ty->FriendlyName();
-        return false;
     }
 
     /// DeclareArrayIndices returns a list of statements that contain the `let`

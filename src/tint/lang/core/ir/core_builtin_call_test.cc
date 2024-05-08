@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
@@ -56,7 +55,7 @@ TEST_F(IR_CoreBuiltinCallTest, Result) {
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -66,7 +65,7 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Fail_NoneFunction) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

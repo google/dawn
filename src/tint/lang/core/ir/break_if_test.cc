@@ -28,7 +28,6 @@
 #include "src/tint/lang/core/ir/break_if.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {
@@ -61,7 +60,7 @@ TEST_F(IR_BreakIfTest, Results) {
 }
 
 TEST_F(IR_BreakIfTest, Fail_NullLoop) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

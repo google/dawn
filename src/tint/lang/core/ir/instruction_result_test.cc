@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -38,7 +37,7 @@ namespace {
 using IR_InstructionResultTest = IRTestHelper;
 
 TEST_F(IR_InstructionResultTest, Destroy_HasInstruction) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

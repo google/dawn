@@ -87,7 +87,7 @@ struct State {
                 default:
                     break;
             }
-            TINT_ASSERT_OR_RETURN(replacement);
+            TINT_ASSERT(replacement);
 
             // Replace the old builtin result with the new value.
             if (auto name = ir.NameOf(builtin->Result(0))) {

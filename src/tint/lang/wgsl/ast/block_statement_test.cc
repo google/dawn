@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/ast/if_statement.h"
@@ -73,7 +72,7 @@ TEST_F(BlockStatementTest, IsBlock) {
 }
 
 TEST_F(BlockStatementTest, Assert_Null_Statement) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<BlockStatement>(tint::Vector<const Statement*, 1>{nullptr}, tint::Empty);
@@ -82,7 +81,7 @@ TEST_F(BlockStatementTest, Assert_Null_Statement) {
 }
 
 TEST_F(BlockStatementTest, Assert_DifferentGenerationID_Statement) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

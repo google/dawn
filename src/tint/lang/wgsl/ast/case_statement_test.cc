@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/wgsl/ast/case_statement.h"
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/ast/if_statement.h"
@@ -100,7 +99,7 @@ TEST_F(CaseStatementTest, IsCase) {
 }
 
 TEST_F(CaseStatementTest, Assert_Null_Body) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<CaseStatement>(tint::Vector{b.DefaultCaseSelector()}, nullptr);
@@ -109,7 +108,7 @@ TEST_F(CaseStatementTest, Assert_Null_Body) {
 }
 
 TEST_F(CaseStatementTest, Assert_Null_Selector) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<CaseStatement>(tint::Vector<const ast::CaseSelector*, 1>{nullptr},
@@ -119,7 +118,7 @@ TEST_F(CaseStatementTest, Assert_Null_Selector) {
 }
 
 TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Call) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -130,7 +129,7 @@ TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Call) {
 }
 
 TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Selector) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

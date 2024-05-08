@@ -234,8 +234,7 @@ struct State {
                     if (arr->ConstantCount()) {
                         return b.Constant(u32(arr->ConstantCount().value() - 1u));
                     }
-                    TINT_ASSERT_OR_RETURN_VALUE(arr->Count()->Is<type::RuntimeArrayCount>(),
-                                                nullptr);
+                    TINT_ASSERT(arr->Count()->Is<type::RuntimeArrayCount>());
 
                     // Skip clamping runtime-sized array indices if requested.
                     if (config.disable_runtime_sized_array_index_clamping) {
@@ -247,8 +246,8 @@ struct State {
                         // Generate a pointer to the runtime-sized array if it isn't the base of
                         // this access instruction.
                         auto* base_ptr = object->Type()->As<type::Pointer>();
-                        TINT_ASSERT_OR_RETURN_VALUE(base_ptr != nullptr, nullptr);
-                        TINT_ASSERT_OR_RETURN_VALUE(i == 1, nullptr);
+                        TINT_ASSERT(base_ptr != nullptr);
+                        TINT_ASSERT(i == 1);
                         auto* arr_ptr = ty.ptr(base_ptr->AddressSpace(), arr, base_ptr->Access());
                         object = b.Access(arr_ptr, object, indices[0])->Result(0);
                     }

@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,28 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/case_selector.h"
+#include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/ice/ice.h"
 
-#include "src/tint/lang/wgsl/ast/helper_test.h"
+namespace tint::detail {
 
-using namespace tint::core::number_suffixes;  // NOLINT
-
-namespace tint::ast {
-namespace {
-
-using CaseSelectorTest = TestHelper;
-
-TEST_F(CaseSelectorTest, NonDefault) {
-    auto* e = Expr(2_i);
-    auto* c = CaseSelector(e);
-    EXPECT_FALSE(c->IsDefault());
-    EXPECT_EQ(e, c->expr);
+void ICENoSwitchPassedNullptr(const char* file, unsigned int line) {
+    InternalCompilerError(file, line) << "Switch() passed nullptr";
 }
 
-TEST_F(CaseSelectorTest, Default) {
-    auto* c = DefaultCaseSelector();
-    EXPECT_TRUE(c->IsDefault());
+void ICENoSwitchCasesMatched(const char* file, unsigned int line, const char* type_name) {
+    InternalCompilerError(file, line) << "Switch() matched no cases. Type: " << type_name;
 }
 
-}  // namespace
-}  // namespace tint::ast
+}  // namespace tint::detail

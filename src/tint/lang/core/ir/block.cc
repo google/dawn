@@ -42,7 +42,6 @@ Block::~Block() = default;
 
 Block* Block::Clone(CloneContext&) {
     TINT_UNREACHABLE() << "blocks must be cloned with CloneInto";
-    return nullptr;
 }
 
 void Block::CloneInto(CloneContext& ctx, Block* out) {
@@ -65,8 +64,8 @@ void Block::CloneInto(CloneContext& ctx, Block* out) {
 }
 
 Instruction* Block::Prepend(Instruction* inst) {
-    TINT_ASSERT_OR_RETURN_VALUE(inst, inst);
-    TINT_ASSERT_OR_RETURN_VALUE(inst->Block() == nullptr, inst);
+    TINT_ASSERT(inst);
+    TINT_ASSERT(inst->Block() == nullptr);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -84,8 +83,8 @@ Instruction* Block::Prepend(Instruction* inst) {
 }
 
 Instruction* Block::Append(Instruction* inst) {
-    TINT_ASSERT_OR_RETURN_VALUE(inst, inst);
-    TINT_ASSERT_OR_RETURN_VALUE(inst->Block() == nullptr, inst);
+    TINT_ASSERT(inst);
+    TINT_ASSERT(inst->Block() == nullptr);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -103,10 +102,10 @@ Instruction* Block::Append(Instruction* inst) {
 }
 
 void Block::InsertBefore(Instruction* before, Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(before);
-    TINT_ASSERT_OR_RETURN(inst);
-    TINT_ASSERT_OR_RETURN(before->Block() == this);
-    TINT_ASSERT_OR_RETURN(inst->Block() == nullptr);
+    TINT_ASSERT(before);
+    TINT_ASSERT(inst);
+    TINT_ASSERT(before->Block() == this);
+    TINT_ASSERT(inst->Block() == nullptr);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -125,10 +124,10 @@ void Block::InsertBefore(Instruction* before, Instruction* inst) {
 }
 
 void Block::InsertAfter(Instruction* after, Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(after);
-    TINT_ASSERT_OR_RETURN(inst);
-    TINT_ASSERT_OR_RETURN(after->Block() == this);
-    TINT_ASSERT_OR_RETURN(inst->Block() == nullptr);
+    TINT_ASSERT(after);
+    TINT_ASSERT(inst);
+    TINT_ASSERT(after->Block() == this);
+    TINT_ASSERT(inst->Block() == nullptr);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -146,10 +145,10 @@ void Block::InsertAfter(Instruction* after, Instruction* inst) {
 }
 
 void Block::Replace(Instruction* target, Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(target);
-    TINT_ASSERT_OR_RETURN(inst);
-    TINT_ASSERT_OR_RETURN(target->Block() == this);
-    TINT_ASSERT_OR_RETURN(inst->Block() == nullptr);
+    TINT_ASSERT(target);
+    TINT_ASSERT(inst);
+    TINT_ASSERT(target->Block() == this);
+    TINT_ASSERT(inst->Block() == nullptr);
 
     inst->SetBlock(this);
     target->SetBlock(nullptr);
@@ -176,8 +175,8 @@ void Block::Replace(Instruction* target, Instruction* inst) {
 }
 
 void Block::Remove(Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(inst);
-    TINT_ASSERT_OR_RETURN(inst->Block() == this);
+    TINT_ASSERT(inst);
+    TINT_ASSERT(inst->Block() == this);
 
     inst->SetBlock(nullptr);
     instructions_.count -= 1;

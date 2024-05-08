@@ -176,13 +176,11 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
                     if (TINT_UNLIKELY(!storage_buffer_sem)) {
                         TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
                                       "&struct_var.array_member";
-                        break;
                     }
                     if (TINT_UNLIKELY(storage_buffer_sem->Type()->Is<core::type::Pointer>())) {
                         TINT_ICE()
                             << "storage buffer variable should not be a pointer. These should have "
                                "been removed by the SimplifyPointers transform";
-                        break;
                     }
                     auto* storage_buffer_var = storage_buffer_sem->Variable();
                     auto* storage_buffer_type =
@@ -234,7 +232,6 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
                             if (TINT_UNLIKELY(!array_type)) {
                                 TINT_ICE() << "expected form of arrayLength argument to be "
                                               "&array_var or &struct_var.array_member";
-                                return name;
                             }
 
                             uint32_t array_stride = array_type->Size();

@@ -28,7 +28,6 @@
 #include "src/tint/lang/core/ir/construct.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {
@@ -57,7 +56,7 @@ TEST_F(IR_ConstructTest, Result) {
 }
 
 TEST_F(IR_ConstructTest, Fail_NullType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

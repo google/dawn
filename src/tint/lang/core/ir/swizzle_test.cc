@@ -28,7 +28,6 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -55,7 +54,7 @@ TEST_F(IR_SwizzleTest, Results) {
 }
 
 TEST_F(IR_SwizzleTest, Fail_NullType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -66,7 +65,7 @@ TEST_F(IR_SwizzleTest, Fail_NullType) {
 }
 
 TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -77,7 +76,7 @@ TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
 }
 
 TEST_F(IR_SwizzleTest, Fail_TooManyIndices) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -88,7 +87,7 @@ TEST_F(IR_SwizzleTest, Fail_TooManyIndices) {
 }
 
 TEST_F(IR_SwizzleTest, Fail_IndexOutOfRange) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

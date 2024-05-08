@@ -202,7 +202,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "unhandled PipelineStage: " << stage;
-        return Function::PipelineStage::kCompute;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -328,7 +327,7 @@ struct Decoder {
             case pb::Instruction::KindCase::KIND_NOT_SET:
                 break;
         }
-        TINT_ASSERT_OR_RETURN_VALUE(inst_out, nullptr);
+        TINT_ASSERT(inst_out);
 
         Vector<ir::Value*, 4> operands;
         for (auto id : inst_in.operands()) {
@@ -556,7 +555,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << type_in.kind_case();
-        return nullptr;
     }
 
     const type::Type* CreateTypeBasic(pb::TypeBasic basic_in) {
@@ -579,7 +577,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid TypeBasic: " << basic_in;
-        return nullptr;
     }
 
     const type::Vector* CreateTypeVector(const pb::TypeVector& vector_in) {
@@ -723,7 +720,6 @@ struct Decoder {
 
         if (!value_out) {
             TINT_ICE() << "invalid TypeDecl.kind: " << value_in.kind_case();
-            return nullptr;
         }
 
         return value_out;
@@ -802,7 +798,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid ConstantValue.kind: " << value_in.kind_case();
-        return nullptr;
     }
 
     const core::constant::Value* CreateConstantScalar(const pb::ConstantValueScalar& value_in) {
@@ -821,7 +816,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid ConstantValueScalar.kind: " << value_in.kind_case();
-        return nullptr;
     }
 
     const core::constant::Value* CreateConstantComposite(
@@ -892,7 +886,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid AddressSpace: " << in;
-        return core::AddressSpace::kUndefined;
     }
 
     core::Access AccessControl(pb::AccessControl in) {
@@ -909,7 +902,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid Access: " << in;
-        return core::Access::kUndefined;
     }
 
     core::UnaryOp UnaryOp(pb::UnaryOp in) {
@@ -930,7 +922,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid UnaryOp: " << in;
-        return core::UnaryOp::kComplement;
     }
 
     core::BinaryOp BinaryOp(pb::BinaryOp in) {
@@ -977,7 +968,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid BinaryOp: " << in;
-        return core::BinaryOp::kAdd;
     }
 
     core::type::TextureDimension TextureDimension(pb::TextureDimension in) {
@@ -1001,7 +991,6 @@ struct Decoder {
         }
 
         TINT_ICE() << "invalid TextureDimension: " << in;
-        return core::type::TextureDimension::k1d;
     }
 
     core::TexelFormat TexelFormat(pb::TexelFormat in) {
@@ -1049,7 +1038,6 @@ struct Decoder {
         }
 
         TINT_ICE() << "invalid TexelFormat: " << in;
-        return core::TexelFormat::kBgra8Unorm;
     }
 
     core::type::SamplerKind SamplerKind(pb::SamplerKind in) {
@@ -1065,7 +1053,6 @@ struct Decoder {
         }
 
         TINT_ICE() << "invalid SamplerKind: " << in;
-        return core::type::SamplerKind::kSampler;
     }
 
     core::InterpolationType InterpolationType(pb::InterpolationType in) {
@@ -1082,7 +1069,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid InterpolationType: " << in;
-        return core::InterpolationType::kFlat;
     }
 
     core::InterpolationSampling InterpolationSampling(pb::InterpolationSampling in) {
@@ -1099,7 +1085,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid InterpolationSampling: " << in;
-        return core::InterpolationSampling::kCenter;
     }
 
     core::BuiltinValue BuiltinValue(pb::BuiltinValue in) {
@@ -1140,7 +1125,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid BuiltinValue: " << in;
-        return core::BuiltinValue::kPointSize;
     }
 
     core::BuiltinFn BuiltinFn(pb::BuiltinFn in) {
@@ -1393,7 +1377,6 @@ struct Decoder {
                 break;
         }
         TINT_ICE() << "invalid BuiltinFn: " << in;
-        return core::BuiltinFn::kAbs;
     }
 };
 

@@ -246,7 +246,6 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
             StyledText err;
             err << "MatchState.MatchState() returned null";
             TINT_ICE() << err.Plain();
-            return err;
         }
     } else {
         return_type = context.types.void_();
@@ -495,7 +494,6 @@ StyledText ErrAmbiguousOverload(Context& context,
         }
     }
     TINT_ICE() << err.Plain();
-    return err;
 }
 
 }  // namespace

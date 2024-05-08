@@ -200,7 +200,6 @@ struct BuiltinPolyfill::State {
             }
             default:
                 TINT_ICE() << "unhandled polyfill level: " << static_cast<int>(cfg.builtins.acosh);
-                return {};
         }
 
         b.Func(name, tint::Vector{b.Param("x", T(ty))}, T(ty), body);
@@ -252,7 +251,6 @@ struct BuiltinPolyfill::State {
                 break;
             default:
                 TINT_ICE() << "unhandled polyfill level: " << static_cast<int>(cfg.builtins.acosh);
-                return {};
         }
 
         b.Func(name, tint::Vector{b.Param("x", T(ty))}, T(ty), body);
@@ -442,7 +440,6 @@ struct BuiltinPolyfill::State {
             default:
                 TINT_ICE() << "unhandled polyfill level: "
                            << static_cast<int>(cfg.builtins.extract_bits);
-                return {};
         }
 
         b.Func(name,
@@ -620,7 +617,6 @@ struct BuiltinPolyfill::State {
             TINT_ICE()
                 << "insertBits polyfill only support i32, u32, and vector of i32 or u32, got "
                 << ty->FriendlyName();
-            return {};
         }
 
         constexpr uint32_t W = 32u;  // 32-bit
@@ -701,7 +697,6 @@ struct BuiltinPolyfill::State {
             default:
                 TINT_ICE() << "unhandled polyfill level: "
                            << static_cast<int>(cfg.builtins.insert_bits);
-                return {};
         }
 
         b.Func(name,

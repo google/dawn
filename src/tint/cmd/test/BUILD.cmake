@@ -75,9 +75,7 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_utils_containers_test
   tint_utils_diagnostic_test
   tint_utils_file_test
-  tint_utils_ice
   tint_utils_ice_test
-  tint_utils_macros
   tint_utils_macros_test
   tint_utils_math_test
   tint_utils_memory_test

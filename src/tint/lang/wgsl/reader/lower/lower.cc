@@ -175,7 +175,6 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
             break;
     }
     TINT_ICE() << "unhandled builtin function: " << fn;
-    return core::BuiltinFn::kNone;
 }
 
 }  // namespace

@@ -27,7 +27,6 @@
 
 #include <utility>
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/transform/get_insertion_point.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"

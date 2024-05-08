@@ -51,7 +51,6 @@ uint32_t IncompleteType::Align() const {
 
 core::type::Type* IncompleteType::Clone(core::type::CloneContext&) const {
     TINT_ICE() << "IncompleteType does not support cloning";
-    return nullptr;
 }
 
 bool IncompleteType::Equals(const core::type::UniqueNode& other) const {

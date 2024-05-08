@@ -25,8 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest-spi.h"
-
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
@@ -78,7 +76,7 @@ TEST_F(VariableTest, CreationEmpty) {
 }
 
 TEST_F(VariableTest, Assert_Null_Name) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.Var(static_cast<Identifier*>(nullptr), b.ty.i32());
@@ -87,7 +85,7 @@ TEST_F(VariableTest, Assert_Null_Name) {
 }
 
 TEST_F(VariableTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -97,7 +95,7 @@ TEST_F(VariableTest, Assert_DifferentGenerationID_Symbol) {
 }
 
 TEST_F(VariableTest, Assert_DifferentGenerationID_Initializer) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

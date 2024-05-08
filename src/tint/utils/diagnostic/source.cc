@@ -192,11 +192,11 @@ std::string ToString(const Source& source) {
 }
 
 size_t Source::Range::Length(const FileContent& content) const {
-    TINT_ASSERT_OR_RETURN_VALUE(begin <= end, 0);
-    TINT_ASSERT_OR_RETURN_VALUE(begin.column > 0, 0);
-    TINT_ASSERT_OR_RETURN_VALUE(begin.line > 0, 0);
-    TINT_ASSERT_OR_RETURN_VALUE(end.line <= 1 + content.lines.size(), 0);
-    TINT_ASSERT_OR_RETURN_VALUE(end.column <= 1 + content.lines[end.line - 1].size(), 0);
+    TINT_ASSERT(begin <= end);
+    TINT_ASSERT(begin.column > 0);
+    TINT_ASSERT(begin.line > 0);
+    TINT_ASSERT(end.line <= 1 + content.lines.size());
+    TINT_ASSERT(end.column <= 1 + content.lines[end.line - 1].size());
 
     if (end.line == begin.line) {
         return end.column - begin.column;

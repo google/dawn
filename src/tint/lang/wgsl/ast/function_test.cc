@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
@@ -114,7 +113,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
 }
 
 TEST_F(FunctionTest, Assert_NullName) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.Func(static_cast<Identifier*>(nullptr), tint::Empty, b.ty.void_(), tint::Empty);
@@ -123,7 +122,7 @@ TEST_F(FunctionTest, Assert_NullName) {
 }
 
 TEST_F(FunctionTest, Assert_TemplatedName) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.Func(b.Ident("a", "b"), tint::Empty, b.ty.void_(), tint::Empty);
@@ -133,7 +132,7 @@ TEST_F(FunctionTest, Assert_TemplatedName) {
 
 TEST_F(FunctionTest, Assert_NullParam) {
     using ParamList = tint::Vector<const Parameter*, 2>;
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             ParamList params;
@@ -145,7 +144,7 @@ TEST_F(FunctionTest, Assert_NullParam) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -155,7 +154,7 @@ TEST_F(FunctionTest, Assert_DifferentGenerationID_Symbol) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_Param) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -169,7 +168,7 @@ TEST_F(FunctionTest, Assert_DifferentGenerationID_Param) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_Attr) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -182,7 +181,7 @@ TEST_F(FunctionTest, Assert_DifferentGenerationID_Attr) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_ReturnType) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -192,7 +191,7 @@ TEST_F(FunctionTest, Assert_DifferentGenerationID_ReturnType) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_ReturnAttr) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

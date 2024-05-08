@@ -290,7 +290,6 @@ struct FunctionInfo {
                 return required_to_be_uniform_info;
             default:
                 TINT_UNREACHABLE() << "unhandled severity";
-                return nullptr;
         }
     }
 
@@ -1478,10 +1477,9 @@ class UniformityGraph {
 
                         return LValue{cf, value, param};
                     },
-                    [&](Default) {
+                    [&](Default) -> LValue {
                         TINT_ICE() << "unknown lvalue identifier expression type: "
                                    << std::string(sem->Variable()->TypeInfo().name);
-                        return LValue{};
                     });
 
                 // If the identifier is part of an expression that is a partial reference to a
@@ -1810,7 +1808,6 @@ class UniformityGraph {
         } else {
             TINT_UNREACHABLE() << "unexpected call expression type";
         }
-        return nullptr;
     }
 
     /// Add diagnostic notes to show where control flow became non-uniform on the way to a node.
@@ -1942,7 +1939,6 @@ class UniformityGraph {
                     }
                     default: {
                         TINT_ICE() << "unhandled source of non-uniformity";
-                        break;
                     }
                 }
             },

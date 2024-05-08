@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/loop.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {
@@ -48,7 +47,7 @@ TEST_F(IR_LoopTest, Result) {
 }
 
 TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -58,7 +57,7 @@ TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
 }
 
 TEST_F(IR_LoopTest, Fail_NullBodyBlock) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -68,7 +67,7 @@ TEST_F(IR_LoopTest, Fail_NullBodyBlock) {
 }
 
 TEST_F(IR_LoopTest, Fail_NullContinuingBlock) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 
@@ -66,7 +65,7 @@ TEST_F(ProgramTest, Assert_GlobalVariable) {
 }
 
 TEST_F(ProgramTest, Assert_NullGlobalVariable) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.AST().AddGlobalVariable(nullptr);
@@ -75,7 +74,7 @@ TEST_F(ProgramTest, Assert_NullGlobalVariable) {
 }
 
 TEST_F(ProgramTest, Assert_NullTypeDecl) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.AST().AddTypeDecl(nullptr);
@@ -84,7 +83,7 @@ TEST_F(ProgramTest, Assert_NullTypeDecl) {
 }
 
 TEST_F(ProgramTest, Assert_Null_Function) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.AST().AddFunction(nullptr);

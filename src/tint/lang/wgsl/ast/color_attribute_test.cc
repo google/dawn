@@ -25,8 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest-spi.h"
-
 #include "src/tint/lang/wgsl/ast/color_attribute.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
@@ -44,7 +42,7 @@ TEST_F(ColorAttributeTest, Creation) {
 }
 
 TEST_F(ColorAttributeTest, Assert_Null_Builtin) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.Color(nullptr);
@@ -53,7 +51,7 @@ TEST_F(ColorAttributeTest, Assert_Null_Builtin) {
 }
 
 TEST_F(ColorAttributeTest, Assert_DifferentGenerationID_Color) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

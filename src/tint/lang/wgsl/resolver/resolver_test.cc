@@ -30,7 +30,6 @@
 #include <tuple>
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -2088,7 +2087,7 @@ TEST_F(ResolverTest, ASTNodesAreReached) {
 }
 
 TEST_F(ResolverTest, ASTNodeNotReached) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.Ident("ident");
@@ -2099,7 +2098,7 @@ TEST_F(ResolverTest, ASTNodeNotReached) {
 }
 
 TEST_F(ResolverTest, ASTNodeReachedTwice) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             auto* expr = b.Expr(1_i);

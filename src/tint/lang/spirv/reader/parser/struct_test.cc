@@ -27,12 +27,10 @@
 
 #include "src/tint/lang/spirv/reader/parser/helper_test.h"
 
-#include "gtest/gtest-spi.h"
-
 namespace tint::spirv::reader {
 
 TEST_F(SpirvParserTest, Struct_Empty) {
-    EXPECT_FATAL_FAILURE(  //
+    EXPECT_DEATH(  //
         {
             auto assembly = Assemble(R"(
                OpCapability Shader

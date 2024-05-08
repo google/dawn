@@ -113,7 +113,6 @@ static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
             return o << "@workgroup_size";
     }
     TINT_UNREACHABLE();
-    return o << "<unknown>";
 }
 
 static bool IsBindingAttribute(AttributeKind kind) {
@@ -254,7 +253,6 @@ const ast::Attribute* CreateAttribute(const Source& source,
             return builder.create<ast::WorkgroupAttribute>(source, builder.Expr(1_i));
     }
     TINT_UNREACHABLE() << kind;
-    return nullptr;
 }
 
 struct TestWithParams : ResolverTestWithParam<TestParams> {

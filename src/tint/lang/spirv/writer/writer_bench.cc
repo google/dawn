@@ -34,6 +34,14 @@
 #include "src/tint/lang/wgsl/reader/reader.h"
 #endif  // TINT_BUILD_WGSL_READER
 
+#if TINT_BUILD_IS_MSVC
+#if _MSC_VER > 1930 && _MSC_VER < 1939
+#define BUGGY_COMPILER  // MSVC can ICE
+#endif
+#endif
+
+#ifndef BUGGY_COMPILER
+
 namespace tint::spirv::writer {
 namespace {
 
@@ -81,3 +89,5 @@ TINT_BENCHMARK_PROGRAMS(GenerateSPIRV_UseIR);
 
 }  // namespace
 }  // namespace tint::spirv::writer
+
+#endif

@@ -1110,7 +1110,6 @@ struct DirectVariableAccess::State {
             }
 
             TINT_ICE() << "unhandled variant for access chain";
-            break;
         }
         return ss.str();
     }
@@ -1158,7 +1157,6 @@ struct DirectVariableAccess::State {
         }
 
         TINT_ICE() << "unhandled variant type for access chain";
-        return nullptr;
     }
 
     /// @returns a new Symbol starting with @p symbol concatenated with @p suffix, and possibly an

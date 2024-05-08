@@ -166,7 +166,6 @@ struct Encoder {
                 break;
         }
         TINT_ICE() << "unhandled PipelineStage: " << stage;
-        return pb::PipelineStage::Compute;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -663,7 +662,6 @@ struct Encoder {
                 break;
         }
         TINT_ICE() << "invalid AddressSpace: " << in;
-        return pb::AddressSpace::function;
     }
 
     pb::AccessControl AccessControl(core::Access in) {
@@ -678,7 +676,6 @@ struct Encoder {
                 break;
         }
         TINT_ICE() << "invalid Access: " << in;
-        return pb::AccessControl::read;
     }
 
     pb::UnaryOp UnaryOp(core::UnaryOp in) {
@@ -695,7 +692,6 @@ struct Encoder {
                 return pb::UnaryOp::not_;
         }
         TINT_ICE() << "invalid UnaryOp: " << in;
-        return pb::UnaryOp::complement;
     }
 
     pb::BinaryOp BinaryOp(core::BinaryOp in) {
@@ -739,7 +735,6 @@ struct Encoder {
         }
 
         TINT_ICE() << "invalid BinaryOp: " << in;
-        return pb::BinaryOp::add_;
     }
 
     pb::TextureDimension TextureDimension(core::type::TextureDimension in) {
@@ -761,7 +756,6 @@ struct Encoder {
         }
 
         TINT_ICE() << "invalid TextureDimension: " << in;
-        return pb::TextureDimension::_1d;
     }
 
     pb::TexelFormat TexelFormat(core::TexelFormat in) {
@@ -807,7 +801,6 @@ struct Encoder {
         }
 
         TINT_ICE() << "invalid TexelFormat: " << in;
-        return pb::TexelFormat::bgra8_unorm;
     }
 
     pb::SamplerKind SamplerKind(core::type::SamplerKind in) {
@@ -819,7 +812,6 @@ struct Encoder {
         }
 
         TINT_ICE() << "invalid SamplerKind: " << in;
-        return pb::SamplerKind::sampler;
     }
 
     pb::InterpolationType InterpolationType(core::InterpolationType in) {
@@ -834,7 +826,6 @@ struct Encoder {
                 break;
         }
         TINT_ICE() << "invalid InterpolationType: " << in;
-        return pb::InterpolationType::flat;
     }
 
     pb::InterpolationSampling InterpolationSampling(core::InterpolationSampling in) {
@@ -849,7 +840,6 @@ struct Encoder {
                 break;
         }
         TINT_ICE() << "invalid InterpolationSampling: " << in;
-        return pb::InterpolationSampling::center;
     }
 
     pb::BuiltinValue BuiltinValue(core::BuiltinValue in) {
@@ -888,7 +878,6 @@ struct Encoder {
                 break;
         }
         TINT_ICE() << "invalid BuiltinValue: " << in;
-        return pb::BuiltinValue::point_size;
     }
 
     pb::BuiltinFn BuiltinFn(core::BuiltinFn in) {
@@ -1139,7 +1128,6 @@ struct Encoder {
                 break;
         }
         TINT_ICE() << "invalid BuiltinFn: " << in;
-        return pb::BuiltinFn::abs;
     }
 };
 

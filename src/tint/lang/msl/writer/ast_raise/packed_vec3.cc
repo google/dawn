@@ -174,7 +174,6 @@ struct PackedVec3::State {
                         return b.ty.array(new_type, u32(count.value()), std::move(attrs));
                     } else {
                         TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
-                        return {};
                     }
                 }
                 return {};

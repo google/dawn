@@ -145,7 +145,6 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::T
         auto count = a->ConstantCount();
         if (TINT_UNLIKELY(!count)) {
             TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
-            return ctx.dst->ty.array(el, u32(1), std::move(attrs));
         }
         return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
     }
@@ -188,7 +187,6 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::T
         return ctx.dst->ty.ptr(address_space, CreateASTTypeFor(ctx, p->StoreType()), access);
     }
     TINT_UNREACHABLE() << "Unhandled type: " << ty->TypeInfo().name;
-    return Type{};
 }
 
 }  // namespace tint::ast::transform

@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
@@ -61,7 +60,7 @@ TEST_F(IndexAccessorExpressionTest, IsIndexAccessor) {
 }
 
 TEST_F(IndexAccessorExpressionTest, Assert_Null_Array) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.IndexAccessor(nullptr, b.Expr("idx"));
@@ -70,7 +69,7 @@ TEST_F(IndexAccessorExpressionTest, Assert_Null_Array) {
 }
 
 TEST_F(IndexAccessorExpressionTest, Assert_Null_Index) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.IndexAccessor(b.Expr("arr"), nullptr);
@@ -79,7 +78,7 @@ TEST_F(IndexAccessorExpressionTest, Assert_Null_Index) {
 }
 
 TEST_F(IndexAccessorExpressionTest, Assert_DifferentGenerationID_Array) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -89,7 +88,7 @@ TEST_F(IndexAccessorExpressionTest, Assert_DifferentGenerationID_Array) {
 }
 
 TEST_F(IndexAccessorExpressionTest, Assert_DifferentGenerationID_Index) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

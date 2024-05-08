@@ -146,7 +146,6 @@ ast::transform::Transform::ApplyResult DecomposeStridedArray::Apply(
             if (TINT_UNLIKELY(ty->Is<core::type::Pointer>())) {
                 TINT_ICE() << "lhs of index accessor expression should not be a pointer. These "
                               "should have been removed by the SimplifyPointers transform";
-                return nullptr;
             }
             if (auto* arr = ty->UnwrapRef()->As<core::type::Array>()) {
                 if (!arr->IsStrideImplicit()) {

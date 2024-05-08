@@ -216,7 +216,6 @@ struct ModuleScopeVarToEntryPointParam::State {
                 break;  // Ignore
             default: {
                 TINT_ICE() << "unhandled module-scope address space (" << sc << ")";
-                break;
             }
         }
     }

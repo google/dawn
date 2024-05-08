@@ -103,7 +103,6 @@ uint32_t BuiltinOrder(core::BuiltinValue builtin) {
             break;
     }
     TINT_UNREACHABLE();
-    return 0;
 }
 
 // Returns true if `attr` is a shader IO attribute.
@@ -224,7 +223,6 @@ struct CanonicalizeEntryPointIO::State {
             return ctx.src->Sem().Get(attr)->Value();
         }
         TINT_ICE() << "could not obtain builtin value from attribute";
-        return core::BuiltinValue::kUndefined;
     }
 
     /// @param attrs the input attribute list
@@ -496,7 +494,6 @@ struct CanonicalizeEntryPointIO::State {
         for (auto* member : str->Members()) {
             if (TINT_UNLIKELY(member->Type()->Is<core::type::Struct>())) {
                 TINT_ICE() << "nested IO struct";
-                continue;
             }
 
             if (auto* wave_intrinsic_call = CallWaveIntrinsic(member->Declaration()->attributes)) {
@@ -530,7 +527,6 @@ struct CanonicalizeEntryPointIO::State {
             for (auto* member : str->Members()) {
                 if (TINT_UNLIKELY(member->Type()->Is<core::type::Struct>())) {
                     TINT_ICE() << "nested IO struct";
-                    continue;
                 }
 
                 auto name = member->Name().Name();

@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
@@ -48,7 +47,7 @@ TEST_F(CallStatementTest, IsCall) {
 }
 
 TEST_F(CallStatementTest, Assert_Null_Call) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.CallStmt(nullptr);
@@ -57,7 +56,7 @@ TEST_F(CallStatementTest, Assert_Null_Call) {
 }
 
 TEST_F(CallStatementTest, Assert_DifferentGenerationID_Call) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

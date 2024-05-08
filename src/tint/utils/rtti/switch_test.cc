@@ -30,7 +30,7 @@
 #include <memory>
 #include <string>
 
-#include "gtest/gtest-spi.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace tint {
@@ -230,7 +230,7 @@ TEST(Castable, SwitchMustMatch_MatchedWithReturnValue) {
 }
 
 TEST(Castable, SwitchMustMatch_NoMatchWithoutReturnValue) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             std::unique_ptr<Animal> frog = std::make_unique<Frog>();
             Switch(
@@ -239,11 +239,11 @@ TEST(Castable, SwitchMustMatch_NoMatchWithoutReturnValue) {
                 [&](Mammal*) {},   //
                 TINT_ICE_ON_NO_MATCH);
         },
-        "internal compiler error: Switch() matched no cases. Type: Frog");
+        testing::HasSubstr("internal compiler error: Switch() matched no cases. Type: Frog"));
 }
 
 TEST(Castable, SwitchMustMatch_NoMatchWithReturnValue) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             std::unique_ptr<Animal> frog = std::make_unique<Frog>();
             int res = Switch(
@@ -253,11 +253,11 @@ TEST(Castable, SwitchMustMatch_NoMatchWithReturnValue) {
                 TINT_ICE_ON_NO_MATCH);
             ASSERT_EQ(res, 0);
         },
-        "internal compiler error: Switch() matched no cases. Type: Frog");
+        testing::HasSubstr("internal compiler error: Switch() matched no cases. Type: Frog"));
 }
 
 TEST(Castable, SwitchMustMatch_NullptrWithoutReturnValue) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Switch(
                 static_cast<CastableBase*>(nullptr),  //
@@ -265,11 +265,11 @@ TEST(Castable, SwitchMustMatch_NullptrWithoutReturnValue) {
                 [&](Mammal*) {},                      //
                 TINT_ICE_ON_NO_MATCH);
         },
-        "internal compiler error: Switch() passed nullptr");
+        testing::HasSubstr("internal compiler error: Switch() passed nullptr"));
 }
 
 TEST(Castable, SwitchMustMatch_NullptrWithReturnValue) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             int res = Switch(
                 static_cast<CastableBase*>(nullptr),  //
@@ -278,7 +278,7 @@ TEST(Castable, SwitchMustMatch_NullptrWithReturnValue) {
                 TINT_ICE_ON_NO_MATCH);
             ASSERT_EQ(res, 0);
         },
-        "internal compiler error: Switch() passed nullptr");
+        testing::HasSubstr("internal compiler error: Switch() passed nullptr"));
 }
 
 TEST(Castable, SwitchMatchFirst) {

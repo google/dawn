@@ -334,7 +334,6 @@ struct TextureBuiltinsFromUniform::State {
                     if (TINT_UNLIKELY(!str)) {
                         TINT_ICE()
                             << "existing ubo binding " << cfg->ubo_binding << " is not a struct.";
-                        return ctx.Clone(ubo->name->symbol);
                     }
 
                     for (auto new_member : new_members) {

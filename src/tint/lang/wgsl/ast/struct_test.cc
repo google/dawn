@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/wgsl/ast/struct.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
@@ -82,7 +81,7 @@ TEST_F(AstStructTest, CreationWithSourceAndAttributes) {
 }
 
 TEST_F(AstStructTest, Assert_Null_StructMember) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.Structure(b.Sym("S"), tint::Vector{b.Member("a", b.ty.i32()), nullptr}, tint::Empty);
@@ -91,7 +90,7 @@ TEST_F(AstStructTest, Assert_Null_StructMember) {
 }
 
 TEST_F(AstStructTest, Assert_Null_Attribute) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.Structure(b.Sym("S"), tint::Vector{b.Member("a", b.ty.i32())},
@@ -101,7 +100,7 @@ TEST_F(AstStructTest, Assert_Null_Attribute) {
 }
 
 TEST_F(AstStructTest, Assert_DifferentGenerationID_StructMember) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -111,7 +110,7 @@ TEST_F(AstStructTest, Assert_DifferentGenerationID_StructMember) {
 }
 
 TEST_F(AstStructTest, Assert_DifferentGenerationID_Attribute) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

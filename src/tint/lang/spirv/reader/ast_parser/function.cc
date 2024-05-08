@@ -4919,7 +4919,6 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 break;
         }
         TINT_UNREACHABLE() << "expected a memory object declaration";
-        return {};
     };
 
     auto where = def_info_.find(id);

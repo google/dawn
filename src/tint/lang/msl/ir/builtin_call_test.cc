@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/msl/ir/builtin_call.h"
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::msl::ir {

@@ -94,7 +94,6 @@ std::string_view SymbolTable::Allocate(std::string_view name) {
     char* name_mem = Bitcast<char*>(name_allocator_.Allocate(name.length() + 1));
     if (name_mem == nullptr) {
         TINT_ICE() << "failed to allocate memory for symbol's string";
-        return {};
     }
 
     memcpy(name_mem, name.data(), name.length() + 1);

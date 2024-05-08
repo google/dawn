@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/core/ir/if.h"
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {
@@ -56,7 +55,7 @@ TEST_F(IR_IfTest, Parent) {
 }
 
 TEST_F(IR_IfTest, Fail_NullTrueBlock) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};
@@ -66,7 +65,7 @@ TEST_F(IR_IfTest, Fail_NullTrueBlock) {
 }
 
 TEST_F(IR_IfTest, Fail_NullFalseBlock) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

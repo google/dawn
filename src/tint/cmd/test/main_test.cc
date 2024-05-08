@@ -28,23 +28,12 @@
 #include "gmock/gmock.h"
 
 #include "src/tint/api/tint.h"
-#include "src/tint/utils/ice/ice.h"
-
-namespace {
-
-void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
-    FAIL() << err.Error();
-}
-
-}  // namespace
 
 // Entry point for tint unit tests
 int main(int argc, char** argv) {
     testing::InitGoogleMock(&argc, argv);
 
     tint::Initialize();
-
-    tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
     auto res = RUN_ALL_TESTS();
 

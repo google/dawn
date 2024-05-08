@@ -27,7 +27,7 @@
 
 #include "src/tint/utils/symbol/symbol_table.h"
 
-#include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 
 namespace tint {
 namespace {
@@ -50,7 +50,7 @@ TEST_F(SymbolTableTest, DeduplicatesNames) {
 }
 
 TEST_F(SymbolTableTest, AssertsForBlankString) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             auto generation_id = GenerationID::New();
             SymbolTable s{generation_id};

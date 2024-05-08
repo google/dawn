@@ -27,13 +27,19 @@
 
 #include "src/tint/utils/ice/ice.h"
 
-#include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
 
 namespace tint {
 namespace {
 
 TEST(ICETest_AssertTrue_Test, Unreachable) {
-    EXPECT_FATAL_FAILURE({ TINT_UNREACHABLE(); }, "internal compiler error");
+    EXPECT_DEATH(
+        {
+            if ((true)) {
+                TINT_UNREACHABLE();
+            }
+        },
+        "internal compiler error");
 }
 
 TEST(ICETest_AssertTrue_Test, AssertTrue) {
@@ -41,7 +47,13 @@ TEST(ICETest_AssertTrue_Test, AssertTrue) {
 }
 
 TEST(ICETest_AssertTrue_Test, AssertFalse) {
-    EXPECT_FATAL_FAILURE({ TINT_ASSERT(false); }, "internal compiler error");
+    EXPECT_DEATH(
+        {
+            if ((true)) {
+                TINT_ASSERT(false);
+            }
+        },
+        "internal compiler error");
 }
 
 }  // namespace

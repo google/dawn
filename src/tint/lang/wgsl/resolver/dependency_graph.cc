@@ -760,7 +760,6 @@ struct DependencyAnalysis {
         }
         TINT_ICE() << "failed to find dependency info for edge: '" << NameOf(from->node) << "' -> '"
                    << NameOf(to->node) << "'";
-        return {};
     }
 
     /// CyclicDependencyFound() emits an error diagnostic for a cyclic dependency.
@@ -907,7 +906,6 @@ std::string ResolvedIdentifier::String() const {
     }
 
     TINT_UNREACHABLE() << "unhandled ResolvedIdentifier";
-    return "<unknown>";
 }
 
 }  // namespace tint::resolver

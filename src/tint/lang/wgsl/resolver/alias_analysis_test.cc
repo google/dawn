@@ -1012,7 +1012,6 @@ class AtomicPointers
                 return CallStmt(Call(fn, ptr, 10_a, 42_a));
             default:
                 TINT_UNIMPLEMENTED() << fn;
-                return nullptr;
         }
     }
 

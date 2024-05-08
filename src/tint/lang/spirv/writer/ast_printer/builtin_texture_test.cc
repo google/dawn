@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "gmock/gmock.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/spirv/writer/ast_printer/helper_test.h"
 #include "src/tint/lang/spirv/writer/common/spv_dump_test.h"
 #include "src/tint/lang/wgsl/ast/builtin_texture_helper_test.h"
@@ -3775,9 +3774,9 @@ TEST_P(BuiltinTextureTest, ValidateSPIRV) {
     Validate(b);
 }
 
-// TODO(dsinclair): This generates two fatal errors, but expect_fatal_failure can only handle 1
+// TODO(dsinclair): This generates two fatal errors, but EXPECT_DEATH can only handle 1
 TEST_P(BuiltinTextureTest, DISABLED_OutsideFunction_IsError) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             auto param = GetParam();
 

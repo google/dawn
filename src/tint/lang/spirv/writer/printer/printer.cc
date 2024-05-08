@@ -764,7 +764,6 @@ class Printer {
             }
             case core::ir::Function::PipelineStage::kUndefined:
                 TINT_ICE() << "undefined pipeline stage for entry point";
-                return;
         }
 
         OperandList operands = {U32Operand(stage), id, ir_.NameOf(func).Name()};
@@ -1198,7 +1197,6 @@ class Printer {
             }
             default:
                 TINT_UNIMPLEMENTED() << binary->Op();
-                break;
         }
 
         // Emit the instruction.
@@ -1339,7 +1337,6 @@ class Printer {
                 break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
-                return;
         }
 
         OperandList operands;
@@ -1790,7 +1787,7 @@ class Printer {
                     one = b_.Constant(1_u);
                     zero = b_.Constant(0_u);
                 });
-            TINT_ASSERT_OR_RETURN(one && zero);
+            TINT_ASSERT(one && zero);
 
             if (auto* vec = res_ty->As<core::type::Vector>()) {
                 // Splat the scalars into vectors.
@@ -1976,7 +1973,6 @@ class Printer {
                 break;
             default:
                 TINT_UNIMPLEMENTED() << unary->Op();
-                break;
         }
         current_function_.push_inst(op, {Type(ty), id, Value(unary->Val())});
     }
@@ -2227,7 +2223,6 @@ class Printer {
         switch (format) {
             case core::TexelFormat::kBgra8Unorm:
                 TINT_ICE() << "bgra8unorm should have been polyfilled to rgba8unorm";
-                return SpvImageFormatUnknown;
             case core::TexelFormat::kR8Unorm:
                 module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
                 return SpvImageFormatR8;

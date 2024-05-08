@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/wgsl/ast/const_assert.h"
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
@@ -60,7 +59,7 @@ TEST_F(ConstAssertTest, IsConstAssert) {
 }
 
 TEST_F(ConstAssertTest, Assert_Null_Condition) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.ConstAssert(nullptr);
@@ -69,7 +68,7 @@ TEST_F(ConstAssertTest, Assert_Null_Condition) {
 }
 
 TEST_F(ConstAssertTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

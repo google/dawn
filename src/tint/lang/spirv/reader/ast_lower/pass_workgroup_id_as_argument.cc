@@ -95,7 +95,7 @@ struct PassWorkgroupIdAsArgument::State {
 
         // The reader should only produce a single use of the parameter which assigns to a global.
         const auto& users = sem.Get(builtin)->Users();
-        TINT_ASSERT_OR_RETURN(users.Length() == 1u);
+        TINT_ASSERT(users.Length() == 1u);
         auto* assign = users[0]->Stmt()->Declaration()->As<ast::AssignmentStatement>();
         auto& stmts =
             sem.Get(assign)->Parent()->Declaration()->As<ast::BlockStatement>()->statements;
@@ -112,10 +112,9 @@ struct PassWorkgroupIdAsArgument::State {
                 }
             }
         }
-        TINT_ASSERT_OR_RETURN(assign && rhs == users[0]->Declaration());
+        TINT_ASSERT(assign && rhs == users[0]->Declaration());
         auto* lhs = sem.GetVal(assign->lhs)->As<sem::VariableUser>();
-        TINT_ASSERT_OR_RETURN(lhs &&
-                              lhs->Variable()->AddressSpace() == core::AddressSpace::kPrivate);
+        TINT_ASSERT(lhs && lhs->Variable()->AddressSpace() == core::AddressSpace::kPrivate);
 
         // Replace all references to the global variable with a function parameter.
         for (auto* user : lhs->Variable()->Users()) {

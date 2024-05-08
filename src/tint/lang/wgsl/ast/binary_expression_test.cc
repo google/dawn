@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
@@ -63,7 +62,7 @@ TEST_F(BinaryExpressionTest, IsBinary) {
 }
 
 TEST_F(BinaryExpressionTest, Assert_Null_LHS) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<BinaryExpression>(core::BinaryOp::kEqual, nullptr, b.Expr("rhs"));
@@ -72,7 +71,7 @@ TEST_F(BinaryExpressionTest, Assert_Null_LHS) {
 }
 
 TEST_F(BinaryExpressionTest, Assert_Null_RHS) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<BinaryExpression>(core::BinaryOp::kEqual, b.Expr("lhs"), nullptr);
@@ -81,7 +80,7 @@ TEST_F(BinaryExpressionTest, Assert_Null_RHS) {
 }
 
 TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_LHS) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -91,7 +90,7 @@ TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_LHS) {
 }
 
 TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_RHS) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

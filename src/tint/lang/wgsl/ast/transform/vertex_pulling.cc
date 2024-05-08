@@ -437,7 +437,6 @@ struct VertexPulling::State {
                             break;
                         default:
                             TINT_UNREACHABLE() << var_dt.width;
-                            return nullptr;
                     }
                 } else if (var_dt.width > fmt_dt.width) {
                     // WGSL variable vector width is wider than the loaded vector width, do padding.
@@ -688,7 +687,6 @@ struct VertexPulling::State {
         }
 
         TINT_UNREACHABLE() << "format " << static_cast<int>(format);
-        return nullptr;
     }
 
     /// Generates an expression reading an aligned basic type (u32, i32, f32) from
@@ -741,7 +739,6 @@ struct VertexPulling::State {
                 break;
         }
         TINT_UNREACHABLE() << "invalid format for LoadPrimitive" << static_cast<int>(format);
-        return nullptr;
     }
 
     /// Generates an expression reading a vec2/3/4 from a vertex buffer.
@@ -791,14 +788,12 @@ struct VertexPulling::State {
 
             if (TINT_UNLIKELY(!sem->Attributes().location.has_value())) {
                 TINT_ICE() << "Location missing value";
-                return;
             }
             location_info[sem->Attributes().location.value()] = info;
         } else {
             auto* builtin_attr = GetAttribute<BuiltinAttribute>(param->attributes);
             if (TINT_UNLIKELY(!builtin_attr)) {
                 TINT_ICE() << "Invalid entry point parameter";
-                return;
             }
             auto builtin = src.Sem().Get(builtin_attr)->Value();
             // Check for existing vertex_index and instance_index builtins.
@@ -852,7 +847,6 @@ struct VertexPulling::State {
                 auto* builtin_attr = GetAttribute<BuiltinAttribute>(member->attributes);
                 if (TINT_UNLIKELY(!builtin_attr)) {
                     TINT_ICE() << "Invalid entry point parameter";
-                    return;
                 }
                 auto builtin = src.Sem().Get(builtin_attr)->Value();
                 // Check for existing vertex_index and instance_index builtins.

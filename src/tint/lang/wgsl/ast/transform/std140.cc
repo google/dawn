@@ -436,7 +436,6 @@ struct Std140::State {
                         //   this method only handles types transitively used as uniform buffers.
                         // * Runtime-sized arrays cannot be used in uniform buffers.
                         TINT_ICE() << "unexpected non-constant array count";
-                        count = 1;
                     }
                     return b.ty.array(std140, b.Expr(u32(count.value())), std::move(attrs));
                 }
@@ -527,7 +526,6 @@ struct Std140::State {
                     }
                     TINT_ICE() << "unexpected variable found walking access chain: "
                                << user->Variable()->Declaration()->name->symbol.Name();
-                    return Action::kError;
                 },
                 [&](const sem::StructMemberAccess* a) {
                     // Is this a std140 decomposed matrix?
@@ -583,15 +581,13 @@ struct Std140::State {
                                           default:
                                               TINT_ICE() << "unhandled unary op for access chain: "
                                                          << u->op;
-                                              return Action::kError;
                                       }
                                   });
                 },
-                [&](Default) {
+                [&](Default) -> Action {
                     TINT_ICE() << "unhandled expression type for access chain\n"
                                << "AST: " << expr->Declaration()->TypeInfo().name << "\n"
                                << "SEM: " << expr->TypeInfo().name;
-                    return Action::kError;
                 });
 
             switch (action) {
@@ -636,7 +632,6 @@ struct Std140::State {
                     //   this method only handles types transitively used as uniform buffers.
                     // * Runtime-sized arrays cannot be used in uniform buffers.
                     TINT_ICE() << "unexpected non-constant array count";
-                    count = 1;
                 }
                 return "arr" + std::to_string(count.value()) + "_" + ConvertSuffix(arr->ElemType());
             },
@@ -738,7 +733,6 @@ struct Std140::State {
                         //   this method only handles types transitively used as uniform buffers.
                         // * Runtime-sized arrays cannot be used in uniform buffers.
                         TINT_ICE() << "unexpected non-constant array count";
-                        count = 1;
                     }
                     stmts.Push(b.Decl(var));
                     stmts.Push(b.For(b.Decl(i),                          //

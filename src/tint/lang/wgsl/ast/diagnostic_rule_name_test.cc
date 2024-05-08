@@ -27,7 +27,6 @@
 
 #include <string>
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_rule_name.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
@@ -42,7 +41,7 @@ TEST_F(DiagnosticRuleNameTest, String) {
 }
 
 TEST_F(DiagnosticRuleNameTest, Assert_NameNotTemplated) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<ast::DiagnosticRuleName>(b.Ident("name", "a", "b", "c"));
@@ -51,7 +50,7 @@ TEST_F(DiagnosticRuleNameTest, Assert_NameNotTemplated) {
 }
 
 TEST_F(DiagnosticRuleNameTest, Assert_CategoryNotTemplated) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b;
             b.create<ast::DiagnosticRuleName>(b.Ident("name"), b.Ident("category", "a", "b", "c"));

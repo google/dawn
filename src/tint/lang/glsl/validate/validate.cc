@@ -48,7 +48,9 @@ EShLanguage PipelineStageToEshLanguage(tint::ast::PipelineStage stage) {
             return EShLangCompute;
         default:
             TINT_UNREACHABLE();
-            return EShLangVertex;
+            // MSVC considered the inlined call:
+            // `lang = PipelineStageToEshLanguage()` as potentially uninitialized
+            TINT_MSVC_ONLY(return EShLangCompute;)
     }
 }
 

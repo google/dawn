@@ -172,7 +172,7 @@ struct State {
                 default:
                     break;
             }
-            TINT_ASSERT_OR_RETURN(replacement);
+            TINT_ASSERT(replacement);
 
             // Replace the old builtin result with the new value.
             if (auto name = ir.NameOf(builtin->Result(0))) {
@@ -199,13 +199,12 @@ struct State {
         while (auto* let = tint::As<core::ir::Let>(ptr->Instruction())) {
             ptr = let->Value()->As<core::ir::InstructionResult>();
         }
-        TINT_ASSERT_OR_RETURN_VALUE(ptr, nullptr);
+        TINT_ASSERT(ptr);
 
         auto* access = ptr->Instruction()->As<core::ir::Access>();
-        TINT_ASSERT_OR_RETURN_VALUE(access, nullptr);
-        TINT_ASSERT_OR_RETURN_VALUE(access->Indices().Length() == 1u, nullptr);
-        TINT_ASSERT_OR_RETURN_VALUE(access->Object()->Type()->UnwrapPtr()->Is<core::type::Struct>(),
-                                    nullptr);
+        TINT_ASSERT(access);
+        TINT_ASSERT(access->Indices().Length() == 1u);
+        TINT_ASSERT(access->Object()->Type()->UnwrapPtr()->Is<core::type::Struct>());
         auto* const_idx = access->Indices()[0]->As<core::ir::Constant>();
 
         // Replace the builtin call with a call to the spirv.array_length intrinsic.
@@ -231,7 +230,6 @@ struct State {
                     return b.Constant(u32(SpvScopeDevice));
                 default:
                     TINT_UNREACHABLE() << "unhandled atomic address space";
-                    return nullptr;
             }
         }();
         auto* memory_semantics = b.Constant(u32(SpvMemorySemanticsMaskNone));

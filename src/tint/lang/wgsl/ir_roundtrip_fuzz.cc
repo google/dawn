@@ -31,8 +31,6 @@
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/disassembly.h"
-#include "src/tint/lang/wgsl/reader/lower/lower.h"
-#include "src/tint/lang/wgsl/reader/parser/parser.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/raise/raise.h"
@@ -43,7 +41,6 @@ namespace tint::wgsl {
 void IRRoundtripFuzzer(core::ir::Module& ir) {
     if (auto res = tint::wgsl::writer::Raise(ir); res != Success) {
         TINT_ICE() << res.Failure();
-        return;
     }
 
     writer::ProgramOptions program_options;
@@ -55,7 +52,6 @@ void IRRoundtripFuzzer(core::ir::Module& ir) {
             std::cerr << "WGSL:\n" << result->wgsl << std::endl << std::endl;
         }
         TINT_ICE() << dst.Diagnostics();
-        return;
     }
 
     return;

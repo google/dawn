@@ -318,7 +318,6 @@ class Impl {
                 }
                 default: {
                     TINT_ICE() << "Invalid pipeline stage";
-                    return;
                 }
             }
 
@@ -340,7 +339,6 @@ class Impl {
                             ir_func->SetReturnBuiltin(ident_sem->Value());
                         } else {
                             TINT_ICE() << "Builtin attribute sem invalid";
-                            return;
                         }
                     });
             }
@@ -376,7 +374,6 @@ class Impl {
                             param->SetBuiltin(ident_sem->Value());
                         } else {
                             TINT_ICE() << "Builtin attribute sem invalid";
-                            return;
                         }
                     });
 
@@ -852,7 +849,6 @@ class Impl {
                     return *val;
                 }
                 TINT_ICE() << "expression did not resolve to a value";
-                return nullptr;
             }
 
             void PushBlock(core::ir::Block* block) {
@@ -884,7 +880,6 @@ class Impl {
                 auto* obj = GetValue(expr->object);
                 if (!obj) {
                     TINT_UNREACHABLE() << "no object result";
-                    return;
                 }
 
                 auto* sem = impl.program_.Sem().Get(expr)->Unwrap();
@@ -906,7 +901,6 @@ class Impl {
                                 return impl.builder_.Constant(cv);
                             }
                             TINT_UNREACHABLE() << "constant clone failed";
-                            return nullptr;
                         }
                         return GetValue(idx->Index()->Declaration());
                     },
@@ -1053,7 +1047,6 @@ class Impl {
                     inst = impl.builder_.Convert(ty, args[0]);
                 } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
                     TINT_UNIMPLEMENTED() << "missing templated ident support";
-                    return;
                 } else {
                     // Not a builtin and not a templated call, so this is a user function.
                     inst = impl.builder_.Call(ty,
@@ -1164,7 +1157,7 @@ class Impl {
                 auto res = GetValue(b);
                 auto* src = res->As<core::ir::InstructionResult>()->Instruction();
                 auto* if_ = src->As<core::ir::If>();
-                TINT_ASSERT_OR_RETURN(if_);
+                TINT_ASSERT(if_);
                 auto rhs = GetValue(b->rhs);
                 if (!rhs) {
                     return;
@@ -1229,7 +1222,6 @@ class Impl {
             return *val;
         }
         TINT_ICE() << "expression did not resolve to a value";
-        return nullptr;
     }
 
     void EmitCall(const ast::CallStatement* stmt) { (void)EmitValueExpression(stmt->expr); }
@@ -1333,10 +1325,8 @@ class Impl {
             case core::BinaryOp::kLogicalAnd:
             case core::BinaryOp::kLogicalOr:
                 TINT_ICE() << "short circuit op should have already been handled";
-                return nullptr;
         }
         TINT_UNREACHABLE();
-        return nullptr;
     }
 };
 

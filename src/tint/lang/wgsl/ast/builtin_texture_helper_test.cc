@@ -166,7 +166,6 @@ Type TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b) cons
     }
 
     TINT_UNREACHABLE();
-    return {};
 }
 
 const Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) const {
@@ -200,7 +199,6 @@ const Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) con
     }
 
     TINT_UNREACHABLE();
-    return nullptr;
 }
 
 const Variable* TextureOverloadCase::BuildSamplerVariable(ProgramBuilder* b) const {

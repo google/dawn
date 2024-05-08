@@ -43,7 +43,6 @@ MultiInBlock::~MultiInBlock() = default;
 
 MultiInBlock* MultiInBlock::Clone(CloneContext&) {
     TINT_UNREACHABLE() << "blocks must be cloned with CloneInto";
-    return nullptr;
 }
 
 void MultiInBlock::CloneInto(CloneContext& ctx, Block* out) {
@@ -59,7 +58,7 @@ void MultiInBlock::SetParams(VectorRef<BlockParam*> params) {
         param->SetBlock(nullptr);
     }
     params_ = std::move(params);
-    TINT_ASSERT_OR_RETURN(!params_.Any(IsNull));
+    TINT_ASSERT(!params_.Any(IsNull));
     for (auto* param : params_) {
         param->SetBlock(this);
     }
@@ -70,19 +69,19 @@ void MultiInBlock::SetParams(std::initializer_list<BlockParam*> params) {
         param->SetBlock(nullptr);
     }
     params_ = std::move(params);
-    TINT_ASSERT_OR_RETURN(!params_.Any(IsNull));
+    TINT_ASSERT(!params_.Any(IsNull));
     for (auto* param : params_) {
         param->SetBlock(this);
     }
 }
 
 void MultiInBlock::AddInboundSiblingBranch(ir::Terminator* node) {
-    TINT_ASSERT_OR_RETURN(node != nullptr);
+    TINT_ASSERT(node != nullptr);
     inbound_sibling_branches_.Push(node);
 }
 
 void MultiInBlock::RemoveInboundSiblingBranch(ir::Terminator* node) {
-    TINT_ASSERT_OR_RETURN(node != nullptr);
+    TINT_ASSERT(node != nullptr);
     inbound_sibling_branches_.EraseIf([node](ir::Terminator* i) { return i == node; });
 }
 

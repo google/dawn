@@ -317,7 +317,6 @@ class CloneContext {
         if (TINT_UNLIKELY(symbol_transform_)) {
             TINT_ICE() << "ReplaceAll(const SymbolTransform&) called multiple times on the same "
                           "CloneContext";
-            return *this;
         }
         symbol_transform_ = replacer;
         return *this;
@@ -568,16 +567,14 @@ class CloneContext {
             return cast;
         }
         CheckedCastFailure(obj, tint::TypeInfo::Of<TO>());
-        return nullptr;
     }
 
     /// Clones a Node object, using any replacements or transforms that have
     /// been configured.
     const ast::Node* CloneNode(const ast::Node* object);
 
-    /// Adds an error diagnostic to Diagnostics() that the cloned object was not
-    /// of the expected type.
-    void CheckedCastFailure(const ast::Node* got, const TypeInfo& expected);
+    /// Aborts with an ICE describing that the cloned object type was not as required.
+    [[noreturn]] void CheckedCastFailure(const ast::Node* got, const TypeInfo& expected);
 
     /// @returns the diagnostic list of #dst
     diag::List& Diagnostics() const;

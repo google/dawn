@@ -72,7 +72,6 @@ const sem::ValueExpression* Zero(ProgramBuilder& b,
         expr = b.Expr(false);
     } else {
         TINT_UNREACHABLE() << "unsupported vector element type: " << ty->TypeInfo().name;
-        return nullptr;
     }
     auto* sem = b.create<sem::ValueExpression>(expr, ty, core::EvaluationStage::kRuntime, stmt,
                                                /* constant_value */ nullptr,

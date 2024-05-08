@@ -27,7 +27,6 @@
 
 #include <utility>
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/hoist_to_decl_before.h"

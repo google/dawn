@@ -118,7 +118,6 @@ class Parser {
             default:
                 TINT_UNIMPLEMENTED()
                     << "unhandled SPIR-V storage class: " << static_cast<uint32_t>(sc);
-                return core::AddressSpace::kUndefined;
         }
     }
 
@@ -156,7 +155,6 @@ class Parser {
                 return core::BuiltinValue::kWorkgroupId;
             default:
                 TINT_UNIMPLEMENTED() << "unhandled SPIR-V BuiltIn: " << static_cast<uint32_t>(b);
-                return core::BuiltinValue::kUndefined;
         }
     }
 
@@ -173,7 +171,7 @@ class Parser {
                     return ty_.bool_();
                 case spvtools::opt::analysis::Type::kInteger: {
                     auto* int_ty = type->AsInteger();
-                    TINT_ASSERT_OR_RETURN_VALUE(int_ty->width() == 32, ty_.void_());
+                    TINT_ASSERT(int_ty->width() == 32);
                     if (int_ty->IsSigned()) {
                         return ty_.i32();
                     } else {
@@ -189,17 +187,16 @@ class Parser {
                     } else {
                         TINT_UNREACHABLE()
                             << "unsupported floating point type width: " << float_ty->width();
-                        return ty_.void_();
                     }
                 }
                 case spvtools::opt::analysis::Type::kVector: {
                     auto* vec_ty = type->AsVector();
-                    TINT_ASSERT_OR_RETURN_VALUE(vec_ty->element_count() <= 4, ty_.void_());
+                    TINT_ASSERT(vec_ty->element_count() <= 4);
                     return ty_.vec(Type(vec_ty->element_type()), vec_ty->element_count());
                 }
                 case spvtools::opt::analysis::Type::kMatrix: {
                     auto* mat_ty = type->AsMatrix();
-                    TINT_ASSERT_OR_RETURN_VALUE(mat_ty->element_count() <= 4, ty_.void_());
+                    TINT_ASSERT(mat_ty->element_count() <= 4);
                     return ty_.mat(As<core::type::Vector>(Type(mat_ty->element_type())),
                                    mat_ty->element_count());
                 }
@@ -214,7 +211,6 @@ class Parser {
                 }
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
-                    return ty_.void_();
             }
         });
     }
@@ -230,18 +226,17 @@ class Parser {
     /// @returns a Tint array object
     const core::type::Type* EmitArray(const spvtools::opt::analysis::Array* arr_ty) {
         const auto& length = arr_ty->length_info();
-        TINT_ASSERT_OR_RETURN_VALUE(!length.words.empty(), ty_.void_());
+        TINT_ASSERT(!length.words.empty());
         if (length.words[0] != spvtools::opt::analysis::Array::LengthInfo::kConstant) {
             TINT_UNIMPLEMENTED() << "specialized array lengths";
-            return ty_.void_();
         }
 
         // Get the value from the constant used for the element count.
         const auto* count_const =
             spirv_context_->get_constant_mgr()->FindDeclaredConstant(length.id);
-        TINT_ASSERT_OR_RETURN_VALUE(count_const, ty_.void_());
+        TINT_ASSERT(count_const);
         const uint64_t count_val = count_const->GetZeroExtendedValue();
-        TINT_ASSERT_OR_RETURN_VALUE(count_val <= UINT32_MAX, ty_.void_());
+        TINT_ASSERT(count_val <= UINT32_MAX);
 
         // TODO(crbug.com/1907): Handle decorations that affect the array layout.
 
@@ -253,7 +248,6 @@ class Parser {
     const core::type::Type* EmitStruct(const spvtools::opt::analysis::Struct* struct_ty) {
         if (struct_ty->NumberOfComponents() == 0) {
             TINT_ICE() << "empty structures are not supported";
-            return ty_.void_();
         }
 
         // Build a list of struct members.
@@ -305,7 +299,6 @@ class Parser {
 
                         default:
                             TINT_UNIMPLEMENTED() << "unhandled member decoration: " << deco[0];
-                            break;
                     }
                 }
             }
@@ -338,7 +331,6 @@ class Parser {
                 return b_.Constant(Constant(c));
             }
             TINT_UNREACHABLE() << "missing value for result ID " << id;
-            return nullptr;
         });
     }
 
@@ -355,7 +347,7 @@ class Parser {
         }
         if (auto* i = constant->AsIntConstant()) {
             auto* int_ty = i->type()->AsInteger();
-            TINT_ASSERT_OR_RETURN_VALUE(int_ty->width() == 32, nullptr);
+            TINT_ASSERT(int_ty->width() == 32);
             if (int_ty->IsSigned()) {
                 return b_.ConstantValue(i32(i->GetS32BitValue()));
             } else {
@@ -370,7 +362,6 @@ class Parser {
                 return b_.ConstantValue(f32(f->GetFloat()));
             } else {
                 TINT_UNREACHABLE() << "unsupported floating point type width";
-                return nullptr;
             }
         }
         if (auto* v = constant->AsVectorConstant()) {
@@ -402,7 +393,6 @@ class Parser {
             return ir_.constant_values.Composite(Type(s->type()), std::move(elements));
         }
         TINT_UNIMPLEMENTED() << "unhandled constant type";
-        return nullptr;
     }
 
     /// Register an IR value for a SPIR-V result ID.
@@ -416,7 +406,7 @@ class Parser {
     void Emit(core::ir::Instruction* inst, uint32_t result_id = 0) {
         current_block_->Append(inst);
         if (result_id != 0) {
-            TINT_ASSERT_OR_RETURN(inst->Results().Length() == 1u);
+            TINT_ASSERT(inst->Results().Length() == 1u);
             AddValue(result_id, inst->Result(0));
         }
     }
@@ -479,7 +469,7 @@ class Parser {
         for (auto& execution_mode : spirv_context_->module()->execution_modes()) {
             auto* func = functions_.GetOr(execution_mode.GetSingleWordInOperand(0), nullptr);
             auto mode = execution_mode.GetSingleWordInOperand(1);
-            TINT_ASSERT_OR_RETURN(func);
+            TINT_ASSERT(func);
 
             switch (spv::ExecutionMode(mode)) {
                 case spv::ExecutionMode::LocalSize:
@@ -658,7 +648,6 @@ class Parser {
                     break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled decoration " << d;
-                    break;
             }
         }
 

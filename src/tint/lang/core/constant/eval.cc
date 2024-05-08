@@ -425,7 +425,6 @@ const Value* ConvertInternal(const Value* root_value,
                         if (members[i]->Type() != target_el_ty) {
                             TINT_ICE()
                                 << "inconsistent target struct member types for SplatConvert";
-                            return false;
                         }
                     }
                 } else {
@@ -447,7 +446,6 @@ const Value* ConvertInternal(const Value* root_value,
                     if (TINT_UNLIKELY(str->Members().Length() != el_count)) {
                         TINT_ICE()
                             << "const-eval conversion of structure has mismatched element counts";
-                        return false;
                     }
                     // Struct composites can have different types for each member.
                     auto members = str->Members();
@@ -1222,7 +1220,6 @@ Eval::Result Eval::Dot(const Source& source, const Value* v1, const Value* v2) {
                 v2->Index(0), v2->Index(1), v2->Index(2), v2->Index(3));
     }
     TINT_ICE() << "Expected vector";
-    return error;
 }
 
 Eval::Result Eval::Length(const Source& source, const core::type::Type* ty, const Value* c0) {
@@ -2066,7 +2063,6 @@ Eval::Result Eval::ShiftLeft(const core::type::Type* ty,
 
     if (TINT_UNLIKELY(!args[1]->Type()->DeepestElement()->Is<core::type::U32>())) {
         TINT_ICE() << "Element type of rhs of ShiftLeft must be a u32";
-        return error;
     }
 
     return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
@@ -2132,7 +2128,6 @@ Eval::Result Eval::ShiftRight(const core::type::Type* ty,
 
     if (TINT_UNLIKELY(!args[1]->Type()->DeepestElement()->Is<core::type::U32>())) {
         TINT_ICE() << "Element type of rhs of ShiftLeft must be a u32";
-        return error;
     }
 
     return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
@@ -2500,7 +2495,6 @@ Eval::Result Eval::determinant(const core::type::Type* ty,
                                            me(0, 3), me(1, 3), me(2, 3), me(3, 3));
         }
         TINT_ICE() << "Unexpected number of matrix rows";
-        return error;
     };
     auto r = calculate();
     if (r != Success) {

@@ -103,7 +103,6 @@ struct PixelLocal::State {
                 if (entry_point != nullptr) {
                     TINT_ICE() << "PixelLocal transform requires that the SingleEntryPoint "
                                   "transform has already been run";
-                    return SkipTransform;
                 }
                 entry_point = sem.Get(fn);
 
@@ -380,7 +379,6 @@ struct PixelLocal::State {
                     break;
                 default:
                     TINT_UNREACHABLE();
-                    break;
             }
             auto pixel_local_var_member_access_in_store_call =
                 b.MemberAccessor(pixel_local_variable_name, ctx.Clone(member->Name()));
@@ -401,7 +399,6 @@ struct PixelLocal::State {
                         break;
                     default:
                         TINT_UNREACHABLE();
-                        break;
                 }
                 auto bitcast_to_rov_format_call =
                     b.Bitcast(rov_pixel_ast_type, pixel_local_var_member_access_in_store_call);

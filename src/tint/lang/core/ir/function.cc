@@ -70,7 +70,7 @@ void Function::SetParams(VectorRef<FunctionParam*> params) {
         param->SetFunction(nullptr);
     }
     params_ = std::move(params);
-    TINT_ASSERT_OR_RETURN(!params_.Any(IsNull));
+    TINT_ASSERT(!params_.Any(IsNull));
     for (auto* param : params_) {
         param->SetFunction(this);
     }
@@ -81,7 +81,7 @@ void Function::SetParams(std::initializer_list<FunctionParam*> params) {
         param->SetFunction(nullptr);
     }
     params_ = params;
-    TINT_ASSERT_OR_RETURN(!params_.Any(IsNull));
+    TINT_ASSERT(!params_.Any(IsNull));
     for (auto* param : params_) {
         param->SetFunction(this);
     }

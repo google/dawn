@@ -650,7 +650,6 @@ struct Robustness::State {
                 break;
         }
         TINT_UNREACHABLE() << "unhandled address space" << address_space;
-        return Action::kDefault;
     }
 
     /// @returns the vector width of @p ty, or 1 if @p ty is not a vector

@@ -308,7 +308,6 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ast::Builder* builder,
         default:
             TINT_ICE() << "invalid IntrinsicType for DecomposeMemoryAccess::Intrinsic: "
                        << ty->TypeInfo().name;
-            break;
     }
 
     DecomposeMemoryAccess::Intrinsic::DataType type;
@@ -513,7 +512,6 @@ struct DecomposeMemoryAccess::State {
                     //   this method only handles storage and uniform.
                     // * Runtime-sized arrays are not loadable.
                     TINT_ICE() << "unexpected non-constant array count";
-                    arr_cnt = 1;
                 }
                 auto* for_cond = b.create<ast::BinaryExpression>(
                     core::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_cnt.value())));
@@ -599,7 +597,6 @@ struct DecomposeMemoryAccess::State {
                             //   arrays, and this method only handles storage and uniform.
                             // * Runtime-sized arrays are not storable.
                             TINT_ICE() << "unexpected non-constant array count";
-                            arr_cnt = 1;
                         }
                         auto* for_cond = b.create<ast::BinaryExpression>(
                             core::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_cnt.value())));

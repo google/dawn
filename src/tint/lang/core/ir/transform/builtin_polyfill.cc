@@ -203,7 +203,7 @@ struct State {
                 default:
                     break;
             }
-            TINT_ASSERT_OR_RETURN(replacement);
+            TINT_ASSERT(replacement);
 
             if (replacement != builtin->Result(0)) {
                 // Replace the old builtin call result with the new value.
@@ -411,7 +411,6 @@ struct State {
             default:
                 TINT_UNIMPLEMENTED() << "extractBits polyfill level";
         }
-        return nullptr;
     }
 
     /// Polyfill a `firstLeadingBit()` builtin call.
@@ -565,7 +564,6 @@ struct State {
             default:
                 TINT_UNIMPLEMENTED() << "insertBits polyfill level";
         }
-        return nullptr;
     }
 
     /// Polyfill a `saturate()` builtin call.

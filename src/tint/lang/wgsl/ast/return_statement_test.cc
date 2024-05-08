@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
@@ -66,7 +65,7 @@ TEST_F(ReturnStatementTest, WithValue) {
 }
 
 TEST_F(ReturnStatementTest, Assert_DifferentGenerationID_Expr) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

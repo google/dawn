@@ -36,7 +36,8 @@
 
 #include <string>
 
-#include "gtest/gtest-spi.h"
+#include "gtest/gtest.h"
+
 #include "src/tint/lang/wgsl/diagnostic_rule.h"
 #include "src/tint/utils/text/string.h"
 

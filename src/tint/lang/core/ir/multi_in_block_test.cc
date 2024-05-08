@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/multi_in_block.h"
-#include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
@@ -37,7 +36,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_MultiInBlockTest = IRTestHelper;
 
 TEST_F(IR_MultiInBlockTest, Fail_NullInboundBranch) {
-    EXPECT_FATAL_FAILURE(
+    EXPECT_DEATH(
         {
             Module mod;
             Builder b{mod};

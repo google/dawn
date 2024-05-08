@@ -612,7 +612,6 @@ void ASTPrinter::EmitBitwiseBoolOp(StringStream& out, const ast::BinaryExpressio
         out << " | ";
     } else {
         TINT_ICE() << "unexpected binary op: " << expr->op;
-        return;
     }
 
     // Cast RHS to uint scalar or vector type.
@@ -738,7 +737,6 @@ void ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
         case core::BinaryOp::kLogicalOr: {
             // These are both handled above.
             TINT_UNREACHABLE();
-            return;
         }
         case core::BinaryOp::kEqual:
             out << "==";
@@ -1349,7 +1347,6 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
     auto* texture = arg(Usage::kTexture);
     if (TINT_UNLIKELY(!texture)) {
         TINT_ICE() << "missing texture argument";
-        return;
     }
 
     auto* texture_type = TypeOf(texture)->UnwrapRef()->As<core::type::Texture>();
@@ -1522,7 +1519,6 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
             break;
         default:
             TINT_ICE() << "Unhandled texture builtin '" << std::string(builtin->str()) << "'";
-            return;
     }
 
     if (builtin->Signature().IndexOf(core::ParameterUsage::kOffset) >= 0) {
@@ -1536,7 +1532,6 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
     auto* param_coords = arg(Usage::kCoords);
     if (TINT_UNLIKELY(!param_coords)) {
         TINT_ICE() << "missing coords argument";
-        return;
     }
 
     if (auto* array_index = arg(Usage::kArrayIndex)) {
@@ -1628,7 +1623,6 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
         TINT_ICE() << "WGSL return width (" << wgsl_ret_width
                    << ") is wider than GLSL return width (" << glsl_ret_width << ") for "
                    << builtin->Fn();
-        return;
     }
 }
 
@@ -1915,7 +1909,6 @@ void ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
                     return;
                 default: {
                     TINT_ICE() << "unhandled address space " << sem->AddressSpace();
-                    break;
                 }
             }
         },
@@ -1937,7 +1930,6 @@ void ASTPrinter::EmitUniformVariable(const ast::Var* var, const sem::Variable* s
     auto* str = type->As<core::type::Struct>();
     if (TINT_UNLIKELY(!str)) {
         TINT_ICE() << "storage variable must be of struct type";
-        return;
     }
     auto bp = *sem->As<sem::GlobalVariable>()->Attributes().binding_point;
     {
@@ -1956,7 +1948,6 @@ void ASTPrinter::EmitStorageVariable(const ast::Var* var, const sem::Variable* s
     auto* str = type->As<core::type::Struct>();
     if (TINT_UNLIKELY(!str)) {
         TINT_ICE() << "storage variable must be of struct type";
-        return;
     }
     auto bp = *sem->As<sem::GlobalVariable>()->Attributes().binding_point;
     Line() << "layout(binding = " << bp.binding << ", std430) buffer "
@@ -1982,7 +1973,6 @@ void ASTPrinter::EmitHandleVariable(const ast::Var* var, const sem::Variable* se
         switch (storage->texel_format()) {
             case core::TexelFormat::kBgra8Unorm:
                 TINT_ICE() << "bgra8unorm should have been polyfilled to rgba8unorm";
-                break;
             case core::TexelFormat::kR32Uint:
                 out << "r32ui";
                 break;
@@ -2036,7 +2026,6 @@ void ASTPrinter::EmitHandleVariable(const ast::Var* var, const sem::Variable* se
                 break;
             case core::TexelFormat::kUndefined:
                 TINT_ICE() << "invalid texel format";
-                return;
         }
         out << ") ";
     }
@@ -2732,7 +2721,6 @@ void ASTPrinter::EmitType(StringStream& out,
     } else if (auto* tex = type->As<core::type::Texture>()) {
         if (TINT_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
             TINT_ICE() << "Multiplanar external texture transform was not run.";
-            return;
         }
 
         auto* storage = tex->As<core::type::StorageTexture>();
@@ -2770,7 +2758,6 @@ void ASTPrinter::EmitType(StringStream& out,
                 } break;
                 default:
                     TINT_UNREACHABLE() << "unexpected storage texture access " << storage->access();
-                    return;
             }
         }
         auto* subtype = sampled   ? sampled->type()
@@ -2784,7 +2771,6 @@ void ASTPrinter::EmitType(StringStream& out,
             out << "u";
         } else {
             TINT_ICE() << "Unsupported texture type";
-            return;
         }
 
         out << (storage ? "image" : "sampler");
@@ -2810,7 +2796,6 @@ void ASTPrinter::EmitType(StringStream& out,
                 break;
             default:
                 TINT_UNREACHABLE() << "unexpected TextureDimension " << tex->dim();
-                return;
         }
         if (tex->Is<core::type::DepthTexture>()) {
             out << "Shadow";

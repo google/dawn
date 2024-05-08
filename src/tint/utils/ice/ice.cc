@@ -27,10 +27,12 @@
 
 #include "src/tint/utils/ice/ice.h"
 
+#include <iostream>
 #include <memory>
 #include <string>
 
 #include "src/tint/utils/debug/debugger.h"
+#include "src/tint/utils/macros/compiler.h"
 
 namespace tint {
 namespace {
@@ -46,12 +48,23 @@ void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter) {
 InternalCompilerError::InternalCompilerError(const char* file, size_t line)
     : file_(file), line_(line) {}
 
+TINT_BEGIN_DISABLE_WARNING(DESTRUCTOR_NEVER_RETURNS);
 InternalCompilerError::~InternalCompilerError() {
     if (ice_reporter) {
         ice_reporter(*this);
+    } else {
+        std::cerr << Error() << std::endl << std::endl;
     }
+
     debugger::Break();
+
+#if defined(_MSC_VER) && !defined(__clang__)
+    abort();
+#else
+    __builtin_trap();
+#endif
 }
+TINT_END_DISABLE_WARNING(DESTRUCTOR_NEVER_RETURNS);
 
 std::string InternalCompilerError::Error() const {
     return std::string(File()) + ":" + std::to_string(Line()) +

@@ -104,7 +104,6 @@ ast::transform::Transform::ApplyResult TruncateInterstageVariables::Apply(
             TINT_ICE() << "Entrypoint function return type is non-struct.\n"
                        << "TruncateInterstageVariables transform needs to run after "
                           "CanonicalizeEntryPointIO transform.";
-            continue;
         }
 
         // A prepass to check if any interstage variable locations in the entry point needs

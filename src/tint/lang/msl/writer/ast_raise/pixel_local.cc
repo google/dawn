@@ -96,7 +96,6 @@ struct PixelLocal::State {
                 if (entry_point != nullptr) {
                     TINT_ICE() << "PixelLocal transform requires that the SingleEntryPoint "
                                   "transform has already been run";
-                    return SkipTransform;
                 }
                 entry_point = sem.Get(fn);
 
