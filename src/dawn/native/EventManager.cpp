@@ -34,6 +34,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/FutureUtils.h"
+#include "dawn/common/Log.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/IntegerTypes.h"
@@ -344,6 +345,12 @@ bool EventManager::IsShutDown() const {
 }
 
 FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
+    if (!ValidateCallbackMode(ToAPI(event->mCallbackMode))) {
+        // TODO: crbug.com/42241407 - Update to use instance logging callback.
+        dawn::ErrorLog() << "Invalid callback mode: " << ToAPI(event->mCallbackMode);
+        return kNullFutureID;
+    }
+
     FutureID futureID = mNextFutureID++;
     event->mFutureID = futureID;
 

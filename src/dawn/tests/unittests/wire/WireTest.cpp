@@ -130,6 +130,7 @@ void WireTest::SetUp() {
     // Create the device for testing.
     apiDevice = api.GetNewDevice();
     WGPUDeviceDescriptor deviceDesc = {};
+    deviceDesc.deviceLostCallbackInfo.mode = WGPUCallbackMode_WaitAnyOnly;
     deviceDesc.deviceLostCallbackInfo.callback = deviceLostCallback.Callback();
     deviceDesc.deviceLostCallbackInfo.userdata = deviceLostCallback.MakeUserdata(this);
     EXPECT_CALL(deviceLostCallback, Call).Times(AtMost(1));

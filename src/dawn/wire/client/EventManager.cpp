@@ -32,6 +32,7 @@
 
 #include "dawn/wire/client/EventManager.h"
 
+#include "dawn/common/Log.h"
 #include "dawn/wire/client/Client.h"
 
 namespace dawn::wire::client {
@@ -70,6 +71,12 @@ EventManager::~EventManager() {
 }
 
 std::pair<FutureID, bool> EventManager::TrackEvent(std::unique_ptr<TrackedEvent> event) {
+    if (!ValidateCallbackMode(event->GetCallbackMode())) {
+        // TODO: crbug.com/42241407 - Update to use instance logging callback.
+        dawn::ErrorLog() << "Invalid callback mode: " << event->GetCallbackMode();
+        return {kNullFutureID, false};
+    }
+
     FutureID futureID = mNextFutureID++;
 
     switch (mState) {

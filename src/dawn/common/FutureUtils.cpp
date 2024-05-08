@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,19 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_FUTUREUTILS_H_
-#define SRC_DAWN_COMMON_FUTUREUTILS_H_
-
-#include <cstddef>
-#include <cstdint>
-
-#include "dawn/webgpu.h"
+#include "dawn/common/FutureUtils.h"
 
 namespace dawn {
 
-using FutureID = uint64_t;
-constexpr FutureID kNullFutureID = 0;
-
-constexpr size_t kTimedWaitAnyMaxCountDefault = 64;
-
-enum class EventCompletionType {
-    // The event is completing because it became ready.
-    Ready,
-    // The event is completing because the instance is shutting down.
-    Shutdown,
-};
-
-bool ValidateCallbackMode(WGPUCallbackMode mode);
+bool ValidateCallbackMode(WGPUCallbackMode mode) {
+    switch (mode) {
+        case WGPUCallbackMode_WaitAnyOnly:
+        case WGPUCallbackMode_AllowProcessEvents:
+        case WGPUCallbackMode_AllowSpontaneous:
+            return true;
+        default:
+            return false;
+    }
+}
 
 }  // namespace dawn
-
-#endif  // SRC_DAWN_COMMON_FUTUREUTILS_H_

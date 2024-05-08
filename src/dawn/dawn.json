@@ -1576,7 +1576,7 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "mode", "type": "callback mode"},
+            {"name": "mode", "type": "callback mode", "default": "wait any only"},
             {"name": "callback", "type": "pop error scope callback"},
             {"name": "old callback", "type": "error callback", "_comment": "TODO(crbug.com/dawn/2021) Deprecate this field once we have moved callers to use the new callback signature."},
             {"name": "userdata", "type": "void *", "default": "nullptr"}
@@ -2415,11 +2415,10 @@
     "callback mode": {
         "category": "enum",
         "emscripten_no_enum_table": true,
-        "_comment": "TODO(crbug.com/dawn/2458): Should this be renumbered to reserve 0?",
         "values": [
-            {"value": 0, "name": "wait any only"},
-            {"value": 1, "name": "allow process events"},
-            {"value": 2, "name": "allow spontaneous"}
+            {"value": 1, "name": "wait any only"},
+            {"value": 2, "name": "allow process events"},
+            {"value": 3, "name": "allow spontaneous"}
         ]
     },
     "future": {
