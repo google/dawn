@@ -140,7 +140,6 @@ struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
 
     BackendValidationLevel backendValidationLevel = BackendValidationLevel::Disabled;
     bool beginCaptureOnStartup = false;
-    bool enableAdapterBlocklist = false;
 
     WGPULoggingCallback loggingCallback = nullptr;
     void* loggingCallbackUserdata = nullptr;
@@ -179,9 +178,6 @@ class DAWN_NATIVE_EXPORT Instance {
 
     // Enable debug capture on Dawn startup
     void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
-
-    // Enable / disable the adapter blocklist.
-    void EnableAdapterBlocklist(bool enable);
 
     uint64_t GetDeviceCountForTesting() const;
 

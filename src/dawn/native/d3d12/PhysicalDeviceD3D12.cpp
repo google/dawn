@@ -102,21 +102,6 @@ MaybeError PhysicalDevice::InitializeImpl() {
     if (mAdapterType == wgpu::AdapterType::DiscreteGPU && mDeviceInfo.isUMA) {
         mAdapterType = wgpu::AdapterType::IntegratedGPU;
     }
-
-    if (GetInstance()->IsAdapterBlocklistEnabled()) {
-#if DAWN_PLATFORM_IS(I386)
-        DAWN_INVALID_IF(
-            mDeviceInfo.highestSupportedShaderModel >= 60,
-            "D3D12 x86 SM6.0+ adapter is blocklisted. See https://crbug.com/tint/1753.");
-
-        DAWN_INVALID_IF(
-            gpu_info::IsNvidia(mVendorId),
-            "D3D12 NVIDIA x86 adapter is blocklisted. See https://crbug.com/dawn/1196.");
-#elif DAWN_PLATFORM_IS(ARM)
-        return DAWN_VALIDATION_ERROR(
-            "D3D12 on ARM CPU is blocklisted. See https://crbug.com/dawn/884.");
-#endif
-    }
     return {};
 }
 

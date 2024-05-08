@@ -124,11 +124,6 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
     void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
     bool IsBeginCaptureOnStartupEnabled() const;
 
-    // TODO(crbug.com/dawn/1495): Move this to a Toggle, perhaps on RequestAdapterOptions
-    // after Toggle refactor is complete.
-    void EnableAdapterBlocklist(bool enable);
-    bool IsAdapterBlocklistEnabled() const;
-
     // Testing only API that is NOT thread-safe.
     void SetPlatformForTesting(dawn::platform::Platform* platform);
     dawn::platform::Platform* GetPlatform();
@@ -202,7 +197,6 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
     std::vector<std::string> mRuntimeSearchPaths;
 
     bool mBeginCaptureOnStartup = false;
-    bool mEnableAdapterBlocklist = false;
     BackendValidationLevel mBackendValidationLevel = BackendValidationLevel::Disabled;
 
     wgpu::LoggingCallback mLoggingCallback = nullptr;
