@@ -33,7 +33,7 @@ group("samples") {
     ":ComputeBoids",
     ":DawnInfo",
     ":HelloTriangle",
-    ":ManualSwapChainTest",
+    ":ManualSurfaceTest",
   ]
 }
 
@@ -78,8 +78,8 @@ sample("Animometer") {
   sources = [ "Animometer.cpp" ]
 }
 
-sample("ManualSwapChainTest") {
-  sources = [ "ManualSwapChainTest.cpp" ]
+sample("ManualSurfaceTest") {
+  sources = [ "ManualSurfaceTest.cpp" ]
 }
 
 sample("DawnInfo") {

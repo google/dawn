@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// This is an example to manually test swapchain code. Controls are the following, scoped to the
+// This is an example to manually test surface code. Controls are the following, scoped to the
 // currently focused window:
 //  - W: creates a new window.
 //  - L: Latches the current swapchain, to check what happens when the window changes but not the
@@ -34,6 +34,8 @@
 //    (WARNING) likely seizure inducing.
 //  - D: cycles the divisor for the swapchain size.
 //  - P: switches present modes.
+//  - A: switches alpha modes.
+//  - F: switches formats.
 //
 // Closing all the windows exits the example. ^C also works.
 //
@@ -60,12 +62,24 @@
 //      diagonal aspect ratio).
 //
 //  - Config change tests:
-//    - Check that cycling between present modes works.
-//    - TODO can't be tested yet: check cycling the same window over multiple devices.
-//    - TODO can't be tested yet: check cycling the same window over multiple formats.
+//    - Check that cycling between present modes.
+//    - Check that cycling between alpha modes (it sometimes produce a meaningful difference).
+//    - Check that cycling between formats works and gives the same color.
+//
+//  - Frame throttling:
+//    - In all present modes, check that there isn't extra latency when going from a render mode
+//      to another (like from the color cycling one to the triangle).
+//
+//  - Additional things to test that aren't supported in this file yet.
+//    - Check cycling the same window over multiple devices.
+//    - Check sRGB vs not sRGB gradients.
+//    - Check wide gamut / extended color range.
+//    - Check OpenGL rendering with extra usages / depth buffer / MRT.
+//    - Check with GLFW transparency on / off.
 
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -78,7 +92,28 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "dawn/webgpu_cpp.h"
+#include "dawn/webgpu_cpp_print.h"
 #include "webgpu/webgpu_glfw.h"
+
+template <typename T>
+std::string NoPrefix(T wgpuThing) {
+    std::ostringstream o;
+    o << wgpuThing;
+    std::string withPrefix = o.str();
+    return withPrefix.substr(withPrefix.rfind(':') + 1);
+}
+
+template <typename T>
+void CycleIn(T* value, const std::vector<T>& cycle) {
+    auto it = std::find(cycle.begin(), cycle.end(), *value);
+    DAWN_ASSERT(it != cycle.end());
+    it++;
+    if (it != cycle.end()) {
+        *value = *it;
+    } else {
+        *value = cycle.front();
+    }
+}
 
 struct WindowData {
     GLFWwindow* window = nullptr;
@@ -89,24 +124,64 @@ struct WindowData {
     bool renderTriangle = true;
     uint32_t divisor = 1;
 
-    wgpu::Surface surface = nullptr;
-    wgpu::SwapChain swapchain = nullptr;
+    std::vector<wgpu::PresentMode> presentModes;
+    std::vector<wgpu::CompositeAlphaMode> alphaModes;
+    std::vector<wgpu::TextureFormat> formats;
 
-    wgpu::SwapChainDescriptor currentDesc;
-    wgpu::SwapChainDescriptor targetDesc;
+    wgpu::Surface surface = nullptr;
+    wgpu::SurfaceConfiguration currentConfig;
+    wgpu::SurfaceConfiguration targetConfig;
 };
 
 static std::unordered_map<GLFWwindow*, std::unique_ptr<WindowData>> windows;
 static uint64_t windowSerial = 0;
 
 static std::unique_ptr<dawn::native::Instance> instance;
+static wgpu::Adapter adapter;
 static wgpu::Device device;
 static wgpu::Queue queue;
-static wgpu::RenderPipeline trianglePipeline;
 
-bool IsSameDescriptor(const wgpu::SwapChainDescriptor& a, const wgpu::SwapChainDescriptor& b) {
-    return a.usage == b.usage && a.format == b.format && a.width == b.width &&
-           a.height == b.height && a.presentMode == b.presentMode;
+static std::unordered_map<wgpu::TextureFormat, wgpu::RenderPipeline> trianglePipelines;
+wgpu::RenderPipeline GetOrCreateTrianglePipeline(wgpu::TextureFormat format) {
+    if (trianglePipelines.count(format)) {
+        return trianglePipelines[format];
+    }
+
+    // The hacky pipeline to render a triangle.
+    wgpu::ShaderModule module = dawn::utils::CreateShaderModule(device, R"(
+        @vertex fn vs(@builtin(vertex_index) VertexIndex : u32)
+                            -> @builtin(position) vec4f {
+            var pos = array(
+                vec2f( 0.0,  0.5),
+                vec2f(-0.5, -0.5),
+                vec2f( 0.5, -0.5)
+            );
+            return vec4f(pos[VertexIndex], 0, 1);
+        }
+
+        @fragment fn fs() -> @location(0) vec4f {
+            return vec4f(1, 0, 0, 1);
+        }
+    )");
+
+    dawn::utils::ComboRenderPipelineDescriptor pipelineDesc;
+    pipelineDesc.vertex.module = module;
+    pipelineDesc.cFragment.module = module;
+    pipelineDesc.cTargets[0].format = format;
+    trianglePipelines[format] = device.CreateRenderPipeline(&pipelineDesc);
+    return trianglePipelines[format];
+}
+
+bool IsSameConfig(const wgpu::SurfaceConfiguration& a, const wgpu::SurfaceConfiguration& b) {
+    DAWN_ASSERT(a.viewFormatCount == 0);
+    DAWN_ASSERT(b.viewFormatCount == 0);
+    return a.device.Get() == b.device.Get() &&  //
+           a.format == b.format &&              //
+           a.usage == b.usage &&                //
+           a.alphaMode == b.alphaMode &&        //
+           a.width == b.width &&                //
+           a.height == b.height &&              //
+           a.presentMode == b.presentMode;
 }
 
 void OnKeyPress(GLFWwindow* window, int key, int, int action, int);
@@ -116,8 +191,8 @@ void SyncFromWindow(WindowData* data) {
     int height;
     glfwGetFramebufferSize(data->window, &width, &height);
 
-    data->targetDesc.width = std::max(1u, width / data->divisor);
-    data->targetDesc.height = std::max(1u, height / data->divisor);
+    data->targetConfig.width = std::max(1u, width / data->divisor);
+    data->targetConfig.height = std::max(1u, height / data->divisor);
 }
 
 void AddWindow() {
@@ -125,36 +200,48 @@ void AddWindow() {
     GLFWwindow* window = glfwCreateWindow(400, 400, "", nullptr, nullptr);
     glfwSetKeyCallback(window, OnKeyPress);
 
-    wgpu::SwapChainDescriptor descriptor;
-    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
-    descriptor.format = wgpu::TextureFormat::BGRA8Unorm;
-    descriptor.width = 0;
-    descriptor.height = 0;
-    descriptor.presentMode = wgpu::PresentMode::Fifo;
+    wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance->Get(), window);
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+
+    wgpu::SurfaceConfiguration config;
+    config.device = device;
+    config.usage = wgpu::TextureUsage::RenderAttachment;
+    config.format = caps.formats[0];
+    config.alphaMode = caps.alphaModes[0];
+    config.presentMode = caps.presentModes[0];
+    config.width = 0;
+    config.height = 0;
 
     std::unique_ptr<WindowData> data = std::make_unique<WindowData>();
     data->window = window;
     data->serial = windowSerial++;
-    data->surface = wgpu::glfw::CreateSurfaceForWindow(instance->Get(), window);
-    data->currentDesc = descriptor;
-    data->targetDesc = descriptor;
+    data->surface = surface;
+    data->currentConfig = config;
+    data->targetConfig = config;
     SyncFromWindow(data.get());
+    data->presentModes.assign(caps.presentModes, caps.presentModes + caps.presentModeCount);
+    data->alphaModes.assign(caps.alphaModes, caps.alphaModes + caps.alphaModeCount);
+    data->formats.assign(caps.formats, caps.formats + caps.formatCount);
 
     windows[window] = std::move(data);
 }
 
 void DoRender(WindowData* data) {
-    wgpu::TextureView view = data->swapchain.GetCurrentTextureView();
+    wgpu::SurfaceTexture surfaceTexture;
+    data->surface.GetCurrentTexture(&surfaceTexture);
+    wgpu::TextureView view = surfaceTexture.texture.CreateView();
+
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
     if (data->renderTriangle) {
         dawn::utils::ComboRenderPassDescriptor desc({view});
-        // Use Load to check the swapchain is lazy cleared (we shouldn't see garbage from previous
+        // Use Load to check the surface is lazy cleared (we shouldn't see garbage from previous
         // frames).
         desc.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
 
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&desc);
-        pass.SetPipeline(trianglePipeline);
+        pass.SetPipeline(GetOrCreateTrianglePipeline(data->currentConfig.format));
         pass.Draw(3);
         pass.End();
     } else {
@@ -175,30 +262,18 @@ void DoRender(WindowData* data) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    data->swapchain.Present();
+    data->surface.Present();
 }
 
-std::ostream& operator<<(std::ostream& o, const wgpu::SwapChainDescriptor& desc) {
+std::ostream& operator<<(std::ostream& o, const wgpu::SurfaceConfiguration& desc) {
     // For now only render attachment is possible.
     DAWN_ASSERT(desc.usage == wgpu::TextureUsage::RenderAttachment);
     o << "RenderAttachment ";
+
     o << desc.width << "x" << desc.height << " ";
-
-    // For now only BGRA is allowed
-    DAWN_ASSERT(desc.format == wgpu::TextureFormat::BGRA8Unorm);
-    o << "BGRA8Unorm ";
-
-    switch (desc.presentMode) {
-        case wgpu::PresentMode::Immediate:
-            o << "Immediate";
-            break;
-        case wgpu::PresentMode::Fifo:
-            o << "Fifo";
-            break;
-        case wgpu::PresentMode::Mailbox:
-            o << "Mailbox";
-            break;
-    }
+    o << NoPrefix(desc.format) << " ";
+    o << NoPrefix(desc.presentMode) << " ";
+    o << NoPrefix(desc.alphaMode) << " ";
     return o;
 }
 
@@ -211,10 +286,10 @@ void UpdateTitle(WindowData* data) {
     }
 
     if (data->latched) {
-        o << "Latched: (" << data->currentDesc << ") ";
-        o << "Target: (" << data->targetDesc << ")";
+        o << "Latched: (" << data->currentConfig << ") ";
+        o << "Target: (" << data->targetConfig << ")";
     } else {
-        o << "(" << data->currentDesc << ")";
+        o << "(" << data->currentConfig << ")";
     }
 
     glfwSetWindowTitle(data->window, o.str().c_str());
@@ -251,17 +326,15 @@ void OnKeyPress(GLFWwindow* window, int key, int, int action, int) {
             break;
 
         case GLFW_KEY_P:
-            switch (data->targetDesc.presentMode) {
-                case wgpu::PresentMode::Immediate:
-                    data->targetDesc.presentMode = wgpu::PresentMode::Fifo;
-                    break;
-                case wgpu::PresentMode::Fifo:
-                    data->targetDesc.presentMode = wgpu::PresentMode::Mailbox;
-                    break;
-                case wgpu::PresentMode::Mailbox:
-                    data->targetDesc.presentMode = wgpu::PresentMode::Immediate;
-                    break;
-            }
+            CycleIn(&data->targetConfig.presentMode, data->presentModes);
+            break;
+
+        case GLFW_KEY_A:
+            CycleIn(&data->targetConfig.alphaMode, data->alphaModes);
+            break;
+
+        case GLFW_KEY_F:
+            CycleIn(&data->targetConfig.format, data->formats);
             break;
 
         default:
@@ -287,6 +360,7 @@ int main(int argc, const char* argv[]) {
 
     dawn::native::Adapter chosenAdapter = instance->EnumerateAdapters()[0];
     DAWN_ASSERT(chosenAdapter);
+    adapter = wgpu::Adapter(chosenAdapter.Get());
 
     // Setup the device on that adapter.
     device = wgpu::Device::Acquire(chosenAdapter.CreateDevice());
@@ -311,31 +385,12 @@ int main(int argc, const char* argv[]) {
                     return;
             }
             dawn::ErrorLog() << errorTypeName << " error: " << message;
+            DAWN_ASSERT(false);
         },
         nullptr);
     queue = device.GetQueue();
 
-    // The hacky pipeline to render a triangle.
-    dawn::utils::ComboRenderPipelineDescriptor pipelineDesc;
-    pipelineDesc.vertex.module = dawn::utils::CreateShaderModule(device, R"(
-        @vertex fn main(@builtin(vertex_index) VertexIndex : u32)
-                            -> @builtin(position) vec4f {
-            var pos = array(
-                vec2f( 0.0,  0.5),
-                vec2f(-0.5, -0.5),
-                vec2f( 0.5, -0.5)
-            );
-            return vec4f(pos[VertexIndex], 0.0, 1.0);
-        })");
-    pipelineDesc.cFragment.module = dawn::utils::CreateShaderModule(device, R"(
-        @fragment fn main() -> @location(0) vec4f {
-            return vec4f(1.0, 0.0, 0.0, 1.0);
-        })");
-    // BGRA shouldn't be hardcoded. Consider having a map[format -> pipeline].
-    pipelineDesc.cTargets[0].format = wgpu::TextureFormat::BGRA8Unorm;
-    trianglePipeline = device.CreateRenderPipeline(&pipelineDesc);
-
-    // Craete the first window, since the example exits when there are no windows.
+    // Create the first window, since the example exits when there are no windows.
     AddWindow();
 
     while (windows.size() != 0) {
@@ -357,9 +412,9 @@ int main(int argc, const char* argv[]) {
             WindowData* data = it.second.get();
 
             SyncFromWindow(data);
-            if (!IsSameDescriptor(data->currentDesc, data->targetDesc) && !data->latched) {
-                data->swapchain = device.CreateSwapChain(data->surface, &data->targetDesc);
-                data->currentDesc = data->targetDesc;
+            if (!IsSameConfig(data->currentConfig, data->targetConfig) && !data->latched) {
+                data->surface.Configure(&data->targetConfig);
+                data->currentConfig = data->targetConfig;
             }
             UpdateTitle(data);
             DoRender(data);

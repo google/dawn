@@ -59,3 +59,6 @@ add_executable(DawnInfo "DawnInfo.cpp")
 common_compile_options(DawnInfo)
 target_link_libraries(DawnInfo dawn_sample_utils)
 
+add_executable(ManualSurfaceTest "ManualSurfaceTest.cpp")
+common_compile_options(ManualSurfaceTest)
+target_link_libraries(ManualSurfaceTest dawn_sample_utils)
