@@ -890,6 +890,11 @@ bool DawnTestBase::IsWARP() const {
                                      mParam.adapterProperties.deviceID);
 }
 
+bool DawnTestBase::IsMesaSoftware() const {
+    return gpu_info::IsMesaSoftware(mParam.adapterProperties.vendorID,
+                                    mParam.adapterProperties.deviceID);
+}
+
 bool DawnTestBase::IsIntelGen9() const {
     return gpu_info::IsIntelGen9(mParam.adapterProperties.vendorID,
                                  mParam.adapterProperties.deviceID);
