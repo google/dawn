@@ -54,6 +54,7 @@ type flags struct {
 	validate             bool
 	dumpShaders          bool
 	fxc                  bool
+	useIR                bool
 	unrollConstEvalLoops bool
 	genCoverage          bool
 	compatibilityMode    bool
@@ -101,6 +102,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.adapterName, "adapter", "", "name (or substring) of the GPU adapter to use")
 	flag.BoolVar(&c.flags.dumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
 	flag.BoolVar(&c.flags.fxc, "fxc", false, "Use FXC instead of DXC. Disables 'use_dxc' Dawn flag")
+	flag.BoolVar(&c.flags.useIR, "use-ir", false, "Use Tint's IR generator code path")
 	flag.BoolVar(&c.flags.unrollConstEvalLoops, "unroll-const-eval-loops", unrollConstEvalLoopsDefault, "unroll loops in const-eval tests")
 	flag.BoolVar(&c.flags.genCoverage, "coverage", false, "displays coverage data")
 	flag.StringVar(&c.flags.coverageFile, "export-coverage", "", "write coverage data to the given path")
@@ -203,6 +205,7 @@ func (c *cmd) processFlags() error {
 		AllowUnsafeAPIs: true,
 		DumpShaders:     c.flags.dumpShaders,
 		UseFXC:          c.flags.fxc,
+		UseIR:           c.flags.useIR,
 	})
 
 	if c.flags.dumpShaders {
