@@ -40,10 +40,12 @@ cc_library(
   name = "lower",
   srcs = [
     "lower.cc",
+    "shader_io.cc",
     "vector_element_pointer.cc",
   ],
   hdrs = [
     "lower.h",
+    "shader_io.h",
     "vector_element_pointer.h",
   ],
   deps = [
@@ -52,6 +54,7 @@ cc_library(
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
+    "//src/tint/lang/core/ir/transform/common",
     "//src/tint/lang/core/type",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -74,6 +77,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "shader_io_test.cc",
     "vector_element_pointer_test.cc",
   ],
   deps = [

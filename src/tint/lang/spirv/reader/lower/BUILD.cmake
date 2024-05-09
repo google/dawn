@@ -41,6 +41,8 @@
 tint_add_target(tint_lang_spirv_reader_lower lib
   lang/spirv/reader/lower/lower.cc
   lang/spirv/reader/lower/lower.h
+  lang/spirv/reader/lower/shader_io.cc
+  lang/spirv/reader/lower/shader_io.h
   lang/spirv/reader/lower/vector_element_pointer.cc
   lang/spirv/reader/lower/vector_element_pointer.h
 )
@@ -51,6 +53,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader_lower lib
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
+  tint_lang_core_ir_transform_common
   tint_lang_core_type
   tint_utils_containers
   tint_utils_diagnostic
@@ -72,6 +75,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader_lower lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_lower_test test
+  lang/spirv/reader/lower/shader_io_test.cc
   lang/spirv/reader/lower/vector_element_pointer_test.cc
 )
 

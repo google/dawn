@@ -46,6 +46,8 @@ libtint_source_set("lower") {
   sources = [
     "lower.cc",
     "lower.h",
+    "shader_io.cc",
+    "shader_io.h",
     "vector_element_pointer.cc",
     "vector_element_pointer.h",
   ]
@@ -55,6 +57,7 @@ libtint_source_set("lower") {
     "${tint_src_dir}/lang/core/constant",
     "${tint_src_dir}/lang/core/intrinsic",
     "${tint_src_dir}/lang/core/ir",
+    "${tint_src_dir}/lang/core/ir/transform/common",
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
@@ -73,7 +76,10 @@ libtint_source_set("lower") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    sources = [ "vector_element_pointer_test.cc" ]
+    sources = [
+      "shader_io_test.cc",
+      "vector_element_pointer_test.cc",
+    ]
     deps = [
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api/common",
