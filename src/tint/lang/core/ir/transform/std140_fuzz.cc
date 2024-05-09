@@ -28,12 +28,31 @@
 #include "src/tint/lang/core/ir/transform/std140.h"
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
+#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/pointer.h"
 
 namespace tint::core::ir::transform {
 namespace {
 
+bool CanRun(Module& module) {
+    for (auto& fn : module.functions) {
+        for (auto* param : fn->Params()) {
+            if (auto* ptr = param->Type()->As<core::type::Pointer>();
+                ptr && ptr->AddressSpace() == core::AddressSpace::kUniform) {
+                return false;  // Requires the DirectVariableAccess transform
+            }
+        }
+    }
+    return true;
+}
+
 void Std140Fuzzer(Module& module) {
+    if (!CanRun(module)) {
+        return;
+    }
+
     if (auto res = Std140(module); res != Success) {
         return;
     }

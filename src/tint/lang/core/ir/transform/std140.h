@@ -41,6 +41,8 @@ namespace tint::core::ir::transform {
 
 /// Std140 is a transform that rewrites matrix types in the uniform address space to conform to
 /// GLSL's std140 layout rules.
+/// @note requires the DirectVariableAccess transform to have been run first to remove uniform
+/// pointer parameters.
 /// @param module the module to transform
 /// @returns success or failure
 Result<SuccessType> Std140(Module& module);

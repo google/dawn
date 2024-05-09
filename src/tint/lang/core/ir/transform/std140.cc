@@ -27,14 +27,23 @@
 
 #include "src/tint/lang/core/ir/transform/std140.h"
 
+#include <cstdint>
 #include <utility>
 
+#include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/memory_view.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/type.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/text/string_stream.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -73,41 +82,49 @@ struct State {
         }
 
         // Find uniform buffers that contain matrices that need to be decomposed.
-        Vector<Var*, 8> buffer_variables;
+        Vector<std::pair<Var*, const core::type::Type*>, 8> buffer_variables;
         for (auto inst : *ir.root_block) {
-            auto* var = inst->As<Var>();
-            if (!var || !var->Alive()) {
-                continue;
-            }
-            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-            if (!ptr || ptr->AddressSpace() != core::AddressSpace::kUniform) {
-                continue;
-            }
-            if (RewriteType(ptr->StoreType()) != ptr->StoreType()) {
-                buffer_variables.Push(var);
+            if (auto* var = inst->As<Var>()) {
+                auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+                if (!ptr || ptr->AddressSpace() != core::AddressSpace::kUniform) {
+                    continue;
+                }
+                auto* store_type = RewriteType(ptr->StoreType());
+                if (store_type != ptr->StoreType()) {
+                    buffer_variables.Push(std::make_pair(var, store_type));
+                }
             }
         }
 
         // Now process the buffer variables, replacing them with new variables that have decomposed
         // matrices and updating all usages of the variables.
-        for (auto* var : buffer_variables) {
+        for (auto var_and_ty : buffer_variables) {
             // Create a new variable with the modified store type.
-            const auto& bp = var->BindingPoint();
-            auto* store_type = var->Result(0)->Type()->As<core::type::Pointer>()->StoreType();
-            auto* new_var = b.Var(ty.ptr(uniform, RewriteType(store_type)));
+            auto* old_var = var_and_ty.first;
+            auto* new_var = b.Var(ty.ptr(uniform, var_and_ty.second));
+            const auto& bp = old_var->BindingPoint();
             new_var->SetBindingPoint(bp->group, bp->binding);
-            if (auto name = ir.NameOf(var)) {
+            if (auto name = ir.NameOf(old_var)) {
                 ir.SetName(new_var->Result(0), name);
             }
 
-            // Replace every instruction that uses the original variable.
-            var->Result(0)->ForEachUse(
+            // Transform instructions that accessed the variable to use the decomposed var.
+            old_var->Result(0)->ForEachUse(
                 [&](Usage use) { Replace(use.instruction, new_var->Result(0)); });
 
             // Replace the original variable with the new variable.
-            var->ReplaceWith(new_var);
-            var->Destroy();
+            old_var->ReplaceWith(new_var);
+            old_var->Destroy();
         }
+    }
+
+    /// @param type the type to check
+    /// @returns the matrix if @p type is a matrix that needs to be decomposed
+    static const core::type::Matrix* NeedsDecomposing(const core::type::Type* type) {
+        if (auto* mat = type->As<core::type::Matrix>(); mat && NeedsDecomposing(mat)) {
+            return mat;
+        }
+        return nullptr;
     }
 
     /// @param mat the matrix type to check
@@ -125,10 +142,10 @@ struct State {
     /// @param type the type to rewrite
     /// @returns the new type
     const core::type::Type* RewriteType(const core::type::Type* type) {
-        return rewritten_types.GetOrAdd(type, [&]() -> const core::type::Type* {
+        return rewritten_types.GetOrAdd(type, [&] {
             return tint::Switch(
                 type,
-                [&](const core::type::Array* arr) -> const core::type::Type* {
+                [&](const core::type::Array* arr) {
                     // Create a new array with element type potentially rewritten.
                     return ty.array(RewriteType(arr->ElemType()), arr->ConstantCount().value());
                 },
@@ -137,8 +154,7 @@ struct State {
                     uint32_t member_index = 0;
                     Vector<const core::type::StructMember*, 4> new_members;
                     for (auto* member : str->Members()) {
-                        auto* mat = member->Type()->As<core::type::Matrix>();
-                        if (mat && NeedsDecomposing(mat)) {
+                        if (auto* mat = NeedsDecomposing(member->Type())) {
                             // Decompose these matrices into a separate member for each column.
                             member_index_map.Add(member, member_index);
                             auto* col = mat->ColumnType();
@@ -182,6 +198,32 @@ struct State {
                     }
                     return new_str;
                 },
+                [&](const core::type::Matrix* mat) -> const core::type::Type* {
+                    if (!NeedsDecomposing(mat)) {
+                        return mat;
+                    }
+                    StringStream name;
+                    name << "mat" << mat->columns() << "x" << mat->rows() << "_"
+                         << mat->ColumnType()->type()->FriendlyName() << "_std140";
+                    Vector<core::type::StructMember*, 4> members;
+                    // Decompose these matrices into a separate member for each column.
+                    auto* col = mat->ColumnType();
+                    uint32_t offset = 0;
+                    for (uint32_t i = 0; i < mat->columns(); i++) {
+                        StringStream ss;
+                        ss << "col" << std::to_string(i);
+                        members.Push(ty.Get<core::type::StructMember>(
+                            sym.New(ss.str()), col, i, offset, col->Align(), col->Size(),
+                            core::type::StructMemberAttributes{}));
+                        offset += col->Align();
+                    }
+
+                    // Create a new struct with the rewritten members.
+                    return ty.Get<core::type::Struct>(
+                        sym.New(name.str()), std::move(members), col->Align(),
+                        col->Align() * mat->columns(),
+                        (col->Align() * (mat->columns() - 1)) + col->Size());
+                },
                 [&](Default) {
                     // This type cannot contain a matrix, so no changes needed.
                     return type;
@@ -189,19 +231,26 @@ struct State {
         });
     }
 
-    /// Load a decomposed matrix from a structure.
+    /// Reconstructs a column-decomposed matrix.
     /// @param mat the matrix type
     /// @param root the root value being accessed into
-    /// @param indices the access indices that get to the first column of the decomposed matrix
+    /// @param indices the access indices that index the first column of the matrix.
     /// @returns the loaded matrix
-    Value* LoadMatrix(const core::type::Matrix* mat, Value* root, Vector<Value*, 4> indices) {
-        // Load each column vector from the struct and reconstruct the original matrix type.
+    Value* RebuildMatrix(const core::type::Matrix* mat, Value* root, VectorRef<Value*> indices) {
+        // Recombine each column vector from the struct and reconstruct the original matrix type.
+        bool is_ptr = root->Type()->Is<core::type::Pointer>();
+        Vector<Value*, 4> column_indices(std::move(indices));
         Vector<Value*, 4> args;
         auto first_column = indices.Back()->As<Constant>()->Value()->ValueAs<uint32_t>();
         for (uint32_t i = 0; i < mat->columns(); i++) {
-            indices.Back() = b.Constant(u32(first_column + i));
-            auto* access = b.Access(ty.ptr(uniform, mat->ColumnType()), root, indices);
-            args.Push(b.Load(access->Result(0))->Result(0));
+            column_indices.Back() = b.Constant(u32(first_column + i));
+            if (is_ptr) {
+                auto* access = b.Access(ty.ptr(uniform, mat->ColumnType()), root, column_indices);
+                args.Push(b.Load(access)->Result(0));
+            } else {
+                auto* access = b.Access(mat->ColumnType(), root, column_indices);
+                args.Push(access->Result(0));
+            }
         }
         return b.Construct(mat, std::move(args))->Result(0);
     }
@@ -228,16 +277,10 @@ struct State {
                         uint32_t index = 0;
                         Vector<Value*, 4> args;
                         for (auto* member : str->Members()) {
-                            if (auto* mat = member->Type()->As<core::type::Matrix>();
-                                mat && NeedsDecomposing(mat)) {
-                                // Extract each decomposed column and reconstruct the matrix.
-                                Vector<Value*, 4> columns;
-                                for (uint32_t i = 0; i < mat->columns(); i++) {
-                                    auto* extract = b.Access(mat->ColumnType(), input, u32(index));
-                                    columns.Push(extract->Result(0));
-                                    index++;
-                                }
-                                args.Push(b.Construct(mat, std::move(columns))->Result(0));
+                            if (auto* mat = NeedsDecomposing(member->Type())) {
+                                args.Push(
+                                    RebuildMatrix(mat, input, Vector{b.Constant(u32(index))}));
+                                index += mat->columns();
                             } else {
                                 // Extract and convert the member.
                                 auto* type = input_str->Element(index);
@@ -268,6 +311,12 @@ struct State {
                 });
                 return b.Load(new_arr)->Result(0);
             },
+            [&](const core::type::Matrix* mat) -> Value* {
+                if (!NeedsDecomposing(mat)) {
+                    return source;
+                }
+                return RebuildMatrix(mat, source, Vector{b.Constant(u32(0))});
+            },
             [&](Default) { return source; });
     }
 
@@ -279,28 +328,75 @@ struct State {
             tint::Switch(
                 inst,  //
                 [&](Access* access) {
+                    auto* object_ty = access->Object()->Type()->As<core::type::MemoryView>();
+                    if (!object_ty || object_ty->AddressSpace() != core::AddressSpace::kUniform) {
+                        // Access to non-uniform memory views does not require transformation.
+                        return;
+                    }
+
+                    if (!replacement->Type()->Is<core::type::MemoryView>()) {
+                        // The replacement is a value, in which case the decomposed matrix has
+                        // already been reconstructed. In this situation the access only needs its
+                        // return type updating, and downstream instructions need updating.
+                        access->SetOperand(Access::kObjectOperandOffset, replacement);
+                        auto* result = access->Result(0);
+                        result->SetType(result->Type()->UnwrapPtrOrRef());
+                        result->ForEachUse([&](Usage use) { Replace(use.instruction, result); });
+                        return;
+                    }
+
                     // Modify the access indices to take decomposed matrices into account.
-                    auto* current_type = access->Object()->Type()->UnwrapPtr();
+                    auto* current_type = object_ty->StoreType();
                     Vector<Value*, 4> indices;
-                    for (auto idx : access->Indices()) {
-                        if (auto* str = current_type->As<core::type::Struct>()) {
+
+                    if (NeedsDecomposing(current_type)) {
+                        // Decomposed matrices are indexed using their first column vector
+                        indices.Push(b.Constant(0_u));
+                    }
+
+                    for (size_t i = 0, n = access->Indices().Length(); i < n; i++) {
+                        auto* idx = access->Indices()[i];
+
+                        if (auto* mat = NeedsDecomposing(current_type)) {
+                            // Access chain passes through decomposed matrix.
+                            if (auto* const_idx = idx->As<Constant>()) {
+                                // Column vector index is a constant.
+                                // Instead of loading the whole matrix, fold the access of the
+                                // matrix and the constant column index into an single access of
+                                // column vector member.
+                                auto* base_idx = indices.Back()->As<Constant>();
+                                indices.Back() =
+                                    b.Constant(u32(base_idx->Value()->ValueAs<uint32_t>() +
+                                                   const_idx->Value()->ValueAs<uint32_t>()));
+                                current_type = mat->ColumnType();
+                                i++;  // We've already consumed the column access
+                            } else {
+                                // Column vector index is dynamic.
+                                // Reconstruct the whole matrix and index that.
+                                replacement = RebuildMatrix(mat, replacement, std::move(indices));
+                                indices.Clear();
+                                indices.Push(idx);
+                                current_type = mat->ColumnType();
+                            }
+                        } else if (auto* str = current_type->As<core::type::Struct>()) {
+                            // Remap member index
                             uint32_t old_index = idx->As<Constant>()->Value()->ValueAs<uint32_t>();
                             uint32_t new_index = *member_index_map.Get(str->Members()[old_index]);
-                            indices.Push(b.Constant(u32(new_index)));
                             current_type = str->Element(old_index);
+                            indices.Push(b.Constant(u32(new_index)));
                         } else {
                             indices.Push(idx);
                             current_type = current_type->Elements().type;
+                            if (NeedsDecomposing(current_type)) {
+                                // Decomposed matrices are indexed using their first column vector
+                                indices.Push(b.Constant(0_u));
+                            }
                         }
+                    }
 
-                        // If we've hit a matrix that was decomposed, load the whole matrix.
-                        // Any additional accesses will extract columns instead of producing
-                        // pointers.
-                        if (auto* mat = current_type->As<core::type::Matrix>();
-                            mat && NeedsDecomposing(mat)) {
-                            replacement = LoadMatrix(mat, replacement, std::move(indices));
-                            indices.Clear();
-                        }
+                    if (auto* mat = NeedsDecomposing(current_type)) {
+                        replacement = RebuildMatrix(mat, replacement, std::move(indices));
+                        indices.Clear();
                     }
 
                     if (!indices.IsEmpty()) {
