@@ -32,6 +32,7 @@
 #include <string>
 #include <string_view>
 
+#include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/block_param.h"
@@ -107,6 +108,12 @@ class Disassembly {
 
     /// @returns the disassembled name for the Switch @p inst
     StyledText NameOf(const Switch* inst);
+
+    /// @returns the disassembled name for the BinaryOp @p op
+    StyledText NameOf(BinaryOp op);
+
+    /// @returns the disassembled name for the UnaryOp @p op
+    StyledText NameOf(UnaryOp op);
 
     /// @param inst the instruction to retrieve
     /// @returns the source for the instruction

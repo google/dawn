@@ -80,7 +80,6 @@
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/defer.h"
-#include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/text_style.h"
@@ -789,7 +788,10 @@ void Validator::CheckInstruction(const Instruction* inst) {
 void Validator::CheckVar(const Var* var) {
     if (var->Result(0) && var->Initializer()) {
         if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtrOrRef()) {
-            AddError(var) << "initializer has incorrect type";
+            AddError(var) << "initializer type "
+                          << style::Type(var->Initializer()->Type()->FriendlyName())
+                          << " does not match store type "
+                          << style::Type(var->Result(0)->Type()->UnwrapPtrOrRef()->FriendlyName());
         }
     }
 }
@@ -799,7 +801,9 @@ void Validator::CheckLet(const Let* let) {
 
     if (let->Result(0) && let->Value()) {
         if (let->Result(0)->Type() != let->Value()->Type()) {
-            AddError(let) << "result type does not match value type";
+            AddError(let) << "result type " << style::Type(let->Result(0)->Type()->FriendlyName())
+                          << " does not match value type "
+                          << style::Type(let->Value()->Type()->FriendlyName());
         }
     }
 }
@@ -859,8 +863,9 @@ void Validator::CheckUserCall(const UserCall* call) {
     for (size_t i = 0; i < args.Length(); i++) {
         if (args[i]->Type() != params[i]->Type()) {
             AddError(call, UserCall::kArgsOperandOffset + i)
-                << "function parameter " << i << " is of type " << params[i]->Type()->FriendlyName()
-                << ", but argument is of type " << args[i]->Type()->FriendlyName();
+                << "function parameter " << i << " is of type "
+                << style::Type(params[i]->Type()->FriendlyName()) << ", but argument is of type "
+                << style::Type(args[i]->Type()->FriendlyName());
         }
     }
 }
@@ -880,13 +885,15 @@ void Validator::CheckAccess(const Access* a) {
     auto desc_of = [&](Kind kind, const core::type::Type* type) {
         switch (kind) {
             case kPtr:
-                return StyledText{} << "ptr<" << obj_view->AddressSpace() << ", "
-                                    << type->FriendlyName() << ", " << obj_view->Access() << ">";
+                return StyledText{}
+                       << style::Type("ptr<", obj_view->AddressSpace(), ", ", type->FriendlyName(),
+                                      ", ", obj_view->Access(), ">");
             case kRef:
-                return StyledText{} << "ref<" << obj_view->AddressSpace() << ", "
-                                    << type->FriendlyName() << ", " << obj_view->Access() << ">";
+                return StyledText{}
+                       << style::Type("ref<", obj_view->AddressSpace(), ", ", type->FriendlyName(),
+                                      ", ", obj_view->Access(), ">");
             default:
-                return StyledText{} << type->FriendlyName();
+                return StyledText{} << style::Type(type->FriendlyName());
         }
     };
 
@@ -957,7 +964,7 @@ void Validator::CheckAccess(const Access* a) {
 
     if (TINT_UNLIKELY(!ok)) {
         AddError(a) << "result of access chain is type " << desc_of(in_kind, ty)
-                    << " but instruction type is " << want->FriendlyName();
+                    << " but instruction type is " << style::Type(want->FriendlyName());
     }
 }
 
@@ -966,11 +973,7 @@ void Validator::CheckBinary(const Binary* b) {
     if (b->LHS() && b->RHS()) {
         auto symbols = SymbolTable::Wrap(mod_.symbols);
         auto type_mgr = type::Manager::Wrap(mod_.Types());
-        intrinsic::Context context{
-            b->TableData(),
-            type_mgr,
-            symbols,
-        };
+        intrinsic::Context context{b->TableData(), type_mgr, symbols};
 
         auto overload =
             core::intrinsic::LookupBinary(context, b->Op(), b->LHS()->Type(), b->RHS()->Type(),
@@ -982,11 +985,10 @@ void Validator::CheckBinary(const Binary* b) {
 
         if (auto* result = b->Result(0)) {
             if (overload->return_type != result->Type()) {
-                StringStream err;
-                err << "binary instruction result type (" << result->Type()->FriendlyName()
-                    << ") does not match overload result type ("
-                    << overload->return_type->FriendlyName() << ")";
-                AddError(b) << err.str();
+                AddError(b) << "result value type " << style::Type(result->Type()->FriendlyName())
+                            << " does not match "
+                            << style::Instruction(Disassembly().NameOf(b->Op())) << " result type "
+                            << style::Type(overload->return_type->FriendlyName());
             }
         }
     }
@@ -997,11 +999,7 @@ void Validator::CheckUnary(const Unary* u) {
     if (u->Val()) {
         auto symbols = SymbolTable::Wrap(mod_.symbols);
         auto type_mgr = type::Manager::Wrap(mod_.Types());
-        intrinsic::Context context{
-            u->TableData(),
-            type_mgr,
-            symbols,
-        };
+        intrinsic::Context context{u->TableData(), type_mgr, symbols};
 
         auto overload = core::intrinsic::LookupUnary(context, u->Op(), u->Val()->Type(),
                                                      core::EvaluationStage::kRuntime);
@@ -1012,11 +1010,10 @@ void Validator::CheckUnary(const Unary* u) {
 
         if (auto* result = u->Result(0)) {
             if (overload->return_type != result->Type()) {
-                StringStream err;
-                err << "unary instruction result type (" << result->Type()->FriendlyName()
-                    << ") does not match overload result type ("
-                    << overload->return_type->FriendlyName() << ")";
-                AddError(u) << err.str();
+                AddError(u) << "result value type " << style::Type(result->Type()->FriendlyName())
+                            << " does not match "
+                            << style::Instruction(Disassembly().NameOf(u->Op())) << " result type "
+                            << style::Type(overload->return_type->FriendlyName());
             }
         }
     }
@@ -1026,7 +1023,8 @@ void Validator::CheckIf(const If* if_) {
     CheckOperandNotNull(if_, if_->Condition(), If::kConditionOperandOffset);
 
     if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
-        AddError(if_, If::kConditionOperandOffset) << "condition must be a `bool` type";
+        AddError(if_, If::kConditionOperandOffset)
+            << "condition type must be " << style::Type("bool");
     }
 
     tasks_.Push([this] { control_stack_.Pop(); });
@@ -1114,9 +1112,9 @@ void Validator::CheckExit(const Exit* e) {
 
     for (size_t i = 0; i < results.Length(); ++i) {
         if (results[i] && args[i] && results[i]->Type() != args[i]->Type()) {
-            AddError(e, i) << "argument type (" << results[i]->Type()->FriendlyName()
-                           << ") does not match control instruction type ("
-                           << args[i]->Type()->FriendlyName() << ")";
+            AddError(e, i) << "argument type " << style::Type(results[i]->Type()->FriendlyName())
+                           << " does not match control instruction type "
+                           << style::Type(args[i]->Type()->FriendlyName());
             AddNote(e->ControlInstruction()) << "control instruction";
         }
     }
@@ -1150,7 +1148,10 @@ void Validator::CheckReturn(const Return* ret) {
         if (!ret->Value()) {
             AddError(ret) << "expected return value";
         } else if (ret->Value()->Type() != func->ReturnType()) {
-            AddError(ret) << "return value type does not match function return type";
+            AddError(ret) << "return value type "
+                          << style::Type(ret->Value()->Type()->FriendlyName())
+                          << " does not match function return type "
+                          << style::Type(func->ReturnType()->FriendlyName());
         }
     }
 }
@@ -1214,7 +1215,10 @@ void Validator::CheckLoad(const Load* l) {
             return;
         }
         if (l->Result(0)->Type() != mv->StoreType()) {
-            AddError(l, Load::kFromOperandOffset) << "result type does not match source store type";
+            AddError(l, Load::kFromOperandOffset)
+                << "result type " << style::Type(l->Result(0)->Type()->FriendlyName())
+                << " does not match source store type "
+                << style::Type(mv->StoreType()->FriendlyName());
         }
     }
 }
@@ -1230,8 +1234,12 @@ void Validator::CheckStore(const Store* s) {
                     << "store target operand is not a memory view";
                 return;
             }
-            if (from->Type() != mv->StoreType()) {
-                AddError(s, Store::kFromOperandOffset) << "value type does not match store type";
+            auto* value_type = from->Type();
+            auto* store_type = mv->StoreType();
+            if (value_type != store_type) {
+                AddError(s, Store::kFromOperandOffset)
+                    << "value type " << style::Type(value_type->FriendlyName())
+                    << " does not match store type " << style::Type(store_type->FriendlyName());
             }
         }
     }
@@ -1245,7 +1253,9 @@ void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
     if (auto* res = l->Result(0)) {
         if (auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset)) {
             if (res->Type() != el_ty) {
-                AddResultError(l, 0) << "result type does not match vector pointer element type";
+                AddResultError(l, 0) << "result type " << style::Type(res->Type()->FriendlyName())
+                                     << " does not match vector pointer element type "
+                                     << style::Type(el_ty->FriendlyName());
             }
         }
     }
@@ -1260,7 +1270,9 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
         if (auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset)) {
             if (value->Type() != el_ty) {
                 AddError(s, StoreVectorElement::kValueOperandOffset)
-                    << "value type does not match vector pointer element type";
+                    << "value type " << style::Type(value->Type()->FriendlyName())
+                    << " does not match vector pointer element type "
+                    << style::Type(el_ty->FriendlyName());
             }
         }
     }
@@ -1285,7 +1297,8 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
         }
     }
 
-    AddError(inst, idx) << "operand must be a pointer to vector, got " << type->FriendlyName();
+    AddError(inst, idx) << "operand must be a pointer to vector, got "
+                        << style::Type(type->FriendlyName());
     return nullptr;
 }
 

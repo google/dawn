@@ -30,6 +30,7 @@
 #include <string_view>
 
 #include "src//tint/lang/core/ir/unary.h"
+#include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
@@ -796,64 +797,7 @@ void Disassembly::EmitTerminator(const Terminator* b) {
 void Disassembly::EmitBinary(const Binary* b) {
     SourceMarker sm(this);
     EmitValueWithType(b);
-    out_ << " = ";
-    switch (b->Op()) {
-        case BinaryOp::kAdd:
-            out_ << StyleInstruction("add");
-            break;
-        case BinaryOp::kSubtract:
-            out_ << StyleInstruction("sub");
-            break;
-        case BinaryOp::kMultiply:
-            out_ << StyleInstruction("mul");
-            break;
-        case BinaryOp::kDivide:
-            out_ << StyleInstruction("div");
-            break;
-        case BinaryOp::kModulo:
-            out_ << StyleInstruction("mod");
-            break;
-        case BinaryOp::kAnd:
-            out_ << StyleInstruction("and");
-            break;
-        case BinaryOp::kOr:
-            out_ << StyleInstruction("or");
-            break;
-        case BinaryOp::kXor:
-            out_ << StyleInstruction("xor");
-            break;
-        case BinaryOp::kEqual:
-            out_ << StyleInstruction("eq");
-            break;
-        case BinaryOp::kNotEqual:
-            out_ << StyleInstruction("neq");
-            break;
-        case BinaryOp::kLessThan:
-            out_ << StyleInstruction("lt");
-            break;
-        case BinaryOp::kGreaterThan:
-            out_ << StyleInstruction("gt");
-            break;
-        case BinaryOp::kLessThanEqual:
-            out_ << StyleInstruction("lte");
-            break;
-        case BinaryOp::kGreaterThanEqual:
-            out_ << StyleInstruction("gte");
-            break;
-        case BinaryOp::kShiftLeft:
-            out_ << StyleInstruction("shl");
-            break;
-        case BinaryOp::kShiftRight:
-            out_ << StyleInstruction("shr");
-            break;
-        case BinaryOp::kLogicalAnd:
-            out_ << StyleInstruction("logical-and");
-            break;
-        case BinaryOp::kLogicalOr:
-            out_ << StyleInstruction("logical-or");
-            break;
-    }
-    out_ << " ";
+    out_ << " = " << NameOf(b->Op()) << " ";
     EmitOperandList(b);
 
     sm.Store(b);
@@ -862,25 +806,7 @@ void Disassembly::EmitBinary(const Binary* b) {
 void Disassembly::EmitUnary(const Unary* u) {
     SourceMarker sm(this);
     EmitValueWithType(u);
-    out_ << " = ";
-    switch (u->Op()) {
-        case UnaryOp::kComplement:
-            out_ << StyleInstruction("complement");
-            break;
-        case UnaryOp::kNegation:
-            out_ << StyleInstruction("negation");
-            break;
-        case UnaryOp::kAddressOf:
-            out_ << StyleInstruction("ref-to-ptr");
-            break;
-        case UnaryOp::kIndirection:
-            out_ << StyleInstruction("ptr-to-ref");
-            break;
-        case UnaryOp::kNot:
-            out_ << StyleInstruction("not");
-            break;
-    }
-    out_ << " ";
+    out_ << " = " << NameOf(u->Op()) << " ";
     EmitOperandList(u);
 
     sm.Store(u);
@@ -982,6 +908,64 @@ StyledText Disassembly::NameOf(const Switch* inst) {
     auto name = switch_names_.GetOrAdd(
         inst, [&] { return "switch_" + std::to_string(switch_names_.Count()); });
     return StyledText{} << StyleInstruction(name);
+}
+
+StyledText Disassembly::NameOf(BinaryOp op) {
+    switch (op) {
+        case BinaryOp::kAdd:
+            return StyledText{} << StyleInstruction("add");
+        case BinaryOp::kSubtract:
+            return StyledText{} << StyleInstruction("sub");
+        case BinaryOp::kMultiply:
+            return StyledText{} << StyleInstruction("mul");
+        case BinaryOp::kDivide:
+            return StyledText{} << StyleInstruction("div");
+        case BinaryOp::kModulo:
+            return StyledText{} << StyleInstruction("mod");
+        case BinaryOp::kAnd:
+            return StyledText{} << StyleInstruction("and");
+        case BinaryOp::kOr:
+            return StyledText{} << StyleInstruction("or");
+        case BinaryOp::kXor:
+            return StyledText{} << StyleInstruction("xor");
+        case BinaryOp::kEqual:
+            return StyledText{} << StyleInstruction("eq");
+        case BinaryOp::kNotEqual:
+            return StyledText{} << StyleInstruction("neq");
+        case BinaryOp::kLessThan:
+            return StyledText{} << StyleInstruction("lt");
+        case BinaryOp::kGreaterThan:
+            return StyledText{} << StyleInstruction("gt");
+        case BinaryOp::kLessThanEqual:
+            return StyledText{} << StyleInstruction("lte");
+        case BinaryOp::kGreaterThanEqual:
+            return StyledText{} << StyleInstruction("gte");
+        case BinaryOp::kShiftLeft:
+            return StyledText{} << StyleInstruction("shl");
+        case BinaryOp::kShiftRight:
+            return StyledText{} << StyleInstruction("shr");
+        case BinaryOp::kLogicalAnd:
+            return StyledText{} << StyleInstruction("logical-and");
+        case BinaryOp::kLogicalOr:
+            return StyledText{} << StyleInstruction("logical-or");
+    }
+    TINT_UNREACHABLE() << op;
+}
+
+StyledText Disassembly::NameOf(UnaryOp op) {
+    switch (op) {
+        case UnaryOp::kComplement:
+            return StyledText{} << StyleInstruction("complement");
+        case UnaryOp::kNegation:
+            return StyledText{} << StyleInstruction("negation");
+        case UnaryOp::kAddressOf:
+            return StyledText{} << StyleInstruction("ref-to-ptr");
+        case UnaryOp::kIndirection:
+            return StyledText{} << StyleInstruction("ptr-to-ref");
+        case UnaryOp::kNot:
+            return StyledText{} << StyleInstruction("not");
+    }
+    TINT_UNREACHABLE() << op;
 }
 
 }  // namespace tint::core::ir

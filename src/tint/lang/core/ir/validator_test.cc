@@ -394,8 +394,9 @@ TEST_F(IR_ValidatorTest, CallToFunctionWrongArgType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:28 error: call: function parameter 1 is of type i32, but argument is of type f32
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:8:28 error: call: function parameter 1 is of type 'i32', but argument is of type 'f32'
     %6:void = call %g, 1i, 2.0f, 3i
                            ^^^^
 
@@ -631,7 +632,7 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Value) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:29 error: access: index out of bounds for type vec2<f32>
+              R"(:3:29 error: access: index out of bounds for type 'vec2<f32>'
     %3:f32 = access %2, 1u, 3u
                             ^^
 
@@ -667,7 +668,7 @@ TEST_F(IR_ValidatorTest, Access_OOB_Index_Ptr) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:55 error: access: index out of bounds for type ptr<private, array<f32, 2>, read_write>
+        R"(:3:55 error: access: index out of bounds for type 'ptr<private, array<f32, 2>, read_write>'
     %3:ptr<private, f32, read_write> = access %2, 1u, 3u
                                                       ^^
 
@@ -701,7 +702,7 @@ TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Value) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:25 error: access: type f32 cannot be indexed
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:25 error: access: type 'f32' cannot be indexed
     %3:f32 = access %2, 1u
                         ^^
 
@@ -732,7 +733,7 @@ TEST_F(IR_ValidatorTest, Access_StaticallyUnindexableType_Ptr) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:51 error: access: type ptr<private, f32, read_write> cannot be indexed
+              R"(:3:51 error: access: type 'ptr<private, f32, read_write>' cannot be indexed
     %3:ptr<private, f32, read_write> = access %2, 1u
                                                   ^^
 
@@ -769,7 +770,7 @@ TEST_F(IR_ValidatorTest, Access_DynamicallyUnindexableType_Value) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:25 error: access: type MyStruct cannot be dynamically indexed
+              R"(:8:25 error: access: type 'MyStruct' cannot be dynamically indexed
     %4:i32 = access %2, %3
                         ^^
 
@@ -812,7 +813,7 @@ TEST_F(IR_ValidatorTest, Access_DynamicallyUnindexableType_Ptr) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:8:25 error: access: type ptr<private, MyStruct, read_write> cannot be dynamically indexed
+        R"(:8:25 error: access: type 'ptr<private, MyStruct, read_write>' cannot be dynamically indexed
     %4:i32 = access %2, %3
                         ^^
 
@@ -847,8 +848,9 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Value_Value) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:14 error: access: result of access chain is type f32 but instruction type is i32
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:3:14 error: access: result of access chain is type 'f32' but instruction type is 'i32'
     %3:i32 = access %2, 1u, 1u
              ^^^^^^
 
@@ -880,7 +882,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Ptr_Ptr) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:40 error: access: result of access chain is type ptr<private, f32, read_write> but instruction type is ptr<private, i32, read_write>
+        R"(:3:40 error: access: result of access chain is type 'ptr<private, f32, read_write>' but instruction type is 'ptr<private, i32, read_write>'
     %3:ptr<private, i32, read_write> = access %2, 1u, 1u
                                        ^^^^^^
 
@@ -912,7 +914,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Type_Ptr_Value) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:14 error: access: result of access chain is type ptr<private, f32, read_write> but instruction type is f32
+        R"(:3:14 error: access: result of access chain is type 'ptr<private, f32, read_write>' but instruction type is 'f32'
     %3:f32 = access %2, 1u, 1u
              ^^^^^^
 
@@ -1034,7 +1036,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_AddressSpace) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:34 error: access: result of access chain is type ptr<storage, f32, read> but instruction type is ptr<uniform, f32, read>
+        R"(:3:34 error: access: result of access chain is type 'ptr<storage, f32, read>' but instruction type is 'ptr<uniform, f32, read>'
     %3:ptr<uniform, f32, read> = access %2, 1u
                                  ^^^^^^
 
@@ -1066,7 +1068,7 @@ TEST_F(IR_ValidatorTest, Access_Incorrect_Ptr_Access) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:40 error: access: result of access chain is type ptr<storage, f32, read> but instruction type is ptr<storage, f32, read_write>
+        R"(:3:40 error: access: result of access chain is type 'ptr<storage, f32, read>' but instruction type is 'ptr<storage, f32, read_write>'
     %3:ptr<storage, f32, read_write> = access %2, 1u
                                        ^^^^^^
 
@@ -1197,7 +1199,7 @@ TEST_F(IR_ValidatorTest, If_ConditionIsBool) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:8 error: if: condition must be a `bool` type
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:8 error: if: condition type must be 'bool'
     if 1i [t: $B2, f: $B3] {  # if_1
        ^^
 
@@ -1400,7 +1402,8 @@ TEST_F(IR_ValidatorTest, Var_Init_WrongType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:41 error: var: initializer has incorrect type
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:41 error: var: initializer type 'i32' does not match store type 'f32'
     %2:ptr<function, f32, read_write> = var, 1i
                                         ^^^
 
@@ -1488,7 +1491,8 @@ TEST_F(IR_ValidatorTest, Let_WrongType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:14 error: let: result type does not match value type
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:14 error: let: result type 'f32' does not match value type 'i32'
     %2:f32 = let 1i
              ^^^
 
@@ -1813,7 +1817,7 @@ TEST_F(IR_ValidatorTest, Unary_ResultTypeNotMatchValueType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:5 error: unary: unary instruction result type (f32) does not match overload result type (i32)
+        R"(:3:5 error: unary: result value type 'f32' does not match complement result type 'i32'
     %2:f32 = complement 2i
     ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1998,7 +2002,7 @@ TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:21 error: exit_if: argument type (f32) does not match control instruction type (i32)
+        R"(:5:21 error: exit_if: argument type 'f32' does not match control instruction type 'i32'
         exit_if 1i, 2i  # if_1
                     ^^
 
@@ -2392,7 +2396,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:25 error: exit_switch: argument type (f32) does not match control instruction type (i32)
+        R"(:5:25 error: exit_switch: argument type 'f32' does not match control instruction type 'i32'
         exit_switch 1i, 2i  # switch_1
                         ^^
 
@@ -2780,7 +2784,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:23 error: exit_loop: argument type (f32) does not match control instruction type (i32)
+        R"(:5:23 error: exit_loop: argument type 'f32' does not match control instruction type 'i32'
         exit_loop 1i, 2i  # loop_1
                       ^^
 
@@ -3300,8 +3304,9 @@ TEST_F(IR_ValidatorTest, Return_WrongValueType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: return: return value type does not match function return type
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:3:5 error: return: return value type 'f32' does not match function return type 'i32'
     ret 42.0f
     ^^^^^^^^^
 
@@ -3392,7 +3397,7 @@ TEST_F(IR_ValidatorTest, Load_TypeMismatch) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:19 error: load: result type does not match source store type
+              R"(:4:19 error: load: result type 'f32' does not match source store type 'i32'
     %3:f32 = load %2
                   ^^
 
@@ -3512,7 +3517,7 @@ TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:15 error: store: value type does not match store type
+              R"(:4:15 error: store: value type 'u32' does not match store type 'i32'
     store %2, 42u
               ^^^
 
@@ -3672,7 +3677,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
   $B1: {
   ^^^
 
-:4:37 error: store_vector_element: value type does not match vector pointer element type
+:4:37 error: store_vector_element: value type 'i32' does not match vector pointer element type 'f32'
     store_vector_element %2, undef, 2i
                                     ^^
 
