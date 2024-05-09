@@ -31,15 +31,12 @@
 #include <mutex>
 #include <string>
 
+#include "absl/strings/str_format.h"
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/Forward.h"
-
-namespace absl {
-class FormatSink;
-}
 
 namespace dawn::native {
 
