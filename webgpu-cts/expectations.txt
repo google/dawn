@@ -458,7 +458,10 @@ crbug.com/41487285 [ webgpu-adapter-swiftshader win10 ] webgpu:web_platform,exte
 # The keep can be removed once this config is promoted to stable.
 # KEEP
 ################################################################################
+crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 target-cpu-32 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
+crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 target-cpu-32 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="default";* [ Failure ]
+crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="none";* [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";* [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="none";* [ Failure ]
 crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";* [ Failure ]
