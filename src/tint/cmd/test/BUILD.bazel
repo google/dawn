@@ -48,6 +48,7 @@ cc_binary(
     "//src/tint/cmd/common:test",
     "//src/tint/lang/core/constant:test",
     "//src/tint/lang/core/intrinsic:test",
+    "//src/tint/lang/core/ir/transform/common:test",
     "//src/tint/lang/core/ir/transform:test",
     "//src/tint/lang/core/ir:test",
     "//src/tint/lang/core/type:test",

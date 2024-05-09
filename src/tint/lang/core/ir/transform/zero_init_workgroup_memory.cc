@@ -32,6 +32,7 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/transform/common/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/reverse.h"
 
@@ -61,17 +62,12 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    /// VarSet is a hash set of workgroup variables.
-    using VarSet = Hashset<Var*, 8>;
-
-    /// A map from variable to an ID used for sorting.
-    Hashmap<Var*, uint32_t, 8> var_to_id{};
-
-    /// A map from blocks to their directly referenced workgroup variables.
-    Hashmap<Block*, VarSet, 64> block_to_direct_vars{};
-
-    /// A map from functions to their transitively referenced workgroup variables.
-    Hashmap<Function*, VarSet, 8> function_to_transitive_vars{};
+    /// The mapping from functions to their transitively referenced workgroup variables.
+    ReferencedModuleVars referenced_module_vars_{
+        ir, [](const Var* var) {
+            auto* view = var->Result(0)->Type()->As<type::MemoryView>();
+            return view && view->AddressSpace() == AddressSpace::kWorkgroup;
+        }};
 
     /// ArrayIndex represents a required array index for an access instruction.
     struct ArrayIndex {
@@ -104,22 +100,6 @@ struct State {
         if (ir.root_block->IsEmpty()) {
             return;
         }
-
-        // Loop over module-scope variables, looking for workgroup variables.
-        uint32_t next_id = 0;
-        for (auto inst : *ir.root_block) {
-            if (auto* var = inst->As<Var>()) {
-                auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-                if (ptr && ptr->AddressSpace() == core::AddressSpace::kWorkgroup) {
-                    // Record the usage of the variable for each block that references it.
-                    var->Result(0)->ForEachUse([&](const Usage& use) {
-                        block_to_direct_vars.GetOrAddZero(use.instruction->Block()).Add(var);
-                    });
-                    var_to_id.Add(var, next_id++);
-                }
-            }
-        }
-
         // Process each entry point function.
         for (auto& func : ir.functions) {
             if (func->Stage() == Function::PipelineStage::kCompute) {
@@ -132,20 +112,14 @@ struct State {
     /// @param func the entry point function
     void ProcessEntryPoint(Function* func) {
         // Get list of transitively referenced workgroup variables.
-        auto vars = GetReferencedVars(func);
+        const auto& vars = referenced_module_vars_.TransitiveReferences(func);
         if (vars.IsEmpty()) {
             return;
         }
 
-        // Sort the variables to get deterministic output in tests.
-        auto sorted_vars = vars.Vector();
-        sorted_vars.Sort([&](Var* first, Var* second) {
-            return *var_to_id.Get(first) < *var_to_id.Get(second);
-        });
-
         // Build list of store descriptors for all workgroup variables.
         StoreMap stores;
-        for (auto* var : sorted_vars) {
+        for (auto* var : vars) {
             PrepareStores(var, var->Result(0)->Type()->UnwrapPtr(), 1, {}, stores);
         }
 
@@ -186,46 +160,6 @@ struct State {
             }
             b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
         });
-    }
-
-    /// Get the set of workgroup variables transitively referenced by @p func.
-    /// @param func the function
-    /// @returns the set of transitively referenced workgroup variables
-    VarSet GetReferencedVars(Function* func) {
-        return function_to_transitive_vars.GetOrAdd(func, [&] {
-            VarSet vars;
-            GetReferencedVars(func->Block(), vars);
-            return vars;
-        });
-    }
-
-    /// Get the set of workgroup variables transitively referenced by @p block.
-    /// @param block the block
-    /// @param vars the set of transitively referenced workgroup variables to populate
-    void GetReferencedVars(Block* block, VarSet& vars) {
-        // Add directly referenced vars.
-        if (auto itr = block_to_direct_vars.Get(block)) {
-            for (auto& var : *itr) {
-                vars.Add(var);
-            }
-        }
-
-        // Loop over instructions in the block.
-        for (auto* inst : *block) {
-            tint::Switch(
-                inst,
-                [&](UserCall* call) {
-                    // Get variables referenced by a function called from this block.
-                    auto callee_vars = GetReferencedVars(call->Target());
-                    for (auto& var : callee_vars) {
-                        vars.Add(var);
-                    }
-                },
-                [&](ControlInstruction* ctrl) {
-                    // Recurse into control instructions and gather their referenced vars.
-                    ctrl->ForeachBlock([&](Block* blk) { GetReferencedVars(blk, vars); });
-                });
-        }
     }
 
     /// Recursively generate store descriptors for a workgroup variable.

@@ -57,6 +57,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/intrinsic:unittests",
       "${tint_src_dir}/lang/core/ir:unittests",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
+      "${tint_src_dir}/lang/core/ir/transform/common:unittests",
       "${tint_src_dir}/lang/core/type:unittests",
       "${tint_src_dir}/lang/hlsl/writer/common:unittests",
       "${tint_src_dir}/lang/msl/ir:unittests",
