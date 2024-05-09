@@ -53,7 +53,6 @@ target_sources(dawn_common PRIVATE
     "Assert.h"
     "BitSetIterator.h"
     "Compiler.h"
-    "ConcurrentCache.h"
     "Constants.h"
     "ContentLessObjectCache.h"
     "ContentLessObjectCacheable.h"
