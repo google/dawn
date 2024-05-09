@@ -41,7 +41,7 @@ TEST_F(DiagnosticRuleNameTest, String) {
 }
 
 TEST_F(DiagnosticRuleNameTest, Assert_NameNotTemplated) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<ast::DiagnosticRuleName>(b.Ident("name", "a", "b", "c"));
@@ -50,7 +50,7 @@ TEST_F(DiagnosticRuleNameTest, Assert_NameNotTemplated) {
 }
 
 TEST_F(DiagnosticRuleNameTest, Assert_CategoryNotTemplated) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<ast::DiagnosticRuleName>(b.Ident("name"), b.Ident("category", "a", "b", "c"));

@@ -99,7 +99,7 @@ TEST_F(CaseStatementTest, IsCase) {
 }
 
 TEST_F(CaseStatementTest, Assert_Null_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<CaseStatement>(tint::Vector{b.DefaultCaseSelector()}, nullptr);
@@ -108,7 +108,7 @@ TEST_F(CaseStatementTest, Assert_Null_Body) {
 }
 
 TEST_F(CaseStatementTest, Assert_Null_Selector) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<CaseStatement>(tint::Vector<const ast::CaseSelector*, 1>{nullptr},
@@ -118,7 +118,7 @@ TEST_F(CaseStatementTest, Assert_Null_Selector) {
 }
 
 TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Call) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -129,7 +129,7 @@ TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Call) {
 }
 
 TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Selector) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

@@ -52,7 +52,7 @@ TEST_F(IdentifierTest, IsIdentifier) {
 }
 
 TEST_F(IdentifierTest, Assert_InvalidSymbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Ident("");
@@ -61,7 +61,7 @@ TEST_F(IdentifierTest, Assert_InvalidSymbol) {
 }
 
 TEST_F(IdentifierTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

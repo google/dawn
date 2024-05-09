@@ -72,7 +72,7 @@ TEST_F(IR_BitcastTest, Bitcast_Usage) {
 }
 
 TEST_F(IR_BitcastTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

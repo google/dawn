@@ -40,7 +40,7 @@ namespace {
 using IR_BinaryTest = IRTestHelper;
 
 TEST_F(IR_BinaryTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

@@ -73,7 +73,7 @@ TEST_F(ForLoopStatementTest, Creation_WithAttributes) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_Null_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.For(nullptr, nullptr, nullptr, nullptr);
@@ -82,7 +82,7 @@ TEST_F(ForLoopStatementTest, Assert_Null_Body) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Initializer) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -92,7 +92,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Initializer) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -102,7 +102,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Condition) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Continuing) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -112,7 +112,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Continuing) {
 }
 
 TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

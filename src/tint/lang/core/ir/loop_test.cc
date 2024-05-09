@@ -47,7 +47,7 @@ TEST_F(IR_LoopTest, Result) {
 }
 
 TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -57,7 +57,7 @@ TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
 }
 
 TEST_F(IR_LoopTest, Fail_NullBodyBlock) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -67,7 +67,7 @@ TEST_F(IR_LoopTest, Fail_NullBodyBlock) {
 }
 
 TEST_F(IR_LoopTest, Fail_NullContinuingBlock) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

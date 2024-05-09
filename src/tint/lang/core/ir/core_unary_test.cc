@@ -80,7 +80,7 @@ TEST_F(IR_UnaryTest, Result) {
 }
 
 TEST_F(IR_UnaryTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

@@ -66,7 +66,7 @@ TEST_F(IR_ValueTest, Destroy) {
 }
 
 TEST_F(IR_ValueTest, Destroy_HasSource) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

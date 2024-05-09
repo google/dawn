@@ -30,7 +30,7 @@
 namespace tint::spirv::reader {
 
 TEST_F(SpirvParserTest, Struct_Empty) {
-    EXPECT_DEATH(  //
+    EXPECT_DEATH_IF_SUPPORTED(  //
         {
             auto assembly = Assemble(R"(
                OpCapability Shader

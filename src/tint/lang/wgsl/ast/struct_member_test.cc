@@ -58,7 +58,7 @@ TEST_F(StructMemberTest, CreationWithSource) {
 }
 
 TEST_F(StructMemberTest, Assert_Null_Name) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Member(static_cast<Identifier*>(nullptr), b.ty.i32());
@@ -67,7 +67,7 @@ TEST_F(StructMemberTest, Assert_Null_Name) {
 }
 
 TEST_F(StructMemberTest, Assert_Null_Type) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Member("a", Type{});
@@ -76,7 +76,7 @@ TEST_F(StructMemberTest, Assert_Null_Type) {
 }
 
 TEST_F(StructMemberTest, Assert_Null_Attribute) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Member("a", b.ty.i32(), tint::Vector{b.MemberSize(4_a), nullptr});
@@ -85,7 +85,7 @@ TEST_F(StructMemberTest, Assert_Null_Attribute) {
 }
 
 TEST_F(StructMemberTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -95,7 +95,7 @@ TEST_F(StructMemberTest, Assert_DifferentGenerationID_Symbol) {
 }
 
 TEST_F(StructMemberTest, Assert_DifferentGenerationID_Attribute) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

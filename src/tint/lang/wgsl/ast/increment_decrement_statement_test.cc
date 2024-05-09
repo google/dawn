@@ -66,7 +66,7 @@ TEST_F(IncrementDecrementStatementTest, Decrement) {
 }
 
 TEST_F(IncrementDecrementStatementTest, Assert_DifferentGenerationID_Expr) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

@@ -36,7 +36,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_MultiInBlockTest = IRTestHelper;
 
 TEST_F(IR_MultiInBlockTest, Fail_NullInboundBranch) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

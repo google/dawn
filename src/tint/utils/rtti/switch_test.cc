@@ -230,7 +230,7 @@ TEST(Castable, SwitchMustMatch_MatchedWithReturnValue) {
 }
 
 TEST(Castable, SwitchMustMatch_NoMatchWithoutReturnValue) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             std::unique_ptr<Animal> frog = std::make_unique<Frog>();
             Switch(
@@ -243,7 +243,7 @@ TEST(Castable, SwitchMustMatch_NoMatchWithoutReturnValue) {
 }
 
 TEST(Castable, SwitchMustMatch_NoMatchWithReturnValue) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             std::unique_ptr<Animal> frog = std::make_unique<Frog>();
             int res = Switch(
@@ -257,7 +257,7 @@ TEST(Castable, SwitchMustMatch_NoMatchWithReturnValue) {
 }
 
 TEST(Castable, SwitchMustMatch_NullptrWithoutReturnValue) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Switch(
                 static_cast<CastableBase*>(nullptr),  //
@@ -269,7 +269,7 @@ TEST(Castable, SwitchMustMatch_NullptrWithoutReturnValue) {
 }
 
 TEST(Castable, SwitchMustMatch_NullptrWithReturnValue) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             int res = Switch(
                 static_cast<CastableBase*>(nullptr),  //

@@ -37,7 +37,7 @@ namespace {
 using DiagnosticControlTest = TestHelper;
 
 TEST_F(DiagnosticControlTest, Assert_RuleNotNull) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             DiagnosticControl control(wgsl::DiagnosticSeverity::kWarning, nullptr);

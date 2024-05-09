@@ -58,7 +58,7 @@ TEST_F(IR_UserCallTest, Results) {
 }
 
 TEST_F(IR_UserCallTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

@@ -72,7 +72,7 @@ TEST_F(BlockStatementTest, IsBlock) {
 }
 
 TEST_F(BlockStatementTest, Assert_Null_Statement) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<BlockStatement>(tint::Vector<const Statement*, 1>{nullptr}, tint::Empty);
@@ -81,7 +81,7 @@ TEST_F(BlockStatementTest, Assert_Null_Statement) {
 }
 
 TEST_F(BlockStatementTest, Assert_DifferentGenerationID_Statement) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

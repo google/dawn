@@ -48,7 +48,7 @@ TEST_F(BreakIfStatementTest, IsBreakIf) {
 }
 
 TEST_F(BreakIfStatementTest, Assert_Null_Condition) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.BreakIf(nullptr);
@@ -57,7 +57,7 @@ TEST_F(BreakIfStatementTest, Assert_Null_Condition) {
 }
 
 TEST_F(BreakIfStatementTest, Assert_DifferentGenerationID_Cond) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

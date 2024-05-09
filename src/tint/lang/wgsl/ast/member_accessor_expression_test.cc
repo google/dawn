@@ -55,7 +55,7 @@ TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {
 }
 
 TEST_F(MemberAccessorExpressionTest, Assert_Null_Struct) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<MemberAccessorExpression>(nullptr, b.Ident("member"));
@@ -64,7 +64,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_Null_Struct) {
 }
 
 TEST_F(MemberAccessorExpressionTest, Assert_Null_Member) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<MemberAccessorExpression>(b.Expr("struct"), nullptr);
@@ -73,7 +73,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_Null_Member) {
 }
 
 TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Struct) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -83,7 +83,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Struct) {
 }
 
 TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Member) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -93,7 +93,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Member) {
 }
 
 TEST_F(MemberAccessorExpressionTest, Assert_MemberNotTemplated) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<MemberAccessorExpression>(b.Expr("structure"),

@@ -64,7 +64,7 @@ TEST_F(SpirvASTPrinterTest, If_Empty_OutsideFunction_IsError) {
     // if (true) {
     // }
 
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder pb;
 

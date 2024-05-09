@@ -42,7 +42,7 @@ TEST_F(ColorAttributeTest, Creation) {
 }
 
 TEST_F(ColorAttributeTest, Assert_Null_Builtin) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Color(nullptr);
@@ -51,7 +51,7 @@ TEST_F(ColorAttributeTest, Assert_Null_Builtin) {
 }
 
 TEST_F(ColorAttributeTest, Assert_DifferentGenerationID_Color) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

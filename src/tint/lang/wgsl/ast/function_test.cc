@@ -113,7 +113,7 @@ TEST_F(FunctionTest, Creation_WithSource) {
 }
 
 TEST_F(FunctionTest, Assert_NullName) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Func(static_cast<Identifier*>(nullptr), tint::Empty, b.ty.void_(), tint::Empty);
@@ -122,7 +122,7 @@ TEST_F(FunctionTest, Assert_NullName) {
 }
 
 TEST_F(FunctionTest, Assert_TemplatedName) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Func(b.Ident("a", "b"), tint::Empty, b.ty.void_(), tint::Empty);
@@ -132,7 +132,7 @@ TEST_F(FunctionTest, Assert_TemplatedName) {
 
 TEST_F(FunctionTest, Assert_NullParam) {
     using ParamList = tint::Vector<const Parameter*, 2>;
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             ParamList params;
@@ -144,7 +144,7 @@ TEST_F(FunctionTest, Assert_NullParam) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -154,7 +154,7 @@ TEST_F(FunctionTest, Assert_DifferentGenerationID_Symbol) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_Param) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -168,7 +168,7 @@ TEST_F(FunctionTest, Assert_DifferentGenerationID_Param) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_Attr) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -181,7 +181,7 @@ TEST_F(FunctionTest, Assert_DifferentGenerationID_Attr) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_ReturnType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -191,7 +191,7 @@ TEST_F(FunctionTest, Assert_DifferentGenerationID_ReturnType) {
 }
 
 TEST_F(FunctionTest, Assert_DifferentGenerationID_ReturnAttr) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

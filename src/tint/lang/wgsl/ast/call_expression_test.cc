@@ -91,7 +91,7 @@ TEST_F(CallExpressionTest, IsCall) {
 }
 
 TEST_F(CallExpressionTest, Assert_Null_Identifier) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Call(static_cast<Identifier*>(nullptr));
@@ -100,7 +100,7 @@ TEST_F(CallExpressionTest, Assert_Null_Identifier) {
 }
 
 TEST_F(CallExpressionTest, Assert_Null_Param) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Call(b.Ident("func"), tint::Vector{
@@ -113,7 +113,7 @@ TEST_F(CallExpressionTest, Assert_Null_Param) {
 }
 
 TEST_F(CallExpressionTest, Assert_DifferentGenerationID_Identifier) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -123,7 +123,7 @@ TEST_F(CallExpressionTest, Assert_DifferentGenerationID_Identifier) {
 }
 
 TEST_F(CallExpressionTest, Assert_DifferentGenerationID_Type) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -133,7 +133,7 @@ TEST_F(CallExpressionTest, Assert_DifferentGenerationID_Type) {
 }
 
 TEST_F(CallExpressionTest, Assert_DifferentGenerationID_Param) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

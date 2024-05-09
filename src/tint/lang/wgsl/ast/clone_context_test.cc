@@ -1053,7 +1053,7 @@ TEST_F(ASTCloneContextTestNodeTest, CloneWithInsertBeforeAndAfterRemoved_Functio
 TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_SameTypeTwice) {
     std::string Testnode_name = TypeInfo::Of<TestNode>().name;
 
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder cloned;
             Program original;
@@ -1070,7 +1070,7 @@ TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_BaseThenDerived) {
     std::string Testnode_name = TypeInfo::Of<TestNode>().name;
     std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
 
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder cloned;
             Program original;
@@ -1087,7 +1087,7 @@ TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_DerivedThenBase) {
     std::string Testnode_name = TypeInfo::Of<TestNode>().name;
     std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
 
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder cloned;
             Program original;
@@ -1103,7 +1103,7 @@ TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_DerivedThenBase) {
 using ASTCloneContextTest = ::testing::Test;
 
 TEST_F(ASTCloneContextTest, CloneWithReplaceAll_SymbolsTwice) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder cloned;
             Program original;
@@ -1181,7 +1181,7 @@ TEST_F(ASTCloneContextTest, GenerationIDs) {
 }
 
 TEST_F(ASTCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder dst;
             Program src(ProgramBuilder{});
@@ -1194,7 +1194,7 @@ TEST_F(ASTCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
 }
 
 TEST_F(ASTCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder dst;
             Program src(ProgramBuilder{});

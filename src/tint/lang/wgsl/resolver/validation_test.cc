@@ -133,7 +133,7 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
 }
 
 TEST_F(ResolverValidationTest, UnhandledStmt) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.WrapInFunction(b.create<FakeStmt>());
@@ -164,7 +164,7 @@ TEST_F(ResolverValidationTest, Stmt_ElseIf_NonBool) {
 }
 
 TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.WrapInFunction(b.create<FakeExpr>());

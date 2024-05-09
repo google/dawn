@@ -35,7 +35,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_ConvertTest = IRTestHelper;
 
 TEST_F(IR_ConvertTest, Fail_NullToType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

@@ -58,7 +58,7 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
 }
 
 TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<VariableDeclStatement>(nullptr);
@@ -67,7 +67,7 @@ TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
 }
 
 TEST_F(VariableDeclStatementTest, Assert_DifferentGenerationID_Variable) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

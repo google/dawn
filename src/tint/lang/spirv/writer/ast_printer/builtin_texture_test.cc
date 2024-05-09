@@ -3774,9 +3774,8 @@ TEST_P(BuiltinTextureTest, ValidateSPIRV) {
     Validate(b);
 }
 
-// TODO(dsinclair): This generates two fatal errors, but EXPECT_DEATH can only handle 1
-TEST_P(BuiltinTextureTest, DISABLED_OutsideFunction_IsError) {
-    EXPECT_DEATH(
+TEST_P(BuiltinTextureTest, OutsideFunction_IsError) {
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             auto param = GetParam();
 

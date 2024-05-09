@@ -39,7 +39,7 @@ TEST_F(BuiltinAttributeTest, Creation) {
 }
 
 TEST_F(BuiltinAttributeTest, Assert_Null_Builtin) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Builtin(nullptr);
@@ -48,7 +48,7 @@ TEST_F(BuiltinAttributeTest, Assert_Null_Builtin) {
 }
 
 TEST_F(BuiltinAttributeTest, Assert_DifferentGenerationID_Builtin) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

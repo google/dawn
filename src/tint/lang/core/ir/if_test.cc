@@ -55,7 +55,7 @@ TEST_F(IR_IfTest, Parent) {
 }
 
 TEST_F(IR_IfTest, Fail_NullTrueBlock) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -65,7 +65,7 @@ TEST_F(IR_IfTest, Fail_NullTrueBlock) {
 }
 
 TEST_F(IR_IfTest, Fail_NullFalseBlock) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

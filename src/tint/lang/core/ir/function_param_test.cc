@@ -37,7 +37,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_FunctionParamTest = IRTestHelper;
 
 TEST_F(IR_FunctionParamTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -47,7 +47,7 @@ TEST_F(IR_FunctionParamTest, Fail_NullType) {
 }
 
 TEST_F(IR_FunctionParamTest, Fail_SetDuplicateBuiltin) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

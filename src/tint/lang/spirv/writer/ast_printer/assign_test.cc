@@ -66,7 +66,7 @@ TEST_F(SpirvASTPrinterTest, Assign_Var) {
 }
 
 TEST_F(SpirvASTPrinterTest, Assign_Var_OutsideFunction_IsError) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder pb;
 

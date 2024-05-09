@@ -47,7 +47,7 @@ TEST_F(CallStatementTest, IsCall) {
 }
 
 TEST_F(CallStatementTest, Assert_Null_Call) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.CallStmt(nullptr);
@@ -56,7 +56,7 @@ TEST_F(CallStatementTest, Assert_Null_Call) {
 }
 
 TEST_F(CallStatementTest, Assert_DifferentGenerationID_Call) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

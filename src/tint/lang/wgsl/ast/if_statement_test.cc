@@ -59,7 +59,7 @@ TEST_F(IfStatementTest, IsIf) {
 }
 
 TEST_F(IfStatementTest, Assert_Null_Condition) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.If(nullptr, b.Block());
@@ -68,7 +68,7 @@ TEST_F(IfStatementTest, Assert_Null_Condition) {
 }
 
 TEST_F(IfStatementTest, Assert_Null_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.If(b.Expr(true), nullptr);
@@ -77,7 +77,7 @@ TEST_F(IfStatementTest, Assert_Null_Body) {
 }
 
 TEST_F(IfStatementTest, Assert_InvalidElse) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.If(b.Expr(true), b.Block(), b.Else(b.CallStmt(b.Call("foo"))));
@@ -86,7 +86,7 @@ TEST_F(IfStatementTest, Assert_InvalidElse) {
 }
 
 TEST_F(IfStatementTest, Assert_DifferentGenerationID_Cond) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -96,7 +96,7 @@ TEST_F(IfStatementTest, Assert_DifferentGenerationID_Cond) {
 }
 
 TEST_F(IfStatementTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -106,7 +106,7 @@ TEST_F(IfStatementTest, Assert_DifferentGenerationID_Body) {
 }
 
 TEST_F(IfStatementTest, Assert_DifferentGenerationID_ElseStatement) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

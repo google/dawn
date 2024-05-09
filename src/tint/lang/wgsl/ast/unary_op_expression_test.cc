@@ -58,7 +58,7 @@ TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
 }
 
 TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<UnaryOpExpression>(core::UnaryOp::kNot, nullptr);
@@ -67,7 +67,7 @@ TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
 }
 
 TEST_F(UnaryOpExpressionTest, Assert_DifferentGenerationID_Expression) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

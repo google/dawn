@@ -68,7 +68,7 @@ TEST_F(CompoundAssignmentStatementTest, IsCompoundAssign) {
 }
 
 TEST_F(CompoundAssignmentStatementTest, Assert_Null_LHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<CompoundAssignmentStatement>(nullptr, b.Expr(1_i), core::BinaryOp::kAdd);
@@ -77,7 +77,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_LHS) {
 }
 
 TEST_F(CompoundAssignmentStatementTest, Assert_Null_RHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<CompoundAssignmentStatement>(b.Expr(1_i), nullptr, core::BinaryOp::kAdd);
@@ -86,7 +86,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_RHS) {
 }
 
 TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -97,7 +97,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
 }
 
 TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_RHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

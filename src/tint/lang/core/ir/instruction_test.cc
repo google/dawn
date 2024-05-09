@@ -48,7 +48,7 @@ TEST_F(IR_InstructionTest, InsertBefore) {
 }
 
 TEST_F(IR_InstructionTest, Fail_InsertBeforeNullptr) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -60,7 +60,7 @@ TEST_F(IR_InstructionTest, Fail_InsertBeforeNullptr) {
 }
 
 TEST_F(IR_InstructionTest, Fail_InsertBeforeNotInserted) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -83,7 +83,7 @@ TEST_F(IR_InstructionTest, InsertAfter) {
 }
 
 TEST_F(IR_InstructionTest, Fail_InsertAfterNullptr) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -95,7 +95,7 @@ TEST_F(IR_InstructionTest, Fail_InsertAfterNullptr) {
 }
 
 TEST_F(IR_InstructionTest, Fail_InsertAfterNotInserted) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -119,7 +119,7 @@ TEST_F(IR_InstructionTest, ReplaceWith) {
 }
 
 TEST_F(IR_InstructionTest, Fail_ReplaceWithNullptr) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -133,7 +133,7 @@ TEST_F(IR_InstructionTest, Fail_ReplaceWithNullptr) {
 }
 
 TEST_F(IR_InstructionTest, Fail_ReplaceWithNotInserted) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -157,7 +157,7 @@ TEST_F(IR_InstructionTest, Remove) {
 }
 
 TEST_F(IR_InstructionTest, Fail_RemoveNotInserted) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

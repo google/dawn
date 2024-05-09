@@ -65,7 +65,7 @@ TEST_F(ReturnStatementTest, WithValue) {
 }
 
 TEST_F(ReturnStatementTest, Assert_DifferentGenerationID_Expr) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

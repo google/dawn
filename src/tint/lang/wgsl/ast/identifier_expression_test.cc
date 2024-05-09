@@ -57,7 +57,7 @@ TEST_F(IdentifierExpressionTest, Creation_WithSource) {
 }
 
 TEST_F(IdentifierExpressionTest, Assert_InvalidSymbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Expr("");
@@ -66,7 +66,7 @@ TEST_F(IdentifierExpressionTest, Assert_InvalidSymbol) {
 }
 
 TEST_F(IdentifierExpressionTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

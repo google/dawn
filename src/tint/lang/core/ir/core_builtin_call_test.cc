@@ -55,7 +55,7 @@ TEST_F(IR_CoreBuiltinCallTest, Result) {
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -65,7 +65,7 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Fail_NoneFunction) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

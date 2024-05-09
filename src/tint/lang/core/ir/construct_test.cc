@@ -56,7 +56,7 @@ TEST_F(IR_ConstructTest, Result) {
 }
 
 TEST_F(IR_ConstructTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

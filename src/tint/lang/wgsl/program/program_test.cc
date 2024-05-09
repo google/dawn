@@ -65,7 +65,7 @@ TEST_F(ProgramTest, Assert_GlobalVariable) {
 }
 
 TEST_F(ProgramTest, Assert_NullGlobalVariable) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.AST().AddGlobalVariable(nullptr);
@@ -74,7 +74,7 @@ TEST_F(ProgramTest, Assert_NullGlobalVariable) {
 }
 
 TEST_F(ProgramTest, Assert_NullTypeDecl) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.AST().AddTypeDecl(nullptr);
@@ -83,7 +83,7 @@ TEST_F(ProgramTest, Assert_NullTypeDecl) {
 }
 
 TEST_F(ProgramTest, Assert_Null_Function) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.AST().AddFunction(nullptr);

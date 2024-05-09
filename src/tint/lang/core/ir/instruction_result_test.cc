@@ -37,7 +37,7 @@ namespace {
 using IR_InstructionResultTest = IRTestHelper;
 
 TEST_F(IR_InstructionResultTest, Destroy_HasInstruction) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

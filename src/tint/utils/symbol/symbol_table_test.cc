@@ -50,7 +50,7 @@ TEST_F(SymbolTableTest, DeduplicatesNames) {
 }
 
 TEST_F(SymbolTableTest, AssertsForBlankString) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             auto generation_id = GenerationID::New();
             SymbolTable s{generation_id};

@@ -88,7 +88,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 
 TEST_F(SwitchStatementTest, Assert_Null_Condition) {
     using CaseStatementList = tint::Vector<const CaseStatement*, 2>;
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             CaseStatementList cases;
@@ -101,7 +101,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
 
 TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
     using CaseStatementList = tint::Vector<const CaseStatement*, 2>;
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<SwitchStatement>(b.Expr(true), CaseStatementList{nullptr}, tint::Empty,
@@ -111,7 +111,7 @@ TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
 }
 
 TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -129,7 +129,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_Condition) {
 }
 
 TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_CaseStatement) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

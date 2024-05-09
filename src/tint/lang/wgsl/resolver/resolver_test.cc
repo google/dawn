@@ -2087,7 +2087,7 @@ TEST_F(ResolverTest, ASTNodesAreReached) {
 }
 
 TEST_F(ResolverTest, ASTNodeNotReached) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Ident("ident");
@@ -2098,7 +2098,7 @@ TEST_F(ResolverTest, ASTNodeNotReached) {
 }
 
 TEST_F(ResolverTest, ASTNodeReachedTwice) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             auto* expr = b.Expr(1_i);

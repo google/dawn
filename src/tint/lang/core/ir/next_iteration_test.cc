@@ -35,7 +35,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_NextIterationTest = IRTestHelper;
 
 TEST_F(IR_NextIterationTest, Fail_NullLoop) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

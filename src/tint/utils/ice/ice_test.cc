@@ -33,7 +33,7 @@ namespace tint {
 namespace {
 
 TEST(ICETest_AssertTrue_Test, Unreachable) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             if ((true)) {
                 TINT_UNREACHABLE();
@@ -47,7 +47,7 @@ TEST(ICETest_AssertTrue_Test, AssertTrue) {
 }
 
 TEST(ICETest_AssertTrue_Test, AssertFalse) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             if ((true)) {
                 TINT_ASSERT(false);

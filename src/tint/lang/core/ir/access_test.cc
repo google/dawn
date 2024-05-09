@@ -62,7 +62,7 @@ TEST_F(IR_AccessTest, Result) {
 }
 
 TEST_F(IR_AccessTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

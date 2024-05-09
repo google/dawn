@@ -37,7 +37,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, IdentifierExpression_GlobalConst) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder pb;
 

@@ -165,7 +165,7 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
 }
 
 TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder pb;
             pb.Override("width", pb.ty.i32(), pb.Call<i32>(2_i), pb.Id(7_u));
@@ -185,7 +185,7 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_OverridableCo
 }
 
 TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder pb;
 

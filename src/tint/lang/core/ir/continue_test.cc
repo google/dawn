@@ -58,7 +58,7 @@ TEST_F(IR_ContinueTest, Results) {
 }
 
 TEST_F(IR_ContinueTest, Fail_NullLoop) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

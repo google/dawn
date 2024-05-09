@@ -93,7 +93,7 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
 }
 
 TEST_F(LoopStatementTest, Assert_Null_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<LoopStatement>(nullptr, nullptr, tint::Empty);
@@ -102,7 +102,7 @@ TEST_F(LoopStatementTest, Assert_Null_Body) {
 }
 
 TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -112,7 +112,7 @@ TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Body) {
 }
 
 TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Continuing) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

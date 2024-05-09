@@ -60,7 +60,7 @@ TEST_F(IR_BreakIfTest, Results) {
 }
 
 TEST_F(IR_BreakIfTest, Fail_NullLoop) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

@@ -62,7 +62,7 @@ TEST_F(BinaryExpressionTest, IsBinary) {
 }
 
 TEST_F(BinaryExpressionTest, Assert_Null_LHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<BinaryExpression>(core::BinaryOp::kEqual, nullptr, b.Expr("rhs"));
@@ -71,7 +71,7 @@ TEST_F(BinaryExpressionTest, Assert_Null_LHS) {
 }
 
 TEST_F(BinaryExpressionTest, Assert_Null_RHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<BinaryExpression>(core::BinaryOp::kEqual, b.Expr("lhs"), nullptr);
@@ -80,7 +80,7 @@ TEST_F(BinaryExpressionTest, Assert_Null_RHS) {
 }
 
 TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_LHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -90,7 +90,7 @@ TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_LHS) {
 }
 
 TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_RHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

@@ -112,11 +112,11 @@ TEST_F(IR_ConstantTest, bool) {
 }
 
 TEST_F(IR_ConstantTest, Fail_NullValue) {
-    EXPECT_DEATH({ Constant c(nullptr); }, "");
+    EXPECT_DEATH_IF_SUPPORTED({ Constant c(nullptr); }, "");
 }
 
 TEST_F(IR_ConstantTest, Fail_Builder_NullValue) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

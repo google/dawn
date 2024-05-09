@@ -76,7 +76,7 @@ TEST_F(VariableTest, CreationEmpty) {
 }
 
 TEST_F(VariableTest, Assert_Null_Name) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Var(static_cast<Identifier*>(nullptr), b.ty.i32());
@@ -85,7 +85,7 @@ TEST_F(VariableTest, Assert_Null_Name) {
 }
 
 TEST_F(VariableTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -95,7 +95,7 @@ TEST_F(VariableTest, Assert_DifferentGenerationID_Symbol) {
 }
 
 TEST_F(VariableTest, Assert_DifferentGenerationID_Initializer) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

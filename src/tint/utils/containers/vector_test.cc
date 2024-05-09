@@ -2110,7 +2110,7 @@ TEST(TintVectorTest, ostream) {
 }
 
 TEST(TintVectorTest, AssertOOBs) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Vector vec{1};
             [[maybe_unused]] int i = vec[1];
@@ -2121,7 +2121,7 @@ TEST(TintVectorTest, AssertOOBs) {
 #if TINT_VECTOR_MUTATION_CHECKS_ENABLED
 TEST(TintVectorTest, AssertPushWhileIterating) {
     using V = Vector<int, 4>;
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             V vec;
             vec.Push(1);
@@ -2136,7 +2136,7 @@ TEST(TintVectorTest, AssertPushWhileIterating) {
 
 TEST(TintVectorTest, AssertPopWhileIterating) {
     using V = Vector<int, 4>;
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             V vec;
             vec.Push(1);
@@ -2151,7 +2151,7 @@ TEST(TintVectorTest, AssertPopWhileIterating) {
 
 TEST(TintVectorTest, AssertClearWhileIterating) {
     using V = Vector<int, 4>;
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             V vec;
             vec.Push(1);
@@ -2446,7 +2446,7 @@ TEST(TintVectorRefTest, ostream) {
 }
 
 TEST(TintVectorRefTest, AssertOOBs) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Vector vec{1};
             const VectorRef<int> vec_ref(vec);

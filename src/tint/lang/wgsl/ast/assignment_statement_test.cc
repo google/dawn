@@ -64,7 +64,7 @@ TEST_F(AssignmentStatementTest, IsAssign) {
 }
 
 TEST_F(AssignmentStatementTest, Assert_Null_LHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<AssignmentStatement>(nullptr, b.Expr(1_i));
@@ -73,7 +73,7 @@ TEST_F(AssignmentStatementTest, Assert_Null_LHS) {
 }
 
 TEST_F(AssignmentStatementTest, Assert_Null_RHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.create<AssignmentStatement>(b.Expr(1_i), nullptr);
@@ -82,7 +82,7 @@ TEST_F(AssignmentStatementTest, Assert_Null_RHS) {
 }
 
 TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -92,7 +92,7 @@ TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
 }
 
 TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_RHS) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

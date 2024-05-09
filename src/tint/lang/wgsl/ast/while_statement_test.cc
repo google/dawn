@@ -65,7 +65,7 @@ TEST_F(WhileStatementTest, Creation_WithAttributes) {
 }
 
 TEST_F(WhileStatementTest, Assert_Null_Cond) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             auto* body = b.Block();
@@ -75,7 +75,7 @@ TEST_F(WhileStatementTest, Assert_Null_Cond) {
 }
 
 TEST_F(WhileStatementTest, Assert_Null_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             auto* cond =
@@ -86,7 +86,7 @@ TEST_F(WhileStatementTest, Assert_Null_Body) {
 }
 
 TEST_F(WhileStatementTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -96,7 +96,7 @@ TEST_F(WhileStatementTest, Assert_DifferentGenerationID_Condition) {
 }
 
 TEST_F(WhileStatementTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

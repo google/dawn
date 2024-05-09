@@ -59,7 +59,7 @@ TEST_F(ConstAssertTest, IsConstAssert) {
 }
 
 TEST_F(ConstAssertTest, Assert_Null_Condition) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.ConstAssert(nullptr);
@@ -68,7 +68,7 @@ TEST_F(ConstAssertTest, Assert_Null_Condition) {
 }
 
 TEST_F(ConstAssertTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

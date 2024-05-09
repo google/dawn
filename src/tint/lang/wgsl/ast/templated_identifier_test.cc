@@ -63,7 +63,7 @@ TEST_F(TemplatedIdentifierTest, Creation_WithSource) {
 }
 
 TEST_F(TemplatedIdentifierTest, Assert_InvalidSymbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
             b.Expr("");
@@ -72,7 +72,7 @@ TEST_F(TemplatedIdentifierTest, Assert_InvalidSymbol) {
 }
 
 TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_Symbol) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -82,7 +82,7 @@ TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_Symbol) {
 }
 
 TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_TemplateArg) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;

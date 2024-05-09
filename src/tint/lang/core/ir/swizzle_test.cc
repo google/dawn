@@ -54,7 +54,7 @@ TEST_F(IR_SwizzleTest, Results) {
 }
 
 TEST_F(IR_SwizzleTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -65,7 +65,7 @@ TEST_F(IR_SwizzleTest, Fail_NullType) {
 }
 
 TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -76,7 +76,7 @@ TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
 }
 
 TEST_F(IR_SwizzleTest, Fail_TooManyIndices) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
@@ -87,7 +87,7 @@ TEST_F(IR_SwizzleTest, Fail_TooManyIndices) {
 }
 
 TEST_F(IR_SwizzleTest, Fail_IndexOutOfRange) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

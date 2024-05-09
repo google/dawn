@@ -41,7 +41,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_VarTest = IRTestHelper;
 
 TEST_F(IR_VarTest, Fail_NullType) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};

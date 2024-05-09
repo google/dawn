@@ -52,7 +52,7 @@ TEST_F(ModuleTest, LookupFunctionMissing) {
 }
 
 TEST_F(ModuleTest, Assert_Null_GlobalVariable) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder builder;
             builder.AST().AddGlobalVariable(nullptr);
@@ -61,7 +61,7 @@ TEST_F(ModuleTest, Assert_Null_GlobalVariable) {
 }
 
 TEST_F(ModuleTest, Assert_Null_TypeDecl) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder builder;
             builder.AST().AddTypeDecl(nullptr);
@@ -70,7 +70,7 @@ TEST_F(ModuleTest, Assert_Null_TypeDecl) {
 }
 
 TEST_F(ModuleTest, Assert_DifferentGenerationID_Function) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -81,7 +81,7 @@ TEST_F(ModuleTest, Assert_DifferentGenerationID_Function) {
 }
 
 TEST_F(ModuleTest, Assert_DifferentGenerationID_GlobalVariable) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
@@ -91,7 +91,7 @@ TEST_F(ModuleTest, Assert_DifferentGenerationID_GlobalVariable) {
 }
 
 TEST_F(ModuleTest, Assert_Null_Function) {
-    EXPECT_DEATH(
+    EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder builder;
             builder.AST().AddFunction(nullptr);
