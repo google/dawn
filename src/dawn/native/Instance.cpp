@@ -634,7 +634,7 @@ Surface* InstanceBase::APICreateSurface(const SurfaceDescriptor* descriptor) {
     return ReturnToAPI(AcquireRef(new Surface(this, unpacked)));
 }
 
-const std::unordered_set<tint::wgsl::LanguageFeature>&
+const absl::flat_hash_set<tint::wgsl::LanguageFeature>&
 InstanceBase::GetAllowedWGSLLanguageFeatures() const {
     return mTintLanguageFeatures;
 }

@@ -1765,7 +1765,8 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     // mAdapter is not set for mock test devices.
     // TODO(crbug.com/dawn/1702): using a mock adapter and instance could avoid the null checking.
     if (mAdapter != nullptr) {
-        mWGSLAllowedFeatures.features = GetInstance()->GetAllowedWGSLLanguageFeatures();
+        const auto& allowedFeatures = GetInstance()->GetAllowedWGSLLanguageFeatures();
+        mWGSLAllowedFeatures.features = {allowedFeatures.begin(), allowedFeatures.end()};
     }
 }
 
