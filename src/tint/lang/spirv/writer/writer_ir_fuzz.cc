@@ -28,6 +28,7 @@
 #include "src/tint/lang/spirv/writer/writer.h"
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 
@@ -43,8 +44,10 @@ void IRFuzzer(core::ir::Module& module, Options options) {
     auto& spirv = output->spirv;
     if (auto res = validate::Validate(Slice(spirv.data(), spirv.size()), SPV_ENV_VULKAN_1_1);
         res != Success) {
-        TINT_ICE() << "Output of SPIR-V writer failed to validate with SPIR-V Tools\n"
-                   << res.Failure();
+        TINT_ICE() << "output of SPIR-V writer failed to validate with SPIR-V Tools\n"
+                   << res.Failure() << "\n\n"
+                   << "IR:\n"
+                   << core::ir::Disassemble(module).Plain();
     }
 }
 
