@@ -124,23 +124,19 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
             exit(1);
         }
 
-        // Convert the IR module to a WGSL string.
+        // Convert the IR module to a Program.
         tint::wgsl::writer::ProgramOptions writer_options;
         writer_options.allow_non_uniform_derivatives =
             opts.spirv_reader_options.allow_non_uniform_derivatives;
         writer_options.allowed_features = opts.spirv_reader_options.allowed_features;
-        auto wgsl_result = tint::wgsl::writer::WgslFromIR(result.Get(), writer_options);
-        if (wgsl_result != Success) {
-            std::cerr << "Failed to convert IR to WGSL:\n\n"
-                      << wgsl_result.Failure().reason << "\n";
+        auto prog_result = tint::wgsl::writer::ProgramFromIR(result.Get(), writer_options);
+        if (prog_result != Success) {
+            std::cerr << "Failed to convert IR to Program:\n\n"
+                      << prog_result.Failure().reason << "\n";
             exit(1);
         }
 
-        // Parse the WGSL string to produce a WGSL AST.
-        tint::wgsl::reader::Options reader_options;
-        reader_options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
-        auto file = std::make_unique<tint::Source::File>(opts.filename, wgsl_result->wgsl);
-        return tint::wgsl::reader::Parse(file.get(), reader_options);
+        return prog_result.Move();
 #else
         std::cerr << "Tint not built with the WGSL writer enabled" << std::endl;
         exit(1);

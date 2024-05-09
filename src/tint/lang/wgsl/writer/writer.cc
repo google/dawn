@@ -68,6 +68,14 @@ Result<Output> Generate(const Program& program, const Options& options) {
 }
 
 Result<Output> WgslFromIR(core::ir::Module& module, const ProgramOptions& options) {
+    auto res = ProgramFromIR(module, options);
+    if (res != Success) {
+        return res.Failure();
+    }
+    return Generate(res.Move(), Options{});
+}
+
+Result<Program> ProgramFromIR(core::ir::Module& module, const ProgramOptions& options) {
     // core-dialect -> WGSL-dialect
     if (auto res = Raise(module); res != Success) {
         return res.Failure();
@@ -78,7 +86,7 @@ Result<Output> WgslFromIR(core::ir::Module& module, const ProgramOptions& option
         return Failure{program.Diagnostics()};
     }
 
-    return Generate(program, Options{});
+    return program;
 }
 
 }  // namespace tint::wgsl::writer
