@@ -185,6 +185,11 @@ class List {
         return Add(std::move(error));
     }
 
+    /// Ensures that the diagnostic list can fit an additional @p count diagnostics without
+    /// resizing. This is useful for ensuring that a reference returned by the AddX() methods is not
+    /// invalidated after another Add().
+    void ReserveAdditional(size_t count) { entries_.Reserve(entries_.Length() + count); }
+
     /// @returns true iff the diagnostic list contains errors diagnostics (or of
     /// higher severity).
     bool ContainsErrors() const { return error_count_ > 0; }
