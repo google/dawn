@@ -352,8 +352,8 @@ $B1: {  # root
     %6:texture_2d<f32> = load %texture_plane0
     %7:texture_2d<f32> = load %texture_plane1
     %8:tint_ExternalTextureParams = load %texture_params
-    %9:vec4<f32> = call %tint_TextureLoadExternal, %6, %7, %8, %coords
-    ret %9
+    %result:vec4<f32> = call %tint_TextureLoadExternal, %6, %7, %8, %coords
+    ret %result
   }
 }
 %tint_TextureLoadExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
@@ -514,8 +514,8 @@ $B1: {  # root
     %7:texture_2d<f32> = load %texture_plane1
     %8:tint_ExternalTextureParams = load %texture_params
     %9:vec2<u32> = convert %coords
-    %10:vec4<f32> = call %tint_TextureLoadExternal, %6, %7, %8, %9
-    ret %10
+    %result:vec4<f32> = call %tint_TextureLoadExternal, %6, %7, %8, %9
+    ret %result
   }
 }
 %tint_TextureLoadExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %coords_1:vec2<u32>):vec4<f32> {  # %coords_1: 'coords'
@@ -677,8 +677,8 @@ $B1: {  # root
     %7:texture_2d<f32> = load %texture_plane0
     %8:texture_2d<f32> = load %texture_plane1
     %9:tint_ExternalTextureParams = load %texture_params
-    %10:vec4<f32> = call %tint_TextureSampleExternal, %7, %8, %9, %sampler, %coords
-    ret %10
+    %result:vec4<f32> = call %tint_TextureSampleExternal, %7, %8, %9, %sampler, %coords
+    ret %result
   }
 }
 %tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
@@ -856,8 +856,8 @@ $B1: {  # root
 
 %foo = func(%texture_plane0_1:texture_2d<f32>, %texture_plane1_1:texture_2d<f32>, %texture_params_1:tint_ExternalTextureParams, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_plane0_1: 'texture_plane0', %texture_plane1_1: 'texture_plane1', %texture_params_1: 'texture_params'
   $B2: {
-    %10:vec4<f32> = call %tint_TextureSampleExternal, %texture_plane0_1, %texture_plane1_1, %texture_params_1, %sampler, %coords
-    ret %10
+    %result:vec4<f32> = call %tint_TextureSampleExternal, %texture_plane0_1, %texture_plane1_1, %texture_params_1, %sampler, %coords
+    ret %result
   }
 }
 %bar = func(%sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
@@ -865,8 +865,8 @@ $B1: {  # root
     %15:texture_2d<f32> = load %texture_plane0
     %16:texture_2d<f32> = load %texture_plane1
     %17:tint_ExternalTextureParams = load %texture_params
-    %result:vec4<f32> = call %foo, %15, %16, %17, %sampler_1, %coords_1
-    ret %result
+    %result_1:vec4<f32> = call %foo, %15, %16, %17, %sampler_1, %coords_1  # %result_1: 'result'
+    ret %result_1
   }
 }
 %tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_2:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %sampler_2: 'sampler', %coords_2: 'coords'
@@ -1062,8 +1062,8 @@ $B1: {  # root
 
 %foo = func(%texture_plane0_1:texture_2d<f32>, %texture_plane1_1:texture_2d<f32>, %texture_params_1:tint_ExternalTextureParams, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_plane0_1: 'texture_plane0', %texture_plane1_1: 'texture_plane1', %texture_params_1: 'texture_params'
   $B2: {
-    %10:vec4<f32> = call %tint_TextureSampleExternal, %texture_plane0_1, %texture_plane1_1, %texture_params_1, %sampler, %coords
-    ret %10
+    %result:vec4<f32> = call %tint_TextureSampleExternal, %texture_plane0_1, %texture_plane1_1, %texture_params_1, %sampler, %coords
+    ret %result
   }
 }
 %bar = func(%sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'

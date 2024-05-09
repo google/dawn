@@ -147,71 +147,60 @@ struct State {
 
         // Polyfill the builtin call instructions that we found.
         for (auto* builtin : worklist) {
-            ir::Value* replacement = nullptr;
             switch (builtin->Func()) {
                 case core::BuiltinFn::kClamp:
-                    replacement = ClampInt(builtin);
+                    ClampInt(builtin);
                     break;
                 case core::BuiltinFn::kCountLeadingZeros:
-                    replacement = CountLeadingZeros(builtin);
+                    CountLeadingZeros(builtin);
                     break;
                 case core::BuiltinFn::kCountTrailingZeros:
-                    replacement = CountTrailingZeros(builtin);
+                    CountTrailingZeros(builtin);
                     break;
                 case core::BuiltinFn::kExtractBits:
-                    replacement = ExtractBits(builtin);
+                    ExtractBits(builtin);
                     break;
                 case core::BuiltinFn::kFirstLeadingBit:
-                    replacement = FirstLeadingBit(builtin);
+                    FirstLeadingBit(builtin);
                     break;
                 case core::BuiltinFn::kFirstTrailingBit:
-                    replacement = FirstTrailingBit(builtin);
+                    FirstTrailingBit(builtin);
                     break;
                 case core::BuiltinFn::kInsertBits:
-                    replacement = InsertBits(builtin);
+                    InsertBits(builtin);
                     break;
                 case core::BuiltinFn::kSaturate:
-                    replacement = Saturate(builtin);
+                    Saturate(builtin);
                     break;
                 case core::BuiltinFn::kTextureSampleBaseClampToEdge:
-                    replacement = TextureSampleBaseClampToEdge_2d_f32(builtin);
+                    TextureSampleBaseClampToEdge_2d_f32(builtin);
                     break;
                 case core::BuiltinFn::kDot4I8Packed:
-                    replacement = Dot4I8Packed(builtin);
+                    Dot4I8Packed(builtin);
                     break;
                 case core::BuiltinFn::kDot4U8Packed:
-                    replacement = Dot4U8Packed(builtin);
+                    Dot4U8Packed(builtin);
                     break;
                 case core::BuiltinFn::kPack4XI8:
-                    replacement = Pack4xI8(builtin);
+                    Pack4xI8(builtin);
                     break;
                 case core::BuiltinFn::kPack4XU8:
-                    replacement = Pack4xU8(builtin);
+                    Pack4xU8(builtin);
                     break;
                 case core::BuiltinFn::kPack4XI8Clamp:
-                    replacement = Pack4xI8Clamp(builtin);
+                    Pack4xI8Clamp(builtin);
                     break;
                 case core::BuiltinFn::kPack4XU8Clamp:
-                    replacement = Pack4xU8Clamp(builtin);
+                    Pack4xU8Clamp(builtin);
                     break;
                 case core::BuiltinFn::kUnpack4XI8:
-                    replacement = Unpack4xI8(builtin);
+                    Unpack4xI8(builtin);
                     break;
                 case core::BuiltinFn::kUnpack4XU8:
-                    replacement = Unpack4xU8(builtin);
+                    Unpack4xU8(builtin);
                     break;
                 default:
                     break;
-            }
-            TINT_ASSERT(replacement);
-
-            if (replacement != builtin->Result(0)) {
-                // Replace the old builtin call result with the new value.
-                if (auto name = ir.NameOf(builtin->Result(0))) {
-                    ir.SetName(replacement, name);
-                }
-                builtin->Result(0)->ReplaceAllUsesWith(replacement);
-                builtin->Destroy();
             }
         }
     }
@@ -243,26 +232,22 @@ struct State {
 
     /// Polyfill a `clamp()` builtin call for integers.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* ClampInt(ir::CoreBuiltinCall* call) {
+    void ClampInt(ir::CoreBuiltinCall* call) {
         auto* type = call->Result(0)->Type();
         auto* e = call->Args()[0];
         auto* low = call->Args()[1];
         auto* high = call->Args()[2];
 
-        Value* result = nullptr;
         b.InsertBefore(call, [&] {
             auto* max = b.Call(type, core::BuiltinFn::kMax, e, low);
-            auto* min = b.Call(type, core::BuiltinFn::kMin, max, high);
-            result = min->Result(0);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kMin, max, high);
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `countLeadingZeros()` builtin call.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* CountLeadingZeros(ir::CoreBuiltinCall* call) {
+    void CountLeadingZeros(ir::CoreBuiltinCall* call) {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
         auto* uint_ty = MatchWidth(ty.u32(), result_ty);
@@ -271,7 +256,6 @@ struct State {
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return MatchWidth(b.Constant(u32(u)), result_ty); };
 
-        Value* result = nullptr;
         b.InsertBefore(call, [&] {
             // %x = %input;
             // if (%x is signed) {
@@ -309,23 +293,23 @@ struct State {
                               b.LessThanEqual(bool_ty, x, V(0x7fffffff)));
             auto* b0 =
                 b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(bool_ty, x, V(0)));
-            result = b.Add(uint_ty,
-                           b.Or(uint_ty, b16,
-                                b.Or(uint_ty, b8,
-                                     b.Or(uint_ty, b4, b.Or(uint_ty, b2, b.Or(uint_ty, b1, b0))))),
-                           b0)
-                         ->Result(0);
+            Instruction* result = b.Add(
+                uint_ty,
+                b.Or(
+                    uint_ty, b16,
+                    b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b.Or(uint_ty, b1, b0))))),
+                b0);
             if (result_ty->is_signed_integer_scalar_or_vector()) {
-                result = b.Bitcast(result_ty, result)->Result(0);
+                result = b.Bitcast(result_ty, result);
             }
+            result->SetResults(Vector{call->DetachResult()});
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `countTrailingZeros()` builtin call.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* CountTrailingZeros(ir::CoreBuiltinCall* call) {
+    void CountTrailingZeros(ir::CoreBuiltinCall* call) {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
         auto* uint_ty = MatchWidth(ty.u32(), result_ty);
@@ -334,7 +318,6 @@ struct State {
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return MatchWidth(b.Constant(u32(u)), result_ty); };
 
-        Value* result = nullptr;
         b.InsertBefore(call, [&] {
             // %x = %input;
             // if (%x is signed) {
@@ -372,22 +355,21 @@ struct State {
                               b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000001)), V(0)));
             auto* b0 =
                 b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(bool_ty, x, V(0)));
-            result = b.Add(uint_ty,
-                           b.Or(uint_ty, b16,
-                                b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1)))),
-                           b0)
-                         ->Result(0);
+            Instruction* result = b.Add(
+                uint_ty,
+                b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1)))),
+                b0);
             if (result_ty->is_signed_integer_scalar_or_vector()) {
-                result = b.Bitcast(result_ty, result)->Result(0);
+                result = b.Bitcast(result_ty, result);
             }
+            result->SetResults(Vector{call->DetachResult()});
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill an `extractBits()` builtin call.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* ExtractBits(ir::CoreBuiltinCall* call) {
+    void ExtractBits(ir::CoreBuiltinCall* call) {
         auto* offset = call->Args()[1];
         auto* count = call->Args()[2];
 
@@ -406,7 +388,7 @@ struct State {
                     call->SetOperand(ir::CoreBuiltinCall::kArgsOperandOffset + 1, o->Result(0));
                     call->SetOperand(ir::CoreBuiltinCall::kArgsOperandOffset + 2, c->Result(0));
                 });
-                return call->Result(0);
+                break;
             }
             default:
                 TINT_UNIMPLEMENTED() << "extractBits polyfill level";
@@ -415,8 +397,7 @@ struct State {
 
     /// Polyfill a `firstLeadingBit()` builtin call.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* FirstLeadingBit(ir::CoreBuiltinCall* call) {
+    void FirstLeadingBit(ir::CoreBuiltinCall* call) {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
         auto* uint_ty = MatchWidth(ty.u32(), result_ty);
@@ -425,7 +406,6 @@ struct State {
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return MatchWidth(b.Constant(u32(u)), result_ty); };
 
-        Value* result = nullptr;
         b.InsertBefore(call, [&] {
             // %x = %input;
             // if (%x is signed) {
@@ -465,22 +445,21 @@ struct State {
             x = b.ShiftRight(uint_ty, x, b2)->Result(0);
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(1), V(0),
                               b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000002)), V(0)));
-            result = b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))))
-                         ->Result(0);
+            Instruction* result =
+                b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))));
             result = b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff),
-                            b.Equal(bool_ty, x, V(0)))
-                         ->Result(0);
+                            b.Equal(bool_ty, x, V(0)));
             if (result_ty->is_signed_integer_scalar_or_vector()) {
-                result = b.Bitcast(result_ty, result)->Result(0);
+                result = b.Bitcast(result_ty, result);
             }
+            result->SetResults(Vector{call->DetachResult()});
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `firstTrailingBit()` builtin call.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* FirstTrailingBit(ir::CoreBuiltinCall* call) {
+    void FirstTrailingBit(ir::CoreBuiltinCall* call) {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
         auto* uint_ty = MatchWidth(ty.u32(), result_ty);
@@ -489,7 +468,6 @@ struct State {
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return MatchWidth(b.Constant(u32(u)), result_ty); };
 
-        Value* result = nullptr;
         b.InsertBefore(call, [&] {
             // %x = %input;
             // if (%x is signed) {
@@ -525,22 +503,21 @@ struct State {
             x = b.ShiftRight(uint_ty, x, b2)->Result(0);
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000001)), V(0)));
-            result = b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))))
-                         ->Result(0);
+            Instruction* result =
+                b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))));
             result = b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff),
-                            b.Equal(bool_ty, x, V(0)))
-                         ->Result(0);
+                            b.Equal(bool_ty, x, V(0)));
             if (result_ty->is_signed_integer_scalar_or_vector()) {
-                result = b.Bitcast(result_ty, result)->Result(0);
+                result = b.Bitcast(result_ty, result);
             }
+            result->SetResults(Vector{call->DetachResult()});
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill an `insertBits()` builtin call.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* InsertBits(ir::CoreBuiltinCall* call) {
+    void InsertBits(ir::CoreBuiltinCall* call) {
         auto* offset = call->Args()[2];
         auto* count = call->Args()[3];
 
@@ -559,7 +536,7 @@ struct State {
                     call->SetOperand(ir::CoreBuiltinCall::kArgsOperandOffset + 2, o->Result(0));
                     call->SetOperand(ir::CoreBuiltinCall::kArgsOperandOffset + 3, c->Result(0));
                 });
-                return call->Result(0);
+                break;
             }
             default:
                 TINT_UNIMPLEMENTED() << "insertBits polyfill level";
@@ -568,8 +545,7 @@ struct State {
 
     /// Polyfill a `saturate()` builtin call.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Saturate(ir::CoreBuiltinCall* call) {
+    void Saturate(ir::CoreBuiltinCall* call) {
         // Replace `saturate(x)` with `clamp(x, 0., 1.)`.
         auto* type = call->Result(0)->Type();
         ir::Constant* zero = nullptr;
@@ -581,21 +557,20 @@ struct State {
             zero = MatchWidth(b.Constant(0_h), type);
             one = MatchWidth(b.Constant(1_h), type);
         }
-        auto* clamp = b.Call(type, core::BuiltinFn::kClamp, Vector{call->Args()[0], zero, one});
+        auto* clamp = b.CallWithResult(call->DetachResult(), core::BuiltinFn::kClamp,
+                                       Vector{call->Args()[0], zero, one});
         clamp->InsertBefore(call);
-        return clamp->Result(0);
+        call->Destroy();
     }
 
     /// Polyfill a `textureSampleBaseClampToEdge()` builtin call for 2D F32 textures.
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* TextureSampleBaseClampToEdge_2d_f32(ir::CoreBuiltinCall* call) {
+    void TextureSampleBaseClampToEdge_2d_f32(ir::CoreBuiltinCall* call) {
         // Replace `textureSampleBaseClampToEdge(%texture, %sample, %coords)` with:
         //   %dims       = vec2f(textureDimensions(%texture));
         //   %half_texel = vec2f(0.5) / dims;
         //   %clamped    = clamp(%coord, %half_texel, 1.0 - %half_texel);
         //   %result     = textureSampleLevel(%texture, %sampler, %clamped, 0);
-        ir::Value* result = nullptr;
         auto* texture = call->Args()[0];
         auto* sampler = call->Args()[1];
         auto* coords = call->Args()[2];
@@ -607,17 +582,15 @@ struct State {
             auto* one_minus_half_texel = b.Subtract(vec2f, b.Splat(vec2f, 1_f, 2), half_texel);
             auto* clamped =
                 b.Call(vec2f, core::BuiltinFn::kClamp, coords, half_texel, one_minus_half_texel);
-            result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSampleLevel, texture, sampler,
-                            clamped, 0_f)
-                         ->Result(0);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kTextureSampleLevel, texture,
+                             sampler, clamped, 0_f);
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `dot4I8Packed()` builtin call
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Dot4I8Packed(ir::CoreBuiltinCall* call) {
+    void Dot4I8Packed(ir::CoreBuiltinCall* call) {
         // Replace `dot4I8Packed(%x,%y)` with:
         //   %unpacked_x = unpack4xI8(%x);
         //   %unpacked_y = unpack4xI8(%y);
@@ -626,17 +599,15 @@ struct State {
         auto* y = call->Args()[1];
         auto* unpacked_x = Unpack4xI8OnValue(call, x);
         auto* unpacked_y = Unpack4xI8OnValue(call, y);
-        ir::Value* result = nullptr;
         b.InsertBefore(call, [&] {
-            result = b.Call(ty.i32(), core::BuiltinFn::kDot, unpacked_x, unpacked_y)->Result(0);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, unpacked_x, unpacked_y);
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `dot4U8Packed()` builtin call
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Dot4U8Packed(ir::CoreBuiltinCall* call) {
+    void Dot4U8Packed(ir::CoreBuiltinCall* call) {
         // Replace `dot4U8Packed(%x,%y)` with:
         //   %unpacked_x = unpack4xU8(%x);
         //   %unpacked_y = unpack4xU8(%y);
@@ -645,23 +616,20 @@ struct State {
         auto* y = call->Args()[1];
         auto* unpacked_x = Unpack4xU8OnValue(call, x);
         auto* unpacked_y = Unpack4xU8OnValue(call, y);
-        ir::Value* result = nullptr;
         b.InsertBefore(call, [&] {
-            result = b.Call(ty.u32(), core::BuiltinFn::kDot, unpacked_x, unpacked_y)->Result(0);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, unpacked_x, unpacked_y);
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `pack4xI8()` builtin call
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Pack4xI8(ir::CoreBuiltinCall* call) {
+    void Pack4xI8(ir::CoreBuiltinCall* call) {
         // Replace `pack4xI8(%x)` with:
         //   %n      = vec4u(0, 8, 16, 24);
         //   %x_u32  = bitcast<vec4u>(%x)
         //   %x_u8   = (%x_u32 & vec4u(0xff)) << n;
         //   %result = dot(%x_u8, vec4u(1));
-        ir::Value* result = nullptr;
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
             auto* vec4u = ty.vec4<u32>();
@@ -671,22 +639,19 @@ struct State {
             auto* x_u32 = b.Bitcast(vec4u, x);
             auto* x_u8 = b.ShiftLeft(
                 vec4u, b.And(vec4u, x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
-            result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_u8,
-                            b.Construct(vec4u, (b.Constant(u32(1)))))
-                         ->Result(0);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
+                             b.Construct(vec4u, (b.Constant(u32(1)))));
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `pack4xU8()` builtin call
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Pack4xU8(ir::CoreBuiltinCall* call) {
+    void Pack4xU8(ir::CoreBuiltinCall* call) {
         // Replace `pack4xU8(%x)` with:
         //   %n      = vec4u(0, 8, 16, 24);
         //   %x_i8   = (%x & vec4u(0xff)) << %n;
         //   %result = dot(%x_i8, vec4u(1));
-        ir::Value* result = nullptr;
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
             auto* vec4u = ty.vec4<u32>();
@@ -695,17 +660,15 @@ struct State {
                                   b.Constant(u32(16)), b.Constant(u32(24)));
             auto* x_u8 =
                 b.ShiftLeft(vec4u, b.And(vec4u, x, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
-            result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_u8,
-                            b.Construct(vec4u, (b.Constant(u32(1)))))
-                         ->Result(0);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
+                             b.Construct(vec4u, (b.Constant(u32(1)))));
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `pack4xI8Clamp()` builtin call
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Pack4xI8Clamp(ir::CoreBuiltinCall* call) {
+    void Pack4xI8Clamp(ir::CoreBuiltinCall* call) {
         // Replace `pack4xI8Clamp(%x)` with:
         //   %n           = vec4u(0, 8, 16, 24);
         //   %min_i8_vec4 = vec4i(-128);
@@ -714,7 +677,6 @@ struct State {
         //   %x_u32       = bitcast<vec4u>(%x_clamp);
         //   %x_u8        = (%x_u32 & vec4u(0xff)) << n;
         //   %result      = dot(%x_u8, vec4u(1));
-        ir::Value* result = nullptr;
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
             auto* vec4i = ty.vec4<i32>();
@@ -728,17 +690,15 @@ struct State {
             auto* x_u32 = b.Bitcast(vec4u, x_clamp);
             auto* x_u8 = b.ShiftLeft(
                 vec4u, b.And(vec4u, x_u32, b.Construct(vec4u, b.Constant(u32(0xff)))), n);
-            result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_u8,
-                            b.Construct(vec4u, (b.Constant(u32(1)))))
-                         ->Result(0);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
+                             b.Construct(vec4u, (b.Constant(u32(1)))));
         });
-        return result;
+        call->Destroy();
     }
 
     /// Polyfill a `pack4xU8Clamp()` builtin call
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Pack4xU8Clamp(ir::CoreBuiltinCall* call) {
+    void Pack4xU8Clamp(ir::CoreBuiltinCall* call) {
         // Replace `pack4xU8Clamp(%x)` with:
         //   %n       = vec4u(0, 8, 16, 24);
         //   %min_u8_vec4 = vec4u(0);
@@ -746,7 +706,6 @@ struct State {
         //   %x_clamp = clamp(%x, vec4u(0), vec4u(255));
         //   %x_u8    = %x_clamp << n;
         //   %result  = dot(%x_u8, vec4u(1));
-        ir::Value* result = nullptr;
         auto* x = call->Args()[0];
         b.InsertBefore(call, [&] {
             auto* vec4u = ty.vec4<u32>();
@@ -757,23 +716,22 @@ struct State {
             auto* max_u8_vec4 = b.Construct(vec4u, b.Constant(u32(255)));
             auto* x_clamp = b.Call(vec4u, core::BuiltinFn::kClamp, x, min_u8_vec4, max_u8_vec4);
             auto* x_u8 = b.ShiftLeft(vec4u, x_clamp, n);
-            result = b.Call(ty.u32(), core::BuiltinFn::kDot, x_u8,
-                            b.Construct(vec4u, (b.Constant(u32(1)))))
-                         ->Result(0);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kDot, x_u8,
+                             b.Construct(vec4u, (b.Constant(u32(1)))));
         });
-        return result;
+        call->Destroy();
     }
 
     /// Emit code for `unpack4xI8` on u32 value `x`, before the given call.
     /// @param call the instruction that should follow the emitted code
     /// @param x the u32 value to be unpacked
-    ir::Value* Unpack4xI8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
+    ir::Instruction* Unpack4xI8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
         // Replace `unpack4xI8(%x)` with:
         //   %n       = vec4u(24, 16, 8, 0);
         //   %x_splat = vec4u(%x); // splat the scalar to a vector
         //   %x_vec4i = bitcast<vec4i>(%x_splat << n);
         //   %result  = %x_vec4i >> vec4u(24);
-        ir::Value* result = nullptr;
+        ir::Instruction* result = nullptr;
         b.InsertBefore(call, [&] {
             auto* vec4i = ty.vec4<i32>();
             auto* vec4u = ty.vec4<u32>();
@@ -782,29 +740,29 @@ struct State {
                                   b.Constant(u32(8)), b.Constant(u32(0)));
             auto* x_splat = b.Construct(vec4u, x);
             auto* x_vec4i = b.Bitcast(vec4i, b.ShiftLeft(vec4u, x_splat, n));
-            result =
-                b.ShiftRight(vec4i, x_vec4i, b.Construct(vec4u, b.Constant(u32(24))))->Result(0);
+            result = b.ShiftRight(vec4i, x_vec4i, b.Construct(vec4u, b.Constant(u32(24))));
         });
         return result;
     }
 
     /// Polyfill a `unpack4xI8()` builtin call
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Unpack4xI8(ir::CoreBuiltinCall* call) {
-        return Unpack4xI8OnValue(call, call->Args()[0]);
+    void Unpack4xI8(ir::CoreBuiltinCall* call) {
+        auto* result = Unpack4xI8OnValue(call, call->Args()[0]);
+        result->SetResults(Vector{call->DetachResult()});
+        call->Destroy();
     }
 
     /// Emit code for `unpack4xU8` on u32 value `x`, before the given call.
     /// @param call the instruction that should follow the emitted code
     /// @param x the u32 value to be unpacked
-    ir::Value* Unpack4xU8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
+    Instruction* Unpack4xU8OnValue(ir::CoreBuiltinCall* call, ir::Value* x) {
         // Replace `unpack4xU8(%x)` with:
         //   %n       = vec4u(0, 8, 16, 24);
         //   %x_splat = vec4u(%x); // splat the scalar to a vector
         //   %x_vec4u = %x_splat >> n;
         //   %result  = %x_vec4u & vec4u(0xff);
-        ir::Value* result = nullptr;
+        ir::Instruction* result = nullptr;
         b.InsertBefore(call, [&] {
             auto* vec4u = ty.vec4<u32>();
 
@@ -812,16 +770,17 @@ struct State {
                                   b.Constant(u32(16)), b.Constant(u32(24)));
             auto* x_splat = b.Construct(vec4u, x);
             auto* x_vec4u = b.ShiftRight(vec4u, x_splat, n);
-            result = b.And(vec4u, x_vec4u, b.Construct(vec4u, b.Constant(u32(0xff))))->Result(0);
+            result = b.And(vec4u, x_vec4u, b.Construct(vec4u, b.Constant(u32(0xff))));
         });
         return result;
     }
 
     /// Polyfill a `unpack4xU8()` builtin call
     /// @param call the builtin call instruction
-    /// @returns the replacement value
-    ir::Value* Unpack4xU8(ir::CoreBuiltinCall* call) {
-        return Unpack4xU8OnValue(call, call->Args()[0]);
+    void Unpack4xU8(ir::CoreBuiltinCall* call) {
+        auto* result = Unpack4xU8OnValue(call, call->Args()[0]);
+        result->SetResults(Vector{call->DetachResult()});
+        call->Destroy();
     }
 };
 

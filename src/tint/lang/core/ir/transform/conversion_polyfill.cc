@@ -82,13 +82,7 @@ struct State {
 
         // Polyfill the conversion instructions that we found.
         for (auto* convert : ftoi_worklist) {
-            auto* replacement = ftoi(convert);
-
-            // Replace the old conversion instruction result with the new value.
-            if (auto name = ir.NameOf(convert->Result(0))) {
-                ir.SetName(replacement, name);
-            }
-            convert->Result(0)->ReplaceAllUsesWith(replacement);
+            ftoi(convert);
             convert->Destroy();
         }
     }
@@ -96,8 +90,7 @@ struct State {
     /// Replace a conversion instruction with a call to helper function that manually clamps the
     /// result to within the limit of the destination type.
     /// @param convert the conversion instruction
-    /// @returns the replacement value
-    ir::Value* ftoi(ir::Convert* convert) {
+    void ftoi(ir::Convert* convert) {
         auto* res_ty = convert->Result(0)->Type();
         auto* src_ty = convert->Args()[0]->Type();
         auto* src_el_ty = src_ty->DeepestElement();
@@ -190,9 +183,8 @@ struct State {
         });
 
         // Call the helper function, splatting the arguments to match the target vector width.
-        auto* call = b.Call(res_ty, helper, convert->Args()[0]);
+        auto* call = b.CallWithResult(convert->DetachResult(), helper, convert->Args()[0]);
         call->InsertBefore(convert);
-        return call->Result(0);
     }
 
     /// Return a type with element type @p type that has the same number of vector components as

@@ -30,6 +30,8 @@
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/module.h"
 
+using namespace tint::core::number_suffixes;  // NOLINT
+
 namespace tint::core::ir {
 namespace {
 
@@ -164,6 +166,17 @@ TEST_F(IR_InstructionTest, Fail_RemoveNotInserted) {
             inst1->Remove();
         },
         "");
+}
+
+TEST_F(IR_InstructionTest, DetachResult) {
+    auto* inst = b.Let("foo", 42_u);
+    auto* result = inst->Result(0);
+    EXPECT_EQ(result->Instruction(), inst);
+
+    auto* detached = inst->DetachResult();
+    EXPECT_EQ(detached, result);
+    EXPECT_EQ(detached->Instruction(), nullptr);
+    EXPECT_EQ(inst->Results().Length(), 0u);
 }
 
 }  // namespace

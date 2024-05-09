@@ -73,42 +73,32 @@ struct State {
 
         // Replace the builtins that we found.
         for (auto* builtin : worklist) {
-            core::ir::Value* replacement = nullptr;
             switch (builtin->Func()) {
                 case core::BuiltinFn::kStorageBarrier:
-                    replacement = ThreadgroupBarrier(builtin, BarrierType::kDevice);
+                    ThreadgroupBarrier(builtin, BarrierType::kDevice);
                     break;
                 case core::BuiltinFn::kWorkgroupBarrier:
-                    replacement = ThreadgroupBarrier(builtin, BarrierType::kThreadGroup);
+                    ThreadgroupBarrier(builtin, BarrierType::kThreadGroup);
                     break;
                 case core::BuiltinFn::kTextureBarrier:
-                    replacement = ThreadgroupBarrier(builtin, BarrierType::kTexture);
+                    ThreadgroupBarrier(builtin, BarrierType::kTexture);
                     break;
                 default:
                     break;
             }
-            TINT_ASSERT(replacement);
-
-            // Replace the old builtin result with the new value.
-            if (auto name = ir.NameOf(builtin->Result(0))) {
-                ir.SetName(replacement, name);
-            }
-            builtin->Result(0)->ReplaceAllUsesWith(replacement);
-            builtin->Destroy();
         }
     }
 
     /// Replace a barrier builtin with the `threadgroupBarrier()` intrinsic.
     /// @param builtin the builtin call instruction
     /// @param type the barrier type
-    /// @returns the replacement value
-    core::ir::Value* ThreadgroupBarrier(core::ir::CoreBuiltinCall* builtin, BarrierType type) {
+    void ThreadgroupBarrier(core::ir::CoreBuiltinCall* builtin, BarrierType type) {
         // Replace the builtin call with a call to the msl.threadgroup_barrier intrinsic.
         auto args = Vector<core::ir::Value*, 1>{b.Constant(u32(type))};
-        auto* call = b.Call<msl::ir::BuiltinCall>(
-            builtin->Result(0)->Type(), msl::BuiltinFn::kThreadgroupBarrier, std::move(args));
+        auto* call = b.CallWithResult<msl::ir::BuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kThreadgroupBarrier, std::move(args));
         call->InsertBefore(builtin);
-        return call->Result(0);
+        builtin->Destroy();
     }
 };
 

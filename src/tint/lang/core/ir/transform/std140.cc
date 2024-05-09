@@ -333,9 +333,7 @@ struct State {
                     if (!replacement->Type()->Is<core::type::Pointer>()) {
                         // We have loaded a decomposed matrix and reconstructed it, so this is now
                         // extracting from a value type.
-                        auto* access =
-                            b.Access(load->Result(0)->Type(), replacement, load->Index());
-                        load->Result(0)->ReplaceAllUsesWith(access->Result(0));
+                        b.AccessWithResult(load->DetachResult(), replacement, load->Index());
                         load->Destroy();
                     } else {
                         // There was no decomposed matrix on the path to this instruction so just

@@ -91,28 +91,17 @@ struct State {
 
         // Polyfill the binary instructions that we found.
         for (auto* binary : worklist) {
-            ir::Value* replacement = nullptr;
             switch (binary->Op()) {
                 case BinaryOp::kDivide:
                 case BinaryOp::kModulo:
-                    replacement = IntDivMod(binary);
+                    IntDivMod(binary);
                     break;
                 case BinaryOp::kShiftLeft:
                 case BinaryOp::kShiftRight:
-                    replacement = MaskShiftAmount(binary);
+                    MaskShiftAmount(binary);
                     break;
                 default:
                     break;
-            }
-            TINT_ASSERT(replacement);
-
-            if (replacement != binary->Result(0)) {
-                // Replace the old binary instruction result with the new value.
-                if (auto name = ir.NameOf(binary->Result(0))) {
-                    ir.SetName(replacement, name);
-                }
-                binary->Result(0)->ReplaceAllUsesWith(replacement);
-                binary->Destroy();
             }
         }
     }
@@ -145,8 +134,7 @@ struct State {
     /// Replace an integer divide or modulo with a call to helper function that prevents
     /// divide-by-zero and signed integer overflow.
     /// @param binary the binary instruction
-    /// @returns the replacement value
-    ir::Value* IntDivMod(ir::CoreBinary* binary) {
+    void IntDivMod(ir::CoreBinary* binary) {
         auto* result_ty = binary->Result(0)->Type();
         bool is_div = binary->Op() == BinaryOp::kDivide;
         bool is_signed = result_ty->is_signed_integer_scalar_or_vector();
@@ -217,26 +205,23 @@ struct State {
         };
 
         // Call the helper function, splatting the arguments to match the target vector width.
-        Value* result = nullptr;
         b.InsertBefore(binary, [&] {
             auto* lhs = maybe_splat(binary->LHS());
             auto* rhs = maybe_splat(binary->RHS());
-            result = b.Call(result_ty, helper, lhs, rhs)->Result(0);
+            b.CallWithResult(binary->DetachResult(), helper, lhs, rhs);
         });
-        return result;
+        binary->Destroy();
     }
 
     /// Mask the RHS of a shift instruction to ensure it is modulo the bitwidth of the LHS.
     /// @param binary the binary instruction
-    /// @returns the replacement value
-    ir::Value* MaskShiftAmount(ir::CoreBinary* binary) {
+    void MaskShiftAmount(ir::CoreBinary* binary) {
         auto* lhs = binary->LHS();
         auto* rhs = binary->RHS();
         auto* mask = b.Constant(u32(lhs->Type()->DeepestElement()->Size() * 8 - 1));
         auto* masked = b.And(rhs->Type(), rhs, MatchWidth(mask, rhs->Type()));
         masked->InsertBefore(binary);
         binary->SetOperand(ir::CoreBinary::kRhsOperandOffset, masked->Result(0));
-        return binary->Result(0);
     }
 };
 

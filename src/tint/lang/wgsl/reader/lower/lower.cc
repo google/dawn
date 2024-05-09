@@ -198,19 +198,16 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
                     //    call workgroupBarrier
                     b.InsertBefore(call, [&] {
                         b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
-                        auto* load = b.Load(call->Args()[0]);
-                        call->Result(0)->ReplaceAllUsesWith(load->Result(0));
+                        b.LoadWithResult(call->DetachResult(), call->Args()[0]);
                         b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
                     });
                     break;
                 }
                 default: {
                     Vector<core::ir::Value*, 8> args(call->Args());
-                    auto* replacement =
-                        mod.allocators.instructions.Create<core::ir::CoreBuiltinCall>(
-                            call->Result(0), Convert(call->Func()), std::move(args));
+                    auto* replacement = b.CallWithResult(call->DetachResult(),
+                                                         Convert(call->Func()), std::move(args));
                     call->ReplaceWith(replacement);
-                    call->ClearResults();
                     break;
                 }
             }

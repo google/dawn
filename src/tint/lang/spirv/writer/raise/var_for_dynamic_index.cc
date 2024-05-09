@@ -237,13 +237,11 @@ struct State {
 
             core::ir::Instruction* load = nullptr;
             if (to_replace.vector_access_type) {
-                load = b.LoadVectorElement(new_access->Result(0), vector_index);
+                load = b.LoadVectorElementWithResult(access->DetachResult(), new_access->Result(0),
+                                                     vector_index);
             } else {
-                load = b.Load(new_access);
+                load = b.LoadWithResult(access->DetachResult(), new_access);
             }
-
-            // Replace all uses of the old access instruction with the loaded result.
-            access->Result(0)->ReplaceAllUsesWith(load->Result(0));
             access->ReplaceWith(load);
             access->Destroy();
         }

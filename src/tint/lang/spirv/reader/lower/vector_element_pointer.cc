@@ -131,9 +131,8 @@ struct State {
             Switch(
                 use.instruction,
                 [&](core::ir::Load* load) {
-                    auto* lve = b.LoadVectorElement(object, index);
+                    auto* lve = b.LoadVectorElementWithResult(load->DetachResult(), object, index);
                     lve->InsertBefore(load);
-                    load->Result(0)->ReplaceAllUsesWith(lve->Result(0));
                     to_destroy.Push(load);
                 },
                 [&](core::ir::Store* store) {

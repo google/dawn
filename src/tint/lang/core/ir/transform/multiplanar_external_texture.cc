@@ -240,19 +240,18 @@ struct State {
                         }
 
                         // Call the `TextureLoadExternal()` helper function.
-                        auto* helper = b.Call(ty.vec4<f32>(), TextureLoadExternal(), plane_0,
-                                              plane_1, params, coords);
+                        auto* helper = b.CallWithResult(call->DetachResult(), TextureLoadExternal(),
+                                                        plane_0, plane_1, params, coords);
                         helper->InsertBefore(call);
-                        call->Result(0)->ReplaceAllUsesWith(helper->Result(0));
                         call->Destroy();
                     } else if (call->Func() == core::BuiltinFn::kTextureSampleBaseClampToEdge) {
                         // Call the `TextureSampleExternal()` helper function.
                         auto* sampler = call->Args()[1];
                         auto* coords = call->Args()[2];
-                        auto* helper = b.Call(ty.vec4<f32>(), TextureSampleExternal(), plane_0,
-                                              plane_1, params, sampler, coords);
+                        auto* helper =
+                            b.CallWithResult(call->DetachResult(), TextureSampleExternal(), plane_0,
+                                             plane_1, params, sampler, coords);
                         helper->InsertBefore(call);
-                        call->Result(0)->ReplaceAllUsesWith(helper->Result(0));
                         call->Destroy();
                     } else {
                         TINT_ICE() << "unhandled texture_external builtin call: " << call->Func();
