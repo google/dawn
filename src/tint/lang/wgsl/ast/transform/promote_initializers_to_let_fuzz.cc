@@ -36,6 +36,7 @@ void PromoteInitializersToLetFuzzer(const Program& program) {
     if (auto result = PromoteInitializersToLet{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "PromoteInitializersToLet returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

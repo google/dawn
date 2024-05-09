@@ -56,7 +56,9 @@ void SingleEntryPointFuzzer(const Program& program, uint8_t entry_point_index) {
     DataMap outputs;
     if (auto result = SingleEntryPoint{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "SingleEntryPoint returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "SingleEntryPoint returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

@@ -36,6 +36,7 @@ void VectorizeScalarMatrixInitializersFuzzer(const Program& program) {
     if (auto result = VectorizeScalarMatrixInitializers{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "VectorizeScalarMatrixInitializers returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

@@ -35,7 +35,9 @@ void FoldConstantsFuzzer(const Program& program) {
     DataMap outputs;
     if (auto result = FoldConstants{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "FoldConstants returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "FoldConstants returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

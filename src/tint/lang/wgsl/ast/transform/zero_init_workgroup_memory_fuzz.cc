@@ -41,6 +41,7 @@ void ZeroInitWorkgroupMemoryFuzzer(const Program& program) {
     if (auto result = ZeroInitWorkgroupMemory{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "ZeroInitWorkgroupMemory returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

@@ -35,7 +35,9 @@ void DemoteToHelperFuzzer(const Program& program) {
     DataMap outputs;
     if (auto result = DemoteToHelper{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "DemoteToHelper returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "DemoteToHelper returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

@@ -57,7 +57,9 @@ void Std140Fuzzer(const Program& program) {
     DataMap outputs;
     if (auto result = Std140{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "Std140 returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "Std140 returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

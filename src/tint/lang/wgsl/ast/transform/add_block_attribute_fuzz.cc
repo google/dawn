@@ -35,7 +35,9 @@ void AddBlockAttributeFuzzer(const Program& program) {
     DataMap outputs;
     if (auto result = AddBlockAttribute{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "AddBlockAttribute returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "AddBlockAttribute returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

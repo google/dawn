@@ -54,6 +54,7 @@ void PromoteSideEffectsToDeclFuzzer(const Program& program) {
     if (auto result = PromoteSideEffectsToDecl{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "PromoteSideEffectsToDecl returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

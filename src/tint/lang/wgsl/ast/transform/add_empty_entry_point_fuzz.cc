@@ -35,7 +35,9 @@ void AddEmptyEntryPointFuzzer(const Program& program) {
     DataMap outputs;
     if (auto result = AddEmptyEntryPoint{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "AddEmptyEntryPoint returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "AddEmptyEntryPoint returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

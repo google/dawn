@@ -72,6 +72,7 @@ void ArrayLengthFromUniformFuzzer(const Program& program,
     if (auto result = ArrayLengthFromUniform{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "ArrayLengthFromUniform returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

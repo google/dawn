@@ -36,6 +36,7 @@ void ExpandCompoundAssignmentFuzzer(const Program& program) {
     if (auto result = ExpandCompoundAssignment{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "ExpandCompoundAssignment returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

@@ -59,7 +59,9 @@ void FirstIndexOffsetFuzzer(const Program& program,
     DataMap outputs;
     if (auto result = FirstIndexOffset{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "FirstIndexOffset returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "FirstIndexOffset returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

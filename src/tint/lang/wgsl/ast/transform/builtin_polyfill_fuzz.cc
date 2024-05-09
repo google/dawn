@@ -38,7 +38,9 @@ void BuiltinPolyfillFuzzer(const Program& program, const BuiltinPolyfill::Config
     DataMap outputs;
     if (auto result = BuiltinPolyfill{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "BuiltinPolyfill returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "BuiltinPolyfill returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

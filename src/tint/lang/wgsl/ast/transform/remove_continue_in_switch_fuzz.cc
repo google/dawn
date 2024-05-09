@@ -36,6 +36,7 @@ void RemoveContinueInSwitchFuzzer(const Program& program) {
     if (auto result = RemoveContinueInSwitch{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "RemoveContinueInSwitch returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

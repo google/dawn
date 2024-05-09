@@ -52,6 +52,7 @@ void RemoveUnreachableStatementsFuzzer(const Program& program) {
     if (auto result = RemoveUnreachableStatements{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "RemoveUnreachableStatements returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

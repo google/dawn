@@ -35,7 +35,9 @@ void RemovePhoniesFuzzer(const Program& program) {
     DataMap outputs;
     if (auto result = RemovePhonies{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "RemovePhonies returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "RemovePhonies returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

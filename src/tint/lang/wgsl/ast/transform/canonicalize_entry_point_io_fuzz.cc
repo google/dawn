@@ -40,6 +40,7 @@ void CanonicalizeEntryPointIOFuzzer(const Program& program,
     if (auto result = CanonicalizeEntryPointIO{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "CanonicalizeEntryPointIO returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

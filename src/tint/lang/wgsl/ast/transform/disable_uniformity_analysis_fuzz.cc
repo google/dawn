@@ -36,6 +36,7 @@ void DisableUniformityAnalysisFuzzer(const Program& program) {
     if (auto result = DisableUniformityAnalysis{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "DisableUniformityAnalysis returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

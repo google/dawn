@@ -27,6 +27,7 @@
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/lang/wgsl/ast/transform/clamp_frag_depth.h"
+#include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::ast::transform {
 namespace {
@@ -49,7 +50,9 @@ void ClampFragDepthFuzzer(const Program& program, const ClampFragDepth::Config& 
     DataMap outputs;
     if (auto result = ClampFragDepth{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "ClampFragDepth returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "ClampFragDepth returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

@@ -78,7 +78,9 @@ void BindingRemapperFuzzer(const Program& program, const BindingRemapper::Remapp
     DataMap outputs;
     if (auto result = BindingRemapper{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "BindingRemapper returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "BindingRemapper returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

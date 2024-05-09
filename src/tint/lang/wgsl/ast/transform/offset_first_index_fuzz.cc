@@ -55,7 +55,9 @@ void OffsetFirstIndexFuzzer(const Program& program, const OffsetFirstIndex::Conf
     DataMap outputs;
     if (auto result = OffsetFirstIndex{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "OffsetFirstIndex returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "OffsetFirstIndex returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

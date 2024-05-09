@@ -95,6 +95,7 @@ void MultiplanarExternalTextureFuzzer(
     if (auto result = MultiplanarExternalTexture{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "MultiplanarExternalTexture returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

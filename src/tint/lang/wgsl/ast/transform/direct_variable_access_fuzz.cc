@@ -40,6 +40,7 @@ void DirectVariableAccessFuzzer(const Program& program,
     if (auto result = DirectVariableAccess{}.Apply(program, inputs, outputs)) {
         if (!result->IsValid()) {
             TINT_ICE() << "DirectVariableAccess returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
                        << result->Diagnostics();
         }
     }

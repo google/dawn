@@ -35,7 +35,9 @@ void PreservePaddingFuzzer(const Program& program) {
     DataMap outputs;
     if (auto result = PreservePadding{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "PreservePadding returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "PreservePadding returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }

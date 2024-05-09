@@ -35,7 +35,9 @@ void UnshadowFuzzer(const Program& program) {
     DataMap outputs;
     if (auto result = Unshadow{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
-            TINT_ICE() << "Unshadow returned invalid program:\n" << result->Diagnostics();
+            TINT_ICE() << "Unshadow returned invalid program:\n"
+                       << Program::printer(*result) << "\n"
+                       << result->Diagnostics();
         }
     }
 }
