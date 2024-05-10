@@ -27,7 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import json, os, sys
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 from generator_lib import Generator, run_generator, FileRender
 
@@ -329,6 +329,12 @@ class StructureType(Record, Type):
         return any(member.requires_struct_defaulting
                    for member in self.members)
 
+    @property
+    # Returns True if the structure can be created with no parameters, e.g. all of its members have
+    # defaults or are optional,
+    def has_basic_constructor(self):
+        return all((member.optional or member.default_value)
+                   for member in self.members)
 
 
 class CallbackInfoType(StructureType):
@@ -781,6 +787,37 @@ def as_protobufMemberNameLPM(*names):
 
 def unreachable_code():
     assert False
+
+
+############################################################
+# KOTLIN STUFF
+############################################################
+
+
+def compute_kotlin_params(loaded_json):
+    params_kotlin = parse_json(loaded_json, enabled_tags=['art'])
+    by_category = params_kotlin['by_category']
+
+    # The 'length' members are removed as Kotlin can infer that from the container.
+    # 'length' members are identified when some *other* member specifies its name as the
+    # length parameter. Void pointer members refer to binary structures that cannot be used by
+    # clients without conversion to ART types in handwritten code, so we don't convert those.
+    for structure in by_category['structure']:
+        structure.members = [
+            member for member in structure.members
+            if member.type.name.get() not in ['void *', 'void const *'] and
+            not [1 for other in structure.members if other.length == member]
+        ]
+
+    # A structure may need to know which other structures listed it as a chain root, e.g.
+    # to know whether to mark the generated class 'open'.
+    chain_children = defaultdict(list)
+    for structure in by_category['structure']:
+        for chain_root in structure.chain_roots:
+            chain_children[chain_root.name.get()].append(structure)
+    params_kotlin['chain_children'] = chain_children
+    params_kotlin['unreachable_code'] = unreachable_code
+    return params_kotlin
 
 
 #############################################################
@@ -1397,8 +1434,18 @@ class MultiGeneratorFromDawnJSON(Generator):
                     lpm_params))
 
         if 'kotlin' in targets:
-            params_kotlin = parse_json(loaded_json,
-                                       enabled_tags=['dawn', 'native'])
+            params_kotlin = compute_kotlin_params(loaded_json)
+            by_category = params_kotlin['by_category']
+            for structure in by_category['structure']:
+                renders.append(
+                    FileRender(
+                        'art/api_kotlin_structure.kt',
+                        'java/' + metadata.kotlin_path + '/' +
+                        structure.name.CamelCase() + '.kt', [
+                            RENDER_PARAMS_BASE, params_kotlin, {
+                                'structure': structure
+                            }
+                        ]))
 
             for enum in (params_kotlin['by_category']['bitmask'] +
                          params_kotlin['by_category']['enum']):
