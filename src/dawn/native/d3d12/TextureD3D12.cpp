@@ -441,8 +441,8 @@ MaybeError Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* command
     if (SharedResourceMemoryContents* contents = GetSharedResourceMemoryContents()) {
         SharedTextureMemoryBase::PendingFenceList fences;
         contents->AcquirePendingFences(&fences);
-        waitFences.insert(waitFences.end(), std::make_move_iterator(fences->begin()),
-                          std::make_move_iterator(fences->end()));
+        waitFences.insert(waitFences.end(), std::make_move_iterator(fences.begin()),
+                          std::make_move_iterator(fences.end()));
         contents->SetLastUsageSerial(queue->GetPendingCommandSerial());
     }
 

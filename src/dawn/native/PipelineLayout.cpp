@@ -31,6 +31,7 @@
 #include <map>
 #include <utility>
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
@@ -57,7 +58,7 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 
     // Validation for any pixel local storage.
     if (auto* pls = unpacked.Get<PipelineLayoutPixelLocalStorage>()) {
-        StackVector<StorageAttachmentInfoForValidation, 4> attachments;
+        absl::InlinedVector<StorageAttachmentInfoForValidation, 4> attachments;
         for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
             const PipelineLayoutStorageAttachment& attachment = pls->storageAttachments[i];
 
@@ -68,11 +69,11 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
                             "storageAttachments[%i]'s format (%s) cannot be used with %s.", i,
                             format->format, wgpu::TextureUsage::StorageAttachment);
 
-            attachments->push_back({attachment.offset, attachment.format});
+            attachments.push_back({attachment.offset, attachment.format});
         }
 
         DAWN_TRY(ValidatePLSInfo(device, pls->totalPixelLocalStorageSize,
-                                 {attachments->data(), attachments->size()}));
+                                 {attachments.data(), attachments.size()}));
     }
 
     DAWN_INVALID_IF(descriptor->bindGroupLayoutCount > kMaxBindGroups,

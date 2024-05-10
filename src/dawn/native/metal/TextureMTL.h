@@ -34,9 +34,9 @@
 
 #include "dawn/native/Texture.h"
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
-#include "dawn/common/StackContainer.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/MetalBackend.h"
 
@@ -94,7 +94,7 @@ class Texture final : public TextureBase {
                             const SubresourceRange& range,
                             TextureBase::ClearValue clearValue);
 
-    StackVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
+    absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
     MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
 
     MTLTextureUsage mMtlUsage;

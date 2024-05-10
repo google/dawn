@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_SHAREDRESOURCEMEMORY_H_
 #define SRC_DAWN_NATIVE_SHAREDRESOURCEMEMORY_H_
 
-#include "dawn/common/StackContainer.h"
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/WeakRef.h"
 #include "dawn/common/WeakRefSupport.h"
 #include "dawn/native/Error.h"
@@ -64,7 +64,7 @@ class SharedResource : public ApiObjectBase {
 
 class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedResourceMemory> {
   public:
-    using PendingFenceList = StackVector<FenceAndSignalValue, 1>;
+    using PendingFenceList = absl::InlinedVector<FenceAndSignalValue, 1>;
 
     ~SharedResourceMemory() override;
     void Initialize();

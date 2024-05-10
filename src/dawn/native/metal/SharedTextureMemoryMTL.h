@@ -32,6 +32,7 @@
 #import <Metal/Metal.h>
 #include <vector>
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
 #include "dawn/native/Error.h"
@@ -51,7 +52,8 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
         const SharedTextureMemoryIOSurfaceDescriptor* descriptor);
 
     IOSurfaceRef GetIOSurface() const;
-    const StackVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat>& GetMtlPlaneTextures() const;
+    const absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat>& GetMtlPlaneTextures()
+        const;
     MTLTextureUsage GetMtlTextureUsage() const;
     MTLPixelFormat GetMtlPixelFormat() const;
 
@@ -74,7 +76,7 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
                                                      UnpackedPtr<EndAccessState>& state) override;
     MaybeError CreateMtlTextures();
 
-    StackVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
+    absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
     MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
     MTLTextureUsage mMtlUsage;
     CFRef<IOSurfaceRef> mIOSurface;

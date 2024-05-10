@@ -33,10 +33,10 @@
 #include <utility>
 
 #include "absl/container/flat_hash_set.h"
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
-#include "dawn/common/StackContainer.h"
 #include "dawn/common/WeakRef.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
@@ -210,14 +210,14 @@ class ContentLessObjectCache {
   private:
     friend struct CacheKeyFuncs::EqualityFunc;
 
-    void TrackTemporaryRef(Ref<RefCountedT> ref) { (*mTemporaryRefs)->push_back(std::move(ref)); }
+    void TrackTemporaryRef(Ref<RefCountedT> ref) { mTemporaryRefs->push_back(std::move(ref)); }
     template <typename F>
     auto WithLockAndCleanup(F func) {
         using RetType = decltype(func());
         RetType result;
 
-        // Creates and owns a temporary StackVector that we point to internally to track Refs.
-        StackVector<Ref<RefCountedT>, 4> temps;
+        // Creates and owns a temporary InlinedVector that we point to internally to track Refs.
+        absl::InlinedVector<Ref<RefCountedT>, 4> temps;
         {
             std::lock_guard<std::mutex> lock(mMutex);
             mTemporaryRefs = &temps;
@@ -233,13 +233,13 @@ class ContentLessObjectCache {
                         typename CacheKeyFuncs::EqualityFunc>
         mCache;
 
-    // The cache has a pointer to a StackVector of temporary Refs that are by-products of Promotes
+    // The cache has a pointer to a InlinedVector of temporary Refs that are by-products of Promotes
     // inside the EqualityFunc. These Refs need to outlive the EqualityFunc calls because otherwise,
     // they could be the last living Ref of the object resulting in a re-entrant Erase call that
     // deadlocks on the mutex.
-    // Absl should make fewer than 1 equality checks per set operation, so a StackVector of length
+    // Absl should make fewer than 1 equality checks per set operation, so a InlinedVector of length
     // 4 should be sufficient for most cases. See dawn:1993 for more details.
-    raw_ptr<StackVector<Ref<RefCountedT>, 4>> mTemporaryRefs = nullptr;
+    raw_ptr<absl::InlinedVector<Ref<RefCountedT>, 4>> mTemporaryRefs = nullptr;
 };
 
 }  // namespace dawn

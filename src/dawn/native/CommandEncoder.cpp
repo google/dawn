@@ -31,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/Math.h"
@@ -229,19 +230,19 @@ class RenderPassValidationState final : public NonMovable {
             record.depthOrArrayLayer = attachment->GetBaseArrayLayer();
         }
 
-        for (size_t i = 0; i < mRecords->size(); i++) {
+        for (size_t i = 0; i < mRecords.size(); i++) {
             DAWN_INVALID_IF(
                 mRecords[i] == record,
                 "The %s %s has read-write or write-write conflict with another attachment.",
                 attachmentTypeStr, attachment);
         }
 
-        mRecords->push_back(record);
+        mRecords.push_back(record);
 
         return {};
     }
 
-    bool HasAttachment() const { return mRecords->size() != 0; }
+    bool HasAttachment() const { return !mRecords.empty(); }
 
     bool IsValidState() const {
         return ((mRenderWidth > 0) && (mRenderHeight > 0) && (mSampleCount > 0) &&
@@ -277,7 +278,7 @@ class RenderPassValidationState final : public NonMovable {
     uint32_t mAttachmentValidationHeight = 0;
 
     // The records of the attachments that were validated in render pass.
-    StackVector<RecordedAttachment, kMaxColorAttachments> mRecords;
+    absl::InlinedVector<RecordedAttachment, kMaxColorAttachments> mRecords;
 
     bool mWillExpandResolveTexture = false;
 };
@@ -693,7 +694,7 @@ MaybeError ValidateRenderPassPLS(DeviceBase* device,
                                  const RenderPassPixelLocalStorage* pls,
                                  UsageValidationMode usageValidationMode,
                                  RenderPassValidationState* validationState) {
-    StackVector<StorageAttachmentInfoForValidation, 4> attachments;
+    absl::InlinedVector<StorageAttachmentInfoForValidation, 4> attachments;
 
     for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
         const RenderPassStorageAttachment& attachment = pls->storageAttachments[i];
@@ -723,11 +724,11 @@ MaybeError ValidateRenderPassPLS(DeviceBase* device,
         DAWN_TRY(
             validationState->AddAttachment(attachment.storage, AttachmentType::StorageAttachment));
 
-        attachments->push_back({attachment.offset, attachment.storage->GetFormat().format});
+        attachments.push_back({attachment.offset, attachment.storage->GetFormat().format});
     }
 
     return ValidatePLSInfo(device, pls->totalPixelLocalStorageSize,
-                           {attachments->data(), attachments->size()});
+                           {attachments.data(), attachments.size()});
 }
 
 ResultOrError<UnpackedPtr<RenderPassDescriptor>> ValidateRenderPassDescriptor(
@@ -753,7 +754,7 @@ ResultOrError<UnpackedPtr<RenderPassDescriptor>> ValidateRenderPassDescriptor(
                                                            validationState),
                          "validating colorAttachments[%u].", i);
         if (attachment.view) {
-            colorAttachmentFormats->push_back(&attachment.view->GetFormat());
+            colorAttachmentFormats.push_back(&attachment.view->GetFormat());
         }
     }
     DAWN_TRY_CONTEXT(ValidateColorAttachmentBytesPerSample(device, colorAttachmentFormats),

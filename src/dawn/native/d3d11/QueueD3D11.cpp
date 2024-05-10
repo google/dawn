@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/Log.h"
 #include "dawn/native/WaitAnySystemEvent.h"
 #include "dawn/native/d3d/D3DError.h"
@@ -362,21 +363,21 @@ ResultOrError<ExecutionSerial> UnmonitoredQueue::CheckAndUpdateCompletedSerials(
                 return GetLastSubmittedCommandSerial();
             }
 
-            StackVector<HANDLE, 8> handles;
+            absl::InlinedVector<HANDLE, 8> handles;
             const size_t numberOfHandles =
                 std::min(pendingEvents->size(), static_cast<size_t>(MAXIMUM_WAIT_OBJECTS));
-            handles->reserve(numberOfHandles);
+            handles.reserve(numberOfHandles);
             // Gather events in reversed order (from the most recent to the oldest events).
             std::for_each_n(pendingEvents->rbegin(), numberOfHandles, [&handles](const auto& e) {
-                handles->push_back(e.receiver.GetPrimitive().Get());
+                handles.push_back(e.receiver.GetPrimitive().Get());
             });
             DWORD result =
-                WaitForMultipleObjects(handles->size(), handles->data(), /*bWaitAll=*/false,
+                WaitForMultipleObjects(handles.size(), handles.data(), /*bWaitAll=*/false,
                                        /*dwMilliseconds=*/0);
             DAWN_INTERNAL_ERROR_IF(result == WAIT_FAILED, "WaitForMultipleObjects() failed");
 
             DAWN_INTERNAL_ERROR_IF(
-                result >= WAIT_ABANDONED_0 && result < WAIT_ABANDONED_0 + handles->size(),
+                result >= WAIT_ABANDONED_0 && result < WAIT_ABANDONED_0 + handles.size(),
                 "WaitForMultipleObjects() get abandoned event");
 
             if (result == WAIT_TIMEOUT) {

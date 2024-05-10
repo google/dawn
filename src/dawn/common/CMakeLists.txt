@@ -95,7 +95,6 @@ target_sources(dawn_common PRIVATE
     "SlabAllocator.cpp"
     "SlabAllocator.h"
     "StackAllocated.h"
-    "StackContainer.h"
     "SystemUtils.cpp"
     "SystemUtils.h"
     "TypeTraits.h"
@@ -131,6 +130,7 @@ endif()
 target_link_libraries(dawn_common
     PUBLIC dawncpp_headers
     PUBLIC partition_alloc
+    PRIVATE absl_inlined_vector
     PRIVATE dawn_internal_config
 )
 

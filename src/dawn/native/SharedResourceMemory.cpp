@@ -165,8 +165,7 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
     DAWN_TRY(BeginAccessImpl(resource, descriptor));
 
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
-        mContents->mPendingFences->push_back(
-            {descriptor->fences[i], descriptor->signaledValues[i]});
+        mContents->mPendingFences.push_back({descriptor->fences[i], descriptor->signaledValues[i]});
     }
 
     DAWN_ASSERT(!resource->IsError());
@@ -275,14 +274,14 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource,
     {
         ResultOrError<FenceAndSignalValue> result = EndAccessInternal(resource, state);
         if (result.IsSuccess()) {
-            fenceList->push_back(result.AcquireSuccess());
+            fenceList.push_back(result.AcquireSuccess());
         } else {
             err = result.AcquireError();
         }
     }
 
     // Copy the fences to the output state.
-    if (size_t fenceCount = fenceList->size()) {
+    if (size_t fenceCount = fenceList.size()) {
         auto* fences = new SharedFenceBase*[fenceCount];
         uint64_t* signaledValues = new uint64_t[fenceCount];
         for (size_t i = 0; i < fenceCount; ++i) {
@@ -325,7 +324,7 @@ const WeakRef<SharedResourceMemory>& SharedResourceMemoryContents::GetSharedReso
 
 void SharedResourceMemoryContents::AcquirePendingFences(PendingFenceList* fences) {
     *fences = mPendingFences;
-    mPendingFences->clear();
+    mPendingFences.clear();
 }
 
 void SharedResourceMemoryContents::SetLastUsageSerial(ExecutionSerial lastUsageSerial) {

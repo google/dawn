@@ -28,7 +28,6 @@
 #ifndef SRC_DAWN_NATIVE_SHAREDTEXTUREMEMORY_H_
 #define SRC_DAWN_NATIVE_SHAREDTEXTUREMEMORY_H_
 
-#include "dawn/common/StackContainer.h"
 #include "dawn/common/WeakRef.h"
 #include "dawn/common/WeakRefSupport.h"
 #include "dawn/native/Error.h"

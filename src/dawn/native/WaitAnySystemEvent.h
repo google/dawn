@@ -43,7 +43,7 @@
 #include <unistd.h>
 #endif
 
-#include "dawn/common/StackContainer.h"
+#include "absl/container/inlined_vector.h"
 #include "dawn/native/SystemEvent.h"
 
 namespace dawn::native {
@@ -78,13 +78,13 @@ template <typename It>
         return false;
     }
 #if DAWN_PLATFORM_IS(WINDOWS)
-    StackVector<HANDLE, 4 /* avoid heap allocation for small waits */> handles;
-    handles->reserve(count);
+    absl::InlinedVector<HANDLE, 4 /* avoid heap allocation for small waits */> handles;
+    handles.reserve(count);
     for (auto it = begin; it != end; ++it) {
-        handles->push_back((*it).first.mPrimitive.Get());
+        handles.push_back((*it).first.mPrimitive.Get());
     }
-    DAWN_ASSERT(handles->size() <= MAXIMUM_WAIT_OBJECTS);
-    DWORD status = WaitForMultipleObjects(handles->size(), handles->data(), /*bWaitAll=*/false,
+    DAWN_ASSERT(handles.size() <= MAXIMUM_WAIT_OBJECTS);
+    DWORD status = WaitForMultipleObjects(handles.size(), handles.data(), /*bWaitAll=*/false,
                                           ToMilliseconds(timeout));
     if (status == WAIT_TIMEOUT) {
         return false;
@@ -95,12 +95,12 @@ template <typename It>
     *(*(begin + completedIndex)).second = true;
     return true;
 #elif DAWN_PLATFORM_IS(POSIX)
-    StackVector<pollfd, 4 /* avoid heap allocation for small waits */> pollfds;
-    pollfds->reserve(count);
+    absl::InlinedVector<pollfd, 4 /* avoid heap allocation for small waits */> pollfds;
+    pollfds.reserve(count);
     for (auto it = begin; it != end; ++it) {
-        pollfds->push_back(pollfd{static_cast<int>((*it).first.mPrimitive.Get()), POLLIN, 0});
+        pollfds.push_back(pollfd{static_cast<int>((*it).first.mPrimitive.Get()), POLLIN, 0});
     }
-    int status = poll(pollfds->data(), pollfds->size(), ToMilliseconds(timeout));
+    int status = poll(pollfds.data(), pollfds.size(), ToMilliseconds(timeout));
 
     DAWN_CHECK(status >= 0);
     if (status == 0) {

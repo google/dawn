@@ -30,8 +30,8 @@
 
 #include <vector>
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/Constants.h"
-#include "dawn/common/StackContainer.h"
 #include "dawn/native/CommandAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Features.h"
@@ -115,7 +115,7 @@ MaybeError ValidateCanUseAs(const TextureBase* texture,
                             UsageValidationMode mode);
 MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
 
-using ColorAttachmentFormats = StackVector<const Format*, kMaxColorAttachments>;
+using ColorAttachmentFormats = absl::InlinedVector<const Format*, kMaxColorAttachments>;
 MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
                                                  const ColorAttachmentFormats& formats);
 

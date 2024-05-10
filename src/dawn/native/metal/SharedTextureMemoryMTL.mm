@@ -155,7 +155,7 @@ IOSurfaceRef SharedTextureMemory::GetIOSurface() const {
     return mIOSurface.Get();
 }
 
-const StackVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat>&
+const absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat>&
 SharedTextureMemory::GetMtlPlaneTextures() const {
     return mMtlPlaneTextures;
 }
@@ -240,7 +240,7 @@ MaybeError SharedTextureMemory::CreateMtlTextures() {
 
         mMtlUsage = mtlDesc.usage;
         mMtlFormat = mtlDesc.pixelFormat;
-        mMtlPlaneTextures->resize(1);
+        mMtlPlaneTextures.resize(1);
         mMtlPlaneTextures[0] =
             AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
                                                                  iosurface:mIOSurface.Get()
@@ -250,7 +250,7 @@ MaybeError SharedTextureMemory::CreateMtlTextures() {
         // Multiplanar format doesn't have equivalent MTLPixelFormat so just set it to invalid.
         mMtlFormat = MTLPixelFormatInvalid;
         const size_t numPlanes = IOSurfaceGetPlaneCount(mIOSurface.Get());
-        mMtlPlaneTextures->resize(numPlanes);
+        mMtlPlaneTextures.resize(numPlanes);
         for (size_t plane = 0; plane < numPlanes; ++plane) {
             mMtlPlaneTextures[plane] = AcquireNSPRef(CreateTextureMtlForPlane(
                 mMtlUsage, *format, plane, device, /*sampleCount=*/1, mIOSurface.Get()));

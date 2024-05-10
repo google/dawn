@@ -31,22 +31,21 @@
 #include <limits>
 #include <vector>
 
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/Assert.h"
-#include "dawn/common/StackContainer.h"
 #include "dawn/common/UnderlyingType.h"
 
 namespace dawn::ityp {
 
 template <typename Index, typename Value, size_t StaticCapacity>
-class stack_vec : private StackVector<Value, StaticCapacity> {
+class stack_vec : private absl::InlinedVector<Value, StaticCapacity> {
     using I = UnderlyingType<Index>;
-    using Base = StackVector<Value, StaticCapacity>;
-    using VectorBase = std::vector<Value, StackAllocator<Value, StaticCapacity>>;
+    using Base = absl::InlinedVector<Value, StaticCapacity>;
     static_assert(StaticCapacity <= std::numeric_limits<I>::max());
 
   public:
     stack_vec() : Base() {}
-    explicit stack_vec(Index size) : Base() { this->container().resize(static_cast<I>(size)); }
+    explicit stack_vec(Index size) : Base() { Base::resize(static_cast<I>(size)); }
 
     Value& operator[](Index i) {
         DAWN_ASSERT(i < size());
@@ -58,31 +57,15 @@ class stack_vec : private StackVector<Value, StaticCapacity> {
         return Base::operator[](static_cast<I>(i));
     }
 
-    void resize(Index size) { this->container().resize(static_cast<I>(size)); }
+    void resize(Index size) { Base::resize(static_cast<I>(size)); }
 
-    void reserve(Index size) { this->container().reserve(static_cast<I>(size)); }
+    void reserve(Index size) { Base::reserve(static_cast<I>(size)); }
 
-    Value* data() { return this->container().data(); }
+    Value* data() { return Base::data(); }
 
-    const Value* data() const { return this->container().data(); }
+    const Value* data() const { return Base::data(); }
 
-    typename VectorBase::iterator begin() noexcept { return this->container().begin(); }
-
-    typename VectorBase::const_iterator begin() const noexcept { return this->container().begin(); }
-
-    typename VectorBase::iterator end() noexcept { return this->container().end(); }
-
-    typename VectorBase::const_iterator end() const noexcept { return this->container().end(); }
-
-    typename VectorBase::reference front() { return this->container().front(); }
-
-    typename VectorBase::const_reference front() const { return this->container().front(); }
-
-    typename VectorBase::reference back() { return this->container().back(); }
-
-    typename VectorBase::const_reference back() const { return this->container().back(); }
-
-    Index size() const { return Index(static_cast<I>(this->container().size())); }
+    Index size() const { return Index(static_cast<I>(Base::size())); }
 };
 
 }  // namespace dawn::ityp

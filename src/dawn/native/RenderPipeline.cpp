@@ -611,7 +611,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
                                                   fragmentMetadata.fragmentOutputMask[i],
                                                   fragmentMetadata.fragmentOutputVariables[i]),
                          "validating targets[%u] framebuffer output.", i);
-        colorAttachmentFormats->push_back(&device->GetValidInternalFormat(targets[i].format));
+        colorAttachmentFormats.push_back(&device->GetValidInternalFormat(targets[i].format));
 
         if (fragmentMetadata.fragmentInputMask[i]) {
             DAWN_TRY_CONTEXT(ValidateFramebufferInput(device, format,
