@@ -318,6 +318,17 @@ TEST_P(SharedBufferMemoryTests, EndAccessOnDifferentBuffer) {
     wgpu::SharedBufferMemoryEndAccessState state;
     ASSERT_DEVICE_ERROR(memory.EndAccess(buffer2, &state));
 
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = kBufferSize;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer dst = device.CreateBuffer(&descriptor);
+
+    // Use the buffer in a submit.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.CopyBufferToBuffer(buffer, 0, dst, 0, kBufferSize);
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
     // Ensure that calling EndAccess on the correct buffer still returns a fence.
     memory.EndAccess(buffer, &state);
     ASSERT_EQ(state.fenceCount, static_cast<size_t>(1));

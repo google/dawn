@@ -377,24 +377,23 @@ ResultOrError<ExecutionSerial> Texture::EndAccess() {
     NotifySwapChainPresentToPIX();
 
     // Synchronize if texture access wasn't synchronized already due to ExecuteCommandLists. If
-    // there were pending commands that used this texture mSignalFenceValue will be set, but if it's
-    // still not set, generate a signal fence after waiting on wait fences.
+    // there were pending commands that used this texture mLastSharedTextureMemoryUsageSerial will
+    // be set, but if it's still not set, generate a signal fence after waiting on wait fences.
     Queue* queue = ToBackend(GetDevice()->GetQueue());
-    if (!mSignalFenceValue) {
+    if (mLastSharedTextureMemoryUsageSerial == kBeginningOfGPUTime) {
         // Even though we aren't recording any commands here, asking for a command context ensures
         // that the device fence is signaled eventually even if no commands were recorded before
         // EndAccess. This is a little sub-optimal, but shouldn't occur often in practice.
         CommandRecordingContext* context =
             queue->GetPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive);
         DAWN_TRY(SynchronizeTextureBeforeUse(context));
-        DAWN_ASSERT(mSignalFenceValue);
+        DAWN_ASSERT(mLastSharedTextureMemoryUsageSerial != kBeginningOfGPUTime);
     }
     // Make the queue signal the fence in finite time.
-    DAWN_TRY(queue->EnsureCommandsFlushed(*mSignalFenceValue));
+    DAWN_TRY(queue->EnsureCommandsFlushed(mLastSharedTextureMemoryUsageSerial));
 
-    ExecutionSerial ret = mSignalFenceValue.value();
-    // Explicitly call reset() since std::move() on optional doesn't make it std::nullopt.
-    mSignalFenceValue.reset();
+    ExecutionSerial ret = mLastSharedTextureMemoryUsageSerial;
+    mLastSharedTextureMemoryUsageSerial = kBeginningOfGPUTime;
     return ret;
 }
 
@@ -443,7 +442,6 @@ MaybeError Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* command
         contents->AcquirePendingFences(&fences);
         waitFences.insert(waitFences.end(), std::make_move_iterator(fences.begin()),
                           std::make_move_iterator(fences.end()));
-        contents->SetLastUsageSerial(queue->GetPendingCommandSerial());
     }
 
     ID3D12CommandQueue* commandQueue = queue->GetCommandQueue();
@@ -457,7 +455,7 @@ MaybeError Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* command
     if (mKeyedMutex != nullptr) {
         DAWN_TRY(commandContext->AcquireKeyedMutex(mKeyedMutex));
     }
-    mSignalFenceValue = queue->GetPendingCommandSerial();
+    mLastSharedTextureMemoryUsageSerial = queue->GetPendingCommandSerial();
     return {};
 }
 

@@ -58,6 +58,7 @@ class SharedBufferMemory final : public SharedBufferMemoryBase {
     MaybeError BeginAccessImpl(BufferBase* buffer,
                                const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
     ResultOrError<FenceAndSignalValue> EndAccessImpl(BufferBase* buffer,
+                                                     ExecutionSerial lastUsageSerial,
                                                      UnpackedPtr<EndAccessState>& state) override;
 
     ComPtr<ID3D12Resource> mResource;

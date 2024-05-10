@@ -67,6 +67,7 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
                                const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;
 
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
+                                                     ExecutionSerial lastUsageSerial,
                                                      UnpackedPtr<EndAccessState>& state) override;
 
     ComPtr<ID3D12Resource> mResource;

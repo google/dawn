@@ -888,8 +888,15 @@ MaybeError BufferBase::UploadData(uint64_t bufferOffset, const void* data, size_
                                            this, bufferOffset, size);
 }
 
-void BufferBase::SetHasAccess(bool hasAccess) {
-    mState = hasAccess ? BufferState::Unmapped : BufferState::SharedMemoryNoAccess;
+ExecutionSerial BufferBase::OnEndAccess() {
+    mState = BufferState::SharedMemoryNoAccess;
+    ExecutionSerial lastUsageSerial = mLastUsageSerial;
+    mLastUsageSerial = kBeginningOfGPUTime;
+    return lastUsageSerial;
+}
+
+void BufferBase::OnBeginAccess() {
+    mState = BufferState::Unmapped;
 }
 
 bool BufferBase::HasAccess() const {

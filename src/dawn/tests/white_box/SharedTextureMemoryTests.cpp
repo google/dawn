@@ -27,6 +27,7 @@
 
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -1622,6 +1623,116 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
         memories[1].EndAccess(texture, &endState);
 
         CheckFourColors(devices[1], texture.GetFormat(), colorTarget);
+    }
+}
+
+// Test that BeginAccess without waiting on anything, followed by EndAccess
+// without using the texture, does not export any fences.
+TEST_P(SharedTextureMemoryTests, EndWithoutUse) {
+    for (const auto& memory : GetParam().mBackend->CreateSharedTextureMemories(device)) {
+        wgpu::Texture texture = memory.CreateTexture();
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.initialized = true;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        memory.BeginAccess(texture, &beginDesc);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memory.EndAccess(texture, &endState);
+
+        EXPECT_EQ(endState.fenceCount, 0u);
+    }
+}
+
+// Test that BeginAccess, waiting on previous work, followed by EndAccess when the
+// texture isn't used at all, doesn't export any new fences from Dawn. It exports the
+// old fences.
+// If concurrent read is supported, use two read textures. The first EndAccess should
+// see no fences. The second should then export all the unacquired fences.
+TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
+    std::vector<wgpu::Device> devices = {device, CreateDevice()};
+
+    for (const auto& memories :
+         GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             devices, wgpu::TextureUsage::TextureBinding)) {
+        wgpu::Texture texture = memories[0].CreateTexture();
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.concurrentRead = false;
+        beginDesc.initialized = false;
+        auto backendBeginState = GetParam().mBackend->ChainInitialBeginState(&beginDesc);
+        memories[0].BeginAccess(texture, &beginDesc);
+
+        // Create a texture of the same size to use as the source content.
+        wgpu::TextureDescriptor texDesc;
+        texDesc.format = texture.GetFormat();
+        texDesc.size = {texture.GetWidth(), texture.GetHeight()};
+        texDesc.usage =
+            texture.GetUsage() | wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+        wgpu::Texture srcTex = devices[0].CreateTexture(&texDesc);
+
+        // Populate the source texture.
+        wgpu::CommandBuffer commandBuffer = MakeFourColorsClearCommandBuffer(devices[0], srcTex);
+        devices[0].GetQueue().Submit(1, &commandBuffer);
+
+        // Copy from the source texture into `texture`.
+        {
+            wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
+            auto src = utils::CreateImageCopyTexture(srcTex);
+            auto dst = utils::CreateImageCopyTexture(texture);
+            encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
+            commandBuffer = encoder.Finish();
+        }
+        devices[0].GetQueue().Submit(1, &commandBuffer);
+
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
+        memories[0].EndAccess(texture, &endState);
+
+        // Import fences and texture to the the other device.
+        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+        for (size_t i = 0; i < endState.fenceCount; ++i) {
+            sharedFences[i] = GetParam().mBackend->ImportFenceTo(devices[1], endState.fences[i]);
+        }
+        beginDesc.fenceCount = endState.fenceCount;
+        beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValues = endState.signaledValues;
+        // Do concurrent read if the backend supports it, and not Vulkan.
+        // Note that here, the "backend" means the handle type. So on Vulkan, sync fds do support
+        // concurrent reads on different devices. But, in Dawn's Vulkan backend within a single
+        // device, support is not implemented yet.
+        beginDesc.concurrentRead = GetParam().mBackend->SupportsConcurrentRead() && !IsVulkan();
+        beginDesc.initialized = endState.initialized;
+        backendBeginState = GetParam().mBackend->ChainBeginState(&beginDesc, endState);
+
+        texDesc.usage = wgpu::TextureUsage::TextureBinding;
+        texture = memories[1].CreateTexture(&texDesc);
+
+        memories[1].BeginAccess(texture, &beginDesc);
+
+        // Prepare to sample the texture without submit, and end access.
+        wgpu::Texture colorTarget;
+        std::tie(commandBuffer, colorTarget) =
+            MakeCheckBySamplingCommandBuffer(devices[1], texture);
+        if (beginDesc.concurrentRead) {
+            // If concurrent read, make another texture, and begin+end access without using it.
+            wgpu::Texture noopTexture = memories[1].CreateTexture(&texDesc);
+            memories[1].BeginAccess(noopTexture, &beginDesc);
+            memories[1].EndAccess(noopTexture, &endState);
+            EXPECT_EQ(endState.fenceCount, 0u);
+        }
+        memories[1].EndAccess(texture, &endState);
+
+        // All of the fences should be identical.
+        EXPECT_EQ(endState.fenceCount, sharedFences.size());
+        for (size_t i = 0; i < endState.fenceCount; ++i) {
+            EXPECT_NE(std::find_if(sharedFences.begin(), sharedFences.end(),
+                                   [&](const auto& fence) {
+                                       return fence.Get() == endState.fences[i].Get();
+                                   }),
+                      sharedFences.end());
+        }
     }
 }
 

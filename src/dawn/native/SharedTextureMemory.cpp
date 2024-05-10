@@ -54,6 +54,7 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
         DAWN_UNREACHABLE();
     }
     ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture,
+                                                     ExecutionSerial lastUsageSerial,
                                                      UnpackedPtr<EndAccessState>& state) override {
         DAWN_UNREACHABLE();
     }
@@ -178,7 +179,7 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
     Ref<TextureBase> texture;
     DAWN_TRY_ASSIGN(texture, CreateTextureImpl(descriptor));
     // Access is started on memory.BeginAccess.
-    texture->SetHasAccess(false);
+    texture->OnEndAccess();
     return texture;
 }
 

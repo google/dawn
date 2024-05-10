@@ -144,6 +144,7 @@ MaybeError SharedBufferMemory::BeginAccessImpl(
 
 ResultOrError<FenceAndSignalValue> SharedBufferMemory::EndAccessImpl(
     BufferBase* buffer,
+    ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {
     DAWN_TRY(state.ValidateSubset<>());
     DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceDXGISharedHandle),
@@ -153,8 +154,7 @@ ResultOrError<FenceAndSignalValue> SharedBufferMemory::EndAccessImpl(
     Ref<d3d::SharedFence> sharedFence;
     DAWN_TRY_ASSIGN(sharedFence, ToBackend(GetDevice()->GetQueue())->GetOrCreateSharedFence());
 
-    return FenceAndSignalValue{std::move(sharedFence),
-                               static_cast<uint64_t>(buffer->GetLastUsageSerial())};
+    return FenceAndSignalValue{std::move(sharedFence), static_cast<uint64_t>(lastUsageSerial)};
 }
 
 }  // namespace dawn::native::d3d12

@@ -418,7 +418,6 @@ void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContex
         SharedResourceMemoryContents* contents = GetSharedResourceMemoryContents();
         if (contents != nullptr) {
             contents->AcquirePendingFences(&fences);
-            contents->SetLastUsageSerial(GetDevice()->GetQueue()->GetPendingCommandSerial());
         }
 
         if (!mWaitEvents.empty() || !fences.empty()) {
@@ -439,6 +438,7 @@ void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContex
                                         value:fence.signaledValue];
         }
     }
+    mLastSharedTextureMemoryUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
 }
 
 Texture::Texture(DeviceBase* dev, const UnpackedPtr<TextureDescriptor>& desc)

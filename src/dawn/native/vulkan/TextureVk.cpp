@@ -1213,6 +1213,8 @@ void Texture::TweakTransitionForExternalUsage(CommandRecordingContext* recording
                                               size_t transitionBarrierStart) {
     DAWN_ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
 
+    mLastSharedTextureMemoryUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();
+
     // transitionBarrierStart specify the index where barriers for current transition start in
     // the vector. barriers->size() - transitionBarrierStart is the number of barriers that we
     // have already added into the vector during current transition.

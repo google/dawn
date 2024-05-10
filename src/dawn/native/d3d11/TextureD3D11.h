@@ -198,9 +198,6 @@ class Texture final : public d3d::Texture {
     ComPtr<ID3D11Resource> mD3d11Resource;
     Ref<d3d::KeyedMutex> mKeyedMutex;
 
-    // TODO(crbug.com/1515640): Remove this once Chromium has migrated to SharedTextureMemory.
-    std::optional<ExecutionSerial> mLastUsageSerial;
-
     // The internal 'R8Uint' texture for sampling stencil from depth-stencil textures.
     Ref<Texture> mTextureForStencilSampling;
 };

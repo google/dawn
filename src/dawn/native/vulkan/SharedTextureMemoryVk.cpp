@@ -971,6 +971,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
 #if DAWN_PLATFORM_IS(FUCHSIA) || DAWN_PLATFORM_IS(LINUX)
 ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
+    ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {
     wgpu::SType type;
     DAWN_TRY_ASSIGN(type,
@@ -1042,6 +1043,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
 
 ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
+    ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {
     return DAWN_VALIDATION_ERROR("No shared fence features supported.");
 }

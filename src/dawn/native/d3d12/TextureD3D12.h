@@ -171,9 +171,9 @@ class Texture final : public d3d::Texture {
 
     Ref<d3d::KeyedMutex> mKeyedMutex;
 
-    // TODO(crbug.com/1515640): Remove these once Chromium has migrated to SharedTextureMemory.
+    // TODO(crbug.com/1515640): Remove wait fences once Chromium has migrated to
+    // SharedTextureMemory.
     std::vector<FenceAndSignalValue> mWaitFences;
-    std::optional<ExecutionSerial> mSignalFenceValue;
 
     bool mSwapChainTexture = false;
 

@@ -198,6 +198,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
 
 ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
+    ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {
     DAWN_TRY(state.ValidateSubset<>());
     DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceMTLSharedEvent),
@@ -205,9 +206,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
                     wgpu::FeatureName::SharedFenceMTLSharedEvent);
     Ref<SharedFence> fence;
     DAWN_TRY_ASSIGN(fence, ToBackend(GetDevice()->GetQueue())->GetOrCreateSharedFence());
-    return FenceAndSignalValue{
-        std::move(fence),
-        static_cast<uint64_t>(texture->GetSharedResourceMemoryContents()->GetLastUsageSerial())};
+    return FenceAndSignalValue{std::move(fence), static_cast<uint64_t>(lastUsageSerial)};
 }
 
 MaybeError SharedTextureMemory::CreateMtlTextures() {

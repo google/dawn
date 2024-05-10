@@ -996,9 +996,15 @@ void TextureBase::SetInitialized(bool initialized) {
     SetIsSubresourceContentInitialized(initialized, GetAllSubresources());
 }
 
-void TextureBase::SetHasAccess(bool hasAccess) {
-    DAWN_ASSERT(!IsError());
-    mState.hasAccess = hasAccess;
+ExecutionSerial TextureBase::OnEndAccess() {
+    mState.hasAccess = false;
+    ExecutionSerial lastUsageSerial = mLastSharedTextureMemoryUsageSerial;
+    mLastSharedTextureMemoryUsageSerial = kBeginningOfGPUTime;
+    return lastUsageSerial;
+}
+
+void TextureBase::OnBeginAccess() {
+    mState.hasAccess = true;
 }
 
 bool TextureBase::HasAccess() const {
