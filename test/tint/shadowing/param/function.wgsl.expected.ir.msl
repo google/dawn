@@ -1,9 +1,16 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:270 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+void a(int a) {
+  int a = a;
+  int b = a;
+}
+program_source:5:7: error: redefinition of 'a'
+  int a = a;
+      ^
+program_source:4:12: note: previous definition is here
+void a(int a) {
+           ^
+

@@ -1,0 +1,24 @@
+SKIP: FAILED
+
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
+  %a:ptr<push_constant, f32, read_write> = var
+}
+
+%tint_symbol = @vertex func(%b:u32 [@instance_index]):vec4<f32> [@position] {
+  $B2: {
+    %4:f32 = load %a
+    %5:f32 = let %4
+    %6:f32 = convert %b
+    %7:f32 = add %5, %6
+    %8:vec4<f32> = construct %7
+    ret %8
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

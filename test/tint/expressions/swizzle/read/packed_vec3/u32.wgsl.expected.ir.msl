@@ -1,15 +1,15 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:458 internal compiler error: S = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(16) {
   v:vec3<u32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %U:ptr<uniform, S, read> = var @binding_point(0, 0)
 }
 
-%f = func():void -> %b2 {
-  %b2 = block {
+%f = func():void {
+  $B2: {
     %3:ptr<uniform, vec3<u32>, read> = access %U, 0u
     %4:vec3<u32> = load %3
     %v:ptr<function, vec3<u32>, read_write> = var, %4

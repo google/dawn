@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(8) {
   injectionSwitch:vec2<f32> @offset(0)
 }
 
@@ -8,62 +8,68 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %a:ptr<function, i32, read_write> = var
     %i:ptr<function, i32, read_write> = var
     store %a, 0i
     store %i, 0i
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
-        %x_33:i32 = load %i
-        %7:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
-        %x_35:f32 = load_vector_element %7, 1u
-        %9:i32 = convert %x_35
-        %10:bool = lt %x_33, %9
-        if %10 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        %6:i32 = load %i
+        %x_33:i32 = let %6
+        %8:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+        %9:f32 = load_vector_element %8, 1u
+        %x_35:f32 = let %9
+        %11:i32 = call %tint_f32_to_i32, %x_35
+        %13:bool = lt %x_33, %11
+        if %13 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
-        %x_39:i32 = load %a
-        %12:bool = gt %x_39, 0i
-        if %12 [t: %b7] {  # if_2
-          %b7 = block {  # true
+        %14:i32 = load %a
+        %x_39:i32 = let %14
+        %16:bool = gt %x_39, 0i
+        if %16 [t: $B7] {  # if_2
+          $B7: {  # true
             exit_loop  # loop_1
           }
         }
-        %13:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
-        %x_44:f32 = load_vector_element %13, 1u
-        %15:i32 = convert %x_44
-        %16:i32 = mul %15, 2i
-        %17:i32 = div %16, 2i
-        store %a, %17
-        continue %b4
+        %17:ptr<uniform, vec2<f32>, read> = access %x_7, 0u
+        %18:f32 = load_vector_element %17, 1u
+        %x_44:f32 = let %18
+        %20:i32 = call %tint_f32_to_i32, %x_44
+        %21:i32 = mul %20, 2i
+        %22:i32 = call %tint_div_i32, %21, 2i
+        store %a, %22
+        continue  # -> $B4
       }
-      %b4 = block {  # continuing
-        %x_48:i32 = load %i
-        %19:i32 = add %x_48, 1i
-        store %i, %19
-        next_iteration %b3
+      $B4: {  # continuing
+        %24:i32 = load %i
+        %x_48:i32 = let %24
+        %26:i32 = add %x_48, 1i
+        store %i, %26
+        next_iteration  # -> $B3
       }
     }
-    %x_50:i32 = load %a
-    %21:bool = eq %x_50, 1i
-    if %21 [t: %b8, f: %b9] {  # if_3
-      %b8 = block {  # true
+    %27:i32 = load %a
+    %x_50:i32 = let %27
+    %29:bool = eq %x_50, 1i
+    if %29 [t: $B8, f: $B9] {  # if_3
+      $B8: {  # true
         store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
         exit_if  # if_3
       }
-      %b9 = block {  # false
+      $B9: {  # false
         store %x_GLF_color, vec4<f32>(0.0f)
         exit_if  # if_3
       }
@@ -71,12 +77,34 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b10 {
-  %b10 = block {
-    %23:void = call %main_1
-    %24:vec4<f32> = load %x_GLF_color
-    %25:main_out = construct %24
-    ret %25
+%tint_symbol = @fragment func():main_out {
+  $B10: {
+    %31:void = call %main_1
+    %32:vec4<f32> = load %x_GLF_color
+    %33:main_out = construct %32
+    ret %33
+  }
+}
+%tint_div_i32 = func(%lhs:i32, %rhs:i32):i32 {
+  $B11: {
+    %36:bool = eq %rhs, 0i
+    %37:bool = eq %lhs, -2147483648i
+    %38:bool = eq %rhs, -1i
+    %39:bool = and %37, %38
+    %40:bool = or %36, %39
+    %41:i32 = select %rhs, 1i, %40
+    %42:i32 = div %lhs, %41
+    ret %42
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 {
+  $B12: {
+    %44:i32 = convert %value
+    %45:bool = gte %value, -2147483648.0f
+    %46:i32 = select -2147483648i, %44, %45
+    %47:bool = lte %value, 2147483520.0f
+    %48:i32 = select 2147483647i, %46, %47
+    ret %48
   }
 }
 

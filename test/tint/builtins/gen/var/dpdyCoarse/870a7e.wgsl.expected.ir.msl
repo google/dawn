@@ -1,11 +1,11 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %prevent_dce:ptr<storage, f32, read_write> = var @binding_point(2, 0)
 }
 
-%dpdyCoarse_870a7e = func():void -> %b2 {
-  %b2 = block {
+%dpdyCoarse_870a7e = func():void {
+  $B2: {
     %arg_0:ptr<function, f32, read_write> = var, 1.0f
     %4:f32 = load %arg_0
     %5:f32 = dpdyCoarse %4
@@ -15,8 +15,8 @@ SKIP: FAILED
     ret
   }
 }
-%fragment_main = @fragment func():void -> %b3 {
-  %b3 = block {
+%fragment_main = @fragment func():void {
+  $B3: {
     %9:void = call %dpdyCoarse_870a7e
     ret
   }

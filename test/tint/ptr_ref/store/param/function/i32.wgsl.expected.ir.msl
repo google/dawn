@@ -1,9 +1,25 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+void func(thread int* const pointer) {
+  pointer = 42;
+}
+kernel void tint_symbol() {
+  int F = 0;
+  func(F);
+}
+program_source:5:11: error: cannot assign to variable 'pointer' with const-qualified type 'int *const'
+  pointer = 42;
+  ~~~~~~~ ^
+program_source:4:29: note: variable 'pointer' declared const here
+void func(thread int* const pointer) {
+          ~~~~~~~~~~~~~~~~~~^~~~~~~
+program_source:9:3: error: no matching function for call to 'func'
+  func(F);
+  ^~~~
+program_source:4:6: note: candidate function not viable: no known conversion from 'int' to 'int *const' for 1st argument; take the address of the argument with &
+void func(thread int* const pointer) {
+     ^
+

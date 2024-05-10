@@ -1,9 +1,17 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::LoadVectorElement
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+void x_200(thread uint2* const x_1) {
+  uint const x_3 = x_1[0u];
+}
+void main_1() {
+}
+fragment void tint_symbol() {
+  main_1();
+}
+program_source:5:14: error: cannot initialize a variable of type 'const uint' (aka 'const unsigned int') with an lvalue of type 'uint2' (vector of 2 'unsigned int' values)
+  uint const x_3 = x_1[0u];
+             ^     ~~~~~~~
+

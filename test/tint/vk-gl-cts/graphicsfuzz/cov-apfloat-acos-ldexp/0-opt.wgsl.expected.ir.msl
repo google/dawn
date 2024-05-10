@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(4) {
   two:i32 @offset(0)
 }
 
@@ -8,32 +8,35 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %v:ptr<function, vec2<f32>, read_write> = var
     %d:ptr<function, f32, read_write> = var
     %6:ptr<uniform, i32, read> = access %x_6, 0u
-    %x_35:i32 = load %6
-    %8:vec2<i32> = construct %x_35, 3i
-    %9:vec2<f32> = ldexp vec2<f32>(0.10000000149011611938f), %8
-    %10:vec2<f32> = acos %9
-    store %v, %10
-    %x_39:vec2<f32> = load %v
-    %12:f32 = distance %x_39, vec2<f32>(1.15927994251251220703f, 0.64349997043609619141f)
-    store %d, %12
-    %x_41:f32 = load %d
-    %14:bool = lt %x_41, 0.00999999977648258209f
-    if %14 [t: %b3, f: %b4] {  # if_1
-      %b3 = block {  # true
+    %7:i32 = load %6
+    %x_35:i32 = let %7
+    %9:vec2<i32> = construct %x_35, 3i
+    %10:vec2<f32> = ldexp vec2<f32>(0.10000000149011611938f), %9
+    %11:vec2<f32> = acos %10
+    store %v, %11
+    %12:vec2<f32> = load %v
+    %x_39:vec2<f32> = let %12
+    %14:f32 = distance %x_39, vec2<f32>(1.15927994251251220703f, 0.64349997043609619141f)
+    store %d, %14
+    %15:f32 = load %d
+    %x_41:f32 = let %15
+    %17:bool = lt %x_41, 0.00999999977648258209f
+    if %17 [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
         store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
         exit_if  # if_1
       }
-      %b4 = block {  # false
+      $B4: {  # false
         store %x_GLF_color, vec4<f32>(0.0f)
         exit_if  # if_1
       }
@@ -41,12 +44,12 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b5 {
-  %b5 = block {
-    %16:void = call %main_1
-    %17:vec4<f32> = load %x_GLF_color
-    %18:main_out = construct %17
-    ret %18
+%tint_symbol = @fragment func():main_out {
+  $B5: {
+    %19:void = call %main_1
+    %20:vec4<f32> = load %x_GLF_color
+    %21:main_out = construct %20
+    ret %21
   }
 }
 

@@ -4,5 +4,9 @@ SKIP: FAILED
 using namespace metal;
 
 thread float2x3 v = float2x3(0.0f);
-void tint_symbol() {
+kernel void tint_symbol() {
 }
+program_source:4:17: error: program scope variable must reside in constant address space
+thread float2x3 v = float2x3(0.0f);
+                ^
+

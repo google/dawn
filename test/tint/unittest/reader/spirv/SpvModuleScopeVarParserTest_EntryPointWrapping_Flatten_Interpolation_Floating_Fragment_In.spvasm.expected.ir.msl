@@ -1,9 +1,47 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  float field0;
+  float field1;
+  float field2;
+  float field3;
+  float field4;
+  float field5;
+};
+
+thread S x_1 = {};
+void main_1() {
+}
+fragment void tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5) {
+  x_1.field0 = x_1_param;
+  x_1.field1 = x_1_param_1;
+  x_1.field2 = x_1_param_2;
+  x_1.field3 = x_1_param_3;
+  x_1.field4 = x_1_param_4;
+  x_1.field5 = x_1_param_5;
+  main_1();
+}
+program_source:12:10: error: program scope variable must reside in constant address space
+thread S x_1 = {};
+         ^
+program_source:15:27: error: invalid type 'float' for input declaration in a fragment function
+fragment void tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5) {
+                          ^~~~~~~~~~~~~~~
+program_source:15:44: error: invalid type 'float' for input declaration in a fragment function
+fragment void tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5) {
+                                           ^~~~~~~~~~~~~~~~~
+program_source:15:63: error: invalid type 'float' for input declaration in a fragment function
+fragment void tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5) {
+                                                              ^~~~~~~~~~~~~~~~~
+program_source:15:82: error: invalid type 'float' for input declaration in a fragment function
+fragment void tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5) {
+                                                                                 ^~~~~~~~~~~~~~~~~
+program_source:15:101: error: invalid type 'float' for input declaration in a fragment function
+fragment void tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5) {
+                                                                                                    ^~~~~~~~~~~~~~~~~
+program_source:15:120: error: invalid type 'float' for input declaration in a fragment function
+fragment void tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2, float x_1_param_3, float x_1_param_4, float x_1_param_5) {
+                                                                                                                       ^~~~~~~~~~~~~~~~~
+

@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
   el:i32 @offset(0)
 }
 
@@ -20,14 +20,14 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_8:ptr<uniform, buf1, read> = var @binding_point(0, 1)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %sums:ptr<function, array<f32, 2>, read_write> = var
     %a:ptr<function, i32, read_write> = var
     %b:ptr<function, i32, read_write> = var
@@ -42,346 +42,353 @@ main_out = struct @align(16) {
     %x_215:ptr<function, bool, read_write> = var
     %x_216:ptr<function, bool, read_write> = var
     %18:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-    %x_20:i32 = load %18
-    %20:ptr<function, f32, read_write> = access %sums, %x_20
-    %21:ptr<uniform, f32, read> = access %x_8, 0u, 0i, 0u
-    %22:f32 = load %21
-    store %20, %22
-    %23:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
-    %x_22:i32 = load %23
-    %25:ptr<function, f32, read_write> = access %sums, %x_22
-    %26:ptr<uniform, f32, read> = access %x_8, 0u, 0i, 0u
-    %27:f32 = load %26
-    store %25, %27
-    %28:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-    %29:i32 = load %28
-    store %a, %29
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
-        %30:i32 = load %a
-        %31:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
-        %32:i32 = load %31
-        %33:bool = lt %30, %32
-        if %33 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+    %19:i32 = load %18
+    %x_20:i32 = let %19
+    %21:ptr<function, f32, read_write> = access %sums, %x_20
+    %22:ptr<uniform, f32, read> = access %x_8, 0u, 0i, 0u
+    %23:f32 = load %22
+    store %21, %23
+    %24:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+    %25:i32 = load %24
+    %x_22:i32 = let %25
+    %27:ptr<function, f32, read_write> = access %sums, %x_22
+    %28:ptr<uniform, f32, read> = access %x_8, 0u, 0i, 0u
+    %29:f32 = load %28
+    store %27, %29
+    %30:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %31:i32 = load %30
+    store %a, %31
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        %32:i32 = load %a
+        %33:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+        %34:i32 = load %33
+        %35:bool = lt %32, %34
+        if %35 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
-        %34:ptr<uniform, i32, read> = access %x_6, 0u, 5i, 0u
-        %35:i32 = load %34
-        store %b, %35
-        loop [b: %b7, c: %b8] {  # loop_2
-          %b7 = block {  # body
-            %36:i32 = load %b
-            %37:ptr<uniform, i32, read> = access %x_6, 0u, 3i, 0u
-            %38:i32 = load %37
-            %39:bool = lt %36, %38
-            if %39 [t: %b9, f: %b10] {  # if_2
-              %b9 = block {  # true
+        %36:ptr<uniform, i32, read> = access %x_6, 0u, 5i, 0u
+        %37:i32 = load %36
+        store %b, %37
+        loop [b: $B7, c: $B8] {  # loop_2
+          $B7: {  # body
+            %38:i32 = load %b
+            %39:ptr<uniform, i32, read> = access %x_6, 0u, 3i, 0u
+            %40:i32 = load %39
+            %41:bool = lt %38, %40
+            if %41 [t: $B9, f: $B10] {  # if_2
+              $B9: {  # true
                 exit_if  # if_2
               }
-              %b10 = block {  # false
+              $B10: {  # false
                 exit_loop  # loop_2
               }
             }
-            %40:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
-            %41:i32 = load %40
-            store %c, %41
-            loop [b: %b11, c: %b12] {  # loop_3
-              %b11 = block {  # body
-                %42:i32 = load %c
-                %43:ptr<uniform, i32, read> = access %x_6, 0u, 4i, 0u
-                %44:i32 = load %43
-                %45:bool = lte %42, %44
-                if %45 [t: %b13, f: %b14] {  # if_3
-                  %b13 = block {  # true
+            %42:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
+            %43:i32 = load %42
+            store %c, %43
+            loop [b: $B11, c: $B12] {  # loop_3
+              $B11: {  # body
+                %44:i32 = load %c
+                %45:ptr<uniform, i32, read> = access %x_6, 0u, 4i, 0u
+                %46:i32 = load %45
+                %47:bool = lte %44, %46
+                if %47 [t: $B13, f: $B14] {  # if_3
+                  $B13: {  # true
                     exit_if  # if_3
                   }
-                  %b14 = block {  # false
+                  $B14: {  # false
                     exit_loop  # loop_3
                   }
                 }
-                %46:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-                %47:i32 = load %46
-                store %d, %47
-                loop [b: %b15, c: %b16] {  # loop_4
-                  %b15 = block {  # body
-                    %48:i32 = load %d
-                    %49:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
-                    %50:i32 = load %49
-                    %51:bool = lt %48, %50
-                    if %51 [t: %b17, f: %b18] {  # if_4
-                      %b17 = block {  # true
+                %48:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+                %49:i32 = load %48
+                store %d, %49
+                loop [b: $B15, c: $B16] {  # loop_4
+                  $B15: {  # body
+                    %50:i32 = load %d
+                    %51:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
+                    %52:i32 = load %51
+                    %53:bool = lt %50, %52
+                    if %53 [t: $B17, f: $B18] {  # if_4
+                      $B17: {  # true
                         exit_if  # if_4
                       }
-                      %b18 = block {  # false
+                      $B18: {  # false
                         exit_loop  # loop_4
                       }
                     }
-                    %52:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
-                    %53:i32 = load %52
-                    store %e, %53
-                    loop [b: %b19, c: %b20] {  # loop_5
-                      %b19 = block {  # body
-                        %54:i32 = load %e
-                        %55:ptr<uniform, i32, read> = access %x_6, 0u, 4i, 0u
-                        %56:i32 = load %55
-                        %57:bool = lte %54, %56
-                        if %57 [t: %b21, f: %b22] {  # if_5
-                          %b21 = block {  # true
+                    %54:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+                    %55:i32 = load %54
+                    store %e, %55
+                    loop [b: $B19, c: $B20] {  # loop_5
+                      $B19: {  # body
+                        %56:i32 = load %e
+                        %57:ptr<uniform, i32, read> = access %x_6, 0u, 4i, 0u
+                        %58:i32 = load %57
+                        %59:bool = lte %56, %58
+                        if %59 [t: $B21, f: $B22] {  # if_5
+                          $B21: {  # true
                             exit_if  # if_5
                           }
-                          %b22 = block {  # false
+                          $B22: {  # false
                             exit_loop  # loop_5
                           }
                         }
-                        %58:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-                        %59:i32 = load %58
-                        store %f, %59
-                        loop [b: %b23, c: %b24] {  # loop_6
-                          %b23 = block {  # body
-                            %60:i32 = load %f
-                            %61:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
-                            %62:i32 = load %61
-                            %63:bool = lt %60, %62
-                            if %63 [t: %b25, f: %b26] {  # if_6
-                              %b25 = block {  # true
+                        %60:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+                        %61:i32 = load %60
+                        store %f, %61
+                        loop [b: $B23, c: $B24] {  # loop_6
+                          $B23: {  # body
+                            %62:i32 = load %f
+                            %63:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+                            %64:i32 = load %63
+                            %65:bool = lt %62, %64
+                            if %65 [t: $B25, f: $B26] {  # if_6
+                              $B25: {  # true
                                 exit_if  # if_6
                               }
-                              %b26 = block {  # false
+                              $B26: {  # false
                                 exit_loop  # loop_6
                               }
                             }
-                            %64:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-                            %65:i32 = load %64
-                            store %g, %65
-                            loop [b: %b27, c: %b28] {  # loop_7
-                              %b27 = block {  # body
-                                %66:i32 = load %g
-                                %67:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
-                                %68:i32 = load %67
-                                %69:bool = lt %66, %68
-                                if %69 [t: %b29, f: %b30] {  # if_7
-                                  %b29 = block {  # true
+                            %66:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+                            %67:i32 = load %66
+                            store %g, %67
+                            loop [b: $B27, c: $B28] {  # loop_7
+                              $B27: {  # body
+                                %68:i32 = load %g
+                                %69:ptr<uniform, i32, read> = access %x_6, 0u, 6i, 0u
+                                %70:i32 = load %69
+                                %71:bool = lt %68, %70
+                                if %71 [t: $B29, f: $B30] {  # if_7
+                                  $B29: {  # true
                                     exit_if  # if_7
                                   }
-                                  %b30 = block {  # false
+                                  $B30: {  # false
                                     exit_loop  # loop_7
                                   }
                                 }
-                                %70:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-                                %71:i32 = load %70
-                                store %h, %71
-                                loop [b: %b31, c: %b32] {  # loop_8
-                                  %b31 = block {  # body
-                                    %72:i32 = load %h
-                                    %73:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
-                                    %74:i32 = load %73
-                                    %75:bool = lt %72, %74
-                                    if %75 [t: %b33, f: %b34] {  # if_8
-                                      %b33 = block {  # true
+                                %72:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+                                %73:i32 = load %72
+                                store %h, %73
+                                loop [b: $B31, c: $B32] {  # loop_8
+                                  $B31: {  # body
+                                    %74:i32 = load %h
+                                    %75:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+                                    %76:i32 = load %75
+                                    %77:bool = lt %74, %76
+                                    if %77 [t: $B33, f: $B34] {  # if_8
+                                      $B33: {  # true
                                         exit_if  # if_8
                                       }
-                                      %b34 = block {  # false
+                                      $B34: {  # false
                                         exit_loop  # loop_8
                                       }
                                     }
-                                    %76:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-                                    %77:i32 = load %76
-                                    store %i, %77
-                                    loop [b: %b35, c: %b36] {  # loop_9
-                                      %b35 = block {  # body
-                                        %78:i32 = load %i
-                                        %79:ptr<uniform, i32, read> = access %x_6, 0u, 4i, 0u
-                                        %80:i32 = load %79
-                                        %81:bool = lt %78, %80
-                                        if %81 [t: %b37, f: %b38] {  # if_9
-                                          %b37 = block {  # true
+                                    %78:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+                                    %79:i32 = load %78
+                                    store %i, %79
+                                    loop [b: $B35, c: $B36] {  # loop_9
+                                      $B35: {  # body
+                                        %80:i32 = load %i
+                                        %81:ptr<uniform, i32, read> = access %x_6, 0u, 4i, 0u
+                                        %82:i32 = load %81
+                                        %83:bool = lt %80, %82
+                                        if %83 [t: $B37, f: $B38] {  # if_9
+                                          $B37: {  # true
                                             exit_if  # if_9
                                           }
-                                          %b38 = block {  # false
+                                          $B38: {  # false
                                             exit_loop  # loop_9
                                           }
                                         }
-                                        %82:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
-                                        %83:i32 = load %82
-                                        store %j, %83
-                                        loop [b: %b39, c: %b40] {  # loop_10
-                                          %b39 = block {  # body
-                                            %84:i32 = load %j
-                                            %85:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-                                            %86:i32 = load %85
-                                            %87:bool = gt %84, %86
-                                            if %87 [t: %b41, f: %b42] {  # if_10
-                                              %b41 = block {  # true
+                                        %84:ptr<uniform, i32, read> = access %x_6, 0u, 0i, 0u
+                                        %85:i32 = load %84
+                                        store %j, %85
+                                        loop [b: $B39, c: $B40] {  # loop_10
+                                          $B39: {  # body
+                                            %86:i32 = load %j
+                                            %87:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+                                            %88:i32 = load %87
+                                            %89:bool = gt %86, %88
+                                            if %89 [t: $B41, f: $B42] {  # if_10
+                                              $B41: {  # true
                                                 exit_if  # if_10
                                               }
-                                              %b42 = block {  # false
+                                              $B42: {  # false
                                                 exit_loop  # loop_10
                                               }
                                             }
-                                            %x_53:i32 = load %a
-                                            %89:ptr<function, f32, read_write> = access %sums, %x_53
                                             %90:i32 = load %a
-                                            %91:ptr<function, f32, read_write> = access %sums, %90
-                                            %92:f32 = load %91
-                                            %93:ptr<uniform, f32, read> = access %x_8, 0u, 2i, 0u
-                                            %94:f32 = load %93
-                                            %95:f32 = add %92, %94
-                                            store %89, %95
-                                            continue %b40
+                                            %x_53:i32 = let %90
+                                            %92:ptr<function, f32, read_write> = access %sums, %x_53
+                                            %93:i32 = load %a
+                                            %94:ptr<function, f32, read_write> = access %sums, %93
+                                            %95:f32 = load %94
+                                            %96:ptr<uniform, f32, read> = access %x_8, 0u, 2i, 0u
+                                            %97:f32 = load %96
+                                            %98:f32 = add %95, %97
+                                            store %92, %98
+                                            continue  # -> $B40
                                           }
-                                          %b40 = block {  # continuing
-                                            %96:i32 = load %j
-                                            %97:i32 = sub %96, 1i
-                                            store %j, %97
-                                            next_iteration %b39
+                                          $B40: {  # continuing
+                                            %99:i32 = load %j
+                                            %100:i32 = sub %99, 1i
+                                            store %j, %100
+                                            next_iteration  # -> $B39
                                           }
                                         }
-                                        continue %b36
+                                        continue  # -> $B36
                                       }
-                                      %b36 = block {  # continuing
-                                        %98:i32 = load %i
-                                        %99:i32 = add %98, 1i
-                                        store %i, %99
-                                        next_iteration %b35
+                                      $B36: {  # continuing
+                                        %101:i32 = load %i
+                                        %102:i32 = add %101, 1i
+                                        store %i, %102
+                                        next_iteration  # -> $B35
                                       }
                                     }
-                                    continue %b32
+                                    continue  # -> $B32
                                   }
-                                  %b32 = block {  # continuing
-                                    %100:i32 = load %h
-                                    %101:i32 = add %100, 1i
-                                    store %h, %101
-                                    next_iteration %b31
+                                  $B32: {  # continuing
+                                    %103:i32 = load %h
+                                    %104:i32 = add %103, 1i
+                                    store %h, %104
+                                    next_iteration  # -> $B31
                                   }
                                 }
-                                continue %b28
+                                continue  # -> $B28
                               }
-                              %b28 = block {  # continuing
-                                %102:i32 = load %g
-                                %103:i32 = add %102, 1i
-                                store %g, %103
-                                next_iteration %b27
+                              $B28: {  # continuing
+                                %105:i32 = load %g
+                                %106:i32 = add %105, 1i
+                                store %g, %106
+                                next_iteration  # -> $B27
                               }
                             }
-                            continue %b24
+                            continue  # -> $B24
                           }
-                          %b24 = block {  # continuing
-                            %104:i32 = load %f
-                            %105:i32 = add %104, 1i
-                            store %f, %105
-                            next_iteration %b23
+                          $B24: {  # continuing
+                            %107:i32 = load %f
+                            %108:i32 = add %107, 1i
+                            store %f, %108
+                            next_iteration  # -> $B23
                           }
                         }
-                        continue %b20
+                        continue  # -> $B20
                       }
-                      %b20 = block {  # continuing
-                        %106:i32 = load %e
-                        %107:i32 = add %106, 1i
-                        store %e, %107
-                        next_iteration %b19
+                      $B20: {  # continuing
+                        %109:i32 = load %e
+                        %110:i32 = add %109, 1i
+                        store %e, %110
+                        next_iteration  # -> $B19
                       }
                     }
-                    continue %b16
+                    continue  # -> $B16
                   }
-                  %b16 = block {  # continuing
-                    %108:i32 = load %d
-                    %109:i32 = add %108, 1i
-                    store %d, %109
-                    next_iteration %b15
+                  $B16: {  # continuing
+                    %111:i32 = load %d
+                    %112:i32 = add %111, 1i
+                    store %d, %112
+                    next_iteration  # -> $B15
                   }
                 }
-                continue %b12
+                continue  # -> $B12
               }
-              %b12 = block {  # continuing
-                %110:i32 = load %c
-                %111:i32 = add %110, 1i
-                store %c, %111
-                next_iteration %b11
+              $B12: {  # continuing
+                %113:i32 = load %c
+                %114:i32 = add %113, 1i
+                store %c, %114
+                next_iteration  # -> $B11
               }
             }
-            continue %b8
+            continue  # -> $B8
           }
-          %b8 = block {  # continuing
-            %112:i32 = load %b
-            %113:i32 = add %112, 1i
-            store %b, %113
-            next_iteration %b7
+          $B8: {  # continuing
+            %115:i32 = load %b
+            %116:i32 = add %115, 1i
+            store %b, %116
+            next_iteration  # -> $B7
           }
         }
-        continue %b4
+        continue  # -> $B4
       }
-      %b4 = block {  # continuing
-        %114:i32 = load %a
-        %115:i32 = add %114, 1i
-        store %a, %115
-        next_iteration %b3
+      $B4: {  # continuing
+        %117:i32 = load %a
+        %118:i32 = add %117, 1i
+        store %a, %118
+        next_iteration  # -> $B3
       }
     }
-    %116:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-    %117:i32 = load %116
-    %118:ptr<function, f32, read_write> = access %sums, %117
-    %119:f32 = load %118
-    %120:ptr<uniform, f32, read> = access %x_8, 0u, 1i, 0u
-    %121:f32 = load %120
-    %x_207:bool = eq %119, %121
+    %119:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+    %120:i32 = load %119
+    %121:ptr<function, f32, read_write> = access %sums, %120
+    %122:f32 = load %121
+    %123:ptr<uniform, f32, read> = access %x_8, 0u, 1i, 0u
+    %124:f32 = load %123
+    %125:bool = eq %122, %124
+    %x_207:bool = let %125
     store %x_216, %x_207
-    if %x_207 [t: %b43] {  # if_11
-      %b43 = block {  # true
-        %123:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
-        %124:i32 = load %123
-        %125:ptr<function, f32, read_write> = access %sums, %124
-        %126:f32 = load %125
-        %127:ptr<uniform, f32, read> = access %x_8, 0u, 1i, 0u
-        %128:f32 = load %127
-        %129:bool = eq %126, %128
-        store %x_215, %129
-        %130:bool = load %x_215
-        store %x_216, %130
+    if %x_207 [t: $B43] {  # if_11
+      $B43: {  # true
+        %127:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+        %128:i32 = load %127
+        %129:ptr<function, f32, read_write> = access %sums, %128
+        %130:f32 = load %129
+        %131:ptr<uniform, f32, read> = access %x_8, 0u, 1i, 0u
+        %132:f32 = load %131
+        %133:bool = eq %130, %132
+        store %x_215, %133
+        %134:bool = load %x_215
+        store %x_216, %134
         exit_if  # if_11
       }
     }
-    %131:bool = load %x_216
-    if %131 [t: %b44, f: %b45] {  # if_12
-      %b44 = block {  # true
-        %132:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
-        %133:i32 = load %132
-        %134:f32 = convert %133
-        %135:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-        %136:i32 = load %135
-        %137:f32 = convert %136
-        %138:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-        %139:i32 = load %138
-        %140:f32 = convert %139
-        %141:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
-        %142:i32 = load %141
-        %143:f32 = convert %142
-        %144:vec4<f32> = construct %134, %137, %140, %143
-        store %x_GLF_color, %144
+    %135:bool = load %x_216
+    if %135 [t: $B44, f: $B45] {  # if_12
+      $B44: {  # true
+        %136:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+        %137:i32 = load %136
+        %138:f32 = convert %137
+        %139:f32 = let %138
+        %140:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+        %141:i32 = load %140
+        %142:f32 = convert %141
+        %143:f32 = let %142
+        %144:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+        %145:i32 = load %144
+        %146:f32 = convert %145
+        %147:f32 = let %146
+        %148:ptr<uniform, i32, read> = access %x_6, 0u, 2i, 0u
+        %149:i32 = load %148
+        %150:f32 = convert %149
+        %151:vec4<f32> = construct %139, %143, %147, %150
+        store %x_GLF_color, %151
         exit_if  # if_12
       }
-      %b45 = block {  # false
-        %145:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
-        %146:i32 = load %145
-        %147:f32 = convert %146
-        %148:vec4<f32> = construct %147
-        store %x_GLF_color, %148
+      $B45: {  # false
+        %152:ptr<uniform, i32, read> = access %x_6, 0u, 1i, 0u
+        %153:i32 = load %152
+        %154:f32 = convert %153
+        %155:vec4<f32> = construct %154
+        store %x_GLF_color, %155
         exit_if  # if_12
       }
     }
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b46 {
-  %b46 = block {
-    %150:void = call %main_1
-    %151:vec4<f32> = load %x_GLF_color
-    %152:main_out = construct %151
-    ret %152
+%tint_symbol = @fragment func():main_out {
+  $B46: {
+    %157:void = call %main_1
+    %158:vec4<f32> = load %x_GLF_color
+    %159:main_out = construct %158
+    ret %159
   }
 }
 

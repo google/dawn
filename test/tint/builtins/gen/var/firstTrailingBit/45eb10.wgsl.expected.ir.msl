@@ -1,35 +1,64 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %prevent_dce:ptr<storage, vec2<u32>, read_write> = var @binding_point(2, 0)
 }
 
-%firstTrailingBit_45eb10 = func():void -> %b2 {
-  %b2 = block {
+%firstTrailingBit_45eb10 = func():void {
+  $B2: {
     %arg_0:ptr<function, vec2<u32>, read_write> = var, vec2<u32>(1u)
     %4:vec2<u32> = load %arg_0
-    %5:vec2<u32> = firstTrailingBit %4
-    %res:ptr<function, vec2<u32>, read_write> = var, %5
-    %7:vec2<u32> = load %res
-    store %prevent_dce, %7
+    %5:vec2<u32> = let %4
+    %6:vec2<u32> = and %5, vec2<u32>(65535u)
+    %7:vec2<bool> = eq %6, vec2<u32>(0u)
+    %8:vec2<u32> = select vec2<u32>(0u), vec2<u32>(16u), %7
+    %9:vec2<u32> = let %8
+    %10:vec2<u32> = shr %5, %9
+    %11:vec2<u32> = and %10, vec2<u32>(255u)
+    %12:vec2<bool> = eq %11, vec2<u32>(0u)
+    %13:vec2<u32> = select vec2<u32>(0u), vec2<u32>(8u), %12
+    %14:vec2<u32> = let %13
+    %15:vec2<u32> = shr %10, %14
+    %16:vec2<u32> = and %15, vec2<u32>(15u)
+    %17:vec2<bool> = eq %16, vec2<u32>(0u)
+    %18:vec2<u32> = select vec2<u32>(0u), vec2<u32>(4u), %17
+    %19:vec2<u32> = let %18
+    %20:vec2<u32> = shr %15, %19
+    %21:vec2<u32> = and %20, vec2<u32>(3u)
+    %22:vec2<bool> = eq %21, vec2<u32>(0u)
+    %23:vec2<u32> = select vec2<u32>(0u), vec2<u32>(2u), %22
+    %24:vec2<u32> = let %23
+    %25:vec2<u32> = shr %20, %24
+    %26:vec2<u32> = and %25, vec2<u32>(1u)
+    %27:vec2<bool> = eq %26, vec2<u32>(0u)
+    %28:vec2<u32> = select vec2<u32>(0u), vec2<u32>(1u), %27
+    %29:vec2<u32> = or %24, %28
+    %30:vec2<u32> = or %19, %29
+    %31:vec2<u32> = or %14, %30
+    %32:vec2<u32> = or %9, %31
+    %33:vec2<bool> = eq %25, vec2<u32>(0u)
+    %34:vec2<u32> = select %32, vec2<u32>(4294967295u), %33
+    %res:ptr<function, vec2<u32>, read_write> = var, %34
+    %36:vec2<u32> = load %res
+    store %prevent_dce, %36
     ret
   }
 }
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
-    %9:void = call %firstTrailingBit_45eb10
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %38:void = call %firstTrailingBit_45eb10
     ret vec4<f32>(0.0f)
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
-    %11:void = call %firstTrailingBit_45eb10
+%fragment_main = @fragment func():void {
+  $B4: {
+    %40:void = call %firstTrailingBit_45eb10
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
-    %13:void = call %firstTrailingBit_45eb10
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
+    %42:void = call %firstTrailingBit_45eb10
     ret
   }
 }

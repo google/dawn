@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: main_out = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
   x_1_1:u32 @offset(0), @location(1), @interpolate(flat)
   x_2_1:vec2<u32> @offset(8), @location(2), @interpolate(flat)
   x_3_1:i32 @offset(16), @location(3), @interpolate(flat)
@@ -10,7 +10,7 @@ SKIP: FAILED
   x_8_1:vec4<f32> @offset(48), @builtin(position)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_1:ptr<private, u32, read_write> = var
   %x_2:ptr<private, vec2<u32>, read_write> = var
   %x_3:ptr<private, i32, read_write> = var
@@ -20,13 +20,13 @@ SKIP: FAILED
   %x_8:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     ret
   }
 }
-%tint_symbol = @vertex func():main_out -> %b3 {
-  %b3 = block {
+%tint_symbol = @vertex func():main_out {
+  $B3: {
     %10:void = call %main_1
     %11:u32 = load %x_1
     %12:vec2<u32> = load %x_2

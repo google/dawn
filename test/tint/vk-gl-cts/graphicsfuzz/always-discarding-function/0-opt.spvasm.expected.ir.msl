@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(8) {
   injectionSwitch:vec2<f32> @offset(0)
 }
 
@@ -12,13 +12,14 @@ tmp_struct = struct @align(4) {
   nmb:array<i32, 1> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_11:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %x_24:ptr<function, array<i32, 1>, read_write> = var
     %x_68:ptr<function, bool, read_write> = var, false
     %x_17:ptr<function, i32, read_write> = var
@@ -28,49 +29,52 @@ tmp_struct = struct @align(4) {
     %x_69:ptr<function, bool, read_write> = var, false
     %tmp_float:ptr<function, f32, read_write> = var
     %color:ptr<function, vec3<f32>, read_write> = var
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
+    loop [b: $B3] {  # loop_1
+      $B3: {  # body
         %x_79:ptr<function, bool, read_write> = var
         %x_25:ptr<function, i32, read_write> = var
         %x_26:ptr<function, i32, read_write> = var
         %x_101:ptr<function, vec3<f32>, read_write> = var
-        %17:ptr<uniform, vec2<f32>, read> = access %x_11, 0u
-        %x_75:f32 = load_vector_element %17, 1u
+        %18:ptr<uniform, vec2<f32>, read> = access %x_11, 0u
+        %19:f32 = load_vector_element %18, 1u
+        %x_75:f32 = let %19
         store %tmp_float, %x_75
-        %x_76:vec3<f32> = construct %x_75
+        %21:vec3<f32> = construct %x_75
+        %x_76:vec3<f32> = let %21
         store %color, %x_76
         store %x_24, array<i32, 1>(0i)
         store %x_68, false
         store %x_79, false
-        loop [b: %b5, c: %b6] {  # loop_2
-          %b5 = block {  # body
+        loop [b: $B4] {  # loop_2
+          $B4: {  # body
             %x_21:ptr<function, i32, read_write> = var
             %x_93:ptr<function, bool, read_write> = var
             store %x_18, 1i
             store %x_21, 1i
-            loop [b: %b7, c: %b8] {  # loop_3
-              %b7 = block {  # body
+            loop [b: $B5, c: $B6] {  # loop_3
+              $B5: {  # body
                 store %x_25, 0i
-                %22:bool = load %x_79
-                store %x_93, %22
-                %23:i32 = load %x_21
-                %24:bool = gt %23, 10i
-                if %24 [t: %b9, f: %b10] {  # if_1
-                  %b9 = block {  # true
+                %25:bool = load %x_79
+                store %x_93, %25
+                %26:i32 = load %x_21
+                %27:bool = gt %26, 10i
+                if %27 [t: $B7, f: $B8] {  # if_1
+                  $B7: {  # true
                     exit_if  # if_1
                   }
-                  %b10 = block {  # false
+                  $B8: {  # false
                     exit_loop  # loop_3
                   }
                 }
-                %25:i32 = load %x_21
-                %x_22:i32 = sub %25, 1i
+                %28:i32 = load %x_21
+                %29:i32 = sub %28, 1i
+                %x_22:i32 = let %29
                 store %x_19, %x_22
-                %27:ptr<function, i32, read_write> = access %x_24, %x_22
-                %28:i32 = load %27
-                %29:bool = eq %28, 1i
-                if %29 [t: %b11] {  # if_2
-                  %b11 = block {  # true
+                %31:ptr<function, i32, read_write> = access %x_24, %x_22
+                %32:i32 = load %31
+                %33:bool = eq %32, 1i
+                if %33 [t: $B9] {  # if_2
+                  $B9: {  # true
                     store %x_68, true
                     store %x_17, 1i
                     store %x_25, 1i
@@ -79,18 +83,18 @@ tmp_struct = struct @align(4) {
                   }
                 }
                 store %x_18, %x_22
-                continue %b8
+                continue  # -> $B6
               }
-              %b8 = block {  # continuing
+              $B6: {  # continuing
                 store %x_21, %x_22
-                next_iteration %b7
+                next_iteration  # -> $B5
               }
             }
-            %30:i32 = load %x_25
-            store %x_26, %30
-            %31:bool = load %x_93
-            if %31 [t: %b12] {  # if_3
-              %b12 = block {  # true
+            %34:i32 = load %x_25
+            store %x_26, %34
+            %35:bool = load %x_93
+            if %35 [t: $B10] {  # if_3
+              $B10: {  # true
                 exit_loop  # loop_2
               }
             }
@@ -99,35 +103,31 @@ tmp_struct = struct @align(4) {
             store %x_26, -1i
             exit_loop  # loop_2
           }
-          %b6 = block {  # continuing
-            store %x_79, false
-            next_iteration %b5
-          }
         }
-        %32:i32 = load %x_26
-        store %x_20, %32
-        %33:i32 = load %x_26
-        %34:bool = eq %33, -1i
-        if %34 [t: %b13, f: %b14] {  # if_4
-          %b13 = block {  # true
-            discard
+        %36:i32 = load %x_26
+        store %x_20, %36
+        %37:i32 = load %x_26
+        %38:bool = eq %37, -1i
+        if %38 [t: $B11, f: $B12] {  # if_4
+          $B11: {  # true
+            store %continue_execution, false
             exit_if  # if_4
           }
-          %b14 = block {  # false
+          $B12: {  # false
             store %x_GLF_color, vec4<f32>(0.0f)
-            %35:f32 = access %x_76, 0u
-            %36:vec2<f32> = swizzle %x_76, yz
-            %37:vec2<f32> = add %36, vec2<f32>(1.0f)
-            %38:vec2<f32> = swizzle %37, xy
-            %39:vec3<f32> = construct %35, %38
-            store %x_101, %39
-            %40:vec3<f32> = load %x_101
-            store %color, %40
-            %41:ptr<uniform, vec2<f32>, read> = access %x_11, 0u
-            %42:f32 = load_vector_element %41, 0u
-            %43:bool = gt %42, 1.0f
-            if %43 [t: %b15] {  # if_5
-              %b15 = block {  # true
+            %39:f32 = access %x_76, 0u
+            %40:vec2<f32> = swizzle %x_76, yz
+            %41:vec2<f32> = add %40, vec2<f32>(1.0f)
+            %42:vec2<f32> = swizzle %41, xy
+            %43:vec3<f32> = construct %39, %42
+            store %x_101, %43
+            %44:vec3<f32> = load %x_101
+            store %color, %44
+            %45:ptr<uniform, vec2<f32>, read> = access %x_11, 0u
+            %46:f32 = load_vector_element %45, 0u
+            %47:bool = gt %46, 1.0f
+            if %47 [t: $B13] {  # if_5
+              $B13: {  # true
                 store %x_69, true
                 exit_loop  # loop_1
               }
@@ -135,31 +135,35 @@ tmp_struct = struct @align(4) {
             exit_if  # if_4
           }
         }
-        %44:f32 = load_vector_element %x_101, 0u
-        %45:f32 = load_vector_element %x_101, 1u
-        %46:f32 = load_vector_element %x_101, 2u
-        %47:vec4<f32> = construct %44, %45, %46, 1.0f
-        store %x_GLF_color, %47
+        %48:f32 = load_vector_element %x_101, 0u
+        %49:f32 = load_vector_element %x_101, 1u
+        %50:f32 = load_vector_element %x_101, 2u
+        %51:vec4<f32> = construct %48, %49, %50, 1.0f
+        store %x_GLF_color, %51
         store %x_69, true
         exit_loop  # loop_1
-      }
-      %b4 = block {  # continuing
-        next_iteration %b3
       }
     }
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b16 {
-  %b16 = block {
-    %49:void = call %main_1
-    %50:vec4<f32> = load %x_GLF_color
-    %51:main_out = construct %50
-    ret %51
+%tint_symbol = @fragment func():main_out {
+  $B14: {
+    %53:void = call %main_1
+    %54:vec4<f32> = load %x_GLF_color
+    %55:main_out = construct %54
+    %56:bool = load %continue_execution
+    %57:bool = eq %56, false
+    if %57 [t: $B15] {  # if_6
+      $B15: {  # true
+        terminate_invocation
+      }
+    }
+    ret %55
   }
 }
-%binarySearch_struct_tmp_struct_i1_1_1_ = func(%obj:ptr<function, tmp_struct, read_write>):i32 -> %b17 {
-  %b17 = block {
+%binarySearch_struct_tmp_struct_i1_1_1_ = func(%obj:ptr<function, tmp_struct, read_write>):i32 {
+  $B16: {
     %x_112:ptr<function, bool, read_write> = var, false
     %x_16:ptr<function, i32, read_write> = var
     %one:ptr<function, i32, read_write> = var
@@ -168,35 +172,36 @@ tmp_struct = struct @align(4) {
     %x_27:ptr<function, i32, read_write> = var
     %x_28:ptr<function, i32, read_write> = var
     store %x_114, false
-    loop [b: %b18, c: %b19] {  # loop_4
-      %b18 = block {  # body
+    loop [b: $B17] {  # loop_4
+      $B17: {  # body
         %x_15:ptr<function, i32, read_write> = var
         %x_128:ptr<function, bool, read_write> = var
         store %one, 1i
         store %x_15, 1i
-        loop [b: %b20, c: %b21] {  # loop_5
-          %b20 = block {  # body
+        loop [b: $B18, c: $B19] {  # loop_5
+          $B18: {  # body
             store %x_27, 0i
-            %63:bool = load %x_114
-            store %x_128, %63
-            %64:i32 = load %x_15
-            %65:bool = gt %64, 10i
-            if %65 [t: %b22, f: %b23] {  # if_6
-              %b22 = block {  # true
-                exit_if  # if_6
+            %69:bool = load %x_114
+            store %x_128, %69
+            %70:i32 = load %x_15
+            %71:bool = gt %70, 10i
+            if %71 [t: $B20, f: $B21] {  # if_7
+              $B20: {  # true
+                exit_if  # if_7
               }
-              %b23 = block {  # false
+              $B21: {  # false
                 exit_loop  # loop_5
               }
             }
-            %66:i32 = load %x_15
-            %x_13:i32 = sub %66, 1i
+            %72:i32 = load %x_15
+            %73:i32 = sub %72, 1i
+            %x_13:i32 = let %73
             store %zero, %x_13
-            %68:ptr<function, i32, read_write> = access %obj, 0u, %x_13
-            %69:i32 = load %68
-            %70:bool = eq %69, 1i
-            if %70 [t: %b24] {  # if_7
-              %b24 = block {  # true
+            %75:ptr<function, i32, read_write> = access %obj, 0u, %x_13
+            %76:i32 = load %75
+            %77:bool = eq %76, 1i
+            if %77 [t: $B22] {  # if_8
+              $B22: {  # true
                 store %x_112, true
                 store %x_16, 1i
                 store %x_27, 1i
@@ -205,18 +210,18 @@ tmp_struct = struct @align(4) {
               }
             }
             store %one, %x_13
-            continue %b21
+            continue  # -> $B19
           }
-          %b21 = block {  # continuing
+          $B19: {  # continuing
             store %x_15, %x_13
-            next_iteration %b20
+            next_iteration  # -> $B18
           }
         }
-        %71:i32 = load %x_27
-        store %x_28, %71
-        %72:bool = load %x_128
-        if %72 [t: %b25] {  # if_8
-          %b25 = block {  # true
+        %78:i32 = load %x_27
+        store %x_28, %78
+        %79:bool = load %x_128
+        if %79 [t: $B23] {  # if_9
+          $B23: {  # true
             exit_loop  # loop_4
           }
         }
@@ -225,13 +230,9 @@ tmp_struct = struct @align(4) {
         store %x_28, -1i
         exit_loop  # loop_4
       }
-      %b19 = block {  # continuing
-        store %x_114, false
-        next_iteration %b18
-      }
     }
-    %73:i32 = load %x_28
-    ret %73
+    %80:i32 = load %x_28
+    ret %80
   }
 }
 

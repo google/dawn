@@ -11,3 +11,16 @@ void more_tests_that_would_fail() {
   float const a = 2.5f;
   float const b = 2.5f;
 }
+program_source:9:15: error: redefinition of 'a'
+  float const a = 2.5f;
+              ^
+program_source:7:15: note: previous definition is here
+  float const a = 1.47112762928009033203f;
+              ^
+program_source:10:15: error: redefinition of 'b'
+  float const b = 2.5f;
+              ^
+program_source:8:15: note: previous definition is here
+  float const b = 0.09966865181922912598f;
+              ^
+

@@ -1,13 +1,13 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %arg_0:ptr<handle, texture_depth_2d, read> = var @binding_point(1, 0)
   %arg_1:ptr<handle, sampler_comparison, read> = var @binding_point(1, 1)
   %prevent_dce:ptr<storage, f32, read_write> = var @binding_point(2, 0)
 }
 
-%textureSampleCompare_3a5923 = func():void -> %b2 {
-  %b2 = block {
+%textureSampleCompare_3a5923 = func():void {
+  $B2: {
     %arg_2:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(1.0f)
     %arg_3:ptr<function, f32, read_write> = var, 1.0f
     %7:texture_depth_2d = load %arg_0
@@ -21,8 +21,8 @@ SKIP: FAILED
     ret
   }
 }
-%fragment_main = @fragment func():void -> %b3 {
-  %b3 = block {
+%fragment_main = @fragment func():void {
+  $B3: {
     %15:void = call %textureSampleCompare_3a5923
     ret
   }

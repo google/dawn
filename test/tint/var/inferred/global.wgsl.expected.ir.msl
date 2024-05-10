@@ -34,5 +34,118 @@ thread MyStruct v13 = MyStruct{};
 thread tint_array<float, 10> v14 = tint_array<float, 10>{};
 thread int3 v15 = int3(1, 2, 3);
 thread float3 v16 = float3(1.0f, 2.0f, 3.0f);
-void f() {
+kernel void f() {
+  int const l1 = v1;
+  uint const l2 = v2;
+  float const l3 = v3;
+  int3 const l4 = v4;
+  uint3 const l5 = v5;
+  float3 const l6 = v6;
+  MyStruct const l7 = v7;
+  tint_array<float, 10> const l8 = v8;
+  int const l9 = v9;
+  uint const l10 = v10;
+  float const l11 = v11;
+  MyStruct const l12 = v12;
+  MyStruct const l13 = v13;
+  tint_array<float, 10> const l14 = v14;
+  int3 const l15 = v15;
+  float3 const l16 = v16;
 }
+program_source:19:12: error: program scope variable must reside in constant address space
+thread int v1 = 1;
+           ^
+program_source:20:13: error: program scope variable must reside in constant address space
+thread uint v2 = 1u;
+            ^
+program_source:21:14: error: program scope variable must reside in constant address space
+thread float v3 = 1.0f;
+             ^
+program_source:22:13: error: program scope variable must reside in constant address space
+thread int3 v4 = int3(1);
+            ^
+program_source:23:14: error: program scope variable must reside in constant address space
+thread uint3 v5 = uint3(1u, 2u, 3u);
+             ^
+program_source:24:15: error: program scope variable must reside in constant address space
+thread float3 v6 = float3(1.0f, 2.0f, 3.0f);
+              ^
+program_source:25:17: error: program scope variable must reside in constant address space
+thread MyStruct v7 = MyStruct{.f1=1.0f};
+                ^
+program_source:26:30: error: program scope variable must reside in constant address space
+thread tint_array<float, 10> v8 = tint_array<float, 10>{};
+                             ^
+program_source:27:12: error: program scope variable must reside in constant address space
+thread int v9 = 0;
+           ^
+program_source:28:13: error: program scope variable must reside in constant address space
+thread uint v10 = 0u;
+            ^
+program_source:29:14: error: program scope variable must reside in constant address space
+thread float v11 = 0.0f;
+             ^
+program_source:30:17: error: program scope variable must reside in constant address space
+thread MyStruct v12 = MyStruct{};
+                ^
+program_source:31:17: error: program scope variable must reside in constant address space
+thread MyStruct v13 = MyStruct{};
+                ^
+program_source:32:30: error: program scope variable must reside in constant address space
+thread tint_array<float, 10> v14 = tint_array<float, 10>{};
+                             ^
+program_source:33:13: error: program scope variable must reside in constant address space
+thread int3 v15 = int3(1, 2, 3);
+            ^
+program_source:34:15: error: program scope variable must reside in constant address space
+thread float3 v16 = float3(1.0f, 2.0f, 3.0f);
+              ^
+program_source:36:13: warning: unused variable 'l1' [-Wunused-variable]
+  int const l1 = v1;
+            ^
+program_source:37:14: warning: unused variable 'l2' [-Wunused-variable]
+  uint const l2 = v2;
+             ^
+program_source:38:15: warning: unused variable 'l3' [-Wunused-variable]
+  float const l3 = v3;
+              ^
+program_source:39:14: warning: unused variable 'l4' [-Wunused-variable]
+  int3 const l4 = v4;
+             ^
+program_source:40:15: warning: unused variable 'l5' [-Wunused-variable]
+  uint3 const l5 = v5;
+              ^
+program_source:41:16: warning: unused variable 'l6' [-Wunused-variable]
+  float3 const l6 = v6;
+               ^
+program_source:42:18: warning: unused variable 'l7' [-Wunused-variable]
+  MyStruct const l7 = v7;
+                 ^
+program_source:43:31: warning: unused variable 'l8' [-Wunused-variable]
+  tint_array<float, 10> const l8 = v8;
+                              ^
+program_source:44:13: warning: unused variable 'l9' [-Wunused-variable]
+  int const l9 = v9;
+            ^
+program_source:45:14: warning: unused variable 'l10' [-Wunused-variable]
+  uint const l10 = v10;
+             ^
+program_source:46:15: warning: unused variable 'l11' [-Wunused-variable]
+  float const l11 = v11;
+              ^
+program_source:47:18: warning: unused variable 'l12' [-Wunused-variable]
+  MyStruct const l12 = v12;
+                 ^
+program_source:48:18: warning: unused variable 'l13' [-Wunused-variable]
+  MyStruct const l13 = v13;
+                 ^
+program_source:49:31: warning: unused variable 'l14' [-Wunused-variable]
+  tint_array<float, 10> const l14 = v14;
+                              ^
+program_source:50:14: warning: unused variable 'l15' [-Wunused-variable]
+  int3 const l15 = v15;
+             ^
+program_source:51:16: warning: unused variable 'l16' [-Wunused-variable]
+  float3 const l16 = v16;
+               ^
+

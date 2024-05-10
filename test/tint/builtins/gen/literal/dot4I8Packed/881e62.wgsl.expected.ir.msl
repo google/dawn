@@ -1,33 +1,32 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
 }
 
-%dot4I8Packed_881e62 = func():void -> %b2 {
-  %b2 = block {
-    %3:i32 = dot4I8Packed 1u, 1u
-    %res:ptr<function, i32, read_write> = var, %3
-    %5:i32 = load %res
-    store %prevent_dce, %5
+%dot4I8Packed_881e62 = func():void {
+  $B2: {
+    %res:ptr<function, i32, read_write> = var, 1i
+    %4:i32 = load %res
+    store %prevent_dce, %4
     ret
   }
 }
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
-    %7:void = call %dot4I8Packed_881e62
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %6:void = call %dot4I8Packed_881e62
     ret vec4<f32>(0.0f)
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
-    %9:void = call %dot4I8Packed_881e62
+%fragment_main = @fragment func():void {
+  $B4: {
+    %8:void = call %dot4I8Packed_881e62
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
-    %11:void = call %dot4I8Packed_881e62
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
+    %10:void = call %dot4I8Packed_881e62
     ret
   }
 }

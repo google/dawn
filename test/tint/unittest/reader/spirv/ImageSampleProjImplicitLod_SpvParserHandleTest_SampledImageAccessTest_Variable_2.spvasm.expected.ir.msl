@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Swizzle
+../../src/tint/lang/msl/writer/printer/printer.cc:924 internal compiler error: TINT_UNREACHABLE unhandled: textureSample
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

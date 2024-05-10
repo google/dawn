@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
   el:f32 @offset(0)
 }
 
@@ -20,53 +20,61 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_8:ptr<uniform, buf1, read> = var @binding_point(0, 1)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %color:ptr<function, vec4<f32>, read_write> = var
     %6:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-    %x_29:f32 = load %6
-    %8:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-    %x_31:f32 = load %8
-    %10:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-    %x_33:f32 = load %10
-    %12:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
-    %x_35:f32 = load %12
-    %14:vec4<f32> = construct %x_29, %x_31, %x_33, %x_35
-    store %color, %14
-    %15:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
-    %x_38:i32 = load %15
-    %17:i32 = or 1i, %x_38
-    %18:i32 = xor %17, 1i
-    switch %18 [c: (0i, %b3), c: (default, %b4)] {  # switch_1
-      %b3 = block {  # case
-        %19:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-        %x_44:i32 = load %19
-        %21:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
-        %x_46:f32 = load %21
+    %7:f32 = load %6
+    %x_29:f32 = let %7
+    %9:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %10:f32 = load %9
+    %x_31:f32 = let %10
+    %12:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %13:f32 = load %12
+    %x_33:f32 = let %13
+    %15:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+    %16:f32 = load %15
+    %x_35:f32 = let %16
+    %18:vec4<f32> = construct %x_29, %x_31, %x_33, %x_35
+    store %color, %18
+    %19:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
+    %20:i32 = load %19
+    %x_38:i32 = let %20
+    %22:i32 = or 1i, %x_38
+    %23:i32 = xor %22, 1i
+    switch %23 [c: (0i, $B3), c: (default, $B4)] {  # switch_1
+      $B3: {  # case
+        %24:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+        %25:i32 = load %24
+        %x_44:i32 = let %25
+        %27:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+        %28:f32 = load %27
+        %x_46:f32 = let %28
         store_vector_element %color, %x_44, %x_46
         exit_switch  # switch_1
       }
-      %b4 = block {  # case
+      $B4: {  # case
         exit_switch  # switch_1
       }
     }
-    %x_48:vec4<f32> = load %color
+    %30:vec4<f32> = load %color
+    %x_48:vec4<f32> = let %30
     store %x_GLF_color, %x_48
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b5 {
-  %b5 = block {
-    %25:void = call %main_1
-    %26:vec4<f32> = load %x_GLF_color
-    %27:main_out = construct %26
-    ret %27
+%tint_symbol = @fragment func():main_out {
+  $B5: {
+    %33:void = call %main_1
+    %34:vec4<f32> = load %x_GLF_color
+    %35:main_out = construct %34
+    ret %35
   }
 }
 

@@ -1,9 +1,29 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct VertexInputs {
+  uint vertex_index [[vertex_id]];
+  uint instance_index [[instance_id]];
+};
+
+vertex float4 tint_symbol(VertexInputs inputs) {
+  uint const foo = (inputs.vertex_index + inputs.instance_index);
+  return float4(0.0f);
+}
+program_source:4:23: error: 'vertex_id' attribute only applies to parameters
+  uint vertex_index [[vertex_id]];
+                      ^
+program_source:5:25: error: 'instance_id' attribute only applies to parameters
+  uint instance_index [[instance_id]];
+                        ^
+program_source:8:27: error: invalid type 'VertexInputs' for input declaration in a vertex function
+vertex float4 tint_symbol(VertexInputs inputs) {
+                          ^~~~~~~~~~~~~~~~~~~
+program_source:4:3: note: type 'uint' (aka 'unsigned int') cannot be used in struct of resources/colors
+  uint vertex_index [[vertex_id]];
+  ^
+program_source:5:3: note: type 'uint' (aka 'unsigned int') cannot be used in struct of resources/colors
+  uint instance_index [[instance_id]];
+  ^
+

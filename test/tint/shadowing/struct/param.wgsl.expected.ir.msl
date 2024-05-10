@@ -1,9 +1,22 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:270 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct a {
+  int a;
+};
+
+void f(a a) {
+  a const b = a;
+}
+program_source:8:4: error: expected ';' after expression
+  a const b = a;
+   ^
+   ;
+program_source:8:11: error: C++ requires a type specifier for all declarations
+  a const b = a;
+    ~~~~~ ^
+program_source:8:3: warning: expression result unused [-Wunused-value]
+  a const b = a;
+  ^
+

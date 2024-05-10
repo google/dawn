@@ -1,67 +1,67 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %b:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
-%func_3 = func():bool -> %b2 {
-  %b2 = block {
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
+%func_3 = func():bool {
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
         %i:ptr<function, i32, read_write> = var, 0i
-        next_iteration %b4
+        next_iteration  # -> $B4
       }
-      %b4 = block {  # body
+      $B4: {  # body
         %4:i32 = load %i
         %5:i32 = load %b
         %6:bool = lt %4, %5
-        if %6 [t: %b6, f: %b7] {  # if_1
-          %b6 = block {  # true
+        if %6 [t: $B6, f: $B7] {  # if_1
+          $B6: {  # true
             exit_if  # if_1
           }
-          %b7 = block {  # false
+          $B7: {  # false
             exit_loop  # loop_1
           }
         }
-        loop [i: %b8, b: %b9, c: %b10] {  # loop_2
-          %b8 = block {  # initializer
+        loop [i: $B8, b: $B9, c: $B10] {  # loop_2
+          $B8: {  # initializer
             %j:ptr<function, i32, read_write> = var, -1i
-            next_iteration %b9
+            next_iteration  # -> $B9
           }
-          %b9 = block {  # body
+          $B9: {  # body
             %8:i32 = load %j
             %9:bool = eq %8, 1i
-            if %9 [t: %b11, f: %b12] {  # if_2
-              %b11 = block {  # true
+            if %9 [t: $B11, f: $B12] {  # if_2
+              $B11: {  # true
                 exit_if  # if_2
               }
-              %b12 = block {  # false
+              $B12: {  # false
                 exit_loop  # loop_2
               }
             }
             ret false
           }
-          %b10 = block {  # continuing
+          $B10: {  # continuing
             %10:i32 = load %j
             %11:i32 = add %10, 1i
             store %j, %11
-            next_iteration %b9
+            next_iteration  # -> $B9
           }
         }
-        continue %b5
+        continue  # -> $B5
       }
-      %b5 = block {  # continuing
+      $B5: {  # continuing
         %12:i32 = load %i
         %13:i32 = add %12, 1i
         store %i, %13
-        next_iteration %b4
+        next_iteration  # -> $B4
       }
     }
     ret false
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b13 {
-  %b13 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B13: {
     %15:bool = call %func_3
     ret
   }

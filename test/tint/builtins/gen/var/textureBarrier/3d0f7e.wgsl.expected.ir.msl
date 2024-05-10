@@ -1,9 +1,9 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:861 internal compiler error: TINT_UNREACHABLE unhandled: textureBarrier
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void textureBarrier_3d0f7e() {
+  threadgroup_barrier(mem_flags::mem_texture);
+}
+kernel void compute_main() {
+  textureBarrier_3d0f7e();
+}

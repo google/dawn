@@ -1,6 +1,268 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void {
+  $B2: {
+    %c:ptr<function, vec4<f32>, read_write> = var
+    %a:ptr<function, i32, read_write> = var
+    %i1:ptr<function, i32, read_write> = var
+    %i2:ptr<function, i32, read_write> = var
+    %i3:ptr<function, i32, read_write> = var
+    %i4:ptr<function, i32, read_write> = var
+    %i5:ptr<function, i32, read_write> = var
+    %i6:ptr<function, i32, read_write> = var
+    %i7:ptr<function, i32, read_write> = var
+    %i8_1:ptr<function, i32, read_write> = var
+    store %c, vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f)
+    store %a, 0i
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        loop [b: $B5, c: $B6] {  # loop_2
+          $B5: {  # body
+            %14:i32 = load %a
+            %x_46:i32 = let %14
+            store_vector_element %c, %x_46, 1.0f
+            store %i1, 0i
+            loop [b: $B7, c: $B8] {  # loop_3
+              $B7: {  # body
+                %16:i32 = load %i1
+                %x_52:i32 = let %16
+                %18:bool = lt %x_52, 1i
+                if %18 [t: $B9, f: $B10] {  # if_1
+                  $B9: {  # true
+                    exit_if  # if_1
+                  }
+                  $B10: {  # false
+                    exit_loop  # loop_3
+                  }
+                }
+                store %i2, 0i
+                loop [b: $B11, c: $B12] {  # loop_4
+                  $B11: {  # body
+                    %19:i32 = load %i2
+                    %x_59:i32 = let %19
+                    %21:bool = lt %x_59, 1i
+                    if %21 [t: $B13, f: $B14] {  # if_2
+                      $B13: {  # true
+                        exit_if  # if_2
+                      }
+                      $B14: {  # false
+                        exit_loop  # loop_4
+                      }
+                    }
+                    store %i3, 0i
+                    loop [b: $B15, c: $B16] {  # loop_5
+                      $B15: {  # body
+                        %22:i32 = load %i3
+                        %x_66:i32 = let %22
+                        %24:bool = lt %x_66, 1i
+                        if %24 [t: $B17, f: $B18] {  # if_3
+                          $B17: {  # true
+                            exit_if  # if_3
+                          }
+                          $B18: {  # false
+                            exit_loop  # loop_5
+                          }
+                        }
+                        store %i4, 0i
+                        loop [b: $B19, c: $B20] {  # loop_6
+                          $B19: {  # body
+                            %25:i32 = load %i4
+                            %x_73:i32 = let %25
+                            %27:bool = lt %x_73, 1i
+                            if %27 [t: $B21, f: $B22] {  # if_4
+                              $B21: {  # true
+                                exit_if  # if_4
+                              }
+                              $B22: {  # false
+                                exit_loop  # loop_6
+                              }
+                            }
+                            store %i5, 0i
+                            loop [b: $B23, c: $B24] {  # loop_7
+                              $B23: {  # body
+                                %28:i32 = load %i5
+                                %x_80:i32 = let %28
+                                %30:bool = lt %x_80, 1i
+                                if %30 [t: $B25, f: $B26] {  # if_5
+                                  $B25: {  # true
+                                    exit_if  # if_5
+                                  }
+                                  $B26: {  # false
+                                    exit_loop  # loop_7
+                                  }
+                                }
+                                store %i6, 0i
+                                loop [b: $B27, c: $B28] {  # loop_8
+                                  $B27: {  # body
+                                    %31:i32 = load %i6
+                                    %x_87:i32 = let %31
+                                    %33:bool = lt %x_87, 1i
+                                    if %33 [t: $B29, f: $B30] {  # if_6
+                                      $B29: {  # true
+                                        exit_if  # if_6
+                                      }
+                                      $B30: {  # false
+                                        exit_loop  # loop_8
+                                      }
+                                    }
+                                    store %i7, 0i
+                                    loop [b: $B31, c: $B32] {  # loop_9
+                                      $B31: {  # body
+                                        %34:i32 = load %i7
+                                        %x_94:i32 = let %34
+                                        %36:bool = lt %x_94, 1i
+                                        if %36 [t: $B33, f: $B34] {  # if_7
+                                          $B33: {  # true
+                                            exit_if  # if_7
+                                          }
+                                          $B34: {  # false
+                                            exit_loop  # loop_9
+                                          }
+                                        }
+                                        store %i8_1, 0i
+                                        loop [b: $B35, c: $B36] {  # loop_10
+                                          $B35: {  # body
+                                            %37:i32 = load %i8_1
+                                            %x_101:i32 = let %37
+                                            %39:bool = lt %x_101, 17i
+                                            if %39 [t: $B37, f: $B38] {  # if_8
+                                              $B37: {  # true
+                                                exit_if  # if_8
+                                              }
+                                              $B38: {  # false
+                                                exit_loop  # loop_10
+                                              }
+                                            }
+                                            %40:i32 = load %a
+                                            %x_104:i32 = let %40
+                                            %42:i32 = add %x_104, 1i
+                                            store %a, %42
+                                            continue  # -> $B36
+                                          }
+                                          $B36: {  # continuing
+                                            %43:i32 = load %i8_1
+                                            %x_106:i32 = let %43
+                                            %45:i32 = add %x_106, 1i
+                                            store %i8_1, %45
+                                            next_iteration  # -> $B35
+                                          }
+                                        }
+                                        continue  # -> $B32
+                                      }
+                                      $B32: {  # continuing
+                                        %46:i32 = load %i7
+                                        %x_108:i32 = let %46
+                                        %48:i32 = add %x_108, 1i
+                                        store %i7, %48
+                                        next_iteration  # -> $B31
+                                      }
+                                    }
+                                    continue  # -> $B28
+                                  }
+                                  $B28: {  # continuing
+                                    %49:i32 = load %i6
+                                    %x_110:i32 = let %49
+                                    %51:i32 = add %x_110, 1i
+                                    store %i6, %51
+                                    next_iteration  # -> $B27
+                                  }
+                                }
+                                continue  # -> $B24
+                              }
+                              $B24: {  # continuing
+                                %52:i32 = load %i5
+                                %x_112:i32 = let %52
+                                %54:i32 = add %x_112, 1i
+                                store %i5, %54
+                                next_iteration  # -> $B23
+                              }
+                            }
+                            continue  # -> $B20
+                          }
+                          $B20: {  # continuing
+                            %55:i32 = load %i4
+                            %x_114:i32 = let %55
+                            %57:i32 = add %x_114, 1i
+                            store %i4, %57
+                            next_iteration  # -> $B19
+                          }
+                        }
+                        continue  # -> $B16
+                      }
+                      $B16: {  # continuing
+                        %58:i32 = load %i3
+                        %x_116:i32 = let %58
+                        %60:i32 = add %x_116, 1i
+                        store %i3, %60
+                        next_iteration  # -> $B15
+                      }
+                    }
+                    continue  # -> $B12
+                  }
+                  $B12: {  # continuing
+                    %61:i32 = load %i2
+                    %x_118:i32 = let %61
+                    %63:i32 = add %x_118, 1i
+                    store %i2, %63
+                    next_iteration  # -> $B11
+                  }
+                }
+                continue  # -> $B8
+              }
+              $B8: {  # continuing
+                %64:i32 = load %i1
+                %x_120:i32 = let %64
+                %66:i32 = add %x_120, 1i
+                store %i1, %66
+                next_iteration  # -> $B7
+              }
+            }
+            continue  # -> $B6
+          }
+          $B6: {  # continuing
+            %67:f32 = load_vector_element %gl_FragCoord, 0u
+            %x_123:f32 = let %67
+            %69:bool = lt %x_123, -1.0f
+            %70:bool = eq %69, false
+            break_if %70  # -> [t: exit_loop loop_2, f: $B5]
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %71:f32 = load_vector_element %gl_FragCoord, 1u
+        %x_126:f32 = let %71
+        %73:bool = lt %x_126, -1.0f
+        %74:bool = eq %73, false
+        break_if %74  # -> [t: exit_loop loop_1, f: $B3]
+      }
+    }
+    %75:vec4<f32> = load %c
+    %x_128:vec4<f32> = let %75
+    store %x_GLF_color, %x_128
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out {
+  $B39: {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %79:void = call %main_1
+    %80:vec4<f32> = load %x_GLF_color
+    %81:main_out = construct %80
+    ret %81
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

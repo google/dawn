@@ -1,0 +1,40 @@
+SKIP: FAILED
+
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
+  %prevent_dce:ptr<storage, vec2<i32>, read_write> = var @binding_point(2, 0)
+}
+
+%bitcast_c69aaf = func():void {
+  $B2: {
+    %res:ptr<function, vec2<i32>, read_write> = var, vec2<i32>(1i)
+    %4:vec2<i32> = load %res
+    store %prevent_dce, %4
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %6:void = call %bitcast_c69aaf
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void {
+  $B4: {
+    %8:void = call %bitcast_c69aaf
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
+    %10:void = call %bitcast_c69aaf
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

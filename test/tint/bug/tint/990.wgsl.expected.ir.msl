@@ -1,9 +1,22 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+void f() {
+  int i = 0;
+  {
+    thread int* const p = i;
+    while(true) {
+      if (false) {
+      } else {
+        break;
+      }
+      continue;
+    }
+  }
+}
+program_source:7:23: error: cannot initialize a variable of type 'int *const' with an lvalue of type 'int'
+    thread int* const p = i;
+                      ^   ~
+

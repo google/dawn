@@ -1,11 +1,11 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %i:ptr<storage, u32, read_write> = var @binding_point(0, 0)
 }
 
-%tint_symbol = func():void -> %b2 {
-  %b2 = block {
+%tint_symbol = func():void {
+  $B2: {
     %3:u32 = load %i
     %4:u32 = sub %3, 1u
     store %i, %4

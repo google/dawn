@@ -1,45 +1,49 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %rarr:ptr<storage, array<f32>, read> = var @binding_point(0, 0)
 }
 
-%vector = func():void -> %b2 {
-  %b2 = block {
+%vector = func():void {
+  $B2: {
     %idx:i32 = let 3i
-    %x:i32 = access vec2<i32>(1i, 2i), %idx
+    %4:i32 = access vec2<i32>(1i, 2i), %idx
+    %x:i32 = let %4
     ret
   }
 }
-%tint_symbol = func():void -> %b3 {
-  %b3 = block {
+%tint_symbol = func():void {
+  $B3: {
     %idx_1:i32 = let 4i  # %idx_1: 'idx'
-    %x_1:vec2<f32> = access mat2x2<f32>(vec2<f32>(1.0f, 2.0f), vec2<f32>(3.0f, 4.0f)), %idx_1  # %x_1: 'x'
+    %8:vec2<f32> = access mat2x2<f32>(vec2<f32>(1.0f, 2.0f), vec2<f32>(3.0f, 4.0f)), %idx_1
+    %x_1:vec2<f32> = let %8  # %x_1: 'x'
     ret
   }
 }
-%fixed_size_array = func():void -> %b4 {
-  %b4 = block {
+%fixed_size_array = func():void {
+  $B4: {
     %arr:array<i32, 2> = let array<i32, 2>(1i, 2i)
     %idx_2:i32 = let 3i  # %idx_2: 'idx'
-    %x_2:i32 = access %arr, %idx_2  # %x_2: 'x'
+    %13:i32 = access %arr, %idx_2
+    %x_2:i32 = let %13  # %x_2: 'x'
     ret
   }
 }
-%runtime_size_array = func():void -> %b5 {
-  %b5 = block {
+%runtime_size_array = func():void {
+  $B5: {
     %idx_3:i32 = let -1i  # %idx_3: 'idx'
-    %14:ptr<storage, f32, read> = access %rarr, %idx_3
-    %x_3:f32 = load %14  # %x_3: 'x'
+    %17:ptr<storage, f32, read> = access %rarr, %idx_3
+    %18:f32 = load %17
+    %x_3:f32 = let %18  # %x_3: 'x'
     ret
   }
 }
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
-  %b6 = block {
-    %17:void = call %vector
-    %18:void = call %tint_symbol
-    %19:void = call %fixed_size_array
-    %20:void = call %runtime_size_array
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B6: {
+    %21:void = call %vector
+    %22:void = call %tint_symbol
+    %23:void = call %fixed_size_array
+    %24:void = call %runtime_size_array
     ret
   }
 }

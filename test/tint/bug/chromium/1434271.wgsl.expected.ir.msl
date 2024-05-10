@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: RenderParams = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: RenderParams = struct @align(16) {
   modelViewProjectionMatrix:mat4x4<f32> @offset(0)
   right:vec3<f32> @offset(64)
   up:vec3<f32> @offset(80)
@@ -42,7 +42,7 @@ Buffer = struct @align(4) {
   weights:array<f32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %rand_seed:ptr<private, vec2<f32>, read_write> = var
   %render_params:ptr<uniform, RenderParams, read> = var @binding_point(0, 5)
   %sim_params:ptr<uniform, SimulationParams, read> = var @binding_point(0, 0)
@@ -55,8 +55,8 @@ Buffer = struct @align(4) {
   %tex_out:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(0, 7)
 }
 
-%asinh_468a48 = func():void -> %b2 {
-  %b2 = block {
+%asinh_468a48 = func():void {
+  $B2: {
     %arg_0:ptr<function, f16, read_write> = var, 0.0h
     %13:f16 = load %arg_0
     %14:f16 = asinh %13
@@ -64,26 +64,26 @@ Buffer = struct @align(4) {
     ret
   }
 }
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
     %17:void = call %asinh_468a48
     ret vec4<f32>(0.0f)
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
+%fragment_main = @fragment func():void {
+  $B4: {
     %19:void = call %asinh_468a48
     ret
   }
 }
-%rgba32uintin = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
+%rgba32uintin = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
     %21:void = call %asinh_468a48
     ret
   }
 }
-%vs_main = @vertex func(%in:VertexInput):VertexOutput -> %b6 {
-  %b6 = block {
+%vs_main = @vertex func(%in:VertexInput):VertexOutput {
+  $B6: {
     %24:ptr<uniform, vec3<f32>, read> = access %render_params, 1u
     %25:vec3<f32> = load %24
     %26:ptr<uniform, vec3<f32>, read> = access %render_params, 2u
@@ -101,103 +101,136 @@ Buffer = struct @align(4) {
     %38:ptr<function, vec4<f32>, read_write> = access %out, 0u
     %39:ptr<uniform, mat4x4<f32>, read> = access %render_params, 0u
     %40:mat4x4<f32> = load %39
-    %41:vec3<f32> = load %position
-    %42:vec4<f32> = construct %41, 1.0f
-    %43:vec4<f32> = mul %40, %42
-    store %38, %43
-    %44:ptr<function, vec4<f32>, read_write> = access %out, 1u
-    %45:vec4<f32> = access %in, 1u
-    store %44, %45
-    %46:ptr<function, vec2<f32>, read_write> = access %out, 2u
-    %47:vec2<f32> = access %in, 2u
-    store %46, %47
-    %48:VertexOutput = load %out
-    ret %48
+    %41:mat4x4<f32> = let %40
+    %42:vec3<f32> = load %position
+    %43:vec4<f32> = construct %42, 1.0f
+    %44:vec4<f32> = mul %41, %43
+    store %38, %44
+    %45:ptr<function, vec4<f32>, read_write> = access %out, 1u
+    %46:vec4<f32> = access %in, 1u
+    store %45, %46
+    %47:ptr<function, vec2<f32>, read_write> = access %out, 2u
+    %48:vec2<f32> = access %in, 2u
+    store %47, %48
+    %49:VertexOutput = load %out
+    ret %49
   }
 }
-%simulate = @compute @workgroup_size(64, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void -> %b7 {
-  %b7 = block {
-    %51:ptr<uniform, vec4<f32>, read> = access %sim_params, 1u
-    %52:vec4<f32> = load %51
-    %53:vec2<f32> = swizzle %52, xy
-    %54:vec2<u32> = swizzle %GlobalInvocationID, xy
-    %55:vec2<f32> = convert %54
-    %56:vec2<f32> = mul %53, %55
-    %57:ptr<uniform, vec4<f32>, read> = access %sim_params, 1u
-    %58:vec4<f32> = load %57
-    %59:vec2<f32> = swizzle %58, zw
-    %60:vec2<f32> = mul %56, %59
-    store %rand_seed, %60
-    %idx:u32 = access %GlobalInvocationID, 0u
-    %62:ptr<storage, Particle, read_write> = access %data, 0u, %idx
-    %63:Particle = load %62
-    %particle:ptr<function, Particle, read_write> = var, %63
+%simulate = @compute @workgroup_size(64, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void {
+  $B7: {
+    %52:ptr<uniform, vec4<f32>, read> = access %sim_params, 1u
+    %53:vec4<f32> = load %52
+    %54:vec2<f32> = swizzle %53, xy
+    %55:vec2<f32> = let %54
+    %56:vec2<u32> = swizzle %GlobalInvocationID, xy
+    %57:vec2<f32> = convert %56
+    %58:vec2<f32> = mul %55, %57
+    %59:ptr<uniform, vec4<f32>, read> = access %sim_params, 1u
+    %60:vec4<f32> = load %59
+    %61:vec2<f32> = swizzle %60, zw
+    %62:vec2<f32> = mul %58, %61
+    store %rand_seed, %62
+    %63:u32 = access %GlobalInvocationID, 0u
+    %idx:u32 = let %63
     %65:ptr<storage, Particle, read_write> = access %data, 0u, %idx
-    %66:Particle = load %particle
-    store %65, %66
+    %66:Particle = load %65
+    %particle:ptr<function, Particle, read_write> = var, %66
+    %68:ptr<storage, Particle, read_write> = access %data, 0u, %idx
+    %69:Particle = load %particle
+    %70:void = call %tint_store_and_preserve_padding, %68, %69
     ret
   }
 }
-%export_level = @compute @workgroup_size(64, 1, 1) func(%coord:vec3<u32> [@global_invocation_id]):void -> %b8 {
-  %b8 = block {
-    %69:vec2<u32> = swizzle %coord, xy
-    %70:texture_storage_2d<rgba8unorm, write> = load %tex_out
-    %71:vec2<u32> = textureDimensions %70
-    %72:vec2<u32> = construct %71
-    %73:vec2<bool> = lt %69, %72
-    %74:bool = all %73
-    if %74 [t: %b9] {  # if_1
-      %b9 = block {  # true
-        %75:u32 = access %coord, 0u
-        %76:u32 = access %coord, 1u
-        %77:ptr<uniform, u32, read> = access %ubo, 0u
-        %78:u32 = load %77
-        %79:u32 = mul %76, %78
-        %dst_offset:u32 = shiftl %75, %79
-        %81:u32 = access %coord, 0u
-        %82:u32 = sub %81, 2u
-        %83:u32 = access %coord, 1u
-        %84:u32 = shiftr %83, 2u
-        %85:ptr<uniform, u32, read> = access %ubo, 0u
-        %86:u32 = load %85
-        %87:u32 = mul %84, %86
-        %src_offset:u32 = add %82, %87
-        %89:u32 = shiftl %src_offset, 0u
-        %90:ptr<storage, f32, read> = access %buf_in, 0u, %89
-        %a:f32 = load %90
-        %92:u32 = add %src_offset, 1u
-        %93:ptr<storage, f32, read> = access %buf_in, 0u, %92
-        %b:f32 = load %93
-        %95:u32 = add %src_offset, 1u
-        %96:ptr<uniform, u32, read> = access %ubo, 0u
-        %97:u32 = load %96
-        %98:u32 = add %95, %97
-        %99:ptr<storage, f32, read> = access %buf_in, 0u, %98
-        %c:f32 = load %99
-        %101:u32 = add %src_offset, 1u
-        %102:ptr<uniform, u32, read> = access %ubo, 0u
-        %103:u32 = load %102
-        %104:u32 = add %101, %103
-        %105:ptr<storage, f32, read> = access %buf_in, 0u, %104
-        %d:f32 = load %105
-        %107:vec4<f32> = construct %a, %b, %c, %d
-        %sum:f32 = dot %107, vec4<f32>(1.0f)
-        %109:ptr<storage, f32, read_write> = access %buf_out, 0u, %dst_offset
-        %110:f32 = mod %sum, 4.0f
-        store %109, %110
-        %111:f32 = mul %a, %b
-        %112:f32 = div %a, %b
-        %113:f32 = add %112, %c
-        %114:vec4<f32> = construct %a, %111, %113, %sum
-        %115:f32 = max %sum, 0.0f
-        %probabilities:vec4<f32> = add %114, %115
-        %117:texture_storage_2d<rgba8unorm, write> = load %tex_out
-        %118:vec2<u32> = swizzle %coord, xy
-        %119:vec2<i32> = convert %118
-        %120:void = textureStore %117, %119, %probabilities
+%export_level = @compute @workgroup_size(64, 1, 1) func(%coord:vec3<u32> [@global_invocation_id]):void {
+  $B8: {
+    %74:vec2<u32> = swizzle %coord, xy
+    %75:texture_storage_2d<rgba8unorm, write> = load %tex_out
+    %76:vec2<u32> = textureDimensions %75
+    %77:vec2<u32> = construct %76
+    %78:vec2<bool> = lt %74, %77
+    %79:bool = all %78
+    if %79 [t: $B9] {  # if_1
+      $B9: {  # true
+        %80:u32 = access %coord, 0u
+        %81:u32 = access %coord, 1u
+        %82:ptr<uniform, u32, read> = access %ubo, 0u
+        %83:u32 = load %82
+        %84:u32 = mul %81, %83
+        %85:u32 = and %84, 31u
+        %86:u32 = shl %80, %85
+        %dst_offset:u32 = let %86
+        %88:u32 = access %coord, 0u
+        %89:u32 = sub %88, 2u
+        %90:u32 = access %coord, 1u
+        %91:u32 = and 2u, 31u
+        %92:u32 = shr %90, %91
+        %93:ptr<uniform, u32, read> = access %ubo, 0u
+        %94:u32 = load %93
+        %95:u32 = mul %92, %94
+        %96:u32 = add %89, %95
+        %src_offset:u32 = let %96
+        %98:u32 = and 0u, 31u
+        %99:u32 = shl %src_offset, %98
+        %100:ptr<storage, f32, read> = access %buf_in, 0u, %99
+        %101:f32 = load %100
+        %a:f32 = let %101
+        %103:u32 = add %src_offset, 1u
+        %104:ptr<storage, f32, read> = access %buf_in, 0u, %103
+        %105:f32 = load %104
+        %b:f32 = let %105
+        %107:u32 = add %src_offset, 1u
+        %108:ptr<uniform, u32, read> = access %ubo, 0u
+        %109:u32 = load %108
+        %110:u32 = add %107, %109
+        %111:ptr<storage, f32, read> = access %buf_in, 0u, %110
+        %112:f32 = load %111
+        %c:f32 = let %112
+        %114:u32 = add %src_offset, 1u
+        %115:ptr<uniform, u32, read> = access %ubo, 0u
+        %116:u32 = load %115
+        %117:u32 = add %114, %116
+        %118:ptr<storage, f32, read> = access %buf_in, 0u, %117
+        %119:f32 = load %118
+        %d:f32 = let %119
+        %121:vec4<f32> = construct %a, %b, %c, %d
+        %122:f32 = dot %121, vec4<f32>(1.0f)
+        %sum:f32 = let %122
+        %124:ptr<storage, f32, read_write> = access %buf_out, 0u, %dst_offset
+        %125:f32 = mod %sum, 4.0f
+        store %124, %125
+        %126:f32 = mul %a, %b
+        %127:f32 = div %a, %b
+        %128:f32 = add %127, %c
+        %129:vec4<f32> = construct %a, %126, %128, %sum
+        %130:vec4<f32> = let %129
+        %131:f32 = max %sum, 0.0f
+        %132:vec4<f32> = add %130, %131
+        %probabilities:vec4<f32> = let %132
+        %134:texture_storage_2d<rgba8unorm, write> = load %tex_out
+        %135:texture_storage_2d<rgba8unorm, write> = let %134
+        %136:vec2<u32> = swizzle %coord, xy
+        %137:vec2<i32> = convert %136
+        %138:void = textureStore %135, %137, %probabilities
         exit_if  # if_1
       }
     }
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<storage, Particle, read_write>, %value_param:Particle):void {
+  $B10: {
+    %141:ptr<storage, vec3<f32>, read_write> = access %target, 0u
+    %142:vec3<f32> = access %value_param, 0u
+    store %141, %142
+    %143:ptr<storage, f32, read_write> = access %target, 1u
+    %144:f32 = access %value_param, 1u
+    store %143, %144
+    %145:ptr<storage, vec4<f32>, read_write> = access %target, 2u
+    %146:vec4<f32> = access %value_param, 2u
+    store %145, %146
+    %147:ptr<storage, vec2<f32>, read_write> = access %target, 3u
+    %148:vec2<f32> = access %value_param, 3u
+    store %147, %148
     ret
   }
 }

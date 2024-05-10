@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(8) {
   injectionSwitch:vec2<f32> @offset(0)
 }
 
@@ -8,39 +8,40 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %gv:ptr<private, vec4<f32>, read_write> = var
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %temp:ptr<function, i32, read_write> = var
-    %6:ptr<uniform, vec2<f32>, read> = access %x_5, 0u
-    %7:f32 = load_vector_element %6, 0u
-    %8:bool = gt %7, 2.0f
-    if %8 [t: %b3] {  # if_1
-      %b3 = block {  # true
-        %9:vec4<f32> = load %gv
-        %10:vec4<f32> = mix vec4<f32>(1.0f), vec4<f32>(1.0f), %9
-        %11:vec4<f32> = max %10, vec4<f32>(8.6000003814697265625f)
-        %12:f32 = access %11, 1u
-        %13:i32 = convert %12
-        store %temp, %13
-        %14:i32 = load %temp
-        %15:bool = lt %14, 150i
-        if %15 [t: %b4] {  # if_2
-          %b4 = block {  # true
-            discard
+    %7:ptr<uniform, vec2<f32>, read> = access %x_5, 0u
+    %8:f32 = load_vector_element %7, 0u
+    %9:bool = gt %8, 2.0f
+    if %9 [t: $B3] {  # if_1
+      $B3: {  # true
+        %10:vec4<f32> = load %gv
+        %11:vec4<f32> = mix vec4<f32>(1.0f), vec4<f32>(1.0f), %10
+        %12:vec4<f32> = max %11, vec4<f32>(8.6000003814697265625f)
+        %13:f32 = access %12, 1u
+        %14:i32 = call %tint_f32_to_i32, %13
+        store %temp, %14
+        %16:i32 = load %temp
+        %17:bool = lt %16, 150i
+        if %17 [t: $B4] {  # if_2
+          $B4: {  # true
+            store %continue_execution, false
             exit_if  # if_2
           }
         }
-        %16:i32 = load %temp
-        %17:bool = lt %16, 180i
-        if %17 [t: %b5] {  # if_3
-          %b5 = block {  # true
-            discard
+        %18:i32 = load %temp
+        %19:bool = lt %18, 180i
+        if %19 [t: $B5] {  # if_3
+          $B5: {  # true
+            store %continue_execution, false
             exit_if  # if_3
           }
         }
@@ -51,12 +52,29 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b6 {
-  %b6 = block {
-    %19:void = call %main_1
-    %20:vec4<f32> = load %x_GLF_color
-    %21:main_out = construct %20
-    ret %21
+%tint_symbol = @fragment func():main_out {
+  $B6: {
+    %21:void = call %main_1
+    %22:vec4<f32> = load %x_GLF_color
+    %23:main_out = construct %22
+    %24:bool = load %continue_execution
+    %25:bool = eq %24, false
+    if %25 [t: $B7] {  # if_4
+      $B7: {  # true
+        terminate_invocation
+      }
+    }
+    ret %23
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 {
+  $B8: {
+    %27:i32 = convert %value
+    %28:bool = gte %value, -2147483648.0f
+    %29:i32 = select -2147483648i, %27, %28
+    %30:bool = lte %value, 2147483520.0f
+    %31:i32 = select 2147483647i, %29, %30
+    ret %31
   }
 }
 

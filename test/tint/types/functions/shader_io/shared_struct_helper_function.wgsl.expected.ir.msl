@@ -1,25 +1,25 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: VertexOutput = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: VertexOutput = struct @align(16) {
   pos:vec4<f32> @offset(0), @builtin(position)
   loc0:i32 @offset(16), @location(0), @interpolate(flat)
 }
 
-%foo = func(%x:f32):VertexOutput -> %b1 {
-  %b1 = block {
+%foo = func(%x:f32):VertexOutput {
+  $B1: {
     %3:vec4<f32> = construct %x, %x, %x, 1.0f
     %4:VertexOutput = construct %3, 42i
     ret %4
   }
 }
-%vert_main1 = @vertex func():VertexOutput -> %b2 {
-  %b2 = block {
+%vert_main1 = @vertex func():VertexOutput {
+  $B2: {
     %6:VertexOutput = call %foo, 0.5f
     ret %6
   }
 }
-%vert_main2 = @vertex func():VertexOutput -> %b3 {
-  %b3 = block {
+%vert_main2 = @vertex func():VertexOutput {
+  $B3: {
     %8:VertexOutput = call %foo, 0.25f
     ret %8
   }

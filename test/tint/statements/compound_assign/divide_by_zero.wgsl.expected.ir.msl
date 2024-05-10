@@ -1,9 +1,31 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread int a = 0;
+thread float b = 0.0f;
+void foo(int maybe_zero) {
+  a = tint_div_i32(a, 0);
+  a = tint_mod_i32(a, 0);
+  a = tint_div_i32(a, maybe_zero);
+  a = tint_mod_i32(a, maybe_zero);
+  b = (b / 0.0f);
+  b = (b % 0.0f);
+  b = (b / float(maybe_zero));
+  b = (b % float(maybe_zero));
+}
+int tint_div_i32(int lhs, int rhs) {
+  return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))));
+}
+int tint_mod_i32(int lhs, int rhs) {
+  int const v = select(rhs, 1, ((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1))));
+  return (lhs - ((lhs / v) * v));
+}
+program_source:4:12: error: program scope variable must reside in constant address space
+thread int a = 0;
+           ^
+program_source:5:14: error: program scope variable must reside in constant address space
+thread float b = 0.0f;
+             ^
+

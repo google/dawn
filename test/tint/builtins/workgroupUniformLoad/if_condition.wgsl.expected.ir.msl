@@ -1,9 +1,19 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:861 internal compiler error: TINT_UNREACHABLE unhandled: workgroupBarrier
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+threadgroup bool v;
+int foo() {
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  bool const v_1 = v;
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  if (v_1) {
+    return 42;
+  }
+  return 0;
+}
+program_source:4:18: error: program scope variable must reside in constant address space
+threadgroup bool v;
+                 ^
+

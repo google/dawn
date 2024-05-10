@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 #include <metal_stdlib>
 using namespace metal;
 
@@ -5,7 +7,14 @@ void foo() {
   int a = 0;
   float4 b = 0.0f;
   float2x2 c = float2x2(0.0f);
-  a = (a / 2);
+  a = tint_div_i32(a, 2);
   b = (b * float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f)));
   c = (c * 2.0f);
 }
+int tint_div_i32(int lhs, int rhs) {
+  return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))));
+}
+program_source:8:7: error: use of undeclared identifier 'tint_div_i32'
+  a = tint_div_i32(a, 2);
+      ^
+

@@ -19,3 +19,7 @@ thread tint_array<float2x2, 2> arr = tint_array<float2x2, 2>{float2x2(float2(1.0
 void f() {
   tint_array<float2x2, 2> v = arr;
 }
+program_source:16:32: error: program scope variable must reside in constant address space
+thread tint_array<float2x2, 2> arr = tint_array<float2x2, 2>{float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f)), float2x2(float2(5.0f, 6.0f), float2(7.0f, 8.0f))};
+                               ^
+

@@ -1,9 +1,36 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+threadgroup float2x4 S;
+void func(threadgroup float4* const pointer) {
+  pointer = float4(0.0f);
+}
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]]) {
+  if ((tint_local_index == 0u)) {
+    S = float2x4(float4(0.0f), float4(0.0f));
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  func(S[1]);
+}
+program_source:4:22: error: program scope variable must reside in constant address space
+threadgroup float2x4 S;
+                     ^
+program_source:6:11: error: cannot assign to variable 'pointer' with const-qualified type 'threadgroup float4 *const'
+  pointer = float4(0.0f);
+  ~~~~~~~ ^
+program_source:5:37: note: variable 'pointer' declared const here
+void func(threadgroup float4* const pointer) {
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+program_source:9:25: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+  if ((tint_local_index == 0u)) {
+       ~~~~~~~~~~~~~~~~~^~~~~
+program_source:9:25: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((tint_local_index == 0u)) {
+      ~                 ^    ~
+program_source:9:25: note: use '=' to turn this equality comparison into an assignment
+  if ((tint_local_index == 0u)) {
+                        ^~
+                        =
+

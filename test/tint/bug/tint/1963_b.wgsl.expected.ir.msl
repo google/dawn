@@ -1,18 +1,19 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: __atomic_compare_exchange_result_i32 = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: __atomic_compare_exchange_result_i32 = struct @align(4) {
   old_value:i32 @offset(0)
   exchanged:bool @offset(4)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %a:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %3:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %a, 1i, 1i
-    %v:i32 = access %3, 0u
+    %4:i32 = access %3, 0u
+    %v:i32 = let %4
     ret
   }
 }

@@ -1,9 +1,25 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+void func(thread float4* const pointer) {
+  pointer = float4(0.0f);
+}
+kernel void tint_symbol() {
+  float2x4 F = float2x4(0.0f);
+  func(F[1]);
+}
+program_source:5:11: error: cannot assign to variable 'pointer' with const-qualified type 'float4 *const'
+  pointer = float4(0.0f);
+  ~~~~~~~ ^
+program_source:4:32: note: variable 'pointer' declared const here
+void func(thread float4* const pointer) {
+          ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
+program_source:9:3: error: no matching function for call to 'func'
+  func(F[1]);
+  ^~~~
+program_source:4:6: note: candidate function not viable: no known conversion from 'vec<float, 4>' (vector of 4 'float' values) to 'float4 *const' for 1st argument; take the address of the argument with &
+void func(thread float4* const pointer) {
+     ^
+

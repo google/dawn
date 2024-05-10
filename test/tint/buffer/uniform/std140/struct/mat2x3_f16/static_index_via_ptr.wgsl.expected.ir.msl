@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Inner = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Inner = struct @align(8) {
   m:mat2x3<f16> @offset(0)
 }
 
@@ -8,25 +8,37 @@ Outer = struct @align(8) {
   a:array<Inner, 4> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %a:ptr<uniform, array<Outer, 4>, read> = var @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %p_a:ptr<uniform, array<Outer, 4>, read> = let %a
-    %p_a_3:ptr<uniform, Outer, read> = access %p_a, 3i
-    %p_a_3_a:ptr<uniform, array<Inner, 4>, read> = access %p_a_3, 0u
-    %p_a_3_a_2:ptr<uniform, Inner, read> = access %p_a_3_a, 2i
-    %p_a_3_a_2_m:ptr<uniform, mat2x3<f16>, read> = access %p_a_3_a_2, 0u
-    %p_a_3_a_2_m_1:ptr<uniform, vec3<f16>, read> = access %p_a_3_a_2_m, 1i
-    %l_a:array<Outer, 4> = load %p_a
-    %l_a_3:Outer = load %p_a_3
-    %l_a_3_a:array<Inner, 4> = load %p_a_3_a
-    %l_a_3_a_2:Inner = load %p_a_3_a_2
-    %l_a_3_a_2_m:mat2x3<f16> = load %p_a_3_a_2_m
-    %l_a_3_a_2_m_1:vec3<f16> = load %p_a_3_a_2_m_1
-    %l_a_3_a_2_m_1_0:f16 = load_vector_element %p_a_3_a_2_m_1, 0i
+    %4:ptr<uniform, Outer, read> = access %p_a, 3i
+    %p_a_3:ptr<uniform, Outer, read> = let %4
+    %6:ptr<uniform, array<Inner, 4>, read> = access %p_a_3, 0u
+    %p_a_3_a:ptr<uniform, array<Inner, 4>, read> = let %6
+    %8:ptr<uniform, Inner, read> = access %p_a_3_a, 2i
+    %p_a_3_a_2:ptr<uniform, Inner, read> = let %8
+    %10:ptr<uniform, mat2x3<f16>, read> = access %p_a_3_a_2, 0u
+    %p_a_3_a_2_m:ptr<uniform, mat2x3<f16>, read> = let %10
+    %12:ptr<uniform, vec3<f16>, read> = access %p_a_3_a_2_m, 1i
+    %p_a_3_a_2_m_1:ptr<uniform, vec3<f16>, read> = let %12
+    %14:array<Outer, 4> = load %p_a
+    %l_a:array<Outer, 4> = let %14
+    %16:Outer = load %p_a_3
+    %l_a_3:Outer = let %16
+    %18:array<Inner, 4> = load %p_a_3_a
+    %l_a_3_a:array<Inner, 4> = let %18
+    %20:Inner = load %p_a_3_a_2
+    %l_a_3_a_2:Inner = let %20
+    %22:mat2x3<f16> = load %p_a_3_a_2_m
+    %l_a_3_a_2_m:mat2x3<f16> = let %22
+    %24:vec3<f16> = load %p_a_3_a_2_m_1
+    %l_a_3_a_2_m_1:vec3<f16> = let %24
+    %26:f16 = load_vector_element %p_a_3_a_2_m_1, 0i
+    %l_a_3_a_2_m_1_0:f16 = let %26
     ret
   }
 }

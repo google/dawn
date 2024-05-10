@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(8) {
   injectionSwitch:vec2<f32> @offset(0)
 }
 
@@ -13,13 +13,13 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %x_33:ptr<function, StructType, read_write> = var
     %x_9:ptr<function, i32, read_write> = var
     %x_38:ptr<function, i32, read_write> = var
@@ -27,93 +27,104 @@ main_out = struct @align(16) {
     %x_10:ptr<function, i32, read_write> = var
     store %x_33, StructType(vec3<f32>(0.0f), vec4<bool>(false))
     store %x_9, 0i
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
         %x_34:ptr<function, StructType, read_write> = var
         %x_7:ptr<function, i32, read_write> = var
         %11:ptr<uniform, vec2<f32>, read> = access %x_5, 0u
         %12:f32 = load_vector_element %11, 1u
-        %13:i32 = convert %12
+        %13:i32 = call %tint_f32_to_i32, %12
         store %x_38, %13
-        %14:i32 = load %x_9
-        %15:i32 = load %x_38
-        %16:bool = lt %14, %15
-        if %16 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+        %15:i32 = load %x_9
+        %16:i32 = load %x_38
+        %17:bool = lt %15, %16
+        if %17 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
-        continue %b4
+        continue  # -> $B4
       }
-      %b4 = block {  # continuing
-        %17:StructType = load %x_33
-        store %x_34, %17
-        %18:ptr<function, vec3<f32>, read_write> = access %x_34, 0u
-        store %18, vec3<f32>(1.0f, 0.0f, 0.0f)
-        %19:i32 = load %x_9
-        %20:i32 = add %19, 1i
-        store %x_7, %20
-        %21:StructType = load %x_34
-        store %x_33, %21
-        %22:i32 = load %x_7
-        store %x_9, %22
-        next_iteration %b3
+      $B4: {  # continuing
+        %18:StructType = load %x_33
+        store %x_34, %18
+        %19:ptr<function, vec3<f32>, read_write> = access %x_34, 0u
+        store %19, vec3<f32>(1.0f, 0.0f, 0.0f)
+        %20:i32 = load %x_9
+        %21:i32 = add %20, 1i
+        store %x_7, %21
+        %22:StructType = load %x_34
+        store %x_33, %22
+        %23:i32 = load %x_7
+        store %x_9, %23
+        next_iteration  # -> $B3
       }
     }
-    %23:StructType = load %x_33
-    store %x_42, %23
+    %24:StructType = load %x_33
+    store %x_42, %24
     store %x_10, 0i
-    loop [b: %b7, c: %b8] {  # loop_2
-      %b7 = block {  # body
+    loop [b: $B7, c: $B8] {  # loop_2
+      $B7: {  # body
         %x_43:ptr<function, StructType, read_write> = var
         %x_8:ptr<function, i32, read_write> = var
-        %26:i32 = load %x_10
-        %27:i32 = load %x_38
-        %28:bool = lt %26, %27
-        if %28 [t: %b9, f: %b10] {  # if_2
-          %b9 = block {  # true
+        %27:i32 = load %x_10
+        %28:i32 = load %x_38
+        %29:bool = lt %27, %28
+        if %29 [t: $B9, f: $B10] {  # if_2
+          $B9: {  # true
             exit_if  # if_2
           }
-          %b10 = block {  # false
+          $B10: {  # false
             exit_loop  # loop_2
           }
         }
-        continue %b8
+        continue  # -> $B8
       }
-      %b8 = block {  # continuing
-        %29:StructType = load %x_42
-        store %x_43, %29
-        %30:ptr<function, vec3<f32>, read_write> = access %x_43, 0u
-        store %30, vec3<f32>(1.0f, 0.0f, 0.0f)
-        %31:i32 = load %x_10
-        %32:i32 = add %31, 1i
-        store %x_8, %32
-        %33:StructType = load %x_43
-        store %x_42, %33
-        %34:i32 = load %x_8
-        store %x_10, %34
-        next_iteration %b7
+      $B8: {  # continuing
+        %30:StructType = load %x_42
+        store %x_43, %30
+        %31:ptr<function, vec3<f32>, read_write> = access %x_43, 0u
+        store %31, vec3<f32>(1.0f, 0.0f, 0.0f)
+        %32:i32 = load %x_10
+        %33:i32 = add %32, 1i
+        store %x_8, %33
+        %34:StructType = load %x_43
+        store %x_42, %34
+        %35:i32 = load %x_8
+        store %x_10, %35
+        next_iteration  # -> $B7
       }
     }
-    %35:ptr<function, vec3<f32>, read_write> = access %x_42, 0u
-    %x_47:vec3<f32> = load %35
-    %37:f32 = access %x_47, 0u
-    %38:f32 = access %x_47, 1u
-    %39:f32 = access %x_47, 2u
-    %40:vec4<f32> = construct %37, %38, %39, 1.0f
-    store %x_GLF_color, %40
+    %36:ptr<function, vec3<f32>, read_write> = access %x_42, 0u
+    %37:vec3<f32> = load %36
+    %x_47:vec3<f32> = let %37
+    %39:f32 = access %x_47, 0u
+    %40:f32 = access %x_47, 1u
+    %41:f32 = access %x_47, 2u
+    %42:vec4<f32> = construct %39, %40, %41, 1.0f
+    store %x_GLF_color, %42
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b11 {
-  %b11 = block {
-    %42:void = call %main_1
-    %43:vec4<f32> = load %x_GLF_color
-    %44:main_out = construct %43
-    ret %44
+%tint_symbol = @fragment func():main_out {
+  $B11: {
+    %44:void = call %main_1
+    %45:vec4<f32> = load %x_GLF_color
+    %46:main_out = construct %45
+    ret %46
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 {
+  $B12: {
+    %48:i32 = convert %value
+    %49:bool = gte %value, -2147483648.0f
+    %50:i32 = select -2147483648i, %48, %49
+    %51:bool = lte %value, 2147483520.0f
+    %52:i32 = select 2147483647i, %50, %51
+    ret %52
   }
 }
 

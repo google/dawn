@@ -1,8 +1,17 @@
+SKIP: FAILED
+
 #include <metal_stdlib>
 using namespace metal;
 
 kernel void f() {
   uint a = 1u;
   uint b = 0u;
-  uint const r = (a / b);
+  uint const r = tint_div_u32(a, b);
 }
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / select(rhs, 1u, (rhs == 0u)));
+}
+program_source:7:18: error: use of undeclared identifier 'tint_div_u32'
+  uint const r = tint_div_u32(a, b);
+                 ^
+

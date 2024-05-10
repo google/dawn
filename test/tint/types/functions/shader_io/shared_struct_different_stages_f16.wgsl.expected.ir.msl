@@ -1,20 +1,22 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: Interface = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: Interface = struct @align(16) {
   col1:f32 @offset(0), @location(1)
   col2:f16 @offset(4), @location(2)
   pos:vec4<f32> @offset(16), @builtin(position)
 }
 
-%vert_main = @vertex func():Interface -> %b1 {
-  %b1 = block {
+%vert_main = @vertex func():Interface {
+  $B1: {
     ret Interface(0.40000000596046447754f, 0.599609375h, vec4<f32>(0.0f))
   }
 }
-%frag_main = @fragment func(%colors:Interface):void -> %b2 {
-  %b2 = block {
-    %r:f32 = access %colors, 0u
-    %g:f16 = access %colors, 1u
+%frag_main = @fragment func(%colors:Interface):void {
+  $B2: {
+    %4:f32 = access %colors, 0u
+    %r:f32 = let %4
+    %6:f16 = access %colors, 1u
+    %g:f16 = let %6
     ret
   }
 }

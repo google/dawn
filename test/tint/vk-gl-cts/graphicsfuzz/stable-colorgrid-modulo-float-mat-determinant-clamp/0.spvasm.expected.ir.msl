@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(8) {
   resolution:vec2<f32> @offset(0)
 }
 
@@ -8,89 +8,95 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_13:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%compute_value_f1_f1_ = func(%limit:ptr<function, f32, read_write>, %thirty_two:ptr<function, f32, read_write>):f32 -> %b2 {
-  %b2 = block {
+%compute_value_f1_f1_ = func(%limit:ptr<function, f32, read_write>, %thirty_two:ptr<function, f32, read_write>):f32 {
+  $B2: {
     %result:ptr<function, f32, read_write> = var
     %i:ptr<function, i32, read_write> = var
     store %result, -0.5f
     store %i, 1i
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
         %9:i32 = load %i
         %10:bool = lt %9, 800i
-        if %10 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+        if %10 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
         %11:i32 = load %i
-        %12:i32 = mod %11, 32i
-        %13:bool = eq %12, 0i
-        if %13 [t: %b7, f: %b8] {  # if_2
-          %b7 = block {  # true
-            %14:f32 = load %result
-            %15:f32 = add %14, 0.40000000596046447754f
-            store %result, %15
+        %12:i32 = call %tint_mod_i32, %11, 32i
+        %14:bool = eq %12, 0i
+        if %14 [t: $B7, f: $B8] {  # if_2
+          $B7: {  # true
+            %15:f32 = load %result
+            %16:f32 = add %15, 0.40000000596046447754f
+            store %result, %16
             exit_if  # if_2
           }
-          %b8 = block {  # false
-            %x_124:f32 = load %thirty_two
-            %17:i32 = load %i
-            %18:f32 = convert %17
-            %19:f32 = round %x_124
-            %20:i32 = load %i
-            %21:f32 = convert %20
+          $B8: {  # false
+            %17:f32 = load %thirty_two
+            %x_124:f32 = let %17
+            %19:i32 = load %i
+            %20:f32 = convert %19
+            %21:f32 = let %20
             %22:f32 = round %x_124
-            %23:f32 = div %21, %22
-            %24:f32 = floor %23
-            %25:f32 = mul %19, %24
-            %26:f32 = sub %18, %25
-            %27:bool = lte %26, 0.00999999977648258209f
-            if %27 [t: %b9] {  # if_3
-              %b9 = block {  # true
-                %28:f32 = load %result
-                %29:f32 = add %28, 100.0f
-                store %result, %29
+            %23:f32 = let %22
+            %24:i32 = load %i
+            %25:f32 = convert %24
+            %26:f32 = let %25
+            %27:f32 = round %x_124
+            %28:f32 = div %26, %27
+            %29:f32 = floor %28
+            %30:f32 = mul %23, %29
+            %31:f32 = sub %21, %30
+            %32:bool = lte %31, 0.00999999977648258209f
+            if %32 [t: $B9] {  # if_3
+              $B9: {  # true
+                %33:f32 = load %result
+                %34:f32 = add %33, 100.0f
+                store %result, %34
                 exit_if  # if_3
               }
             }
             exit_if  # if_2
           }
         }
-        %30:i32 = load %i
-        %31:f32 = convert %30
-        %32:f32 = load %limit
-        %33:bool = gte %31, %32
-        if %33 [t: %b10] {  # if_4
-          %b10 = block {  # true
-            %x_138:f32 = load %result
+        %35:i32 = load %i
+        %36:f32 = convert %35
+        %37:f32 = load %limit
+        %38:bool = gte %36, %37
+        if %38 [t: $B10] {  # if_4
+          $B10: {  # true
+            %39:f32 = load %result
+            %x_138:f32 = let %39
             ret %x_138
           }
         }
-        continue %b4
+        continue  # -> $B4
       }
-      %b4 = block {  # continuing
-        %35:i32 = load %i
-        %36:i32 = add %35, 1i
-        store %i, %36
-        next_iteration %b3
+      $B4: {  # continuing
+        %41:i32 = load %i
+        %42:i32 = add %41, 1i
+        store %i, %42
+        next_iteration  # -> $B3
       }
     }
-    %x_141:f32 = load %result
+    %43:f32 = load %result
+    %x_141:f32 = let %43
     ret %x_141
   }
 }
-%main_1 = func():void -> %b11 {
-  %b11 = block {
+%main_1 = func():void {
+  $B11: {
     %c:ptr<function, vec3<f32>, read_write> = var
     %thirty_two_1:ptr<function, f32, read_write> = var
     %param:ptr<function, f32, read_write> = var
@@ -99,82 +105,101 @@ main_out = struct @align(16) {
     %param_3:ptr<function, f32, read_write> = var
     %i_1:ptr<function, i32, read_write> = var
     store %c, vec3<f32>(7.0f, 8.0f, 9.0f)
-    %46:ptr<uniform, vec2<f32>, read> = access %x_13, 0u
-    %47:f32 = load_vector_element %46, 0u
-    %48:f32 = div %47, 8.0f
-    %49:f32 = round %48
-    store %thirty_two_1, %49
-    %50:f32 = load_vector_element %gl_FragCoord, 0u
-    store %param, %50
-    %51:f32 = load %thirty_two_1
-    store %param_1, %51
-    %x_62:f32 = call %compute_value_f1_f1_, %param, %param_1
+    %53:ptr<uniform, vec2<f32>, read> = access %x_13, 0u
+    %54:f32 = load_vector_element %53, 0u
+    %55:f32 = div %54, 8.0f
+    %56:f32 = round %55
+    store %thirty_two_1, %56
+    %57:f32 = load_vector_element %gl_FragCoord, 0u
+    store %param, %57
+    %58:f32 = load %thirty_two_1
+    store %param_1, %58
+    %59:f32 = call %compute_value_f1_f1_, %param, %param_1
+    %x_62:f32 = let %59
     store_vector_element %c, 0u, %x_62
-    %53:f32 = load_vector_element %gl_FragCoord, 1u
-    store %param_2, %53
-    %54:f32 = load %thirty_two_1
-    store %param_3, %54
-    %x_67:f32 = call %compute_value_f1_f1_, %param_2, %param_3
+    %61:f32 = load_vector_element %gl_FragCoord, 1u
+    store %param_2, %61
+    %62:f32 = load %thirty_two_1
+    store %param_3, %62
+    %63:f32 = call %compute_value_f1_f1_, %param_2, %param_3
+    %x_67:f32 = let %63
     store_vector_element %c, 1u, %x_67
-    %56:f32 = load_vector_element %c, 0u
-    %57:f32 = load_vector_element %c, 1u
-    %58:f32 = add %56, %57
-    store_vector_element %c, 2u, %58
+    %65:f32 = load_vector_element %c, 0u
+    %66:f32 = load_vector_element %c, 1u
+    %67:f32 = add %65, %66
+    store_vector_element %c, 2u, %67
     store %i_1, 0i
-    loop [b: %b12, c: %b13] {  # loop_2
-      %b12 = block {  # body
-        %59:i32 = load %i_1
-        %60:bool = lt %59, 3i
-        if %60 [t: %b14, f: %b15] {  # if_5
-          %b14 = block {  # true
+    loop [b: $B12, c: $B13] {  # loop_2
+      $B12: {  # body
+        %68:i32 = load %i_1
+        %69:bool = lt %68, 3i
+        if %69 [t: $B14, f: $B15] {  # if_5
+          $B14: {  # true
             exit_if  # if_5
           }
-          %b15 = block {  # false
+          $B15: {  # false
             exit_loop  # loop_2
           }
         }
-        %61:i32 = load %i_1
-        %62:f32 = load_vector_element %c, %61
-        %63:bool = gte %62, 1.0f
-        if %63 [t: %b16] {  # if_6
-          %b16 = block {  # true
-            %x_88:i32 = load %i_1
-            %65:i32 = load %i_1
-            %66:f32 = load_vector_element %c, %65
-            %67:i32 = load %i_1
-            %68:f32 = load_vector_element %c, %67
-            %69:f32 = mul %66, %68
-            store_vector_element %c, %x_88, %69
+        %70:i32 = load %i_1
+        %71:f32 = load_vector_element %c, %70
+        %72:bool = gte %71, 1.0f
+        if %72 [t: $B16] {  # if_6
+          $B16: {  # true
+            %73:i32 = load %i_1
+            %x_88:i32 = let %73
+            %75:i32 = load %i_1
+            %76:f32 = load_vector_element %c, %75
+            %77:i32 = load %i_1
+            %78:f32 = load_vector_element %c, %77
+            %79:f32 = mul %76, %78
+            store_vector_element %c, %x_88, %79
             exit_if  # if_6
           }
         }
-        continue %b13
+        continue  # -> $B13
       }
-      %b13 = block {  # continuing
-        %70:i32 = load %i_1
-        %71:i32 = add %70, 1i
-        store %i_1, %71
-        next_iteration %b12
+      $B13: {  # continuing
+        %80:i32 = load %i_1
+        %81:i32 = add %80, 1i
+        store %i_1, %81
+        next_iteration  # -> $B12
       }
     }
-    %72:vec3<f32> = load %c
-    %73:vec3<f32> = abs %72
-    %x_101:vec3<f32> = normalize %73
-    %75:f32 = access %x_101, 0u
-    %76:f32 = access %x_101, 1u
-    %77:f32 = access %x_101, 2u
-    %78:vec4<f32> = construct %75, %76, %77, 1.0f
-    store %x_GLF_color, %78
+    %82:vec3<f32> = load %c
+    %83:vec3<f32> = abs %82
+    %84:vec3<f32> = normalize %83
+    %x_101:vec3<f32> = let %84
+    %86:f32 = access %x_101, 0u
+    %87:f32 = access %x_101, 1u
+    %88:f32 = access %x_101, 2u
+    %89:vec4<f32> = construct %86, %87, %88, 1.0f
+    store %x_GLF_color, %89
     ret
   }
 }
-%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b17 {
-  %b17 = block {
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out {
+  $B17: {
     store %gl_FragCoord, %gl_FragCoord_param
-    %81:void = call %main_1
-    %82:vec4<f32> = load %x_GLF_color
-    %83:main_out = construct %82
-    ret %83
+    %92:void = call %main_1
+    %93:vec4<f32> = load %x_GLF_color
+    %94:main_out = construct %93
+    ret %94
+  }
+}
+%tint_mod_i32 = func(%lhs:i32, %rhs:i32):i32 {
+  $B18: {
+    %97:bool = eq %rhs, 0i
+    %98:bool = eq %lhs, -2147483648i
+    %99:bool = eq %rhs, -1i
+    %100:bool = and %98, %99
+    %101:bool = or %97, %100
+    %102:i32 = select %rhs, 1i, %101
+    %103:i32 = let %102
+    %104:i32 = div %lhs, %103
+    %105:i32 = mul %104, %103
+    %106:i32 = sub %lhs, %105
+    ret %106
   }
 }
 

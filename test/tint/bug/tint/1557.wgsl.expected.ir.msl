@@ -1,23 +1,23 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %u:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
-%f = func():i32 -> %b2 {
-  %b2 = block {
+%f = func():i32 {
+  $B2: {
     ret 0i
   }
 }
-%g = func():void -> %b3 {
-  %b3 = block {
+%g = func():void {
+  $B3: {
     %j:ptr<function, i32, read_write> = var, 0i
-    loop [b: %b4, c: %b5] {  # loop_1
-      %b4 = block {  # body
+    loop [b: $B4, c: $B5] {  # loop_1
+      $B4: {  # body
         %5:i32 = load %j
         %6:bool = gte %5, 1i
-        if %6 [t: %b6] {  # if_1
-          %b6 = block {  # true
+        if %6 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
@@ -26,33 +26,33 @@ SKIP: FAILED
         store %j, %8
         %9:i32 = call %f
         %k:ptr<function, i32, read_write> = var, %9
-        continue %b5
+        continue  # -> $B5
       }
-      %b5 = block {  # continuing
-        next_iteration %b4
+      $B5: {  # continuing
+        next_iteration  # -> $B4
       }
     }
     ret
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b7 {
-  %b7 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B7: {
     %12:i32 = load %u
-    switch %12 [c: (0i, %b8), c: (default, %b9)] {  # switch_1
-      %b8 = block {  # case
+    switch %12 [c: (0i, $B8), c: (default, $B9)] {  # switch_1
+      $B8: {  # case
         %13:i32 = load %u
-        switch %13 [c: (0i, %b10), c: (default, %b11)] {  # switch_2
-          %b10 = block {  # case
+        switch %13 [c: (0i, $B10), c: (default, $B11)] {  # switch_2
+          $B10: {  # case
             exit_switch  # switch_2
           }
-          %b11 = block {  # case
+          $B11: {  # case
             %14:void = call %g
             exit_switch  # switch_2
           }
         }
         exit_switch  # switch_1
       }
-      %b9 = block {  # case
+      $B9: {  # case
         exit_switch  # switch_1
       }
     }

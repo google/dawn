@@ -1,16 +1,16 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %s:ptr<storage, f32, read_write> = var @binding_point(0, 0)
 }
 
-%f1 = func():array<f32, 4> -> %b2 {
-  %b2 = block {
+%f1 = func():array<f32, 4> {
+  $B2: {
     ret array<f32, 4>(0.0f)
   }
 }
-%f2 = func():array<array<f32, 4>, 3> -> %b3 {
-  %b3 = block {
+%f2 = func():array<array<f32, 4>, 3> {
+  $B3: {
     %4:array<f32, 4> = call %f1
     %5:array<f32, 4> = let %4
     %6:array<f32, 4> = call %f1
@@ -20,8 +20,8 @@ SKIP: FAILED
     ret %9
   }
 }
-%f3 = func():array<array<array<f32, 4>, 3>, 2> -> %b4 {
-  %b4 = block {
+%f3 = func():array<array<array<f32, 4>, 3>, 2> {
+  $B4: {
     %11:array<array<f32, 4>, 3> = call %f2
     %12:array<array<f32, 4>, 3> = let %11
     %13:array<array<f32, 4>, 3> = call %f2
@@ -29,8 +29,8 @@ SKIP: FAILED
     ret %14
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
     %16:array<f32, 4> = call %f1
     %a1:array<f32, 4> = let %16
     %18:array<array<f32, 4>, 3> = call %f2

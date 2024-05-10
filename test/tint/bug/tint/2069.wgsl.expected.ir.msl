@@ -1,0 +1,16 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+struct modf_result_f32 {
+  float fract;
+  float whole;
+};
+
+thread modf_result_f32 v = modf_result_f32{.fract=0.0f, .whole=1.0f};
+kernel void tint_symbol() {
+}
+program_source:8:24: error: program scope variable must reside in constant address space
+thread modf_result_f32 v = modf_result_f32{.fract=0.0f, .whole=1.0f};
+                       ^
+

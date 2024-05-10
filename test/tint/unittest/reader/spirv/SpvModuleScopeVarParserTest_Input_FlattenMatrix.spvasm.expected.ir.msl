@@ -1,9 +1,31 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct main_out {
+  float4 x_2_1 [[position]];
+};
+
+thread float2x4 x_1 = float2x4(0.0f);
+thread float4 x_2 = 0.0f;
+void main_1() {
+}
+vertex main_out tint_symbol(float4 x_1_param, float4 x_1_param_1) {
+  x_1[0] = x_1_param;
+  x_1[1] = x_1_param_1;
+  main_1();
+  return {.x_2_1=x_2};
+}
+program_source:7:17: error: program scope variable must reside in constant address space
+thread float2x4 x_1 = float2x4(0.0f);
+                ^
+program_source:8:15: error: program scope variable must reside in constant address space
+thread float4 x_2 = 0.0f;
+              ^
+program_source:11:29: error: invalid type 'float4' (vector of 4 'float' values) for input declaration in a vertex function
+vertex main_out tint_symbol(float4 x_1_param, float4 x_1_param_1) {
+                            ^~~~~~~~~~~~~~~~
+program_source:11:47: error: invalid type 'float4' (vector of 4 'float' values) for input declaration in a vertex function
+vertex main_out tint_symbol(float4 x_1_param, float4 x_1_param_1) {
+                                              ^~~~~~~~~~~~~~~~~~
+

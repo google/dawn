@@ -1,0 +1,90 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+void deref_const() {
+  int3 a = 0;
+  thread int3* const p = a;
+  int b = p[0];
+  p[0] = 42;
+}
+void no_deref_const() {
+  int3 a = 0;
+  thread int3* const p = a;
+  int b = p[0];
+  p[0] = 42;
+}
+void deref_let() {
+  int3 a = 0;
+  thread int3* const p = a;
+  int const i = 0;
+  int b = p[i];
+  p[0] = 42;
+}
+void no_deref_let() {
+  int3 a = 0;
+  thread int3* const p = a;
+  int const i = 0;
+  int b = p[i];
+  p[0] = 42;
+}
+void deref_var() {
+  int3 a = 0;
+  thread int3* const p = a;
+  int i = 0;
+  int b = p[i];
+  p[0] = 42;
+}
+void no_deref_var() {
+  int3 a = 0;
+  thread int3* const p = a;
+  int const i = 0;
+  int b = p[i];
+  p[0] = 42;
+}
+kernel void tint_symbol() {
+  deref_const();
+  no_deref_const();
+  deref_let();
+  no_deref_let();
+  deref_var();
+  no_deref_var();
+}
+program_source:6:22: error: cannot initialize a variable of type 'int3 *const' with an lvalue of type 'int3' (vector of 3 'int' values)
+  thread int3* const p = a;
+                     ^   ~
+program_source:7:7: error: cannot initialize a variable of type 'int' with an lvalue of type 'int3' (vector of 3 'int' values)
+  int b = p[0];
+      ^   ~~~~
+program_source:12:22: error: cannot initialize a variable of type 'int3 *const' with an lvalue of type 'int3' (vector of 3 'int' values)
+  thread int3* const p = a;
+                     ^   ~
+program_source:13:7: error: cannot initialize a variable of type 'int' with an lvalue of type 'int3' (vector of 3 'int' values)
+  int b = p[0];
+      ^   ~~~~
+program_source:18:22: error: cannot initialize a variable of type 'int3 *const' with an lvalue of type 'int3' (vector of 3 'int' values)
+  thread int3* const p = a;
+                     ^   ~
+program_source:20:7: error: cannot initialize a variable of type 'int' with an lvalue of type 'int3' (vector of 3 'int' values)
+  int b = p[i];
+      ^   ~~~~
+program_source:25:22: error: cannot initialize a variable of type 'int3 *const' with an lvalue of type 'int3' (vector of 3 'int' values)
+  thread int3* const p = a;
+                     ^   ~
+program_source:27:7: error: cannot initialize a variable of type 'int' with an lvalue of type 'int3' (vector of 3 'int' values)
+  int b = p[i];
+      ^   ~~~~
+program_source:32:22: error: cannot initialize a variable of type 'int3 *const' with an lvalue of type 'int3' (vector of 3 'int' values)
+  thread int3* const p = a;
+                     ^   ~
+program_source:34:7: error: cannot initialize a variable of type 'int' with an lvalue of type 'int3' (vector of 3 'int' values)
+  int b = p[i];
+      ^   ~~~~
+program_source:39:22: error: cannot initialize a variable of type 'int3 *const' with an lvalue of type 'int3' (vector of 3 'int' values)
+  thread int3* const p = a;
+                     ^   ~
+program_source:41:7: error: cannot initialize a variable of type 'int' with an lvalue of type 'int3' (vector of 3 'int' values)
+  int b = p[i];
+      ^   ~~~~
+

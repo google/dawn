@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(8) {
   injected:vec2<f32> @offset(0)
 }
 
@@ -8,13 +8,13 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
   %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %m:ptr<function, i32, read_write> = var
     store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
     %5:ptr<uniform, vec2<f32>, read> = access %x_5, 0u
@@ -22,32 +22,32 @@ main_out = struct @align(16) {
     %7:ptr<uniform, vec2<f32>, read> = access %x_5, 0u
     %8:f32 = load_vector_element %7, 1u
     %9:bool = gt %6, %8
-    if %9 [t: %b3] {  # if_1
-      %b3 = block {  # true
-        loop [b: %b4, c: %b5] {  # loop_1
-          %b4 = block {  # body
-            continue %b5
+    if %9 [t: $B3] {  # if_1
+      $B3: {  # true
+        loop [b: $B4, c: $B5] {  # loop_1
+          $B4: {  # body
+            continue  # -> $B5
           }
-          %b5 = block {  # continuing
-            break_if true %b4
+          $B5: {  # continuing
+            break_if true  # -> [t: exit_loop loop_1, f: $B4]
           }
         }
         store %m, 1i
-        loop [b: %b6, c: %b7] {  # loop_2
-          %b6 = block {  # body
-            if true [t: %b8, f: %b9] {  # if_2
-              %b8 = block {  # true
+        loop [b: $B6, c: $B7] {  # loop_2
+          $B6: {  # body
+            if true [t: $B8, f: $B9] {  # if_2
+              $B8: {  # true
                 exit_if  # if_2
               }
-              %b9 = block {  # false
+              $B9: {  # false
                 exit_loop  # loop_2
               }
             }
             store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
-            continue %b7
+            continue  # -> $B7
           }
-          %b7 = block {  # continuing
-            next_iteration %b6
+          $B7: {  # continuing
+            next_iteration  # -> $B6
           }
         }
         exit_if  # if_1
@@ -56,8 +56,8 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b10 {
-  %b10 = block {
+%tint_symbol = @fragment func():main_out {
+  $B10: {
     %11:void = call %main_1
     %12:vec4<f32> = load %x_GLF_color
     %13:main_out = construct %12

@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: PixelLocal = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: PixelLocal = struct @align(4) {
   a:u32 @offset(0)
   b:i32 @offset(4)
   c:f32 @offset(8)
@@ -11,22 +11,33 @@ In = struct @align(16) {
   uv:vec4<f32> @offset(16), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %P:ptr<pixel_local, PixelLocal, read_write> = var
 }
 
-%f = @fragment func(%in:In):void -> %b2 {
-  %b2 = block {
+%f = @fragment func(%in:In):void {
+  $B2: {
     %4:ptr<pixel_local, u32, read_write> = access %P, 0u
     %5:f32 = access %in, 0u, 0u
-    %6:u32 = convert %5
-    %7:f32 = access %in, 1u, 0u
-    %8:u32 = convert %7
-    %9:u32 = add %6, %8
-    %10:u32 = load %4
-    %11:u32 = add %10, %9
-    store %4, %11
+    %6:u32 = call %tint_f32_to_u32, %5
+    %8:u32 = let %6
+    %9:f32 = access %in, 1u, 0u
+    %10:u32 = call %tint_f32_to_u32, %9
+    %11:u32 = add %8, %10
+    %12:u32 = load %4
+    %13:u32 = add %12, %11
+    store %4, %13
     ret
+  }
+}
+%tint_f32_to_u32 = func(%value:f32):u32 {
+  $B3: {
+    %15:u32 = convert %value
+    %16:bool = gte %value, 0.0f
+    %17:u32 = select 0u, %15, %16
+    %18:bool = lte %value, 4294967040.0f
+    %19:u32 = select 4294967295u, %17, %18
+    ret %19
   }
 }
 

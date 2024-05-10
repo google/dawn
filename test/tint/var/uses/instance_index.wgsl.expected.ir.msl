@@ -1,0 +1,12 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+vertex float4 tint_symbol(uint b [[]]) {
+  return float4(float(b));
+}
+program_source:4:27: error: invalid type 'uint' (aka 'unsigned int') for input declaration in a vertex function
+vertex float4 tint_symbol(uint b [[]]) {
+                          ^~~~~~
+

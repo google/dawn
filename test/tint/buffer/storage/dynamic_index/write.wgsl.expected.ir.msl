@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Inner = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Inner = struct @align(16) {
   scalar_f32:f32 @offset(0)
   scalar_i32:i32 @offset(4)
   scalar_u32:u32 @offset(8)
@@ -29,12 +29,12 @@ S = struct @align(16) {
   arr:array<Inner> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
 }
 
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%idx:u32 [@local_invocation_index]):void -> %b2 {
-  %b2 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%idx:u32 [@local_invocation_index]):void {
+  $B2: {
     %4:ptr<storage, f32, read_write> = access %sb, 0u, %idx, 0u
     store %4, 0.0f
     %5:ptr<storage, i32, read_write> = access %sb, 0u, %idx, 1u
@@ -62,23 +62,91 @@ S = struct @align(16) {
     %16:ptr<storage, mat2x2<f32>, read_write> = access %sb, 0u, %idx, 12u
     store %16, mat2x2<f32>(vec2<f32>(0.0f))
     %17:ptr<storage, mat2x3<f32>, read_write> = access %sb, 0u, %idx, 13u
-    store %17, mat2x3<f32>(vec3<f32>(0.0f))
-    %18:ptr<storage, mat2x4<f32>, read_write> = access %sb, 0u, %idx, 14u
-    store %18, mat2x4<f32>(vec4<f32>(0.0f))
-    %19:ptr<storage, mat3x2<f32>, read_write> = access %sb, 0u, %idx, 15u
-    store %19, mat3x2<f32>(vec2<f32>(0.0f))
-    %20:ptr<storage, mat3x3<f32>, read_write> = access %sb, 0u, %idx, 16u
-    store %20, mat3x3<f32>(vec3<f32>(0.0f))
-    %21:ptr<storage, mat3x4<f32>, read_write> = access %sb, 0u, %idx, 17u
-    store %21, mat3x4<f32>(vec4<f32>(0.0f))
-    %22:ptr<storage, mat4x2<f32>, read_write> = access %sb, 0u, %idx, 18u
-    store %22, mat4x2<f32>(vec2<f32>(0.0f))
-    %23:ptr<storage, mat4x3<f32>, read_write> = access %sb, 0u, %idx, 19u
-    store %23, mat4x3<f32>(vec3<f32>(0.0f))
-    %24:ptr<storage, mat4x4<f32>, read_write> = access %sb, 0u, %idx, 20u
-    store %24, mat4x4<f32>(vec4<f32>(0.0f))
-    %25:ptr<storage, array<vec3<f32>, 2>, read_write> = access %sb, 0u, %idx, 21u
-    store %25, array<vec3<f32>, 2>(vec3<f32>(0.0f))
+    %18:void = call %tint_store_and_preserve_padding, %17, mat2x3<f32>(vec3<f32>(0.0f))
+    %20:ptr<storage, mat2x4<f32>, read_write> = access %sb, 0u, %idx, 14u
+    store %20, mat2x4<f32>(vec4<f32>(0.0f))
+    %21:ptr<storage, mat3x2<f32>, read_write> = access %sb, 0u, %idx, 15u
+    store %21, mat3x2<f32>(vec2<f32>(0.0f))
+    %22:ptr<storage, mat3x3<f32>, read_write> = access %sb, 0u, %idx, 16u
+    %23:void = call %tint_store_and_preserve_padding_1, %22, mat3x3<f32>(vec3<f32>(0.0f))
+    %25:ptr<storage, mat3x4<f32>, read_write> = access %sb, 0u, %idx, 17u
+    store %25, mat3x4<f32>(vec4<f32>(0.0f))
+    %26:ptr<storage, mat4x2<f32>, read_write> = access %sb, 0u, %idx, 18u
+    store %26, mat4x2<f32>(vec2<f32>(0.0f))
+    %27:ptr<storage, mat4x3<f32>, read_write> = access %sb, 0u, %idx, 19u
+    %28:void = call %tint_store_and_preserve_padding_2, %27, mat4x3<f32>(vec3<f32>(0.0f))
+    %30:ptr<storage, mat4x4<f32>, read_write> = access %sb, 0u, %idx, 20u
+    store %30, mat4x4<f32>(vec4<f32>(0.0f))
+    %31:ptr<storage, array<vec3<f32>, 2>, read_write> = access %sb, 0u, %idx, 21u
+    %32:void = call %tint_store_and_preserve_padding_3, %31, array<vec3<f32>, 2>(vec3<f32>(0.0f))
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<storage, mat2x3<f32>, read_write>, %value_param:mat2x3<f32>):void {
+  $B3: {
+    %36:ptr<storage, vec3<f32>, read_write> = access %target, 0u
+    %37:vec3<f32> = access %value_param, 0u
+    store %36, %37
+    %38:ptr<storage, vec3<f32>, read_write> = access %target, 1u
+    %39:vec3<f32> = access %value_param, 1u
+    store %38, %39
+    ret
+  }
+}
+%tint_store_and_preserve_padding_1 = func(%target_1:ptr<storage, mat3x3<f32>, read_write>, %value_param_1:mat3x3<f32>):void {  # %tint_store_and_preserve_padding_1: 'tint_store_and_preserve_padding', %target_1: 'target', %value_param_1: 'value_param'
+  $B4: {
+    %42:ptr<storage, vec3<f32>, read_write> = access %target_1, 0u
+    %43:vec3<f32> = access %value_param_1, 0u
+    store %42, %43
+    %44:ptr<storage, vec3<f32>, read_write> = access %target_1, 1u
+    %45:vec3<f32> = access %value_param_1, 1u
+    store %44, %45
+    %46:ptr<storage, vec3<f32>, read_write> = access %target_1, 2u
+    %47:vec3<f32> = access %value_param_1, 2u
+    store %46, %47
+    ret
+  }
+}
+%tint_store_and_preserve_padding_2 = func(%target_2:ptr<storage, mat4x3<f32>, read_write>, %value_param_2:mat4x3<f32>):void {  # %tint_store_and_preserve_padding_2: 'tint_store_and_preserve_padding', %target_2: 'target', %value_param_2: 'value_param'
+  $B5: {
+    %50:ptr<storage, vec3<f32>, read_write> = access %target_2, 0u
+    %51:vec3<f32> = access %value_param_2, 0u
+    store %50, %51
+    %52:ptr<storage, vec3<f32>, read_write> = access %target_2, 1u
+    %53:vec3<f32> = access %value_param_2, 1u
+    store %52, %53
+    %54:ptr<storage, vec3<f32>, read_write> = access %target_2, 2u
+    %55:vec3<f32> = access %value_param_2, 2u
+    store %54, %55
+    %56:ptr<storage, vec3<f32>, read_write> = access %target_2, 3u
+    %57:vec3<f32> = access %value_param_2, 3u
+    store %56, %57
+    ret
+  }
+}
+%tint_store_and_preserve_padding_3 = func(%target_3:ptr<storage, array<vec3<f32>, 2>, read_write>, %value_param_3:array<vec3<f32>, 2>):void {  # %tint_store_and_preserve_padding_3: 'tint_store_and_preserve_padding', %target_3: 'target', %value_param_3: 'value_param'
+  $B6: {
+    loop [i: $B7, b: $B8, c: $B9] {  # loop_1
+      $B7: {  # initializer
+        next_iteration 0u  # -> $B8
+      }
+      $B8 (%idx_1:u32): {  # body
+        %61:bool = gte %idx_1, 2u
+        if %61 [t: $B10] {  # if_1
+          $B10: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %62:ptr<storage, vec3<f32>, read_write> = access %target_3, %idx_1
+        %63:vec3<f32> = access %value_param_3, %idx_1
+        store %62, %63
+        continue  # -> $B9
+      }
+      $B9: {  # continuing
+        %64:u32 = add %idx_1, 1u
+        next_iteration %64  # -> $B8
+      }
+    }
     ret
   }
 }

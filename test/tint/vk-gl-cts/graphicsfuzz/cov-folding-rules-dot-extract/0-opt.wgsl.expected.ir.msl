@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(4) {
   three:f32 @offset(0)
 }
 
@@ -8,24 +8,25 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_5:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %4:ptr<uniform, f32, read> = access %x_5, 0u
-    %x_25:f32 = load %4
-    %6:vec4<f32> = construct 1.0f, 2.0f, %x_25, 4.0f
-    %7:f32 = dot %6, vec4<f32>(0.0f, 1.0f, 0.0f, 0.0f)
-    %8:bool = eq %7, 2.0f
-    if %8 [t: %b3, f: %b4] {  # if_1
-      %b3 = block {  # true
+    %5:f32 = load %4
+    %x_25:f32 = let %5
+    %7:vec4<f32> = construct 1.0f, 2.0f, %x_25, 4.0f
+    %8:f32 = dot %7, vec4<f32>(0.0f, 1.0f, 0.0f, 0.0f)
+    %9:bool = eq %8, 2.0f
+    if %9 [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
         store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
         exit_if  # if_1
       }
-      %b4 = block {  # false
+      $B4: {  # false
         store %x_GLF_color, vec4<f32>(0.0f)
         exit_if  # if_1
       }
@@ -33,12 +34,12 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b5 {
-  %b5 = block {
-    %10:void = call %main_1
-    %11:vec4<f32> = load %x_GLF_color
-    %12:main_out = construct %11
-    ret %12
+%tint_symbol = @fragment func():main_out {
+  $B5: {
+    %11:void = call %main_1
+    %12:vec4<f32> = load %x_GLF_color
+    %13:main_out = construct %12
+    ret %13
   }
 }
 

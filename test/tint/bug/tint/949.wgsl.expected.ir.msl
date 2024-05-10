@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: LeftOver = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: LeftOver = struct @align(16) {
   u_World:mat4x4<f32> @offset(0)
   u_ViewProjection:mat4x4<f32> @offset(64)
   u_bumpStrength:f32 @offset(128)
@@ -31,7 +31,7 @@ main_out = struct @align(16) {
   glFragColor_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %u_Float:ptr<private, f32, read_write> = var
   %u_Color:ptr<private, vec3<f32>, read_write> = var
   %TextureSamplerTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 1)
@@ -46,12 +46,12 @@ main_out = struct @align(16) {
   %TextureSampler1Sampler:ptr<handle, sampler, read> = var @binding_point(2, 2)
   %light0:ptr<uniform, Light0, read> = var @binding_point(0, 5)
   %glFragColor:ptr<private, vec4<f32>, read_write> = var
-  %bumpSamplerSampler:ptr<handle, sampler, read> = var @binding_point(2, 4)
-  %bumpSamplerTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 5)
+  %bumpSamplerSampler:ptr<handle, sampler, read> = var @binding_point(0, 4)
+  %bumpSamplerTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 5)
 }
 
-%cotangent_frame_vf3_vf3_vf2_vf2_ = func(%normal_1:ptr<function, vec3<f32>, read_write>, %p:ptr<function, vec3<f32>, read_write>, %uv:ptr<function, vec2<f32>, read_write>, %tangentSpaceParams:ptr<function, vec2<f32>, read_write>):mat3x3<f32> -> %b2 {
-  %b2 = block {
+%cotangent_frame_vf3_vf3_vf2_vf2_ = func(%normal_1:ptr<function, vec3<f32>, read_write>, %p:ptr<function, vec3<f32>, read_write>, %uv:ptr<function, vec2<f32>, read_write>, %tangentSpaceParams:ptr<function, vec2<f32>, read_write>):mat3x3<f32> {
+  $B2: {
     %dp1:ptr<function, vec3<f32>, read_write> = var
     %dp2:ptr<function, vec3<f32>, read_write> = var
     %duv1:ptr<function, vec2<f32>, read_write> = var
@@ -61,206 +61,278 @@ main_out = struct @align(16) {
     %tangent:ptr<function, vec3<f32>, read_write> = var
     %bitangent:ptr<function, vec3<f32>, read_write> = var
     %invmax:ptr<function, f32, read_write> = var
-    %x_133:vec3<f32> = load %p
-    %32:vec3<f32> = dpdx %x_133
-    store %dp1, %32
-    %x_136:vec3<f32> = load %p
-    %34:vec3<f32> = dpdy %x_136
-    store %dp2, %34
-    %x_139:vec2<f32> = load %uv
-    %36:vec2<f32> = dpdx %x_139
-    store %duv1, %36
-    %x_142:vec2<f32> = load %uv
-    %38:vec2<f32> = dpdy %x_142
-    store %duv2, %38
-    %x_145:vec3<f32> = load %dp2
-    %x_146:vec3<f32> = load %normal_1
-    %41:vec3<f32> = cross %x_145, %x_146
-    store %dp2perp, %41
-    %x_149:vec3<f32> = load %normal_1
-    %x_150:vec3<f32> = load %dp1
-    %44:vec3<f32> = cross %x_149, %x_150
-    store %dp1perp, %44
-    %x_153:vec3<f32> = load %dp2perp
-    %x_155:f32 = load_vector_element %duv1, 0u
-    %x_157:vec3<f32> = load %dp1perp
-    %x_159:f32 = load_vector_element %duv2, 0u
-    %49:vec3<f32> = mul %x_153, %x_155
-    %50:vec3<f32> = mul %x_157, %x_159
-    %51:vec3<f32> = add %49, %50
-    store %tangent, %51
-    %x_163:vec3<f32> = load %dp2perp
-    %x_165:f32 = load_vector_element %duv1, 1u
-    %x_167:vec3<f32> = load %dp1perp
-    %x_169:f32 = load_vector_element %duv2, 1u
-    %56:vec3<f32> = mul %x_163, %x_165
-    %57:vec3<f32> = mul %x_167, %x_169
-    %58:vec3<f32> = add %56, %57
-    store %bitangent, %58
-    %x_173:f32 = load_vector_element %tangentSpaceParams, 0u
-    %x_174:vec3<f32> = load %tangent
-    %61:vec3<f32> = mul %x_174, %x_173
-    store %tangent, %61
-    %x_177:f32 = load_vector_element %tangentSpaceParams, 1u
-    %x_178:vec3<f32> = load %bitangent
-    %64:vec3<f32> = mul %x_178, %x_177
-    store %bitangent, %64
-    %x_181:vec3<f32> = load %tangent
-    %x_182:vec3<f32> = load %tangent
-    %x_184:vec3<f32> = load %bitangent
-    %x_185:vec3<f32> = load %bitangent
-    %69:f32 = dot %x_181, %x_182
-    %70:f32 = dot %x_184, %x_185
-    %71:f32 = max %69, %70
-    %72:f32 = inverseSqrt %71
-    store %invmax, %72
-    %x_189:vec3<f32> = load %tangent
-    %x_190:f32 = load %invmax
-    %x_191:vec3<f32> = mul %x_189, %x_190
-    %x_192:vec3<f32> = load %bitangent
-    %x_193:f32 = load %invmax
-    %x_194:vec3<f32> = mul %x_192, %x_193
-    %x_195:vec3<f32> = load %normal_1
-    %80:f32 = access %x_191, 0u
-    %81:f32 = access %x_191, 1u
-    %82:f32 = access %x_191, 2u
-    %83:vec3<f32> = construct %80, %81, %82
-    %84:f32 = access %x_194, 0u
-    %85:f32 = access %x_194, 1u
-    %86:f32 = access %x_194, 2u
-    %87:vec3<f32> = construct %84, %85, %86
-    %88:f32 = access %x_195, 0u
-    %89:f32 = access %x_195, 1u
-    %90:f32 = access %x_195, 2u
-    %91:vec3<f32> = construct %88, %89, %90
-    %92:mat3x3<f32> = construct %83, %87, %91
-    ret %92
+    %31:vec3<f32> = load %p
+    %x_133:vec3<f32> = let %31
+    %33:vec3<f32> = dpdx %x_133
+    store %dp1, %33
+    %34:vec3<f32> = load %p
+    %x_136:vec3<f32> = let %34
+    %36:vec3<f32> = dpdy %x_136
+    store %dp2, %36
+    %37:vec2<f32> = load %uv
+    %x_139:vec2<f32> = let %37
+    %39:vec2<f32> = dpdx %x_139
+    store %duv1, %39
+    %40:vec2<f32> = load %uv
+    %x_142:vec2<f32> = let %40
+    %42:vec2<f32> = dpdy %x_142
+    store %duv2, %42
+    %43:vec3<f32> = load %dp2
+    %x_145:vec3<f32> = let %43
+    %45:vec3<f32> = load %normal_1
+    %x_146:vec3<f32> = let %45
+    %47:vec3<f32> = cross %x_145, %x_146
+    store %dp2perp, %47
+    %48:vec3<f32> = load %normal_1
+    %x_149:vec3<f32> = let %48
+    %50:vec3<f32> = load %dp1
+    %x_150:vec3<f32> = let %50
+    %52:vec3<f32> = cross %x_149, %x_150
+    store %dp1perp, %52
+    %53:vec3<f32> = load %dp2perp
+    %x_153:vec3<f32> = let %53
+    %55:f32 = load_vector_element %duv1, 0u
+    %x_155:f32 = let %55
+    %57:vec3<f32> = load %dp1perp
+    %x_157:vec3<f32> = let %57
+    %59:f32 = load_vector_element %duv2, 0u
+    %x_159:f32 = let %59
+    %61:vec3<f32> = mul %x_153, %x_155
+    %62:vec3<f32> = mul %x_157, %x_159
+    %63:vec3<f32> = add %61, %62
+    store %tangent, %63
+    %64:vec3<f32> = load %dp2perp
+    %x_163:vec3<f32> = let %64
+    %66:f32 = load_vector_element %duv1, 1u
+    %x_165:f32 = let %66
+    %68:vec3<f32> = load %dp1perp
+    %x_167:vec3<f32> = let %68
+    %70:f32 = load_vector_element %duv2, 1u
+    %x_169:f32 = let %70
+    %72:vec3<f32> = mul %x_163, %x_165
+    %73:vec3<f32> = mul %x_167, %x_169
+    %74:vec3<f32> = add %72, %73
+    store %bitangent, %74
+    %75:f32 = load_vector_element %tangentSpaceParams, 0u
+    %x_173:f32 = let %75
+    %77:vec3<f32> = load %tangent
+    %x_174:vec3<f32> = let %77
+    %79:vec3<f32> = mul %x_174, %x_173
+    store %tangent, %79
+    %80:f32 = load_vector_element %tangentSpaceParams, 1u
+    %x_177:f32 = let %80
+    %82:vec3<f32> = load %bitangent
+    %x_178:vec3<f32> = let %82
+    %84:vec3<f32> = mul %x_178, %x_177
+    store %bitangent, %84
+    %85:vec3<f32> = load %tangent
+    %x_181:vec3<f32> = let %85
+    %87:vec3<f32> = load %tangent
+    %x_182:vec3<f32> = let %87
+    %89:vec3<f32> = load %bitangent
+    %x_184:vec3<f32> = let %89
+    %91:vec3<f32> = load %bitangent
+    %x_185:vec3<f32> = let %91
+    %93:f32 = dot %x_181, %x_182
+    %94:f32 = let %93
+    %95:f32 = dot %x_184, %x_185
+    %96:f32 = max %94, %95
+    %97:f32 = inverseSqrt %96
+    store %invmax, %97
+    %98:vec3<f32> = load %tangent
+    %x_189:vec3<f32> = let %98
+    %100:f32 = load %invmax
+    %x_190:f32 = let %100
+    %102:vec3<f32> = mul %x_189, %x_190
+    %x_191:vec3<f32> = let %102
+    %104:vec3<f32> = load %bitangent
+    %x_192:vec3<f32> = let %104
+    %106:f32 = load %invmax
+    %x_193:f32 = let %106
+    %108:vec3<f32> = mul %x_192, %x_193
+    %x_194:vec3<f32> = let %108
+    %110:vec3<f32> = load %normal_1
+    %x_195:vec3<f32> = let %110
+    %112:f32 = access %x_191, 0u
+    %113:f32 = access %x_191, 1u
+    %114:f32 = access %x_191, 2u
+    %115:vec3<f32> = construct %112, %113, %114
+    %116:vec3<f32> = let %115
+    %117:f32 = access %x_194, 0u
+    %118:f32 = access %x_194, 1u
+    %119:f32 = access %x_194, 2u
+    %120:vec3<f32> = construct %117, %118, %119
+    %121:vec3<f32> = let %120
+    %122:f32 = access %x_195, 0u
+    %123:f32 = access %x_195, 1u
+    %124:f32 = access %x_195, 2u
+    %125:vec3<f32> = construct %122, %123, %124
+    %126:mat3x3<f32> = construct %116, %121, %125
+    ret %126
   }
 }
-%transposeMat3_mf33_ = func(%inMatrix:ptr<function, mat3x3<f32>, read_write>):mat3x3<f32> -> %b3 {
-  %b3 = block {
+%transposeMat3_mf33_ = func(%inMatrix:ptr<function, mat3x3<f32>, read_write>):mat3x3<f32> {
+  $B3: {
     %i0:ptr<function, vec3<f32>, read_write> = var
     %i1:ptr<function, vec3<f32>, read_write> = var
     %i2:ptr<function, vec3<f32>, read_write> = var
     %outMatrix:ptr<function, mat3x3<f32>, read_write> = var
-    %99:ptr<function, vec3<f32>, read_write> = access %inMatrix, 0i
-    %x_60:vec3<f32> = load %99
+    %133:ptr<function, vec3<f32>, read_write> = access %inMatrix, 0i
+    %134:vec3<f32> = load %133
+    %x_60:vec3<f32> = let %134
     store %i0, %x_60
-    %101:ptr<function, vec3<f32>, read_write> = access %inMatrix, 1i
-    %x_64:vec3<f32> = load %101
+    %136:ptr<function, vec3<f32>, read_write> = access %inMatrix, 1i
+    %137:vec3<f32> = load %136
+    %x_64:vec3<f32> = let %137
     store %i1, %x_64
-    %103:ptr<function, vec3<f32>, read_write> = access %inMatrix, 2i
-    %x_68:vec3<f32> = load %103
+    %139:ptr<function, vec3<f32>, read_write> = access %inMatrix, 2i
+    %140:vec3<f32> = load %139
+    %x_68:vec3<f32> = let %140
     store %i2, %x_68
-    %x_73:f32 = load_vector_element %i0, 0u
-    %x_75:f32 = load_vector_element %i1, 0u
-    %x_77:f32 = load_vector_element %i2, 0u
-    %x_78:vec3<f32> = construct %x_73, %x_75, %x_77
-    %x_81:f32 = load_vector_element %i0, 1u
-    %x_83:f32 = load_vector_element %i1, 1u
-    %x_85:f32 = load_vector_element %i2, 1u
-    %x_86:vec3<f32> = construct %x_81, %x_83, %x_85
-    %x_89:f32 = load_vector_element %i0, 2u
-    %x_91:f32 = load_vector_element %i1, 2u
-    %x_93:f32 = load_vector_element %i2, 2u
-    %x_94:vec3<f32> = construct %x_89, %x_91, %x_93
-    %117:f32 = access %x_78, 0u
-    %118:f32 = access %x_78, 1u
-    %119:f32 = access %x_78, 2u
-    %120:vec3<f32> = construct %117, %118, %119
-    %121:f32 = access %x_86, 0u
-    %122:f32 = access %x_86, 1u
-    %123:f32 = access %x_86, 2u
-    %124:vec3<f32> = construct %121, %122, %123
-    %125:f32 = access %x_94, 0u
-    %126:f32 = access %x_94, 1u
-    %127:f32 = access %x_94, 2u
-    %128:vec3<f32> = construct %125, %126, %127
-    %129:mat3x3<f32> = construct %120, %124, %128
-    store %outMatrix, %129
-    %x_110:mat3x3<f32> = load %outMatrix
+    %142:f32 = load_vector_element %i0, 0u
+    %x_73:f32 = let %142
+    %144:f32 = load_vector_element %i1, 0u
+    %x_75:f32 = let %144
+    %146:f32 = load_vector_element %i2, 0u
+    %x_77:f32 = let %146
+    %148:vec3<f32> = construct %x_73, %x_75, %x_77
+    %x_78:vec3<f32> = let %148
+    %150:f32 = load_vector_element %i0, 1u
+    %x_81:f32 = let %150
+    %152:f32 = load_vector_element %i1, 1u
+    %x_83:f32 = let %152
+    %154:f32 = load_vector_element %i2, 1u
+    %x_85:f32 = let %154
+    %156:vec3<f32> = construct %x_81, %x_83, %x_85
+    %x_86:vec3<f32> = let %156
+    %158:f32 = load_vector_element %i0, 2u
+    %x_89:f32 = let %158
+    %160:f32 = load_vector_element %i1, 2u
+    %x_91:f32 = let %160
+    %162:f32 = load_vector_element %i2, 2u
+    %x_93:f32 = let %162
+    %164:vec3<f32> = construct %x_89, %x_91, %x_93
+    %x_94:vec3<f32> = let %164
+    %166:f32 = access %x_78, 0u
+    %167:f32 = access %x_78, 1u
+    %168:f32 = access %x_78, 2u
+    %169:vec3<f32> = construct %166, %167, %168
+    %170:vec3<f32> = let %169
+    %171:f32 = access %x_86, 0u
+    %172:f32 = access %x_86, 1u
+    %173:f32 = access %x_86, 2u
+    %174:vec3<f32> = construct %171, %172, %173
+    %175:vec3<f32> = let %174
+    %176:f32 = access %x_94, 0u
+    %177:f32 = access %x_94, 1u
+    %178:f32 = access %x_94, 2u
+    %179:vec3<f32> = construct %176, %177, %178
+    %180:mat3x3<f32> = construct %170, %175, %179
+    store %outMatrix, %180
+    %181:mat3x3<f32> = load %outMatrix
+    %x_110:mat3x3<f32> = let %181
     ret %x_110
   }
 }
-%perturbNormalBase_mf33_vf3_f1_ = func(%cotangentFrame:ptr<function, mat3x3<f32>, read_write>, %normal:ptr<function, vec3<f32>, read_write>, %scale:ptr<function, f32, read_write>):vec3<f32> -> %b4 {
-  %b4 = block {
-    %x_113:mat3x3<f32> = load %cotangentFrame
-    %x_114:vec3<f32> = load %normal
-    %137:vec3<f32> = mul %x_113, %x_114
-    %138:vec3<f32> = normalize %137
-    ret %138
+%perturbNormalBase_mf33_vf3_f1_ = func(%cotangentFrame:ptr<function, mat3x3<f32>, read_write>, %normal:ptr<function, vec3<f32>, read_write>, %scale:ptr<function, f32, read_write>):vec3<f32> {
+  $B4: {
+    %187:mat3x3<f32> = load %cotangentFrame
+    %x_113:mat3x3<f32> = let %187
+    %189:vec3<f32> = load %normal
+    %x_114:vec3<f32> = let %189
+    %191:vec3<f32> = mul %x_113, %x_114
+    %192:vec3<f32> = normalize %191
+    ret %192
   }
 }
-%perturbNormal_mf33_vf3_f1_ = func(%cotangentFrame_1:ptr<function, mat3x3<f32>, read_write>, %textureSample:ptr<function, vec3<f32>, read_write>, %scale_1:ptr<function, f32, read_write>):vec3<f32> -> %b5 {
-  %b5 = block {
+%perturbNormal_mf33_vf3_f1_ = func(%cotangentFrame_1:ptr<function, mat3x3<f32>, read_write>, %textureSample:ptr<function, vec3<f32>, read_write>, %scale_1:ptr<function, f32, read_write>):vec3<f32> {
+  $B5: {
     %param:ptr<function, mat3x3<f32>, read_write> = var
     %param_1:ptr<function, vec3<f32>, read_write> = var
     %param_2:ptr<function, f32, read_write> = var
-    %x_119:vec3<f32> = load %textureSample
-    %x_125:mat3x3<f32> = load %cotangentFrame_1
+    %200:vec3<f32> = load %textureSample
+    %x_119:vec3<f32> = let %200
+    %202:mat3x3<f32> = load %cotangentFrame_1
+    %x_125:mat3x3<f32> = let %202
     store %param, %x_125
-    %148:vec3<f32> = mul %x_119, 2.0f
-    %149:vec3<f32> = sub %148, vec3<f32>(1.0f)
-    store %param_1, %149
-    %x_128:f32 = load %scale_1
+    %204:vec3<f32> = mul %x_119, 2.0f
+    %205:vec3<f32> = sub %204, vec3<f32>(1.0f)
+    store %param_1, %205
+    %206:f32 = load %scale_1
+    %x_128:f32 = let %206
     store %param_2, %x_128
-    %x_129:vec3<f32> = call %perturbNormalBase_mf33_vf3_f1_, %param, %param_1, %param_2
+    %208:vec3<f32> = call %perturbNormalBase_mf33_vf3_f1_, %param, %param_1, %param_2
+    %x_129:vec3<f32> = let %208
     ret %x_129
   }
 }
-%computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_ = func(%viewDirectionW:ptr<function, vec3<f32>, read_write>, %vNormal:ptr<function, vec3<f32>, read_write>, %lightData:ptr<function, vec4<f32>, read_write>, %diffuseColor:ptr<function, vec3<f32>, read_write>, %specularColor:ptr<function, vec3<f32>, read_write>, %groundColor:ptr<function, vec3<f32>, read_write>, %glossiness:ptr<function, f32, read_write>):lightingInfo -> %b6 {
-  %b6 = block {
+%computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_ = func(%viewDirectionW:ptr<function, vec3<f32>, read_write>, %vNormal:ptr<function, vec3<f32>, read_write>, %lightData:ptr<function, vec4<f32>, read_write>, %diffuseColor:ptr<function, vec3<f32>, read_write>, %specularColor:ptr<function, vec3<f32>, read_write>, %groundColor:ptr<function, vec3<f32>, read_write>, %glossiness:ptr<function, f32, read_write>):lightingInfo {
+  $B6: {
     %ndl:ptr<function, f32, read_write> = var
     %result:ptr<function, lightingInfo, read_write> = var
     %angleW:ptr<function, vec3<f32>, read_write> = var
     %specComp:ptr<function, f32, read_write> = var
-    %x_212:vec3<f32> = load %vNormal
-    %x_213:vec4<f32> = load %lightData
-    %166:f32 = access %x_213, 0u
-    %167:f32 = access %x_213, 1u
-    %168:f32 = access %x_213, 2u
-    %169:vec3<f32> = construct %166, %167, %168
-    %170:f32 = dot %x_212, %169
-    %171:f32 = mul %170, 0.5f
-    %172:f32 = add %171, 0.5f
-    store %ndl, %172
-    %x_220:vec3<f32> = load %groundColor
-    %x_221:vec3<f32> = load %diffuseColor
-    %x_222:f32 = load %ndl
-    %176:ptr<function, vec3<f32>, read_write> = access %result, 0u
-    %177:vec3<f32> = construct %x_222, %x_222, %x_222
-    %178:vec3<f32> = mix %x_220, %x_221, %177
-    store %176, %178
-    %x_227:vec3<f32> = load %viewDirectionW
-    %x_228:vec4<f32> = load %lightData
-    %181:f32 = access %x_228, 0u
-    %182:f32 = access %x_228, 1u
-    %183:f32 = access %x_228, 2u
-    %184:vec3<f32> = construct %181, %182, %183
-    %185:vec3<f32> = add %x_227, %184
-    %186:vec3<f32> = normalize %185
-    store %angleW, %186
-    %x_233:vec3<f32> = load %vNormal
-    %x_234:vec3<f32> = load %angleW
-    %189:f32 = dot %x_233, %x_234
-    %190:f32 = max 0.0f, %189
-    store %specComp, %190
-    %x_237:f32 = load %specComp
-    %x_238:f32 = load %glossiness
-    %193:f32 = max 1.0f, %x_238
-    %194:f32 = pow %x_237, %193
-    store %specComp, %194
-    %x_241:f32 = load %specComp
-    %x_242:vec3<f32> = load %specularColor
-    %197:ptr<function, vec3<f32>, read_write> = access %result, 1u
-    %198:vec3<f32> = mul %x_242, %x_241
-    store %197, %198
-    %x_245:lightingInfo = load %result
+    %222:vec3<f32> = load %vNormal
+    %x_212:vec3<f32> = let %222
+    %224:vec4<f32> = load %lightData
+    %x_213:vec4<f32> = let %224
+    %226:f32 = access %x_213, 0u
+    %227:f32 = access %x_213, 1u
+    %228:f32 = access %x_213, 2u
+    %229:vec3<f32> = construct %226, %227, %228
+    %230:f32 = dot %x_212, %229
+    %231:f32 = mul %230, 0.5f
+    %232:f32 = add %231, 0.5f
+    store %ndl, %232
+    %233:vec3<f32> = load %groundColor
+    %x_220:vec3<f32> = let %233
+    %235:vec3<f32> = load %diffuseColor
+    %x_221:vec3<f32> = let %235
+    %237:f32 = load %ndl
+    %x_222:f32 = let %237
+    %239:ptr<function, vec3<f32>, read_write> = access %result, 0u
+    %240:vec3<f32> = construct %x_222, %x_222, %x_222
+    %241:vec3<f32> = mix %x_220, %x_221, %240
+    store %239, %241
+    %242:vec3<f32> = load %viewDirectionW
+    %x_227:vec3<f32> = let %242
+    %244:vec4<f32> = load %lightData
+    %x_228:vec4<f32> = let %244
+    %246:f32 = access %x_228, 0u
+    %247:f32 = access %x_228, 1u
+    %248:f32 = access %x_228, 2u
+    %249:vec3<f32> = construct %246, %247, %248
+    %250:vec3<f32> = add %x_227, %249
+    %251:vec3<f32> = normalize %250
+    store %angleW, %251
+    %252:vec3<f32> = load %vNormal
+    %x_233:vec3<f32> = let %252
+    %254:vec3<f32> = load %angleW
+    %x_234:vec3<f32> = let %254
+    %256:f32 = dot %x_233, %x_234
+    %257:f32 = max 0.0f, %256
+    store %specComp, %257
+    %258:f32 = load %specComp
+    %x_237:f32 = let %258
+    %260:f32 = load %glossiness
+    %x_238:f32 = let %260
+    %262:f32 = max 1.0f, %x_238
+    %263:f32 = pow %x_237, %262
+    store %specComp, %263
+    %264:f32 = load %specComp
+    %x_241:f32 = let %264
+    %266:vec3<f32> = load %specularColor
+    %x_242:vec3<f32> = let %266
+    %268:ptr<function, vec3<f32>, read_write> = access %result, 1u
+    %269:vec3<f32> = mul %x_242, %x_241
+    store %268, %269
+    %270:lightingInfo = load %result
+    %x_245:lightingInfo = let %270
     ret %x_245
   }
 }
-%main_1 = func():void -> %b7 {
-  %b7 = block {
+%main_1 = func():void {
+  $B7: {
     %tempTextureRead:ptr<function, vec4<f32>, read_write> = var
     %rgb:ptr<function, vec3<f32>, read_write> = var
     %output5:ptr<function, vec3<f32>, read_write> = var
@@ -316,351 +388,451 @@ main_out = struct @align(16) {
     %output3:ptr<function, vec3<f32>, read_write> = var
     store %u_Float, 100.0f
     store %u_Color, vec3<f32>(0.5f)
-    %x_261:vec2<f32> = load %vMainuv
-    %255:texture_2d<f32> = load %TextureSamplerTexture
-    %256:sampler = load %TextureSamplerSampler
-    %x_262:vec4<f32> = textureSample %255, %256, %x_261
+    %326:vec2<f32> = load %vMainuv
+    %x_261:vec2<f32> = let %326
+    %328:texture_2d<f32> = load %TextureSamplerTexture
+    %329:sampler = load %TextureSamplerSampler
+    %330:vec4<f32> = textureSample %328, %329, %x_261
+    %x_262:vec4<f32> = let %330
     store %tempTextureRead, %x_262
-    %x_264:vec4<f32> = load %tempTextureRead
-    %259:ptr<uniform, f32, read> = access %x_269, 6u
-    %x_273:f32 = load %259
-    %261:f32 = access %x_264, 0u
-    %262:f32 = access %x_264, 1u
-    %263:f32 = access %x_264, 2u
-    %264:vec3<f32> = construct %261, %262, %263
-    %265:vec3<f32> = mul %264, %x_273
-    store %rgb, %265
-    %266:ptr<uniform, vec3<f32>, read> = access %x_269, 4u
-    %x_279:vec3<f32> = load %266
-    %x_282:vec4<f32> = load %v_output1
-    %269:f32 = access %x_282, 0u
-    %270:f32 = access %x_282, 1u
-    %271:f32 = access %x_282, 2u
-    %272:vec3<f32> = construct %269, %270, %271
-    %273:vec3<f32> = sub %x_279, %272
-    %274:vec3<f32> = normalize %273
-    store %output5, %274
+    %332:vec4<f32> = load %tempTextureRead
+    %x_264:vec4<f32> = let %332
+    %334:ptr<uniform, f32, read> = access %x_269, 6u
+    %335:f32 = load %334
+    %x_273:f32 = let %335
+    %337:f32 = access %x_264, 0u
+    %338:f32 = access %x_264, 1u
+    %339:f32 = access %x_264, 2u
+    %340:vec3<f32> = construct %337, %338, %339
+    %341:vec3<f32> = mul %340, %x_273
+    store %rgb, %341
+    %342:ptr<uniform, vec3<f32>, read> = access %x_269, 4u
+    %343:vec3<f32> = load %342
+    %x_279:vec3<f32> = let %343
+    %345:vec4<f32> = load %v_output1
+    %x_282:vec4<f32> = let %345
+    %347:f32 = access %x_282, 0u
+    %348:f32 = access %x_282, 1u
+    %349:f32 = access %x_282, 2u
+    %350:vec3<f32> = construct %347, %348, %349
+    %351:vec3<f32> = sub %x_279, %350
+    %352:vec3<f32> = normalize %351
+    store %output5, %352
     store %output4, vec4<f32>(0.0f)
     store %uvOffset, vec2<f32>(0.0f)
-    %275:ptr<uniform, f32, read> = access %x_269, 2u
-    %x_292:f32 = load %275
-    %277:f32 = div 1.0f, %x_292
-    store %normalScale, %277
-    %x_298:bool = load %gl_FrontFacing
-    if %x_298 [t: %b8, f: %b9] {  # if_1
-      %b8 = block {  # true
-        %x_303:vec2<f32> = load %v_uv
+    %353:ptr<uniform, f32, read> = access %x_269, 2u
+    %354:f32 = load %353
+    %x_292:f32 = let %354
+    %356:f32 = div 1.0f, %x_292
+    store %normalScale, %356
+    %357:bool = load %gl_FrontFacing
+    %x_298:bool = let %357
+    if %x_298 [t: $B8, f: $B9] {  # if_1
+      $B8: {  # true
+        %359:vec2<f32> = load %v_uv
+        %x_303:vec2<f32> = let %359
         store %x_299, %x_303
         exit_if  # if_1
       }
-      %b9 = block {  # false
-        %x_305:vec2<f32> = load %v_uv
-        %281:vec2<f32> = negation %x_305
-        store %x_299, %281
+      $B9: {  # false
+        %361:vec2<f32> = load %v_uv
+        %x_305:vec2<f32> = let %361
+        %363:vec2<f32> = negation %x_305
+        store %x_299, %363
         exit_if  # if_1
       }
     }
-    %x_307:vec2<f32> = load %x_299
+    %364:vec2<f32> = load %x_299
+    %x_307:vec2<f32> = let %364
     store %TBNUV, %x_307
-    %x_310:vec4<f32> = load %v_output2
-    %x_312:f32 = load %normalScale
-    %285:f32 = access %x_310, 0u
-    %286:f32 = access %x_310, 1u
-    %287:f32 = access %x_310, 2u
-    %288:vec3<f32> = construct %285, %286, %287
-    %289:vec3<f32> = mul %288, %x_312
-    store %param_3, %289
-    %x_317:vec4<f32> = load %v_output1
-    %291:f32 = access %x_317, 0u
-    %292:f32 = access %x_317, 1u
-    %293:f32 = access %x_317, 2u
-    %294:vec3<f32> = construct %291, %292, %293
-    store %param_4, %294
-    %x_320:vec2<f32> = load %TBNUV
+    %366:vec4<f32> = load %v_output2
+    %x_310:vec4<f32> = let %366
+    %368:f32 = load %normalScale
+    %x_312:f32 = let %368
+    %370:f32 = access %x_310, 0u
+    %371:f32 = access %x_310, 1u
+    %372:f32 = access %x_310, 2u
+    %373:vec3<f32> = construct %370, %371, %372
+    %374:vec3<f32> = mul %373, %x_312
+    store %param_3, %374
+    %375:vec4<f32> = load %v_output1
+    %x_317:vec4<f32> = let %375
+    %377:f32 = access %x_317, 0u
+    %378:f32 = access %x_317, 1u
+    %379:f32 = access %x_317, 2u
+    %380:vec3<f32> = construct %377, %378, %379
+    store %param_4, %380
+    %381:vec2<f32> = load %TBNUV
+    %x_320:vec2<f32> = let %381
     store %param_5, %x_320
-    %296:ptr<uniform, vec2<f32>, read> = access %x_269, 8u
-    %x_324:vec2<f32> = load %296
+    %383:ptr<uniform, vec2<f32>, read> = access %x_269, 8u
+    %384:vec2<f32> = load %383
+    %x_324:vec2<f32> = let %384
     store %param_6, %x_324
-    %x_325:mat3x3<f32> = call %cotangent_frame_vf3_vf3_vf2_vf2_, %param_3, %param_4, %param_5, %param_6
+    %386:mat3x3<f32> = call %cotangent_frame_vf3_vf3_vf2_vf2_, %param_3, %param_4, %param_5, %param_6
+    %x_325:mat3x3<f32> = let %386
     store %TBN, %x_325
-    %x_328:mat3x3<f32> = load %TBN
+    %388:mat3x3<f32> = load %TBN
+    %x_328:mat3x3<f32> = let %388
     store %param_7, %x_328
-    %x_329:mat3x3<f32> = call %transposeMat3_mf33_, %param_7
+    %390:mat3x3<f32> = call %transposeMat3_mf33_, %param_7
+    %x_329:mat3x3<f32> = let %390
     store %invTBN, %x_329
-    %x_331:mat3x3<f32> = load %invTBN
-    %x_332:vec3<f32> = load %output5
-    %303:vec3<f32> = negation %x_332
-    %x_334:vec3<f32> = mul %x_331, %303
-    %x_337:mat3x3<f32> = load %invTBN
-    %x_338:vec3<f32> = load %output5
-    %307:f32 = access %x_334, 0u
-    %308:f32 = access %x_334, 1u
-    %309:vec2<f32> = construct %307, %308
-    %310:f32 = length %309
-    %311:vec3<f32> = negation %x_338
-    %312:vec3<f32> = mul %x_337, %311
-    %313:f32 = access %312, 2u
-    %314:f32 = div %310, %313
-    store %parallaxLimit, %314
-    %315:ptr<uniform, f32, read> = access %x_269, 5u
-    %x_345:f32 = load %315
-    %x_346:f32 = load %parallaxLimit
-    %318:f32 = mul %x_346, %x_345
-    store %parallaxLimit, %318
-    %x_349:mat3x3<f32> = load %invTBN
-    %x_350:vec3<f32> = load %output5
-    %321:vec3<f32> = negation %x_350
-    %x_352:vec3<f32> = mul %x_349, %321
-    %323:f32 = access %x_352, 0u
-    %324:f32 = access %x_352, 1u
-    %325:vec2<f32> = construct %323, %324
-    %326:vec2<f32> = normalize %325
-    store %vOffsetDir, %326
-    %x_356:vec2<f32> = load %vOffsetDir
-    %x_357:f32 = load %parallaxLimit
-    %329:vec2<f32> = mul %x_356, %x_357
-    store %vMaxOffset, %329
-    %x_361:mat3x3<f32> = load %invTBN
-    %x_362:vec3<f32> = load %output5
-    %x_365:mat3x3<f32> = load %invTBN
-    %x_366:vec4<f32> = load %v_output2
-    %334:vec3<f32> = negation %x_362
-    %335:vec3<f32> = mul %x_361, %334
-    %336:f32 = access %x_366, 0u
-    %337:f32 = access %x_366, 1u
-    %338:f32 = access %x_366, 2u
-    %339:vec3<f32> = construct %336, %337, %338
-    %340:vec3<f32> = mul %x_365, %339
-    %341:f32 = dot %335, %340
-    %342:f32 = mul %341, -11.0f
-    %343:f32 = add 15.0f, %342
-    store %numSamples, %343
-    %x_374:f32 = load %numSamples
-    %345:f32 = div 1.0f, %x_374
-    store %stepSize, %345
+    %392:mat3x3<f32> = load %invTBN
+    %x_331:mat3x3<f32> = let %392
+    %394:vec3<f32> = load %output5
+    %x_332:vec3<f32> = let %394
+    %396:vec3<f32> = negation %x_332
+    %397:vec3<f32> = mul %x_331, %396
+    %x_334:vec3<f32> = let %397
+    %399:mat3x3<f32> = load %invTBN
+    %x_337:mat3x3<f32> = let %399
+    %401:vec3<f32> = load %output5
+    %x_338:vec3<f32> = let %401
+    %403:f32 = access %x_334, 0u
+    %404:f32 = access %x_334, 1u
+    %405:vec2<f32> = construct %403, %404
+    %406:f32 = length %405
+    %407:vec3<f32> = negation %x_338
+    %408:vec3<f32> = mul %x_337, %407
+    %409:f32 = access %408, 2u
+    %410:f32 = div %406, %409
+    store %parallaxLimit, %410
+    %411:ptr<uniform, f32, read> = access %x_269, 5u
+    %412:f32 = load %411
+    %x_345:f32 = let %412
+    %414:f32 = load %parallaxLimit
+    %x_346:f32 = let %414
+    %416:f32 = mul %x_346, %x_345
+    store %parallaxLimit, %416
+    %417:mat3x3<f32> = load %invTBN
+    %x_349:mat3x3<f32> = let %417
+    %419:vec3<f32> = load %output5
+    %x_350:vec3<f32> = let %419
+    %421:vec3<f32> = negation %x_350
+    %422:vec3<f32> = mul %x_349, %421
+    %x_352:vec3<f32> = let %422
+    %424:f32 = access %x_352, 0u
+    %425:f32 = access %x_352, 1u
+    %426:vec2<f32> = construct %424, %425
+    %427:vec2<f32> = normalize %426
+    store %vOffsetDir, %427
+    %428:vec2<f32> = load %vOffsetDir
+    %x_356:vec2<f32> = let %428
+    %430:f32 = load %parallaxLimit
+    %x_357:f32 = let %430
+    %432:vec2<f32> = mul %x_356, %x_357
+    store %vMaxOffset, %432
+    %433:mat3x3<f32> = load %invTBN
+    %x_361:mat3x3<f32> = let %433
+    %435:vec3<f32> = load %output5
+    %x_362:vec3<f32> = let %435
+    %437:mat3x3<f32> = load %invTBN
+    %x_365:mat3x3<f32> = let %437
+    %439:vec4<f32> = load %v_output2
+    %x_366:vec4<f32> = let %439
+    %441:vec3<f32> = negation %x_362
+    %442:vec3<f32> = mul %x_361, %441
+    %443:f32 = access %x_366, 0u
+    %444:f32 = access %x_366, 1u
+    %445:f32 = access %x_366, 2u
+    %446:vec3<f32> = construct %443, %444, %445
+    %447:vec3<f32> = mul %x_365, %446
+    %448:f32 = dot %442, %447
+    %449:f32 = mul %448, -11.0f
+    %450:f32 = add 15.0f, %449
+    store %numSamples, %450
+    %451:f32 = load %numSamples
+    %x_374:f32 = let %451
+    %453:f32 = div 1.0f, %x_374
+    store %stepSize, %453
     store %currRayHeight, 1.0f
     store %vCurrOffset, vec2<f32>(0.0f)
     store %vLastOffset, vec2<f32>(0.0f)
     store %lastSampledHeight, 1.0f
     store %currSampledHeight, 1.0f
     store %i, 0i
-    loop [b: %b10, c: %b11] {  # loop_1
-      %b10 = block {  # body
-        %x_388:i32 = load %i
-        %347:bool = lt %x_388, 15i
-        if %347 [t: %b12, f: %b13] {  # if_2
-          %b12 = block {  # true
+    loop [b: $B10, c: $B11] {  # loop_1
+      $B10: {  # body
+        %454:i32 = load %i
+        %x_388:i32 = let %454
+        %456:bool = lt %x_388, 15i
+        if %456 [t: $B12, f: $B13] {  # if_2
+          $B12: {  # true
             exit_if  # if_2
           }
-          %b13 = block {  # false
+          $B13: {  # false
             exit_loop  # loop_1
           }
         }
-        %x_394:vec2<f32> = load %v_uv
-        %x_395:vec2<f32> = load %vCurrOffset
+        %457:vec2<f32> = load %v_uv
+        %x_394:vec2<f32> = let %457
+        %459:vec2<f32> = load %vCurrOffset
+        %x_395:vec2<f32> = let %459
         %x_397:vec4<f32> = let vec4<f32>(0.0f)
-        %351:f32 = access %x_397, 3u
-        store %currSampledHeight, %351
-        %x_400:f32 = load %currSampledHeight
-        %x_401:f32 = load %currRayHeight
-        %354:bool = gt %x_400, %x_401
-        if %354 [t: %b14, f: %b15] {  # if_3
-          %b14 = block {  # true
-            %x_406:f32 = load %currSampledHeight
-            %x_407:f32 = load %currRayHeight
-            %357:f32 = sub %x_406, %x_407
-            store %delta1, %357
-            %x_410:f32 = load %currRayHeight
-            %x_411:f32 = load %stepSize
-            %x_413:f32 = load %lastSampledHeight
-            %361:f32 = add %x_410, %x_411
-            %362:f32 = sub %361, %x_413
-            store %delta2, %362
-            %x_416:f32 = load %delta1
-            %x_417:f32 = load %delta1
-            %x_418:f32 = load %delta2
-            %366:f32 = add %x_417, %x_418
-            %367:f32 = div %x_416, %366
-            store %ratio, %367
-            %x_421:f32 = load %ratio
-            %x_422:vec2<f32> = load %vLastOffset
-            %x_424:f32 = load %ratio
-            %x_426:vec2<f32> = load %vCurrOffset
-            %372:vec2<f32> = mul %x_422, %x_421
-            %373:f32 = sub 1.0f, %x_424
-            %374:vec2<f32> = mul %x_426, %373
-            %375:vec2<f32> = add %372, %374
-            store %vCurrOffset, %375
+        %462:f32 = access %x_397, 3u
+        store %currSampledHeight, %462
+        %463:f32 = load %currSampledHeight
+        %x_400:f32 = let %463
+        %465:f32 = load %currRayHeight
+        %x_401:f32 = let %465
+        %467:bool = gt %x_400, %x_401
+        if %467 [t: $B14, f: $B15] {  # if_3
+          $B14: {  # true
+            %468:f32 = load %currSampledHeight
+            %x_406:f32 = let %468
+            %470:f32 = load %currRayHeight
+            %x_407:f32 = let %470
+            %472:f32 = sub %x_406, %x_407
+            store %delta1, %472
+            %473:f32 = load %currRayHeight
+            %x_410:f32 = let %473
+            %475:f32 = load %stepSize
+            %x_411:f32 = let %475
+            %477:f32 = load %lastSampledHeight
+            %x_413:f32 = let %477
+            %479:f32 = add %x_410, %x_411
+            %480:f32 = sub %479, %x_413
+            store %delta2, %480
+            %481:f32 = load %delta1
+            %x_416:f32 = let %481
+            %483:f32 = load %delta1
+            %x_417:f32 = let %483
+            %485:f32 = load %delta2
+            %x_418:f32 = let %485
+            %487:f32 = add %x_417, %x_418
+            %488:f32 = div %x_416, %487
+            store %ratio, %488
+            %489:f32 = load %ratio
+            %x_421:f32 = let %489
+            %491:vec2<f32> = load %vLastOffset
+            %x_422:vec2<f32> = let %491
+            %493:f32 = load %ratio
+            %x_424:f32 = let %493
+            %495:vec2<f32> = load %vCurrOffset
+            %x_426:vec2<f32> = let %495
+            %497:vec2<f32> = mul %x_422, %x_421
+            %498:f32 = sub 1.0f, %x_424
+            %499:vec2<f32> = mul %x_426, %498
+            %500:vec2<f32> = add %497, %499
+            store %vCurrOffset, %500
             exit_loop  # loop_1
           }
-          %b15 = block {  # false
-            %x_431:f32 = load %stepSize
-            %x_432:f32 = load %currRayHeight
-            %378:f32 = sub %x_432, %x_431
-            store %currRayHeight, %378
-            %x_434:vec2<f32> = load %vCurrOffset
+          $B15: {  # false
+            %501:f32 = load %stepSize
+            %x_431:f32 = let %501
+            %503:f32 = load %currRayHeight
+            %x_432:f32 = let %503
+            %505:f32 = sub %x_432, %x_431
+            store %currRayHeight, %505
+            %506:vec2<f32> = load %vCurrOffset
+            %x_434:vec2<f32> = let %506
             store %vLastOffset, %x_434
-            %x_435:f32 = load %stepSize
-            %x_436:vec2<f32> = load %vMaxOffset
-            %x_438:vec2<f32> = load %vCurrOffset
-            %383:vec2<f32> = mul %x_436, %x_435
-            %384:vec2<f32> = add %x_438, %383
-            store %vCurrOffset, %384
-            %x_440:f32 = load %currSampledHeight
+            %508:f32 = load %stepSize
+            %x_435:f32 = let %508
+            %510:vec2<f32> = load %vMaxOffset
+            %x_436:vec2<f32> = let %510
+            %512:vec2<f32> = load %vCurrOffset
+            %x_438:vec2<f32> = let %512
+            %514:vec2<f32> = mul %x_436, %x_435
+            %515:vec2<f32> = add %x_438, %514
+            store %vCurrOffset, %515
+            %516:f32 = load %currSampledHeight
+            %x_440:f32 = let %516
             store %lastSampledHeight, %x_440
             exit_if  # if_3
           }
         }
-        continue %b11
+        continue  # -> $B11
       }
-      %b11 = block {  # continuing
-        %x_441:i32 = load %i
-        %387:i32 = add %x_441, 1i
-        store %i, %387
-        next_iteration %b10
+      $B11: {  # continuing
+        %518:i32 = load %i
+        %x_441:i32 = let %518
+        %520:i32 = add %x_441, 1i
+        store %i, %520
+        next_iteration  # -> $B10
       }
     }
-    %x_444:vec2<f32> = load %vCurrOffset
+    %521:vec2<f32> = load %vCurrOffset
+    %x_444:vec2<f32> = let %521
     store %parallaxOcclusion_0, %x_444
-    %x_445:vec2<f32> = load %parallaxOcclusion_0
+    %523:vec2<f32> = load %parallaxOcclusion_0
+    %x_445:vec2<f32> = let %523
     store %uvOffset, %x_445
-    %x_449:vec2<f32> = load %v_uv
-    %x_450:vec2<f32> = load %uvOffset
-    %392:texture_2d<f32> = load %TextureSamplerTexture
-    %393:sampler = load %TextureSamplerSampler
-    %394:vec2<f32> = add %x_449, %x_450
-    %x_452:vec4<f32> = textureSample %392, %393, %394
-    %396:ptr<uniform, f32, read> = access %x_269, 2u
-    %x_454:f32 = load %396
-    %x_457:mat3x3<f32> = load %TBN
+    %525:vec2<f32> = load %v_uv
+    %x_449:vec2<f32> = let %525
+    %527:vec2<f32> = load %uvOffset
+    %x_450:vec2<f32> = let %527
+    %529:texture_2d<f32> = load %TextureSamplerTexture
+    %530:sampler = load %TextureSamplerSampler
+    %531:vec2<f32> = add %x_449, %x_450
+    %532:vec4<f32> = textureSample %529, %530, %531
+    %x_452:vec4<f32> = let %532
+    %534:ptr<uniform, f32, read> = access %x_269, 2u
+    %535:f32 = load %534
+    %x_454:f32 = let %535
+    %537:mat3x3<f32> = load %TBN
+    %x_457:mat3x3<f32> = let %537
     store %param_8, %x_457
-    %399:f32 = access %x_452, 0u
-    %400:f32 = access %x_452, 1u
-    %401:f32 = access %x_452, 2u
-    %402:vec3<f32> = construct %399, %400, %401
-    store %param_9, %402
-    %403:f32 = div 1.0f, %x_454
-    store %param_10, %403
-    %x_461:vec3<f32> = call %perturbNormal_mf33_vf3_f1_, %param_8, %param_9, %param_10
-    %x_462:vec4<f32> = load %output4
-    %406:f32 = access %x_461, 0u
-    %407:f32 = access %x_461, 1u
-    %408:f32 = access %x_461, 2u
-    %409:f32 = access %x_462, 3u
-    %410:vec4<f32> = construct %406, %407, %408, %409
-    store %output4, %410
-    %x_465:vec2<f32> = load %v_uv
-    %x_466:vec2<f32> = load %uvOffset
-    %413:vec2<f32> = add %x_465, %x_466
-    store %output6, %413
-    %x_474:vec2<f32> = load %output6
-    %415:texture_2d<f32> = load %TextureSampler1Texture
-    %416:sampler = load %TextureSampler1Sampler
-    %x_475:vec4<f32> = textureSample %415, %416, %x_474
+    %539:f32 = access %x_452, 0u
+    %540:f32 = access %x_452, 1u
+    %541:f32 = access %x_452, 2u
+    %542:vec3<f32> = construct %539, %540, %541
+    store %param_9, %542
+    %543:f32 = div 1.0f, %x_454
+    store %param_10, %543
+    %544:vec3<f32> = call %perturbNormal_mf33_vf3_f1_, %param_8, %param_9, %param_10
+    %x_461:vec3<f32> = let %544
+    %546:vec4<f32> = load %output4
+    %x_462:vec4<f32> = let %546
+    %548:f32 = access %x_461, 0u
+    %549:f32 = access %x_461, 1u
+    %550:f32 = access %x_461, 2u
+    %551:f32 = access %x_462, 3u
+    %552:vec4<f32> = construct %548, %549, %550, %551
+    store %output4, %552
+    %553:vec2<f32> = load %v_uv
+    %x_465:vec2<f32> = let %553
+    %555:vec2<f32> = load %uvOffset
+    %x_466:vec2<f32> = let %555
+    %557:vec2<f32> = add %x_465, %x_466
+    store %output6, %557
+    %558:vec2<f32> = load %output6
+    %x_474:vec2<f32> = let %558
+    %560:texture_2d<f32> = load %TextureSampler1Texture
+    %561:sampler = load %TextureSampler1Sampler
+    %562:vec4<f32> = textureSample %560, %561, %x_474
+    %x_475:vec4<f32> = let %562
     store %tempTextureRead1, %x_475
-    %x_477:vec4<f32> = load %tempTextureRead1
-    %419:f32 = access %x_477, 0u
-    %420:f32 = access %x_477, 1u
-    %421:f32 = access %x_477, 2u
-    %422:vec3<f32> = construct %419, %420, %421
-    store %rgb1, %422
-    %423:ptr<uniform, vec3<f32>, read> = access %x_269, 4u
-    %x_481:vec3<f32> = load %423
-    %x_482:vec4<f32> = load %v_output1
-    %426:f32 = access %x_482, 0u
-    %427:f32 = access %x_482, 1u
-    %428:f32 = access %x_482, 2u
-    %429:vec3<f32> = construct %426, %427, %428
-    %430:vec3<f32> = sub %x_481, %429
-    %431:vec3<f32> = normalize %430
-    store %viewDirectionW_1, %431
+    %564:vec4<f32> = load %tempTextureRead1
+    %x_477:vec4<f32> = let %564
+    %566:f32 = access %x_477, 0u
+    %567:f32 = access %x_477, 1u
+    %568:f32 = access %x_477, 2u
+    %569:vec3<f32> = construct %566, %567, %568
+    store %rgb1, %569
+    %570:ptr<uniform, vec3<f32>, read> = access %x_269, 4u
+    %571:vec3<f32> = load %570
+    %x_481:vec3<f32> = let %571
+    %573:vec4<f32> = load %v_output1
+    %x_482:vec4<f32> = let %573
+    %575:f32 = access %x_482, 0u
+    %576:f32 = access %x_482, 1u
+    %577:f32 = access %x_482, 2u
+    %578:vec3<f32> = construct %575, %576, %577
+    %579:vec3<f32> = sub %x_481, %578
+    %580:vec3<f32> = normalize %579
+    store %viewDirectionW_1, %580
     store %shadow, 1.0f
-    %x_488:f32 = load %u_Float
-    %433:f32 = mul 1.0f, %x_488
-    store %glossiness_1, %433
+    %581:f32 = load %u_Float
+    %x_488:f32 = let %581
+    %583:f32 = mul 1.0f, %x_488
+    store %glossiness_1, %583
     store %diffuseBase, vec3<f32>(0.0f)
     store %specularBase, vec3<f32>(0.0f)
-    %x_494:vec4<f32> = load %output4
-    %435:f32 = access %x_494, 0u
-    %436:f32 = access %x_494, 1u
-    %437:f32 = access %x_494, 2u
-    %438:vec3<f32> = construct %435, %436, %437
-    store %normalW, %438
-    %x_501:vec3<f32> = load %viewDirectionW_1
+    %584:vec4<f32> = load %output4
+    %x_494:vec4<f32> = let %584
+    %586:f32 = access %x_494, 0u
+    %587:f32 = access %x_494, 1u
+    %588:f32 = access %x_494, 2u
+    %589:vec3<f32> = construct %586, %587, %588
+    store %normalW, %589
+    %590:vec3<f32> = load %viewDirectionW_1
+    %x_501:vec3<f32> = let %590
     store %param_11, %x_501
-    %x_503:vec3<f32> = load %normalW
+    %592:vec3<f32> = load %normalW
+    %x_503:vec3<f32> = let %592
     store %param_12, %x_503
-    %441:ptr<uniform, vec4<f32>, read> = access %light0, 0u
-    %x_507:vec4<f32> = load %441
+    %594:ptr<uniform, vec4<f32>, read> = access %light0, 0u
+    %595:vec4<f32> = load %594
+    %x_507:vec4<f32> = let %595
     store %param_13, %x_507
-    %443:ptr<uniform, vec4<f32>, read> = access %light0, 1u
-    %x_510:vec4<f32> = load %443
-    %445:f32 = access %x_510, 0u
-    %446:f32 = access %x_510, 1u
-    %447:f32 = access %x_510, 2u
-    %448:vec3<f32> = construct %445, %446, %447
-    store %param_14, %448
-    %449:ptr<uniform, vec4<f32>, read> = access %light0, 2u
-    %x_514:vec4<f32> = load %449
-    %451:f32 = access %x_514, 0u
-    %452:f32 = access %x_514, 1u
-    %453:f32 = access %x_514, 2u
-    %454:vec3<f32> = construct %451, %452, %453
-    store %param_15, %454
-    %455:ptr<uniform, vec3<f32>, read> = access %light0, 3u
-    %x_518:vec3<f32> = load %455
+    %597:ptr<uniform, vec4<f32>, read> = access %light0, 1u
+    %598:vec4<f32> = load %597
+    %x_510:vec4<f32> = let %598
+    %600:f32 = access %x_510, 0u
+    %601:f32 = access %x_510, 1u
+    %602:f32 = access %x_510, 2u
+    %603:vec3<f32> = construct %600, %601, %602
+    store %param_14, %603
+    %604:ptr<uniform, vec4<f32>, read> = access %light0, 2u
+    %605:vec4<f32> = load %604
+    %x_514:vec4<f32> = let %605
+    %607:f32 = access %x_514, 0u
+    %608:f32 = access %x_514, 1u
+    %609:f32 = access %x_514, 2u
+    %610:vec3<f32> = construct %607, %608, %609
+    store %param_15, %610
+    %611:ptr<uniform, vec3<f32>, read> = access %light0, 3u
+    %612:vec3<f32> = load %611
+    %x_518:vec3<f32> = let %612
     store %param_16, %x_518
-    %x_520:f32 = load %glossiness_1
+    %614:f32 = load %glossiness_1
+    %x_520:f32 = let %614
     store %param_17, %x_520
-    %x_521:lightingInfo = call %computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_, %param_11, %param_12, %param_13, %param_14, %param_15, %param_16, %param_17
+    %616:lightingInfo = call %computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_, %param_11, %param_12, %param_13, %param_14, %param_15, %param_16, %param_17
+    %x_521:lightingInfo = let %616
     store %info, %x_521
     store %shadow, 1.0f
-    %459:ptr<function, vec3<f32>, read_write> = access %info, 0u
-    %x_523:vec3<f32> = load %459
-    %x_524:f32 = load %shadow
-    %x_526:vec3<f32> = load %diffuseBase
-    %463:vec3<f32> = mul %x_523, %x_524
-    %464:vec3<f32> = add %x_526, %463
-    store %diffuseBase, %464
-    %465:ptr<function, vec3<f32>, read_write> = access %info, 1u
-    %x_529:vec3<f32> = load %465
-    %x_530:f32 = load %shadow
-    %x_532:vec3<f32> = load %specularBase
-    %469:vec3<f32> = mul %x_529, %x_530
-    %470:vec3<f32> = add %x_532, %469
-    store %specularBase, %470
-    %x_535:vec3<f32> = load %diffuseBase
-    %x_536:vec3<f32> = load %rgb1
-    %473:vec3<f32> = mul %x_535, %x_536
-    store %diffuseOutput, %473
-    %x_539:vec3<f32> = load %specularBase
-    %x_540:vec3<f32> = load %u_Color
-    %476:vec3<f32> = mul %x_539, %x_540
-    store %specularOutput, %476
-    %x_543:vec3<f32> = load %diffuseOutput
-    %x_544:vec3<f32> = load %specularOutput
-    %479:vec3<f32> = add %x_543, %x_544
-    store %output3, %479
-    %x_548:vec3<f32> = load %output3
-    %481:f32 = access %x_548, 0u
-    %482:f32 = access %x_548, 1u
-    %483:f32 = access %x_548, 2u
-    %484:vec4<f32> = construct %481, %482, %483, 1.0f
-    store %glFragColor, %484
+    %618:ptr<function, vec3<f32>, read_write> = access %info, 0u
+    %619:vec3<f32> = load %618
+    %x_523:vec3<f32> = let %619
+    %621:f32 = load %shadow
+    %x_524:f32 = let %621
+    %623:vec3<f32> = load %diffuseBase
+    %x_526:vec3<f32> = let %623
+    %625:vec3<f32> = mul %x_523, %x_524
+    %626:vec3<f32> = add %x_526, %625
+    store %diffuseBase, %626
+    %627:ptr<function, vec3<f32>, read_write> = access %info, 1u
+    %628:vec3<f32> = load %627
+    %x_529:vec3<f32> = let %628
+    %630:f32 = load %shadow
+    %x_530:f32 = let %630
+    %632:vec3<f32> = load %specularBase
+    %x_532:vec3<f32> = let %632
+    %634:vec3<f32> = mul %x_529, %x_530
+    %635:vec3<f32> = add %x_532, %634
+    store %specularBase, %635
+    %636:vec3<f32> = load %diffuseBase
+    %x_535:vec3<f32> = let %636
+    %638:vec3<f32> = load %rgb1
+    %x_536:vec3<f32> = let %638
+    %640:vec3<f32> = mul %x_535, %x_536
+    store %diffuseOutput, %640
+    %641:vec3<f32> = load %specularBase
+    %x_539:vec3<f32> = let %641
+    %643:vec3<f32> = load %u_Color
+    %x_540:vec3<f32> = let %643
+    %645:vec3<f32> = mul %x_539, %x_540
+    store %specularOutput, %645
+    %646:vec3<f32> = load %diffuseOutput
+    %x_543:vec3<f32> = let %646
+    %648:vec3<f32> = load %specularOutput
+    %x_544:vec3<f32> = let %648
+    %650:vec3<f32> = add %x_543, %x_544
+    store %output3, %650
+    %651:vec3<f32> = load %output3
+    %x_548:vec3<f32> = let %651
+    %653:f32 = access %x_548, 0u
+    %654:f32 = access %x_548, 1u
+    %655:f32 = access %x_548, 2u
+    %656:vec4<f32> = construct %653, %654, %655, 1.0f
+    store %glFragColor, %656
     ret
   }
 }
-%tint_symbol = @fragment func(%vMainuv_param:vec2<f32> [@location(1)], %v_output1_param:vec4<f32> [@location(0)], %gl_FrontFacing_param:bool [@front_facing], %v_uv_param:vec2<f32> [@location(3)], %v_output2_param:vec4<f32> [@location(2)]):main_out -> %b16 {
-  %b16 = block {
+%tint_symbol = @fragment func(%vMainuv_param:vec2<f32> [@location(1)], %v_output1_param:vec4<f32> [@location(0)], %gl_FrontFacing_param:bool [@front_facing], %v_uv_param:vec2<f32> [@location(3)], %v_output2_param:vec4<f32> [@location(2)]):main_out {
+  $B16: {
     store %vMainuv, %vMainuv_param
     store %v_output1, %v_output1_param
     store %gl_FrontFacing, %gl_FrontFacing_param
     store %v_uv, %v_uv_param
     store %v_output2, %v_output2_param
-    %491:void = call %main_1
-    %492:vec4<f32> = load %glFragColor
-    %493:main_out = construct %492
-    ret %493
+    %663:void = call %main_1
+    %664:vec4<f32> = load %glFragColor
+    %665:main_out = construct %664
+    ret %665
   }
 }
 

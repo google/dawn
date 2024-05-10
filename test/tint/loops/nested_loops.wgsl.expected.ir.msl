@@ -19,7 +19,7 @@ int f() {
           continue;
         }
       }
-      continue;
+      /* unreachable */
     }
   }
   /* unreachable */

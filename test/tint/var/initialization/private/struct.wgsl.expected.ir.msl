@@ -8,5 +8,9 @@ struct S {
 };
 
 thread S v = {};
-void tint_symbol() {
+kernel void tint_symbol() {
 }
+program_source:8:10: error: program scope variable must reside in constant address space
+thread S v = {};
+         ^
+

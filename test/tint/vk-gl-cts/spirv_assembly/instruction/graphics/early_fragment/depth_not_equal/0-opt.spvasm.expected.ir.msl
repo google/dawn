@@ -1,9 +1,29 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Swizzle
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct main_out {
+  float4 gl_Position [[position]];
+};
+
+thread float4 position_1 = 0.0f;
+thread float4 gl_Position = 0.0f;
+void main_1() {
+  float2 const x_23 = position_1.xy;
+  gl_Position = float4(x_23[0u], x_23[1u], 0.30000001192092895508f, 1.0f);
+}
+vertex main_out tint_symbol(float4 position_1_param) {
+  position_1 = position_1_param;
+  main_1();
+  return {.gl_Position=gl_Position};
+}
+program_source:7:15: error: program scope variable must reside in constant address space
+thread float4 position_1 = 0.0f;
+              ^
+program_source:8:15: error: program scope variable must reside in constant address space
+thread float4 gl_Position = 0.0f;
+              ^
+program_source:13:29: error: invalid type 'float4' (vector of 4 'float' values) for input declaration in a vertex function
+vertex main_out tint_symbol(float4 position_1_param) {
+                            ^~~~~~~~~~~~~~~~~~~~~~~
+

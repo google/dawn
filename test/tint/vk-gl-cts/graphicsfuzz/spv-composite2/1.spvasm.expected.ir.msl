@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(8) {
   resolution:vec2<f32> @offset(0)
 }
 
@@ -8,86 +8,127 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %indexable:ptr<function, array<vec4<f32>, 16>, read_write> = var
     %x_72:ptr<function, i32, read_write> = var
     %x_75:ptr<function, i32, read_write> = var
     %8:vec4<f32> = load %gl_FragCoord
-    %x_55:vec2<f32> = swizzle %8, xy
-    %10:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
-    %11:vec2<f32> = load %10
-    %x_59:vec2<f32> = div %x_55, %11
-    %13:f32 = access %x_59, 0u
-    %14:vec4<f32> = construct 0.0f, %x_55, 0.5f
-    %15:f32 = access %14, 3u
-    %16:vec4<f32> = construct %15, 10.0f, vec2<f32>(0.0f)
-    %17:f32 = access %16, 1u
-    %18:f32 = mul %13, %17
-    %19:i32 = convert %18
-    %20:f32 = access %x_59, 1u
-    %21:f32 = mul %20, 10.0f
-    %22:i32 = convert %21
-    %23:i32 = mul %22, 10i
-    %x_70:i32 = add %19, %23
+    %9:vec2<f32> = swizzle %8, xy
+    %x_55:vec2<f32> = let %9
+    %11:ptr<uniform, vec2<f32>, read> = access %x_6, 0u
+    %12:vec2<f32> = load %11
+    %13:vec2<f32> = div %x_55, %12
+    %x_59:vec2<f32> = let %13
+    %15:f32 = access %x_59, 0u
+    %16:vec4<f32> = construct 0.0f, %x_55, 0.5f
+    %17:f32 = access %16, 3u
+    %18:vec4<f32> = construct %17, 10.0f, vec2<f32>(0.0f)
+    %19:f32 = access %18, 1u
+    %20:f32 = mul %15, %19
+    %21:i32 = call %tint_f32_to_i32, %20
+    %23:i32 = let %21
+    %24:f32 = access %x_59, 1u
+    %25:f32 = mul %24, 10.0f
+    %26:i32 = call %tint_f32_to_i32, %25
+    %27:i32 = mul %26, 10i
+    %28:i32 = add %23, %27
+    %x_70:i32 = let %28
     store %x_72, 100i
     store %x_75, 0i
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
         %x_73:ptr<function, i32, read_write> = var
         %x_76:ptr<function, i32, read_write> = var
-        %27:i32 = load %x_75
-        %28:bool = lt %27, %x_70
-        if %28 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+        %32:i32 = load %x_75
+        %33:bool = lt %32, %x_70
+        if %33 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
-        continue %b4
+        continue  # -> $B4
       }
-      %b4 = block {  # continuing
-        %29:i32 = load %x_72
-        %30:i32 = mul 4i, %29
-        %31:i32 = load %x_72
-        %32:i32 = sub 1000i, %31
-        %33:i32 = mul %30, %32
-        %34:i32 = div %33, 1000i
-        store %x_73, %34
-        %35:i32 = load %x_75
-        %36:i32 = add %35, 1i
-        store %x_76, %36
-        %37:i32 = load %x_73
-        store %x_72, %37
-        %38:i32 = load %x_76
-        store %x_75, %38
-        next_iteration %b3
+      $B4: {  # continuing
+        %34:i32 = load %x_72
+        %35:i32 = mul 4i, %34
+        %36:i32 = load %x_72
+        %37:i32 = sub 1000i, %36
+        %38:i32 = mul %35, %37
+        %39:i32 = call %tint_div_i32, %38, 1000i
+        store %x_73, %39
+        %41:i32 = load %x_75
+        %42:i32 = add %41, 1i
+        store %x_76, %42
+        %43:i32 = load %x_73
+        store %x_72, %43
+        %44:i32 = load %x_76
+        store %x_75, %44
+        next_iteration  # -> $B3
       }
     }
     store %indexable, array<vec4<f32>, 16>(vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f), vec4<f32>(0.5f, 0.0f, 0.0f, 1.0f), vec4<f32>(0.0f, 0.5f, 0.0f, 1.0f), vec4<f32>(0.5f, 0.5f, 0.0f, 1.0f), vec4<f32>(0.0f, 0.0f, 0.5f, 1.0f), vec4<f32>(0.5f, 0.0f, 0.5f, 1.0f), vec4<f32>(0.0f, 0.5f, 0.5f, 1.0f), vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f), vec4<f32>(0.0f, 0.0f, 0.0f, 1.0f), vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f), vec4<f32>(0.0f, 1.0f, 0.0f, 1.0f), vec4<f32>(1.0f, 1.0f, 0.0f, 1.0f), vec4<f32>(0.0f, 0.0f, 1.0f, 1.0f), vec4<f32>(1.0f, 0.0f, 1.0f, 1.0f), vec4<f32>(0.0f, 1.0f, 1.0f, 1.0f), vec4<f32>(1.0f))
-    %39:i32 = load %x_72
-    %40:i32 = mod %39, 16i
-    %41:ptr<function, vec4<f32>, read_write> = access %indexable, %40
-    %42:vec4<f32> = load %41
-    store %x_GLF_color, %42
+    %45:i32 = load %x_72
+    %46:i32 = call %tint_mod_i32, %45, 16i
+    %48:ptr<function, vec4<f32>, read_write> = access %indexable, %46
+    %49:vec4<f32> = load %48
+    store %x_GLF_color, %49
     ret
   }
 }
-%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b7 {
-  %b7 = block {
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out {
+  $B7: {
     store %gl_FragCoord, %gl_FragCoord_param
-    %45:void = call %main_1
-    %46:vec4<f32> = load %x_GLF_color
-    %47:main_out = construct %46
-    ret %47
+    %52:void = call %main_1
+    %53:vec4<f32> = load %x_GLF_color
+    %54:main_out = construct %53
+    ret %54
+  }
+}
+%tint_div_i32 = func(%lhs:i32, %rhs:i32):i32 {
+  $B8: {
+    %57:bool = eq %rhs, 0i
+    %58:bool = eq %lhs, -2147483648i
+    %59:bool = eq %rhs, -1i
+    %60:bool = and %58, %59
+    %61:bool = or %57, %60
+    %62:i32 = select %rhs, 1i, %61
+    %63:i32 = div %lhs, %62
+    ret %63
+  }
+}
+%tint_mod_i32 = func(%lhs_1:i32, %rhs_1:i32):i32 {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
+  $B9: {
+    %66:bool = eq %rhs_1, 0i
+    %67:bool = eq %lhs_1, -2147483648i
+    %68:bool = eq %rhs_1, -1i
+    %69:bool = and %67, %68
+    %70:bool = or %66, %69
+    %71:i32 = select %rhs_1, 1i, %70
+    %72:i32 = let %71
+    %73:i32 = div %lhs_1, %72
+    %74:i32 = mul %73, %72
+    %75:i32 = sub %lhs_1, %74
+    ret %75
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 {
+  $B10: {
+    %77:i32 = convert %value
+    %78:bool = gte %value, -2147483648.0f
+    %79:i32 = select -2147483648i, %77, %78
+    %80:bool = lte %value, 2147483520.0f
+    %81:i32 = select 2147483647i, %79, %80
+    ret %81
   }
 }
 

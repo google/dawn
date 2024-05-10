@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: ResultMatrix = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: ResultMatrix = struct @align(4) {
   numbers:array<f32> @offset(0)
 }
 
@@ -18,7 +18,7 @@ Uniforms = struct @align(4) {
   sizeB:i32 @offset(8)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %gl_GlobalInvocationID:ptr<private, vec3<u32>, read_write> = var
   %resultMatrix:ptr<storage, ResultMatrix, read_write> = var @binding_point(0, 2)
   %firstMatrix:ptr<storage, FirstMatrix, read> = var @binding_point(0, 0)
@@ -26,72 +26,77 @@ Uniforms = struct @align(4) {
   %x_46:ptr<uniform, Uniforms, read> = var @binding_point(0, 3)
 }
 
-%binaryOperation_f1_f1_ = func(%a:ptr<function, f32, read_write>, %b:ptr<function, f32, read_write>):f32 -> %b2 {
-  %b2 = block {
+%binaryOperation_f1_f1_ = func(%a:ptr<function, f32, read_write>, %b:ptr<function, f32, read_write>):f32 {
+  $B2: {
     %x_26:ptr<function, f32, read_write> = var
     %10:f32 = load %b
     %11:bool = eq %10, 0.0f
-    if %11 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %11 [t: $B3] {  # if_1
+      $B3: {  # true
         ret 1.0f
       }
     }
-    %x_21:f32 = load %b
-    %13:f32 = div %x_21, 2.0f
-    %14:f32 = floor %13
-    %15:f32 = mul 2.0f, %14
-    %16:f32 = sub %x_21, %15
-    %17:f32 = round %16
-    %18:bool = eq %17, 1.0f
-    %19:bool = eq %18, false
-    if %19 [t: %b4, f: %b5] {  # if_2
-      %b4 = block {  # true
-        %20:f32 = load %a
-        %21:f32 = abs %20
-        %22:f32 = load %b
-        %23:f32 = pow %21, %22
-        store %x_26, %23
+    %12:f32 = load %b
+    %x_21:f32 = let %12
+    %14:f32 = div %x_21, 2.0f
+    %15:f32 = floor %14
+    %16:f32 = mul 2.0f, %15
+    %17:f32 = sub %x_21, %16
+    %18:f32 = round %17
+    %19:bool = eq %18, 1.0f
+    %20:bool = eq %19, false
+    if %20 [t: $B4, f: $B5] {  # if_2
+      $B4: {  # true
+        %21:f32 = load %a
+        %22:f32 = abs %21
+        %23:f32 = load %b
+        %24:f32 = pow %22, %23
+        store %x_26, %24
         exit_if  # if_2
       }
-      %b5 = block {  # false
-        %24:f32 = load %a
-        %25:f32 = sign %24
-        %26:f32 = load %a
-        %27:f32 = abs %26
-        %28:f32 = load %b
-        %29:f32 = pow %27, %28
-        %30:f32 = mul %25, %29
-        store %x_26, %30
+      $B5: {  # false
+        %25:f32 = load %a
+        %26:f32 = sign %25
+        %27:f32 = let %26
+        %28:f32 = load %a
+        %29:f32 = abs %28
+        %30:f32 = load %b
+        %31:f32 = pow %29, %30
+        %32:f32 = mul %27, %31
+        store %x_26, %32
         exit_if  # if_2
       }
     }
-    %x_41:f32 = load %x_26
+    %33:f32 = load %x_26
+    %x_41:f32 = let %33
     ret %x_41
   }
 }
-%main_1 = func():void -> %b6 {
-  %b6 = block {
+%main_1 = func():void {
+  $B6: {
     %index:ptr<function, i32, read_write> = var
     %a_1:ptr<function, i32, read_write> = var
     %param:ptr<function, f32, read_write> = var
     %param_1:ptr<function, f32, read_write> = var
-    %37:u32 = load_vector_element %gl_GlobalInvocationID, 0u
-    %38:i32 = bitcast %37
-    store %index, %38
+    %40:u32 = load_vector_element %gl_GlobalInvocationID, 0u
+    %41:i32 = bitcast %40
+    store %index, %41
     store %a_1, -10i
-    %x_63:i32 = load %index
+    %42:i32 = load %index
+    %x_63:i32 = let %42
     store %param, -4.0f
     store %param_1, -3.0f
-    %x_68:f32 = call %binaryOperation_f1_f1_, %param, %param_1
-    %41:ptr<storage, f32, read_write> = access %resultMatrix, 0u, %x_63
-    store %41, %x_68
+    %44:f32 = call %binaryOperation_f1_f1_, %param, %param_1
+    %x_68:f32 = let %44
+    %46:ptr<storage, f32, read_write> = access %resultMatrix, 0u, %x_63
+    store %46, %x_68
     ret
   }
 }
-%tint_symbol_1 = @compute @workgroup_size(1, 1, 1) func(%gl_GlobalInvocationID_param:vec3<u32> [@global_invocation_id]):void -> %b7 {
-  %b7 = block {
+%tint_symbol_1 = @compute @workgroup_size(1, 1, 1) func(%gl_GlobalInvocationID_param:vec3<u32> [@global_invocation_id]):void {
+  $B7: {
     store %gl_GlobalInvocationID, %gl_GlobalInvocationID_param
-    %44:void = call %main_1
+    %49:void = call %main_1
     ret
   }
 }

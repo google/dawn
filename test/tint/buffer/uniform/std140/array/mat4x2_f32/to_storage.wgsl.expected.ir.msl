@@ -1,12 +1,12 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %u:ptr<uniform, array<mat4x2<f32>, 4>, read> = var @binding_point(0, 0)
   %s:ptr<storage, array<mat4x2<f32>, 4>, read_write> = var @binding_point(0, 1)
 }
 
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %4:array<mat4x2<f32>, 4> = load %u
     store %s, %4
     %5:ptr<storage, mat4x2<f32>, read_write> = access %s, 1i

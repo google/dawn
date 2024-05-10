@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:775 internal compiler error: Out = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: Out = struct @align(16) {
   pos:vec4<f32> @offset(0), @builtin(position)
   none:f32 @offset(16), @location(0)
   flat:f32 @offset(20), @location(1), @interpolate(flat)
@@ -12,8 +12,8 @@ SKIP: FAILED
   linear_sample:f32 @offset(44), @location(7), @interpolate(linear, sample)
 }
 
-%tint_symbol = @vertex func():Out -> %b1 {
-  %b1 = block {
+%tint_symbol = @vertex func():Out {
+  $B1: {
     ret Out(vec4<f32>(0.0f), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
   }
 }

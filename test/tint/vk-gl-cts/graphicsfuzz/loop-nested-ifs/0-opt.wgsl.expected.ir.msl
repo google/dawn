@@ -1,6 +1,93 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void {
+  $B2: {
+    %j:ptr<function, i32, read_write> = var
+    %a:ptr<function, f32, read_write> = var
+    store %j, 0i
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        %5:i32 = load %j
+        %x_6:i32 = let %5
+        %7:bool = lt %x_6, 2i
+        if %7 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        %8:i32 = load %j
+        %x_7:i32 = let %8
+        %10:bool = lt %x_7, 1i
+        if %10 [t: $B7] {  # if_2
+          $B7: {  # true
+            store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+            exit_if  # if_2
+          }
+        }
+        %11:i32 = load %j
+        %x_8:i32 = let %11
+        %13:bool = neq %x_8, 3i
+        if %13 [t: $B8] {  # if_3
+          $B8: {  # true
+            %14:i32 = load %j
+            %x_9:i32 = let %14
+            %16:bool = neq %x_9, 4i
+            if %16 [t: $B9] {  # if_4
+              $B9: {  # true
+                %17:i32 = load %j
+                %x_10:i32 = let %17
+                %19:bool = eq %x_10, 5i
+                if %19 [t: $B10, f: $B11] {  # if_5
+                  $B10: {  # true
+                    store_vector_element %x_GLF_color, 0u, 4.0f
+                    exit_if  # if_5
+                  }
+                  $B11: {  # false
+                    store %a, 4.0f
+                    store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+                    exit_if  # if_5
+                  }
+                }
+                exit_if  # if_4
+              }
+            }
+            exit_if  # if_3
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %20:i32 = load %j
+        %x_11:i32 = let %20
+        %22:i32 = add %x_11, 1i
+        store %j, %22
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out {
+  $B12: {
+    %24:void = call %main_1
+    %25:vec4<f32> = load %x_GLF_color
+    %26:main_out = construct %25
+    ret %26
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

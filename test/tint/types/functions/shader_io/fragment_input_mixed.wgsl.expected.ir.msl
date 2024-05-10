@@ -1,6 +1,38 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:270 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: FragmentInputs0 = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:i32 @offset(16), @location(0), @interpolate(flat)
+}
+
+FragmentInputs1 = struct @align(16) {
+  loc3:vec4<f32> @offset(0), @location(3)
+  sample_mask:u32 @offset(16), @builtin(sample_mask)
+}
+
+%tint_symbol = @fragment func(%inputs0:FragmentInputs0, %front_facing:bool [@front_facing], %loc1:u32 [@location(1), @interpolate(flat)], %sample_index:u32 [@sample_index], %inputs1:FragmentInputs1, %loc2:f32 [@location(2)]):void {
+  $B1: {
+    if %front_facing [t: $B2] {  # if_1
+      $B2: {  # true
+        %8:vec4<f32> = access %inputs0, 0u
+        %foo:vec4<f32> = let %8
+        %10:u32 = access %inputs1, 1u
+        %11:u32 = add %sample_index, %10
+        %bar:u32 = let %11
+        %13:i32 = access %inputs0, 1u
+        %i:i32 = let %13
+        %u:u32 = let %loc1
+        %f:f32 = let %loc2
+        %17:vec4<f32> = access %inputs1, 0u
+        %v:vec4<f32> = let %17
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -1,0 +1,33 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void tint_symbol() {
+  uint out = 0u;
+  {
+    while(true) {
+      switch(2) {
+        case 1:
+        {
+          if true { break; }
+          continue;
+        }
+        default:
+        {
+          break;
+        }
+      }
+      out = (out + 1u);
+      if true { break; }
+      continue;
+    }
+  }
+}
+program_source:11:14: error: expected '(' after 'if'
+          if true { break; }
+             ^
+program_source:20:10: error: expected '(' after 'if'
+      if true { break; }
+         ^
+

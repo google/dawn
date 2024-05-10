@@ -6,6 +6,11 @@ struct Out {
   float4 pos [[position]] TINT_INVARIANT;
 };
 
-Out tint_symbol() {
+vertex Out tint_symbol() {
   return Out{};
 }
+program_source:4:26: error: expected ';' at end of declaration list
+  float4 pos [[position]] TINT_INVARIANT;
+                         ^
+                         ;
+

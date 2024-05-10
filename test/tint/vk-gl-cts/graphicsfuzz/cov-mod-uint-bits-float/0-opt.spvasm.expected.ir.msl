@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
   el:f32 @offset(0)
 }
 
@@ -12,13 +12,13 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %a:ptr<function, f32, read_write> = var
     store %a, 1.40129846e-45f
     %5:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
@@ -29,8 +29,8 @@ main_out = struct @align(16) {
     %9:ptr<uniform, f32, read> = access %x_6, 0u, 2i, 0u
     %10:f32 = load %9
     %11:bool = lt %8, %10
-    if %11 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %11 [t: $B3] {  # if_1
+      $B3: {  # true
         %12:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
         %13:f32 = load %12
         %14:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
@@ -47,8 +47,8 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b4 {
-  %b4 = block {
+%tint_symbol = @fragment func():main_out {
+  $B4: {
     %22:void = call %main_1
     %23:vec4<f32> = load %x_GLF_color
     %24:main_out = construct %23

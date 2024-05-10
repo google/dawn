@@ -1,6 +1,27 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: In = struct @align(16) {
+  a:vec4<f32> @offset(0), @location(0)
+  b:vec4<f32> @offset(16), @location(1), @interpolate(flat)
+  fbf:vec4<i32> @offset(32)
+}
+
+%g = func(%a:f32, %b:f32, %c:i32):void {
+  $B1: {
+    ret
+  }
+}
+%f = @fragment func(%in:In):void {
+  $B2: {
+    %7:f32 = access %in, 0u, 0u
+    %8:f32 = access %in, 1u, 1u
+    %9:i32 = access %in, 2u, 0u
+    %10:void = call %g, %7, %8, %9
+    ret
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

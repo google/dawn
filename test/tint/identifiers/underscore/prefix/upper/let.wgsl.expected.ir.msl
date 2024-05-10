@@ -1,9 +1,27 @@
-#include <metal_stdlib>
-using namespace metal;
+SKIP: FAILED
 
-void f() {
-  int const A = 1;
-  int const _A = 2;
-  int const B = A;
-  int const _B = _A;
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
+  %s:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
+
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %A:i32 = let 1i
+    %_A:i32 = let 2i
+    %B:i32 = let %A
+    %_B:i32 = let %_A
+    %7:i32 = add %A, %_A
+    %8:i32 = add %7, %B
+    %9:i32 = add %8, %_B
+    store %s, %9
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

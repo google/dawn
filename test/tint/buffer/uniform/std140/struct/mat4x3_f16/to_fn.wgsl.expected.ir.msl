@@ -1,42 +1,42 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(64) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(64) {
   before:i32 @offset(0)
   m:mat4x3<f16> @offset(8)
   after:i32 @offset(64)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %u:ptr<uniform, array<S, 4>, read> = var @binding_point(0, 0)
 }
 
-%a = func(%a_1:array<S, 4>):void -> %b2 {  # %a_1: 'a'
-  %b2 = block {
+%a = func(%a_1:array<S, 4>):void {  # %a_1: 'a'
+  $B2: {
     ret
   }
 }
-%b = func(%s:S):void -> %b3 {
-  %b3 = block {
+%b = func(%s:S):void {
+  $B3: {
     ret
   }
 }
-%c = func(%m:mat4x3<f16>):void -> %b4 {
-  %b4 = block {
+%c = func(%m:mat4x3<f16>):void {
+  $B4: {
     ret
   }
 }
-%d = func(%v:vec3<f16>):void -> %b5 {
-  %b5 = block {
+%d = func(%v:vec3<f16>):void {
+  $B5: {
     ret
   }
 }
-%e = func(%f:f16):void -> %b6 {
-  %b6 = block {
+%e = func(%f:f16):void {
+  $B6: {
     ret
   }
 }
-%f_1 = @compute @workgroup_size(1, 1, 1) func():void -> %b7 {  # %f_1: 'f'
-  %b7 = block {
+%f_1 = @compute @workgroup_size(1, 1, 1) func():void {  # %f_1: 'f'
+  $B7: {
     %13:array<S, 4> = load %u
     %14:void = call %a, %13
     %15:ptr<uniform, S, read> = access %u, 2i

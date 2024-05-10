@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
   el:f32 @offset(0)
 }
 
@@ -20,66 +20,75 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
   %x_8:ptr<uniform, buf1, read> = var @binding_point(0, 1)
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %6:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
-    %x_31:f32 = load %6
-    %8:vec4<f32> = construct %x_31, %x_31, %x_31, %x_31
-    store %x_GLF_color, %8
-    %x_34:f32 = load_vector_element %gl_FragCoord, 1u
-    %10:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-    %x_36:f32 = load %10
-    %12:bool = gte %x_34, %x_36
-    if %12 [t: %b3] {  # if_1
-      %b3 = block {  # true
-        %13:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
-        %x_41:i32 = load %13
-        switch %x_41 [c: (0i 16i, %b4), c: (default, %b5)] {  # switch_1
-          %b4 = block {  # case
-            %15:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-            %x_45:i32 = load %15
-            %x_46:f32 = convert %x_45
-            %x_47:f32 = convert %x_41
-            %19:vec4<f32> = construct %x_46, %x_47, %x_47, %x_46
-            store %x_GLF_color, %19
+    %7:f32 = load %6
+    %x_31:f32 = let %7
+    %9:vec4<f32> = construct %x_31, %x_31, %x_31, %x_31
+    store %x_GLF_color, %9
+    %10:f32 = load_vector_element %gl_FragCoord, 1u
+    %x_34:f32 = let %10
+    %12:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %13:f32 = load %12
+    %x_36:f32 = let %13
+    %15:bool = gte %x_34, %x_36
+    if %15 [t: $B3] {  # if_1
+      $B3: {  # true
+        %16:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
+        %17:i32 = load %16
+        %x_41:i32 = let %17
+        switch %x_41 [c: (0i 16i, $B4), c: (default, $B5)] {  # switch_1
+          $B4: {  # case
+            %19:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+            %20:i32 = load %19
+            %x_45:i32 = let %20
+            %22:f32 = convert %x_45
+            %x_46:f32 = let %22
+            %24:f32 = convert %x_41
+            %x_47:f32 = let %24
+            %26:vec4<f32> = construct %x_46, %x_47, %x_47, %x_46
+            store %x_GLF_color, %26
             exit_switch  # switch_1
           }
-          %b5 = block {  # case
+          $B5: {  # case
             exit_switch  # switch_1
           }
         }
         exit_if  # if_1
       }
     }
-    %20:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
-    %x_50:i32 = load %20
-    %22:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-    %x_52:i32 = load %22
-    %24:bool = eq %x_50, %x_52
-    if %24 [t: %b6] {  # if_2
-      %b6 = block {  # true
-        %25:vec4<f32> = construct %x_36, %x_36, %x_36, %x_36
-        store %x_GLF_color, %25
+    %27:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
+    %28:i32 = load %27
+    %x_50:i32 = let %28
+    %30:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+    %31:i32 = load %30
+    %x_52:i32 = let %31
+    %33:bool = eq %x_50, %x_52
+    if %33 [t: $B6] {  # if_2
+      $B6: {  # true
+        %34:vec4<f32> = construct %x_36, %x_36, %x_36, %x_36
+        store %x_GLF_color, %34
         exit_if  # if_2
       }
     }
     ret
   }
 }
-%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out -> %b7 {
-  %b7 = block {
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out {
+  $B7: {
     store %gl_FragCoord, %gl_FragCoord_param
-    %28:void = call %main_1
-    %29:vec4<f32> = load %x_GLF_color
-    %30:main_out = construct %29
-    ret %30
+    %37:void = call %main_1
+    %38:vec4<f32> = load %x_GLF_color
+    %39:main_out = construct %38
+    ret %39
   }
 }
 

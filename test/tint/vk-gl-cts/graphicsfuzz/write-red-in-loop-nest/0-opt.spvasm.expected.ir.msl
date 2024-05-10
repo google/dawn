@@ -1,6 +1,171 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void {
+  $B2: {
+    %m43:ptr<function, mat4x3<f32>, read_write> = var
+    %ll1:ptr<function, i32, read_write> = var
+    %rows:ptr<function, i32, read_write> = var
+    %ll4:ptr<function, i32, read_write> = var
+    %ll2:ptr<function, i32, read_write> = var
+    %c:ptr<function, i32, read_write> = var
+    %tempm43:ptr<function, mat4x3<f32>, read_write> = var
+    %ll3:ptr<function, i32, read_write> = var
+    %d:ptr<function, i32, read_write> = var
+    %r:ptr<function, i32, read_write> = var
+    %sums:ptr<function, array<f32, 9>, read_write> = var
+    %idx:ptr<function, i32, read_write> = var
+    store %m43, mat4x3<f32>(vec3<f32>(1.0f, 0.0f, 0.0f), vec3<f32>(0.0f, 1.0f, 0.0f), vec3<f32>(0.0f, 0.0f, 1.0f), vec3<f32>(0.0f))
+    store %ll1, 0i
+    store %rows, 2i
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        if true [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        %15:i32 = load %ll1
+        %16:bool = gte %15, 5i
+        if %16 [t: $B7] {  # if_2
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %17:i32 = load %ll1
+        %18:i32 = add %17, 1i
+        store %ll1, %18
+        store %ll4, 10i
+        store %ll2, 0i
+        store %c, 0i
+        loop [b: $B8, c: $B9] {  # loop_2
+          $B8: {  # body
+            %19:i32 = load %c
+            %20:bool = lt %19, 1i
+            if %20 [t: $B10, f: $B11] {  # if_3
+              $B10: {  # true
+                exit_if  # if_3
+              }
+              $B11: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            %21:i32 = load %ll2
+            %22:bool = gte %21, 0i
+            if %22 [t: $B12] {  # if_4
+              $B12: {  # true
+                exit_loop  # loop_2
+              }
+            }
+            %23:i32 = load %ll2
+            %24:i32 = add %23, 1i
+            store %ll2, %24
+            %25:mat4x3<f32> = load %m43
+            store %tempm43, %25
+            store %ll3, 0i
+            store %d, 0i
+            loop [b: $B13, c: $B14] {  # loop_3
+              $B13: {  # body
+                %26:i32 = load %ll4
+                %27:bool = lt 1i, %26
+                if %27 [t: $B15, f: $B16] {  # if_5
+                  $B15: {  # true
+                    exit_if  # if_5
+                  }
+                  $B16: {  # false
+                    exit_loop  # loop_3
+                  }
+                }
+                %28:i32 = load %d
+                %x_24:i32 = let %28
+                %30:i32 = load %d
+                %x_25:i32 = let %30
+                %32:i32 = load %d
+                %x_26:i32 = let %32
+                %34:i32 = load %r
+                %x_27:i32 = let %34
+                %36:i32 = load %r
+                %x_28:i32 = let %36
+                %38:i32 = load %r
+                %x_29:i32 = let %38
+                %40:bool = gte %x_24, 0i
+                %41:bool = lt %x_25, 4i
+                %42:bool = and %40, %41
+                %43:i32 = select 0i, %x_26, %42
+                %44:ptr<function, vec3<f32>, read_write> = access %tempm43, %43
+                %45:ptr<function, vec3<f32>, read_write> = let %44
+                %46:bool = gte %x_27, 0i
+                %47:bool = lt %x_28, 3i
+                %48:bool = and %46, %47
+                %49:i32 = select 0i, %x_29, %48
+                store_vector_element %45, %49, 1.0f
+                continue  # -> $B14
+              }
+              $B14: {  # continuing
+                %50:i32 = load %d
+                %51:i32 = add %50, 1i
+                store %d, %51
+                next_iteration  # -> $B13
+              }
+            }
+            %52:i32 = load %idx
+            %53:i32 = load %idx
+            %54:bool = gte %53, 0i
+            %55:i32 = load %idx
+            %56:bool = lt %55, 9i
+            %57:bool = and %54, %56
+            %58:i32 = select 0i, %52, %57
+            %x_111:i32 = let %58
+            %60:ptr<function, f32, read_write> = access %sums, %x_111
+            %61:ptr<function, f32, read_write> = access %sums, %x_111
+            %62:f32 = load %61
+            %63:i32 = load %c
+            %64:ptr<function, vec3<f32>, read_write> = access %m43, %63
+            %65:f32 = load_vector_element %64, 1u
+            %66:f32 = add %62, %65
+            store %60, %66
+            continue  # -> $B9
+          }
+          $B9: {  # continuing
+            %67:i32 = load %c
+            %68:i32 = add %67, 1i
+            store %c, %68
+            next_iteration  # -> $B8
+          }
+        }
+        %69:i32 = load %idx
+        %70:i32 = add %69, 1i
+        store %idx, %70
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out {
+  $B17: {
+    %72:void = call %main_1
+    %73:vec4<f32> = load %x_GLF_color
+    %74:main_out = construct %73
+    ret %74
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

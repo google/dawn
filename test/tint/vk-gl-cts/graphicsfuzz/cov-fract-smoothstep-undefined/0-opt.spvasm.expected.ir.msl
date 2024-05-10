@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
   el:f32 @offset(0)
 }
 
@@ -12,13 +12,13 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %v1:ptr<function, vec2<f32>, read_write> = var
     %b:ptr<function, vec2<f32>, read_write> = var
     %a:ptr<function, f32, read_write> = var
@@ -44,48 +44,49 @@ main_out = struct @align(16) {
     %23:vec4<f32> = construct %18, %19, %20, %22
     store %x_GLF_color, %23
     %24:f32 = load_vector_element %b, 0u
-    %x_46:bool = lt %24, 1.0f
+    %25:bool = lt %24, 1.0f
+    %x_46:bool = let %25
     store %x_52, %x_46
-    if %x_46 [t: %b3] {  # if_1
-      %b3 = block {  # true
-        %26:f32 = load_vector_element %b, 1u
-        %27:bool = lt %26, 1.0f
-        store %x_51, %27
-        %28:bool = load %x_51
-        store %x_52, %28
+    if %x_46 [t: $B3] {  # if_1
+      $B3: {  # true
+        %27:f32 = load_vector_element %b, 1u
+        %28:bool = lt %27, 1.0f
+        store %x_51, %28
+        %29:bool = load %x_51
+        store %x_52, %29
         exit_if  # if_1
       }
     }
-    %29:bool = load %x_52
-    if %29 [t: %b4, f: %b5] {  # if_2
-      %b4 = block {  # true
-        %30:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-        %31:f32 = load %30
-        %32:f32 = load_vector_element %b, 0u
-        %33:f32 = load_vector_element %b, 1u
-        %34:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-        %35:f32 = load %34
-        %36:vec4<f32> = construct %31, %32, %33, %35
-        store %x_GLF_color, %36
+    %30:bool = load %x_52
+    if %30 [t: $B4, f: $B5] {  # if_2
+      $B4: {  # true
+        %31:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+        %32:f32 = load %31
+        %33:f32 = load_vector_element %b, 0u
+        %34:f32 = load_vector_element %b, 1u
+        %35:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+        %36:f32 = load %35
+        %37:vec4<f32> = construct %32, %33, %34, %36
+        store %x_GLF_color, %37
         exit_if  # if_2
       }
-      %b5 = block {  # false
-        %37:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-        %38:f32 = load %37
-        %39:vec4<f32> = construct %38
-        store %x_GLF_color, %39
+      $B5: {  # false
+        %38:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+        %39:f32 = load %38
+        %40:vec4<f32> = construct %39
+        store %x_GLF_color, %40
         exit_if  # if_2
       }
     }
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b6 {
-  %b6 = block {
-    %41:void = call %main_1
-    %42:vec4<f32> = load %x_GLF_color
-    %43:main_out = construct %42
-    ret %43
+%tint_symbol = @fragment func():main_out {
+  $B6: {
+    %42:void = call %main_1
+    %43:vec4<f32> = load %x_GLF_color
+    %44:main_out = construct %43
+    ret %44
   }
 }
 

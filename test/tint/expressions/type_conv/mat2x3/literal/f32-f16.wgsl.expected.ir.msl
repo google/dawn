@@ -4,3 +4,7 @@ SKIP: FAILED
 using namespace metal;
 
 thread half2x3 u = half2x3(half3(1.0h, 2.0h, 3.0h), half3(4.0h, 5.0h, 6.0h));
+program_source:4:16: error: program scope variable must reside in constant address space
+thread half2x3 u = half2x3(half3(1.0h, 2.0h, 3.0h), half3(4.0h, 5.0h, 6.0h));
+               ^
+

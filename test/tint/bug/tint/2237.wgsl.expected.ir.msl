@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
+  %tint_symbol:ptr<storage, u32, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:u32 = load %tint_symbol
+    %4:u32 = access array<u32, 4>(0u, 1u, 2u, 4u), %3
+    ret %4
+  }
+}
+%tint_symbol_1 = @compute @workgroup_size(1, 1, 1) func():void {
+  $B3: {
+    %6:u32 = load %tint_symbol
+    %7:u32 = access array<u32, 4>(0u, 1u, 2u, 4u), %6
+    %v:u32 = let %7
+    %9:u32 = call %foo
+    %10:u32 = add %v, %9
+    store %tint_symbol, %10
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

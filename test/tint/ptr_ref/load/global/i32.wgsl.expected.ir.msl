@@ -4,5 +4,14 @@ SKIP: FAILED
 using namespace metal;
 
 thread int I = 0;
-void tint_symbol() {
+kernel void tint_symbol() {
+  int const i = I;
+  int const u = (i + 1);
 }
+program_source:4:12: error: program scope variable must reside in constant address space
+thread int I = 0;
+           ^
+program_source:7:13: warning: unused variable 'u' [-Wunused-variable]
+  int const u = (i + 1);
+            ^
+

@@ -1,18 +1,18 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(64) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(64) {
   before:i32 @offset(0)
   m:mat3x2<f32> @offset(8)
   after:i32 @offset(64)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %u:ptr<uniform, array<S, 4>, read> = var @binding_point(0, 0)
   %p:ptr<private, array<S, 4>, read_write> = var
 }
 
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %4:array<S, 4> = load %u
     store %p, %4
     %5:ptr<private, S, read_write> = access %p, 1i

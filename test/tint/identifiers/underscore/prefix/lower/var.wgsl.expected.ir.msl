@@ -1,11 +1,29 @@
 SKIP: FAILED
 
-#include <metal_stdlib>
-using namespace metal;
-
-thread int a = 1;
-thread int _a = 2;
-void f() {
-  int b = a;
-  int _b = _a;
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
+  %s:ptr<storage, i32, read_write> = var @binding_point(0, 0)
+  %a:ptr<private, i32, read_write> = var, 1i
+  %_a:ptr<private, i32, read_write> = var, 2i
 }
+
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %5:i32 = load %a
+    %b:ptr<function, i32, read_write> = var, %5
+    %7:i32 = load %_a
+    %_b:ptr<function, i32, read_write> = var, %7
+    %9:i32 = load %b
+    %10:i32 = load %_b
+    %11:i32 = add %9, %10
+    store %s, %11
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

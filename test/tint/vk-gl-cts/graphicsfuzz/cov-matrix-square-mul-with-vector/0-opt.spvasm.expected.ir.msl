@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
   el:f32 @offset(0)
 }
 
@@ -12,69 +12,70 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %m0:ptr<function, mat2x2<f32>, read_write> = var
     %m1:ptr<function, mat2x2<f32>, read_write> = var
     %v:ptr<function, vec2<f32>, read_write> = var
     %7:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
     %8:f32 = load %7
     %9:vec2<f32> = construct %8, -0.540302276611328125f
-    %10:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-    %11:f32 = load %10
-    %12:vec2<f32> = construct 0.540302276611328125f, %11
-    %13:mat2x2<f32> = construct %9, %12
-    store %m0, %13
-    %14:mat2x2<f32> = load %m0
+    %10:vec2<f32> = let %9
+    %11:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %12:f32 = load %11
+    %13:vec2<f32> = construct 0.540302276611328125f, %12
+    %14:mat2x2<f32> = construct %10, %13
+    store %m0, %14
     %15:mat2x2<f32> = load %m0
-    %16:mat2x2<f32> = mul %14, %15
-    store %m1, %16
-    %17:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-    %18:f32 = load %17
-    %19:vec2<f32> = construct %18
-    %20:mat2x2<f32> = load %m1
-    %21:vec2<f32> = mul %19, %20
-    store %v, %21
-    %22:f32 = load_vector_element %v, 0u
-    %23:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-    %24:f32 = load %23
-    %25:bool = lt %22, %24
-    if %25 [t: %b3, f: %b4] {  # if_1
-      %b3 = block {  # true
-        %26:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-        %27:f32 = load %26
-        %28:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
-        %29:f32 = load %28
-        %30:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
-        %31:f32 = load %30
-        %32:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-        %33:f32 = load %32
-        %34:vec4<f32> = construct %27, %29, %31, %33
-        store %x_GLF_color, %34
+    %16:mat2x2<f32> = load %m0
+    %17:mat2x2<f32> = mul %15, %16
+    store %m1, %17
+    %18:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %19:f32 = load %18
+    %20:vec2<f32> = construct %19
+    %21:mat2x2<f32> = load %m1
+    %22:vec2<f32> = mul %20, %21
+    store %v, %22
+    %23:f32 = load_vector_element %v, 0u
+    %24:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %25:f32 = load %24
+    %26:bool = lt %23, %25
+    if %26 [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
+        %27:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+        %28:f32 = load %27
+        %29:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+        %30:f32 = load %29
+        %31:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+        %32:f32 = load %31
+        %33:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+        %34:f32 = load %33
+        %35:vec4<f32> = construct %28, %30, %32, %34
+        store %x_GLF_color, %35
         exit_if  # if_1
       }
-      %b4 = block {  # false
-        %35:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
-        %36:f32 = load %35
-        %37:vec4<f32> = construct %36
-        store %x_GLF_color, %37
+      $B4: {  # false
+        %36:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+        %37:f32 = load %36
+        %38:vec4<f32> = construct %37
+        store %x_GLF_color, %38
         exit_if  # if_1
       }
     }
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b5 {
-  %b5 = block {
-    %39:void = call %main_1
-    %40:vec4<f32> = load %x_GLF_color
-    %41:main_out = construct %40
-    ret %41
+%tint_symbol = @fragment func():main_out {
+  $B5: {
+    %40:void = call %main_1
+    %41:vec4<f32> = load %x_GLF_color
+    %42:main_out = construct %41
+    ret %42
   }
 }
 

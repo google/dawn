@@ -1,9 +1,20 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void tint_symbol() {
+  float3x3 m = float3x3(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), float3(7.0f, 8.0f, 9.0f));
+  thread float3* const v = m[1];
+  v = float3(5.0f);
+}
+program_source:6:24: error: cannot initialize a variable of type 'float3 *const' with an lvalue of type 'vec<float, 3>' (vector of 3 'float' values)
+  thread float3* const v = m[1];
+                       ^   ~~~~
+program_source:7:5: error: cannot assign to variable 'v' with const-qualified type 'float3 *const'
+  v = float3(5.0f);
+  ~ ^
+program_source:6:24: note: variable 'v' declared const here
+  thread float3* const v = m[1];
+  ~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+

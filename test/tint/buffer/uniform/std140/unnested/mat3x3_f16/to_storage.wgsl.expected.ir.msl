@@ -1,27 +1,41 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %u:ptr<uniform, mat3x3<f16>, read> = var @binding_point(0, 0)
   %s:ptr<storage, mat3x3<f16>, read_write> = var @binding_point(0, 1)
 }
 
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %4:mat3x3<f16> = load %u
-    store %s, %4
-    %5:ptr<storage, vec3<f16>, read_write> = access %s, 1i
-    %6:ptr<uniform, vec3<f16>, read> = access %u, 0i
-    %7:vec3<f16> = load %6
-    store %5, %7
-    %8:ptr<storage, vec3<f16>, read_write> = access %s, 1i
-    %9:ptr<uniform, vec3<f16>, read> = access %u, 0i
-    %10:vec3<f16> = load %9
-    %11:vec3<f16> = swizzle %10, zxy
-    store %8, %11
-    %12:ptr<storage, vec3<f16>, read_write> = access %s, 0i
-    %13:ptr<uniform, vec3<f16>, read> = access %u, 1i
-    %14:f16 = load_vector_element %13, 0i
-    store_vector_element %12, 1i, %14
+    %5:void = call %tint_store_and_preserve_padding, %s, %4
+    %7:ptr<storage, vec3<f16>, read_write> = access %s, 1i
+    %8:ptr<uniform, vec3<f16>, read> = access %u, 0i
+    %9:vec3<f16> = load %8
+    store %7, %9
+    %10:ptr<storage, vec3<f16>, read_write> = access %s, 1i
+    %11:ptr<uniform, vec3<f16>, read> = access %u, 0i
+    %12:vec3<f16> = load %11
+    %13:vec3<f16> = swizzle %12, zxy
+    store %10, %13
+    %14:ptr<storage, vec3<f16>, read_write> = access %s, 0i
+    %15:ptr<uniform, vec3<f16>, read> = access %u, 1i
+    %16:f16 = load_vector_element %15, 0i
+    store_vector_element %14, 1i, %16
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<storage, mat3x3<f16>, read_write>, %value_param:mat3x3<f16>):void {
+  $B3: {
+    %19:ptr<storage, vec3<f16>, read_write> = access %target, 0u
+    %20:vec3<f16> = access %value_param, 0u
+    store %19, %20
+    %21:ptr<storage, vec3<f16>, read_write> = access %target, 1u
+    %22:vec3<f16> = access %value_param, 1u
+    store %21, %22
+    %23:ptr<storage, vec3<f16>, read_write> = access %target, 2u
+    %24:vec3<f16> = access %value_param, 2u
+    store %23, %24
     ret
   }
 }

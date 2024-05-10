@@ -1,29 +1,43 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %a:ptr<uniform, array<mat4x4<f16>, 4>, read> = var @binding_point(0, 0)
+  %s:ptr<storage, f16, read_write> = var @binding_point(0, 1)
   %counter:ptr<private, i32, read_write> = var, 0i
 }
 
-%i = func():i32 -> %b2 {
-  %b2 = block {
-    %4:i32 = load %counter
-    %5:i32 = add %4, 1i
-    store %counter, %5
-    %6:i32 = load %counter
-    ret %6
+%i = func():i32 {
+  $B2: {
+    %5:i32 = load %counter
+    %6:i32 = add %5, 1i
+    store %counter, %6
+    %7:i32 = load %counter
+    ret %7
   }
 }
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
-  %b3 = block {
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B3: {
     %p_a:ptr<uniform, array<mat4x4<f16>, 4>, read> = let %a
-    %9:i32 = call %i
-    %p_a_i:ptr<uniform, mat4x4<f16>, read> = access %p_a, %9
-    %11:i32 = call %i
-    %p_a_i_i:ptr<uniform, vec4<f16>, read> = access %p_a_i, %11
-    %l_a:array<mat4x4<f16>, 4> = load %p_a
-    %l_a_i:mat4x4<f16> = load %p_a_i
-    %l_a_i_i:vec4<f16> = load %p_a_i_i
+    %10:i32 = call %i
+    %11:ptr<uniform, mat4x4<f16>, read> = access %p_a, %10
+    %p_a_i:ptr<uniform, mat4x4<f16>, read> = let %11
+    %13:i32 = call %i
+    %14:ptr<uniform, vec4<f16>, read> = access %p_a_i, %13
+    %p_a_i_i:ptr<uniform, vec4<f16>, read> = let %14
+    %16:array<mat4x4<f16>, 4> = load %p_a
+    %l_a:array<mat4x4<f16>, 4> = let %16
+    %18:mat4x4<f16> = load %p_a_i
+    %l_a_i:mat4x4<f16> = let %18
+    %20:vec4<f16> = load %p_a_i_i
+    %l_a_i_i:vec4<f16> = let %20
+    %22:f16 = load_vector_element %p_a_i_i, 0u
+    %23:f16 = access %l_a, 0i, 0i, 0u
+    %24:f16 = add %22, %23
+    %25:f16 = access %l_a_i, 0i, 0u
+    %26:f16 = add %24, %25
+    %27:f16 = access %l_a_i_i, 0u
+    %28:f16 = add %26, %27
+    store %s, %28
     ret
   }
 }

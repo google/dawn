@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(8) {
   el:vec2<f32> @offset(0)
 }
 
@@ -8,42 +8,77 @@ SSBO = struct @align(8) {
   m:array<strided_arr, 2> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %ssbo:ptr<storage, SSBO, read_write> = var @binding_point(0, 0)
 }
 
-%mat2x2_stride_16_to_arr = func(%m:mat2x2<f32>):array<strided_arr, 2> -> %b2 {
-  %b2 = block {
+%mat2x2_stride_16_to_arr = func(%m:mat2x2<f32>):array<strided_arr, 2> {
+  $B2: {
     %4:vec2<f32> = access %m, 0u
     %5:strided_arr = construct %4
-    %6:vec2<f32> = access %m, 1u
-    %7:strided_arr = construct %6
-    %8:array<strided_arr, 2> = construct %5, %7
-    ret %8
+    %6:strided_arr = let %5
+    %7:vec2<f32> = access %m, 1u
+    %8:strided_arr = construct %7
+    %9:array<strided_arr, 2> = construct %6, %8
+    ret %9
   }
 }
-%arr_to_mat2x2_stride_16 = func(%arr:array<strided_arr, 2>):mat2x2<f32> -> %b3 {
-  %b3 = block {
-    %11:vec2<f32> = access %arr, 0u, 0u
-    %12:vec2<f32> = access %arr, 1u, 0u
-    %13:mat2x2<f32> = construct %11, %12
-    ret %13
+%arr_to_mat2x2_stride_16 = func(%arr:array<strided_arr, 2>):mat2x2<f32> {
+  $B3: {
+    %12:vec2<f32> = access %arr, 0u, 0u
+    %13:vec2<f32> = access %arr, 1u, 0u
+    %14:mat2x2<f32> = construct %12, %13
+    ret %14
   }
 }
-%f_1 = func():void -> %b4 {
-  %b4 = block {
-    %15:ptr<storage, array<strided_arr, 2>, read_write> = access %ssbo, 0u
+%f_1 = func():void {
+  $B4: {
     %16:ptr<storage, array<strided_arr, 2>, read_write> = access %ssbo, 0u
-    %17:array<strided_arr, 2> = load %16
-    %18:mat2x2<f32> = call %arr_to_mat2x2_stride_16, %17
-    %19:array<strided_arr, 2> = call %mat2x2_stride_16_to_arr, %18
-    store %15, %19
+    %17:ptr<storage, array<strided_arr, 2>, read_write> = access %ssbo, 0u
+    %18:array<strided_arr, 2> = load %17
+    %19:mat2x2<f32> = call %arr_to_mat2x2_stride_16, %18
+    %20:array<strided_arr, 2> = call %mat2x2_stride_16_to_arr, %19
+    %21:void = call %tint_store_and_preserve_padding, %16, %20
     ret
   }
 }
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
-    %21:void = call %f_1
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
+    %24:void = call %f_1
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<storage, array<strided_arr, 2>, read_write>, %value_param:array<strided_arr, 2>):void {
+  $B6: {
+    loop [i: $B7, b: $B8, c: $B9] {  # loop_1
+      $B7: {  # initializer
+        next_iteration 0u  # -> $B8
+      }
+      $B8 (%idx:u32): {  # body
+        %28:bool = gte %idx, 2u
+        if %28 [t: $B10] {  # if_1
+          $B10: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %29:ptr<storage, strided_arr, read_write> = access %target, %idx
+        %30:strided_arr = access %value_param, %idx
+        %31:void = call %tint_store_and_preserve_padding_1, %29, %30
+        continue  # -> $B9
+      }
+      $B9: {  # continuing
+        %33:u32 = add %idx, 1u
+        next_iteration %33  # -> $B8
+      }
+    }
+    ret
+  }
+}
+%tint_store_and_preserve_padding_1 = func(%target_1:ptr<storage, strided_arr, read_write>, %value_param_1:strided_arr):void {  # %tint_store_and_preserve_padding_1: 'tint_store_and_preserve_padding', %target_1: 'target', %value_param_1: 'value_param'
+  $B11: {
+    %36:ptr<storage, vec2<f32>, read_write> = access %target_1, 0u
+    %37:vec2<f32> = access %value_param_1, 0u
+    store %36, %37
     ret
   }
 }

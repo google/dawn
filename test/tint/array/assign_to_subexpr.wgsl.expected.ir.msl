@@ -1,15 +1,15 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: S = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(4) {
   arr:array<i32, 4> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %s:ptr<storage, i32, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func():i32 -> %b2 {
-  %b2 = block {
+%foo = func():i32 {
+  $B2: {
     %src:array<i32, 4> = let array<i32, 4>(0i)
     %dst:ptr<function, array<i32, 4>, read_write> = var
     %dst_struct:ptr<function, S, read_write> = var
@@ -37,8 +37,8 @@ SKIP: FAILED
     ret %21
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
-  %b3 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B3: {
     %23:i32 = call %foo
     store %s, %23
     ret

@@ -4,5 +4,13 @@ SKIP: FAILED
 using namespace metal;
 
 thread int a = 1;
-void f() {
+fragment void f() {
+  int const b = a;
 }
+program_source:4:12: error: program scope variable must reside in constant address space
+thread int a = 1;
+           ^
+program_source:6:13: warning: unused variable 'b' [-Wunused-variable]
+  int const b = a;
+            ^
+

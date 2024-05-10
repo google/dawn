@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Constants = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Constants = struct @align(4) {
   level:i32 @offset(0)
 }
 
@@ -8,14 +8,14 @@ Result = struct @align(4) {
   values:array<f32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %constants:ptr<uniform, Constants, read> = var @binding_point(0, 0)
   %myTexture:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 1)
   %result:ptr<storage, Result, read_write> = var @binding_point(0, 3)
 }
 
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void -> %b2 {
-  %b2 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void {
+  $B2: {
     %6:u32 = access %GlobalInvocationID, 2u
     %7:u32 = mul 4u, %6
     %8:u32 = access %GlobalInvocationID, 1u
@@ -28,39 +28,40 @@ Result = struct @align(4) {
     %15:u32 = mul %14, 1u
     store %flatIndex, %15
     %16:texture_2d_array<f32> = load %myTexture
-    %17:vec2<u32> = swizzle %GlobalInvocationID, xy
-    %18:vec2<i32> = convert %17
-    %19:vec4<f32> = textureLoad %16, %18, 0i, 0i
-    %texel:ptr<function, vec4<f32>, read_write> = var, %19
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
+    %17:texture_2d_array<f32> = let %16
+    %18:vec2<u32> = swizzle %GlobalInvocationID, xy
+    %19:vec2<i32> = convert %18
+    %20:vec4<f32> = textureLoad %17, %19, 0i, 0i
+    %texel:ptr<function, vec4<f32>, read_write> = var, %20
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
         %i:ptr<function, u32, read_write> = var, 0u
-        next_iteration %b4
+        next_iteration  # -> $B4
       }
-      %b4 = block {  # body
-        %22:u32 = load %i
-        %23:bool = lt %22, 1u
-        if %23 [t: %b6, f: %b7] {  # if_1
-          %b6 = block {  # true
+      $B4: {  # body
+        %23:u32 = load %i
+        %24:bool = lt %23, 1u
+        if %24 [t: $B6, f: $B7] {  # if_1
+          $B6: {  # true
             exit_if  # if_1
           }
-          %b7 = block {  # false
+          $B7: {  # false
             exit_loop  # loop_1
           }
         }
-        %24:u32 = load %flatIndex
-        %25:u32 = load %i
-        %26:u32 = add %24, %25
-        %27:ptr<storage, f32, read_write> = access %result, 0u, %26
-        %28:f32 = load_vector_element %texel, 0u
-        store %27, %28
-        continue %b5
+        %25:u32 = load %flatIndex
+        %26:u32 = load %i
+        %27:u32 = add %25, %26
+        %28:ptr<storage, f32, read_write> = access %result, 0u, %27
+        %29:f32 = load_vector_element %texel, 0u
+        store %28, %29
+        continue  # -> $B5
       }
-      %b5 = block {  # continuing
-        %29:u32 = load %i
-        %30:u32 = add %29, 1u
-        store %i, %30
-        next_iteration %b4
+      $B5: {  # continuing
+        %30:u32 = load %i
+        %31:u32 = add %30, 1u
+        store %i, %31
+        next_iteration  # -> $B4
       }
     }
     ret

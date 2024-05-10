@@ -1,9 +1,24 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct frexp_result_f32 {
+  float f;
+};
+struct frexp_result_f32_1 {
+  float fract;
+  int exp;
+};
+
+thread frexp_result_f32 a = {};
+thread frexp_result_f32_1 b = frexp_result_f32_1{.fract=0.5f, .exp=1};
+fragment float4 tint_symbol() {
+  return float4(a.f, b.fract, 0.0f, 0.0f);
+}
+program_source:11:25: error: program scope variable must reside in constant address space
+thread frexp_result_f32 a = {};
+                        ^
+program_source:12:27: error: program scope variable must reside in constant address space
+thread frexp_result_f32_1 b = frexp_result_f32_1{.fract=0.5f, .exp=1};
+                          ^
+

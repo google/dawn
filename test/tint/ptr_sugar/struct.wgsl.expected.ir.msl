@@ -1,0 +1,47 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  int x;
+};
+
+void deref() {
+  S a = {};
+  thread S* const p = a;
+  int b = p.x;
+  p.x = 42;
+}
+void no_deref() {
+  S a = {};
+  thread S* const p = a;
+  int b = p.x;
+  p.x = 42;
+}
+kernel void tint_symbol() {
+  deref();
+  no_deref();
+}
+program_source:9:19: error: no viable conversion from 'S' to 'S *const'
+  thread S* const p = a;
+                  ^   ~
+program_source:10:12: error: member reference type 'S *const' is a pointer; did you mean to use '->'?
+  int b = p.x;
+          ~^
+           ->
+program_source:11:4: error: member reference type 'S *const' is a pointer; did you mean to use '->'?
+  p.x = 42;
+  ~^
+   ->
+program_source:15:19: error: no viable conversion from 'S' to 'S *const'
+  thread S* const p = a;
+                  ^   ~
+program_source:16:12: error: member reference type 'S *const' is a pointer; did you mean to use '->'?
+  int b = p.x;
+          ~^
+           ->
+program_source:17:4: error: member reference type 'S *const' is a pointer; did you mean to use '->'?
+  p.x = 42;
+  ~^
+   ->
+

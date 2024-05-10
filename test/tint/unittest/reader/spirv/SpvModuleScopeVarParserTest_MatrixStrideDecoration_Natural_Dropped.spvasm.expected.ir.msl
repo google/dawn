@@ -1,20 +1,20 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(8) {
   field0:mat3x2<f32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %myvar:ptr<storage, S, read_write> = var @binding_point(0, 0)
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     ret
   }
 }
-%tint_symbol = @fragment func():void -> %b3 {
-  %b3 = block {
+%tint_symbol = @fragment func():void {
+  $B3: {
     %4:void = call %main_1
     ret
   }

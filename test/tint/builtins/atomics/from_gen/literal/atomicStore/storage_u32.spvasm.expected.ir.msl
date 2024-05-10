@@ -1,40 +1,40 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: SB_RW_atomic = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SB_RW_atomic = struct @align(4) {
   arg_0:atomic<u32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %sb_rw:ptr<storage, SB_RW_atomic, read_write> = var @binding_point(0, 0)
 }
 
-%atomicStore_cdc29e = func():void -> %b2 {
-  %b2 = block {
+%atomicStore_cdc29e = func():void {
+  $B2: {
     %3:ptr<storage, atomic<u32>, read_write> = access %sb_rw, 0u
     %4:void = atomicStore %3, 1u
     ret
   }
 }
-%fragment_main_1 = func():void -> %b3 {
-  %b3 = block {
+%fragment_main_1 = func():void {
+  $B3: {
     %6:void = call %atomicStore_cdc29e
     ret
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
+%fragment_main = @fragment func():void {
+  $B4: {
     %8:void = call %fragment_main_1
     ret
   }
 }
-%compute_main_1 = func():void -> %b5 {
-  %b5 = block {
+%compute_main_1 = func():void {
+  $B5: {
     %10:void = call %atomicStore_cdc29e
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
-  %b6 = block {
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B6: {
     %12:void = call %compute_main_1
     ret
   }

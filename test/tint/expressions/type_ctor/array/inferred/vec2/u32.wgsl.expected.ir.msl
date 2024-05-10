@@ -19,3 +19,10 @@ thread tint_array<uint2, 2> arr = tint_array<uint2, 2>{uint2(1u), uint2(2u)};
 void f() {
   tint_array<uint2, 2> v = arr;
 }
+program_source:16:29: error: program scope variable must reside in constant address space
+thread tint_array<uint2, 2> arr = tint_array<uint2, 2>{uint2(1u), uint2(2u)};
+                            ^
+program_source:18:24: warning: unused variable 'v' [-Wunused-variable]
+  tint_array<uint2, 2> v = arr;
+                       ^
+

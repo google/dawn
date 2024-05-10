@@ -12,10 +12,22 @@ SKIP: FAILED
   switch (i32(x)) @diagnostic(warning, derivative_uniformity) {
               ^
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Convert
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+fragment void tint_symbol(float x) {
+  switch(tint_f32_to_i32(x)) {
+    default:
+    {
+      dfdx(1.0f);
+      break;
+    }
+  }
+}
+int tint_f32_to_i32(float value) {
+  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+}
+program_source:4:27: error: invalid type 'float' for input declaration in a fragment function
+fragment void tint_symbol(float x) {
+                          ^~~~~~~
+

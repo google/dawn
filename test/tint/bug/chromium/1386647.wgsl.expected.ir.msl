@@ -1,9 +1,16 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void f(uint3 v [[thread_position_in_grid]]) {
+  uint const l = (v[0u] << (tint_mod_u32(v[1u], 1u) & 31u));
+}
+uint tint_mod_u32(uint lhs, uint rhs) {
+  uint const v_1 = select(rhs, 1u, (rhs == 0u));
+  return (lhs - ((lhs / v_1) * v_1));
+}
+program_source:5:29: error: use of undeclared identifier 'tint_mod_u32'
+  uint const l = (v[0u] << (tint_mod_u32(v[1u], 1u) & 31u));
+                            ^
+

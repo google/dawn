@@ -1,6 +1,193 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %data:ptr<private, array<i32, 9>, read_write> = var
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %temp:ptr<private, array<i32, 7>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%func_i1_ = func(%a:ptr<function, i32, read_write>):f32 {
+  $B2: {
+    %b:ptr<function, i32, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %x_115:ptr<function, bool, read_write> = var
+    %x_116:ptr<function, bool, read_write> = var
+    store %b, 0i
+    %11:ptr<private, i32, read_write> = access %data, 0i
+    store %11, 5i
+    %12:ptr<private, i32, read_write> = access %data, 2i
+    store %12, 0i
+    %13:ptr<private, i32, read_write> = access %data, 4i
+    store %13, 0i
+    %14:ptr<private, i32, read_write> = access %data, 6i
+    store %14, 0i
+    %15:ptr<private, i32, read_write> = access %data, 8i
+    store %15, 0i
+    %16:f32 = load_vector_element %gl_FragCoord, 0u
+    %17:bool = gte %16, 0.0f
+    if %17 [t: $B3] {  # if_1
+      $B3: {  # true
+        loop [b: $B4, c: $B5] {  # loop_1
+          $B4: {  # body
+            %18:i32 = load %b
+            %19:i32 = load %a
+            %20:bool = lte %18, %19
+            if %20 [t: $B6, f: $B7] {  # if_2
+              $B6: {  # true
+                exit_if  # if_2
+              }
+              $B7: {  # false
+                exit_loop  # loop_1
+              }
+            }
+            %21:i32 = load %b
+            %22:bool = lte %21, 5i
+            if %22 [t: $B8] {  # if_3
+              $B8: {  # true
+                %23:i32 = load %b
+                %x_87:i32 = let %23
+                %25:ptr<private, i32, read_write> = access %temp, %x_87
+                %26:i32 = load %b
+                %27:ptr<private, i32, read_write> = access %data, %26
+                %28:i32 = load %27
+                store %25, %28
+                %29:i32 = load %b
+                %30:i32 = add %29, 2i
+                store %b, %30
+                exit_if  # if_3
+              }
+            }
+            continue  # -> $B5
+          }
+          $B5: {  # continuing
+            next_iteration  # -> $B4
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    store %i, 0i
+    loop [b: $B9, c: $B10] {  # loop_2
+      $B9: {  # body
+        %31:i32 = load %i
+        %32:bool = lt %31, 3i
+        if %32 [t: $B11, f: $B12] {  # if_4
+          $B11: {  # true
+            exit_if  # if_4
+          }
+          $B12: {  # false
+            exit_loop  # loop_2
+          }
+        }
+        %33:i32 = load %i
+        %x_101:i32 = let %33
+        %35:ptr<private, i32, read_write> = access %data, %x_101
+        %36:ptr<private, i32, read_write> = access %temp, 0i
+        %37:i32 = load %36
+        %38:i32 = add %37, 1i
+        store %35, %38
+        continue  # -> $B10
+      }
+      $B10: {  # continuing
+        %39:i32 = load %i
+        %40:i32 = add %39, 1i
+        store %i, %40
+        next_iteration  # -> $B9
+      }
+    }
+    %41:ptr<private, i32, read_write> = access %temp, 0i
+    %42:i32 = load %41
+    %43:bool = eq %42, 5i
+    %x_110:bool = let %43
+    store %x_116, %x_110
+    if %x_110 [t: $B13] {  # if_5
+      $B13: {  # true
+        %45:ptr<private, i32, read_write> = access %data, 0i
+        %46:i32 = load %45
+        %47:bool = eq %46, 6i
+        store %x_115, %47
+        %48:bool = load %x_115
+        store %x_116, %48
+        exit_if  # if_5
+      }
+    }
+    %49:bool = load %x_116
+    if %49 [t: $B14, f: $B15] {  # if_6
+      $B14: {  # true
+        ret 1.0f
+      }
+      $B15: {  # false
+        ret 0.0f
+      }
+    }
+    unreachable
+  }
+}
+%main_1 = func():void {
+  $B16: {
+    %i_1:ptr<function, i32, read_write> = var
+    %param:ptr<function, i32, read_write> = var
+    %param_1:ptr<function, i32, read_write> = var
+    store %i_1, 0i
+    loop [b: $B17, c: $B18] {  # loop_3
+      $B17: {  # body
+        %54:i32 = load %i_1
+        %55:bool = lt %54, 6i
+        if %55 [t: $B19, f: $B20] {  # if_7
+          $B19: {  # true
+            exit_if  # if_7
+          }
+          $B20: {  # false
+            exit_loop  # loop_3
+          }
+        }
+        %56:i32 = load %i_1
+        store %param, %56
+        %57:f32 = call %func_i1_, %param
+        %x_55:f32 = let %57
+        %59:i32 = load %i_1
+        store %param_1, %59
+        %60:f32 = call %func_i1_, %param_1
+        %x_57:f32 = let %60
+        %62:bool = eq %x_57, 1.0f
+        if %62 [t: $B21, f: $B22] {  # if_8
+          $B21: {  # true
+            store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+            exit_if  # if_8
+          }
+          $B22: {  # false
+            store %x_GLF_color, vec4<f32>(0.0f)
+            exit_if  # if_8
+          }
+        }
+        continue  # -> $B18
+      }
+      $B18: {  # continuing
+        %63:i32 = load %i_1
+        %64:i32 = add %63, 1i
+        store %i_1, %64
+        next_iteration  # -> $B17
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out {
+  $B23: {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %67:void = call %main_1
+    %68:vec4<f32> = load %x_GLF_color
+    %69:main_out = construct %68
+    ret %69
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

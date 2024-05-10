@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(4) {
   four:f32 @offset(0)
 }
 
@@ -8,30 +8,33 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %a:ptr<function, f32, read_write> = var
     %5:ptr<uniform, f32, read> = access %x_6, 0u
-    %x_27:f32 = load %5
-    %7:f32 = div 1.0f, %x_27
-    %8:f32 = div 2.0f, %7
-    store %a, %8
-    %x_30:f32 = load %a
-    %x_32:f32 = load %a
-    %11:bool = gt %x_30, 7.90000009536743164062f
-    %12:bool = lt %x_32, 8.1000003814697265625f
-    %13:bool = and %11, %12
-    if %13 [t: %b3, f: %b4] {  # if_1
-      %b3 = block {  # true
+    %6:f32 = load %5
+    %x_27:f32 = let %6
+    %8:f32 = div 1.0f, %x_27
+    %9:f32 = div 2.0f, %8
+    store %a, %9
+    %10:f32 = load %a
+    %x_30:f32 = let %10
+    %12:f32 = load %a
+    %x_32:f32 = let %12
+    %14:bool = gt %x_30, 7.90000009536743164062f
+    %15:bool = lt %x_32, 8.1000003814697265625f
+    %16:bool = and %14, %15
+    if %16 [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
         store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
         exit_if  # if_1
       }
-      %b4 = block {  # false
+      $B4: {  # false
         store %x_GLF_color, vec4<f32>(0.0f)
         exit_if  # if_1
       }
@@ -39,12 +42,12 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b5 {
-  %b5 = block {
-    %15:void = call %main_1
-    %16:vec4<f32> = load %x_GLF_color
-    %17:main_out = construct %16
-    ret %17
+%tint_symbol = @fragment func():main_out {
+  $B5: {
+    %18:void = call %main_1
+    %19:vec4<f32> = load %x_GLF_color
+    %20:main_out = construct %19
+    ret %20
   }
 }
 

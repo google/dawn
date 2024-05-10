@@ -4,3 +4,7 @@ SKIP: FAILED
 using namespace metal;
 
 thread bool3 u = bool3(true);
+program_source:4:14: error: program scope variable must reside in constant address space
+thread bool3 u = bool3(true);
+             ^
+

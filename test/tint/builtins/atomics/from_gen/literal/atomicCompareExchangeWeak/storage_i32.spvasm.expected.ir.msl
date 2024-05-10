@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: SB_RW_atomic = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SB_RW_atomic = struct @align(4) {
   arg_0:atomic<i32> @offset(0)
 }
 
@@ -14,44 +14,45 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
   exchanged:bool @offset(4)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %sb_rw:ptr<storage, SB_RW_atomic, read_write> = var @binding_point(0, 0)
 }
 
-%atomicCompareExchangeWeak_1bd40a = func():void -> %b2 {
-  %b2 = block {
+%atomicCompareExchangeWeak_1bd40a = func():void {
+  $B2: {
     %res:ptr<function, x__atomic_compare_exchange_resulti32, read_write> = var, x__atomic_compare_exchange_resulti32(0i, false)
     %4:ptr<storage, atomic<i32>, read_write> = access %sb_rw, 0u
     %5:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %4, 1i, 1i
-    %old_value_1:i32 = access %5, 0u
+    %6:i32 = access %5, 0u
+    %old_value_1:i32 = let %6
     %x_19:i32 = let %old_value_1
-    %8:bool = eq %x_19, 1i
-    %9:x__atomic_compare_exchange_resulti32 = construct %x_19, %8
-    store %res, %9
+    %9:bool = eq %x_19, 1i
+    %10:x__atomic_compare_exchange_resulti32 = construct %x_19, %9
+    store %res, %10
     ret
   }
 }
-%fragment_main_1 = func():void -> %b3 {
-  %b3 = block {
-    %11:void = call %atomicCompareExchangeWeak_1bd40a
+%fragment_main_1 = func():void {
+  $B3: {
+    %12:void = call %atomicCompareExchangeWeak_1bd40a
     ret
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
-    %13:void = call %fragment_main_1
+%fragment_main = @fragment func():void {
+  $B4: {
+    %14:void = call %fragment_main_1
     ret
   }
 }
-%compute_main_1 = func():void -> %b5 {
-  %b5 = block {
-    %15:void = call %atomicCompareExchangeWeak_1bd40a
+%compute_main_1 = func():void {
+  $B5: {
+    %16:void = call %atomicCompareExchangeWeak_1bd40a
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b6 {
-  %b6 = block {
-    %17:void = call %compute_main_1
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B6: {
+    %18:void = call %compute_main_1
     ret
   }
 }

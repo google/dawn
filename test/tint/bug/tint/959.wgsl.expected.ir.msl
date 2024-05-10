@@ -1,10 +1,10 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(4) {
   a:f32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %b0:ptr<storage, S, read> = var @binding_point(0, 0)
   %b1:ptr<storage, S, read> = var @binding_point(1, 0)
   %b2:ptr<storage, S, read> = var @binding_point(2, 0)
@@ -55,8 +55,8 @@ SKIP: FAILED
   %s15:ptr<handle, sampler_comparison, read> = var @binding_point(15, 300)
 }
 
-%tint_symbol = @fragment func():void -> %b2 {
-  %b2 = block {
+%tint_symbol = @fragment func():void {
+  $B2: {
     %50:S = load %b0
     %51:S = load %b1
     %52:S = load %b2

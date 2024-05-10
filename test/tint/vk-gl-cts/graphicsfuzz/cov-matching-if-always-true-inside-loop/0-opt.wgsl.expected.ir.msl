@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
   el:i32 @offset(0)
 }
 
@@ -12,150 +12,182 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_8:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%func_i1_ = func(%x:ptr<function, i32, read_write>):i32 -> %b2 {
-  %b2 = block {
+%func_i1_ = func(%x:ptr<function, i32, read_write>):i32 {
+  $B2: {
     %a:ptr<function, i32, read_write> = var
     %i:ptr<function, i32, read_write> = var
     %indexable:ptr<function, array<i32, 4>, read_write> = var
     %8:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-    %x_72:i32 = load %8
+    %9:i32 = load %8
+    %x_72:i32 = let %9
     store %a, %x_72
-    %10:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-    %x_74:i32 = load %10
+    %11:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+    %12:i32 = load %11
+    %x_74:i32 = let %12
     store %i, %x_74
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
-        %x_79:i32 = load %i
-        %13:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
-        %x_81:i32 = load %13
-        %15:bool = lt %x_79, %x_81
-        if %15 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        %14:i32 = load %i
+        %x_79:i32 = let %14
+        %16:ptr<uniform, i32, read> = access %x_8, 0u, 1i, 0u
+        %17:i32 = load %16
+        %x_81:i32 = let %17
+        %19:bool = lt %x_79, %x_81
+        if %19 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
-        %16:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-        %x_85:i32 = load %16
-        %18:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-        %x_87:i32 = load %18
         %20:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-        %x_89:i32 = load %20
-        %22:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-        %x_91:i32 = load %22
-        %x_93:i32 = load %a
-        %25:array<i32, 4> = construct %x_85, %x_87, %x_89, %x_91
-        store %indexable, %25
-        %26:ptr<function, i32, read_write> = access %indexable, %x_93
-        %x_95:i32 = load %26
-        %x_96:i32 = load %x
-        %29:bool = gt %x_95, %x_96
-        if %29 [t: %b7, f: %b8] {  # if_2
-          %b7 = block {  # true
-            if true [t: %b9, f: %b10] {  # if_3
-              %b9 = block {  # true
-                %30:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-                %x_105:i32 = load %30
+        %21:i32 = load %20
+        %x_85:i32 = let %21
+        %23:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
+        %24:i32 = load %23
+        %x_87:i32 = let %24
+        %26:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
+        %27:i32 = load %26
+        %x_89:i32 = let %27
+        %29:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
+        %30:i32 = load %29
+        %x_91:i32 = let %30
+        %32:i32 = load %a
+        %x_93:i32 = let %32
+        %34:array<i32, 4> = construct %x_85, %x_87, %x_89, %x_91
+        store %indexable, %34
+        %35:ptr<function, i32, read_write> = access %indexable, %x_93
+        %36:i32 = load %35
+        %x_95:i32 = let %36
+        %38:i32 = load %x
+        %x_96:i32 = let %38
+        %40:bool = gt %x_95, %x_96
+        if %40 [t: $B7, f: $B8] {  # if_2
+          $B7: {  # true
+            if true [t: $B9, f: $B10] {  # if_3
+              $B9: {  # true
+                %41:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
+                %42:i32 = load %41
+                %x_105:i32 = let %42
                 ret %x_105
               }
-              %b10 = block {  # false
-                %32:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-                %x_107:i32 = load %32
+              $B10: {  # false
+                %44:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
+                %45:i32 = load %44
+                %x_107:i32 = let %45
                 store %a, %x_107
                 exit_if  # if_3
               }
             }
             exit_if  # if_2
           }
-          %b8 = block {  # false
-            if true [t: %b11] {  # if_4
-              %b11 = block {  # true
-                %34:ptr<uniform, i32, read> = access %x_8, 0u, 4i, 0u
-                %x_111:i32 = load %34
+          $B8: {  # false
+            if true [t: $B11] {  # if_4
+              $B11: {  # true
+                %47:ptr<uniform, i32, read> = access %x_8, 0u, 4i, 0u
+                %48:i32 = load %47
+                %x_111:i32 = let %48
                 ret %x_111
               }
             }
             exit_if  # if_2
           }
         }
-        continue %b4
+        continue  # -> $B4
       }
-      %b4 = block {  # continuing
-        %x_112:i32 = load %i
-        %37:i32 = add %x_112, 1i
-        store %i, %37
-        next_iteration %b3
+      $B4: {  # continuing
+        %50:i32 = load %i
+        %x_112:i32 = let %50
+        %52:i32 = add %x_112, 1i
+        store %i, %52
+        next_iteration  # -> $B3
       }
     }
-    %38:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-    %x_115:i32 = load %38
+    %53:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+    %54:i32 = load %53
+    %x_115:i32 = let %54
     ret %x_115
   }
 }
-%main_1 = func():void -> %b12 {
-  %b12 = block {
+%main_1 = func():void {
+  $B12: {
     %a_1:ptr<function, i32, read_write> = var
     %param:ptr<function, i32, read_write> = var
     %param_1:ptr<function, i32, read_write> = var
-    %44:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-    %x_39:i32 = load %44
+    %60:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+    %61:i32 = load %60
+    %x_39:i32 = let %61
     store %param, %x_39
-    %x_40:i32 = call %func_i1_, %param
+    %63:i32 = call %func_i1_, %param
+    %x_40:i32 = let %63
     store %a_1, %x_40
-    %47:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-    %x_42:i32 = load %47
+    %65:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
+    %66:i32 = load %65
+    %x_42:i32 = let %66
     store %param_1, %x_42
-    %x_43:i32 = call %func_i1_, %param_1
-    %x_44:i32 = load %a_1
-    %51:i32 = add %x_44, %x_43
-    store %a_1, %51
-    %x_46:i32 = load %a_1
-    %53:ptr<uniform, i32, read> = access %x_8, 0u, 2i, 0u
-    %x_48:i32 = load %53
-    %55:bool = eq %x_46, %x_48
-    if %55 [t: %b13, f: %b14] {  # if_5
-      %b13 = block {  # true
-        %56:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-        %x_54:i32 = load %56
-        %58:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-        %x_57:i32 = load %58
-        %60:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-        %x_60:i32 = load %60
-        %62:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
-        %x_63:i32 = load %62
-        %64:f32 = convert %x_54
-        %65:f32 = convert %x_57
-        %66:f32 = convert %x_60
-        %67:f32 = convert %x_63
-        %68:vec4<f32> = construct %64, %65, %66, %67
-        store %x_GLF_color, %68
+    %68:i32 = call %func_i1_, %param_1
+    %x_43:i32 = let %68
+    %70:i32 = load %a_1
+    %x_44:i32 = let %70
+    %72:i32 = add %x_44, %x_43
+    store %a_1, %72
+    %73:i32 = load %a_1
+    %x_46:i32 = let %73
+    %75:ptr<uniform, i32, read> = access %x_8, 0u, 2i, 0u
+    %76:i32 = load %75
+    %x_48:i32 = let %76
+    %78:bool = eq %x_46, %x_48
+    if %78 [t: $B13, f: $B14] {  # if_5
+      $B13: {  # true
+        %79:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
+        %80:i32 = load %79
+        %x_54:i32 = let %80
+        %82:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+        %83:i32 = load %82
+        %x_57:i32 = let %83
+        %85:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+        %86:i32 = load %85
+        %x_60:i32 = let %86
+        %88:ptr<uniform, i32, read> = access %x_8, 0u, 3i, 0u
+        %89:i32 = load %88
+        %x_63:i32 = let %89
+        %91:f32 = convert %x_54
+        %92:f32 = let %91
+        %93:f32 = convert %x_57
+        %94:f32 = let %93
+        %95:f32 = convert %x_60
+        %96:f32 = let %95
+        %97:f32 = convert %x_63
+        %98:vec4<f32> = construct %92, %94, %96, %97
+        store %x_GLF_color, %98
         exit_if  # if_5
       }
-      %b14 = block {  # false
-        %69:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
-        %x_67:i32 = load %69
-        %x_68:f32 = convert %x_67
-        %72:vec4<f32> = construct %x_68, %x_68, %x_68, %x_68
-        store %x_GLF_color, %72
+      $B14: {  # false
+        %99:ptr<uniform, i32, read> = access %x_8, 0u, 0i, 0u
+        %100:i32 = load %99
+        %x_67:i32 = let %100
+        %102:f32 = convert %x_67
+        %x_68:f32 = let %102
+        %104:vec4<f32> = construct %x_68, %x_68, %x_68, %x_68
+        store %x_GLF_color, %104
         exit_if  # if_5
       }
     }
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b15 {
-  %b15 = block {
-    %74:void = call %main_1
-    %75:vec4<f32> = load %x_GLF_color
-    %76:main_out = construct %75
-    ret %76
+%tint_symbol = @fragment func():main_out {
+  $B15: {
+    %106:void = call %main_1
+    %107:vec4<f32> = load %x_GLF_color
+    %108:main_out = construct %107
+    ret %108
   }
 }
 

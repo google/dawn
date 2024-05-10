@@ -1,27 +1,52 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %u:ptr<uniform, array<mat2x3<f16>, 4>, read> = var @binding_point(0, 0)
+  %s:ptr<storage, f16, read_write> = var @binding_point(0, 1)
   %w:ptr<workgroup, array<mat2x3<f16>, 4>, read_write> = var
 }
 
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
-    %4:array<mat2x3<f16>, 4> = load %u
-    store %w, %4
-    %5:ptr<workgroup, mat2x3<f16>, read_write> = access %w, 1i
-    %6:ptr<uniform, mat2x3<f16>, read> = access %u, 2i
-    %7:mat2x3<f16> = load %6
-    store %5, %7
-    %8:ptr<workgroup, vec3<f16>, read_write> = access %w, 1i, 0i
-    %9:ptr<uniform, vec3<f16>, read> = access %u, 0i, 1i
-    %10:vec3<f16> = load %9
-    %11:vec3<f16> = swizzle %10, zxy
-    store %8, %11
-    %12:ptr<workgroup, vec3<f16>, read_write> = access %w, 1i, 0i
-    %13:ptr<uniform, vec3<f16>, read> = access %u, 0i, 1i
-    %14:f16 = load_vector_element %13, 0u
-    store_vector_element %12, 0u, %14
+%f = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration %tint_local_index  # -> $B4
+      }
+      $B4 (%idx:u32): {  # body
+        %7:bool = gte %idx, 4u
+        if %7 [t: $B6] {  # if_1
+          $B6: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %8:ptr<workgroup, mat2x3<f16>, read_write> = access %w, %idx
+        store %8, mat2x3<f16>(vec3<f16>(0.0h))
+        continue  # -> $B5
+      }
+      $B5: {  # continuing
+        %9:u32 = add %idx, 1u
+        next_iteration %9  # -> $B4
+      }
+    }
+    %10:void = msl.threadgroup_barrier 4u
+    %11:array<mat2x3<f16>, 4> = load %u
+    store %w, %11
+    %12:ptr<workgroup, mat2x3<f16>, read_write> = access %w, 1i
+    %13:ptr<uniform, mat2x3<f16>, read> = access %u, 2i
+    %14:mat2x3<f16> = load %13
+    store %12, %14
+    %15:ptr<workgroup, vec3<f16>, read_write> = access %w, 1i, 0i
+    %16:ptr<uniform, vec3<f16>, read> = access %u, 0i, 1i
+    %17:vec3<f16> = load %16
+    %18:vec3<f16> = swizzle %17, zxy
+    store %15, %18
+    %19:ptr<workgroup, vec3<f16>, read_write> = access %w, 1i, 0i
+    %20:ptr<uniform, vec3<f16>, read> = access %u, 0i, 1i
+    %21:f16 = load_vector_element %20, 0u
+    store_vector_element %19, 0u, %21
+    %22:ptr<workgroup, vec3<f16>, read_write> = access %w, 1i, 0i
+    %23:f16 = load_vector_element %22, 0u
+    store %s, %23
     ret
   }
 }

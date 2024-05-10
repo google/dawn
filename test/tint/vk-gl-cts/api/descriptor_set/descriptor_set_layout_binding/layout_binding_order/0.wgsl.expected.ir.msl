@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: result = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: result = struct @align(4) {
   res0:i32 @offset(0)
   res1:i32 @offset(4)
   res2:i32 @offset(8)
@@ -18,33 +18,36 @@ block2 = struct @align(4) {
   data2:i32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_4:ptr<storage, result, read_write> = var @binding_point(0, 3)
   %x_6:ptr<uniform, block0, read> = var @binding_point(0, 0)
   %x_8:ptr<uniform, block1, read> = var @binding_point(0, 1)
   %x_10:ptr<uniform, block2, read> = var @binding_point(0, 2)
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %6:ptr<uniform, i32, read> = access %x_6, 0u
-    %x_25:i32 = load %6
-    %8:ptr<storage, i32, read_write> = access %x_4, 0u
-    store %8, %x_25
-    %9:ptr<uniform, i32, read> = access %x_8, 0u
-    %x_28:i32 = load %9
-    %11:ptr<storage, i32, read_write> = access %x_4, 1u
-    store %11, %x_28
-    %12:ptr<uniform, i32, read> = access %x_10, 0u
-    %x_31:i32 = load %12
-    %14:ptr<storage, i32, read_write> = access %x_4, 2u
-    store %14, %x_31
+    %7:i32 = load %6
+    %x_25:i32 = let %7
+    %9:ptr<storage, i32, read_write> = access %x_4, 0u
+    store %9, %x_25
+    %10:ptr<uniform, i32, read> = access %x_8, 0u
+    %11:i32 = load %10
+    %x_28:i32 = let %11
+    %13:ptr<storage, i32, read_write> = access %x_4, 1u
+    store %13, %x_28
+    %14:ptr<uniform, i32, read> = access %x_10, 0u
+    %15:i32 = load %14
+    %x_31:i32 = let %15
+    %17:ptr<storage, i32, read_write> = access %x_4, 2u
+    store %17, %x_31
     ret
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
-  %b3 = block {
-    %16:void = call %main_1
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B3: {
+    %19:void = call %main_1
     ret
   }
 }

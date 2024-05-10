@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(4) {
   field0:array<i32> @offset(0)
 }
 
@@ -8,49 +8,63 @@ main_out = struct @align(4) {
   x_4_1:i32 @offset(0), @location(0), @interpolate(flat)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_2:ptr<private, vec4<f32>, read_write> = var
   %x_3:ptr<private, i32, read_write> = var
   %x_4:ptr<private, i32, read_write> = var
   %x_5:ptr<storage, S, read_write> = var @binding_point(0, 0)
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     store %x_4, 1i
-    %x_23:vec4<f32> = load %x_2
-    %7:f32 = load_vector_element %x_2, 0u
-    %x_27:i32 = convert %7
-    %9:f32 = load_vector_element %x_2, 1u
-    %x_28:i32 = convert %9
-    %x_33:i32 = load %x_3
-    %12:i32 = mul %x_28, 8i
-    %13:i32 = add %x_27, %12
-    %14:ptr<storage, i32, read_write> = access %x_5, 0u, %13
-    store %14, %x_27
-    %15:i32 = and %x_27, 1i
-    %16:i32 = and %x_28, 1i
-    %17:i32 = add %15, %16
-    %18:i32 = add %17, %x_33
-    %19:f32 = access %x_23, 2u
-    %20:i32 = convert %19
-    %21:bool = eq %18, %20
-    if %21 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    %6:vec4<f32> = load %x_2
+    %x_23:vec4<f32> = let %6
+    %8:f32 = load_vector_element %x_2, 0u
+    %9:i32 = call %tint_f32_to_i32, %8
+    %x_27:i32 = let %9
+    %12:f32 = load_vector_element %x_2, 1u
+    %13:i32 = call %tint_f32_to_i32, %12
+    %x_28:i32 = let %13
+    %15:i32 = load %x_3
+    %x_33:i32 = let %15
+    %17:i32 = mul %x_28, 8i
+    %18:i32 = add %x_27, %17
+    %19:ptr<storage, i32, read_write> = access %x_5, 0u, %18
+    store %19, %x_27
+    %20:i32 = and %x_27, 1i
+    %21:i32 = and %x_28, 1i
+    %22:i32 = add %20, %21
+    %23:i32 = add %22, %x_33
+    %24:f32 = access %x_23, 2u
+    %25:i32 = call %tint_f32_to_i32, %24
+    %26:bool = eq %23, %25
+    if %26 [t: $B3] {  # if_1
+      $B3: {  # true
         exit_if  # if_1
       }
     }
     ret
   }
 }
-%tint_symbol = @fragment func(%x_2_param:vec4<f32> [@position], %x_3_param:i32 [@location(0), @interpolate(flat)]):main_out -> %b4 {
-  %b4 = block {
+%tint_symbol = @fragment func(%x_2_param:vec4<f32> [@position], %x_3_param:i32 [@location(0), @interpolate(flat)]):main_out {
+  $B4: {
     store %x_2, %x_2_param
     store %x_3, %x_3_param
-    %25:void = call %main_1
-    %26:i32 = load %x_4
-    %27:main_out = construct %26
-    ret %27
+    %30:void = call %main_1
+    %31:i32 = load %x_4
+    %32:main_out = construct %31
+    ret %32
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 {
+  $B5: {
+    %34:i32 = convert %value
+    %35:bool = gte %value, -2147483648.0f
+    %36:i32 = select -2147483648i, %34, %35
+    %37:bool = lte %value, 2147483520.0f
+    %38:i32 = select 2147483647i, %36, %37
+    ret %38
   }
 }
 

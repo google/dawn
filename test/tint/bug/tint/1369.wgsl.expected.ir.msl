@@ -1,11 +1,27 @@
+SKIP: FAILED
+
 #include <metal_stdlib>
 using namespace metal;
 
+thread bool continue_execution = true;
 bool call_discard() {
-  discard_fragment();
+  continue_execution = false;
   return true;
 }
 fragment void f() {
   bool v = call_discard();
   bool also_unreachable = false;
+  if (!(continue_execution)) {
+    discard_fragment();
+  }
 }
+program_source:4:13: error: program scope variable must reside in constant address space
+thread bool continue_execution = true;
+            ^
+program_source:10:8: warning: unused variable 'v' [-Wunused-variable]
+  bool v = call_discard();
+       ^
+program_source:11:8: warning: unused variable 'also_unreachable' [-Wunused-variable]
+  bool also_unreachable = false;
+       ^
+

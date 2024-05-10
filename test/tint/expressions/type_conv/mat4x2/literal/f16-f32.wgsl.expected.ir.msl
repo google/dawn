@@ -4,3 +4,7 @@ SKIP: FAILED
 using namespace metal;
 
 thread float4x2 u = float4x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f), float2(5.0f, 6.0f), float2(7.0f, 8.0f));
+program_source:4:17: error: program scope variable must reside in constant address space
+thread float4x2 u = float4x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f), float2(5.0f, 6.0f), float2(7.0f, 8.0f));
+                ^
+

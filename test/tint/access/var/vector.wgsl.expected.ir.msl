@@ -1,9 +1,34 @@
-#include <metal_stdlib>
-using namespace metal;
+SKIP: FAILED
 
-kernel void tint_symbol() {
-  float3 v = 0.0f;
-  float const scalar = v[1u];
-  float2 const swizzle2 = v.xz;
-  float3 const swizzle3 = v.xzy;
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
+  %s:ptr<storage, vec3<f32>, read_write> = var @binding_point(0, 0)
 }
+
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %v:ptr<function, vec3<f32>, read_write> = var
+    %4:f32 = load_vector_element %v, 1u
+    %scalar:f32 = let %4
+    %6:vec3<f32> = load %v
+    %7:vec2<f32> = swizzle %6, xz
+    %swizzle2:vec2<f32> = let %7
+    %9:vec3<f32> = load %v
+    %10:vec3<f32> = swizzle %9, xzy
+    %swizzle3:vec3<f32> = let %10
+    %12:vec3<f32> = construct %scalar
+    %13:vec3<f32> = let %12
+    %14:vec3<f32> = construct %swizzle2, 1.0f
+    %15:vec3<f32> = add %13, %14
+    %16:vec3<f32> = add %15, %swizzle3
+    store %s, %16
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

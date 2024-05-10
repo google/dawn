@@ -1,35 +1,70 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
 }
 
-%firstLeadingBit_57a1a3 = func():void -> %b2 {
-  %b2 = block {
+%firstLeadingBit_57a1a3 = func():void {
+  $B2: {
     %arg_0:ptr<function, i32, read_write> = var, 1i
     %4:i32 = load %arg_0
-    %5:i32 = firstLeadingBit %4
-    %res:ptr<function, i32, read_write> = var, %5
-    %7:i32 = load %res
-    store %prevent_dce, %7
+    %5:u32 = bitcast %4
+    %6:u32 = let %5
+    %7:u32 = complement %6
+    %8:bool = lt %6, 2147483648u
+    %9:u32 = select %7, %6, %8
+    %10:u32 = let %9
+    %11:u32 = and %10, 4294901760u
+    %12:bool = eq %11, 0u
+    %13:u32 = select 16u, 0u, %12
+    %14:u32 = let %13
+    %15:u32 = shr %10, %14
+    %16:u32 = and %15, 65280u
+    %17:bool = eq %16, 0u
+    %18:u32 = select 8u, 0u, %17
+    %19:u32 = let %18
+    %20:u32 = shr %15, %19
+    %21:u32 = and %20, 240u
+    %22:bool = eq %21, 0u
+    %23:u32 = select 4u, 0u, %22
+    %24:u32 = let %23
+    %25:u32 = shr %20, %24
+    %26:u32 = and %25, 12u
+    %27:bool = eq %26, 0u
+    %28:u32 = select 2u, 0u, %27
+    %29:u32 = let %28
+    %30:u32 = shr %25, %29
+    %31:u32 = and %30, 2u
+    %32:bool = eq %31, 0u
+    %33:u32 = select 1u, 0u, %32
+    %34:u32 = or %29, %33
+    %35:u32 = or %24, %34
+    %36:u32 = or %19, %35
+    %37:u32 = or %14, %36
+    %38:bool = eq %30, 0u
+    %39:u32 = select %37, 4294967295u, %38
+    %40:i32 = bitcast %39
+    %res:ptr<function, i32, read_write> = var, %40
+    %42:i32 = load %res
+    store %prevent_dce, %42
     ret
   }
 }
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
-    %9:void = call %firstLeadingBit_57a1a3
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %44:void = call %firstLeadingBit_57a1a3
     ret vec4<f32>(0.0f)
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
-    %11:void = call %firstLeadingBit_57a1a3
+%fragment_main = @fragment func():void {
+  $B4: {
+    %46:void = call %firstLeadingBit_57a1a3
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
-    %13:void = call %firstLeadingBit_57a1a3
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
+    %48:void = call %firstLeadingBit_57a1a3
     ret
   }
 }

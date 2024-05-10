@@ -1,9 +1,22 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:270 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread float2x2 P = float2x2(0.0f);
+float2 func(thread float2* const pointer) {
+  return pointer;
+}
+kernel void tint_symbol() {
+  float2 const r = func(P[1]);
+}
+program_source:4:17: error: program scope variable must reside in constant address space
+thread float2x2 P = float2x2(0.0f);
+                ^
+program_source:6:10: error: cannot initialize return object of type 'float2' (vector of 2 'float' values) with an lvalue of type 'float2 *const'
+  return pointer;
+         ^~~~~~~
+program_source:9:16: warning: unused variable 'r' [-Wunused-variable]
+  float2 const r = func(P[1]);
+               ^
+

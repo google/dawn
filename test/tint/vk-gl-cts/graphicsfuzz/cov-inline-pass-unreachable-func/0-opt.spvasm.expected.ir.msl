@@ -1,6 +1,69 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%func_ = func():f32 {
+  $B2: {
+    %x:ptr<function, f32, read_write> = var
+    store %x, 2.0f
+    %5:f32 = load_vector_element %gl_FragCoord, 0u
+    %6:bool = eq %5, 12.0f
+    if %6 [t: $B3] {  # if_1
+      $B3: {  # true
+        %7:f32 = load_vector_element %gl_FragCoord, 1u
+        %8:bool = eq %7, 13.0f
+        if %8 [t: $B4] {  # if_2
+          $B4: {  # true
+            %9:f32 = load %x
+            %10:f32 = add %9, 1.0f
+            store %x, %10
+            exit_if  # if_2
+          }
+        }
+        %11:f32 = load %x
+        %x_46:f32 = let %11
+        ret %x_46
+      }
+    }
+    ret 1.0f
+  }
+}
+%main_1 = func():void {
+  $B5: {
+    if false [t: $B6, f: $B7] {  # if_3
+      $B6: {  # true
+        %14:f32 = call %func_
+        %x_31:f32 = let %14
+        %16:vec4<f32> = construct %x_31
+        store %x_GLF_color, %16
+        exit_if  # if_3
+      }
+      $B7: {  # false
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out {
+  $B8: {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %19:void = call %main_1
+    %20:vec4<f32> = load %x_GLF_color
+    %21:main_out = construct %20
+    ret %21
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

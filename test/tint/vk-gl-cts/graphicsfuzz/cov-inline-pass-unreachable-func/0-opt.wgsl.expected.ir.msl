@@ -1,6 +1,72 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%func_ = func():f32 {
+  $B2: {
+    %x:ptr<function, f32, read_write> = var
+    store %x, 2.0f
+    %5:f32 = load_vector_element %gl_FragCoord, 0u
+    %x_35:f32 = let %5
+    %7:bool = eq %x_35, 12.0f
+    if %7 [t: $B3] {  # if_1
+      $B3: {  # true
+        %8:f32 = load_vector_element %gl_FragCoord, 1u
+        %x_40:f32 = let %8
+        %10:bool = eq %x_40, 13.0f
+        if %10 [t: $B4] {  # if_2
+          $B4: {  # true
+            %11:f32 = load %x
+            %x_44:f32 = let %11
+            %13:f32 = add %x_44, 1.0f
+            store %x, %13
+            exit_if  # if_2
+          }
+        }
+        %14:f32 = load %x
+        %x_46:f32 = let %14
+        ret %x_46
+      }
+    }
+    ret 1.0f
+  }
+}
+%main_1 = func():void {
+  $B5: {
+    if false [t: $B6, f: $B7] {  # if_3
+      $B6: {  # true
+        %17:f32 = call %func_
+        %x_31:f32 = let %17
+        %19:vec4<f32> = construct %x_31, %x_31, %x_31, %x_31
+        store %x_GLF_color, %19
+        exit_if  # if_3
+      }
+      $B7: {  # false
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_3
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out {
+  $B8: {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %22:void = call %main_1
+    %23:vec4<f32> = load %x_GLF_color
+    %24:main_out = construct %23
+    ret %24
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

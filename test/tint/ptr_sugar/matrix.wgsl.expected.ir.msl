@@ -1,0 +1,68 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+void deref() {
+  float2x3 a = float2x3(0.0f);
+  thread float2x3* const p = a;
+  float3 b = p[0];
+  p[0] = float3(1.0f, 2.0f, 3.0f);
+}
+void no_deref() {
+  float2x3 a = float2x3(0.0f);
+  thread float2x3* const p = a;
+  float3 b = p[0];
+  p[0] = float3(1.0f, 2.0f, 3.0f);
+}
+kernel void tint_symbol() {
+  deref();
+  no_deref();
+}
+program_source:6:26: error: no viable conversion from 'metal::float2x3' (aka 'matrix<float, 2, 3>') to 'metal::float2x3 *const' (aka 'matrix<float, 2, 3> *const')
+  thread float2x3* const p = a;
+                         ^   ~
+program_source:7:10: error: no viable conversion from 'metal::float2x3' (aka 'matrix<float, 2, 3>') to 'float3' (vector of 3 'float' values)
+  float3 b = p[0];
+         ^   ~~~~
+program_source:8:8: error: no viable overloaded '='
+  p[0] = float3(1.0f, 2.0f, 3.0f);
+  ~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'float3' (vector of 3 'float' values) to 'const metal::matrix<float, 2, 3, void>' for 1st argument
+struct matrix
+       ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'float3' (vector of 3 'float' values) to 'const device metal::matrix<float, 2, 3, void> &' for 1st argument
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'float3' (vector of 3 'float' values) to 'const threadgroup metal::matrix<float, 2, 3, void> &' for 1st argument
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'float3' (vector of 3 'float' values) to 'const constant metal::matrix<float, 2, 3, void> &' for 1st argument
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:12:26: error: no viable conversion from 'metal::float2x3' (aka 'matrix<float, 2, 3>') to 'metal::float2x3 *const' (aka 'matrix<float, 2, 3> *const')
+  thread float2x3* const p = a;
+                         ^   ~
+program_source:13:10: error: no viable conversion from 'metal::float2x3' (aka 'matrix<float, 2, 3>') to 'float3' (vector of 3 'float' values)
+  float3 b = p[0];
+         ^   ~~~~
+program_source:14:8: error: no viable overloaded '='
+  p[0] = float3(1.0f, 2.0f, 3.0f);
+  ~~~~ ^ ~~~~~~~~~~~~~~~~~~~~~~~~
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'float3' (vector of 3 'float' values) to 'const metal::matrix<float, 2, 3, void>' for 1st argument
+struct matrix
+       ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'float3' (vector of 3 'float' values) to 'const device metal::matrix<float, 2, 3, void> &' for 1st argument
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'float3' (vector of 3 'float' values) to 'const threadgroup metal::matrix<float, 2, 3, void> &' for 1st argument
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'float3' (vector of 3 'float' values) to 'const constant metal::matrix<float, 2, 3, void> &' for 1st argument
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_matrix:21:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+

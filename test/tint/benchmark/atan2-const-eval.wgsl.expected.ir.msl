@@ -1,115 +1,115 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Output = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Output = struct @align(4) {
   value:f32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %outputs:ptr<storage, array<Output, 1000>, read_write> = var @binding_point(0, 0)
 }
 
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %3:ptr<storage, f32, read_write> = access %outputs, 0i, 0u
     store %3, -2.35619449615478515625f
     %4:ptr<storage, f32, read_write> = access %outputs, 1i, 0u
-    store %4, -3.14159274101257324219f
+    store %4, -3.14159250259399414062f
     %5:ptr<storage, f32, read_write> = access %outputs, 2i, 0u
-    store %5, -3.14159274101257324219f
+    store %5, -3.14159250259399414062f
     %6:ptr<storage, f32, read_write> = access %outputs, 3i, 0u
-    store %6, -3.14159274101257324219f
+    store %6, -3.14159250259399414062f
     %7:ptr<storage, f32, read_write> = access %outputs, 4i, 0u
-    store %7, -3.14159274101257324219f
+    store %7, -3.14159250259399414062f
     %8:ptr<storage, f32, read_write> = access %outputs, 5i, 0u
-    store %8, -3.14159274101257324219f
+    store %8, -3.14159250259399414062f
     %9:ptr<storage, f32, read_write> = access %outputs, 6i, 0u
-    store %9, -3.14159274101257324219f
+    store %9, -3.14159250259399414062f
     %10:ptr<storage, f32, read_write> = access %outputs, 7i, 0u
-    store %10, -3.14159274101257324219f
+    store %10, -3.14159250259399414062f
     %11:ptr<storage, f32, read_write> = access %outputs, 8i, 0u
-    store %11, -3.14159274101257324219f
+    store %11, -3.14159250259399414062f
     %12:ptr<storage, f32, read_write> = access %outputs, 9i, 0u
-    store %12, -3.14159274101257324219f
+    store %12, -3.14159250259399414062f
     %13:ptr<storage, f32, read_write> = access %outputs, 10i, 0u
-    store %13, -3.14159274101257324219f
+    store %13, -3.14159250259399414062f
     %14:ptr<storage, f32, read_write> = access %outputs, 11i, 0u
-    store %14, -3.14159274101257324219f
+    store %14, -3.14159250259399414062f
     %15:ptr<storage, f32, read_write> = access %outputs, 12i, 0u
-    store %15, -3.14159274101257324219f
+    store %15, -3.14159250259399414062f
     %16:ptr<storage, f32, read_write> = access %outputs, 13i, 0u
-    store %16, -3.14159274101257324219f
+    store %16, -3.14159250259399414062f
     %17:ptr<storage, f32, read_write> = access %outputs, 14i, 0u
-    store %17, -3.14159274101257324219f
+    store %17, -3.14159250259399414062f
     %18:ptr<storage, f32, read_write> = access %outputs, 15i, 0u
-    store %18, -3.14159274101257324219f
+    store %18, -3.14159250259399414062f
     %19:ptr<storage, f32, read_write> = access %outputs, 16i, 0u
-    store %19, -3.14159274101257324219f
+    store %19, -3.14159250259399414062f
     %20:ptr<storage, f32, read_write> = access %outputs, 17i, 0u
-    store %20, -3.14159274101257324219f
+    store %20, -3.14159250259399414062f
     %21:ptr<storage, f32, read_write> = access %outputs, 18i, 0u
-    store %21, -3.14159274101257324219f
+    store %21, -3.14159250259399414062f
     %22:ptr<storage, f32, read_write> = access %outputs, 19i, 0u
-    store %22, -3.14159274101257324219f
+    store %22, -3.14159250259399414062f
     %23:ptr<storage, f32, read_write> = access %outputs, 20i, 0u
-    store %23, -3.14159274101257324219f
+    store %23, -3.14159250259399414062f
     %24:ptr<storage, f32, read_write> = access %outputs, 21i, 0u
-    store %24, -3.14159274101257324219f
+    store %24, -3.14159250259399414062f
     %25:ptr<storage, f32, read_write> = access %outputs, 22i, 0u
-    store %25, -3.14159274101257324219f
+    store %25, -3.14159250259399414062f
     %26:ptr<storage, f32, read_write> = access %outputs, 23i, 0u
-    store %26, -3.14159274101257324219f
+    store %26, -3.14159250259399414062f
     %27:ptr<storage, f32, read_write> = access %outputs, 24i, 0u
-    store %27, -3.14159274101257324219f
+    store %27, -3.14159250259399414062f
     %28:ptr<storage, f32, read_write> = access %outputs, 25i, 0u
-    store %28, -3.14159274101257324219f
+    store %28, -3.14159250259399414062f
     %29:ptr<storage, f32, read_write> = access %outputs, 26i, 0u
-    store %29, -3.14159274101257324219f
+    store %29, -3.14159250259399414062f
     %30:ptr<storage, f32, read_write> = access %outputs, 27i, 0u
-    store %30, -3.14159274101257324219f
+    store %30, -3.14159250259399414062f
     %31:ptr<storage, f32, read_write> = access %outputs, 28i, 0u
-    store %31, -3.14159274101257324219f
+    store %31, -3.14159250259399414062f
     %32:ptr<storage, f32, read_write> = access %outputs, 29i, 0u
-    store %32, -3.14159274101257324219f
+    store %32, -3.14159250259399414062f
     %33:ptr<storage, f32, read_write> = access %outputs, 30i, 0u
-    store %33, -3.14159274101257324219f
+    store %33, -3.14159250259399414062f
     %34:ptr<storage, f32, read_write> = access %outputs, 31i, 0u
-    store %34, -3.14159274101257324219f
+    store %34, -3.14159250259399414062f
     %35:ptr<storage, f32, read_write> = access %outputs, 32i, 0u
-    store %35, -3.14159274101257324219f
+    store %35, -3.14159250259399414062f
     %36:ptr<storage, f32, read_write> = access %outputs, 33i, 0u
-    store %36, -3.14159274101257324219f
+    store %36, -3.14159250259399414062f
     %37:ptr<storage, f32, read_write> = access %outputs, 34i, 0u
-    store %37, -3.14159274101257324219f
+    store %37, -3.14159250259399414062f
     %38:ptr<storage, f32, read_write> = access %outputs, 35i, 0u
-    store %38, -3.14159274101257324219f
+    store %38, -3.14159250259399414062f
     %39:ptr<storage, f32, read_write> = access %outputs, 36i, 0u
-    store %39, -3.14159274101257324219f
+    store %39, -3.14159250259399414062f
     %40:ptr<storage, f32, read_write> = access %outputs, 37i, 0u
-    store %40, -3.14159274101257324219f
+    store %40, -3.14159250259399414062f
     %41:ptr<storage, f32, read_write> = access %outputs, 38i, 0u
-    store %41, -3.14159274101257324219f
+    store %41, -3.14159250259399414062f
     %42:ptr<storage, f32, read_write> = access %outputs, 39i, 0u
-    store %42, -3.14159274101257324219f
+    store %42, -3.14159250259399414062f
     %43:ptr<storage, f32, read_write> = access %outputs, 40i, 0u
-    store %43, -3.14159274101257324219f
+    store %43, -3.14159250259399414062f
     %44:ptr<storage, f32, read_write> = access %outputs, 41i, 0u
-    store %44, -3.14159274101257324219f
+    store %44, -3.14159250259399414062f
     %45:ptr<storage, f32, read_write> = access %outputs, 42i, 0u
-    store %45, -3.14159274101257324219f
+    store %45, -3.14159250259399414062f
     %46:ptr<storage, f32, read_write> = access %outputs, 43i, 0u
-    store %46, -3.14159274101257324219f
+    store %46, -3.14159250259399414062f
     %47:ptr<storage, f32, read_write> = access %outputs, 44i, 0u
-    store %47, -3.14159274101257324219f
+    store %47, -3.14159250259399414062f
     %48:ptr<storage, f32, read_write> = access %outputs, 45i, 0u
-    store %48, -3.14159274101257324219f
+    store %48, -3.14159250259399414062f
     %49:ptr<storage, f32, read_write> = access %outputs, 46i, 0u
-    store %49, -3.14159274101257324219f
+    store %49, -3.14159250259399414062f
     %50:ptr<storage, f32, read_write> = access %outputs, 47i, 0u
-    store %50, -3.14159274101257324219f
+    store %50, -3.14159250259399414062f
     %51:ptr<storage, f32, read_write> = access %outputs, 48i, 0u
-    store %51, -3.14159274101257324219f
+    store %51, -3.14159250259399414062f
     %52:ptr<storage, f32, read_write> = access %outputs, 49i, 0u
-    store %52, -3.14159274101257324219f
+    store %52, -3.14159250259399414062f
     %53:ptr<storage, f32, read_write> = access %outputs, 50i, 0u
     store %53, -2.35619449615478515625f
     %54:ptr<storage, f32, read_write> = access %outputs, 51i, 0u
@@ -119,17 +119,17 @@ SKIP: FAILED
     %56:ptr<storage, f32, read_write> = access %outputs, 53i, 0u
     store %56, -2.15879893302917480469f
     %57:ptr<storage, f32, read_write> = access %outputs, 54i, 0u
-    store %57, -2.07789468765258789062f
+    store %57, -2.07789492607116699219f
     %58:ptr<storage, f32, read_write> = access %outputs, 55i, 0u
     store %58, -1.98902058601379394531f
     %59:ptr<storage, f32, read_write> = access %outputs, 56i, 0u
     store %59, -1.89254689216613769531f
     %60:ptr<storage, f32, read_write> = access %outputs, 57i, 0u
-    store %60, -1.78946530818939208984f
+    store %60, -1.78946542739868164062f
     %61:ptr<storage, f32, read_write> = access %outputs, 58i, 0u
     store %61, -1.68145358562469482422f
     %62:ptr<storage, f32, read_write> = access %outputs, 59i, 0u
-    store %62, -1.57079637050628662109f
+    store %62, -1.57079648971557617188f
     %63:ptr<storage, f32, read_write> = access %outputs, 60i, 0u
     store %63, -1.57079637050628662109f
     %64:ptr<storage, f32, read_write> = access %outputs, 61i, 0u
@@ -147,11 +147,11 @@ SKIP: FAILED
     %70:ptr<storage, f32, read_write> = access %outputs, 67i, 0u
     store %70, -0.98279374837875366211f
     %71:ptr<storage, f32, read_write> = access %outputs, 68i, 0u
-    store %71, -0.90975326299667358398f
+    store %71, -0.90975320339202880859f
     %72:ptr<storage, f32, read_write> = access %outputs, 69i, 0u
-    store %72, -0.84415405988693237305f
+    store %72, -0.84415400028228759766f
     %73:ptr<storage, f32, read_write> = access %outputs, 70i, 0u
-    store %73, -0.78539824485778808594f
+    store %73, -0.78539818525314331055f
     %74:ptr<storage, f32, read_write> = access %outputs, 71i, 0u
     store %74, -0.78539818525314331055f
     %75:ptr<storage, f32, read_write> = access %outputs, 72i, 0u
@@ -351,25 +351,25 @@ SKIP: FAILED
     %172:ptr<storage, f32, read_write> = access %outputs, 169i, 0u
     store %172, -3.1411762237548828125f
     %173:ptr<storage, f32, read_write> = access %outputs, 170i, 0u
-    store %173, -1.57079625129699707031f
+    store %173, -1.57079637050628662109f
     %174:ptr<storage, f32, read_write> = access %outputs, 171i, 0u
-    store %174, -1.57079625129699707031f
+    store %174, -1.57079637050628662109f
     %175:ptr<storage, f32, read_write> = access %outputs, 172i, 0u
-    store %175, -1.57079625129699707031f
+    store %175, -1.57079637050628662109f
     %176:ptr<storage, f32, read_write> = access %outputs, 173i, 0u
-    store %176, -1.57079625129699707031f
+    store %176, -1.57079637050628662109f
     %177:ptr<storage, f32, read_write> = access %outputs, 174i, 0u
-    store %177, -1.57079625129699707031f
+    store %177, -1.57079637050628662109f
     %178:ptr<storage, f32, read_write> = access %outputs, 175i, 0u
-    store %178, -1.57079625129699707031f
+    store %178, -1.57079637050628662109f
     %179:ptr<storage, f32, read_write> = access %outputs, 176i, 0u
-    store %179, -1.57079625129699707031f
+    store %179, -1.57079637050628662109f
     %180:ptr<storage, f32, read_write> = access %outputs, 177i, 0u
-    store %180, -1.57079625129699707031f
+    store %180, -1.57079637050628662109f
     %181:ptr<storage, f32, read_write> = access %outputs, 178i, 0u
-    store %181, -1.57079625129699707031f
+    store %181, -1.57079637050628662109f
     %182:ptr<storage, f32, read_write> = access %outputs, 179i, 0u
-    store %182, -1.57079625129699707031f
+    store %182, -1.57079637050628662109f
     %183:ptr<storage, f32, read_write> = access %outputs, 180i, 0u
     store %183, -1.57079637050628662109f
     %184:ptr<storage, f32, read_write> = access %outputs, 181i, 0u
@@ -411,7 +411,7 @@ SKIP: FAILED
     %202:ptr<storage, f32, read_write> = access %outputs, 199i, 0u
     store %202, -0.01562372874468564987f
     %203:ptr<storage, f32, read_write> = access %outputs, 200i, 0u
-    store %203, -0.0123450523242354393f
+    store %203, -0.01234505139291286469f
     %204:ptr<storage, f32, read_write> = access %outputs, 201i, 0u
     store %204, -0.00999966636300086975f
     %205:ptr<storage, f32, read_write> = access %outputs, 202i, 0u
@@ -423,17 +423,17 @@ SKIP: FAILED
     %208:ptr<storage, f32, read_write> = access %outputs, 205i, 0u
     store %208, -0.00510199647396802902f
     %209:ptr<storage, f32, read_write> = access %outputs, 206i, 0u
-    store %209, -0.00444441474974155426f
+    store %209, -0.00444441521540284157f
     %210:ptr<storage, f32, read_write> = access %outputs, 207i, 0u
     store %210, -0.00390623020939528942f
     %211:ptr<storage, f32, read_write> = access %outputs, 208i, 0u
-    store %211, -0.00346019398421049118f
+    store %211, -0.00346019375137984753f
     %212:ptr<storage, f32, read_write> = access %outputs, 209i, 0u
-    store %212, -0.00308640999719500542f
+    store %212, -0.00308640976436436176f
     %213:ptr<storage, f32, read_write> = access %outputs, 210i, 0u
     store %213, -0.00277007604017853737f
     %214:ptr<storage, f32, read_write> = access %outputs, 211i, 0u
-    store %214, -0.00249999482184648514f
+    store %214, -0.00249999458901584148f
     %215:ptr<storage, f32, read_write> = access %outputs, 212i, 0u
     store %215, -0.00226756976917386055f
     %216:ptr<storage, f32, read_write> = access %outputs, 213i, 0u
@@ -451,11 +451,11 @@ SKIP: FAILED
     %222:ptr<storage, f32, read_write> = access %outputs, 219i, 0u
     store %222, -0.00127550947945564985f
     %223:ptr<storage, f32, read_write> = access %outputs, 220i, 0u
-    store %223, -0.00118906004354357719f
+    store %223, -0.00118906015995889902f
     %224:ptr<storage, f32, read_write> = access %outputs, 221i, 0u
     store %224, -0.00111111055593937635f
     %225:ptr<storage, f32, read_write> = access %outputs, 222i, 0u
-    store %225, -0.00104058242868632078f
+    store %225, -0.00104058231227099895f
     %226:ptr<storage, f32, read_write> = access %outputs, 223i, 0u
     store %226, -0.00097656220896169543f
     %227:ptr<storage, f32, read_write> = access %outputs, 224i, 0u
@@ -473,7 +473,7 @@ SKIP: FAILED
     %233:ptr<storage, f32, read_write> = access %outputs, 230i, 0u
     store %233, -0.00065746204927563667f
     %234:ptr<storage, f32, read_write> = access %outputs, 231i, 0u
-    store %234, -0.00062499992782250047f
+    store %234, -0.00062499986961483955f
     %235:ptr<storage, f32, read_write> = access %outputs, 232i, 0u
     store %235, -0.00059488392435014248f
     %236:ptr<storage, f32, read_write> = access %outputs, 233i, 0u
@@ -483,7 +483,7 @@ SKIP: FAILED
     %238:ptr<storage, f32, read_write> = access %outputs, 235i, 0u
     store %238, -0.00051652890397235751f
     %239:ptr<storage, f32, read_write> = access %outputs, 236i, 0u
-    store %239, -0.00049382710130885243f
+    store %239, -0.00049382715951651335f
     %240:ptr<storage, f32, read_write> = access %outputs, 237i, 0u
     store %240, -0.00047258977429009974f
     %241:ptr<storage, f32, read_write> = access %outputs, 238i, 0u
@@ -589,25 +589,25 @@ SKIP: FAILED
     %291:ptr<storage, f32, read_write> = access %outputs, 288i, 0u
     store %291, -3.13992667198181152344f
     %292:ptr<storage, f32, read_write> = access %outputs, 289i, 0u
-    store %292, -1.57079625129699707031f
+    store %292, -1.57079637050628662109f
     %293:ptr<storage, f32, read_write> = access %outputs, 290i, 0u
-    store %293, -1.57079625129699707031f
+    store %293, -1.57079637050628662109f
     %294:ptr<storage, f32, read_write> = access %outputs, 291i, 0u
-    store %294, -1.57079625129699707031f
+    store %294, -1.57079637050628662109f
     %295:ptr<storage, f32, read_write> = access %outputs, 292i, 0u
-    store %295, -1.57079625129699707031f
+    store %295, -1.57079637050628662109f
     %296:ptr<storage, f32, read_write> = access %outputs, 293i, 0u
-    store %296, -1.57079625129699707031f
+    store %296, -1.57079637050628662109f
     %297:ptr<storage, f32, read_write> = access %outputs, 294i, 0u
-    store %297, -1.57079625129699707031f
+    store %297, -1.57079637050628662109f
     %298:ptr<storage, f32, read_write> = access %outputs, 295i, 0u
-    store %298, -1.57079625129699707031f
+    store %298, -1.57079637050628662109f
     %299:ptr<storage, f32, read_write> = access %outputs, 296i, 0u
-    store %299, -1.57079625129699707031f
+    store %299, -1.57079637050628662109f
     %300:ptr<storage, f32, read_write> = access %outputs, 297i, 0u
-    store %300, -1.57079625129699707031f
+    store %300, -1.57079637050628662109f
     %301:ptr<storage, f32, read_write> = access %outputs, 298i, 0u
-    store %301, -1.57079625129699707031f
+    store %301, -1.57079637050628662109f
     %302:ptr<storage, f32, read_write> = access %outputs, 299i, 0u
     store %302, -1.57079637050628662109f
     %303:ptr<storage, f32, read_write> = access %outputs, 300i, 0u
@@ -653,7 +653,7 @@ SKIP: FAILED
     %323:ptr<storage, f32, read_write> = access %outputs, 320i, 0u
     store %323, -0.03997868672013282776f
     %324:ptr<storage, f32, read_write> = access %outputs, 321i, 0u
-    store %324, -0.03304582089185714722f
+    store %324, -0.03304581716656684875f
     %325:ptr<storage, f32, read_write> = access %outputs, 322i, 0u
     store %325, -0.02777063660323619843f
     %326:ptr<storage, f32, read_write> = access %outputs, 323i, 0u
@@ -667,7 +667,7 @@ SKIP: FAILED
     %330:ptr<storage, f32, read_write> = access %outputs, 327i, 0u
     store %330, -0.01383994705975055695f
     %331:ptr<storage, f32, read_write> = access %outputs, 328i, 0u
-    store %331, -0.0123450523242354393f
+    store %331, -0.01234505139291286469f
     %332:ptr<storage, f32, read_write> = access %outputs, 329i, 0u
     store %332, -0.0110798785462975502f
     %333:ptr<storage, f32, read_write> = access %outputs, 330i, 0u
@@ -691,7 +691,7 @@ SKIP: FAILED
     %342:ptr<storage, f32, read_write> = access %outputs, 339i, 0u
     store %342, -0.00475620664656162262f
     %343:ptr<storage, f32, read_write> = access %outputs, 340i, 0u
-    store %343, -0.00444441474974155426f
+    store %343, -0.00444441521540284157f
     %344:ptr<storage, f32, read_write> = access %outputs, 341i, 0u
     store %344, -0.00416230689734220505f
     %345:ptr<storage, f32, read_write> = access %outputs, 342i, 0u
@@ -699,11 +699,11 @@ SKIP: FAILED
     %346:ptr<storage, f32, read_write> = access %outputs, 343i, 0u
     store %346, -0.0036730780266225338f
     %347:ptr<storage, f32, read_write> = access %outputs, 344i, 0u
-    store %347, -0.00346019398421049118f
+    store %347, -0.00346019375137984753f
     %348:ptr<storage, f32, read_write> = access %outputs, 345i, 0u
     store %348, -0.00326529424637556076f
     %349:ptr<storage, f32, read_write> = access %outputs, 346i, 0u
-    store %349, -0.00308640999719500542f
+    store %349, -0.00308640976436436176f
     %350:ptr<storage, f32, read_write> = access %outputs, 347i, 0u
     store %350, -0.0029218324925750494f
     %351:ptr<storage, f32, read_write> = access %outputs, 348i, 0u
@@ -711,13 +711,13 @@ SKIP: FAILED
     %352:ptr<storage, f32, read_write> = access %outputs, 349i, 0u
     store %352, -0.002629842609167099f
     %353:ptr<storage, f32, read_write> = access %outputs, 350i, 0u
-    store %353, -0.00249999482184648514f
+    store %353, -0.00249999458901584148f
     %354:ptr<storage, f32, read_write> = access %outputs, 351i, 0u
     store %354, -0.00237953150644898415f
     %355:ptr<storage, f32, read_write> = access %outputs, 352i, 0u
     store %355, -0.00226756976917386055f
     %356:ptr<storage, f32, read_write> = access %outputs, 353i, 0u
-    store %356, -0.00216332823038101196f
+    store %356, -0.00216332799755036831f
     %357:ptr<storage, f32, read_write> = access %outputs, 354i, 0u
     store %357, -0.0020661128219217062f
     %358:ptr<storage, f32, read_write> = access %outputs, 355i, 0u
@@ -825,25 +825,25 @@ SKIP: FAILED
     %409:ptr<storage, f32, read_write> = access %outputs, 406i, 0u
     store %409, -3.13784432411193847656f
     %410:ptr<storage, f32, read_write> = access %outputs, 407i, 0u
-    store %410, -1.57079625129699707031f
+    store %410, -1.57079637050628662109f
     %411:ptr<storage, f32, read_write> = access %outputs, 408i, 0u
-    store %411, -1.57079625129699707031f
+    store %411, -1.57079637050628662109f
     %412:ptr<storage, f32, read_write> = access %outputs, 409i, 0u
-    store %412, -1.57079625129699707031f
+    store %412, -1.57079637050628662109f
     %413:ptr<storage, f32, read_write> = access %outputs, 410i, 0u
-    store %413, -1.57079625129699707031f
+    store %413, -1.57079637050628662109f
     %414:ptr<storage, f32, read_write> = access %outputs, 411i, 0u
-    store %414, -1.57079625129699707031f
+    store %414, -1.57079637050628662109f
     %415:ptr<storage, f32, read_write> = access %outputs, 412i, 0u
-    store %415, -1.57079625129699707031f
+    store %415, -1.57079637050628662109f
     %416:ptr<storage, f32, read_write> = access %outputs, 413i, 0u
-    store %416, -1.57079625129699707031f
+    store %416, -1.57079637050628662109f
     %417:ptr<storage, f32, read_write> = access %outputs, 414i, 0u
-    store %417, -1.57079625129699707031f
+    store %417, -1.57079637050628662109f
     %418:ptr<storage, f32, read_write> = access %outputs, 415i, 0u
-    store %418, -1.57079625129699707031f
+    store %418, -1.57079637050628662109f
     %419:ptr<storage, f32, read_write> = access %outputs, 416i, 0u
-    store %419, -1.57079625129699707031f
+    store %419, -1.57079637050628662109f
     %420:ptr<storage, f32, read_write> = access %outputs, 417i, 0u
     store %420, -1.57079637050628662109f
     %421:ptr<storage, f32, read_write> = access %outputs, 418i, 0u
@@ -875,9 +875,9 @@ SKIP: FAILED
     %434:ptr<storage, f32, read_write> = access %outputs, 431i, 0u
     store %434, -0.78539818525314331055f
     %435:ptr<storage, f32, read_write> = access %outputs, 432i, 0u
-    store %435, -0.5123894810676574707f
+    store %435, -0.51238942146301269531f
     %436:ptr<storage, f32, read_write> = access %outputs, 433i, 0u
-    store %436, -0.34555557370185852051f
+    store %436, -0.34555554389953613281f
     %437:ptr<storage, f32, read_write> = access %outputs, 434i, 0u
     store %437, -0.24497866630554199219f
     %438:ptr<storage, f32, read_write> = access %outputs, 435i, 0u
@@ -919,13 +919,13 @@ SKIP: FAILED
     %456:ptr<storage, f32, read_write> = access %outputs, 453i, 0u
     store %456, -0.01439900510013103485f
     %457:ptr<storage, f32, read_write> = access %outputs, 454i, 0u
-    store %457, -0.01331282220780849457f
+    store %457, -0.01331282313913106918f
     %458:ptr<storage, f32, read_write> = access %outputs, 455i, 0u
-    store %458, -0.0123450523242354393f
+    store %458, -0.01234505139291286469f
     %459:ptr<storage, f32, read_write> = access %outputs, 456i, 0u
     store %459, -0.01147908717393875122f
     %460:ptr<storage, f32, read_write> = access %outputs, 457i, 0u
-    store %460, -0.01070113666355609894f
+    store %460, -0.01070113759487867355f
     %461:ptr<storage, f32, read_write> = access %outputs, 458i, 0u
     store %461, -0.00999966636300086975f
     %462:ptr<storage, f32, read_write> = access %outputs, 459i, 0u
@@ -939,21 +939,21 @@ SKIP: FAILED
     %466:ptr<storage, f32, read_write> = access %outputs, 463i, 0u
     store %466, -0.0073468061164021492f
     %467:ptr<storage, f32, read_write> = access %outputs, 464i, 0u
-    store %467, -0.00694433227181434631f
+    store %467, -0.00694433273747563362f
     %468:ptr<storage, f32, read_write> = access %outputs, 465i, 0u
-    store %468, -0.0065740472637116909f
+    store %468, -0.00657404679805040359f
     %469:ptr<storage, f32, read_write> = access %outputs, 466i, 0u
     store %469, -0.00623260624706745148f
     %470:ptr<storage, f32, read_write> = access %outputs, 467i, 0u
     store %470, -0.00591709045693278313f
     %471:ptr<storage, f32, read_write> = access %outputs, 468i, 0u
-    store %471, -0.00562494061887264252f
+    store %471, -0.00562494015321135521f
     %472:ptr<storage, f32, read_write> = access %outputs, 469i, 0u
-    store %472, -0.00535390432924032211f
+    store %472, -0.00535390479490160942f
     %473:ptr<storage, f32, read_write> = access %outputs, 470i, 0u
     store %473, -0.00510199647396802902f
     %474:ptr<storage, f32, read_write> = access %outputs, 471i, 0u
-    store %474, -0.00486745685338973999f
+    store %474, -0.0048674573190510273f
     %475:ptr<storage, f32, read_write> = access %outputs, 472i, 0u
     store %475, -0.00464872689917683601f
     %476:ptr<storage, f32, read_write> = access %outputs, 473i, 0u
@@ -1059,25 +1059,25 @@ SKIP: FAILED
     %526:ptr<storage, f32, read_write> = access %outputs, 523i, 0u
     store %526, -3.13492894172668457031f
     %527:ptr<storage, f32, read_write> = access %outputs, 524i, 0u
-    store %527, -1.57079625129699707031f
+    store %527, -1.57079637050628662109f
     %528:ptr<storage, f32, read_write> = access %outputs, 525i, 0u
-    store %528, -1.57079625129699707031f
+    store %528, -1.57079637050628662109f
     %529:ptr<storage, f32, read_write> = access %outputs, 526i, 0u
-    store %529, -1.57079625129699707031f
+    store %529, -1.57079637050628662109f
     %530:ptr<storage, f32, read_write> = access %outputs, 527i, 0u
-    store %530, -1.57079625129699707031f
+    store %530, -1.57079637050628662109f
     %531:ptr<storage, f32, read_write> = access %outputs, 528i, 0u
-    store %531, -1.57079625129699707031f
+    store %531, -1.57079637050628662109f
     %532:ptr<storage, f32, read_write> = access %outputs, 529i, 0u
-    store %532, -1.57079625129699707031f
+    store %532, -1.57079637050628662109f
     %533:ptr<storage, f32, read_write> = access %outputs, 530i, 0u
-    store %533, -1.57079625129699707031f
+    store %533, -1.57079637050628662109f
     %534:ptr<storage, f32, read_write> = access %outputs, 531i, 0u
-    store %534, -1.57079625129699707031f
+    store %534, -1.57079637050628662109f
     %535:ptr<storage, f32, read_write> = access %outputs, 532i, 0u
-    store %535, -1.57079625129699707031f
+    store %535, -1.57079637050628662109f
     %536:ptr<storage, f32, read_write> = access %outputs, 533i, 0u
-    store %536, -1.57079625129699707031f
+    store %536, -1.57079637050628662109f
     %537:ptr<storage, f32, read_write> = access %outputs, 534i, 0u
     store %537, -1.57079637050628662109f
     %538:ptr<storage, f32, read_write> = access %outputs, 535i, 0u
@@ -1119,7 +1119,7 @@ SKIP: FAILED
     %556:ptr<storage, f32, read_write> = access %outputs, 553i, 0u
     store %556, -0.24497866630554199219f
     %557:ptr<storage, f32, read_write> = access %outputs, 554i, 0u
-    store %557, -0.19502027332782745361f
+    store %557, -0.19502025842666625977f
     %558:ptr<storage, f32, read_write> = access %outputs, 555i, 0u
     store %558, -0.15865525603294372559f
     %559:ptr<storage, f32, read_write> = access %outputs, 556i, 0u
@@ -1145,7 +1145,7 @@ SKIP: FAILED
     %569:ptr<storage, f32, read_write> = access %outputs, 566i, 0u
     store %569, -0.03626527264714241028f
     %570:ptr<storage, f32, read_write> = access %outputs, 567i, 0u
-    store %570, -0.03304582089185714722f
+    store %570, -0.03304581716656684875f
     %571:ptr<storage, f32, read_write> = access %outputs, 568i, 0u
     store %571, -0.03023652918636798859f
     %572:ptr<storage, f32, read_write> = access %outputs, 569i, 0u
@@ -1173,9 +1173,9 @@ SKIP: FAILED
     %583:ptr<storage, f32, read_write> = access %outputs, 580i, 0u
     store %583, -0.01306048128753900528f
     %584:ptr<storage, f32, read_write> = access %outputs, 581i, 0u
-    store %584, -0.0123450523242354393f
+    store %584, -0.01234505139291286469f
     %585:ptr<storage, f32, read_write> = access %outputs, 582i, 0u
-    store %585, -0.01168683171272277832f
+    store %585, -0.0116868307814002037f
     %586:ptr<storage, f32, read_write> = access %outputs, 583i, 0u
     store %586, -0.0110798785462975502f
     %587:ptr<storage, f32, read_write> = access %outputs, 584i, 0u
@@ -1191,7 +1191,7 @@ SKIP: FAILED
     %592:ptr<storage, f32, read_write> = access %outputs, 589i, 0u
     store %592, -0.00826427526772022247f
     %593:ptr<storage, f32, read_write> = access %outputs, 590i, 0u
-    store %593, -0.00790106970816850662f
+    store %593, -0.00790107063949108124f
     %594:ptr<storage, f32, read_write> = access %outputs, 591i, 0u
     store %594, -0.00756129296496510506f
     %595:ptr<storage, f32, read_write> = access %outputs, 592i, 0u
@@ -1291,25 +1291,25 @@ SKIP: FAILED
     %642:ptr<storage, f32, read_write> = access %outputs, 639i, 0u
     store %642, -3.13118076324462890625f
     %643:ptr<storage, f32, read_write> = access %outputs, 640i, 0u
-    store %643, -1.57079625129699707031f
+    store %643, -1.57079637050628662109f
     %644:ptr<storage, f32, read_write> = access %outputs, 641i, 0u
-    store %644, -1.57079625129699707031f
+    store %644, -1.57079637050628662109f
     %645:ptr<storage, f32, read_write> = access %outputs, 642i, 0u
-    store %645, -1.57079625129699707031f
+    store %645, -1.57079637050628662109f
     %646:ptr<storage, f32, read_write> = access %outputs, 643i, 0u
-    store %646, -1.57079625129699707031f
+    store %646, -1.57079637050628662109f
     %647:ptr<storage, f32, read_write> = access %outputs, 644i, 0u
-    store %647, -1.57079625129699707031f
+    store %647, -1.57079637050628662109f
     %648:ptr<storage, f32, read_write> = access %outputs, 645i, 0u
-    store %648, -1.57079625129699707031f
+    store %648, -1.57079637050628662109f
     %649:ptr<storage, f32, read_write> = access %outputs, 646i, 0u
-    store %649, -1.57079625129699707031f
+    store %649, -1.57079637050628662109f
     %650:ptr<storage, f32, read_write> = access %outputs, 647i, 0u
-    store %650, -1.57079625129699707031f
+    store %650, -1.57079637050628662109f
     %651:ptr<storage, f32, read_write> = access %outputs, 648i, 0u
-    store %651, -1.57079625129699707031f
+    store %651, -1.57079637050628662109f
     %652:ptr<storage, f32, read_write> = access %outputs, 649i, 0u
-    store %652, -1.57079625129699707031f
+    store %652, -1.57079637050628662109f
     %653:ptr<storage, f32, read_write> = access %outputs, 650i, 0u
     store %653, -1.57079637050628662109f
     %654:ptr<storage, f32, read_write> = access %outputs, 651i, 0u
@@ -1339,7 +1339,7 @@ SKIP: FAILED
     %666:ptr<storage, f32, read_write> = access %outputs, 663i, 0u
     store %666, -1.41214108467102050781f
     %667:ptr<storage, f32, read_write> = access %outputs, 664i, 0u
-    store %667, -1.2252407073974609375f
+    store %667, -1.22524082660675048828f
     %668:ptr<storage, f32, read_write> = access %outputs, 665i, 0u
     store %668, -1.00148320198059082031f
     %669:ptr<storage, f32, read_write> = access %outputs, 666i, 0u
@@ -1347,7 +1347,7 @@ SKIP: FAILED
     %670:ptr<storage, f32, read_write> = access %outputs, 667i, 0u
     store %670, -0.60698771476745605469f
     %671:ptr<storage, f32, read_write> = access %outputs, 668i, 0u
-    store %671, -0.47177749872207641602f
+    store %671, -0.47177752852439880371f
     %672:ptr<storage, f32, read_write> = access %outputs, 669i, 0u
     store %672, -0.37239846587181091309f
     %673:ptr<storage, f32, read_write> = access %outputs, 670i, 0u
@@ -1361,7 +1361,7 @@ SKIP: FAILED
     %677:ptr<storage, f32, read_write> = access %outputs, 674i, 0u
     store %677, -0.1468639075756072998f
     %678:ptr<storage, f32, read_write> = access %outputs, 675i, 0u
-    store %678, -0.12686596810817718506f
+    store %678, -0.12686598300933837891f
     %679:ptr<storage, f32, read_write> = access %outputs, 676i, 0u
     store %679, -0.11065722256898880005f
     %680:ptr<storage, f32, read_write> = access %outputs, 677i, 0u
@@ -1369,15 +1369,15 @@ SKIP: FAILED
     %681:ptr<storage, f32, read_write> = access %outputs, 678i, 0u
     store %681, -0.08629038184881210327f
     %682:ptr<storage, f32, read_write> = access %outputs, 679i, 0u
-    store %682, -0.07700790464878082275f
+    store %682, -0.07700791209936141968f
     %683:ptr<storage, f32, read_write> = access %outputs, 680i, 0u
-    store %683, -0.06914169341325759888f
+    store %683, -0.06914168596267700195f
     %684:ptr<storage, f32, read_write> = access %outputs, 681i, 0u
     store %684, -0.06241881102323532104f
     %685:ptr<storage, f32, read_write> = access %outputs, 682i, 0u
     store %685, -0.05662873387336730957f
     %686:ptr<storage, f32, read_write> = access %outputs, 683i, 0u
-    store %686, -0.05160703510046005249f
+    store %686, -0.05160703137516975403f
     %687:ptr<storage, f32, read_write> = access %outputs, 684i, 0u
     store %687, -0.04722384735941886902f
     %688:ptr<storage, f32, read_write> = access %outputs, 685i, 0u
@@ -1389,15 +1389,15 @@ SKIP: FAILED
     %691:ptr<storage, f32, read_write> = access %outputs, 688i, 0u
     store %691, -0.0342801213264465332f
     %692:ptr<storage, f32, read_write> = access %outputs, 689i, 0u
-    store %692, -0.03187695145606994629f
+    store %692, -0.03187695518136024475f
     %693:ptr<storage, f32, read_write> = access %outputs, 690i, 0u
-    store %693, -0.02971776761114597321f
+    store %693, -0.02971776574850082397f
     %694:ptr<storage, f32, read_write> = access %outputs, 691i, 0u
     store %694, -0.02777063660323619843f
     %695:ptr<storage, f32, read_write> = access %outputs, 692i, 0u
-    store %695, -0.02600870467722415924f
+    store %695, -0.02600870281457901001f
     %696:ptr<storage, f32, read_write> = access %outputs, 693i, 0u
-    store %696, -0.02440921589732170105f
+    store %696, -0.02440921403467655182f
     %697:ptr<storage, f32, read_write> = access %outputs, 694i, 0u
     store %697, -0.02295281179249286652f
     %698:ptr<storage, f32, read_write> = access %outputs, 695i, 0u
@@ -1407,11 +1407,11 @@ SKIP: FAILED
     %700:ptr<storage, f32, read_write> = access %outputs, 697i, 0u
     store %700, -0.01928773149847984314f
     %701:ptr<storage, f32, read_write> = access %outputs, 698i, 0u
-    store %701, -0.01825947500765323639f
+    store %701, -0.01825947687029838562f
     %702:ptr<storage, f32, read_write> = access %outputs, 699i, 0u
     store %702, -0.01731128990650177002f
     %703:ptr<storage, f32, read_write> = access %outputs, 700i, 0u
-    store %703, -0.01643507368862628937f
+    store %703, -0.0164350755512714386f
     %704:ptr<storage, f32, read_write> = access %outputs, 701i, 0u
     store %704, -0.01562372874468564987f
     %705:ptr<storage, f32, read_write> = access %outputs, 702i, 0u
@@ -1419,13 +1419,13 @@ SKIP: FAILED
     %706:ptr<storage, f32, read_write> = access %outputs, 703i, 0u
     store %706, -0.01417138706892728806f
     %707:ptr<storage, f32, read_write> = access %outputs, 704i, 0u
-    store %707, -0.01351999770849943161f
+    store %707, -0.01351999863982200623f
     %708:ptr<storage, f32, read_write> = access %outputs, 705i, 0u
     store %708, -0.01291250623762607574f
     %709:ptr<storage, f32, read_write> = access %outputs, 706i, 0u
-    store %709, -0.01234505325555801392f
+    store %709, -0.0123450523242354393f
     %710:ptr<storage, f32, read_write> = access %outputs, 707i, 0u
-    store %710, -0.01181419659405946732f
+    store %710, -0.0118141956627368927f
     %711:ptr<storage, f32, read_write> = access %outputs, 708i, 0u
     store %711, -0.01131685543805360794f
     %712:ptr<storage, f32, read_write> = access %outputs, 709i, 0u
@@ -1435,7 +1435,7 @@ SKIP: FAILED
     %714:ptr<storage, f32, read_write> = access %outputs, 711i, 0u
     store %714, -2.35619449615478515625f
     %715:ptr<storage, f32, read_write> = access %outputs, 712i, 0u
-    store %715, -2.50795984268188476562f
+    store %715, -2.50795960426330566406f
     %716:ptr<storage, f32, read_write> = access %outputs, 713i, 0u
     store %716, -2.62920331954956054688f
     %717:ptr<storage, f32, read_write> = access %outputs, 714i, 0u
@@ -1521,25 +1521,25 @@ SKIP: FAILED
     %757:ptr<storage, f32, read_write> = access %outputs, 754i, 0u
     store %757, -3.12660002708435058594f
     %758:ptr<storage, f32, read_write> = access %outputs, 755i, 0u
-    store %758, -1.57079625129699707031f
+    store %758, -1.57079637050628662109f
     %759:ptr<storage, f32, read_write> = access %outputs, 756i, 0u
-    store %759, -1.57079625129699707031f
+    store %759, -1.57079637050628662109f
     %760:ptr<storage, f32, read_write> = access %outputs, 757i, 0u
-    store %760, -1.57079625129699707031f
+    store %760, -1.57079637050628662109f
     %761:ptr<storage, f32, read_write> = access %outputs, 758i, 0u
-    store %761, -1.57079625129699707031f
+    store %761, -1.57079637050628662109f
     %762:ptr<storage, f32, read_write> = access %outputs, 759i, 0u
-    store %762, -1.57079625129699707031f
+    store %762, -1.57079637050628662109f
     %763:ptr<storage, f32, read_write> = access %outputs, 760i, 0u
-    store %763, -1.57079625129699707031f
+    store %763, -1.57079637050628662109f
     %764:ptr<storage, f32, read_write> = access %outputs, 761i, 0u
-    store %764, -1.57079625129699707031f
+    store %764, -1.57079637050628662109f
     %765:ptr<storage, f32, read_write> = access %outputs, 762i, 0u
-    store %765, -1.57079625129699707031f
+    store %765, -1.57079637050628662109f
     %766:ptr<storage, f32, read_write> = access %outputs, 763i, 0u
-    store %766, -1.57079625129699707031f
+    store %766, -1.57079637050628662109f
     %767:ptr<storage, f32, read_write> = access %outputs, 764i, 0u
-    store %767, -1.57079625129699707031f
+    store %767, -1.57079637050628662109f
     %768:ptr<storage, f32, read_write> = access %outputs, 765i, 0u
     store %768, -1.57079637050628662109f
     %769:ptr<storage, f32, read_write> = access %outputs, 766i, 0u
@@ -1577,15 +1577,15 @@ SKIP: FAILED
     %785:ptr<storage, f32, read_write> = access %outputs, 782i, 0u
     store %785, -0.78539818525314331055f
     %786:ptr<storage, f32, read_write> = access %outputs, 783i, 0u
-    store %786, -0.63363295793533325195f
+    store %786, -0.63363301753997802734f
     %787:ptr<storage, f32, read_write> = access %outputs, 784i, 0u
-    store %787, -0.5123894810676574707f
+    store %787, -0.51238942146301269531f
     %788:ptr<storage, f32, read_write> = access %outputs, 785i, 0u
     store %788, -0.4182243049144744873f
     %789:ptr<storage, f32, read_write> = access %outputs, 786i, 0u
-    store %789, -0.34555557370185852051f
+    store %789, -0.34555554389953613281f
     %790:ptr<storage, f32, read_write> = access %outputs, 787i, 0u
-    store %790, -0.28918063640594482422f
+    store %790, -0.28918060660362243652f
     %791:ptr<storage, f32, read_write> = access %outputs, 788i, 0u
     store %791, -0.24497866630554199219f
     %792:ptr<storage, f32, read_write> = access %outputs, 789i, 0u
@@ -1621,7 +1621,7 @@ SKIP: FAILED
     %807:ptr<storage, f32, read_write> = access %outputs, 804i, 0u
     store %807, -0.0458861328661441803f
     %808:ptr<storage, f32, read_write> = access %outputs, 805i, 0u
-    store %808, -0.04278006404638290405f
+    store %808, -0.04278006777167320251f
     %809:ptr<storage, f32, read_write> = access %outputs, 806i, 0u
     store %809, -0.03997868672013282776f
     %810:ptr<storage, f32, read_write> = access %outputs, 807i, 0u
@@ -1649,7 +1649,7 @@ SKIP: FAILED
     %821:ptr<storage, f32, read_write> = access %outputs, 818i, 0u
     store %821, -0.02040532976388931274f
     %822:ptr<storage, f32, read_write> = access %outputs, 819i, 0u
-    store %822, -0.01946752145886421204f
+    store %822, -0.01946752332150936127f
     %823:ptr<storage, f32, read_write> = access %outputs, 820i, 0u
     store %823, -0.01859289966523647308f
     %824:ptr<storage, f32, read_write> = access %outputs, 821i, 0u
@@ -1749,25 +1749,25 @@ SKIP: FAILED
     %871:ptr<storage, f32, read_write> = access %outputs, 868i, 0u
     store %871, -3.1211872100830078125f
     %872:ptr<storage, f32, read_write> = access %outputs, 869i, 0u
-    store %872, -1.57079625129699707031f
+    store %872, -1.57079637050628662109f
     %873:ptr<storage, f32, read_write> = access %outputs, 870i, 0u
-    store %873, -1.57079625129699707031f
+    store %873, -1.57079637050628662109f
     %874:ptr<storage, f32, read_write> = access %outputs, 871i, 0u
-    store %874, -1.57079625129699707031f
+    store %874, -1.57079637050628662109f
     %875:ptr<storage, f32, read_write> = access %outputs, 872i, 0u
-    store %875, -1.57079625129699707031f
+    store %875, -1.57079637050628662109f
     %876:ptr<storage, f32, read_write> = access %outputs, 873i, 0u
-    store %876, -1.57079625129699707031f
+    store %876, -1.57079637050628662109f
     %877:ptr<storage, f32, read_write> = access %outputs, 874i, 0u
-    store %877, -1.57079625129699707031f
+    store %877, -1.57079637050628662109f
     %878:ptr<storage, f32, read_write> = access %outputs, 875i, 0u
-    store %878, -1.57079625129699707031f
+    store %878, -1.57079637050628662109f
     %879:ptr<storage, f32, read_write> = access %outputs, 876i, 0u
-    store %879, -1.57079625129699707031f
+    store %879, -1.57079637050628662109f
     %880:ptr<storage, f32, read_write> = access %outputs, 877i, 0u
-    store %880, -1.57079625129699707031f
+    store %880, -1.57079637050628662109f
     %881:ptr<storage, f32, read_write> = access %outputs, 878i, 0u
-    store %881, -1.57079625129699707031f
+    store %881, -1.57079637050628662109f
     %882:ptr<storage, f32, read_write> = access %outputs, 879i, 0u
     store %882, -1.57079637050628662109f
     %883:ptr<storage, f32, read_write> = access %outputs, 880i, 0u
@@ -1807,7 +1807,7 @@ SKIP: FAILED
     %900:ptr<storage, f32, read_write> = access %outputs, 897i, 0u
     store %900, -0.78539818525314331055f
     %901:ptr<storage, f32, read_write> = access %outputs, 898i, 0u
-    store %901, -0.65342640876770019531f
+    store %901, -0.65342634916305541992f
     %902:ptr<storage, f32, read_write> = access %outputs, 899i, 0u
     store %902, -0.54404264688491821289f
     %903:ptr<storage, f32, read_write> = access %outputs, 900i, 0u
@@ -1821,7 +1821,7 @@ SKIP: FAILED
     %907:ptr<storage, f32, read_write> = access %outputs, 904i, 0u
     store %907, -0.24497866630554199219f
     %908:ptr<storage, f32, read_write> = access %outputs, 905i, 0u
-    store %908, -0.21442967653274536133f
+    store %908, -0.21442969143390655518f
     %909:ptr<storage, f32, read_write> = access %outputs, 906i, 0u
     store %909, -0.18911886215209960938f
     %910:ptr<storage, f32, read_write> = access %outputs, 907i, 0u
@@ -1851,13 +1851,13 @@ SKIP: FAILED
     %922:ptr<storage, f32, read_write> = access %outputs, 919i, 0u
     store %922, -0.05819818004965782166f
     %923:ptr<storage, f32, read_write> = access %outputs, 920i, 0u
-    store %923, -0.05439074337482452393f
+    store %923, -0.05439074710011482239f
     %924:ptr<storage, f32, read_write> = access %outputs, 921i, 0u
     store %924, -0.05094443634152412415f
     %925:ptr<storage, f32, read_write> = access %outputs, 922i, 0u
     store %925, -0.04781509190797805786f
     %926:ptr<storage, f32, read_write> = access %outputs, 923i, 0u
-    store %926, -0.04496508464217185974f
+    store %926, -0.04496508091688156128f
     %927:ptr<storage, f32, read_write> = access %outputs, 924i, 0u
     store %927, -0.04236218705773353577f
     %928:ptr<storage, f32, read_write> = access %outputs, 925i, 0u
@@ -1871,7 +1871,7 @@ SKIP: FAILED
     %932:ptr<storage, f32, read_write> = access %outputs, 929i, 0u
     store %932, -0.03220450878143310547f
     %933:ptr<storage, f32, read_write> = access %outputs, 930i, 0u
-    store %933, -0.03061543218791484833f
+    store %933, -0.0306154303252696991f
     %934:ptr<storage, f32, read_write> = access %outputs, 931i, 0u
     store %934, -0.02914106473326683044f
     %935:ptr<storage, f32, read_write> = access %outputs, 932i, 0u
@@ -1881,7 +1881,7 @@ SKIP: FAILED
     %937:ptr<storage, f32, read_write> = access %outputs, 934i, 0u
     store %937, -0.02530451677739620209f
     %938:ptr<storage, f32, read_write> = access %outputs, 935i, 0u
-    store %938, -0.02419281005859375f
+    store %938, -0.02419281192123889923f
     %939:ptr<storage, f32, read_write> = access %outputs, 936i, 0u
     store %939, -0.02315276302397251129f
     %940:ptr<storage, f32, read_write> = access %outputs, 937i, 0u
@@ -1975,25 +1975,25 @@ SKIP: FAILED
     %984:ptr<storage, f32, read_write> = access %outputs, 981i, 0u
     store %984, -3.11494350433349609375f
     %985:ptr<storage, f32, read_write> = access %outputs, 982i, 0u
-    store %985, -1.57079625129699707031f
+    store %985, -1.57079637050628662109f
     %986:ptr<storage, f32, read_write> = access %outputs, 983i, 0u
-    store %986, -1.57079625129699707031f
+    store %986, -1.57079637050628662109f
     %987:ptr<storage, f32, read_write> = access %outputs, 984i, 0u
-    store %987, -1.57079625129699707031f
+    store %987, -1.57079637050628662109f
     %988:ptr<storage, f32, read_write> = access %outputs, 985i, 0u
-    store %988, -1.57079625129699707031f
+    store %988, -1.57079637050628662109f
     %989:ptr<storage, f32, read_write> = access %outputs, 986i, 0u
-    store %989, -1.57079625129699707031f
+    store %989, -1.57079637050628662109f
     %990:ptr<storage, f32, read_write> = access %outputs, 987i, 0u
-    store %990, -1.57079625129699707031f
+    store %990, -1.57079637050628662109f
     %991:ptr<storage, f32, read_write> = access %outputs, 988i, 0u
-    store %991, -1.57079625129699707031f
+    store %991, -1.57079637050628662109f
     %992:ptr<storage, f32, read_write> = access %outputs, 989i, 0u
-    store %992, -1.57079625129699707031f
+    store %992, -1.57079637050628662109f
     %993:ptr<storage, f32, read_write> = access %outputs, 990i, 0u
-    store %993, -1.57079625129699707031f
+    store %993, -1.57079637050628662109f
     %994:ptr<storage, f32, read_write> = access %outputs, 991i, 0u
-    store %994, -1.57079625129699707031f
+    store %994, -1.57079637050628662109f
     %995:ptr<storage, f32, read_write> = access %outputs, 992i, 0u
     store %995, -1.57079637050628662109f
     %996:ptr<storage, f32, read_write> = access %outputs, 993i, 0u

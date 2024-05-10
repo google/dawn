@@ -1,0 +1,27 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+
+threadgroup float2x2 W;
+kernel void F(uint mat2x2 [[thread_index_in_threadgroup]]) {
+  if ((mat2x2 == 0u)) {
+    W = float2x2(float2(0.0f), float2(0.0f));
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  W[0] = (W[0] + 0.0f);
+}
+program_source:4:22: error: program scope variable must reside in constant address space
+threadgroup float2x2 W;
+                     ^
+program_source:6:15: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+  if ((mat2x2 == 0u)) {
+       ~~~~~~~^~~~~
+program_source:6:15: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((mat2x2 == 0u)) {
+      ~       ^    ~
+program_source:6:15: note: use '=' to turn this equality comparison into an assignment
+  if ((mat2x2 == 0u)) {
+              ^~
+              =
+

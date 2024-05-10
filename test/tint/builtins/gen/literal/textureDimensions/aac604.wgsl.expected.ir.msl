@@ -1,12 +1,12 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %arg_0:ptr<handle, texture_1d<f32>, read> = var @binding_point(1, 0)
   %prevent_dce:ptr<storage, u32, read_write> = var @binding_point(2, 0)
 }
 
-%textureDimensions_aac604 = func():void -> %b2 {
-  %b2 = block {
+%textureDimensions_aac604 = func():void {
+  $B2: {
     %4:texture_1d<f32> = load %arg_0
     %5:u32 = textureDimensions %4, 1u
     %res:ptr<function, u32, read_write> = var, %5
@@ -15,20 +15,20 @@ SKIP: FAILED
     ret
   }
 }
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
     %9:void = call %textureDimensions_aac604
     ret vec4<f32>(0.0f)
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
+%fragment_main = @fragment func():void {
+  $B4: {
     %11:void = call %textureDimensions_aac604
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
     %13:void = call %textureDimensions_aac604
     ret
   }

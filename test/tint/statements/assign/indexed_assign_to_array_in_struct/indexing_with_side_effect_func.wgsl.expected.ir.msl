@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Uniforms = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Uniforms = struct @align(4) {
   i:u32 @offset(0)
   j:u32 @offset(4)
 }
@@ -17,13 +17,13 @@ OuterS = struct @align(4) {
   a1:array<S1, 8> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %nextIndex:ptr<private, u32, read_write> = var
   %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(1, 4)
 }
 
-%getNextIndex = func():u32 -> %b2 {
-  %b2 = block {
+%getNextIndex = func():u32 {
+  $B2: {
     %4:u32 = load %nextIndex
     %5:u32 = add %4, 1u
     store %nextIndex, %5
@@ -31,8 +31,8 @@ OuterS = struct @align(4) {
     ret %6
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b3 {
-  %b3 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B3: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
     %10:u32 = call %getNextIndex

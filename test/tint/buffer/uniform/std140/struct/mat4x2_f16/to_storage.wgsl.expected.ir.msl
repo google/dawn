@@ -1,33 +1,73 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(64) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(64) {
   before:i32 @offset(0)
   m:mat4x2<f16> @offset(4)
   after:i32 @offset(64)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %u:ptr<uniform, array<S, 4>, read> = var @binding_point(0, 0)
   %s:ptr<storage, array<S, 4>, read_write> = var @binding_point(0, 1)
 }
 
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %4:array<S, 4> = load %u
-    store %s, %4
-    %5:ptr<storage, S, read_write> = access %s, 1i
-    %6:ptr<uniform, S, read> = access %u, 2i
-    %7:S = load %6
-    store %5, %7
-    %8:ptr<storage, mat4x2<f16>, read_write> = access %s, 3i, 1u
-    %9:ptr<uniform, mat4x2<f16>, read> = access %u, 2i, 1u
-    %10:mat4x2<f16> = load %9
-    store %8, %10
-    %11:ptr<storage, vec2<f16>, read_write> = access %s, 1i, 1u, 0i
-    %12:ptr<uniform, vec2<f16>, read> = access %u, 0i, 1u, 1i
-    %13:vec2<f16> = load %12
-    %14:vec2<f16> = swizzle %13, yx
-    store %11, %14
+    %5:void = call %tint_store_and_preserve_padding, %s, %4
+    %7:ptr<storage, S, read_write> = access %s, 1i
+    %8:ptr<uniform, S, read> = access %u, 2i
+    %9:S = load %8
+    %10:void = call %tint_store_and_preserve_padding_1, %7, %9
+    %12:ptr<storage, mat4x2<f16>, read_write> = access %s, 3i, 1u
+    %13:ptr<uniform, mat4x2<f16>, read> = access %u, 2i, 1u
+    %14:mat4x2<f16> = load %13
+    store %12, %14
+    %15:ptr<storage, vec2<f16>, read_write> = access %s, 1i, 1u, 0i
+    %16:ptr<uniform, vec2<f16>, read> = access %u, 0i, 1u, 1i
+    %17:vec2<f16> = load %16
+    %18:vec2<f16> = swizzle %17, yx
+    store %15, %18
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<storage, array<S, 4>, read_write>, %value_param:array<S, 4>):void {
+  $B3: {
+    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+      $B4: {  # initializer
+        next_iteration 0u  # -> $B5
+      }
+      $B5 (%idx:u32): {  # body
+        %22:bool = gte %idx, 4u
+        if %22 [t: $B7] {  # if_1
+          $B7: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        %23:ptr<storage, S, read_write> = access %target, %idx
+        %24:S = access %value_param, %idx
+        %25:void = call %tint_store_and_preserve_padding_1, %23, %24
+        continue  # -> $B6
+      }
+      $B6: {  # continuing
+        %26:u32 = add %idx, 1u
+        next_iteration %26  # -> $B5
+      }
+    }
+    ret
+  }
+}
+%tint_store_and_preserve_padding_1 = func(%target_1:ptr<storage, S, read_write>, %value_param_1:S):void {  # %tint_store_and_preserve_padding_1: 'tint_store_and_preserve_padding', %target_1: 'target', %value_param_1: 'value_param'
+  $B8: {
+    %29:ptr<storage, i32, read_write> = access %target_1, 0u
+    %30:i32 = access %value_param_1, 0u
+    store %29, %30
+    %31:ptr<storage, mat4x2<f16>, read_write> = access %target_1, 1u
+    %32:mat4x2<f16> = access %value_param_1, 1u
+    store %31, %32
+    %33:ptr<storage, i32, read_write> = access %target_1, 2u
+    %34:i32 = access %value_param_1, 2u
+    store %33, %34
     ret
   }
 }

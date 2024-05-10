@@ -1,30 +1,30 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:1110 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:1164 internal compiler error: $B1: {  # root
   %arg_0:ptr<handle, texture_storage_3d<rgba32float, read_write>, read> = var @binding_point(1, 0)
 }
 
-%textureStore_195d1b = func():void -> %b2 {
-  %b2 = block {
+%textureStore_195d1b = func():void {
+  $B2: {
     %3:texture_storage_3d<rgba32float, read_write> = load %arg_0
     %4:void = textureStore %3, vec3<u32>(1u), vec4<f32>(1.0f)
     ret
   }
 }
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
     %6:void = call %textureStore_195d1b
     ret vec4<f32>(0.0f)
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
+%fragment_main = @fragment func():void {
+  $B4: {
     %8:void = call %textureStore_195d1b
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
     %10:void = call %textureStore_195d1b
     ret
   }

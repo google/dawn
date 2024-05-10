@@ -1,29 +1,32 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(64) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(64) {
   before:i32 @offset(0)
   m:mat3x4<f32> @offset(16)
   after:i32 @offset(64)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %u:ptr<uniform, array<S, 4>, read> = var @binding_point(0, 0)
 }
 
-%f = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %3:ptr<uniform, mat3x4<f32>, read> = access %u, 2i, 1u
     %4:mat3x4<f32> = load %3
-    %t:mat4x3<f32> = transpose %4
-    %6:ptr<uniform, vec4<f32>, read> = access %u, 0i, 1u, 1i
-    %7:vec4<f32> = load %6
-    %8:vec4<f32> = swizzle %7, ywxz
-    %l:f32 = length %8
-    %10:ptr<uniform, vec4<f32>, read> = access %u, 0i, 1u, 1i
-    %11:vec4<f32> = load %10
-    %12:vec4<f32> = swizzle %11, ywxz
-    %13:f32 = access %12, 0u
-    %a:f32 = abs %13
+    %5:mat4x3<f32> = transpose %4
+    %t:mat4x3<f32> = let %5
+    %7:ptr<uniform, vec4<f32>, read> = access %u, 0i, 1u, 1i
+    %8:vec4<f32> = load %7
+    %9:vec4<f32> = swizzle %8, ywxz
+    %10:f32 = length %9
+    %l:f32 = let %10
+    %12:ptr<uniform, vec4<f32>, read> = access %u, 0i, 1u, 1i
+    %13:vec4<f32> = load %12
+    %14:vec4<f32> = swizzle %13, ywxz
+    %15:f32 = access %14, 0u
+    %16:f32 = abs %15
+    %a:f32 = let %16
     ret
   }
 }

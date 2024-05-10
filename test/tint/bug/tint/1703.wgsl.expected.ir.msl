@@ -1,14 +1,14 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %my_global:ptr<private, vec4<f32>, read_write> = var
   %my_uniform:ptr<uniform, f32, read> = var @binding_point(0, 0)
   %my_texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
   %my_sampler:ptr<handle, sampler, read> = var @binding_point(0, 2)
 }
 
-%foo_member_initialize = func():void -> %b2 {
-  %b2 = block {
+%foo_member_initialize = func():void {
+  $B2: {
     %vb2:ptr<function, vec2<bool>, read_write> = var
     %7:f32 = load_vector_element %my_global, 2u
     %8:bool = neq %7, 0.0f
@@ -21,33 +21,35 @@ SKIP: FAILED
     %13:vec2<bool> = construct %12, false
     store %vb2, %13
     %14:bool = load_vector_element %vb2, 0u
-    if %14 [t: %b3] {  # if_1
-      %b3 = block {  # true
+    if %14 [t: $B3] {  # if_1
+      $B3: {  # true
         %15:texture_2d<f32> = load %my_texture
         %16:sampler = load %my_sampler
-        %r:vec4<f32> = textureSampleBias %15, %16, vec2<f32>(0.0f), 0.0f
+        %17:vec4<f32> = textureSampleBias %15, %16, vec2<f32>(0.0f), 0.0f
+        %r:vec4<f32> = let %17
         exit_if  # if_1
       }
     }
     ret
   }
 }
-%foo_default_initialize = func():void -> %b4 {
-  %b4 = block {
+%foo_default_initialize = func():void {
+  $B4: {
     %vb2_1:ptr<function, vec2<bool>, read_write> = var  # %vb2_1: 'vb2'
-    %20:f32 = load_vector_element %my_global, 2u
-    %21:bool = neq %20, 0.0f
-    store_vector_element %vb2_1, 0u, %21
-    %22:f32 = load %my_uniform
-    %23:bool = eq %22, -1.0f
-    store_vector_element %vb2_1, 0u, %23
+    %21:f32 = load_vector_element %my_global, 2u
+    %22:bool = neq %21, 0.0f
+    store_vector_element %vb2_1, 0u, %22
+    %23:f32 = load %my_uniform
+    %24:bool = eq %23, -1.0f
+    store_vector_element %vb2_1, 0u, %24
     store %vb2_1, vec2<bool>(false)
-    %24:bool = load_vector_element %vb2_1, 0u
-    if %24 [t: %b5] {  # if_2
-      %b5 = block {  # true
-        %25:texture_2d<f32> = load %my_texture
-        %26:sampler = load %my_sampler
-        %r_1:vec4<f32> = textureSampleBias %25, %26, vec2<f32>(0.0f), 0.0f  # %r_1: 'r'
+    %25:bool = load_vector_element %vb2_1, 0u
+    if %25 [t: $B5] {  # if_2
+      $B5: {  # true
+        %26:texture_2d<f32> = load %my_texture
+        %27:sampler = load %my_sampler
+        %28:vec4<f32> = textureSampleBias %26, %27, vec2<f32>(0.0f), 0.0f
+        %r_1:vec4<f32> = let %28  # %r_1: 'r'
         exit_if  # if_2
       }
     }

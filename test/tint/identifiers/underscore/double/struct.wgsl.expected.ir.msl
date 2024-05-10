@@ -1,10 +1,29 @@
-#include <metal_stdlib>
-using namespace metal;
-struct a__ {
-  int b__;
-};
+SKIP: FAILED
 
-void f() {
-  a__ const c = a__{};
-  int const d = c.b__;
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: a__ = struct @align(4) {
+  b__:i32 @offset(0)
 }
+
+$B1: {  # root
+  %s:ptr<storage, i32, read_write> = var @binding_point(0, 0)
+}
+
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %c:a__ = let a__(0i)
+    %4:i32 = access %c, 0u
+    %d:i32 = let %4
+    %6:i32 = access %c, 0u
+    %7:i32 = add %6, %d
+    store %s, %7
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

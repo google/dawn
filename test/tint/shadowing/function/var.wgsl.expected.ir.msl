@@ -12,3 +12,48 @@ void f() {
   a a = a{};
   a b = a;
 }
+program_source:8:10: error: expected ';' at end of declaration
+  a a = a{};
+         ^
+         ;
+program_source:9:3: error: must use 'struct' tag to refer to type 'a' in this scope
+  a b = a;
+  ^
+  struct 
+program_source:8:5: note: struct 'a' is hidden by a non-type declaration of 'a' here
+  a a = a{};
+    ^
+program_source:10:3: error: must use 'struct' tag to refer to type 'a' in this scope
+  a a = a{};
+  ^
+  struct 
+program_source:8:5: note: struct 'a' is hidden by a non-type declaration of 'a' here
+  a a = a{};
+    ^
+program_source:10:5: error: redefinition of 'a'
+  a a = a{};
+    ^
+program_source:8:5: note: previous definition is here
+  a a = a{};
+    ^
+program_source:10:10: error: expected ';' at end of declaration
+  a a = a{};
+         ^
+         ;
+program_source:11:3: error: must use 'struct' tag to refer to type 'a' in this scope
+  a b = a;
+  ^
+  struct 
+program_source:8:5: note: struct 'a' is hidden by a non-type declaration of 'a' here
+  a a = a{};
+    ^
+program_source:11:5: error: redefinition of 'b'
+  a b = a;
+    ^
+program_source:9:5: note: previous definition is here
+  a b = a;
+    ^
+program_source:8:9: warning: variable 'a' is uninitialized when used within its own initialization [-Wuninitialized]
+  a a = a{};
+    ~   ^
+

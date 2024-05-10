@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Uniforms = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Uniforms = struct @align(8) {
   u_scale:vec2<f32> @offset(0)
   u_offset:vec2<f32> @offset(8)
 }
@@ -10,81 +10,89 @@ VertexOutputs = struct @align(16) {
   position:vec4<f32> @offset(16), @builtin(position)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 0)
   %mySampler:ptr<handle, sampler, read> = var @binding_point(0, 1)
   %myTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 2)
+  %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%vs_main = @vertex func(%VertexIndex:u32 [@vertex_index]):VertexOutputs -> %b2 {
-  %b2 = block {
+%vs_main = @vertex func(%VertexIndex:u32 [@vertex_index]):VertexOutputs {
+  $B2: {
     %texcoord:ptr<function, array<vec2<f32>, 3>, read_write> = var, array<vec2<f32>, 3>(vec2<f32>(-0.5f, 0.0f), vec2<f32>(1.5f, 0.0f), vec2<f32>(0.5f, 2.0f))
     %output:ptr<function, VertexOutputs, read_write> = var
-    %8:ptr<function, vec4<f32>, read_write> = access %output, 1u
-    %9:ptr<function, vec2<f32>, read_write> = access %texcoord, %VertexIndex
-    %10:vec2<f32> = load %9
-    %11:vec2<f32> = mul %10, 2.0f
-    %12:vec2<f32> = sub %11, vec2<f32>(1.0f)
-    %13:vec4<f32> = construct %12, 0.0f, 1.0f
-    store %8, %13
-    %14:ptr<uniform, vec2<f32>, read> = access %uniforms, 0u
-    %15:f32 = load_vector_element %14, 1u
-    %16:bool = lt %15, 0.0f
-    %flipY:ptr<function, bool, read_write> = var, %16
-    %18:bool = load %flipY
-    if %18 [t: %b3, f: %b4] {  # if_1
-      %b3 = block {  # true
-        %19:ptr<function, vec2<f32>, read_write> = access %output, 0u
-        %20:ptr<function, vec2<f32>, read_write> = access %texcoord, %VertexIndex
-        %21:vec2<f32> = load %20
-        %22:ptr<uniform, vec2<f32>, read> = access %uniforms, 0u
-        %23:vec2<f32> = load %22
-        %24:vec2<f32> = mul %21, %23
-        %25:ptr<uniform, vec2<f32>, read> = access %uniforms, 1u
-        %26:vec2<f32> = load %25
-        %27:vec2<f32> = add %24, %26
-        %28:vec2<f32> = mul %27, vec2<f32>(1.0f, -1.0f)
-        %29:vec2<f32> = add %28, vec2<f32>(0.0f, 1.0f)
-        store %19, %29
+    %9:ptr<function, vec4<f32>, read_write> = access %output, 1u
+    %10:ptr<function, vec2<f32>, read_write> = access %texcoord, %VertexIndex
+    %11:vec2<f32> = load %10
+    %12:vec2<f32> = mul %11, 2.0f
+    %13:vec2<f32> = sub %12, vec2<f32>(1.0f)
+    %14:vec4<f32> = construct %13, 0.0f, 1.0f
+    store %9, %14
+    %15:ptr<uniform, vec2<f32>, read> = access %uniforms, 0u
+    %16:f32 = load_vector_element %15, 1u
+    %17:bool = lt %16, 0.0f
+    %flipY:ptr<function, bool, read_write> = var, %17
+    %19:bool = load %flipY
+    if %19 [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
+        %20:ptr<function, vec2<f32>, read_write> = access %output, 0u
+        %21:ptr<function, vec2<f32>, read_write> = access %texcoord, %VertexIndex
+        %22:vec2<f32> = load %21
+        %23:ptr<uniform, vec2<f32>, read> = access %uniforms, 0u
+        %24:vec2<f32> = load %23
+        %25:vec2<f32> = mul %22, %24
+        %26:ptr<uniform, vec2<f32>, read> = access %uniforms, 1u
+        %27:vec2<f32> = load %26
+        %28:vec2<f32> = add %25, %27
+        %29:vec2<f32> = mul %28, vec2<f32>(1.0f, -1.0f)
+        %30:vec2<f32> = add %29, vec2<f32>(0.0f, 1.0f)
+        store %20, %30
         exit_if  # if_1
       }
-      %b4 = block {  # false
-        %30:ptr<function, vec2<f32>, read_write> = access %output, 0u
-        %31:ptr<function, vec2<f32>, read_write> = access %texcoord, %VertexIndex
-        %32:vec2<f32> = load %31
-        %33:vec2<f32> = mul %32, vec2<f32>(1.0f, -1.0f)
-        %34:vec2<f32> = add %33, vec2<f32>(0.0f, 1.0f)
-        %35:ptr<uniform, vec2<f32>, read> = access %uniforms, 0u
-        %36:vec2<f32> = load %35
-        %37:vec2<f32> = mul %34, %36
-        %38:ptr<uniform, vec2<f32>, read> = access %uniforms, 1u
-        %39:vec2<f32> = load %38
-        %40:vec2<f32> = add %37, %39
-        store %30, %40
+      $B4: {  # false
+        %31:ptr<function, vec2<f32>, read_write> = access %output, 0u
+        %32:ptr<function, vec2<f32>, read_write> = access %texcoord, %VertexIndex
+        %33:vec2<f32> = load %32
+        %34:vec2<f32> = mul %33, vec2<f32>(1.0f, -1.0f)
+        %35:vec2<f32> = add %34, vec2<f32>(0.0f, 1.0f)
+        %36:ptr<uniform, vec2<f32>, read> = access %uniforms, 0u
+        %37:vec2<f32> = load %36
+        %38:vec2<f32> = mul %35, %37
+        %39:ptr<uniform, vec2<f32>, read> = access %uniforms, 1u
+        %40:vec2<f32> = load %39
+        %41:vec2<f32> = add %38, %40
+        store %31, %41
         exit_if  # if_1
       }
     }
-    %41:VertexOutputs = load %output
-    ret %41
+    %42:VertexOutputs = load %output
+    ret %42
   }
 }
-%fs_main = @fragment func(%texcoord_1:vec2<f32> [@location(0)]):vec4<f32> [@location(0)] -> %b5 {  # %texcoord_1: 'texcoord'
-  %b5 = block {
-    %44:vec2<f32> = clamp %texcoord_1, vec2<f32>(0.0f), vec2<f32>(1.0f)
-    %clampedTexcoord:ptr<function, vec2<f32>, read_write> = var, %44
-    %46:vec2<f32> = load %clampedTexcoord
-    %47:vec2<bool> = eq %46, %texcoord_1
-    %48:bool = all %47
-    %49:bool = eq %48, false
-    if %49 [t: %b6] {  # if_2
-      %b6 = block {  # true
-        discard
+%fs_main = @fragment func(%texcoord_1:vec2<f32> [@location(0)]):vec4<f32> [@location(0)] {  # %texcoord_1: 'texcoord'
+  $B5: {
+    %45:vec2<f32> = clamp %texcoord_1, vec2<f32>(0.0f), vec2<f32>(1.0f)
+    %clampedTexcoord:ptr<function, vec2<f32>, read_write> = var, %45
+    %47:vec2<f32> = load %clampedTexcoord
+    %48:vec2<bool> = eq %47, %texcoord_1
+    %49:bool = all %48
+    %50:bool = eq %49, false
+    if %50 [t: $B6] {  # if_2
+      $B6: {  # true
+        store %continue_execution, false
         exit_if  # if_2
       }
     }
     %srcColor:ptr<function, vec4<f32>, read_write> = var, vec4<f32>(0.0f)
-    %51:vec4<f32> = load %srcColor
-    ret %51
+    %52:vec4<f32> = load %srcColor
+    %53:bool = load %continue_execution
+    %54:bool = eq %53, false
+    if %54 [t: $B7] {  # if_3
+      $B7: {  # true
+        terminate_invocation
+      }
+    }
+    ret %52
   }
 }
 

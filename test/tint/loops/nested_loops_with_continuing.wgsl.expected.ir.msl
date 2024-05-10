@@ -18,8 +18,7 @@ int f() {
           continue;
         }
       }
-      i = (i + 1);
-      continue;
+      /* unreachable */
     }
   }
   /* unreachable */

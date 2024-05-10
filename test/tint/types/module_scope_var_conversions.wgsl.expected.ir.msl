@@ -1,9 +1,108 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread bool bool_var1 = true;
+thread bool bool_var2 = true;
+thread bool bool_var3 = true;
+thread int i32_var1 = 1;
+thread int i32_var2 = 1;
+thread int i32_var3 = 1;
+thread uint u32_var1 = 1u;
+thread uint u32_var2 = 1u;
+thread uint u32_var3 = 1u;
+thread bool3 v3bool_var1 = bool3(true);
+thread bool3 v3bool_var2 = bool3(true);
+thread bool3 v3bool_var3 = bool3(true);
+thread int3 v3i32_var1 = int3(1);
+thread int3 v3i32_var2 = int3(1);
+thread int3 v3i32_var3 = int3(1);
+thread uint3 v3u32_var1 = uint3(1u);
+thread uint3 v3u32_var2 = uint3(1u);
+thread uint3 v3u32_var3 = uint3(1u);
+thread bool3 v3bool_var4 = bool3(true);
+thread bool4 v4bool_var5 = bool4(true, false, true, false);
+kernel void tint_symbol() {
+  bool_var1 = false;
+  bool_var2 = false;
+  bool_var3 = false;
+  i32_var1 = 0;
+  i32_var2 = 0;
+  i32_var3 = 0;
+  u32_var1 = 0u;
+  u32_var2 = 0u;
+  u32_var3 = 0u;
+  v3bool_var1 = bool3(false);
+  v3bool_var2 = bool3(false);
+  v3bool_var3 = bool3(false);
+  v3bool_var4 = bool3(false);
+  v4bool_var5 = bool4(false);
+  v3i32_var1 = int3(0);
+  v3i32_var2 = int3(0);
+  v3i32_var3 = int3(0);
+  v3u32_var1 = uint3(0u);
+  v3u32_var2 = uint3(0u);
+  v3u32_var3 = uint3(0u);
+}
+program_source:4:13: error: program scope variable must reside in constant address space
+thread bool bool_var1 = true;
+            ^
+program_source:5:13: error: program scope variable must reside in constant address space
+thread bool bool_var2 = true;
+            ^
+program_source:6:13: error: program scope variable must reside in constant address space
+thread bool bool_var3 = true;
+            ^
+program_source:7:12: error: program scope variable must reside in constant address space
+thread int i32_var1 = 1;
+           ^
+program_source:8:12: error: program scope variable must reside in constant address space
+thread int i32_var2 = 1;
+           ^
+program_source:9:12: error: program scope variable must reside in constant address space
+thread int i32_var3 = 1;
+           ^
+program_source:10:13: error: program scope variable must reside in constant address space
+thread uint u32_var1 = 1u;
+            ^
+program_source:11:13: error: program scope variable must reside in constant address space
+thread uint u32_var2 = 1u;
+            ^
+program_source:12:13: error: program scope variable must reside in constant address space
+thread uint u32_var3 = 1u;
+            ^
+program_source:13:14: error: program scope variable must reside in constant address space
+thread bool3 v3bool_var1 = bool3(true);
+             ^
+program_source:14:14: error: program scope variable must reside in constant address space
+thread bool3 v3bool_var2 = bool3(true);
+             ^
+program_source:15:14: error: program scope variable must reside in constant address space
+thread bool3 v3bool_var3 = bool3(true);
+             ^
+program_source:16:13: error: program scope variable must reside in constant address space
+thread int3 v3i32_var1 = int3(1);
+            ^
+program_source:17:13: error: program scope variable must reside in constant address space
+thread int3 v3i32_var2 = int3(1);
+            ^
+program_source:18:13: error: program scope variable must reside in constant address space
+thread int3 v3i32_var3 = int3(1);
+            ^
+program_source:19:14: error: program scope variable must reside in constant address space
+thread uint3 v3u32_var1 = uint3(1u);
+             ^
+program_source:20:14: error: program scope variable must reside in constant address space
+thread uint3 v3u32_var2 = uint3(1u);
+             ^
+program_source:21:14: error: program scope variable must reside in constant address space
+thread uint3 v3u32_var3 = uint3(1u);
+             ^
+program_source:22:14: error: program scope variable must reside in constant address space
+thread bool3 v3bool_var4 = bool3(true);
+             ^
+program_source:23:14: error: program scope variable must reside in constant address space
+thread bool4 v4bool_var5 = bool4(true, false, true, false);
+             ^
+

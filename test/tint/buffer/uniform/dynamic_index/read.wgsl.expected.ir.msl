@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Inner = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Inner = struct @align(16) {
   scalar_f32:f32 @offset(0)
   scalar_i32:i32 @offset(4)
   scalar_u32:u32 @offset(8)
@@ -29,57 +29,166 @@ S = struct @align(16) {
   arr:array<Inner, 8> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %ub:ptr<uniform, S, read> = var @binding_point(0, 0)
+  %s:ptr<storage, i32, read_write> = var @binding_point(0, 1)
 }
 
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%idx:u32 [@local_invocation_index]):void -> %b2 {
-  %b2 = block {
-    %4:ptr<uniform, f32, read> = access %ub, 0u, %idx, 0u
-    %scalar_f32:f32 = load %4
-    %6:ptr<uniform, i32, read> = access %ub, 0u, %idx, 1u
-    %scalar_i32:i32 = load %6
-    %8:ptr<uniform, u32, read> = access %ub, 0u, %idx, 2u
-    %scalar_u32:u32 = load %8
-    %10:ptr<uniform, vec2<f32>, read> = access %ub, 0u, %idx, 3u
-    %vec2_f32:vec2<f32> = load %10
-    %12:ptr<uniform, vec2<i32>, read> = access %ub, 0u, %idx, 4u
-    %vec2_i32:vec2<i32> = load %12
-    %14:ptr<uniform, vec2<u32>, read> = access %ub, 0u, %idx, 5u
-    %vec2_u32:vec2<u32> = load %14
-    %16:ptr<uniform, vec3<f32>, read> = access %ub, 0u, %idx, 6u
-    %vec3_f32:vec3<f32> = load %16
-    %18:ptr<uniform, vec3<i32>, read> = access %ub, 0u, %idx, 7u
-    %vec3_i32:vec3<i32> = load %18
-    %20:ptr<uniform, vec3<u32>, read> = access %ub, 0u, %idx, 8u
-    %vec3_u32:vec3<u32> = load %20
-    %22:ptr<uniform, vec4<f32>, read> = access %ub, 0u, %idx, 9u
-    %vec4_f32:vec4<f32> = load %22
-    %24:ptr<uniform, vec4<i32>, read> = access %ub, 0u, %idx, 10u
-    %vec4_i32:vec4<i32> = load %24
-    %26:ptr<uniform, vec4<u32>, read> = access %ub, 0u, %idx, 11u
-    %vec4_u32:vec4<u32> = load %26
-    %28:ptr<uniform, mat2x2<f32>, read> = access %ub, 0u, %idx, 12u
-    %mat2x2_f32:mat2x2<f32> = load %28
-    %30:ptr<uniform, mat2x3<f32>, read> = access %ub, 0u, %idx, 13u
-    %mat2x3_f32:mat2x3<f32> = load %30
-    %32:ptr<uniform, mat2x4<f32>, read> = access %ub, 0u, %idx, 14u
-    %mat2x4_f32:mat2x4<f32> = load %32
-    %34:ptr<uniform, mat3x2<f32>, read> = access %ub, 0u, %idx, 15u
-    %mat3x2_f32:mat3x2<f32> = load %34
-    %36:ptr<uniform, mat3x3<f32>, read> = access %ub, 0u, %idx, 16u
-    %mat3x3_f32:mat3x3<f32> = load %36
-    %38:ptr<uniform, mat3x4<f32>, read> = access %ub, 0u, %idx, 17u
-    %mat3x4_f32:mat3x4<f32> = load %38
-    %40:ptr<uniform, mat4x2<f32>, read> = access %ub, 0u, %idx, 18u
-    %mat4x2_f32:mat4x2<f32> = load %40
-    %42:ptr<uniform, mat4x3<f32>, read> = access %ub, 0u, %idx, 19u
-    %mat4x3_f32:mat4x3<f32> = load %42
-    %44:ptr<uniform, mat4x4<f32>, read> = access %ub, 0u, %idx, 20u
-    %mat4x4_f32:mat4x4<f32> = load %44
-    %46:ptr<uniform, array<vec3<f32>, 2>, read> = access %ub, 0u, %idx, 21u
-    %arr2_vec3_f32:array<vec3<f32>, 2> = load %46
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%idx:u32 [@local_invocation_index]):void {
+  $B2: {
+    %5:ptr<uniform, f32, read> = access %ub, 0u, %idx, 0u
+    %6:f32 = load %5
+    %scalar_f32:f32 = let %6
+    %8:ptr<uniform, i32, read> = access %ub, 0u, %idx, 1u
+    %9:i32 = load %8
+    %scalar_i32:i32 = let %9
+    %11:ptr<uniform, u32, read> = access %ub, 0u, %idx, 2u
+    %12:u32 = load %11
+    %scalar_u32:u32 = let %12
+    %14:ptr<uniform, vec2<f32>, read> = access %ub, 0u, %idx, 3u
+    %15:vec2<f32> = load %14
+    %vec2_f32:vec2<f32> = let %15
+    %17:ptr<uniform, vec2<i32>, read> = access %ub, 0u, %idx, 4u
+    %18:vec2<i32> = load %17
+    %vec2_i32:vec2<i32> = let %18
+    %20:ptr<uniform, vec2<u32>, read> = access %ub, 0u, %idx, 5u
+    %21:vec2<u32> = load %20
+    %vec2_u32:vec2<u32> = let %21
+    %23:ptr<uniform, vec3<f32>, read> = access %ub, 0u, %idx, 6u
+    %24:vec3<f32> = load %23
+    %vec3_f32:vec3<f32> = let %24
+    %26:ptr<uniform, vec3<i32>, read> = access %ub, 0u, %idx, 7u
+    %27:vec3<i32> = load %26
+    %vec3_i32:vec3<i32> = let %27
+    %29:ptr<uniform, vec3<u32>, read> = access %ub, 0u, %idx, 8u
+    %30:vec3<u32> = load %29
+    %vec3_u32:vec3<u32> = let %30
+    %32:ptr<uniform, vec4<f32>, read> = access %ub, 0u, %idx, 9u
+    %33:vec4<f32> = load %32
+    %vec4_f32:vec4<f32> = let %33
+    %35:ptr<uniform, vec4<i32>, read> = access %ub, 0u, %idx, 10u
+    %36:vec4<i32> = load %35
+    %vec4_i32:vec4<i32> = let %36
+    %38:ptr<uniform, vec4<u32>, read> = access %ub, 0u, %idx, 11u
+    %39:vec4<u32> = load %38
+    %vec4_u32:vec4<u32> = let %39
+    %41:ptr<uniform, mat2x2<f32>, read> = access %ub, 0u, %idx, 12u
+    %42:mat2x2<f32> = load %41
+    %mat2x2_f32:mat2x2<f32> = let %42
+    %44:ptr<uniform, mat2x3<f32>, read> = access %ub, 0u, %idx, 13u
+    %45:mat2x3<f32> = load %44
+    %mat2x3_f32:mat2x3<f32> = let %45
+    %47:ptr<uniform, mat2x4<f32>, read> = access %ub, 0u, %idx, 14u
+    %48:mat2x4<f32> = load %47
+    %mat2x4_f32:mat2x4<f32> = let %48
+    %50:ptr<uniform, mat3x2<f32>, read> = access %ub, 0u, %idx, 15u
+    %51:mat3x2<f32> = load %50
+    %mat3x2_f32:mat3x2<f32> = let %51
+    %53:ptr<uniform, mat3x3<f32>, read> = access %ub, 0u, %idx, 16u
+    %54:mat3x3<f32> = load %53
+    %mat3x3_f32:mat3x3<f32> = let %54
+    %56:ptr<uniform, mat3x4<f32>, read> = access %ub, 0u, %idx, 17u
+    %57:mat3x4<f32> = load %56
+    %mat3x4_f32:mat3x4<f32> = let %57
+    %59:ptr<uniform, mat4x2<f32>, read> = access %ub, 0u, %idx, 18u
+    %60:mat4x2<f32> = load %59
+    %mat4x2_f32:mat4x2<f32> = let %60
+    %62:ptr<uniform, mat4x3<f32>, read> = access %ub, 0u, %idx, 19u
+    %63:mat4x3<f32> = load %62
+    %mat4x3_f32:mat4x3<f32> = let %63
+    %65:ptr<uniform, mat4x4<f32>, read> = access %ub, 0u, %idx, 20u
+    %66:mat4x4<f32> = load %65
+    %mat4x4_f32:mat4x4<f32> = let %66
+    %68:ptr<uniform, array<vec3<f32>, 2>, read> = access %ub, 0u, %idx, 21u
+    %69:array<vec3<f32>, 2> = load %68
+    %arr2_vec3_f32:array<vec3<f32>, 2> = let %69
+    %71:i32 = call %tint_f32_to_i32, %scalar_f32
+    %73:i32 = add %71, %scalar_i32
+    %74:i32 = let %73
+    %75:i32 = convert %scalar_u32
+    %76:i32 = add %74, %75
+    %77:i32 = let %76
+    %78:f32 = access %vec2_f32, 0u
+    %79:i32 = call %tint_f32_to_i32, %78
+    %80:i32 = add %77, %79
+    %81:i32 = access %vec2_i32, 0u
+    %82:i32 = add %80, %81
+    %83:i32 = let %82
+    %84:u32 = access %vec2_u32, 0u
+    %85:i32 = convert %84
+    %86:i32 = add %83, %85
+    %87:i32 = let %86
+    %88:f32 = access %vec3_f32, 1u
+    %89:i32 = call %tint_f32_to_i32, %88
+    %90:i32 = add %87, %89
+    %91:i32 = access %vec3_i32, 1u
+    %92:i32 = add %90, %91
+    %93:i32 = let %92
+    %94:u32 = access %vec3_u32, 1u
+    %95:i32 = convert %94
+    %96:i32 = add %93, %95
+    %97:i32 = let %96
+    %98:f32 = access %vec4_f32, 2u
+    %99:i32 = call %tint_f32_to_i32, %98
+    %100:i32 = add %97, %99
+    %101:i32 = access %vec4_i32, 2u
+    %102:i32 = add %100, %101
+    %103:i32 = let %102
+    %104:u32 = access %vec4_u32, 2u
+    %105:i32 = convert %104
+    %106:i32 = add %103, %105
+    %107:i32 = let %106
+    %108:f32 = access %mat2x2_f32, 0i, 0u
+    %109:i32 = call %tint_f32_to_i32, %108
+    %110:i32 = add %107, %109
+    %111:i32 = let %110
+    %112:f32 = access %mat2x3_f32, 0i, 0u
+    %113:i32 = call %tint_f32_to_i32, %112
+    %114:i32 = add %111, %113
+    %115:i32 = let %114
+    %116:f32 = access %mat2x4_f32, 0i, 0u
+    %117:i32 = call %tint_f32_to_i32, %116
+    %118:i32 = add %115, %117
+    %119:i32 = let %118
+    %120:f32 = access %mat3x2_f32, 0i, 0u
+    %121:i32 = call %tint_f32_to_i32, %120
+    %122:i32 = add %119, %121
+    %123:i32 = let %122
+    %124:f32 = access %mat3x3_f32, 0i, 0u
+    %125:i32 = call %tint_f32_to_i32, %124
+    %126:i32 = add %123, %125
+    %127:i32 = let %126
+    %128:f32 = access %mat3x4_f32, 0i, 0u
+    %129:i32 = call %tint_f32_to_i32, %128
+    %130:i32 = add %127, %129
+    %131:i32 = let %130
+    %132:f32 = access %mat4x2_f32, 0i, 0u
+    %133:i32 = call %tint_f32_to_i32, %132
+    %134:i32 = add %131, %133
+    %135:i32 = let %134
+    %136:f32 = access %mat4x3_f32, 0i, 0u
+    %137:i32 = call %tint_f32_to_i32, %136
+    %138:i32 = add %135, %137
+    %139:i32 = let %138
+    %140:f32 = access %mat4x4_f32, 0i, 0u
+    %141:i32 = call %tint_f32_to_i32, %140
+    %142:i32 = add %139, %141
+    %143:i32 = let %142
+    %144:f32 = access %arr2_vec3_f32, 0i, 0u
+    %145:i32 = call %tint_f32_to_i32, %144
+    %146:i32 = add %143, %145
+    store %s, %146
     ret
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 {
+  $B3: {
+    %148:i32 = convert %value
+    %149:bool = gte %value, -2147483648.0f
+    %150:i32 = select -2147483648i, %148, %149
+    %151:bool = lte %value, 2147483520.0f
+    %152:i32 = select 2147483647i, %150, %151
+    ret %152
   }
 }
 

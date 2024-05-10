@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(8) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(8) {
   injectionSwitch:vec2<f32> @offset(0)
 }
 
@@ -12,135 +12,160 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_8:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%binarySearch_struct_BinarySearchObject_i1_10_1_ = func(%obj:ptr<function, BinarySearchObject, read_write>):i32 -> %b2 {
-  %b2 = block {
+%binarySearch_struct_BinarySearchObject_i1_10_1_ = func(%obj:ptr<function, BinarySearchObject, read_write>):i32 {
+  $B2: {
     %m:ptr<function, i32, read_write> = var
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
         %6:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
-        %x_91:f32 = load_vector_element %6, 0u
-        %8:bool = gt %x_91, 1.0f
-        if %8 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+        %7:f32 = load_vector_element %6, 0u
+        %x_91:f32 = let %7
+        %9:bool = gt %x_91, 1.0f
+        if %9 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
-        %9:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
-        %x_95:f32 = load_vector_element %9, 0u
-        %11:i32 = convert %x_95
-        store %m, %11
-        %x_14:i32 = load %m
-        %13:ptr<function, i32, read_write> = access %obj, 0u, %x_14
-        %x_15:i32 = load %13
-        %15:bool = eq %x_15, 1i
-        if %15 [t: %b7] {  # if_2
-          %b7 = block {  # true
+        %10:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+        %11:f32 = load_vector_element %10, 0u
+        %x_95:f32 = let %11
+        %13:i32 = call %tint_f32_to_i32, %x_95
+        store %m, %13
+        %15:i32 = load %m
+        %x_14:i32 = let %15
+        %17:ptr<function, i32, read_write> = access %obj, 0u, %x_14
+        %18:i32 = load %17
+        %x_15:i32 = let %18
+        %20:bool = eq %x_15, 1i
+        if %20 [t: $B7] {  # if_2
+          $B7: {  # true
             ret 1i
           }
         }
-        continue %b4
+        continue  # -> $B4
       }
-      %b4 = block {  # continuing
-        next_iteration %b3
+      $B4: {  # continuing
+        next_iteration  # -> $B3
       }
     }
     ret 1i
   }
 }
-%main_1 = func():void -> %b8 {
-  %b8 = block {
+%main_1 = func():void {
+  $B8: {
     %i:ptr<function, i32, read_write> = var
     %obj_1:ptr<function, BinarySearchObject, read_write> = var
     %param:ptr<function, BinarySearchObject, read_write> = var
     store %i, 0i
-    loop [b: %b9, c: %b10] {  # loop_2
-      %b9 = block {  # body
-        %x_16:i32 = load %i
-        %21:bool = lt %x_16, 10i
-        if %21 [t: %b11, f: %b12] {  # if_3
-          %b11 = block {  # true
+    loop [b: $B9, c: $B10] {  # loop_2
+      $B9: {  # body
+        %25:i32 = load %i
+        %x_16:i32 = let %25
+        %27:bool = lt %x_16, 10i
+        if %27 [t: $B11, f: $B12] {  # if_3
+          $B11: {  # true
             exit_if  # if_3
           }
-          %b12 = block {  # false
+          $B12: {  # false
             exit_loop  # loop_2
           }
         }
-        %x_17:i32 = load %i
-        %23:bool = neq %x_17, 3i
-        if %23 [t: %b13] {  # if_4
-          %b13 = block {  # true
-            %x_18:i32 = load %i
-            %25:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
-            %x_67:f32 = load_vector_element %25, 0u
-            %27:i32 = convert %x_67
-            %28:i32 = sub %x_18, %27
-            %29:bool = eq %28, 4i
-            if %29 [t: %b14, f: %b15] {  # if_5
-              %b14 = block {  # true
-                %x_21:i32 = load %i
-                %31:ptr<function, i32, read_write> = access %obj_1, 0u, %x_21
-                store %31, 11i
+        %28:i32 = load %i
+        %x_17:i32 = let %28
+        %30:bool = neq %x_17, 3i
+        if %30 [t: $B13] {  # if_4
+          $B13: {  # true
+            %31:i32 = load %i
+            %x_18:i32 = let %31
+            %33:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+            %34:f32 = load_vector_element %33, 0u
+            %x_67:f32 = let %34
+            %36:i32 = call %tint_f32_to_i32, %x_67
+            %37:i32 = sub %x_18, %36
+            %38:bool = eq %37, 4i
+            if %38 [t: $B14, f: $B15] {  # if_5
+              $B14: {  # true
+                %39:i32 = load %i
+                %x_21:i32 = let %39
+                %41:ptr<function, i32, read_write> = access %obj_1, 0u, %x_21
+                store %41, 11i
                 exit_if  # if_5
               }
-              %b15 = block {  # false
-                %x_22:i32 = load %i
-                %33:bool = eq %x_22, 6i
-                if %33 [t: %b16] {  # if_6
-                  %b16 = block {  # true
-                    %x_23:i32 = load %i
-                    %35:ptr<function, i32, read_write> = access %obj_1, 0u, %x_23
-                    store %35, 17i
+              $B15: {  # false
+                %42:i32 = load %i
+                %x_22:i32 = let %42
+                %44:bool = eq %x_22, 6i
+                if %44 [t: $B16] {  # if_6
+                  $B16: {  # true
+                    %45:i32 = load %i
+                    %x_23:i32 = let %45
+                    %47:ptr<function, i32, read_write> = access %obj_1, 0u, %x_23
+                    store %47, 17i
                     exit_if  # if_6
                   }
                 }
-                continue %b10
+                continue  # -> $B10
               }
             }
             exit_if  # if_4
           }
         }
-        loop [b: %b17, c: %b18] {  # loop_3
-          %b17 = block {  # body
-            continue %b18
+        loop [b: $B17, c: $B18] {  # loop_3
+          $B17: {  # body
+            continue  # -> $B18
           }
-          %b18 = block {  # continuing
-            %36:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
-            %x_82:f32 = load_vector_element %36, 1u
-            %38:bool = gt 0.0f, %x_82
-            %39:bool = eq %38, false
-            break_if %39 %b17
+          $B18: {  # continuing
+            %48:ptr<uniform, vec2<f32>, read> = access %x_8, 0u
+            %49:f32 = load_vector_element %48, 1u
+            %x_82:f32 = let %49
+            %51:bool = gt 0.0f, %x_82
+            %52:bool = eq %51, false
+            break_if %52  # -> [t: exit_loop loop_3, f: $B17]
           }
         }
-        continue %b10
+        continue  # -> $B10
       }
-      %b10 = block {  # continuing
-        %x_24:i32 = load %i
-        %41:i32 = add %x_24, 1i
-        store %i, %41
-        next_iteration %b9
+      $B10: {  # continuing
+        %53:i32 = load %i
+        %x_24:i32 = let %53
+        %55:i32 = add %x_24, 1i
+        store %i, %55
+        next_iteration  # -> $B9
       }
     }
-    %x_84:BinarySearchObject = load %obj_1
+    %56:BinarySearchObject = load %obj_1
+    %x_84:BinarySearchObject = let %56
     store %param, %x_84
-    %x_26:i32 = call %binarySearch_struct_BinarySearchObject_i1_10_1_, %param
+    %58:i32 = call %binarySearch_struct_BinarySearchObject_i1_10_1_, %param
+    %x_26:i32 = let %58
     store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b19 {
-  %b19 = block {
-    %45:void = call %main_1
-    %46:vec4<f32> = load %x_GLF_color
-    %47:main_out = construct %46
-    ret %47
+%tint_symbol = @fragment func():main_out {
+  $B19: {
+    %61:void = call %main_1
+    %62:vec4<f32> = load %x_GLF_color
+    %63:main_out = construct %62
+    ret %63
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 {
+  $B20: {
+    %65:i32 = convert %value
+    %66:bool = gte %value, -2147483648.0f
+    %67:i32 = select -2147483648i, %65, %66
+    %68:bool = lte %value, 2147483520.0f
+    %69:i32 = select 2147483647i, %67, %68
+    ret %69
   }
 }
 

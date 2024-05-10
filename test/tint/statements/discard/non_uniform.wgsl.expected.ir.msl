@@ -1,22 +1,37 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %non_uniform_global:ptr<storage, i32, read_write> = var @binding_point(0, 0)
   %output:ptr<storage, f32, read_write> = var @binding_point(0, 1)
+  %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%tint_symbol = @fragment func():void -> %b2 {
-  %b2 = block {
-    %4:i32 = load %non_uniform_global
-    %5:bool = lt %4, 0i
-    if %5 [t: %b3] {  # if_1
-      %b3 = block {  # true
-        discard
+%tint_symbol = @fragment func():void {
+  $B2: {
+    %5:i32 = load %non_uniform_global
+    %6:bool = lt %5, 0i
+    if %6 [t: $B3] {  # if_1
+      $B3: {  # true
+        store %continue_execution, false
         exit_if  # if_1
       }
     }
-    %6:f32 = dpdx 1.0f
-    store %output, %6
+    %7:f32 = dpdx 1.0f
+    %8:f32 = let %7
+    %9:bool = load %continue_execution
+    if %9 [t: $B4] {  # if_2
+      $B4: {  # true
+        store %output, %8
+        exit_if  # if_2
+      }
+    }
+    %10:bool = load %continue_execution
+    %11:bool = eq %10, false
+    if %11 [t: $B5] {  # if_3
+      $B5: {  # true
+        terminate_invocation
+      }
+    }
     ret
   }
 }

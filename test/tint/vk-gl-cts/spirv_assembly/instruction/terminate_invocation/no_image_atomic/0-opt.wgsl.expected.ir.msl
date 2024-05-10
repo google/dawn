@@ -1,6 +1,41 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  x_4_1:i32 @offset(0), @location(0), @interpolate(flat)
+  gl_Position:vec4<f32> @offset(16), @builtin(position)
+}
+
+$B1: {  # root
+  %x_2:ptr<private, vec3<f32>, read_write> = var
+  %x_3:ptr<private, i32, read_write> = var
+  %x_4:ptr<private, i32, read_write> = var
+  %gl_Position:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void {
+  $B2: {
+    %6:vec3<f32> = load %x_2
+    %x_22:vec3<f32> = let %6
+    %8:vec4<f32> = construct %x_22, 1.0f
+    store %gl_Position, %8
+    %9:i32 = load %x_3
+    store %x_4, %9
+    ret
+  }
+}
+%tint_symbol = @vertex func(%x_2_param:vec3<f32> [@location(0)], %x_3_param:i32 [@location(1), @interpolate(flat)]):main_out {
+  $B3: {
+    store %x_2, %x_2_param
+    store %x_3, %x_3_param
+    %13:void = call %main_1
+    %14:i32 = load %x_4
+    %15:vec4<f32> = load %gl_Position
+    %16:main_out = construct %14, %15
+    ret %16
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

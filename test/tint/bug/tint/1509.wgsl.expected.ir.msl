@@ -1,9 +1,5013 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread uint v0 = 0u;
+thread uint v1 = 0u;
+thread uint v2 = 0u;
+thread uint v3 = 0u;
+thread uint v4 = 0u;
+thread uint v5 = 0u;
+thread uint v6 = 0u;
+thread uint v7 = 0u;
+thread uint v8 = 0u;
+thread uint v9 = 0u;
+thread uint v10 = 0u;
+thread uint v11 = 0u;
+thread uint v12 = 0u;
+thread uint v13 = 0u;
+thread uint v14 = 0u;
+thread uint v15 = 0u;
+thread uint v16 = 0u;
+thread uint v17 = 0u;
+thread uint v18 = 0u;
+thread uint v19 = 0u;
+thread uint v20 = 0u;
+thread uint v21 = 0u;
+thread uint v22 = 0u;
+thread uint v23 = 0u;
+thread uint v24 = 0u;
+thread uint v25 = 0u;
+thread uint v26 = 0u;
+thread uint v27 = 0u;
+thread uint v28 = 0u;
+thread uint v29 = 0u;
+thread uint v30 = 0u;
+thread uint v31 = 0u;
+thread uint v32 = 0u;
+thread uint v33 = 0u;
+thread uint v34 = 0u;
+thread uint v35 = 0u;
+thread uint v36 = 0u;
+thread uint v37 = 0u;
+thread uint v38 = 0u;
+thread uint v39 = 0u;
+thread uint v40 = 0u;
+thread uint v41 = 0u;
+thread uint v42 = 0u;
+thread uint v43 = 0u;
+thread uint v44 = 0u;
+thread uint v45 = 0u;
+thread uint v46 = 0u;
+thread uint v47 = 0u;
+thread uint v48 = 0u;
+thread uint v49 = 0u;
+thread uint v50 = 0u;
+thread uint v51 = 0u;
+thread uint v52 = 0u;
+thread uint v53 = 0u;
+thread uint v54 = 0u;
+thread uint v55 = 0u;
+thread uint v56 = 0u;
+thread uint v57 = 0u;
+thread uint v58 = 0u;
+thread uint v59 = 0u;
+thread uint v60 = 0u;
+thread uint v61 = 0u;
+thread uint v62 = 0u;
+thread uint v63 = 0u;
+thread uint v64 = 0u;
+thread uint v65 = 0u;
+thread uint v66 = 0u;
+thread uint v67 = 0u;
+thread uint v68 = 0u;
+thread uint v69 = 0u;
+thread uint v70 = 0u;
+thread uint v71 = 0u;
+thread uint v72 = 0u;
+thread uint v73 = 0u;
+thread uint v74 = 0u;
+thread uint v75 = 0u;
+thread uint v76 = 0u;
+thread uint v77 = 0u;
+thread uint v78 = 0u;
+thread uint v79 = 0u;
+thread uint v80 = 0u;
+thread uint v81 = 0u;
+thread uint v82 = 0u;
+thread uint v83 = 0u;
+thread uint v84 = 0u;
+thread uint v85 = 0u;
+thread uint v86 = 0u;
+thread uint v87 = 0u;
+thread uint v88 = 0u;
+thread uint v89 = 0u;
+thread uint v90 = 0u;
+thread uint v91 = 0u;
+thread uint v92 = 0u;
+thread uint v93 = 0u;
+thread uint v94 = 0u;
+thread uint v95 = 0u;
+thread uint v96 = 0u;
+thread uint v97 = 0u;
+thread uint v98 = 0u;
+thread uint v99 = 0u;
+thread uint v100 = 0u;
+thread uint v101 = 0u;
+thread uint v102 = 0u;
+thread uint v103 = 0u;
+thread uint v104 = 0u;
+thread uint v105 = 0u;
+thread uint v106 = 0u;
+thread uint v107 = 0u;
+thread uint v108 = 0u;
+thread uint v109 = 0u;
+thread uint v110 = 0u;
+thread uint v111 = 0u;
+thread uint v112 = 0u;
+thread uint v113 = 0u;
+thread uint v114 = 0u;
+thread uint v115 = 0u;
+thread uint v116 = 0u;
+thread uint v117 = 0u;
+thread uint v118 = 0u;
+thread uint v119 = 0u;
+thread uint v120 = 0u;
+thread uint v121 = 0u;
+thread uint v122 = 0u;
+thread uint v123 = 0u;
+thread uint v124 = 0u;
+thread uint v125 = 0u;
+thread uint v126 = 0u;
+thread uint v127 = 0u;
+thread uint v128 = 0u;
+thread uint v129 = 0u;
+thread uint v130 = 0u;
+thread uint v131 = 0u;
+thread uint v132 = 0u;
+thread uint v133 = 0u;
+thread uint v134 = 0u;
+thread uint v135 = 0u;
+thread uint v136 = 0u;
+thread uint v137 = 0u;
+thread uint v138 = 0u;
+thread uint v139 = 0u;
+thread uint v140 = 0u;
+thread uint v141 = 0u;
+thread uint v142 = 0u;
+thread uint v143 = 0u;
+thread uint v144 = 0u;
+thread uint v145 = 0u;
+thread uint v146 = 0u;
+thread uint v147 = 0u;
+thread uint v148 = 0u;
+thread uint v149 = 0u;
+thread uint v150 = 0u;
+thread uint v151 = 0u;
+thread uint v152 = 0u;
+thread uint v153 = 0u;
+thread uint v154 = 0u;
+thread uint v155 = 0u;
+thread uint v156 = 0u;
+thread uint v157 = 0u;
+thread uint v158 = 0u;
+thread uint v159 = 0u;
+thread uint v160 = 0u;
+thread uint v161 = 0u;
+thread uint v162 = 0u;
+thread uint v163 = 0u;
+thread uint v164 = 0u;
+thread uint v165 = 0u;
+thread uint v166 = 0u;
+thread uint v167 = 0u;
+thread uint v168 = 0u;
+thread uint v169 = 0u;
+thread uint v170 = 0u;
+thread uint v171 = 0u;
+thread uint v172 = 0u;
+thread uint v173 = 0u;
+thread uint v174 = 0u;
+thread uint v175 = 0u;
+thread uint v176 = 0u;
+thread uint v177 = 0u;
+thread uint v178 = 0u;
+thread uint v179 = 0u;
+thread uint v180 = 0u;
+thread uint v181 = 0u;
+thread uint v182 = 0u;
+thread uint v183 = 0u;
+thread uint v184 = 0u;
+thread uint v185 = 0u;
+thread uint v186 = 0u;
+thread uint v187 = 0u;
+thread uint v188 = 0u;
+thread uint v189 = 0u;
+thread uint v190 = 0u;
+thread uint v191 = 0u;
+thread uint v192 = 0u;
+thread uint v193 = 0u;
+thread uint v194 = 0u;
+thread uint v195 = 0u;
+thread uint v196 = 0u;
+thread uint v197 = 0u;
+thread uint v198 = 0u;
+thread uint v199 = 0u;
+thread uint v200 = 0u;
+thread uint v201 = 0u;
+thread uint v202 = 0u;
+thread uint v203 = 0u;
+thread uint v204 = 0u;
+thread uint v205 = 0u;
+thread uint v206 = 0u;
+thread uint v207 = 0u;
+thread uint v208 = 0u;
+thread uint v209 = 0u;
+thread uint v210 = 0u;
+thread uint v211 = 0u;
+thread uint v212 = 0u;
+thread uint v213 = 0u;
+thread uint v214 = 0u;
+thread uint v215 = 0u;
+thread uint v216 = 0u;
+thread uint v217 = 0u;
+thread uint v218 = 0u;
+thread uint v219 = 0u;
+thread uint v220 = 0u;
+thread uint v221 = 0u;
+thread uint v222 = 0u;
+thread uint v223 = 0u;
+thread uint v224 = 0u;
+thread uint v225 = 0u;
+thread uint v226 = 0u;
+thread uint v227 = 0u;
+thread uint v228 = 0u;
+thread uint v229 = 0u;
+thread uint v230 = 0u;
+thread uint v231 = 0u;
+thread uint v232 = 0u;
+thread uint v233 = 0u;
+thread uint v234 = 0u;
+thread uint v235 = 0u;
+thread uint v236 = 0u;
+thread uint v237 = 0u;
+thread uint v238 = 0u;
+thread uint v239 = 0u;
+thread uint v240 = 0u;
+thread uint v241 = 0u;
+thread uint v242 = 0u;
+thread uint v243 = 0u;
+thread uint v244 = 0u;
+thread uint v245 = 0u;
+thread uint v246 = 0u;
+thread uint v247 = 0u;
+thread uint v248 = 0u;
+thread uint v249 = 0u;
+thread uint v250 = 0u;
+thread uint v251 = 0u;
+thread uint v252 = 0u;
+thread uint v253 = 0u;
+thread uint v254 = 0u;
+thread uint v255 = 0u;
+thread uint v256 = 0u;
+thread uint v257 = 0u;
+thread uint v258 = 0u;
+thread uint v259 = 0u;
+thread uint v260 = 0u;
+thread uint v261 = 0u;
+thread uint v262 = 0u;
+thread uint v263 = 0u;
+thread uint v264 = 0u;
+thread uint v265 = 0u;
+thread uint v266 = 0u;
+thread uint v267 = 0u;
+thread uint v268 = 0u;
+thread uint v269 = 0u;
+thread uint v270 = 0u;
+thread uint v271 = 0u;
+thread uint v272 = 0u;
+thread uint v273 = 0u;
+thread uint v274 = 0u;
+thread uint v275 = 0u;
+thread uint v276 = 0u;
+thread uint v277 = 0u;
+thread uint v278 = 0u;
+thread uint v279 = 0u;
+thread uint v280 = 0u;
+thread uint v281 = 0u;
+thread uint v282 = 0u;
+thread uint v283 = 0u;
+thread uint v284 = 0u;
+thread uint v285 = 0u;
+thread uint v286 = 0u;
+thread uint v287 = 0u;
+thread uint v288 = 0u;
+thread uint v289 = 0u;
+thread uint v290 = 0u;
+thread uint v291 = 0u;
+thread uint v292 = 0u;
+thread uint v293 = 0u;
+thread uint v294 = 0u;
+thread uint v295 = 0u;
+thread uint v296 = 0u;
+thread uint v297 = 0u;
+thread uint v298 = 0u;
+thread uint v299 = 0u;
+thread uint v300 = 0u;
+thread uint v301 = 0u;
+thread uint v302 = 0u;
+thread uint v303 = 0u;
+thread uint v304 = 0u;
+thread uint v305 = 0u;
+thread uint v306 = 0u;
+thread uint v307 = 0u;
+thread uint v308 = 0u;
+thread uint v309 = 0u;
+thread uint v310 = 0u;
+thread uint v311 = 0u;
+thread uint v312 = 0u;
+thread uint v313 = 0u;
+thread uint v314 = 0u;
+thread uint v315 = 0u;
+thread uint v316 = 0u;
+thread uint v317 = 0u;
+thread uint v318 = 0u;
+thread uint v319 = 0u;
+thread uint v320 = 0u;
+thread uint v321 = 0u;
+thread uint v322 = 0u;
+thread uint v323 = 0u;
+thread uint v324 = 0u;
+thread uint v325 = 0u;
+thread uint v326 = 0u;
+thread uint v327 = 0u;
+thread uint v328 = 0u;
+thread uint v329 = 0u;
+thread uint v330 = 0u;
+thread uint v331 = 0u;
+thread uint v332 = 0u;
+thread uint v333 = 0u;
+thread uint v334 = 0u;
+thread uint v335 = 0u;
+thread uint v336 = 0u;
+thread uint v337 = 0u;
+thread uint v338 = 0u;
+thread uint v339 = 0u;
+thread uint v340 = 0u;
+thread uint v341 = 0u;
+thread uint v342 = 0u;
+thread uint v343 = 0u;
+thread uint v344 = 0u;
+thread uint v345 = 0u;
+thread uint v346 = 0u;
+thread uint v347 = 0u;
+thread uint v348 = 0u;
+thread uint v349 = 0u;
+thread uint v350 = 0u;
+thread uint v351 = 0u;
+thread uint v352 = 0u;
+thread uint v353 = 0u;
+thread uint v354 = 0u;
+thread uint v355 = 0u;
+thread uint v356 = 0u;
+thread uint v357 = 0u;
+thread uint v358 = 0u;
+thread uint v359 = 0u;
+thread uint v360 = 0u;
+thread uint v361 = 0u;
+thread uint v362 = 0u;
+thread uint v363 = 0u;
+thread uint v364 = 0u;
+thread uint v365 = 0u;
+thread uint v366 = 0u;
+thread uint v367 = 0u;
+thread uint v368 = 0u;
+thread uint v369 = 0u;
+thread uint v370 = 0u;
+thread uint v371 = 0u;
+thread uint v372 = 0u;
+thread uint v373 = 0u;
+thread uint v374 = 0u;
+thread uint v375 = 0u;
+thread uint v376 = 0u;
+thread uint v377 = 0u;
+thread uint v378 = 0u;
+thread uint v379 = 0u;
+thread uint v380 = 0u;
+thread uint v381 = 0u;
+thread uint v382 = 0u;
+thread uint v383 = 0u;
+thread uint v384 = 0u;
+thread uint v385 = 0u;
+thread uint v386 = 0u;
+thread uint v387 = 0u;
+thread uint v388 = 0u;
+thread uint v389 = 0u;
+thread uint v390 = 0u;
+thread uint v391 = 0u;
+thread uint v392 = 0u;
+thread uint v393 = 0u;
+thread uint v394 = 0u;
+thread uint v395 = 0u;
+thread uint v396 = 0u;
+thread uint v397 = 0u;
+thread uint v398 = 0u;
+thread uint v399 = 0u;
+thread uint v400 = 0u;
+thread uint v401 = 0u;
+thread uint v402 = 0u;
+thread uint v403 = 0u;
+thread uint v404 = 0u;
+thread uint v405 = 0u;
+thread uint v406 = 0u;
+thread uint v407 = 0u;
+thread uint v408 = 0u;
+thread uint v409 = 0u;
+thread uint v410 = 0u;
+thread uint v411 = 0u;
+thread uint v412 = 0u;
+thread uint v413 = 0u;
+thread uint v414 = 0u;
+thread uint v415 = 0u;
+thread uint v416 = 0u;
+thread uint v417 = 0u;
+thread uint v418 = 0u;
+thread uint v419 = 0u;
+thread uint v420 = 0u;
+thread uint v421 = 0u;
+thread uint v422 = 0u;
+thread uint v423 = 0u;
+thread uint v424 = 0u;
+thread uint v425 = 0u;
+thread uint v426 = 0u;
+thread uint v427 = 0u;
+thread uint v428 = 0u;
+thread uint v429 = 0u;
+thread uint v430 = 0u;
+thread uint v431 = 0u;
+thread uint v432 = 0u;
+thread uint v433 = 0u;
+thread uint v434 = 0u;
+thread uint v435 = 0u;
+thread uint v436 = 0u;
+thread uint v437 = 0u;
+thread uint v438 = 0u;
+thread uint v439 = 0u;
+thread uint v440 = 0u;
+thread uint v441 = 0u;
+thread uint v442 = 0u;
+thread uint v443 = 0u;
+thread uint v444 = 0u;
+thread uint v445 = 0u;
+thread uint v446 = 0u;
+thread uint v447 = 0u;
+thread uint v448 = 0u;
+thread uint v449 = 0u;
+thread uint v450 = 0u;
+thread uint v451 = 0u;
+thread uint v452 = 0u;
+thread uint v453 = 0u;
+thread uint v454 = 0u;
+thread uint v455 = 0u;
+thread uint v456 = 0u;
+thread uint v457 = 0u;
+thread uint v458 = 0u;
+thread uint v459 = 0u;
+thread uint v460 = 0u;
+thread uint v461 = 0u;
+thread uint v462 = 0u;
+thread uint v463 = 0u;
+thread uint v464 = 0u;
+thread uint v465 = 0u;
+thread uint v466 = 0u;
+thread uint v467 = 0u;
+thread uint v468 = 0u;
+thread uint v469 = 0u;
+thread uint v470 = 0u;
+thread uint v471 = 0u;
+thread uint v472 = 0u;
+thread uint v473 = 0u;
+thread uint v474 = 0u;
+thread uint v475 = 0u;
+thread uint v476 = 0u;
+thread uint v477 = 0u;
+thread uint v478 = 0u;
+thread uint v479 = 0u;
+thread uint v480 = 0u;
+thread uint v481 = 0u;
+thread uint v482 = 0u;
+thread uint v483 = 0u;
+thread uint v484 = 0u;
+thread uint v485 = 0u;
+thread uint v486 = 0u;
+thread uint v487 = 0u;
+thread uint v488 = 0u;
+thread uint v489 = 0u;
+thread uint v490 = 0u;
+thread uint v491 = 0u;
+thread uint v492 = 0u;
+thread uint v493 = 0u;
+thread uint v494 = 0u;
+thread uint v495 = 0u;
+thread uint v496 = 0u;
+thread uint v497 = 0u;
+thread uint v498 = 0u;
+thread uint v499 = 0u;
+thread uint v500 = 0u;
+thread uint v501 = 0u;
+thread uint v502 = 0u;
+thread uint v503 = 0u;
+thread uint v504 = 0u;
+thread uint v505 = 0u;
+thread uint v506 = 0u;
+thread uint v507 = 0u;
+thread uint v508 = 0u;
+thread uint v509 = 0u;
+thread uint v510 = 0u;
+thread uint v511 = 0u;
+thread uint v512 = 0u;
+thread uint v513 = 0u;
+thread uint v514 = 0u;
+thread uint v515 = 0u;
+thread uint v516 = 0u;
+thread uint v517 = 0u;
+thread uint v518 = 0u;
+thread uint v519 = 0u;
+thread uint v520 = 0u;
+thread uint v521 = 0u;
+thread uint v522 = 0u;
+thread uint v523 = 0u;
+thread uint v524 = 0u;
+thread uint v525 = 0u;
+thread uint v526 = 0u;
+thread uint v527 = 0u;
+thread uint v528 = 0u;
+thread uint v529 = 0u;
+thread uint v530 = 0u;
+thread uint v531 = 0u;
+thread uint v532 = 0u;
+thread uint v533 = 0u;
+thread uint v534 = 0u;
+thread uint v535 = 0u;
+thread uint v536 = 0u;
+thread uint v537 = 0u;
+thread uint v538 = 0u;
+thread uint v539 = 0u;
+thread uint v540 = 0u;
+thread uint v541 = 0u;
+thread uint v542 = 0u;
+thread uint v543 = 0u;
+thread uint v544 = 0u;
+thread uint v545 = 0u;
+thread uint v546 = 0u;
+thread uint v547 = 0u;
+thread uint v548 = 0u;
+thread uint v549 = 0u;
+thread uint v550 = 0u;
+thread uint v551 = 0u;
+thread uint v552 = 0u;
+thread uint v553 = 0u;
+thread uint v554 = 0u;
+thread uint v555 = 0u;
+thread uint v556 = 0u;
+thread uint v557 = 0u;
+thread uint v558 = 0u;
+thread uint v559 = 0u;
+thread uint v560 = 0u;
+thread uint v561 = 0u;
+thread uint v562 = 0u;
+thread uint v563 = 0u;
+thread uint v564 = 0u;
+thread uint v565 = 0u;
+thread uint v566 = 0u;
+thread uint v567 = 0u;
+thread uint v568 = 0u;
+thread uint v569 = 0u;
+thread uint v570 = 0u;
+thread uint v571 = 0u;
+thread uint v572 = 0u;
+thread uint v573 = 0u;
+thread uint v574 = 0u;
+thread uint v575 = 0u;
+thread uint v576 = 0u;
+thread uint v577 = 0u;
+thread uint v578 = 0u;
+thread uint v579 = 0u;
+thread uint v580 = 0u;
+thread uint v581 = 0u;
+thread uint v582 = 0u;
+thread uint v583 = 0u;
+thread uint v584 = 0u;
+thread uint v585 = 0u;
+thread uint v586 = 0u;
+thread uint v587 = 0u;
+thread uint v588 = 0u;
+thread uint v589 = 0u;
+thread uint v590 = 0u;
+thread uint v591 = 0u;
+thread uint v592 = 0u;
+thread uint v593 = 0u;
+thread uint v594 = 0u;
+thread uint v595 = 0u;
+thread uint v596 = 0u;
+thread uint v597 = 0u;
+thread uint v598 = 0u;
+thread uint v599 = 0u;
+thread uint v600 = 0u;
+thread uint v601 = 0u;
+thread uint v602 = 0u;
+thread uint v603 = 0u;
+thread uint v604 = 0u;
+thread uint v605 = 0u;
+thread uint v606 = 0u;
+thread uint v607 = 0u;
+thread uint v608 = 0u;
+thread uint v609 = 0u;
+thread uint v610 = 0u;
+thread uint v611 = 0u;
+thread uint v612 = 0u;
+thread uint v613 = 0u;
+thread uint v614 = 0u;
+thread uint v615 = 0u;
+thread uint v616 = 0u;
+thread uint v617 = 0u;
+thread uint v618 = 0u;
+thread uint v619 = 0u;
+thread uint v620 = 0u;
+thread uint v621 = 0u;
+thread uint v622 = 0u;
+thread uint v623 = 0u;
+thread uint v624 = 0u;
+thread uint v625 = 0u;
+thread uint v626 = 0u;
+thread uint v627 = 0u;
+thread uint v628 = 0u;
+thread uint v629 = 0u;
+thread uint v630 = 0u;
+thread uint v631 = 0u;
+thread uint v632 = 0u;
+thread uint v633 = 0u;
+thread uint v634 = 0u;
+thread uint v635 = 0u;
+thread uint v636 = 0u;
+thread uint v637 = 0u;
+thread uint v638 = 0u;
+thread uint v639 = 0u;
+thread uint v640 = 0u;
+thread uint v641 = 0u;
+thread uint v642 = 0u;
+thread uint v643 = 0u;
+thread uint v644 = 0u;
+thread uint v645 = 0u;
+thread uint v646 = 0u;
+thread uint v647 = 0u;
+thread uint v648 = 0u;
+thread uint v649 = 0u;
+thread uint v650 = 0u;
+thread uint v651 = 0u;
+thread uint v652 = 0u;
+thread uint v653 = 0u;
+thread uint v654 = 0u;
+thread uint v655 = 0u;
+thread uint v656 = 0u;
+thread uint v657 = 0u;
+thread uint v658 = 0u;
+thread uint v659 = 0u;
+thread uint v660 = 0u;
+thread uint v661 = 0u;
+thread uint v662 = 0u;
+thread uint v663 = 0u;
+thread uint v664 = 0u;
+thread uint v665 = 0u;
+thread uint v666 = 0u;
+thread uint v667 = 0u;
+thread uint v668 = 0u;
+thread uint v669 = 0u;
+thread uint v670 = 0u;
+thread uint v671 = 0u;
+thread uint v672 = 0u;
+thread uint v673 = 0u;
+thread uint v674 = 0u;
+thread uint v675 = 0u;
+thread uint v676 = 0u;
+thread uint v677 = 0u;
+thread uint v678 = 0u;
+thread uint v679 = 0u;
+thread uint v680 = 0u;
+thread uint v681 = 0u;
+thread uint v682 = 0u;
+thread uint v683 = 0u;
+thread uint v684 = 0u;
+thread uint v685 = 0u;
+thread uint v686 = 0u;
+thread uint v687 = 0u;
+thread uint v688 = 0u;
+thread uint v689 = 0u;
+thread uint v690 = 0u;
+thread uint v691 = 0u;
+thread uint v692 = 0u;
+thread uint v693 = 0u;
+thread uint v694 = 0u;
+thread uint v695 = 0u;
+thread uint v696 = 0u;
+thread uint v697 = 0u;
+thread uint v698 = 0u;
+thread uint v699 = 0u;
+thread uint v700 = 0u;
+thread uint v701 = 0u;
+thread uint v702 = 0u;
+thread uint v703 = 0u;
+thread uint v704 = 0u;
+thread uint v705 = 0u;
+thread uint v706 = 0u;
+thread uint v707 = 0u;
+thread uint v708 = 0u;
+thread uint v709 = 0u;
+thread uint v710 = 0u;
+thread uint v711 = 0u;
+thread uint v712 = 0u;
+thread uint v713 = 0u;
+thread uint v714 = 0u;
+thread uint v715 = 0u;
+thread uint v716 = 0u;
+thread uint v717 = 0u;
+thread uint v718 = 0u;
+thread uint v719 = 0u;
+thread uint v720 = 0u;
+thread uint v721 = 0u;
+thread uint v722 = 0u;
+thread uint v723 = 0u;
+thread uint v724 = 0u;
+thread uint v725 = 0u;
+thread uint v726 = 0u;
+thread uint v727 = 0u;
+thread uint v728 = 0u;
+thread uint v729 = 0u;
+thread uint v730 = 0u;
+thread uint v731 = 0u;
+thread uint v732 = 0u;
+thread uint v733 = 0u;
+thread uint v734 = 0u;
+thread uint v735 = 0u;
+thread uint v736 = 0u;
+thread uint v737 = 0u;
+thread uint v738 = 0u;
+thread uint v739 = 0u;
+thread uint v740 = 0u;
+thread uint v741 = 0u;
+thread uint v742 = 0u;
+thread uint v743 = 0u;
+thread uint v744 = 0u;
+thread uint v745 = 0u;
+thread uint v746 = 0u;
+thread uint v747 = 0u;
+thread uint v748 = 0u;
+thread uint v749 = 0u;
+thread uint v750 = 0u;
+thread uint v751 = 0u;
+thread uint v752 = 0u;
+thread uint v753 = 0u;
+thread uint v754 = 0u;
+thread uint v755 = 0u;
+thread uint v756 = 0u;
+thread uint v757 = 0u;
+thread uint v758 = 0u;
+thread uint v759 = 0u;
+thread uint v760 = 0u;
+thread uint v761 = 0u;
+thread uint v762 = 0u;
+thread uint v763 = 0u;
+thread uint v764 = 0u;
+thread uint v765 = 0u;
+thread uint v766 = 0u;
+thread uint v767 = 0u;
+thread uint v768 = 0u;
+thread uint v769 = 0u;
+thread uint v770 = 0u;
+thread uint v771 = 0u;
+thread uint v772 = 0u;
+thread uint v773 = 0u;
+thread uint v774 = 0u;
+thread uint v775 = 0u;
+thread uint v776 = 0u;
+thread uint v777 = 0u;
+thread uint v778 = 0u;
+thread uint v779 = 0u;
+thread uint v780 = 0u;
+thread uint v781 = 0u;
+thread uint v782 = 0u;
+thread uint v783 = 0u;
+thread uint v784 = 0u;
+thread uint v785 = 0u;
+thread uint v786 = 0u;
+thread uint v787 = 0u;
+thread uint v788 = 0u;
+thread uint v789 = 0u;
+thread uint v790 = 0u;
+thread uint v791 = 0u;
+thread uint v792 = 0u;
+thread uint v793 = 0u;
+thread uint v794 = 0u;
+thread uint v795 = 0u;
+thread uint v796 = 0u;
+thread uint v797 = 0u;
+thread uint v798 = 0u;
+thread uint v799 = 0u;
+thread uint v800 = 0u;
+thread uint v801 = 0u;
+thread uint v802 = 0u;
+thread uint v803 = 0u;
+thread uint v804 = 0u;
+thread uint v805 = 0u;
+thread uint v806 = 0u;
+thread uint v807 = 0u;
+thread uint v808 = 0u;
+thread uint v809 = 0u;
+thread uint v810 = 0u;
+thread uint v811 = 0u;
+thread uint v812 = 0u;
+thread uint v813 = 0u;
+thread uint v814 = 0u;
+thread uint v815 = 0u;
+thread uint v816 = 0u;
+thread uint v817 = 0u;
+thread uint v818 = 0u;
+thread uint v819 = 0u;
+thread uint v820 = 0u;
+thread uint v821 = 0u;
+thread uint v822 = 0u;
+thread uint v823 = 0u;
+thread uint v824 = 0u;
+thread uint v825 = 0u;
+thread uint v826 = 0u;
+thread uint v827 = 0u;
+thread uint v828 = 0u;
+thread uint v829 = 0u;
+thread uint v830 = 0u;
+thread uint v831 = 0u;
+thread uint v832 = 0u;
+thread uint v833 = 0u;
+thread uint v834 = 0u;
+thread uint v835 = 0u;
+thread uint v836 = 0u;
+thread uint v837 = 0u;
+thread uint v838 = 0u;
+thread uint v839 = 0u;
+thread uint v840 = 0u;
+thread uint v841 = 0u;
+thread uint v842 = 0u;
+thread uint v843 = 0u;
+thread uint v844 = 0u;
+thread uint v845 = 0u;
+thread uint v846 = 0u;
+thread uint v847 = 0u;
+thread uint v848 = 0u;
+thread uint v849 = 0u;
+thread uint v850 = 0u;
+thread uint v851 = 0u;
+thread uint v852 = 0u;
+thread uint v853 = 0u;
+thread uint v854 = 0u;
+thread uint v855 = 0u;
+thread uint v856 = 0u;
+thread uint v857 = 0u;
+thread uint v858 = 0u;
+thread uint v859 = 0u;
+thread uint v860 = 0u;
+thread uint v861 = 0u;
+thread uint v862 = 0u;
+thread uint v863 = 0u;
+thread uint v864 = 0u;
+thread uint v865 = 0u;
+thread uint v866 = 0u;
+thread uint v867 = 0u;
+thread uint v868 = 0u;
+thread uint v869 = 0u;
+thread uint v870 = 0u;
+thread uint v871 = 0u;
+thread uint v872 = 0u;
+thread uint v873 = 0u;
+thread uint v874 = 0u;
+thread uint v875 = 0u;
+thread uint v876 = 0u;
+thread uint v877 = 0u;
+thread uint v878 = 0u;
+thread uint v879 = 0u;
+thread uint v880 = 0u;
+thread uint v881 = 0u;
+thread uint v882 = 0u;
+thread uint v883 = 0u;
+thread uint v884 = 0u;
+thread uint v885 = 0u;
+thread uint v886 = 0u;
+thread uint v887 = 0u;
+thread uint v888 = 0u;
+thread uint v889 = 0u;
+thread uint v890 = 0u;
+thread uint v891 = 0u;
+thread uint v892 = 0u;
+thread uint v893 = 0u;
+thread uint v894 = 0u;
+thread uint v895 = 0u;
+thread uint v896 = 0u;
+thread uint v897 = 0u;
+thread uint v898 = 0u;
+thread uint v899 = 0u;
+thread uint v900 = 0u;
+thread uint v901 = 0u;
+thread uint v902 = 0u;
+thread uint v903 = 0u;
+thread uint v904 = 0u;
+thread uint v905 = 0u;
+thread uint v906 = 0u;
+thread uint v907 = 0u;
+thread uint v908 = 0u;
+thread uint v909 = 0u;
+thread uint v910 = 0u;
+thread uint v911 = 0u;
+thread uint v912 = 0u;
+thread uint v913 = 0u;
+thread uint v914 = 0u;
+thread uint v915 = 0u;
+thread uint v916 = 0u;
+thread uint v917 = 0u;
+thread uint v918 = 0u;
+thread uint v919 = 0u;
+thread uint v920 = 0u;
+thread uint v921 = 0u;
+thread uint v922 = 0u;
+thread uint v923 = 0u;
+thread uint v924 = 0u;
+thread uint v925 = 0u;
+thread uint v926 = 0u;
+thread uint v927 = 0u;
+thread uint v928 = 0u;
+thread uint v929 = 0u;
+thread uint v930 = 0u;
+thread uint v931 = 0u;
+thread uint v932 = 0u;
+thread uint v933 = 0u;
+thread uint v934 = 0u;
+thread uint v935 = 0u;
+thread uint v936 = 0u;
+thread uint v937 = 0u;
+thread uint v938 = 0u;
+thread uint v939 = 0u;
+thread uint v940 = 0u;
+thread uint v941 = 0u;
+thread uint v942 = 0u;
+thread uint v943 = 0u;
+thread uint v944 = 0u;
+thread uint v945 = 0u;
+thread uint v946 = 0u;
+thread uint v947 = 0u;
+thread uint v948 = 0u;
+thread uint v949 = 0u;
+thread uint v950 = 0u;
+thread uint v951 = 0u;
+thread uint v952 = 0u;
+thread uint v953 = 0u;
+thread uint v954 = 0u;
+thread uint v955 = 0u;
+thread uint v956 = 0u;
+thread uint v957 = 0u;
+thread uint v958 = 0u;
+thread uint v959 = 0u;
+thread uint v960 = 0u;
+thread uint v961 = 0u;
+thread uint v962 = 0u;
+thread uint v963 = 0u;
+thread uint v964 = 0u;
+thread uint v965 = 0u;
+thread uint v966 = 0u;
+thread uint v967 = 0u;
+thread uint v968 = 0u;
+thread uint v969 = 0u;
+thread uint v970 = 0u;
+thread uint v971 = 0u;
+thread uint v972 = 0u;
+thread uint v973 = 0u;
+thread uint v974 = 0u;
+thread uint v975 = 0u;
+thread uint v976 = 0u;
+thread uint v977 = 0u;
+thread uint v978 = 0u;
+thread uint v979 = 0u;
+thread uint v980 = 0u;
+thread uint v981 = 0u;
+thread uint v982 = 0u;
+thread uint v983 = 0u;
+thread uint v984 = 0u;
+thread uint v985 = 0u;
+thread uint v986 = 0u;
+thread uint v987 = 0u;
+thread uint v988 = 0u;
+thread uint v989 = 0u;
+thread uint v990 = 0u;
+thread uint v991 = 0u;
+thread uint v992 = 0u;
+thread uint v993 = 0u;
+thread uint v994 = 0u;
+thread uint v995 = 0u;
+thread uint v996 = 0u;
+thread uint v997 = 0u;
+thread uint v998 = 0u;
+thread uint v999 = 0u;
+uint foo() {
+  uint x = 0u;
+  x = (x + v0);
+  x = (x + v1);
+  x = (x + v2);
+  x = (x + v3);
+  x = (x + v4);
+  x = (x + v5);
+  x = (x + v6);
+  x = (x + v7);
+  x = (x + v8);
+  x = (x + v9);
+  x = (x + v10);
+  x = (x + v11);
+  x = (x + v12);
+  x = (x + v13);
+  x = (x + v14);
+  x = (x + v15);
+  x = (x + v16);
+  x = (x + v17);
+  x = (x + v18);
+  x = (x + v19);
+  x = (x + v20);
+  x = (x + v21);
+  x = (x + v22);
+  x = (x + v23);
+  x = (x + v24);
+  x = (x + v25);
+  x = (x + v26);
+  x = (x + v27);
+  x = (x + v28);
+  x = (x + v29);
+  x = (x + v30);
+  x = (x + v31);
+  x = (x + v32);
+  x = (x + v33);
+  x = (x + v34);
+  x = (x + v35);
+  x = (x + v36);
+  x = (x + v37);
+  x = (x + v38);
+  x = (x + v39);
+  x = (x + v40);
+  x = (x + v41);
+  x = (x + v42);
+  x = (x + v43);
+  x = (x + v44);
+  x = (x + v45);
+  x = (x + v46);
+  x = (x + v47);
+  x = (x + v48);
+  x = (x + v49);
+  x = (x + v50);
+  x = (x + v51);
+  x = (x + v52);
+  x = (x + v53);
+  x = (x + v54);
+  x = (x + v55);
+  x = (x + v56);
+  x = (x + v57);
+  x = (x + v58);
+  x = (x + v59);
+  x = (x + v60);
+  x = (x + v61);
+  x = (x + v62);
+  x = (x + v63);
+  x = (x + v64);
+  x = (x + v65);
+  x = (x + v66);
+  x = (x + v67);
+  x = (x + v68);
+  x = (x + v69);
+  x = (x + v70);
+  x = (x + v71);
+  x = (x + v72);
+  x = (x + v73);
+  x = (x + v74);
+  x = (x + v75);
+  x = (x + v76);
+  x = (x + v77);
+  x = (x + v78);
+  x = (x + v79);
+  x = (x + v80);
+  x = (x + v81);
+  x = (x + v82);
+  x = (x + v83);
+  x = (x + v84);
+  x = (x + v85);
+  x = (x + v86);
+  x = (x + v87);
+  x = (x + v88);
+  x = (x + v89);
+  x = (x + v90);
+  x = (x + v91);
+  x = (x + v92);
+  x = (x + v93);
+  x = (x + v94);
+  x = (x + v95);
+  x = (x + v96);
+  x = (x + v97);
+  x = (x + v98);
+  x = (x + v99);
+  x = (x + v100);
+  x = (x + v101);
+  x = (x + v102);
+  x = (x + v103);
+  x = (x + v104);
+  x = (x + v105);
+  x = (x + v106);
+  x = (x + v107);
+  x = (x + v108);
+  x = (x + v109);
+  x = (x + v110);
+  x = (x + v111);
+  x = (x + v112);
+  x = (x + v113);
+  x = (x + v114);
+  x = (x + v115);
+  x = (x + v116);
+  x = (x + v117);
+  x = (x + v118);
+  x = (x + v119);
+  x = (x + v120);
+  x = (x + v121);
+  x = (x + v122);
+  x = (x + v123);
+  x = (x + v124);
+  x = (x + v125);
+  x = (x + v126);
+  x = (x + v127);
+  x = (x + v128);
+  x = (x + v129);
+  x = (x + v130);
+  x = (x + v131);
+  x = (x + v132);
+  x = (x + v133);
+  x = (x + v134);
+  x = (x + v135);
+  x = (x + v136);
+  x = (x + v137);
+  x = (x + v138);
+  x = (x + v139);
+  x = (x + v140);
+  x = (x + v141);
+  x = (x + v142);
+  x = (x + v143);
+  x = (x + v144);
+  x = (x + v145);
+  x = (x + v146);
+  x = (x + v147);
+  x = (x + v148);
+  x = (x + v149);
+  x = (x + v150);
+  x = (x + v151);
+  x = (x + v152);
+  x = (x + v153);
+  x = (x + v154);
+  x = (x + v155);
+  x = (x + v156);
+  x = (x + v157);
+  x = (x + v158);
+  x = (x + v159);
+  x = (x + v160);
+  x = (x + v161);
+  x = (x + v162);
+  x = (x + v163);
+  x = (x + v164);
+  x = (x + v165);
+  x = (x + v166);
+  x = (x + v167);
+  x = (x + v168);
+  x = (x + v169);
+  x = (x + v170);
+  x = (x + v171);
+  x = (x + v172);
+  x = (x + v173);
+  x = (x + v174);
+  x = (x + v175);
+  x = (x + v176);
+  x = (x + v177);
+  x = (x + v178);
+  x = (x + v179);
+  x = (x + v180);
+  x = (x + v181);
+  x = (x + v182);
+  x = (x + v183);
+  x = (x + v184);
+  x = (x + v185);
+  x = (x + v186);
+  x = (x + v187);
+  x = (x + v188);
+  x = (x + v189);
+  x = (x + v190);
+  x = (x + v191);
+  x = (x + v192);
+  x = (x + v193);
+  x = (x + v194);
+  x = (x + v195);
+  x = (x + v196);
+  x = (x + v197);
+  x = (x + v198);
+  x = (x + v199);
+  x = (x + v200);
+  x = (x + v201);
+  x = (x + v202);
+  x = (x + v203);
+  x = (x + v204);
+  x = (x + v205);
+  x = (x + v206);
+  x = (x + v207);
+  x = (x + v208);
+  x = (x + v209);
+  x = (x + v210);
+  x = (x + v211);
+  x = (x + v212);
+  x = (x + v213);
+  x = (x + v214);
+  x = (x + v215);
+  x = (x + v216);
+  x = (x + v217);
+  x = (x + v218);
+  x = (x + v219);
+  x = (x + v220);
+  x = (x + v221);
+  x = (x + v222);
+  x = (x + v223);
+  x = (x + v224);
+  x = (x + v225);
+  x = (x + v226);
+  x = (x + v227);
+  x = (x + v228);
+  x = (x + v229);
+  x = (x + v230);
+  x = (x + v231);
+  x = (x + v232);
+  x = (x + v233);
+  x = (x + v234);
+  x = (x + v235);
+  x = (x + v236);
+  x = (x + v237);
+  x = (x + v238);
+  x = (x + v239);
+  x = (x + v240);
+  x = (x + v241);
+  x = (x + v242);
+  x = (x + v243);
+  x = (x + v244);
+  x = (x + v245);
+  x = (x + v246);
+  x = (x + v247);
+  x = (x + v248);
+  x = (x + v249);
+  x = (x + v250);
+  x = (x + v251);
+  x = (x + v252);
+  x = (x + v253);
+  x = (x + v254);
+  x = (x + v255);
+  x = (x + v256);
+  x = (x + v257);
+  x = (x + v258);
+  x = (x + v259);
+  x = (x + v260);
+  x = (x + v261);
+  x = (x + v262);
+  x = (x + v263);
+  x = (x + v264);
+  x = (x + v265);
+  x = (x + v266);
+  x = (x + v267);
+  x = (x + v268);
+  x = (x + v269);
+  x = (x + v270);
+  x = (x + v271);
+  x = (x + v272);
+  x = (x + v273);
+  x = (x + v274);
+  x = (x + v275);
+  x = (x + v276);
+  x = (x + v277);
+  x = (x + v278);
+  x = (x + v279);
+  x = (x + v280);
+  x = (x + v281);
+  x = (x + v282);
+  x = (x + v283);
+  x = (x + v284);
+  x = (x + v285);
+  x = (x + v286);
+  x = (x + v287);
+  x = (x + v288);
+  x = (x + v289);
+  x = (x + v290);
+  x = (x + v291);
+  x = (x + v292);
+  x = (x + v293);
+  x = (x + v294);
+  x = (x + v295);
+  x = (x + v296);
+  x = (x + v297);
+  x = (x + v298);
+  x = (x + v299);
+  x = (x + v300);
+  x = (x + v301);
+  x = (x + v302);
+  x = (x + v303);
+  x = (x + v304);
+  x = (x + v305);
+  x = (x + v306);
+  x = (x + v307);
+  x = (x + v308);
+  x = (x + v309);
+  x = (x + v310);
+  x = (x + v311);
+  x = (x + v312);
+  x = (x + v313);
+  x = (x + v314);
+  x = (x + v315);
+  x = (x + v316);
+  x = (x + v317);
+  x = (x + v318);
+  x = (x + v319);
+  x = (x + v320);
+  x = (x + v321);
+  x = (x + v322);
+  x = (x + v323);
+  x = (x + v324);
+  x = (x + v325);
+  x = (x + v326);
+  x = (x + v327);
+  x = (x + v328);
+  x = (x + v329);
+  x = (x + v330);
+  x = (x + v331);
+  x = (x + v332);
+  x = (x + v333);
+  x = (x + v334);
+  x = (x + v335);
+  x = (x + v336);
+  x = (x + v337);
+  x = (x + v338);
+  x = (x + v339);
+  x = (x + v340);
+  x = (x + v341);
+  x = (x + v342);
+  x = (x + v343);
+  x = (x + v344);
+  x = (x + v345);
+  x = (x + v346);
+  x = (x + v347);
+  x = (x + v348);
+  x = (x + v349);
+  x = (x + v350);
+  x = (x + v351);
+  x = (x + v352);
+  x = (x + v353);
+  x = (x + v354);
+  x = (x + v355);
+  x = (x + v356);
+  x = (x + v357);
+  x = (x + v358);
+  x = (x + v359);
+  x = (x + v360);
+  x = (x + v361);
+  x = (x + v362);
+  x = (x + v363);
+  x = (x + v364);
+  x = (x + v365);
+  x = (x + v366);
+  x = (x + v367);
+  x = (x + v368);
+  x = (x + v369);
+  x = (x + v370);
+  x = (x + v371);
+  x = (x + v372);
+  x = (x + v373);
+  x = (x + v374);
+  x = (x + v375);
+  x = (x + v376);
+  x = (x + v377);
+  x = (x + v378);
+  x = (x + v379);
+  x = (x + v380);
+  x = (x + v381);
+  x = (x + v382);
+  x = (x + v383);
+  x = (x + v384);
+  x = (x + v385);
+  x = (x + v386);
+  x = (x + v387);
+  x = (x + v388);
+  x = (x + v389);
+  x = (x + v390);
+  x = (x + v391);
+  x = (x + v392);
+  x = (x + v393);
+  x = (x + v394);
+  x = (x + v395);
+  x = (x + v396);
+  x = (x + v397);
+  x = (x + v398);
+  x = (x + v399);
+  x = (x + v400);
+  x = (x + v401);
+  x = (x + v402);
+  x = (x + v403);
+  x = (x + v404);
+  x = (x + v405);
+  x = (x + v406);
+  x = (x + v407);
+  x = (x + v408);
+  x = (x + v409);
+  x = (x + v410);
+  x = (x + v411);
+  x = (x + v412);
+  x = (x + v413);
+  x = (x + v414);
+  x = (x + v415);
+  x = (x + v416);
+  x = (x + v417);
+  x = (x + v418);
+  x = (x + v419);
+  x = (x + v420);
+  x = (x + v421);
+  x = (x + v422);
+  x = (x + v423);
+  x = (x + v424);
+  x = (x + v425);
+  x = (x + v426);
+  x = (x + v427);
+  x = (x + v428);
+  x = (x + v429);
+  x = (x + v430);
+  x = (x + v431);
+  x = (x + v432);
+  x = (x + v433);
+  x = (x + v434);
+  x = (x + v435);
+  x = (x + v436);
+  x = (x + v437);
+  x = (x + v438);
+  x = (x + v439);
+  x = (x + v440);
+  x = (x + v441);
+  x = (x + v442);
+  x = (x + v443);
+  x = (x + v444);
+  x = (x + v445);
+  x = (x + v446);
+  x = (x + v447);
+  x = (x + v448);
+  x = (x + v449);
+  x = (x + v450);
+  x = (x + v451);
+  x = (x + v452);
+  x = (x + v453);
+  x = (x + v454);
+  x = (x + v455);
+  x = (x + v456);
+  x = (x + v457);
+  x = (x + v458);
+  x = (x + v459);
+  x = (x + v460);
+  x = (x + v461);
+  x = (x + v462);
+  x = (x + v463);
+  x = (x + v464);
+  x = (x + v465);
+  x = (x + v466);
+  x = (x + v467);
+  x = (x + v468);
+  x = (x + v469);
+  x = (x + v470);
+  x = (x + v471);
+  x = (x + v472);
+  x = (x + v473);
+  x = (x + v474);
+  x = (x + v475);
+  x = (x + v476);
+  x = (x + v477);
+  x = (x + v478);
+  x = (x + v479);
+  x = (x + v480);
+  x = (x + v481);
+  x = (x + v482);
+  x = (x + v483);
+  x = (x + v484);
+  x = (x + v485);
+  x = (x + v486);
+  x = (x + v487);
+  x = (x + v488);
+  x = (x + v489);
+  x = (x + v490);
+  x = (x + v491);
+  x = (x + v492);
+  x = (x + v493);
+  x = (x + v494);
+  x = (x + v495);
+  x = (x + v496);
+  x = (x + v497);
+  x = (x + v498);
+  x = (x + v499);
+  x = (x + v500);
+  x = (x + v501);
+  x = (x + v502);
+  x = (x + v503);
+  x = (x + v504);
+  x = (x + v505);
+  x = (x + v506);
+  x = (x + v507);
+  x = (x + v508);
+  x = (x + v509);
+  x = (x + v510);
+  x = (x + v511);
+  x = (x + v512);
+  x = (x + v513);
+  x = (x + v514);
+  x = (x + v515);
+  x = (x + v516);
+  x = (x + v517);
+  x = (x + v518);
+  x = (x + v519);
+  x = (x + v520);
+  x = (x + v521);
+  x = (x + v522);
+  x = (x + v523);
+  x = (x + v524);
+  x = (x + v525);
+  x = (x + v526);
+  x = (x + v527);
+  x = (x + v528);
+  x = (x + v529);
+  x = (x + v530);
+  x = (x + v531);
+  x = (x + v532);
+  x = (x + v533);
+  x = (x + v534);
+  x = (x + v535);
+  x = (x + v536);
+  x = (x + v537);
+  x = (x + v538);
+  x = (x + v539);
+  x = (x + v540);
+  x = (x + v541);
+  x = (x + v542);
+  x = (x + v543);
+  x = (x + v544);
+  x = (x + v545);
+  x = (x + v546);
+  x = (x + v547);
+  x = (x + v548);
+  x = (x + v549);
+  x = (x + v550);
+  x = (x + v551);
+  x = (x + v552);
+  x = (x + v553);
+  x = (x + v554);
+  x = (x + v555);
+  x = (x + v556);
+  x = (x + v557);
+  x = (x + v558);
+  x = (x + v559);
+  x = (x + v560);
+  x = (x + v561);
+  x = (x + v562);
+  x = (x + v563);
+  x = (x + v564);
+  x = (x + v565);
+  x = (x + v566);
+  x = (x + v567);
+  x = (x + v568);
+  x = (x + v569);
+  x = (x + v570);
+  x = (x + v571);
+  x = (x + v572);
+  x = (x + v573);
+  x = (x + v574);
+  x = (x + v575);
+  x = (x + v576);
+  x = (x + v577);
+  x = (x + v578);
+  x = (x + v579);
+  x = (x + v580);
+  x = (x + v581);
+  x = (x + v582);
+  x = (x + v583);
+  x = (x + v584);
+  x = (x + v585);
+  x = (x + v586);
+  x = (x + v587);
+  x = (x + v588);
+  x = (x + v589);
+  x = (x + v590);
+  x = (x + v591);
+  x = (x + v592);
+  x = (x + v593);
+  x = (x + v594);
+  x = (x + v595);
+  x = (x + v596);
+  x = (x + v597);
+  x = (x + v598);
+  x = (x + v599);
+  x = (x + v600);
+  x = (x + v601);
+  x = (x + v602);
+  x = (x + v603);
+  x = (x + v604);
+  x = (x + v605);
+  x = (x + v606);
+  x = (x + v607);
+  x = (x + v608);
+  x = (x + v609);
+  x = (x + v610);
+  x = (x + v611);
+  x = (x + v612);
+  x = (x + v613);
+  x = (x + v614);
+  x = (x + v615);
+  x = (x + v616);
+  x = (x + v617);
+  x = (x + v618);
+  x = (x + v619);
+  x = (x + v620);
+  x = (x + v621);
+  x = (x + v622);
+  x = (x + v623);
+  x = (x + v624);
+  x = (x + v625);
+  x = (x + v626);
+  x = (x + v627);
+  x = (x + v628);
+  x = (x + v629);
+  x = (x + v630);
+  x = (x + v631);
+  x = (x + v632);
+  x = (x + v633);
+  x = (x + v634);
+  x = (x + v635);
+  x = (x + v636);
+  x = (x + v637);
+  x = (x + v638);
+  x = (x + v639);
+  x = (x + v640);
+  x = (x + v641);
+  x = (x + v642);
+  x = (x + v643);
+  x = (x + v644);
+  x = (x + v645);
+  x = (x + v646);
+  x = (x + v647);
+  x = (x + v648);
+  x = (x + v649);
+  x = (x + v650);
+  x = (x + v651);
+  x = (x + v652);
+  x = (x + v653);
+  x = (x + v654);
+  x = (x + v655);
+  x = (x + v656);
+  x = (x + v657);
+  x = (x + v658);
+  x = (x + v659);
+  x = (x + v660);
+  x = (x + v661);
+  x = (x + v662);
+  x = (x + v663);
+  x = (x + v664);
+  x = (x + v665);
+  x = (x + v666);
+  x = (x + v667);
+  x = (x + v668);
+  x = (x + v669);
+  x = (x + v670);
+  x = (x + v671);
+  x = (x + v672);
+  x = (x + v673);
+  x = (x + v674);
+  x = (x + v675);
+  x = (x + v676);
+  x = (x + v677);
+  x = (x + v678);
+  x = (x + v679);
+  x = (x + v680);
+  x = (x + v681);
+  x = (x + v682);
+  x = (x + v683);
+  x = (x + v684);
+  x = (x + v685);
+  x = (x + v686);
+  x = (x + v687);
+  x = (x + v688);
+  x = (x + v689);
+  x = (x + v690);
+  x = (x + v691);
+  x = (x + v692);
+  x = (x + v693);
+  x = (x + v694);
+  x = (x + v695);
+  x = (x + v696);
+  x = (x + v697);
+  x = (x + v698);
+  x = (x + v699);
+  x = (x + v700);
+  x = (x + v701);
+  x = (x + v702);
+  x = (x + v703);
+  x = (x + v704);
+  x = (x + v705);
+  x = (x + v706);
+  x = (x + v707);
+  x = (x + v708);
+  x = (x + v709);
+  x = (x + v710);
+  x = (x + v711);
+  x = (x + v712);
+  x = (x + v713);
+  x = (x + v714);
+  x = (x + v715);
+  x = (x + v716);
+  x = (x + v717);
+  x = (x + v718);
+  x = (x + v719);
+  x = (x + v720);
+  x = (x + v721);
+  x = (x + v722);
+  x = (x + v723);
+  x = (x + v724);
+  x = (x + v725);
+  x = (x + v726);
+  x = (x + v727);
+  x = (x + v728);
+  x = (x + v729);
+  x = (x + v730);
+  x = (x + v731);
+  x = (x + v732);
+  x = (x + v733);
+  x = (x + v734);
+  x = (x + v735);
+  x = (x + v736);
+  x = (x + v737);
+  x = (x + v738);
+  x = (x + v739);
+  x = (x + v740);
+  x = (x + v741);
+  x = (x + v742);
+  x = (x + v743);
+  x = (x + v744);
+  x = (x + v745);
+  x = (x + v746);
+  x = (x + v747);
+  x = (x + v748);
+  x = (x + v749);
+  x = (x + v750);
+  x = (x + v751);
+  x = (x + v752);
+  x = (x + v753);
+  x = (x + v754);
+  x = (x + v755);
+  x = (x + v756);
+  x = (x + v757);
+  x = (x + v758);
+  x = (x + v759);
+  x = (x + v760);
+  x = (x + v761);
+  x = (x + v762);
+  x = (x + v763);
+  x = (x + v764);
+  x = (x + v765);
+  x = (x + v766);
+  x = (x + v767);
+  x = (x + v768);
+  x = (x + v769);
+  x = (x + v770);
+  x = (x + v771);
+  x = (x + v772);
+  x = (x + v773);
+  x = (x + v774);
+  x = (x + v775);
+  x = (x + v776);
+  x = (x + v777);
+  x = (x + v778);
+  x = (x + v779);
+  x = (x + v780);
+  x = (x + v781);
+  x = (x + v782);
+  x = (x + v783);
+  x = (x + v784);
+  x = (x + v785);
+  x = (x + v786);
+  x = (x + v787);
+  x = (x + v788);
+  x = (x + v789);
+  x = (x + v790);
+  x = (x + v791);
+  x = (x + v792);
+  x = (x + v793);
+  x = (x + v794);
+  x = (x + v795);
+  x = (x + v796);
+  x = (x + v797);
+  x = (x + v798);
+  x = (x + v799);
+  x = (x + v800);
+  x = (x + v801);
+  x = (x + v802);
+  x = (x + v803);
+  x = (x + v804);
+  x = (x + v805);
+  x = (x + v806);
+  x = (x + v807);
+  x = (x + v808);
+  x = (x + v809);
+  x = (x + v810);
+  x = (x + v811);
+  x = (x + v812);
+  x = (x + v813);
+  x = (x + v814);
+  x = (x + v815);
+  x = (x + v816);
+  x = (x + v817);
+  x = (x + v818);
+  x = (x + v819);
+  x = (x + v820);
+  x = (x + v821);
+  x = (x + v822);
+  x = (x + v823);
+  x = (x + v824);
+  x = (x + v825);
+  x = (x + v826);
+  x = (x + v827);
+  x = (x + v828);
+  x = (x + v829);
+  x = (x + v830);
+  x = (x + v831);
+  x = (x + v832);
+  x = (x + v833);
+  x = (x + v834);
+  x = (x + v835);
+  x = (x + v836);
+  x = (x + v837);
+  x = (x + v838);
+  x = (x + v839);
+  x = (x + v840);
+  x = (x + v841);
+  x = (x + v842);
+  x = (x + v843);
+  x = (x + v844);
+  x = (x + v845);
+  x = (x + v846);
+  x = (x + v847);
+  x = (x + v848);
+  x = (x + v849);
+  x = (x + v850);
+  x = (x + v851);
+  x = (x + v852);
+  x = (x + v853);
+  x = (x + v854);
+  x = (x + v855);
+  x = (x + v856);
+  x = (x + v857);
+  x = (x + v858);
+  x = (x + v859);
+  x = (x + v860);
+  x = (x + v861);
+  x = (x + v862);
+  x = (x + v863);
+  x = (x + v864);
+  x = (x + v865);
+  x = (x + v866);
+  x = (x + v867);
+  x = (x + v868);
+  x = (x + v869);
+  x = (x + v870);
+  x = (x + v871);
+  x = (x + v872);
+  x = (x + v873);
+  x = (x + v874);
+  x = (x + v875);
+  x = (x + v876);
+  x = (x + v877);
+  x = (x + v878);
+  x = (x + v879);
+  x = (x + v880);
+  x = (x + v881);
+  x = (x + v882);
+  x = (x + v883);
+  x = (x + v884);
+  x = (x + v885);
+  x = (x + v886);
+  x = (x + v887);
+  x = (x + v888);
+  x = (x + v889);
+  x = (x + v890);
+  x = (x + v891);
+  x = (x + v892);
+  x = (x + v893);
+  x = (x + v894);
+  x = (x + v895);
+  x = (x + v896);
+  x = (x + v897);
+  x = (x + v898);
+  x = (x + v899);
+  x = (x + v900);
+  x = (x + v901);
+  x = (x + v902);
+  x = (x + v903);
+  x = (x + v904);
+  x = (x + v905);
+  x = (x + v906);
+  x = (x + v907);
+  x = (x + v908);
+  x = (x + v909);
+  x = (x + v910);
+  x = (x + v911);
+  x = (x + v912);
+  x = (x + v913);
+  x = (x + v914);
+  x = (x + v915);
+  x = (x + v916);
+  x = (x + v917);
+  x = (x + v918);
+  x = (x + v919);
+  x = (x + v920);
+  x = (x + v921);
+  x = (x + v922);
+  x = (x + v923);
+  x = (x + v924);
+  x = (x + v925);
+  x = (x + v926);
+  x = (x + v927);
+  x = (x + v928);
+  x = (x + v929);
+  x = (x + v930);
+  x = (x + v931);
+  x = (x + v932);
+  x = (x + v933);
+  x = (x + v934);
+  x = (x + v935);
+  x = (x + v936);
+  x = (x + v937);
+  x = (x + v938);
+  x = (x + v939);
+  x = (x + v940);
+  x = (x + v941);
+  x = (x + v942);
+  x = (x + v943);
+  x = (x + v944);
+  x = (x + v945);
+  x = (x + v946);
+  x = (x + v947);
+  x = (x + v948);
+  x = (x + v949);
+  x = (x + v950);
+  x = (x + v951);
+  x = (x + v952);
+  x = (x + v953);
+  x = (x + v954);
+  x = (x + v955);
+  x = (x + v956);
+  x = (x + v957);
+  x = (x + v958);
+  x = (x + v959);
+  x = (x + v960);
+  x = (x + v961);
+  x = (x + v962);
+  x = (x + v963);
+  x = (x + v964);
+  x = (x + v965);
+  x = (x + v966);
+  x = (x + v967);
+  x = (x + v968);
+  x = (x + v969);
+  x = (x + v970);
+  x = (x + v971);
+  x = (x + v972);
+  x = (x + v973);
+  x = (x + v974);
+  x = (x + v975);
+  x = (x + v976);
+  x = (x + v977);
+  x = (x + v978);
+  x = (x + v979);
+  x = (x + v980);
+  x = (x + v981);
+  x = (x + v982);
+  x = (x + v983);
+  x = (x + v984);
+  x = (x + v985);
+  x = (x + v986);
+  x = (x + v987);
+  x = (x + v988);
+  x = (x + v989);
+  x = (x + v990);
+  x = (x + v991);
+  x = (x + v992);
+  x = (x + v993);
+  x = (x + v994);
+  x = (x + v995);
+  x = (x + v996);
+  x = (x + v997);
+  x = (x + v998);
+  x = (x + v999);
+  return x;
+}
+fragment uint tint_symbol() {
+  return foo();
+}
+program_source:4:13: error: program scope variable must reside in constant address space
+thread uint v0 = 0u;
+            ^
+program_source:5:13: error: program scope variable must reside in constant address space
+thread uint v1 = 0u;
+            ^
+program_source:6:13: error: program scope variable must reside in constant address space
+thread uint v2 = 0u;
+            ^
+program_source:7:13: error: program scope variable must reside in constant address space
+thread uint v3 = 0u;
+            ^
+program_source:8:13: error: program scope variable must reside in constant address space
+thread uint v4 = 0u;
+            ^
+program_source:9:13: error: program scope variable must reside in constant address space
+thread uint v5 = 0u;
+            ^
+program_source:10:13: error: program scope variable must reside in constant address space
+thread uint v6 = 0u;
+            ^
+program_source:11:13: error: program scope variable must reside in constant address space
+thread uint v7 = 0u;
+            ^
+program_source:12:13: error: program scope variable must reside in constant address space
+thread uint v8 = 0u;
+            ^
+program_source:13:13: error: program scope variable must reside in constant address space
+thread uint v9 = 0u;
+            ^
+program_source:14:13: error: program scope variable must reside in constant address space
+thread uint v10 = 0u;
+            ^
+program_source:15:13: error: program scope variable must reside in constant address space
+thread uint v11 = 0u;
+            ^
+program_source:16:13: error: program scope variable must reside in constant address space
+thread uint v12 = 0u;
+            ^
+program_source:17:13: error: program scope variable must reside in constant address space
+thread uint v13 = 0u;
+            ^
+program_source:18:13: error: program scope variable must reside in constant address space
+thread uint v14 = 0u;
+            ^
+program_source:19:13: error: program scope variable must reside in constant address space
+thread uint v15 = 0u;
+            ^
+program_source:20:13: error: program scope variable must reside in constant address space
+thread uint v16 = 0u;
+            ^
+program_source:21:13: error: program scope variable must reside in constant address space
+thread uint v17 = 0u;
+            ^
+program_source:22:13: error: program scope variable must reside in constant address space
+thread uint v18 = 0u;
+            ^
+program_source:23:13: error: program scope variable must reside in constant address space
+thread uint v19 = 0u;
+            ^
+program_source:24:13: error: program scope variable must reside in constant address space
+thread uint v20 = 0u;
+            ^
+program_source:25:13: error: program scope variable must reside in constant address space
+thread uint v21 = 0u;
+            ^
+program_source:26:13: error: program scope variable must reside in constant address space
+thread uint v22 = 0u;
+            ^
+program_source:27:13: error: program scope variable must reside in constant address space
+thread uint v23 = 0u;
+            ^
+program_source:28:13: error: program scope variable must reside in constant address space
+thread uint v24 = 0u;
+            ^
+program_source:29:13: error: program scope variable must reside in constant address space
+thread uint v25 = 0u;
+            ^
+program_source:30:13: error: program scope variable must reside in constant address space
+thread uint v26 = 0u;
+            ^
+program_source:31:13: error: program scope variable must reside in constant address space
+thread uint v27 = 0u;
+            ^
+program_source:32:13: error: program scope variable must reside in constant address space
+thread uint v28 = 0u;
+            ^
+program_source:33:13: error: program scope variable must reside in constant address space
+thread uint v29 = 0u;
+            ^
+program_source:34:13: error: program scope variable must reside in constant address space
+thread uint v30 = 0u;
+            ^
+program_source:35:13: error: program scope variable must reside in constant address space
+thread uint v31 = 0u;
+            ^
+program_source:36:13: error: program scope variable must reside in constant address space
+thread uint v32 = 0u;
+            ^
+program_source:37:13: error: program scope variable must reside in constant address space
+thread uint v33 = 0u;
+            ^
+program_source:38:13: error: program scope variable must reside in constant address space
+thread uint v34 = 0u;
+            ^
+program_source:39:13: error: program scope variable must reside in constant address space
+thread uint v35 = 0u;
+            ^
+program_source:40:13: error: program scope variable must reside in constant address space
+thread uint v36 = 0u;
+            ^
+program_source:41:13: error: program scope variable must reside in constant address space
+thread uint v37 = 0u;
+            ^
+program_source:42:13: error: program scope variable must reside in constant address space
+thread uint v38 = 0u;
+            ^
+program_source:43:13: error: program scope variable must reside in constant address space
+thread uint v39 = 0u;
+            ^
+program_source:44:13: error: program scope variable must reside in constant address space
+thread uint v40 = 0u;
+            ^
+program_source:45:13: error: program scope variable must reside in constant address space
+thread uint v41 = 0u;
+            ^
+program_source:46:13: error: program scope variable must reside in constant address space
+thread uint v42 = 0u;
+            ^
+program_source:47:13: error: program scope variable must reside in constant address space
+thread uint v43 = 0u;
+            ^
+program_source:48:13: error: program scope variable must reside in constant address space
+thread uint v44 = 0u;
+            ^
+program_source:49:13: error: program scope variable must reside in constant address space
+thread uint v45 = 0u;
+            ^
+program_source:50:13: error: program scope variable must reside in constant address space
+thread uint v46 = 0u;
+            ^
+program_source:51:13: error: program scope variable must reside in constant address space
+thread uint v47 = 0u;
+            ^
+program_source:52:13: error: program scope variable must reside in constant address space
+thread uint v48 = 0u;
+            ^
+program_source:53:13: error: program scope variable must reside in constant address space
+thread uint v49 = 0u;
+            ^
+program_source:54:13: error: program scope variable must reside in constant address space
+thread uint v50 = 0u;
+            ^
+program_source:55:13: error: program scope variable must reside in constant address space
+thread uint v51 = 0u;
+            ^
+program_source:56:13: error: program scope variable must reside in constant address space
+thread uint v52 = 0u;
+            ^
+program_source:57:13: error: program scope variable must reside in constant address space
+thread uint v53 = 0u;
+            ^
+program_source:58:13: error: program scope variable must reside in constant address space
+thread uint v54 = 0u;
+            ^
+program_source:59:13: error: program scope variable must reside in constant address space
+thread uint v55 = 0u;
+            ^
+program_source:60:13: error: program scope variable must reside in constant address space
+thread uint v56 = 0u;
+            ^
+program_source:61:13: error: program scope variable must reside in constant address space
+thread uint v57 = 0u;
+            ^
+program_source:62:13: error: program scope variable must reside in constant address space
+thread uint v58 = 0u;
+            ^
+program_source:63:13: error: program scope variable must reside in constant address space
+thread uint v59 = 0u;
+            ^
+program_source:64:13: error: program scope variable must reside in constant address space
+thread uint v60 = 0u;
+            ^
+program_source:65:13: error: program scope variable must reside in constant address space
+thread uint v61 = 0u;
+            ^
+program_source:66:13: error: program scope variable must reside in constant address space
+thread uint v62 = 0u;
+            ^
+program_source:67:13: error: program scope variable must reside in constant address space
+thread uint v63 = 0u;
+            ^
+program_source:68:13: error: program scope variable must reside in constant address space
+thread uint v64 = 0u;
+            ^
+program_source:69:13: error: program scope variable must reside in constant address space
+thread uint v65 = 0u;
+            ^
+program_source:70:13: error: program scope variable must reside in constant address space
+thread uint v66 = 0u;
+            ^
+program_source:71:13: error: program scope variable must reside in constant address space
+thread uint v67 = 0u;
+            ^
+program_source:72:13: error: program scope variable must reside in constant address space
+thread uint v68 = 0u;
+            ^
+program_source:73:13: error: program scope variable must reside in constant address space
+thread uint v69 = 0u;
+            ^
+program_source:74:13: error: program scope variable must reside in constant address space
+thread uint v70 = 0u;
+            ^
+program_source:75:13: error: program scope variable must reside in constant address space
+thread uint v71 = 0u;
+            ^
+program_source:76:13: error: program scope variable must reside in constant address space
+thread uint v72 = 0u;
+            ^
+program_source:77:13: error: program scope variable must reside in constant address space
+thread uint v73 = 0u;
+            ^
+program_source:78:13: error: program scope variable must reside in constant address space
+thread uint v74 = 0u;
+            ^
+program_source:79:13: error: program scope variable must reside in constant address space
+thread uint v75 = 0u;
+            ^
+program_source:80:13: error: program scope variable must reside in constant address space
+thread uint v76 = 0u;
+            ^
+program_source:81:13: error: program scope variable must reside in constant address space
+thread uint v77 = 0u;
+            ^
+program_source:82:13: error: program scope variable must reside in constant address space
+thread uint v78 = 0u;
+            ^
+program_source:83:13: error: program scope variable must reside in constant address space
+thread uint v79 = 0u;
+            ^
+program_source:84:13: error: program scope variable must reside in constant address space
+thread uint v80 = 0u;
+            ^
+program_source:85:13: error: program scope variable must reside in constant address space
+thread uint v81 = 0u;
+            ^
+program_source:86:13: error: program scope variable must reside in constant address space
+thread uint v82 = 0u;
+            ^
+program_source:87:13: error: program scope variable must reside in constant address space
+thread uint v83 = 0u;
+            ^
+program_source:88:13: error: program scope variable must reside in constant address space
+thread uint v84 = 0u;
+            ^
+program_source:89:13: error: program scope variable must reside in constant address space
+thread uint v85 = 0u;
+            ^
+program_source:90:13: error: program scope variable must reside in constant address space
+thread uint v86 = 0u;
+            ^
+program_source:91:13: error: program scope variable must reside in constant address space
+thread uint v87 = 0u;
+            ^
+program_source:92:13: error: program scope variable must reside in constant address space
+thread uint v88 = 0u;
+            ^
+program_source:93:13: error: program scope variable must reside in constant address space
+thread uint v89 = 0u;
+            ^
+program_source:94:13: error: program scope variable must reside in constant address space
+thread uint v90 = 0u;
+            ^
+program_source:95:13: error: program scope variable must reside in constant address space
+thread uint v91 = 0u;
+            ^
+program_source:96:13: error: program scope variable must reside in constant address space
+thread uint v92 = 0u;
+            ^
+program_source:97:13: error: program scope variable must reside in constant address space
+thread uint v93 = 0u;
+            ^
+program_source:98:13: error: program scope variable must reside in constant address space
+thread uint v94 = 0u;
+            ^
+program_source:99:13: error: program scope variable must reside in constant address space
+thread uint v95 = 0u;
+            ^
+program_source:100:13: error: program scope variable must reside in constant address space
+thread uint v96 = 0u;
+            ^
+program_source:101:13: error: program scope variable must reside in constant address space
+thread uint v97 = 0u;
+            ^
+program_source:102:13: error: program scope variable must reside in constant address space
+thread uint v98 = 0u;
+            ^
+program_source:103:13: error: program scope variable must reside in constant address space
+thread uint v99 = 0u;
+            ^
+program_source:104:13: error: program scope variable must reside in constant address space
+thread uint v100 = 0u;
+            ^
+program_source:105:13: error: program scope variable must reside in constant address space
+thread uint v101 = 0u;
+            ^
+program_source:106:13: error: program scope variable must reside in constant address space
+thread uint v102 = 0u;
+            ^
+program_source:107:13: error: program scope variable must reside in constant address space
+thread uint v103 = 0u;
+            ^
+program_source:108:13: error: program scope variable must reside in constant address space
+thread uint v104 = 0u;
+            ^
+program_source:109:13: error: program scope variable must reside in constant address space
+thread uint v105 = 0u;
+            ^
+program_source:110:13: error: program scope variable must reside in constant address space
+thread uint v106 = 0u;
+            ^
+program_source:111:13: error: program scope variable must reside in constant address space
+thread uint v107 = 0u;
+            ^
+program_source:112:13: error: program scope variable must reside in constant address space
+thread uint v108 = 0u;
+            ^
+program_source:113:13: error: program scope variable must reside in constant address space
+thread uint v109 = 0u;
+            ^
+program_source:114:13: error: program scope variable must reside in constant address space
+thread uint v110 = 0u;
+            ^
+program_source:115:13: error: program scope variable must reside in constant address space
+thread uint v111 = 0u;
+            ^
+program_source:116:13: error: program scope variable must reside in constant address space
+thread uint v112 = 0u;
+            ^
+program_source:117:13: error: program scope variable must reside in constant address space
+thread uint v113 = 0u;
+            ^
+program_source:118:13: error: program scope variable must reside in constant address space
+thread uint v114 = 0u;
+            ^
+program_source:119:13: error: program scope variable must reside in constant address space
+thread uint v115 = 0u;
+            ^
+program_source:120:13: error: program scope variable must reside in constant address space
+thread uint v116 = 0u;
+            ^
+program_source:121:13: error: program scope variable must reside in constant address space
+thread uint v117 = 0u;
+            ^
+program_source:122:13: error: program scope variable must reside in constant address space
+thread uint v118 = 0u;
+            ^
+program_source:123:13: error: program scope variable must reside in constant address space
+thread uint v119 = 0u;
+            ^
+program_source:124:13: error: program scope variable must reside in constant address space
+thread uint v120 = 0u;
+            ^
+program_source:125:13: error: program scope variable must reside in constant address space
+thread uint v121 = 0u;
+            ^
+program_source:126:13: error: program scope variable must reside in constant address space
+thread uint v122 = 0u;
+            ^
+program_source:127:13: error: program scope variable must reside in constant address space
+thread uint v123 = 0u;
+            ^
+program_source:128:13: error: program scope variable must reside in constant address space
+thread uint v124 = 0u;
+            ^
+program_source:129:13: error: program scope variable must reside in constant address space
+thread uint v125 = 0u;
+            ^
+program_source:130:13: error: program scope variable must reside in constant address space
+thread uint v126 = 0u;
+            ^
+program_source:131:13: error: program scope variable must reside in constant address space
+thread uint v127 = 0u;
+            ^
+program_source:132:13: error: program scope variable must reside in constant address space
+thread uint v128 = 0u;
+            ^
+program_source:133:13: error: program scope variable must reside in constant address space
+thread uint v129 = 0u;
+            ^
+program_source:134:13: error: program scope variable must reside in constant address space
+thread uint v130 = 0u;
+            ^
+program_source:135:13: error: program scope variable must reside in constant address space
+thread uint v131 = 0u;
+            ^
+program_source:136:13: error: program scope variable must reside in constant address space
+thread uint v132 = 0u;
+            ^
+program_source:137:13: error: program scope variable must reside in constant address space
+thread uint v133 = 0u;
+            ^
+program_source:138:13: error: program scope variable must reside in constant address space
+thread uint v134 = 0u;
+            ^
+program_source:139:13: error: program scope variable must reside in constant address space
+thread uint v135 = 0u;
+            ^
+program_source:140:13: error: program scope variable must reside in constant address space
+thread uint v136 = 0u;
+            ^
+program_source:141:13: error: program scope variable must reside in constant address space
+thread uint v137 = 0u;
+            ^
+program_source:142:13: error: program scope variable must reside in constant address space
+thread uint v138 = 0u;
+            ^
+program_source:143:13: error: program scope variable must reside in constant address space
+thread uint v139 = 0u;
+            ^
+program_source:144:13: error: program scope variable must reside in constant address space
+thread uint v140 = 0u;
+            ^
+program_source:145:13: error: program scope variable must reside in constant address space
+thread uint v141 = 0u;
+            ^
+program_source:146:13: error: program scope variable must reside in constant address space
+thread uint v142 = 0u;
+            ^
+program_source:147:13: error: program scope variable must reside in constant address space
+thread uint v143 = 0u;
+            ^
+program_source:148:13: error: program scope variable must reside in constant address space
+thread uint v144 = 0u;
+            ^
+program_source:149:13: error: program scope variable must reside in constant address space
+thread uint v145 = 0u;
+            ^
+program_source:150:13: error: program scope variable must reside in constant address space
+thread uint v146 = 0u;
+            ^
+program_source:151:13: error: program scope variable must reside in constant address space
+thread uint v147 = 0u;
+            ^
+program_source:152:13: error: program scope variable must reside in constant address space
+thread uint v148 = 0u;
+            ^
+program_source:153:13: error: program scope variable must reside in constant address space
+thread uint v149 = 0u;
+            ^
+program_source:154:13: error: program scope variable must reside in constant address space
+thread uint v150 = 0u;
+            ^
+program_source:155:13: error: program scope variable must reside in constant address space
+thread uint v151 = 0u;
+            ^
+program_source:156:13: error: program scope variable must reside in constant address space
+thread uint v152 = 0u;
+            ^
+program_source:157:13: error: program scope variable must reside in constant address space
+thread uint v153 = 0u;
+            ^
+program_source:158:13: error: program scope variable must reside in constant address space
+thread uint v154 = 0u;
+            ^
+program_source:159:13: error: program scope variable must reside in constant address space
+thread uint v155 = 0u;
+            ^
+program_source:160:13: error: program scope variable must reside in constant address space
+thread uint v156 = 0u;
+            ^
+program_source:161:13: error: program scope variable must reside in constant address space
+thread uint v157 = 0u;
+            ^
+program_source:162:13: error: program scope variable must reside in constant address space
+thread uint v158 = 0u;
+            ^
+program_source:163:13: error: program scope variable must reside in constant address space
+thread uint v159 = 0u;
+            ^
+program_source:164:13: error: program scope variable must reside in constant address space
+thread uint v160 = 0u;
+            ^
+program_source:165:13: error: program scope variable must reside in constant address space
+thread uint v161 = 0u;
+            ^
+program_source:166:13: error: program scope variable must reside in constant address space
+thread uint v162 = 0u;
+            ^
+program_source:167:13: error: program scope variable must reside in constant address space
+thread uint v163 = 0u;
+            ^
+program_source:168:13: error: program scope variable must reside in constant address space
+thread uint v164 = 0u;
+            ^
+program_source:169:13: error: program scope variable must reside in constant address space
+thread uint v165 = 0u;
+            ^
+program_source:170:13: error: program scope variable must reside in constant address space
+thread uint v166 = 0u;
+            ^
+program_source:171:13: error: program scope variable must reside in constant address space
+thread uint v167 = 0u;
+            ^
+program_source:172:13: error: program scope variable must reside in constant address space
+thread uint v168 = 0u;
+            ^
+program_source:173:13: error: program scope variable must reside in constant address space
+thread uint v169 = 0u;
+            ^
+program_source:174:13: error: program scope variable must reside in constant address space
+thread uint v170 = 0u;
+            ^
+program_source:175:13: error: program scope variable must reside in constant address space
+thread uint v171 = 0u;
+            ^
+program_source:176:13: error: program scope variable must reside in constant address space
+thread uint v172 = 0u;
+            ^
+program_source:177:13: error: program scope variable must reside in constant address space
+thread uint v173 = 0u;
+            ^
+program_source:178:13: error: program scope variable must reside in constant address space
+thread uint v174 = 0u;
+            ^
+program_source:179:13: error: program scope variable must reside in constant address space
+thread uint v175 = 0u;
+            ^
+program_source:180:13: error: program scope variable must reside in constant address space
+thread uint v176 = 0u;
+            ^
+program_source:181:13: error: program scope variable must reside in constant address space
+thread uint v177 = 0u;
+            ^
+program_source:182:13: error: program scope variable must reside in constant address space
+thread uint v178 = 0u;
+            ^
+program_source:183:13: error: program scope variable must reside in constant address space
+thread uint v179 = 0u;
+            ^
+program_source:184:13: error: program scope variable must reside in constant address space
+thread uint v180 = 0u;
+            ^
+program_source:185:13: error: program scope variable must reside in constant address space
+thread uint v181 = 0u;
+            ^
+program_source:186:13: error: program scope variable must reside in constant address space
+thread uint v182 = 0u;
+            ^
+program_source:187:13: error: program scope variable must reside in constant address space
+thread uint v183 = 0u;
+            ^
+program_source:188:13: error: program scope variable must reside in constant address space
+thread uint v184 = 0u;
+            ^
+program_source:189:13: error: program scope variable must reside in constant address space
+thread uint v185 = 0u;
+            ^
+program_source:190:13: error: program scope variable must reside in constant address space
+thread uint v186 = 0u;
+            ^
+program_source:191:13: error: program scope variable must reside in constant address space
+thread uint v187 = 0u;
+            ^
+program_source:192:13: error: program scope variable must reside in constant address space
+thread uint v188 = 0u;
+            ^
+program_source:193:13: error: program scope variable must reside in constant address space
+thread uint v189 = 0u;
+            ^
+program_source:194:13: error: program scope variable must reside in constant address space
+thread uint v190 = 0u;
+            ^
+program_source:195:13: error: program scope variable must reside in constant address space
+thread uint v191 = 0u;
+            ^
+program_source:196:13: error: program scope variable must reside in constant address space
+thread uint v192 = 0u;
+            ^
+program_source:197:13: error: program scope variable must reside in constant address space
+thread uint v193 = 0u;
+            ^
+program_source:198:13: error: program scope variable must reside in constant address space
+thread uint v194 = 0u;
+            ^
+program_source:199:13: error: program scope variable must reside in constant address space
+thread uint v195 = 0u;
+            ^
+program_source:200:13: error: program scope variable must reside in constant address space
+thread uint v196 = 0u;
+            ^
+program_source:201:13: error: program scope variable must reside in constant address space
+thread uint v197 = 0u;
+            ^
+program_source:202:13: error: program scope variable must reside in constant address space
+thread uint v198 = 0u;
+            ^
+program_source:203:13: error: program scope variable must reside in constant address space
+thread uint v199 = 0u;
+            ^
+program_source:204:13: error: program scope variable must reside in constant address space
+thread uint v200 = 0u;
+            ^
+program_source:205:13: error: program scope variable must reside in constant address space
+thread uint v201 = 0u;
+            ^
+program_source:206:13: error: program scope variable must reside in constant address space
+thread uint v202 = 0u;
+            ^
+program_source:207:13: error: program scope variable must reside in constant address space
+thread uint v203 = 0u;
+            ^
+program_source:208:13: error: program scope variable must reside in constant address space
+thread uint v204 = 0u;
+            ^
+program_source:209:13: error: program scope variable must reside in constant address space
+thread uint v205 = 0u;
+            ^
+program_source:210:13: error: program scope variable must reside in constant address space
+thread uint v206 = 0u;
+            ^
+program_source:211:13: error: program scope variable must reside in constant address space
+thread uint v207 = 0u;
+            ^
+program_source:212:13: error: program scope variable must reside in constant address space
+thread uint v208 = 0u;
+            ^
+program_source:213:13: error: program scope variable must reside in constant address space
+thread uint v209 = 0u;
+            ^
+program_source:214:13: error: program scope variable must reside in constant address space
+thread uint v210 = 0u;
+            ^
+program_source:215:13: error: program scope variable must reside in constant address space
+thread uint v211 = 0u;
+            ^
+program_source:216:13: error: program scope variable must reside in constant address space
+thread uint v212 = 0u;
+            ^
+program_source:217:13: error: program scope variable must reside in constant address space
+thread uint v213 = 0u;
+            ^
+program_source:218:13: error: program scope variable must reside in constant address space
+thread uint v214 = 0u;
+            ^
+program_source:219:13: error: program scope variable must reside in constant address space
+thread uint v215 = 0u;
+            ^
+program_source:220:13: error: program scope variable must reside in constant address space
+thread uint v216 = 0u;
+            ^
+program_source:221:13: error: program scope variable must reside in constant address space
+thread uint v217 = 0u;
+            ^
+program_source:222:13: error: program scope variable must reside in constant address space
+thread uint v218 = 0u;
+            ^
+program_source:223:13: error: program scope variable must reside in constant address space
+thread uint v219 = 0u;
+            ^
+program_source:224:13: error: program scope variable must reside in constant address space
+thread uint v220 = 0u;
+            ^
+program_source:225:13: error: program scope variable must reside in constant address space
+thread uint v221 = 0u;
+            ^
+program_source:226:13: error: program scope variable must reside in constant address space
+thread uint v222 = 0u;
+            ^
+program_source:227:13: error: program scope variable must reside in constant address space
+thread uint v223 = 0u;
+            ^
+program_source:228:13: error: program scope variable must reside in constant address space
+thread uint v224 = 0u;
+            ^
+program_source:229:13: error: program scope variable must reside in constant address space
+thread uint v225 = 0u;
+            ^
+program_source:230:13: error: program scope variable must reside in constant address space
+thread uint v226 = 0u;
+            ^
+program_source:231:13: error: program scope variable must reside in constant address space
+thread uint v227 = 0u;
+            ^
+program_source:232:13: error: program scope variable must reside in constant address space
+thread uint v228 = 0u;
+            ^
+program_source:233:13: error: program scope variable must reside in constant address space
+thread uint v229 = 0u;
+            ^
+program_source:234:13: error: program scope variable must reside in constant address space
+thread uint v230 = 0u;
+            ^
+program_source:235:13: error: program scope variable must reside in constant address space
+thread uint v231 = 0u;
+            ^
+program_source:236:13: error: program scope variable must reside in constant address space
+thread uint v232 = 0u;
+            ^
+program_source:237:13: error: program scope variable must reside in constant address space
+thread uint v233 = 0u;
+            ^
+program_source:238:13: error: program scope variable must reside in constant address space
+thread uint v234 = 0u;
+            ^
+program_source:239:13: error: program scope variable must reside in constant address space
+thread uint v235 = 0u;
+            ^
+program_source:240:13: error: program scope variable must reside in constant address space
+thread uint v236 = 0u;
+            ^
+program_source:241:13: error: program scope variable must reside in constant address space
+thread uint v237 = 0u;
+            ^
+program_source:242:13: error: program scope variable must reside in constant address space
+thread uint v238 = 0u;
+            ^
+program_source:243:13: error: program scope variable must reside in constant address space
+thread uint v239 = 0u;
+            ^
+program_source:244:13: error: program scope variable must reside in constant address space
+thread uint v240 = 0u;
+            ^
+program_source:245:13: error: program scope variable must reside in constant address space
+thread uint v241 = 0u;
+            ^
+program_source:246:13: error: program scope variable must reside in constant address space
+thread uint v242 = 0u;
+            ^
+program_source:247:13: error: program scope variable must reside in constant address space
+thread uint v243 = 0u;
+            ^
+program_source:248:13: error: program scope variable must reside in constant address space
+thread uint v244 = 0u;
+            ^
+program_source:249:13: error: program scope variable must reside in constant address space
+thread uint v245 = 0u;
+            ^
+program_source:250:13: error: program scope variable must reside in constant address space
+thread uint v246 = 0u;
+            ^
+program_source:251:13: error: program scope variable must reside in constant address space
+thread uint v247 = 0u;
+            ^
+program_source:252:13: error: program scope variable must reside in constant address space
+thread uint v248 = 0u;
+            ^
+program_source:253:13: error: program scope variable must reside in constant address space
+thread uint v249 = 0u;
+            ^
+program_source:254:13: error: program scope variable must reside in constant address space
+thread uint v250 = 0u;
+            ^
+program_source:255:13: error: program scope variable must reside in constant address space
+thread uint v251 = 0u;
+            ^
+program_source:256:13: error: program scope variable must reside in constant address space
+thread uint v252 = 0u;
+            ^
+program_source:257:13: error: program scope variable must reside in constant address space
+thread uint v253 = 0u;
+            ^
+program_source:258:13: error: program scope variable must reside in constant address space
+thread uint v254 = 0u;
+            ^
+program_source:259:13: error: program scope variable must reside in constant address space
+thread uint v255 = 0u;
+            ^
+program_source:260:13: error: program scope variable must reside in constant address space
+thread uint v256 = 0u;
+            ^
+program_source:261:13: error: program scope variable must reside in constant address space
+thread uint v257 = 0u;
+            ^
+program_source:262:13: error: program scope variable must reside in constant address space
+thread uint v258 = 0u;
+            ^
+program_source:263:13: error: program scope variable must reside in constant address space
+thread uint v259 = 0u;
+            ^
+program_source:264:13: error: program scope variable must reside in constant address space
+thread uint v260 = 0u;
+            ^
+program_source:265:13: error: program scope variable must reside in constant address space
+thread uint v261 = 0u;
+            ^
+program_source:266:13: error: program scope variable must reside in constant address space
+thread uint v262 = 0u;
+            ^
+program_source:267:13: error: program scope variable must reside in constant address space
+thread uint v263 = 0u;
+            ^
+program_source:268:13: error: program scope variable must reside in constant address space
+thread uint v264 = 0u;
+            ^
+program_source:269:13: error: program scope variable must reside in constant address space
+thread uint v265 = 0u;
+            ^
+program_source:270:13: error: program scope variable must reside in constant address space
+thread uint v266 = 0u;
+            ^
+program_source:271:13: error: program scope variable must reside in constant address space
+thread uint v267 = 0u;
+            ^
+program_source:272:13: error: program scope variable must reside in constant address space
+thread uint v268 = 0u;
+            ^
+program_source:273:13: error: program scope variable must reside in constant address space
+thread uint v269 = 0u;
+            ^
+program_source:274:13: error: program scope variable must reside in constant address space
+thread uint v270 = 0u;
+            ^
+program_source:275:13: error: program scope variable must reside in constant address space
+thread uint v271 = 0u;
+            ^
+program_source:276:13: error: program scope variable must reside in constant address space
+thread uint v272 = 0u;
+            ^
+program_source:277:13: error: program scope variable must reside in constant address space
+thread uint v273 = 0u;
+            ^
+program_source:278:13: error: program scope variable must reside in constant address space
+thread uint v274 = 0u;
+            ^
+program_source:279:13: error: program scope variable must reside in constant address space
+thread uint v275 = 0u;
+            ^
+program_source:280:13: error: program scope variable must reside in constant address space
+thread uint v276 = 0u;
+            ^
+program_source:281:13: error: program scope variable must reside in constant address space
+thread uint v277 = 0u;
+            ^
+program_source:282:13: error: program scope variable must reside in constant address space
+thread uint v278 = 0u;
+            ^
+program_source:283:13: error: program scope variable must reside in constant address space
+thread uint v279 = 0u;
+            ^
+program_source:284:13: error: program scope variable must reside in constant address space
+thread uint v280 = 0u;
+            ^
+program_source:285:13: error: program scope variable must reside in constant address space
+thread uint v281 = 0u;
+            ^
+program_source:286:13: error: program scope variable must reside in constant address space
+thread uint v282 = 0u;
+            ^
+program_source:287:13: error: program scope variable must reside in constant address space
+thread uint v283 = 0u;
+            ^
+program_source:288:13: error: program scope variable must reside in constant address space
+thread uint v284 = 0u;
+            ^
+program_source:289:13: error: program scope variable must reside in constant address space
+thread uint v285 = 0u;
+            ^
+program_source:290:13: error: program scope variable must reside in constant address space
+thread uint v286 = 0u;
+            ^
+program_source:291:13: error: program scope variable must reside in constant address space
+thread uint v287 = 0u;
+            ^
+program_source:292:13: error: program scope variable must reside in constant address space
+thread uint v288 = 0u;
+            ^
+program_source:293:13: error: program scope variable must reside in constant address space
+thread uint v289 = 0u;
+            ^
+program_source:294:13: error: program scope variable must reside in constant address space
+thread uint v290 = 0u;
+            ^
+program_source:295:13: error: program scope variable must reside in constant address space
+thread uint v291 = 0u;
+            ^
+program_source:296:13: error: program scope variable must reside in constant address space
+thread uint v292 = 0u;
+            ^
+program_source:297:13: error: program scope variable must reside in constant address space
+thread uint v293 = 0u;
+            ^
+program_source:298:13: error: program scope variable must reside in constant address space
+thread uint v294 = 0u;
+            ^
+program_source:299:13: error: program scope variable must reside in constant address space
+thread uint v295 = 0u;
+            ^
+program_source:300:13: error: program scope variable must reside in constant address space
+thread uint v296 = 0u;
+            ^
+program_source:301:13: error: program scope variable must reside in constant address space
+thread uint v297 = 0u;
+            ^
+program_source:302:13: error: program scope variable must reside in constant address space
+thread uint v298 = 0u;
+            ^
+program_source:303:13: error: program scope variable must reside in constant address space
+thread uint v299 = 0u;
+            ^
+program_source:304:13: error: program scope variable must reside in constant address space
+thread uint v300 = 0u;
+            ^
+program_source:305:13: error: program scope variable must reside in constant address space
+thread uint v301 = 0u;
+            ^
+program_source:306:13: error: program scope variable must reside in constant address space
+thread uint v302 = 0u;
+            ^
+program_source:307:13: error: program scope variable must reside in constant address space
+thread uint v303 = 0u;
+            ^
+program_source:308:13: error: program scope variable must reside in constant address space
+thread uint v304 = 0u;
+            ^
+program_source:309:13: error: program scope variable must reside in constant address space
+thread uint v305 = 0u;
+            ^
+program_source:310:13: error: program scope variable must reside in constant address space
+thread uint v306 = 0u;
+            ^
+program_source:311:13: error: program scope variable must reside in constant address space
+thread uint v307 = 0u;
+            ^
+program_source:312:13: error: program scope variable must reside in constant address space
+thread uint v308 = 0u;
+            ^
+program_source:313:13: error: program scope variable must reside in constant address space
+thread uint v309 = 0u;
+            ^
+program_source:314:13: error: program scope variable must reside in constant address space
+thread uint v310 = 0u;
+            ^
+program_source:315:13: error: program scope variable must reside in constant address space
+thread uint v311 = 0u;
+            ^
+program_source:316:13: error: program scope variable must reside in constant address space
+thread uint v312 = 0u;
+            ^
+program_source:317:13: error: program scope variable must reside in constant address space
+thread uint v313 = 0u;
+            ^
+program_source:318:13: error: program scope variable must reside in constant address space
+thread uint v314 = 0u;
+            ^
+program_source:319:13: error: program scope variable must reside in constant address space
+thread uint v315 = 0u;
+            ^
+program_source:320:13: error: program scope variable must reside in constant address space
+thread uint v316 = 0u;
+            ^
+program_source:321:13: error: program scope variable must reside in constant address space
+thread uint v317 = 0u;
+            ^
+program_source:322:13: error: program scope variable must reside in constant address space
+thread uint v318 = 0u;
+            ^
+program_source:323:13: error: program scope variable must reside in constant address space
+thread uint v319 = 0u;
+            ^
+program_source:324:13: error: program scope variable must reside in constant address space
+thread uint v320 = 0u;
+            ^
+program_source:325:13: error: program scope variable must reside in constant address space
+thread uint v321 = 0u;
+            ^
+program_source:326:13: error: program scope variable must reside in constant address space
+thread uint v322 = 0u;
+            ^
+program_source:327:13: error: program scope variable must reside in constant address space
+thread uint v323 = 0u;
+            ^
+program_source:328:13: error: program scope variable must reside in constant address space
+thread uint v324 = 0u;
+            ^
+program_source:329:13: error: program scope variable must reside in constant address space
+thread uint v325 = 0u;
+            ^
+program_source:330:13: error: program scope variable must reside in constant address space
+thread uint v326 = 0u;
+            ^
+program_source:331:13: error: program scope variable must reside in constant address space
+thread uint v327 = 0u;
+            ^
+program_source:332:13: error: program scope variable must reside in constant address space
+thread uint v328 = 0u;
+            ^
+program_source:333:13: error: program scope variable must reside in constant address space
+thread uint v329 = 0u;
+            ^
+program_source:334:13: error: program scope variable must reside in constant address space
+thread uint v330 = 0u;
+            ^
+program_source:335:13: error: program scope variable must reside in constant address space
+thread uint v331 = 0u;
+            ^
+program_source:336:13: error: program scope variable must reside in constant address space
+thread uint v332 = 0u;
+            ^
+program_source:337:13: error: program scope variable must reside in constant address space
+thread uint v333 = 0u;
+            ^
+program_source:338:13: error: program scope variable must reside in constant address space
+thread uint v334 = 0u;
+            ^
+program_source:339:13: error: program scope variable must reside in constant address space
+thread uint v335 = 0u;
+            ^
+program_source:340:13: error: program scope variable must reside in constant address space
+thread uint v336 = 0u;
+            ^
+program_source:341:13: error: program scope variable must reside in constant address space
+thread uint v337 = 0u;
+            ^
+program_source:342:13: error: program scope variable must reside in constant address space
+thread uint v338 = 0u;
+            ^
+program_source:343:13: error: program scope variable must reside in constant address space
+thread uint v339 = 0u;
+            ^
+program_source:344:13: error: program scope variable must reside in constant address space
+thread uint v340 = 0u;
+            ^
+program_source:345:13: error: program scope variable must reside in constant address space
+thread uint v341 = 0u;
+            ^
+program_source:346:13: error: program scope variable must reside in constant address space
+thread uint v342 = 0u;
+            ^
+program_source:347:13: error: program scope variable must reside in constant address space
+thread uint v343 = 0u;
+            ^
+program_source:348:13: error: program scope variable must reside in constant address space
+thread uint v344 = 0u;
+            ^
+program_source:349:13: error: program scope variable must reside in constant address space
+thread uint v345 = 0u;
+            ^
+program_source:350:13: error: program scope variable must reside in constant address space
+thread uint v346 = 0u;
+            ^
+program_source:351:13: error: program scope variable must reside in constant address space
+thread uint v347 = 0u;
+            ^
+program_source:352:13: error: program scope variable must reside in constant address space
+thread uint v348 = 0u;
+            ^
+program_source:353:13: error: program scope variable must reside in constant address space
+thread uint v349 = 0u;
+            ^
+program_source:354:13: error: program scope variable must reside in constant address space
+thread uint v350 = 0u;
+            ^
+program_source:355:13: error: program scope variable must reside in constant address space
+thread uint v351 = 0u;
+            ^
+program_source:356:13: error: program scope variable must reside in constant address space
+thread uint v352 = 0u;
+            ^
+program_source:357:13: error: program scope variable must reside in constant address space
+thread uint v353 = 0u;
+            ^
+program_source:358:13: error: program scope variable must reside in constant address space
+thread uint v354 = 0u;
+            ^
+program_source:359:13: error: program scope variable must reside in constant address space
+thread uint v355 = 0u;
+            ^
+program_source:360:13: error: program scope variable must reside in constant address space
+thread uint v356 = 0u;
+            ^
+program_source:361:13: error: program scope variable must reside in constant address space
+thread uint v357 = 0u;
+            ^
+program_source:362:13: error: program scope variable must reside in constant address space
+thread uint v358 = 0u;
+            ^
+program_source:363:13: error: program scope variable must reside in constant address space
+thread uint v359 = 0u;
+            ^
+program_source:364:13: error: program scope variable must reside in constant address space
+thread uint v360 = 0u;
+            ^
+program_source:365:13: error: program scope variable must reside in constant address space
+thread uint v361 = 0u;
+            ^
+program_source:366:13: error: program scope variable must reside in constant address space
+thread uint v362 = 0u;
+            ^
+program_source:367:13: error: program scope variable must reside in constant address space
+thread uint v363 = 0u;
+            ^
+program_source:368:13: error: program scope variable must reside in constant address space
+thread uint v364 = 0u;
+            ^
+program_source:369:13: error: program scope variable must reside in constant address space
+thread uint v365 = 0u;
+            ^
+program_source:370:13: error: program scope variable must reside in constant address space
+thread uint v366 = 0u;
+            ^
+program_source:371:13: error: program scope variable must reside in constant address space
+thread uint v367 = 0u;
+            ^
+program_source:372:13: error: program scope variable must reside in constant address space
+thread uint v368 = 0u;
+            ^
+program_source:373:13: error: program scope variable must reside in constant address space
+thread uint v369 = 0u;
+            ^
+program_source:374:13: error: program scope variable must reside in constant address space
+thread uint v370 = 0u;
+            ^
+program_source:375:13: error: program scope variable must reside in constant address space
+thread uint v371 = 0u;
+            ^
+program_source:376:13: error: program scope variable must reside in constant address space
+thread uint v372 = 0u;
+            ^
+program_source:377:13: error: program scope variable must reside in constant address space
+thread uint v373 = 0u;
+            ^
+program_source:378:13: error: program scope variable must reside in constant address space
+thread uint v374 = 0u;
+            ^
+program_source:379:13: error: program scope variable must reside in constant address space
+thread uint v375 = 0u;
+            ^
+program_source:380:13: error: program scope variable must reside in constant address space
+thread uint v376 = 0u;
+            ^
+program_source:381:13: error: program scope variable must reside in constant address space
+thread uint v377 = 0u;
+            ^
+program_source:382:13: error: program scope variable must reside in constant address space
+thread uint v378 = 0u;
+            ^
+program_source:383:13: error: program scope variable must reside in constant address space
+thread uint v379 = 0u;
+            ^
+program_source:384:13: error: program scope variable must reside in constant address space
+thread uint v380 = 0u;
+            ^
+program_source:385:13: error: program scope variable must reside in constant address space
+thread uint v381 = 0u;
+            ^
+program_source:386:13: error: program scope variable must reside in constant address space
+thread uint v382 = 0u;
+            ^
+program_source:387:13: error: program scope variable must reside in constant address space
+thread uint v383 = 0u;
+            ^
+program_source:388:13: error: program scope variable must reside in constant address space
+thread uint v384 = 0u;
+            ^
+program_source:389:13: error: program scope variable must reside in constant address space
+thread uint v385 = 0u;
+            ^
+program_source:390:13: error: program scope variable must reside in constant address space
+thread uint v386 = 0u;
+            ^
+program_source:391:13: error: program scope variable must reside in constant address space
+thread uint v387 = 0u;
+            ^
+program_source:392:13: error: program scope variable must reside in constant address space
+thread uint v388 = 0u;
+            ^
+program_source:393:13: error: program scope variable must reside in constant address space
+thread uint v389 = 0u;
+            ^
+program_source:394:13: error: program scope variable must reside in constant address space
+thread uint v390 = 0u;
+            ^
+program_source:395:13: error: program scope variable must reside in constant address space
+thread uint v391 = 0u;
+            ^
+program_source:396:13: error: program scope variable must reside in constant address space
+thread uint v392 = 0u;
+            ^
+program_source:397:13: error: program scope variable must reside in constant address space
+thread uint v393 = 0u;
+            ^
+program_source:398:13: error: program scope variable must reside in constant address space
+thread uint v394 = 0u;
+            ^
+program_source:399:13: error: program scope variable must reside in constant address space
+thread uint v395 = 0u;
+            ^
+program_source:400:13: error: program scope variable must reside in constant address space
+thread uint v396 = 0u;
+            ^
+program_source:401:13: error: program scope variable must reside in constant address space
+thread uint v397 = 0u;
+            ^
+program_source:402:13: error: program scope variable must reside in constant address space
+thread uint v398 = 0u;
+            ^
+program_source:403:13: error: program scope variable must reside in constant address space
+thread uint v399 = 0u;
+            ^
+program_source:404:13: error: program scope variable must reside in constant address space
+thread uint v400 = 0u;
+            ^
+program_source:405:13: error: program scope variable must reside in constant address space
+thread uint v401 = 0u;
+            ^
+program_source:406:13: error: program scope variable must reside in constant address space
+thread uint v402 = 0u;
+            ^
+program_source:407:13: error: program scope variable must reside in constant address space
+thread uint v403 = 0u;
+            ^
+program_source:408:13: error: program scope variable must reside in constant address space
+thread uint v404 = 0u;
+            ^
+program_source:409:13: error: program scope variable must reside in constant address space
+thread uint v405 = 0u;
+            ^
+program_source:410:13: error: program scope variable must reside in constant address space
+thread uint v406 = 0u;
+            ^
+program_source:411:13: error: program scope variable must reside in constant address space
+thread uint v407 = 0u;
+            ^
+program_source:412:13: error: program scope variable must reside in constant address space
+thread uint v408 = 0u;
+            ^
+program_source:413:13: error: program scope variable must reside in constant address space
+thread uint v409 = 0u;
+            ^
+program_source:414:13: error: program scope variable must reside in constant address space
+thread uint v410 = 0u;
+            ^
+program_source:415:13: error: program scope variable must reside in constant address space
+thread uint v411 = 0u;
+            ^
+program_source:416:13: error: program scope variable must reside in constant address space
+thread uint v412 = 0u;
+            ^
+program_source:417:13: error: program scope variable must reside in constant address space
+thread uint v413 = 0u;
+            ^
+program_source:418:13: error: program scope variable must reside in constant address space
+thread uint v414 = 0u;
+            ^
+program_source:419:13: error: program scope variable must reside in constant address space
+thread uint v415 = 0u;
+            ^
+program_source:420:13: error: program scope variable must reside in constant address space
+thread uint v416 = 0u;
+            ^
+program_source:421:13: error: program scope variable must reside in constant address space
+thread uint v417 = 0u;
+            ^
+program_source:422:13: error: program scope variable must reside in constant address space
+thread uint v418 = 0u;
+            ^
+program_source:423:13: error: program scope variable must reside in constant address space
+thread uint v419 = 0u;
+            ^
+program_source:424:13: error: program scope variable must reside in constant address space
+thread uint v420 = 0u;
+            ^
+program_source:425:13: error: program scope variable must reside in constant address space
+thread uint v421 = 0u;
+            ^
+program_source:426:13: error: program scope variable must reside in constant address space
+thread uint v422 = 0u;
+            ^
+program_source:427:13: error: program scope variable must reside in constant address space
+thread uint v423 = 0u;
+            ^
+program_source:428:13: error: program scope variable must reside in constant address space
+thread uint v424 = 0u;
+            ^
+program_source:429:13: error: program scope variable must reside in constant address space
+thread uint v425 = 0u;
+            ^
+program_source:430:13: error: program scope variable must reside in constant address space
+thread uint v426 = 0u;
+            ^
+program_source:431:13: error: program scope variable must reside in constant address space
+thread uint v427 = 0u;
+            ^
+program_source:432:13: error: program scope variable must reside in constant address space
+thread uint v428 = 0u;
+            ^
+program_source:433:13: error: program scope variable must reside in constant address space
+thread uint v429 = 0u;
+            ^
+program_source:434:13: error: program scope variable must reside in constant address space
+thread uint v430 = 0u;
+            ^
+program_source:435:13: error: program scope variable must reside in constant address space
+thread uint v431 = 0u;
+            ^
+program_source:436:13: error: program scope variable must reside in constant address space
+thread uint v432 = 0u;
+            ^
+program_source:437:13: error: program scope variable must reside in constant address space
+thread uint v433 = 0u;
+            ^
+program_source:438:13: error: program scope variable must reside in constant address space
+thread uint v434 = 0u;
+            ^
+program_source:439:13: error: program scope variable must reside in constant address space
+thread uint v435 = 0u;
+            ^
+program_source:440:13: error: program scope variable must reside in constant address space
+thread uint v436 = 0u;
+            ^
+program_source:441:13: error: program scope variable must reside in constant address space
+thread uint v437 = 0u;
+            ^
+program_source:442:13: error: program scope variable must reside in constant address space
+thread uint v438 = 0u;
+            ^
+program_source:443:13: error: program scope variable must reside in constant address space
+thread uint v439 = 0u;
+            ^
+program_source:444:13: error: program scope variable must reside in constant address space
+thread uint v440 = 0u;
+            ^
+program_source:445:13: error: program scope variable must reside in constant address space
+thread uint v441 = 0u;
+            ^
+program_source:446:13: error: program scope variable must reside in constant address space
+thread uint v442 = 0u;
+            ^
+program_source:447:13: error: program scope variable must reside in constant address space
+thread uint v443 = 0u;
+            ^
+program_source:448:13: error: program scope variable must reside in constant address space
+thread uint v444 = 0u;
+            ^
+program_source:449:13: error: program scope variable must reside in constant address space
+thread uint v445 = 0u;
+            ^
+program_source:450:13: error: program scope variable must reside in constant address space
+thread uint v446 = 0u;
+            ^
+program_source:451:13: error: program scope variable must reside in constant address space
+thread uint v447 = 0u;
+            ^
+program_source:452:13: error: program scope variable must reside in constant address space
+thread uint v448 = 0u;
+            ^
+program_source:453:13: error: program scope variable must reside in constant address space
+thread uint v449 = 0u;
+            ^
+program_source:454:13: error: program scope variable must reside in constant address space
+thread uint v450 = 0u;
+            ^
+program_source:455:13: error: program scope variable must reside in constant address space
+thread uint v451 = 0u;
+            ^
+program_source:456:13: error: program scope variable must reside in constant address space
+thread uint v452 = 0u;
+            ^
+program_source:457:13: error: program scope variable must reside in constant address space
+thread uint v453 = 0u;
+            ^
+program_source:458:13: error: program scope variable must reside in constant address space
+thread uint v454 = 0u;
+            ^
+program_source:459:13: error: program scope variable must reside in constant address space
+thread uint v455 = 0u;
+            ^
+program_source:460:13: error: program scope variable must reside in constant address space
+thread uint v456 = 0u;
+            ^
+program_source:461:13: error: program scope variable must reside in constant address space
+thread uint v457 = 0u;
+            ^
+program_source:462:13: error: program scope variable must reside in constant address space
+thread uint v458 = 0u;
+            ^
+program_source:463:13: error: program scope variable must reside in constant address space
+thread uint v459 = 0u;
+            ^
+program_source:464:13: error: program scope variable must reside in constant address space
+thread uint v460 = 0u;
+            ^
+program_source:465:13: error: program scope variable must reside in constant address space
+thread uint v461 = 0u;
+            ^
+program_source:466:13: error: program scope variable must reside in constant address space
+thread uint v462 = 0u;
+            ^
+program_source:467:13: error: program scope variable must reside in constant address space
+thread uint v463 = 0u;
+            ^
+program_source:468:13: error: program scope variable must reside in constant address space
+thread uint v464 = 0u;
+            ^
+program_source:469:13: error: program scope variable must reside in constant address space
+thread uint v465 = 0u;
+            ^
+program_source:470:13: error: program scope variable must reside in constant address space
+thread uint v466 = 0u;
+            ^
+program_source:471:13: error: program scope variable must reside in constant address space
+thread uint v467 = 0u;
+            ^
+program_source:472:13: error: program scope variable must reside in constant address space
+thread uint v468 = 0u;
+            ^
+program_source:473:13: error: program scope variable must reside in constant address space
+thread uint v469 = 0u;
+            ^
+program_source:474:13: error: program scope variable must reside in constant address space
+thread uint v470 = 0u;
+            ^
+program_source:475:13: error: program scope variable must reside in constant address space
+thread uint v471 = 0u;
+            ^
+program_source:476:13: error: program scope variable must reside in constant address space
+thread uint v472 = 0u;
+            ^
+program_source:477:13: error: program scope variable must reside in constant address space
+thread uint v473 = 0u;
+            ^
+program_source:478:13: error: program scope variable must reside in constant address space
+thread uint v474 = 0u;
+            ^
+program_source:479:13: error: program scope variable must reside in constant address space
+thread uint v475 = 0u;
+            ^
+program_source:480:13: error: program scope variable must reside in constant address space
+thread uint v476 = 0u;
+            ^
+program_source:481:13: error: program scope variable must reside in constant address space
+thread uint v477 = 0u;
+            ^
+program_source:482:13: error: program scope variable must reside in constant address space
+thread uint v478 = 0u;
+            ^
+program_source:483:13: error: program scope variable must reside in constant address space
+thread uint v479 = 0u;
+            ^
+program_source:484:13: error: program scope variable must reside in constant address space
+thread uint v480 = 0u;
+            ^
+program_source:485:13: error: program scope variable must reside in constant address space
+thread uint v481 = 0u;
+            ^
+program_source:486:13: error: program scope variable must reside in constant address space
+thread uint v482 = 0u;
+            ^
+program_source:487:13: error: program scope variable must reside in constant address space
+thread uint v483 = 0u;
+            ^
+program_source:488:13: error: program scope variable must reside in constant address space
+thread uint v484 = 0u;
+            ^
+program_source:489:13: error: program scope variable must reside in constant address space
+thread uint v485 = 0u;
+            ^
+program_source:490:13: error: program scope variable must reside in constant address space
+thread uint v486 = 0u;
+            ^
+program_source:491:13: error: program scope variable must reside in constant address space
+thread uint v487 = 0u;
+            ^
+program_source:492:13: error: program scope variable must reside in constant address space
+thread uint v488 = 0u;
+            ^
+program_source:493:13: error: program scope variable must reside in constant address space
+thread uint v489 = 0u;
+            ^
+program_source:494:13: error: program scope variable must reside in constant address space
+thread uint v490 = 0u;
+            ^
+program_source:495:13: error: program scope variable must reside in constant address space
+thread uint v491 = 0u;
+            ^
+program_source:496:13: error: program scope variable must reside in constant address space
+thread uint v492 = 0u;
+            ^
+program_source:497:13: error: program scope variable must reside in constant address space
+thread uint v493 = 0u;
+            ^
+program_source:498:13: error: program scope variable must reside in constant address space
+thread uint v494 = 0u;
+            ^
+program_source:499:13: error: program scope variable must reside in constant address space
+thread uint v495 = 0u;
+            ^
+program_source:500:13: error: program scope variable must reside in constant address space
+thread uint v496 = 0u;
+            ^
+program_source:501:13: error: program scope variable must reside in constant address space
+thread uint v497 = 0u;
+            ^
+program_source:502:13: error: program scope variable must reside in constant address space
+thread uint v498 = 0u;
+            ^
+program_source:503:13: error: program scope variable must reside in constant address space
+thread uint v499 = 0u;
+            ^
+program_source:504:13: error: program scope variable must reside in constant address space
+thread uint v500 = 0u;
+            ^
+program_source:505:13: error: program scope variable must reside in constant address space
+thread uint v501 = 0u;
+            ^
+program_source:506:13: error: program scope variable must reside in constant address space
+thread uint v502 = 0u;
+            ^
+program_source:507:13: error: program scope variable must reside in constant address space
+thread uint v503 = 0u;
+            ^
+program_source:508:13: error: program scope variable must reside in constant address space
+thread uint v504 = 0u;
+            ^
+program_source:509:13: error: program scope variable must reside in constant address space
+thread uint v505 = 0u;
+            ^
+program_source:510:13: error: program scope variable must reside in constant address space
+thread uint v506 = 0u;
+            ^
+program_source:511:13: error: program scope variable must reside in constant address space
+thread uint v507 = 0u;
+            ^
+program_source:512:13: error: program scope variable must reside in constant address space
+thread uint v508 = 0u;
+            ^
+program_source:513:13: error: program scope variable must reside in constant address space
+thread uint v509 = 0u;
+            ^
+program_source:514:13: error: program scope variable must reside in constant address space
+thread uint v510 = 0u;
+            ^
+program_source:515:13: error: program scope variable must reside in constant address space
+thread uint v511 = 0u;
+            ^
+program_source:516:13: error: program scope variable must reside in constant address space
+thread uint v512 = 0u;
+            ^
+program_source:517:13: error: program scope variable must reside in constant address space
+thread uint v513 = 0u;
+            ^
+program_source:518:13: error: program scope variable must reside in constant address space
+thread uint v514 = 0u;
+            ^
+program_source:519:13: error: program scope variable must reside in constant address space
+thread uint v515 = 0u;
+            ^
+program_source:520:13: error: program scope variable must reside in constant address space
+thread uint v516 = 0u;
+            ^
+program_source:521:13: error: program scope variable must reside in constant address space
+thread uint v517 = 0u;
+            ^
+program_source:522:13: error: program scope variable must reside in constant address space
+thread uint v518 = 0u;
+            ^
+program_source:523:13: error: program scope variable must reside in constant address space
+thread uint v519 = 0u;
+            ^
+program_source:524:13: error: program scope variable must reside in constant address space
+thread uint v520 = 0u;
+            ^
+program_source:525:13: error: program scope variable must reside in constant address space
+thread uint v521 = 0u;
+            ^
+program_source:526:13: error: program scope variable must reside in constant address space
+thread uint v522 = 0u;
+            ^
+program_source:527:13: error: program scope variable must reside in constant address space
+thread uint v523 = 0u;
+            ^
+program_source:528:13: error: program scope variable must reside in constant address space
+thread uint v524 = 0u;
+            ^
+program_source:529:13: error: program scope variable must reside in constant address space
+thread uint v525 = 0u;
+            ^
+program_source:530:13: error: program scope variable must reside in constant address space
+thread uint v526 = 0u;
+            ^
+program_source:531:13: error: program scope variable must reside in constant address space
+thread uint v527 = 0u;
+            ^
+program_source:532:13: error: program scope variable must reside in constant address space
+thread uint v528 = 0u;
+            ^
+program_source:533:13: error: program scope variable must reside in constant address space
+thread uint v529 = 0u;
+            ^
+program_source:534:13: error: program scope variable must reside in constant address space
+thread uint v530 = 0u;
+            ^
+program_source:535:13: error: program scope variable must reside in constant address space
+thread uint v531 = 0u;
+            ^
+program_source:536:13: error: program scope variable must reside in constant address space
+thread uint v532 = 0u;
+            ^
+program_source:537:13: error: program scope variable must reside in constant address space
+thread uint v533 = 0u;
+            ^
+program_source:538:13: error: program scope variable must reside in constant address space
+thread uint v534 = 0u;
+            ^
+program_source:539:13: error: program scope variable must reside in constant address space
+thread uint v535 = 0u;
+            ^
+program_source:540:13: error: program scope variable must reside in constant address space
+thread uint v536 = 0u;
+            ^
+program_source:541:13: error: program scope variable must reside in constant address space
+thread uint v537 = 0u;
+            ^
+program_source:542:13: error: program scope variable must reside in constant address space
+thread uint v538 = 0u;
+            ^
+program_source:543:13: error: program scope variable must reside in constant address space
+thread uint v539 = 0u;
+            ^
+program_source:544:13: error: program scope variable must reside in constant address space
+thread uint v540 = 0u;
+            ^
+program_source:545:13: error: program scope variable must reside in constant address space
+thread uint v541 = 0u;
+            ^
+program_source:546:13: error: program scope variable must reside in constant address space
+thread uint v542 = 0u;
+            ^
+program_source:547:13: error: program scope variable must reside in constant address space
+thread uint v543 = 0u;
+            ^
+program_source:548:13: error: program scope variable must reside in constant address space
+thread uint v544 = 0u;
+            ^
+program_source:549:13: error: program scope variable must reside in constant address space
+thread uint v545 = 0u;
+            ^
+program_source:550:13: error: program scope variable must reside in constant address space
+thread uint v546 = 0u;
+            ^
+program_source:551:13: error: program scope variable must reside in constant address space
+thread uint v547 = 0u;
+            ^
+program_source:552:13: error: program scope variable must reside in constant address space
+thread uint v548 = 0u;
+            ^
+program_source:553:13: error: program scope variable must reside in constant address space
+thread uint v549 = 0u;
+            ^
+program_source:554:13: error: program scope variable must reside in constant address space
+thread uint v550 = 0u;
+            ^
+program_source:555:13: error: program scope variable must reside in constant address space
+thread uint v551 = 0u;
+            ^
+program_source:556:13: error: program scope variable must reside in constant address space
+thread uint v552 = 0u;
+            ^
+program_source:557:13: error: program scope variable must reside in constant address space
+thread uint v553 = 0u;
+            ^
+program_source:558:13: error: program scope variable must reside in constant address space
+thread uint v554 = 0u;
+            ^
+program_source:559:13: error: program scope variable must reside in constant address space
+thread uint v555 = 0u;
+            ^
+program_source:560:13: error: program scope variable must reside in constant address space
+thread uint v556 = 0u;
+            ^
+program_source:561:13: error: program scope variable must reside in constant address space
+thread uint v557 = 0u;
+            ^
+program_source:562:13: error: program scope variable must reside in constant address space
+thread uint v558 = 0u;
+            ^
+program_source:563:13: error: program scope variable must reside in constant address space
+thread uint v559 = 0u;
+            ^
+program_source:564:13: error: program scope variable must reside in constant address space
+thread uint v560 = 0u;
+            ^
+program_source:565:13: error: program scope variable must reside in constant address space
+thread uint v561 = 0u;
+            ^
+program_source:566:13: error: program scope variable must reside in constant address space
+thread uint v562 = 0u;
+            ^
+program_source:567:13: error: program scope variable must reside in constant address space
+thread uint v563 = 0u;
+            ^
+program_source:568:13: error: program scope variable must reside in constant address space
+thread uint v564 = 0u;
+            ^
+program_source:569:13: error: program scope variable must reside in constant address space
+thread uint v565 = 0u;
+            ^
+program_source:570:13: error: program scope variable must reside in constant address space
+thread uint v566 = 0u;
+            ^
+program_source:571:13: error: program scope variable must reside in constant address space
+thread uint v567 = 0u;
+            ^
+program_source:572:13: error: program scope variable must reside in constant address space
+thread uint v568 = 0u;
+            ^
+program_source:573:13: error: program scope variable must reside in constant address space
+thread uint v569 = 0u;
+            ^
+program_source:574:13: error: program scope variable must reside in constant address space
+thread uint v570 = 0u;
+            ^
+program_source:575:13: error: program scope variable must reside in constant address space
+thread uint v571 = 0u;
+            ^
+program_source:576:13: error: program scope variable must reside in constant address space
+thread uint v572 = 0u;
+            ^
+program_source:577:13: error: program scope variable must reside in constant address space
+thread uint v573 = 0u;
+            ^
+program_source:578:13: error: program scope variable must reside in constant address space
+thread uint v574 = 0u;
+            ^
+program_source:579:13: error: program scope variable must reside in constant address space
+thread uint v575 = 0u;
+            ^
+program_source:580:13: error: program scope variable must reside in constant address space
+thread uint v576 = 0u;
+            ^
+program_source:581:13: error: program scope variable must reside in constant address space
+thread uint v577 = 0u;
+            ^
+program_source:582:13: error: program scope variable must reside in constant address space
+thread uint v578 = 0u;
+            ^
+program_source:583:13: error: program scope variable must reside in constant address space
+thread uint v579 = 0u;
+            ^
+program_source:584:13: error: program scope variable must reside in constant address space
+thread uint v580 = 0u;
+            ^
+program_source:585:13: error: program scope variable must reside in constant address space
+thread uint v581 = 0u;
+            ^
+program_source:586:13: error: program scope variable must reside in constant address space
+thread uint v582 = 0u;
+            ^
+program_source:587:13: error: program scope variable must reside in constant address space
+thread uint v583 = 0u;
+            ^
+program_source:588:13: error: program scope variable must reside in constant address space
+thread uint v584 = 0u;
+            ^
+program_source:589:13: error: program scope variable must reside in constant address space
+thread uint v585 = 0u;
+            ^
+program_source:590:13: error: program scope variable must reside in constant address space
+thread uint v586 = 0u;
+            ^
+program_source:591:13: error: program scope variable must reside in constant address space
+thread uint v587 = 0u;
+            ^
+program_source:592:13: error: program scope variable must reside in constant address space
+thread uint v588 = 0u;
+            ^
+program_source:593:13: error: program scope variable must reside in constant address space
+thread uint v589 = 0u;
+            ^
+program_source:594:13: error: program scope variable must reside in constant address space
+thread uint v590 = 0u;
+            ^
+program_source:595:13: error: program scope variable must reside in constant address space
+thread uint v591 = 0u;
+            ^
+program_source:596:13: error: program scope variable must reside in constant address space
+thread uint v592 = 0u;
+            ^
+program_source:597:13: error: program scope variable must reside in constant address space
+thread uint v593 = 0u;
+            ^
+program_source:598:13: error: program scope variable must reside in constant address space
+thread uint v594 = 0u;
+            ^
+program_source:599:13: error: program scope variable must reside in constant address space
+thread uint v595 = 0u;
+            ^
+program_source:600:13: error: program scope variable must reside in constant address space
+thread uint v596 = 0u;
+            ^
+program_source:601:13: error: program scope variable must reside in constant address space
+thread uint v597 = 0u;
+            ^
+program_source:602:13: error: program scope variable must reside in constant address space
+thread uint v598 = 0u;
+            ^
+program_source:603:13: error: program scope variable must reside in constant address space
+thread uint v599 = 0u;
+            ^
+program_source:604:13: error: program scope variable must reside in constant address space
+thread uint v600 = 0u;
+            ^
+program_source:605:13: error: program scope variable must reside in constant address space
+thread uint v601 = 0u;
+            ^
+program_source:606:13: error: program scope variable must reside in constant address space
+thread uint v602 = 0u;
+            ^
+program_source:607:13: error: program scope variable must reside in constant address space
+thread uint v603 = 0u;
+            ^
+program_source:608:13: error: program scope variable must reside in constant address space
+thread uint v604 = 0u;
+            ^
+program_source:609:13: error: program scope variable must reside in constant address space
+thread uint v605 = 0u;
+            ^
+program_source:610:13: error: program scope variable must reside in constant address space
+thread uint v606 = 0u;
+            ^
+program_source:611:13: error: program scope variable must reside in constant address space
+thread uint v607 = 0u;
+            ^
+program_source:612:13: error: program scope variable must reside in constant address space
+thread uint v608 = 0u;
+            ^
+program_source:613:13: error: program scope variable must reside in constant address space
+thread uint v609 = 0u;
+            ^
+program_source:614:13: error: program scope variable must reside in constant address space
+thread uint v610 = 0u;
+            ^
+program_source:615:13: error: program scope variable must reside in constant address space
+thread uint v611 = 0u;
+            ^
+program_source:616:13: error: program scope variable must reside in constant address space
+thread uint v612 = 0u;
+            ^
+program_source:617:13: error: program scope variable must reside in constant address space
+thread uint v613 = 0u;
+            ^
+program_source:618:13: error: program scope variable must reside in constant address space
+thread uint v614 = 0u;
+            ^
+program_source:619:13: error: program scope variable must reside in constant address space
+thread uint v615 = 0u;
+            ^
+program_source:620:13: error: program scope variable must reside in constant address space
+thread uint v616 = 0u;
+            ^
+program_source:621:13: error: program scope variable must reside in constant address space
+thread uint v617 = 0u;
+            ^
+program_source:622:13: error: program scope variable must reside in constant address space
+thread uint v618 = 0u;
+            ^
+program_source:623:13: error: program scope variable must reside in constant address space
+thread uint v619 = 0u;
+            ^
+program_source:624:13: error: program scope variable must reside in constant address space
+thread uint v620 = 0u;
+            ^
+program_source:625:13: error: program scope variable must reside in constant address space
+thread uint v621 = 0u;
+            ^
+program_source:626:13: error: program scope variable must reside in constant address space
+thread uint v622 = 0u;
+            ^
+program_source:627:13: error: program scope variable must reside in constant address space
+thread uint v623 = 0u;
+            ^
+program_source:628:13: error: program scope variable must reside in constant address space
+thread uint v624 = 0u;
+            ^
+program_source:629:13: error: program scope variable must reside in constant address space
+thread uint v625 = 0u;
+            ^
+program_source:630:13: error: program scope variable must reside in constant address space
+thread uint v626 = 0u;
+            ^
+program_source:631:13: error: program scope variable must reside in constant address space
+thread uint v627 = 0u;
+            ^
+program_source:632:13: error: program scope variable must reside in constant address space
+thread uint v628 = 0u;
+            ^
+program_source:633:13: error: program scope variable must reside in constant address space
+thread uint v629 = 0u;
+            ^
+program_source:634:13: error: program scope variable must reside in constant address space
+thread uint v630 = 0u;
+            ^
+program_source:635:13: error: program scope variable must reside in constant address space
+thread uint v631 = 0u;
+            ^
+program_source:636:13: error: program scope variable must reside in constant address space
+thread uint v632 = 0u;
+            ^
+program_source:637:13: error: program scope variable must reside in constant address space
+thread uint v633 = 0u;
+            ^
+program_source:638:13: error: program scope variable must reside in constant address space
+thread uint v634 = 0u;
+            ^
+program_source:639:13: error: program scope variable must reside in constant address space
+thread uint v635 = 0u;
+            ^
+program_source:640:13: error: program scope variable must reside in constant address space
+thread uint v636 = 0u;
+            ^
+program_source:641:13: error: program scope variable must reside in constant address space
+thread uint v637 = 0u;
+            ^
+program_source:642:13: error: program scope variable must reside in constant address space
+thread uint v638 = 0u;
+            ^
+program_source:643:13: error: program scope variable must reside in constant address space
+thread uint v639 = 0u;
+            ^
+program_source:644:13: error: program scope variable must reside in constant address space
+thread uint v640 = 0u;
+            ^
+program_source:645:13: error: program scope variable must reside in constant address space
+thread uint v641 = 0u;
+            ^
+program_source:646:13: error: program scope variable must reside in constant address space
+thread uint v642 = 0u;
+            ^
+program_source:647:13: error: program scope variable must reside in constant address space
+thread uint v643 = 0u;
+            ^
+program_source:648:13: error: program scope variable must reside in constant address space
+thread uint v644 = 0u;
+            ^
+program_source:649:13: error: program scope variable must reside in constant address space
+thread uint v645 = 0u;
+            ^
+program_source:650:13: error: program scope variable must reside in constant address space
+thread uint v646 = 0u;
+            ^
+program_source:651:13: error: program scope variable must reside in constant address space
+thread uint v647 = 0u;
+            ^
+program_source:652:13: error: program scope variable must reside in constant address space
+thread uint v648 = 0u;
+            ^
+program_source:653:13: error: program scope variable must reside in constant address space
+thread uint v649 = 0u;
+            ^
+program_source:654:13: error: program scope variable must reside in constant address space
+thread uint v650 = 0u;
+            ^
+program_source:655:13: error: program scope variable must reside in constant address space
+thread uint v651 = 0u;
+            ^
+program_source:656:13: error: program scope variable must reside in constant address space
+thread uint v652 = 0u;
+            ^
+program_source:657:13: error: program scope variable must reside in constant address space
+thread uint v653 = 0u;
+            ^
+program_source:658:13: error: program scope variable must reside in constant address space
+thread uint v654 = 0u;
+            ^
+program_source:659:13: error: program scope variable must reside in constant address space
+thread uint v655 = 0u;
+            ^
+program_source:660:13: error: program scope variable must reside in constant address space
+thread uint v656 = 0u;
+            ^
+program_source:661:13: error: program scope variable must reside in constant address space
+thread uint v657 = 0u;
+            ^
+program_source:662:13: error: program scope variable must reside in constant address space
+thread uint v658 = 0u;
+            ^
+program_source:663:13: error: program scope variable must reside in constant address space
+thread uint v659 = 0u;
+            ^
+program_source:664:13: error: program scope variable must reside in constant address space
+thread uint v660 = 0u;
+            ^
+program_source:665:13: error: program scope variable must reside in constant address space
+thread uint v661 = 0u;
+            ^
+program_source:666:13: error: program scope variable must reside in constant address space
+thread uint v662 = 0u;
+            ^
+program_source:667:13: error: program scope variable must reside in constant address space
+thread uint v663 = 0u;
+            ^
+program_source:668:13: error: program scope variable must reside in constant address space
+thread uint v664 = 0u;
+            ^
+program_source:669:13: error: program scope variable must reside in constant address space
+thread uint v665 = 0u;
+            ^
+program_source:670:13: error: program scope variable must reside in constant address space
+thread uint v666 = 0u;
+            ^
+program_source:671:13: error: program scope variable must reside in constant address space
+thread uint v667 = 0u;
+            ^
+program_source:672:13: error: program scope variable must reside in constant address space
+thread uint v668 = 0u;
+            ^
+program_source:673:13: error: program scope variable must reside in constant address space
+thread uint v669 = 0u;
+            ^
+program_source:674:13: error: program scope variable must reside in constant address space
+thread uint v670 = 0u;
+            ^
+program_source:675:13: error: program scope variable must reside in constant address space
+thread uint v671 = 0u;
+            ^
+program_source:676:13: error: program scope variable must reside in constant address space
+thread uint v672 = 0u;
+            ^
+program_source:677:13: error: program scope variable must reside in constant address space
+thread uint v673 = 0u;
+            ^
+program_source:678:13: error: program scope variable must reside in constant address space
+thread uint v674 = 0u;
+            ^
+program_source:679:13: error: program scope variable must reside in constant address space
+thread uint v675 = 0u;
+            ^
+program_source:680:13: error: program scope variable must reside in constant address space
+thread uint v676 = 0u;
+            ^
+program_source:681:13: error: program scope variable must reside in constant address space
+thread uint v677 = 0u;
+            ^
+program_source:682:13: error: program scope variable must reside in constant address space
+thread uint v678 = 0u;
+            ^
+program_source:683:13: error: program scope variable must reside in constant address space
+thread uint v679 = 0u;
+            ^
+program_source:684:13: error: program scope variable must reside in constant address space
+thread uint v680 = 0u;
+            ^
+program_source:685:13: error: program scope variable must reside in constant address space
+thread uint v681 = 0u;
+            ^
+program_source:686:13: error: program scope variable must reside in constant address space
+thread uint v682 = 0u;
+            ^
+program_source:687:13: error: program scope variable must reside in constant address space
+thread uint v683 = 0u;
+            ^
+program_source:688:13: error: program scope variable must reside in constant address space
+thread uint v684 = 0u;
+            ^
+program_source:689:13: error: program scope variable must reside in constant address space
+thread uint v685 = 0u;
+            ^
+program_source:690:13: error: program scope variable must reside in constant address space
+thread uint v686 = 0u;
+            ^
+program_source:691:13: error: program scope variable must reside in constant address space
+thread uint v687 = 0u;
+            ^
+program_source:692:13: error: program scope variable must reside in constant address space
+thread uint v688 = 0u;
+            ^
+program_source:693:13: error: program scope variable must reside in constant address space
+thread uint v689 = 0u;
+            ^
+program_source:694:13: error: program scope variable must reside in constant address space
+thread uint v690 = 0u;
+            ^
+program_source:695:13: error: program scope variable must reside in constant address space
+thread uint v691 = 0u;
+            ^
+program_source:696:13: error: program scope variable must reside in constant address space
+thread uint v692 = 0u;
+            ^
+program_source:697:13: error: program scope variable must reside in constant address space
+thread uint v693 = 0u;
+            ^
+program_source:698:13: error: program scope variable must reside in constant address space
+thread uint v694 = 0u;
+            ^
+program_source:699:13: error: program scope variable must reside in constant address space
+thread uint v695 = 0u;
+            ^
+program_source:700:13: error: program scope variable must reside in constant address space
+thread uint v696 = 0u;
+            ^
+program_source:701:13: error: program scope variable must reside in constant address space
+thread uint v697 = 0u;
+            ^
+program_source:702:13: error: program scope variable must reside in constant address space
+thread uint v698 = 0u;
+            ^
+program_source:703:13: error: program scope variable must reside in constant address space
+thread uint v699 = 0u;
+            ^
+program_source:704:13: error: program scope variable must reside in constant address space
+thread uint v700 = 0u;
+            ^
+program_source:705:13: error: program scope variable must reside in constant address space
+thread uint v701 = 0u;
+            ^
+program_source:706:13: error: program scope variable must reside in constant address space
+thread uint v702 = 0u;
+            ^
+program_source:707:13: error: program scope variable must reside in constant address space
+thread uint v703 = 0u;
+            ^
+program_source:708:13: error: program scope variable must reside in constant address space
+thread uint v704 = 0u;
+            ^
+program_source:709:13: error: program scope variable must reside in constant address space
+thread uint v705 = 0u;
+            ^
+program_source:710:13: error: program scope variable must reside in constant address space
+thread uint v706 = 0u;
+            ^
+program_source:711:13: error: program scope variable must reside in constant address space
+thread uint v707 = 0u;
+            ^
+program_source:712:13: error: program scope variable must reside in constant address space
+thread uint v708 = 0u;
+            ^
+program_source:713:13: error: program scope variable must reside in constant address space
+thread uint v709 = 0u;
+            ^
+program_source:714:13: error: program scope variable must reside in constant address space
+thread uint v710 = 0u;
+            ^
+program_source:715:13: error: program scope variable must reside in constant address space
+thread uint v711 = 0u;
+            ^
+program_source:716:13: error: program scope variable must reside in constant address space
+thread uint v712 = 0u;
+            ^
+program_source:717:13: error: program scope variable must reside in constant address space
+thread uint v713 = 0u;
+            ^
+program_source:718:13: error: program scope variable must reside in constant address space
+thread uint v714 = 0u;
+            ^
+program_source:719:13: error: program scope variable must reside in constant address space
+thread uint v715 = 0u;
+            ^
+program_source:720:13: error: program scope variable must reside in constant address space
+thread uint v716 = 0u;
+            ^
+program_source:721:13: error: program scope variable must reside in constant address space
+thread uint v717 = 0u;
+            ^
+program_source:722:13: error: program scope variable must reside in constant address space
+thread uint v718 = 0u;
+            ^
+program_source:723:13: error: program scope variable must reside in constant address space
+thread uint v719 = 0u;
+            ^
+program_source:724:13: error: program scope variable must reside in constant address space
+thread uint v720 = 0u;
+            ^
+program_source:725:13: error: program scope variable must reside in constant address space
+thread uint v721 = 0u;
+            ^
+program_source:726:13: error: program scope variable must reside in constant address space
+thread uint v722 = 0u;
+            ^
+program_source:727:13: error: program scope variable must reside in constant address space
+thread uint v723 = 0u;
+            ^
+program_source:728:13: error: program scope variable must reside in constant address space
+thread uint v724 = 0u;
+            ^
+program_source:729:13: error: program scope variable must reside in constant address space
+thread uint v725 = 0u;
+            ^
+program_source:730:13: error: program scope variable must reside in constant address space
+thread uint v726 = 0u;
+            ^
+program_source:731:13: error: program scope variable must reside in constant address space
+thread uint v727 = 0u;
+            ^
+program_source:732:13: error: program scope variable must reside in constant address space
+thread uint v728 = 0u;
+            ^
+program_source:733:13: error: program scope variable must reside in constant address space
+thread uint v729 = 0u;
+            ^
+program_source:734:13: error: program scope variable must reside in constant address space
+thread uint v730 = 0u;
+            ^
+program_source:735:13: error: program scope variable must reside in constant address space
+thread uint v731 = 0u;
+            ^
+program_source:736:13: error: program scope variable must reside in constant address space
+thread uint v732 = 0u;
+            ^
+program_source:737:13: error: program scope variable must reside in constant address space
+thread uint v733 = 0u;
+            ^
+program_source:738:13: error: program scope variable must reside in constant address space
+thread uint v734 = 0u;
+            ^
+program_source:739:13: error: program scope variable must reside in constant address space
+thread uint v735 = 0u;
+            ^
+program_source:740:13: error: program scope variable must reside in constant address space
+thread uint v736 = 0u;
+            ^
+program_source:741:13: error: program scope variable must reside in constant address space
+thread uint v737 = 0u;
+            ^
+program_source:742:13: error: program scope variable must reside in constant address space
+thread uint v738 = 0u;
+            ^
+program_source:743:13: error: program scope variable must reside in constant address space
+thread uint v739 = 0u;
+            ^
+program_source:744:13: error: program scope variable must reside in constant address space
+thread uint v740 = 0u;
+            ^
+program_source:745:13: error: program scope variable must reside in constant address space
+thread uint v741 = 0u;
+            ^
+program_source:746:13: error: program scope variable must reside in constant address space
+thread uint v742 = 0u;
+            ^
+program_source:747:13: error: program scope variable must reside in constant address space
+thread uint v743 = 0u;
+            ^
+program_source:748:13: error: program scope variable must reside in constant address space
+thread uint v744 = 0u;
+            ^
+program_source:749:13: error: program scope variable must reside in constant address space
+thread uint v745 = 0u;
+            ^
+program_source:750:13: error: program scope variable must reside in constant address space
+thread uint v746 = 0u;
+            ^
+program_source:751:13: error: program scope variable must reside in constant address space
+thread uint v747 = 0u;
+            ^
+program_source:752:13: error: program scope variable must reside in constant address space
+thread uint v748 = 0u;
+            ^
+program_source:753:13: error: program scope variable must reside in constant address space
+thread uint v749 = 0u;
+            ^
+program_source:754:13: error: program scope variable must reside in constant address space
+thread uint v750 = 0u;
+            ^
+program_source:755:13: error: program scope variable must reside in constant address space
+thread uint v751 = 0u;
+            ^
+program_source:756:13: error: program scope variable must reside in constant address space
+thread uint v752 = 0u;
+            ^
+program_source:757:13: error: program scope variable must reside in constant address space
+thread uint v753 = 0u;
+            ^
+program_source:758:13: error: program scope variable must reside in constant address space
+thread uint v754 = 0u;
+            ^
+program_source:759:13: error: program scope variable must reside in constant address space
+thread uint v755 = 0u;
+            ^
+program_source:760:13: error: program scope variable must reside in constant address space
+thread uint v756 = 0u;
+            ^
+program_source:761:13: error: program scope variable must reside in constant address space
+thread uint v757 = 0u;
+            ^
+program_source:762:13: error: program scope variable must reside in constant address space
+thread uint v758 = 0u;
+            ^
+program_source:763:13: error: program scope variable must reside in constant address space
+thread uint v759 = 0u;
+            ^
+program_source:764:13: error: program scope variable must reside in constant address space
+thread uint v760 = 0u;
+            ^
+program_source:765:13: error: program scope variable must reside in constant address space
+thread uint v761 = 0u;
+            ^
+program_source:766:13: error: program scope variable must reside in constant address space
+thread uint v762 = 0u;
+            ^
+program_source:767:13: error: program scope variable must reside in constant address space
+thread uint v763 = 0u;
+            ^
+program_source:768:13: error: program scope variable must reside in constant address space
+thread uint v764 = 0u;
+            ^
+program_source:769:13: error: program scope variable must reside in constant address space
+thread uint v765 = 0u;
+            ^
+program_source:770:13: error: program scope variable must reside in constant address space
+thread uint v766 = 0u;
+            ^
+program_source:771:13: error: program scope variable must reside in constant address space
+thread uint v767 = 0u;
+            ^
+program_source:772:13: error: program scope variable must reside in constant address space
+thread uint v768 = 0u;
+            ^
+program_source:773:13: error: program scope variable must reside in constant address space
+thread uint v769 = 0u;
+            ^
+program_source:774:13: error: program scope variable must reside in constant address space
+thread uint v770 = 0u;
+            ^
+program_source:775:13: error: program scope variable must reside in constant address space
+thread uint v771 = 0u;
+            ^
+program_source:776:13: error: program scope variable must reside in constant address space
+thread uint v772 = 0u;
+            ^
+program_source:777:13: error: program scope variable must reside in constant address space
+thread uint v773 = 0u;
+            ^
+program_source:778:13: error: program scope variable must reside in constant address space
+thread uint v774 = 0u;
+            ^
+program_source:779:13: error: program scope variable must reside in constant address space
+thread uint v775 = 0u;
+            ^
+program_source:780:13: error: program scope variable must reside in constant address space
+thread uint v776 = 0u;
+            ^
+program_source:781:13: error: program scope variable must reside in constant address space
+thread uint v777 = 0u;
+            ^
+program_source:782:13: error: program scope variable must reside in constant address space
+thread uint v778 = 0u;
+            ^
+program_source:783:13: error: program scope variable must reside in constant address space
+thread uint v779 = 0u;
+            ^
+program_source:784:13: error: program scope variable must reside in constant address space
+thread uint v780 = 0u;
+            ^
+program_source:785:13: error: program scope variable must reside in constant address space
+thread uint v781 = 0u;
+            ^
+program_source:786:13: error: program scope variable must reside in constant address space
+thread uint v782 = 0u;
+            ^
+program_source:787:13: error: program scope variable must reside in constant address space
+thread uint v783 = 0u;
+            ^
+program_source:788:13: error: program scope variable must reside in constant address space
+thread uint v784 = 0u;
+            ^
+program_source:789:13: error: program scope variable must reside in constant address space
+thread uint v785 = 0u;
+            ^
+program_source:790:13: error: program scope variable must reside in constant address space
+thread uint v786 = 0u;
+            ^
+program_source:791:13: error: program scope variable must reside in constant address space
+thread uint v787 = 0u;
+            ^
+program_source:792:13: error: program scope variable must reside in constant address space
+thread uint v788 = 0u;
+            ^
+program_source:793:13: error: program scope variable must reside in constant address space
+thread uint v789 = 0u;
+            ^
+program_source:794:13: error: program scope variable must reside in constant address space
+thread uint v790 = 0u;
+            ^
+program_source:795:13: error: program scope variable must reside in constant address space
+thread uint v791 = 0u;
+            ^
+program_source:796:13: error: program scope variable must reside in constant address space
+thread uint v792 = 0u;
+            ^
+program_source:797:13: error: program scope variable must reside in constant address space
+thread uint v793 = 0u;
+            ^
+program_source:798:13: error: program scope variable must reside in constant address space
+thread uint v794 = 0u;
+            ^
+program_source:799:13: error: program scope variable must reside in constant address space
+thread uint v795 = 0u;
+            ^
+program_source:800:13: error: program scope variable must reside in constant address space
+thread uint v796 = 0u;
+            ^
+program_source:801:13: error: program scope variable must reside in constant address space
+thread uint v797 = 0u;
+            ^
+program_source:802:13: error: program scope variable must reside in constant address space
+thread uint v798 = 0u;
+            ^
+program_source:803:13: error: program scope variable must reside in constant address space
+thread uint v799 = 0u;
+            ^
+program_source:804:13: error: program scope variable must reside in constant address space
+thread uint v800 = 0u;
+            ^
+program_source:805:13: error: program scope variable must reside in constant address space
+thread uint v801 = 0u;
+            ^
+program_source:806:13: error: program scope variable must reside in constant address space
+thread uint v802 = 0u;
+            ^
+program_source:807:13: error: program scope variable must reside in constant address space
+thread uint v803 = 0u;
+            ^
+program_source:808:13: error: program scope variable must reside in constant address space
+thread uint v804 = 0u;
+            ^
+program_source:809:13: error: program scope variable must reside in constant address space
+thread uint v805 = 0u;
+            ^
+program_source:810:13: error: program scope variable must reside in constant address space
+thread uint v806 = 0u;
+            ^
+program_source:811:13: error: program scope variable must reside in constant address space
+thread uint v807 = 0u;
+            ^
+program_source:812:13: error: program scope variable must reside in constant address space
+thread uint v808 = 0u;
+            ^
+program_source:813:13: error: program scope variable must reside in constant address space
+thread uint v809 = 0u;
+            ^
+program_source:814:13: error: program scope variable must reside in constant address space
+thread uint v810 = 0u;
+            ^
+program_source:815:13: error: program scope variable must reside in constant address space
+thread uint v811 = 0u;
+            ^
+program_source:816:13: error: program scope variable must reside in constant address space
+thread uint v812 = 0u;
+            ^
+program_source:817:13: error: program scope variable must reside in constant address space
+thread uint v813 = 0u;
+            ^
+program_source:818:13: error: program scope variable must reside in constant address space
+thread uint v814 = 0u;
+            ^
+program_source:819:13: error: program scope variable must reside in constant address space
+thread uint v815 = 0u;
+            ^
+program_source:820:13: error: program scope variable must reside in constant address space
+thread uint v816 = 0u;
+            ^
+program_source:821:13: error: program scope variable must reside in constant address space
+thread uint v817 = 0u;
+            ^
+program_source:822:13: error: program scope variable must reside in constant address space
+thread uint v818 = 0u;
+            ^
+program_source:823:13: error: program scope variable must reside in constant address space
+thread uint v819 = 0u;
+            ^
+program_source:824:13: error: program scope variable must reside in constant address space
+thread uint v820 = 0u;
+            ^
+program_source:825:13: error: program scope variable must reside in constant address space
+thread uint v821 = 0u;
+            ^
+program_source:826:13: error: program scope variable must reside in constant address space
+thread uint v822 = 0u;
+            ^
+program_source:827:13: error: program scope variable must reside in constant address space
+thread uint v823 = 0u;
+            ^
+program_source:828:13: error: program scope variable must reside in constant address space
+thread uint v824 = 0u;
+            ^
+program_source:829:13: error: program scope variable must reside in constant address space
+thread uint v825 = 0u;
+            ^
+program_source:830:13: error: program scope variable must reside in constant address space
+thread uint v826 = 0u;
+            ^
+program_source:831:13: error: program scope variable must reside in constant address space
+thread uint v827 = 0u;
+            ^
+program_source:832:13: error: program scope variable must reside in constant address space
+thread uint v828 = 0u;
+            ^
+program_source:833:13: error: program scope variable must reside in constant address space
+thread uint v829 = 0u;
+            ^
+program_source:834:13: error: program scope variable must reside in constant address space
+thread uint v830 = 0u;
+            ^
+program_source:835:13: error: program scope variable must reside in constant address space
+thread uint v831 = 0u;
+            ^
+program_source:836:13: error: program scope variable must reside in constant address space
+thread uint v832 = 0u;
+            ^
+program_source:837:13: error: program scope variable must reside in constant address space
+thread uint v833 = 0u;
+            ^
+program_source:838:13: error: program scope variable must reside in constant address space
+thread uint v834 = 0u;
+            ^
+program_source:839:13: error: program scope variable must reside in constant address space
+thread uint v835 = 0u;
+            ^
+program_source:840:13: error: program scope variable must reside in constant address space
+thread uint v836 = 0u;
+            ^
+program_source:841:13: error: program scope variable must reside in constant address space
+thread uint v837 = 0u;
+            ^
+program_source:842:13: error: program scope variable must reside in constant address space
+thread uint v838 = 0u;
+            ^
+program_source:843:13: error: program scope variable must reside in constant address space
+thread uint v839 = 0u;
+            ^
+program_source:844:13: error: program scope variable must reside in constant address space
+thread uint v840 = 0u;
+            ^
+program_source:845:13: error: program scope variable must reside in constant address space
+thread uint v841 = 0u;
+            ^
+program_source:846:13: error: program scope variable must reside in constant address space
+thread uint v842 = 0u;
+            ^
+program_source:847:13: error: program scope variable must reside in constant address space
+thread uint v843 = 0u;
+            ^
+program_source:848:13: error: program scope variable must reside in constant address space
+thread uint v844 = 0u;
+            ^
+program_source:849:13: error: program scope variable must reside in constant address space
+thread uint v845 = 0u;
+            ^
+program_source:850:13: error: program scope variable must reside in constant address space
+thread uint v846 = 0u;
+            ^
+program_source:851:13: error: program scope variable must reside in constant address space
+thread uint v847 = 0u;
+            ^
+program_source:852:13: error: program scope variable must reside in constant address space
+thread uint v848 = 0u;
+            ^
+program_source:853:13: error: program scope variable must reside in constant address space
+thread uint v849 = 0u;
+            ^
+program_source:854:13: error: program scope variable must reside in constant address space
+thread uint v850 = 0u;
+            ^
+program_source:855:13: error: program scope variable must reside in constant address space
+thread uint v851 = 0u;
+            ^
+program_source:856:13: error: program scope variable must reside in constant address space
+thread uint v852 = 0u;
+            ^
+program_source:857:13: error: program scope variable must reside in constant address space
+thread uint v853 = 0u;
+            ^
+program_source:858:13: error: program scope variable must reside in constant address space
+thread uint v854 = 0u;
+            ^
+program_source:859:13: error: program scope variable must reside in constant address space
+thread uint v855 = 0u;
+            ^
+program_source:860:13: error: program scope variable must reside in constant address space
+thread uint v856 = 0u;
+            ^
+program_source:861:13: error: program scope variable must reside in constant address space
+thread uint v857 = 0u;
+            ^
+program_source:862:13: error: program scope variable must reside in constant address space
+thread uint v858 = 0u;
+            ^
+program_source:863:13: error: program scope variable must reside in constant address space
+thread uint v859 = 0u;
+            ^
+program_source:864:13: error: program scope variable must reside in constant address space
+thread uint v860 = 0u;
+            ^
+program_source:865:13: error: program scope variable must reside in constant address space
+thread uint v861 = 0u;
+            ^
+program_source:866:13: error: program scope variable must reside in constant address space
+thread uint v862 = 0u;
+            ^
+program_source:867:13: error: program scope variable must reside in constant address space
+thread uint v863 = 0u;
+            ^
+program_source:868:13: error: program scope variable must reside in constant address space
+thread uint v864 = 0u;
+            ^
+program_source:869:13: error: program scope variable must reside in constant address space
+thread uint v865 = 0u;
+            ^
+program_source:870:13: error: program scope variable must reside in constant address space
+thread uint v866 = 0u;
+            ^
+program_source:871:13: error: program scope variable must reside in constant address space
+thread uint v867 = 0u;
+            ^
+program_source:872:13: error: program scope variable must reside in constant address space
+thread uint v868 = 0u;
+            ^
+program_source:873:13: error: program scope variable must reside in constant address space
+thread uint v869 = 0u;
+            ^
+program_source:874:13: error: program scope variable must reside in constant address space
+thread uint v870 = 0u;
+            ^
+program_source:875:13: error: program scope variable must reside in constant address space
+thread uint v871 = 0u;
+            ^
+program_source:876:13: error: program scope variable must reside in constant address space
+thread uint v872 = 0u;
+            ^
+program_source:877:13: error: program scope variable must reside in constant address space
+thread uint v873 = 0u;
+            ^
+program_source:878:13: error: program scope variable must reside in constant address space
+thread uint v874 = 0u;
+            ^
+program_source:879:13: error: program scope variable must reside in constant address space
+thread uint v875 = 0u;
+            ^
+program_source:880:13: error: program scope variable must reside in constant address space
+thread uint v876 = 0u;
+            ^
+program_source:881:13: error: program scope variable must reside in constant address space
+thread uint v877 = 0u;
+            ^
+program_source:882:13: error: program scope variable must reside in constant address space
+thread uint v878 = 0u;
+            ^
+program_source:883:13: error: program scope variable must reside in constant address space
+thread uint v879 = 0u;
+            ^
+program_source:884:13: error: program scope variable must reside in constant address space
+thread uint v880 = 0u;
+            ^
+program_source:885:13: error: program scope variable must reside in constant address space
+thread uint v881 = 0u;
+            ^
+program_source:886:13: error: program scope variable must reside in constant address space
+thread uint v882 = 0u;
+            ^
+program_source:887:13: error: program scope variable must reside in constant address space
+thread uint v883 = 0u;
+            ^
+program_source:888:13: error: program scope variable must reside in constant address space
+thread uint v884 = 0u;
+            ^
+program_source:889:13: error: program scope variable must reside in constant address space
+thread uint v885 = 0u;
+            ^
+program_source:890:13: error: program scope variable must reside in constant address space
+thread uint v886 = 0u;
+            ^
+program_source:891:13: error: program scope variable must reside in constant address space
+thread uint v887 = 0u;
+            ^
+program_source:892:13: error: program scope variable must reside in constant address space
+thread uint v888 = 0u;
+            ^
+program_source:893:13: error: program scope variable must reside in constant address space
+thread uint v889 = 0u;
+            ^
+program_source:894:13: error: program scope variable must reside in constant address space
+thread uint v890 = 0u;
+            ^
+program_source:895:13: error: program scope variable must reside in constant address space
+thread uint v891 = 0u;
+            ^
+program_source:896:13: error: program scope variable must reside in constant address space
+thread uint v892 = 0u;
+            ^
+program_source:897:13: error: program scope variable must reside in constant address space
+thread uint v893 = 0u;
+            ^
+program_source:898:13: error: program scope variable must reside in constant address space
+thread uint v894 = 0u;
+            ^
+program_source:899:13: error: program scope variable must reside in constant address space
+thread uint v895 = 0u;
+            ^
+program_source:900:13: error: program scope variable must reside in constant address space
+thread uint v896 = 0u;
+            ^
+program_source:901:13: error: program scope variable must reside in constant address space
+thread uint v897 = 0u;
+            ^
+program_source:902:13: error: program scope variable must reside in constant address space
+thread uint v898 = 0u;
+            ^
+program_source:903:13: error: program scope variable must reside in constant address space
+thread uint v899 = 0u;
+            ^
+program_source:904:13: error: program scope variable must reside in constant address space
+thread uint v900 = 0u;
+            ^
+program_source:905:13: error: program scope variable must reside in constant address space
+thread uint v901 = 0u;
+            ^
+program_source:906:13: error: program scope variable must reside in constant address space
+thread uint v902 = 0u;
+            ^
+program_source:907:13: error: program scope variable must reside in constant address space
+thread uint v903 = 0u;
+            ^
+program_source:908:13: error: program scope variable must reside in constant address space
+thread uint v904 = 0u;
+            ^
+program_source:909:13: error: program scope variable must reside in constant address space
+thread uint v905 = 0u;
+            ^
+program_source:910:13: error: program scope variable must reside in constant address space
+thread uint v906 = 0u;
+            ^
+program_source:911:13: error: program scope variable must reside in constant address space
+thread uint v907 = 0u;
+            ^
+program_source:912:13: error: program scope variable must reside in constant address space
+thread uint v908 = 0u;
+            ^
+program_source:913:13: error: program scope variable must reside in constant address space
+thread uint v909 = 0u;
+            ^
+program_source:914:13: error: program scope variable must reside in constant address space
+thread uint v910 = 0u;
+            ^
+program_source:915:13: error: program scope variable must reside in constant address space
+thread uint v911 = 0u;
+            ^
+program_source:916:13: error: program scope variable must reside in constant address space
+thread uint v912 = 0u;
+            ^
+program_source:917:13: error: program scope variable must reside in constant address space
+thread uint v913 = 0u;
+            ^
+program_source:918:13: error: program scope variable must reside in constant address space
+thread uint v914 = 0u;
+            ^
+program_source:919:13: error: program scope variable must reside in constant address space
+thread uint v915 = 0u;
+            ^
+program_source:920:13: error: program scope variable must reside in constant address space
+thread uint v916 = 0u;
+            ^
+program_source:921:13: error: program scope variable must reside in constant address space
+thread uint v917 = 0u;
+            ^
+program_source:922:13: error: program scope variable must reside in constant address space
+thread uint v918 = 0u;
+            ^
+program_source:923:13: error: program scope variable must reside in constant address space
+thread uint v919 = 0u;
+            ^
+program_source:924:13: error: program scope variable must reside in constant address space
+thread uint v920 = 0u;
+            ^
+program_source:925:13: error: program scope variable must reside in constant address space
+thread uint v921 = 0u;
+            ^
+program_source:926:13: error: program scope variable must reside in constant address space
+thread uint v922 = 0u;
+            ^
+program_source:927:13: error: program scope variable must reside in constant address space
+thread uint v923 = 0u;
+            ^
+program_source:928:13: error: program scope variable must reside in constant address space
+thread uint v924 = 0u;
+            ^
+program_source:929:13: error: program scope variable must reside in constant address space
+thread uint v925 = 0u;
+            ^
+program_source:930:13: error: program scope variable must reside in constant address space
+thread uint v926 = 0u;
+            ^
+program_source:931:13: error: program scope variable must reside in constant address space
+thread uint v927 = 0u;
+            ^
+program_source:932:13: error: program scope variable must reside in constant address space
+thread uint v928 = 0u;
+            ^
+program_source:933:13: error: program scope variable must reside in constant address space
+thread uint v929 = 0u;
+            ^
+program_source:934:13: error: program scope variable must reside in constant address space
+thread uint v930 = 0u;
+            ^
+program_source:935:13: error: program scope variable must reside in constant address space
+thread uint v931 = 0u;
+            ^
+program_source:936:13: error: program scope variable must reside in constant address space
+thread uint v932 = 0u;
+            ^
+program_source:937:13: error: program scope variable must reside in constant address space
+thread uint v933 = 0u;
+            ^
+program_source:938:13: error: program scope variable must reside in constant address space
+thread uint v934 = 0u;
+            ^
+program_source:939:13: error: program scope variable must reside in constant address space
+thread uint v935 = 0u;
+            ^
+program_source:940:13: error: program scope variable must reside in constant address space
+thread uint v936 = 0u;
+            ^
+program_source:941:13: error: program scope variable must reside in constant address space
+thread uint v937 = 0u;
+            ^
+program_source:942:13: error: program scope variable must reside in constant address space
+thread uint v938 = 0u;
+            ^
+program_source:943:13: error: program scope variable must reside in constant address space
+thread uint v939 = 0u;
+            ^
+program_source:944:13: error: program scope variable must reside in constant address space
+thread uint v940 = 0u;
+            ^
+program_source:945:13: error: program scope variable must reside in constant address space
+thread uint v941 = 0u;
+            ^
+program_source:946:13: error: program scope variable must reside in constant address space
+thread uint v942 = 0u;
+            ^
+program_source:947:13: error: program scope variable must reside in constant address space
+thread uint v943 = 0u;
+            ^
+program_source:948:13: error: program scope variable must reside in constant address space
+thread uint v944 = 0u;
+            ^
+program_source:949:13: error: program scope variable must reside in constant address space
+thread uint v945 = 0u;
+            ^
+program_source:950:13: error: program scope variable must reside in constant address space
+thread uint v946 = 0u;
+            ^
+program_source:951:13: error: program scope variable must reside in constant address space
+thread uint v947 = 0u;
+            ^
+program_source:952:13: error: program scope variable must reside in constant address space
+thread uint v948 = 0u;
+            ^
+program_source:953:13: error: program scope variable must reside in constant address space
+thread uint v949 = 0u;
+            ^
+program_source:954:13: error: program scope variable must reside in constant address space
+thread uint v950 = 0u;
+            ^
+program_source:955:13: error: program scope variable must reside in constant address space
+thread uint v951 = 0u;
+            ^
+program_source:956:13: error: program scope variable must reside in constant address space
+thread uint v952 = 0u;
+            ^
+program_source:957:13: error: program scope variable must reside in constant address space
+thread uint v953 = 0u;
+            ^
+program_source:958:13: error: program scope variable must reside in constant address space
+thread uint v954 = 0u;
+            ^
+program_source:959:13: error: program scope variable must reside in constant address space
+thread uint v955 = 0u;
+            ^
+program_source:960:13: error: program scope variable must reside in constant address space
+thread uint v956 = 0u;
+            ^
+program_source:961:13: error: program scope variable must reside in constant address space
+thread uint v957 = 0u;
+            ^
+program_source:962:13: error: program scope variable must reside in constant address space
+thread uint v958 = 0u;
+            ^
+program_source:963:13: error: program scope variable must reside in constant address space
+thread uint v959 = 0u;
+            ^
+program_source:964:13: error: program scope variable must reside in constant address space
+thread uint v960 = 0u;
+            ^
+program_source:965:13: error: program scope variable must reside in constant address space
+thread uint v961 = 0u;
+            ^
+program_source:966:13: error: program scope variable must reside in constant address space
+thread uint v962 = 0u;
+            ^
+program_source:967:13: error: program scope variable must reside in constant address space
+thread uint v963 = 0u;
+            ^
+program_source:968:13: error: program scope variable must reside in constant address space
+thread uint v964 = 0u;
+            ^
+program_source:969:13: error: program scope variable must reside in constant address space
+thread uint v965 = 0u;
+            ^
+program_source:970:13: error: program scope variable must reside in constant address space
+thread uint v966 = 0u;
+            ^
+program_source:971:13: error: program scope variable must reside in constant address space
+thread uint v967 = 0u;
+            ^
+program_source:972:13: error: program scope variable must reside in constant address space
+thread uint v968 = 0u;
+            ^
+program_source:973:13: error: program scope variable must reside in constant address space
+thread uint v969 = 0u;
+            ^
+program_source:974:13: error: program scope variable must reside in constant address space
+thread uint v970 = 0u;
+            ^
+program_source:975:13: error: program scope variable must reside in constant address space
+thread uint v971 = 0u;
+            ^
+program_source:976:13: error: program scope variable must reside in constant address space
+thread uint v972 = 0u;
+            ^
+program_source:977:13: error: program scope variable must reside in constant address space
+thread uint v973 = 0u;
+            ^
+program_source:978:13: error: program scope variable must reside in constant address space
+thread uint v974 = 0u;
+            ^
+program_source:979:13: error: program scope variable must reside in constant address space
+thread uint v975 = 0u;
+            ^
+program_source:980:13: error: program scope variable must reside in constant address space
+thread uint v976 = 0u;
+            ^
+program_source:981:13: error: program scope variable must reside in constant address space
+thread uint v977 = 0u;
+            ^
+program_source:982:13: error: program scope variable must reside in constant address space
+thread uint v978 = 0u;
+            ^
+program_source:983:13: error: program scope variable must reside in constant address space
+thread uint v979 = 0u;
+            ^
+program_source:984:13: error: program scope variable must reside in constant address space
+thread uint v980 = 0u;
+            ^
+program_source:985:13: error: program scope variable must reside in constant address space
+thread uint v981 = 0u;
+            ^
+program_source:986:13: error: program scope variable must reside in constant address space
+thread uint v982 = 0u;
+            ^
+program_source:987:13: error: program scope variable must reside in constant address space
+thread uint v983 = 0u;
+            ^
+program_source:988:13: error: program scope variable must reside in constant address space
+thread uint v984 = 0u;
+            ^
+program_source:989:13: error: program scope variable must reside in constant address space
+thread uint v985 = 0u;
+            ^
+program_source:990:13: error: program scope variable must reside in constant address space
+thread uint v986 = 0u;
+            ^
+program_source:991:13: error: program scope variable must reside in constant address space
+thread uint v987 = 0u;
+            ^
+program_source:992:13: error: program scope variable must reside in constant address space
+thread uint v988 = 0u;
+            ^
+program_source:993:13: error: program scope variable must reside in constant address space
+thread uint v989 = 0u;
+            ^
+program_source:994:13: error: program scope variable must reside in constant address space
+thread uint v990 = 0u;
+            ^
+program_source:995:13: error: program scope variable must reside in constant address space
+thread uint v991 = 0u;
+            ^
+program_source:996:13: error: program scope variable must reside in constant address space
+thread uint v992 = 0u;
+            ^
+program_source:997:13: error: program scope variable must reside in constant address space
+thread uint v993 = 0u;
+            ^
+program_source:998:13: error: program scope variable must reside in constant address space
+thread uint v994 = 0u;
+            ^
+program_source:999:13: error: program scope variable must reside in constant address space
+thread uint v995 = 0u;
+            ^
+program_source:1000:13: error: program scope variable must reside in constant address space
+thread uint v996 = 0u;
+            ^
+program_source:1001:13: error: program scope variable must reside in constant address space
+thread uint v997 = 0u;
+            ^
+program_source:1002:13: error: program scope variable must reside in constant address space
+thread uint v998 = 0u;
+            ^
+program_source:1003:13: error: program scope variable must reside in constant address space
+thread uint v999 = 0u;
+            ^
+

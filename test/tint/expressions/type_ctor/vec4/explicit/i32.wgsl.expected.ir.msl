@@ -4,3 +4,7 @@ SKIP: FAILED
 using namespace metal;
 
 thread int4 v = int4(0, 1, 2, 3);
+program_source:4:13: error: program scope variable must reside in constant address space
+thread int4 v = int4(0, 1, 2, 3);
+            ^
+

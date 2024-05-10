@@ -1,9 +1,25 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread float v = 0.0f;
+void x(thread float* const p) {
+  p = 0.0f;
+}
+void g() {
+  x(v);
+}
+fragment void f() {
+  g();
+}
+program_source:4:14: error: program scope variable must reside in constant address space
+thread float v = 0.0f;
+             ^
+program_source:6:5: error: cannot assign to variable 'p' with const-qualified type 'float *const'
+  p = 0.0f;
+  ~ ^
+program_source:5:28: note: variable 'p' declared const here
+void x(thread float* const p) {
+       ~~~~~~~~~~~~~~~~~~~~^
+

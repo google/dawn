@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: BST = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: BST = struct @align(4) {
   data:i32 @offset(0)
   leftIndex:i32 @offset(4)
   rightIndex:i32 @offset(8)
@@ -14,26 +14,27 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %tree_1:ptr<private, array<BST, 10>, read_write> = var
   %x_16:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
 }
 
-%makeTreeNode_struct_BST_i1_i1_i11_i1_ = func(%tree:ptr<function, BST, read_write>, %data:ptr<function, i32, read_write>):void -> %b2 {
-  %b2 = block {
-    %x_165:i32 = load %data
-    %8:ptr<function, i32, read_write> = access %tree, 0u
-    store %8, %x_165
-    %9:ptr<function, i32, read_write> = access %tree, 1u
-    store %9, -1i
-    %10:ptr<function, i32, read_write> = access %tree, 2u
+%makeTreeNode_struct_BST_i1_i1_i11_i1_ = func(%tree:ptr<function, BST, read_write>, %data:ptr<function, i32, read_write>):void {
+  $B2: {
+    %7:i32 = load %data
+    %x_165:i32 = let %7
+    %9:ptr<function, i32, read_write> = access %tree, 0u
+    store %9, %x_165
+    %10:ptr<function, i32, read_write> = access %tree, 1u
     store %10, -1i
+    %11:ptr<function, i32, read_write> = access %tree, 2u
+    store %11, -1i
     ret
   }
 }
-%insert_i1_i1_ = func(%treeIndex:ptr<function, i32, read_write>, %data_1:ptr<function, i32, read_write>):void -> %b3 {
-  %b3 = block {
+%insert_i1_i1_ = func(%treeIndex:ptr<function, i32, read_write>, %data_1:ptr<function, i32, read_write>):void {
+  $B3: {
     %baseIndex:ptr<function, i32, read_write> = var
     %param:ptr<function, BST, read_write> = var
     %param_1:ptr<function, i32, read_write> = var
@@ -41,213 +42,260 @@ main_out = struct @align(16) {
     %param_2:ptr<function, BST, read_write> = var
     %param_3:ptr<function, i32, read_write> = var
     store %baseIndex, 0i
-    loop [b: %b4, c: %b5] {  # loop_1
-      %b4 = block {  # body
-        %x_175:i32 = load %baseIndex
-        %x_176:i32 = load %treeIndex
-        %22:bool = lte %x_175, %x_176
-        if %22 [t: %b6, f: %b7] {  # if_1
-          %b6 = block {  # true
+    loop [b: $B4, c: $B5] {  # loop_1
+      $B4: {  # body
+        %21:i32 = load %baseIndex
+        %x_175:i32 = let %21
+        %23:i32 = load %treeIndex
+        %x_176:i32 = let %23
+        %25:bool = lte %x_175, %x_176
+        if %25 [t: $B6, f: $B7] {  # if_1
+          $B6: {  # true
             exit_if  # if_1
           }
-          %b7 = block {  # false
+          $B7: {  # false
             exit_loop  # loop_1
           }
         }
-        %x_179:i32 = load %data_1
-        %x_180:i32 = load %baseIndex
-        %25:ptr<private, i32, read_write> = access %tree_1, %x_180, 0u
-        %x_182:i32 = load %25
-        %27:bool = lte %x_179, %x_182
-        if %27 [t: %b8, f: %b9] {  # if_2
-          %b8 = block {  # true
-            %x_187:i32 = load %baseIndex
-            %29:ptr<private, i32, read_write> = access %tree_1, %x_187, 1u
-            %x_189:i32 = load %29
-            %31:bool = eq %x_189, -1i
-            if %31 [t: %b10, f: %b11] {  # if_3
-              %b10 = block {  # true
-                %x_194:i32 = load %baseIndex
-                %x_195:i32 = load %treeIndex
-                %34:ptr<private, i32, read_write> = access %tree_1, %x_194, 1u
-                store %34, %x_195
-                %35:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
-                %x_198:f32 = load_vector_element %35, 0u
-                %37:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
-                %x_200:f32 = load_vector_element %37, 1u
-                %39:bool = lt %x_198, %x_200
-                if %39 [t: %b12] {  # if_4
-                  %b12 = block {  # true
-                    %x_204:i32 = load %treeIndex
-                    %41:ptr<private, BST, read_write> = access %tree_1, %x_204
-                    %x_206:BST = load %41
+        %26:i32 = load %data_1
+        %x_179:i32 = let %26
+        %28:i32 = load %baseIndex
+        %x_180:i32 = let %28
+        %30:ptr<private, i32, read_write> = access %tree_1, %x_180, 0u
+        %31:i32 = load %30
+        %x_182:i32 = let %31
+        %33:bool = lte %x_179, %x_182
+        if %33 [t: $B8, f: $B9] {  # if_2
+          $B8: {  # true
+            %34:i32 = load %baseIndex
+            %x_187:i32 = let %34
+            %36:ptr<private, i32, read_write> = access %tree_1, %x_187, 1u
+            %37:i32 = load %36
+            %x_189:i32 = let %37
+            %39:bool = eq %x_189, -1i
+            if %39 [t: $B10, f: $B11] {  # if_3
+              $B10: {  # true
+                %40:i32 = load %baseIndex
+                %x_194:i32 = let %40
+                %42:i32 = load %treeIndex
+                %x_195:i32 = let %42
+                %44:ptr<private, i32, read_write> = access %tree_1, %x_194, 1u
+                store %44, %x_195
+                %45:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
+                %46:f32 = load_vector_element %45, 0u
+                %x_198:f32 = let %46
+                %48:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
+                %49:f32 = load_vector_element %48, 1u
+                %x_200:f32 = let %49
+                %51:bool = lt %x_198, %x_200
+                if %51 [t: $B12] {  # if_4
+                  $B12: {  # true
+                    %52:i32 = load %treeIndex
+                    %x_204:i32 = let %52
+                    %54:ptr<private, BST, read_write> = access %tree_1, %x_204
+                    %55:BST = load %54
+                    %x_206:BST = let %55
                     store %param, %x_206
-                    %x_207:i32 = load %data_1
+                    %57:i32 = load %data_1
+                    %x_207:i32 = let %57
                     store %param_1, %x_207
-                    %44:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param, %param_1
-                    %x_209:BST = load %param
-                    %46:ptr<private, BST, read_write> = access %tree_1, %x_204
-                    store %46, %x_209
+                    %59:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param, %param_1
+                    %60:BST = load %param
+                    %x_209:BST = let %60
+                    %62:ptr<private, BST, read_write> = access %tree_1, %x_204
+                    store %62, %x_209
                     exit_if  # if_4
                   }
                 }
-                %47:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
-                %x_212:f32 = load_vector_element %47, 0u
-                %49:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
-                %x_214:f32 = load_vector_element %49, 1u
-                %51:bool = lt %x_212, %x_214
-                if %51 [t: %b13] {  # if_5
-                  %b13 = block {  # true
+                %63:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
+                %64:f32 = load_vector_element %63, 0u
+                %x_212:f32 = let %64
+                %66:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
+                %67:f32 = load_vector_element %66, 1u
+                %x_214:f32 = let %67
+                %69:bool = lt %x_212, %x_214
+                if %69 [t: $B13] {  # if_5
+                  $B13: {  # true
                     ret
                   }
                 }
                 exit_if  # if_3
               }
-              %b11 = block {  # false
-                %x_218:i32 = load %baseIndex
-                %53:ptr<private, i32, read_write> = access %tree_1, %x_218, 1u
-                %x_220:i32 = load %53
+              $B11: {  # false
+                %70:i32 = load %baseIndex
+                %x_218:i32 = let %70
+                %72:ptr<private, i32, read_write> = access %tree_1, %x_218, 1u
+                %73:i32 = load %72
+                %x_220:i32 = let %73
                 store %baseIndex, %x_220
-                continue %b5
+                continue  # -> $B5
               }
             }
             exit_if  # if_2
           }
-          %b9 = block {  # false
-            %55:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
-            %x_222:f32 = load_vector_element %55, 0u
-            %57:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
-            %x_224:f32 = load_vector_element %57, 1u
-            %59:bool = lt %x_222, %x_224
-            if %59 [t: %b14, f: %b15] {  # if_6
-              %b14 = block {  # true
-                %x_229:i32 = load %baseIndex
-                %61:ptr<private, i32, read_write> = access %tree_1, %x_229, 2u
-                %x_231:i32 = load %61
+          $B9: {  # false
+            %75:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
+            %76:f32 = load_vector_element %75, 0u
+            %x_222:f32 = let %76
+            %78:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
+            %79:f32 = load_vector_element %78, 1u
+            %x_224:f32 = let %79
+            %81:bool = lt %x_222, %x_224
+            if %81 [t: $B14, f: $B15] {  # if_6
+              $B14: {  # true
+                %82:i32 = load %baseIndex
+                %x_229:i32 = let %82
+                %84:ptr<private, i32, read_write> = access %tree_1, %x_229, 2u
+                %85:i32 = load %84
+                %x_231:i32 = let %85
                 store %x_170, %x_231
                 exit_if  # if_6
               }
-              %b15 = block {  # false
-                %x_232:i32 = load %baseIndex
-                %64:ptr<private, i32, read_write> = access %tree_1, %x_232, 2u
-                %x_234:i32 = load %64
+              $B15: {  # false
+                %87:i32 = load %baseIndex
+                %x_232:i32 = let %87
+                %89:ptr<private, i32, read_write> = access %tree_1, %x_232, 2u
+                %90:i32 = load %89
+                %x_234:i32 = let %90
                 store %x_170, %x_234
                 exit_if  # if_6
               }
             }
-            %x_235:i32 = load %x_170
-            %67:bool = eq %x_235, -1i
-            if %67 [t: %b16, f: %b17] {  # if_7
-              %b16 = block {  # true
-                %x_240:i32 = load %baseIndex
-                %x_241:i32 = load %treeIndex
-                %70:ptr<private, i32, read_write> = access %tree_1, %x_240, 2u
-                store %70, %x_241
-                %x_243:i32 = load %treeIndex
-                %72:ptr<private, BST, read_write> = access %tree_1, %x_243
-                %x_245:BST = load %72
+            %92:i32 = load %x_170
+            %x_235:i32 = let %92
+            %94:bool = eq %x_235, -1i
+            if %94 [t: $B16, f: $B17] {  # if_7
+              $B16: {  # true
+                %95:i32 = load %baseIndex
+                %x_240:i32 = let %95
+                %97:i32 = load %treeIndex
+                %x_241:i32 = let %97
+                %99:ptr<private, i32, read_write> = access %tree_1, %x_240, 2u
+                store %99, %x_241
+                %100:i32 = load %treeIndex
+                %x_243:i32 = let %100
+                %102:ptr<private, BST, read_write> = access %tree_1, %x_243
+                %103:BST = load %102
+                %x_245:BST = let %103
                 store %param_2, %x_245
-                %x_246:i32 = load %data_1
+                %105:i32 = load %data_1
+                %x_246:i32 = let %105
                 store %param_3, %x_246
-                %75:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param_2, %param_3
-                %x_248:BST = load %param_2
-                %77:ptr<private, BST, read_write> = access %tree_1, %x_243
-                store %77, %x_248
+                %107:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param_2, %param_3
+                %108:BST = load %param_2
+                %x_248:BST = let %108
+                %110:ptr<private, BST, read_write> = access %tree_1, %x_243
+                store %110, %x_248
                 ret
               }
-              %b17 = block {  # false
-                %x_250:i32 = load %baseIndex
-                %79:ptr<private, i32, read_write> = access %tree_1, %x_250, 2u
-                %x_252:i32 = load %79
+              $B17: {  # false
+                %111:i32 = load %baseIndex
+                %x_250:i32 = let %111
+                %113:ptr<private, i32, read_write> = access %tree_1, %x_250, 2u
+                %114:i32 = load %113
+                %x_252:i32 = let %114
                 store %baseIndex, %x_252
-                continue %b5
+                continue  # -> $B5
               }
             }
             exit_if  # if_2
           }
         }
-        %81:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
-        %x_254:f32 = load_vector_element %81, 0u
-        %83:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
-        %x_256:f32 = load_vector_element %83, 1u
-        %85:bool = gt %x_254, %x_256
-        if %85 [t: %b18] {  # if_8
-          %b18 = block {  # true
+        %116:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
+        %117:f32 = load_vector_element %116, 0u
+        %x_254:f32 = let %117
+        %119:ptr<uniform, vec2<f32>, read> = access %x_16, 0u
+        %120:f32 = load_vector_element %119, 1u
+        %x_256:f32 = let %120
+        %122:bool = gt %x_254, %x_256
+        if %122 [t: $B18] {  # if_8
+          $B18: {  # true
             ret
           }
         }
-        continue %b5
+        continue  # -> $B5
       }
-      %b5 = block {  # continuing
-        next_iteration %b4
+      $B5: {  # continuing
+        next_iteration  # -> $B4
       }
     }
     ret
   }
 }
-%search_i1_ = func(%t:ptr<function, i32, read_write>):i32 -> %b19 {
-  %b19 = block {
+%search_i1_ = func(%t:ptr<function, i32, read_write>):i32 {
+  $B19: {
     %index:ptr<function, i32, read_write> = var
     %currentNode:ptr<function, BST, read_write> = var
     %x_261:ptr<function, i32, read_write> = var
     store %index, 0i
-    loop [b: %b20, c: %b21] {  # loop_2
-      %b20 = block {  # body
-        %x_266:i32 = load %index
-        %92:bool = neq %x_266, -1i
-        if %92 [t: %b22, f: %b23] {  # if_9
-          %b22 = block {  # true
+    loop [b: $B20, c: $B21] {  # loop_2
+      $B20: {  # body
+        %128:i32 = load %index
+        %x_266:i32 = let %128
+        %130:bool = neq %x_266, -1i
+        if %130 [t: $B22, f: $B23] {  # if_9
+          $B22: {  # true
             exit_if  # if_9
           }
-          %b23 = block {  # false
+          $B23: {  # false
             exit_loop  # loop_2
           }
         }
-        %x_269:i32 = load %index
-        %94:ptr<private, BST, read_write> = access %tree_1, %x_269
-        %x_271:BST = load %94
+        %131:i32 = load %index
+        %x_269:i32 = let %131
+        %133:ptr<private, BST, read_write> = access %tree_1, %x_269
+        %134:BST = load %133
+        %x_271:BST = let %134
         store %currentNode, %x_271
-        %96:ptr<function, i32, read_write> = access %currentNode, 0u
-        %x_273:i32 = load %96
-        %x_274:i32 = load %t
-        %99:bool = eq %x_273, %x_274
-        if %99 [t: %b24] {  # if_10
-          %b24 = block {  # true
-            %x_278:i32 = load %t
+        %136:ptr<function, i32, read_write> = access %currentNode, 0u
+        %137:i32 = load %136
+        %x_273:i32 = let %137
+        %139:i32 = load %t
+        %x_274:i32 = let %139
+        %141:bool = eq %x_273, %x_274
+        if %141 [t: $B24] {  # if_10
+          $B24: {  # true
+            %142:i32 = load %t
+            %x_278:i32 = let %142
             ret %x_278
           }
         }
-        %x_279:i32 = load %t
-        %102:ptr<function, i32, read_write> = access %currentNode, 0u
-        %x_281:i32 = load %102
-        %104:bool = gt %x_279, %x_281
-        if %104 [t: %b25, f: %b26] {  # if_11
-          %b25 = block {  # true
-            %105:ptr<function, i32, read_write> = access %currentNode, 2u
-            %x_287:i32 = load %105
+        %144:i32 = load %t
+        %x_279:i32 = let %144
+        %146:ptr<function, i32, read_write> = access %currentNode, 0u
+        %147:i32 = load %146
+        %x_281:i32 = let %147
+        %149:bool = gt %x_279, %x_281
+        if %149 [t: $B25, f: $B26] {  # if_11
+          $B25: {  # true
+            %150:ptr<function, i32, read_write> = access %currentNode, 2u
+            %151:i32 = load %150
+            %x_287:i32 = let %151
             store %x_261, %x_287
             exit_if  # if_11
           }
-          %b26 = block {  # false
-            %107:ptr<function, i32, read_write> = access %currentNode, 1u
-            %x_289:i32 = load %107
+          $B26: {  # false
+            %153:ptr<function, i32, read_write> = access %currentNode, 1u
+            %154:i32 = load %153
+            %x_289:i32 = let %154
             store %x_261, %x_289
             exit_if  # if_11
           }
         }
-        %x_290:i32 = load %x_261
+        %156:i32 = load %x_261
+        %x_290:i32 = let %156
         store %index, %x_290
-        continue %b21
+        continue  # -> $B21
       }
-      %b21 = block {  # continuing
-        next_iteration %b20
+      $B21: {  # continuing
+        next_iteration  # -> $B20
       }
     }
     ret -1i
   }
 }
-%main_1 = func():void -> %b27 {
-  %b27 = block {
+%main_1 = func():void {
+  $B27: {
     %treeIndex_1:ptr<function, i32, read_write> = var
     %param_4:ptr<function, BST, read_write> = var
     %param_5:ptr<function, i32, read_write> = var
@@ -274,142 +322,173 @@ main_out = struct @align(16) {
     %result:ptr<function, i32, read_write> = var
     %param_24:ptr<function, i32, read_write> = var
     store %treeIndex_1, 0i
-    %136:ptr<private, BST, read_write> = access %tree_1, 0i
-    %x_91:BST = load %136
+    %184:ptr<private, BST, read_write> = access %tree_1, 0i
+    %185:BST = load %184
+    %x_91:BST = let %185
     store %param_4, %x_91
     store %param_5, 9i
-    %138:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param_4, %param_5
-    %x_93:BST = load %param_4
-    %140:ptr<private, BST, read_write> = access %tree_1, 0i
-    store %140, %x_93
-    %x_95:i32 = load %treeIndex_1
-    %142:i32 = add %x_95, 1i
-    store %treeIndex_1, %142
-    %x_97:i32 = load %treeIndex_1
+    %187:void = call %makeTreeNode_struct_BST_i1_i1_i11_i1_, %param_4, %param_5
+    %188:BST = load %param_4
+    %x_93:BST = let %188
+    %190:ptr<private, BST, read_write> = access %tree_1, 0i
+    store %190, %x_93
+    %191:i32 = load %treeIndex_1
+    %x_95:i32 = let %191
+    %193:i32 = add %x_95, 1i
+    store %treeIndex_1, %193
+    %194:i32 = load %treeIndex_1
+    %x_97:i32 = let %194
     store %param_6, %x_97
     store %param_7, 5i
-    %144:void = call %insert_i1_i1_, %param_6, %param_7
-    %x_99:i32 = load %treeIndex_1
-    %146:i32 = add %x_99, 1i
-    store %treeIndex_1, %146
-    %x_101:i32 = load %treeIndex_1
+    %196:void = call %insert_i1_i1_, %param_6, %param_7
+    %197:i32 = load %treeIndex_1
+    %x_99:i32 = let %197
+    %199:i32 = add %x_99, 1i
+    store %treeIndex_1, %199
+    %200:i32 = load %treeIndex_1
+    %x_101:i32 = let %200
     store %param_8, %x_101
     store %param_9, 12i
-    %148:void = call %insert_i1_i1_, %param_8, %param_9
-    %x_103:i32 = load %treeIndex_1
-    %150:i32 = add %x_103, 1i
-    store %treeIndex_1, %150
-    %x_105:i32 = load %treeIndex_1
+    %202:void = call %insert_i1_i1_, %param_8, %param_9
+    %203:i32 = load %treeIndex_1
+    %x_103:i32 = let %203
+    %205:i32 = add %x_103, 1i
+    store %treeIndex_1, %205
+    %206:i32 = load %treeIndex_1
+    %x_105:i32 = let %206
     store %param_10, %x_105
     store %param_11, 15i
-    %152:void = call %insert_i1_i1_, %param_10, %param_11
-    %x_107:i32 = load %treeIndex_1
-    %154:i32 = add %x_107, 1i
-    store %treeIndex_1, %154
-    %x_109:i32 = load %treeIndex_1
+    %208:void = call %insert_i1_i1_, %param_10, %param_11
+    %209:i32 = load %treeIndex_1
+    %x_107:i32 = let %209
+    %211:i32 = add %x_107, 1i
+    store %treeIndex_1, %211
+    %212:i32 = load %treeIndex_1
+    %x_109:i32 = let %212
     store %param_12, %x_109
     store %param_13, 7i
-    %156:void = call %insert_i1_i1_, %param_12, %param_13
-    %x_111:i32 = load %treeIndex_1
-    %158:i32 = add %x_111, 1i
-    store %treeIndex_1, %158
-    %x_113:i32 = load %treeIndex_1
+    %214:void = call %insert_i1_i1_, %param_12, %param_13
+    %215:i32 = load %treeIndex_1
+    %x_111:i32 = let %215
+    %217:i32 = add %x_111, 1i
+    store %treeIndex_1, %217
+    %218:i32 = load %treeIndex_1
+    %x_113:i32 = let %218
     store %param_14, %x_113
     store %param_15, 8i
-    %160:void = call %insert_i1_i1_, %param_14, %param_15
-    %x_115:i32 = load %treeIndex_1
-    %162:i32 = add %x_115, 1i
-    store %treeIndex_1, %162
-    %x_117:i32 = load %treeIndex_1
+    %220:void = call %insert_i1_i1_, %param_14, %param_15
+    %221:i32 = load %treeIndex_1
+    %x_115:i32 = let %221
+    %223:i32 = add %x_115, 1i
+    store %treeIndex_1, %223
+    %224:i32 = load %treeIndex_1
+    %x_117:i32 = let %224
     store %param_16, %x_117
     store %param_17, 2i
-    %164:void = call %insert_i1_i1_, %param_16, %param_17
-    %x_119:i32 = load %treeIndex_1
-    %166:i32 = add %x_119, 1i
-    store %treeIndex_1, %166
-    %x_121:i32 = load %treeIndex_1
+    %226:void = call %insert_i1_i1_, %param_16, %param_17
+    %227:i32 = load %treeIndex_1
+    %x_119:i32 = let %227
+    %229:i32 = add %x_119, 1i
+    store %treeIndex_1, %229
+    %230:i32 = load %treeIndex_1
+    %x_121:i32 = let %230
     store %param_18, %x_121
     store %param_19, 6i
-    %168:void = call %insert_i1_i1_, %param_18, %param_19
-    %x_123:i32 = load %treeIndex_1
-    %170:i32 = add %x_123, 1i
-    store %treeIndex_1, %170
-    %x_125:i32 = load %treeIndex_1
+    %232:void = call %insert_i1_i1_, %param_18, %param_19
+    %233:i32 = load %treeIndex_1
+    %x_123:i32 = let %233
+    %235:i32 = add %x_123, 1i
+    store %treeIndex_1, %235
+    %236:i32 = load %treeIndex_1
+    %x_125:i32 = let %236
     store %param_20, %x_125
     store %param_21, 17i
-    %172:void = call %insert_i1_i1_, %param_20, %param_21
-    %x_127:i32 = load %treeIndex_1
-    %174:i32 = add %x_127, 1i
-    store %treeIndex_1, %174
-    %x_129:i32 = load %treeIndex_1
+    %238:void = call %insert_i1_i1_, %param_20, %param_21
+    %239:i32 = load %treeIndex_1
+    %x_127:i32 = let %239
+    %241:i32 = add %x_127, 1i
+    store %treeIndex_1, %241
+    %242:i32 = load %treeIndex_1
+    %x_129:i32 = let %242
     store %param_22, %x_129
     store %param_23, 13i
-    %176:void = call %insert_i1_i1_, %param_22, %param_23
+    %244:void = call %insert_i1_i1_, %param_22, %param_23
     store %count, 0i
     store %i, 0i
-    loop [b: %b28, c: %b29] {  # loop_3
-      %b28 = block {  # body
-        %x_135:i32 = load %i
-        %178:bool = lt %x_135, 20i
-        if %178 [t: %b30, f: %b31] {  # if_12
-          %b30 = block {  # true
+    loop [b: $B28, c: $B29] {  # loop_3
+      $B28: {  # body
+        %245:i32 = load %i
+        %x_135:i32 = let %245
+        %247:bool = lt %x_135, 20i
+        if %247 [t: $B30, f: $B31] {  # if_12
+          $B30: {  # true
             exit_if  # if_12
           }
-          %b31 = block {  # false
+          $B31: {  # false
             exit_loop  # loop_3
           }
         }
-        %x_138:i32 = load %i
+        %248:i32 = load %i
+        %x_138:i32 = let %248
         store %param_24, %x_138
-        %x_139:i32 = call %search_i1_, %param_24
+        %250:i32 = call %search_i1_, %param_24
+        %x_139:i32 = let %250
         store %result, %x_139
-        %x_140:i32 = load %i
-        switch %x_140 [c: (2i 5i 6i 7i 8i 9i 12i 13i 15i 17i, %b32), c: (default, %b33)] {  # switch_1
-          %b32 = block {  # case
-            %x_150:i32 = load %result
-            %x_151:i32 = load %i
-            %184:bool = eq %x_150, %x_151
-            if %184 [t: %b34] {  # if_13
-              %b34 = block {  # true
-                %x_155:i32 = load %count
-                %186:i32 = add %x_155, 1i
-                store %count, %186
+        %252:i32 = load %i
+        %x_140:i32 = let %252
+        switch %x_140 [c: (2i 5i 6i 7i 8i 9i 12i 13i 15i 17i, $B32), c: (default, $B33)] {  # switch_1
+          $B32: {  # case
+            %254:i32 = load %result
+            %x_150:i32 = let %254
+            %256:i32 = load %i
+            %x_151:i32 = let %256
+            %258:bool = eq %x_150, %x_151
+            if %258 [t: $B34] {  # if_13
+              $B34: {  # true
+                %259:i32 = load %count
+                %x_155:i32 = let %259
+                %261:i32 = add %x_155, 1i
+                store %count, %261
                 exit_if  # if_13
               }
             }
             exit_switch  # switch_1
           }
-          %b33 = block {  # case
-            %x_144:i32 = load %result
-            %188:bool = eq %x_144, -1i
-            if %188 [t: %b35] {  # if_14
-              %b35 = block {  # true
-                %x_148:i32 = load %count
-                %190:i32 = add %x_148, 1i
-                store %count, %190
+          $B33: {  # case
+            %262:i32 = load %result
+            %x_144:i32 = let %262
+            %264:bool = eq %x_144, -1i
+            if %264 [t: $B35] {  # if_14
+              $B35: {  # true
+                %265:i32 = load %count
+                %x_148:i32 = let %265
+                %267:i32 = add %x_148, 1i
+                store %count, %267
                 exit_if  # if_14
               }
             }
             exit_switch  # switch_1
           }
         }
-        continue %b29
+        continue  # -> $B29
       }
-      %b29 = block {  # continuing
-        %x_157:i32 = load %i
-        %192:i32 = add %x_157, 1i
-        store %i, %192
-        next_iteration %b28
+      $B29: {  # continuing
+        %268:i32 = load %i
+        %x_157:i32 = let %268
+        %270:i32 = add %x_157, 1i
+        store %i, %270
+        next_iteration  # -> $B28
       }
     }
-    %x_159:i32 = load %count
-    %194:bool = eq %x_159, 20i
-    if %194 [t: %b36, f: %b37] {  # if_15
-      %b36 = block {  # true
+    %271:i32 = load %count
+    %x_159:i32 = let %271
+    %273:bool = eq %x_159, 20i
+    if %273 [t: $B36, f: $B37] {  # if_15
+      $B36: {  # true
         store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
         exit_if  # if_15
       }
-      %b37 = block {  # false
+      $B37: {  # false
         store %x_GLF_color, vec4<f32>(0.0f, 0.0f, 1.0f, 1.0f)
         exit_if  # if_15
       }
@@ -417,12 +496,12 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b38 {
-  %b38 = block {
-    %196:void = call %main_1
-    %197:vec4<f32> = load %x_GLF_color
-    %198:main_out = construct %197
-    ret %198
+%tint_symbol = @fragment func():main_out {
+  $B38: {
+    %275:void = call %main_1
+    %276:vec4<f32> = load %x_GLF_color
+    %277:main_out = construct %276
+    ret %277
   }
 }
 

@@ -1,6 +1,65 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(4) {
+  x_4_1:i32 @offset(0), @location(0), @interpolate(flat)
+}
+
+$B1: {  # root
+  %x_2:ptr<private, vec4<f32>, read_write> = var
+  %x_3:ptr<private, i32, read_write> = var
+  %x_4:ptr<private, i32, read_write> = var
+}
+
+%main_1 = func():void {
+  $B2: {
+    %5:vec4<f32> = load %x_2
+    %x_16:vec4<f32> = let %5
+    %7:i32 = load %x_3
+    %x_26:i32 = let %7
+    store %x_4, 1i
+    %9:f32 = access %x_16, 0u
+    %10:i32 = call %tint_f32_to_i32, %9
+    %12:i32 = and %10, 1i
+    %13:i32 = let %12
+    %14:f32 = access %x_16, 1u
+    %15:i32 = call %tint_f32_to_i32, %14
+    %16:i32 = and %15, 1i
+    %17:i32 = add %13, %16
+    %18:i32 = add %17, %x_26
+    %19:i32 = let %18
+    %20:f32 = access %x_16, 2u
+    %21:i32 = call %tint_f32_to_i32, %20
+    %22:bool = eq %19, %21
+    if %22 [t: $B3] {  # if_1
+      $B3: {  # true
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%x_2_param:vec4<f32> [@position], %x_3_param:i32 [@location(0), @interpolate(flat)]):main_out {
+  $B4: {
+    store %x_2, %x_2_param
+    store %x_3, %x_3_param
+    %26:void = call %main_1
+    %27:i32 = load %x_4
+    %28:main_out = construct %27
+    ret %28
+  }
+}
+%tint_f32_to_i32 = func(%value:f32):i32 {
+  $B5: {
+    %30:i32 = convert %value
+    %31:bool = gte %value, -2147483648.0f
+    %32:i32 = select -2147483648i, %30, %31
+    %33:bool = lte %value, 2147483520.0f
+    %34:i32 = select 2147483647i, %32, %33
+    ret %34
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

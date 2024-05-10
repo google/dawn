@@ -1,0 +1,22 @@
+SKIP: FAILED
+
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
+  %weights:ptr<storage, array<f32>, read> = var @binding_point(0, 0)
+}
+
+%tint_symbol = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, f32, read> = access %weights, 0i
+    %4:f32 = load %3
+    %a:ptr<function, f32, read_write> = var, %4
+    ret
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

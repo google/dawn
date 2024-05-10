@@ -1,0 +1,50 @@
+SKIP: FAILED
+
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: __atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+$B1: {  # root
+  %S:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %continue_execution:ptr<private, bool, read_write> = var, true
+}
+
+%tint_symbol = @fragment func():vec4<f32> [@location(0)] {
+  $B2: {
+    if false [t: $B3] {  # if_1
+      $B3: {  # true
+        store %continue_execution, false
+        exit_if  # if_1
+      }
+    }
+    %4:bool = load %continue_execution
+    %5:__atomic_compare_exchange_result_i32 = if %4 [t: $B4] {  # if_2
+      $B4: {  # true
+        %6:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %S, 0i, 1i
+        exit_if %6  # if_2
+      }
+      # implicit false block: exit_if undef
+    }
+    %7:i32 = access %5, 0u
+    %old_value:i32 = let %7
+    %9:f32 = convert %old_value
+    %10:vec4<f32> = construct %9
+    %11:bool = load %continue_execution
+    %12:bool = eq %11, false
+    if %12 [t: $B5] {  # if_3
+      $B5: {  # true
+        terminate_invocation
+      }
+    }
+    ret %10
+  }
+}
+
+unhandled variable address space
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

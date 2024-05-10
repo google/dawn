@@ -1,17 +1,17 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: PixelLocal = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: PixelLocal = struct @align(4) {
   a:u32 @offset(0)
   b:i32 @offset(4)
   c:f32 @offset(8)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %P:ptr<pixel_local, PixelLocal, read_write> = var
 }
 
-%f0 = func():void -> %b2 {
-  %b2 = block {
+%f0 = func():void {
+  $B2: {
     %3:ptr<pixel_local, u32, read_write> = access %P, 0u
     %4:u32 = load %3
     %5:u32 = add %4, 9u
@@ -19,8 +19,8 @@ SKIP: FAILED
     ret
   }
 }
-%f1 = func():void -> %b3 {
-  %b3 = block {
+%f1 = func():void {
+  $B3: {
     %7:void = call %f0
     %8:ptr<pixel_local, u32, read_write> = access %P, 0u
     %9:u32 = load %8
@@ -29,8 +29,8 @@ SKIP: FAILED
     ret
   }
 }
-%f2 = func():void -> %b4 {
-  %b4 = block {
+%f2 = func():void {
+  $B4: {
     %12:ptr<pixel_local, u32, read_write> = access %P, 0u
     %13:u32 = load %12
     %14:u32 = add %13, 7u
@@ -39,8 +39,8 @@ SKIP: FAILED
     ret
   }
 }
-%f = @fragment func():vec4<f32> [@location(0)] -> %b5 {
-  %b5 = block {
+%f = @fragment func():vec4<f32> [@location(0)] {
+  $B5: {
     %17:void = call %f2
     ret vec4<f32>(2.0f)
   }

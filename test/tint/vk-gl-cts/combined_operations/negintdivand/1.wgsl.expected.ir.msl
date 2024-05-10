@@ -1,6 +1,76 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  color_out_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %frag_color:ptr<private, vec4<f32>, read_write> = var
+  %color_out:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void {
+  $B2: {
+    %iv:ptr<function, vec2<i32>, read_write> = var
+    %5:vec4<f32> = load %frag_color
+    %x_28:vec4<f32> = let %5
+    %7:f32 = access %x_28, 0u
+    %8:f32 = access %x_28, 1u
+    %9:vec2<f32> = construct %7, %8
+    %10:vec2<f32> = mul %9, 256.0f
+    %11:vec2<i32> = call %tint_v2f32_to_v2i32, %10
+    store %iv, %11
+    %13:i32 = load_vector_element %iv, 1u
+    %x_33:i32 = let %13
+    %15:i32 = call %tint_div_i32, %x_33, 2i
+    %17:i32 = and %15, 64i
+    %18:bool = eq %17, 64i
+    if %18 [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
+        store %color_out, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_1
+      }
+      $B4: {  # false
+        store %color_out, vec4<f32>(0.0f, 1.0f, 1.0f, 1.0f)
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%frag_color_param:vec4<f32> [@location(1)]):main_out {
+  $B5: {
+    store %frag_color, %frag_color_param
+    %21:void = call %main_1
+    %22:vec4<f32> = load %color_out
+    %23:main_out = construct %22
+    ret %23
+  }
+}
+%tint_div_i32 = func(%lhs:i32, %rhs:i32):i32 {
+  $B6: {
+    %26:bool = eq %rhs, 0i
+    %27:bool = eq %lhs, -2147483648i
+    %28:bool = eq %rhs, -1i
+    %29:bool = and %27, %28
+    %30:bool = or %26, %29
+    %31:i32 = select %rhs, 1i, %30
+    %32:i32 = div %lhs, %31
+    ret %32
+  }
+}
+%tint_v2f32_to_v2i32 = func(%value:vec2<f32>):vec2<i32> {
+  $B7: {
+    %34:vec2<i32> = convert %value
+    %35:vec2<bool> = gte %value, vec2<f32>(-2147483648.0f)
+    %36:vec2<i32> = select vec2<i32>(-2147483648i), %34, %35
+    %37:vec2<bool> = lte %value, vec2<f32>(2147483520.0f)
+    %38:vec2<i32> = select vec2<i32>(2147483647i), %36, %37
+    ret %38
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

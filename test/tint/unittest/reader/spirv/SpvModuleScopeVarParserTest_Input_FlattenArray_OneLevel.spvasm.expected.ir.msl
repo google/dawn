@@ -1,9 +1,47 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct main_out {
+  float4 x_2_1 [[position]];
+};
+
+thread tint_array<float, 3> x_1 = {};
+thread float4 x_2 = 0.0f;
+void main_1() {
+}
+vertex main_out tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2) {
+  x_1[0] = x_1_param;
+  x_1[1] = x_1_param_1;
+  x_1[2] = x_1_param_2;
+  main_1();
+  return {.x_2_1=x_2};
+}
+program_source:19:29: error: program scope variable must reside in constant address space
+thread tint_array<float, 3> x_1 = {};
+                            ^
+program_source:20:15: error: program scope variable must reside in constant address space
+thread float4 x_2 = 0.0f;
+              ^
+program_source:23:29: error: invalid type 'float' for input declaration in a vertex function
+vertex main_out tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2) {
+                            ^~~~~~~~~~~~~~~
+program_source:23:46: error: invalid type 'float' for input declaration in a vertex function
+vertex main_out tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2) {
+                                             ^~~~~~~~~~~~~~~~~
+program_source:23:65: error: invalid type 'float' for input declaration in a vertex function
+vertex main_out tint_symbol(float x_1_param, float x_1_param_1, float x_1_param_2) {
+                                                                ^~~~~~~~~~~~~~~~~
+

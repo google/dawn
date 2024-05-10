@@ -1,9 +1,23 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread half t = 0.0h;
+half4 m() {
+  t = 1.0h;
+  return half4(t);
+}
+void f() {
+  int4 v = tint_v4f16_to_v4i32(m());
+}
+int4 tint_v4f16_to_v4i32(half4 value) {
+  return select(int4(2147483647), select(int4((-2147483647 - 1)), int4(value), (value >= half4(-65504.0h))), (value <= half4(65504.0h)));
+}
+program_source:4:13: error: program scope variable must reside in constant address space
+thread half t = 0.0h;
+            ^
+program_source:10:12: error: use of undeclared identifier 'tint_v4f16_to_v4i32'
+  int4 v = tint_v4f16_to_v4i32(m());
+           ^
+

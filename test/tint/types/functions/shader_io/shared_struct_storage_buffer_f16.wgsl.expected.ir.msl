@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: S = struct @align(128) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(128) {
   f:f32 @offset(0), @location(0)
   u:u32 @offset(4), @location(1), @interpolate(flat)
   v:vec4<f32> @offset(128), @builtin(position)
@@ -8,18 +8,43 @@ SKIP: FAILED
   y:vec3<f16> @offset(192), @location(3)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %output:ptr<storage, S, read_write> = var @binding_point(0, 0)
 }
 
-%frag_main = @fragment func(%input:S):void -> %b2 {
-  %b2 = block {
-    %f:f32 = access %input, 0u
-    %u:u32 = access %input, 1u
-    %v:vec4<f32> = access %input, 2u
-    %x:f16 = access %input, 3u
-    %y:vec3<f16> = access %input, 4u
-    store %output, %input
+%frag_main = @fragment func(%input:S):void {
+  $B2: {
+    %4:f32 = access %input, 0u
+    %f:f32 = let %4
+    %6:u32 = access %input, 1u
+    %u:u32 = let %6
+    %8:vec4<f32> = access %input, 2u
+    %v:vec4<f32> = let %8
+    %10:f16 = access %input, 3u
+    %x:f16 = let %10
+    %12:vec3<f16> = access %input, 4u
+    %y:vec3<f16> = let %12
+    %14:void = call %tint_store_and_preserve_padding, %output, %input
+    ret
+  }
+}
+%tint_store_and_preserve_padding = func(%target:ptr<storage, S, read_write>, %value_param:S):void {
+  $B3: {
+    %18:ptr<storage, f32, read_write> = access %target, 0u
+    %19:f32 = access %value_param, 0u
+    store %18, %19
+    %20:ptr<storage, u32, read_write> = access %target, 1u
+    %21:u32 = access %value_param, 1u
+    store %20, %21
+    %22:ptr<storage, vec4<f32>, read_write> = access %target, 2u
+    %23:vec4<f32> = access %value_param, 2u
+    store %22, %23
+    %24:ptr<storage, f16, read_write> = access %target, 3u
+    %25:f16 = access %value_param, 3u
+    store %24, %25
+    %26:ptr<storage, vec3<f16>, read_write> = access %target, 4u
+    %27:vec3<f16> = access %value_param, 4u
+    store %26, %27
     ret
   }
 }

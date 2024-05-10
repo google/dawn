@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: block0 = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: block0 = struct @align(16) {
   in_color:vec4<f32> @offset(0)
 }
 
@@ -9,31 +9,33 @@ main_out = struct @align(16) {
   frag_color_1:vec4<f32> @offset(16), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %pos:ptr<private, vec4<f32>, read_write> = var
   %frag_color:ptr<private, vec4<f32>, read_write> = var
   %x_8:ptr<uniform, block0, read> = var @binding_point(0, 1)
   %gl_Position:ptr<private, vec4<f32>, read_write> = var
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
-    %x_24:vec4<f32> = load %pos
+%main_1 = func():void {
+  $B2: {
+    %6:vec4<f32> = load %pos
+    %x_24:vec4<f32> = let %6
     store %gl_Position, %x_24
-    %7:ptr<uniform, vec4<f32>, read> = access %x_8, 0u
-    %x_27:vec4<f32> = load %7
+    %8:ptr<uniform, vec4<f32>, read> = access %x_8, 0u
+    %9:vec4<f32> = load %8
+    %x_27:vec4<f32> = let %9
     store %frag_color, %x_27
     ret
   }
 }
-%tint_symbol = @vertex func(%position_param:vec4<f32> [@location(0)]):main_out -> %b3 {
-  %b3 = block {
+%tint_symbol = @vertex func(%position_param:vec4<f32> [@location(0)]):main_out {
+  $B3: {
     store %pos, %position_param
-    %11:void = call %main_1
-    %12:vec4<f32> = load %gl_Position
-    %13:vec4<f32> = load %frag_color
-    %14:main_out = construct %12, %13
-    ret %14
+    %13:void = call %main_1
+    %14:vec4<f32> = load %gl_Position
+    %15:vec4<f32> = load %frag_color
+    %16:main_out = construct %14, %15
+    ret %16
   }
 }
 

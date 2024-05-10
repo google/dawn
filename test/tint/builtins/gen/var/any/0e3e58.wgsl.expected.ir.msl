@@ -1,11 +1,11 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
 }
 
-%any_0e3e58 = func():void -> %b2 {
-  %b2 = block {
+%any_0e3e58 = func():void {
+  $B2: {
     %arg_0:ptr<function, vec2<bool>, read_write> = var, vec2<bool>(true)
     %4:vec2<bool> = load %arg_0
     %5:bool = any %4
@@ -18,20 +18,20 @@ SKIP: FAILED
     ret
   }
 }
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
     %12:void = call %any_0e3e58
     ret vec4<f32>(0.0f)
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
+%fragment_main = @fragment func():void {
+  $B4: {
     %14:void = call %any_0e3e58
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
     %16:void = call %any_0e3e58
     ret
   }

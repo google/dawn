@@ -1,9 +1,45 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:270 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread bool continue_execution = true;
+int f(int x) {
+  if ((x == 10)) {
+    continue_execution = false;
+  }
+  return x;
+}
+fragment int tint_symbol(int3 x) {
+  int y = x[0u];
+  {
+    while(true) {
+      int const r = f(y);
+      if ((r == 0)) {
+        break;
+      }
+      continue;
+    }
+  }
+  if (!(continue_execution)) {
+    discard_fragment();
+  }
+  return y;
+}
+program_source:4:13: error: program scope variable must reside in constant address space
+thread bool continue_execution = true;
+            ^
+program_source:6:10: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+  if ((x == 10)) {
+       ~~^~~~~
+program_source:6:10: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((x == 10)) {
+      ~  ^    ~
+program_source:6:10: note: use '=' to turn this equality comparison into an assignment
+  if ((x == 10)) {
+         ^~
+         =
+program_source:11:26: error: invalid type 'int3' (vector of 3 'int' values) for input declaration in a fragment function
+fragment int tint_symbol(int3 x) {
+                         ^~~~~~
+

@@ -9,3 +9,16 @@ void f() {
   int a = 0;
   int b = a;
 }
+program_source:7:7: error: redefinition of 'a'
+  int a = 0;
+      ^
+program_source:5:7: note: previous definition is here
+  int a = 0;
+      ^
+program_source:8:7: error: redefinition of 'b'
+  int b = a;
+      ^
+program_source:6:7: note: previous definition is here
+  int b = a;
+      ^
+

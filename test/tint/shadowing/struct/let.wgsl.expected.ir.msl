@@ -12,3 +12,48 @@ void f() {
   a const a = a{};
   a const b = a;
 }
+program_source:8:16: error: expected ';' at end of declaration
+  a const a = a{};
+               ^
+               ;
+program_source:9:4: error: expected ';' after expression
+  a const b = a;
+   ^
+   ;
+program_source:9:11: error: C++ requires a type specifier for all declarations
+  a const b = a;
+    ~~~~~ ^
+program_source:10:4: error: expected ';' after expression
+  a const a = a{};
+   ^
+   ;
+program_source:10:11: error: must use 'struct' tag to refer to type 'a' in this scope
+  a const a = a{};
+          ^
+          struct 
+program_source:8:11: note: struct 'a' is hidden by a non-type declaration of 'a' here
+  a const a = a{};
+          ^
+program_source:10:13: error: expected unqualified-id
+  a const a = a{};
+            ^
+program_source:11:4: error: expected ';' after expression
+  a const b = a;
+   ^
+   ;
+program_source:11:11: error: C++ requires a type specifier for all declarations
+  a const b = a;
+    ~~~~~ ^
+program_source:8:15: warning: variable 'a' is uninitialized when used within its own initialization [-Wuninitialized]
+  a const a = a{};
+          ~   ^
+program_source:9:3: warning: expression result unused [-Wunused-value]
+  a const b = a;
+  ^
+program_source:10:3: warning: expression result unused [-Wunused-value]
+  a const a = a{};
+  ^
+program_source:11:3: warning: expression result unused [-Wunused-value]
+  a const b = a;
+  ^
+

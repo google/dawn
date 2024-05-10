@@ -1,10 +1,9 @@
 SKIP: FAILED
 
-#include <metal_stdlib>
-using namespace metal;
-
-texturecube_array<float, access::sample> t_f;
-texturecube_array<int, access::sample> t_i;
-texturecube_array<uint, access::sample> t_u;
-void tint_symbol() {
-}
+../../src/tint/lang/msl/writer/printer/printer.cc:924 internal compiler error: TINT_UNREACHABLE unhandled: textureDimensions
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

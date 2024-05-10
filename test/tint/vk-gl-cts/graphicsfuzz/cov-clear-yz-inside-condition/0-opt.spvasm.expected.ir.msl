@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: strided_arr = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
   el:f32 @offset(0)
 }
 
@@ -16,72 +16,81 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_6:ptr<uniform, buf0, read> = var @binding_point(0, 0)
   %x_9:ptr<uniform, buf1, read> = var @binding_point(0, 1)
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+  %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %v0:ptr<function, vec2<f32>, read_write> = var
     %v1:ptr<function, vec4<f32>, read_write> = var
     %x_57:ptr<function, vec4<f32>, read_write> = var
-    %8:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-    %9:f32 = load %8
-    %10:vec2<f32> = construct %9
-    store %v0, %10
-    %11:f32 = load_vector_element %v0, 0u
-    %x_36:vec4<f32> = construct %11
+    %9:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %10:f32 = load %9
+    %11:vec2<f32> = construct %10
+    store %v0, %11
+    %12:f32 = load_vector_element %v0, 0u
+    %13:vec4<f32> = construct %12
+    %x_36:vec4<f32> = let %13
     store %v1, %x_36
-    %13:ptr<uniform, f32, read> = access %x_9, 0u
-    %14:f32 = load %13
-    %15:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %15:ptr<uniform, f32, read> = access %x_9, 0u
     %16:f32 = load %15
-    %17:bool = eq %14, %16
-    %18:bool = eq %17, false
-    if %18 [t: %b3, f: %b4] {  # if_1
-      %b3 = block {  # true
-        %19:ptr<uniform, f32, read> = access %x_9, 0u
-        %20:f32 = load %19
-        %21:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+    %17:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+    %18:f32 = load %17
+    %19:bool = eq %16, %18
+    %20:bool = eq %19, false
+    if %20 [t: $B3, f: $B4] {  # if_1
+      $B3: {  # true
+        %21:ptr<uniform, f32, read> = access %x_9, 0u
         %22:f32 = load %21
-        %23:bool = eq %20, %22
-        if %23 [t: %b5] {  # if_2
-          %b5 = block {  # true
+        %23:ptr<uniform, f32, read> = access %x_6, 0u, 1i, 0u
+        %24:f32 = load %23
+        %25:bool = eq %22, %24
+        if %25 [t: $B5] {  # if_2
+          $B5: {  # true
             ret
           }
         }
-        %24:f32 = access %x_36, 0u
-        %25:vec2<f32> = swizzle %x_36, yz
-        %26:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
-        %27:f32 = load %26
-        %28:vec2<f32> = construct %27
-        %29:vec2<f32> = sub %25, %28
-        %30:vec2<f32> = swizzle %29, xy
-        %31:f32 = access %x_36, 3u
-        %32:vec4<f32> = construct %24, %30, %31
-        store %x_57, %32
-        %33:vec4<f32> = load %x_57
-        store %v1, %33
+        %26:f32 = access %x_36, 0u
+        %27:vec2<f32> = swizzle %x_36, yz
+        %28:ptr<uniform, f32, read> = access %x_6, 0u, 0i, 0u
+        %29:f32 = load %28
+        %30:vec2<f32> = construct %29
+        %31:vec2<f32> = sub %27, %30
+        %32:vec2<f32> = swizzle %31, xy
+        %33:f32 = access %x_36, 3u
+        %34:vec4<f32> = construct %26, %32, %33
+        store %x_57, %34
+        %35:vec4<f32> = load %x_57
+        store %v1, %35
         exit_if  # if_1
       }
-      %b4 = block {  # false
-        discard
+      $B4: {  # false
+        store %continue_execution, false
         exit_if  # if_1
       }
     }
-    %34:vec4<f32> = load %x_57
-    store %x_GLF_color, %34
+    %36:vec4<f32> = load %x_57
+    store %x_GLF_color, %36
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b6 {
-  %b6 = block {
-    %36:void = call %main_1
-    %37:vec4<f32> = load %x_GLF_color
-    %38:main_out = construct %37
-    ret %38
+%tint_symbol = @fragment func():main_out {
+  $B6: {
+    %38:void = call %main_1
+    %39:vec4<f32> = load %x_GLF_color
+    %40:main_out = construct %39
+    %41:bool = load %continue_execution
+    %42:bool = eq %41, false
+    if %42 [t: $B7] {  # if_3
+      $B7: {  # true
+        terminate_invocation
+      }
+    }
+    ret %40
   }
 }
 

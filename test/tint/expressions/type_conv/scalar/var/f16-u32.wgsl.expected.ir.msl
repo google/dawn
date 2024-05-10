@@ -1,9 +1,19 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Convert
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread half u = 1.0h;
+void f() {
+  uint const v = tint_f16_to_u32(u);
+}
+uint tint_f16_to_u32(half value) {
+  return select(4294967295u, select(0u, uint(value), (value >= 0.0h)), (value <= 65504.0h));
+}
+program_source:4:13: error: program scope variable must reside in constant address space
+thread half u = 1.0h;
+            ^
+program_source:6:14: warning: unused variable 'v' [-Wunused-variable]
+  uint const v = tint_f16_to_u32(u);
+             ^
+

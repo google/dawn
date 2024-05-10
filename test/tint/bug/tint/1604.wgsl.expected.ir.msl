@@ -1,25 +1,22 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %x:ptr<uniform, i32, read> = var @binding_point(0, 0)
 }
 
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
-  %b2 = block {
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
     %3:i32 = load %x
-    switch %3 [c: (0i, %b3), c: (default, %b4)] {  # switch_1
-      %b3 = block {  # case
-        loop [b: %b5, c: %b6] {  # loop_1
-          %b5 = block {  # body
+    switch %3 [c: (0i, $B3), c: (default, $B4)] {  # switch_1
+      $B3: {  # case
+        loop [b: $B5] {  # loop_1
+          $B5: {  # body
             ret
-          }
-          %b6 = block {  # continuing
-            next_iteration %b5
           }
         }
         exit_switch  # switch_1
       }
-      %b4 = block {  # case
+      $B4: {  # case
         exit_switch  # switch_1
       }
     }

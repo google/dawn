@@ -4,5 +4,23 @@ SKIP: FAILED
 using namespace metal;
 
 threadgroup int3 v;
-void tint_symbol() {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]]) {
+  if ((tint_local_index == 0u)) {
+    v = int3(0);
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
 }
+program_source:4:18: error: program scope variable must reside in constant address space
+threadgroup int3 v;
+                 ^
+program_source:6:25: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
+  if ((tint_local_index == 0u)) {
+       ~~~~~~~~~~~~~~~~~^~~~~
+program_source:6:25: note: remove extraneous parentheses around the comparison to silence this warning
+  if ((tint_local_index == 0u)) {
+      ~                 ^    ~
+program_source:6:25: note: use '=' to turn this equality comparison into an assignment
+  if ((tint_local_index == 0u)) {
+                        ^~
+                        =
+

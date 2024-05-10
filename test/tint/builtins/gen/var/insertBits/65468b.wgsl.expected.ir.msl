@@ -1,41 +1,48 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
 }
 
-%insertBits_65468b = func():void -> %b2 {
-  %b2 = block {
+%insertBits_65468b = func():void {
+  $B2: {
     %arg_0:ptr<function, i32, read_write> = var, 1i
     %arg_1:ptr<function, i32, read_write> = var, 1i
     %arg_2:ptr<function, u32, read_write> = var, 1u
     %arg_3:ptr<function, u32, read_write> = var, 1u
     %7:i32 = load %arg_0
-    %8:i32 = load %arg_1
-    %9:u32 = load %arg_2
-    %10:u32 = load %arg_3
-    %11:i32 = insertBits %7, %8, %9, %10
-    %res:ptr<function, i32, read_write> = var, %11
-    %13:i32 = load %res
-    store %prevent_dce, %13
+    %8:i32 = let %7
+    %9:i32 = load %arg_1
+    %10:i32 = let %9
+    %11:u32 = load %arg_2
+    %12:u32 = load %arg_3
+    %13:u32 = let %12
+    %14:u32 = min %11, 32u
+    %15:u32 = let %14
+    %16:u32 = sub 32u, %15
+    %17:u32 = min %13, %16
+    %18:i32 = insertBits %8, %10, %15, %17
+    %res:ptr<function, i32, read_write> = var, %18
+    %20:i32 = load %res
+    store %prevent_dce, %20
     ret
   }
 }
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
-    %15:void = call %insertBits_65468b
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %22:void = call %insertBits_65468b
     ret vec4<f32>(0.0f)
   }
 }
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
-    %17:void = call %insertBits_65468b
+%fragment_main = @fragment func():void {
+  $B4: {
+    %24:void = call %insertBits_65468b
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
-    %19:void = call %insertBits_65468b
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
+    %26:void = call %insertBits_65468b
     ret
   }
 }

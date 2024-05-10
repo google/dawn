@@ -1,0 +1,43 @@
+SKIP: FAILED
+
+../../src/tint/lang/msl/writer/printer/printer.cc:1164 internal compiler error: $B1: {  # root
+  %arg_0:ptr<handle, texture_storage_3d<r8unorm, read_write>, read> = var @binding_point(1, 0)
+}
+
+%textureStore_ed6198 = func():void {
+  $B2: {
+    %arg_1:ptr<function, vec3<i32>, read_write> = var, vec3<i32>(1i)
+    %arg_2:ptr<function, vec4<f32>, read_write> = var, vec4<f32>(1.0f)
+    %5:texture_storage_3d<r8unorm, read_write> = load %arg_0
+    %6:vec3<i32> = load %arg_1
+    %7:vec4<f32> = load %arg_2
+    %8:void = textureStore %5, %6, %7
+    ret
+  }
+}
+%vertex_main = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %10:void = call %textureStore_ed6198
+    ret vec4<f32>(0.0f)
+  }
+}
+%fragment_main = @fragment func():void {
+  $B4: {
+    %12:void = call %textureStore_ed6198
+    ret
+  }
+}
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B5: {
+    %14:void = call %textureStore_ed6198
+    ret
+  }
+}
+
+invalid access control for storage texture
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

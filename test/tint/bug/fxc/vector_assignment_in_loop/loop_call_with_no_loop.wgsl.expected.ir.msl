@@ -1,9 +1,43 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::StoreVectorElement
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread float2 v2f = 0.0f;
+thread int3 v3i = 0;
+thread uint4 v4u = 0u;
+thread bool2 v2b = false;
+void foo() {
+  int i = 0;
+  v2f[i] = 1.0f;
+  v3i[i] = 1;
+  v4u[i] = 1u;
+  v2b[i] = true;
+}
+kernel void tint_symbol() {
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 2)) {
+      } else {
+        break;
+      }
+      foo();
+      i = (i + 1);
+      continue;
+    }
+  }
+}
+program_source:4:15: error: program scope variable must reside in constant address space
+thread float2 v2f = 0.0f;
+              ^
+program_source:5:13: error: program scope variable must reside in constant address space
+thread int3 v3i = 0;
+            ^
+program_source:6:14: error: program scope variable must reside in constant address space
+thread uint4 v4u = 0u;
+             ^
+program_source:7:14: error: program scope variable must reside in constant address space
+thread bool2 v2b = false;
+             ^
+

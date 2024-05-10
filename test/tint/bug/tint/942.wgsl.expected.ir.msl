@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: Params = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Params = struct @align(4) {
   filterDim:u32 @offset(0)
   blockDim:u32 @offset(4)
 }
@@ -9,7 +9,7 @@ Flip = struct @align(4) {
   value:u32 @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %samp:ptr<handle, sampler, read> = var @binding_point(0, 0)
   %params:ptr<uniform, Params, read> = var @binding_point(0, 1)
   %inputTex:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 1)
@@ -18,254 +18,297 @@ Flip = struct @align(4) {
   %tile:ptr<workgroup, array<array<vec3<f32>, 256>, 4>, read_write> = var
 }
 
-%tint_symbol = @compute @workgroup_size(64, 1, 1) func(%WorkGroupID:vec3<u32> [@workgroup_id], %LocalInvocationID:vec3<u32> [@local_invocation_id]):void -> %b2 {
-  %b2 = block {
-    %10:ptr<uniform, u32, read> = access %params, 0u
-    %11:u32 = load %10
-    %12:u32 = sub %11, 1u
-    %filterOffset:u32 = div %12, 2u
-    %14:texture_2d<f32> = load %inputTex
-    %dims:vec2<u32> = textureDimensions %14, 0i
-    %16:vec2<u32> = swizzle %WorkGroupID, xy
-    %17:ptr<uniform, u32, read> = access %params, 1u
-    %18:u32 = load %17
-    %19:vec2<u32> = construct %18, 4u
-    %20:vec2<u32> = mul %16, %19
-    %21:vec2<u32> = swizzle %LocalInvocationID, xy
-    %22:vec2<u32> = mul %21, vec2<u32>(4u, 1u)
-    %23:vec2<u32> = add %20, %22
-    %24:vec2<u32> = construct %filterOffset, 0u
-    %baseIndex:vec2<u32> = sub %23, %24
-    loop [i: %b3, b: %b4, c: %b5] {  # loop_1
-      %b3 = block {  # initializer
-        %r:ptr<function, u32, read_write> = var, 0u
-        next_iteration %b4
+%tint_symbol = @compute @workgroup_size(64, 1, 1) func(%WorkGroupID:vec3<u32> [@workgroup_id], %LocalInvocationID:vec3<u32> [@local_invocation_id], %tint_local_index:u32 [@local_invocation_index]):void {
+  $B2: {
+    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
+      $B3: {  # initializer
+        next_iteration %tint_local_index  # -> $B4
       }
-      %b4 = block {  # body
-        %27:u32 = load %r
-        %28:bool = lt %27, 4u
-        if %28 [t: %b6, f: %b7] {  # if_1
-          %b6 = block {  # true
-            exit_if  # if_1
-          }
-          %b7 = block {  # false
+      $B4 (%idx:u32): {  # body
+        %12:bool = gte %idx, 1024u
+        if %12 [t: $B6] {  # if_1
+          $B6: {  # true
             exit_loop  # loop_1
           }
         }
-        loop [i: %b8, b: %b9, c: %b10] {  # loop_2
-          %b8 = block {  # initializer
-            %c:ptr<function, u32, read_write> = var, 0u
-            next_iteration %b9
-          }
-          %b9 = block {  # body
-            %30:u32 = load %c
-            %31:bool = lt %30, 4u
-            if %31 [t: %b11, f: %b12] {  # if_2
-              %b11 = block {  # true
-                exit_if  # if_2
-              }
-              %b12 = block {  # false
-                exit_loop  # loop_2
-              }
-            }
-            %32:u32 = load %c
-            %33:u32 = load %r
-            %34:vec2<u32> = construct %32, %33
-            %35:vec2<u32> = add %baseIndex, %34
-            %loadIndex:ptr<function, vec2<u32>, read_write> = var, %35
-            %37:ptr<uniform, u32, read> = access %flip, 0u
-            %38:u32 = load %37
-            %39:bool = neq %38, 0u
-            if %39 [t: %b13] {  # if_3
-              %b13 = block {  # true
-                %40:vec2<u32> = load %loadIndex
-                %41:vec2<u32> = swizzle %40, yx
-                store %loadIndex, %41
-                exit_if  # if_3
-              }
-            }
-            %42:u32 = load %r
-            %43:u32 = access %LocalInvocationID, 0u
-            %44:u32 = mul 4u, %43
-            %45:u32 = load %c
-            %46:u32 = add %44, %45
-            %47:ptr<workgroup, vec3<f32>, read_write> = access %tile, %42, %46
-            %48:texture_2d<f32> = load %inputTex
-            %49:sampler = load %samp
-            %50:vec2<u32> = load %loadIndex
-            %51:vec2<f32> = convert %50
-            %52:vec2<f32> = add %51, vec2<f32>(0.25f)
-            %53:vec2<f32> = convert %dims
-            %54:vec2<f32> = div %52, %53
-            %55:vec4<f32> = textureSampleLevel %48, %49, %54, 0.0f
-            %56:vec3<f32> = swizzle %55, xyz
-            store %47, %56
-            continue %b10
-          }
-          %b10 = block {  # continuing
-            %57:u32 = load %c
-            %58:u32 = add %57, 1u
-            store %c, %58
-            next_iteration %b9
-          }
-        }
-        continue %b5
+        %13:u32 = mod %idx, 256u
+        %14:u32 = div %idx, 256u
+        %15:ptr<workgroup, vec3<f32>, read_write> = access %tile, %14, %13
+        store %15, vec3<f32>(0.0f)
+        continue  # -> $B5
       }
-      %b5 = block {  # continuing
-        %59:u32 = load %r
-        %60:u32 = add %59, 1u
-        store %r, %60
-        next_iteration %b4
+      $B5: {  # continuing
+        %16:u32 = add %idx, 64u
+        next_iteration %16  # -> $B4
       }
     }
-    %61:void = workgroupBarrier
-    loop [i: %b14, b: %b15, c: %b16] {  # loop_3
-      %b14 = block {  # initializer
-        %r_1:ptr<function, u32, read_write> = var, 0u  # %r_1: 'r'
-        next_iteration %b15
+    %17:void = msl.threadgroup_barrier 4u
+    %18:ptr<uniform, u32, read> = access %params, 0u
+    %19:u32 = load %18
+    %20:u32 = sub %19, 1u
+    %21:u32 = call %tint_div_u32, %20, 2u
+    %filterOffset:u32 = let %21
+    %24:texture_2d<f32> = load %inputTex
+    %25:vec2<u32> = textureDimensions %24, 0i
+    %dims:vec2<u32> = let %25
+    %27:vec2<u32> = swizzle %WorkGroupID, xy
+    %28:ptr<uniform, u32, read> = access %params, 1u
+    %29:u32 = load %28
+    %30:vec2<u32> = construct %29, 4u
+    %31:vec2<u32> = mul %27, %30
+    %32:vec2<u32> = swizzle %LocalInvocationID, xy
+    %33:vec2<u32> = mul %32, vec2<u32>(4u, 1u)
+    %34:vec2<u32> = add %31, %33
+    %35:vec2<u32> = let %34
+    %36:vec2<u32> = construct %filterOffset, 0u
+    %37:vec2<u32> = sub %35, %36
+    %baseIndex:vec2<u32> = let %37
+    loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+      $B7: {  # initializer
+        %r:ptr<function, u32, read_write> = var, 0u
+        next_iteration  # -> $B8
       }
-      %b15 = block {  # body
-        %63:u32 = load %r_1
-        %64:bool = lt %63, 4u
-        if %64 [t: %b17, f: %b18] {  # if_4
-          %b17 = block {  # true
-            exit_if  # if_4
+      $B8: {  # body
+        %40:u32 = load %r
+        %41:bool = lt %40, 4u
+        if %41 [t: $B10, f: $B11] {  # if_2
+          $B10: {  # true
+            exit_if  # if_2
           }
-          %b18 = block {  # false
-            exit_loop  # loop_3
+          $B11: {  # false
+            exit_loop  # loop_2
           }
         }
-        loop [i: %b19, b: %b20, c: %b21] {  # loop_4
-          %b19 = block {  # initializer
-            %c_1:ptr<function, u32, read_write> = var, 0u  # %c_1: 'c'
-            next_iteration %b20
+        loop [i: $B12, b: $B13, c: $B14] {  # loop_3
+          $B12: {  # initializer
+            %c:ptr<function, u32, read_write> = var, 0u
+            next_iteration  # -> $B13
           }
-          %b20 = block {  # body
-            %66:u32 = load %c_1
-            %67:bool = lt %66, 4u
-            if %67 [t: %b22, f: %b23] {  # if_5
-              %b22 = block {  # true
-                exit_if  # if_5
+          $B13: {  # body
+            %43:u32 = load %c
+            %44:bool = lt %43, 4u
+            if %44 [t: $B15, f: $B16] {  # if_3
+              $B15: {  # true
+                exit_if  # if_3
               }
-              %b23 = block {  # false
-                exit_loop  # loop_4
+              $B16: {  # false
+                exit_loop  # loop_3
               }
             }
-            %68:u32 = load %c_1
-            %69:u32 = load %r_1
-            %70:vec2<u32> = construct %68, %69
-            %71:vec2<u32> = add %baseIndex, %70
-            %writeIndex:ptr<function, vec2<u32>, read_write> = var, %71
-            %73:ptr<uniform, u32, read> = access %flip, 0u
-            %74:u32 = load %73
-            %75:bool = neq %74, 0u
-            if %75 [t: %b24] {  # if_6
-              %b24 = block {  # true
-                %76:vec2<u32> = load %writeIndex
-                %77:vec2<u32> = swizzle %76, yx
-                store %writeIndex, %77
+            %45:u32 = load %c
+            %46:u32 = load %r
+            %47:vec2<u32> = construct %45, %46
+            %48:vec2<u32> = add %baseIndex, %47
+            %loadIndex:ptr<function, vec2<u32>, read_write> = var, %48
+            %50:ptr<uniform, u32, read> = access %flip, 0u
+            %51:u32 = load %50
+            %52:bool = neq %51, 0u
+            if %52 [t: $B17] {  # if_4
+              $B17: {  # true
+                %53:vec2<u32> = load %loadIndex
+                %54:vec2<u32> = swizzle %53, yx
+                store %loadIndex, %54
+                exit_if  # if_4
+              }
+            }
+            %55:u32 = load %r
+            %56:u32 = access %LocalInvocationID, 0u
+            %57:u32 = mul 4u, %56
+            %58:u32 = load %c
+            %59:u32 = add %57, %58
+            %60:ptr<workgroup, vec3<f32>, read_write> = access %tile, %55, %59
+            %61:ptr<workgroup, vec3<f32>, read_write> = let %60
+            %62:texture_2d<f32> = load %inputTex
+            %63:texture_2d<f32> = let %62
+            %64:sampler = load %samp
+            %65:sampler = let %64
+            %66:vec2<u32> = load %loadIndex
+            %67:vec2<f32> = convert %66
+            %68:vec2<f32> = add %67, vec2<f32>(0.25f)
+            %69:vec2<f32> = let %68
+            %70:vec2<f32> = convert %dims
+            %71:vec2<f32> = div %69, %70
+            %72:vec4<f32> = textureSampleLevel %63, %65, %71, 0.0f
+            %73:vec3<f32> = swizzle %72, xyz
+            store %61, %73
+            continue  # -> $B14
+          }
+          $B14: {  # continuing
+            %74:u32 = load %c
+            %75:u32 = add %74, 1u
+            store %c, %75
+            next_iteration  # -> $B13
+          }
+        }
+        continue  # -> $B9
+      }
+      $B9: {  # continuing
+        %76:u32 = load %r
+        %77:u32 = add %76, 1u
+        store %r, %77
+        next_iteration  # -> $B8
+      }
+    }
+    %78:void = msl.threadgroup_barrier 4u
+    loop [i: $B18, b: $B19, c: $B20] {  # loop_4
+      $B18: {  # initializer
+        %r_1:ptr<function, u32, read_write> = var, 0u  # %r_1: 'r'
+        next_iteration  # -> $B19
+      }
+      $B19: {  # body
+        %80:u32 = load %r_1
+        %81:bool = lt %80, 4u
+        if %81 [t: $B21, f: $B22] {  # if_5
+          $B21: {  # true
+            exit_if  # if_5
+          }
+          $B22: {  # false
+            exit_loop  # loop_4
+          }
+        }
+        loop [i: $B23, b: $B24, c: $B25] {  # loop_5
+          $B23: {  # initializer
+            %c_1:ptr<function, u32, read_write> = var, 0u  # %c_1: 'c'
+            next_iteration  # -> $B24
+          }
+          $B24: {  # body
+            %83:u32 = load %c_1
+            %84:bool = lt %83, 4u
+            if %84 [t: $B26, f: $B27] {  # if_6
+              $B26: {  # true
                 exit_if  # if_6
               }
-            }
-            %78:u32 = access %LocalInvocationID, 0u
-            %79:u32 = mul 4u, %78
-            %80:u32 = load %c_1
-            %center:u32 = add %79, %80
-            %82:bool = gte %center, %filterOffset
-            %83:bool = if %82 [t: %b25, f: %b26] {  # if_7
-              %b25 = block {  # true
-                %84:u32 = sub 256u, %filterOffset
-                %85:bool = lt %center, %84
-                exit_if %85  # if_7
-              }
-              %b26 = block {  # false
-                exit_if false  # if_7
+              $B27: {  # false
+                exit_loop  # loop_5
               }
             }
-            %86:bool = if %83 [t: %b27, f: %b28] {  # if_8
-              %b27 = block {  # true
-                %87:vec2<u32> = load %writeIndex
-                %88:vec2<bool> = lt %87, %dims
-                %89:bool = all %88
-                exit_if %89  # if_8
+            %85:u32 = load %c_1
+            %86:u32 = load %r_1
+            %87:vec2<u32> = construct %85, %86
+            %88:vec2<u32> = add %baseIndex, %87
+            %writeIndex:ptr<function, vec2<u32>, read_write> = var, %88
+            %90:ptr<uniform, u32, read> = access %flip, 0u
+            %91:u32 = load %90
+            %92:bool = neq %91, 0u
+            if %92 [t: $B28] {  # if_7
+              $B28: {  # true
+                %93:vec2<u32> = load %writeIndex
+                %94:vec2<u32> = swizzle %93, yx
+                store %writeIndex, %94
+                exit_if  # if_7
               }
-              %b28 = block {  # false
+            }
+            %95:u32 = access %LocalInvocationID, 0u
+            %96:u32 = mul 4u, %95
+            %97:u32 = load %c_1
+            %98:u32 = add %96, %97
+            %center:u32 = let %98
+            %100:bool = gte %center, %filterOffset
+            %101:bool = if %100 [t: $B29, f: $B30] {  # if_8
+              $B29: {  # true
+                %102:u32 = sub 256u, %filterOffset
+                %103:bool = lt %center, %102
+                exit_if %103  # if_8
+              }
+              $B30: {  # false
                 exit_if false  # if_8
               }
             }
-            if %86 [t: %b29] {  # if_9
-              %b29 = block {  # true
-                %acc:ptr<function, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
-                loop [i: %b30, b: %b31, c: %b32] {  # loop_5
-                  %b30 = block {  # initializer
-                    %f:ptr<function, u32, read_write> = var, 0u
-                    next_iteration %b31
-                  }
-                  %b31 = block {  # body
-                    %92:u32 = load %f
-                    %93:ptr<uniform, u32, read> = access %params, 0u
-                    %94:u32 = load %93
-                    %95:bool = lt %92, %94
-                    if %95 [t: %b33, f: %b34] {  # if_10
-                      %b33 = block {  # true
-                        exit_if  # if_10
-                      }
-                      %b34 = block {  # false
-                        exit_loop  # loop_5
-                      }
-                    }
-                    %96:u32 = load %f
-                    %97:u32 = add %center, %96
-                    %98:u32 = sub %97, %filterOffset
-                    %i:ptr<function, u32, read_write> = var, %98
-                    %100:vec3<f32> = load %acc
-                    %101:ptr<uniform, u32, read> = access %params, 0u
-                    %102:u32 = load %101
-                    %103:f32 = convert %102
-                    %104:f32 = div 1.0f, %103
-                    %105:u32 = load %r_1
-                    %106:u32 = load %i
-                    %107:ptr<workgroup, vec3<f32>, read_write> = access %tile, %105, %106
-                    %108:vec3<f32> = load %107
-                    %109:vec3<f32> = mul %104, %108
-                    %110:vec3<f32> = add %100, %109
-                    store %acc, %110
-                    continue %b32
-                  }
-                  %b32 = block {  # continuing
-                    %111:u32 = load %f
-                    %112:u32 = add %111, 1u
-                    store %f, %112
-                    next_iteration %b31
-                  }
-                }
-                %113:texture_storage_2d<rgba8unorm, write> = load %outputTex
-                %114:vec2<u32> = load %writeIndex
-                %115:vec3<f32> = load %acc
-                %116:vec4<f32> = construct %115, 1.0f
-                %117:void = textureStore %113, %114, %116
-                exit_if  # if_9
+            %104:bool = if %101 [t: $B31, f: $B32] {  # if_9
+              $B31: {  # true
+                %105:vec2<u32> = load %writeIndex
+                %106:vec2<bool> = lt %105, %dims
+                %107:bool = all %106
+                exit_if %107  # if_9
+              }
+              $B32: {  # false
+                exit_if false  # if_9
               }
             }
-            continue %b21
+            if %104 [t: $B33] {  # if_10
+              $B33: {  # true
+                %acc:ptr<function, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
+                loop [i: $B34, b: $B35, c: $B36] {  # loop_6
+                  $B34: {  # initializer
+                    %f:ptr<function, u32, read_write> = var, 0u
+                    next_iteration  # -> $B35
+                  }
+                  $B35: {  # body
+                    %110:u32 = load %f
+                    %111:ptr<uniform, u32, read> = access %params, 0u
+                    %112:u32 = load %111
+                    %113:bool = lt %110, %112
+                    if %113 [t: $B37, f: $B38] {  # if_11
+                      $B37: {  # true
+                        exit_if  # if_11
+                      }
+                      $B38: {  # false
+                        exit_loop  # loop_6
+                      }
+                    }
+                    %114:u32 = load %f
+                    %115:u32 = add %center, %114
+                    %116:u32 = sub %115, %filterOffset
+                    %i:ptr<function, u32, read_write> = var, %116
+                    %118:vec3<f32> = load %acc
+                    %119:vec3<f32> = let %118
+                    %120:ptr<uniform, u32, read> = access %params, 0u
+                    %121:u32 = load %120
+                    %122:f32 = convert %121
+                    %123:f32 = div 1.0f, %122
+                    %124:u32 = load %r_1
+                    %125:u32 = load %i
+                    %126:ptr<workgroup, vec3<f32>, read_write> = access %tile, %124, %125
+                    %127:vec3<f32> = load %126
+                    %128:vec3<f32> = mul %123, %127
+                    %129:vec3<f32> = add %119, %128
+                    store %acc, %129
+                    continue  # -> $B36
+                  }
+                  $B36: {  # continuing
+                    %130:u32 = load %f
+                    %131:u32 = add %130, 1u
+                    store %f, %131
+                    next_iteration  # -> $B35
+                  }
+                }
+                %132:texture_storage_2d<rgba8unorm, write> = load %outputTex
+                %133:texture_storage_2d<rgba8unorm, write> = let %132
+                %134:vec2<u32> = load %writeIndex
+                %135:vec2<u32> = let %134
+                %136:vec3<f32> = load %acc
+                %137:vec4<f32> = construct %136, 1.0f
+                %138:void = textureStore %133, %135, %137
+                exit_if  # if_10
+              }
+            }
+            continue  # -> $B25
           }
-          %b21 = block {  # continuing
-            %118:u32 = load %c_1
-            %119:u32 = add %118, 1u
-            store %c_1, %119
-            next_iteration %b20
+          $B25: {  # continuing
+            %139:u32 = load %c_1
+            %140:u32 = add %139, 1u
+            store %c_1, %140
+            next_iteration  # -> $B24
           }
         }
-        continue %b16
+        continue  # -> $B20
       }
-      %b16 = block {  # continuing
-        %120:u32 = load %r_1
-        %121:u32 = add %120, 1u
-        store %r_1, %121
-        next_iteration %b15
+      $B20: {  # continuing
+        %141:u32 = load %r_1
+        %142:u32 = add %141, 1u
+        store %r_1, %142
+        next_iteration  # -> $B19
       }
     }
     ret
+  }
+}
+%tint_div_u32 = func(%lhs:u32, %rhs:u32):u32 {
+  $B39: {
+    %145:bool = eq %rhs, 0u
+    %146:u32 = select %rhs, 1u, %145
+    %147:u32 = div %lhs, %146
+    ret %147
   }
 }
 

@@ -1,6 +1,33 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: VertexInputs = struct @align(16) {
+  loc0:i32 @offset(0), @location(0)
+  loc1:u32 @offset(4), @location(1)
+  loc2:f32 @offset(8), @location(2)
+  loc3:vec4<f32> @offset(16), @location(3)
+  loc4:f16 @offset(32), @location(4)
+  loc5:vec3<f16> @offset(40), @location(5)
+}
+
+%tint_symbol = @vertex func(%inputs:VertexInputs):vec4<f32> [@position] {
+  $B1: {
+    %3:i32 = access %inputs, 0u
+    %i:i32 = let %3
+    %5:u32 = access %inputs, 1u
+    %u:u32 = let %5
+    %7:f32 = access %inputs, 2u
+    %f:f32 = let %7
+    %9:vec4<f32> = access %inputs, 3u
+    %v:vec4<f32> = let %9
+    %11:f16 = access %inputs, 4u
+    %x:f16 = let %11
+    %13:vec3<f16> = access %inputs, 5u
+    %y:vec3<f16> = let %13
+    ret vec4<f32>(0.0f)
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -1,6 +1,125 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: S = struct @align(16) {
+  f0:i32 @offset(0)
+  f1:mat4x3<f32> @offset(16)
+}
+
+main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %gl_FragCoord:ptr<private, vec4<f32>, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void {
+  $B2: {
+    %x_51:ptr<function, i32, read_write> = var
+    %x_12_phi:ptr<function, i32, read_write> = var
+    loop [b: $B3] {  # loop_1
+      $B3: {  # body
+        %x_45:ptr<function, S, read_write> = var
+        %x_45_phi:ptr<function, S, read_write> = var
+        %x_11_phi:ptr<function, i32, read_write> = var
+        store %x_45_phi, S(0i, mat4x3<f32>(vec3<f32>(1.0f, 0.0f, 0.0f), vec3<f32>(0.0f, 1.0f, 0.0f), vec3<f32>(0.0f, 0.0f, 1.0f), vec3<f32>(0.0f)))
+        store %x_11_phi, 0i
+        loop [b: $B4, c: $B5] {  # loop_2
+          $B4: {  # body
+            %x_46:ptr<function, S, read_write> = var
+            %x_9:ptr<function, i32, read_write> = var
+            %11:S = load %x_45_phi
+            store %x_45, %11
+            %12:i32 = load %x_11_phi
+            %x_11:i32 = let %12
+            %14:f32 = load_vector_element %gl_FragCoord, 0u
+            %x_49:f32 = let %14
+            %16:bool = eq %x_49, 0.0f
+            %17:i32 = select 2i, 1i, %16
+            store %x_51, %17
+            %18:i32 = load %x_51
+            %19:bool = lt %x_11, %18
+            if %19 [t: $B6, f: $B7] {  # if_1
+              $B6: {  # true
+                exit_if  # if_1
+              }
+              $B7: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            continue  # -> $B5
+          }
+          $B5: {  # continuing
+            store %x_GLF_color, vec4<f32>(1.0f)
+            %20:S = load %x_45
+            store %x_46, %20
+            %21:ptr<function, i32, read_write> = access %x_46, 0u
+            %22:ptr<function, i32, read_write> = access %x_45, 0u
+            %23:i32 = load %22
+            %24:i32 = add %23, 1i
+            store %21, %24
+            %25:i32 = add %x_11, 1i
+            store %x_9, %25
+            %26:S = load %x_46
+            store %x_45_phi, %26
+            %27:i32 = load %x_9
+            store %x_11_phi, %27
+            next_iteration  # -> $B4
+          }
+        }
+        %28:ptr<function, i32, read_write> = access %x_45, 0u
+        %29:i32 = load %28
+        %30:bool = lt %29, 1000i
+        if %30 [t: $B8] {  # if_2
+          $B8: {  # true
+            exit_loop  # loop_1
+          }
+        }
+        exit_loop  # loop_1
+      }
+    }
+    store %x_12_phi, 0i
+    loop [b: $B9, c: $B10] {  # loop_3
+      $B9: {  # body
+        %x_6:ptr<function, i32, read_write> = var
+        %32:i32 = load %x_12_phi
+        %x_12:i32 = let %32
+        %34:i32 = load %x_51
+        %35:bool = lt %x_12, %34
+        if %35 [t: $B11, f: $B12] {  # if_3
+          $B11: {  # true
+            exit_if  # if_3
+          }
+          $B12: {  # false
+            exit_loop  # loop_3
+          }
+        }
+        continue  # -> $B10
+      }
+      $B10: {  # continuing
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        %36:i32 = add %x_12, 1i
+        store %x_6, %36
+        %37:i32 = load %x_6
+        store %x_12_phi, %37
+        next_iteration  # -> $B9
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func(%gl_FragCoord_param:vec4<f32> [@position]):main_out {
+  $B13: {
+    store %gl_FragCoord, %gl_FragCoord_param
+    %40:void = call %main_1
+    %41:vec4<f32> = load %x_GLF_color
+    %42:main_out = construct %41
+    ret %42
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

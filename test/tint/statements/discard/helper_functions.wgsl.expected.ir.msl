@@ -1,34 +1,49 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: %b1 = block {  # root
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
   %non_uniform_global:ptr<storage, i32, read_write> = var @binding_point(0, 0)
   %output:ptr<storage, f32, read_write> = var @binding_point(0, 1)
+  %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%foo = func():void -> %b2 {
-  %b2 = block {
-    %4:i32 = load %non_uniform_global
-    %5:bool = lt %4, 0i
-    if %5 [t: %b3] {  # if_1
-      %b3 = block {  # true
-        discard
+%foo = func():void {
+  $B2: {
+    %5:i32 = load %non_uniform_global
+    %6:bool = lt %5, 0i
+    if %6 [t: $B3] {  # if_1
+      $B3: {  # true
+        store %continue_execution, false
         exit_if  # if_1
       }
     }
     ret
   }
 }
-%bar = func():void -> %b4 {
-  %b4 = block {
-    %7:f32 = dpdx 1.0f
-    store %output, %7
+%bar = func():void {
+  $B4: {
+    %8:f32 = dpdx 1.0f
+    %9:f32 = let %8
+    %10:bool = load %continue_execution
+    if %10 [t: $B5] {  # if_2
+      $B5: {  # true
+        store %output, %9
+        exit_if  # if_2
+      }
+    }
     ret
   }
 }
-%tint_symbol = @fragment func():void -> %b5 {
-  %b5 = block {
-    %9:void = call %foo
-    %10:void = call %bar
+%tint_symbol = @fragment func():void {
+  $B6: {
+    %12:void = call %foo
+    %13:void = call %bar
+    %14:bool = load %continue_execution
+    %15:bool = eq %14, false
+    if %15 [t: $B7] {  # if_3
+      $B7: {  # true
+        terminate_invocation
+      }
+    }
     ret
   }
 }

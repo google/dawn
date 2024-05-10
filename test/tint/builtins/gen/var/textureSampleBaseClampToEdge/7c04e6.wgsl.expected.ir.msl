@@ -1,47 +1,32 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:1057 internal compiler error: %b1 = block {  # root
-  %arg_0:ptr<handle, texture_external, read> = var @binding_point(1, 0)
-  %arg_1:ptr<handle, sampler, read> = var @binding_point(1, 1)
-  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+
+@group(1) @binding(0) var arg_0 : texture_external;
+
+@group(1) @binding(1) var arg_1 : sampler;
+
+fn textureSampleBaseClampToEdge_7c04e6() {
+  var arg_2 = vec2<f32>(1.0f);
+  var res : vec4<f32> = textureSampleBaseClampToEdge(arg_0, arg_1, arg_2);
+  prevent_dce = res;
 }
 
-%textureSampleBaseClampToEdge_7c04e6 = func():void -> %b2 {
-  %b2 = block {
-    %arg_2:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(1.0f)
-    %6:texture_external = load %arg_0
-    %7:sampler = load %arg_1
-    %8:vec2<f32> = load %arg_2
-    %9:vec4<f32> = textureSampleBaseClampToEdge %6, %7, %8
-    %res:ptr<function, vec4<f32>, read_write> = var, %9
-    %11:vec4<f32> = load %res
-    store %prevent_dce, %11
-    ret
-  }
-}
-%vertex_main = @vertex func():vec4<f32> [@position] -> %b3 {
-  %b3 = block {
-    %13:void = call %textureSampleBaseClampToEdge_7c04e6
-    ret vec4<f32>(0.0f)
-  }
-}
-%fragment_main = @fragment func():void -> %b4 {
-  %b4 = block {
-    %15:void = call %textureSampleBaseClampToEdge_7c04e6
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b5 {
-  %b5 = block {
-    %17:void = call %textureSampleBaseClampToEdge_7c04e6
-    ret
-  }
+@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
+@vertex
+fn vertex_main() -> @builtin(position) vec4<f32> {
+  textureSampleBaseClampToEdge_7c04e6();
+  return vec4<f32>();
 }
 
-Multiplanar external texture transform was not run.
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+@fragment
+fn fragment_main() {
+  textureSampleBaseClampToEdge_7c04e6();
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  textureSampleBaseClampToEdge_7c04e6();
+}
+
+Failed to generate: error: ExternalTextureOptions missing binding entry for [group: 1, binding: 0]

@@ -18,7 +18,7 @@ struct S {
   float a;
 };
 
-void tint_symbol() {
+kernel void tint_symbol() {
   bool bool_var = false;
   bool const bool_let = false;
   int i32_var = 0;
@@ -43,3 +43,13 @@ void tint_symbol() {
   thread float4* const ptr_vec = v4f32_var;
   thread tint_array<float, 4>* const ptr_arr = arr_var;
 }
+program_source:40:23: error: cannot initialize a variable of type 'float *const' with an lvalue of type 'float'
+  thread float* const ptr_f32 = f32_var;
+                      ^         ~~~~~~~
+program_source:41:24: error: cannot initialize a variable of type 'float4 *const' with an lvalue of type 'float4' (vector of 4 'float' values)
+  thread float4* const ptr_vec = v4f32_var;
+                       ^         ~~~~~~~~~
+program_source:42:38: error: no viable conversion from 'tint_array<float, 4>' to 'tint_array<float, 4> *const'
+  thread tint_array<float, 4>* const ptr_arr = arr_var;
+                                     ^         ~~~~~~~
+

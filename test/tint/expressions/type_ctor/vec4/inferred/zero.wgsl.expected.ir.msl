@@ -6,3 +6,13 @@ using namespace metal;
 thread float4 f = float4(0.0f);
 thread int4 i = int4(0);
 thread uint4 u = uint4(0u);
+program_source:4:15: error: program scope variable must reside in constant address space
+thread float4 f = float4(0.0f);
+              ^
+program_source:5:13: error: program scope variable must reside in constant address space
+thread int4 i = int4(0);
+            ^
+program_source:6:14: error: program scope variable must reside in constant address space
+thread uint4 u = uint4(0u);
+             ^
+

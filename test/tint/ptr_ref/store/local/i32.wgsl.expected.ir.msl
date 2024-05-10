@@ -1,9 +1,27 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+kernel void tint_symbol() {
+  int i = 123;
+  thread int* const p = i;
+  p = 123;
+  p = 123;
+}
+program_source:6:21: error: cannot initialize a variable of type 'int *const' with an lvalue of type 'int'
+  thread int* const p = i;
+                    ^   ~
+program_source:7:5: error: cannot assign to variable 'p' with const-qualified type 'int *const'
+  p = 123;
+  ~ ^
+program_source:6:21: note: variable 'p' declared const here
+  thread int* const p = i;
+  ~~~~~~~~~~~~~~~~~~^~~~~
+program_source:8:5: error: cannot assign to variable 'p' with const-qualified type 'int *const'
+  p = 123;
+  ~ ^
+program_source:6:21: note: variable 'p' declared const here
+  thread int* const p = i;
+  ~~~~~~~~~~~~~~~~~~^~~~~
+

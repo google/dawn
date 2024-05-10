@@ -1,9 +1,25 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:270 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+vertex float4 tint_symbol(int loc0, uint loc1, float loc2, float4 loc3) {
+  int const i = loc0;
+  uint const u = loc1;
+  float const f = loc2;
+  float4 const v = loc3;
+  return float4(0.0f);
+}
+program_source:4:27: error: invalid type 'int' for input declaration in a vertex function
+vertex float4 tint_symbol(int loc0, uint loc1, float loc2, float4 loc3) {
+                          ^~~~~~~~
+program_source:4:37: error: invalid type 'uint' (aka 'unsigned int') for input declaration in a vertex function
+vertex float4 tint_symbol(int loc0, uint loc1, float loc2, float4 loc3) {
+                                    ^~~~~~~~~
+program_source:4:48: error: invalid type 'float' for input declaration in a vertex function
+vertex float4 tint_symbol(int loc0, uint loc1, float loc2, float4 loc3) {
+                                               ^~~~~~~~~~
+program_source:4:60: error: invalid type 'float4' (vector of 4 'float' values) for input declaration in a vertex function
+vertex float4 tint_symbol(int loc0, uint loc1, float loc2, float4 loc3) {
+                                                           ^~~~~~~~~~~
+

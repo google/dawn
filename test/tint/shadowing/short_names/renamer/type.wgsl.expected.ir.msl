@@ -1,9 +1,18 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct vec4f {
+  int i;
+};
+
+vertex float4 tint_symbol(uint VertexIndex [[]]) {
+  vec4f const s = vec4f{.i=1};
+  float const f = float(s.i);
+  bool const b = bool(f);
+  return select(float4(0.0f), float4(1.0f), b);
+}
+program_source:7:27: error: invalid type 'uint' (aka 'unsigned int') for input declaration in a vertex function
+vertex float4 tint_symbol(uint VertexIndex [[]]) {
+                          ^~~~~~~~~~~~~~~~
+

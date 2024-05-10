@@ -1,10 +1,10 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:493 internal compiler error: S = struct @align(16) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(16) {
   arr:array<vec4<i32>, 4> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %src_private:ptr<private, array<vec4<i32>, 4>, read_write> = var
   %src_workgroup:ptr<workgroup, array<vec4<i32>, 4>, read_write> = var
   %src_uniform:ptr<uniform, S, read> = var @binding_point(0, 0)
@@ -13,18 +13,18 @@ SKIP: FAILED
   %dst_nested:ptr<private, array<array<array<i32, 2>, 3>, 4>, read_write> = var
 }
 
-%ret_arr = func():array<vec4<i32>, 4> -> %b2 {
-  %b2 = block {
+%ret_arr = func():array<vec4<i32>, 4> {
+  $B2: {
     ret array<vec4<i32>, 4>(vec4<i32>(0i))
   }
 }
-%ret_struct_arr = func():S -> %b3 {
-  %b3 = block {
+%ret_struct_arr = func():S {
+  $B3: {
     ret S(array<vec4<i32>, 4>(vec4<i32>(0i)))
   }
 }
-%foo = func(%src_param:array<vec4<i32>, 4>):void -> %b4 {
-  %b4 = block {
+%foo = func(%src_param:array<vec4<i32>, 4>):void {
+  $B4: {
     %src_function:ptr<function, array<vec4<i32>, 4>, read_write> = var
     store %dst, array<vec4<i32>, 4>(vec4<i32>(1i), vec4<i32>(2i), vec4<i32>(3i), vec4<i32>(3i))
     store %dst, %src_param
@@ -53,26 +53,26 @@ SKIP: FAILED
     ret
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void -> %b5 {
-  %b5 = block {
-    loop [i: %b6, b: %b7, c: %b8] {  # loop_1
-      %b6 = block {  # initializer
-        next_iteration %b7 %tint_local_index
+%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
+  $B5: {
+    loop [i: $B6, b: $B7, c: $B8] {  # loop_1
+      $B6: {  # initializer
+        next_iteration %tint_local_index  # -> $B7
       }
-      %b7 = block (%idx:u32) {  # body
-        %28:bool = gte %idx:u32, 4u
-        if %28 [t: %b9] {  # if_1
-          %b9 = block {  # true
+      $B7 (%idx:u32): {  # body
+        %28:bool = gte %idx, 4u
+        if %28 [t: $B9] {  # if_1
+          $B9: {  # true
             exit_loop  # loop_1
           }
         }
-        %29:ptr<workgroup, vec4<i32>, read_write> = access %src_workgroup, %idx:u32
+        %29:ptr<workgroup, vec4<i32>, read_write> = access %src_workgroup, %idx
         store %29, vec4<i32>(0i)
-        continue %b8
+        continue  # -> $B8
       }
-      %b8 = block {  # continuing
-        %30:u32 = add %idx:u32, 1u
-        next_iteration %b7 %30
+      $B8: {  # continuing
+        %30:u32 = add %idx, 1u
+        next_iteration %30  # -> $B7
       }
     }
     %31:void = msl.threadgroup_barrier 4u

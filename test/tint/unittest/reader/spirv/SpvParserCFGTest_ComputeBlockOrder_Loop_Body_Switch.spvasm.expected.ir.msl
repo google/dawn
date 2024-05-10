@@ -1,9 +1,38 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+
+thread uint var_1 = 0u;
+void main_1() {
+  {
+    while(true) {
+      if (false) {
+      } else {
+        break;
+      }
+      switch(42u) {
+        case 45u:
+        {
+          break;
+        }
+        case 40u:
+        {
+          break;
+        }
+        default:
+        {
+          break;
+        }
+      }
+      continue;
+    }
+  }
+}
+fragment void tint_symbol() {
+  main_1();
+}
+program_source:4:13: error: program scope variable must reside in constant address space
+thread uint var_1 = 0u;
+            ^
+

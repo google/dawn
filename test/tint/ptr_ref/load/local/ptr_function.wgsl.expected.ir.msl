@@ -3,7 +3,15 @@ SKIP: FAILED
 #include <metal_stdlib>
 using namespace metal;
 
-void tint_symbol() {
+kernel void tint_symbol() {
   int i = 123;
   thread int* const p = i;
+  int const u = (p + 1);
 }
+program_source:6:21: error: cannot initialize a variable of type 'int *const' with an lvalue of type 'int'
+  thread int* const p = i;
+                    ^   ~
+program_source:7:13: error: cannot initialize a variable of type 'const int' with an rvalue of type 'int *'
+  int const u = (p + 1);
+            ^   ~~~~~~~
+

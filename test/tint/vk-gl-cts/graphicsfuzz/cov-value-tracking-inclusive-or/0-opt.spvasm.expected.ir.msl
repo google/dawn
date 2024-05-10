@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:355 internal compiler error: buf0 = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(4) {
   two:i32 @offset(0)
 }
 
@@ -8,26 +8,26 @@ main_out = struct @align(16) {
   x_GLF_color_1:vec4<f32> @offset(0), @location(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
   %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
 }
 
-%main_1 = func():void -> %b2 {
-  %b2 = block {
+%main_1 = func():void {
+  $B2: {
     %a:ptr<function, i32, read_write> = var
     %i:ptr<function, i32, read_write> = var
     store %a, 0i
     store %i, 0i
-    loop [b: %b3, c: %b4] {  # loop_1
-      %b3 = block {  # body
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
         %6:i32 = load %i
         %7:bool = lt %6, 2i
-        if %7 [t: %b5, f: %b6] {  # if_1
-          %b5 = block {  # true
+        if %7 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
             exit_if  # if_1
           }
-          %b6 = block {  # false
+          $B6: {  # false
             exit_loop  # loop_1
           }
         }
@@ -35,23 +35,23 @@ main_out = struct @align(16) {
         %9:i32 = or %8, -2i
         %10:i32 = sub %9, 1i
         store %a, %10
-        continue %b4
+        continue  # -> $B4
       }
-      %b4 = block {  # continuing
+      $B4: {  # continuing
         %11:i32 = load %i
         %12:i32 = add %11, 1i
         store %i, %12
-        next_iteration %b3
+        next_iteration  # -> $B3
       }
     }
     %13:i32 = load %a
     %14:bool = eq %13, -2i
-    if %14 [t: %b7, f: %b8] {  # if_2
-      %b7 = block {  # true
+    if %14 [t: $B7, f: $B8] {  # if_2
+      $B7: {  # true
         store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
         exit_if  # if_2
       }
-      %b8 = block {  # false
+      $B8: {  # false
         store %x_GLF_color, vec4<f32>(0.0f)
         exit_if  # if_2
       }
@@ -59,8 +59,8 @@ main_out = struct @align(16) {
     ret
   }
 }
-%tint_symbol = @fragment func():main_out -> %b9 {
-  %b9 = block {
+%tint_symbol = @fragment func():main_out {
+  $B9: {
     %16:void = call %main_1
     %17:vec4<f32> = load %x_GLF_color
     %18:main_out = construct %17

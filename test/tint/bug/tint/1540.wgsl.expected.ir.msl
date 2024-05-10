@@ -6,7 +6,18 @@ struct S {
   bool e;
 };
 
-void tint_symbol() {
+kernel void tint_symbol() {
   bool b = false;
   S v = {.e=(true & b)};
 }
+program_source:9:13: error: non-constant-expression cannot be narrowed from type 'int' to 'bool' in initializer list [-Wc++11-narrowing]
+  S v = {.e=(true & b)};
+            ^~~~~~~~~~
+program_source:9:13: note: insert an explicit cast to silence this issue
+  S v = {.e=(true & b)};
+            ^~~~~~~~~~
+            static_cast<bool>( )
+program_source:9:5: warning: unused variable 'v' [-Wunused-variable]
+  S v = {.e=(true & b)};
+    ^
+

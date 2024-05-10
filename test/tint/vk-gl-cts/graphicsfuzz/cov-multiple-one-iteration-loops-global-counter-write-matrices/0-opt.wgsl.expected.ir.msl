@@ -1,6 +1,1176 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:247 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: main_out = struct @align(16) {
+  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
+}
+
+$B1: {  # root
+  %x_GLF_global_loop_count:ptr<private, i32, read_write> = var
+  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
+}
+
+%main_1 = func():void {
+  $B2: {
+    %m23:ptr<function, mat2x3<f32>, read_write> = var
+    %m24:ptr<function, mat2x4<f32>, read_write> = var
+    %m32:ptr<function, mat3x2<f32>, read_write> = var
+    %m33:ptr<function, mat3x3<f32>, read_write> = var
+    %m34:ptr<function, mat3x4<f32>, read_write> = var
+    %m42:ptr<function, mat4x2<f32>, read_write> = var
+    %m43:ptr<function, mat4x3<f32>, read_write> = var
+    %m44:ptr<function, mat4x4<f32>, read_write> = var
+    %i:ptr<function, i32, read_write> = var
+    %i_1:ptr<function, i32, read_write> = var
+    %i_2:ptr<function, i32, read_write> = var
+    %i_3:ptr<function, i32, read_write> = var
+    %i_4:ptr<function, i32, read_write> = var
+    %i_5:ptr<function, i32, read_write> = var
+    %i_6:ptr<function, i32, read_write> = var
+    %i_7:ptr<function, i32, read_write> = var
+    %i_8:ptr<function, i32, read_write> = var
+    %i_9:ptr<function, i32, read_write> = var
+    %i_10:ptr<function, i32, read_write> = var
+    %i_11:ptr<function, i32, read_write> = var
+    %i_12:ptr<function, i32, read_write> = var
+    %i_13:ptr<function, i32, read_write> = var
+    %i_14:ptr<function, i32, read_write> = var
+    %i_15:ptr<function, i32, read_write> = var
+    %i_16:ptr<function, i32, read_write> = var
+    %i_17:ptr<function, i32, read_write> = var
+    %i_18:ptr<function, i32, read_write> = var
+    %i_19:ptr<function, i32, read_write> = var
+    %i_20:ptr<function, i32, read_write> = var
+    %i_21:ptr<function, i32, read_write> = var
+    %i_22:ptr<function, i32, read_write> = var
+    %i_23:ptr<function, i32, read_write> = var
+    %i_24:ptr<function, i32, read_write> = var
+    %i_25:ptr<function, i32, read_write> = var
+    %i_26:ptr<function, i32, read_write> = var
+    %i_27:ptr<function, i32, read_write> = var
+    %i_28:ptr<function, i32, read_write> = var
+    %i_29:ptr<function, i32, read_write> = var
+    %i_30:ptr<function, i32, read_write> = var
+    %i_31:ptr<function, i32, read_write> = var
+    %i_32:ptr<function, i32, read_write> = var
+    %i_33:ptr<function, i32, read_write> = var
+    %i_34:ptr<function, i32, read_write> = var
+    %i_35:ptr<function, i32, read_write> = var
+    %i_36:ptr<function, i32, read_write> = var
+    %i_37:ptr<function, i32, read_write> = var
+    %sum:ptr<function, f32, read_write> = var
+    %r:ptr<function, i32, read_write> = var
+    store %x_GLF_global_loop_count, 0i
+    store %m23, mat2x3<f32>(vec3<f32>(0.0f))
+    store %m24, mat2x4<f32>(vec4<f32>(0.0f))
+    store %m32, mat3x2<f32>(vec2<f32>(0.0f))
+    store %m33, mat3x3<f32>(vec3<f32>(0.0f))
+    store %m34, mat3x4<f32>(vec4<f32>(0.0f))
+    store %m42, mat4x2<f32>(vec2<f32>(0.0f))
+    store %m43, mat4x3<f32>(vec3<f32>(0.0f))
+    store %m44, mat4x4<f32>(vec4<f32>(0.0f))
+    store %i, 0i
+    loop [b: $B3, c: $B4] {  # loop_1
+      $B3: {  # body
+        %52:i32 = load %i
+        %x_105:i32 = let %52
+        %54:bool = lt %x_105, 1i
+        if %54 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        store %i_1, 0i
+        loop [b: $B7, c: $B8] {  # loop_2
+          $B7: {  # body
+            %55:i32 = load %i_1
+            %x_112:i32 = let %55
+            %57:bool = lt %x_112, 1i
+            if %57 [t: $B9, f: $B10] {  # if_2
+              $B9: {  # true
+                exit_if  # if_2
+              }
+              $B10: {  # false
+                exit_loop  # loop_2
+              }
+            }
+            store %i_2, 0i
+            loop [b: $B11, c: $B12] {  # loop_3
+              $B11: {  # body
+                %58:i32 = load %i_2
+                %x_119:i32 = let %58
+                %60:bool = lt %x_119, 1i
+                if %60 [t: $B13, f: $B14] {  # if_3
+                  $B13: {  # true
+                    exit_if  # if_3
+                  }
+                  $B14: {  # false
+                    exit_loop  # loop_3
+                  }
+                }
+                store %i_3, 0i
+                loop [b: $B15, c: $B16] {  # loop_4
+                  $B15: {  # body
+                    %61:i32 = load %i_3
+                    %x_126:i32 = let %61
+                    %63:bool = lt %x_126, 1i
+                    if %63 [t: $B17, f: $B18] {  # if_4
+                      $B17: {  # true
+                        exit_if  # if_4
+                      }
+                      $B18: {  # false
+                        exit_loop  # loop_4
+                      }
+                    }
+                    store %i_4, 0i
+                    loop [b: $B19, c: $B20] {  # loop_5
+                      $B19: {  # body
+                        %64:i32 = load %i_4
+                        %x_133:i32 = let %64
+                        %66:bool = lt %x_133, 1i
+                        if %66 [t: $B21, f: $B22] {  # if_5
+                          $B21: {  # true
+                            exit_if  # if_5
+                          }
+                          $B22: {  # false
+                            exit_loop  # loop_5
+                          }
+                        }
+                        store %i_5, 0i
+                        loop [b: $B23, c: $B24] {  # loop_6
+                          $B23: {  # body
+                            %67:i32 = load %i_5
+                            %x_140:i32 = let %67
+                            %69:bool = lt %x_140, 1i
+                            if %69 [t: $B25, f: $B26] {  # if_6
+                              $B25: {  # true
+                                exit_if  # if_6
+                              }
+                              $B26: {  # false
+                                exit_loop  # loop_6
+                              }
+                            }
+                            store %i_6, 0i
+                            loop [b: $B27, c: $B28] {  # loop_7
+                              $B27: {  # body
+                                %70:i32 = load %i_6
+                                %x_147:i32 = let %70
+                                %72:bool = lt %x_147, 1i
+                                if %72 [t: $B29, f: $B30] {  # if_7
+                                  $B29: {  # true
+                                    exit_if  # if_7
+                                  }
+                                  $B30: {  # false
+                                    exit_loop  # loop_7
+                                  }
+                                }
+                                store %i_7, 0i
+                                loop [b: $B31, c: $B32] {  # loop_8
+                                  $B31: {  # body
+                                    %73:i32 = load %i_7
+                                    %x_154:i32 = let %73
+                                    %75:bool = lt %x_154, 1i
+                                    if %75 [t: $B33, f: $B34] {  # if_8
+                                      $B33: {  # true
+                                        exit_if  # if_8
+                                      }
+                                      $B34: {  # false
+                                        exit_loop  # loop_8
+                                      }
+                                    }
+                                    store %i_8, 0i
+                                    loop [b: $B35, c: $B36] {  # loop_9
+                                      $B35: {  # body
+                                        %76:i32 = load %i_8
+                                        %x_161:i32 = let %76
+                                        %78:bool = lt %x_161, 1i
+                                        if %78 [t: $B37, f: $B38] {  # if_9
+                                          $B37: {  # true
+                                            exit_if  # if_9
+                                          }
+                                          $B38: {  # false
+                                            exit_loop  # loop_9
+                                          }
+                                        }
+                                        store %i_9, 0i
+                                        loop [b: $B39, c: $B40] {  # loop_10
+                                          $B39: {  # body
+                                            %79:i32 = load %i_9
+                                            %x_168:i32 = let %79
+                                            %81:bool = lt %x_168, 1i
+                                            if %81 [t: $B41, f: $B42] {  # if_10
+                                              $B41: {  # true
+                                                exit_if  # if_10
+                                              }
+                                              $B42: {  # false
+                                                exit_loop  # loop_10
+                                              }
+                                            }
+                                            store %i_10, 0i
+                                            loop [b: $B43, c: $B44] {  # loop_11
+                                              $B43: {  # body
+                                                %82:i32 = load %i_10
+                                                %x_175:i32 = let %82
+                                                %84:bool = lt %x_175, 1i
+                                                if %84 [t: $B45, f: $B46] {  # if_11
+                                                  $B45: {  # true
+                                                    exit_if  # if_11
+                                                  }
+                                                  $B46: {  # false
+                                                    exit_loop  # loop_11
+                                                  }
+                                                }
+                                                store %i_11, 0i
+                                                loop [b: $B47, c: $B48] {  # loop_12
+                                                  $B47: {  # body
+                                                    %85:i32 = load %i_11
+                                                    %x_182:i32 = let %85
+                                                    %87:bool = lt %x_182, 1i
+                                                    if %87 [t: $B49, f: $B50] {  # if_12
+                                                      $B49: {  # true
+                                                        exit_if  # if_12
+                                                      }
+                                                      $B50: {  # false
+                                                        exit_loop  # loop_12
+                                                      }
+                                                    }
+                                                    store %i_12, 0i
+                                                    loop [b: $B51, c: $B52] {  # loop_13
+                                                      $B51: {  # body
+                                                        %88:i32 = load %i_12
+                                                        %x_189:i32 = let %88
+                                                        %90:bool = lt %x_189, 1i
+                                                        if %90 [t: $B53, f: $B54] {  # if_13
+                                                          $B53: {  # true
+                                                            exit_if  # if_13
+                                                          }
+                                                          $B54: {  # false
+                                                            exit_loop  # loop_13
+                                                          }
+                                                        }
+                                                        store %i_13, 0i
+                                                        loop [b: $B55, c: $B56] {  # loop_14
+                                                          $B55: {  # body
+                                                            %91:i32 = load %i_13
+                                                            %x_196:i32 = let %91
+                                                            %93:bool = lt %x_196, 1i
+                                                            if %93 [t: $B57, f: $B58] {  # if_14
+                                                              $B57: {  # true
+                                                                exit_if  # if_14
+                                                              }
+                                                              $B58: {  # false
+                                                                exit_loop  # loop_14
+                                                              }
+                                                            }
+                                                            store %i_14, 0i
+                                                            loop [b: $B59, c: $B60] {  # loop_15
+                                                              $B59: {  # body
+                                                                %94:i32 = load %i_14
+                                                                %x_203:i32 = let %94
+                                                                %96:bool = lt %x_203, 1i
+                                                                if %96 [t: $B61, f: $B62] {  # if_15
+                                                                  $B61: {  # true
+                                                                    exit_if  # if_15
+                                                                  }
+                                                                  $B62: {  # false
+                                                                    exit_loop  # loop_15
+                                                                  }
+                                                                }
+                                                                store %i_15, 0i
+                                                                loop [b: $B63, c: $B64] {  # loop_16
+                                                                  $B63: {  # body
+                                                                    %97:i32 = load %i_15
+                                                                    %x_210:i32 = let %97
+                                                                    %99:bool = lt %x_210, 1i
+                                                                    if %99 [t: $B65, f: $B66] {  # if_16
+                                                                      $B65: {  # true
+                                                                        exit_if  # if_16
+                                                                      }
+                                                                      $B66: {  # false
+                                                                        exit_loop  # loop_16
+                                                                      }
+                                                                    }
+                                                                    store %i_16, 0i
+                                                                    loop [b: $B67, c: $B68] {  # loop_17
+                                                                      $B67: {  # body
+                                                                        %100:i32 = load %i_16
+                                                                        %x_217:i32 = let %100
+                                                                        %102:bool = lt %x_217, 1i
+                                                                        if %102 [t: $B69, f: $B70] {  # if_17
+                                                                          $B69: {  # true
+                                                                            exit_if  # if_17
+                                                                          }
+                                                                          $B70: {  # false
+                                                                            exit_loop  # loop_17
+                                                                          }
+                                                                        }
+                                                                        store %i_17, 0i
+                                                                        loop [b: $B71, c: $B72] {  # loop_18
+                                                                          $B71: {  # body
+                                                                            %103:i32 = load %i_17
+                                                                            %x_224:i32 = let %103
+                                                                            %105:bool = lt %x_224, 1i
+                                                                            if %105 [t: $B73, f: $B74] {  # if_18
+                                                                              $B73: {  # true
+                                                                                exit_if  # if_18
+                                                                              }
+                                                                              $B74: {  # false
+                                                                                exit_loop  # loop_18
+                                                                              }
+                                                                            }
+                                                                            store %i_18, 0i
+                                                                            loop [b: $B75, c: $B76] {  # loop_19
+                                                                              $B75: {  # body
+                                                                                %106:i32 = load %i_18
+                                                                                %x_231:i32 = let %106
+                                                                                %108:bool = lt %x_231, 1i
+                                                                                if %108 [t: $B77, f: $B78] {  # if_19
+                                                                                  $B77: {  # true
+                                                                                    exit_if  # if_19
+                                                                                  }
+                                                                                  $B78: {  # false
+                                                                                    exit_loop  # loop_19
+                                                                                  }
+                                                                                }
+                                                                                store %i_19, 0i
+                                                                                loop [b: $B79, c: $B80] {  # loop_20
+                                                                                  $B79: {  # body
+                                                                                    %109:i32 = load %i_19
+                                                                                    %x_238:i32 = let %109
+                                                                                    %111:bool = lt %x_238, 1i
+                                                                                    if %111 [t: $B81, f: $B82] {  # if_20
+                                                                                      $B81: {  # true
+                                                                                        exit_if  # if_20
+                                                                                      }
+                                                                                      $B82: {  # false
+                                                                                        exit_loop  # loop_20
+                                                                                      }
+                                                                                    }
+                                                                                    store %i_20, 0i
+                                                                                    loop [b: $B83, c: $B84] {  # loop_21
+                                                                                      $B83: {  # body
+                                                                                        %112:i32 = load %i_20
+                                                                                        %x_245:i32 = let %112
+                                                                                        %114:bool = lt %x_245, 1i
+                                                                                        if %114 [t: $B85, f: $B86] {  # if_21
+                                                                                          $B85: {  # true
+                                                                                            exit_if  # if_21
+                                                                                          }
+                                                                                          $B86: {  # false
+                                                                                            exit_loop  # loop_21
+                                                                                          }
+                                                                                        }
+                                                                                        store %i_21, 0i
+                                                                                        loop [b: $B87, c: $B88] {  # loop_22
+                                                                                          $B87: {  # body
+                                                                                            %115:i32 = load %i_21
+                                                                                            %x_252:i32 = let %115
+                                                                                            %117:bool = lt %x_252, 1i
+                                                                                            if %117 [t: $B89, f: $B90] {  # if_22
+                                                                                              $B89: {  # true
+                                                                                                exit_if  # if_22
+                                                                                              }
+                                                                                              $B90: {  # false
+                                                                                                exit_loop  # loop_22
+                                                                                              }
+                                                                                            }
+                                                                                            store %i_22, 0i
+                                                                                            loop [b: $B91, c: $B92] {  # loop_23
+                                                                                              $B91: {  # body
+                                                                                                %118:i32 = load %i_22
+                                                                                                %x_259:i32 = let %118
+                                                                                                %120:bool = lt %x_259, 1i
+                                                                                                if %120 [t: $B93, f: $B94] {  # if_23
+                                                                                                  $B93: {  # true
+                                                                                                    exit_if  # if_23
+                                                                                                  }
+                                                                                                  $B94: {  # false
+                                                                                                    exit_loop  # loop_23
+                                                                                                  }
+                                                                                                }
+                                                                                                store %i_23, 0i
+                                                                                                loop [b: $B95, c: $B96] {  # loop_24
+                                                                                                  $B95: {  # body
+                                                                                                    %121:i32 = load %i_23
+                                                                                                    %x_266:i32 = let %121
+                                                                                                    %123:bool = lt %x_266, 1i
+                                                                                                    if %123 [t: $B97, f: $B98] {  # if_24
+                                                                                                      $B97: {  # true
+                                                                                                        exit_if  # if_24
+                                                                                                      }
+                                                                                                      $B98: {  # false
+                                                                                                        exit_loop  # loop_24
+                                                                                                      }
+                                                                                                    }
+                                                                                                    store %i_24, 0i
+                                                                                                    loop [b: $B99, c: $B100] {  # loop_25
+                                                                                                      $B99: {  # body
+                                                                                                        %124:i32 = load %i_24
+                                                                                                        %x_273:i32 = let %124
+                                                                                                        %126:bool = lt %x_273, 1i
+                                                                                                        if %126 [t: $B101, f: $B102] {  # if_25
+                                                                                                          $B101: {  # true
+                                                                                                            exit_if  # if_25
+                                                                                                          }
+                                                                                                          $B102: {  # false
+                                                                                                            exit_loop  # loop_25
+                                                                                                          }
+                                                                                                        }
+                                                                                                        store %i_25, 0i
+                                                                                                        loop [b: $B103, c: $B104] {  # loop_26
+                                                                                                          $B103: {  # body
+                                                                                                            %127:i32 = load %i_25
+                                                                                                            %x_280:i32 = let %127
+                                                                                                            %129:bool = lt %x_280, 1i
+                                                                                                            if %129 [t: $B105, f: $B106] {  # if_26
+                                                                                                              $B105: {  # true
+                                                                                                                exit_if  # if_26
+                                                                                                              }
+                                                                                                              $B106: {  # false
+                                                                                                                exit_loop  # loop_26
+                                                                                                              }
+                                                                                                            }
+                                                                                                            store %i_26, 0i
+                                                                                                            loop [b: $B107, c: $B108] {  # loop_27
+                                                                                                              $B107: {  # body
+                                                                                                                %130:i32 = load %i_26
+                                                                                                                %x_287:i32 = let %130
+                                                                                                                %132:bool = lt %x_287, 1i
+                                                                                                                if %132 [t: $B109, f: $B110] {  # if_27
+                                                                                                                  $B109: {  # true
+                                                                                                                    exit_if  # if_27
+                                                                                                                  }
+                                                                                                                  $B110: {  # false
+                                                                                                                    exit_loop  # loop_27
+                                                                                                                  }
+                                                                                                                }
+                                                                                                                store %i_27, 0i
+                                                                                                                loop [b: $B111, c: $B112] {  # loop_28
+                                                                                                                  $B111: {  # body
+                                                                                                                    %133:i32 = load %i_27
+                                                                                                                    %x_294:i32 = let %133
+                                                                                                                    %135:bool = lt %x_294, 1i
+                                                                                                                    if %135 [t: $B113, f: $B114] {  # if_28
+                                                                                                                      $B113: {  # true
+                                                                                                                        exit_if  # if_28
+                                                                                                                      }
+                                                                                                                      $B114: {  # false
+                                                                                                                        exit_loop  # loop_28
+                                                                                                                      }
+                                                                                                                    }
+                                                                                                                    store %i_28, 0i
+                                                                                                                    loop [b: $B115, c: $B116] {  # loop_29
+                                                                                                                      $B115: {  # body
+                                                                                                                        %136:i32 = load %i_28
+                                                                                                                        %x_301:i32 = let %136
+                                                                                                                        %138:bool = lt %x_301, 1i
+                                                                                                                        if %138 [t: $B117, f: $B118] {  # if_29
+                                                                                                                          $B117: {  # true
+                                                                                                                            exit_if  # if_29
+                                                                                                                          }
+                                                                                                                          $B118: {  # false
+                                                                                                                            exit_loop  # loop_29
+                                                                                                                          }
+                                                                                                                        }
+                                                                                                                        store %i_29, 0i
+                                                                                                                        loop [b: $B119, c: $B120] {  # loop_30
+                                                                                                                          $B119: {  # body
+                                                                                                                            %139:i32 = load %i_29
+                                                                                                                            %x_308:i32 = let %139
+                                                                                                                            %141:bool = lt %x_308, 1i
+                                                                                                                            if %141 [t: $B121, f: $B122] {  # if_30
+                                                                                                                              $B121: {  # true
+                                                                                                                                exit_if  # if_30
+                                                                                                                              }
+                                                                                                                              $B122: {  # false
+                                                                                                                                exit_loop  # loop_30
+                                                                                                                              }
+                                                                                                                            }
+                                                                                                                            store %i_30, 0i
+                                                                                                                            loop [b: $B123, c: $B124] {  # loop_31
+                                                                                                                              $B123: {  # body
+                                                                                                                                %142:i32 = load %i_30
+                                                                                                                                %x_315:i32 = let %142
+                                                                                                                                %144:bool = lt %x_315, 1i
+                                                                                                                                if %144 [t: $B125, f: $B126] {  # if_31
+                                                                                                                                  $B125: {  # true
+                                                                                                                                    exit_if  # if_31
+                                                                                                                                  }
+                                                                                                                                  $B126: {  # false
+                                                                                                                                    exit_loop  # loop_31
+                                                                                                                                  }
+                                                                                                                                }
+                                                                                                                                store %i_31, 0i
+                                                                                                                                loop [b: $B127, c: $B128] {  # loop_32
+                                                                                                                                  $B127: {  # body
+                                                                                                                                    %145:i32 = load %i_31
+                                                                                                                                    %x_322:i32 = let %145
+                                                                                                                                    %147:bool = lt %x_322, 1i
+                                                                                                                                    if %147 [t: $B129, f: $B130] {  # if_32
+                                                                                                                                      $B129: {  # true
+                                                                                                                                        exit_if  # if_32
+                                                                                                                                      }
+                                                                                                                                      $B130: {  # false
+                                                                                                                                        exit_loop  # loop_32
+                                                                                                                                      }
+                                                                                                                                    }
+                                                                                                                                    store %i_32, 0i
+                                                                                                                                    loop [b: $B131, c: $B132] {  # loop_33
+                                                                                                                                      $B131: {  # body
+                                                                                                                                        %148:i32 = load %i_32
+                                                                                                                                        %x_329:i32 = let %148
+                                                                                                                                        %150:bool = lt %x_329, 1i
+                                                                                                                                        if %150 [t: $B133, f: $B134] {  # if_33
+                                                                                                                                          $B133: {  # true
+                                                                                                                                            exit_if  # if_33
+                                                                                                                                          }
+                                                                                                                                          $B134: {  # false
+                                                                                                                                            exit_loop  # loop_33
+                                                                                                                                          }
+                                                                                                                                        }
+                                                                                                                                        store %i_33, 0i
+                                                                                                                                        loop [b: $B135, c: $B136] {  # loop_34
+                                                                                                                                          $B135: {  # body
+                                                                                                                                            %151:i32 = load %i_33
+                                                                                                                                            %x_336:i32 = let %151
+                                                                                                                                            %153:bool = lt %x_336, 1i
+                                                                                                                                            if %153 [t: $B137, f: $B138] {  # if_34
+                                                                                                                                              $B137: {  # true
+                                                                                                                                                exit_if  # if_34
+                                                                                                                                              }
+                                                                                                                                              $B138: {  # false
+                                                                                                                                                exit_loop  # loop_34
+                                                                                                                                              }
+                                                                                                                                            }
+                                                                                                                                            store %i_34, 0i
+                                                                                                                                            loop [b: $B139, c: $B140] {  # loop_35
+                                                                                                                                              $B139: {  # body
+                                                                                                                                                %154:i32 = load %i_34
+                                                                                                                                                %x_343:i32 = let %154
+                                                                                                                                                %156:bool = lt %x_343, 1i
+                                                                                                                                                if %156 [t: $B141, f: $B142] {  # if_35
+                                                                                                                                                  $B141: {  # true
+                                                                                                                                                    exit_if  # if_35
+                                                                                                                                                  }
+                                                                                                                                                  $B142: {  # false
+                                                                                                                                                    exit_loop  # loop_35
+                                                                                                                                                  }
+                                                                                                                                                }
+                                                                                                                                                store %i_35, 0i
+                                                                                                                                                loop [b: $B143, c: $B144] {  # loop_36
+                                                                                                                                                  $B143: {  # body
+                                                                                                                                                    %157:i32 = load %i_35
+                                                                                                                                                    %x_350:i32 = let %157
+                                                                                                                                                    %159:bool = lt %x_350, 1i
+                                                                                                                                                    if %159 [t: $B145, f: $B146] {  # if_36
+                                                                                                                                                      $B145: {  # true
+                                                                                                                                                        exit_if  # if_36
+                                                                                                                                                      }
+                                                                                                                                                      $B146: {  # false
+                                                                                                                                                        exit_loop  # loop_36
+                                                                                                                                                      }
+                                                                                                                                                    }
+                                                                                                                                                    store %i_36, 0i
+                                                                                                                                                    loop [b: $B147, c: $B148] {  # loop_37
+                                                                                                                                                      $B147: {  # body
+                                                                                                                                                        %160:i32 = load %i_36
+                                                                                                                                                        %x_357:i32 = let %160
+                                                                                                                                                        %162:bool = lt %x_357, 1i
+                                                                                                                                                        if %162 [t: $B149, f: $B150] {  # if_37
+                                                                                                                                                          $B149: {  # true
+                                                                                                                                                            exit_if  # if_37
+                                                                                                                                                          }
+                                                                                                                                                          $B150: {  # false
+                                                                                                                                                            exit_loop  # loop_37
+                                                                                                                                                          }
+                                                                                                                                                        }
+                                                                                                                                                        store %i_37, 0i
+                                                                                                                                                        loop [b: $B151, c: $B152] {  # loop_38
+                                                                                                                                                          $B151: {  # body
+                                                                                                                                                            %163:i32 = load %i_37
+                                                                                                                                                            %x_364:i32 = let %163
+                                                                                                                                                            %165:bool = lt %x_364, 1i
+                                                                                                                                                            if %165 [t: $B153, f: $B154] {  # if_38
+                                                                                                                                                              $B153: {  # true
+                                                                                                                                                                exit_if  # if_38
+                                                                                                                                                              }
+                                                                                                                                                              $B154: {  # false
+                                                                                                                                                                exit_loop  # loop_38
+                                                                                                                                                              }
+                                                                                                                                                            }
+                                                                                                                                                            loop [b: $B155, c: $B156] {  # loop_39
+                                                                                                                                                              $B155: {  # body
+                                                                                                                                                                %166:i32 = load %x_GLF_global_loop_count
+                                                                                                                                                                %x_371:i32 = let %166
+                                                                                                                                                                %168:i32 = add %x_371, 1i
+                                                                                                                                                                store %x_GLF_global_loop_count, %168
+                                                                                                                                                                continue  # -> $B156
+                                                                                                                                                              }
+                                                                                                                                                              $B156: {  # continuing
+                                                                                                                                                                %169:i32 = load %x_GLF_global_loop_count
+                                                                                                                                                                %x_373:i32 = let %169
+                                                                                                                                                                %171:bool = lt %x_373, 98i
+                                                                                                                                                                %172:bool = eq %171, false
+                                                                                                                                                                break_if %172  # -> [t: exit_loop loop_39, f: $B155]
+                                                                                                                                                              }
+                                                                                                                                                            }
+                                                                                                                                                            %173:i32 = load %i_37
+                                                                                                                                                            %x_375:i32 = let %173
+                                                                                                                                                            %175:i32 = load %i_37
+                                                                                                                                                            %x_376:i32 = let %175
+                                                                                                                                                            %177:ptr<function, vec3<f32>, read_write> = access %m23, %x_375
+                                                                                                                                                            store_vector_element %177, %x_376, 1.0f
+                                                                                                                                                            %178:i32 = load %i_37
+                                                                                                                                                            %x_378:i32 = let %178
+                                                                                                                                                            %180:i32 = load %i_37
+                                                                                                                                                            %x_379:i32 = let %180
+                                                                                                                                                            %182:ptr<function, vec4<f32>, read_write> = access %m24, %x_378
+                                                                                                                                                            store_vector_element %182, %x_379, 1.0f
+                                                                                                                                                            %183:i32 = load %i_37
+                                                                                                                                                            %x_381:i32 = let %183
+                                                                                                                                                            %185:i32 = load %i_37
+                                                                                                                                                            %x_382:i32 = let %185
+                                                                                                                                                            %187:ptr<function, vec2<f32>, read_write> = access %m32, %x_381
+                                                                                                                                                            store_vector_element %187, %x_382, 1.0f
+                                                                                                                                                            %188:i32 = load %i_37
+                                                                                                                                                            %x_384:i32 = let %188
+                                                                                                                                                            %190:i32 = load %i_37
+                                                                                                                                                            %x_385:i32 = let %190
+                                                                                                                                                            %192:ptr<function, vec3<f32>, read_write> = access %m33, %x_384
+                                                                                                                                                            store_vector_element %192, %x_385, 1.0f
+                                                                                                                                                            %193:i32 = load %i_37
+                                                                                                                                                            %x_387:i32 = let %193
+                                                                                                                                                            %195:i32 = load %i_37
+                                                                                                                                                            %x_388:i32 = let %195
+                                                                                                                                                            %197:ptr<function, vec4<f32>, read_write> = access %m34, %x_387
+                                                                                                                                                            store_vector_element %197, %x_388, 1.0f
+                                                                                                                                                            %198:i32 = load %i_37
+                                                                                                                                                            %x_390:i32 = let %198
+                                                                                                                                                            %200:i32 = load %i_37
+                                                                                                                                                            %x_391:i32 = let %200
+                                                                                                                                                            %202:ptr<function, vec2<f32>, read_write> = access %m42, %x_390
+                                                                                                                                                            store_vector_element %202, %x_391, 1.0f
+                                                                                                                                                            %203:i32 = load %i_37
+                                                                                                                                                            %x_393:i32 = let %203
+                                                                                                                                                            %205:i32 = load %i_37
+                                                                                                                                                            %x_394:i32 = let %205
+                                                                                                                                                            %207:ptr<function, vec3<f32>, read_write> = access %m43, %x_393
+                                                                                                                                                            store_vector_element %207, %x_394, 1.0f
+                                                                                                                                                            %208:i32 = load %i_37
+                                                                                                                                                            %x_396:i32 = let %208
+                                                                                                                                                            %210:i32 = load %i_37
+                                                                                                                                                            %x_397:i32 = let %210
+                                                                                                                                                            %212:ptr<function, vec4<f32>, read_write> = access %m44, %x_396
+                                                                                                                                                            store_vector_element %212, %x_397, 1.0f
+                                                                                                                                                            continue  # -> $B152
+                                                                                                                                                          }
+                                                                                                                                                          $B152: {  # continuing
+                                                                                                                                                            %213:i32 = load %i_37
+                                                                                                                                                            %x_399:i32 = let %213
+                                                                                                                                                            %215:i32 = add %x_399, 1i
+                                                                                                                                                            store %i_37, %215
+                                                                                                                                                            next_iteration  # -> $B151
+                                                                                                                                                          }
+                                                                                                                                                        }
+                                                                                                                                                        continue  # -> $B148
+                                                                                                                                                      }
+                                                                                                                                                      $B148: {  # continuing
+                                                                                                                                                        %216:i32 = load %i_36
+                                                                                                                                                        %x_401:i32 = let %216
+                                                                                                                                                        %218:i32 = add %x_401, 1i
+                                                                                                                                                        store %i_36, %218
+                                                                                                                                                        next_iteration  # -> $B147
+                                                                                                                                                      }
+                                                                                                                                                    }
+                                                                                                                                                    continue  # -> $B144
+                                                                                                                                                  }
+                                                                                                                                                  $B144: {  # continuing
+                                                                                                                                                    %219:i32 = load %i_35
+                                                                                                                                                    %x_403:i32 = let %219
+                                                                                                                                                    %221:i32 = add %x_403, 1i
+                                                                                                                                                    store %i_35, %221
+                                                                                                                                                    next_iteration  # -> $B143
+                                                                                                                                                  }
+                                                                                                                                                }
+                                                                                                                                                continue  # -> $B140
+                                                                                                                                              }
+                                                                                                                                              $B140: {  # continuing
+                                                                                                                                                %222:i32 = load %i_34
+                                                                                                                                                %x_405:i32 = let %222
+                                                                                                                                                %224:i32 = add %x_405, 1i
+                                                                                                                                                store %i_34, %224
+                                                                                                                                                next_iteration  # -> $B139
+                                                                                                                                              }
+                                                                                                                                            }
+                                                                                                                                            continue  # -> $B136
+                                                                                                                                          }
+                                                                                                                                          $B136: {  # continuing
+                                                                                                                                            %225:i32 = load %i_33
+                                                                                                                                            %x_407:i32 = let %225
+                                                                                                                                            %227:i32 = add %x_407, 1i
+                                                                                                                                            store %i_33, %227
+                                                                                                                                            next_iteration  # -> $B135
+                                                                                                                                          }
+                                                                                                                                        }
+                                                                                                                                        continue  # -> $B132
+                                                                                                                                      }
+                                                                                                                                      $B132: {  # continuing
+                                                                                                                                        %228:i32 = load %i_32
+                                                                                                                                        %x_409:i32 = let %228
+                                                                                                                                        %230:i32 = add %x_409, 1i
+                                                                                                                                        store %i_32, %230
+                                                                                                                                        next_iteration  # -> $B131
+                                                                                                                                      }
+                                                                                                                                    }
+                                                                                                                                    continue  # -> $B128
+                                                                                                                                  }
+                                                                                                                                  $B128: {  # continuing
+                                                                                                                                    %231:i32 = load %i_31
+                                                                                                                                    %x_411:i32 = let %231
+                                                                                                                                    %233:i32 = add %x_411, 1i
+                                                                                                                                    store %i_31, %233
+                                                                                                                                    next_iteration  # -> $B127
+                                                                                                                                  }
+                                                                                                                                }
+                                                                                                                                continue  # -> $B124
+                                                                                                                              }
+                                                                                                                              $B124: {  # continuing
+                                                                                                                                %234:i32 = load %i_30
+                                                                                                                                %x_413:i32 = let %234
+                                                                                                                                %236:i32 = add %x_413, 1i
+                                                                                                                                store %i_30, %236
+                                                                                                                                next_iteration  # -> $B123
+                                                                                                                              }
+                                                                                                                            }
+                                                                                                                            continue  # -> $B120
+                                                                                                                          }
+                                                                                                                          $B120: {  # continuing
+                                                                                                                            %237:i32 = load %i_29
+                                                                                                                            %x_415:i32 = let %237
+                                                                                                                            %239:i32 = add %x_415, 1i
+                                                                                                                            store %i_29, %239
+                                                                                                                            next_iteration  # -> $B119
+                                                                                                                          }
+                                                                                                                        }
+                                                                                                                        continue  # -> $B116
+                                                                                                                      }
+                                                                                                                      $B116: {  # continuing
+                                                                                                                        %240:i32 = load %i_28
+                                                                                                                        %x_417:i32 = let %240
+                                                                                                                        %242:i32 = add %x_417, 1i
+                                                                                                                        store %i_28, %242
+                                                                                                                        next_iteration  # -> $B115
+                                                                                                                      }
+                                                                                                                    }
+                                                                                                                    continue  # -> $B112
+                                                                                                                  }
+                                                                                                                  $B112: {  # continuing
+                                                                                                                    %243:i32 = load %i_27
+                                                                                                                    %x_419:i32 = let %243
+                                                                                                                    %245:i32 = add %x_419, 1i
+                                                                                                                    store %i_27, %245
+                                                                                                                    next_iteration  # -> $B111
+                                                                                                                  }
+                                                                                                                }
+                                                                                                                continue  # -> $B108
+                                                                                                              }
+                                                                                                              $B108: {  # continuing
+                                                                                                                %246:i32 = load %i_26
+                                                                                                                %x_421:i32 = let %246
+                                                                                                                %248:i32 = add %x_421, 1i
+                                                                                                                store %i_26, %248
+                                                                                                                next_iteration  # -> $B107
+                                                                                                              }
+                                                                                                            }
+                                                                                                            continue  # -> $B104
+                                                                                                          }
+                                                                                                          $B104: {  # continuing
+                                                                                                            %249:i32 = load %i_25
+                                                                                                            %x_423:i32 = let %249
+                                                                                                            %251:i32 = add %x_423, 1i
+                                                                                                            store %i_25, %251
+                                                                                                            next_iteration  # -> $B103
+                                                                                                          }
+                                                                                                        }
+                                                                                                        continue  # -> $B100
+                                                                                                      }
+                                                                                                      $B100: {  # continuing
+                                                                                                        %252:i32 = load %i_24
+                                                                                                        %x_425:i32 = let %252
+                                                                                                        %254:i32 = add %x_425, 1i
+                                                                                                        store %i_24, %254
+                                                                                                        next_iteration  # -> $B99
+                                                                                                      }
+                                                                                                    }
+                                                                                                    continue  # -> $B96
+                                                                                                  }
+                                                                                                  $B96: {  # continuing
+                                                                                                    %255:i32 = load %i_23
+                                                                                                    %x_427:i32 = let %255
+                                                                                                    %257:i32 = add %x_427, 1i
+                                                                                                    store %i_23, %257
+                                                                                                    next_iteration  # -> $B95
+                                                                                                  }
+                                                                                                }
+                                                                                                continue  # -> $B92
+                                                                                              }
+                                                                                              $B92: {  # continuing
+                                                                                                %258:i32 = load %i_22
+                                                                                                %x_429:i32 = let %258
+                                                                                                %260:i32 = add %x_429, 1i
+                                                                                                store %i_22, %260
+                                                                                                next_iteration  # -> $B91
+                                                                                              }
+                                                                                            }
+                                                                                            continue  # -> $B88
+                                                                                          }
+                                                                                          $B88: {  # continuing
+                                                                                            %261:i32 = load %i_21
+                                                                                            %x_431:i32 = let %261
+                                                                                            %263:i32 = add %x_431, 1i
+                                                                                            store %i_21, %263
+                                                                                            next_iteration  # -> $B87
+                                                                                          }
+                                                                                        }
+                                                                                        continue  # -> $B84
+                                                                                      }
+                                                                                      $B84: {  # continuing
+                                                                                        %264:i32 = load %i_20
+                                                                                        %x_433:i32 = let %264
+                                                                                        %266:i32 = add %x_433, 1i
+                                                                                        store %i_20, %266
+                                                                                        next_iteration  # -> $B83
+                                                                                      }
+                                                                                    }
+                                                                                    continue  # -> $B80
+                                                                                  }
+                                                                                  $B80: {  # continuing
+                                                                                    %267:i32 = load %i_19
+                                                                                    %x_435:i32 = let %267
+                                                                                    %269:i32 = add %x_435, 1i
+                                                                                    store %i_19, %269
+                                                                                    next_iteration  # -> $B79
+                                                                                  }
+                                                                                }
+                                                                                continue  # -> $B76
+                                                                              }
+                                                                              $B76: {  # continuing
+                                                                                %270:i32 = load %i_18
+                                                                                %x_437:i32 = let %270
+                                                                                %272:i32 = add %x_437, 1i
+                                                                                store %i_18, %272
+                                                                                next_iteration  # -> $B75
+                                                                              }
+                                                                            }
+                                                                            continue  # -> $B72
+                                                                          }
+                                                                          $B72: {  # continuing
+                                                                            %273:i32 = load %i_17
+                                                                            %x_439:i32 = let %273
+                                                                            %275:i32 = add %x_439, 1i
+                                                                            store %i_17, %275
+                                                                            next_iteration  # -> $B71
+                                                                          }
+                                                                        }
+                                                                        continue  # -> $B68
+                                                                      }
+                                                                      $B68: {  # continuing
+                                                                        %276:i32 = load %i_16
+                                                                        %x_441:i32 = let %276
+                                                                        %278:i32 = add %x_441, 1i
+                                                                        store %i_16, %278
+                                                                        next_iteration  # -> $B67
+                                                                      }
+                                                                    }
+                                                                    continue  # -> $B64
+                                                                  }
+                                                                  $B64: {  # continuing
+                                                                    %279:i32 = load %i_15
+                                                                    %x_443:i32 = let %279
+                                                                    %281:i32 = add %x_443, 1i
+                                                                    store %i_15, %281
+                                                                    next_iteration  # -> $B63
+                                                                  }
+                                                                }
+                                                                continue  # -> $B60
+                                                              }
+                                                              $B60: {  # continuing
+                                                                %282:i32 = load %i_14
+                                                                %x_445:i32 = let %282
+                                                                %284:i32 = add %x_445, 1i
+                                                                store %i_14, %284
+                                                                next_iteration  # -> $B59
+                                                              }
+                                                            }
+                                                            continue  # -> $B56
+                                                          }
+                                                          $B56: {  # continuing
+                                                            %285:i32 = load %i_13
+                                                            %x_447:i32 = let %285
+                                                            %287:i32 = add %x_447, 1i
+                                                            store %i_13, %287
+                                                            next_iteration  # -> $B55
+                                                          }
+                                                        }
+                                                        continue  # -> $B52
+                                                      }
+                                                      $B52: {  # continuing
+                                                        %288:i32 = load %i_12
+                                                        %x_449:i32 = let %288
+                                                        %290:i32 = add %x_449, 1i
+                                                        store %i_12, %290
+                                                        next_iteration  # -> $B51
+                                                      }
+                                                    }
+                                                    continue  # -> $B48
+                                                  }
+                                                  $B48: {  # continuing
+                                                    %291:i32 = load %i_11
+                                                    %x_451:i32 = let %291
+                                                    %293:i32 = add %x_451, 1i
+                                                    store %i_11, %293
+                                                    next_iteration  # -> $B47
+                                                  }
+                                                }
+                                                continue  # -> $B44
+                                              }
+                                              $B44: {  # continuing
+                                                %294:i32 = load %i_10
+                                                %x_453:i32 = let %294
+                                                %296:i32 = add %x_453, 1i
+                                                store %i_10, %296
+                                                next_iteration  # -> $B43
+                                              }
+                                            }
+                                            continue  # -> $B40
+                                          }
+                                          $B40: {  # continuing
+                                            %297:i32 = load %i_9
+                                            %x_455:i32 = let %297
+                                            %299:i32 = add %x_455, 1i
+                                            store %i_9, %299
+                                            next_iteration  # -> $B39
+                                          }
+                                        }
+                                        continue  # -> $B36
+                                      }
+                                      $B36: {  # continuing
+                                        %300:i32 = load %i_8
+                                        %x_457:i32 = let %300
+                                        %302:i32 = add %x_457, 1i
+                                        store %i_8, %302
+                                        next_iteration  # -> $B35
+                                      }
+                                    }
+                                    continue  # -> $B32
+                                  }
+                                  $B32: {  # continuing
+                                    %303:i32 = load %i_7
+                                    %x_459:i32 = let %303
+                                    %305:i32 = add %x_459, 1i
+                                    store %i_7, %305
+                                    next_iteration  # -> $B31
+                                  }
+                                }
+                                continue  # -> $B28
+                              }
+                              $B28: {  # continuing
+                                %306:i32 = load %i_6
+                                %x_461:i32 = let %306
+                                %308:i32 = add %x_461, 1i
+                                store %i_6, %308
+                                next_iteration  # -> $B27
+                              }
+                            }
+                            continue  # -> $B24
+                          }
+                          $B24: {  # continuing
+                            %309:i32 = load %i_5
+                            %x_463:i32 = let %309
+                            %311:i32 = add %x_463, 1i
+                            store %i_5, %311
+                            next_iteration  # -> $B23
+                          }
+                        }
+                        continue  # -> $B20
+                      }
+                      $B20: {  # continuing
+                        %312:i32 = load %i_4
+                        %x_465:i32 = let %312
+                        %314:i32 = add %x_465, 1i
+                        store %i_4, %314
+                        next_iteration  # -> $B19
+                      }
+                    }
+                    continue  # -> $B16
+                  }
+                  $B16: {  # continuing
+                    %315:i32 = load %i_3
+                    %x_467:i32 = let %315
+                    %317:i32 = add %x_467, 1i
+                    store %i_3, %317
+                    next_iteration  # -> $B15
+                  }
+                }
+                continue  # -> $B12
+              }
+              $B12: {  # continuing
+                %318:i32 = load %i_2
+                %x_469:i32 = let %318
+                %320:i32 = add %x_469, 1i
+                store %i_2, %320
+                next_iteration  # -> $B11
+              }
+            }
+            continue  # -> $B8
+          }
+          $B8: {  # continuing
+            %321:i32 = load %i_1
+            %x_471:i32 = let %321
+            %323:i32 = add %x_471, 1i
+            store %i_1, %323
+            next_iteration  # -> $B7
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %324:i32 = load %i
+        %x_473:i32 = let %324
+        %326:i32 = add %x_473, 1i
+        store %i, %326
+        next_iteration  # -> $B3
+      }
+    }
+    store %sum, 0.0f
+    store %r, 0i
+    loop [b: $B157, c: $B158] {  # loop_40
+      $B157: {  # body
+        %327:i32 = load %x_GLF_global_loop_count
+        %x_479:i32 = let %327
+        %329:bool = lt %x_479, 100i
+        if %329 [t: $B159, f: $B160] {  # if_39
+          $B159: {  # true
+            exit_if  # if_39
+          }
+          $B160: {  # false
+            exit_loop  # loop_40
+          }
+        }
+        %330:i32 = load %x_GLF_global_loop_count
+        %x_482:i32 = let %330
+        %332:i32 = add %x_482, 1i
+        store %x_GLF_global_loop_count, %332
+        %333:i32 = load %r
+        %x_484:i32 = let %333
+        %335:ptr<function, vec3<f32>, read_write> = access %m23, 0i
+        %336:f32 = load_vector_element %335, %x_484
+        %x_486:f32 = let %336
+        %338:f32 = load %sum
+        %x_487:f32 = let %338
+        %340:f32 = add %x_487, %x_486
+        store %sum, %340
+        %341:i32 = load %r
+        %x_489:i32 = let %341
+        %343:ptr<function, vec4<f32>, read_write> = access %m24, 0i
+        %344:f32 = load_vector_element %343, %x_489
+        %x_491:f32 = let %344
+        %346:f32 = load %sum
+        %x_492:f32 = let %346
+        %348:f32 = add %x_492, %x_491
+        store %sum, %348
+        %349:i32 = load %r
+        %x_494:i32 = let %349
+        %351:ptr<function, vec2<f32>, read_write> = access %m32, 0i
+        %352:f32 = load_vector_element %351, %x_494
+        %x_496:f32 = let %352
+        %354:f32 = load %sum
+        %x_497:f32 = let %354
+        %356:f32 = add %x_497, %x_496
+        store %sum, %356
+        %357:i32 = load %r
+        %x_499:i32 = let %357
+        %359:ptr<function, vec3<f32>, read_write> = access %m33, 0i
+        %360:f32 = load_vector_element %359, %x_499
+        %x_501:f32 = let %360
+        %362:f32 = load %sum
+        %x_502:f32 = let %362
+        %364:f32 = add %x_502, %x_501
+        store %sum, %364
+        %365:i32 = load %r
+        %x_504:i32 = let %365
+        %367:ptr<function, vec4<f32>, read_write> = access %m34, 0i
+        %368:f32 = load_vector_element %367, %x_504
+        %x_506:f32 = let %368
+        %370:f32 = load %sum
+        %x_507:f32 = let %370
+        %372:f32 = add %x_507, %x_506
+        store %sum, %372
+        %373:i32 = load %r
+        %x_509:i32 = let %373
+        %375:ptr<function, vec2<f32>, read_write> = access %m42, 0i
+        %376:f32 = load_vector_element %375, %x_509
+        %x_511:f32 = let %376
+        %378:f32 = load %sum
+        %x_512:f32 = let %378
+        %380:f32 = add %x_512, %x_511
+        store %sum, %380
+        %381:i32 = load %r
+        %x_514:i32 = let %381
+        %383:ptr<function, vec3<f32>, read_write> = access %m43, 0i
+        %384:f32 = load_vector_element %383, %x_514
+        %x_516:f32 = let %384
+        %386:f32 = load %sum
+        %x_517:f32 = let %386
+        %388:f32 = add %x_517, %x_516
+        store %sum, %388
+        %389:i32 = load %r
+        %x_519:i32 = let %389
+        %391:ptr<function, vec4<f32>, read_write> = access %m44, 0i
+        %392:f32 = load_vector_element %391, %x_519
+        %x_521:f32 = let %392
+        %394:f32 = load %sum
+        %x_522:f32 = let %394
+        %396:f32 = add %x_522, %x_521
+        store %sum, %396
+        continue  # -> $B158
+      }
+      $B158: {  # continuing
+        %397:i32 = load %r
+        %x_524:i32 = let %397
+        %399:i32 = add %x_524, 1i
+        store %r, %399
+        next_iteration  # -> $B157
+      }
+    }
+    %400:f32 = load %sum
+    %x_526:f32 = let %400
+    %402:bool = eq %x_526, 8.0f
+    if %402 [t: $B161, f: $B162] {  # if_40
+      $B161: {  # true
+        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
+        exit_if  # if_40
+      }
+      $B162: {  # false
+        store %x_GLF_color, vec4<f32>(0.0f)
+        exit_if  # if_40
+      }
+    }
+    ret
+  }
+}
+%tint_symbol = @fragment func():main_out {
+  $B163: {
+    %404:void = call %main_1
+    %405:vec4<f32> = load %x_GLF_color
+    %406:main_out = construct %405
+    ret %406
+  }
+}
+
+invalid entry point IO struct uses
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

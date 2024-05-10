@@ -1,28 +1,28 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/msl/writer/printer/printer.cc:469 internal compiler error: SB_RW = struct @align(4) {
+../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SB_RW = struct @align(4) {
   arg_0:atomic<u32> @offset(0)
 }
 
-%b1 = block {  # root
+$B1: {  # root
   %sb_rw:ptr<storage, SB_RW, read_write> = var @binding_point(0, 0)
 }
 
-%atomicStore_cdc29e = func():void -> %b2 {
-  %b2 = block {
+%atomicStore_cdc29e = func():void {
+  $B2: {
     %3:ptr<storage, atomic<u32>, read_write> = access %sb_rw, 0u
     %4:void = atomicStore %3, 1u
     ret
   }
 }
-%fragment_main = @fragment func():void -> %b3 {
-  %b3 = block {
+%fragment_main = @fragment func():void {
+  $B3: {
     %6:void = call %atomicStore_cdc29e
     ret
   }
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void -> %b4 {
-  %b4 = block {
+%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
+  $B4: {
     %8:void = call %atomicStore_cdc29e
     ret
   }

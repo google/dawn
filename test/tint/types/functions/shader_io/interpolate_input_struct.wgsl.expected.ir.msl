@@ -1,7 +1,28 @@
 SKIP: FAILED
 
-#include <metal_stdlib>
-using namespace metal;
-
-void tint_symbol() {
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: In = struct @align(4) {
+  none:f32 @offset(0), @location(0)
+  flat:f32 @offset(4), @location(1), @interpolate(flat)
+  perspective_center:f32 @offset(8), @location(2), @interpolate(perspective, center)
+  perspective_centroid:f32 @offset(12), @location(3), @interpolate(perspective, centroid)
+  perspective_sample:f32 @offset(16), @location(4), @interpolate(perspective, sample)
+  linear_center:f32 @offset(20), @location(5), @interpolate(linear, center)
+  linear_centroid:f32 @offset(24), @location(6), @interpolate(linear, centroid)
+  linear_sample:f32 @offset(28), @location(7), @interpolate(linear, sample)
+  perspective_default:f32 @offset(32), @location(8), @interpolate(perspective)
+  linear_default:f32 @offset(36), @location(9), @interpolate(linear)
 }
+
+%tint_symbol = @fragment func(%in:In):void {
+  $B1: {
+    ret
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

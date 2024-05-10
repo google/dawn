@@ -1,0 +1,23 @@
+SKIP: FAILED
+
+../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: Outputs = struct @align(8) {
+  a:f16 @offset(0), @location(1)
+  b:vec4<f16> @offset(8), @location(2)
+}
+
+%frag_main = @fragment func(%loc1:f16 [@location(1)], %loc2:vec4<f16> [@location(2)]):Outputs {
+  $B1: {
+    %4:f16 = mul %loc1, 2.0h
+    %5:vec4<f16> = mul %loc2, 3.0h
+    %6:Outputs = construct %4, %5
+    ret %6
+  }
+}
+
+invalid entry point IO struct uses
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

@@ -1,0 +1,330 @@
+SKIP: FAILED
+
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+
+void deref_const() {
+  tint_array<int, 10> a = {};
+  thread tint_array<int, 10>* const p = a;
+  int b = p[0];
+  p[0] = 42;
+}
+void no_deref_const() {
+  tint_array<int, 10> a = {};
+  thread tint_array<int, 10>* const p = a;
+  int b = p[0];
+  p[0] = 42;
+}
+void deref_let() {
+  tint_array<int, 10> a = {};
+  thread tint_array<int, 10>* const p = a;
+  int const i = 0;
+  int b = p[i];
+  p[0] = 42;
+}
+void no_deref_let() {
+  tint_array<int, 10> a = {};
+  thread tint_array<int, 10>* const p = a;
+  int const i = 0;
+  int b = p[i];
+  p[0] = 42;
+}
+void deref_var() {
+  tint_array<int, 10> a = {};
+  thread tint_array<int, 10>* const p = a;
+  int i = 0;
+  int b = p[i];
+  p[0] = 42;
+}
+void no_deref_var() {
+  tint_array<int, 10> a = {};
+  thread tint_array<int, 10>* const p = a;
+  int i = 0;
+  int b = p[i];
+  p[0] = 42;
+}
+kernel void tint_symbol() {
+  deref_const();
+  no_deref_const();
+  deref_let();
+  no_deref_let();
+  deref_var();
+  no_deref_var();
+}
+program_source:18:37: error: no viable conversion from 'tint_array<int, 10>' to 'tint_array<int, 10> *const'
+  thread tint_array<int, 10>* const p = a;
+                                    ^   ~
+program_source:19:7: error: no viable conversion from 'tint_array<int, 10>' to 'int'
+  int b = p[0];
+      ^   ~~~~
+program_source:20:8: error: no viable overloaded '='
+  p[0] = 42;
+  ~~~~ ^ ~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const device tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const threadgroup tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const constant tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'device tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'threadgroup tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:24:37: error: no viable conversion from 'tint_array<int, 10>' to 'tint_array<int, 10> *const'
+  thread tint_array<int, 10>* const p = a;
+                                    ^   ~
+program_source:25:7: error: no viable conversion from 'tint_array<int, 10>' to 'int'
+  int b = p[0];
+      ^   ~~~~
+program_source:26:8: error: no viable overloaded '='
+  p[0] = 42;
+  ~~~~ ^ ~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const device tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const threadgroup tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const constant tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'device tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'threadgroup tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:30:37: error: no viable conversion from 'tint_array<int, 10>' to 'tint_array<int, 10> *const'
+  thread tint_array<int, 10>* const p = a;
+                                    ^   ~
+program_source:32:7: error: no viable conversion from 'tint_array<int, 10>' to 'int'
+  int b = p[i];
+      ^   ~~~~
+program_source:33:8: error: no viable overloaded '='
+  p[0] = 42;
+  ~~~~ ^ ~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const device tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const threadgroup tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const constant tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'device tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'threadgroup tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:37:37: error: no viable conversion from 'tint_array<int, 10>' to 'tint_array<int, 10> *const'
+  thread tint_array<int, 10>* const p = a;
+                                    ^   ~
+program_source:39:7: error: no viable conversion from 'tint_array<int, 10>' to 'int'
+  int b = p[i];
+      ^   ~~~~
+program_source:40:8: error: no viable overloaded '='
+  p[0] = 42;
+  ~~~~ ^ ~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const device tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const threadgroup tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const constant tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'device tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'threadgroup tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:44:37: error: no viable conversion from 'tint_array<int, 10>' to 'tint_array<int, 10> *const'
+  thread tint_array<int, 10>* const p = a;
+                                    ^   ~
+program_source:46:7: error: no viable conversion from 'tint_array<int, 10>' to 'int'
+  int b = p[i];
+      ^   ~~~~
+program_source:47:8: error: no viable overloaded '='
+  p[0] = 42;
+  ~~~~ ^ ~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const device tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const threadgroup tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const constant tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'device tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'threadgroup tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:51:37: error: no viable conversion from 'tint_array<int, 10>' to 'tint_array<int, 10> *const'
+  thread tint_array<int, 10>* const p = a;
+                                    ^   ~
+program_source:53:7: error: no viable conversion from 'tint_array<int, 10>' to 'int'
+  int b = p[i];
+      ^   ~~~~
+program_source:54:8: error: no viable overloaded '='
+  p[0] = 42;
+  ~~~~ ^ ~~
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const device tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const threadgroup tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: no known conversion from 'int' to 'const constant tint_array<int, 10> &' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit copy assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'tint_array<int, 10>' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'device tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: no known conversion from 'int' to 'threadgroup tint_array<int, 10> &&' for 1st argument
+struct tint_array {
+       ^
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'device'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+program_source:4:8: note: candidate function (the implicit move assignment operator) not viable: 'this' object is in default address space, but method expects object in address space 'threadgroup'
+
