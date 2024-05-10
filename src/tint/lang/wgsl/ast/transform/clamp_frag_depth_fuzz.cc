@@ -33,8 +33,13 @@ namespace tint::ast::transform {
 namespace {
 
 bool CanRun(const ClampFragDepth::Config& config) {
-    if (config.offsets && config.offsets->min >= config.offsets->max) {
-        return false;  // member offset collision / non-ascending
+    if (config.offsets) {
+        if (config.offsets->min >= config.offsets->max) {
+            return false;  // member offset collision / non-ascending
+        }
+        if ((config.offsets->min & 3) != 0 || (config.offsets->max & 3) != 0) {
+            return false;  // Offsets need 4-byte alignment.
+        }
     }
     return true;
 }
