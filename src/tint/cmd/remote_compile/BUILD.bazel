@@ -42,11 +42,8 @@ cc_binary(
     "main.cc",
   ],
   deps = [
-    "//src/tint/lang/wgsl/ast",
     "//src/tint/utils/macros",
     "//src/tint/utils/socket",
-    "//src/tint/utils/text",
-    "//src/tint/utils/traits",
     
   ] + select({
     ":tint_build_msl_writer": [

@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/msl/validate/validate.h"
 
-#include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/file/tmpfile.h"
 

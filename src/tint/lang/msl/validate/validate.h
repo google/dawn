@@ -31,13 +31,6 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
-
-// Forward declarations
-namespace tint {
-class Program;
-}  // namespace tint
-
 namespace tint::msl::validate {
 
 /// The version of MSL to validate against.

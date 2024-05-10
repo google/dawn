@@ -31,11 +31,6 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/utils/result/result.h"
 
-// Forward declarations
-namespace tint {
-class Program;
-}  // namespace tint
-
 namespace tint::spirv::validate {
 
 /// Validate checks that the provided SPIR-V passes validation.

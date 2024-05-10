@@ -43,11 +43,8 @@ tint_add_target(tint_cmd_remote_compile_cmd cmd
 )
 
 tint_target_add_dependencies(tint_cmd_remote_compile_cmd cmd
-  tint_lang_wgsl_ast
   tint_utils_macros
   tint_utils_socket
-  tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_cmd_remote_compile_cmd cmd

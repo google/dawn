@@ -43,11 +43,8 @@ tint_executable("remote_compile") {
   sources = [ "main.cc" ]
   deps = [
     "${tint_src_dir}:thread",
-    "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/socket",
-    "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
   ]
 
   if (tint_build_msl_writer) {
