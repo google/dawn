@@ -211,30 +211,30 @@ void foo() {
 
 TEST_F(MslPrinterTest, EmitType_Atomic_U32) {
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<u32>()));
+    auto* param = b.FunctionParam("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<u32>()));
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup atomic_uint a;
+void foo(threadgroup atomic_uint* const a) {
 }
 )");
 }
 
 TEST_F(MslPrinterTest, EmitType_Atomic_I32) {
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<i32>()));
+    auto* param = b.FunctionParam("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<i32>()));
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup atomic_int a;
+void foo(threadgroup atomic_int* const a) {
 }
 )");
 }
@@ -257,29 +257,28 @@ void foo() {
 TEST_F(MslPrinterTest, EmitType_VectorPacked) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.packed_vec(ty.f32(), 3)));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.packed_vec(ty.f32(), 3)));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
-  threadgroup packed_float3 a;
+  packed_float3 a = 0.0f;
 }
 )");
 }
 
 TEST_F(MslPrinterTest, EmitType_Void) {
+    // Tested via the function return type.
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.void_()));
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
-  threadgroup void a;
 }
 )");
 }
@@ -912,30 +911,30 @@ void foo() {
 
 TEST_F(MslPrinterTest, EmitType_Sampler) {
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.sampler()));
+    auto* param = b.FunctionParam("a", ty.sampler());
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup sampler a;
+void foo(sampler a) {
 }
 )");
 }
 
 TEST_F(MslPrinterTest, EmitType_SamplerComparison) {
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.comparison_sampler()));
+    auto* param = b.FunctionParam("a", ty.comparison_sampler());
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup sampler a;
+void foo(sampler a) {
 }
 )");
 }
@@ -956,16 +955,16 @@ TEST_P(MslPrinterDepthTexturesTest, Emit) {
 
     auto* t = ty.Get<core::type::DepthTexture>(params.dim);
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, t));
+    auto* param = b.FunctionParam("a", t);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup )" + params.result +
-                           R"( a;
+void foo()" + params.result +
+                           R"( a) {
 }
 )");
 }
@@ -981,18 +980,18 @@ INSTANTIATE_TEST_SUITE_P(
                     MslDepthTextureData{core::type::TextureDimension::kCubeArray,
                                         "depthcube_array<float, access::sample>"}));
 
-TEST_F(MslPrinterTest, EmiType_DepthMultisampledTexture) {
+TEST_F(MslPrinterTest, EmitType_DepthMultisampledTexture) {
     auto* t = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, t));
+    auto* param = b.FunctionParam("a", t);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup depth2d_ms<float, access::read> a;
+void foo(depth2d_ms<float, access::read> a) {
 }
 )");
 }
@@ -1013,16 +1012,16 @@ TEST_P(MslPrinterSampledtexturesTest, Emit) {
 
     auto* t = ty.Get<core::type::SampledTexture>(params.dim, ty.f32());
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, t));
+    auto* param = b.FunctionParam("a", t);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup )" + params.result +
-                           R"( a;
+void foo()" + params.result +
+                           R"( a) {
 }
 )");
 }
@@ -1039,18 +1038,18 @@ INSTANTIATE_TEST_SUITE_P(
         MslTextureData{core::type::TextureDimension::kCubeArray,
                        "texturecube_array<float, access::sample>"}));
 
-TEST_F(MslPrinterTest, Emit_TypeMultisampledTexture) {
+TEST_F(MslPrinterTest, EmitType_MultisampledTexture) {
     auto* ms = ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.u32());
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ms));
+    auto* param = b.FunctionParam("a", ms);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup texture2d_ms<uint, access::read> a;
+void foo(texture2d_ms<uint, access::read> a) {
 }
 )");
 }
@@ -1072,16 +1071,16 @@ TEST_P(MslPrinterStorageTexturesTest, Emit) {
     auto s = ty.Get<core::type::StorageTexture>(params.dim, core::TexelFormat::kR32Float,
                                                 core::Access::kWrite, f32);
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, s));
+    auto* param = b.FunctionParam("a", s);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
-void foo() {
-  threadgroup )" + params.result +
-                           R"( a;
+void foo()" + params.result +
+                           R"( a) {
 }
 )");
 }
