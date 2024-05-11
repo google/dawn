@@ -531,6 +531,12 @@ MaybeError ValidateTextureDescriptor(
         switch (allowMultiPlanar) {
             case AllowMultiPlanarTextureFormat::Yes:
                 DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D ||
+                                    descriptor->mipLevelCount != 1,
+                                "Multiplanar texture must be non-mipmapped & 2D in order to be "
+                                "created directly.");
+                break;
+            case AllowMultiPlanarTextureFormat::SingleLayerOnly:
+                DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D ||
                                     descriptor->mipLevelCount != 1 ||
                                     descriptor->size.depthOrArrayLayers != 1,
                                 "Multiplanar texture must be non-mipmapped & 2D in order to be "

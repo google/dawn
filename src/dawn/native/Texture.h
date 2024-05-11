@@ -48,6 +48,7 @@ namespace dawn::native {
 
 enum class AllowMultiPlanarTextureFormat {
     No,
+    SingleLayerOnly,
     Yes,
 };
 

@@ -115,7 +115,8 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
     }
 
     // Create one basic shared texture memory. It should support most operations.
-    wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device) override {
+    wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device,
+                                                        int layerCount) override {
         wgpu::SharedTextureMemory ret = CreateSharedTextureMemoryHelper(
             16, AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
             static_cast<AHardwareBuffer_UsageFlags>(
@@ -129,7 +130,8 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
     }
 
     std::vector<std::vector<wgpu::SharedTextureMemory>> CreatePerDeviceSharedTextureMemories(
-        const std::vector<wgpu::Device>& devices) override {
+        const std::vector<wgpu::Device>& devices,
+        int layerCount) override {
         std::vector<std::vector<wgpu::SharedTextureMemory>> memories;
 
         for (auto format : {
@@ -315,12 +317,14 @@ TEST_P(SharedTextureMemoryTests, CPUWriteThenGPURead) {
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Vulkan,
                                  SharedTextureMemoryNoFeatureTests,
                                  {VulkanBackend()},
-                                 {Backend::GetInstance()});
+                                 {Backend::GetInstance()},
+                                 {1});
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Vulkan,
                                  SharedTextureMemoryTests,
                                  {VulkanBackend()},
-                                 {Backend::GetInstance()});
+                                 {Backend::GetInstance()},
+                                 {1});
 
 }  // anonymous namespace
 }  // namespace dawn

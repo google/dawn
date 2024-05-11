@@ -113,7 +113,8 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
     }
 
     // Create one basic shared texture memory. It should support most operations.
-    wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device) override {
+    wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device,
+                                                        int layerCount) override {
         auto format = GBM_FORMAT_ABGR8888;
         auto usage = GBM_BO_USE_LINEAR;
 
@@ -126,7 +127,8 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
     }
 
     std::vector<std::vector<wgpu::SharedTextureMemory>> CreatePerDeviceSharedTextureMemories(
-        const std::vector<wgpu::Device>& devices) override {
+        const std::vector<wgpu::Device>& devices,
+        int layerCount) override {
         std::vector<std::vector<wgpu::SharedTextureMemory>> memories;
         for (uint32_t format : {
                  GBM_FORMAT_R8,
@@ -224,14 +226,16 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(
     SharedTextureMemoryNoFeatureTests,
     {VulkanBackend()},
     {Backend<wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD>::GetInstance(),
-     Backend<wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD>::GetInstance()});
+     Backend<wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD>::GetInstance()},
+    {1});
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(
     Vulkan,
     SharedTextureMemoryTests,
     {VulkanBackend()},
     {Backend<wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD>::GetInstance(),
-     Backend<wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD>::GetInstance()});
+     Backend<wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD>::GetInstance()},
+    {1});
 
 }  // anonymous namespace
 }  // namespace dawn

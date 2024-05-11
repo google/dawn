@@ -50,14 +50,16 @@ class SharedTextureMemoryTestBackend {
     virtual std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter& device) const = 0;
 
     // Create one basic shared texture memory. It should support most operations.
-    virtual wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device) = 0;
+    virtual wgpu::SharedTextureMemory CreateSharedTextureMemory(const wgpu::Device& device,
+                                                                int layerCount) = 0;
 
     // Create a variety of valid SharedTextureMemory for testing, one on each device.
     // Backends should return all interesting types of shared texture memory here, including
     // different sizes, formats, memory types, etc.
     // The inner vector is a vector of the same memory imported to each device.
     virtual std::vector<std::vector<wgpu::SharedTextureMemory>>
-    CreatePerDeviceSharedTextureMemories(const std::vector<wgpu::Device>& devices) = 0;
+    CreatePerDeviceSharedTextureMemories(const std::vector<wgpu::Device>& devices,
+                                         int layerCount) = 0;
 
     // Import `fence` which may have been created on some other device, onto `importingDevice`.
     wgpu::SharedFence ImportFenceTo(const wgpu::Device& importingDevice,
@@ -65,18 +67,21 @@ class SharedTextureMemoryTestBackend {
 
     // Shorthand version of `CreatePerDeviceSharedTextureMemories` that creates memories on a single
     // device.
-    std::vector<wgpu::SharedTextureMemory> CreateSharedTextureMemories(wgpu::Device& device);
+    std::vector<wgpu::SharedTextureMemory> CreateSharedTextureMemories(wgpu::Device& device,
+                                                                       int layerCount);
 
     // Wrapper around CreateSharedTextureMemories() that restricts the returned
     // vector to only the single-planar instances.
     std::vector<wgpu::SharedTextureMemory> CreateSinglePlanarSharedTextureMemories(
-        wgpu::Device& device);
+        wgpu::Device& device,
+        int layerCount);
 
     // Wrapper around CreatePerDeviceSharedTextureMemories that filters the memories by
     // usage to ensure they have `requiredUsage`.
     std::vector<std::vector<wgpu::SharedTextureMemory>>
     CreatePerDeviceSharedTextureMemoriesFilterByUsage(const std::vector<wgpu::Device>& devices,
-                                                      wgpu::TextureUsage requiredUsage);
+                                                      wgpu::TextureUsage requiredUsage,
+                                                      int layerCount);
 
     // Return true if the test should always use the same device.
     // Some interop paths require the same underyling backend device.
@@ -148,7 +153,8 @@ inline std::ostream& operator<<(std::ostream& o, SharedTextureMemoryTestBackend*
 }
 
 using Backend = SharedTextureMemoryTestBackend*;
-DAWN_TEST_PARAM_STRUCT(SharedTextureMemoryTestParams, Backend);
+using LayerCount = int;
+DAWN_TEST_PARAM_STRUCT(SharedTextureMemoryTestParams, Backend, LayerCount);
 
 class SharedTextureMemoryNoFeatureTests : public DawnTestWithParams<SharedTextureMemoryTestParams> {
   protected:
@@ -179,6 +185,9 @@ class SharedTextureMemoryTests : public DawnTestWithParams<SharedTextureMemoryTe
     std::pair<wgpu::CommandBuffer, wgpu::Texture> MakeCheckBySamplingTwoTexturesCommandBuffer(
         wgpu::Texture& texture0,
         wgpu::Texture& texture1);
+    std::pair<wgpu::CommandBuffer, wgpu::Texture> MakeCheckBySamplingTexture2DArrayCommandBuffer(
+        wgpu::Device& deviceObj,
+        wgpu::Texture& texture);
     void CheckFourColors(wgpu::Device& deviceObj,
                          wgpu::TextureFormat format,
                          wgpu::Texture& colorTarget);

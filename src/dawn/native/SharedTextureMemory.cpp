@@ -153,8 +153,6 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
                     wgpu::TextureDimension::e2D);
     DAWN_INVALID_IF(descriptor->mipLevelCount != 1, "Mip level count (%u) is not 1.",
                     descriptor->mipLevelCount);
-    DAWN_INVALID_IF(descriptor->size.depthOrArrayLayers != 1, "Array layer count (%u) is not 1.",
-                    descriptor->size.depthOrArrayLayers);
     DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
                     descriptor->sampleCount);
 
