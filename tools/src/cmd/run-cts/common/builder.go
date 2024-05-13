@@ -47,7 +47,7 @@ type Builder struct {
 
 // BuildIfRequired calls Build() if the CTS sources have been modified since the last build.
 func (b *Builder) BuildIfRequired(verbose bool) error {
-	name := fmt.Sprintf("CTS-%v", b.Name)
+	name := fmt.Sprintf("cts %v", b.Name)
 
 	// Scan the CTS source to determine the most recent change to the CTS source
 	mostRecentSourceChange, err := scanSourceTimestamps(filepath.Join(b.Out, "../src"), verbose)
@@ -115,6 +115,10 @@ func (b *Builder) Build(verbose bool) error {
 
 	if err := os.MkdirAll(b.Out, 0777); err != nil {
 		return err
+	}
+
+	if !fileutils.IsExe(b.npx) {
+		return fmt.Errorf("cannot find npx at '%v'", b.npx)
 	}
 
 	for _, action := range []string{"run:generate-version", b.Name} {
