@@ -73,8 +73,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define WGPU_BREAKING_REFERENCE_ADDREF
-
 #if defined(__cplusplus)
 #  if __cplusplus >= 201103L
 #    define {{API}}_MAKE_INIT_STRUCT(type, value) (type value)

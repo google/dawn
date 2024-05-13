@@ -76,8 +76,6 @@ class RefCounted {
     // synchronization in place for destruction.
     void Release();
 
-    // TODO(dawn:2234): Deprecated. Remove when no longer used.
-    void APIReference() { APIAddRef(); }
     void APIAddRef() { AddRef(); }
     void APIRelease() { Release(); }
 
