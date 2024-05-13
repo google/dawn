@@ -48,8 +48,6 @@ class Backend : public BackendConnection {
     std::vector<Ref<PhysicalDeviceBase>> mPhysicalDevices;
 };
 
-bool IsMetalValidationEnabled(PhysicalDeviceBase* physicalDevice);
-
 }  // namespace dawn::native::metal
 
 #endif  // SRC_DAWN_NATIVE_METAL_BACKENDMTL_H_

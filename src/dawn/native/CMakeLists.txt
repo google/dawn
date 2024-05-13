@@ -506,6 +506,8 @@ if (DAWN_ENABLE_METAL)
         "metal/DeviceMTL.h"
         "metal/DeviceMTL.mm"
         "metal/Forward.h"
+        "metal/PhysicalDeviceMTL.h"
+        "metal/PhysicalDeviceMTL.mm"
         "metal/PipelineLayoutMTL.h"
         "metal/PipelineLayoutMTL.mm"
         "metal/QueueMTL.h"

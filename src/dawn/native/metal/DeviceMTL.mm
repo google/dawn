@@ -41,6 +41,7 @@
 #include "dawn/native/metal/BufferMTL.h"
 #include "dawn/native/metal/CommandBufferMTL.h"
 #include "dawn/native/metal/ComputePipelineMTL.h"
+#include "dawn/native/metal/PhysicalDeviceMTL.h"
 #include "dawn/native/metal/PipelineLayoutMTL.h"
 #include "dawn/native/metal/QuerySetMTL.h"
 #include "dawn/native/metal/QueueMTL.h"
@@ -243,8 +244,8 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     return TextureView::Create(texture, descriptor);
 }
 void Device::InitializeComputePipelineAsyncImpl(Ref<CreateComputePipelineAsyncEvent> event) {
-    PhysicalDeviceBase* physicalDevice = GetPhysicalDevice();
-    if (IsMetalValidationEnabled(physicalDevice) &&
+    PhysicalDevice* physicalDevice = ToBackend(GetPhysicalDevice());
+    if (physicalDevice->IsMetalValidationEnabled() &&
         gpu_info::IsAMD(physicalDevice->GetVendorId())) {
         event->InitializeSync();
         return;
@@ -253,8 +254,8 @@ void Device::InitializeComputePipelineAsyncImpl(Ref<CreateComputePipelineAsyncEv
     event->InitializeAsync();
 }
 void Device::InitializeRenderPipelineAsyncImpl(Ref<CreateRenderPipelineAsyncEvent> event) {
-    PhysicalDeviceBase* physicalDevice = GetPhysicalDevice();
-    if (IsMetalValidationEnabled(physicalDevice) &&
+    PhysicalDevice* physicalDevice = ToBackend(GetPhysicalDevice());
+    if (physicalDevice->IsMetalValidationEnabled() &&
         gpu_info::IsAMD(physicalDevice->GetVendorId())) {
         event->InitializeSync();
         return;
