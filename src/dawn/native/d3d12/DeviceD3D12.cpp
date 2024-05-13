@@ -38,7 +38,6 @@
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d/KeyedMutex.h"
 #include "dawn/native/d3d12/BackendD3D12.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
@@ -560,76 +559,6 @@ ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
     return (*mResourceAllocatorManager)
         ->AllocateMemory(heapType, resourceDescriptor, initialUsage, formatBytesPerBlock,
                          forceAllocateAsCommittedResource);
-}
-
-ResultOrError<FenceAndSignalValue> Device::CreateFence(
-    const d3d::ExternalImageDXGIFenceDescriptor* externalImageFenceDesc) {
-    SharedFenceDXGISharedHandleDescriptor sharedFenceDesc;
-    sharedFenceDesc.handle = externalImageFenceDesc->fenceHandle;
-
-    Ref<SharedFence> fence;
-    DAWN_TRY_ASSIGN(fence, SharedFence::Create(this, "Imported DXGI fence", &sharedFenceDesc));
-
-    return FenceAndSignalValue{std::move(fence), externalImageFenceDesc->fenceValue};
-}
-
-ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExternalImageDXGIImplImpl(
-    const ExternalImageDescriptor* descriptor) {
-    // ExternalImageDXGIImpl holds a weak reference to the device. If the device is destroyed before
-    // the image is created, the image will have a dangling reference to the device which can cause
-    // a use-after-free.
-    DAWN_TRY(ValidateIsAlive());
-
-    DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::DXGISharedHandle,
-                    "descriptor is not an ExternalImageDescriptorDXGISharedHandle");
-
-    const d3d::ExternalImageDescriptorDXGISharedHandle* sharedHandleDescriptor =
-        static_cast<const d3d::ExternalImageDescriptorDXGISharedHandle*>(descriptor);
-
-    Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource;
-    Ref<d3d::KeyedMutex> keyedMutex;
-    DAWN_TRY(ImportSharedHandleResource(sharedHandleDescriptor->sharedHandle,
-                                        sharedHandleDescriptor->useKeyedMutex, d3d12Resource,
-                                        keyedMutex));
-
-    UnpackedPtr<TextureDescriptor> textureDescriptor;
-    DAWN_TRY_ASSIGN(textureDescriptor,
-                    ValidateAndUnpack(FromAPI(sharedHandleDescriptor->cTextureDescriptor)));
-    DAWN_TRY(
-        ValidateTextureDescriptor(this, textureDescriptor, AllowMultiPlanarTextureFormat::Yes));
-
-    DAWN_TRY_CONTEXT(d3d::ValidateTextureDescriptorCanBeWrapped(textureDescriptor),
-                     "validating that a D3D12 external image can be wrapped with %s",
-                     textureDescriptor);
-
-    DAWN_TRY(ValidateTextureCanBeWrapped(d3d12Resource.Get(), textureDescriptor));
-
-    // Shared handle is assumed to support resource sharing capability. The resource
-    // shared capability tier must agree to share resources between D3D devices.
-    const Format* format = GetInternalFormat(textureDescriptor->format).AcquireSuccess();
-    if (format->IsMultiPlanar()) {
-        DAWN_TRY(ValidateVideoTextureCanBeShared(
-            this, d3d::DXGITextureFormat(textureDescriptor->format)));
-    }
-
-    return std::make_unique<d3d::ExternalImageDXGIImpl>(this, std::move(d3d12Resource),
-                                                        std::move(keyedMutex), textureDescriptor);
-}
-
-Ref<TextureBase> Device::CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
-                                                  ComPtr<IUnknown> d3dTexture,
-                                                  Ref<d3d::KeyedMutex> keyedMutex,
-                                                  std::vector<FenceAndSignalValue> waitFences,
-                                                  bool isSwapChainTexture,
-                                                  bool isInitialized) {
-    Ref<Texture> dawnTexture;
-    if (ConsumedError(Texture::CreateExternalImage(this, descriptor, std::move(d3dTexture),
-                                                   std::move(keyedMutex), std::move(waitFences),
-                                                   isSwapChainTexture, isInitialized),
-                      &dawnTexture)) {
-        return nullptr;
-    }
-    return {dawnTexture};
 }
 
 MaybeError Device::ImportSharedHandleResource(HANDLE handle,

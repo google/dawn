@@ -38,7 +38,7 @@
 
 #include "VideoViewsTests.h"
 #include "dawn/common/Assert.h"
-#include "dawn/native/D3D12Backend.h"
+#include "dawn/native/D3DBackend.h"
 #include "dawn/utils/TextureUtils.h"
 
 namespace dawn {
@@ -58,12 +58,12 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
   public:
     ~VideoViewsTestBackendWin() override = default;
 
-    void OnSetUp(WGPUDevice device) override {
+    void OnSetUp(const wgpu::Device& device) override {
         mWGPUDevice = device;
 
         // Create the D3D11 device/contexts that will be used in subsequent tests
         ComPtr<IDXGIAdapter> dxgiAdapter =
-            native::d3d::GetDXGIAdapter(wgpuDeviceGetAdapter(device));
+            native::d3d::GetDXGIAdapter(wgpuDeviceGetAdapter(device.Get()));
 
         ComPtr<ID3D11Device> d3d11Device;
         D3D_FEATURE_LEVEL d3dFeatureLevel;
@@ -203,45 +203,42 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         DAWN_ASSERT(hr == S_OK);
 
         // Open the DX11 texture in Dawn from the shared handle and return it as a WebGPU texture.
-        native::d3d::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
-        externalImageDesc.cTextureDescriptor =
-            reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
-        externalImageDesc.sharedHandle = sharedHandle;
+        wgpu::SharedTextureMemoryDXGISharedHandleDescriptor sharedHandleDesc{};
+        sharedHandleDesc.handle = sharedHandle;
 
-        std::unique_ptr<native::d3d::ExternalImageDXGI> externalImage =
-            native::d3d::ExternalImageDXGI::Create(mWGPUDevice, &externalImageDesc);
+        wgpu::SharedTextureMemoryDescriptor desc;
+        desc.nextInChain = &sharedHandleDesc;
 
+        auto sharedTextureMemory = mWGPUDevice.ImportSharedTextureMemory(&desc);
         // Handle is no longer needed once resources are created.
         ::CloseHandle(sharedHandle);
 
-        if (!externalImage) {
-            // Failed to create external image. Return early and close outstanding handles.
-            // Otherwise we'll dereference a nullptr below.
-            ::CloseHandle(fenceSharedHandle);
-            return nullptr;
-        }
+        wgpu::SharedFenceDXGISharedHandleDescriptor dxgiFenceDesc{};
+        dxgiFenceDesc.handle = fenceSharedHandle;
+        wgpu::SharedFenceDescriptor fenceDesc{};
+        fenceDesc.nextInChain = &dxgiFenceDesc;
+        auto wgpuFence = mWGPUDevice.ImportSharedFence(&fenceDesc);
+        uint64_t signaled_value = 1;
 
-        native::d3d::ExternalImageDXGIFenceDescriptor fenceDesc;
-        fenceDesc.fenceHandle = fenceSharedHandle;
-        fenceDesc.fenceValue = 1;
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc{};
+        beginDesc.initialized = initialized;
+        beginDesc.concurrentRead = false;
+        beginDesc.fenceCount = 1;
+        beginDesc.fences = &wgpuFence;
+        beginDesc.signaledValues = &signaled_value;
 
-        native::d3d::ExternalImageDXGIBeginAccessDescriptor externalAccessDesc;
-        externalAccessDesc.isInitialized = initialized;
-        externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(textureDesc.usage);
-        externalAccessDesc.waitFences = {};
-
-        auto wgpuTexture = wgpu::Texture::Acquire(externalImage->BeginAccess(&externalAccessDesc));
-
+        auto wgpuTexture = sharedTextureMemory.CreateTexture(&textureDesc);
+        bool success = sharedTextureMemory.BeginAccess(wgpuTexture, &beginDesc);
         // Fence handle is no longer needed after begin access.
         ::CloseHandle(fenceSharedHandle);
 
-        return std::make_unique<PlatformTextureWin>(std::move(wgpuTexture));
+        return success ? std::make_unique<PlatformTextureWin>(std::move(wgpuTexture)) : nullptr;
     }
 
     void DestroyVideoTextureForTest(
-        std::unique_ptr<VideoViewsTestBackend::PlatformTexture>&& PlatformTexture) override {}
+        std::unique_ptr<VideoViewsTestBackend::PlatformTexture>&& platformTexture) override {}
 
-    WGPUDevice mWGPUDevice = nullptr;
+    wgpu::Device mWGPUDevice = nullptr;
     ComPtr<ID3D11Device> mD3d11Device;
 };
 

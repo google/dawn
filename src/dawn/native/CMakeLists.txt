@@ -313,8 +313,6 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/D3DError.h"
         "d3d/DeviceD3D.cpp"
         "d3d/DeviceD3D.h"
-        "d3d/ExternalImageDXGIImpl.cpp"
-        "d3d/ExternalImageDXGIImpl.h"
         "d3d/Forward.h"
         "d3d/KeyedMutex.cpp"
         "d3d/KeyedMutex.h"

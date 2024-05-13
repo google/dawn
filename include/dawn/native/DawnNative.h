@@ -234,8 +234,6 @@ enum ExternalImageType {
     OpaqueFD,
     DmaBuf,
     IOSurface,
-    DXGISharedHandle,
-    D3D11Texture,
     EGLImage,
     GLTexture,
     AHardwareBuffer,

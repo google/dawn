@@ -36,7 +36,6 @@
 #include "dawn/common/Log.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/d3d/DeviceD3D.h"
-#include "dawn/native/d3d/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d/Forward.h"
 #include "dawn/native/d3d/PhysicalDeviceD3D.h"
 
@@ -48,55 +47,6 @@ RequestAdapterOptionsLUID::RequestAdapterOptionsLUID() {
 
 Microsoft::WRL::ComPtr<IDXGIAdapter> GetDXGIAdapter(WGPUAdapter adapter) {
     return ToBackend(FromAPI(adapter)->GetPhysicalDevice())->GetHardwareAdapter();
-}
-
-ExternalImageDescriptorDXGISharedHandle::ExternalImageDescriptorDXGISharedHandle()
-    : ExternalImageDescriptor(ExternalImageType::DXGISharedHandle) {}
-
-ExternalImageDescriptorD3D11Texture::ExternalImageDescriptorD3D11Texture()
-    : ExternalImageDescriptor(ExternalImageType::D3D11Texture) {}
-
-ExternalImageDXGI::ExternalImageDXGI(std::unique_ptr<ExternalImageDXGIImpl> impl)
-    : mImpl(std::move(impl)) {
-    DAWN_ASSERT(mImpl != nullptr);
-}
-
-ExternalImageDXGI::~ExternalImageDXGI() {
-    auto deviceLock = mImpl->GetScopedDeviceLock();
-    mImpl = nullptr;
-}
-
-bool ExternalImageDXGI::IsValid() const {
-    auto deviceLock = mImpl->GetScopedDeviceLock();
-    return mImpl->IsValid();
-}
-
-WGPUTexture ExternalImageDXGI::BeginAccess(
-    const ExternalImageDXGIBeginAccessDescriptor* descriptor) {
-    auto deviceLock = mImpl->GetScopedDeviceLock();
-    return mImpl->BeginAccess(descriptor);
-}
-
-void ExternalImageDXGI::EndAccess(WGPUTexture texture,
-                                  ExternalImageDXGIFenceDescriptor* signalFence) {
-    auto deviceLock = mImpl->GetScopedDeviceLock();
-    mImpl->EndAccess(texture, signalFence);
-}
-
-// static
-std::unique_ptr<ExternalImageDXGI> ExternalImageDXGI::Create(
-    WGPUDevice device,
-    const ExternalImageDescriptor* descriptor) {
-    Device* backendDevice = ToBackend(FromAPI(device));
-    auto deviceLock = backendDevice->GetScopedLock();
-
-    std::unique_ptr<ExternalImageDXGIImpl> impl =
-        backendDevice->CreateExternalImageDXGIImpl(descriptor);
-    if (!impl) {
-        dawn::ErrorLog() << "Failed to create DXGI external image";
-        return nullptr;
-    }
-    return std::unique_ptr<ExternalImageDXGI>(new ExternalImageDXGI(std::move(impl)));
 }
 
 }  // namespace dawn::native::d3d

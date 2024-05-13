@@ -47,7 +47,7 @@ class VideoViewsTestBackend {
 
     virtual ~VideoViewsTestBackend();
 
-    virtual void OnSetUp(WGPUDevice device) = 0;
+    virtual void OnSetUp(const wgpu::Device& device) = 0;
     virtual void OnTearDown() {}
 
     class PlatformTexture {

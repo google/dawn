@@ -79,8 +79,8 @@ class PlatformTextureGbm : public VideoViewsTestBackend::PlatformTexture {
 
 class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
   public:
-    void OnSetUp(WGPUDevice device) override {
-        mWGPUDevice = device;
+    void OnSetUp(const wgpu::Device& device) override {
+        mWGPUDevice = device.Get();
         mGbmDevice = CreateGbmDevice();
     }
 

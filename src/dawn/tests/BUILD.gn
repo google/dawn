@@ -682,10 +682,7 @@ source_set("end2end_tests_sources") {
       "dxgi.lib",
     ]
 
-    sources += [
-      "end2end/D3DResourceWrappingTests.cpp",
-      "end2end/VideoViewsTests_win.cpp",
-    ]
+    sources += [ "end2end/VideoViewsTests_win.cpp" ]
   }
 
   if (dawn_enable_d3d12) {

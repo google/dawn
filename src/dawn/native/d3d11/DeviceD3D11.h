@@ -56,12 +56,6 @@ class Device final : public d3d::Device {
     const DeviceInfo& GetDeviceInfo() const;
 
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
-    Ref<TextureBase> CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
-                                              ComPtr<IUnknown> d3dTexture,
-                                              Ref<d3d::KeyedMutex> keyedMutex,
-                                              std::vector<FenceAndSignalValue> waitFences,
-                                              bool isSwapChainTexture,
-                                              bool isInitialized) override;
 
     ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
         CommandEncoder* encoder,
@@ -83,12 +77,6 @@ class Device final : public d3d::Device {
     uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const override;
     bool IsResolveTextureBlitWithDrawSupported() const override;
     void SetLabelImpl() override;
-
-    ResultOrError<FenceAndSignalValue> CreateFence(
-        const d3d::ExternalImageDXGIFenceDescriptor* descriptor) override;
-
-    ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> CreateExternalImageDXGIImplImpl(
-        const ExternalImageDescriptor* descriptor) override;
 
     void DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) override;
 

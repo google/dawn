@@ -75,6 +75,17 @@ std::vector<wgpu::FeatureName> VideoViewsTestsBase::GetRequiredFeatures() {
         requiredFeatures.push_back(wgpu::FeatureName::SharedFenceMTLSharedEvent);
     }
 
+    // Required for the Win tests.
+    if (SupportsFeatures({wgpu::FeatureName::SharedTextureMemoryD3D11Texture2D})) {
+        requiredFeatures.push_back(wgpu::FeatureName::SharedTextureMemoryD3D11Texture2D);
+    }
+    if (SupportsFeatures({wgpu::FeatureName::SharedTextureMemoryDXGISharedHandle})) {
+        requiredFeatures.push_back(wgpu::FeatureName::SharedTextureMemoryDXGISharedHandle);
+    }
+    if (SupportsFeatures({wgpu::FeatureName::SharedFenceDXGISharedHandle})) {
+        requiredFeatures.push_back(wgpu::FeatureName::SharedFenceDXGISharedHandle);
+    }
+
     mIsMultiPlanarFormatP010Supported =
         SupportsFeatures({wgpu::FeatureName::MultiPlanarFormatP010});
     if (mIsMultiPlanarFormatP010Supported) {
@@ -513,7 +524,7 @@ class VideoViewsTests : public VideoViewsTestsBase {
         DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
         mBackend = VideoViewsTestBackend::Create();
-        mBackend->OnSetUp(device.Get());
+        mBackend->OnSetUp(device);
     }
 
     void TearDown() override {
@@ -1465,12 +1476,19 @@ TEST_P(VideoViewsValidationTests, SamplingMultiPlanarTexture) {
 
 // Tests creating a texture with a multi-plane format.
 TEST_P(VideoViewsValidationTests, RenderAttachmentInvalid) {
+    // "Invalid Texture" error is expected if failed to create the video texture.
+    EXPECT_CALL(mDeviceErrorCallback, Call(testing::Ne(WGPUErrorType_NoError),
+                                           testing::HasSubstr("Invalid Texture"), device.Get()))
+        .Times(testing::AnyNumber());
+
     // multi-planar formats are NOT allowed to be renderable by default and require
     // Feature::MultiPlanarRenderTargets.
-    ASSERT_DEVICE_ERROR(auto platformTexture = mBackend->CreateVideoTextureForTest(
-                            GetFormat(), wgpu::TextureUsage::RenderAttachment,
-                            /*isCheckerboard*/ true,
-                            /*initialized*/ true));
+    // "RenderAttachment is incompatible with the non-renderable format" error is expected.
+    ASSERT_DEVICE_ERROR_MSG(auto platformTexture = mBackend->CreateVideoTextureForTest(
+                                GetFormat(), wgpu::TextureUsage::RenderAttachment,
+                                /*isCheckerboard*/ true,
+                                /*initialized*/ true),
+                            testing::HasSubstr("is incompatible"));
     mBackend->DestroyVideoTextureForTest(std::move(platformTexture));
 }
 

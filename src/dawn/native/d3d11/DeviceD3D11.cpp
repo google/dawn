@@ -38,7 +38,6 @@
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d/D3DError.h"
-#include "dawn/native/d3d/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d/KeyedMutex.h"
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d11/BackendD3D11.h"
@@ -394,89 +393,6 @@ float Device::GetTimestampPeriodInNS() const {
 
 void Device::SetLabelImpl() {}
 
-ResultOrError<FenceAndSignalValue> Device::CreateFence(
-    const d3d::ExternalImageDXGIFenceDescriptor* externalImageFenceDesc) {
-    SharedFenceDXGISharedHandleDescriptor sharedFenceDesc;
-    sharedFenceDesc.handle = externalImageFenceDesc->fenceHandle;
-
-    Ref<SharedFence> fence;
-    DAWN_TRY_ASSIGN(fence, SharedFence::Create(this, "Imported DXGI fence", &sharedFenceDesc));
-
-    return FenceAndSignalValue{std::move(fence), externalImageFenceDesc->fenceValue};
-}
-
-ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExternalImageDXGIImplImpl(
-    const ExternalImageDescriptor* descriptor) {
-    // ExternalImageDXGIImpl holds a weak reference to the device. If the device is destroyed before
-    // the image is created, the image will have a dangling reference to the device which can cause
-    // a use-after-free.
-    DAWN_TRY(ValidateIsAlive());
-
-    ComPtr<ID3D11Resource> d3d11Resource;
-    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-    switch (descriptor->GetType()) {
-        case ExternalImageType::DXGISharedHandle: {
-            const auto* sharedHandleDescriptor =
-                static_cast<const d3d::ExternalImageDescriptorDXGISharedHandle*>(descriptor);
-            DAWN_TRY(CheckHRESULT(
-                mD3d11Device5->OpenSharedResource1(sharedHandleDescriptor->sharedHandle,
-                                                   IID_PPV_ARGS(&d3d11Resource)),
-                "D3D11 OpenSharedResource1"));
-            if (sharedHandleDescriptor->useKeyedMutex) {
-                d3d11Resource.As(&dxgiKeyedMutex);
-                DAWN_INVALID_IF(!dxgiKeyedMutex,
-                                "Failed to retrieve DXGI keyed mutex when expected");
-            }
-            break;
-        }
-        case ExternalImageType::D3D11Texture: {
-            const auto* d3d11TextureDescriptor =
-                static_cast<const d3d::ExternalImageDescriptorD3D11Texture*>(descriptor);
-            DAWN_TRY(CheckHRESULT(d3d11TextureDescriptor->texture.As(&d3d11Resource),
-                                  "Cannot get ID3D11Resource from texture"));
-            ComPtr<ID3D11Device> textureDevice;
-            d3d11Resource->GetDevice(textureDevice.GetAddressOf());
-            DAWN_INVALID_IF(
-                textureDevice.Get() != mD3d11Device.Get(),
-                "The D3D11 device of the texture and the D3D11 device of the WebGPU device "
-                "must be same.");
-            d3d11Resource.As(&dxgiKeyedMutex);
-            break;
-        }
-        default: {
-            return DAWN_VALIDATION_ERROR("descriptor type (%d) is not supported",
-                                         static_cast<int>(descriptor->GetType()));
-        }
-    }
-
-    UnpackedPtr<TextureDescriptor> textureDescriptor;
-    DAWN_TRY_ASSIGN(textureDescriptor, ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)));
-    DAWN_TRY(
-        ValidateTextureDescriptor(this, textureDescriptor, AllowMultiPlanarTextureFormat::Yes));
-
-    DAWN_TRY_CONTEXT(d3d::ValidateTextureDescriptorCanBeWrapped(textureDescriptor),
-                     "validating that a D3D11 external image can be wrapped with %s",
-                     textureDescriptor);
-
-    DAWN_TRY(ValidateTextureCanBeWrapped(d3d11Resource.Get(), textureDescriptor));
-
-    // Shared handle is assumed to support resource sharing capability. The resource
-    // shared capability tier must agree to share resources between D3D devices.
-    const Format* format = GetInternalFormat(textureDescriptor->format).AcquireSuccess();
-    if (format->IsMultiPlanar() && descriptor->GetType() == ExternalImageType::DXGISharedHandle) {
-        DAWN_TRY(ValidateVideoTextureCanBeShared(
-            this, d3d::DXGITextureFormat(textureDescriptor->format)));
-    }
-
-    Ref<d3d::KeyedMutex> keyedMutex;
-    if (dxgiKeyedMutex) {
-        keyedMutex = AcquireRef(new d3d::KeyedMutex(this, std::move(dxgiKeyedMutex)));
-    }
-
-    return std::make_unique<d3d::ExternalImageDXGIImpl>(this, std::move(d3d11Resource),
-                                                        std::move(keyedMutex), textureDescriptor);
-}
-
 void Device::DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) {
     // Nothing to do, the ComPtr will release the keyed mutex.
 }
@@ -491,22 +407,6 @@ uint64_t Device::GetBufferCopyOffsetAlignmentForDepthStencil() const {
 
 bool Device::IsResolveTextureBlitWithDrawSupported() const {
     return true;
-}
-
-Ref<TextureBase> Device::CreateD3DExternalTexture(const UnpackedPtr<TextureDescriptor>& descriptor,
-                                                  ComPtr<IUnknown> d3dTexture,
-                                                  Ref<d3d::KeyedMutex> keyedMutex,
-                                                  std::vector<FenceAndSignalValue> waitFences,
-                                                  bool isSwapChainTexture,
-                                                  bool isInitialized) {
-    Ref<Texture> dawnTexture;
-    if (ConsumedError(Texture::CreateExternalImage(this, descriptor, std::move(d3dTexture),
-                                                   std::move(keyedMutex), std::move(waitFences),
-                                                   isSwapChainTexture, isInitialized),
-                      &dawnTexture)) {
-        return nullptr;
-    }
-    return {dawnTexture};
 }
 
 uint32_t Device::GetUAVSlotCount() const {
