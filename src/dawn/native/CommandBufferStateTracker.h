@@ -36,7 +36,7 @@
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
-#include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
 namespace dawn::native {
 
@@ -95,7 +95,8 @@ class CommandBufferStateTracker {
 
     ValidationAspects mAspects;
 
-    PerBindGroup<raw_ptr<BindGroupBase>> mBindgroups = {};
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION PerBindGroup<BindGroupBase*> mBindgroups = {};
     PerBindGroup<std::vector<uint32_t>> mDynamicOffsets = {};
 
     VertexBufferMask mVertexBuffersUsed;
@@ -106,9 +107,10 @@ class CommandBufferStateTracker {
     uint64_t mIndexBufferSize = 0;
     uint64_t mIndexBufferOffset = 0;
 
-    raw_ptr<PipelineLayoutBase> mLastPipelineLayout = nullptr;
-    raw_ptr<PipelineBase> mLastPipeline = nullptr;
-    raw_ptr<const RequiredBufferSizes> mMinBufferSizes = nullptr;
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION PipelineLayoutBase* mLastPipelineLayout = nullptr;
+    RAW_PTR_EXCLUSION PipelineBase* mLastPipeline = nullptr;
+    RAW_PTR_EXCLUSION const RequiredBufferSizes* mMinBufferSizes = nullptr;
 };
 
 }  // namespace dawn::native

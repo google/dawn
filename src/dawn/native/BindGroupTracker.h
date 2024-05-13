@@ -36,7 +36,7 @@
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
-#include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
 namespace dawn::native {
 
@@ -126,8 +126,9 @@ class BindGroupTrackerBase {
     // |mPipelineLayout| is the current pipeline layout set on the command buffer.
     // |mLastAppliedPipelineLayout| is the last pipeline layout for which we applied changes
     // to the bind group bindings.
-    raw_ptr<PipelineLayoutBase> mPipelineLayout = nullptr;
-    raw_ptr<PipelineLayoutBase> mLastAppliedPipelineLayout = nullptr;
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION PipelineLayoutBase* mPipelineLayout = nullptr;
+    RAW_PTR_EXCLUSION PipelineLayoutBase* mLastAppliedPipelineLayout = nullptr;
 };
 
 }  // namespace dawn::native

@@ -12,7 +12,7 @@
 #define SRC_DAWN_COMMON_LINKEDLIST_H_
 
 #include "dawn/common/Assert.h"
-#include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
 namespace dawn {
 
@@ -172,8 +172,9 @@ class LinkNode {
 
   private:
     friend class LinkedList<T>;
-    raw_ptr<LinkNode<T>> previous_;
-    raw_ptr<LinkNode<T>> next_;
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION LinkNode<T>* previous_ = nullptr;
+    RAW_PTR_EXCLUSION LinkNode<T>* next_ = nullptr;
 };
 
 template <typename T>
@@ -234,8 +235,9 @@ class LinkedListIterator {
     LinkNode<T>* operator*() const { return current_; }
 
   private:
-    raw_ptr<LinkNode<T>> current_;
-    raw_ptr<LinkNode<T>> next_;
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION LinkNode<T>* current_ = nullptr;
+    RAW_PTR_EXCLUSION LinkNode<T>* next_ = nullptr;
 };
 
 template <typename T>

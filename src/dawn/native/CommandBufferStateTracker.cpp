@@ -100,7 +100,7 @@ using WritableBindingAliasingResult = std::variant<std::monostate, BufferAliasin
 
 template <typename Return>
 Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout,
-                                        const PerBindGroup<raw_ptr<BindGroupBase>>& bindGroups,
+                                        const PerBindGroup<BindGroupBase*>& bindGroups,
                                         const PerBindGroup<std::vector<uint32_t>>& dynamicOffsets) {
     // If true, returns detailed validation error info. Otherwise simply returns if any binding
     // aliasing is found.

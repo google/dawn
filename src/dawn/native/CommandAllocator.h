@@ -36,7 +36,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/NonCopyable.h"
-#include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
 namespace dawn::native {
 
@@ -71,7 +71,8 @@ namespace dawn::native {
 // and CommandIterator
 struct BlockDef {
     size_t size;
-    raw_ptr<uint8_t> block;
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION uint8_t* block = nullptr;
 };
 using CommandBlocks = std::vector<BlockDef>;
 
@@ -120,9 +121,9 @@ class CommandIterator : public NonCopyable {
     bool IsEmpty() const;
 
     DAWN_FORCE_INLINE bool NextCommandId(uint32_t* commandId) {
-        uint8_t* idPtr = AlignPtr(mCurrentPtr.get(), alignof(uint32_t));
+        uint8_t* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
         DAWN_ASSERT(idPtr + sizeof(uint32_t) <=
-                    mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size);
+                    mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
 
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
@@ -137,9 +138,9 @@ class CommandIterator : public NonCopyable {
     bool NextCommandIdInNewBlock(uint32_t* commandId);
 
     DAWN_FORCE_INLINE void* NextCommand(size_t commandSize, size_t commandAlignment) {
-        uint8_t* commandPtr = AlignPtr(mCurrentPtr.get(), commandAlignment);
+        uint8_t* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
         DAWN_ASSERT(commandPtr + sizeof(commandSize) <=
-                    mBlocks[mCurrentBlock].block.get() + mBlocks[mCurrentBlock].size);
+                    mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
 
         mCurrentPtr = commandPtr + commandSize;
         return commandPtr;
@@ -155,7 +156,8 @@ class CommandIterator : public NonCopyable {
     }
 
     CommandBlocks mBlocks;
-    raw_ptr<uint8_t> mCurrentPtr = nullptr;
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION uint8_t* mCurrentPtr = nullptr;
     size_t mCurrentBlock = 0;
     // Used to avoid a special case for empty iterators.
     uint32_t mEndOfBlock = detail::kEndOfBlock;
@@ -245,11 +247,10 @@ class CommandAllocator : public NonCopyable {
         // extra required space.
         if ((remainingSize >= kWorstCaseAdditionalSize) &&
             (remainingSize - kWorstCaseAdditionalSize >= commandSize)) {
-            uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr.get());
+            uint32_t* idAlloc = reinterpret_cast<uint32_t*>(mCurrentPtr);
             *idAlloc = commandId;
 
-            uint8_t* commandAlloc =
-                AlignPtr(mCurrentPtr.get() + sizeof(uint32_t), commandAlignment);
+            uint8_t* commandAlloc = AlignPtr(mCurrentPtr + sizeof(uint32_t), commandAlignment);
             mCurrentPtr = AlignPtr(commandAlloc + commandSize, alignof(uint32_t));
 
             return commandAlloc;
@@ -278,8 +279,9 @@ class CommandAllocator : public NonCopyable {
     // Pointers to the current range of allocation in the block. Guaranteed to allow for at
     // least one uint32_t if not nullptr, so that the special kEndOfBlock command id can always
     // be written. Nullptr iff the blocks were moved out.
-    raw_ptr<uint8_t, AllowPtrArithmetic> mCurrentPtr = nullptr;
-    raw_ptr<uint8_t, AllowPtrArithmetic> mEndPtr = nullptr;
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION uint8_t* mCurrentPtr = nullptr;
+    RAW_PTR_EXCLUSION uint8_t* mEndPtr = nullptr;
 };
 
 }  // namespace dawn::native

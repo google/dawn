@@ -33,7 +33,7 @@
 
 #include "dawn/common/Mutex.h"
 #include "dawn/common/Ref.h"
-#include "partition_alloc/pointers/raw_ptr.h"
+#include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
 namespace dawn {
 
@@ -85,14 +85,15 @@ class Guard {
     Guard& operator=(const Guard& other) = delete;
     Guard& operator=(Guard&& other) = delete;
 
-    auto* Get() const { return Traits::GetObj(mObj.get()); }
+    auto* Get() const { return Traits::GetObj(mObj); }
 
   private:
     using NonConstT = typename std::remove_const<T>::type;
     friend class MutexProtected<NonConstT, Guard>;
 
     typename Traits::LockType mLock;
-    raw_ptr<T> mObj;
+    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    RAW_PTR_EXCLUSION T* mObj = nullptr;
 };
 
 }  // namespace detail
