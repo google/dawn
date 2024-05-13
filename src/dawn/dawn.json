@@ -1897,6 +1897,15 @@
             {"name": "format", "type": "texture format"}
         ]
     },
+    "shared texture memory vk properties": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared texture memory properties"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "y cb cr info", "type": "y cb cr vk descriptor"}
+        ]
+    },
     "shared texture memory descriptor": {
         "category": "structure",
         "extensible": "in",
@@ -3774,7 +3783,8 @@
             {"value": 1214, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]},
             {"value": 1215, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 1216, "name": "static sampler binding layout", "tags": ["dawn"]},
-            {"value": 1217, "name": "y cb cr vk descriptor", "tags": ["dawn"]}
+            {"value": 1217, "name": "y cb cr vk descriptor", "tags": ["dawn"]},
+            {"value": 1218, "name": "shared texture memory vk properties", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {
