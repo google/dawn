@@ -44,7 +44,7 @@ void Value::Destroy() {
     flags_.Add(Flag::kDead);
 }
 
-void Value::ForEachUse(std::function<void(Usage use)> func) {
+void Value::ForEachUse(std::function<void(Usage use)> func) const {
     auto uses = uses_;
     for (auto& use : uses) {
         func(use);

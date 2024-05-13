@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/continue.h"
+#include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembly.h"
@@ -51,6 +52,7 @@
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/if.h"
+#include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
@@ -76,6 +78,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/hashset.h"
+#include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/ice/ice.h"
@@ -96,6 +99,24 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::core::ir {
 
 namespace {
+
+/// @returns the parent block of @p block
+const Block* ParentBlockOf(const Block* block) {
+    if (auto* parent = block->Parent()) {
+        return parent->Block();
+    }
+    return nullptr;
+}
+
+/// @returns true if @p block directly or transitively holds the instruction @p inst
+bool TransitivelyHolds(const Block* block, const Instruction* inst) {
+    for (auto* b = inst->Block(); b; b = ParentBlockOf(b)) {
+        if (b == block) {
+            return true;
+        }
+    }
+    return false;
+}
 
 /// @returns true if the type @p type is of, or indirectly references a type of type `T`.
 template <typename T>
@@ -294,6 +315,10 @@ class Validator {
     /// @param l the loop to validate
     void CheckLoop(const Loop* l);
 
+    /// Validates the loop continuing block
+    /// @param l the loop to validate
+    void CheckLoopContinuing(const Loop* l);
+
     /// Validates the given switch
     /// @param s the switch to validate
     void CheckSwitch(const Switch* s);
@@ -305,6 +330,10 @@ class Validator {
     /// Validates the given exit
     /// @param e the exit to validate
     void CheckExit(const Exit* e);
+
+    /// Validates the continue instruction
+    /// @param c the continue to validate
+    void CheckContinue(const Continue* c);
 
     /// Validates the given exit if
     /// @param e the exit if to validate
@@ -389,6 +418,7 @@ class Validator {
     diag::List diagnostics_;
     Hashset<const Function*, 4> all_functions_;
     Hashset<const Instruction*, 4> visited_instructions_;
+    Hashmap<const Loop*, const Continue*, 4> first_continues_;
     Vector<const ControlInstruction*, 8> control_stack_;
     Vector<const Block*, 8> block_stack_;
     ScopeStack scope_stack_;
@@ -1043,7 +1073,10 @@ void Validator::CheckIf(const If* if_) {
 
 void Validator::CheckLoop(const Loop* l) {
     // Note: Tasks are queued in reverse order of their execution
-    tasks_.Push([this] { control_stack_.Pop(); });
+    tasks_.Push([this, l] {
+        first_continues_.Remove(l);  // No need for this any more. Free memory.
+        control_stack_.Pop();
+    });
     if (!l->Initializer()->IsEmpty()) {
         tasks_.Push([this] { EndBlock(); });
     }
@@ -1057,13 +1090,52 @@ void Validator::CheckLoop(const Loop* l) {
     // ⎣    ⎣    [Continuing ]  ⎦⎦
 
     if (!l->Continuing()->IsEmpty()) {
-        tasks_.Push([this, l] { BeginBlock(l->Continuing()); });
+        tasks_.Push([this, l] {
+            CheckLoopContinuing(l);
+            BeginBlock(l->Continuing());
+        });
     }
+
     tasks_.Push([this, l] { BeginBlock(l->Body()); });
     if (!l->Initializer()->IsEmpty()) {
         tasks_.Push([this, l] { BeginBlock(l->Initializer()); });
     }
     tasks_.Push([this, l] { control_stack_.Push(l); });
+}
+
+void Validator::CheckLoopContinuing(const Loop* loop) {
+    if (!loop->HasContinuing()) {
+        return;
+    }
+
+    // Ensure that values used in the loop continuing are not from the loop body, after a
+    // continue instruction.
+    if (auto* first_continue = first_continues_.GetOr(loop, nullptr)) {
+        // Find the instruction in the body block that is or holds the first continue instruction.
+        const Instruction* holds_continue = first_continue;
+        while (holds_continue && holds_continue->Block() &&
+               holds_continue->Block() != loop->Body()) {
+            holds_continue = holds_continue->Block()->Parent();
+        }
+
+        // Check that all subsequent instruction values are not used in the continuing block.
+        for (auto* inst = holds_continue; inst; inst = inst->next) {
+            for (auto* result : inst->Results()) {
+                result->ForEachUse([&](Usage use) {
+                    if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
+                        AddError(use.instruction, use.operand_index)
+                            << NameOf(result)
+                            << " cannot be used in continuing block as it is declared after the "
+                               "first "
+                            << style::Instruction("continue") << " in the loop's body";
+                        AddDeclarationNote(result);
+                        AddNote(first_continue)
+                            << "loop body's first " << style::Instruction("continue");
+                    }
+                });
+            }
+        }
+    }
 }
 
 void Validator::CheckSwitch(const Switch* s) {
@@ -1083,13 +1155,30 @@ void Validator::CheckTerminator(const Terminator* b) {
     tint::Switch(
         b,                                                 //
         [&](const ir::BreakIf*) {},                        //
-        [&](const ir::Continue*) {},                       //
+        [&](const ir::Continue* c) { CheckContinue(c); },  //
         [&](const ir::Exit* e) { CheckExit(e); },          //
         [&](const ir::NextIteration*) {},                  //
         [&](const ir::Return* ret) { CheckReturn(ret); },  //
         [&](const ir::TerminateInvocation*) {},            //
         [&](const ir::Unreachable*) {},                    //
         [&](Default) { AddError(b) << "missing validation"; });
+}
+
+void Validator::CheckContinue(const Continue* c) {
+    auto* loop = c->Loop();
+    if (loop == nullptr) {
+        AddError(c) << "has no associated loop";
+        return;
+    }
+    if (!TransitivelyHolds(loop->Body(), c)) {
+        if (control_stack_.Any(Eq<const ControlInstruction*>(loop))) {
+            AddError(c) << "must only be called from loop body";
+        } else {
+            AddError(c) << "called outside of associated loop";
+        }
+    }
+
+    first_continues_.Add(loop, c);
 }
 
 void Validator::CheckExit(const Exit* e) {

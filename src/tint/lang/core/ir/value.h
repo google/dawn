@@ -105,7 +105,7 @@ class Value : public Castable<Value> {
 
     /// Apply a function to all uses of the value that exist prior to calling this method.
     /// @param func the function will be applied to each use
-    void ForEachUse(std::function<void(Usage use)> func);
+    void ForEachUse(std::function<void(Usage use)> func) const;
 
     /// Replace all uses of the value.
     /// @param replacer a function which returns a replacement for a given use
