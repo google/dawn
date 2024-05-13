@@ -327,13 +327,17 @@ class Validator {
     /// @param b the terminator to validate
     void CheckTerminator(const Terminator* b);
 
+    /// Validates the continue instruction
+    /// @param c the continue to validate
+    void CheckContinue(const Continue* c);
+
     /// Validates the given exit
     /// @param e the exit to validate
     void CheckExit(const Exit* e);
 
-    /// Validates the continue instruction
-    /// @param c the continue to validate
-    void CheckContinue(const Continue* c);
+    /// Validates the next iteration instruction
+    /// @param n the next iteration to validate
+    void CheckNextIteration(const NextIteration* n);
 
     /// Validates the given exit if
     /// @param e the exit if to validate
@@ -1153,14 +1157,14 @@ void Validator::CheckTerminator(const Terminator* b) {
     // DemoteToHelper) so we can't add validation.
 
     tint::Switch(
-        b,                                                 //
-        [&](const ir::BreakIf*) {},                        //
-        [&](const ir::Continue* c) { CheckContinue(c); },  //
-        [&](const ir::Exit* e) { CheckExit(e); },          //
-        [&](const ir::NextIteration*) {},                  //
-        [&](const ir::Return* ret) { CheckReturn(ret); },  //
-        [&](const ir::TerminateInvocation*) {},            //
-        [&](const ir::Unreachable*) {},                    //
+        b,                                                           //
+        [&](const ir::BreakIf*) {},                                  //
+        [&](const ir::Continue* c) { CheckContinue(c); },            //
+        [&](const ir::Exit* e) { CheckExit(e); },                    //
+        [&](const ir::NextIteration* n) { CheckNextIteration(n); },  //
+        [&](const ir::Return* ret) { CheckReturn(ret); },            //
+        [&](const ir::TerminateInvocation*) {},                      //
+        [&](const ir::Unreachable*) {},                              //
         [&](Default) { AddError(b) << "missing validation"; });
 }
 
@@ -1217,6 +1221,21 @@ void Validator::CheckExit(const Exit* e) {
         [&](const ir::ExitLoop* l) { CheckExitLoop(l); },      //
         [&](const ir::ExitSwitch* s) { CheckExitSwitch(s); },  //
         [&](Default) { AddError(e) << "missing validation"; });
+}
+
+void Validator::CheckNextIteration(const NextIteration* n) {
+    auto* loop = n->Loop();
+    if (loop == nullptr) {
+        AddError(n) << "has no associated loop";
+        return;
+    }
+    if (!TransitivelyHolds(loop->Initializer(), n) && !TransitivelyHolds(loop->Continuing(), n)) {
+        if (control_stack_.Any(Eq<const ControlInstruction*>(loop))) {
+            AddError(n) << "must only be called from loop initializer or continuing";
+        } else {
+            AddError(n) << "called outside of associated loop";
+        }
+    }
 }
 
 void Validator::CheckExitIf(const ExitIf* e) {

@@ -2093,7 +2093,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
                 b.Append(if2->True(), [&] { b.Return(fn, 1_i); });
                 b.Append(if2->False(), [&] { b.Return(fn, 2_i); });
 
-                b.NextIteration(loop);
+                b.Continue(loop);
             });
         });
 
