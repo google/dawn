@@ -436,7 +436,7 @@ TEST_P(DeviceLostTest, LoseDeviceForTestingOnce) {
     // First LoseDeviceForTesting call should occur normally. The callback is already set in SetUp.
     LoseDeviceForTesting();
 
-    device.ForceLoss(wgpu::DeviceLostReason::Undefined, "Device lost for testing");
+    device.ForceLoss(wgpu::DeviceLostReason::Unknown, "Device lost for testing");
     FlushWire();
     testing::Mock::VerifyAndClearExpectations(&mDeviceLostCallback);
 }

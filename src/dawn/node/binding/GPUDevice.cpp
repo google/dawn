@@ -187,7 +187,6 @@ GPUDevice::GPUDevice(Napi::Env env,
                 case WGPUDeviceLostReason_InstanceDropped:
                     UNREACHABLE("WGPUDeviceLostReason_InstanceDropped");
                     break;
-                case WGPUDeviceLostReason_Undefined:
                 case WGPUDeviceLostReason_Unknown:
                     r = interop::GPUDeviceLostReason::kUnknown;
                     break;
