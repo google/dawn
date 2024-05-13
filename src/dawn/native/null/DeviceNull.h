@@ -185,9 +185,7 @@ class Device final : public DeviceBase {
 
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    // Create null adapter without providing toggles state for testing, only inherit instance's
-    // toggles state
-    explicit PhysicalDevice(InstanceBase* instance);
+    PhysicalDevice();
     ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation
@@ -196,6 +194,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
+        InstanceBase* instance,
         const Surface* surface) const override;
 
     // Used for the tests that intend to use an adapter without all features enabled.
@@ -210,8 +209,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
         wgpu::FeatureName feature,
         const TogglesState& toggles) const override;
 
-    void SetupBackendAdapterToggles(TogglesState* adapterToggles) const override;
-    void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
+    void SetupBackendAdapterToggles(dawn::platform::Platform* platform,
+                                    TogglesState* adapterToggles) const override;
+    void SetupBackendDeviceToggles(dawn::platform::Platform* platform,
+                                   TogglesState* deviceToggles) const override;
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
         AdapterBase* adapter,
         const UnpackedPtr<DeviceDescriptor>& descriptor,

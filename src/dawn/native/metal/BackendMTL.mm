@@ -99,14 +99,6 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     return std::vector<Ref<PhysicalDeviceBase>>{mPhysicalDevices};
 }
 
-void Backend::ClearPhysicalDevices() {
-    mPhysicalDevices.clear();
-}
-
-size_t Backend::GetPhysicalDeviceCountForTesting() const {
-    return mPhysicalDevices.size();
-}
-
 BackendConnection* Connect(InstanceBase* instance) {
     return new Backend(instance);
 }

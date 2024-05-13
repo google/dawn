@@ -589,8 +589,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
             const std::vector<VkPhysicalDevice>& vkPhysicalDevices =
                 mVulkanInstances[icd]->GetVkPhysicalDevices();
             for (VkPhysicalDevice vkPhysicalDevice : vkPhysicalDevices) {
-                Ref<PhysicalDevice> physicalDevice = AcquireRef(
-                    new PhysicalDevice(instance, mVulkanInstances[icd].Get(), vkPhysicalDevice));
+                Ref<PhysicalDevice> physicalDevice =
+                    AcquireRef(new PhysicalDevice(mVulkanInstances[icd].Get(), vkPhysicalDevice));
                 if (instance->ConsumedErrorAndWarnOnce(physicalDevice->Initialize())) {
                     continue;
                 }
@@ -601,20 +601,6 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
                                mPhysicalDevices[icd].end());
     }
     return physicalDevices;
-}
-
-void Backend::ClearPhysicalDevices() {
-    for (ICD icd : kICDs) {
-        mPhysicalDevices[icd].clear();
-    }
-}
-
-size_t Backend::GetPhysicalDeviceCountForTesting() const {
-    size_t count = 0;
-    for (ICD icd : kICDs) {
-        count += mPhysicalDevices[icd].size();
-    }
-    return count;
 }
 
 BackendConnection* Connect(InstanceBase* instance) {

@@ -150,10 +150,6 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
         wgpu::Adapter adapter;
 
         auto instance = std::make_unique<native::Instance>();
-        // Save a pointer to the instance.
-        // It will only be valid as long as the instance is alive.
-        WGPUInstance unsafeInstancePtr = instance->Get();
-
         for (native::Adapter& nativeAdapter : instance->EnumerateAdapters()) {
             wgpu::AdapterProperties properties;
             nativeAdapter.GetProperties(&properties);
@@ -163,14 +159,8 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
                 properties.adapterType == desiredProperties.adapterType &&
                 properties.backendType == desiredProperties.backendType) {
                 // Save the adapter, and reset the instance.
-                // Check that the number of adapters before the reset is > 0, and after the reset
-                // is 0. Unsafe, but we assume the pointer is still valid since the adapter is
-                // holding onto the instance. The instance should have cleared all internal
-                // references to adapters when the last external ref is dropped.
                 adapter = wgpu::Adapter(nativeAdapter.Get());
-                EXPECT_GT(native::GetPhysicalDeviceCountForTesting(unsafeInstancePtr), 0u);
                 instance.reset();
-                EXPECT_EQ(native::GetPhysicalDeviceCountForTesting(unsafeInstancePtr), 0u);
                 break;
             }
         }

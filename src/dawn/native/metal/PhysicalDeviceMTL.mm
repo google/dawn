@@ -316,7 +316,7 @@ ResultOrError<MTLGPUFamily> GetMTLGPUFamily(id<MTLDevice> device) {
 PhysicalDevice::PhysicalDevice(InstanceBase* instance,
                                NSPRef<id<MTLDevice>> device,
                                bool metalValidationEnabled)
-    : PhysicalDeviceBase(instance, wgpu::BackendType::Metal),
+    : PhysicalDeviceBase(wgpu::BackendType::Metal),
       mDevice(std::move(device)),
       mMetalValidationEnabled(metalValidationEnabled) {
     mName = std::string([[*mDevice name] UTF8String]);
@@ -360,6 +360,7 @@ bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel) const {
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
+    InstanceBase* instance,
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 
@@ -401,9 +402,11 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     return Device::Create(adapter, mDevice, descriptor, deviceToggles, std::move(lostEvent));
 }
 
-void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adapterToggles) const {}
+void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
+                                                TogglesState* adapterToggles) const {}
 
-void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
+                                               TogglesState* deviceToggles) const {
     {
         bool haveStoreAndMSAAResolve = false;
 #if DAWN_PLATFORM_IS(MACOS)

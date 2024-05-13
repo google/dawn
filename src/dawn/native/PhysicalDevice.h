@@ -68,7 +68,7 @@ struct FeatureValidationResult {
 
 class PhysicalDeviceBase : public RefCounted {
   public:
-    PhysicalDeviceBase(InstanceBase* instance, wgpu::BackendType backend);
+    explicit PhysicalDeviceBase(wgpu::BackendType backend);
     ~PhysicalDeviceBase() override;
 
     MaybeError Initialize();
@@ -88,11 +88,7 @@ class PhysicalDeviceBase : public RefCounted {
     wgpu::AdapterType GetAdapterType() const;
     wgpu::BackendType GetBackendType() const;
 
-    // This method differs from APIGetInstance() in that it won't increase the ref count of the
-    // instance.
-    InstanceBase* GetInstance() const;
-
-    void ResetInternalDeviceForTesting();
+    MaybeError ResetInternalDeviceForTesting();
 
     // Get all features supported by the physical device and suitable with given toggles.
     FeaturesSet GetSupportedFeatures(const TogglesState& toggles) const;
@@ -108,9 +104,11 @@ class PhysicalDeviceBase : public RefCounted {
     virtual bool SupportsFeatureLevel(FeatureLevel featureLevel) const = 0;
 
     // Backend-specific force-setting and defaulting device toggles
-    virtual void SetupBackendAdapterToggles(TogglesState* adapterToggles) const = 0;
+    virtual void SetupBackendAdapterToggles(dawn::platform::Platform* platform,
+                                            TogglesState* adapterToggles) const = 0;
     // Backend-specific force-setting and defaulting device toggles
-    virtual void SetupBackendDeviceToggles(TogglesState* deviceToggles) const = 0;
+    virtual void SetupBackendDeviceToggles(dawn::platform::Platform* platform,
+                                           TogglesState* deviceToggles) const = 0;
 
     // Check if a feature os supported by this adapter AND suitable with given toggles.
     FeatureValidationResult ValidateFeatureSupportedWithToggles(wgpu::FeatureName feature,
@@ -126,6 +124,7 @@ class PhysicalDeviceBase : public RefCounted {
         UnpackedPtr<FormatCapabilities>& capabilities) const;
 
     virtual ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
+        InstanceBase* instance,
         const Surface* surface) const = 0;
 
   protected:
@@ -171,7 +170,6 @@ class PhysicalDeviceBase : public RefCounted {
         const TogglesState& toggles) const = 0;
 
     virtual MaybeError ResetInternalDeviceForTestingImpl();
-    Ref<InstanceBase> mInstance;
     wgpu::BackendType mBackend;
 
     // Features set that CAN be supported by devices of this adapter. Some features in this set may

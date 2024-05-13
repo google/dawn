@@ -145,7 +145,8 @@ void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
 }
 
 void Adapter::ResetInternalDeviceForTesting() {
-    mImpl->GetPhysicalDevice()->ResetInternalDeviceForTesting();
+    [[maybe_unused]] bool hadError = mImpl->GetInstance()->ConsumedError(
+        mImpl->GetPhysicalDevice()->ResetInternalDeviceForTesting());
 }
 
 // DawnInstanceDescriptor
@@ -225,10 +226,6 @@ size_t GetLazyClearCountForTesting(WGPUDevice device) {
 
 size_t GetDeprecationWarningCountForTesting(WGPUDevice device) {
     return FromAPI(device)->GetDeprecationWarningCountForTesting();
-}
-
-size_t GetPhysicalDeviceCountForTesting(WGPUInstance instance) {
-    return FromAPI(instance)->GetPhysicalDeviceCountForTesting();
 }
 
 bool IsTextureSubresourceInitialized(WGPUTexture texture,

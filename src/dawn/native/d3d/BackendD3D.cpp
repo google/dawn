@@ -328,14 +328,6 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     return physicalDevices;
 }
 
-void Backend::ClearPhysicalDevices() {
-    mPhysicalDevices.clear();
-}
-
-size_t Backend::GetPhysicalDeviceCountForTesting() const {
-    return mPhysicalDevices.size();
-}
-
 size_t Backend::LUIDHashFunc::operator()(const LUID& luid) const {
     size_t hash = 0;
     dawn::HashCombine(&hash, luid.LowPart, luid.HighPart);

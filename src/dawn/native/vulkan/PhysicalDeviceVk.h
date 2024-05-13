@@ -28,11 +28,16 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_ADAPTERVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_ADAPTERVK_H_
 
-#include "dawn/native/PhysicalDevice.h"
+#include <memory>
 
 #include "dawn/common/Ref.h"
 #include "dawn/common/vulkan_platform.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/vulkan/VulkanInfo.h"
+
+namespace dawn::native {
+class AHBFunctions;
+}  // namespace dawn::native
 
 namespace dawn::native::vulkan {
 
@@ -40,9 +45,7 @@ class VulkanInstance;
 
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
-    PhysicalDevice(InstanceBase* instance,
-                   VulkanInstance* vulkanInstance,
-                   VkPhysicalDevice physicalDevice);
+    PhysicalDevice(VulkanInstance* vulkanInstance, VkPhysicalDevice physicalDevice);
     ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation
@@ -62,7 +65,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
     uint32_t GetDefaultComputeSubgroupSize() const;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
+        InstanceBase* instance,
         const Surface* surface) const override;
+    const AHBFunctions* GetOrLoadAHBFunctions();
 
   private:
     MaybeError InitializeImpl() override;
@@ -73,8 +78,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
         wgpu::FeatureName feature,
         const TogglesState& toggles) const override;
 
-    void SetupBackendAdapterToggles(TogglesState* adapterToggles) const override;
-    void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
+    void SetupBackendAdapterToggles(dawn::platform::Platform* platform,
+                                    TogglesState* adapterToggles) const override;
+    void SetupBackendDeviceToggles(dawn::platform::Platform* platform,
+                                   TogglesState* deviceToggles) const override;
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
         AdapterBase* adapter,
         const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -95,6 +102,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
     VulkanDeviceInfo mDeviceInfo = {};
 
     uint32_t mDefaultComputeSubgroupSize = 0;
+
+#if DAWN_PLATFORM_IS(ANDROID)
+    std::unique_ptr<AHBFunctions> mAHBFunctions;
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 };
 
 }  // namespace dawn::native::vulkan

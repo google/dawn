@@ -48,6 +48,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     Backend* GetBackend() const;
 
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
+        InstanceBase* instance,
         const Surface* surface) const override;
 
   protected:

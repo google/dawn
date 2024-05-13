@@ -109,8 +109,6 @@ class Backend : public BackendConnection {
 
     std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(
         const UnpackedPtr<RequestAdapterOptions>& options) override;
-    void ClearPhysicalDevices() override;
-    size_t GetPhysicalDeviceCountForTesting() const override;
 
   private:
     ityp::bitset<ICD, kICDCount> mVulkanInstancesCreated = {};

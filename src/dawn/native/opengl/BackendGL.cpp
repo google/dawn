@@ -99,22 +99,13 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevicesWithProcs(
     }
     if (mPhysicalDevice == nullptr) {
         if (GetInstance()->ConsumedErrorAndWarnOnce(
-                PhysicalDevice::Create(GetInstance(), GetType(), getProc, display),
-                &mPhysicalDevice)) {
+                PhysicalDevice::Create(GetType(), getProc, display), &mPhysicalDevice)) {
             return {};
         }
         mGetProc = getProc;
         mDisplay = display;
     }
     return {mPhysicalDevice};
-}
-
-void Backend::ClearPhysicalDevices() {
-    mPhysicalDevice = nullptr;
-}
-
-size_t Backend::GetPhysicalDeviceCountForTesting() const {
-    return mPhysicalDevice != nullptr ? 1 : 0;
 }
 
 BackendConnection* Connect(InstanceBase* instance, wgpu::BackendType backendType) {

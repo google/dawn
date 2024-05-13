@@ -108,7 +108,7 @@ const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
     return mDeviceInfo;
 }
 
-ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device() {
+ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device(bool enableDebugLayer) {
     if (mIsSharedD3D11Device) {
         DAWN_ASSERT(mD3D11Device);
         // If the shared d3d11 device was created with debug layer, we have to initialize debug
@@ -121,9 +121,8 @@ ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device() {
 
     // If there mD3D11Device which is used for collecting GPU info is not null, try to use it.
     if (mD3D11Device) {
-        bool isDebugLayerEnabled = IsDebugLayerEnabled(mD3D11Device);
         // Backend validation level doesn't match, recreate the d3d11 device.
-        if (GetInstance()->IsBackendValidationEnabled() == isDebugLayerEnabled) {
+        if (enableDebugLayer == IsDebugLayerEnabled(mD3D11Device)) {
             return std::move(mD3D11Device);
         }
         mD3D11Device = nullptr;
@@ -134,7 +133,7 @@ ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device() {
 
     ComPtr<ID3D11Device> d3d11Device;
 
-    if (GetInstance()->IsBackendValidationEnabled()) {
+    if (enableDebugLayer) {
         // Try create d3d11 device with debug layer.
         HRESULT hr = functions->d3d11CreateDevice(
             GetHardwareAdapter(), D3D_DRIVER_TYPE_UNKNOWN,
@@ -165,7 +164,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
     // Create the device to populate the adapter properties then reuse it when needed for actual
     // rendering.
     if (!mIsSharedD3D11Device) {
-        DAWN_TRY_ASSIGN(mD3D11Device, CreateD3D11Device());
+        DAWN_TRY_ASSIGN(mD3D11Device, CreateD3D11Device(/*enableDebugLayers=*/false));
     }
 
     mFeatureLevel = mD3D11Device->GetFeatureLevel();
@@ -309,12 +308,14 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     return {};
 }
 
-void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adpterToggles) const {
+void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
+                                                TogglesState* adapterToggles) const {
     // D3D11 must use FXC, not DXC.
-    adpterToggles->ForceSet(Toggle::UseDXC, false);
+    adapterToggles->ForceSet(Toggle::UseDXC, false);
 }
 
-void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
+                                               TogglesState* deviceToggles) const {
     // D3D11 can only clear RTV with float values.
     deviceToggles->Default(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);

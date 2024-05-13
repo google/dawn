@@ -44,8 +44,7 @@ FeatureValidationResult::FeatureValidationResult() : success(true) {}
 FeatureValidationResult::FeatureValidationResult(std::string errorMsg)
     : success(false), errorMessage(errorMsg) {}
 
-PhysicalDeviceBase::PhysicalDeviceBase(InstanceBase* instance, wgpu::BackendType backend)
-    : mInstance(instance), mBackend(backend) {}
+PhysicalDeviceBase::PhysicalDeviceBase(wgpu::BackendType backend) : mBackend(backend) {}
 
 PhysicalDeviceBase::~PhysicalDeviceBase() = default;
 
@@ -117,10 +116,6 @@ wgpu::AdapterType PhysicalDeviceBase::GetAdapterType() const {
 
 wgpu::BackendType PhysicalDeviceBase::GetBackendType() const {
     return mBackend;
-}
-
-InstanceBase* PhysicalDeviceBase::GetInstance() const {
-    return mInstance.Get();
 }
 
 bool PhysicalDeviceBase::IsFeatureSupportedWithToggles(wgpu::FeatureName feature,
@@ -201,8 +196,8 @@ void PhysicalDeviceBase::SetSupportedFeaturesForTesting(
     }
 }
 
-void PhysicalDeviceBase::ResetInternalDeviceForTesting() {
-    [[maybe_unused]] bool hadError = mInstance->ConsumedError(ResetInternalDeviceForTestingImpl());
+MaybeError PhysicalDeviceBase::ResetInternalDeviceForTesting() {
+    return ResetInternalDeviceForTestingImpl();
 }
 
 MaybeError PhysicalDeviceBase::ResetInternalDeviceForTestingImpl() {

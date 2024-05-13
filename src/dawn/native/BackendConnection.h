@@ -55,12 +55,6 @@ class BackendConnection : NonMovable {
     virtual std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(
         const UnpackedPtr<RequestAdapterOptions>& options) = 0;
 
-    // Clear all internal refs to physical devices.
-    virtual void ClearPhysicalDevices() = 0;
-
-    // Get the number of internally-referenced physical devices, for testing.
-    virtual size_t GetPhysicalDeviceCountForTesting() const = 0;
-
   private:
     raw_ptr<InstanceBase> mInstance = nullptr;
     wgpu::BackendType mType;

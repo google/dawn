@@ -48,11 +48,15 @@ struct SupportedLimits;
 
 class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
   public:
-    AdapterBase(Ref<PhysicalDeviceBase> physicalDevice,
+    AdapterBase(InstanceBase* instance,
+                Ref<PhysicalDeviceBase> physicalDevice,
                 FeatureLevel featureLevel,
                 const TogglesState& requiredAdapterToggles,
                 wgpu::PowerPreference powerPreference);
     ~AdapterBase() override;
+
+    // Gets the instance without adding a ref.
+    InstanceBase* GetInstance() const;
 
     // WebGPU API
     InstanceBase* APIGetInstance() const;
@@ -90,6 +94,7 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
     ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(const DeviceDescriptor* rawDescriptor,
                                                         Ref<DeviceBase::DeviceLostEvent> lostEvent);
 
+    Ref<InstanceBase> mInstance;
     Ref<PhysicalDeviceBase> mPhysicalDevice;
     FeatureLevel mFeatureLevel;
     bool mUseTieredLimits = false;

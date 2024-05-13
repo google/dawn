@@ -465,7 +465,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     // mAdapter is not set for mock test devices.
     // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
     if (mAdapter != nullptr) {
-        mAdapter->GetPhysicalDevice()->GetInstance()->AddDevice(this);
+        mAdapter->GetInstance()->AddDevice(this);
     }
 
     return {};
@@ -515,12 +515,11 @@ void DeviceBase::WillDropLastExternalRef() {
     // mAdapter is not set for mock test devices.
     // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
     if (mAdapter != nullptr) {
-        mAdapter->GetPhysicalDevice()->GetInstance()->RemoveDevice(this);
+        mAdapter->GetInstance()->RemoveDevice(this);
 
         // Once last external ref dropped, all callbacks should be forwarded to Instance's callback
         // queue instead.
-        mCallbackTaskManager =
-            mAdapter->GetPhysicalDevice()->GetInstance()->GetCallbackTaskManager();
+        mCallbackTaskManager = mAdapter->GetInstance()->GetCallbackTaskManager();
     }
 }
 
@@ -956,7 +955,7 @@ const ApiObjectList* DeviceBase::GetObjectTrackingList(ObjectType type) const {
 }
 
 InstanceBase* DeviceBase::GetInstance() const {
-    return mAdapter->GetPhysicalDevice()->GetInstance();
+    return mAdapter->GetInstance();
 }
 
 AdapterBase* DeviceBase::GetAdapter() const {
@@ -968,7 +967,7 @@ PhysicalDeviceBase* DeviceBase::GetPhysicalDevice() const {
 }
 
 dawn::platform::Platform* DeviceBase::GetPlatform() const {
-    return GetPhysicalDevice()->GetInstance()->GetPlatform();
+    return GetAdapter()->GetInstance()->GetPlatform();
 }
 
 InternalPipelineStore* DeviceBase::GetInternalPipelineStore() {
@@ -1864,7 +1863,7 @@ void DeviceBase::EmitLog(WGPULoggingType loggingType, const char* message) {
 
 bool DeviceBase::APIGetLimits(SupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
-    InstanceBase* instance = GetPhysicalDevice()->GetInstance();
+    InstanceBase* instance = GetAdapter()->GetInstance();
 
     UnpackedPtr<SupportedLimits> unpacked;
     if (instance->ConsumedError(ValidateAndUnpack(limits), &unpacked)) {

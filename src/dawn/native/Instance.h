@@ -57,7 +57,6 @@ class Platform;
 
 namespace dawn::native {
 
-class AHBFunctions;
 class CallbackTaskManager;
 class DeviceBase;
 class Surface;
@@ -138,7 +137,6 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
 
     // Get backend-independent libraries that need to be loaded dynamically.
     const X11Functions* GetOrLoadX11Functions();
-    const AHBFunctions* GetOrLoadAHBFunctions();
 
     // TODO(dawn:752) Standardize webgpu.h to decide if we should return bool.
     //   Currently this is a backdoor for Chromium's process event loop.
@@ -183,7 +181,7 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
     Ref<AdapterBase> CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
                                    FeatureLevel featureLevel,
                                    const DawnTogglesDescriptor* requiredAdapterToggles,
-                                   wgpu::PowerPreference powerPreference) const;
+                                   wgpu::PowerPreference powerPreference);
 
     void GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist);
 
@@ -216,9 +214,6 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
 #if defined(DAWN_USE_X11)
     std::unique_ptr<X11Functions> mX11Functions;
 #endif  // defined(DAWN_USE_X11)
-#if DAWN_PLATFORM_IS(ANDROID)
-    std::unique_ptr<AHBFunctions> mAHBFunctions;
-#endif  // DAWN_PLATFORM_IS(ANDROID)
 
     Ref<CallbackTaskManager> mCallbackTaskManager;
     EventManager mEventManager;

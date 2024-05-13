@@ -65,10 +65,6 @@
 #include "dawn/native/X11Functions.h"
 #endif  // defined(DAWN_USE_X11)
 
-#if DAWN_PLATFORM_IS(ANDROID)
-#include "dawn/native/AHBFunctions.h"
-#endif  // DAWN_PLATFORM_IS(ANDROID)
-
 namespace dawn::native {
 
 // Forward definitions of each backend's "Connect" function that creates new BackendConnection.
@@ -194,22 +190,8 @@ void InstanceBase::DisconnectDawnPlatform() {
 }
 
 void InstanceBase::WillDropLastExternalRef() {
-    // InstanceBase uses RefCountedWithExternalCount to break refcycles.
-
     // Stop tracking events. See comment on ShutDown.
     mEventManager.ShutDown();
-
-    // InstanceBase holds backends which hold Refs to PhysicalDeviceBases discovered, which hold
-    // Refs back to the InstanceBase.
-    // In order to break this cycle and prevent leaks, when the application drops the last external
-    // ref and WillDropLastExternalRef is called, the instance clears out any member refs to
-    // physical devices that hold back-refs to the instance - thus breaking any reference cycles.
-    for (auto& backend : mBackends) {
-        if (backend != nullptr) {
-            backend->ClearPhysicalDevices();
-        }
-    }
-
     mLoggingCallback = nullptr;
     mLoggingCallbackUserdata = nullptr;
 }
@@ -342,17 +324,17 @@ Future InstanceBase::APIRequestAdapter2(const RequestAdapterOptions* options,
 Ref<AdapterBase> InstanceBase::CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
                                              FeatureLevel featureLevel,
                                              const DawnTogglesDescriptor* requiredAdapterToggles,
-                                             wgpu::PowerPreference powerPreference) const {
+                                             wgpu::PowerPreference powerPreference) {
     // Set up toggles state for default adapter from given toggles descriptor and inherit from
     // instance toggles.
     TogglesState adapterToggles =
         TogglesState::CreateFromTogglesDescriptor(requiredAdapterToggles, ToggleStage::Adapter);
     adapterToggles.InheritFrom(mToggles);
     // Set up forced and default adapter toggles for selected physical device.
-    physicalDevice->SetupBackendAdapterToggles(&adapterToggles);
+    physicalDevice->SetupBackendAdapterToggles(GetPlatform(), &adapterToggles);
 
-    return AcquireRef(
-        new AdapterBase(std::move(physicalDevice), featureLevel, adapterToggles, powerPreference));
+    return AcquireRef(new AdapterBase(this, std::move(physicalDevice), featureLevel, adapterToggles,
+                                      powerPreference));
 }
 
 const TogglesState& InstanceBase::GetTogglesState() const {
@@ -388,16 +370,6 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
             CreateAdapter(physicalDevice, featureLevel, togglesDesc, unpacked->powerPreference));
     }
     return SortAdapters(std::move(adapters), options);
-}
-
-size_t InstanceBase::GetPhysicalDeviceCountForTesting() const {
-    size_t count = 0;
-    for (auto& backend : mBackends) {
-        if (backend != nullptr) {
-            count += backend->GetPhysicalDeviceCountForTesting();
-        }
-    }
-    return count;
 }
 
 BackendConnection* InstanceBase::GetBackendConnection(wgpu::BackendType backendType) {
@@ -612,17 +584,6 @@ const X11Functions* InstanceBase::GetOrLoadX11Functions() {
 #else
     DAWN_UNREACHABLE();
 #endif  // defined(DAWN_USE_X11)
-}
-
-const AHBFunctions* InstanceBase::GetOrLoadAHBFunctions() {
-#if DAWN_PLATFORM_IS(ANDROID)
-    if (mAHBFunctions == nullptr) {
-        mAHBFunctions = std::make_unique<AHBFunctions>();
-    }
-    return mAHBFunctions.get();
-#else
-    DAWN_UNREACHABLE();
-#endif  // DAWN_PLATFORM_IS(ANDROID)
 }
 
 Surface* InstanceBase::APICreateSurface(const SurfaceDescriptor* descriptor) {

@@ -90,8 +90,7 @@ uint32_t GetDeviceIdFromRender(std::string_view render) {
 }  // anonymous namespace
 
 // static
-ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(InstanceBase* instance,
-                                                          wgpu::BackendType backendType,
+ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
                                                           void* (*getProc)(const char*),
                                                           EGLDisplay display) {
     EGLFunctions egl;
@@ -116,8 +115,7 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(InstanceBase* instance
 
     context->MakeCurrent();
 
-    Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(instance, backendType, display));
+    Ref<PhysicalDevice> physicalDevice = AcquireRef(new PhysicalDevice(backendType, display));
     DAWN_TRY(physicalDevice->InitializeGLFunctions(getProc));
     DAWN_TRY(physicalDevice->Initialize());
 
@@ -125,10 +123,8 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(InstanceBase* instance
     return physicalDevice;
 }
 
-PhysicalDevice::PhysicalDevice(InstanceBase* instance,
-                               wgpu::BackendType backendType,
-                               EGLDisplay display)
-    : PhysicalDeviceBase(instance, backendType), mDisplay(display) {}
+PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType, EGLDisplay display)
+    : PhysicalDeviceBase(backendType), mDisplay(display) {}
 
 MaybeError PhysicalDevice::InitializeGLFunctions(void* (*getProc)(const char*)) {
     // Use getProc to populate the dispatch table
@@ -331,9 +327,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     return {};
 }
 
-void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adpterToggles) const {}
+void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
+                                                TogglesState* adapterToggles) const {}
 
-void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
+                                               TogglesState* deviceToggles) const {
     const OpenGLFunctions& gl = mFunctions;
 
     bool supportsBaseVertex = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 2);
@@ -453,6 +451,7 @@ bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
+    InstanceBase*,
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 

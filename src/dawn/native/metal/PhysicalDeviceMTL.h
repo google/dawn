@@ -48,6 +48,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool SupportsExternalImages() const override;
     bool SupportsFeatureLevel(FeatureLevel) const override;
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
+        InstanceBase* instance,
         const Surface*) const override;
 
   private:
@@ -57,8 +58,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
         const TogglesState& deviceToggles,
         Ref<DeviceBase::DeviceLostEvent>&& lostEvent) override;
 
-    void SetupBackendAdapterToggles(TogglesState* adapterToggles) const override;
-    void SetupBackendDeviceToggles(TogglesState* deviceToggles) const override;
+    void SetupBackendAdapterToggles(dawn::platform::Platform* platform,
+                                    TogglesState* adapterToggles) const override;
+    void SetupBackendDeviceToggles(dawn::platform::Platform* platform,
+                                   TogglesState* deviceToggles) const override;
 
     MaybeError InitializeImpl() override;
 

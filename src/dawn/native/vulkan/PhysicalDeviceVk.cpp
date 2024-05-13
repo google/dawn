@@ -81,10 +81,8 @@ gpu_info::DriverVersion DecodeVulkanDriverVersion(uint32_t vendorID, uint32_t ve
 
 }  // anonymous namespace
 
-PhysicalDevice::PhysicalDevice(InstanceBase* instance,
-                               VulkanInstance* vulkanInstance,
-                               VkPhysicalDevice physicalDevice)
-    : PhysicalDeviceBase(instance, wgpu::BackendType::Vulkan),
+PhysicalDevice::PhysicalDevice(VulkanInstance* vulkanInstance, VkPhysicalDevice physicalDevice)
+    : PhysicalDeviceBase(wgpu::BackendType::Vulkan),
       mVkPhysicalDevice(physicalDevice),
       mVulkanInstance(vulkanInstance) {}
 
@@ -412,7 +410,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
 #if DAWN_PLATFORM_IS(ANDROID)
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer)) {
-        if (GetInstance()->GetOrLoadAHBFunctions()->IsValid()) {
+        if (GetOrLoadAHBFunctions()->IsValid()) {
             EnableFeature(Feature::SharedTextureMemoryAHardwareBuffer);
         }
     }
@@ -625,9 +623,11 @@ bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel) const {
     return true;
 }
 
-void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adpterToggles) const {}
+void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
+                                                TogglesState* adapterToggles) const {}
 
-void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
+void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
+                                               TogglesState* deviceToggles) const {
     // TODO(crbug.com/dawn/857): tighten this workaround when this issue is fixed in both
     // Vulkan SPEC and drivers.
     deviceToggles->Default(Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy, true);
@@ -637,8 +637,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(Toggle::UseTintIR, true);
 #else
     // All other platforms default to the value corresponding to the feature flag.
-    deviceToggles->Default(Toggle::UseTintIR, GetInstance()->GetPlatform()->IsFeatureEnabled(
-                                                  platform::Features::kWebGPUUseTintIR));
+    deviceToggles->Default(Toggle::UseTintIR,
+                           platform->IsFeatureEnabled(platform::Features::kWebGPUUseTintIR));
 #endif
 
     if (IsAndroidQualcomm()) {
@@ -867,6 +867,7 @@ uint32_t PhysicalDevice::GetDefaultComputeSubgroupSize() const {
 }
 
 ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapabilities(
+    InstanceBase* instance,
     const Surface* surface) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 
@@ -902,7 +903,7 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     capabilities.alphaModes.push_back(wgpu::CompositeAlphaMode::Opaque);
 #else
     VkSurfaceKHR vkSurface;
-    DAWN_TRY_ASSIGN(vkSurface, CreateVulkanSurface(this, surface));
+    DAWN_TRY_ASSIGN(vkSurface, CreateVulkanSurface(instance, this, surface));
 
     VkPhysicalDevice vkPhysicalDevice = GetVkPhysicalDevice();
     const VulkanFunctions& fn = GetVulkanInstance()->GetFunctions();
@@ -939,6 +940,17 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     capabilities.alphaModes.push_back(wgpu::CompositeAlphaMode::Auto);
 
     return capabilities;
+}
+
+const AHBFunctions* PhysicalDevice::GetOrLoadAHBFunctions() {
+#if DAWN_PLATFORM_IS(ANDROID)
+    if (mAHBFunctions == nullptr) {
+        mAHBFunctions = std::make_unique<AHBFunctions>();
+    }
+    return mAHBFunctions.get();
+#else
+    DAWN_UNREACHABLE();
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 }
 
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const {
