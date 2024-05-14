@@ -48,6 +48,8 @@ class RefCountedWithExternalCountBase : public T {
     using T::Release;
     using T::T;
 
+    // TODO(dawn:2234): Deprecated. Remove when no longer used.
+    void APIReference() { APIAddRef(); }
     void APIAddRef() {
         IncrementExternalRefCount();
         T::APIAddRef();
@@ -57,7 +59,7 @@ class RefCountedWithExternalCountBase : public T {
         if (mExternalRefCount.Decrement()) {
             WillDropLastExternalRef();
         }
-        T::Release();
+        T::APIRelease();
     }
 
     void IncrementExternalRefCount() { mExternalRefCount.Increment(); }

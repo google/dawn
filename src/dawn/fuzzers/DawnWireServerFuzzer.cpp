@@ -120,7 +120,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
         for (dawn::native::Adapter adapter : adapters) {
             if (sAdapterSupported(adapter)) {
                 WGPUAdapter cAdapter = adapter.Get();
-                dawn::native::GetProcs().adapterAddRef(cAdapter);
+                dawn::native::GetProcs().adapterReference(cAdapter);
                 callback(WGPURequestAdapterStatus_Success, cAdapter, nullptr, userdata);
                 return;
             }

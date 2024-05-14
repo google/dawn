@@ -964,6 +964,8 @@ def as_wireType(metadata, typ):
 
 def c_methods(params, typ):
     return typ.methods + [
+        # TODO(dawn:2234): Deprecated. Remove when no longer used.
+        Method(Name('reference'), params['types']['void'], [], False, {}),
         Method(Name('add ref'), params['types']['void'], [], False, {}),
         Method(Name('release'), params['types']['void'], [], False, {}),
     ]
