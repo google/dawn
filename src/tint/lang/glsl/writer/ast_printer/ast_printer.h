@@ -70,7 +70,7 @@ struct SanitizedResult {
 };
 
 /// Sanitize a program in preparation for generating GLSL.
-/// @program The program to sanitize
+/// @param program The program to sanitize
 /// @param options The HLSL generator options.
 /// @param entry_point the entry point to generate GLSL for
 /// @returns the sanitized program and any supplementary information
