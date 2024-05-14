@@ -258,6 +258,7 @@ MaybeError Queue::WaitForIdleForDestruction() {
     gl.Finish();
     DAWN_TRY(CheckPassedSerials());
     DAWN_ASSERT(mFencesInFlight->empty());
+    mHasPendingCommands = false;
     return {};
 }
 
