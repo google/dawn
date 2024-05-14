@@ -354,7 +354,9 @@ message InstructionNextIteration {}
 
 message InstructionContinue {}
 
-message InstructionBreakIf {}
+message InstructionBreakIf {
+    uint32 num_next_iter_values = 1;
+}
 
 message InstructionUnreachable {}
 

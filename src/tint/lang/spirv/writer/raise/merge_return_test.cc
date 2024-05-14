@@ -1698,7 +1698,7 @@ TEST_F(SpirvWriter_MergeReturnTest, DISABLED_Loop_WithBasicBlockArgumentsOnMerge
 
         b.Append(loop->Continuing(), [&] {
             b.Store(global, 1_i);
-            b.BreakIf(loop, true, 4_i);
+            b.BreakIf(loop, true, /* next_iter */ b.Values(4_i), /* exit */ Empty);
         });
 
         b.Store(global, 3_i);

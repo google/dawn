@@ -42,11 +42,16 @@ namespace tint::core::ir {
 
 BreakIf::BreakIf() = default;
 
-BreakIf::BreakIf(Value* condition, ir::Loop* loop, VectorRef<Value*> args) : loop_(loop) {
+BreakIf::BreakIf(Value* condition,
+                 ir::Loop* loop,
+                 VectorRef<Value*> next_iter_values /* = tint::Empty */,
+                 VectorRef<Value*> exit_values /* = tint::Empty */)
+    : loop_(loop), num_next_iter_values_(next_iter_values.Length()) {
     TINT_ASSERT(loop_);
 
     AddOperand(BreakIf::kConditionOperandOffset, condition);
-    AddOperands(BreakIf::kArgsOperandOffset, std::move(args));
+    AddOperands(BreakIf::kArgsOperandOffset, std::move(next_iter_values));
+    AddOperands(BreakIf::kArgsOperandOffset + num_next_iter_values_, std::move(exit_values));
 
     if (loop_) {
         loop_->Body()->AddInboundSiblingBranch(this);

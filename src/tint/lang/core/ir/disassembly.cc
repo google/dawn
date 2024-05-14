@@ -26,7 +26,10 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/disassembly.h"
+
+#include <algorithm>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "src//tint/lang/core/ir/unary.h"
@@ -577,6 +580,16 @@ void Disassembly::EmitOperandList(const Instruction* inst, size_t start_index /*
     }
 }
 
+void Disassembly::EmitOperandList(const Instruction* inst, size_t start_index, size_t count) {
+    size_t n = std::min(count, inst->Operands().Length());
+    for (size_t i = start_index; i < n; i++) {
+        if (i != start_index) {
+            out_ << ", ";
+        }
+        EmitOperand(inst, i);
+    }
+}
+
 void Disassembly::EmitIf(const If* if_) {
     SourceMarker sm(this);
     if (auto results = if_->Results(); !results.IsEmpty()) {
@@ -730,52 +743,74 @@ void Disassembly::EmitSwitch(const Switch* s) {
     out_ << "}";
 }
 
-void Disassembly::EmitTerminator(const Terminator* b) {
+void Disassembly::EmitTerminator(const Terminator* term) {
     SourceMarker sm(this);
-    size_t args_offset = 0;
-    tint::Switch(
-        b,
+    auto args_offset = tint::Switch<std::optional<size_t>>(
+        term,
         [&](const ir::Return*) {
             out_ << StyleInstruction("ret");
-            args_offset = ir::Return::kArgsOperandOffset;
+            return ir::Return::kArgsOperandOffset;
         },
         [&](const ir::Continue*) {
             out_ << StyleInstruction("continue");
-            args_offset = ir::Continue::kArgsOperandOffset;
+            return ir::Continue::kArgsOperandOffset;
         },
         [&](const ir::ExitIf*) {
             out_ << StyleInstruction("exit_if");
-            args_offset = ir::ExitIf::kArgsOperandOffset;
+            return ir::ExitIf::kArgsOperandOffset;
         },
         [&](const ir::ExitSwitch*) {
             out_ << StyleInstruction("exit_switch");
-            args_offset = ir::ExitSwitch::kArgsOperandOffset;
+            return ir::ExitSwitch::kArgsOperandOffset;
         },
         [&](const ir::ExitLoop*) {
             out_ << StyleInstruction("exit_loop");
-            args_offset = ir::ExitLoop::kArgsOperandOffset;
+            return ir::ExitLoop::kArgsOperandOffset;
         },
         [&](const ir::NextIteration*) {
             out_ << StyleInstruction("next_iteration");
-            args_offset = ir::NextIteration::kArgsOperandOffset;
+            return ir::NextIteration::kArgsOperandOffset;
         },
-        [&](const ir::Unreachable*) { out_ << StyleInstruction("unreachable"); },
+        [&](const ir::Unreachable*) {
+            out_ << StyleInstruction("unreachable");
+            return std::nullopt;
+        },
         [&](const ir::BreakIf* bi) {
-            out_ << StyleInstruction("break_if") << " ";
+            out_ << StyleInstruction("break_if");
+            out_ << " ";
             EmitValue(bi->Condition());
-            args_offset = ir::BreakIf::kArgsOperandOffset;
+            auto next_iter_values = bi->NextIterValues();
+            auto exit_values = bi->ExitValues();
+            if (!next_iter_values.IsEmpty()) {
+                out_ << " " << StyleLabel("next_iteration") << ": [ ";
+                EmitOperandList(bi, ir::BreakIf::kArgsOperandOffset, next_iter_values.Length());
+                out_ << " ]";
+            }
+            if (!exit_values.IsEmpty()) {
+                out_ << " " << StyleLabel("exit_loop") << ": [ ";
+                EmitOperandList(bi, ir::BreakIf::kArgsOperandOffset + next_iter_values.Length());
+                out_ << " ]";
+            }
+            return std::nullopt;
         },
-        [&](const ir::TerminateInvocation*) { out_ << StyleInstruction("terminate_invocation"); },
-        [&](Default) { out_ << StyleError("unknown terminator ", b->TypeInfo().name); });
+        [&](const ir::TerminateInvocation*) {
+            out_ << StyleInstruction("terminate_invocation");
+            return std::nullopt;
+        },
+        [&](Default) {
+            out_ << StyleError("unknown terminator ", term->TypeInfo().name);
+            return std::nullopt;
+        });
 
-    if (!b->Args().IsEmpty()) {
+    if (args_offset && !term->Args().IsEmpty()) {
         out_ << " ";
-        EmitOperandList(b, args_offset);
+        EmitOperandList(term, *args_offset);
     }
-    sm.Store(b);
+
+    sm.Store(term);
 
     tint::Switch(
-        b,  //
+        term,  //
         [&](const ir::BreakIf* bi) {
             out_ << "  "
                  << StyleComment("# -> [t: exit_loop ", NameOf(bi->Loop()),

@@ -57,8 +57,14 @@ class BreakIf final : public Castable<BreakIf, Terminator> {
     /// Constructor
     /// @param condition the break condition
     /// @param loop the loop containing the break-if
-    /// @param args the MultiInBlock arguments
-    BreakIf(Value* condition, ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
+    /// @param next_iter_values the arguments passed to the loop body MultiInBlock, if the break
+    /// condition evaluates to `false`.
+    /// @param exit_values the values returned by the loop, if the break condition evaluates to
+    /// `true`.
+    BreakIf(Value* condition,
+            ir::Loop* loop,
+            VectorRef<Value*> next_iter_values = tint::Empty,
+            VectorRef<Value*> exit_values = tint::Empty);
     ~BreakIf() override;
 
     /// @copydoc Instruction::Clone()
@@ -85,8 +91,39 @@ class BreakIf final : public Castable<BreakIf, Terminator> {
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "break_if"; }
 
+    /// @returns the arguments passed to the loop body MultiInBlock, if the break condition
+    /// evaluates to `false`.
+    Slice<Value* const> NextIterValues() {
+        return operands_.Slice().Offset(kArgsOperandOffset).Truncate(num_next_iter_values_);
+    }
+
+    /// @returns the arguments passed to the loop body MultiInBlock, if the break condition
+    /// evaluates to `false`.
+    Slice<const Value* const> NextIterValues() const {
+        return operands_.Slice().Offset(kArgsOperandOffset).Truncate(num_next_iter_values_);
+    }
+
+    /// @returns the values returned by the loop, if the break condition evaluates to `true`.
+    Slice<Value* const> ExitValues() {
+        return operands_.Slice().Offset(kArgsOperandOffset + num_next_iter_values_);
+    }
+
+    /// @returns the values returned by the loop, if the break condition evaluates to `true`.
+    Slice<const Value* const> ExitValues() const {
+        return operands_.Slice().Offset(kArgsOperandOffset + num_next_iter_values_);
+    }
+
+    /// Sets the number of operands used as the next iterator values.
+    /// The first @p num operands after kArgsOperandOffset are used as next iterator values,
+    /// subsequent operators are used as exit values.
+    void SetNumNextIterValues(size_t num) {
+        TINT_ASSERT(operands_.Length() >= num + kArgsOperandOffset);
+        num_next_iter_values_ = num;
+    }
+
   private:
     ConstPropagatingPtr<ir::Loop> loop_;
+    size_t num_next_iter_values_ = 0;
 };
 
 }  // namespace tint::core::ir

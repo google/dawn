@@ -698,7 +698,10 @@ TEST_F(IRBinaryRoundtripTest, LoopResults) {
 TEST_F(IRBinaryRoundtripTest, LoopBlockParams) {
     auto* fn = b.Function("Function", ty.void_());
     b.Append(fn->Block(), [&] {
+        auto* loop_res_a = b.InstructionResult(ty.i32());
+        auto* loop_res_b = b.InstructionResult(ty.f32());
         auto* loop = b.Loop();
+        loop->SetResults(Vector{loop_res_a, loop_res_b});
         b.Append(loop->Initializer(), [&] {
             b.Let("L", 1_i);
             b.NextIteration(loop);
@@ -710,7 +713,12 @@ TEST_F(IRBinaryRoundtripTest, LoopBlockParams) {
         auto* z = b.BlockParam<u32>("z");
         auto* w = b.BlockParam<bool>("w");
         loop->Continuing()->SetParams({z, w});
-        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, false, 3_i, 4_f); });
+        b.Append(loop->Continuing(), [&] {
+            b.BreakIf(loop,
+                      /* condition */ false,
+                      /* next iter */ b.Values(3_i, 4_f),
+                      /* exit */ b.Values(5_u, 6_i));
+        });
         b.Return(fn);
     });
     RUN_TEST();

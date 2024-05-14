@@ -247,6 +247,7 @@ class Disassembly {
     void EmitLine();
     void EmitOperand(const Instruction* inst, size_t index);
     void EmitOperandList(const Instruction* inst, size_t start_index = 0);
+    void EmitOperandList(const Instruction* inst, size_t start_index, size_t count);
     void EmitInstructionName(const Instruction* inst);
 
     const Module& mod_;

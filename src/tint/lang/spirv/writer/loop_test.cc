@@ -358,7 +358,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
         loop->Continuing()->SetParams({cont_param});
         b.Append(loop->Continuing(), [&] {
             auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
-            b.BreakIf(loop, cmp, cont_param);
+            b.BreakIf(loop, cmp, /* next_iter */ Vector{cont_param}, /* exit */ Empty);
         });
 
         b.Return(func);
@@ -467,7 +467,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
         loop->Continuing()->SetParams({cont_param});
         b.Append(loop->Continuing(), [&] {
             auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
-            b.BreakIf(loop, cmp, cont_param);
+            b.BreakIf(loop, cmp, /* next_iter */ Vector{cont_param}, /* exit */ Empty);
         });
 
         b.Return(func);
@@ -533,7 +533,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedLoop) {
         outer->Continuing()->SetParams({cont_param});
         b.Append(outer->Continuing(), [&] {
             auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
-            b.BreakIf(outer, cmp, cont_param);
+            b.BreakIf(outer, cmp, /* next_iter */ Vector{cont_param}, /* exit */ Empty);
         });
 
         b.Return(func);

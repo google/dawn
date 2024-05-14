@@ -1304,14 +1304,32 @@ class Builder {
     /// Creates a loop break-if instruction
     /// @param condition the break condition
     /// @param loop the loop being iterated
-    /// @param args the arguments for the target MultiInBlock
     /// @returns the instruction
-    template <typename CONDITION, typename... ARGS>
-    ir::BreakIf* BreakIf(ir::Loop* loop, CONDITION&& condition, ARGS&&... args) {
-        CheckForNonDeterministicEvaluation<CONDITION, ARGS...>();
+    template <typename CONDITION>
+    ir::BreakIf* BreakIf(ir::Loop* loop, CONDITION&& condition) {
+        CheckForNonDeterministicEvaluation<CONDITION>();
+        auto* cond_val = Value(std::forward<CONDITION>(condition));
+        return Append(ir.allocators.instructions.Create<ir::BreakIf>(cond_val, loop));
+    }
+
+    /// Creates a loop break-if instruction
+    /// @param condition the break condition
+    /// @param loop the loop being iterated
+    /// @param next_iter_values the arguments passed to the loop body MultiInBlock, if the break
+    /// condition evaluates to `false`.
+    /// @param exit_values the values returned by the loop, if the break condition evaluates to
+    /// `true`.
+    /// @returns the instruction
+    template <typename CONDITION, typename NEXT_ITER_VALUES, typename EXIT_VALUES>
+    ir::BreakIf* BreakIf(ir::Loop* loop,
+                         CONDITION&& condition,
+                         NEXT_ITER_VALUES&& next_iter_values,
+                         EXIT_VALUES&& exit_values) {
+        CheckForNonDeterministicEvaluation<CONDITION, NEXT_ITER_VALUES, EXIT_VALUES>();
         auto* cond_val = Value(std::forward<CONDITION>(condition));
         return Append(ir.allocators.instructions.Create<ir::BreakIf>(
-            cond_val, loop, Values(std::forward<ARGS>(args)...)));
+            cond_val, loop, Values(std::forward<NEXT_ITER_VALUES>(next_iter_values)),
+            Values(std::forward<EXIT_VALUES>(exit_values))));
     }
 
     /// Creates a continue instruction

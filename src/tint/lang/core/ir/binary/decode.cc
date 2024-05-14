@@ -341,6 +341,11 @@ struct Decoder {
         }
         inst_out->SetResults(std::move(results));
 
+        if (inst_in.has_break_if()) {
+            static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(
+                inst_in.break_if().num_next_iter_values());
+        }
+
         return inst_out;
     }
 
