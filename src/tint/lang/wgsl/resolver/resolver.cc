@@ -3072,10 +3072,12 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
         return nullptr;
     }
 
+    auto stage = skip_const_eval_.Contains(expr) ? core::EvaluationStage::kNotEvaluated
+                                                 : core::EvaluationStage::kRuntime;
+
     // TODO(crbug.com/tint/1420): For now, assume all function calls have side effects.
     bool has_side_effects = true;
-    auto* call = b.create<sem::Call>(expr, target, core::EvaluationStage::kRuntime, std::move(args),
-                                     current_statement_,
+    auto* call = b.create<sem::Call>(expr, target, stage, std::move(args), current_statement_,
                                      /* constant_value */ nullptr, has_side_effects);
 
     target->AddCallSite(call);

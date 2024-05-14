@@ -29,6 +29,7 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/utils/containers/slice.h"
 
 namespace tint::resolver {
 namespace {
@@ -352,6 +353,59 @@ TEST_F(ResolverEvaluationStageTest, Binary_NotEvaluated) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     EXPECT_EQ(Sem().Get(lhs)->Stage(), core::EvaluationStage::kConstant);
     EXPECT_EQ(Sem().Get(rhs)->Stage(), core::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kConstant);
+}
+
+TEST_F(ResolverEvaluationStageTest, FnCall_Runtime) {
+    // fn f() -> bool { return true; }
+    // let l = false
+    // let result = l && f();
+    Func("f", Empty, ty.bool_(), Vector{Return(true)});
+    auto* let = Let("l", Expr(false));
+    auto* lhs = Expr(let);
+    auto* rhs = Call("f");
+    auto* binary = LogicalAnd(lhs, rhs);
+    auto* result = Let("result", binary);
+    WrapInFunction(let, result);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(rhs)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kRuntime);
+}
+
+TEST_F(ResolverEvaluationStageTest, FnCall_NotEvaluated) {
+    // fn f() -> bool { return true; }
+    // let result = false && f();
+    Func("f", Empty, ty.bool_(), Vector{Return(true)});
+    auto* rhs = Call("f");
+    auto* lhs = Expr(false);
+    auto* binary = LogicalAnd(lhs, rhs);
+    auto* result = Let("result", binary);
+    WrapInFunction(result);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(rhs)->Stage(), core::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kConstant);
+}
+
+TEST_F(ResolverEvaluationStageTest, NestedFnCall_NotEvaluated) {
+    // fn f(b : bool) -> bool { return b; }
+    // let result = false && f(f(f(1 == 0)));
+    Func("f", Vector{Param("b", ty.bool_())}, ty.bool_(), Vector{Return("b")});
+    auto* cmp = Equal(0_i, 1_i);
+    auto* rhs_0 = Call("f", cmp);
+    auto* rhs_1 = Call("f", rhs_0);
+    auto* rhs_2 = Call("f", rhs_1);
+    auto* lhs = Expr(false);
+    auto* binary = LogicalAnd(lhs, rhs_2);
+    auto* result = Let("result", binary);
+    WrapInFunction(result);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(Sem().Get(cmp)->Stage(), core::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(Sem().Get(rhs_0)->Stage(), core::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(Sem().Get(rhs_1)->Stage(), core::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(Sem().Get(rhs_2)->Stage(), core::EvaluationStage::kNotEvaluated);
     EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kConstant);
 }
 
