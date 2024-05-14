@@ -3209,6 +3209,33 @@ fn b() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(DirectVariableAccessFunctionASTest, PointerForwarding_NoUse) {
+    auto* src = R"(
+fn a(p : ptr<function, i32>) -> i32 {
+  return *p;
+}
+
+fn b(p : ptr<function, i32>) -> i32 {
+  return a(p);
+}
+)";
+
+    auto* expect =
+        R"(
+fn a_F(p : ptr<function, i32>) -> i32 {
+  return *(p);
+}
+
+fn b(p : ptr<function, i32>) -> i32 {
+  return a_F(p);
+}
+)";
+
+    auto got = Run<DirectVariableAccess>(src, EnableFunction());
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace function_as_tests
 
 ////////////////////////////////////////////////////////////////////////////////
