@@ -496,5 +496,30 @@ struct S {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(RemovePhoniesTest, ConstShortCircuit) {
+    auto* src = R"(
+fn a(v : i32) -> i32 {
+  return v;
+}
+
+fn b() {
+  _ = false && (a(4294967295) < a(a(4294967295)));
+}
+)";
+
+    auto* expect = R"(
+fn a(v : i32) -> i32 {
+  return v;
+}
+
+fn b() {
+}
+)";
+
+    auto got = Run<RemovePhonies>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::ast::transform

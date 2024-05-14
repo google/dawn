@@ -32,6 +32,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/evaluation_stage.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -85,7 +86,8 @@ Transform::ApplyResult RemovePhonies::Apply(const Program& src, const DataMap&, 
                                 return TraverseAction::Skip;
                             }
                             if (call->Target()->IsAnyOf<sem::Function, sem::BuiltinFn>() &&
-                                call->HasSideEffects()) {
+                                call->HasSideEffects() &&
+                                call->Stage() != core::EvaluationStage::kNotEvaluated) {
                                 side_effects.push_back(expr);
                                 return TraverseAction::Skip;
                             }

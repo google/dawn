@@ -38,6 +38,8 @@ namespace tint::ast::transform {
 /// RemovePhonies is a Transform that removes all phony-assignment statements,
 /// while preserving function call expressions in the RHS of the assignment that
 /// may have side-effects. It also removes calls to builtins that return a constant value.
+/// @note RemovePhonies must be run after the PromoteSideEffectsToDecl transform, otherwise `f` in
+/// `_ = cond && f()` may get hoisted to a call statement without the short-circuiting conditional.
 class RemovePhonies final : public Castable<RemovePhonies, Transform> {
   public:
     /// Constructor
