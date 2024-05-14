@@ -97,7 +97,7 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@e1385296c4ab4c7ee0a809676635b52d1df23b87',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@c5e2ceabe3f09fbfb10e5eab2576d02947530bc6',
     'condition': 'dawn_standalone',
   },
 
