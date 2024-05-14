@@ -1866,16 +1866,16 @@ TEST_F(RenderPipelineValidationTest, RenderPipelineColorAttachmentBytesPerSample
     }
 }
 
-// Creating render pipeline with DawnMultisampleStateRenderToSingleSampled without enabling
-// MSAARenderToSingleSampled feature should result in error.
-TEST_F(RenderPipelineValidationTest, MSAARenderToSingleSampledOnUnsupportedDevice) {
+// Creating render pipeline with MultisampleStateExpandResolveTextureDawn without enabling
+// LoadResolveTexture feature should result in error.
+TEST_F(RenderPipelineValidationTest, LoadResolveTextureOnUnsupportedDevice) {
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
 
-    wgpu::DawnMultisampleStateRenderToSingleSampled pipelineMSAARenderToSingleSampledDesc;
-    pipelineMSAARenderToSingleSampledDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAARenderToSingleSampledDesc;
+    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = 4;
 
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor),
@@ -2289,8 +2289,7 @@ TEST_F(RenderPipelineTransientAttachmentValidationTest, LoadCausesError) {
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
-class MSAARenderToSingleSampledPipelineDescriptorValidationTest
-    : public RenderPipelineValidationTest {
+class LoadResolveTexturePipelineDescriptorValidationTest : public RenderPipelineValidationTest {
   protected:
     void SetUp() override {
         RenderPipelineValidationTest::SetUp();
@@ -2305,7 +2304,7 @@ class MSAARenderToSingleSampledPipelineDescriptorValidationTest
 
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::MSAARenderToSingleSampled};
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DawnLoadResolveTexture};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
@@ -2326,22 +2325,21 @@ class MSAARenderToSingleSampledPipelineDescriptorValidationTest
     wgpu::ShaderModule fsWithTextureModule;
 };
 
-// Test that creating and using a render pipeline with DawnMultisampleStateRenderToSingleSampled
+// Test that creating and using a render pipeline with MultisampleStateExpandResolveTextureDawn
 // chained struct should success.
-TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest, ValidUse) {
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, ValidUse) {
     constexpr uint32_t kSampleCount = 4;
+
+    auto msaaTexture = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
 
     // Create single sampled texture.
     auto texture =
         CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
 
-    // Create render pass (with DawnRenderPassColorAttachmentRenderToSingleSampled).
-    utils::ComboRenderPassDescriptor renderPassDescriptor({texture.CreateView()});
-    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
-
-    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled renderPassRenderToSingleSampledDesc;
-    renderPassRenderToSingleSampledDesc.implicitSampleCount = kSampleCount;
-    renderPassDescriptor.cColorAttachments[0].nextInChain = &renderPassRenderToSingleSampledDesc;
+    // Create render pass (with ExpandResolveTexture load op).
+    utils::ComboRenderPassDescriptor renderPassDescriptor({msaaTexture.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPassDescriptor.cColorAttachments[0].resolveTarget = texture.CreateView();
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -2351,9 +2349,9 @@ TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest, ValidUse) {
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsWithTextureModule;
 
-    wgpu::DawnMultisampleStateRenderToSingleSampled pipelineMSAARenderToSingleSampledDesc;
-    pipelineMSAARenderToSingleSampledDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAARenderToSingleSampledDesc;
+    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = kSampleCount;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
@@ -2371,33 +2369,34 @@ TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest, ValidUse) {
     encoder.Finish();
 }
 
-// If a render pipeline's MultisampleState contains DawnMultisampleStateRenderToSingleSampled
+// If a render pipeline's MultisampleState contains MultisampleStateExpandResolveTextureDawn
 // chained struct. Then its sampleCount must be > 1.
-TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest,
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
        PipelineSampleCountMustBeGreaterThanOne) {
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
 
-    wgpu::DawnMultisampleStateRenderToSingleSampled pipelineMSAARenderToSingleSampledDesc;
-    pipelineMSAARenderToSingleSampledDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAARenderToSingleSampledDesc;
+    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = 1;
 
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor),
                         testing::HasSubstr("multisample count (1) is not > 1"));
 }
 
-// If a render pipeline is created with MSAA render to single sampled enabled , then it cannot be
-// used in a render pass that wasn't created with that feature enabled.
-TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest,
+// If a render pipeline is created with MultisampleStateExpandResolveTextureDawn.enabled =
+// true, then it cannot be used in a render pass that wasn't created with ExpandResolveTexture load
+// op.
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
        MSAARenderToSingleSampledPipeline_UseIn_NormalRenderPass_Error) {
     constexpr uint32_t kSampleCount = 4;
 
     // Create MSAA texture.
     auto texture = CreateTexture(wgpu::TextureUsage::RenderAttachment, 4);
 
-    // Create render pass (without DawnRenderPassColorAttachmentRenderToSingleSampled).
+    // Create render pass (without ExpandResolveTexture load op).
     utils::ComboRenderPassDescriptor renderPassDescriptor({texture.CreateView()});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -2408,9 +2407,9 @@ TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest,
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
 
-    wgpu::DawnMultisampleStateRenderToSingleSampled pipelineMSAARenderToSingleSampledDesc;
-    pipelineMSAARenderToSingleSampledDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAARenderToSingleSampledDesc;
+    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = kSampleCount;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
@@ -2420,26 +2419,28 @@ TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest,
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
-// Using a normal render pipeline in a MSAA render to single sampled render pass should result in
+// Using a normal render pipeline in a ExpandResolveTexture render pass should result in
 // incompatible error.
-TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest,
-       NormalPipeline_Use_In_MSAARenderToSingleSampledRenderPass_Error) {
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
+       NormalPipeline_Use_In_ExpandResolveTextureRenderPass_Error) {
     constexpr uint32_t kSampleCount = 4;
+
+    // Create multi sampled texture.
+    auto msaaTexture = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
 
     // Create single sampled texture.
     auto texture =
         CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
 
-    // Create render pass (with DawnRenderPassColorAttachmentRenderToSingleSampled).
-    utils::ComboRenderPassDescriptor renderPassDescriptor({texture.CreateView()});
-    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled renderPassRenderToSingleSampledDesc;
-    renderPassRenderToSingleSampledDesc.implicitSampleCount = kSampleCount;
-    renderPassDescriptor.cColorAttachments[0].nextInChain = &renderPassRenderToSingleSampledDesc;
+    // Create render pass (with ExpandResolveTexture load op).
+    utils::ComboRenderPassDescriptor renderPassDescriptor({msaaTexture.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPassDescriptor.cColorAttachments[0].resolveTarget = texture.CreateView();
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
 
-    // Create render pipeline (without DawnMultisampleStateRenderToSingleSampled)
+    // Create render pipeline (without MultisampleStateExpandResolveTextureDawn)
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
@@ -2453,25 +2454,22 @@ TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest,
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
-// Bind color attachment in the MSAA render to single sampled render pass as texture should result
+// Bind resolve attachment in a ExpandResolveTexture render pass as texture should result
 // in error.
-TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest,
-       BindColorAttachmentAsTextureError) {
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, BindColorAttachmentAsTextureError) {
     constexpr uint32_t kSampleCount = 4;
 
+    // Create multi sampled texture.
+    auto msaaTexture = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
+
     // Create single sampled texture.
-    auto renderTexture =
-        CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding |
-                          wgpu::TextureUsage::TextureBinding,
-                      1);
+    auto resolveTexture =
+        CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
 
-    // Create render pass (with DawnRenderPassColorAttachmentRenderToSingleSampled).
-    utils::ComboRenderPassDescriptor renderPassDescriptor({renderTexture.CreateView()});
-    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
-
-    wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled renderPassRenderToSingleSampledDesc;
-    renderPassRenderToSingleSampledDesc.implicitSampleCount = kSampleCount;
-    renderPassDescriptor.cColorAttachments[0].nextInChain = &renderPassRenderToSingleSampledDesc;
+    // Create render pass (with ExpandResolveTexture load op).
+    utils::ComboRenderPassDescriptor renderPassDescriptor({msaaTexture.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPassDescriptor.cColorAttachments[0].resolveTarget = resolveTexture.CreateView();
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
@@ -2481,16 +2479,16 @@ TEST_F(MSAARenderToSingleSampledPipelineDescriptorValidationTest,
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsWithTextureModule;
 
-    wgpu::DawnMultisampleStateRenderToSingleSampled pipelineMSAARenderToSingleSampledDesc;
-    pipelineMSAARenderToSingleSampledDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAARenderToSingleSampledDesc;
+    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = kSampleCount;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
-    // Use color attachment's texture as input texture.
+    // Use resolve attachment as input texture.
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
-                                                     {{0, renderTexture.CreateView()}});
+                                                     {{0, resolveTexture.CreateView()}});
 
     renderPass.SetPipeline(pipeline);
     renderPass.SetBindGroup(0, bindGroup);

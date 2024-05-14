@@ -14,14 +14,8 @@ desc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureB
 
 auto texture = device.CreateTexture(&desc);
 
-// Create a render pipeline to be used in a "implicit multi-sampled" render pass.
-wgpu::DawnMultisampleStateRenderToSingleSampled pipelineMSAARenderToSingleSampledDesc;
-pipelineMSAARenderToSingleSampledDesc.enabled = true;
-
+// Create a render pipeline
 wgpu::RenderPipelineDescriptor pipelineDesc = ...;
-pipelineDesc.multisample.count = 4;
-pipelineDesc.multisample.nextInChain = &pipelineMSAARenderToSingleSampledDesc;
-
 auto pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
 // Create a render pass with "implicit multi-sampled" enabled.
@@ -43,8 +37,6 @@ renderPassEncoder.End();
 
 Notes:
  - If a texture needs to be used as an attachment in a "implicit multi-sampled" render pass, it must have `wgpu::TextureUsage::TextureBinding` usage.
- - If `wgpu::DawnMultisampleStateRenderToSingleSampled` chained struct is not included in a `wgpu::RenderPipelineDescriptor::MultisampleState`  or if it is included but `enabled` boolean flag is false, then the result render pipeline cannot be used in a "implicit multi-sampled" render pass.
-   - Similarly, a render pipeline created with `wgpu::DawnMultisampleStateRenderToSingleSampled`'s `enabled` flag = `true` won't be able to be used in normal render passes.
  - If a texture is attached to a "implicit multi-sampled" render pass. It must be single-sampled. It mustn't be assigned to the `resolveTarget` field of the the render pass' color attachment.
  - Depth stencil textures can be attached to a "implicit multi-sampled" render pass. But its sample count must match the number specified in one color attachment's `wgpu::DawnRenderPassColorAttachmentRenderToSingleSampled`'s `implicitSampleCount` field.
  - Currently only one color attachment is supported, this could be changed in future.

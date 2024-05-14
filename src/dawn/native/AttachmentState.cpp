@@ -64,9 +64,9 @@ AttachmentState::AttachmentState(DeviceBase* device,
                                  const PipelineLayoutBase* layout)
     : ObjectBase(device), mSampleCount(descriptor->multisample.count) {
     UnpackedPtr<MultisampleState> unpackedMultisampleState = Unpack(&descriptor->multisample);
-    if (auto* msaaRenderToSingleSampledDesc =
-            unpackedMultisampleState.Get<DawnMultisampleStateRenderToSingleSampled>()) {
-        mIsMSAARenderToSingleSampledEnabled = msaaRenderToSingleSampledDesc->enabled;
+    if (auto* msaaExpandResolveState =
+            unpackedMultisampleState.Get<MultisampleStateExpandResolveTextureDawn>()) {
+        mHasExpandResolveLoadOp = msaaExpandResolveState->enabled;
     }
 
     if (descriptor->fragment != nullptr) {
@@ -112,7 +112,6 @@ AttachmentState::AttachmentState(DeviceBase* device,
         if (msaaRenderToSingleSampledDesc != nullptr &&
             msaaRenderToSingleSampledDesc->implicitSampleCount > 1) {
             attachmentSampleCount = msaaRenderToSingleSampledDesc->implicitSampleCount;
-            mIsMSAARenderToSingleSampledEnabled = true;
         } else {
             attachmentSampleCount = attachment->GetTexture()->GetSampleCount();
         }
@@ -121,6 +120,10 @@ AttachmentState::AttachmentState(DeviceBase* device,
             mSampleCount = attachmentSampleCount;
         } else {
             DAWN_ASSERT(mSampleCount == attachmentSampleCount);
+        }
+
+        if (colorAttachment.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
+            mHasExpandResolveLoadOp = true;
         }
     }
 
@@ -163,7 +166,7 @@ AttachmentState::AttachmentState(const AttachmentState& blueprint)
     mColorFormats = blueprint.mColorFormats;
     mDepthStencilFormat = blueprint.mDepthStencilFormat;
     mSampleCount = blueprint.mSampleCount;
-    mIsMSAARenderToSingleSampledEnabled = blueprint.mIsMSAARenderToSingleSampledEnabled;
+    mHasExpandResolveLoadOp = blueprint.mHasExpandResolveLoadOp;
     mHasPLS = blueprint.mHasPLS;
     mStorageAttachmentSlots = blueprint.mStorageAttachmentSlots;
     SetContentHash(blueprint.GetContentHash());
@@ -199,7 +202,7 @@ bool AttachmentState::EqualityFunc::operator()(const AttachmentState* a,
     }
 
     // Both attachment state must either enable MSAA render to single sampled or disable it.
-    if (a->mIsMSAARenderToSingleSampledEnabled != b->mIsMSAARenderToSingleSampledEnabled) {
+    if (a->mHasExpandResolveLoadOp != b->mHasExpandResolveLoadOp) {
         return false;
     }
 
@@ -235,7 +238,7 @@ size_t AttachmentState::ComputeContentHash() {
     HashCombine(&hash, mSampleCount);
 
     // Hash MSAA render to single sampled flag
-    HashCombine(&hash, mIsMSAARenderToSingleSampledEnabled);
+    HashCombine(&hash, mHasExpandResolveLoadOp);
 
     // Hash the PLS state
     HashCombine(&hash, mHasPLS);
@@ -268,8 +271,8 @@ uint32_t AttachmentState::GetSampleCount() const {
     return mSampleCount;
 }
 
-bool AttachmentState::IsMSAARenderToSingleSampledEnabled() const {
-    return mIsMSAARenderToSingleSampledEnabled;
+bool AttachmentState::HasExpandResolveLoadOp() const {
+    return mHasExpandResolveLoadOp;
 }
 
 bool AttachmentState::HasPixelLocalStorage() const {

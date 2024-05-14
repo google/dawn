@@ -355,9 +355,8 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 
     s->Append(absl::StrFormat("sampleCount: %u", value->GetSampleCount()));
 
-    if (value->GetDevice()->HasFeature(Feature::MSAARenderToSingleSampled)) {
-        s->Append(absl::StrFormat(", msaaRenderToSingleSampled: %d",
-                                  value->IsMSAARenderToSingleSampledEnabled()));
+    if (value->GetDevice()->HasFeature(Feature::DawnLoadResolveTexture)) {
+        s->Append(absl::StrFormat(", hasExpandResolveLoadOp: %d", value->HasExpandResolveLoadOp()));
     }
 
     if (value->HasPixelLocalStorage()) {

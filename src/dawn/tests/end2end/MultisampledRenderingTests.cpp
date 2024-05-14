@@ -62,7 +62,7 @@ class MultisampledRenderingTest : public DawnTest {
         uint32_t sampleMask = 0xFFFFFFFF,
         bool alphaToCoverageEnabled = false,
         bool flipTriangle = false,
-        bool enableMSAARenderToSingleSampled = false) {
+        bool enableExpandResolveLoadOp = false) {
         const char* kFsOneOutputWithDepth = R"(
             struct U {
                 color : vec4f,
@@ -95,13 +95,13 @@ class MultisampledRenderingTest : public DawnTest {
         const char* fs = testDepth ? kFsOneOutputWithDepth : kFsOneOutputWithoutDepth;
 
         return CreateRenderPipelineForTest(fs, 1, testDepth, sampleMask, alphaToCoverageEnabled,
-                                           flipTriangle, enableMSAARenderToSingleSampled);
+                                           flipTriangle, enableExpandResolveLoadOp);
     }
 
     wgpu::RenderPipeline CreateRenderPipelineWithTwoOutputsForTest(
         uint32_t sampleMask = 0xFFFFFFFF,
         bool alphaToCoverageEnabled = false,
-        bool enableMSAARenderToSingleSampled = false) {
+        bool enableExpandResolveLoadOp = false) {
         const char* kFsTwoOutputs = R"(
             struct U {
                 color0 : vec4f,
@@ -123,13 +123,13 @@ class MultisampledRenderingTest : public DawnTest {
 
         return CreateRenderPipelineForTest(kFsTwoOutputs, 2, false, sampleMask,
                                            alphaToCoverageEnabled, /*flipTriangle=*/false,
-                                           enableMSAARenderToSingleSampled);
+                                           enableExpandResolveLoadOp);
     }
 
     wgpu::RenderPipeline CreateRenderPipelineWithNonZeroLocationOutputForTest(
         uint32_t sampleMask = 0xFFFFFFFF,
         bool alphaToCoverageEnabled = false,
-        bool enableMSAARenderToSingleSampled = false) {
+        bool enableExpandResolveLoadOp = false) {
         const char* kFsNonZeroLocationOutputs = R"(
             struct U {
                 color : vec4f
@@ -142,7 +142,7 @@ class MultisampledRenderingTest : public DawnTest {
 
         return CreateRenderPipelineForTest(kFsNonZeroLocationOutputs, 1, false, sampleMask,
                                            alphaToCoverageEnabled, /*flipTriangle=*/false,
-                                           enableMSAARenderToSingleSampled, 1);
+                                           enableExpandResolveLoadOp, 1);
     }
 
     wgpu::Texture CreateTextureForRenderAttachment(wgpu::TextureFormat format,
@@ -271,7 +271,7 @@ class MultisampledRenderingTest : public DawnTest {
                                                      uint32_t sampleMask = 0xFFFFFFFF,
                                                      bool alphaToCoverageEnabled = false,
                                                      bool flipTriangle = false,
-                                                     bool enableMSAARenderToSingleSampled = false,
+                                                     bool enableExpandResolveLoadOp = false,
                                                      uint32_t firstAttachmentLocation = 0) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
@@ -319,10 +319,10 @@ class MultisampledRenderingTest : public DawnTest {
         pipelineDescriptor.multisample.mask = sampleMask;
         pipelineDescriptor.multisample.alphaToCoverageEnabled = alphaToCoverageEnabled;
 
-        wgpu::DawnMultisampleStateRenderToSingleSampled msaaRenderToSingleSampledDesc;
-        if (enableMSAARenderToSingleSampled) {
-            msaaRenderToSingleSampledDesc.enabled = true;
-            pipelineDescriptor.multisample.nextInChain = &msaaRenderToSingleSampledDesc;
+        wgpu::MultisampleStateExpandResolveTextureDawn msaaExpandResolveDesc;
+        if (enableExpandResolveLoadOp) {
+            msaaExpandResolveDesc.enabled = true;
+            pipelineDescriptor.multisample.nextInChain = &msaaExpandResolveDesc;
         }
 
         pipelineDescriptor.cFragment.targetCount = numColorAttachments + firstAttachmentLocation;
@@ -1373,7 +1373,7 @@ TEST_P(MultisampledRenderToSingleSampledTest, DrawThenLoad) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
         /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
-        /*flipTriangle=*/false, /*enableMSAARenderToSingleSampled=*/true);
+        /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/false);
 
     constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
 
@@ -1420,7 +1420,7 @@ TEST_P(MultisampledRenderToSingleSampledTest, ClearThenLoadThenDraw) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
         /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
-        /*flipTriangle=*/false, /*enableMSAARenderToSingleSampled=*/true);
+        /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/false);
 
     constexpr wgpu::Color kRed = {1.0f, 0.0f, 0.0f, 1.0f};
     constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
@@ -1474,7 +1474,7 @@ TEST_P(MultisampledRenderToSingleSampledTest, DrawWithDepthTest) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
         /*testDepth=*/true, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
-        /*flipTriangle=*/false, /*enableMSAARenderToSingleSampled=*/true);
+        /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/false);
 
     constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
     constexpr wgpu::Color kRed = {0.8f, 0.0f, 0.0f, 0.8f};
@@ -1555,7 +1555,7 @@ TEST_P(DawnLoadResolveTextureTest, DrawThenLoad) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
         /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
-        /*flipTriangle=*/false, /*enableMSAARenderToSingleSampled=*/false);
+        /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/false);
 
     constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
 
@@ -1584,6 +1584,79 @@ TEST_P(DawnLoadResolveTextureTest, DrawThenLoad) {
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
     queue.Submit(1, &commandBuffer);
 
+    VerifyResolveTarget(kGreen, singleSampledTexture);
+}
+
+// Test ExpandResolveTexture load op rendering with depth test works correctly.
+TEST_P(DawnLoadResolveTextureTest, DrawWithDepthTest) {
+    auto multiSampledTexture = CreateTextureForRenderAttachment(
+        kColorFormat, 4, 1, 1,
+        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
+        /*supportsTextureBinding=*/false);
+    auto multiSampledTextureView = multiSampledTexture.CreateView();
+
+    auto singleSampledTexture =
+        CreateTextureForRenderAttachment(kColorFormat, 1, 1, 1, /*transientAttachment=*/false,
+                                         /*supportsTextureBinding=*/true);
+
+    auto singleSampledTextureView = singleSampledTexture.CreateView();
+
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+        /*testDepth=*/true, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
+        /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/true);
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+
+    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+    constexpr wgpu::Color kRed = {0.8f, 0.0f, 0.0f, 0.8f};
+
+    // In first render pass we clear the render pass without drawing anything
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {multiSampledTextureView}, {singleSampledTextureView}, wgpu::LoadOp::Clear,
+            wgpu::LoadOp::Clear,
+            /*testDepth=*/true);
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.End();
+    }
+
+    // In 2nd render pass we draw a green triangle with depth value == 0.2f.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {multiSampledTextureView}, {singleSampledTextureView},
+            wgpu::LoadOp::ExpandResolveTexture, wgpu::LoadOp::Clear,
+            /*testDepth=*/true);
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+
+        std::array<float, 8> kUniformData = {kGreen.r, kGreen.g, kGreen.b, kGreen.a,  // Color
+                                             0.2f};                                   // depth
+        constexpr uint32_t kSize = sizeof(kUniformData);
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
+    }
+
+    // In 3rd render pass we draw a red triangle with depth value == 0.5f.
+    // This red triangle should not be displayed because it is behind the green one that is drawn in
+    // the last render pass.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {multiSampledTextureView}, {singleSampledTextureView},
+            wgpu::LoadOp::ExpandResolveTexture, wgpu::LoadOp::Load,
+            /*testDepth=*/true);
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+
+        std::array<float, 8> kUniformData = {kRed.r, kRed.g, kRed.b, kRed.a,  // color
+                                             0.5f};                           // depth
+        constexpr uint32_t kSize = sizeof(kUniformData);
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
+    }
+
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    // The color of the pixel in the middle of mResolveTexture should be green if MSAA resolve runs
+    // correctly with depth test.
     VerifyResolveTarget(kGreen, singleSampledTexture);
 }
 
