@@ -150,9 +150,9 @@ class Printer : public tint::TextGenerator {
     std::unordered_set<const core::type::Struct*> emitted_structs_;
 
     /// The current function being emitted
-    core::ir::Function* current_function_ = nullptr;
+    const core::ir::Function* current_function_ = nullptr;
     /// The current block being emitted
-    core::ir::Block* current_block_ = nullptr;
+    const core::ir::Block* current_block_ = nullptr;
 
     /// Unique name of the tint_array<T, N> template.
     /// Non-empty only if the template has been generated.
@@ -224,7 +224,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit the function
     /// @param func the function to emit
-    void EmitFunction(core::ir::Function* func) {
+    void EmitFunction(const core::ir::Function* func) {
         TINT_SCOPED_ASSIGNMENT(current_function_, func);
 
         {
@@ -318,43 +318,43 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a block
     /// @param block the block to emit
-    void EmitBlock(core::ir::Block* block) { EmitBlockInstructions(block); }
+    void EmitBlock(const core::ir::Block* block) { EmitBlockInstructions(block); }
 
     /// Emit the instructions in a block
     /// @param block the block with the instructions to emit
-    void EmitBlockInstructions(core::ir::Block* block) {
+    void EmitBlockInstructions(const core::ir::Block* block) {
         TINT_SCOPED_ASSIGNMENT(current_block_, block);
 
         for (auto* inst : *block) {
             Switch(
-                inst,                                                //
-                [&](core::ir::BreakIf* i) { EmitBreakIf(i); },       //
-                [&](core::ir::Continue*) { EmitContinue(); },        //
-                [&](core::ir::Discard*) { EmitDiscard(); },          //
-                [&](core::ir::ExitIf* i) { EmitExitIf(i); },         //
-                [&](core::ir::ExitLoop*) { EmitExitLoop(); },        //
-                [&](core::ir::ExitSwitch*) { EmitExitSwitch(); },    //
-                [&](core::ir::If* i) { EmitIf(i); },                 //
-                [&](core::ir::Let* i) { EmitLet(i); },               //
-                [&](core::ir::Loop* i) { EmitLoop(i); },             //
-                [&](core::ir::NextIteration*) { /* do nothing */ },  //
-                [&](core::ir::Return* i) { EmitReturn(i); },         //
-                [&](core::ir::Store* i) { EmitStore(i); },           //
-                [&](core::ir::Switch* i) { EmitSwitch(i); },         //
-                [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
-                [&](core::ir::Call* i) { EmitCallStmt(i); },         //
-                [&](core::ir::Var* i) { EmitVar(i); },               //
-                [&](core::ir::StoreVectorElement* e) { EmitStoreVectorElement(e); },
-                [&](core::ir::TerminateInvocation*) { EmitDiscard(); },  //
+                inst,                                                      //
+                [&](const core::ir::BreakIf* i) { EmitBreakIf(i); },       //
+                [&](const core::ir::Continue*) { EmitContinue(); },        //
+                [&](const core::ir::Discard*) { EmitDiscard(); },          //
+                [&](const core::ir::ExitIf* i) { EmitExitIf(i); },         //
+                [&](const core::ir::ExitLoop*) { EmitExitLoop(); },        //
+                [&](const core::ir::ExitSwitch*) { EmitExitSwitch(); },    //
+                [&](const core::ir::If* i) { EmitIf(i); },                 //
+                [&](const core::ir::Let* i) { EmitLet(i); },               //
+                [&](const core::ir::Loop* i) { EmitLoop(i); },             //
+                [&](const core::ir::NextIteration*) { /* do nothing */ },  //
+                [&](const core::ir::Return* i) { EmitReturn(i); },         //
+                [&](const core::ir::Store* i) { EmitStore(i); },           //
+                [&](const core::ir::Switch* i) { EmitSwitch(i); },         //
+                [&](const core::ir::Unreachable*) { EmitUnreachable(); },  //
+                [&](const core::ir::Call* i) { EmitCallStmt(i); },         //
+                [&](const core::ir::Var* i) { EmitVar(i); },               //
+                [&](const core::ir::StoreVectorElement* e) { EmitStoreVectorElement(e); },
+                [&](const core::ir::TerminateInvocation*) { EmitDiscard(); },  //
 
-                [&](core::ir::LoadVectorElement*) { /* inlined */ },  //
-                [&](core::ir::Swizzle*) { /* inlined */ },            //
-                [&](core::ir::Bitcast*) { /* inlined */ },            //
-                [&](core::ir::CoreBinary*) { /* inlined */ },         //
-                [&](core::ir::CoreUnary*) { /* inlined */ },          //
-                [&](core::ir::Load*) { /* inlined */ },               //
-                [&](core::ir::Construct*) { /* inlined */ },          //
-                [&](core::ir::Access*) { /* inlined */ },             //
+                [&](const core::ir::LoadVectorElement*) { /* inlined */ },  //
+                [&](const core::ir::Swizzle*) { /* inlined */ },            //
+                [&](const core::ir::Bitcast*) { /* inlined */ },            //
+                [&](const core::ir::CoreBinary*) { /* inlined */ },         //
+                [&](const core::ir::CoreUnary*) { /* inlined */ },          //
+                [&](const core::ir::Load*) { /* inlined */ },               //
+                [&](const core::ir::Construct*) { /* inlined */ },          //
+                [&](const core::ir::Access*) { /* inlined */ },             //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -479,7 +479,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a var instruction
     /// @param v the var instruction
-    void EmitVar(core::ir::Var* v) {
+    void EmitVar(const core::ir::Var* v) {
         auto out = Line();
 
         auto* ptr = v->Result(0)->Type()->As<core::type::Pointer>();
@@ -517,7 +517,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a let instruction
     /// @param l the let instruction
-    void EmitLet(core::ir::Let* l) {
+    void EmitLet(const core::ir::Let* l) {
         auto out = Line();
         EmitType(out, l->Result(0)->Type());
         out << " const " << NameOf(l->Result(0)) << " = ";
@@ -527,7 +527,7 @@ class Printer : public tint::TextGenerator {
 
     void EmitExitLoop() { Line() << "break;"; }
 
-    void EmitBreakIf(core::ir::BreakIf* b) {
+    void EmitBreakIf(const core::ir::BreakIf* b) {
         auto out = Line();
         out << "if ";
         EmitValue(out, b->Condition());
@@ -541,7 +541,7 @@ class Printer : public tint::TextGenerator {
         Line() << "continue;";
     }
 
-    void EmitLoop(core::ir::Loop* l) {
+    void EmitLoop(const core::ir::Loop* l) {
         // Note, we can't just emit the continuing inside a conditional at the top of the loop
         // because any variable declared in the block must be visible to the continuing.
         //
@@ -572,7 +572,7 @@ class Printer : public tint::TextGenerator {
 
     void EmitExitSwitch() { Line() << "break;"; }
 
-    void EmitSwitch(core::ir::Switch* s) {
+    void EmitSwitch(const core::ir::Switch* s) {
         {
             auto out = Line();
             out << "switch(";
@@ -646,7 +646,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit an if instruction
     /// @param if_ the if instruction
-    void EmitIf(core::ir::If* if_) {
+    void EmitIf(const core::ir::If* if_) {
         {
             auto out = Line();
             out << "if (";
@@ -671,7 +671,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit an exit-if instruction
     /// @param e the exit-if instruction
-    void EmitExitIf(core::ir::ExitIf* e) {
+    void EmitExitIf(const core::ir::ExitIf* e) {
         auto results = e->If()->Results();
         auto args = e->Args();
         for (size_t i = 0; i < e->Args().Length(); ++i) {
@@ -687,7 +687,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a return instruction
     /// @param r the return instruction
-    void EmitReturn(core::ir::Return* r) {
+    void EmitReturn(const core::ir::Return* r) {
         // If this return has no arguments and the current block is for the function which is
         // being returned, skip the return.
         if (current_block_ == current_function_->Block() && r->Args().IsEmpty()) {
@@ -710,7 +710,7 @@ class Printer : public tint::TextGenerator {
     void EmitDiscard() { Line() << "discard_fragment();"; }
 
     /// Emit a store
-    void EmitStore(core::ir::Store* s) {
+    void EmitStore(const core::ir::Store* s) {
         auto out = Line();
 
         EmitValue(out, s->To());
