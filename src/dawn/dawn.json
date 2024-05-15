@@ -2667,10 +2667,10 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 1, "name": "fifo"},
-            {"value": 2, "name": "fifo relaxed", "tags": ["upstream"]},
-            {"value": 3, "name": "immediate"},
-            {"value": 4, "name": "mailbox"}
+            {"value": 0, "name": "fifo"},
+            {"value": 1, "name": "fifo relaxed"},
+            {"value": 2, "name": "immediate"},
+            {"value": 3, "name": "mailbox"}
         ]
     },
     "programmable stage descriptor": {

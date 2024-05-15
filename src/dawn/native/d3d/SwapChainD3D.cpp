@@ -49,7 +49,10 @@ uint32_t PresentModeToBufferCount(wgpu::PresentMode mode) {
             return 2;
         case wgpu::PresentMode::Mailbox:
             return 3;
+        default:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 uint32_t PresentModeToSwapInterval(wgpu::PresentMode mode) {
@@ -59,7 +62,10 @@ uint32_t PresentModeToSwapInterval(wgpu::PresentMode mode) {
             return 0;
         case wgpu::PresentMode::Fifo:
             return 1;
+        default:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 UINT PresentModeToSwapChainFlags(wgpu::PresentMode mode) {
