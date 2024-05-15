@@ -1114,6 +1114,25 @@ TEST_F(IR_ValidatorTest, Access_IndexVector_ViaMatrix) {
     ASSERT_EQ(res, Success);
 }
 
+TEST_F(IR_ValidatorTest, Access_ExtractPointerFromStruct) {
+    auto* ptr = ty.ptr<private_, i32>();
+    Vector<type::Manager::StructMemberDesc, 1> members{
+        type::Manager::StructMemberDesc{mod.symbols.New("a"), ptr},
+    };
+    auto* str = ty.Struct(mod.symbols.New("MyStruct"), std::move(members));
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam("obj", str);
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ptr, obj, 0_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
 TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
     auto* f = b.Function("my_func", ty.void_());
 

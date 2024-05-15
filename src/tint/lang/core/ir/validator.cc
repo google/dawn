@@ -992,13 +992,20 @@ void Validator::CheckAccess(const Access* a) {
 
     auto* want = a->Result(0)->Type();
     auto* want_view = want->As<type::MemoryView>();
-    bool ok = ty == want->UnwrapPtrOrRef() && (obj_view == nullptr) == (want_view == nullptr);
-    if (ok && obj_view) {
-        ok = obj_view->Is<type::Pointer>() == want_view->Is<type::Pointer>() &&
-             obj_view->AddressSpace() == want_view->AddressSpace() &&
-             obj_view->Access() == want_view->Access();
+    bool ok = true;
+    if (obj_view) {
+        // Pointer source always means pointer result.
+        ok = want_view && ty == want_view->StoreType();
+        if (ok) {
+            // Also check that the address space and access modes match.
+            ok = obj_view->Is<type::Pointer>() == want_view->Is<type::Pointer>() &&
+                 obj_view->AddressSpace() == want_view->AddressSpace() &&
+                 obj_view->Access() == want_view->Access();
+        }
+    } else {
+        // Otherwise, result types should exactly match.
+        ok = ty == want;
     }
-
     if (TINT_UNLIKELY(!ok)) {
         AddError(a) << "result of access chain is type " << desc_of(in_kind, ty)
                     << " but instruction type is " << style::Type(want->FriendlyName());
