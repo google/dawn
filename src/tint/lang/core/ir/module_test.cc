@@ -26,8 +26,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/ir/module.h"
+
+#include "gmock/gmock.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/var.h"
+
+using ::testing::ElementsAre;
 
 namespace tint::core::ir {
 namespace {
@@ -53,6 +57,43 @@ TEST_F(IR_ModuleTest, SetNameRename) {
     mod.SetName(v, "a");
     mod.SetName(v, "b");
     EXPECT_EQ(mod.NameOf(v).Name(), "b");
+}
+
+TEST_F(IR_ModuleTest, DependencyOrderedFunctions) {
+    auto* fa = b.Function("a", ty.void_());
+    auto* fb = b.Function("b", ty.void_());
+    auto* fc = b.Function("c", ty.void_());
+    auto* fd = b.Function("d", ty.void_());
+    b.Append(fa->Block(), [&] {  //
+        auto* ifelse = b.If(true);
+        b.Append(ifelse->True(), [&] {
+            b.Call(fc);
+            b.ExitIf(ifelse);
+        });
+        b.Append(ifelse->False(), [&] {
+            b.Call(fb);
+            b.ExitIf(ifelse);
+        });
+        b.Return(fa);
+    });
+    b.Append(fb->Block(), [&] {  //
+        b.Call(fc);
+        b.Call(fd);
+        b.Return(fb);
+    });
+    b.Append(fc->Block(), [&] {  //
+        b.Call(fd);
+        b.Return(fc);
+    });
+    b.Append(fd->Block(), [&] {  //
+        b.Return(fd);
+    });
+    mod.functions.Clear();
+    mod.functions.Push(fa);
+    mod.functions.Push(fd);
+    mod.functions.Push(fb);
+    mod.functions.Push(fc);
+    EXPECT_THAT(mod.DependencyOrderedFunctions(), ElementsAre(fd, fc, fb, fa));
 }
 
 }  // namespace

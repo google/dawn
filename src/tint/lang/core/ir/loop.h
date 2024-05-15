@@ -88,6 +88,9 @@ class Loop final : public Castable<Loop, ControlInstruction> {
     /// @copydoc ControlInstruction::ForeachBlock
     void ForeachBlock(const std::function<void(ir::Block*)>& cb) override;
 
+    /// @copydoc ControlInstruction::ForeachBlock
+    void ForeachBlock(const std::function<void(const ir::Block*)>& cb) const override;
+
     /// @returns the switch initializer block
     ir::Block* Initializer() { return initializer_; }
 

@@ -54,6 +54,10 @@ class ControlInstruction : public Castable<ControlInstruction, OperandInstructio
     /// @param cb the function to call once for each block
     virtual void ForeachBlock(const std::function<void(ir::Block*)>& cb) = 0;
 
+    /// Calls @p cb for each block owned by this control instruction
+    /// @param cb the function to call once for each block
+    virtual void ForeachBlock(const std::function<void(const ir::Block*)>& cb) const = 0;
+
     /// @return All the exits for the flow control instruction
     const Hashset<Exit*, 2>& Exits() const { return exits_; }
 

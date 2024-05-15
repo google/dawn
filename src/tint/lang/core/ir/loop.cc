@@ -87,6 +87,18 @@ void Loop::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
     }
 }
 
+void Loop::ForeachBlock(const std::function<void(const ir::Block*)>& cb) const {
+    if (initializer_) {
+        cb(initializer_);
+    }
+    if (body_) {
+        cb(body_);
+    }
+    if (continuing_) {
+        cb(continuing_);
+    }
+}
+
 bool Loop::HasInitializer() const {
     return initializer_->Terminator() != nullptr;
 }

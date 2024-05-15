@@ -129,6 +129,9 @@ class Module {
         return {allocators.values.Objects()};
     }
 
+    /// @returns the functions in the module, in dependency order
+    Vector<const Function*, 16> DependencyOrderedFunctions() const;
+
     /// The block allocator
     BlockAllocator<Block> blocks;
 
@@ -144,7 +147,7 @@ class Module {
         BlockAllocator<Value> values;
     } allocators;
 
-    /// List of functions in the program
+    /// List of functions in the module.
     Vector<ConstPropagatingPtr<Function>, 8> functions;
 
     /// The block containing module level declarations, if any exist.

@@ -63,6 +63,15 @@ void If::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
     }
 }
 
+void If::ForeachBlock(const std::function<void(const ir::Block*)>& cb) const {
+    if (true_) {
+        cb(true_);
+    }
+    if (false_) {
+        cb(false_);
+    }
+}
+
 If* If::Clone(CloneContext& ctx) {
     auto* cond = ctx.Remap(Condition());
     auto* new_true = ctx.ir.blocks.Create<ir::Block>();
