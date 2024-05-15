@@ -1,18 +1,12 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
+uint tint_mod_u32(uint lhs, uint rhs) {
+  uint const v = select(rhs, 1u, (rhs == 0u));
+  return (lhs - ((lhs / v) * v));
+}
 kernel void f() {
   uint const a = 1u;
   uint const b = 2u;
   uint const r = tint_mod_u32(a, b);
 }
-uint tint_mod_u32(uint lhs, uint rhs) {
-  uint const v = select(rhs, 1u, (rhs == 0u));
-  return (lhs - ((lhs / v) * v));
-}
-program_source:7:18: error: use of undeclared identifier 'tint_mod_u32'
-  uint const r = tint_mod_u32(a, b);
-                 ^
-

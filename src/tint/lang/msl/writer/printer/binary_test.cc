@@ -91,13 +91,13 @@ TEST_F(MslPrinterTest, BinaryDivU32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / select(rhs, 1u, (rhs == 0u)));
+}
 void foo() {
   uint const left = 1u;
   uint const right = 2u;
   uint const val = tint_div_u32(left, right);
-}
-uint tint_div_u32(uint lhs, uint rhs) {
-  return (lhs / select(rhs, 1u, (rhs == 0u)));
 }
 )");
 }
@@ -114,14 +114,14 @@ TEST_F(MslPrinterTest, BinaryModU32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
+uint tint_mod_u32(uint lhs, uint rhs) {
+  uint const v = select(rhs, 1u, (rhs == 0u));
+  return (lhs - ((lhs / v) * v));
+}
 void foo() {
   uint const left = 1u;
   uint const right = 2u;
   uint const val = tint_mod_u32(left, right);
-}
-uint tint_mod_u32(uint lhs, uint rhs) {
-  uint const v = select(rhs, 1u, (rhs == 0u));
-  return (lhs - ((lhs / v) * v));
 }
 )");
 }

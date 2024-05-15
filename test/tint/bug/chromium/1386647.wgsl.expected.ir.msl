@@ -1,16 +1,10 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
-kernel void f(uint3 v [[thread_position_in_grid]]) {
-  uint const l = (v[0u] << (tint_mod_u32(v[1u], 1u) & 31u));
-}
 uint tint_mod_u32(uint lhs, uint rhs) {
   uint const v_1 = select(rhs, 1u, (rhs == 0u));
   return (lhs - ((lhs / v_1) * v_1));
 }
-program_source:5:29: error: use of undeclared identifier 'tint_mod_u32'
+kernel void f(uint3 v [[thread_position_in_grid]]) {
   uint const l = (v[0u] << (tint_mod_u32(v[1u], 1u) & 31u));
-                            ^
-
+}

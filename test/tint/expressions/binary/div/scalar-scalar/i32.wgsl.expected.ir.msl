@@ -1,17 +1,11 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
+int tint_div_i32(int lhs, int rhs) {
+  return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))));
+}
 kernel void f() {
   int const a = 1;
   int const b = 2;
   int const r = tint_div_i32(a, b);
 }
-int tint_div_i32(int lhs, int rhs) {
-  return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))));
-}
-program_source:7:17: error: use of undeclared identifier 'tint_div_i32'
-  int const r = tint_div_i32(a, b);
-                ^
-
