@@ -228,7 +228,7 @@ void SetDebugNameInternal(Device* device,
                           uint64_t objectHandle,
                           const char* prefix,
                           std::string label) {
-    if (!objectHandle) {
+    if (!objectHandle || !device->GetVkDevice()) {
         return;
     }
 
