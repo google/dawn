@@ -792,6 +792,12 @@ luci.cq_tryjob_verifier(
 
 luci.cq_tryjob_verifier(
     cq_group = "Dawn-CQ",
+    builder = "chromium:try/dawn-try-mac-arm64-m2-exp",
+    includable_only = True,
+)
+
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
     builder = "chromium:try/dawn-try-mac-intel-exp",
     includable_only = True,
 )
