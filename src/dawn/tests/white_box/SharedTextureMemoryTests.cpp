@@ -772,7 +772,7 @@ GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SharedTextureMemoryTests);
 namespace {
 
 using testing::HasSubstr;
-using testing::MockCallback;
+using testing::MockCppCallback;
 
 template <typename T>
 T& AsNonConst(const T& rhs) {
@@ -788,12 +788,13 @@ TEST_P(SharedTextureMemoryNoFeatureTests, CreationWithoutFeature) {
     const auto& memories =
         GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount);
 
-    MockCallback<WGPUErrorCallback> popErrorScopeCallback;
+    MockCppCallback<void (*)(wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*)>
+        popErrorScopeCallback;
     EXPECT_CALL(popErrorScopeCallback,
-                Call(WGPUErrorType_Validation, HasSubstr("is not enabled"), this));
+                Call(wgpu::PopErrorScopeStatus::Success, wgpu::ErrorType::Validation,
+                     HasSubstr("is not enabled")));
 
-    device.PopErrorScope(popErrorScopeCallback.Callback(),
-                         popErrorScopeCallback.MakeUserdata(this));
+    device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, popErrorScopeCallback.Callback());
 
     for (wgpu::SharedTextureMemory memory : memories) {
         ASSERT_DEVICE_ERROR_MSG(wgpu::Texture texture = memory.CreateTexture(),

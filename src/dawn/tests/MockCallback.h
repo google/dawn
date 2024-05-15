@@ -113,6 +113,23 @@ class MockCallback<R (*)(Args...)> : public ::testing::MockFunction<R(Args...)> 
     std::set<std::unique_ptr<MockAndUserdata>> mUserdatas;
 };
 
+template <typename F>
+class MockCppCallback;
+
+// Helper wrapper class for C++ entry point callbacks.
+// Example Usage:
+//   MockCppCallback<void (*)(wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*)> mock;
+//
+//   device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mock.Callback());
+//   EXPECT_CALL(mock, Call(wgpu::PopErrorScopeStatus::Success, _, _));
+template <typename R, typename... Args>
+class MockCppCallback<R (*)(Args...)> : public ::testing::MockFunction<R(Args...)> {
+  public:
+    auto Callback() {
+        return [this](Args... args) -> R { return this->Call(args...); };
+    }
+};
+
 }  // namespace testing
 
 #endif  // SRC_DAWN_TESTS_MOCKCALLBACK_H_

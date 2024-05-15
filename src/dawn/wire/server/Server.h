@@ -250,6 +250,7 @@ class Server : public ServerBase {
                       WGPUDeviceLostReason reason,
                       const char* message);
     void OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
+                               WGPUPopErrorScopeStatus status,
                                WGPUErrorType type,
                                const char* message);
     void OnBufferMapAsyncCallback(MapUserdata* userdata, WGPUBufferMapAsyncStatus status);

@@ -102,9 +102,11 @@ TEST_P(DeviceLifetimeTests, DroppedWhilePopErrorScope) {
     bool done = false;
 
     device.PopErrorScope(
-        [](WGPUErrorType type, const char*, void* userdata) {
-            *static_cast<bool*>(userdata) = true;
-            EXPECT_EQ(type, WGPUErrorType_NoError);
+        wgpu::CallbackMode::AllowProcessEvents,
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*, bool* done) {
+            *done = true;
+            EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
+            EXPECT_EQ(type, wgpu::ErrorType::NoError);
         },
         &done);
     device = nullptr;
@@ -125,10 +127,13 @@ TEST_P(DeviceLifetimeTests, DroppedInsidePopErrorScope) {
     // Ask for a popErrorScope callback and drop the device inside the callback.
     Userdata data = Userdata{std::move(device), false};
     data.device.PopErrorScope(
-        [](WGPUErrorType type, const char*, void* userdata) {
-            EXPECT_EQ(type, WGPUErrorType_NoError);
-            static_cast<Userdata*>(userdata)->device = nullptr;
-            static_cast<Userdata*>(userdata)->done = true;
+        wgpu::CallbackMode::AllowProcessEvents,
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*,
+           Userdata* userdata) {
+            EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
+            EXPECT_EQ(type, wgpu::ErrorType::NoError);
+            userdata->device = nullptr;
+            userdata->done = true;
         },
         &data);
 
@@ -555,9 +560,9 @@ TEST_P(DeviceLifetimeTests, DropDevice2InProcessEvents) {
     // The following callback will drop the 2nd device. It won't be triggered until
     // instance.ProcessEvents() is called.
     device.PopErrorScope(
-        [](WGPUErrorType type, const char*, void* userdataPtr) {
-            auto userdata = static_cast<UserData*>(userdataPtr);
-
+        wgpu::CallbackMode::AllowProcessEvents,
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*,
+           UserData* userdata) {
             userdata->device2 = nullptr;
             userdata->done = true;
         },

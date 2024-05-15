@@ -1491,6 +1491,15 @@
                 ]
             },
             {
+                "name": "pop error scope 2",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "callback info", "type": "pop error scope callback info 2"}
+                ]
+            },
+            {
                 "name": "set label",
                 "returns": "void",
                 "args": [
@@ -1586,6 +1595,14 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "pop error scope callback 2": {
+        "category": "callback function",
+        "args": [
+            {"name": "status", "type": "pop error scope status"},
+            {"name": "type", "type": "error type"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
+        ]
+    },
     "pop error scope callback info": {
         "category": "structure",
         "extensible": "in",
@@ -1594,6 +1611,12 @@
             {"name": "callback", "type": "pop error scope callback"},
             {"name": "old callback", "type": "error callback", "_comment": "TODO(crbug.com/dawn/2021) Deprecate this field once we have moved callers to use the new callback signature."},
             {"name": "userdata", "type": "void *", "default": "nullptr"}
+        ]
+    },
+    "pop error scope callback info 2": {
+        "category": "callback info",
+        "members": [
+            {"name": "callback", "type": "pop error scope callback 2"}
         ]
     },
     "limits": {

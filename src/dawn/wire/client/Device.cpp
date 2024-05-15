@@ -45,15 +45,11 @@ class PopErrorScopeEvent final : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::PopErrorScope;
 
-    explicit PopErrorScopeEvent(const WGPUPopErrorScopeCallbackInfo& callbackInfo)
+    explicit PopErrorScopeEvent(const WGPUPopErrorScopeCallbackInfo2& callbackInfo)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
-          mOldCallback(callbackInfo.oldCallback),
-          mUserdata(callbackInfo.userdata) {
-        // Exactly 1 callback should be set.
-        DAWN_ASSERT((mCallback != nullptr && mOldCallback == nullptr) ||
-                    (mCallback == nullptr && mOldCallback != nullptr));
-    }
+          mUserdata1(callbackInfo.userdata1),
+          mUserdata2(callbackInfo.userdata2) {}
 
     EventType GetType() override { return kType; }
 
@@ -71,19 +67,16 @@ class PopErrorScopeEvent final : public TrackedEvent {
             mStatus = WGPUPopErrorScopeStatus_InstanceDropped;
             mMessage = std::nullopt;
         }
-        void* userdata = mUserdata.ExtractAsDangling();
-        if (mOldCallback) {
-            mOldCallback(mType, mMessage ? mMessage->c_str() : nullptr, userdata);
-        }
+        void* userdata1 = mUserdata1.ExtractAsDangling();
+        void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
-            mCallback(mStatus, mType, mMessage ? mMessage->c_str() : nullptr, userdata);
+            mCallback(mStatus, mType, mMessage ? mMessage->c_str() : nullptr, userdata1, userdata2);
         }
     }
 
-    // TODO(crbug.com/dawn/2021) Remove the old callback type.
-    WGPUPopErrorScopeCallback mCallback;
-    WGPUErrorCallback mOldCallback;
-    raw_ptr<void> mUserdata;
+    WGPUPopErrorScopeCallback2 mCallback;
+    raw_ptr<void> mUserdata1;
+    raw_ptr<void> mUserdata2;
 
     WGPUPopErrorScopeStatus mStatus = WGPUPopErrorScopeStatus_Success;
     WGPUErrorType mType = WGPUErrorType_Unknown;
@@ -385,14 +378,29 @@ WireResult Client::DoDeviceLostCallback(ObjectHandle eventManager,
 }
 
 void Device::PopErrorScope(WGPUErrorCallback callback, void* userdata) {
-    WGPUPopErrorScopeCallbackInfo callbackInfo = {};
-    callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-    callbackInfo.oldCallback = callback;
-    callbackInfo.userdata = userdata;
-    PopErrorScopeF(callbackInfo);
+    static WGPUErrorCallback kDefaultCallback = [](WGPUErrorType, char const*, void*) {};
+
+    PopErrorScope2({nullptr, WGPUCallbackMode_AllowSpontaneous,
+                    [](WGPUPopErrorScopeStatus, WGPUErrorType type, char const* message,
+                       void* callback, void* userdata) {
+                        auto cb = reinterpret_cast<WGPUErrorCallback>(callback);
+                        cb(type, message, userdata);
+                    },
+                    reinterpret_cast<void*>(callback != nullptr ? callback : kDefaultCallback),
+                    userdata});
 }
 
 WGPUFuture Device::PopErrorScopeF(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
+    return PopErrorScope2({nullptr, callbackInfo.mode,
+                           [](WGPUPopErrorScopeStatus status, WGPUErrorType type,
+                              char const* message, void* callback, void* userdata) {
+                               auto cb = reinterpret_cast<WGPUPopErrorScopeCallback>(callback);
+                               cb(status, type, message, userdata);
+                           },
+                           reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
+}
+
+WGPUFuture Device::PopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo) {
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<PopErrorScopeEvent>(callbackInfo));

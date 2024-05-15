@@ -301,6 +301,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     void APIPushErrorScope(wgpu::ErrorFilter filter);
     void APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata);
     Future APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackInfo);
+    Future APIPopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo);
 
     MaybeError ValidateIsAlive() const;
 

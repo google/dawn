@@ -647,9 +647,8 @@ TEST_P(FutureTests, MixedSourcePolling) {
 
     // PopErrorScope is implemented via a signal.
     device.PushErrorScope(wgpu::ErrorFilter::Validation);
-    device.PopErrorScope({nullptr, wgpu::CallbackMode::AllowProcessEvents,
-                          [](WGPUPopErrorScopeStatus, WGPUErrorType, char const*, void*) {},
-                          nullptr, nullptr});
+    device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
+                         [](wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*) {});
 
     instance.ProcessEvents();
 }

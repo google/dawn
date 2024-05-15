@@ -229,6 +229,7 @@
             "DeviceEnumerateFeatures",
             "DevicePopErrorScope",
             "DevicePopErrorScopeF",
+            "DevicePopErrorScope2",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
             "DeviceSetLoggingCallback",

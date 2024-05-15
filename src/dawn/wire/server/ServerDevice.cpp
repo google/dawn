@@ -71,12 +71,14 @@ WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device,
     userdata->eventManager = eventManager;
     userdata->future = future;
 
-    mProcs.devicePopErrorScope(device->handle, ForwardToServer<&Server::OnDevicePopErrorScope>,
-                               userdata.release());
+    mProcs.devicePopErrorScope2(device->handle, {nullptr, WGPUCallbackMode_AllowProcessEvents,
+                                                 ForwardToServer2<&Server::OnDevicePopErrorScope>,
+                                                 userdata.release(), nullptr});
     return WireResult::Success;
 }
 
 void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
+                                   WGPUPopErrorScopeStatus status,
                                    WGPUErrorType type,
                                    const char* message) {
     ReturnDevicePopErrorScopeCallbackCmd cmd;

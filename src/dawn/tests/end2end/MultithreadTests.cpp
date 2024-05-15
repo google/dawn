@@ -168,30 +168,25 @@ TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
     // Create threads
     utils::RunInParallel(static_cast<uint32_t>(devices.size()), [&devices, this](uint32_t index) {
         auto additionalDevice = std::move(devices[index]);
-        struct UserData {
-            wgpu::Device device2ndRef;
-            std::atomic_bool isCompleted{false};
-        } userData;
-
-        userData.device2ndRef = additionalDevice;
+        wgpu::Device device2ndRef = additionalDevice;
+        std::atomic_bool isCompleted{false};
 
         // Drop the last ref inside a callback.
         additionalDevice.PushErrorScope(wgpu::ErrorFilter::Validation);
         additionalDevice.PopErrorScope(
-            [](WGPUErrorType type, const char*, void* userdataPtr) {
-                auto userdata = static_cast<UserData*>(userdataPtr);
-                userdata->device2ndRef = nullptr;
-                userdata->isCompleted = true;
-            },
-            &userData);
+            wgpu::CallbackMode::AllowProcessEvents,
+            [&device2ndRef, &isCompleted](wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*) {
+                device2ndRef = nullptr;
+                isCompleted = true;
+            });
         // main ref dropped.
         additionalDevice = nullptr;
 
         do {
             WaitABit();
-        } while (!userData.isCompleted.load());
+        } while (!isCompleted.load());
 
-        EXPECT_EQ(userData.device2ndRef, nullptr);
+        EXPECT_EQ(device2ndRef, nullptr);
     });
 }
 
@@ -1330,12 +1325,12 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserErrorNoDeadLock) {
 
         std::atomic<bool> errorThrown(false);
         device.PopErrorScope(
-            [](WGPUErrorType type, char const* message, void* userdata) {
-                EXPECT_EQ(type, WGPUErrorType_Validation);
-                auto error = static_cast<std::atomic<bool>*>(userdata);
-                *error = true;
-            },
-            &errorThrown);
+            wgpu::CallbackMode::AllowProcessEvents,
+            [&errorThrown](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, char const*) {
+                EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
+                EXPECT_EQ(type, wgpu::ErrorType::Validation);
+                errorThrown = true;
+            });
         instance.ProcessEvents();
         EXPECT_TRUE(errorThrown.load());
 

@@ -827,32 +827,42 @@ void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
 void DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
     static wgpu::ErrorCallback kDefaultCallback = [](WGPUErrorType, char const*, void*) {};
 
-    PopErrorScopeCallbackInfo callbackInfo = {};
-    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
-    callbackInfo.oldCallback = callback != nullptr ? callback : kDefaultCallback;
-    callbackInfo.userdata = userdata;
-    APIPopErrorScopeF(callbackInfo);
+    APIPopErrorScope2({nullptr, WGPUCallbackMode_AllowProcessEvents,
+                       [](WGPUPopErrorScopeStatus, WGPUErrorType type, char const* message,
+                          void* callback, void* userdata) {
+                           auto cb = reinterpret_cast<wgpu::ErrorCallback>(callback);
+                           cb(type, message, userdata);
+                       },
+                       reinterpret_cast<void*>(callback != nullptr ? callback : kDefaultCallback),
+                       userdata});
 }
 
 Future DeviceBase::APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackInfo) {
+    return APIPopErrorScope2({nullptr, ToAPI(callbackInfo.mode),
+                              [](WGPUPopErrorScopeStatus status, WGPUErrorType type,
+                                 char const* message, void* callback, void* userdata) {
+                                  auto cb = reinterpret_cast<WGPUPopErrorScopeCallback>(callback);
+                                  cb(status, type, message, userdata);
+                              },
+                              reinterpret_cast<void*>(callbackInfo.callback),
+                              callbackInfo.userdata});
+}
+
+Future DeviceBase::APIPopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo) {
     struct PopErrorScopeEvent final : public EventManager::TrackedEvent {
-        // TODO(crbug.com/dawn/2021) Remove the old callback type.
-        WGPUPopErrorScopeCallback mCallback;
-        WGPUErrorCallback mOldCallback;
-        void* mUserdata;
+        WGPUPopErrorScopeCallback2 mCallback;
+        raw_ptr<void> mUserdata1;
+        raw_ptr<void> mUserdata2;
         std::optional<ErrorScope> mScope;
 
-        PopErrorScopeEvent(const PopErrorScopeCallbackInfo& callbackInfo,
+        PopErrorScopeEvent(const WGPUPopErrorScopeCallbackInfo2& callbackInfo,
                            std::optional<ErrorScope>&& scope)
-            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+            : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
+                           TrackedEvent::Completed{}),
               mCallback(callbackInfo.callback),
-              mOldCallback(callbackInfo.oldCallback),
-              mUserdata(callbackInfo.userdata),
-              mScope(scope) {
-            // Exactly 1 callback should be set.
-            DAWN_ASSERT((mCallback != nullptr && mOldCallback == nullptr) ||
-                        (mCallback == nullptr && mOldCallback != nullptr));
-        }
+              mUserdata1(callbackInfo.userdata1),
+              mUserdata2(callbackInfo.userdata2),
+              mScope(scope) {}
 
         ~PopErrorScopeEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 
@@ -870,11 +880,8 @@ Future DeviceBase::APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackIn
                 message = "No error scopes to pop";
             }
 
-            if (mCallback) {
-                mCallback(status, type, message, mUserdata);
-            } else {
-                mOldCallback(type, message, mUserdata);
-            }
+            mCallback(status, type, message, mUserdata1.ExtractAsDangling(),
+                      mUserdata2.ExtractAsDangling());
         }
     };
 
