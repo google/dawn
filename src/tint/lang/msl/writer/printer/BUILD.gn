@@ -119,6 +119,7 @@ if (tint_build_unittests) {
 
       if (tint_build_msl_writer) {
         deps += [
+          "${tint_src_dir}/lang/msl/validate",
           "${tint_src_dir}/lang/msl/writer/common",
           "${tint_src_dir}/lang/msl/writer/printer",
           "${tint_src_dir}/lang/msl/writer/raise",

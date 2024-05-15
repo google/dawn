@@ -34,6 +34,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/msl/validate/validate.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
 #include "src/tint/lang/msl/writer/raise/raise.h"
 
@@ -91,6 +92,14 @@ class MslPrinterTestHelperBase : public BASE {
             return false;
         }
         output_ = result.Get();
+
+#if TINT_BUILD_IS_MAC
+        auto msl_validation = validate::ValidateUsingMetal(output_, validate::MslVersion::kMsl_2_3);
+        if (msl_validation.failed) {
+            err_ = msl_validation.output;
+            return false;
+        }
+#endif
 
         return true;
     }

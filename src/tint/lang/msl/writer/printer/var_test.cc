@@ -247,7 +247,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Requires ModuleScopeVarToEntryPointParam transform
+// TODO(jrprice): Requires ModuleScopeVarToEntryPointParam transform
 TEST_F(MslPrinterTest, DISABLED_VarGlobalPrivate) {
     core::ir::Var* v = nullptr;
     b.Append(mod.root_block, [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kPrivate, f32>()); });
@@ -274,7 +274,8 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, VarGlobalWorkgroup) {
+// TODO(jrprice): Requires ModuleScopeVarToEntryPointParam transform
+TEST_F(MslPrinterTest, DISABLED_VarGlobalWorkgroup) {
     core::ir::Var* v = nullptr;
     b.Append(mod.root_block,
              [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kWorkgroup, f32>()); });
