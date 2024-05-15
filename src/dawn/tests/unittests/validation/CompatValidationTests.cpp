@@ -1135,6 +1135,27 @@ TEST_F(CompatValidationTest, CanNotCopyMultisampleTextureToTexture) {
                         testing::HasSubstr("cannot be copied in compatibility mode"));
 }
 
+// Regression test for crbug.com/339704108
+// Error texture should not resolve mCompatibilityTextureBindingViewDimension,
+// as dimension could be in bad form.
+TEST_F(CompatValidationTest, DoNotResolveDefaultTextureBindingViewDimensionOnErrorTexture) {
+    // Set incompatible texture format and view format.
+    // This validation happens before texture dimension validation and binding view dimension
+    // resolving and shall return an error texture.
+    constexpr wgpu::TextureFormat format = wgpu::TextureFormat::BGRA8Unorm;
+    constexpr wgpu::TextureFormat viewFormat = wgpu::TextureFormat::RGBA8UnormSrgb;
+
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {1, 1, 1};
+    descriptor.dimension = wgpu::TextureDimension::Undefined;
+    descriptor.format = format;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+    descriptor.viewFormatCount = 1;
+    descriptor.viewFormats = &viewFormat;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+}
+
 class CompatTextureViewDimensionValidationTests : public CompatValidationTest {
   protected:
     void TestBindingTextureViewDimensions(

@@ -197,8 +197,9 @@ class TextureBase : public SharedResource {
     uint64_t ComputeEstimatedByteSize() const;
 
     wgpu::TextureDimension mDimension;
-    wgpu::TextureViewDimension
-        mCompatibilityTextureBindingViewDimension;  // only used for compatibility mode
+    // Only used for compatibility mode
+    wgpu::TextureViewDimension mCompatibilityTextureBindingViewDimension =
+        wgpu::TextureViewDimension::Undefined;
     const raw_ref<const Format> mFormat;
     FormatSet mViewFormats;
     Extent3D mBaseSize;
