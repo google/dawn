@@ -168,12 +168,11 @@ MaybeError SharedResourceMemory::BeginAccess(Resource* resource,
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         // Add the fences to mPendingFences if they are not already contained in the list.
         // This loop is O(n*m), but there shouldn't be very many fences.
-        auto it = std::find_if(mContents->mPendingFences.begin(), mContents->mPendingFences.end(),
-                               [&](const auto& fence) {
-                                   return fence.object.Get() == descriptor->fences[i] &&
-                                          fence.signaledValue == descriptor->signaledValues[i];
-                               });
+        auto it = std::find_if(
+            mContents->mPendingFences.begin(), mContents->mPendingFences.end(),
+            [&](const auto& fence) { return fence.object.Get() == descriptor->fences[i]; });
         if (it != mContents->mPendingFences.end()) {
+            it->signaledValue = std::max(it->signaledValue, descriptor->signaledValues[i]);
             continue;
         }
         mContents->mPendingFences.push_back({descriptor->fences[i], descriptor->signaledValues[i]});
