@@ -357,8 +357,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
 
     size_t GetLazyClearCountForTesting();
     void IncrementLazyClearCountForTesting();
-    size_t GetDeprecationWarningCountForTesting();
-    void EmitDeprecationWarning(const std::string& warning);
     void EmitWarningOnce(const std::string& message);
     void EmitLog(const char* message);
     void EmitLog(WGPULoggingType loggingType, const char* message);
@@ -572,8 +570,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     std::unique_ptr<DynamicUploader> mDynamicUploader;
     Ref<QueueBase> mQueue;
 
-    struct DeprecationWarnings;
-    std::unique_ptr<DeprecationWarnings> mDeprecationWarnings;
     std::atomic<uint32_t> mEmittedCompilationLogCount = 0;
 
     absl::flat_hash_set<std::string> mWarnings;

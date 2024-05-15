@@ -719,6 +719,7 @@ const std::vector<std::string>& DawnTestEnvironment::GetDisabledToggles() const 
 
 DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
     gCurrentTest = this;
+    mLastWarningCount = GetDeprecationWarningCountForTesting();
 
     DawnProcTable procs = native::GetProcs();
     // Override procs to provide harness-specific behavior to always select the adapter required in
@@ -1080,6 +1081,10 @@ bool DawnTestBase::SupportsFeatures(const std::vector<wgpu::FeatureName>& featur
     return true;
 }
 
+uint64_t DawnTestBase::GetDeprecationWarningCountForTesting() const {
+    return gTestEnv->GetInstance()->GetDeprecationWarningCountForTesting();
+}
+
 void* DawnTestBase::GetUniqueUserdata() {
     return reinterpret_cast<void*>(++mNextUniqueUserdata);
 }
@@ -1212,8 +1217,8 @@ void DawnTestBase::SetUp() {
 void DawnTestBase::TearDown() {
     ResolveDeferredExpectationsNow();
 
-    if (!UsesWire() && device) {
-        EXPECT_EQ(mLastWarningCount, native::GetDeprecationWarningCountForTesting(device.Get()));
+    if (!UsesWire()) {
+        EXPECT_EQ(mLastWarningCount, GetDeprecationWarningCountForTesting());
     }
 }
 

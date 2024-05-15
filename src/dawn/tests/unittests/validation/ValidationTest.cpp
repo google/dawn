@@ -184,9 +184,10 @@ void ValidationTest::TearDown() {
     FlushWire();
     ASSERT_FALSE(mExpectError);
 
-    if (device) {
-        EXPECT_EQ(mLastWarningCount,
-                  dawn::native::GetDeprecationWarningCountForTesting(backendDevice));
+    // Note that if the test is skipped before SetUp is called, mDawnInstance will not get set and
+    // remain nullptr.
+    if (mDawnInstance) {
+        EXPECT_EQ(mLastWarningCount, mDawnInstance->GetDeprecationWarningCountForTesting());
     }
 
     // The device will be destroyed soon after, so we want to set the expectation.

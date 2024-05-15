@@ -135,6 +135,11 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
 
 // InstanceBase
 
+struct InstanceBase::DeprecationWarnings {
+    absl::flat_hash_set<std::string> emitted;
+    uint64_t count = 0;
+};
+
 // static
 ResultOrError<Ref<InstanceBase>> InstanceBase::Create(const InstanceDescriptor* descriptor) {
     static constexpr InstanceDescriptor kDefaultDesc = {};
@@ -159,7 +164,8 @@ ResultOrError<Ref<InstanceBase>> InstanceBase::Create(const InstanceDescriptor* 
     return instance;
 }
 
-InstanceBase::InstanceBase(const TogglesState& instanceToggles) : mToggles(instanceToggles) {}
+InstanceBase::InstanceBase(const TogglesState& instanceToggles)
+    : mToggles(instanceToggles), mDeprecationWarnings(std::make_unique<DeprecationWarnings>()) {}
 
 InstanceBase::~InstanceBase() = default;
 
@@ -510,6 +516,17 @@ void InstanceBase::SetPlatformForTesting(dawn::platform::Platform* platform) {
 
 dawn::platform::Platform* InstanceBase::GetPlatform() {
     return mPlatform;
+}
+
+uint64_t InstanceBase::GetDeprecationWarningCountForTesting() {
+    return mDeprecationWarnings->count;
+}
+
+void InstanceBase::EmitDeprecationWarning(const std::string& message) {
+    mDeprecationWarnings->count++;
+    if (mDeprecationWarnings->emitted.insert(message).second) {
+        dawn::WarningLog() << message;
+    }
 }
 
 uint64_t InstanceBase::GetDeviceCountForTesting() const {

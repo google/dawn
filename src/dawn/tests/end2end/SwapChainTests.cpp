@@ -264,7 +264,9 @@ TEST_P(SwapChainTests, SwitchingDevice) {
             deviceToUse = device2;
         }
 
-        wgpu::SwapChain swapchain = deviceToUse.CreateSwapChain(surface, &baseDescriptor);
+        wgpu::SwapChain swapchain;
+        EXPECT_DEPRECATION_WARNING(swapchain =
+                                       deviceToUse.CreateSwapChain(surface, &baseDescriptor));
         swapchain.GetCurrentTexture();
         swapchain.Present();
     }

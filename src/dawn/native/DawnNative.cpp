@@ -212,6 +212,10 @@ uint64_t Instance::GetDeviceCountForTesting() const {
     return mImpl->GetDeviceCountForTesting();
 }
 
+uint64_t Instance::GetDeprecationWarningCountForTesting() const {
+    return mImpl->GetDeprecationWarningCountForTesting();
+}
+
 WGPUInstance Instance::Get() const {
     return ToAPI(mImpl);
 }
@@ -222,10 +226,6 @@ void Instance::DisconnectDawnPlatform() {
 
 size_t GetLazyClearCountForTesting(WGPUDevice device) {
     return FromAPI(device)->GetLazyClearCountForTesting();
-}
-
-size_t GetDeprecationWarningCountForTesting(WGPUDevice device) {
-    return FromAPI(device)->GetDeprecationWarningCountForTesting();
 }
 
 bool IsTextureSubresourceInitialized(WGPUTexture texture,

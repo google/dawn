@@ -180,6 +180,8 @@ class DAWN_NATIVE_EXPORT Instance {
     void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
 
     uint64_t GetDeviceCountForTesting() const;
+    // Backdoor to get the number of deprecation warnings for testing
+    uint64_t GetDeprecationWarningCountForTesting() const;
 
     // Returns the underlying WGPUInstance object.
     WGPUInstance Get() const;
@@ -199,9 +201,6 @@ DAWN_NATIVE_EXPORT std::vector<const char*> GetTogglesUsed(WGPUDevice device);
 
 // Backdoor to get the number of lazy clears for testing
 DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(WGPUDevice device);
-
-// Backdoor to get the number of deprecation warnings for testing
-DAWN_NATIVE_EXPORT size_t GetDeprecationWarningCountForTesting(WGPUDevice device);
 
 //  Query if texture has been initialized
 DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(

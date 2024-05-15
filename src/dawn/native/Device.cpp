@@ -128,11 +128,6 @@ auto GetOrCreate(ContentLessObjectCache<RefCountedT>& cache,
     return ReturnType(result);
 }
 
-struct DeviceBase::DeprecationWarnings {
-    absl::flat_hash_set<std::string> emitted;
-    size_t count = 0;
-};
-
 namespace {
 
 struct LoggingCallbackTask : CallbackTask {
@@ -427,7 +422,6 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     mErrorScopeStack = std::make_unique<ErrorScopeStack>();
     mDynamicUploader = std::make_unique<DynamicUploader>(this);
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
-    mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
 
     DAWN_ASSERT(GetPlatform() != nullptr);
@@ -792,7 +786,7 @@ void DeviceBase::APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, voi
 }
 
 void DeviceBase::APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata) {
-    EmitDeprecationWarning(
+    GetInstance()->EmitDeprecationWarning(
         "SetDeviceLostCallback is deprecated. Pass the callback in the device descriptor instead.");
 
     // The registered callback function and userdata pointer are stored and used by deferred
@@ -1804,17 +1798,6 @@ void DeviceBase::IncrementLazyClearCountForTesting() {
     ++mLazyClearCountForTesting;
 }
 
-size_t DeviceBase::GetDeprecationWarningCountForTesting() {
-    return mDeprecationWarnings->count;
-}
-
-void DeviceBase::EmitDeprecationWarning(const std::string& message) {
-    mDeprecationWarnings->count++;
-    if (mDeprecationWarnings->emitted.insert(message).second) {
-        dawn::WarningLog() << message;
-    }
-}
-
 void DeviceBase::EmitWarningOnce(const std::string& message) {
     if (mWarnings.insert(message).second) {
         this->EmitLog(WGPULoggingType_Warning, message.c_str());
@@ -2203,7 +2186,7 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
 ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(
     Surface* surface,
     const SwapChainDescriptor* descriptor) {
-    EmitDeprecationWarning(
+    GetInstance()->EmitDeprecationWarning(
         "The explicit creation of a SwapChain object is deprecated and should be replaced by "
         "Surface configuration.");
 

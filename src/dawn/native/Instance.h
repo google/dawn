@@ -126,6 +126,10 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
     void SetPlatformForTesting(dawn::platform::Platform* platform);
     dawn::platform::Platform* GetPlatform();
 
+    // Testing only API that is NOT thread-safe.
+    uint64_t GetDeprecationWarningCountForTesting();
+    void EmitDeprecationWarning(const std::string& warning);
+
     uint64_t GetDeviceCountForTesting() const;
     void AddDevice(DeviceBase* device);
     void RemoveDevice(DeviceBase* device);
@@ -217,6 +221,9 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
 
     Ref<CallbackTaskManager> mCallbackTaskManager;
     EventManager mEventManager;
+
+    struct DeprecationWarnings;
+    std::unique_ptr<DeprecationWarnings> mDeprecationWarnings;
 
     MutexProtected<absl::flat_hash_set<DeviceBase*>> mDevicesList;
 };
