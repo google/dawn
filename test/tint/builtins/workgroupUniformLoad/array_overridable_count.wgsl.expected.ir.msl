@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -14,15 +12,13 @@ struct tint_array {
   T elements[N];
 };
 
+struct tint_module_vars_struct {
+  threadgroup tint_array<int, 128>* v;
+};
 
-threadgroup tint_array<int, 128> v;
-int foo() {
+int foo(tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  tint_array<int, 128> const v_1 = v;
+  tint_array<int, 128> const v_1 = (*tint_module_vars.v);
   threadgroup_barrier(mem_flags::mem_threadgroup);
   return v_1[0];
 }
-program_source:16:34: error: program scope variable must reside in constant address space
-threadgroup tint_array<int, 128> v;
-                                 ^
-

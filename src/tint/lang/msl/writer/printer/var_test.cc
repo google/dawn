@@ -247,29 +247,37 @@ void foo() {
 )");
 }
 
-// TODO(jrprice): Requires ModuleScopeVarToEntryPointParam transform
-TEST_F(MslPrinterTest, DISABLED_VarGlobalPrivate) {
+TEST_F(MslPrinterTest, VarGlobalPrivate) {
     core::ir::Var* v = nullptr;
-    b.Append(mod.root_block, [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kPrivate, f32>()); });
+    b.Append(mod.root_block, [&] {  //
+        v = b.Var("v", ty.ptr<core::AddressSpace::kPrivate, f32>());
+    });
 
-    auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
         auto* ld = b.Load(v->Result(0));
-        auto* a = b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
-        a->SetInitializer(ld->Result(0));
-        b.Return(func);
+        b.Let("a", ld);
+        b.Return(foo);
+    });
+
+    auto* frag = b.Function("frag", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(frag->Block(), [&] {
+        b.Call(foo);
+        b.Return(frag);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
-struct tint_private_vars_struct {
-  float a;
+    EXPECT_EQ(output_, MetalHeader() + R"(struct tint_module_vars_struct {
+  thread float* v;
 };
 
-void foo() {
-    thread tint_private_vars_struct tint_private_vars = {};
-    float const a = tint_private_vars.a;
-    return;
+void foo(tint_module_vars_struct tint_module_vars) {
+  float const a = (*tint_module_vars.v);
+}
+fragment void frag() {
+  thread float v = 0.0f;
+  tint_module_vars_struct const tint_module_vars = {.v=(&v)};
+  foo(tint_module_vars);
 }
 )");
 }

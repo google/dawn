@@ -1,51 +1,20 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  const constant float4x2* u;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %u:ptr<uniform, mat4x2<f32>, read> = var @binding_point(0, 0)
+void a(float4x2 m) {
 }
-
-%a = func(%m:mat4x2<f32>):void {
-  $B2: {
-    ret
-  }
+void b(float2 v) {
 }
-%b = func(%v:vec2<f32>):void {
-  $B3: {
-    ret
-  }
+void c(float f) {
 }
-%c = func(%f:f32):void {
-  $B4: {
-    ret
-  }
+kernel void f(const constant float4x2* u [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.u=u};
+  a((*tint_module_vars.u));
+  b((*tint_module_vars.u)[1]);
+  b((*tint_module_vars.u)[1].yx);
+  c((*tint_module_vars.u)[1][0u]);
+  c((*tint_module_vars.u)[1].yx[0u]);
 }
-%f_1 = @compute @workgroup_size(1, 1, 1) func():void {  # %f_1: 'f'
-  $B5: {
-    %9:mat4x2<f32> = load %u
-    %10:void = call %a, %9
-    %11:ptr<uniform, vec2<f32>, read> = access %u, 1i
-    %12:vec2<f32> = load %11
-    %13:void = call %b, %12
-    %14:ptr<uniform, vec2<f32>, read> = access %u, 1i
-    %15:vec2<f32> = load %14
-    %16:vec2<f32> = swizzle %15, yx
-    %17:void = call %b, %16
-    %18:ptr<uniform, vec2<f32>, read> = access %u, 1i
-    %19:f32 = load_vector_element %18, 0u
-    %20:void = call %c, %19
-    %21:ptr<uniform, vec2<f32>, read> = access %u, 1i
-    %22:vec2<f32> = load %21
-    %23:vec2<f32> = swizzle %22, yx
-    %24:f32 = access %23, 0u
-    %25:void = call %c, %24
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

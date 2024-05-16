@@ -1,27 +1,14 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int* s;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %s:ptr<storage, i32, read_write> = var @binding_point(0, 0)
+kernel void f(device int* s [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.s=s};
+  int const a = 1;
+  int const _a = a;
+  int const b = a;
+  int const _b = _a;
+  (*tint_module_vars.s) = (((a + _a) + b) + _b);
 }
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %a:i32 = let 1i
-    %_a:i32 = let %a
-    %b:i32 = let %a
-    %_b:i32 = let %_a
-    %7:i32 = add %a, %_a
-    %8:i32 = add %7, %b
-    %9:i32 = add %8, %_b
-    store %s, %9
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

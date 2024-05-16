@@ -1,26 +1,13 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct DeclaredAfterUsage {
+  float f;
+};
+struct tint_module_vars_struct {
+  const constant DeclaredAfterUsage* declared_after_usage;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: DeclaredAfterUsage = struct @align(4) {
-  f:f32 @offset(0)
+vertex float4 tint_symbol(const constant DeclaredAfterUsage* declared_after_usage [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.declared_after_usage=declared_after_usage};
+  return float4((*tint_module_vars.declared_after_usage).f);
 }
-
-$B1: {  # root
-  %declared_after_usage:ptr<uniform, DeclaredAfterUsage, read> = var @binding_point(0, 0)
-}
-
-%tint_symbol = @vertex func():vec4<f32> [@position] {
-  $B2: {
-    %3:ptr<uniform, f32, read> = access %declared_after_usage, 0u
-    %4:f32 = load %3
-    %5:vec4<f32> = construct %4
-    ret %5
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

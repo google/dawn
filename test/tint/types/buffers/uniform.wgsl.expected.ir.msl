@@ -1,21 +1,10 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  const constant float2* weights;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %weights:ptr<uniform, vec2<f32>, read> = var @binding_point(0, 0)
+fragment void tint_symbol(const constant float2* weights [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.weights=weights};
+  float a = (*tint_module_vars.weights)[0];
 }
-
-%tint_symbol = @fragment func():void {
-  $B2: {
-    %3:f32 = load_vector_element %weights, 0i
-    %a:ptr<function, f32, read_write> = var, %3
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

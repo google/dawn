@@ -1,52 +1,40 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Inner = struct @align(8) {
-  m:mat4x3<f16> @offset(0)
+struct Inner {
+  half4x3 m;
+};
+struct Outer {
+  tint_array<Inner, 4> a;
+};
+struct tint_module_vars_struct {
+  const constant tint_array<Outer, 4>* a;
+};
+
+kernel void f(const constant tint_array<Outer, 4>* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.a=a};
+  const constant tint_array<Outer, 4>* const p_a = tint_module_vars.a;
+  const constant Outer* const p_a_3 = (&(*p_a)[3]);
+  const constant tint_array<Inner, 4>* const p_a_3_a = (&(*p_a_3).a);
+  const constant Inner* const p_a_3_a_2 = (&(*p_a_3_a)[2]);
+  const constant half4x3* const p_a_3_a_2_m = (&(*p_a_3_a_2).m);
+  const constant half3* const p_a_3_a_2_m_1 = (&(*p_a_3_a_2_m)[1]);
+  tint_array<Outer, 4> const l_a = (*p_a);
+  Outer const l_a_3 = (*p_a_3);
+  tint_array<Inner, 4> const l_a_3_a = (*p_a_3_a);
+  Inner const l_a_3_a_2 = (*p_a_3_a_2);
+  half4x3 const l_a_3_a_2_m = (*p_a_3_a_2_m);
+  half3 const l_a_3_a_2_m_1 = (*p_a_3_a_2_m_1);
+  half const l_a_3_a_2_m_1_0 = (*p_a_3_a_2_m_1)[0];
 }
-
-Outer = struct @align(8) {
-  a:array<Inner, 4> @offset(0)
-}
-
-$B1: {  # root
-  %a:ptr<uniform, array<Outer, 4>, read> = var @binding_point(0, 0)
-}
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %p_a:ptr<uniform, array<Outer, 4>, read> = let %a
-    %4:ptr<uniform, Outer, read> = access %p_a, 3i
-    %p_a_3:ptr<uniform, Outer, read> = let %4
-    %6:ptr<uniform, array<Inner, 4>, read> = access %p_a_3, 0u
-    %p_a_3_a:ptr<uniform, array<Inner, 4>, read> = let %6
-    %8:ptr<uniform, Inner, read> = access %p_a_3_a, 2i
-    %p_a_3_a_2:ptr<uniform, Inner, read> = let %8
-    %10:ptr<uniform, mat4x3<f16>, read> = access %p_a_3_a_2, 0u
-    %p_a_3_a_2_m:ptr<uniform, mat4x3<f16>, read> = let %10
-    %12:ptr<uniform, vec3<f16>, read> = access %p_a_3_a_2_m, 1i
-    %p_a_3_a_2_m_1:ptr<uniform, vec3<f16>, read> = let %12
-    %14:array<Outer, 4> = load %p_a
-    %l_a:array<Outer, 4> = let %14
-    %16:Outer = load %p_a_3
-    %l_a_3:Outer = let %16
-    %18:array<Inner, 4> = load %p_a_3_a
-    %l_a_3_a:array<Inner, 4> = let %18
-    %20:Inner = load %p_a_3_a_2
-    %l_a_3_a_2:Inner = let %20
-    %22:mat4x3<f16> = load %p_a_3_a_2_m
-    %l_a_3_a_2_m:mat4x3<f16> = let %22
-    %24:vec3<f16> = load %p_a_3_a_2_m_1
-    %l_a_3_a_2_m_1:vec3<f16> = let %24
-    %26:f16 = load_vector_element %p_a_3_a_2_m_1, 0i
-    %l_a_3_a_2_m_1_0:f16 = let %26
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

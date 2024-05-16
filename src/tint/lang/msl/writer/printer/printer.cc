@@ -191,6 +191,60 @@ class Printer : public tint::TextGenerator {
         return array_template_name_;
     }
 
+    /// Check if a value is emitted as an actual pointer (instead of a reference).
+    /// @param value the value to check
+    /// @returns true if @p value will be emitted as an actual pointer
+    bool IsRealPointer(const core::ir::Value* value) {
+        if (value->Is<core::ir::FunctionParam>()) {
+            // Pointer parameters are always emitted as actual pointers.
+            return true;
+        }
+        return Switch(
+            value->As<core::ir::InstructionResult>()->Instruction(),
+            [&](const core::ir::Var*) {
+                // Variable declarations are always references.
+                return false;
+            },
+            [&](const core::ir::Let*) {
+                // Let declarations capture actual pointers.
+                return true;
+            },
+            [&](const core::ir::Access* a) {
+                // Access instruction emission always dereferences the source.
+                // We only produce a pointer when extracting a pointer from a composite value.
+                return !a->Object()->Type()->Is<core::type::Pointer>() &&
+                       a->Result(0)->Type()->Is<core::type::Pointer>();
+            });
+    }
+
+    /// Emit @p param value, dereferencing it if it is an actual pointer.
+    /// @param out the output stream to write to
+    /// @param value the value to emit
+    template <typename OUT>
+    void EmitAndDerefIfNeeded(OUT& out, const core::ir::Value* value) {
+        if (value && value->Type()->Is<core::type::Pointer>() && IsRealPointer(value)) {
+            out << "(*";
+            EmitValue(out, value);
+            out << ")";
+        } else {
+            EmitValue(out, value);
+        }
+    }
+
+    /// Emit @p param value, taking its address if it is not an actual pointer.
+    /// @param out the output stream to write to
+    /// @param value the value to emit
+    template <typename OUT>
+    void EmitAndTakeAddressIfNeeded(OUT& out, const core::ir::Value* value) {
+        if (value && value->Type()->Is<core::type::Pointer>() && !IsRealPointer(value)) {
+            out << "(&";
+            EmitValue(out, value);
+            out << ")";
+        } else {
+            EmitValue(out, value);
+        }
+    }
+
     /// Emit the function
     /// @param func the function to emit
     void EmitFunction(const core::ir::Function* func) {
@@ -353,7 +407,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },                  //
                     [&](const core::ir::Convert* b) { EmitConvert(out, b); },                  //
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },              //
-                    [&](const core::ir::Load* l) { EmitValue(out, l->From()); },               //
+                    [&](const core::ir::Load* l) { EmitLoad(out, l); },                        //
                     [&](const core::ir::Construct* c) { EmitConstruct(out, c); },              //
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },          //
                     [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },                  //
@@ -504,7 +558,7 @@ class Printer : public tint::TextGenerator {
         auto out = Line();
         EmitType(out, l->Result(0)->Type());
         out << " const " << NameOf(l->Result(0)) << " = ";
-        EmitValue(out, l->Value());
+        EmitAndTakeAddressIfNeeded(out, l->Value());
         out << ";";
     }
 
@@ -612,7 +666,7 @@ class Printer : public tint::TextGenerator {
     void EmitStoreVectorElement(const core::ir::StoreVectorElement* l) {
         auto out = Line();
 
-        EmitValue(out, l->To());
+        EmitAndDerefIfNeeded(out, l->To());
         out << "[";
         EmitValue(out, l->Index());
         out << "] = ";
@@ -621,7 +675,7 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
-        EmitValue(out, l->From());
+        EmitAndDerefIfNeeded(out, l->From());
         out << "[";
         EmitValue(out, l->Index());
         out << "]";
@@ -692,11 +746,16 @@ class Printer : public tint::TextGenerator {
     /// Emit a discard instruction
     void EmitDiscard() { Line() << "discard_fragment();"; }
 
+    /// Emit a load
+    void EmitLoad(StringStream& out, const core::ir::Load* l) {
+        EmitAndDerefIfNeeded(out, l->From());
+    }
+
     /// Emit a store
     void EmitStore(const core::ir::Store* s) {
         auto out = Line();
 
-        EmitValue(out, s->To());
+        EmitAndDerefIfNeeded(out, s->To());
         out << " = ";
         EmitValue(out, s->From());
         out << ";";
@@ -713,7 +772,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit an accessor
     void EmitAccess(StringStream& out, const core::ir::Access* a) {
-        EmitValue(out, a->Object());
+        EmitAndDerefIfNeeded(out, a->Object());
 
         auto* current_type = a->Object()->Type();
         for (auto* index : a->Indices()) {
@@ -786,7 +845,7 @@ class Printer : public tint::TextGenerator {
             }
             ++i;
 
-            EmitValue(out, arg);
+            EmitAndTakeAddressIfNeeded(out, arg);
         }
         out << ")";
     }
@@ -918,7 +977,7 @@ class Printer : public tint::TextGenerator {
             }
             ++i;
 
-            EmitValue(out, arg);
+            EmitAndTakeAddressIfNeeded(out, arg);
         }
         out << ")";
     }
@@ -950,7 +1009,7 @@ class Printer : public tint::TextGenerator {
                     // Emit field designators for structures to account for padding members.
                     auto name = struct_ty->Members()[i]->Name().Name();
                     out << "." << name << "=";
-                    EmitValue(out, arg);
+                    EmitAndTakeAddressIfNeeded(out, arg);
                     i++;
                 }
                 out << "}";

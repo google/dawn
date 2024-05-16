@@ -1,52 +1,20 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  const constant half4x3* u;
+  device half4x3* s;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %u:ptr<uniform, mat4x3<f16>, read> = var @binding_point(0, 0)
-  %s:ptr<storage, mat4x3<f16>, read_write> = var @binding_point(0, 1)
+void tint_store_and_preserve_padding(device half4x3* const target, half4x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+  (*target)[2u] = value_param[2u];
+  (*target)[3u] = value_param[3u];
 }
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %4:mat4x3<f16> = load %u
-    %5:void = call %tint_store_and_preserve_padding, %s, %4
-    %7:ptr<storage, vec3<f16>, read_write> = access %s, 1i
-    %8:ptr<uniform, vec3<f16>, read> = access %u, 0i
-    %9:vec3<f16> = load %8
-    store %7, %9
-    %10:ptr<storage, vec3<f16>, read_write> = access %s, 1i
-    %11:ptr<uniform, vec3<f16>, read> = access %u, 0i
-    %12:vec3<f16> = load %11
-    %13:vec3<f16> = swizzle %12, zxy
-    store %10, %13
-    %14:ptr<storage, vec3<f16>, read_write> = access %s, 0i
-    %15:ptr<uniform, vec3<f16>, read> = access %u, 1i
-    %16:f16 = load_vector_element %15, 0i
-    store_vector_element %14, 1i, %16
-    ret
-  }
+kernel void f(const constant half4x3* u [[buffer(0)]], device half4x3* s [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = {.u=u, .s=s};
+  tint_store_and_preserve_padding(tint_module_vars.s, (*tint_module_vars.u));
+  (*tint_module_vars.s)[1] = (*tint_module_vars.u)[0];
+  (*tint_module_vars.s)[1] = (*tint_module_vars.u)[0].zxy;
+  (*tint_module_vars.s)[0][1] = (*tint_module_vars.u)[1][0];
 }
-%tint_store_and_preserve_padding = func(%target:ptr<storage, mat4x3<f16>, read_write>, %value_param:mat4x3<f16>):void {
-  $B3: {
-    %19:ptr<storage, vec3<f16>, read_write> = access %target, 0u
-    %20:vec3<f16> = access %value_param, 0u
-    store %19, %20
-    %21:ptr<storage, vec3<f16>, read_write> = access %target, 1u
-    %22:vec3<f16> = access %value_param, 1u
-    store %21, %22
-    %23:ptr<storage, vec3<f16>, read_write> = access %target, 2u
-    %24:vec3<f16> = access %value_param, 2u
-    store %23, %24
-    %25:ptr<storage, vec3<f16>, read_write> = access %target, 3u
-    %26:vec3<f16> = access %value_param, 3u
-    store %25, %26
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

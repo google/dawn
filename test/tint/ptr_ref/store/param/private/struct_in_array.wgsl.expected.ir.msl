@@ -1,7 +1,8 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct str {
+  int i;
+};
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -14,24 +15,15 @@ struct tint_array {
   T elements[N];
 };
 
-struct str {
-  int i;
+struct tint_module_vars_struct {
+  thread tint_array<str, 4>* P;
 };
 
-thread tint_array<str, 4> P = {};
 void func(thread str* const pointer) {
-  pointer = str{};
+  (*pointer) = str{};
 }
 kernel void tint_symbol() {
-  func(P[2]);
+  thread tint_array<str, 4> P = {};
+  tint_module_vars_struct const tint_module_vars = {.P=(&P)};
+  func((&(*tint_module_vars.P)[2]));
 }
-program_source:19:27: error: program scope variable must reside in constant address space
-thread tint_array<str, 4> P = {};
-                          ^
-program_source:21:11: error: cannot assign to variable 'pointer' with const-qualified type 'str *const'
-  pointer = str{};
-  ~~~~~~~ ^
-program_source:20:29: note: variable 'pointer' declared const here
-void func(thread str* const pointer) {
-          ~~~~~~~~~~~~~~~~~~^~~~~~~
-

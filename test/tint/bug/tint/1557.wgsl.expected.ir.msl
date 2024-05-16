@@ -1,69 +1,46 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  const constant int* u;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %u:ptr<uniform, i32, read> = var @binding_point(0, 0)
+int f() {
+  return 0;
 }
-
-%f = func():i32 {
-  $B2: {
-    ret 0i
-  }
-}
-%g = func():void {
-  $B3: {
-    %j:ptr<function, i32, read_write> = var, 0i
-    loop [b: $B4, c: $B5] {  # loop_1
-      $B4: {  # body
-        %5:i32 = load %j
-        %6:bool = gte %5, 1i
-        if %6 [t: $B6] {  # if_1
-          $B6: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %7:i32 = load %j
-        %8:i32 = add %7, 1i
-        store %j, %8
-        %9:i32 = call %f
-        %k:ptr<function, i32, read_write> = var, %9
-        continue  # -> $B5
+void g() {
+  int j = 0;
+  {
+    while(true) {
+      if ((j >= 1)) {
+        break;
       }
-      $B5: {  # continuing
-        next_iteration  # -> $B4
-      }
+      j = (j + 1);
+      int k = f();
+      continue;
     }
-    ret
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B7: {
-    %12:i32 = load %u
-    switch %12 [c: (0i, $B8), c: (default, $B9)] {  # switch_1
-      $B8: {  # case
-        %13:i32 = load %u
-        switch %13 [c: (0i, $B10), c: (default, $B11)] {  # switch_2
-          $B10: {  # case
-            exit_switch  # switch_2
-          }
-          $B11: {  # case
-            %14:void = call %g
-            exit_switch  # switch_2
-          }
+kernel void tint_symbol(const constant int* u [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.u=u};
+  switch((*tint_module_vars.u)) {
+    case 0:
+    {
+      switch((*tint_module_vars.u)) {
+        case 0:
+        {
+          break;
         }
-        exit_switch  # switch_1
+        default:
+        {
+          g();
+          break;
+        }
       }
-      $B9: {  # case
-        exit_switch  # switch_1
-      }
+      break;
     }
-    ret
+    default:
+    {
+      break;
+    }
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

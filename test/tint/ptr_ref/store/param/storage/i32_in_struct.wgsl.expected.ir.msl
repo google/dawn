@@ -1,31 +1,16 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct str {
+  int i;
+};
+struct tint_module_vars_struct {
+  device str* S;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: str = struct @align(4) {
-  i:i32 @offset(0)
+void func(device int* const pointer) {
+  (*pointer) = 42;
 }
-
-$B1: {  # root
-  %S:ptr<storage, str, read_write> = var @binding_point(0, 0)
+kernel void tint_symbol(device str* S [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.S=S};
+  func((&(*tint_module_vars.S).i));
 }
-
-%func = func(%pointer:ptr<storage, i32, read_write>):void {
-  $B2: {
-    store %pointer, 42i
-    ret
-  }
-}
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %5:ptr<storage, i32, read_write> = access %S, 0u
-    %6:void = call %func, %5
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

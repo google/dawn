@@ -1,20 +1,13 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread int* t;
+};
 
-thread int t = 0;
-int2 m() {
-  t = 1;
-  return int2(t);
+int2 m(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.t) = 1;
+  return int2((*tint_module_vars.t));
 }
-void f() {
-  bool2 v = bool2(m());
+void f(tint_module_vars_struct tint_module_vars) {
+  bool2 v = bool2(m(tint_module_vars));
 }
-program_source:4:12: error: program scope variable must reside in constant address space
-thread int t = 0;
-           ^
-program_source:10:9: warning: unused variable 'v' [-Wunused-variable]
-  bool2 v = bool2(m());
-        ^
-

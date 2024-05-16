@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -39,17 +37,7 @@ kernel void tint_symbol() {
   tint_array<float, 4> const arr_let = tint_array<float, 4>{};
   S struct_var = S{};
   S const struct_let = S{};
-  thread float* const ptr_f32 = f32_var;
-  thread float4* const ptr_vec = v4f32_var;
-  thread tint_array<float, 4>* const ptr_arr = arr_var;
+  thread float* const ptr_f32 = (&f32_var);
+  thread float4* const ptr_vec = (&v4f32_var);
+  thread tint_array<float, 4>* const ptr_arr = (&arr_var);
 }
-program_source:40:23: error: cannot initialize a variable of type 'float *const' with an lvalue of type 'float'
-  thread float* const ptr_f32 = f32_var;
-                      ^         ~~~~~~~
-program_source:41:24: error: cannot initialize a variable of type 'float4 *const' with an lvalue of type 'float4' (vector of 4 'float' values)
-  thread float4* const ptr_vec = v4f32_var;
-                       ^         ~~~~~~~~~
-program_source:42:38: error: no viable conversion from 'tint_array<float, 4>' to 'tint_array<float, 4> *const'
-  thread tint_array<float, 4>* const ptr_arr = arr_var;
-                                     ^         ~~~~~~~
-

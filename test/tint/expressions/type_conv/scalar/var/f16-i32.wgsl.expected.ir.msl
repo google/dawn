@@ -1,19 +1,12 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread half* u;
+};
 
-thread half u = 1.0h;
-void f() {
-  int const v = tint_f16_to_i32(u);
-}
 int tint_f16_to_i32(half value) {
   return select(2147483647, select((-2147483647 - 1), int(value), (value >= -65504.0h)), (value <= 65504.0h));
 }
-program_source:4:13: error: program scope variable must reside in constant address space
-thread half u = 1.0h;
-            ^
-program_source:6:13: warning: unused variable 'v' [-Wunused-variable]
-  int const v = tint_f16_to_i32(u);
-            ^
-
+void f(tint_module_vars_struct tint_module_vars) {
+  int const v = tint_f16_to_i32((*tint_module_vars.u));
+}

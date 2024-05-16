@@ -1,16 +1,11 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread int* a;
+};
 
-thread int a = 1;
 fragment void f() {
-  int const b = a;
+  thread int a = 1;
+  tint_module_vars_struct const tint_module_vars = {.a=(&a)};
+  int const b = (*tint_module_vars.a);
 }
-program_source:4:12: error: program scope variable must reside in constant address space
-thread int a = 1;
-           ^
-program_source:6:13: warning: unused variable 'b' [-Wunused-variable]
-  int const b = a;
-            ^
-

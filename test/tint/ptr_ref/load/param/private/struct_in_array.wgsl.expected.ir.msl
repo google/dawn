@@ -1,7 +1,8 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct str {
+  int i;
+};
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -14,75 +15,15 @@ struct tint_array {
   T elements[N];
 };
 
-struct str {
-  int i;
+struct tint_module_vars_struct {
+  thread tint_array<str, 4>* P;
 };
 
-thread tint_array<str, 4> P = {};
 str func(thread str* const pointer) {
-  return pointer;
+  return (*pointer);
 }
 kernel void tint_symbol() {
-  str const r = func(P[2]);
+  thread tint_array<str, 4> P = {};
+  tint_module_vars_struct const tint_module_vars = {.P=(&P)};
+  str const r = func((&(*tint_module_vars.P)[2]));
 }
-program_source:19:27: error: program scope variable must reside in constant address space
-thread tint_array<str, 4> P = {};
-                          ^
-program_source:21:10: error: no viable conversion from returned value of type 'str *const' to function return type 'str'
-  return pointer;
-         ^~~~~~~
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const str &' for 1st argument; dereference the argument with *
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const str &' for 1st argument; dereference the argument with *
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const str &' for 1st argument; dereference the argument with *
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const device str &' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const threadgroup str &' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const constant str &' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const device str &' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const threadgroup str &' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const constant str &' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const constant str &' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'str &&' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'device str &&' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'threadgroup str &&' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'str &&' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'device str &&' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'threadgroup str &&' for 1st argument
-struct str {
-       ^
-program_source:15:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'str &&' for 1st argument
-struct str {
-       ^
-program_source:24:13: warning: unused variable 'r' [-Wunused-variable]
-  str const r = func(P[2]);
-            ^
-

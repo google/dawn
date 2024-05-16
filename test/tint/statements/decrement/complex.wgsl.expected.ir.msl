@@ -1,113 +1,65 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(16) {
-  a:array<vec4<i32>, 4> @offset(0)
-}
+struct S {
+  tint_array<int4, 4> a;
+};
+struct tint_module_vars_struct {
+  device tint_array<S, 1>* tint_symbol;
+  thread uint* v;
+};
 
-$B1: {  # root
-  %tint_symbol:ptr<storage, array<S>, read_write> = var @binding_point(0, 0)
-  %v:ptr<private, u32, read_write> = var
+int idx1(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
+  return 1;
 }
-
-%idx1 = func():i32 {
-  $B2: {
-    %4:u32 = load %v
-    %5:u32 = sub %4, 1u
-    store %v, %5
-    ret 1i
-  }
+int idx2(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
+  return 2;
 }
-%idx2 = func():i32 {
-  $B3: {
-    %7:u32 = load %v
-    %8:u32 = sub %7, 1u
-    store %v, %8
-    ret 2i
-  }
+int idx3(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
+  return 3;
 }
-%idx3 = func():i32 {
-  $B4: {
-    %10:u32 = load %v
-    %11:u32 = sub %10, 1u
-    store %v, %11
-    ret 3i
-  }
+int idx4(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
+  return 4;
 }
-%idx4 = func():i32 {
-  $B5: {
-    %13:u32 = load %v
-    %14:u32 = sub %13, 1u
-    store %v, %14
-    ret 4i
-  }
+int idx5(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
+  return 0;
 }
-%idx5 = func():i32 {
-  $B6: {
-    %16:u32 = load %v
-    %17:u32 = sub %16, 1u
-    store %v, %17
-    ret 0i
-  }
+int idx6(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
+  return 2;
 }
-%idx6 = func():i32 {
-  $B7: {
-    %19:u32 = load %v
-    %20:u32 = sub %19, 1u
-    store %v, %20
-    ret 2i
-  }
-}
-%tint_symbol_1 = func():void {
-  $B8: {
-    loop [i: $B9, b: $B10, c: $B11] {  # loop_1
-      $B9: {  # initializer
-        %22:i32 = call %idx1
-        %23:i32 = let %22
-        %24:i32 = call %idx2
-        %25:ptr<storage, vec4<i32>, read_write> = access %tint_symbol, %23, 0u, %24
-        %26:ptr<storage, vec4<i32>, read_write> = let %25
-        %27:i32 = call %idx3
-        %28:i32 = let %27
-        %29:i32 = load_vector_element %26, %28
-        %30:i32 = sub %29, 1i
-        store_vector_element %26, %28, %30
-        next_iteration  # -> $B10
+void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
+  {
+    int const v_1 = idx1(tint_module_vars);
+    device int4* const v_2 = (&(*tint_module_vars.tint_symbol)[v_1].a[idx2(tint_module_vars)]);
+    int const v_3 = idx3(tint_module_vars);
+    (*v_2)[v_3] = ((*v_2)[v_3] - 1);
+    while(true) {
+      if (((*tint_module_vars.v) < 10u)) {
+      } else {
+        break;
       }
-      $B10: {  # body
-        %31:u32 = load %v
-        %32:bool = lt %31, 10u
-        if %32 [t: $B12, f: $B13] {  # if_1
-          $B12: {  # true
-            exit_if  # if_1
-          }
-          $B13: {  # false
-            exit_loop  # loop_1
-          }
-        }
-        continue  # -> $B11
-      }
-      $B11: {  # continuing
-        %33:i32 = call %idx4
-        %34:i32 = let %33
-        %35:i32 = call %idx5
-        %36:ptr<storage, vec4<i32>, read_write> = access %tint_symbol, %34, 0u, %35
-        %37:ptr<storage, vec4<i32>, read_write> = let %36
-        %38:i32 = call %idx6
-        %39:i32 = let %38
-        %40:i32 = load_vector_element %37, %39
-        %41:i32 = sub %40, 1i
-        store_vector_element %37, %39, %41
-        next_iteration  # -> $B10
-      }
+      int const v_4 = idx4(tint_module_vars);
+      device int4* const v_5 = (&(*tint_module_vars.tint_symbol)[v_4].a[idx5(tint_module_vars)]);
+      int const v_6 = idx6(tint_module_vars);
+      (*v_5)[v_6] = ((*v_5)[v_6] - 1);
+      continue;
     }
-    ret
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

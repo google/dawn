@@ -1,23 +1,11 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device half3x2* out;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %out:ptr<storage, mat3x2<f16>, read_write> = var @binding_point(0, 0)
+kernel void f(device half3x2* out [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.out=out};
+  half3x2 m = half3x2(half2(0.0h), half2(0.0h), half2(0.0h));
+  (*tint_module_vars.out) = half3x2(m);
 }
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %m:ptr<function, mat3x2<f16>, read_write> = var, mat3x2<f16>(vec2<f16>(0.0h))
-    %4:mat3x2<f16> = load %m
-    %5:mat3x2<f16> = construct %4
-    store %out, %5
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

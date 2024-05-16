@@ -1,27 +1,13 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Input {
+  int3 position;
+};
+struct tint_module_vars_struct {
+  const device Input* input;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Input = struct @align(16) {
-  position:vec3<i32> @offset(0)
+kernel void tint_symbol(uint3 id [[thread_position_in_grid]], const device Input* input [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.input=input};
+  int3 const pos = ((*tint_module_vars.input).position - int3(0));
 }
-
-$B1: {  # root
-  %input:ptr<storage, Input, read> = var @binding_point(0, 0)
-}
-
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%id:vec3<u32> [@global_invocation_id]):void {
-  $B2: {
-    %4:ptr<storage, vec3<i32>, read> = access %input, 0u
-    %5:vec3<i32> = load %4
-    %6:vec3<i32> = sub %5, vec3<i32>(0i)
-    %pos:vec3<i32> = let %6
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

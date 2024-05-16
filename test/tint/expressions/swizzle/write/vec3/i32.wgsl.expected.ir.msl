@@ -1,19 +1,15 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct S {
   int3 v;
 };
+struct tint_module_vars_struct {
+  thread S* P;
+};
 
-thread S P = {};
-void f() {
-  P.v = int3(1, 2, 3);
-  P.v[0u] = 1;
-  P.v[1u] = 2;
-  P.v[2u] = 3;
+void f(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.P).v = int3(1, 2, 3);
+  (*tint_module_vars.P).v[0u] = 1;
+  (*tint_module_vars.P).v[1u] = 2;
+  (*tint_module_vars.P).v[2u] = 3;
 }
-program_source:7:10: error: program scope variable must reside in constant address space
-thread S P = {};
-         ^
-

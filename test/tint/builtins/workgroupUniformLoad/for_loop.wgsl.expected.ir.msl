@@ -1,34 +1,27 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  threadgroup int* a;
+  threadgroup int* b;
+};
 
-threadgroup int a;
-threadgroup int b;
-void foo() {
+void foo(tint_module_vars_struct tint_module_vars) {
   {
     int i = 0;
     while(true) {
       int const v = i;
       threadgroup_barrier(mem_flags::mem_threadgroup);
-      int const v_1 = a;
+      int const v_1 = (*tint_module_vars.a);
       threadgroup_barrier(mem_flags::mem_threadgroup);
       if ((v < v_1)) {
       } else {
         break;
       }
       threadgroup_barrier(mem_flags::mem_threadgroup);
-      int const v_2 = b;
+      int const v_2 = (*tint_module_vars.b);
       threadgroup_barrier(mem_flags::mem_threadgroup);
       i = (i + v_2);
       continue;
     }
   }
 }
-program_source:4:17: error: program scope variable must reside in constant address space
-threadgroup int a;
-                ^
-program_source:5:17: error: program scope variable must reside in constant address space
-threadgroup int b;
-                ^
-

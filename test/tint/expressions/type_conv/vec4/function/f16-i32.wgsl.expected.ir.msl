@@ -1,23 +1,16 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread half* t;
+};
 
-thread half t = 0.0h;
-half4 m() {
-  t = 1.0h;
-  return half4(t);
-}
-void f() {
-  int4 v = tint_v4f16_to_v4i32(m());
+half4 m(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.t) = 1.0h;
+  return half4((*tint_module_vars.t));
 }
 int4 tint_v4f16_to_v4i32(half4 value) {
   return select(int4(2147483647), select(int4((-2147483647 - 1)), int4(value), (value >= half4(-65504.0h))), (value <= half4(65504.0h)));
 }
-program_source:4:13: error: program scope variable must reside in constant address space
-thread half t = 0.0h;
-            ^
-program_source:10:12: error: use of undeclared identifier 'tint_v4f16_to_v4i32'
-  int4 v = tint_v4f16_to_v4i32(m());
-           ^
-
+void f(tint_module_vars_struct tint_module_vars) {
+  int4 v = tint_v4f16_to_v4i32(m(tint_module_vars));
+}

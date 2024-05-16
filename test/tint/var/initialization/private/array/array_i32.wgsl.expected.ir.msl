@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -14,23 +12,15 @@ struct tint_array {
   T elements[N];
 };
 
+struct tint_module_vars_struct {
+  thread tint_array<tint_array<int, 3>, 2>* zero;
+  thread tint_array<tint_array<int, 3>, 2>* init;
+};
 
-thread tint_array<tint_array<int, 3>, 2> zero = {};
-thread tint_array<tint_array<int, 3>, 2> init = tint_array<tint_array<int, 3>, 2>{tint_array<int, 3>{1, 2, 3}, tint_array<int, 3>{4, 5, 6}};
 kernel void tint_symbol() {
-  tint_array<tint_array<int, 3>, 2> v0 = zero;
-  tint_array<tint_array<int, 3>, 2> v1 = init;
+  thread tint_array<tint_array<int, 3>, 2> zero = {};
+  thread tint_array<tint_array<int, 3>, 2> init = tint_array<tint_array<int, 3>, 2>{tint_array<int, 3>{1, 2, 3}, tint_array<int, 3>{4, 5, 6}};
+  tint_module_vars_struct const tint_module_vars = {.zero=(&zero), .init=(&init)};
+  tint_array<tint_array<int, 3>, 2> v0 = (*tint_module_vars.zero);
+  tint_array<tint_array<int, 3>, 2> v1 = (*tint_module_vars.init);
 }
-program_source:16:42: error: program scope variable must reside in constant address space
-thread tint_array<tint_array<int, 3>, 2> zero = {};
-                                         ^
-program_source:17:42: error: program scope variable must reside in constant address space
-thread tint_array<tint_array<int, 3>, 2> init = tint_array<tint_array<int, 3>, 2>{tint_array<int, 3>{1, 2, 3}, tint_array<int, 3>{4, 5, 6}};
-                                         ^
-program_source:19:37: warning: unused variable 'v0' [-Wunused-variable]
-  tint_array<tint_array<int, 3>, 2> v0 = zero;
-                                    ^
-program_source:20:37: warning: unused variable 'v1' [-Wunused-variable]
-  tint_array<tint_array<int, 3>, 2> v1 = init;
-                                    ^
-

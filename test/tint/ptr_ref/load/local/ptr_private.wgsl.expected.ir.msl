@@ -1,17 +1,12 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread int* i;
+};
 
-thread int i = 123;
 kernel void tint_symbol() {
-  thread int* const p = i;
-  int const u = (p + 1);
+  thread int i = 123;
+  tint_module_vars_struct const tint_module_vars = {.i=(&i)};
+  thread int* const p = tint_module_vars.i;
+  int const u = ((*p) + 1);
 }
-program_source:4:12: error: program scope variable must reside in constant address space
-thread int i = 123;
-           ^
-program_source:7:13: error: cannot initialize a variable of type 'const int' with an rvalue of type 'int *'
-  int const u = (p + 1);
-            ^   ~~~~~~~
-

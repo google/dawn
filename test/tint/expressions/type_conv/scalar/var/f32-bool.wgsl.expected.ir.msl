@@ -5,5 +5,5 @@ struct tint_module_vars_struct {
 };
 
 void f(tint_module_vars_struct tint_module_vars) {
-  bool const v = bool(tint_module_vars.u);
+  bool const v = bool((*tint_module_vars.u));
 }

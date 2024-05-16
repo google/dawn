@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct str {
@@ -7,22 +5,9 @@ struct str {
 };
 
 void func(thread float4* const pointer) {
-  pointer = float4(0.0f);
+  (*pointer) = float4(0.0f);
 }
 kernel void tint_symbol() {
   str F = {};
-  func(F.i);
+  func((&F.i));
 }
-program_source:8:11: error: cannot assign to variable 'pointer' with const-qualified type 'float4 *const'
-  pointer = float4(0.0f);
-  ~~~~~~~ ^
-program_source:7:32: note: variable 'pointer' declared const here
-void func(thread float4* const pointer) {
-          ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
-program_source:12:3: error: no matching function for call to 'func'
-  func(F.i);
-  ^~~~
-program_source:7:6: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'float4 *const' for 1st argument; take the address of the argument with &
-void func(thread float4* const pointer) {
-     ^
-

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -14,21 +12,16 @@ struct tint_array {
   T elements[N];
 };
 
+struct tint_module_vars_struct {
+  threadgroup tint_array<int, 4>* v;
+};
 
-threadgroup tint_array<int, 4> v;
 int foo(threadgroup int* const p) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  int const v_1 = p;
+  int const v_1 = (*p);
   threadgroup_barrier(mem_flags::mem_threadgroup);
   return v_1;
 }
-int bar() {
-  return foo(v[0]);
+int bar(tint_module_vars_struct tint_module_vars) {
+  return foo((&(*tint_module_vars.v)[0]));
 }
-program_source:16:32: error: program scope variable must reside in constant address space
-threadgroup tint_array<int, 4> v;
-                               ^
-program_source:19:13: error: cannot initialize a variable of type 'const int' with an lvalue of type 'threadgroup int *const'
-  int const v_1 = p;
-            ^     ~
-

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct str {
@@ -7,19 +5,9 @@ struct str {
 };
 
 float4 func(thread float4* const pointer) {
-  return pointer;
+  return (*pointer);
 }
 kernel void tint_symbol() {
   str F = {};
-  float4 const r = func(F.i);
+  float4 const r = func((&F.i));
 }
-program_source:8:10: error: cannot initialize return object of type 'float4' (vector of 4 'float' values) with an lvalue of type 'float4 *const'
-  return pointer;
-         ^~~~~~~
-program_source:12:20: error: no matching function for call to 'func'
-  float4 const r = func(F.i);
-                   ^~~~
-program_source:7:8: note: candidate function not viable: no known conversion from 'float4' (vector of 4 'float' values) to 'float4 *const' for 1st argument; take the address of the argument with &
-float4 func(thread float4* const pointer) {
-       ^
-

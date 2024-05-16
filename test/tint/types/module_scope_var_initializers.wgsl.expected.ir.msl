@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -17,57 +15,39 @@ struct tint_array {
 struct S {
   float a;
 };
+struct tint_module_vars_struct {
+  thread bool* bool_var;
+  thread int* i32_var;
+  thread uint* u32_var;
+  thread float* f32_var;
+  thread int2* v2i32_var;
+  thread uint3* v3u32_var;
+  thread float4* v4f32_var;
+  thread float2x3* m2x3_var;
+  thread tint_array<float, 4>* arr_var;
+  thread S* struct_var;
+};
 
-thread bool bool_var = false;
-thread int i32_var = 0;
-thread uint u32_var = 0u;
-thread float f32_var = 0.0f;
-thread int2 v2i32_var = int2(0);
-thread uint3 v3u32_var = uint3(0u);
-thread float4 v4f32_var = float4(0.0f);
-thread float2x3 m2x3_var = float2x3(float3(0.0f), float3(0.0f));
-thread tint_array<float, 4> arr_var = tint_array<float, 4>{};
-thread S struct_var = S{};
 kernel void tint_symbol() {
-  bool_var = false;
-  i32_var = 0;
-  u32_var = 0u;
-  f32_var = 0.0f;
-  v2i32_var = int2(0);
-  v3u32_var = uint3(0u);
-  v4f32_var = float4(0.0f);
-  m2x3_var = float2x3(float3(0.0f), float3(0.0f));
-  arr_var = tint_array<float, 4>{};
-  struct_var = S{};
+  thread bool bool_var = false;
+  thread int i32_var = 0;
+  thread uint u32_var = 0u;
+  thread float f32_var = 0.0f;
+  thread int2 v2i32_var = int2(0);
+  thread uint3 v3u32_var = uint3(0u);
+  thread float4 v4f32_var = float4(0.0f);
+  thread float2x3 m2x3_var = float2x3(float3(0.0f), float3(0.0f));
+  thread tint_array<float, 4> arr_var = tint_array<float, 4>{};
+  thread S struct_var = S{};
+  tint_module_vars_struct const tint_module_vars = {.bool_var=(&bool_var), .i32_var=(&i32_var), .u32_var=(&u32_var), .f32_var=(&f32_var), .v2i32_var=(&v2i32_var), .v3u32_var=(&v3u32_var), .v4f32_var=(&v4f32_var), .m2x3_var=(&m2x3_var), .arr_var=(&arr_var), .struct_var=(&struct_var)};
+  (*tint_module_vars.bool_var) = false;
+  (*tint_module_vars.i32_var) = 0;
+  (*tint_module_vars.u32_var) = 0u;
+  (*tint_module_vars.f32_var) = 0.0f;
+  (*tint_module_vars.v2i32_var) = int2(0);
+  (*tint_module_vars.v3u32_var) = uint3(0u);
+  (*tint_module_vars.v4f32_var) = float4(0.0f);
+  (*tint_module_vars.m2x3_var) = float2x3(float3(0.0f), float3(0.0f));
+  (*tint_module_vars.arr_var) = tint_array<float, 4>{};
+  (*tint_module_vars.struct_var) = S{};
 }
-program_source:19:13: error: program scope variable must reside in constant address space
-thread bool bool_var = false;
-            ^
-program_source:20:12: error: program scope variable must reside in constant address space
-thread int i32_var = 0;
-           ^
-program_source:21:13: error: program scope variable must reside in constant address space
-thread uint u32_var = 0u;
-            ^
-program_source:22:14: error: program scope variable must reside in constant address space
-thread float f32_var = 0.0f;
-             ^
-program_source:23:13: error: program scope variable must reside in constant address space
-thread int2 v2i32_var = int2(0);
-            ^
-program_source:24:14: error: program scope variable must reside in constant address space
-thread uint3 v3u32_var = uint3(0u);
-             ^
-program_source:25:15: error: program scope variable must reside in constant address space
-thread float4 v4f32_var = float4(0.0f);
-              ^
-program_source:26:17: error: program scope variable must reside in constant address space
-thread float2x3 m2x3_var = float2x3(float3(0.0f), float3(0.0f));
-                ^
-program_source:27:29: error: program scope variable must reside in constant address space
-thread tint_array<float, 4> arr_var = tint_array<float, 4>{};
-                            ^
-program_source:28:10: error: program scope variable must reside in constant address space
-thread S struct_var = S{};
-         ^
-

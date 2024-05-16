@@ -4,7 +4,11 @@ struct S {
   int a;
   float b;
 };
+struct tint_module_vars_struct {
+  thread S* v;
+};
 
 kernel void tint_symbol() {
   thread S v = {};
+  tint_module_vars_struct const tint_module_vars = {.v=(&v)};
 }

@@ -1,94 +1,52 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Matrix = struct @align(4) {
-  numbers:array<u32> @offset(0)
-}
+struct Matrix {
+  tint_array<uint, 1> numbers;
+};
+struct Uniforms {
+  uint2 aShape;
+  uint2 bShape;
+  uint2 outShape;
+};
+struct tint_module_vars_struct {
+  const device Matrix* firstMatrix;
+  const device Matrix* secondMatrix;
+  device Matrix* resultMatrix;
+  const constant Uniforms* uniforms;
+};
 
-Uniforms = struct @align(8) {
-  aShape:vec2<u32> @offset(0)
-  bShape:vec2<u32> @offset(8)
-  outShape:vec2<u32> @offset(16)
-}
-
-$B1: {  # root
-  %firstMatrix:ptr<storage, Matrix, read> = var @binding_point(0, 0)
-  %secondMatrix:ptr<storage, Matrix, read> = var @binding_point(0, 1)
-  %resultMatrix:ptr<storage, Matrix, read_write> = var @binding_point(0, 2)
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 3)
-}
-
-%tint_symbol = @compute @workgroup_size(2, 2, 1) func(%global_id:vec3<u32> [@global_invocation_id]):void {
-  $B2: {
-    %7:u32 = access %global_id, 1u
-    %8:u32 = access %global_id, 0u
-    %9:vec2<u32> = construct %7, %8
-    %resultCell:vec2<u32> = let %9
-    %11:ptr<uniform, vec2<u32>, read> = access %uniforms, 0u
-    %12:u32 = load_vector_element %11, 1u
-    %dimInner:u32 = let %12
-    %14:ptr<uniform, vec2<u32>, read> = access %uniforms, 2u
-    %15:u32 = load_vector_element %14, 1u
-    %dimOutter:u32 = let %15
-    %result:ptr<function, u32, read_write> = var, 0u
-    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
-      $B3: {  # initializer
-        %i:ptr<function, u32, read_write> = var, 0u
-        next_iteration  # -> $B4
+kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(0)]], const device Matrix* secondMatrix [[buffer(1)]], device Matrix* resultMatrix [[buffer(2)]], const constant Uniforms* uniforms [[buffer(3)]]) {
+  tint_module_vars_struct const tint_module_vars = {.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms};
+  uint2 const resultCell = uint2(global_id[1u], global_id[0u]);
+  uint const dimInner = (*tint_module_vars.uniforms).aShape[1u];
+  uint const dimOutter = (*tint_module_vars.uniforms).outShape[1u];
+  uint result = 0u;
+  {
+    uint i = 0u;
+    while(true) {
+      if ((i < dimInner)) {
+      } else {
+        break;
       }
-      $B4: {  # body
-        %19:u32 = load %i
-        %20:bool = lt %19, %dimInner
-        if %20 [t: $B6, f: $B7] {  # if_1
-          $B6: {  # true
-            exit_if  # if_1
-          }
-          $B7: {  # false
-            exit_loop  # loop_1
-          }
-        }
-        %21:u32 = load %i
-        %22:u32 = access %resultCell, 0u
-        %23:u32 = mul %22, %dimInner
-        %24:u32 = add %21, %23
-        %a:u32 = let %24
-        %26:u32 = access %resultCell, 1u
-        %27:u32 = load %i
-        %28:u32 = mul %27, %dimOutter
-        %29:u32 = add %26, %28
-        %b:u32 = let %29
-        %31:u32 = load %result
-        %32:ptr<storage, u32, read> = access %firstMatrix, 0u, %a
-        %33:u32 = load %32
-        %34:ptr<storage, u32, read> = access %secondMatrix, 0u, %b
-        %35:u32 = load %34
-        %36:u32 = mul %33, %35
-        %37:u32 = add %31, %36
-        store %result, %37
-        continue  # -> $B5
-      }
-      $B5: {  # continuing
-        %38:u32 = load %i
-        %39:u32 = add %38, 1u
-        store %i, %39
-        next_iteration  # -> $B4
-      }
+      uint const a = (i + (resultCell[0u] * dimInner));
+      uint const b = (resultCell[1u] + (i * dimOutter));
+      result = (result + ((*tint_module_vars.firstMatrix).numbers[a] * (*tint_module_vars.secondMatrix).numbers[b]));
+      i = (i + 1u);
+      continue;
     }
-    %40:u32 = access %resultCell, 1u
-    %41:u32 = access %resultCell, 0u
-    %42:u32 = mul %41, %dimOutter
-    %43:u32 = add %40, %42
-    %index:u32 = let %43
-    %45:ptr<storage, u32, read_write> = access %resultMatrix, 0u, %index
-    %46:u32 = load %result
-    store %45, %46
-    ret
   }
+  uint const index = (resultCell[1u] + (resultCell[0u] * dimOutter));
+  (*tint_module_vars.resultMatrix).numbers[index] = result;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

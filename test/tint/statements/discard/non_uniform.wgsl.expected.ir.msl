@@ -1,45 +1,22 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int* non_uniform_global;
+  device float* output;
+  thread bool* continue_execution;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %non_uniform_global:ptr<storage, i32, read_write> = var @binding_point(0, 0)
-  %output:ptr<storage, f32, read_write> = var @binding_point(0, 1)
-  %continue_execution:ptr<private, bool, read_write> = var, true
-}
-
-%tint_symbol = @fragment func():void {
-  $B2: {
-    %5:i32 = load %non_uniform_global
-    %6:bool = lt %5, 0i
-    if %6 [t: $B3] {  # if_1
-      $B3: {  # true
-        store %continue_execution, false
-        exit_if  # if_1
-      }
-    }
-    %7:f32 = dpdx 1.0f
-    %8:f32 = let %7
-    %9:bool = load %continue_execution
-    if %9 [t: $B4] {  # if_2
-      $B4: {  # true
-        store %output, %8
-        exit_if  # if_2
-      }
-    }
-    %10:bool = load %continue_execution
-    %11:bool = eq %10, false
-    if %11 [t: $B5] {  # if_3
-      $B5: {  # true
-        terminate_invocation
-      }
-    }
-    ret
+fragment void tint_symbol(device int* non_uniform_global [[buffer(0)]], device float* output [[buffer(1)]]) {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = {.non_uniform_global=non_uniform_global, .output=output, .continue_execution=(&continue_execution)};
+  if (((*tint_module_vars.non_uniform_global) < 0)) {
+    (*tint_module_vars.continue_execution) = false;
+  }
+  float const v = dfdx(1.0f);
+  if ((*tint_module_vars.continue_execution)) {
+    (*tint_module_vars.output) = v;
+  }
+  if (!((*tint_module_vars.continue_execution))) {
+    discard_fragment();
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct str {
@@ -19,70 +17,9 @@ struct tint_array {
 
 
 str func(thread str* const pointer) {
-  return pointer;
+  return (*pointer);
 }
 kernel void tint_symbol() {
   tint_array<str, 4> F = {};
-  str const r = func(F[2]);
+  str const r = func((&F[2]));
 }
-program_source:20:10: error: no viable conversion from returned value of type 'str *const' to function return type 'str'
-  return pointer;
-         ^~~~~~~
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const str &' for 1st argument; dereference the argument with *
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const str &' for 1st argument; dereference the argument with *
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const str &' for 1st argument; dereference the argument with *
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const device str &' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const threadgroup str &' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const constant str &' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const device str &' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const threadgroup str &' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const constant str &' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit copy constructor) not viable: no known conversion from 'str *const' to 'const constant str &' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'str &&' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'device str &&' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'threadgroup str &&' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'str &&' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'device str &&' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'threadgroup str &&' for 1st argument
-struct str {
-       ^
-program_source:3:8: note: candidate constructor (the implicit move constructor) not viable: no known conversion from 'str *const' to 'str &&' for 1st argument
-struct str {
-       ^
-program_source:24:17: error: no matching function for call to 'func'
-  str const r = func(F[2]);
-                ^~~~
-program_source:19:5: note: candidate function not viable: no known conversion from 'str' to 'str *const' for 1st argument; take the address of the argument with &
-str func(thread str* const pointer) {
-    ^
-

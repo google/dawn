@@ -1,25 +1,10 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void func(thread float2* const pointer) {
-  pointer = float2(0.0f);
+  (*pointer) = float2(0.0f);
 }
 kernel void tint_symbol() {
   float2x2 F = float2x2(0.0f);
-  func(F[1]);
+  func((&F[1]));
 }
-program_source:5:11: error: cannot assign to variable 'pointer' with const-qualified type 'float2 *const'
-  pointer = float2(0.0f);
-  ~~~~~~~ ^
-program_source:4:32: note: variable 'pointer' declared const here
-void func(thread float2* const pointer) {
-          ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
-program_source:9:3: error: no matching function for call to 'func'
-  func(F[1]);
-  ^~~~
-program_source:4:6: note: candidate function not viable: no known conversion from 'vec<float, 2>' (vector of 2 'float' values) to 'float2 *const' for 1st argument; take the address of the argument with &
-void func(thread float2* const pointer) {
-     ^
-

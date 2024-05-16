@@ -1,6 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread int3* v;
+};
 
 kernel void tint_symbol() {
   thread int3 v = 0;
+  tint_module_vars_struct const tint_module_vars = {.v=(&v)};
 }

@@ -1,26 +1,16 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread int* a;
+  thread float4* b;
+  thread float2x2* c;
+};
 
-thread int a = 0;
-thread float4 b = 0.0f;
-thread float2x2 c = float2x2(0.0f);
-void foo() {
-  a = tint_div_i32(a, 2);
-  b = (b * float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f)));
-  c = (c * 2.0f);
-}
 int tint_div_i32(int lhs, int rhs) {
   return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))));
 }
-program_source:4:12: error: program scope variable must reside in constant address space
-thread int a = 0;
-           ^
-program_source:5:15: error: program scope variable must reside in constant address space
-thread float4 b = 0.0f;
-              ^
-program_source:6:17: error: program scope variable must reside in constant address space
-thread float2x2 c = float2x2(0.0f);
-                ^
-
+void foo(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.a) = tint_div_i32((*tint_module_vars.a), 2);
+  (*tint_module_vars.b) = ((*tint_module_vars.b) * float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f)));
+  (*tint_module_vars.c) = ((*tint_module_vars.c) * 2.0f);
+}

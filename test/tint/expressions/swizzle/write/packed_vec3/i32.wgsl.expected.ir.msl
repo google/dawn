@@ -1,31 +1,15 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  int3 v;
+};
+struct tint_module_vars_struct {
+  device S* U;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(16) {
-  v:vec3<i32> @offset(0)
+void f(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.U).v = int3(1, 2, 3);
+  (*tint_module_vars.U).v[0u] = 1;
+  (*tint_module_vars.U).v[1u] = 2;
+  (*tint_module_vars.U).v[2u] = 3;
 }
-
-$B1: {  # root
-  %U:ptr<storage, S, read_write> = var @binding_point(0, 0)
-}
-
-%f = func():void {
-  $B2: {
-    %3:ptr<storage, vec3<i32>, read_write> = access %U, 0u
-    store %3, vec3<i32>(1i, 2i, 3i)
-    %4:ptr<storage, vec3<i32>, read_write> = access %U, 0u
-    store_vector_element %4, 0u, 1i
-    %5:ptr<storage, vec3<i32>, read_write> = access %U, 0u
-    store_vector_element %5, 1u, 2i
-    %6:ptr<storage, vec3<i32>, read_write> = access %U, 0u
-    store_vector_element %6, 2u, 3i
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

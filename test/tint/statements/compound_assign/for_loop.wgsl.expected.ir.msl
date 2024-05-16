@@ -1,86 +1,52 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  int a;
+  float4 b;
+  float2x2 c;
+};
+struct tint_module_vars_struct {
+  device S* v;
+  thread uint* i;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(16) {
-  a:i32 @offset(0)
-  b:vec4<f32> @offset(16)
-  c:mat2x2<f32> @offset(32)
-}
 
-$B1: {  # root
-  %v:ptr<storage, S, read_write> = var @binding_point(0, 0)
-  %i:ptr<private, u32, read_write> = var
+int idx1(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.i) = ((*tint_module_vars.i) + 1u);
+  return 1;
 }
-
-%idx1 = func():i32 {
-  $B2: {
-    %4:u32 = load %i
-    %5:u32 = add %4, 1u
-    store %i, %5
-    ret 1i
-  }
+int idx2(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.i) = ((*tint_module_vars.i) + 2u);
+  return 1;
 }
-%idx2 = func():i32 {
-  $B3: {
-    %7:u32 = load %i
-    %8:u32 = add %7, 2u
-    store %i, %8
-    ret 1i
-  }
+int idx3(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.i) = ((*tint_module_vars.i) + 3u);
+  return 1;
 }
-%idx3 = func():i32 {
-  $B4: {
-    %10:u32 = load %i
-    %11:u32 = add %10, 3u
-    store %i, %11
-    ret 1i
-  }
-}
-%foo = func():void {
-  $B5: {
-    %a:ptr<function, array<f32, 4>, read_write> = var, array<f32, 4>(0.0f)
-    loop [i: $B6, b: $B7, c: $B8] {  # loop_1
-      $B6: {  # initializer
-        %14:i32 = call %idx1
-        %15:ptr<function, f32, read_write> = access %a, %14
-        %16:ptr<function, f32, read_write> = let %15
-        %17:f32 = load %16
-        %18:f32 = mul %17, 2.0f
-        store %16, %18
-        next_iteration  # -> $B7
+void foo(tint_module_vars_struct tint_module_vars) {
+  tint_array<float, 4> a = tint_array<float, 4>{};
+  {
+    thread float* const v_1 = (&a[idx1(tint_module_vars)]);
+    (*v_1) = ((*v_1) * 2.0f);
+    while(true) {
+      if ((a[idx2(tint_module_vars)] < 10.0f)) {
+      } else {
+        break;
       }
-      $B7: {  # body
-        %19:i32 = call %idx2
-        %20:ptr<function, f32, read_write> = access %a, %19
-        %21:f32 = load %20
-        %22:bool = lt %21, 10.0f
-        if %22 [t: $B9, f: $B10] {  # if_1
-          $B9: {  # true
-            exit_if  # if_1
-          }
-          $B10: {  # false
-            exit_loop  # loop_1
-          }
-        }
-        continue  # -> $B8
-      }
-      $B8: {  # continuing
-        %23:i32 = call %idx3
-        %24:ptr<function, f32, read_write> = access %a, %23
-        %25:ptr<function, f32, read_write> = let %24
-        %26:f32 = load %25
-        %27:f32 = add %26, 1.0f
-        store %25, %27
-        next_iteration  # -> $B7
-      }
+      thread float* const v_2 = (&a[idx3(tint_module_vars)]);
+      (*v_2) = ((*v_2) + 1.0f);
+      continue;
     }
-    ret
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -1,40 +1,17 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device half4x3* out;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %out:ptr<storage, mat4x3<f16>, read_write> = var @binding_point(0, 0)
+void tint_store_and_preserve_padding(device half4x3* const target, half4x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+  (*target)[2u] = value_param[2u];
+  (*target)[3u] = value_param[3u];
 }
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %m:ptr<function, mat4x3<f16>, read_write> = var, mat4x3<f16>(vec3<f16>(0.0h))
-    %4:mat4x3<f16> = load %m
-    %5:mat4x3<f16> = construct %4
-    %6:void = call %tint_store_and_preserve_padding, %out, %5
-    ret
-  }
+kernel void f(device half4x3* out [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.out=out};
+  half4x3 m = half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h));
+  tint_store_and_preserve_padding(tint_module_vars.out, half4x3(m));
 }
-%tint_store_and_preserve_padding = func(%target:ptr<storage, mat4x3<f16>, read_write>, %value_param:mat4x3<f16>):void {
-  $B3: {
-    %10:ptr<storage, vec3<f16>, read_write> = access %target, 0u
-    %11:vec3<f16> = access %value_param, 0u
-    store %10, %11
-    %12:ptr<storage, vec3<f16>, read_write> = access %target, 1u
-    %13:vec3<f16> = access %value_param, 1u
-    store %12, %13
-    %14:ptr<storage, vec3<f16>, read_write> = access %target, 2u
-    %15:vec3<f16> = access %value_param, 2u
-    store %14, %15
-    %16:ptr<storage, vec3<f16>, read_write> = access %target, 3u
-    %17:vec3<f16> = access %value_param, 3u
-    store %16, %17
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

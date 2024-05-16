@@ -1,49 +1,37 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %s:ptr<storage, f32, read_write> = var @binding_point(0, 0)
-}
+struct tint_module_vars_struct {
+  device float* s;
+};
 
-%f1 = func(%a:array<f32, 4>):f32 {
-  $B2: {
-    %4:f32 = access %a, 3i
-    ret %4
-  }
+float f1(tint_array<float, 4> a) {
+  return a[3];
 }
-%f2 = func(%a_1:array<array<f32, 4>, 3>):f32 {  # %a_1: 'a'
-  $B3: {
-    %7:f32 = access %a_1, 2i, 3i
-    ret %7
-  }
+float f2(tint_array<tint_array<float, 4>, 3> a) {
+  return a[2][3];
 }
-%f3 = func(%a_2:array<array<array<f32, 4>, 3>, 2>):f32 {  # %a_2: 'a'
-  $B4: {
-    %10:f32 = access %a_2, 1i, 2i, 3i
-    ret %10
-  }
+float f3(tint_array<tint_array<tint_array<float, 4>, 3>, 2> a) {
+  return a[1][2][3];
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %a1:array<f32, 4> = let array<f32, 4>(0.0f)
-    %a2:array<array<f32, 4>, 3> = let array<array<f32, 4>, 3>(array<f32, 4>(0.0f))
-    %a3:array<array<array<f32, 4>, 3>, 2> = let array<array<array<f32, 4>, 3>, 2>(array<array<f32, 4>, 3>(array<f32, 4>(0.0f)))
-    %15:f32 = call %f1, %a1
-    %v1:f32 = let %15
-    %17:f32 = call %f2, %a2
-    %v2:f32 = let %17
-    %19:f32 = call %f3, %a3
-    %v3:f32 = let %19
-    %21:f32 = add %v1, %v2
-    %22:f32 = add %21, %v3
-    store %s, %22
-    ret
-  }
+kernel void tint_symbol(device float* s [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.s=s};
+  tint_array<float, 4> const a1 = tint_array<float, 4>{};
+  tint_array<tint_array<float, 4>, 3> const a2 = tint_array<tint_array<float, 4>, 3>{};
+  tint_array<tint_array<tint_array<float, 4>, 3>, 2> const a3 = tint_array<tint_array<tint_array<float, 4>, 3>, 2>{};
+  float const v1 = f1(a1);
+  float const v2 = f2(a2);
+  float const v3 = f3(a3);
+  (*tint_module_vars.s) = ((v1 + v2) + v3);
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

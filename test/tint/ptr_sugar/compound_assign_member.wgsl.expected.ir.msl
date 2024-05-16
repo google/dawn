@@ -1,26 +1,17 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void deref() {
   int3 a = 0;
-  thread int3* const p = a;
-  p[0u] = (p[0u] + 42);
+  thread int3* const p = (&a);
+  (*p)[0u] = ((*p)[0u] + 42);
 }
 void no_deref() {
   int3 a = 0;
-  thread int3* const p = a;
-  p[0u] = (p[0u] + 42);
+  thread int3* const p = (&a);
+  (*p)[0u] = ((*p)[0u] + 42);
 }
 kernel void tint_symbol() {
   deref();
   no_deref();
 }
-program_source:6:22: error: cannot initialize a variable of type 'int3 *const' with an lvalue of type 'int3' (vector of 3 'int' values)
-  thread int3* const p = a;
-                     ^   ~
-program_source:11:22: error: cannot initialize a variable of type 'int3 *const' with an lvalue of type 'int3' (vector of 3 'int' values)
-  thread int3* const p = a;
-                     ^   ~
-

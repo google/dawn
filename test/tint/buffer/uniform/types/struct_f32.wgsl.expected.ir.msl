@@ -1,55 +1,28 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Inner {
+  float scalar_f32;
+  float3 vec3_f32;
+  float2x4 mat2x4_f32;
+};
+struct S {
+  Inner inner;
+};
+struct tint_module_vars_struct {
+  const constant S* u;
+  device S* s;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Inner = struct @align(16) {
-  scalar_f32:f32 @offset(0)
-  vec3_f32:vec3<f32> @offset(16)
-  mat2x4_f32:mat2x4<f32> @offset(32)
+void tint_store_and_preserve_padding(device Inner* const target, Inner value_param) {
+  (*target).scalar_f32 = value_param.scalar_f32;
+  (*target).vec3_f32 = value_param.vec3_f32;
+  (*target).mat2x4_f32 = value_param.mat2x4_f32;
 }
-
-S = struct @align(16) {
-  inner:Inner @offset(0)
+void tint_store_and_preserve_padding(device S* const target, S value_param) {
+  tint_store_and_preserve_padding((&(*target).inner), value_param.inner);
 }
-
-$B1: {  # root
-  %u:ptr<uniform, S, read> = var @binding_point(0, 0)
-  %s:ptr<storage, S, read_write> = var @binding_point(0, 1)
+kernel void tint_symbol(const constant S* u [[buffer(0)]], device S* s [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = {.u=u, .s=s};
+  S const x = (*tint_module_vars.u);
+  tint_store_and_preserve_padding(tint_module_vars.s, x);
 }
-
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %4:S = load %u
-    %x:S = let %4
-    %6:void = call %tint_store_and_preserve_padding, %s, %x
-    ret
-  }
-}
-%tint_store_and_preserve_padding = func(%target:ptr<storage, S, read_write>, %value_param:S):void {
-  $B3: {
-    %10:ptr<storage, Inner, read_write> = access %target, 0u
-    %11:Inner = access %value_param, 0u
-    %12:void = call %tint_store_and_preserve_padding_1, %10, %11
-    ret
-  }
-}
-%tint_store_and_preserve_padding_1 = func(%target_1:ptr<storage, Inner, read_write>, %value_param_1:Inner):void {  # %tint_store_and_preserve_padding_1: 'tint_store_and_preserve_padding', %target_1: 'target', %value_param_1: 'value_param'
-  $B4: {
-    %16:ptr<storage, f32, read_write> = access %target_1, 0u
-    %17:f32 = access %value_param_1, 0u
-    store %16, %17
-    %18:ptr<storage, vec3<f32>, read_write> = access %target_1, 1u
-    %19:vec3<f32> = access %value_param_1, 1u
-    store %18, %19
-    %20:ptr<storage, mat2x4<f32>, read_write> = access %target_1, 2u
-    %21:mat2x4<f32> = access %value_param_1, 2u
-    store %20, %21
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

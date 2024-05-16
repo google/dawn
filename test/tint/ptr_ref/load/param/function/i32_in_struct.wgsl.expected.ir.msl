@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct str {
@@ -7,19 +5,9 @@ struct str {
 };
 
 int func(thread int* const pointer) {
-  return pointer;
+  return (*pointer);
 }
 kernel void tint_symbol() {
   str F = {};
-  int const r = func(F.i);
+  int const r = func((&F.i));
 }
-program_source:8:10: error: cannot initialize return object of type 'int' with an lvalue of type 'int *const'
-  return pointer;
-         ^~~~~~~
-program_source:12:17: error: no matching function for call to 'func'
-  int const r = func(F.i);
-                ^~~~
-program_source:7:5: note: candidate function not viable: no known conversion from 'int' to 'int *const' for 1st argument; take the address of the argument with &
-int func(thread int* const pointer) {
-    ^
-

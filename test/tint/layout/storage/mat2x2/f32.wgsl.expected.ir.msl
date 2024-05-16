@@ -1,28 +1,14 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct SSBO {
+  float2x2 m;
+};
+struct tint_module_vars_struct {
+  device SSBO* ssbo;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SSBO = struct @align(8) {
-  m:mat2x2<f32> @offset(0)
+kernel void f(device SSBO* ssbo [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.ssbo=ssbo};
+  float2x2 const v = (*tint_module_vars.ssbo).m;
+  (*tint_module_vars.ssbo).m = v;
 }
-
-$B1: {  # root
-  %ssbo:ptr<storage, SSBO, read_write> = var @binding_point(0, 0)
-}
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %3:ptr<storage, mat2x2<f32>, read_write> = access %ssbo, 0u
-    %4:mat2x2<f32> = load %3
-    %v:mat2x2<f32> = let %4
-    %6:ptr<storage, mat2x2<f32>, read_write> = access %ssbo, 0u
-    store %6, %v
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

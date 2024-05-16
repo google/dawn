@@ -1,16 +1,12 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread bool* continue_execution;
+};
 
-thread bool continue_execution = true;
-void f(bool cond) {
+void f(bool cond, tint_module_vars_struct tint_module_vars) {
   if (cond) {
-    continue_execution = false;
+    (*tint_module_vars.continue_execution) = false;
     return;
   }
 }
-program_source:4:13: error: program scope variable must reside in constant address space
-thread bool continue_execution = true;
-            ^
-

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct VSOut {
@@ -8,21 +6,10 @@ struct VSOut {
 
 void foo(thread VSOut* const out) {
   float4 pos = float4(1.0f, 2.0f, 3.0f, 4.0f);
-  out.pos = pos;
+  (*out).pos = pos;
 }
 vertex VSOut tint_symbol() {
   VSOut out = {};
-  foo(out);
+  foo((&out));
   return out;
 }
-program_source:9:6: error: member reference type 'VSOut *const' is a pointer; did you mean to use '->'?
-  out.pos = pos;
-  ~~~^
-     ->
-program_source:13:3: error: no matching function for call to 'foo'
-  foo(out);
-  ^~~
-program_source:7:6: note: candidate function not viable: no known conversion from 'VSOut' to 'VSOut *const' for 1st argument; take the address of the argument with &
-void foo(thread VSOut* const out) {
-     ^
-

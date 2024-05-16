@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 template<typename T, size_t N>
@@ -14,23 +12,12 @@ struct tint_array {
   T elements[N];
 };
 
+struct tint_module_vars_struct {
+  threadgroup tint_array<float, 10>* a;
+  threadgroup tint_array<float, 20>* b;
+};
 
-threadgroup tint_array<float, 10> a;
-threadgroup tint_array<float, 20> b;
-void f() {
-  float const x = a[0];
-  float const y = b[0];
+void f(tint_module_vars_struct tint_module_vars) {
+  float const x = (*tint_module_vars.a)[0];
+  float const y = (*tint_module_vars.b)[0];
 }
-program_source:16:35: error: program scope variable must reside in constant address space
-threadgroup tint_array<float, 10> a;
-                                  ^
-program_source:17:35: error: program scope variable must reside in constant address space
-threadgroup tint_array<float, 20> b;
-                                  ^
-program_source:19:15: warning: unused variable 'x' [-Wunused-variable]
-  float const x = a[0];
-              ^
-program_source:20:15: warning: unused variable 'y' [-Wunused-variable]
-  float const y = b[0];
-              ^
-

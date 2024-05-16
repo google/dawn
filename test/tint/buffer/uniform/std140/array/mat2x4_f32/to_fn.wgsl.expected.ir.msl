@@ -1,64 +1,38 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %u:ptr<uniform, array<mat2x4<f32>, 4>, read> = var @binding_point(0, 0)
-  %s:ptr<storage, f32, read_write> = var @binding_point(0, 1)
-}
+struct tint_module_vars_struct {
+  const constant tint_array<float2x4, 4>* u;
+  device float* s;
+};
 
-%a = func(%a_1:array<mat2x4<f32>, 4>):f32 {  # %a_1: 'a'
-  $B2: {
-    %5:f32 = access %a_1, 0i, 0i, 0u
-    ret %5
-  }
+float a(tint_array<float2x4, 4> a) {
+  return a[0][0][0u];
 }
-%b = func(%m:mat2x4<f32>):f32 {
-  $B3: {
-    %8:f32 = access %m, 0i, 0u
-    ret %8
-  }
+float b(float2x4 m) {
+  return m[0][0u];
 }
-%c = func(%v:vec4<f32>):f32 {
-  $B4: {
-    %11:f32 = access %v, 0u
-    ret %11
-  }
+float c(float4 v) {
+  return v[0u];
 }
-%d = func(%f:f32):f32 {
-  $B5: {
-    ret %f
-  }
+float d(float f) {
+  return f;
 }
-%f_1 = @compute @workgroup_size(1, 1, 1) func():void {  # %f_1: 'f'
-  $B6: {
-    %15:array<mat2x4<f32>, 4> = load %u
-    %16:f32 = call %a, %15
-    %17:f32 = let %16
-    %18:ptr<uniform, mat2x4<f32>, read> = access %u, 1i
-    %19:mat2x4<f32> = load %18
-    %20:f32 = call %b, %19
-    %21:f32 = add %17, %20
-    %22:f32 = let %21
-    %23:ptr<uniform, vec4<f32>, read> = access %u, 1i, 0i
-    %24:vec4<f32> = load %23
-    %25:vec4<f32> = swizzle %24, ywxz
-    %26:f32 = call %c, %25
-    %27:f32 = add %22, %26
-    %28:f32 = let %27
-    %29:ptr<uniform, vec4<f32>, read> = access %u, 1i, 0i
-    %30:vec4<f32> = load %29
-    %31:vec4<f32> = swizzle %30, ywxz
-    %32:f32 = access %31, 0u
-    %33:f32 = call %d, %32
-    %34:f32 = add %28, %33
-    store %s, %34
-    ret
-  }
+kernel void f(const constant tint_array<float2x4, 4>* u [[buffer(0)]], device float* s [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = {.u=u, .s=s};
+  float const v_1 = a((*tint_module_vars.u));
+  float const v_2 = (v_1 + b((*tint_module_vars.u)[1]));
+  float const v_3 = (v_2 + c((*tint_module_vars.u)[1][0].ywxz));
+  (*tint_module_vars.s) = (v_3 + d((*tint_module_vars.u)[1][0].ywxz[0u]));
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

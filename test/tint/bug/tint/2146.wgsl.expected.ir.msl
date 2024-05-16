@@ -1,34 +1,18 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread uint3* localId;
+  thread uint* localIndex;
+  thread uint3* globalId;
+  thread uint3* numWorkgroups;
+  thread uint3* workgroupId;
+};
 
-thread uint3 localId = 0u;
-thread uint localIndex = 0u;
-thread uint3 globalId = 0u;
-thread uint3 numWorkgroups = 0u;
-thread uint3 workgroupId = 0u;
-uint globalId2Index() {
-  return globalId[0u];
+uint globalId2Index(tint_module_vars_struct tint_module_vars) {
+  return (*tint_module_vars.globalId)[0u];
 }
 kernel void tint_symbol() {
   half4 a = half4(0.0h);
   half const b = 1.0h;
   a[0] = (a[0] + b);
 }
-program_source:4:14: error: program scope variable must reside in constant address space
-thread uint3 localId = 0u;
-             ^
-program_source:5:13: error: program scope variable must reside in constant address space
-thread uint localIndex = 0u;
-            ^
-program_source:6:14: error: program scope variable must reside in constant address space
-thread uint3 globalId = 0u;
-             ^
-program_source:7:14: error: program scope variable must reside in constant address space
-thread uint3 numWorkgroups = 0u;
-             ^
-program_source:8:14: error: program scope variable must reside in constant address space
-thread uint3 workgroupId = 0u;
-             ^
-

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct str {
@@ -19,22 +17,9 @@ struct tint_array {
 
 
 void func(thread str* const pointer) {
-  pointer = str{};
+  (*pointer) = str{};
 }
 kernel void tint_symbol() {
   tint_array<str, 4> F = {};
-  func(F[2]);
+  func((&F[2]));
 }
-program_source:20:11: error: cannot assign to variable 'pointer' with const-qualified type 'str *const'
-  pointer = str{};
-  ~~~~~~~ ^
-program_source:19:29: note: variable 'pointer' declared const here
-void func(thread str* const pointer) {
-          ~~~~~~~~~~~~~~~~~~^~~~~~~
-program_source:24:3: error: no matching function for call to 'func'
-  func(F[2]);
-  ^~~~
-program_source:19:6: note: candidate function not viable: no known conversion from 'str' to 'str *const' for 1st argument; take the address of the argument with &
-void func(thread str* const pointer) {
-     ^
-

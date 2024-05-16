@@ -1,53 +1,39 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Outputs = struct @align(4) {
-  data:array<u32> @offset(0)
-}
+struct Outputs {
+  tint_array<uint, 1> data;
+};
+struct tint_module_vars_struct {
+  thread uint* count;
+  device Outputs* outputs;
+};
 
-$B1: {  # root
-  %count:ptr<private, u32, read_write> = var, 0u
-  %outputs:ptr<storage, Outputs, read_write> = var @binding_point(0, 1)
+void push_output(uint value, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.outputs).data[(*tint_module_vars.count)] = value;
+  (*tint_module_vars.count) = ((*tint_module_vars.count) + 1u);
 }
-
-%push_output = func(%value:u32):void {
-  $B2: {
-    %5:u32 = load %count
-    %6:ptr<storage, u32, read_write> = access %outputs, 0u, %5
-    store %6, %value
-    %7:u32 = load %count
-    %8:u32 = add %7, 1u
-    store %count, %8
-    ret
-  }
+kernel void tint_symbol(device Outputs* outputs [[buffer(1)]]) {
+  thread uint count = 0u;
+  tint_module_vars_struct const tint_module_vars = {.count=(&count), .outputs=outputs};
+  uint a = 0u;
+  uint b = 10u;
+  uint c = 4294967294u;
+  a = (a + 1u);
+  b = (b + 1u);
+  c = (c + 1u);
+  push_output(a, tint_module_vars);
+  push_output(b, tint_module_vars);
+  push_output(c, tint_module_vars);
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %a:ptr<function, u32, read_write> = var, 0u
-    %b:ptr<function, u32, read_write> = var, 10u
-    %c:ptr<function, u32, read_write> = var, 4294967294u
-    %13:u32 = load %a
-    %14:u32 = add %13, 1u
-    store %a, %14
-    %15:u32 = load %b
-    %16:u32 = add %15, 1u
-    store %b, %16
-    %17:u32 = load %c
-    %18:u32 = add %17, 1u
-    store %c, %18
-    %19:u32 = load %a
-    %20:void = call %push_output, %19
-    %21:u32 = load %b
-    %22:void = call %push_output, %21
-    %23:u32 = load %c
-    %24:void = call %push_output, %23
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

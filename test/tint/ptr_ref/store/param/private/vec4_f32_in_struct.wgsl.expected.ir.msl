@@ -1,25 +1,17 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct str {
   float4 i;
 };
+struct tint_module_vars_struct {
+  thread str* P;
+};
 
-thread str P = {};
 void func(thread float4* const pointer) {
-  pointer = float4(0.0f);
+  (*pointer) = float4(0.0f);
 }
 kernel void tint_symbol() {
-  func(P.i);
+  thread str P = {};
+  tint_module_vars_struct const tint_module_vars = {.P=(&P)};
+  func((&(*tint_module_vars.P).i));
 }
-program_source:7:12: error: program scope variable must reside in constant address space
-thread str P = {};
-           ^
-program_source:9:11: error: cannot assign to variable 'pointer' with const-qualified type 'float4 *const'
-  pointer = float4(0.0f);
-  ~~~~~~~ ^
-program_source:8:32: note: variable 'pointer' declared const here
-void func(thread float4* const pointer) {
-          ~~~~~~~~~~~~~~~~~~~~~^~~~~~~
-

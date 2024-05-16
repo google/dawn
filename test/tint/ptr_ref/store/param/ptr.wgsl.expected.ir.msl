@@ -1,25 +1,10 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void func(int value, thread int* const pointer) {
-  pointer = value;
+  (*pointer) = value;
 }
 kernel void tint_symbol() {
   int i = 123;
-  func(123, i);
+  func(123, (&i));
 }
-program_source:5:11: error: cannot assign to variable 'pointer' with const-qualified type 'int *const'
-  pointer = value;
-  ~~~~~~~ ^
-program_source:4:40: note: variable 'pointer' declared const here
-void func(int value, thread int* const pointer) {
-                     ~~~~~~~~~~~~~~~~~~^~~~~~~
-program_source:9:3: error: no matching function for call to 'func'
-  func(123, i);
-  ^~~~
-program_source:4:6: note: candidate function not viable: no known conversion from 'int' to 'int *const' for 2nd argument; take the address of the argument with &
-void func(int value, thread int* const pointer) {
-     ^
-

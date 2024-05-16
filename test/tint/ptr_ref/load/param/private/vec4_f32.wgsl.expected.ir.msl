@@ -1,22 +1,14 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread float4* P;
+};
 
-thread float4 P = 0.0f;
 float4 func(thread float4* const pointer) {
-  return pointer;
+  return (*pointer);
 }
 kernel void tint_symbol() {
-  float4 const r = func(P);
+  thread float4 P = 0.0f;
+  tint_module_vars_struct const tint_module_vars = {.P=(&P)};
+  float4 const r = func(tint_module_vars.P);
 }
-program_source:4:15: error: program scope variable must reside in constant address space
-thread float4 P = 0.0f;
-              ^
-program_source:6:10: error: cannot initialize return object of type 'float4' (vector of 4 'float' values) with an lvalue of type 'float4 *const'
-  return pointer;
-         ^~~~~~~
-program_source:9:16: warning: unused variable 'r' [-Wunused-variable]
-  float4 const r = func(P);
-               ^
-

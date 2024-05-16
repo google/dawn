@@ -1,66 +1,46 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Inner = struct @align(4) {
-  m:mat4x2<f16> @offset(0)
-}
+struct Inner {
+  half4x2 m;
+};
+struct Outer {
+  tint_array<Inner, 4> a;
+};
+struct tint_module_vars_struct {
+  const constant tint_array<Outer, 4>* a;
+  thread int* counter;
+};
 
-Outer = struct @align(4) {
-  a:array<Inner, 4> @offset(0)
+int i(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.counter) = ((*tint_module_vars.counter) + 1);
+  return (*tint_module_vars.counter);
 }
-
-$B1: {  # root
-  %a:ptr<uniform, array<Outer, 4>, read> = var @binding_point(0, 0)
-  %counter:ptr<private, i32, read_write> = var, 0i
+kernel void f(const constant tint_array<Outer, 4>* a [[buffer(0)]]) {
+  thread int counter = 0;
+  tint_module_vars_struct const tint_module_vars = {.a=a, .counter=(&counter)};
+  const constant tint_array<Outer, 4>* const p_a = tint_module_vars.a;
+  const constant Outer* const p_a_i = (&(*p_a)[i(tint_module_vars)]);
+  const constant tint_array<Inner, 4>* const p_a_i_a = (&(*p_a_i).a);
+  const constant Inner* const p_a_i_a_i = (&(*p_a_i_a)[i(tint_module_vars)]);
+  const constant half4x2* const p_a_i_a_i_m = (&(*p_a_i_a_i).m);
+  const constant half2* const p_a_i_a_i_m_i = (&(*p_a_i_a_i_m)[i(tint_module_vars)]);
+  tint_array<Outer, 4> const l_a = (*p_a);
+  Outer const l_a_i = (*p_a_i);
+  tint_array<Inner, 4> const l_a_i_a = (*p_a_i_a);
+  Inner const l_a_i_a_i = (*p_a_i_a_i);
+  half4x2 const l_a_i_a_i_m = (*p_a_i_a_i_m);
+  half2 const l_a_i_a_i_m_i = (*p_a_i_a_i_m_i);
+  half const l_a_i_a_i_m_i_i = (*p_a_i_a_i_m_i)[i(tint_module_vars)];
 }
-
-%i = func():i32 {
-  $B2: {
-    %4:i32 = load %counter
-    %5:i32 = add %4, 1i
-    store %counter, %5
-    %6:i32 = load %counter
-    ret %6
-  }
-}
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %p_a:ptr<uniform, array<Outer, 4>, read> = let %a
-    %9:i32 = call %i
-    %10:ptr<uniform, Outer, read> = access %p_a, %9
-    %p_a_i:ptr<uniform, Outer, read> = let %10
-    %12:ptr<uniform, array<Inner, 4>, read> = access %p_a_i, 0u
-    %p_a_i_a:ptr<uniform, array<Inner, 4>, read> = let %12
-    %14:i32 = call %i
-    %15:ptr<uniform, Inner, read> = access %p_a_i_a, %14
-    %p_a_i_a_i:ptr<uniform, Inner, read> = let %15
-    %17:ptr<uniform, mat4x2<f16>, read> = access %p_a_i_a_i, 0u
-    %p_a_i_a_i_m:ptr<uniform, mat4x2<f16>, read> = let %17
-    %19:i32 = call %i
-    %20:ptr<uniform, vec2<f16>, read> = access %p_a_i_a_i_m, %19
-    %p_a_i_a_i_m_i:ptr<uniform, vec2<f16>, read> = let %20
-    %22:array<Outer, 4> = load %p_a
-    %l_a:array<Outer, 4> = let %22
-    %24:Outer = load %p_a_i
-    %l_a_i:Outer = let %24
-    %26:array<Inner, 4> = load %p_a_i_a
-    %l_a_i_a:array<Inner, 4> = let %26
-    %28:Inner = load %p_a_i_a_i
-    %l_a_i_a_i:Inner = let %28
-    %30:mat4x2<f16> = load %p_a_i_a_i_m
-    %l_a_i_a_i_m:mat4x2<f16> = let %30
-    %32:vec2<f16> = load %p_a_i_a_i_m_i
-    %l_a_i_a_i_m_i:vec2<f16> = let %32
-    %34:i32 = call %i
-    %35:f16 = load_vector_element %p_a_i_a_i_m_i, %34
-    %l_a_i_a_i_m_i_i:f16 = let %35
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

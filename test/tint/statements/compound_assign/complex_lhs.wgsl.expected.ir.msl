@@ -1,7 +1,8 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread int* counter;
+};
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -18,33 +19,18 @@ struct S {
   tint_array<int4, 4> a;
 };
 
-thread int counter = 0;
-int foo() {
-  counter = (counter + 1);
-  return counter;
+int foo(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.counter) = ((*tint_module_vars.counter) + 1);
+  return (*tint_module_vars.counter);
 }
-int bar() {
-  counter = (counter + 2);
-  return counter;
+int bar(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.counter) = ((*tint_module_vars.counter) + 2);
+  return (*tint_module_vars.counter);
 }
-void tint_symbol() {
+void tint_symbol(tint_module_vars_struct tint_module_vars) {
   S x = S{};
-  thread S* const p = x;
-  thread int4* const v = p.a[foo()];
-  int const v_1 = bar();
-  v[v_1] = (v[v_1] + 5);
+  thread S* const p = (&x);
+  thread int4* const v = (&(*p).a[foo(tint_module_vars)]);
+  int const v_1 = bar(tint_module_vars);
+  (*v)[v_1] = ((*v)[v_1] + 5);
 }
-program_source:19:12: error: program scope variable must reside in constant address space
-thread int counter = 0;
-           ^
-program_source:30:19: error: no viable conversion from 'S' to 'S *const'
-  thread S* const p = x;
-                  ^   ~
-program_source:31:27: error: member reference type 'S *const' is a pointer; did you mean to use '->'?
-  thread int4* const v = p.a[foo()];
-                         ~^
-                          ->
-program_source:31:22: error: cannot initialize a variable of type 'int4 *const' with an lvalue of type 'int __attribute__((ext_vector_type(4)))' (vector of 4 'int' values)
-  thread int4* const v = p.a[foo()];
-                     ^   ~~~~~~~~~~
-

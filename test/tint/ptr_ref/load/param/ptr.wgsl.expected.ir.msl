@@ -1,22 +1,10 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 int func(int value, thread int* const pointer) {
-  return (value + pointer);
+  return (value + (*pointer));
 }
 kernel void tint_symbol() {
   int i = 123;
-  int const r = func(i, i);
+  int const r = func(i, (&i));
 }
-program_source:5:10: error: cannot initialize return object of type 'int' with an rvalue of type 'int *'
-  return (value + pointer);
-         ^~~~~~~~~~~~~~~~~
-program_source:9:17: error: no matching function for call to 'func'
-  int const r = func(i, i);
-                ^~~~
-program_source:4:5: note: candidate function not viable: no known conversion from 'int' to 'int *const' for 2nd argument; take the address of the argument with &
-int func(int value, thread int* const pointer) {
-    ^
-

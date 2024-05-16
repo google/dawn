@@ -1,32 +1,26 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device uint* tint_symbol;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %tint_symbol:ptr<storage, u32, read_write> = var @binding_point(0, 0)
-}
 
-%foo = func():u32 {
-  $B2: {
-    %3:u32 = load %tint_symbol
-    %4:u32 = access array<u32, 4>(0u, 1u, 2u, 4u), %3
-    ret %4
-  }
+uint foo(tint_module_vars_struct tint_module_vars) {
+  return tint_array<uint, 4>{0u, 1u, 2u, 4u}[(*tint_module_vars.tint_symbol)];
 }
-%tint_symbol_1 = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %6:u32 = load %tint_symbol
-    %7:u32 = access array<u32, 4>(0u, 1u, 2u, 4u), %6
-    %v:u32 = let %7
-    %9:u32 = call %foo
-    %10:u32 = add %v, %9
-    store %tint_symbol, %10
-    ret
-  }
+kernel void tint_symbol_1(device uint* tint_symbol [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.tint_symbol=tint_symbol};
+  uint const v = tint_array<uint, 4>{0u, 1u, 2u, 4u}[(*tint_module_vars.tint_symbol)];
+  (*tint_module_vars.tint_symbol) = (v + foo(tint_module_vars));
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -1,35 +1,15 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  const constant half4x3* u;
+  thread half4x3* p;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %u:ptr<uniform, mat4x3<f16>, read> = var @binding_point(0, 0)
-  %p:ptr<private, mat4x3<f16>, read_write> = var
+kernel void f(const constant half4x3* u [[buffer(0)]]) {
+  thread half4x3 p = half4x3(0.0h);
+  tint_module_vars_struct const tint_module_vars = {.u=u, .p=(&p)};
+  (*tint_module_vars.p) = (*tint_module_vars.u);
+  (*tint_module_vars.p)[1] = (*tint_module_vars.u)[0];
+  (*tint_module_vars.p)[1] = (*tint_module_vars.u)[0].zxy;
+  (*tint_module_vars.p)[0][1] = (*tint_module_vars.u)[1][0];
 }
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %4:mat4x3<f16> = load %u
-    store %p, %4
-    %5:ptr<private, vec3<f16>, read_write> = access %p, 1i
-    %6:ptr<uniform, vec3<f16>, read> = access %u, 0i
-    %7:vec3<f16> = load %6
-    store %5, %7
-    %8:ptr<private, vec3<f16>, read_write> = access %p, 1i
-    %9:ptr<uniform, vec3<f16>, read> = access %u, 0i
-    %10:vec3<f16> = load %9
-    %11:vec3<f16> = swizzle %10, zxy
-    store %8, %11
-    %12:ptr<private, vec3<f16>, read_write> = access %p, 0i
-    %13:ptr<uniform, vec3<f16>, read> = access %u, 1i
-    %14:f16 = load_vector_element %13, 0i
-    store_vector_element %12, 1i, %14
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

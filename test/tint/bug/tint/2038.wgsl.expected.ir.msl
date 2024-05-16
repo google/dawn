@@ -1,33 +1,27 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %output:ptr<storage, array<u32, 2>, read_write> = var @binding_point(0, 0)
-}
+struct tint_module_vars_struct {
+  device tint_array<uint, 2>* output;
+};
 
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    if false [t: $B3] {  # if_1
-      $B3: {  # true
-        %3:ptr<storage, u32, read_write> = access %output, 0i
-        store %3, 1u
-        exit_if  # if_1
-      }
-    }
-    if false [t: $B4] {  # if_2
-      $B4: {  # true
-        %4:ptr<storage, u32, read_write> = access %output, 1i
-        store %4, 1u
-        exit_if  # if_2
-      }
-    }
-    ret
+kernel void tint_symbol(device tint_array<uint, 2>* output [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.output=output};
+  if (false) {
+    (*tint_module_vars.output)[0] = 1u;
+  }
+  if (false) {
+    (*tint_module_vars.output)[1] = 1u;
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

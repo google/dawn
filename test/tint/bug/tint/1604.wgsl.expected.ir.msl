@@ -1,33 +1,24 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  const constant int* x;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %x:ptr<uniform, i32, read> = var @binding_point(0, 0)
-}
-
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %3:i32 = load %x
-    switch %3 [c: (0i, $B3), c: (default, $B4)] {  # switch_1
-      $B3: {  # case
-        loop [b: $B5] {  # loop_1
-          $B5: {  # body
-            ret
-          }
+kernel void tint_symbol(const constant int* x [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.x=x};
+  switch((*tint_module_vars.x)) {
+    case 0:
+    {
+      {
+        while(true) {
+          return;
         }
-        exit_switch  # switch_1
       }
-      $B4: {  # case
-        exit_switch  # switch_1
-      }
+      break;
     }
-    ret
+    default:
+    {
+      break;
+    }
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

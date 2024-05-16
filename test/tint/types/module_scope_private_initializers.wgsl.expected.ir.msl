@@ -1,20 +1,13 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread float* a;
+  thread float* b;
+};
 
-thread float a = 1.0f;
-thread float b = 0.0f;
 kernel void tint_symbol() {
-  float const x = (a + b);
+  thread float a = 1.0f;
+  thread float b = 0.0f;
+  tint_module_vars_struct const tint_module_vars = {.a=(&a), .b=(&b)};
+  float const x = ((*tint_module_vars.a) + (*tint_module_vars.b));
 }
-program_source:4:14: error: program scope variable must reside in constant address space
-thread float a = 1.0f;
-             ^
-program_source:5:14: error: program scope variable must reside in constant address space
-thread float b = 0.0f;
-             ^
-program_source:7:15: warning: unused variable 'x' [-Wunused-variable]
-  float const x = (a + b);
-              ^
-

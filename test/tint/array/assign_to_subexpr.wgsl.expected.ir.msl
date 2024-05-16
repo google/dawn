@@ -1,54 +1,40 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(4) {
-  arr:array<i32, 4> @offset(0)
-}
+struct S {
+  tint_array<int, 4> arr;
+};
+struct tint_module_vars_struct {
+  device int* s;
+};
 
-$B1: {  # root
-  %s:ptr<storage, i32, read_write> = var @binding_point(0, 0)
+int foo() {
+  tint_array<int, 4> const src = tint_array<int, 4>{};
+  tint_array<int, 4> dst = {};
+  S dst_struct = {};
+  tint_array<tint_array<int, 4>, 2> dst_array = {};
+  thread tint_array<int, 4>* const dst_ptr = (&dst);
+  thread S* const dst_struct_ptr = (&dst_struct);
+  thread tint_array<tint_array<int, 4>, 2>* const dst_array_ptr = (&dst_array);
+  dst_struct.arr = src;
+  dst_array[1] = src;
+  (*dst_ptr) = src;
+  (*dst_struct_ptr).arr = src;
+  (*dst_array_ptr)[0] = src;
+  return (((*dst_ptr)[0] + (*dst_struct_ptr).arr[0]) + (*dst_array_ptr)[0][0]);
 }
-
-%foo = func():i32 {
-  $B2: {
-    %src:array<i32, 4> = let array<i32, 4>(0i)
-    %dst:ptr<function, array<i32, 4>, read_write> = var
-    %dst_struct:ptr<function, S, read_write> = var
-    %dst_array:ptr<function, array<array<i32, 4>, 2>, read_write> = var
-    %dst_ptr:ptr<function, array<i32, 4>, read_write> = let %dst
-    %dst_struct_ptr:ptr<function, S, read_write> = let %dst_struct
-    %dst_array_ptr:ptr<function, array<array<i32, 4>, 2>, read_write> = let %dst_array
-    %10:ptr<function, array<i32, 4>, read_write> = access %dst_struct, 0u
-    store %10, %src
-    %11:ptr<function, array<i32, 4>, read_write> = access %dst_array, 1i
-    store %11, %src
-    store %dst_ptr, %src
-    %12:ptr<function, array<i32, 4>, read_write> = access %dst_struct_ptr, 0u
-    store %12, %src
-    %13:ptr<function, array<i32, 4>, read_write> = access %dst_array_ptr, 0i
-    store %13, %src
-    %14:ptr<function, i32, read_write> = access %dst_ptr, 0i
-    %15:i32 = load %14
-    %16:ptr<function, i32, read_write> = access %dst_struct_ptr, 0u, 0i
-    %17:i32 = load %16
-    %18:i32 = add %15, %17
-    %19:ptr<function, i32, read_write> = access %dst_array_ptr, 0i, 0i
-    %20:i32 = load %19
-    %21:i32 = add %18, %20
-    ret %21
-  }
+kernel void tint_symbol(device int* s [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.s=s};
+  (*tint_module_vars.s) = foo();
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %23:i32 = call %foo
-    store %s, %23
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -1,16 +1,9 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread half3x2* u;
+};
 
-thread half3x2 u = half3x2(half2(1.0h, 2.0h), half2(3.0h, 4.0h), half2(5.0h, 6.0h));
-void f() {
-  float3x2 v = float3x2(u);
+void f(tint_module_vars_struct tint_module_vars) {
+  float3x2 v = float3x2((*tint_module_vars.u));
 }
-program_source:4:16: error: program scope variable must reside in constant address space
-thread half3x2 u = half3x2(half2(1.0h, 2.0h), half2(3.0h, 4.0h), half2(5.0h, 6.0h));
-               ^
-program_source:6:12: warning: unused variable 'v' [-Wunused-variable]
-  float3x2 v = float3x2(u);
-           ^
-

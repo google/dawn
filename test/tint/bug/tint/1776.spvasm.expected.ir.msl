@@ -1,37 +1,32 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(16) {
-  a:vec4<f32> @offset(0)
-  b:i32 @offset(16)
-}
+struct S {
+  float4 a;
+  int b;
+};
+struct sb_block {
+  tint_array<S, 1> inner;
+};
+struct tint_module_vars_struct {
+  device sb_block* sb;
+};
 
-sb_block = struct @align(16) {
-  inner:array<S> @offset(0)
+void main_1(tint_module_vars_struct tint_module_vars) {
+  S const x_18 = (*tint_module_vars.sb).inner[1];
 }
-
-$B1: {  # root
-  %sb:ptr<storage, sb_block, read_write> = var @binding_point(0, 0)
+kernel void tint_symbol(device sb_block* sb [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.sb=sb};
+  main_1(tint_module_vars);
 }
-
-%main_1 = func():void {
-  $B2: {
-    %3:ptr<storage, S, read_write> = access %sb, 0u, 1i
-    %4:S = load %3
-    %x_18:S = let %4
-    ret
-  }
-}
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %7:void = call %main_1
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

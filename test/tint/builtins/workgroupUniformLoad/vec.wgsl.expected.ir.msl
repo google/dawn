@@ -1,16 +1,12 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  threadgroup float4* v;
+};
 
-threadgroup float4 v;
-float4 foo() {
+float4 foo(tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  float4 const v_1 = v;
+  float4 const v_1 = (*tint_module_vars.v);
   threadgroup_barrier(mem_flags::mem_threadgroup);
   return v_1;
 }
-program_source:4:20: error: program scope variable must reside in constant address space
-threadgroup float4 v;
-                   ^
-
