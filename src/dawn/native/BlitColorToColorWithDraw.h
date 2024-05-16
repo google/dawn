@@ -28,8 +28,13 @@
 #ifndef SRC_DAWN_NATIVE_BLITCOLORTOCOLORWITHDRAW_H_
 #define SRC_DAWN_NATIVE_BLITCOLORTOCOLORWITHDRAW_H_
 
+#include <bitset>
+
 #include "absl/container/flat_hash_map.h"
+#include "dawn/common/ityp_array.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/IntegerTypes.h"
 
 namespace dawn::native {
 
@@ -39,8 +44,13 @@ struct RenderPassDescriptor;
 class TextureViewBase;
 
 struct BlitColorToColorWithDrawPipelineKey {
-    wgpu::TextureFormat colorFormat;
-    wgpu::TextureFormat depthStencilFormat;
+    BlitColorToColorWithDrawPipelineKey() {
+        colorTargetFormats.fill(wgpu::TextureFormat::Undefined);
+    }
+
+    PerColorAttachment<wgpu::TextureFormat> colorTargetFormats;
+    ColorAttachmentMask attachmentsToExpandResolve;
+    wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
     uint32_t sampleCount = 1;
 
     struct HashFunc {

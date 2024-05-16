@@ -813,12 +813,6 @@ ResultOrError<UnpackedPtr<RenderPassDescriptor>> ValidateRenderPassDescriptor(
     }
 
     if (validationState->WillExpandResolveTexture()) {
-        // TODO(dawn:1710): support multiple attachments.
-        DAWN_INVALID_IF(
-            descriptor->colorAttachmentCount != 1,
-            "colorAttachmentCount (%u) is not supported when the render pass has one attachment "
-            "with %s. (Currently) colorAttachmentCount = 1 is supported.",
-            descriptor->colorAttachmentCount, wgpu::LoadOp::ExpandResolveTexture);
         // TODO(dawn:1704): Consider supporting ExpandResolveTexture + PLS
         DAWN_INVALID_IF(pls != nullptr, "For now pixel local storage is invalid to use with %s.",
                         wgpu::LoadOp::ExpandResolveTexture);
@@ -935,12 +929,6 @@ MaybeError EncodeTimestampsToNanosecondsConversion(CommandEncoder* encoder,
 MaybeError ApplyExpandResolveTextureLoadOp(DeviceBase* device,
                                            RenderPassEncoder* renderPassEncoder,
                                            const RenderPassDescriptor* renderPassDescriptor) {
-    // TODO(dawn:1710): support multiple attachments.
-    DAWN_ASSERT(renderPassDescriptor->colorAttachmentCount == 1);
-    if (renderPassDescriptor->colorAttachments[0].loadOp != wgpu::LoadOp::ExpandResolveTexture) {
-        return {};
-    }
-
     // TODO(dawn:1710): support loading resolve texture on platforms that don't support reading
     // it in fragment shader such as vulkan.
     DAWN_ASSERT(device->IsResolveTextureBlitWithDrawSupported());

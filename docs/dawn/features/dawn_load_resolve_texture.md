@@ -67,5 +67,5 @@ Notes:
  - If a resolve texture is used in a `wgpu::LoadOp::ExpandResolveTexture` operation, it must have `wgpu::TextureUsage::TextureBinding` usage.
  - If `wgpu::ColorTargetStateExpandResolveTextureDawn` chained struct is not included in a `wgpu::RenderPipelineDescriptor::FragmentState::ColorTargetState`  or if it is included but `enabled` boolean flag is false, then the result render pipeline cannot be used in a render pass using `ExpandResolveTexture` load op for that respective color attachment.
    - Similarly, a render pipeline created with `wgpu::ColorTargetStateExpandResolveTextureDawn`'s `enabled` flag = `true` won't be able to be used in render passes that don't use `ExpandResolveTexture` load op for the respective color attachment.
- - Currently only one color attachment is supported and the `ExpandResolveTexture` LoadOp only works on color attachment, this could be changed in future.
+ - Currently the `ExpandResolveTexture` LoadOp only works on color attachment, this could be changed in future.
  - The texture is not supported if it is not resolvable by WebGPU standard. This means this feature currently doesn't work with integer textures.

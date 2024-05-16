@@ -2336,6 +2336,13 @@ class LoadResolveTexturePipelineDescriptorValidationTest : public RenderPipeline
             @fragment fn main() -> @location(0) vec4f {
                 return textureLoad(src_tex, vec2u(0, 0), 0);
             })");
+
+        fsWithTextureToTarget1Module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var src_tex : texture_2d<f32>;
+
+            @fragment fn main() -> @location(1) vec4f {
+                return textureLoad(src_tex, vec2u(0, 0), 0);
+            })");
     }
 
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
@@ -2359,6 +2366,7 @@ class LoadResolveTexturePipelineDescriptorValidationTest : public RenderPipeline
     static constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
 
     wgpu::ShaderModule fsWithTextureModule;
+    wgpu::ShaderModule fsWithTextureToTarget1Module;
 };
 
 // Test that creating and using a render pipeline with ColorTargetStateExpandResolveTextureDawn
@@ -2389,6 +2397,55 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, ValidUse) {
     wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
     pipelineMSAAExpandResolveDesc.enabled = true;
     pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    // Input texture.
+    auto sampledTexture = CreateTexture(wgpu::TextureUsage::TextureBinding, 1);
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, sampledTexture.CreateView()}});
+
+    renderPass.SetPipeline(pipeline);
+    renderPass.SetBindGroup(0, bindGroup);
+    renderPass.Draw(3);
+    renderPass.End();
+
+    encoder.Finish();
+}
+
+// Test that creating and using a render pipeline with ColorTargetStateExpandResolveTextureDawn
+// chained struct in a non-zero indexed attachment should success.
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, UseInNonZeroIndexedAttachment) {
+    constexpr uint32_t kSampleCount = 4;
+
+    auto msaaTexture = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
+
+    // Create single sampled texture.
+    auto texture =
+        CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
+
+    // Create render pass (with ExpandResolveTexture load op).
+    utils::ComboRenderPassDescriptor renderPassDescriptor({nullptr, msaaTexture.CreateView()});
+    renderPassDescriptor.cColorAttachments[1].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPassDescriptor.cColorAttachments[1].resolveTarget = texture.CreateView();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+
+    // Create render pipeline
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsWithTextureToTarget1Module;
+    pipelineDescriptor.multisample.count = kSampleCount;
+    pipelineDescriptor.cFragment.targetCount = 2;
+    pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::Undefined;
+    pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+    pipelineDescriptor.cTargets[1].format = kColorFormat;
+    pipelineDescriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::All;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.cTargets[1].nextInChain = &pipelineMSAAExpandResolveDesc;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 

@@ -1981,29 +1981,10 @@ TEST_F(DawnLoadResolveTextureValidationTest, UnresolvableColorFormatError) {
     AssertBeginRenderPassError(&renderPass, testing::HasSubstr("does not support resolve"));
 }
 
-// LoadOp::ExpandResolveTexture can only be used in a render pass with single color attachment.
-// The LoadOp is NOT currently supported on depth/stencil attachment either.
-TEST_F(DawnLoadResolveTextureValidationTest, OnlyLoadingSingleColorAttachmentIsSupported) {
+// The LoadOp is NOT currently supported on depth/stencil attachment.
+TEST_F(DawnLoadResolveTextureValidationTest, OnlyLoadingColorAttachmentIsSupported) {
     auto multisampledColorTextureView = CreateMultisampledColorTextureView();
     auto resolveTarget = CreateCompatibleResolveTextureView();
-
-    // Error case: Use ExpandResolveTexture with multiple color attachments.
-    {
-        auto multisampledColorTextureView2 = CreateMultisampledColorTextureView();
-        auto resolveTarget2 = CreateCompatibleResolveTextureView();
-
-        auto renderPass = CreateMultisampledRenderPass();
-        renderPass.colorAttachmentCount = 2;
-        renderPass.cColorAttachments[0].view = multisampledColorTextureView;
-        renderPass.cColorAttachments[0].resolveTarget = resolveTarget;
-        renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
-
-        renderPass.cColorAttachments[1].view = multisampledColorTextureView2;
-        renderPass.cColorAttachments[1].resolveTarget = resolveTarget2;
-        renderPass.cColorAttachments[1].loadOp = wgpu::LoadOp::ExpandResolveTexture;
-
-        AssertBeginRenderPassError(&renderPass, testing::HasSubstr("colorAttachmentCount"));
-    }
 
     // Error case: Use ExpandResolveTexture on depth/stencil attachment.
     {

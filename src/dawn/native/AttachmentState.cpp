@@ -54,6 +54,7 @@ AttachmentState::AttachmentState(DeviceBase* device,
     mDepthStencilFormat = descriptor->depthStencilFormat;
 
     // TODO(dawn:1710): support MSAA render to single sampled in render bundles.
+    // TODO(dawn:1710): support LoadOp::ExpandResolveTexture in render bundles.
     // TODO(dawn:1704): support PLS in render bundles.
 
     SetContentHash(ComputeContentHash());
