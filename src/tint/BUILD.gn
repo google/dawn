@@ -108,6 +108,12 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_SYNTAX_TREE_WRITER=0" ]
   }
 
+  if (tint_build_ir_binary) {
+    defines += [ "TINT_BUILD_IR_BINARY=1" ]
+  } else {
+    defines += [ "TINT_BUILD_IR_BINARY=0" ]
+  }
+
   if (tint_build_is_win) {
     defines += [ "TINT_BUILD_IS_WIN=1" ]
   } else {

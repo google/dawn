@@ -97,6 +97,11 @@ cc_binary(
     ],
     "//conditions:default": [],
   }) + select({
+    ":tint_build_ir_binary": [
+      "//src/tint/lang/core/ir/binary",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_msl_writer": [
       "//src/tint/lang/msl/validate",
       "//src/tint/lang/msl/writer",
@@ -150,6 +155,11 @@ alias(
 alias(
   name = "tint_build_hlsl_writer",
   actual = "//src/tint:tint_build_hlsl_writer_true",
+)
+
+alias(
+  name = "tint_build_ir_binary",
+  actual = "//src/tint:tint_build_ir_binary_true",
 )
 
 alias(

@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/ir/binary/encode.h"
 
+#include <string>
 #include <utility>
 
 #include "src/tint/lang/core/builtin_fn.h"
@@ -1151,6 +1152,15 @@ Result<Vector<std::byte, 0>> Encode(const Module& mod_in) {
         }
     }
     return buffer;
+}
+
+Result<std::string> EncodeDebug(const Module& mod_in) {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    pb::Module mod_out;
+    Encoder{mod_in, mod_out}.Encode();
+
+    return mod_out.DebugString();
 }
 
 }  // namespace tint::core::ir::binary
