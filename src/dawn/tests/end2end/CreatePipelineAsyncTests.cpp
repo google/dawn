@@ -177,8 +177,6 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
 // Verify that callback can be nullptr.
 TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncNullCallback) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    // TODO(crbug.com/dawn/2471): QueueGL hangs
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
@@ -204,8 +202,6 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncNullCallback) {
 // Stress test that asynchronously creates many compute pipelines.
 TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStress) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    // TODO(crbug.com/dawn/2471): QueueGL hangs
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::CreateComputePipelineAsyncCallbackInfo callbackInfo;
     callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
@@ -240,8 +236,8 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStress) {
 // Stress test that asynchronously creates many compute pipelines in different threads.
 TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStressManyThreads) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    // TODO(crbug.com/dawn/2471): QueueGL hangs
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    // eglMakeCurrent: Context can only be current on one thread
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
 
     auto f = [&](size_t t) {
         wgpu::ComputePipelineDescriptor csDesc;
@@ -384,8 +380,6 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
 // Verify that callback can be nullptr.
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncNullCallback) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    // TODO(crbug.com/dawn/2471): QueueGL hangs
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
     renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
@@ -407,8 +401,6 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncNullCallback) {
 // Stress test that asynchronously creates many render pipelines.
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStress) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    // TODO(crbug.com/dawn/2471): QueueGL hangs
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::CreateRenderPipelineAsyncCallbackInfo callbackInfo;
     callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
@@ -439,8 +431,8 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStress) {
 // Stress test that asynchronously creates many render pipelines in different threads.
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStressManyThreads) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    // TODO(crbug.com/dawn/2471): QueueGL hangs
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    // eglMakeCurrent: Context can only be current on one thread
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
 
     auto f = [&](size_t t) {
         utils::ComboRenderPipelineDescriptor desc;
