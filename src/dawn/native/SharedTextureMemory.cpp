@@ -107,15 +107,28 @@ ObjectType SharedTextureMemoryBase::GetType() const {
 }
 
 void SharedTextureMemoryBase::APIGetProperties(SharedTextureMemoryProperties* properties) const {
+    if (GetDevice()->ConsumedError(GetProperties(properties), "calling %s.GetProperties", this)) {
+        return;
+    }
+}
+
+MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties* properties) const {
     properties->usage = mProperties.usage;
     properties->size = mProperties.size;
     properties->format = mProperties.format;
 
     UnpackedPtr<SharedTextureMemoryProperties> unpacked;
-    if (GetDevice()->ConsumedError(ValidateAndUnpack(properties), &unpacked,
-                                   "calling %s.GetProperties", this)) {
-        return;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(properties));
+
+    if (unpacked.Get<SharedTextureMemoryAHardwareBufferProperties>()) {
+        DAWN_INVALID_IF(
+            !GetDevice()->HasFeature(Feature::SharedTextureMemoryAHardwareBuffer),
+            "SharedTextureMemory properties (%s) have a chained "
+            "SharedTextureMemoryAHardwareBufferProperties without the %s feature being set.",
+            this, ToAPI(Feature::SharedTextureMemoryAHardwareBuffer));
     }
+
+    return {};
 }
 
 TextureBase* SharedTextureMemoryBase::APICreateTexture(const TextureDescriptor* descriptor) {

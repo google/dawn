@@ -1021,6 +1021,33 @@ TEST_P(SharedTextureMemoryTests, GetPropertiesInvalidChain) {
     EXPECT_EQ(properties1.format, properties2.format);
 }
 
+// Test that calling GetProperties with a chained
+// SharedTextureMemoryAHardwareBufferProperties struct will generate an error
+// unless the required feature is present. In either case, the base properties
+// should still be populated.
+TEST_P(SharedTextureMemoryTests, GetPropertiesAHardwareBufferPropertiesRequiresAHBFeature) {
+    wgpu::SharedTextureMemory memory =
+        GetParam().mBackend->CreateSharedTextureMemory(device, GetParam().mLayerCount);
+
+    wgpu::SharedTextureMemoryAHardwareBufferProperties aHBProps;
+    wgpu::SharedTextureMemoryProperties properties1;
+    properties1.nextInChain = &aHBProps;
+    if (device.HasFeature(wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer)) {
+        memory.GetProperties(&properties1);
+    } else {
+        ASSERT_DEVICE_ERROR(memory.GetProperties(&properties1));
+    }
+
+    wgpu::SharedTextureMemoryProperties properties2;
+    memory.GetProperties(&properties2);
+
+    EXPECT_EQ(properties1.usage, properties2.usage);
+    EXPECT_EQ(properties1.size.width, properties2.size.width);
+    EXPECT_EQ(properties1.size.height, properties2.size.height);
+    EXPECT_EQ(properties1.size.depthOrArrayLayers, properties2.size.depthOrArrayLayers);
+    EXPECT_EQ(properties1.format, properties2.format);
+}
+
 // Test that texture usages must be a subset of the shared texture memory's usage.
 TEST_P(SharedTextureMemoryTests, UsageValidation) {
     for (wgpu::SharedTextureMemory memory :

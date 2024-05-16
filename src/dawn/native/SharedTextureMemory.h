@@ -70,6 +70,7 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
 
   private:
     ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
+    MaybeError GetProperties(SharedTextureMemoryProperties* properties) const;
 
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) = 0;
