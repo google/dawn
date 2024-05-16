@@ -95,7 +95,7 @@ int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::na
         for (dawn::native::Adapter adapter : adapters) {
             if (sAdapterSupported(adapter)) {
                 WGPUAdapter cAdapter = adapter.Get();
-                dawn::native::GetProcs().adapterReference(cAdapter);
+                dawn::native::GetProcs().adapterAddRef(cAdapter);
                 callback(WGPURequestAdapterStatus_Success, cAdapter, nullptr, userdata);
                 return;
             }
