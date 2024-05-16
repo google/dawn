@@ -126,7 +126,9 @@ class BindGroupTrackerBase {
     // |mPipelineLayout| is the current pipeline layout set on the command buffer.
     // |mLastAppliedPipelineLayout| is the last pipeline layout for which we applied changes
     // to the bind group bindings.
-    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    // RAW_PTR_EXCLUSION: These pointers are very hot in command recording code and point at
+    // pipeline layouts referenced by the object graph of the CommandBuffer so they cannot be
+    // freed from underneath this class.
     RAW_PTR_EXCLUSION PipelineLayoutBase* mPipelineLayout = nullptr;
     RAW_PTR_EXCLUSION PipelineLayoutBase* mLastAppliedPipelineLayout = nullptr;
 };

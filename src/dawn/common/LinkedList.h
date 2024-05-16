@@ -172,7 +172,9 @@ class LinkNode {
 
   private:
     friend class LinkedList<T>;
-    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    // RAW_PTR_EXCLUSION: Linked lists are used and iterated a lot so these pointers are very hot.
+    // All accesses to the pointers are behind "safe" APIs such that it is not possible (in
+    // single-threaded code) to use them after they are freed.
     RAW_PTR_EXCLUSION LinkNode<T>* previous_ = nullptr;
     RAW_PTR_EXCLUSION LinkNode<T>* next_ = nullptr;
 };
@@ -235,7 +237,9 @@ class LinkedListIterator {
     LinkNode<T>* operator*() const { return current_; }
 
   private:
-    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    // RAW_PTR_EXCLUSION: Linked lists are used and iterated a lot so these pointers are very hot.
+    // All accesses to the pointers are behind "safe" APIs such that it is not possible (in
+    // single-threaded code) to use them after they are freed.
     RAW_PTR_EXCLUSION LinkNode<T>* current_ = nullptr;
     RAW_PTR_EXCLUSION LinkNode<T>* next_ = nullptr;
 };

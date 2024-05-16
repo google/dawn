@@ -32,7 +32,9 @@
 #include <utility>
 
 #include "dawn/common/Mutex.h"
+#include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
+#include "dawn/common/StackAllocated.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
 namespace dawn {
@@ -69,7 +71,7 @@ struct MutexProtectedTraits<Ref<T>> {
 // Guard class is a wrapping class that gives access to a protected resource after acquiring the
 // lock related to it. For the lifetime of this class, the lock is held.
 template <typename T, typename Traits>
-class Guard {
+class Guard : public NonMovable, StackAllocated {
   public:
     // It's the programmer's burden to not save the pointer/reference and reuse it without the lock.
     auto* operator->() const { return Get(); }
@@ -92,7 +94,9 @@ class Guard {
     friend class MutexProtected<NonConstT, Guard>;
 
     typename Traits::LockType mLock;
-    // RAW_PTR_EXCLUSION: Performance reasons (based on analysis of MotionMark).
+    // RAW_PTR_EXCLUSION: This pointer is created/destroyed on each access to a MutexProtected.
+    // The pointer is always transiently used while the MutexProtected is in scope so it is
+    // unlikely to be used after it is freed.
     RAW_PTR_EXCLUSION T* mObj = nullptr;
 };
 
