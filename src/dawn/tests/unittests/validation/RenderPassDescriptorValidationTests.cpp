@@ -985,6 +985,39 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, MultisampledResolveTarget
     AssertBeginRenderPassError(&renderPass);
 }
 
+// Test the view dimension of resolve target.
+TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetDimension) {
+    wgpu::Texture resolveTexture2D = CreateTexture(
+        device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize, kArrayLayers, kLevelCount);
+
+    // It is allowed to use a 2d texture view as resolve target.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
+        renderPass.cColorAttachments[0].resolveTarget = resolveTexture2D.CreateView();
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // It is allowed to use a 2d-array texture view as resolve target.
+    {
+        wgpu::TextureViewDescriptor viewDesc;
+        viewDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+
+        utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
+        renderPass.cColorAttachments[0].resolveTarget = resolveTexture2D.CreateView(&viewDesc);
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // It is not allowed to use a 3d texture view as resolve target.
+    {
+        wgpu::Texture resolveTexture3D =
+            CreateTexture(device, wgpu::TextureDimension::e3D, kColorFormat, kSize, kSize,
+                          kArrayLayers, kLevelCount);
+        utils::ComboRenderPassDescriptor renderPass = CreateMultisampledRenderPass();
+        renderPass.cColorAttachments[0].resolveTarget = resolveTexture3D.CreateView();
+        AssertBeginRenderPassError(&renderPass);
+    }
+}
+
 // It is not allowed to use a resolve target with array layer count > 1.
 TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetArrayLayerMoreThanOne) {
     constexpr uint32_t kArrayLayers2 = 2;

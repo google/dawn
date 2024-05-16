@@ -397,6 +397,11 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
                     "Cannot use %s as resolve target. Sample count (%u) is greater than 1.",
                     resolveTarget, resolveTarget->GetTexture()->GetSampleCount());
 
+    DAWN_INVALID_IF(resolveTarget->GetDimension() != wgpu::TextureViewDimension::e2D &&
+                        resolveTarget->GetDimension() != wgpu::TextureViewDimension::e2DArray,
+                    "The dimension (%s) of resolve target %s is not 2D or 2DArray.",
+                    resolveTarget->GetDimension(), resolveTarget);
+
     DAWN_INVALID_IF(resolveTarget->GetLayerCount() > 1,
                     "The resolve target %s array layer count (%u) is not 1.", resolveTarget,
                     resolveTarget->GetLayerCount());
