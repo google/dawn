@@ -325,7 +325,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         return {true};
     }
 
-    s->Append("{ colorFormats: [");
+    s->Append("{ colorTargets: [");
 
     ColorAttachmentIndex nextColorIndex{};
 
@@ -336,12 +336,18 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         }
 
         while (nextColorIndex < i) {
-            s->Append(absl::StrFormat("%s, ", wgpu::TextureFormat::Undefined));
+            s->Append(absl::StrFormat("{format: %s}, ", wgpu::TextureFormat::Undefined));
             nextColorIndex++;
             needsComma = false;
         }
 
-        s->Append(absl::StrFormat("%s", value->GetColorAttachmentFormat(i)));
+        s->Append(absl::StrFormat("{format:%s", value->GetColorAttachmentFormat(i)));
+
+        if (value->GetDevice()->HasFeature(Feature::DawnLoadResolveTexture)) {
+            s->Append(absl::StrFormat(", expandResolveTexture:%v",
+                                      value->GetExpandResolveUsingAttachmentsMask().test(i)));
+        }
+        s->Append("}");
 
         nextColorIndex++;
         needsComma = true;
@@ -354,10 +360,6 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     }
 
     s->Append(absl::StrFormat("sampleCount: %u", value->GetSampleCount()));
-
-    if (value->GetDevice()->HasFeature(Feature::DawnLoadResolveTexture)) {
-        s->Append(absl::StrFormat(", hasExpandResolveLoadOp: %d", value->HasExpandResolveLoadOp()));
-    }
 
     if (value->HasPixelLocalStorage()) {
         const std::vector<wgpu::TextureFormat>& plsSlots = value->GetStorageAttachmentSlots();

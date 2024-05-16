@@ -114,6 +114,9 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
 
     fragmentState.targetCount = 1;
     fragmentState.targets = &colorTarget;
+    wgpu::ColorTargetStateExpandResolveTextureDawn msaaExpandResolveState;
+    msaaExpandResolveState.enabled = true;
+    colorTarget.nextInChain = &msaaExpandResolveState;
 
     RenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.label = "blit_color_to_color";
@@ -134,9 +137,6 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     // Multisample state.
     DAWN_ASSERT(sampleCount > 1);
     renderPipelineDesc.multisample.count = sampleCount;
-    wgpu::MultisampleStateExpandResolveTextureDawn msaaExpandResolveState;
-    msaaExpandResolveState.enabled = true;
-    renderPipelineDesc.multisample.nextInChain = &msaaExpandResolveState;
 
     // Bind group layout.
     Ref<BindGroupLayoutBase> bindGroupLayout;

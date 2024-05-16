@@ -1902,17 +1902,17 @@ TEST_F(RenderPipelineValidationTest, RenderPipelineColorAttachmentBytesPerSample
     }
 }
 
-// Creating render pipeline with MultisampleStateExpandResolveTextureDawn without enabling
+// Creating render pipeline with ColorTargetStateExpandResolveTextureDawn without enabling
 // LoadResolveTexture feature should result in error.
 TEST_F(RenderPipelineValidationTest, LoadResolveTextureOnUnsupportedDevice) {
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
-
-    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
-    pipelineMSAAExpandResolveDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = 4;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
 
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor),
                         testing::HasSubstr("feature is not enabled"));
@@ -2361,7 +2361,7 @@ class LoadResolveTexturePipelineDescriptorValidationTest : public RenderPipeline
     wgpu::ShaderModule fsWithTextureModule;
 };
 
-// Test that creating and using a render pipeline with MultisampleStateExpandResolveTextureDawn
+// Test that creating and using a render pipeline with ColorTargetStateExpandResolveTextureDawn
 // chained struct should success.
 TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, ValidUse) {
     constexpr uint32_t kSampleCount = 4;
@@ -2384,11 +2384,11 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, ValidUse) {
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsWithTextureModule;
-
-    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
-    pipelineMSAAExpandResolveDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = kSampleCount;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
@@ -2405,28 +2405,28 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, ValidUse) {
     encoder.Finish();
 }
 
-// If a render pipeline's MultisampleState contains MultisampleStateExpandResolveTextureDawn
+// If a render pipeline's MultisampleState contains ColorTargetStateExpandResolveTextureDawn
 // chained struct. Then its sampleCount must be > 1.
 TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
        PipelineSampleCountMustBeGreaterThanOne) {
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
-
-    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
-    pipelineMSAAExpandResolveDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = 1;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
 
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor),
                         testing::HasSubstr("multisample count (1) is not > 1"));
 }
 
-// If a render pipeline is created with MultisampleStateExpandResolveTextureDawn.enabled =
+// If a render pipeline is created with ColorTargetStateExpandResolveTextureDawn.enabled =
 // true, then it cannot be used in a render pass that wasn't created with ExpandResolveTexture load
 // op.
 TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
-       MSAARenderToSingleSampledPipeline_UseIn_NormalRenderPass_Error) {
+       ExpandResolveTexturePipeline_UseIn_NormalRenderPass_Error) {
     constexpr uint32_t kSampleCount = 4;
 
     // Create MSAA texture.
@@ -2442,11 +2442,11 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
-
-    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
-    pipelineMSAAExpandResolveDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = kSampleCount;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
     renderPass.SetPipeline(pipeline);
@@ -2476,7 +2476,7 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
 
-    // Create render pipeline (without MultisampleStateExpandResolveTextureDawn)
+    // Create render pipeline (without ColorTargetStateExpandResolveTextureDawn)
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
@@ -2514,11 +2514,11 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, BindColorAttachmentAs
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsWithTextureModule;
-
-    wgpu::MultisampleStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
-    pipelineMSAAExpandResolveDesc.enabled = true;
-    pipelineDescriptor.multisample.nextInChain = &pipelineMSAAExpandResolveDesc;
     pipelineDescriptor.multisample.count = kSampleCount;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 

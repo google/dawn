@@ -377,21 +377,6 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
 }
 
 MaybeError ValidateMultisampleState(const DeviceBase* device, const MultisampleState* descriptor) {
-    UnpackedPtr<MultisampleState> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-    if (unpacked.Get<MultisampleStateExpandResolveTextureDawn>()) {
-        DAWN_INVALID_IF(!device->HasFeature(Feature::DawnLoadResolveTexture),
-                        "The MultisampleStateExpandResolveTextureDawn struct is used while the "
-                        "%s feature is not enabled.",
-                        ToAPI(Feature::DawnLoadResolveTexture));
-
-        DAWN_INVALID_IF(
-            descriptor->count <= 1,
-            "The MultisampleStateExpandResolveTextureDawn struct is used while multisample count "
-            "(%u) is not > 1.",
-            descriptor->count);
-    }
-
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->count),
                     "Multisample count (%u) is not supported.", descriptor->count);
 
@@ -462,8 +447,22 @@ MaybeError ValidateColorTargetState(
     const ColorTargetState& descriptor,
     const Format* format,
     bool fragmentWritten,
-    const EntryPointMetadata::FragmentRenderAttachmentInfo& fragmentOutputVariable) {
-    DAWN_INVALID_IF(descriptor.nextInChain != nullptr, "nextInChain must be nullptr.");
+    const EntryPointMetadata::FragmentRenderAttachmentInfo& fragmentOutputVariable,
+    const MultisampleState& multisample) {
+    UnpackedPtr<ColorTargetState> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&descriptor));
+    if (unpacked.Get<ColorTargetStateExpandResolveTextureDawn>()) {
+        DAWN_INVALID_IF(!device->HasFeature(Feature::DawnLoadResolveTexture),
+                        "The ColorTargetStateExpandResolveTextureDawn struct is used while the "
+                        "%s feature is not enabled.",
+                        ToAPI(Feature::DawnLoadResolveTexture));
+
+        DAWN_INVALID_IF(
+            multisample.count <= 1,
+            "The ColorTargetStateExpandResolveTextureDawn struct is used while multisample count "
+            "(%u) is not > 1.",
+            multisample.count);
+    }
 
     if (descriptor.blend) {
         DAWN_TRY_CONTEXT(ValidateBlendState(device, descriptor.blend), "validating blend state.");
@@ -635,9 +634,9 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(targets[i].format));
 
-        DAWN_TRY_CONTEXT(ValidateColorTargetState(device, targets[i], format,
-                                                  fragmentMetadata.fragmentOutputMask[i],
-                                                  fragmentMetadata.fragmentOutputVariables[i]),
+        DAWN_TRY_CONTEXT(ValidateColorTargetState(
+                             device, targets[i], format, fragmentMetadata.fragmentOutputMask[i],
+                             fragmentMetadata.fragmentOutputVariables[i], multisample),
                          "validating targets[%u] framebuffer output.", i);
         colorAttachmentFormats.push_back(&device->GetValidInternalFormat(targets[i].format));
 

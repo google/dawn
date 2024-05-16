@@ -319,12 +319,6 @@ class MultisampledRenderingTest : public DawnTest {
         pipelineDescriptor.multisample.mask = sampleMask;
         pipelineDescriptor.multisample.alphaToCoverageEnabled = alphaToCoverageEnabled;
 
-        wgpu::MultisampleStateExpandResolveTextureDawn msaaExpandResolveDesc;
-        if (enableExpandResolveLoadOp) {
-            msaaExpandResolveDesc.enabled = true;
-            pipelineDescriptor.multisample.nextInChain = &msaaExpandResolveDesc;
-        }
-
         pipelineDescriptor.cFragment.targetCount = numColorAttachments + firstAttachmentLocation;
         for (uint32_t i = 0; i < numColorAttachments + firstAttachmentLocation; ++i) {
             if (i < firstAttachmentLocation) {
@@ -333,6 +327,13 @@ class MultisampledRenderingTest : public DawnTest {
             } else {
                 pipelineDescriptor.cTargets[i].format = kColorFormat;
             }
+        }
+
+        // TODO(dawn:1710): support multiple targets with ExpandResolveTexture load op.
+        wgpu::ColorTargetStateExpandResolveTextureDawn msaaExpandResolveDesc;
+        if (enableExpandResolveLoadOp) {
+            msaaExpandResolveDesc.enabled = true;
+            pipelineDescriptor.cTargets[0].nextInChain = &msaaExpandResolveDesc;
         }
 
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);

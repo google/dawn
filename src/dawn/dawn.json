@@ -3369,16 +3369,6 @@
         ]
     },
 
-    "multisample state expand resolve texture dawn": {
-        "tags": ["dawn"],
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["multisample state"],
-        "members": [
-            {"name": "enabled", "type": "bool", "default": "false"}
-        ]
-    },
-
     "fragment state": {
         "category": "structure",
         "extensible": "in",
@@ -3398,6 +3388,15 @@
             {"name": "format", "type": "texture format"},
             {"name": "blend", "type": "blend state", "annotation": "const*", "optional": true},
             {"name": "write mask", "type": "color write mask", "default": "all"}
+        ]
+    },
+    "color target state expand resolve texture dawn": {
+        "tags": ["dawn"],
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["color target state"],
+        "members": [
+            {"name": "enabled", "type": "bool", "default": "false"}
         ]
     },
     "blend state": {
@@ -3787,7 +3786,7 @@
             {"value": 1024, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
             {"value": 1025, "name": "drm format capabilities", "tags": ["dawn"]},
             {"value": 1026, "name": "shader module compilation options", "tags": ["dawn"]},
-            {"value": 1027, "name": "multisample state expand resolve texture dawn", "tags": ["dawn"]},
+            {"value": 1027, "name": "color target state expand resolve texture dawn", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
