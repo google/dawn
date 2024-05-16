@@ -369,6 +369,8 @@ void Texture::DestroyImpl() {
     //   other threads using the texture since there are no other live refs.
     TextureBase::DestroyImpl();
     mD3d11Resource = nullptr;
+    mKeyedMutex = nullptr;
+    mTextureForStencilSampling = nullptr;
 }
 
 ID3D11Resource* Texture::GetD3D11Resource() const {
@@ -1203,7 +1205,10 @@ TextureView::~TextureView() = default;
 
 void TextureView::DestroyImpl() {
     TextureViewBase::DestroyImpl();
+    mD3d11SharedResourceView = nullptr;
     mD3d11RenderTargetViews.clear();
+    mD3d11DepthStencilView = nullptr;
+    mD3d11UnorderedAccessView = nullptr;
 }
 
 ResultOrError<ID3D11ShaderResourceView*> TextureView::GetOrCreateD3D11ShaderResourceView() {

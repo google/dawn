@@ -395,6 +395,7 @@ void Buffer::DestroyImpl() {
     if (mMappedData) {
         UnmapImpl();
     }
+    mD3d11ConstantBuffer = nullptr;
     mD3d11NonConstantBuffer = nullptr;
 }
 
