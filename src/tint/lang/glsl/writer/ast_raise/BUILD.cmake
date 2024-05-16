@@ -53,6 +53,7 @@ tint_add_target(tint_lang_glsl_writer_ast_raise lib
 
 tint_target_add_dependencies(tint_lang_glsl_writer_ast_raise lib
   tint_api_common
+  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
@@ -79,6 +80,12 @@ tint_target_add_dependencies(tint_lang_glsl_writer_ast_raise lib
   tint_utils_traits
 )
 
+if(TINT_BUILD_GLSL_WRITER)
+  tint_target_add_dependencies(tint_lang_glsl_writer_ast_raise lib
+    tint_lang_glsl_writer_common
+  )
+endif(TINT_BUILD_GLSL_WRITER)
+
 endif(TINT_BUILD_GLSL_WRITER)
 if(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 ################################################################################
@@ -95,6 +102,7 @@ tint_add_target(tint_lang_glsl_writer_ast_raise_test test
 
 tint_target_add_dependencies(tint_lang_glsl_writer_ast_raise_test test
   tint_api_common
+  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_ir
@@ -129,6 +137,7 @@ tint_target_add_external_dependencies(tint_lang_glsl_writer_ast_raise_test test
 if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_lang_glsl_writer_ast_raise_test test
     tint_lang_glsl_writer_ast_raise
+    tint_lang_glsl_writer_common
   )
 endif(TINT_BUILD_GLSL_WRITER)
 

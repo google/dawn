@@ -55,6 +55,7 @@ tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
   tint_lang_hlsl_writer_helpers
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
   tint_lang_wgsl_common
   tint_lang_wgsl_features
   tint_lang_wgsl_helpers

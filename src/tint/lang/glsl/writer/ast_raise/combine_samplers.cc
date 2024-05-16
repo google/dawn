@@ -32,6 +32,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/glsl/writer/common/options.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
@@ -41,7 +42,7 @@
 #include "src/tint/utils/containers/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::CombineSamplers);
-TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::CombineSamplers::BindingInfo);
+TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::CombineSamplersInfo);
 
 namespace {
 
@@ -55,11 +56,13 @@ bool IsGlobal(const tint::sem::VariablePair& pair) {
 namespace tint::glsl::writer {
 
 using namespace tint::core::number_suffixes;  // NOLINT
+                                              //
+CombineSamplersInfo::CombineSamplersInfo() = default;
 
-CombineSamplers::BindingInfo::BindingInfo(const BindingMap& map, const BindingPoint& placeholder)
-    : binding_map(map), placeholder_binding_point(placeholder) {}
-CombineSamplers::BindingInfo::BindingInfo(const BindingInfo& other) = default;
-CombineSamplers::BindingInfo::~BindingInfo() = default;
+CombineSamplersInfo::CombineSamplersInfo(CombinedTextureSamplerInfo map, BindingPoint placeholder)
+    : sampler_texture_to_name(std::move(map)), placeholder_sampler_binding(placeholder) {}
+
+CombineSamplersInfo::~CombineSamplersInfo() = default;
 
 /// PIMPL state for the transform
 struct CombineSamplers::State {
@@ -70,8 +73,8 @@ struct CombineSamplers::State {
     /// The clone context
     program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
 
-    /// The binding info
-    const BindingInfo* binding_info;
+    /// The combined sampler information
+    const CombineSamplersInfo* combined_samplers_info;
 
     /// Map from a texture/sampler pair to the corresponding combined sampler
     /// variable
@@ -104,7 +107,8 @@ struct CombineSamplers::State {
     /// Constructor
     /// @param program the source program
     /// @param info the binding map information
-    State(const Program& program, const BindingInfo* info) : src(program), binding_info(info) {}
+    State(const Program& program, const CombineSamplersInfo* info)
+        : src(program), combined_samplers_info(info) {}
 
     /// Creates a combined sampler global variables.
     /// (Note this is actually a Texture node at the AST level, but it will be
@@ -116,15 +120,15 @@ struct CombineSamplers::State {
     const ast::Variable* CreateCombinedGlobal(const sem::Variable* texture_var,
                                               const sem::Variable* sampler_var,
                                               std::string name) {
-        SamplerTexturePair bp_pair;
-        bp_pair.texture_binding_point =
-            texture_var ? *texture_var->As<sem::GlobalVariable>()->Attributes().binding_point
-                        : binding_info->placeholder_binding_point;
-        bp_pair.sampler_binding_point =
-            sampler_var ? *sampler_var->As<sem::GlobalVariable>()->Attributes().binding_point
-                        : binding_info->placeholder_binding_point;
-        auto it = binding_info->binding_map.find(bp_pair);
-        if (it != binding_info->binding_map.end()) {
+        binding::CombinedTextureSamplerPair st_pair;
+        st_pair.texture = texture_var
+                              ? *texture_var->As<sem::GlobalVariable>()->Attributes().binding_point
+                              : combined_samplers_info->placeholder_sampler_binding;
+        st_pair.sampler = sampler_var
+                              ? *sampler_var->As<sem::GlobalVariable>()->Attributes().binding_point
+                              : combined_samplers_info->placeholder_sampler_binding;
+        auto it = combined_samplers_info->sampler_texture_to_name.find(st_pair);
+        if (it != combined_samplers_info->sampler_texture_to_name.end()) {
             name = it->second;
         }
         ast::Type type = CreateCombinedASTTypeFor(texture_var, sampler_var);
@@ -438,14 +442,14 @@ CombineSamplers::~CombineSamplers() = default;
 ast::transform::Transform::ApplyResult CombineSamplers::Apply(const Program& src,
                                                               const ast::transform::DataMap& inputs,
                                                               ast::transform::DataMap&) const {
-    auto* binding_info = inputs.Get<BindingInfo>();
-    if (!binding_info) {
+    auto* info = inputs.Get<CombineSamplersInfo>();
+    if (!info) {
         ProgramBuilder b;
         b.Diagnostics().AddError(Source{}) << "missing transform data for " << TypeInfo().name;
         return resolver::Resolve(b);
     }
 
-    return State(src, binding_info).Run();
+    return State(src, info).Run();
 }
 
 }  // namespace tint::glsl::writer

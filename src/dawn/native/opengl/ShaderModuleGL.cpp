@@ -71,15 +71,16 @@ tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
 using BindingMap = std::unordered_map<tint::BindingPoint, tint::BindingPoint>;
 
 opengl::CombinedSampler* AppendCombinedSampler(opengl::CombinedSamplerInfo* info,
-                                               tint::inspector::SamplerTexturePair pair,
+                                               tint::BindingPoint texture,
+                                               tint::BindingPoint sampler,
                                                tint::BindingPoint placeholderBindingPoint) {
     info->emplace_back();
     opengl::CombinedSampler* combinedSampler = &info->back();
-    combinedSampler->usePlaceholderSampler = pair.sampler_binding_point == placeholderBindingPoint;
-    combinedSampler->samplerLocation.group = BindGroupIndex(pair.sampler_binding_point.group);
-    combinedSampler->samplerLocation.binding = BindingNumber(pair.sampler_binding_point.binding);
-    combinedSampler->textureLocation.group = BindGroupIndex(pair.texture_binding_point.group);
-    combinedSampler->textureLocation.binding = BindingNumber(pair.texture_binding_point.binding);
+    combinedSampler->usePlaceholderSampler = sampler == placeholderBindingPoint;
+    combinedSampler->samplerLocation.group = BindGroupIndex(sampler.group);
+    combinedSampler->samplerLocation.binding = BindingNumber(sampler.binding);
+    combinedSampler->textureLocation.group = BindGroupIndex(texture.group);
+    combinedSampler->textureLocation.binding = BindingNumber(texture.binding);
     return combinedSampler;
 }
 
@@ -334,24 +335,34 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     CombinedSamplerInfo combinedSamplerInfo;
     for (const auto& use : uses) {
         CombinedSampler* info =
-            AppendCombinedSampler(&combinedSamplerInfo, use, placeholderBindingPoint);
+            AppendCombinedSampler(&combinedSamplerInfo, use.texture_binding_point,
+                                  use.sampler_binding_point, placeholderBindingPoint);
 
         if (info->usePlaceholderSampler) {
             *needsPlaceholderSampler = true;
-            req.tintOptions.placeholder_binding_point = placeholderBindingPoint;
+            req.tintOptions.combined_samplers_info.placeholder_sampler_binding =
+                placeholderBindingPoint;
         }
-        req.tintOptions.binding_map[use] = info->GetName();
+
+        tint::glsl::writer::binding::CombinedTextureSamplerPair pair;
+        pair.texture = use.texture_binding_point;
+        pair.sampler = use.sampler_binding_point;
+
+        req.tintOptions.combined_samplers_info.sampler_texture_to_name[pair] = info->GetName();
 
         // If the texture has an associated plane1 texture (ie., it's an external texture),
         // append a new combined sampler with the same sampler and the plane1 texture.
         BindingMap::iterator plane1Texture =
             externalTextureExpansionMap.find(use.texture_binding_point);
         if (plane1Texture != externalTextureExpansionMap.end()) {
-            tint::inspector::SamplerTexturePair plane1Use{use.sampler_binding_point,
-                                                          plane1Texture->second};
+            tint::glsl::writer::binding::CombinedTextureSamplerPair plane1Use{
+                plane1Texture->second, use.sampler_binding_point};
+
             CombinedSampler* plane1Info =
-                AppendCombinedSampler(&combinedSamplerInfo, plane1Use, placeholderBindingPoint);
-            req.tintOptions.binding_map[plane1Use] = plane1Info->GetName();
+                AppendCombinedSampler(&combinedSamplerInfo, plane1Use.texture, plane1Use.sampler,
+                                      placeholderBindingPoint);
+            req.tintOptions.combined_samplers_info.sampler_texture_to_name[plane1Use] =
+                plane1Info->GetName();
         }
     }
 

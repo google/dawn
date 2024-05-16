@@ -234,7 +234,7 @@ SanitizedResult Sanitize(const Program& in,
         options.texture_builtins_from_uniform.ubo_binding,
         options.texture_builtins_from_uniform.ubo_bindingpoint_ordering);
 
-    data.Add<CombineSamplers::BindingInfo>(options.binding_map, options.placeholder_binding_point);
+    data.Add<CombineSamplersInfo>(options.combined_samplers_info);
     manager.Add<CombineSamplers>();
 
     data.Add<ast::transform::BindingRemapper::Remappings>(
