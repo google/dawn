@@ -41,5 +41,21 @@ void foo() {
 )");
 }
 
+TEST_F(MslPrinterTest, EntryPointParameterBindingPoint) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* storage = b.FunctionParam("storage", ty.ptr(core::AddressSpace::kStorage, ty.i32()));
+    auto* uniform = b.FunctionParam("uniform", ty.ptr(core::AddressSpace::kUniform, ty.i32()));
+    storage->SetBindingPoint(0, 1);
+    uniform->SetBindingPoint(0, 2);
+    func->SetParams({storage, uniform});
+    func->Block()->Append(b.Return(func));
+
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
+fragment void foo(device int* storage [[buffer(1)]], const constant int* uniform [[buffer(2)]]) {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer

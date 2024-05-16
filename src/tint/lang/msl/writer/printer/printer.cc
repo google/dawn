@@ -304,6 +304,20 @@ class Printer : public tint::TextGenerator {
                     }
                     out << "]]";
                 }
+
+                if (auto binding_point = param->BindingPoint()) {
+                    auto ptr = param->Type()->As<core::type::Pointer>();
+                    TINT_ASSERT(binding_point->group == 0);
+                    switch (ptr->AddressSpace()) {
+                        case core::AddressSpace::kStorage:
+                        case core::AddressSpace::kUniform:
+                            out << " [[buffer(" << binding_point->binding << ")]]";
+                            break;
+                        default:
+                            TINT_UNREACHABLE() << "invalid address space with binding point: "
+                                               << ptr->AddressSpace();
+                    }
+                }
             }
 
             out << ") {";
