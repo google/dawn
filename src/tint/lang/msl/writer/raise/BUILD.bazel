@@ -40,10 +40,12 @@ cc_library(
   name = "raise",
   srcs = [
     "builtin_polyfill.cc",
+    "module_scope_vars.cc",
     "raise.cc",
   ],
   hdrs = [
     "builtin_polyfill.h",
+    "module_scope_vars.h",
     "raise.h",
   ],
   deps = [
@@ -54,6 +56,7 @@ cc_library(
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/ir/transform",
+    "//src/tint/lang/core/ir/transform/common",
     "//src/tint/lang/core/type",
     "//src/tint/lang/msl",
     "//src/tint/lang/msl/intrinsic",
@@ -85,6 +88,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "builtin_polyfill_test.cc",
+    "module_scope_vars_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

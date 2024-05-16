@@ -110,6 +110,12 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @param binding the binding
     void SetBindingPoint(uint32_t group, uint32_t binding) { binding_point_ = {group, binding}; }
 
+    /// Sets the binding point
+    /// @param binding_point the binding point
+    void SetBindingPoint(std::optional<struct BindingPoint> binding_point) {
+        binding_point_ = binding_point;
+    }
+
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
     std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
 

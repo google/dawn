@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
 
 namespace tint::msl::writer {
 
@@ -97,13 +98,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory);
     }
 
-    // PreservePadding must come before DirectVariableAccess.
     RUN_TRANSFORM(core::ir::transform::PreservePadding);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors);
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper);
 
+    RUN_TRANSFORM(raise::ModuleScopeVars);
     RUN_TRANSFORM(core::ir::transform::ValueToLet);
     RUN_TRANSFORM(raise::BuiltinPolyfill);
 

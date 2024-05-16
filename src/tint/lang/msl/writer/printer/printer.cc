@@ -118,8 +118,8 @@ class Printer : public tint::TextGenerator {
             Line() << "using namespace metal;";
         }
 
-        // Emit module-scope declarations.
-        EmitBlockInstructions(ir_.root_block);
+        // Module-scope declarations should have all been moved into the entry points.
+        TINT_ASSERT(ir_.root_block->IsEmpty());
 
         // Emit functions.
         for (auto* func : ir_.DependencyOrderedFunctions()) {
