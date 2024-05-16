@@ -67,6 +67,7 @@ class RenderPipeline final : public RenderPipelineBase {
     using RenderPipelineBase::RenderPipelineBase;
 
     NSRef<MTLVertexDescriptor> MakeVertexDesc() const;
+    NSRef<MTLDepthStencilDescriptor> MakeDepthStencilDesc();
 
     MTLPrimitiveType mMtlPrimitiveTopology;
     MTLWinding mMtlFrontFace;

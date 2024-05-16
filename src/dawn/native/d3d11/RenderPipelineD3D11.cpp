@@ -412,7 +412,7 @@ MaybeError RenderPipeline::InitializeDepthStencilState() {
         state->depthWriteEnabled ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
     depthStencilDesc.DepthFunc = ToD3D11ComparisonFunc(state->depthCompare);
 
-    depthStencilDesc.StencilEnable = StencilTestEnabled(state) ? TRUE : FALSE;
+    depthStencilDesc.StencilEnable = UsesStencil() ? TRUE : FALSE;
     depthStencilDesc.StencilReadMask = static_cast<UINT8>(state->stencilReadMask);
     depthStencilDesc.StencilWriteMask = static_cast<UINT8>(state->stencilWriteMask);
 

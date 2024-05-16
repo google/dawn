@@ -60,6 +60,9 @@ class RenderPipeline final : public RenderPipelineBase, public PipelineGL {
 
     void CreateVAOForVertexState();
 
+    void ApplyDepthStencilState(const OpenGLFunctions& gl,
+                                PersistentPipelineState* persistentPipelineState);
+
     // TODO(yunchao.he@intel.com): vao need to be deduplicated between pipelines.
     GLuint mVertexArrayObject;
     GLenum mGlPrimitiveTopology;

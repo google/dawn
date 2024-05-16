@@ -155,6 +155,42 @@ TEST_F(RenderPipelineValidationTest, DepthStencilAspectRequirement) {
         device.CreateRenderPipeline(&descriptor);
     }
 
+    // Control case, stencil faces with Keep/Always are valid when the format doesn't have stencil
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24Plus);
+        depthStencil->stencilFront.compare = wgpu::CompareFunction::Always;
+        depthStencil->stencilFront.failOp = wgpu::StencilOperation::Keep;
+        depthStencil->stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
+        depthStencil->stencilFront.passOp = wgpu::StencilOperation::Keep;
+        depthStencil->stencilBack.compare = wgpu::CompareFunction::Always;
+        depthStencil->stencilBack.failOp = wgpu::StencilOperation::Keep;
+        depthStencil->stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
+        depthStencil->stencilBack.passOp = wgpu::StencilOperation::Keep;
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    // Control case, stencil faces with Undefined are valid when the format doesn't have stencil
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24Plus);
+        depthStencil->stencilFront.compare = wgpu::CompareFunction::Undefined;
+        depthStencil->stencilFront.failOp = wgpu::StencilOperation::Undefined;
+        depthStencil->stencilFront.depthFailOp = wgpu::StencilOperation::Undefined;
+        depthStencil->stencilFront.passOp = wgpu::StencilOperation::Undefined;
+        depthStencil->stencilBack.compare = wgpu::CompareFunction::Undefined;
+        depthStencil->stencilBack.failOp = wgpu::StencilOperation::Undefined;
+        depthStencil->stencilBack.depthFailOp = wgpu::StencilOperation::Undefined;
+        depthStencil->stencilBack.passOp = wgpu::StencilOperation::Undefined;
+        device.CreateRenderPipeline(&descriptor);
+    }
+
     // It is invalid if the texture format doesn't have stencil aspect while stencil test is
     // enabled (depthStencilState.stencilFront are not default values).
     {

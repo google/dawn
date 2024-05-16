@@ -282,50 +282,6 @@ MTLStencilOperation MetalStencilOperation(wgpu::StencilOperation stencilOperatio
     DAWN_UNREACHABLE();
 }
 
-NSRef<MTLDepthStencilDescriptor> MakeDepthStencilDesc(const DepthStencilState* descriptor) {
-    NSRef<MTLDepthStencilDescriptor> mtlDepthStencilDescRef =
-        AcquireNSRef([MTLDepthStencilDescriptor new]);
-    MTLDepthStencilDescriptor* mtlDepthStencilDescriptor = mtlDepthStencilDescRef.Get();
-
-    mtlDepthStencilDescriptor.depthCompareFunction =
-        ToMetalCompareFunction(descriptor->depthCompare);
-    mtlDepthStencilDescriptor.depthWriteEnabled = descriptor->depthWriteEnabled;
-
-    if (StencilTestEnabled(descriptor)) {
-        NSRef<MTLStencilDescriptor> backFaceStencilRef = AcquireNSRef([MTLStencilDescriptor new]);
-        MTLStencilDescriptor* backFaceStencil = backFaceStencilRef.Get();
-        NSRef<MTLStencilDescriptor> frontFaceStencilRef = AcquireNSRef([MTLStencilDescriptor new]);
-        MTLStencilDescriptor* frontFaceStencil = frontFaceStencilRef.Get();
-
-        backFaceStencil.stencilCompareFunction =
-            ToMetalCompareFunction(descriptor->stencilBack.compare);
-        backFaceStencil.stencilFailureOperation =
-            MetalStencilOperation(descriptor->stencilBack.failOp);
-        backFaceStencil.depthFailureOperation =
-            MetalStencilOperation(descriptor->stencilBack.depthFailOp);
-        backFaceStencil.depthStencilPassOperation =
-            MetalStencilOperation(descriptor->stencilBack.passOp);
-        backFaceStencil.readMask = descriptor->stencilReadMask;
-        backFaceStencil.writeMask = descriptor->stencilWriteMask;
-
-        frontFaceStencil.stencilCompareFunction =
-            ToMetalCompareFunction(descriptor->stencilFront.compare);
-        frontFaceStencil.stencilFailureOperation =
-            MetalStencilOperation(descriptor->stencilFront.failOp);
-        frontFaceStencil.depthFailureOperation =
-            MetalStencilOperation(descriptor->stencilFront.depthFailOp);
-        frontFaceStencil.depthStencilPassOperation =
-            MetalStencilOperation(descriptor->stencilFront.passOp);
-        frontFaceStencil.readMask = descriptor->stencilReadMask;
-        frontFaceStencil.writeMask = descriptor->stencilWriteMask;
-
-        mtlDepthStencilDescriptor.backFaceStencil = backFaceStencil;
-        mtlDepthStencilDescriptor.frontFaceStencil = frontFaceStencil;
-    }
-
-    return mtlDepthStencilDescRef;
-}
-
 MTLWinding MTLFrontFace(wgpu::FrontFace face) {
     switch (face) {
         case wgpu::FrontFace::CW:
@@ -494,8 +450,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     // Create depth stencil state and cache it, fetch the cached depth stencil state when we
     // call setDepthStencilState() for a given render pipeline in CommandEncoder, in order
     // to improve performance.
-    NSRef<MTLDepthStencilDescriptor> depthStencilDesc =
-        MakeDepthStencilDesc(GetDepthStencilState());
+    NSRef<MTLDepthStencilDescriptor> depthStencilDesc = MakeDepthStencilDesc();
     mMtlDepthStencilState =
         AcquireNSPRef([mtlDevice newDepthStencilStateWithDescriptor:depthStencilDesc.Get()]);
 
@@ -580,6 +535,52 @@ NSRef<MTLVertexDescriptor> RenderPipeline::MakeVertexDesc() const {
     }
 
     return AcquireNSRef(mtlVertexDescriptor);
+}
+
+NSRef<MTLDepthStencilDescriptor> RenderPipeline::MakeDepthStencilDesc() {
+    const DepthStencilState* descriptor = GetDepthStencilState();
+
+    NSRef<MTLDepthStencilDescriptor> mtlDepthStencilDescRef =
+        AcquireNSRef([MTLDepthStencilDescriptor new]);
+    MTLDepthStencilDescriptor* mtlDepthStencilDescriptor = mtlDepthStencilDescRef.Get();
+
+    mtlDepthStencilDescriptor.depthCompareFunction =
+        ToMetalCompareFunction(descriptor->depthCompare);
+    mtlDepthStencilDescriptor.depthWriteEnabled = descriptor->depthWriteEnabled;
+
+    if (UsesStencil()) {
+        NSRef<MTLStencilDescriptor> backFaceStencilRef = AcquireNSRef([MTLStencilDescriptor new]);
+        MTLStencilDescriptor* backFaceStencil = backFaceStencilRef.Get();
+        NSRef<MTLStencilDescriptor> frontFaceStencilRef = AcquireNSRef([MTLStencilDescriptor new]);
+        MTLStencilDescriptor* frontFaceStencil = frontFaceStencilRef.Get();
+
+        backFaceStencil.stencilCompareFunction =
+            ToMetalCompareFunction(descriptor->stencilBack.compare);
+        backFaceStencil.stencilFailureOperation =
+            MetalStencilOperation(descriptor->stencilBack.failOp);
+        backFaceStencil.depthFailureOperation =
+            MetalStencilOperation(descriptor->stencilBack.depthFailOp);
+        backFaceStencil.depthStencilPassOperation =
+            MetalStencilOperation(descriptor->stencilBack.passOp);
+        backFaceStencil.readMask = descriptor->stencilReadMask;
+        backFaceStencil.writeMask = descriptor->stencilWriteMask;
+
+        frontFaceStencil.stencilCompareFunction =
+            ToMetalCompareFunction(descriptor->stencilFront.compare);
+        frontFaceStencil.stencilFailureOperation =
+            MetalStencilOperation(descriptor->stencilFront.failOp);
+        frontFaceStencil.depthFailureOperation =
+            MetalStencilOperation(descriptor->stencilFront.depthFailOp);
+        frontFaceStencil.depthStencilPassOperation =
+            MetalStencilOperation(descriptor->stencilFront.passOp);
+        frontFaceStencil.readMask = descriptor->stencilReadMask;
+        frontFaceStencil.writeMask = descriptor->stencilWriteMask;
+
+        mtlDepthStencilDescriptor.backFaceStencil = backFaceStencil;
+        mtlDepthStencilDescriptor.frontFaceStencil = frontFaceStencil;
+    }
+
+    return mtlDepthStencilDescRef;
 }
 
 }  // namespace dawn::native::metal

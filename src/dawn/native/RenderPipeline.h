@@ -70,8 +70,6 @@ size_t IndexFormatSize(wgpu::IndexFormat format);
 
 bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology);
 
-bool StencilTestEnabled(const DepthStencilState* depthStencil);
-
 struct VertexAttributeInfo {
     wgpu::VertexFormat format;
     uint64_t offset;
@@ -98,6 +96,7 @@ class RenderPipelineBase : public PipelineBase,
 
     ObjectType GetType() const override;
 
+    // Vertex getters
     const VertexAttributeMask& GetAttributeLocationsUsed() const;
     const VertexAttributeInfo& GetAttribute(VertexAttributeLocation location) const;
     const VertexBufferMask& GetVertexBuffersUsed() const;
@@ -106,25 +105,34 @@ class RenderPipelineBase : public PipelineBase,
     const VertexBufferInfo& GetVertexBuffer(VertexBufferSlot slot) const;
     uint32_t GetVertexBufferCount() const;
 
+    // Color attachment getters
     const ColorTargetState* GetColorTargetState(ColorAttachmentIndex attachmentSlot) const;
-    const DepthStencilState* GetDepthStencilState() const;
+    ColorAttachmentMask GetColorAttachmentsMask() const;
+    wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex attachment) const;
+
+    // Primitive getters
     wgpu::PrimitiveTopology GetPrimitiveTopology() const;
     wgpu::IndexFormat GetStripIndexFormat() const;
     wgpu::CullMode GetCullMode() const;
     wgpu::FrontFace GetFrontFace() const;
+
+    // Depth-stencil getters
+    const DepthStencilState* GetDepthStencilState() const;
+    bool HasDepthStencilAttachment() const;
+    bool UsesStencil() const;
+    wgpu::TextureFormat GetDepthStencilFormat() const;
     bool IsDepthBiasEnabled() const;
     int32_t GetDepthBias() const;
     float GetDepthBiasSlopeScale() const;
     float GetDepthBiasClamp() const;
     bool HasUnclippedDepth() const;
 
-    ColorAttachmentMask GetColorAttachmentsMask() const;
-    bool HasDepthStencilAttachment() const;
-    wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex attachment) const;
-    wgpu::TextureFormat GetDepthStencilFormat() const;
+    // Multisample getters
     uint32_t GetSampleCount() const;
     uint32_t GetSampleMask() const;
     bool IsAlphaToCoverageEnabled() const;
+
+    // Shader builtin getters
     bool WritesDepth() const;
     bool WritesStencil() const;
     bool UsesFragDepth() const;

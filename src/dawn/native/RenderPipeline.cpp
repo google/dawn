@@ -273,6 +273,26 @@ MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState
     return {};
 }
 
+MaybeError ValidateStencilFaceUnused(StencilFaceState face) {
+    DAWN_INVALID_IF((face.compare != wgpu::CompareFunction::Always) &&
+                        (face.compare != wgpu::CompareFunction::Undefined),
+                    "compare (%s) is defined and not %s.", face.compare,
+                    wgpu::CompareFunction::Always);
+    DAWN_INVALID_IF((face.failOp != wgpu::StencilOperation::Keep) &&
+                        (face.failOp != wgpu::StencilOperation::Undefined),
+                    "failOp (%s) is defined and not %s.", face.failOp,
+                    wgpu::StencilOperation::Keep);
+    DAWN_INVALID_IF((face.depthFailOp != wgpu::StencilOperation::Keep) &&
+                        (face.depthFailOp != wgpu::StencilOperation::Undefined),
+                    "depthFailOp (%s) is defined and not %s.", face.depthFailOp,
+                    wgpu::StencilOperation::Keep);
+    DAWN_INVALID_IF((face.passOp != wgpu::StencilOperation::Keep) &&
+                        (face.passOp != wgpu::StencilOperation::Undefined),
+                    "passOp (%s) is defined and not %s.", face.passOp,
+                    wgpu::StencilOperation::Keep);
+    return {};
+}
+
 MaybeError ValidateDepthStencilState(const DeviceBase* device,
                                      const DepthStencilState* descriptor) {
     DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->depthCompare),
@@ -342,10 +362,16 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
         "Depth stencil format (%s) doesn't have depth aspect while depthWriteEnabled (%u) is true.",
         descriptor->format, descriptor->depthWriteEnabled);
 
-    DAWN_INVALID_IF(!format->HasStencil() && StencilTestEnabled(descriptor),
-                    "Depth stencil format (%s) doesn't have stencil aspect while stencil "
-                    "test or stencil write is enabled.",
-                    descriptor->format);
+    if (!format->HasStencil()) {
+        DAWN_TRY_CONTEXT(ValidateStencilFaceUnused(descriptor->stencilFront),
+                         "validating that stencilFront doesn't use stencil when the depth-stencil "
+                         "format (%s) doesn't have a stencil aspect.",
+                         descriptor->format);
+        DAWN_TRY_CONTEXT(ValidateStencilFaceUnused(descriptor->stencilBack),
+                         "validating that stencilBack doesn't use stencil when the depth-stencil "
+                         "format (%s) doesn't have a stencil aspect.",
+                         descriptor->format);
+    }
 
     return {};
 }
@@ -840,17 +866,6 @@ std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
     return stages;
 }
 
-bool StencilTestEnabled(const DepthStencilState* depthStencil) {
-    return depthStencil->stencilBack.compare != wgpu::CompareFunction::Always ||
-           depthStencil->stencilBack.failOp != wgpu::StencilOperation::Keep ||
-           depthStencil->stencilBack.depthFailOp != wgpu::StencilOperation::Keep ||
-           depthStencil->stencilBack.passOp != wgpu::StencilOperation::Keep ||
-           depthStencil->stencilFront.compare != wgpu::CompareFunction::Always ||
-           depthStencil->stencilFront.failOp != wgpu::StencilOperation::Keep ||
-           depthStencil->stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
-           depthStencil->stencilFront.passOp != wgpu::StencilOperation::Keep;
-}
-
 // RenderPipelineBase
 
 RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
@@ -1076,6 +1091,17 @@ const ColorTargetState* RenderPipelineBase::GetColorTargetState(
 const DepthStencilState* RenderPipelineBase::GetDepthStencilState() const {
     DAWN_ASSERT(!IsError());
     return &mDepthStencil;
+}
+
+bool RenderPipelineBase::UsesStencil() const {
+    return mDepthStencil.stencilBack.compare != wgpu::CompareFunction::Always ||
+           mDepthStencil.stencilBack.failOp != wgpu::StencilOperation::Keep ||
+           mDepthStencil.stencilBack.depthFailOp != wgpu::StencilOperation::Keep ||
+           mDepthStencil.stencilBack.passOp != wgpu::StencilOperation::Keep ||
+           mDepthStencil.stencilFront.compare != wgpu::CompareFunction::Always ||
+           mDepthStencil.stencilFront.failOp != wgpu::StencilOperation::Keep ||
+           mDepthStencil.stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
+           mDepthStencil.stencilFront.passOp != wgpu::StencilOperation::Keep;
 }
 
 wgpu::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {

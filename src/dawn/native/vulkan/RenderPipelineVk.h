@@ -61,6 +61,7 @@ class RenderPipeline final : public RenderPipelineBase {
     };
     VkPipelineVertexInputStateCreateInfo ComputeVertexInputDesc(
         PipelineVertexInputStateCreateInfoTemporaryAllocations* temporaryAllocations);
+    VkPipelineDepthStencilStateCreateInfo ComputeDepthStencilDesc();
 
     VkPipeline mHandle = VK_NULL_HANDLE;
 };

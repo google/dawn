@@ -200,46 +200,6 @@ GLuint OpenGLStencilOperation(wgpu::StencilOperation stencilOperation) {
     DAWN_UNREACHABLE();
 }
 
-void ApplyDepthStencilState(const OpenGLFunctions& gl,
-                            const DepthStencilState* descriptor,
-                            PersistentPipelineState* persistentPipelineState) {
-    // Depth writes only occur if depth is enabled
-    if (descriptor->depthCompare == wgpu::CompareFunction::Always &&
-        !descriptor->depthWriteEnabled) {
-        gl.Disable(GL_DEPTH_TEST);
-    } else {
-        gl.Enable(GL_DEPTH_TEST);
-    }
-
-    if (descriptor->depthWriteEnabled) {
-        gl.DepthMask(GL_TRUE);
-    } else {
-        gl.DepthMask(GL_FALSE);
-    }
-
-    gl.DepthFunc(ToOpenGLCompareFunction(descriptor->depthCompare));
-
-    if (StencilTestEnabled(descriptor)) {
-        gl.Enable(GL_STENCIL_TEST);
-    } else {
-        gl.Disable(GL_STENCIL_TEST);
-    }
-
-    GLenum backCompareFunction = ToOpenGLCompareFunction(descriptor->stencilBack.compare);
-    GLenum frontCompareFunction = ToOpenGLCompareFunction(descriptor->stencilFront.compare);
-    persistentPipelineState->SetStencilFuncsAndMask(gl, backCompareFunction, frontCompareFunction,
-                                                    descriptor->stencilReadMask);
-
-    gl.StencilOpSeparate(GL_BACK, OpenGLStencilOperation(descriptor->stencilBack.failOp),
-                         OpenGLStencilOperation(descriptor->stencilBack.depthFailOp),
-                         OpenGLStencilOperation(descriptor->stencilBack.passOp));
-    gl.StencilOpSeparate(GL_FRONT, OpenGLStencilOperation(descriptor->stencilFront.failOp),
-                         OpenGLStencilOperation(descriptor->stencilFront.depthFailOp),
-                         OpenGLStencilOperation(descriptor->stencilFront.passOp));
-
-    gl.StencilMask(descriptor->stencilWriteMask);
-}
-
 }  // anonymous namespace
 
 // static
@@ -323,7 +283,7 @@ void RenderPipeline::ApplyNow(PersistentPipelineState& persistentPipelineState) 
 
     ApplyFrontFaceAndCulling(gl, GetFrontFace(), GetCullMode());
 
-    ApplyDepthStencilState(gl, GetDepthStencilState(), &persistentPipelineState);
+    ApplyDepthStencilState(gl, &persistentPipelineState);
 
     gl.SampleMaski(0, GetSampleMask());
     if (IsAlphaToCoverageEnabled()) {
@@ -377,6 +337,47 @@ void RenderPipeline::ApplyNow(PersistentPipelineState& persistentPipelineState) 
             }
         }
     }
+}
+
+void RenderPipeline::ApplyDepthStencilState(const OpenGLFunctions& gl,
+                                            PersistentPipelineState* persistentPipelineState) {
+    const DepthStencilState* descriptor = GetDepthStencilState();
+
+    // Depth writes only occur if depth is enabled
+    if (descriptor->depthCompare == wgpu::CompareFunction::Always &&
+        !descriptor->depthWriteEnabled) {
+        gl.Disable(GL_DEPTH_TEST);
+    } else {
+        gl.Enable(GL_DEPTH_TEST);
+    }
+
+    if (descriptor->depthWriteEnabled) {
+        gl.DepthMask(GL_TRUE);
+    } else {
+        gl.DepthMask(GL_FALSE);
+    }
+
+    gl.DepthFunc(ToOpenGLCompareFunction(descriptor->depthCompare));
+
+    if (UsesStencil()) {
+        gl.Enable(GL_STENCIL_TEST);
+    } else {
+        gl.Disable(GL_STENCIL_TEST);
+    }
+
+    GLenum backCompareFunction = ToOpenGLCompareFunction(descriptor->stencilBack.compare);
+    GLenum frontCompareFunction = ToOpenGLCompareFunction(descriptor->stencilFront.compare);
+    persistentPipelineState->SetStencilFuncsAndMask(gl, backCompareFunction, frontCompareFunction,
+                                                    descriptor->stencilReadMask);
+
+    gl.StencilOpSeparate(GL_BACK, OpenGLStencilOperation(descriptor->stencilBack.failOp),
+                         OpenGLStencilOperation(descriptor->stencilBack.depthFailOp),
+                         OpenGLStencilOperation(descriptor->stencilBack.passOp));
+    gl.StencilOpSeparate(GL_FRONT, OpenGLStencilOperation(descriptor->stencilFront.failOp),
+                         OpenGLStencilOperation(descriptor->stencilFront.depthFailOp),
+                         OpenGLStencilOperation(descriptor->stencilFront.passOp));
+
+    gl.StencilMask(descriptor->stencilWriteMask);
 }
 
 }  // namespace dawn::native::opengl
