@@ -1,26 +1,12 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  int i;
+};
+struct tint_module_vars_struct {
+  const constant S* u;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(4) {
-  i:i32 @offset(0)
+kernel void tint_symbol(const constant S* u [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = {.u=u};
 }
-
-$B1: {  # root
-  %u:ptr<uniform, S, read> = var @binding_point(0, 0)
-}
-
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %3:S = load %u
-    %4:ptr<uniform, i32, read> = access %u, 0u
-    %5:i32 = load %4
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

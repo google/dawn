@@ -1,10 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
-
-thread half4 u = half4(1.0h);
-program_source:4:14: error: program scope variable must reside in constant address space
-thread half4 u = half4(1.0h);
-             ^
 

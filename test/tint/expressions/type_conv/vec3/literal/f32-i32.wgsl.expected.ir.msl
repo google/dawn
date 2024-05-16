@@ -1,10 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
-
-thread int3 u = int3(1);
-program_source:4:13: error: program scope variable must reside in constant address space
-thread int3 u = int3(1);
-            ^
 
