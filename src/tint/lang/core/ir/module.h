@@ -130,6 +130,8 @@ class Module {
     }
 
     /// @returns the functions in the module, in dependency order
+    Vector<Function*, 16> DependencyOrderedFunctions();
+    /// @returns the functions in the module, in dependency order
     Vector<const Function*, 16> DependencyOrderedFunctions() const;
 
     /// The block allocator
