@@ -4161,7 +4161,7 @@
             {"name": "vk component swizzle alpha", "type": "uint32_t", "default": "0"},
             {"name": "vk x chroma offset", "type": "uint32_t", "default": "0"},
             {"name": "vk y chroma offset", "type": "uint32_t", "default": "0"},
-            {"name": "vk chroma filter", "type": "uint32_t", "default": "0"},
+            {"name": "vk chroma filter", "type": "filter mode", "default": "nearest"},
             {"name": "force explicit reconstruction", "type": "bool", "default": "false"},
             {"name": "external format", "type": "uint64_t", "default": "0"}
         ]

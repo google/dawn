@@ -408,10 +408,10 @@ TEST_P(SharedTextureMemoryTests, QueryYCbCrInfo) {
     EXPECT_EQ(bufferFormatProperties.suggestedXChromaOffset, yCbCrInfo.vkXChromaOffset);
     EXPECT_EQ(bufferFormatProperties.suggestedYChromaOffset, yCbCrInfo.vkYChromaOffset);
 
-    uint32_t expectedFilter =
+    wgpu::FilterMode expectedFilter =
         (formatFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT)
-            ? VK_FILTER_LINEAR
-            : VK_FILTER_NEAREST;
+            ? wgpu::FilterMode::Linear
+            : wgpu::FilterMode::Nearest;
     EXPECT_EQ(expectedFilter, yCbCrInfo.vkChromaFilter);
     EXPECT_EQ(
         formatFeatures &

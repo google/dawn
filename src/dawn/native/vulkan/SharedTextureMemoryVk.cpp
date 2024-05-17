@@ -549,8 +549,8 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         uint32_t formatFeatures = bufferFormatProperties.formatFeatures;
         yCbCrAHBInfo.vkChromaFilter =
             (formatFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT)
-                ? VK_FILTER_LINEAR
-                : VK_FILTER_NEAREST;
+                ? wgpu::FilterMode::Linear
+                : wgpu::FilterMode::Nearest;
         yCbCrAHBInfo.forceExplicitReconstruction =
             formatFeatures &
             VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_BIT;

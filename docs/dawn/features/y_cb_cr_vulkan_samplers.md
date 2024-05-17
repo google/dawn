@@ -9,9 +9,9 @@ querying its properties. Most properties will be created directly from the
 corresponding buffer format properties on the underlying AHardwareBuffer. The
 two exceptions are as follows:
 
-* `vkChromaFilter`: Will be set to VK_FILTER_LINEAR iff
+* `vkChromaFilter`: Will be set to FilterMode::Linear iff
   `VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT` is
-  present in the AHB format features and VK_FILTER_NEAREST otherwise
+  present in the AHB format features and FilterMode::Nearest otherwise
 * `forceExplicitReconstruction`: will be set to true iff
   `VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_BIT`
   is present in the AHB format features
