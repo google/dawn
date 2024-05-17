@@ -419,6 +419,9 @@ TEST_P(VulkanImageWrappingUsageTests, ClearImageAcrossDevices) {
 // This is intended to verify that waiting on the signalFd for one external texture does not affect
 // those of other external textures.
 TEST_P(VulkanImageWrappingUsageTests, ClearTwoImagesAcrossDevices) {
+    // TODO(crbug.com/341124484): Fails on Linux/Intel UHD 770.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsBackendValidationEnabled() && IsIntelGen12());
+
     static_assert(kTestTexturesCount >= 2);
 
     std::vector<wgpu::Texture> wrappedTextures;
@@ -997,6 +1000,9 @@ class VulkanImageWrappingMultithreadTests : public VulkanImageWrappingUsageTests
 
 // Test that wrapping multiple VulkanImage and clear them on multiple threads work.
 TEST_P(VulkanImageWrappingMultithreadTests, WrapAndClear_OnMultipleThreads) {
+    // TODO(crbug.com/341124484): Crashes on Linux/Intel UHD 770.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsBackendValidationEnabled() && IsIntelGen12());
+
     std::vector<std::unique_ptr<ExternalTexture>> testTextures(10);
     for (auto& testTexture : testTextures) {
         testTexture =
