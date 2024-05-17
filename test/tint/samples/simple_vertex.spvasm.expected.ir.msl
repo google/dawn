@@ -12,7 +12,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
 }
 vertex main_out tint_symbol() {
   thread float4 gl_Position = 0.0f;
-  tint_module_vars_struct const tint_module_vars = {.gl_Position=(&gl_Position)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.gl_Position=(&gl_Position)};
   main_1(tint_module_vars);
-  return {.gl_Position=(*tint_module_vars.gl_Position)};
+  return main_out{.gl_Position=(*tint_module_vars.gl_Position)};
 }

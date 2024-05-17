@@ -34,7 +34,7 @@ void runtime_size_array(tint_module_vars_struct tint_module_vars) {
   float const x = (*tint_module_vars.rarr)[idx];
 }
 kernel void f(const device tint_array<float, 1>* rarr [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.rarr=rarr};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rarr=rarr};
   vector();
   tint_symbol();
   fixed_size_array();

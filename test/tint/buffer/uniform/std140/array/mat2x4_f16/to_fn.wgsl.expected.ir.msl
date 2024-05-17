@@ -30,7 +30,7 @@ half d(half f) {
   return f;
 }
 kernel void f(const constant tint_array<half2x4, 4>* u [[buffer(0)]], device half* s [[buffer(1)]]) {
-  tint_module_vars_struct const tint_module_vars = {.u=u, .s=s};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   half const v_1 = a((*tint_module_vars.u));
   half const v_2 = (v_1 + b((*tint_module_vars.u)[1]));
   half const v_3 = (v_2 + c((*tint_module_vars.u)[1][0].ywxz));

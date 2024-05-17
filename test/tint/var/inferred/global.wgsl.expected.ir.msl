@@ -51,7 +51,7 @@ kernel void f() {
   thread tint_array<float, 10> v14 = tint_array<float, 10>{};
   thread int3 v15 = int3(1, 2, 3);
   thread float3 v16 = float3(1.0f, 2.0f, 3.0f);
-  tint_module_vars_struct const tint_module_vars = {.v1=(&v1), .v2=(&v2), .v3=(&v3), .v4=(&v4), .v5=(&v5), .v6=(&v6), .v7=(&v7), .v8=(&v8), .v9=(&v9), .v10=(&v10), .v11=(&v11), .v12=(&v12), .v13=(&v13), .v14=(&v14), .v15=(&v15), .v16=(&v16)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v1=(&v1), .v2=(&v2), .v3=(&v3), .v4=(&v4), .v5=(&v5), .v6=(&v6), .v7=(&v7), .v8=(&v8), .v9=(&v9), .v10=(&v10), .v11=(&v11), .v12=(&v12), .v13=(&v13), .v14=(&v14), .v15=(&v15), .v16=(&v16)};
   int const l1 = (*tint_module_vars.v1);
   uint const l2 = (*tint_module_vars.v2);
   float const l3 = (*tint_module_vars.v3);

@@ -18,7 +18,7 @@ struct tint_module_vars_struct {
 };
 
 kernel void f(const constant tint_array<float2x2, 4>* a [[buffer(0)]], device float* s [[buffer(1)]]) {
-  tint_module_vars_struct const tint_module_vars = {.a=a, .s=s};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .s=s};
   const constant tint_array<float2x2, 4>* const p_a = tint_module_vars.a;
   const constant float2x2* const p_a_2 = (&(*p_a)[2]);
   const constant float2* const p_a_2_1 = (&(*p_a_2)[1]);

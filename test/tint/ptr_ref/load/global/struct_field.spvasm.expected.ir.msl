@@ -13,6 +13,6 @@ void main_1(tint_module_vars_struct tint_module_vars) {
 }
 kernel void tint_symbol() {
   thread S V = {};
-  tint_module_vars_struct const tint_module_vars = {.V=(&V)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.V=(&V)};
   main_1(tint_module_vars);
 }

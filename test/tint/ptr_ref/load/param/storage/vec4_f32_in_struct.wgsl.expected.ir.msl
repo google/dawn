@@ -11,6 +11,6 @@ float4 func(const device float4* const pointer) {
   return (*pointer);
 }
 kernel void tint_symbol(const device str* S [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.S=S};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=S};
   float4 const r = func((&(*tint_module_vars.S).i));
 }

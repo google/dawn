@@ -8,6 +8,6 @@ struct tint_module_vars_struct {
 };
 
 kernel void tint_symbol(uint3 id [[thread_position_in_grid]], const device Input* input [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.input=input};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.input=input};
   int3 const pos = ((*tint_module_vars.input).position - int3(0));
 }

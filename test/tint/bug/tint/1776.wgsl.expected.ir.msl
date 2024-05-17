@@ -21,6 +21,6 @@ struct tint_module_vars_struct {
 };
 
 kernel void tint_symbol(const device tint_array<S, 1>* sb [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.sb=sb};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
   S const x = (*tint_module_vars.sb)[1];
 }

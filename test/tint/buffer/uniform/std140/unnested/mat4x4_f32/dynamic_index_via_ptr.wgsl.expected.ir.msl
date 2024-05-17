@@ -11,7 +11,7 @@ int i(tint_module_vars_struct tint_module_vars) {
 }
 kernel void f(const constant float4x4* m [[buffer(0)]]) {
   thread int counter = 0;
-  tint_module_vars_struct const tint_module_vars = {.m=m, .counter=(&counter)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.m=m, .counter=(&counter)};
   const constant float4x4* const p_m = tint_module_vars.m;
   const constant float4* const p_m_i = (&(*p_m)[i(tint_module_vars)]);
   float4x4 const l_m = (*p_m);

@@ -9,6 +9,6 @@ struct tint_module_vars_struct {
 };
 
 fragment void tint_symbol_1(const constant S* data [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.data=data};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data};
   half4 const x = ((*tint_module_vars.data).vector * (*tint_module_vars.data).tint_symbol);
 }

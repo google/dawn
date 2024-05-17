@@ -5,7 +5,7 @@ struct tint_module_vars_struct {
 };
 
 kernel void tint_symbol(device float3* s [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.s=s};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
   float3 v = 0.0f;
   float const scalar = v[1u];
   float2 const swizzle2 = v.xz;

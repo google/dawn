@@ -11,7 +11,7 @@ void tint_store_and_preserve_padding(device half4x3* const target, half4x3 value
   (*target)[3u] = value_param[3u];
 }
 kernel void f(device half4x3* out [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.out=out};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out=out};
   half4x3 m = half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h));
   tint_store_and_preserve_padding(tint_module_vars.out, half4x3(m));
 }

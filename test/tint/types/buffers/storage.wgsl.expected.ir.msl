@@ -17,6 +17,6 @@ struct tint_module_vars_struct {
 };
 
 fragment void tint_symbol(const device tint_array<float, 1>* weights [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.weights=weights};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.weights=weights};
   float a = (*tint_module_vars.weights)[0];
 }

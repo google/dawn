@@ -9,7 +9,7 @@ struct tint_module_vars_struct {
 };
 
 vertex float4 tint_symbol_1(const constant S* tint_symbol [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.tint_symbol=tint_symbol};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_symbol=tint_symbol};
   float const x = (*tint_module_vars.tint_symbol).matrix_view[0][2u];
   return float4(x, 0.0f, 0.0f, 1.0f);
 }

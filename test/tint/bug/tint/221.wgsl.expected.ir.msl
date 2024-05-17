@@ -25,7 +25,7 @@ uint tint_mod_u32(uint lhs, uint rhs) {
   return (lhs - ((lhs / v) * v));
 }
 kernel void tint_symbol(device Buf* b [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.b=b};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=b};
   uint i = 0u;
   {
     while(true) {

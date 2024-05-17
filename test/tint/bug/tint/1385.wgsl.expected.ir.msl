@@ -20,6 +20,6 @@ int foo(tint_module_vars_struct tint_module_vars) {
   return (*tint_module_vars.data)[0];
 }
 kernel void tint_symbol(const device tint_array<int, 1>* data [[buffer(1)]]) {
-  tint_module_vars_struct const tint_module_vars = {.data=data};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data};
   foo(tint_module_vars);
 }

@@ -29,7 +29,7 @@ tint_array<tint_array<tint_array<float, 4>, 3>, 2> f3() {
   return tint_array<tint_array<tint_array<float, 4>, 3>, 2>{v_2, f2()};
 }
 kernel void tint_symbol(device float* s [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.s=s};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
   tint_array<float, 4> const a1 = f1();
   tint_array<tint_array<float, 4>, 3> const a2 = f2();
   tint_array<tint_array<tint_array<float, 4>, 3>, 2> const a3 = f3();

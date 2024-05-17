@@ -28,7 +28,7 @@ struct tint_module_vars_struct {
 };
 
 kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(0)]], const device Matrix* secondMatrix [[buffer(1)]], device Matrix* resultMatrix [[buffer(2)]], const constant Uniforms* uniforms [[buffer(3)]]) {
-  tint_module_vars_struct const tint_module_vars = {.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms};
   uint2 const resultCell = uint2(global_id[1u], global_id[0u]);
   uint const dimInner = (*tint_module_vars.uniforms).aShape[1u];
   uint const dimOutter = (*tint_module_vars.uniforms).outShape[1u];

@@ -11,6 +11,6 @@ void tint_store_and_preserve_padding(device float2x3* const target, float2x3 val
 }
 kernel void f(device float2x3* out [[buffer(0)]]) {
   thread float2x3 m = float2x3(float3(0.0f, 1.0f, 2.0f), float3(3.0f, 4.0f, 5.0f));
-  tint_module_vars_struct const tint_module_vars = {.m=(&m), .out=out};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.m=(&m), .out=out};
   tint_store_and_preserve_padding(tint_module_vars.out, float2x3((*tint_module_vars.m)));
 }

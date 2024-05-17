@@ -29,7 +29,7 @@ kernel void tint_symbol() {
   thread int3 v3i = 0;
   thread uint4 v4u = 0u;
   thread bool2 v2b = false;
-  tint_module_vars_struct const tint_module_vars = {.v2f=(&v2f), .v3i=(&v3i), .v4u=(&v4u), .v2b=(&v2b)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v2f=(&v2f), .v3i=(&v3i), .v4u=(&v4u), .v2b=(&v2b)};
   {
     int i = 0;
     while(true) {

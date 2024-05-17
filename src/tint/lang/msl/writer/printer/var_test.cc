@@ -276,7 +276,7 @@ void foo(tint_module_vars_struct tint_module_vars) {
 }
 fragment void frag() {
   thread float v = 0.0f;
-  tint_module_vars_struct const tint_module_vars = {.v=(&v)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&v)};
   foo(tint_module_vars);
 }
 )");

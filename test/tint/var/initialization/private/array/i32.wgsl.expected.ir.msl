@@ -20,7 +20,7 @@ struct tint_module_vars_struct {
 kernel void tint_symbol() {
   thread tint_array<int, 3> zero = {};
   thread tint_array<int, 3> init = tint_array<int, 3>{1, 2, 3};
-  tint_module_vars_struct const tint_module_vars = {.zero=(&zero), .init=(&init)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.zero=(&zero), .init=(&init)};
   tint_array<int, 3> v0 = (*tint_module_vars.zero);
   tint_array<int, 3> v1 = (*tint_module_vars.init);
 }

@@ -22,7 +22,7 @@ void tint_store_and_preserve_padding(device S* const target, S value_param) {
   tint_store_and_preserve_padding((&(*target).inner), value_param.inner);
 }
 kernel void tint_symbol(const device S* in [[buffer(0)]], device S* out [[buffer(1)]]) {
-  tint_module_vars_struct const tint_module_vars = {.in=in, .out=out};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out};
   S const t = (*tint_module_vars.in);
   tint_store_and_preserve_padding(tint_module_vars.out, t);
 }

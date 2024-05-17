@@ -11,7 +11,7 @@ void b(float3 v) {
 void c(float f) {
 }
 kernel void f(const constant float4x3* u [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.u=u};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   a((*tint_module_vars.u));
   b((*tint_module_vars.u)[1]);
   b((*tint_module_vars.u)[1].zxy);

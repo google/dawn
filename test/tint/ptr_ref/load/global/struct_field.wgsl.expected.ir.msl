@@ -9,6 +9,6 @@ struct tint_module_vars_struct {
 
 kernel void tint_symbol() {
   thread S V = {};
-  tint_module_vars_struct const tint_module_vars = {.V=(&V)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.V=(&V)};
   int const i = (*tint_module_vars.V).i;
 }

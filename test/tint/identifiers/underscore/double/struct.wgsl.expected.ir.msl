@@ -8,7 +8,7 @@ struct a__ {
 };
 
 kernel void f(device int* s [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.s=s};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
   a__ const c = a__{};
   int const d = c.b__;
   (*tint_module_vars.s) = (c.b__ + d);

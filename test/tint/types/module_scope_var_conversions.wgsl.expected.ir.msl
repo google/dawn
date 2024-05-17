@@ -44,7 +44,7 @@ kernel void tint_symbol() {
   thread uint3 v3u32_var3 = uint3(1u);
   thread bool3 v3bool_var4 = bool3(true);
   thread bool4 v4bool_var5 = bool4(true, false, true, false);
-  tint_module_vars_struct const tint_module_vars = {.bool_var1=(&bool_var1), .bool_var2=(&bool_var2), .bool_var3=(&bool_var3), .i32_var1=(&i32_var1), .i32_var2=(&i32_var2), .i32_var3=(&i32_var3), .u32_var1=(&u32_var1), .u32_var2=(&u32_var2), .u32_var3=(&u32_var3), .v3bool_var1=(&v3bool_var1), .v3bool_var2=(&v3bool_var2), .v3bool_var3=(&v3bool_var3), .v3i32_var1=(&v3i32_var1), .v3i32_var2=(&v3i32_var2), .v3i32_var3=(&v3i32_var3), .v3u32_var1=(&v3u32_var1), .v3u32_var2=(&v3u32_var2), .v3u32_var3=(&v3u32_var3), .v3bool_var4=(&v3bool_var4), .v4bool_var5=(&v4bool_var5)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.bool_var1=(&bool_var1), .bool_var2=(&bool_var2), .bool_var3=(&bool_var3), .i32_var1=(&i32_var1), .i32_var2=(&i32_var2), .i32_var3=(&i32_var3), .u32_var1=(&u32_var1), .u32_var2=(&u32_var2), .u32_var3=(&u32_var3), .v3bool_var1=(&v3bool_var1), .v3bool_var2=(&v3bool_var2), .v3bool_var3=(&v3bool_var3), .v3i32_var1=(&v3i32_var1), .v3i32_var2=(&v3i32_var2), .v3i32_var3=(&v3i32_var3), .v3u32_var1=(&v3u32_var1), .v3u32_var2=(&v3u32_var2), .v3u32_var3=(&v3u32_var3), .v3bool_var4=(&v3bool_var4), .v4bool_var5=(&v4bool_var5)};
   (*tint_module_vars.bool_var1) = false;
   (*tint_module_vars.bool_var2) = false;
   (*tint_module_vars.bool_var3) = false;

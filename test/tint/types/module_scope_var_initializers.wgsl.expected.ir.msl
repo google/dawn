@@ -39,7 +39,7 @@ kernel void tint_symbol() {
   thread float2x3 m2x3_var = float2x3(float3(0.0f), float3(0.0f));
   thread tint_array<float, 4> arr_var = tint_array<float, 4>{};
   thread S struct_var = S{};
-  tint_module_vars_struct const tint_module_vars = {.bool_var=(&bool_var), .i32_var=(&i32_var), .u32_var=(&u32_var), .f32_var=(&f32_var), .v2i32_var=(&v2i32_var), .v3u32_var=(&v3u32_var), .v4f32_var=(&v4f32_var), .m2x3_var=(&m2x3_var), .arr_var=(&arr_var), .struct_var=(&struct_var)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.bool_var=(&bool_var), .i32_var=(&i32_var), .u32_var=(&u32_var), .f32_var=(&f32_var), .v2i32_var=(&v2i32_var), .v3u32_var=(&v3u32_var), .v4f32_var=(&v4f32_var), .m2x3_var=(&m2x3_var), .arr_var=(&arr_var), .struct_var=(&struct_var)};
   (*tint_module_vars.bool_var) = false;
   (*tint_module_vars.i32_var) = 0;
   (*tint_module_vars.u32_var) = 0u;

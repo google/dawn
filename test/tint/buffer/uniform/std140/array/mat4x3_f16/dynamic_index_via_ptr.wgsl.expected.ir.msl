@@ -24,7 +24,7 @@ int i(tint_module_vars_struct tint_module_vars) {
 }
 kernel void f(const constant tint_array<half4x3, 4>* a [[buffer(0)]], device half* s [[buffer(1)]]) {
   thread int counter = 0;
-  tint_module_vars_struct const tint_module_vars = {.a=a, .s=s, .counter=(&counter)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .s=s, .counter=(&counter)};
   const constant tint_array<half4x3, 4>* const p_a = tint_module_vars.a;
   const constant half4x3* const p_a_i = (&(*p_a)[i(tint_module_vars)]);
   const constant half3* const p_a_i_i = (&(*p_a_i)[i(tint_module_vars)]);

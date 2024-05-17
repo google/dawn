@@ -9,7 +9,7 @@ struct tint_module_vars_struct {
 kernel void f(device int* s [[buffer(0)]]) {
   thread int a = 1;
   thread int a__ = 2;
-  tint_module_vars_struct const tint_module_vars = {.s=s, .a=(&a), .a__=(&a__)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s, .a=(&a), .a__=(&a__)};
   int b = (*tint_module_vars.a);
   int b__ = (*tint_module_vars.a__);
   (*tint_module_vars.s) = (b + b__);

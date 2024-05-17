@@ -15,6 +15,6 @@ struct tint_module_vars_struct {
 fragment float4 tint_symbol() {
   thread frexp_result_f32 a = {};
   thread frexp_result_f32_1 b = frexp_result_f32_1{.fract=0.5f, .exp=1};
-  tint_module_vars_struct const tint_module_vars = {.a=(&a), .b=(&b)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&a), .b=(&b)};
   return float4((*tint_module_vars.a).f, (*tint_module_vars.b).fract, 0.0f, 0.0f);
 }

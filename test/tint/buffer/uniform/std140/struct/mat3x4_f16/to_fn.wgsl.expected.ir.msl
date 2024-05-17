@@ -32,7 +32,7 @@ void d(half4 v) {
 void e(half f) {
 }
 kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = {.u=u};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   a((*tint_module_vars.u));
   b((*tint_module_vars.u)[2]);
   c((*tint_module_vars.u)[2].m);
