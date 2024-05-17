@@ -832,7 +832,7 @@ void DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) 
 }
 
 Future DeviceBase::APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackInfo) {
-    return APIPopErrorScope2({nullptr, ToAPI(callbackInfo.mode),
+    return APIPopErrorScope2({ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
                               [](WGPUPopErrorScopeStatus status, WGPUErrorType type,
                                  char const* message, void* callback, void* userdata) {
                                   auto cb = reinterpret_cast<WGPUPopErrorScopeCallback>(callback);

@@ -43,40 +43,40 @@
 // (wgpu::Buffer is dawn::native::BufferBase*)
 #include <{{native_dir}}/{{namespace}}_structs_autogen.h>
 
+{% macro render_structure_conversions(name) -%}
+    inline const {{as_cType(name)}}* ToAPI(const {{as_cppType(name)}}* rhs) {
+        return reinterpret_cast<const {{as_cType(name)}}*>(rhs);
+    }
+    inline {{as_cType(name)}}* ToAPI({{as_cppType(name)}}* rhs) {
+        return reinterpret_cast<{{as_cType(name)}}*>(rhs);
+    }
+    inline const {{as_cppType(name)}}* FromAPI(const {{as_cType(name)}}* rhs) {
+        return reinterpret_cast<const {{as_cppType(name)}}*>(rhs);
+    }
+    inline {{as_cppType(name)}}* FromAPI({{as_cType(name)}}* rhs) {
+        return reinterpret_cast<{{as_cppType(name)}}*>(rhs);
+    }
+    inline const {{metadata.namespace}}::{{as_cppType(name)}}* ToCppAPI(const {{as_cppType(name)}}* rhs) {
+        return reinterpret_cast<const {{metadata.namespace}}::{{as_cppType(name)}}*>(rhs);
+    }
+    inline {{metadata.namespace}}::{{as_cppType(name)}}* ToCppAPI({{as_cppType(name)}}* rhs) {
+        return reinterpret_cast<{{metadata.namespace}}::{{as_cppType(name)}}*>(rhs);
+    }
+    inline const {{as_cppType(name)}}* FromCppAPI(const {{metadata.namespace}}::{{as_cppType(name)}}* rhs) {
+        return reinterpret_cast<const {{as_cppType(name)}}*>(rhs);
+    }
+    inline {{as_cppType(name)}}* FromCppAPI({{metadata.namespace}}::{{as_cppType(name)}}* rhs) {
+        return reinterpret_cast<{{as_cppType(name)}}*>(rhs);
+    }
+{%- endmacro %}
+
 namespace {{native_namespace}} {
 
+    {% set ChainedStructName = Name("chained struct") %}
+    {{render_structure_conversions(ChainedStructName)|indent}}
+
     {% for type in by_category["structure"] %}
-        inline const {{as_cType(type.name)}}* ToAPI(const {{as_cppType(type.name)}}* rhs) {
-            return reinterpret_cast<const {{as_cType(type.name)}}*>(rhs);
-        }
-
-        inline {{as_cType(type.name)}}* ToAPI({{as_cppType(type.name)}}* rhs) {
-            return reinterpret_cast<{{as_cType(type.name)}}*>(rhs);
-        }
-
-        inline const {{as_cppType(type.name)}}* FromAPI(const {{as_cType(type.name)}}* rhs) {
-            return reinterpret_cast<const {{as_cppType(type.name)}}*>(rhs);
-        }
-
-        inline {{as_cppType(type.name)}}* FromAPI({{as_cType(type.name)}}* rhs) {
-            return reinterpret_cast<{{as_cppType(type.name)}}*>(rhs);
-        }
-
-        inline const {{metadata.namespace}}::{{as_cppType(type.name)}}* ToCppAPI(const {{as_cppType(type.name)}}* rhs) {
-            return reinterpret_cast<const {{metadata.namespace}}::{{as_cppType(type.name)}}*>(rhs);
-        }
-
-        inline {{metadata.namespace}}::{{as_cppType(type.name)}}* ToCppAPI({{as_cppType(type.name)}}* rhs) {
-            return reinterpret_cast<{{metadata.namespace}}::{{as_cppType(type.name)}}*>(rhs);
-        }
-
-        inline const {{as_cppType(type.name)}}* FromCppAPI(const {{metadata.namespace}}::{{as_cppType(type.name)}}* rhs) {
-            return reinterpret_cast<const {{as_cppType(type.name)}}*>(rhs);
-        }
-
-        inline {{as_cppType(type.name)}}* FromCppAPI({{metadata.namespace}}::{{as_cppType(type.name)}}* rhs) {
-            return reinterpret_cast<{{as_cppType(type.name)}}*>(rhs);
-        }
+        {{render_structure_conversions(type.name)|indent}}
 
     {% endfor %}
 

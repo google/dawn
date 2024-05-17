@@ -270,7 +270,7 @@ void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
 Future InstanceBase::APIRequestAdapterF(const RequestAdapterOptions* options,
                                         const RequestAdapterCallbackInfo& callbackInfo) {
     return APIRequestAdapter2(
-        options, {nullptr, ToAPI(callbackInfo.mode),
+        options, {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
                   [](WGPURequestAdapterStatus status, WGPUAdapter adapter, char const* message,
                      void* callback, void* userdata) {
                       auto cb = reinterpret_cast<WGPURequestAdapterCallback>(callback);
