@@ -550,14 +550,9 @@ TEST_F(QueueWriteTextureValidationTest, WriteToStencilAspect) {
 
 class WriteTextureTest_CompressedTextureFormats : public QueueWriteTextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[3] = {wgpu::FeatureName::TextureCompressionBC,
-                                                 wgpu::FeatureName::TextureCompressionETC2,
-                                                 wgpu::FeatureName::TextureCompressionASTC};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 3;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureCompressionBC, wgpu::FeatureName::TextureCompressionETC2,
+                wgpu::FeatureName::TextureCompressionASTC};
     }
 
     wgpu::Texture Create2DTexture(wgpu::TextureFormat format,

@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <array>
+#include <vector>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -946,12 +947,8 @@ TEST_F(TextureViewValidationTest, CreateErrorView) {
 
 class D32S8TextureViewValidationTests : public ValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::Depth32FloatStencil8};
     }
 };
 

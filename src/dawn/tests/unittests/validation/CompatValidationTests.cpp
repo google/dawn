@@ -1341,18 +1341,14 @@ TEST_F(CompatTextureViewDimensionValidationTests, CubeTextureViewDimensionCanNot
 
 class CompatCompressedCopyT2BAndCopyT2TValidationTests : public CompatValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures;
         for (TextureInfo textureInfo : textureInfos) {
             if (adapter.HasFeature(textureInfo.feature)) {
                 requiredFeatures.push_back(textureInfo.feature);
             }
         }
-
-        descriptor.requiredFeatures = requiredFeatures.data();
-        descriptor.requiredFeatureCount = requiredFeatures.size();
-        return dawnAdapter.CreateDevice(&descriptor);
+        return requiredFeatures;
     }
 
     struct TextureInfo {

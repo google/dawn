@@ -25,8 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/unittests/validation/ValidationTest.h"
+#include <vector>
 
+#include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
@@ -80,12 +81,8 @@ TEST_F(InternalUsageValidationDisabledTest, CommandEncoderDescriptorRequiresFeat
 }
 
 class TextureInternalUsageValidationTest : public ValidationTest {
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DawnInternalUsages};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::DawnInternalUsages};
     }
 };
 

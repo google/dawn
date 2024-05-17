@@ -1721,12 +1721,8 @@ class MSAARenderToSingleSampledRenderPassDescriptorValidationTest
         mRenderToSingleSampledDesc.implicitSampleCount = kSampleCount;
     }
 
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::MSAARenderToSingleSampled};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::MSAARenderToSingleSampled};
     }
 
     utils::ComboRenderPassDescriptor CreateMultisampledRenderToSingleSampledRenderPass(
@@ -1861,14 +1857,8 @@ TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest,
 
 class DawnLoadResolveTextureValidationTest : public MultisampledRenderPassDescriptorValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::DawnLoadResolveTexture,
-                                                 wgpu::FeatureName::TransientAttachments};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 2;
-
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::DawnLoadResolveTexture, wgpu::FeatureName::TransientAttachments};
     }
 
     // Create a view for a resolve texture that can be used with LoadOp::ExpandResolveTexture.

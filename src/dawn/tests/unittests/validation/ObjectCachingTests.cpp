@@ -40,12 +40,8 @@ using testing::Not;
 // These tests works assuming Dawn Native's object deduplication. Comparing the pointer is
 // exploiting an implementation detail of Dawn Native.
 class ObjectCachingTest : public ValidationTest {
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::StaticSamplers};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::StaticSamplers};
     }
 
     void SetUp() override {

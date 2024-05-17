@@ -27,6 +27,7 @@
 
 #include <limits>
 #include <memory>
+#include <vector>
 
 #include "dawn/common/Platform.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
@@ -1368,12 +1369,8 @@ class BufferMapExtendedUsagesValidationTest : public BufferValidationTest {
         BufferValidationTest::SetUp();
     }
 
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[] = {wgpu::FeatureName::BufferMapExtendedUsages};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::BufferMapExtendedUsages};
     }
 };
 

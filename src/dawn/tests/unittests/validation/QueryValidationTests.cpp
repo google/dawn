@@ -263,13 +263,8 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
 
 class TimestampQueryValidationTest : public QuerySetValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TimestampQuery};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TimestampQuery};
     }
 
     void EncodeRenderPassWithTimestampWrites(
@@ -525,18 +520,12 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnCommandEncoder) {
 
 class TimestampQueryInsidePassesValidationTest : public QuerySetValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         // The timestamp query feature must be supported if the chromium experimental timestamp
         // query inside passes feature is supported. Enable timestamp query for validating queries
         // overwrite inside and outside of the passes.
-        wgpu::FeatureName requiredFeatures[2] = {
-            wgpu::FeatureName::TimestampQuery,
-            wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 2;
-
-        return dawnAdapter.CreateDevice(&descriptor);
+        return {wgpu::FeatureName::TimestampQuery,
+                wgpu::FeatureName::ChromiumExperimentalTimestampQueryInsidePasses};
     }
 };
 

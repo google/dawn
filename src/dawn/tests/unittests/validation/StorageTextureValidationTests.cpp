@@ -285,14 +285,11 @@ class BGRA8UnormStorageTextureValidationTests
       // Bool param indicates whether requires the BGRA8UnormStorage feature or not.
       public ::testing::WithParamInterface<bool> {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         if (GetParam()) {
-            descriptor.requiredFeatures = requiredFeatures;
-            descriptor.requiredFeatureCount = 1;
+            return {wgpu::FeatureName::BGRA8UnormStorage};
         }
-        return dawnAdapter.CreateDevice(&descriptor);
+        return {};
     }
 };
 
@@ -494,12 +491,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroupLayout) {
 
 class BGRA8UnormStorageBindGroupLayoutTest : public StorageTextureValidationTests {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::BGRA8UnormStorage};
     }
 };
 
@@ -1192,12 +1185,8 @@ TEST_F(ReadWriteStorageTextureResourceUsageTrackingTests, StorageTextureInComput
 }
 
 class R8UnormStorageValidationTests : public StorageTextureValidationTests {
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::R8UnormStorage};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::R8UnormStorage};
     }
 };
 

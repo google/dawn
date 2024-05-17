@@ -87,14 +87,8 @@ TEST_F(ComputePipelineValidationTest, UnexpectedDawnComputePipelineFullSubgroups
 class ComputePipelineValidationTestWithSubgroupFeaturesEnabled
     : public ComputePipelineValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        std::vector<wgpu::FeatureName> requiredFeatures = {
-            wgpu::FeatureName::ChromiumExperimentalSubgroups};
-        descriptor.requiredFeatures = requiredFeatures.data();
-        descriptor.requiredFeatureCount = requiredFeatures.size();
-
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::ChromiumExperimentalSubgroups};
     }
 
     // Helper function that create a shader module with compute entry point named main and

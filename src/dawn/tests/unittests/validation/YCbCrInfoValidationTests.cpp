@@ -105,13 +105,8 @@ class YCbCrInfoWithFeatureValidationTest : public YCbCrInfoWithoutFeatureValidat
         DAWN_SKIP_TEST_IF(UsesWire());
     }
 
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::StaticSamplers,
-                                                 wgpu::FeatureName::YCbCrVulkanSamplers};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 2;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::StaticSamplers, wgpu::FeatureName::YCbCrVulkanSamplers};
     }
 };
 

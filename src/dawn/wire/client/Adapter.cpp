@@ -45,7 +45,14 @@ class RequestDeviceEvent : public TrackedEvent {
     RequestDeviceEvent(const WGPURequestDeviceCallbackInfo& callbackInfo, Device* device)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
-          mUserdata(callbackInfo.userdata),
+          mUserdata1(callbackInfo.userdata),
+          mDevice(device) {}
+
+    RequestDeviceEvent(const WGPURequestDeviceCallbackInfo2& callbackInfo, Device* device)
+        : TrackedEvent(callbackInfo.mode),
+          mCallback2(callbackInfo.callback),
+          mUserdata1(callbackInfo.userdata1),
+          mUserdata2(callbackInfo.userdata2),
           mDevice(device) {}
 
     EventType GetType() override { return kType; }
@@ -76,10 +83,15 @@ class RequestDeviceEvent : public TrackedEvent {
         }
 
         Device* device = mDevice.ExtractAsDangling();
+        // Callback needs to happen before device lost handling to ensure resolution order.
         if (mCallback) {
-            // Callback needs to happen before device lost handling to ensure resolution order.
             mCallback(mStatus, ToAPI(mStatus == WGPURequestDeviceStatus_Success ? device : nullptr),
-                      mMessage ? mMessage->c_str() : nullptr, mUserdata.ExtractAsDangling());
+                      mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling());
+        } else if (mCallback2) {
+            mCallback2(mStatus,
+                       ToAPI(mStatus == WGPURequestDeviceStatus_Success ? device : nullptr),
+                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
+                       mUserdata2.ExtractAsDangling());
         }
 
         if (mStatus != WGPURequestDeviceStatus_Success) {
@@ -94,15 +106,18 @@ class RequestDeviceEvent : public TrackedEvent {
             }
         }
 
-        if (mCallback == nullptr) {
+        if (mCallback == nullptr && mCallback2 == nullptr) {
             // If there's no callback, clean up the resources.
             device->Release();
-            mUserdata.ExtractAsDangling();
+            mUserdata1.ExtractAsDangling();
+            mUserdata2.ExtractAsDangling();
         }
     }
 
-    WGPURequestDeviceCallback mCallback;
-    raw_ptr<void> mUserdata;
+    WGPURequestDeviceCallback mCallback = nullptr;
+    WGPURequestDeviceCallback2 mCallback2 = nullptr;
+    raw_ptr<void> mUserdata1;
+    raw_ptr<void> mUserdata2;
 
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
@@ -278,6 +293,43 @@ WGPUFuture Adapter::RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
     cmd.deviceObjectHandle = device->GetWireHandle();
     cmd.deviceLostFuture = device->GetDeviceLostFuture();
     cmd.descriptor = &wireDescriptor;
+    cmd.userdataCount = 1;
+
+    client->SerializeCommand(cmd);
+    return {futureIDInternal};
+}
+
+WGPUFuture Adapter::RequestDevice2(const WGPUDeviceDescriptor* descriptor,
+                                   const WGPURequestDeviceCallbackInfo2& callbackInfo) {
+    Client* client = GetClient();
+    Device* device = client->Make<Device>(GetEventManagerHandle(), descriptor);
+    auto [futureIDInternal, tracked] =
+        GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(callbackInfo, device));
+    if (!tracked) {
+        return {futureIDInternal};
+    }
+
+    // Ensure callbacks are not serialized as part of the command, as they cannot be passed between
+    // processes.
+    WGPUDeviceDescriptor wireDescriptor = {};
+    if (descriptor) {
+        wireDescriptor = *descriptor;
+        wireDescriptor.deviceLostCallback = nullptr;
+        wireDescriptor.deviceLostUserdata = nullptr;
+        wireDescriptor.deviceLostCallbackInfo.callback = nullptr;
+        wireDescriptor.deviceLostCallbackInfo.userdata = nullptr;
+        wireDescriptor.uncapturedErrorCallbackInfo.callback = nullptr;
+        wireDescriptor.uncapturedErrorCallbackInfo.userdata = nullptr;
+    }
+
+    AdapterRequestDeviceCmd cmd;
+    cmd.adapterId = GetWireId();
+    cmd.eventManagerHandle = GetEventManagerHandle();
+    cmd.future = {futureIDInternal};
+    cmd.deviceObjectHandle = device->GetWireHandle();
+    cmd.deviceLostFuture = device->GetDeviceLostFuture();
+    cmd.descriptor = &wireDescriptor;
+    cmd.userdataCount = 2;
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};

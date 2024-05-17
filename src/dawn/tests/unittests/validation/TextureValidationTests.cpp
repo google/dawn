@@ -25,10 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/unittests/validation/ValidationTest.h"
+#include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
+#include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -713,12 +714,8 @@ TEST_F(TextureValidationTest, UseASTCFormatWithoutEnablingFeature) {
 
 class D32S8TextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::Depth32FloatStencil8};
     }
 };
 
@@ -735,15 +732,9 @@ TEST_F(D32S8TextureFormatsValidationTests, DepthStencilFormatsFor3D) {
 
 class CompressedTextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[3] = {wgpu::FeatureName::TextureCompressionBC,
-                                                 wgpu::FeatureName::TextureCompressionETC2,
-                                                 wgpu::FeatureName::TextureCompressionASTC};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 3;
-
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureCompressionBC, wgpu::FeatureName::TextureCompressionETC2,
+                wgpu::FeatureName::TextureCompressionASTC};
     }
 
     wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {
@@ -892,12 +883,8 @@ TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
 
 class RG11B10UfloatTextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::RG11B10UfloatRenderable};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::RG11B10UfloatRenderable};
     }
 };
 
@@ -915,12 +902,8 @@ TEST_F(RG11B10UfloatTextureFormatsValidationTests, RenderableFeature) {
 
 class BGRA8UnormTextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::BGRA8UnormStorage};
     }
 };
 
@@ -936,12 +919,8 @@ TEST_F(BGRA8UnormTextureFormatsValidationTests, StorageFeature) {
 
 class Unorm16TextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Unorm16TextureFormats};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::Unorm16TextureFormats};
     }
 };
 
@@ -961,12 +940,8 @@ TEST_F(Unorm16TextureFormatsValidationTests, RenderAndSample) {
 
 class Snorm16TextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Snorm16TextureFormats};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::Snorm16TextureFormats};
     }
 };
 
@@ -1132,12 +1107,8 @@ TEST_F(TextureValidationTest, TransientAttachmentOnUnsupportedDevice) {
 
 class TransientAttachmentValidationTest : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TransientAttachments};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeatureCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TransientAttachments};
     }
 };
 

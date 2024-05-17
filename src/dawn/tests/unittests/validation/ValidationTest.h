@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "dawn/common/Log.h"
 #include "dawn/native/BindGroupLayout.h"
@@ -128,6 +129,8 @@ class ValidationTest : public testing::Test {
     ValidationTest();
     ~ValidationTest() override;
 
+    // The default setup initializes the Instance with AllowUnsafeAPIs enabled and additional
+    // toggles and features via the getters enabled/disabled on the device.
     void SetUp() override;
     void TearDown() override;
 
@@ -164,18 +167,17 @@ class ValidationTest : public testing::Test {
 
   protected:
     dawn::native::Adapter& GetBackendAdapter();
-    // Helper function to create testing adapter and device during SetUp. Override these functions
-    // to change the creation behavior.
-    virtual void CreateTestAdapter(wgpu::RequestAdapterOptions options);
-    virtual WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
-                                        wgpu::DeviceDescriptor descriptor);
 
-    // Reinitializes the ValidationTest internal members given the instance descriptors.
-    // Particularly useful when writing tests that may need to pass different toggles to the
-    // instance. Note that this also reinitializes the adapter and device on the new instances via
-    // potentially overriden CreateTest[Adapter|Device] functions above.
-    void ReinitializeInstances(const wgpu::InstanceDescriptor* nativeDesc,
-                               const wgpu::InstanceDescriptor* wireDesc = nullptr);
+    // Called during SetUp() to get the required features and toggles to be enabled for the tests.
+    // Override these appropriately for different tests.
+    virtual bool AllowUnsafeAPIs();
+    virtual std::vector<wgpu::FeatureName> GetRequiredFeatures();
+    virtual std::vector<const char*> GetEnabledToggles();
+    virtual std::vector<const char*> GetDisabledToggles();
+
+    // Sets up the internal members by initializing the instances, adapter, and device.
+    void SetUp(const wgpu::InstanceDescriptor* nativeDesc,
+               const wgpu::InstanceDescriptor* wireDesc = nullptr);
 
     wgpu::Device RequestDeviceSync(const wgpu::DeviceDescriptor& deviceDesc);
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);

@@ -106,13 +106,13 @@ ValidationTest::ValidationTest() {
 
     // Forward to dawn::native instanceRequestAdapter, but save the returned adapter in
     // gCurrentTest->mBackendAdapter.
-    procs.instanceRequestAdapter2 = [](WGPUInstance i, const WGPURequestAdapterOptions* options,
+    procs.instanceRequestAdapter2 = [](WGPUInstance self, const WGPURequestAdapterOptions* options,
                                        WGPURequestAdapterCallbackInfo2 callbackInfo) -> WGPUFuture {
         DAWN_ASSERT(gCurrentTest);
         DAWN_ASSERT(callbackInfo.mode == WGPUCallbackMode_AllowSpontaneous);
 
         return dawn::native::GetProcs().instanceRequestAdapter2(
-            i, options,
+            self, options,
             {nullptr, WGPUCallbackMode_AllowSpontaneous,
              [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, char const* message,
                 void* userdata, void*) {
@@ -125,41 +125,72 @@ ValidationTest::ValidationTest() {
              new WGPURequestAdapterCallbackInfo2(callbackInfo), nullptr});
     };
 
-    procs.adapterRequestDevice = [](WGPUAdapter self, const WGPUDeviceDescriptor* descriptor,
-                                    WGPURequestDeviceCallback callback, void* userdata) {
+    // Forward to dawn::native instanceRequestAdapter, but save the returned backend device in
+    // gCurrentTest->mLastCreatedBackendDevice.
+    procs.adapterRequestDevice2 = [](WGPUAdapter self, const WGPUDeviceDescriptor* descriptor,
+                                     WGPURequestDeviceCallbackInfo2 callbackInfo) -> WGPUFuture {
         DAWN_ASSERT(gCurrentTest);
+        DAWN_ASSERT(callbackInfo.mode == WGPUCallbackMode_AllowSpontaneous);
+
         wgpu::DeviceDescriptor deviceDesc = {};
         if (descriptor != nullptr) {
             deviceDesc = *(reinterpret_cast<const wgpu::DeviceDescriptor*>(descriptor));
         }
-        WGPUDevice cDevice = gCurrentTest->CreateTestDevice(
-            dawn::native::Adapter(reinterpret_cast<dawn::native::AdapterBase*>(self)), deviceDesc);
-        DAWN_ASSERT(cDevice != nullptr);
-        gCurrentTest->mLastCreatedBackendDevice = cDevice;
-        callback(WGPURequestDeviceStatus_Success, cDevice, nullptr, userdata);
+
+        // Set the toggles for the device. We start with all test specific toggles, then toggle
+        // flags so that toggle flags will always take precedence. Note that disabling toggles also
+        // take precedence.
+        wgpu::DawnTogglesDescriptor deviceTogglesDesc;
+        deviceTogglesDesc.nextInChain = deviceDesc.nextInChain;
+        deviceDesc.nextInChain = &deviceTogglesDesc;
+
+        auto enabledToggles = gCurrentTest->GetEnabledToggles();
+        auto disabledToggles = gCurrentTest->GetDisabledToggles();
+        for (const std::string& toggle : gToggleParser->GetEnabledToggles()) {
+            enabledToggles.push_back(toggle.c_str());
+        }
+        for (const std::string& toggle : gToggleParser->GetDisabledToggles()) {
+            disabledToggles.push_back(toggle.c_str());
+        }
+        deviceTogglesDesc.enabledToggles = enabledToggles.data();
+        deviceTogglesDesc.enabledToggleCount = enabledToggles.size();
+        deviceTogglesDesc.disabledToggles = disabledToggles.data();
+        deviceTogglesDesc.disabledToggleCount = disabledToggles.size();
+
+        return dawn::native::GetProcs().adapterRequestDevice2(
+            self, reinterpret_cast<WGPUDeviceDescriptor*>(&deviceDesc),
+            {nullptr, WGPUCallbackMode_AllowSpontaneous,
+             [](WGPURequestDeviceStatus status, WGPUDevice cDevice, const char* message,
+                void* userdata, void*) {
+                 gCurrentTest->mLastCreatedBackendDevice = cDevice;
+
+                 auto* info = static_cast<WGPURequestDeviceCallbackInfo2*>(userdata);
+                 info->callback(status, cDevice, message, info->userdata1, info->userdata2);
+                 delete info;
+             },
+             new WGPURequestDeviceCallbackInfo2(callbackInfo), nullptr});
     };
 
     mWireHelper = dawn::utils::CreateWireHelper(procs, gUseWire, gWireTraceDir.c_str());
 }
 
 void ValidationTest::SetUp() {
-    std::string traceName =
-        std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
-        "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
-    mWireHelper->BeginWireTrace(traceName.c_str());
-
-    // Create an instance with toggle AllowUnsafeAPIs enabled, which would be inherited to
-    // adapter and device toggles and allow us to test unsafe apis (including experimental
+    // By default create the instance with toggle AllowUnsafeAPIs enabled, which would be inherited
+    // to adapter and device toggles and allow us to test unsafe apis (including experimental
     // features). To test device with AllowUnsafeAPIs disabled, require it in device toggles
-    // descriptor to override the inheritance.
-    const char* allowUnsafeApisToggle = "allow_unsafe_apis";
+    // descriptor to override the inheritance. Alternatively, override AllowUnsafeAPIs() if
+    // querying for features via the adapter, i.e. prior to device creation.
     wgpu::DawnTogglesDescriptor instanceToggles = {};
-    instanceToggles.enabledToggleCount = 1;
-    instanceToggles.enabledToggles = &allowUnsafeApisToggle;
+    if (AllowUnsafeAPIs()) {
+        static const char* allowUnsafeApisToggle = "allow_unsafe_apis";
+        instanceToggles.enabledToggleCount = 1;
+        instanceToggles.enabledToggles = &allowUnsafeApisToggle;
+    }
 
     wgpu::InstanceDescriptor instanceDesc = {};
     instanceDesc.nextInChain = &instanceToggles;
-    ReinitializeInstances(&instanceDesc);
+
+    SetUp(&instanceDesc);
 }
 
 ValidationTest::~ValidationTest() {
@@ -261,6 +292,22 @@ wgpu::SupportedLimits ValidationTest::GetSupportedLimits() const {
     return supportedLimits;
 }
 
+bool ValidationTest::AllowUnsafeAPIs() {
+    return true;
+}
+
+std::vector<wgpu::FeatureName> ValidationTest::GetRequiredFeatures() {
+    return {};
+}
+
+std::vector<const char*> ValidationTest::GetEnabledToggles() {
+    return {};
+}
+
+std::vector<const char*> ValidationTest::GetDisabledToggles() {
+    return {};
+}
+
 dawn::utils::WireHelper* ValidationTest::GetWireHelper() const {
     return mWireHelper.get();
 }
@@ -270,11 +317,14 @@ wgpu::Device ValidationTest::RequestDeviceSync(const wgpu::DeviceDescriptor& dev
 
     wgpu::Device apiDevice;
     adapter.RequestDevice(
-        &deviceDesc,
-        [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
-            *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
-        },
-        &apiDevice);
+        &deviceDesc, wgpu::CallbackMode::AllowSpontaneous,
+        [&apiDevice](wgpu::RequestDeviceStatus status, wgpu::Device result, const char* message) {
+            if (status != wgpu::RequestDeviceStatus::Success) {
+                ADD_FAILURE() << "Unable to create device: " << message;
+                DAWN_ASSERT(false);
+            }
+            apiDevice = std::move(result);
+        });
     FlushWire();
 
     DAWN_ASSERT(apiDevice);
@@ -285,63 +335,42 @@ dawn::native::Adapter& ValidationTest::GetBackendAdapter() {
     return mBackendAdapter;
 }
 
-void ValidationTest::CreateTestAdapter(wgpu::RequestAdapterOptions options) {
-    instance.RequestAdapter(
-        &options, wgpu::CallbackMode::AllowSpontaneous,
-        [](wgpu::RequestAdapterStatus status, wgpu::Adapter result, char const* message,
-           wgpu::Adapter* userdata) -> void { *userdata = std::move(result); },
-        &adapter);
-    FlushWire();
-}
+void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
+                           const wgpu::InstanceDescriptor* wireDesc) {
+    std::string traceName =
+        std::string(::testing::UnitTest::GetInstance()->current_test_info()->test_suite_name()) +
+        "_" + ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    mWireHelper->BeginWireTrace(traceName.c_str());
 
-WGPUDevice ValidationTest::CreateTestDevice(dawn::native::Adapter dawnAdapter,
-                                            wgpu::DeviceDescriptor deviceDescriptor) {
-    std::vector<const char*> enabledToggles;
-    std::vector<const char*> disabledToggles;
-
-    for (const std::string& toggle : gToggleParser->GetEnabledToggles()) {
-        enabledToggles.push_back(toggle.c_str());
-    }
-
-    for (const std::string& toggle : gToggleParser->GetDisabledToggles()) {
-        disabledToggles.push_back(toggle.c_str());
-    }
-
-    wgpu::DawnTogglesDescriptor deviceTogglesDesc;
-    deviceDescriptor.nextInChain = &deviceTogglesDesc;
-
-    deviceTogglesDesc.enabledToggles = enabledToggles.data();
-    deviceTogglesDesc.enabledToggleCount = enabledToggles.size();
-    deviceTogglesDesc.disabledToggles = disabledToggles.data();
-    deviceTogglesDesc.disabledToggleCount = disabledToggles.size();
-
-    return dawnAdapter.CreateDevice(&deviceDescriptor);
-}
-
-void ValidationTest::ReinitializeInstances(const wgpu::InstanceDescriptor* nativeDesc,
-                                           const wgpu::InstanceDescriptor* wireDesc) {
-    // Reinitialize the instances.
+    // Initialize the instances.
     std::tie(instance, mDawnInstance) = mWireHelper->CreateInstances(nativeDesc, wireDesc);
 
-    // Reinitialize the adapter.
+    // Initialize the adapter.
     wgpu::RequestAdapterOptions options = {};
     options.backendType = wgpu::BackendType::Null;
     options.compatibilityMode = gCurrentTest->UseCompatibilityMode();
-
-    CreateTestAdapter(options);
+    instance.RequestAdapter(&options, wgpu::CallbackMode::AllowSpontaneous,
+                            [this](wgpu::RequestAdapterStatus, wgpu::Adapter result,
+                                   char const*) -> void { adapter = std::move(result); });
+    FlushWire();
     DAWN_ASSERT(adapter);
 
-    // Reinitialize the device.
-    mExpectDestruction = true;
+    // Initialize the device.
     wgpu::DeviceDescriptor deviceDescriptor = {};
     deviceDescriptor.deviceLostCallbackInfo = {nullptr, wgpu::CallbackMode::AllowSpontaneous,
                                                ValidationTest::OnDeviceLost, this};
-    deviceDescriptor.uncapturedErrorCallbackInfo.callback = ValidationTest::OnDeviceError;
-    deviceDescriptor.uncapturedErrorCallbackInfo.userdata = this;
+    deviceDescriptor.uncapturedErrorCallbackInfo = {nullptr, ValidationTest::OnDeviceError, this};
+
+    // Set the required features for the device.
+    auto requiredFeatures = GetRequiredFeatures();
+    deviceDescriptor.requiredFeatures = requiredFeatures.data();
+    deviceDescriptor.requiredFeatureCount = requiredFeatures.size();
 
     device = RequestDeviceSync(deviceDescriptor);
+    DAWN_ASSERT(device);
+
+    // We only want to set the backendDevice when the device was created via the test setup.
     backendDevice = mLastCreatedBackendDevice;
-    mExpectDestruction = false;
 }
 
 bool ValidationTest::UseCompatibilityMode() const {

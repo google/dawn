@@ -29,9 +29,16 @@
 
 #include "dawn/native/Device.h"
 #include "dawn/native/dawn_platform.h"
+#include "dawn/tests/MockCallback.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 
-using ::testing::HasSubstr;
+namespace dawn {
+namespace {
+
+using testing::IsNull;
+using testing::MockCppCallback;
+using testing::NotNull;
+using testing::WithArgs;
 
 class RequestDeviceValidationTest : public ValidationTest {
   protected:
@@ -40,51 +47,24 @@ class RequestDeviceValidationTest : public ValidationTest {
         DAWN_SKIP_TEST_IF(UsesWire());
     }
 
-    static void ExpectRequestDeviceSuccess(WGPURequestDeviceStatus status,
-                                           WGPUDevice cDevice,
-                                           const char* message,
-                                           void* userdata) {
-        wgpu::Device device = wgpu::Device::Acquire(cDevice);
-        EXPECT_EQ(status, WGPURequestDeviceStatus_Success);
-        EXPECT_NE(device, nullptr);
-        EXPECT_STREQ(message, nullptr);
-        if (userdata != nullptr) {
-            CallCheckDevice(static_cast<std::function<void(wgpu::Device)>*>(userdata),
-                            std::move(device));
-        }
-    }
-
-    static void ExpectRequestDeviceError(WGPURequestDeviceStatus status,
-                                         WGPUDevice cDevice,
-                                         const char* message,
-                                         void* userdata) {
-        wgpu::Device device = wgpu::Device::Acquire(cDevice);
-        EXPECT_EQ(status, WGPURequestDeviceStatus_Error);
-        EXPECT_EQ(device, nullptr);
-        EXPECT_STRNE(message, nullptr);
-    }
-
-    template <typename F>
-    static void* CheckDevice(F&& f) {
-        return new std::function<void(wgpu::Device)>(f);
-    }
-
-    static void CallCheckDevice(std::function<void(wgpu::Device)>* f, wgpu::Device d) {
-        (*f)(std::move(d));
-        delete f;
-    }
+    MockCppCallback<void (*)(wgpu::RequestDeviceStatus, wgpu::Device, const char*)>
+        mRequestDeviceCallback;
 };
 
 // Test that requesting a device without specifying limits is valid.
 TEST_F(RequestDeviceValidationTest, NoRequiredLimits) {
     wgpu::DeviceDescriptor descriptor;
-    GetBackendAdapter().RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
-                                      CheckDevice([](wgpu::Device device) {
-                                          // Check one of the default limits.
-                                          wgpu::SupportedLimits limits;
-                                          device.GetLimits(&limits);
-                                          EXPECT_EQ(limits.limits.maxBindGroups, 4u);
-                                      }));
+
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+        .WillOnce(WithArgs<1>([](wgpu::Device device) {
+            // Check one of the default limits.
+            wgpu::SupportedLimits limits;
+            device.GetLimits(&limits);
+            EXPECT_EQ(limits.limits.maxBindGroups, 4u);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 }
 
 // Test that requesting a device with the default limits is valid.
@@ -92,13 +72,17 @@ TEST_F(RequestDeviceValidationTest, DefaultLimits) {
     wgpu::RequiredLimits limits = {};
     wgpu::DeviceDescriptor descriptor;
     descriptor.requiredLimits = &limits;
-    GetBackendAdapter().RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
-                                      CheckDevice([](wgpu::Device device) {
-                                          // Check one of the default limits.
-                                          wgpu::SupportedLimits limits;
-                                          device.GetLimits(&limits);
-                                          EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
-                                      }));
+
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+        .WillOnce(WithArgs<1>([](wgpu::Device device) {
+            // Check one of the default limits.
+            wgpu::SupportedLimits limits;
+            device.GetLimits(&limits);
+            EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 }
 
 // Test that requesting a device where a required limit is above the maximum value.
@@ -113,8 +97,9 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
     // If we can support better than the default, test below the max.
     if (supportedLimits.limits.maxBindGroups > 4u) {
         limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups - 1;
-        GetBackendAdapter().RequestDevice(
-            &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+        EXPECT_CALL(mRequestDeviceCallback,
+                    Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+            .WillOnce(WithArgs<1>([&](wgpu::Device device) {
                 wgpu::SupportedLimits limits;
                 device.GetLimits(&limits);
 
@@ -123,12 +108,15 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
                 // Check another default limit.
                 EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
             }));
+        adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                              mRequestDeviceCallback.Callback());
     }
 
     // Test the max.
     limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups;
-    GetBackendAdapter().RequestDevice(
-        &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+        .WillOnce(WithArgs<1>([&](wgpu::Device device) {
             wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
 
@@ -137,21 +125,29 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
             // Check another default limit.
             EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
         }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 
     // Test above the max.
     limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups + 1;
-    GetBackendAdapter().RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
+    EXPECT_CALL(mRequestDeviceCallback, Call(wgpu::RequestDeviceStatus::Error, IsNull(), NotNull()))
+        .Times(1);
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 
     // Test worse than the default
     limits.limits.maxBindGroups = 3u;
-    GetBackendAdapter().RequestDevice(&descriptor, ExpectRequestDeviceSuccess,
-                                      CheckDevice([&](wgpu::Device device) {
-                                          wgpu::SupportedLimits limits;
-                                          device.GetLimits(&limits);
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+        .WillOnce(WithArgs<1>([&](wgpu::Device device) {
+            wgpu::SupportedLimits limits;
+            device.GetLimits(&limits);
 
-                                          // Check we got the default.
-                                          EXPECT_EQ(limits.limits.maxBindGroups, 4u);
-                                      }));
+            // Check we got the default.
+            EXPECT_EQ(limits.limits.maxBindGroups, 4u);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 }
 
 // Test that requesting a device where a required limit is below the minimum value.
@@ -166,13 +162,17 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
     // Test below the min.
     limits.limits.minUniformBufferOffsetAlignment =
         supportedLimits.limits.minUniformBufferOffsetAlignment / 2;
-    GetBackendAdapter().RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
+    EXPECT_CALL(mRequestDeviceCallback, Call(wgpu::RequestDeviceStatus::Error, IsNull(), NotNull()))
+        .Times(1);
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 
     // Test the min.
     limits.limits.minUniformBufferOffsetAlignment =
         supportedLimits.limits.minUniformBufferOffsetAlignment;
-    GetBackendAdapter().RequestDevice(
-        &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+        .WillOnce(WithArgs<1>([&](wgpu::Device device) {
             wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
 
@@ -182,13 +182,16 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
             // Check another default limit.
             EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
         }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 
     // IF we can support better than the default, test above the min.
     if (supportedLimits.limits.minUniformBufferOffsetAlignment > 256u) {
         limits.limits.minUniformBufferOffsetAlignment =
             supportedLimits.limits.minUniformBufferOffsetAlignment * 2;
-        GetBackendAdapter().RequestDevice(
-            &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+        EXPECT_CALL(mRequestDeviceCallback,
+                    Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+            .WillOnce(WithArgs<1>([&](wgpu::Device device) {
                 wgpu::SupportedLimits limits;
                 device.GetLimits(&limits);
 
@@ -198,18 +201,23 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
                 // Check another default limit.
                 EXPECT_EQ(limits.limits.maxTextureArrayLayers, 256u);
             }));
+        adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                              mRequestDeviceCallback.Callback());
     }
 
     // Test worse than the default
     limits.limits.minUniformBufferOffsetAlignment = 2u * 256u;
-    GetBackendAdapter().RequestDevice(
-        &descriptor, ExpectRequestDeviceSuccess, CheckDevice([&](wgpu::Device device) {
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+        .WillOnce(WithArgs<1>([&](wgpu::Device device) {
             wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
 
             // Check we got the default.
             EXPECT_EQ(limits.limits.minUniformBufferOffsetAlignment, 256u);
         }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 }
 
 // Test that it is an error to request limits with an invalid chained struct
@@ -220,7 +228,10 @@ TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
 
     wgpu::DeviceDescriptor descriptor;
     descriptor.requiredLimits = &limits;
-    GetBackendAdapter().RequestDevice(&descriptor, ExpectRequestDeviceError, nullptr);
+    EXPECT_CALL(mRequestDeviceCallback, Call(wgpu::RequestDeviceStatus::Error, IsNull(), NotNull()))
+        .Times(1);
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 }
 
 class DeviceTickValidationTest : public ValidationTest {};
@@ -231,3 +242,6 @@ TEST_F(DeviceTickValidationTest, DestroyDeviceBeforeAPITick) {
     device.Destroy();
     device.Tick();
 }
+
+}  // anonymous namespace
+}  // namespace dawn

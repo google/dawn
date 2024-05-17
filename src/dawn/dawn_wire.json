@@ -117,7 +117,8 @@
             { "name": "future", "type": "future" },
             { "name": "device object handle", "type": "ObjectHandle", "handle_type": "device"},
             { "name": "device lost future", "type": "future" },
-            { "name": "descriptor", "type": "device descriptor", "annotation": "const*" }
+            { "name": "descriptor", "type": "device descriptor", "annotation": "const*" },
+            { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."}
         ]
     },
     "return commands": {
@@ -212,6 +213,7 @@
             "AdapterEnumerateFeatures",
             "AdapterRequestDevice",
             "AdapterRequestDeviceF",
+            "AdapterRequestDevice2",
             "BufferMapAsync",
             "BufferMapAsyncF",
             "BufferGetConstMappedRange",

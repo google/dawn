@@ -56,6 +56,8 @@ class Adapter final : public ObjectWithEventsBase {
                        void* userdata);
     WGPUFuture RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
                               const WGPURequestDeviceCallbackInfo& callbackInfo);
+    WGPUFuture RequestDevice2(const WGPUDeviceDescriptor* descriptor,
+                              const WGPURequestDeviceCallbackInfo2& callbackInfo);
 
     // Unimplementable. Only availale in dawn_native.
     WGPUInstance GetInstance() const;

@@ -764,51 +764,12 @@ class ShaderModuleExtensionValidationTestBase : public ValidationTest {
         ValidationTest::SetUp();
     }
 
-    // Create testing adapter with the AllowUnsafeAPIs toggle explicitly enabled or disabled,
-    // overriding the instance's toggle.
-    void CreateTestAdapterWithUnsafeAPIToggle(wgpu::RequestAdapterOptions options,
-                                              bool allowUnsafeAPIs) {
-        wgpu::DawnTogglesDescriptor deviceTogglesDesc{};
-        options.nextInChain = &deviceTogglesDesc;
-        const char* toggle = "allow_unsafe_apis";
-        // Explicitly enable or disable the AllowUnsafeAPIs toggle.
-        if (allowUnsafeAPIs) {
-            deviceTogglesDesc.enabledToggles = &toggle;
-            deviceTogglesDesc.enabledToggleCount = 1;
-        } else {
-            deviceTogglesDesc.disabledToggles = &toggle;
-            deviceTogglesDesc.disabledToggleCount = 1;
-        }
-
-        instance.RequestAdapter(
-            &options,
-            [](WGPURequestAdapterStatus, WGPUAdapter cAdapter, const char*, void* userdata) {
-                *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(cAdapter);
-            },
-            &adapter);
-        FlushWire();
-    }
-
-    // Create the device with none or all valid features required.
-    WGPUDevice CreateTestDeviceWithAllFeatures(native::Adapter dawnAdapter,
-                                               wgpu::DeviceDescriptor descriptor,
-                                               bool requireAllFeatures) {
+    std::vector<wgpu::FeatureName> GetAllFeatures() {
         std::vector<wgpu::FeatureName> requiredFeatures;
-
-        if (requireAllFeatures) {
-            // Require all features that the adapter supports.
-            WGPUAdapter adapter = dawnAdapter.Get();
-            const size_t adapterSupportedFeaturesCount =
-                wgpuAdapterEnumerateFeatures(adapter, nullptr);
-            requiredFeatures.resize(adapterSupportedFeaturesCount);
-            wgpuAdapterEnumerateFeatures(
-                adapter, reinterpret_cast<WGPUFeatureName*>(requiredFeatures.data()));
-        }
-
-        descriptor.requiredFeatures = requiredFeatures.data();
-        descriptor.requiredFeatureCount = requiredFeatures.size();
-
-        return dawnAdapter.CreateDevice(&descriptor);
+        const size_t featureCount = adapter.EnumerateFeatures(nullptr);
+        requiredFeatures.resize(featureCount);
+        adapter.EnumerateFeatures(requiredFeatures.data());
+        return requiredFeatures;
     }
 };
 
@@ -841,15 +802,8 @@ constexpr struct WGSLExtensionInfo kExtensions[] = {
 class ShaderModuleExtensionValidationTestSafeNoFeature
     : public ShaderModuleExtensionValidationTestBase {
   protected:
-    void CreateTestAdapter(wgpu::RequestAdapterOptions options) override {
-        // Create a safe adapter
-        CreateTestAdapterWithUnsafeAPIToggle(options, false);
-    }
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        // Create a device requiring no features
-        return CreateTestDeviceWithAllFeatures(dawnAdapter, descriptor, false);
-    }
+    bool AllowUnsafeAPIs() override { return false; }
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override { return {}; }
 };
 
 TEST_F(ShaderModuleExtensionValidationTestSafeNoFeature,
@@ -873,15 +827,7 @@ TEST_F(ShaderModuleExtensionValidationTestSafeNoFeature,
 class ShaderModuleExtensionValidationTestUnsafeNoFeature
     : public ShaderModuleExtensionValidationTestBase {
   protected:
-    void CreateTestAdapter(wgpu::RequestAdapterOptions options) override {
-        // Create an unsafe adapter
-        CreateTestAdapterWithUnsafeAPIToggle(options, true);
-    }
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        // Create a device requiring no features
-        return CreateTestDeviceWithAllFeatures(dawnAdapter, descriptor, false);
-    }
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override { return {}; }
 };
 
 TEST_F(ShaderModuleExtensionValidationTestUnsafeNoFeature,
@@ -905,15 +851,8 @@ TEST_F(ShaderModuleExtensionValidationTestUnsafeNoFeature,
 class ShaderModuleExtensionValidationTestSafeAllFeatures
     : public ShaderModuleExtensionValidationTestBase {
   protected:
-    void CreateTestAdapter(wgpu::RequestAdapterOptions options) override {
-        // Create a safe adapter
-        CreateTestAdapterWithUnsafeAPIToggle(options, false);
-    }
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        // Create a device requiring all features
-        return CreateTestDeviceWithAllFeatures(dawnAdapter, descriptor, true);
-    }
+    bool AllowUnsafeAPIs() override { return false; }
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override { return GetAllFeatures(); }
 };
 
 TEST_F(ShaderModuleExtensionValidationTestSafeAllFeatures, OnlyStableExtensionsAllowed) {
@@ -935,15 +874,7 @@ TEST_F(ShaderModuleExtensionValidationTestSafeAllFeatures, OnlyStableExtensionsA
 class ShaderModuleExtensionValidationTestUnsafeAllFeatures
     : public ShaderModuleExtensionValidationTestBase {
   protected:
-    void CreateTestAdapter(wgpu::RequestAdapterOptions options) override {
-        // Create an unsafe adapter
-        CreateTestAdapterWithUnsafeAPIToggle(options, true);
-    }
-    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
-                                wgpu::DeviceDescriptor descriptor) override {
-        // Create a device requiring all features
-        return CreateTestDeviceWithAllFeatures(dawnAdapter, descriptor, true);
-    }
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override { return GetAllFeatures(); }
 };
 
 TEST_F(ShaderModuleExtensionValidationTestUnsafeAllFeatures, AllExtensionsAllowed) {

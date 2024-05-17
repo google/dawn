@@ -298,26 +298,44 @@ void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
 
 Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
                                       const RequestDeviceCallbackInfo& callbackInfo) {
+    return APIRequestDevice2(
+        descriptor, {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
+                     [](WGPURequestDeviceStatus status, WGPUDevice device, char const* message,
+                        void* callback, void* userdata) {
+                         auto cb = reinterpret_cast<WGPURequestDeviceCallback>(callback);
+                         cb(status, device, message, userdata);
+                     },
+                     reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
+}
+
+Future AdapterBase::APIRequestDevice2(const DeviceDescriptor* descriptor,
+                                      const WGPURequestDeviceCallbackInfo2& callbackInfo) {
     struct RequestDeviceEvent final : public EventManager::TrackedEvent {
-        WGPURequestDeviceCallback mCallback;
-        raw_ptr<void> mUserdata;
+        WGPURequestDeviceCallback2 mCallback;
+        raw_ptr<void> mUserdata1;
+        raw_ptr<void> mUserdata2;
 
         WGPURequestDeviceStatus mStatus;
         Ref<DeviceBase> mDevice = nullptr;
         std::string mMessage;
 
-        RequestDeviceEvent(const RequestDeviceCallbackInfo& callbackInfo, Ref<DeviceBase> device)
-            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+        RequestDeviceEvent(const WGPURequestDeviceCallbackInfo2& callbackInfo,
+                           Ref<DeviceBase> device)
+            : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
+                           TrackedEvent::Completed{}),
               mCallback(callbackInfo.callback),
-              mUserdata(callbackInfo.userdata),
+              mUserdata1(callbackInfo.userdata1),
+              mUserdata2(callbackInfo.userdata2),
               mStatus(WGPURequestDeviceStatus_Success),
               mDevice(std::move(device)) {}
 
-        RequestDeviceEvent(const RequestDeviceCallbackInfo& callbackInfo,
+        RequestDeviceEvent(const WGPURequestDeviceCallbackInfo2& callbackInfo,
                            const std::string& message)
-            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+            : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
+                           TrackedEvent::Completed{}),
               mCallback(callbackInfo.callback),
-              mUserdata(callbackInfo.userdata),
+              mUserdata1(callbackInfo.userdata1),
+              mUserdata2(callbackInfo.userdata2),
               mStatus(WGPURequestDeviceStatus_Error),
               mMessage(message) {}
 
@@ -330,7 +348,8 @@ Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
                 mMessage = "A valid external Instance reference no longer exists.";
             }
             mCallback(mStatus, ToAPI(ReturnToAPI(std::move(mDevice))),
-                      mMessage.empty() ? nullptr : mMessage.c_str(), mUserdata.ExtractAsDangling());
+                      mMessage.empty() ? nullptr : mMessage.c_str(), mUserdata1.ExtractAsDangling(),
+                      mUserdata2.ExtractAsDangling());
         }
     };
 

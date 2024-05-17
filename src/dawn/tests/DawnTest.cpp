@@ -771,9 +771,10 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         return {0};
     };
 
-    procs.adapterRequestDevice = [](WGPUAdapter cAdapter, const WGPUDeviceDescriptor* descriptor,
-                                    WGPURequestDeviceCallback callback, void* userdata) {
+    procs.adapterRequestDevice2 = [](WGPUAdapter cAdapter, const WGPUDeviceDescriptor* descriptor,
+                                     WGPURequestDeviceCallbackInfo2 callbackInfo) -> WGPUFuture {
         DAWN_ASSERT(gCurrentTest);
+        DAWN_ASSERT(callbackInfo.mode == WGPUCallbackMode_AllowSpontaneous);
 
         // Isolation keys may be enqueued by CreateDevice(std::string isolationKey).
         // CreateDevice calls requestAdapter, so consume them there and forward them
@@ -787,7 +788,11 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         DAWN_ASSERT(cDevice != nullptr);
 
         gCurrentTest->mLastCreatedBackendDevice = cDevice;
-        callback(WGPURequestDeviceStatus_Success, cDevice, nullptr, userdata);
+        callbackInfo.callback(WGPURequestDeviceStatus_Success, cDevice, nullptr,
+                              callbackInfo.userdata1, callbackInfo.userdata2);
+
+        // Returning a placeholder future that we should never be waiting on.
+        return {0};
     };
 
     mWireHelper = utils::CreateWireHelper(procs, gTestEnv->UsesWire(), gTestEnv->GetWireTraceDir());
@@ -1139,12 +1144,9 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
     // RequestDevice is overriden by CreateDeviceImpl and device descriptor is ignored by it.
     wgpu::DeviceDescriptor deviceDesc = {};
 
-    adapter.RequestDevice(
-        &deviceDesc,
-        [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
-            *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
-        },
-        &apiDevice);
+    adapter.RequestDevice(&deviceDesc, wgpu::CallbackMode::AllowSpontaneous,
+                          [&apiDevice](wgpu::RequestDeviceStatus, wgpu::Device result,
+                                       const char*) { apiDevice = std::move(result); });
     FlushWire();
     DAWN_ASSERT(apiDevice);
 
