@@ -511,6 +511,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     }
 
     VkFormat vkFormat;
+    YCbCrVkDescriptor yCbCrAHBInfo;
     VkAndroidHardwareBufferPropertiesANDROID bufferProperties = {
         .sType = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_PROPERTIES_ANDROID,
     };
@@ -529,13 +530,30 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 
         vkFormat = bufferFormatProperties.format;
 
-        // TODO(dawn:1745): Support external formats.
-        // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#memory-external-android-hardware-buffer-external-formats
-        DAWN_INVALID_IF(vkFormat == VK_FORMAT_UNDEFINED,
-                        "AHardwareBuffer did not have a supported format. External format (%u) "
-                        "requires YCbCr conversion and is "
-                        "not supported yet.",
-                        bufferFormatProperties.externalFormat);
+        // Populate the YCbCr info.
+        yCbCrAHBInfo.externalFormat = bufferFormatProperties.externalFormat;
+        yCbCrAHBInfo.vkFormat = bufferFormatProperties.format;
+        yCbCrAHBInfo.vkYCbCrModel = bufferFormatProperties.suggestedYcbcrModel;
+        yCbCrAHBInfo.vkYCbCrRange = bufferFormatProperties.suggestedYcbcrRange;
+        yCbCrAHBInfo.vkComponentSwizzleRed =
+            bufferFormatProperties.samplerYcbcrConversionComponents.r;
+        yCbCrAHBInfo.vkComponentSwizzleGreen =
+            bufferFormatProperties.samplerYcbcrConversionComponents.g;
+        yCbCrAHBInfo.vkComponentSwizzleBlue =
+            bufferFormatProperties.samplerYcbcrConversionComponents.b;
+        yCbCrAHBInfo.vkComponentSwizzleAlpha =
+            bufferFormatProperties.samplerYcbcrConversionComponents.a;
+        yCbCrAHBInfo.vkXChromaOffset = bufferFormatProperties.suggestedXChromaOffset;
+        yCbCrAHBInfo.vkYChromaOffset = bufferFormatProperties.suggestedYChromaOffset;
+
+        uint32_t formatFeatures = bufferFormatProperties.formatFeatures;
+        yCbCrAHBInfo.vkChromaFilter =
+            (formatFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT)
+                ? VK_FILTER_LINEAR
+                : VK_FILTER_NEAREST;
+        yCbCrAHBInfo.forceExplicitReconstruction =
+            formatFeatures &
+            VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_BIT;
     }
     DAWN_TRY_ASSIGN(properties.format, FormatFromVkFormat(device, vkFormat));
 
@@ -548,6 +566,8 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // Create the SharedTextureMemory object.
     Ref<SharedTextureMemory> sharedTextureMemory =
         SharedTextureMemory::Create(device, label, properties, VK_QUEUE_FAMILY_FOREIGN_EXT);
+
+    sharedTextureMemory->mYCbCrAHBInfo = yCbCrAHBInfo;
 
     // Reflect properties to reify them.
     sharedTextureMemory->APIGetProperties(&properties);
@@ -1049,5 +1069,24 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
 }
 
 #endif  // DAWN_PLATFORM_IS(FUCHSIA) || DAWN_PLATFORM_IS(LINUX)
+
+MaybeError SharedTextureMemory::GetChainedProperties(
+    UnpackedPtr<SharedTextureMemoryProperties>& properties) const {
+    auto ahbProperties = properties.Get<SharedTextureMemoryAHardwareBufferProperties>();
+
+    if (!ahbProperties) {
+        return {};
+    }
+
+    if (ahbProperties->yCbCrInfo.nextInChain) {
+        return DAWN_VALIDATION_ERROR(
+            "yCBCrInfo field of SharedTextureMemoryAHardwareBufferProperties has a chained "
+            "struct.");
+    }
+
+    ahbProperties->yCbCrInfo = mYCbCrAHBInfo;
+
+    return {};
+}
 
 }  // namespace dawn::native::vulkan

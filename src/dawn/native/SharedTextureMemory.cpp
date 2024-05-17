@@ -128,6 +128,8 @@ MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties*
             this, ToAPI(Feature::SharedTextureMemoryAHardwareBuffer));
     }
 
+    DAWN_TRY(GetChainedProperties(unpacked));
+
     return {};
 }
 

@@ -78,9 +78,15 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
                                                      ExecutionSerial lastUsageSerial,
                                                      UnpackedPtr<EndAccessState>& state) override;
 
+    MaybeError GetChainedProperties(
+        UnpackedPtr<SharedTextureMemoryProperties>& properties) const override;
+
     Ref<RefCountedVkHandle<VkImage>> mVkImage;
     Ref<RefCountedVkHandle<VkDeviceMemory>> mVkDeviceMemory;
     const uint32_t mQueueFamilyIndex;
+
+    // Populated if this instance was created from an AHardwareBuffer.
+    YCbCrVkDescriptor mYCbCrAHBInfo;
 };
 
 }  // namespace dawn::native::vulkan

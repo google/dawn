@@ -75,6 +75,11 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) = 0;
 
+    virtual MaybeError GetChainedProperties(
+        UnpackedPtr<SharedTextureMemoryProperties>& properties) const {
+        return {};
+    }
+
     SharedTextureMemoryProperties mProperties;
 };
 
