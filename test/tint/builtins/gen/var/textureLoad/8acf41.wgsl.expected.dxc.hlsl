@@ -19,13 +19,13 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   float3x3 gamutConversionMatrix;
-  float3x2 coordTransformationMatrix;
-  float3x2 loadTransformationMatrix;
+  float3x2 sampleTransform;
+  float3x2 loadTransform;
   float2 samplePlane0RectMin;
   float2 samplePlane0RectMax;
   float2 samplePlane1RectMin;
   float2 samplePlane1RectMax;
-  uint2 displayVisibleRectMax;
+  uint2 visibleSize;
   float2 plane1CoordFactor;
 };
 
@@ -43,8 +43,8 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureLoadExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, int2 coord, ExternalTextureParams params) {
-  uint2 clampedCoords = min(uint2(coord), params.displayVisibleRectMax);
-  uint2 plane0_clamped = tint_ftou(round(mul(float3(float2(clampedCoords), 1.0f), params.loadTransformationMatrix)));
+  uint2 clampedCoords = min(uint2(coord), params.visibleSize);
+  uint2 plane0_clamped = tint_ftou(round(mul(float3(float2(clampedCoords), 1.0f), params.loadTransform)));
   float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
     color = plane0.Load(uint3(plane0_clamped, uint(0))).rgba;

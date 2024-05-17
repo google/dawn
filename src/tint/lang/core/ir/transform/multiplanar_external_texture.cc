@@ -304,13 +304,13 @@ struct State {
                            {sym.Register("gammaDecodeParams"), GammaTransferParams()},
                            {sym.Register("gammaEncodeParams"), GammaTransferParams()},
                            {sym.Register("gamutConversionMatrix"), ty.mat3x3<f32>()},
-                           {sym.Register("coordTransformationMatrix"), ty.mat3x2<f32>()},
-                           {sym.Register("loadTransformationMatrix"), ty.mat3x2<f32>()},
+                           {sym.Register("sampleTransform"), ty.mat3x2<f32>()},
+                           {sym.Register("loadTransform"), ty.mat3x2<f32>()},
                            {sym.Register("samplePlane0RectMin"), ty.vec2<f32>()},
                            {sym.Register("samplePlane0RectMax"), ty.vec2<f32>()},
                            {sym.Register("samplePlane1RectMin"), ty.vec2<f32>()},
                            {sym.Register("samplePlane1RectMax"), ty.vec2<f32>()},
-                           {sym.Register("displayVisibleRectMax"), ty.vec2<u32>()},
+                           {sym.Register("visibleSize"), ty.vec2<u32>()},
                            {sym.Register("plane1CoordFactor"), ty.vec2<f32>()}});
         }
         return external_texture_params_struct;
@@ -375,9 +375,9 @@ struct State {
         //                             plane1 : texture_2d<f32>,
         //                             coords : vec2<u32>,
         //                             params : ExternalTextureParams) ->vec4f {
-        //     let clampedCoords = min(coords, params.displayVisibleRectMax);
+        //     let clampedCoords = min(coords, params.visibleSize);
         //     let plane0_clamped = vec2<u32>(
-        //         round(params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1)));
+        //         round(params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1)));
         //     var color : vec4<f32>;
         //     if ((params.numPlanes == 1)) {
         //         color = textureLoad(plane0, plane0_clamped, 0).rgba;
@@ -493,7 +493,7 @@ struct State {
         //                          smp    : sampler,
         //                          coord  : vec2f,
         //                          params : ExternalTextureParams) ->vec4f {
-        //     let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+        //     let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
         //     let plane0_clamped =
         //         clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
         //     var color : vec4<f32>;

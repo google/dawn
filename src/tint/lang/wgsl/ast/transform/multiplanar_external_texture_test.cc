@@ -152,13 +152,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -212,13 +212,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -236,8 +236,8 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<u32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.displayVisibleRectMax);
-  let plane0_clamped = vec2<u32>(round((params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1))));
+  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
     color = textureLoad(plane0, plane0_clamped, 0).rgba;
@@ -301,13 +301,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -363,13 +363,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -389,7 +389,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -450,13 +450,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -472,7 +472,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -538,13 +538,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -562,8 +562,8 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.displayVisibleRectMax);
-  let plane0_clamped = vec2<u32>(round((params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1))));
+  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
     color = textureLoad(plane0, plane0_clamped, 0).rgba;
@@ -580,8 +580,8 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
 }
 
 fn textureLoadExternal_1(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<u32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.displayVisibleRectMax);
-  let plane0_clamped = vec2<u32>(round((params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1))));
+  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
     color = textureLoad(plane0, plane0_clamped, 0).rgba;
@@ -644,13 +644,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -666,8 +666,8 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.displayVisibleRectMax);
-  let plane0_clamped = vec2<u32>(round((params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1))));
+  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
     color = textureLoad(plane0, plane0_clamped, 0).rgba;
@@ -684,8 +684,8 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
 }
 
 fn textureLoadExternal_1(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<u32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.displayVisibleRectMax);
-  let plane0_clamped = vec2<u32>(round((params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1))));
+  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
     color = textureLoad(plane0, plane0_clamped, 0).rgba;
@@ -749,13 +749,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -775,7 +775,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -793,8 +793,8 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.displayVisibleRectMax);
-  let plane0_clamped = vec2<u32>(round((params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1))));
+  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
     color = textureLoad(plane0, plane0_clamped, 0).rgba;
@@ -854,13 +854,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -876,7 +876,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -894,8 +894,8 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.displayVisibleRectMax);
-  let plane0_clamped = vec2<u32>(round((params.loadTransformationMatrix * vec3<f32>(vec2<f32>(clampedCoords), 1))));
+  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
     color = textureLoad(plane0, plane0_clamped, 0).rgba;
@@ -965,13 +965,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1009,7 +1009,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1079,13 +1079,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1101,7 +1101,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1175,13 +1175,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1202,7 +1202,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1271,13 +1271,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1293,7 +1293,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1369,13 +1369,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1395,7 +1395,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1476,13 +1476,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1507,7 +1507,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1584,13 +1584,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1606,7 +1606,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1688,13 +1688,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1710,7 +1710,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1780,13 +1780,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1839,13 +1839,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1863,7 +1863,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -1938,13 +1938,13 @@ struct ExternalTextureParams {
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
   gamutConversionMatrix : mat3x3<f32>,
-  coordTransformationMatrix : mat3x2<f32>,
-  loadTransformationMatrix : mat3x2<f32>,
+  sampleTransform : mat3x2<f32>,
+  loadTransform : mat3x2<f32>,
   samplePlane0RectMin : vec2<f32>,
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  displayVisibleRectMax : vec2<u32>,
+  visibleSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1965,7 +1965,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
-  let modifiedCoords = (params.coordTransformationMatrix * vec3<f32>(coord, 1));
+  let modifiedCoords = (params.sampleTransform * vec3<f32>(coord, 1));
   let plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {

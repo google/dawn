@@ -15,13 +15,13 @@ struct ExternalTextureParams {
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
   float3x3 gamutConversionMatrix;
-  float3x2 coordTransformationMatrix;
-  float3x2 loadTransformationMatrix;
+  float3x2 sampleTransform;
+  float3x2 loadTransform;
   float2 samplePlane0RectMin;
   float2 samplePlane0RectMax;
   float2 samplePlane1RectMin;
   float2 samplePlane1RectMax;
-  uint2 displayVisibleRectMax;
+  uint2 visibleSize;
   float2 plane1CoordFactor;
 };
 
@@ -40,7 +40,7 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureSampleExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, SamplerState smp, float2 coord, ExternalTextureParams params) {
-  float2 modifiedCoords = mul(float3(coord, 1.0f), params.coordTransformationMatrix);
+  float2 modifiedCoords = mul(float3(coord, 1.0f), params.sampleTransform);
   float2 plane0_clamped = clamp(modifiedCoords, params.samplePlane0RectMin, params.samplePlane0RectMax);
   float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {

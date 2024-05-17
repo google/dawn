@@ -215,16 +215,23 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
 
     // Unlike WGSL, which stores matrices in column vectors, the following arithmetic uses row
     // vectors, so elements are stored in the following order:
+    //
     // ┌         ┐
     // │ 0, 1, 2 │
     // │ 3, 4, 5 │
     // └         ┘
+    //
     // The matrix is transposed at the end.
+    //
+    // Note that we are working in homogeneous coordinates so there is an implied third row
+    // containing [0, 0, 1].
     using mat2x3 = std::array<float, 6>;
+    // Likewise the vectors have an implicit last element that's 1.
+    using vec2 = std::array<float, 2>;
 
     // Multiplies the two mat2x3 matrices, by treating the RHS matrix as a mat3x3 where the last row
     // is [0, 0, 1].
-    auto Mul = [&](const mat2x3& lhs, const mat2x3& rhs) {
+    auto Mul = [](const mat2x3& lhs, const mat2x3& rhs) -> mat2x3 {
         auto& a = lhs[0];
         auto& b = lhs[1];
         auto& c = lhs[2];
@@ -251,30 +258,37 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
             d * i + e * l + f,  //
         };
     };
-
-    auto Scale = [&](const mat2x3& m, float x, float y) {
-        return Mul(mat2x3{x, 0, 0, 0, y, 0}, m);
+    auto Scale = [](float x, float y) -> mat2x3 { return {x, 0, 0, 0, y, 0}; };
+    auto ScaleVec = [&](vec2 v) -> mat2x3 { return Scale(v[0], v[1]); };
+    auto Translate = [](float x, float y) -> mat2x3 { return mat2x3{1, 0, x, 0, 1, y}; };
+    auto TranslateVec = [&](vec2 v) -> mat2x3 { return Translate(v[0], v[1]); };
+    auto TransposeForWGSL = [](const mat2x3& m) -> std::array<float, 6> {
+        return {m[0], m[3], m[1], m[4], m[2], m[5]};
     };
 
-    auto Translate = [&](const mat2x3& m, float x, float y) {
-        return Mul(mat2x3{1, 0, x, 0, 1, y}, m);
-    };
+    // Vector operations
+    auto Add = [](const vec2& a, const vec2& b) -> vec2 { return {a[0] + b[0], a[1] + b[1]}; };
+    auto Sub = [](const vec2& a, const vec2& b) -> vec2 { return {a[0] - b[0], a[1] - b[1]}; };
+    auto Div = [](const vec2& a, const vec2& b) -> vec2 { return {a[0] / b[0], a[1] / b[1]}; };
 
-    mat2x3 coordTransformMatrix = {
-        1, 0, 0,  //
-        0, 1, 0,  //
-    };
-
-    Extent3D frameSize = descriptor->plane0->GetSingleSubresourceVirtualSize();
-    Extent3D plane1Size = {1, 1, 1};
-
+    // Extract all the relevant sizes as float to avoid extra casts in later computations.
+    Extent3D plane0Extent = descriptor->plane0->GetSingleSubresourceVirtualSize();
+    Extent3D plane1Extent = {1, 1, 1};
     if (params.numPlanes == 2) {
-        plane1Size = descriptor->plane1->GetSingleSubresourceVirtualSize();
+        plane1Extent = descriptor->plane1->GetSingleSubresourceVirtualSize();
     }
+    vec2 plane0Size = {static_cast<float>(plane0Extent.width),
+                       static_cast<float>(plane0Extent.height)};
+    vec2 plane1Size = {static_cast<float>(plane1Extent.width),
+                       static_cast<float>(plane1Extent.height)};
+    vec2 visibleOrigin = {static_cast<float>(mVisibleOrigin.x),
+                          static_cast<float>(mVisibleOrigin.y)};
+    vec2 visibleSize = {static_cast<float>(mVisibleSize.width),
+                        static_cast<float>(mVisibleSize.height)};
 
     // Offset the coordinates so the center texel is at the origin, so we can apply rotations and
     // y-flips. After translation, coordinates range from [-0.5 .. +0.5] in both U and V.
-    coordTransformMatrix = Translate(coordTransformMatrix, -0.5, -0.5);
+    mat2x3 sampleTransform = Translate(-0.5, -0.5);
 
     // Texture applies rotation first and do mirrored(horizontal flip) next.
     // Do reverse order here to mapping final uv coordinate to origin texture.
@@ -284,107 +298,68 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     // attribute and pass mirrored to descriptor->flipY and this is incorrect. Workaround to fix
     // mirrored issue by delegate flipY operation to mirrored and remove flipY attribute in future.
     if (descriptor->flipY || descriptor->mirrored) {
-        coordTransformMatrix = Scale(coordTransformMatrix, -1, 1);
+        sampleTransform = Mul(Scale(-1, 1), sampleTransform);
     }
 
-    // Apply rotations as needed.
+    // Apply rotations as needed this may rotate the shader-visible size of the texture for
+    // textureLoad operations.
+    std::array<uint32_t, 2> loadBounds = {mVisibleSize.width - 1, mVisibleSize.height - 1};
     switch (descriptor->rotation) {
         case wgpu::ExternalTextureRotation::Rotate0Degrees:
             break;
         case wgpu::ExternalTextureRotation::Rotate90Degrees:
-            coordTransformMatrix = Mul(mat2x3{0, +1, 0,   // x' = y
-                                              -1, 0, 0},  // y' = -x
-                                       coordTransformMatrix);
+            sampleTransform = Mul(mat2x3{0, +1, 0,   // x' = y
+                                         -1, 0, 0},  // y' = -x
+                                  sampleTransform);
             break;
         case wgpu::ExternalTextureRotation::Rotate180Degrees:
-            coordTransformMatrix = Mul(mat2x3{-1, 0, 0,   // x' = -x
-                                              0, -1, 0},  // y' = -y
-                                       coordTransformMatrix);
+            sampleTransform = Mul(mat2x3{-1, 0, 0,   // x' = -x
+                                         0, -1, 0},  // y' = -y
+                                  sampleTransform);
             break;
         case wgpu::ExternalTextureRotation::Rotate270Degrees:
 
-            coordTransformMatrix = Mul(mat2x3{0, -1, 0,   // x' = -y
-                                              +1, 0, 0},  // y' = x
-                                       coordTransformMatrix);
+            sampleTransform = Mul(mat2x3{0, -1, 0,   // x' = -y
+                                         +1, 0, 0},  // y' = x
+                                  sampleTransform);
             break;
     }
 
     // Offset the coordinates so the bottom-left texel is at origin.
     // After translation, coordinates range from [0 .. 1] in both U and V.
-    coordTransformMatrix = Translate(coordTransformMatrix, 0.5, 0.5);
-
-    // Calculate scale factors and offsets from the specified visibleSize.
-    DAWN_ASSERT(mVisibleSize.width > 0);
-    DAWN_ASSERT(mVisibleSize.height > 0);
-    float xScale = static_cast<float>(mVisibleSize.width) / static_cast<float>(frameSize.width);
-    float yScale = static_cast<float>(mVisibleSize.height) / static_cast<float>(frameSize.height);
-    float xOffset = static_cast<float>(mVisibleOrigin.x) / static_cast<float>(frameSize.width);
-    float yOffset = static_cast<float>(mVisibleOrigin.y) / static_cast<float>(frameSize.height);
+    sampleTransform = Mul(Translate(0.5, 0.5), sampleTransform);
 
     // Finally, scale and translate based on the visible rect. This applies cropping.
-    coordTransformMatrix = Scale(coordTransformMatrix, xScale, yScale);
-    coordTransformMatrix = Translate(coordTransformMatrix, xOffset, yOffset);
+    vec2 rectScale = Div(visibleSize, plane0Size);
+    vec2 rectOffset = Div(visibleOrigin, plane0Size);
+    sampleTransform = Mul(TranslateVec(rectOffset), Mul(ScaleVec(rectScale), sampleTransform));
 
-    // Calculate load transformation matrix by using
-    // toTexels * coordTransformMatrix * toNormalized
+    params.sampleTransform = TransposeForWGSL(sampleTransform);
+
+    // Compute the load transformation matrix by using toTexels * sampleTransform * toNormalized
     // Note that coords starts from 0 so the max value is size - 1.
-    mat2x3 toTexels = {static_cast<float>(frameSize.width - 1),  0, 0, 0,
-                       static_cast<float>(frameSize.height - 1), 0};
+    {
+        mat2x3 toTexels = ScaleVec(Sub(plane0Size, {1.0f, 1.0f}));
+        mat2x3 toNormalized = Scale(1.0f / loadBounds[0], 1.0f / loadBounds[1]);
+        mat2x3 loadTransform = Mul(toTexels, Mul(sampleTransform, toNormalized));
 
-    bool orientationChanged =
-        descriptor->rotation == wgpu::ExternalTextureRotation::Rotate90Degrees ||
-        descriptor->rotation == wgpu::ExternalTextureRotation::Rotate270Degrees;
+        params.loadTransform = TransposeForWGSL(loadTransform);
+    }
 
-    uint32_t displayVisibleWidth = orientationChanged ? mVisibleSize.height : mVisibleSize.width;
-    uint32_t displayVisibleHeight = orientationChanged ? mVisibleSize.width : mVisibleSize.height;
+    // Compute the clamping for each plane individually: to avoid bleeding of OOB texels due to
+    // interpolation we need to offset by a half texel in, which depends on the size of the plane.
+    {
+        vec2 plane0HalfTexel = Div({0.5f, 0.5f}, plane0Size);
+        vec2 plane1HalfTexel = Div({0.5f, 0.5f}, plane1Size);
 
-    mat2x3 toNormalized = {1.0f / static_cast<float>(displayVisibleWidth - 1),  0, 0, 0,
-                           1.0f / static_cast<float>(displayVisibleHeight - 1), 0};
+        params.samplePlane0RectMin = Add(rectOffset, plane0HalfTexel);
+        params.samplePlane1RectMin = Add(rectOffset, plane1HalfTexel);
+        params.samplePlane0RectMax = Sub(Add(rectOffset, rectScale), plane0HalfTexel);
+        params.samplePlane1RectMax = Sub(Add(rectOffset, rectScale), plane1HalfTexel);
+    }
 
-    mat2x3 loadTransformMatrix = Mul(toTexels, Mul(coordTransformMatrix, toNormalized));
-
-    // Transpose the mat2x3 into column vectors for use by WGSL.
-    params.coordTransformMatrix[0] = coordTransformMatrix[0];
-    params.coordTransformMatrix[1] = coordTransformMatrix[3];
-    params.coordTransformMatrix[2] = coordTransformMatrix[1];
-    params.coordTransformMatrix[3] = coordTransformMatrix[4];
-    params.coordTransformMatrix[4] = coordTransformMatrix[2];
-    params.coordTransformMatrix[5] = coordTransformMatrix[5];
-
-    params.loadTransformMatrix[0] = loadTransformMatrix[0];
-    params.loadTransformMatrix[1] = loadTransformMatrix[3];
-    params.loadTransformMatrix[2] = loadTransformMatrix[1];
-    params.loadTransformMatrix[3] = loadTransformMatrix[4];
-    params.loadTransformMatrix[4] = loadTransformMatrix[2];
-    params.loadTransformMatrix[5] = loadTransformMatrix[5];
-
-    // clamped rect for sample and load
-    float plane0HalfTexelX = 0.5 / static_cast<float>(frameSize.width);
-    float plane0HalfTexelY = 0.5 / static_cast<float>(frameSize.height);
-    float plane1HalfTexelX = 0.5 / static_cast<float>(plane1Size.width);
-    float plane1HalfTexelY = 0.5 / static_cast<float>(plane1Size.height);
-
-    float normVisibleRectMinX = xOffset;
-    float normVisibleRectMinY = yOffset;
-    float normVisibleRectMaxX = xOffset + xScale;
-    float normVisibleRectMaxY = yOffset + yScale;
-
-    params.samplePlane0RectMin[0] = normVisibleRectMinX + plane0HalfTexelX;
-    params.samplePlane0RectMin[1] = normVisibleRectMinY + plane0HalfTexelY;
-    params.samplePlane0RectMax[0] = normVisibleRectMaxX - plane0HalfTexelX;
-    params.samplePlane0RectMax[1] = normVisibleRectMaxY - plane0HalfTexelY;
-    params.samplePlane1RectMin[0] = normVisibleRectMinX + plane1HalfTexelX;
-    params.samplePlane1RectMin[1] = normVisibleRectMinY + plane1HalfTexelY;
-    params.samplePlane1RectMax[0] = normVisibleRectMaxX - plane1HalfTexelX;
-    params.samplePlane1RectMax[1] = normVisibleRectMaxY - plane1HalfTexelY;
-
-    params.displayVisibleRectMax[0] = displayVisibleWidth - 1;
-    params.displayVisibleRectMax[1] = displayVisibleHeight - 1;
-
-    params.plane1CoordFactor[0] =
-        static_cast<float>(plane1Size.width) / static_cast<float>(frameSize.width);
-    params.plane1CoordFactor[1] =
-        static_cast<float>(plane1Size.height) / static_cast<float>(frameSize.height);
+    params.plane1CoordFactor = Div(plane1Size, plane0Size);
+    params.visibleSize = loadBounds;
 
     DAWN_TRY(device->GetQueue()->WriteBuffer(mParamsBuffer.Get(), 0, &params,
                                              sizeof(ExternalTextureParams)));

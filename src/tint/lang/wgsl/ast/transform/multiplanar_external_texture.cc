@@ -294,13 +294,13 @@ struct MultiplanarExternalTexture::State {
             b.Member("gammaDecodeParams", b.ty("GammaTransferParams")),
             b.Member("gammaEncodeParams", b.ty("GammaTransferParams")),
             b.Member("gamutConversionMatrix", b.ty.mat3x3<f32>()),
-            b.Member("coordTransformationMatrix", b.ty.mat3x2<f32>()),
-            b.Member("loadTransformationMatrix", b.ty.mat3x2<f32>()),
+            b.Member("sampleTransform", b.ty.mat3x2<f32>()),
+            b.Member("loadTransform", b.ty.mat3x2<f32>()),
             b.Member("samplePlane0RectMin", b.ty.vec2<f32>()),
             b.Member("samplePlane0RectMax", b.ty.vec2<f32>()),
             b.Member("samplePlane1RectMin", b.ty.vec2<f32>()),
             b.Member("samplePlane1RectMax", b.ty.vec2<f32>()),
-            b.Member("displayVisibleRectMax", b.ty.vec2<u32>()),
+            b.Member("visibleSize", b.ty.vec2<u32>()),
             b.Member("plane1CoordFactor", b.ty.vec2<f32>())};
 
         params_struct_sym = b.Symbols().New("ExternalTextureParams");
@@ -354,9 +354,9 @@ struct MultiplanarExternalTexture::State {
         const BlockStatement* multi_plane_block = nullptr;
         switch (call_type) {
             case wgsl::BuiltinFn::kTextureSampleBaseClampToEdge:
-                stmts.Push(b.Decl(b.Let(
-                    "modifiedCoords", b.Mul(b.MemberAccessor("params", "coordTransformationMatrix"),
-                                            b.Call<vec3<f32>>("coord", 1_a)))));
+                stmts.Push(b.Decl(
+                    b.Let("modifiedCoords", b.Mul(b.MemberAccessor("params", "sampleTransform"),
+                                                  b.Call<vec3<f32>>("coord", 1_a)))));
 
                 stmts.Push(b.Decl(b.Let(
                     "plane0_clamped", b.Call("clamp", "modifiedCoords",
@@ -391,14 +391,14 @@ struct MultiplanarExternalTexture::State {
                                  1_a)));
                 break;
             case wgsl::BuiltinFn::kTextureLoad:
-                stmts.Push(b.Decl(b.Let(
-                    "clampedCoords", b.Call("min", b.Call<vec2<u32>>("coord"),
-                                            b.MemberAccessor("params", "displayVisibleRectMax")))));
+                stmts.Push(b.Decl(
+                    b.Let("clampedCoords", b.Call("min", b.Call<vec2<u32>>("coord"),
+                                                  b.MemberAccessor("params", "visibleSize")))));
                 stmts.Push(b.Decl(b.Let(
                     "plane0_clamped",
                     b.Call<vec2<u32>>(b.Call(
                         "round",
-                        b.Mul(b.MemberAccessor("params", "loadTransformationMatrix"),
+                        b.Mul(b.MemberAccessor("params", "loadTransform"),
                               b.Call<vec3<f32>>(b.Call<vec2<f32>>("clampedCoords"), 1_a)))))));
 
                 // var color: vec4<f32>;
