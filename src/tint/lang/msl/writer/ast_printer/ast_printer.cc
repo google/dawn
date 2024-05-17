@@ -168,6 +168,23 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         manager.Add<ast::transform::Robustness>();
     }
 
+    ExternalTextureOptions external_texture_options{};
+    RemapperData remapper_data{};
+    ArrayLengthFromUniformOptions array_length_from_uniform_options{};
+    PopulateBindingRelatedOptions(options, remapper_data, external_texture_options,
+                                  array_length_from_uniform_options);
+
+    manager.Add<ast::transform::BindingRemapper>();
+    data.Add<ast::transform::BindingRemapper::Remappings>(
+        remapper_data, std::unordered_map<BindingPoint, core::Access>{},
+        /* allow_collisions */ true);
+
+    // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
+    // MultiplanarExternalTexture must come after BindingRemapper
+    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
+        external_texture_options.bindings_map, /* allow_collisions */ true);
+    manager.Add<ast::transform::MultiplanarExternalTexture>();
+
     {  // Builtin polyfills
         ast::transform::BuiltinPolyfill::Builtins polyfills;
         polyfills.acosh = ast::transform::BuiltinPolyfill::Level::kRangeCheck;
@@ -189,23 +206,6 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         data.Add<ast::transform::BuiltinPolyfill::Config>(polyfills);
         manager.Add<ast::transform::BuiltinPolyfill>();
     }
-
-    ExternalTextureOptions external_texture_options{};
-    RemapperData remapper_data{};
-    ArrayLengthFromUniformOptions array_length_from_uniform_options{};
-    PopulateBindingRelatedOptions(options, remapper_data, external_texture_options,
-                                  array_length_from_uniform_options);
-
-    manager.Add<ast::transform::BindingRemapper>();
-    data.Add<ast::transform::BindingRemapper::Remappings>(
-        remapper_data, std::unordered_map<BindingPoint, core::Access>{},
-        /* allow_collisions */ true);
-
-    // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
-    // MultiplanarExternalTexture must come after BindingRemapper
-    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
-        external_texture_options.bindings_map, /* allow_collisions */ true);
-    manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
