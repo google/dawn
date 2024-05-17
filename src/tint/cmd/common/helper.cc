@@ -149,7 +149,7 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
 
 }  // namespace
 
-[[noreturn]] void TintInternalCompilerErrorReporter(const InternalCompilerError& err) {
+void TintInternalCompilerErrorReporter(const InternalCompilerError& err) {
     auto printer = StyledTextPrinter::Create(stderr);
     StyledText msg;
     msg << (style::Error + style::Bold) << err.Error();
@@ -162,7 +162,6 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
 ********************************************************************
 )";
     printer->Print(msg);
-    exit(1);
 }
 
 void PrintWGSL(std::ostream& out, const tint::Program& program) {
