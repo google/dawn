@@ -1,9 +1,17 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/lang/msl/writer/printer/printer.cc:924 internal compiler error: TINT_UNREACHABLE unhandled: min
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void f_1() {
+  uint3 v = uint3(0u);
+  uint3 n = uint3(0u);
+  uint offset_1 = 0u;
+  uint count = 0u;
+  uint3 const v_1 = v;
+  uint3 const v_2 = n;
+  uint const v_3 = count;
+  uint const v_4 = min(offset_1, 32u);
+  uint3 const x_15 = insert_bits(v_1, v_2, v_4, min(v_3, (32u - v_4)));
+}
+kernel void f() {
+  f_1();
+}
