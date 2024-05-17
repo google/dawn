@@ -72,10 +72,6 @@ class ProcTableAsClass {
 
             virtual void {{as_MethodSuffix(type.name, Name("add ref"))}}({{as_cType(type.name)}} self) = 0;
             virtual void {{as_MethodSuffix(type.name, Name("release"))}}({{as_cType(type.name)}} self) = 0;
-            // TODO(dawn::2234): Deprecated. Remove once no longer used.
-            void {{as_MethodSuffix(type.name, Name("reference"))}}({{as_cType(type.name)}} self) {
-                {{as_MethodSuffix(type.name, Name("add ref"))}}(self);
-            }
             {% for method in type.methods if method.name.get() not in ManuallyMockedFunctions %}
                 {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
                 {% if not has_callback_arguments(method) and not has_callback_info(method) and not has_callbackInfoStruct(method) %}
