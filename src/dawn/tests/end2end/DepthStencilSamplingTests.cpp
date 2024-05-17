@@ -888,6 +888,9 @@ TEST_P(DepthSamplingTest, SampleDepthOnly) {
     // TODO(crbug.com/dawn/2552): diagnose this flake on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
+    // TODO(crbug.com/341258943): Fails on Win/Intel UHD 770.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsIntelGen12() && IsANGLED3D11());
+
     wgpu::TextureFormat format = GetParam().mTextureFormat;
     float tolerance = format == wgpu::TextureFormat::Depth16Unorm ? 0.001f : 0.0f;
 
