@@ -199,8 +199,8 @@ crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-
 # Interpolated fragment_output_mask failing on Android Arm (Pixel 6)
 # KEEP
 ################################################################################
-crbug.com/dawn/1550 [ android arm ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:interpolated=true;sampleCount=4;* [ Failure ]
-crbug.com/dawn/1550 [ android arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ Failure ]
+crbug.com/dawn/1550 [ android-t arm ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:interpolated=true;sampleCount=4;* [ Failure ]
+crbug.com/dawn/1550 [ android-t arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ Failure ]
 
 ################################################################################
 # Some copyTextureToTexture tests fail on Qualcomm Android R (Pixel 4), don't appear to repro on Android T
@@ -271,7 +271,6 @@ crbug.com/tint/2129 [ intel-0x9bc5 win10 ] webgpu:shader,execution,expression,ca
 [ android-r qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ RetryOnFailure ]
 [ android-r qualcomm target-cpu-32 webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:* [ RetryOnFailure ]
 [ apple-angle-metal-renderer:-apple-m2 dawn-backend-validation mac ] webgpu:api,operation,compute_pipeline,overrides:workgroup_size:* [ RetryOnFailure ]
-crbug.com/1516044 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:web_platform,canvas,configure:viewFormats:* [ RetryOnFailure ]
 crbug.com/338471695 [ android ] webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleStage="vertex" [ RetryOnFailure ]
 crbug.com/dawn/2331 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,validation,render_pipeline,fragment_state:* [ RetryOnFailure ]
 crbug.com/dawn/2331 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,validation,render_pipeline,inter_stage:* [ RetryOnFailure ]
@@ -369,8 +368,6 @@ crbug.com/41487285 [ dawn-no-backend-validation nvidia-0x2184 ubuntu webgpu-adap
 crbug.com/41487285 [ dawn-no-backend-validation nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-vflip.mp4";sourceType="VideoFrame";dstColorSpace="srgb" [ Failure ]
 crbug.com/41487285 [ dawn-no-backend-validation nvidia-0x2184 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
 crbug.com/41487285 [ dawn-no-backend-validation nvidia-0x2184 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
-crbug.com/41487285 [ dawn-no-backend-validation nvidia-0x2184 webgpu-adapter-swiftshader webgpu-dxc-enabled win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoElement";dstColorSpace="display-p3" [ Failure ]
-crbug.com/41487285 [ dawn-no-backend-validation nvidia-0x2184 webgpu-adapter-swiftshader webgpu-dxc-enabled win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-h264-bt601-hflip.mp4";sourceType="VideoFrame";dstColorSpace="display-p3" [ Failure ]
 crbug.com/41487285 [ intel-0x3e9b mac ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-hflip.mp4";* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-180.mp4";* [ Failure ]
@@ -505,13 +502,9 @@ crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,validation,expression,call,
 crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,validation,expression,call,builtin,normalize:values:stage="override";type="vec3%3Cf16%3E" [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,validation,expression,call,builtin,normalize:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/dawn/0000 [ android-t arm dawn-backend-validation target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
 crbug.com/dawn/0000 [ android-t arm dawn-backend-validation target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/dawn/0000 [ android-t arm dawn-backend-validation target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
@@ -523,7 +516,6 @@ crbug.com/dawn/0000 [ android-t arm dawn-no-backend-validation target-cpu-64 web
 crbug.com/dawn/2414 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAdd:* [ Failure ]
 crbug.com/dawn/2414 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:* [ Failure ]
 crbug.com/dawn/2414 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicExchange:* [ Failure ]
-crbug.com/dawn/2414 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicLoad:* [ Failure ]
 crbug.com/dawn/2414 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicMax:* [ Failure ]
 crbug.com/dawn/2414 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:* [ Failure ]
 crbug.com/dawn/2414 [ android-14 android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:* [ Failure ]
@@ -595,10 +587,6 @@ crbug.com/dawn/2455 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:api,oper
 # keep is no longer needed.
 # KEEP
 ################################################################################
-crbug.com/1457970 [ amd-0x67ef mac ] webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:valid=false;awaitLost=false [ Failure ]
-crbug.com/1457970 [ amd-0x67ef mac ] webgpu:api,validation,state,device_lost,destroy:createComputePipelineAsync:valid=false;awaitLost=true [ Failure ]
-crbug.com/1457970 [ amd-0x67ef mac ] webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=false [ Failure ]
-crbug.com/1457970 [ amd-0x67ef mac ] webgpu:api,validation,state,device_lost,destroy:createRenderPipelineAsync:valid=false;awaitLost=true [ Failure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation mac target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation mac target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,unpack2x16snorm:* [ Failure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation mac target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="bool";wgsize=[1,128] [ Failure ]
@@ -664,7 +652,6 @@ crbug.com/dawn/2479 [ webgpu-no-worker ] webgpu:api,validation,buffer,mapping:ma
 # being handled properly in Chrome's WebGPU decoder.
 ################################################################################
 crbug.com/1467566 [ amd-0x67ef mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
-crbug.com/1467566 [ android-14 arm webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/1467566 [ apple-angle-metal-renderer:-apple-m2 mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/1467566 [ intel-0x3e9b mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
 crbug.com/1467566 [ intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
@@ -780,18 +767,18 @@ crbug.com/tint/1796 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,c
 crbug.com/tint/1796 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="uniform";vectorize=2 [ Failure ]
 crbug.com/tint/1796 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="uniform";vectorize=3 [ Failure ]
 crbug.com/tint/1796 [ intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,asin:f32:inputSource="uniform";vectorize=4 [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="param";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="param";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="param";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="param";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
-crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="param";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="param";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="param";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="param";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
+crbug.com/tint/1801 [ dawn-no-backend-validation graphite-disabled nvidia-0x2184 nvidia_lt_31.0.15.4601 target-cpu-32 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="struct";dispatch="indirect";groupSize={"x":8,"y":4,"z":2};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 crbug.com/tint/2179 [ amd-0x67ef ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="bool";wgsize=[1,1] [ Failure ]
 crbug.com/tint/2179 [ amd-0x67ef ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="bool";wgsize=[16,16] [ Failure ]
 crbug.com/tint/2179 [ amd-0x67ef ] webgpu:shader,execution,expression,call,builtin,workgroupUniformLoad:types:type="bool";wgsize=[3,7] [ Failure ]
@@ -1403,15 +1390,10 @@ crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,constructor,non
 ################################################################################
 # New flakes. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ] webgpu:shader,validation,expression,call,builtin,sign:values:stage="override";type="vec4%3Cf16%3E" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-backend-validation ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="direct";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,log2:f16:inputSource="uniform";vectorize="_undef_" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";workgroupSize=[64,1,1];batch__=0 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba32float" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 target-cpu-64 webgpu-dxc-disabled win10 ] webgpu:shader,execution,expression,unary,i32_conversion:f32:inputSource="const";vectorize="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,validation,expression,call,builtin,abs:parameters:test="sampler" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=29 [ RetryOnFailure ]
 
 ################################################################################
@@ -1548,7 +1530,7 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 ubuntu ] webgpu:sh
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 ubuntu ] webgpu:shader,execution,memory_model,barrier:workgroup_barrier_store_store:accessValueType="f16";memType="non_atomic_storage";accessPair="ww";normalBarrier=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=-8388608;biasSlopeScale=0;biasClamp=0.125 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation webgpu-dxc-disabled win10 ] webgpu:shader,execution,limits:struct_members: [ Failure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation no-asan webgpu-dxc-disabled win10 ] webgpu:shader,execution,limits:struct_members: [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b mac ] webgpu:shader,validation,expression,call,builtin,refract:values:stage="constant";type="vec3%3Cf16%3E" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b mac ] webgpu:shader,validation,expression,call,builtin,refract:values:stage="constant";type="vec4%3Cf16%3E" [ Failure ]
