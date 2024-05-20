@@ -463,8 +463,14 @@ absl_source_set("debugging_internal") {
 }
 
 absl_source_set("demangle_internal") {
-  sources = [ "${dawn_abseil_dir}/absl/debugging/internal/demangle.cc" ]
-  public = [ "${dawn_abseil_dir}/absl/debugging/internal/demangle.h" ]
+  sources = [
+    "${dawn_abseil_dir}/absl/debugging/internal/demangle.cc",
+    "${dawn_abseil_dir}/absl/debugging/internal/demangle_rust.cc",
+  ]
+  public = [
+    "${dawn_abseil_dir}/absl/debugging/internal/demangle.h",
+    "${dawn_abseil_dir}/absl/debugging/internal/demangle_rust.h",
+  ]
   deps = [
     ":base",
     ":config",
