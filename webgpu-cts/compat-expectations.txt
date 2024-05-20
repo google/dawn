@@ -162,8 +162,7 @@ crbug.com/341327470 [ linux intel-0x4680 ] webgpu:shader,execution,expression,ca
 crbug.com/341282605 [ linux intel-0x4680 ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 crbug.com/341327471 [ linux intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 crbug.com/341327471 [ linux intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:resize:canvasType="onscreen" [ Failure ]
-crbug.com/341327472 [ linux intel-0x4680 ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="onscreen";contextType="webgl2";awaitLost=false [ Failure ]
-crbug.com/341327472 [ linux intel-0x4680 ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoElement";* [ Failure ]
+crbug.com/341327472 [ linux intel-0x4680 ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
 
 ### This section represents things that are probably fixable in Dawn.
 
