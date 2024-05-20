@@ -1801,7 +1801,6 @@
                 "length": 7},
             {"name": "gamut conversion matrix", "type": "float", "annotation": "const*",
                 "length": 9},
-            {"name": "flip y", "type": "bool", "default": "false", "tags": ["deprecated"]},
             {"name": "mirrored", "type": "bool", "default": "false"},
             {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"}
         ]

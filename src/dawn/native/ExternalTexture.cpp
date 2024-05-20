@@ -290,14 +290,10 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     // y-flips. After translation, coordinates range from [-0.5 .. +0.5] in both U and V.
     mat2x3 sampleTransform = Translate(-0.5, -0.5);
 
-    // Texture applies rotation first and do mirrored(horizontal flip) next.
-    // Do reverse order here to mapping final uv coordinate to origin texture.
-    // TODO(crbug.com/1514732): VideoFrame metadata defines horizontal flip (mirrored) and rotation.
-    // The vertical flip (which is flipY) could be achieved by rotate 180 + mirrored. Deprecate
-    // flipY attribute to align with VideoFrame metadata. Chrome is the only place to use this
-    // attribute and pass mirrored to descriptor->flipY and this is incorrect. Workaround to fix
-    // mirrored issue by delegate flipY operation to mirrored and remove flipY attribute in future.
-    if (descriptor->flipY || descriptor->mirrored) {
+    // The video frame metadata both rotation and mirroring information. The rotation happens before
+    // the mirroring when processing the video frame, so do the inverse order when converting UV
+    // coordinates.
+    if (descriptor->mirrored) {
         sampleTransform = Mul(Scale(-1, 1), sampleTransform);
     }
 
