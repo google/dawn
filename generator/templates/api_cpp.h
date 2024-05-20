@@ -364,7 +364,7 @@ class ObjectBase {
         };
         callbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
         callbackInfo.userdata2 = reinterpret_cast<void*>(userdata);
-        auto result = {{as_cMethod(type.name, method.name)}}(Get(){{", "}}
+        auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
             {%- for arg in method.arguments if arg.type.category != "callback info" -%}
                 {{render_c_actual_arg(arg)}}{{", "}}
             {%- endfor -%}
@@ -401,7 +401,7 @@ class ObjectBase {
             };
             callbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
             callbackInfo.userdata2 = nullptr;
-            auto result = {{as_cMethod(type.name, method.name)}}(Get(){{", "}}
+            auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
             {%- for arg in method.arguments if arg.type.category != "callback info" -%}
                 {{render_c_actual_arg(arg)}}{{", "}}
             {%- endfor -%}
@@ -423,7 +423,7 @@ class ObjectBase {
             };
             callbackInfo.userdata1 = reinterpret_cast<void*>(lambda);
             callbackInfo.userdata2 = nullptr;
-            auto result = {{as_cMethod(type.name, method.name)}}(Get(){{", "}}
+            auto result = {{as_cMethodNamespaced(type.name, method.name, c_namespace)}}(Get(){{", "}}
             {%- for arg in method.arguments if arg.type.category != "callback info" -%}
                 {{render_c_actual_arg(arg)}}{{", "}}
             {%- endfor -%}
