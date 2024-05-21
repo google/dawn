@@ -115,7 +115,8 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
                                       const WGPURequestAdapterOptions* options,
                                       WGPURequestAdapterCallback callback, void* userdata) {
         std::vector<dawn::native::Adapter> adapters =
-            reinterpret_cast<dawn::native::Instance*>(cInstance)->EnumerateAdapters();
+            dawn::native::Instance(reinterpret_cast<dawn::native::InstanceBase*>(cInstance))
+                .EnumerateAdapters();
         for (dawn::native::Adapter adapter : adapters) {
             if (sAdapterSupported(adapter)) {
                 WGPUAdapter cAdapter = adapter.Get();
@@ -137,14 +138,5 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     std::unique_ptr<dawn::wire::WireServer> wireServer(new dawn::wire::WireServer(serverDesc));
     wireServer->InjectInstance(instance->Get(), {1, 0});
     wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);
-
-    // Flush remaining callbacks to avoid memory leaks.
-    // TODO(crbug.com/dawn/1712): DeviceNull's APITick() will always return true so cannot
-    // do a polling loop here.
-    dawn::native::InstanceProcessEvents(instance->Get());
-
-    // Note: Deleting the server will release all created objects.
-    // Deleted devices will wait for idle on destruction.
-    wireServer = nullptr;
     return 0;
 }

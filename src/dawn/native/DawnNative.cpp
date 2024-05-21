@@ -170,6 +170,13 @@ Instance::Instance(const WGPUInstanceDescriptor* desc)
     tint::Initialize();
 }
 
+Instance::Instance(InstanceBase* impl) : mImpl(impl) {
+    if (mImpl != nullptr) {
+        mImpl->APIAddRef();
+    }
+    tint::Initialize();
+}
+
 Instance::~Instance() {
     if (mImpl != nullptr) {
         mImpl->APIRelease();

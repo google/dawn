@@ -89,7 +89,8 @@ int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::na
                                       const WGPURequestAdapterOptions* options,
                                       WGPURequestAdapterCallback callback, void* userdata) {
         std::vector<dawn::native::Adapter> adapters =
-            reinterpret_cast<dawn::native::Instance*>(cInstance)->EnumerateAdapters();
+            dawn::native::Instance(reinterpret_cast<dawn::native::InstanceBase*>(cInstance))
+                .EnumerateAdapters();
         for (dawn::native::Adapter adapter : adapters) {
             if (sAdapterSupported(adapter)) {
                 WGPUAdapter cAdapter = adapter.Get();
@@ -124,7 +125,6 @@ int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::na
     // Note: Deleting the server will release all created objects.
     // Deleted devices will wait for idle on destruction.
     mCommandBuffer->SetHandler(nullptr);
-    wireServer = nullptr;
     return result == dawn::wire::WireResult::FatalError;
 }
 
