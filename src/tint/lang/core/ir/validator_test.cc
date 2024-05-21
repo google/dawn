@@ -1144,7 +1144,7 @@ TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: return: block terminator which isn't the final instruction
+              R"(:3:5 error: return: must be the last instruction in the block
     ret
     ^^^
 

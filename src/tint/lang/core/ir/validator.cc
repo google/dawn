@@ -716,11 +716,6 @@ void Validator::BeginBlock(const Block* blk) {
         if (inst->Block() != blk) {
             AddError(inst) << "block instruction does not have same block as parent";
             AddNote(blk) << "in block";
-            continue;
-        }
-        if (inst->Is<ir::Terminator>() && inst != blk->Terminator()) {
-            AddError(inst) << "block terminator which isn't the final instruction";
-            continue;
         }
     }
 
@@ -1173,6 +1168,10 @@ void Validator::CheckTerminator(const Terminator* b) {
         [&](const ir::TerminateInvocation*) {},                      //
         [&](const ir::Unreachable*) {},                              //
         [&](Default) { AddError(b) << "missing validation"; });
+
+    if (b->next) {
+        AddError(b) << "must be the last instruction in the block";
+    }
 }
 
 void Validator::CheckContinue(const Continue* c) {
