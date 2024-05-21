@@ -308,9 +308,14 @@
                 WIRE_TRY(buffer->NextN(memberLength, &memberBuffer));
 
                 {% if member.type.is_wire_transparent %}
-                    memcpy(
-                        memberBuffer, record.{{memberName}},
-                        {{member_transfer_sizeof(member)}} * memberLength);
+                    //* memcpy is not defined for null pointers, even when the length is zero.
+                    //* conflicts with the common practice to use (nullptr, 0) to represent an
+                    //* span. Guard memcpy with a zero check to work around this language bug.
+                    if (memberLength != 0) {
+                        memcpy(
+                            memberBuffer, record.{{memberName}},
+                            {{member_transfer_sizeof(member)}} * memberLength);
+                    }
                 {% else %}
                     //* This loop cannot overflow because it iterates up to |memberLength|. Even if
                     //* memberLength were the maximum integer value, |i| would become equal to it
@@ -436,15 +441,20 @@
                     record->{{memberName}} = copiedMembers;
 
                     {% if member.type.is_wire_transparent %}
-                        //* memcpy is not allowed to copy from volatile objects. However, these
-                        //* arrays are just used as plain data, and don't impact control flow. So if
-                        //* the underlying data were changed while the copy was still executing, we
-                        //* would get different data - but it wouldn't cause unexpected downstream
-                        //* effects.
-                        memcpy(
-                            copiedMembers,
-                            const_cast<const {{member_transfer_type(member)}}*>(memberBuffer),
-                           {{member_transfer_sizeof(member)}} * memberLength);
+                        //* memcpy is not defined for null pointers, even when the length is zero.
+                        //* conflicts with the common practice to use (nullptr, 0) to represent an
+                        //* span. Guard memcpy with a zero check to work around this language bug.
+                        if (memberLength != 0) {
+                            //* memcpy is not allowed to copy from volatile objects. However, these
+                            //* arrays are just used as plain data, and don't impact control flow.
+                            //* So if the underlying data were changed while the copy was still
+                            //* executing, we would get different data - but it wouldn't cause
+                            //* unexpected downstream effects.
+                            memcpy(
+                                copiedMembers,
+                                const_cast<const {{member_transfer_type(member)}}*>(memberBuffer),
+                              {{member_transfer_sizeof(member)}} * memberLength);
+                        }
                     {% else %}
                         //* This loop cannot overflow because it iterates up to |memberLength|. Even
                         //* if memberLength were the maximum integer value, |i| would become equal
