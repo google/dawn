@@ -1851,13 +1851,13 @@ void DeviceBase::EmitLog(WGPULoggingType loggingType, const char* message) {
     }
 }
 
-bool DeviceBase::APIGetLimits(SupportedLimits* limits) const {
+wgpu::Status DeviceBase::APIGetLimits(SupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     InstanceBase* instance = GetAdapter()->GetInstance();
 
     UnpackedPtr<SupportedLimits> unpacked;
     if (instance->ConsumedError(ValidateAndUnpack(limits), &unpacked)) {
-        return false;
+        return wgpu::Status::Error;
     }
 
     limits->limits = mLimits.v1;
@@ -1873,7 +1873,7 @@ bool DeviceBase::APIGetLimits(SupportedLimits* limits) const {
         }
     }
 
-    return true;
+    return wgpu::Status::Success;
 }
 
 bool DeviceBase::APIHasFeature(wgpu::FeatureName feature) const {

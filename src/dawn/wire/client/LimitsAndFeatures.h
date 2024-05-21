@@ -38,7 +38,7 @@ class LimitsAndFeatures {
     LimitsAndFeatures();
     ~LimitsAndFeatures();
 
-    bool GetLimits(WGPUSupportedLimits* limits) const;
+    WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
     size_t EnumerateFeatures(WGPUFeatureName* features) const;
 

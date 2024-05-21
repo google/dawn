@@ -55,7 +55,7 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
     static Ref<SharedTextureMemoryBase> MakeError(DeviceBase* device,
                                                   const SharedTextureMemoryDescriptor* descriptor);
 
-    void APIGetProperties(SharedTextureMemoryProperties* properties) const;
+    wgpu::Status APIGetProperties(SharedTextureMemoryProperties* properties) const;
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 
     ObjectType GetType() const override;

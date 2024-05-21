@@ -137,7 +137,7 @@ ObjectType Adapter::GetObjectType() const {
     return ObjectType::Adapter;
 }
 
-bool Adapter::GetLimits(WGPUSupportedLimits* limits) const {
+WGPUStatus Adapter::GetLimits(WGPUSupportedLimits* limits) const {
     return mLimitsAndFeatures.GetLimits(limits);
 }
 
@@ -192,7 +192,7 @@ void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
     }
 }
 
-void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
+WGPUStatus Adapter::GetProperties(WGPUAdapterProperties* properties) const {
     // Loop through the chained struct.
     WGPUChainedStructOut* chain = properties->nextInChain;
     while (chain != nullptr) {
@@ -251,6 +251,8 @@ void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
     properties->driverDescription = ptr;
     memcpy(ptr, mProperties.driverDescription, driverDescriptionCLen);
     ptr += driverDescriptionCLen;
+
+    return WGPUStatus_Success;
 }
 
 void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
@@ -357,10 +359,10 @@ WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor*) {
     return nullptr;
 }
 
-bool Adapter::GetFormatCapabilities(WGPUTextureFormat format,
-                                    WGPUFormatCapabilities* capabilities) {
+WGPUStatus Adapter::GetFormatCapabilities(WGPUTextureFormat format,
+                                          WGPUFormatCapabilities* capabilities) {
     dawn::ErrorLog() << "adapter.GetFormatCapabilities not supported with dawn_wire.";
-    return false;
+    return WGPUStatus_Error;
 }
 
 }  // namespace dawn::wire::client

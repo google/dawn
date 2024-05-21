@@ -139,6 +139,23 @@ class {{BoolCppType}} {
     {{BoolCType}} mValue = static_cast<{{BoolCType}}>(false);
 };
 
+// Helper class to wrap Status which allows implicit conversion to bool.
+// Used while callers switch to checking the Status enum instead of booleans.
+// TODO(crbug.com/42241199): Remove when all callers check the enum.
+struct ConvertibleStatus {
+    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
+    constexpr ConvertibleStatus(Status status) : status(status) {}
+    // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+    constexpr operator bool() const {
+        return status == Status::Success;
+    }
+    // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+    constexpr operator Status() const {
+        return status;
+    }
+    Status status;
+};
+
 template<typename Derived, typename CType>
 class ObjectBase {
   public:
@@ -305,7 +322,7 @@ class ObjectBase {
     {% set OriginalMethodName = method.name.CamelCase() %}
     {% set MethodName = OriginalMethodName[:-1] if method.name.chunks[-1] == "f" else OriginalMethodName %}
     {% set MethodName = CppType + "::" + MethodName if dfn else MethodName %}
-    {{as_cppType(method.return_type.name)}} {{MethodName}}(
+    {{"ConvertibleStatus" if method.return_type.name.get() == "status" else as_cppType(method.return_type.name)}} {{MethodName}}(
         {%- for arg in method.arguments -%}
             {%- if not loop.first %}, {% endif -%}
             {%- if arg.type.category == "object" and arg.annotation == "value" -%}

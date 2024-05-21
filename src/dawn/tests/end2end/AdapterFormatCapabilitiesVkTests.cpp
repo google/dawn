@@ -40,7 +40,7 @@ TEST_P(AdapterFormatCapabilitiesVkTest, GetDrmFormatProperties) {
     wgpu::DrmFormatCapabilities drmCapabilities;
     capabilities.nextInChain = &drmCapabilities;
 
-    EXPECT_EQ(supported,
+    EXPECT_EQ(supported ? wgpu::Status::Success : wgpu::Status::Error,
               adapter.GetFormatCapabilities(wgpu::TextureFormat::RGBA8Unorm, &capabilities));
 }
 

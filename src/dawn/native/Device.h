@@ -288,7 +288,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     AdapterBase* APIGetAdapter();
     QueueBase* APIGetQueue();
 
-    bool APIGetLimits(SupportedLimits* limits) const;
+    wgpu::Status APIGetLimits(SupportedLimits* limits) const;
     bool APIHasFeature(wgpu::FeatureName feature) const;
     size_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
     void APIInjectError(wgpu::ErrorType type, const char* message);

@@ -89,12 +89,12 @@ Adapter& Adapter::operator=(const Adapter& other) {
     return *this;
 }
 
-void Adapter::GetProperties(wgpu::AdapterProperties* properties) const {
-    GetProperties(reinterpret_cast<WGPUAdapterProperties*>(properties));
+wgpu::Status Adapter::GetProperties(wgpu::AdapterProperties* properties) const {
+    return GetProperties(reinterpret_cast<WGPUAdapterProperties*>(properties));
 }
 
-void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
-    mImpl->APIGetProperties(FromAPI(properties));
+wgpu::Status Adapter::GetProperties(WGPUAdapterProperties* properties) const {
+    return mImpl->APIGetProperties(FromAPI(properties));
 }
 
 WGPUAdapter Adapter::Get() const {
@@ -106,7 +106,7 @@ std::vector<const char*> Adapter::GetSupportedFeatures() const {
     return supportedFeaturesSet.GetEnabledFeatureNames();
 }
 
-bool Adapter::GetLimits(WGPUSupportedLimits* limits) const {
+wgpu::ConvertibleStatus Adapter::GetLimits(WGPUSupportedLimits* limits) const {
     return mImpl->APIGetLimits(FromAPI(limits));
 }
 

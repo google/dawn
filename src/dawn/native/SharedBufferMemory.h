@@ -52,7 +52,7 @@ class SharedBufferMemoryBase : public SharedResourceMemory {
     static SharedBufferMemoryBase* MakeError(DeviceBase* device,
                                              const SharedBufferMemoryDescriptor* descriptor);
 
-    void APIGetProperties(SharedBufferMemoryProperties* properties) const;
+    wgpu::Status APIGetProperties(SharedBufferMemoryProperties* properties) const;
     BufferBase* APICreateBuffer(const BufferDescriptor* descriptor);
 
     ObjectType GetType() const override;

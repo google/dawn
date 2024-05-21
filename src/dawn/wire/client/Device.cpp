@@ -293,7 +293,7 @@ uint32_t Device::Release() {
     return refCount;
 }
 
-bool Device::GetLimits(WGPUSupportedLimits* limits) const {
+WGPUStatus Device::GetLimits(WGPUSupportedLimits* limits) const {
     return mLimitsAndFeatures.GetLimits(limits);
 }
 

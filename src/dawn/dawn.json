@@ -126,13 +126,14 @@
             },
             {
                 "name": "get limits",
-                "returns": "bool",
+                "returns": "status",
                 "args": [
                     {"name": "limits", "type": "supported limits", "annotation": "*"}
                 ]
             },
             {
                 "name": "get properties",
+                "returns": "status",
                 "args": [
                     {"name": "properties", "type": "adapter properties", "annotation": "*"}
                 ]
@@ -190,7 +191,7 @@
             {
                 "name": "get format capabilities",
                 "tags": ["dawn"],
-                "returns": "bool",
+                "returns": "status",
                 "args": [
                     {"name": "format", "type": "texture format"},
                     {"name": "capabilities", "type": "format capabilities", "annotation": "*"}
@@ -1402,7 +1403,7 @@
             },
             {
                 "name": "get limits",
-                "returns": "bool",
+                "returns": "status",
                 "args": [
                     {"name": "limits", "type": "supported limits", "annotation": "*"}
                 ]
@@ -1805,6 +1806,13 @@
             {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"}
         ]
     },
+    "status": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "error"}
+        ]
+    },
     "shared buffer memory": {
         "category": "object",
         "tags": ["dawn", "native"],
@@ -1818,7 +1826,7 @@
             },
             {
                 "name": "get properties",
-                "returns": "void",
+                "returns": "status",
                 "args": [
                     {"name": "properties", "type": "shared buffer memory properties", "annotation": "*"}
                 ]
@@ -1883,7 +1891,7 @@
             },
             {
                 "name": "get properties",
-                "returns": "void",
+                "returns": "status",
                 "args": [
                     {"name": "properties", "type": "shared texture memory properties", "annotation": "*"}
                 ]
@@ -2529,8 +2537,7 @@
     },
     "get instance features": {
         "category": "function",
-        "_comment": "TODO(crbug.com/dawn/1987): Figure out how to return error codes for functions like this (https://github.com/webgpu-native/webgpu-headers/issues/115).",
-        "returns": "bool",
+        "returns": "status",
         "args": [
             {"name": "features", "type": "instance features", "annotation": "*"}
         ]
@@ -3602,7 +3609,7 @@
             },
             {
                 "name": "get capabilities",
-                "returns": "void",
+                "returns": "status",
                 "args": [
                     {"name": "adapter", "type": "adapter"},
                     {"name": "capabilities", "type": "surface capabilities", "annotation": "*"}

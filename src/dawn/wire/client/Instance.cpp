@@ -366,14 +366,14 @@ size_t Instance::EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) co
 
 // Free-standing API functions
 
-DAWN_WIRE_EXPORT WGPUBool wgpuDawnWireClientGetInstanceFeatures(WGPUInstanceFeatures* features) {
+DAWN_WIRE_EXPORT WGPUStatus wgpuDawnWireClientGetInstanceFeatures(WGPUInstanceFeatures* features) {
     if (features->nextInChain != nullptr) {
-        return false;
+        return WGPUStatus_Error;
     }
 
     features->timedWaitAnyEnable = false;
     features->timedWaitAnyMaxCount = dawn::kTimedWaitAnyMaxCountDefault;
-    return true;
+    return WGPUStatus_Success;
 }
 
 DAWN_WIRE_EXPORT WGPUInstance

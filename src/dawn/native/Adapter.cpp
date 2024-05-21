@@ -92,11 +92,11 @@ InstanceBase* AdapterBase::APIGetInstance() const {
     return instance;
 }
 
-bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
+wgpu::Status AdapterBase::APIGetLimits(SupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     UnpackedPtr<SupportedLimits> unpacked;
     if (mInstance->ConsumedError(ValidateAndUnpack(limits), &unpacked)) {
-        return false;
+        return wgpu::Status::Error;
     }
 
     if (mUseTieredLimits) {
@@ -116,30 +116,34 @@ bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
         }
     }
 
-    return true;
+    return wgpu::Status::Success;
 }
 
-void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
+wgpu::Status AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     DAWN_ASSERT(properties != nullptr);
     UnpackedPtr<AdapterProperties> unpacked;
     if (mInstance->ConsumedError(ValidateAndUnpack(properties), &unpacked)) {
-        return;
+        return wgpu::Status::Error;
     }
 
+    bool hadError = false;
     if (unpacked.Get<AdapterPropertiesMemoryHeaps>() != nullptr &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
-        [[maybe_unused]] bool hadError = mInstance->ConsumedError(
+        hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
     }
     if (unpacked.Get<AdapterPropertiesD3D>() != nullptr &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesD3D)) {
-        [[maybe_unused]] bool hadError = mInstance->ConsumedError(
+        hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesD3D is not available."));
     }
     if (unpacked.Get<AdapterPropertiesVk>() != nullptr &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk)) {
-        [[maybe_unused]] bool hadError = mInstance->ConsumedError(
+        hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesVk is not available."));
+    }
+    if (hadError) {
+        return wgpu::Status::Error;
     }
 
     if (auto* powerPreferenceDesc = unpacked.Get<DawnAdapterPropertiesPowerPreference>()) {
@@ -178,6 +182,8 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     properties->driverDescription = ptr;
     memcpy(ptr, mPhysicalDevice->GetDriverDescription().c_str(), driverDescriptionCLen);
     ptr += driverDescriptionCLen;
+
+    return wgpu::Status::Success;
 }
 
 void APIAdapterPropertiesFreeMembers(WGPUAdapterProperties properties) {
@@ -263,8 +269,8 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
                         "can not chain after requiredLimits.");
 
         SupportedLimits supportedLimits;
-        bool success = APIGetLimits(&supportedLimits);
-        DAWN_ASSERT(success);
+        wgpu::Status status = APIGetLimits(&supportedLimits);
+        DAWN_ASSERT(status == wgpu::Status::Success);
 
         DAWN_TRY_CONTEXT(ValidateLimits(supportedLimits.limits, descriptor->requiredLimits->limits),
                          "validating required limits");
@@ -370,29 +376,29 @@ Future AdapterBase::APIRequestDevice2(const DeviceDescriptor* descriptor,
     return {futureID};
 }
 
-bool AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
-                                           FormatCapabilities* capabilities) {
+wgpu::Status AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
+                                                   FormatCapabilities* capabilities) {
     if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::FormatCapabilities)) {
         [[maybe_unused]] bool hadError = mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature FormatCapabilities is not available."));
-        return false;
+        return wgpu::Status::Error;
     }
     DAWN_ASSERT(capabilities != nullptr);
 
     UnpackedPtr<FormatCapabilities> unpacked;
     if (mInstance->ConsumedError(ValidateAndUnpack(capabilities), &unpacked)) {
-        return false;
+        return wgpu::Status::Error;
     }
 
     if (unpacked.Get<DrmFormatCapabilities>() != nullptr &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DrmFormatCapabilities)) {
         [[maybe_unused]] bool hadError = mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature DrmFormatCapabilities is not available."));
-        return false;
+        return wgpu::Status::Error;
     }
 
     mPhysicalDevice->PopulateBackendFormatCapabilities(format, unpacked);
-    return true;
+    return wgpu::Status::Success;
 }
 
 const TogglesState& AdapterBase::GetTogglesState() const {

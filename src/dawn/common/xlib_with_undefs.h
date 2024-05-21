@@ -47,6 +47,7 @@
 #undef None
 #undef Always
 #undef Bool
+#undef Status
 
 using XErrorHandler = int (*)(Display*, XErrorEvent*);
 

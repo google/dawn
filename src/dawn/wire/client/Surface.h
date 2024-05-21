@@ -46,7 +46,7 @@ class Surface final : public ObjectBase {
 
     WGPUTextureFormat GetPreferredFormat(WGPUAdapter adapter) const;
 
-    void GetCapabilities(WGPUAdapter adapter, WGPUSurfaceCapabilities* capabilities) const;
+    WGPUStatus GetCapabilities(WGPUAdapter adapter, WGPUSurfaceCapabilities* capabilities) const;
 
     void GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture);
 

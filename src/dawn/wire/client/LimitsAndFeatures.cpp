@@ -36,7 +36,7 @@ LimitsAndFeatures::LimitsAndFeatures() = default;
 
 LimitsAndFeatures::~LimitsAndFeatures() = default;
 
-bool LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
+WGPUStatus LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     auto* originalNextInChain = limits->nextInChain;
     *limits = mLimits;
@@ -55,12 +55,12 @@ bool LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
             }
             default:
                 // Fail if unknown sType found.
-                return false;
+                return WGPUStatus_Error;
         }
         // Restore the chain.
         *chain = originalChainedStructOut;
     }
-    return true;
+    return WGPUStatus_Success;
 }
 
 bool LimitsAndFeatures::HasFeature(WGPUFeatureName feature) const {

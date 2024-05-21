@@ -90,7 +90,7 @@ class ExperimentalSubgroupsTests : public DawnTest {
         wgpu::SupportedLimits limits{};
         wgpu::DawnExperimentalSubgroupLimits subgroupLimits{};
         limits.nextInChain = &subgroupLimits;
-        EXPECT_TRUE(device.GetLimits(&limits));
+        EXPECT_EQ(device.GetLimits(&limits), wgpu::Status::Success);
         uint32_t maxSubgroupSize = subgroupLimits.maxSubgroupSize;
         EXPECT_TRUE(1 <= maxSubgroupSize && maxSubgroupSize <= 128);
         // maxSubgroupSize should be a power of 2.

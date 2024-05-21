@@ -76,16 +76,16 @@ TEST_P(BasicTests, QueueWriteBufferError) {
 
 TEST_P(BasicTests, GetInstanceFeatures) {
     wgpu::InstanceFeatures instanceFeatures{};
-    bool success = wgpu::GetInstanceFeatures(&instanceFeatures);
-    EXPECT_TRUE(success);
+    auto status = wgpu::GetInstanceFeatures(&instanceFeatures);
+    EXPECT_EQ(status, wgpu::Status::Success);
     EXPECT_EQ(instanceFeatures.timedWaitAnyEnable, !UsesWire());
     EXPECT_EQ(instanceFeatures.timedWaitAnyMaxCount, kTimedWaitAnyMaxCountDefault);
     EXPECT_EQ(instanceFeatures.nextInChain, nullptr);
 
     wgpu::ChainedStruct chained{};
     instanceFeatures.nextInChain = &chained;
-    success = wgpu::GetInstanceFeatures(&instanceFeatures);
-    EXPECT_FALSE(success);
+    status = wgpu::GetInstanceFeatures(&instanceFeatures);
+    EXPECT_EQ(status, wgpu::Status::Error);
 }
 
 DAWN_INSTANTIATE_TEST(BasicTests,

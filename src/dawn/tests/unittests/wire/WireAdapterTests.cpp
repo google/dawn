@@ -181,7 +181,7 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
             EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
                     *reinterpret_cast<wgpu::SupportedLimits*>(limits) = fakeLimits;
-                    return true;
+                    return WGPUStatus_Success;
                 })));
 
             EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, nullptr))
@@ -215,7 +215,7 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
                 device = wgpu::Device::Acquire(cDevice);
 
                 wgpu::SupportedLimits limits;
-                EXPECT_TRUE(device.GetLimits(&limits));
+                EXPECT_EQ(device.GetLimits(&limits), wgpu::Status::Success);
                 EXPECT_EQ(limits.limits.maxTextureDimension1D,
                           fakeLimits.limits.maxTextureDimension1D);
                 EXPECT_EQ(limits.limits.maxVertexAttributes, fakeLimits.limits.maxVertexAttributes);
@@ -355,7 +355,7 @@ TEST_P(WireAdapterTests, RequestDeviceAdapterDestroyedBeforeCallback) {
             EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
                     *reinterpret_cast<wgpu::SupportedLimits*>(limits) = fakeLimits;
-                    return true;
+                    return WGPUStatus_Success;
                 })));
 
             EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, nullptr))

@@ -65,9 +65,11 @@ WGPUTextureFormat Surface::GetPreferredFormat([[maybe_unused]] WGPUAdapter adapt
     return WGPUTextureFormat_BGRA8Unorm;
 }
 
-void Surface::GetCapabilities(WGPUAdapter adapter, WGPUSurfaceCapabilities* capabilities) const {
+WGPUStatus Surface::GetCapabilities(WGPUAdapter adapter,
+                                    WGPUSurfaceCapabilities* capabilities) const {
     // TODO(dawn:2320): Implement this
     dawn::ErrorLog() << "surface.GetCapabilities not supported yet with dawn_wire.";
+    return WGPUStatus_Error;
 }
 
 void Surface::GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {

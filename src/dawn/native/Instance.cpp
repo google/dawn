@@ -114,14 +114,14 @@ wgpu::WGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
 
 }  // anonymous namespace
 
-wgpu::Bool APIGetInstanceFeatures(InstanceFeatures* features) {
+wgpu::Status APIGetInstanceFeatures(InstanceFeatures* features) {
     if (features->nextInChain != nullptr) {
-        return false;
+        return wgpu::Status::Error;
     }
 
     features->timedWaitAnyEnable = true;
     features->timedWaitAnyMaxCount = kTimedWaitAnyMaxCountDefault;
-    return true;
+    return wgpu::Status::Success;
 }
 
 InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {

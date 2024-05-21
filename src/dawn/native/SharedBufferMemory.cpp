@@ -86,15 +86,17 @@ ObjectType SharedBufferMemoryBase::GetType() const {
     return ObjectType::SharedBufferMemory;
 }
 
-void SharedBufferMemoryBase::APIGetProperties(SharedBufferMemoryProperties* properties) const {
+wgpu::Status SharedBufferMemoryBase::APIGetProperties(
+    SharedBufferMemoryProperties* properties) const {
     properties->usage = mProperties.usage;
     properties->size = mProperties.size;
 
     UnpackedPtr<SharedBufferMemoryProperties> unpacked;
     if (GetDevice()->ConsumedError(ValidateAndUnpack(properties), &unpacked,
                                    "calling %s.GetProperties", this)) {
-        return;
+        return wgpu::Status::Error;
     }
+    return wgpu::Status::Success;
 }
 
 BufferBase* SharedBufferMemoryBase::APICreateBuffer(const BufferDescriptor* descriptor) {

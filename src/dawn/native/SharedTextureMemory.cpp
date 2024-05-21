@@ -106,10 +106,12 @@ ObjectType SharedTextureMemoryBase::GetType() const {
     return ObjectType::SharedTextureMemory;
 }
 
-void SharedTextureMemoryBase::APIGetProperties(SharedTextureMemoryProperties* properties) const {
+wgpu::Status SharedTextureMemoryBase::APIGetProperties(
+    SharedTextureMemoryProperties* properties) const {
     if (GetDevice()->ConsumedError(GetProperties(properties), "calling %s.GetProperties", this)) {
-        return;
+        return wgpu::Status::Error;
     }
+    return wgpu::Status::Success;
 }
 
 MaybeError SharedTextureMemoryBase::GetProperties(SharedTextureMemoryProperties* properties) const {

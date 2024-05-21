@@ -80,7 +80,7 @@ class Device final : public ObjectWithEventsBase {
     void HandleLogging(WGPULoggingType loggingType, const char* message);
     void HandleDeviceLost(WGPUDeviceLostReason reason, const char* message);
 
-    bool GetLimits(WGPUSupportedLimits* limits) const;
+    WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
     size_t EnumerateFeatures(WGPUFeatureName* features) const;
     void SetLimits(const WGPUSupportedLimits* limits);

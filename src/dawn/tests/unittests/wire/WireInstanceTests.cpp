@@ -145,12 +145,15 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
             EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
             EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
-                .WillOnce(SetArgPointee<1>(fakeProperties));
+                .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
+                    *properties = fakeProperties;
+                    return WGPUStatus_Success;
+                })));
 
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
                     *limits = fakeLimits;
-                    return true;
+                    return WGPUStatus_Success;
                 })));
 
             EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
@@ -186,7 +189,7 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                 EXPECT_EQ(properties.adapterType, fakeProperties.adapterType);
 
                 WGPUSupportedLimits limits = {};
-                EXPECT_TRUE(wgpuAdapterGetLimits(adapter, &limits));
+                EXPECT_EQ(wgpuAdapterGetLimits(adapter, &limits), WGPUStatus_Success);
                 EXPECT_EQ(limits.limits.maxTextureDimension1D,
                           fakeLimits.limits.maxTextureDimension1D);
                 EXPECT_EQ(limits.limits.maxVertexAttributes, fakeLimits.limits.maxVertexAttributes);
@@ -268,7 +271,8 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                                     fakeVkProperties;
                                 break;
                             default:
-                                FAIL() << "Unexpected chain";
+                                ADD_FAILURE() << "Unexpected chain";
+                                return WGPUStatus_Error;
                         }
                         // update next pointer back to the original since it would be overwritten
                         // in the switch statement
@@ -276,12 +280,13 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
 
                         chain = next;
                     }
+                    return WGPUStatus_Success;
                 })));
 
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
                     *limits = {};
-                    return true;
+                    return WGPUStatus_Success;
                 })));
 
             EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
@@ -372,12 +377,13 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
                     properties->architecture = "";
                     properties->name = "";
                     properties->driverDescription = "";
+                    return WGPUStatus_Success;
                 })));
 
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
                     *limits = {};
-                    return true;
+                    return WGPUStatus_Success;
                 })));
 
             EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))

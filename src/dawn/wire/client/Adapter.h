@@ -44,13 +44,13 @@ class Adapter final : public ObjectWithEventsBase {
 
     ObjectType GetObjectType() const override;
 
-    bool GetLimits(WGPUSupportedLimits* limits) const;
+    WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
     size_t EnumerateFeatures(WGPUFeatureName* features) const;
     void SetLimits(const WGPUSupportedLimits* limits);
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
     void SetProperties(const WGPUAdapterProperties* properties);
-    void GetProperties(WGPUAdapterProperties* properties) const;
+    WGPUStatus GetProperties(WGPUAdapterProperties* properties) const;
     void RequestDevice(const WGPUDeviceDescriptor* descriptor,
                        WGPURequestDeviceCallback callback,
                        void* userdata);
@@ -62,7 +62,8 @@ class Adapter final : public ObjectWithEventsBase {
     // Unimplementable. Only availale in dawn_native.
     WGPUInstance GetInstance() const;
     WGPUDevice CreateDevice(const WGPUDeviceDescriptor*);
-    bool GetFormatCapabilities(WGPUTextureFormat format, WGPUFormatCapabilities* capabilities);
+    WGPUStatus GetFormatCapabilities(WGPUTextureFormat format,
+                                     WGPUFormatCapabilities* capabilities);
 
   private:
     LimitsAndFeatures mLimitsAndFeatures;

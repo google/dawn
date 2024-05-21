@@ -123,7 +123,7 @@ class Surface final : public ErrorMonad {
 
     // Dawn API
     void APIConfigure(const SurfaceConfiguration* config);
-    void APIGetCapabilities(AdapterBase* adapter, SurfaceCapabilities* capabilities) const;
+    wgpu::Status APIGetCapabilities(AdapterBase* adapter, SurfaceCapabilities* capabilities) const;
     void APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const;
     wgpu::TextureFormat APIGetPreferredFormat(AdapterBase* adapter) const;
     void APIPresent();
