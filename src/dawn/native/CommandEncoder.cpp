@@ -497,20 +497,16 @@ MaybeError ValidateExpandResolveTextureLoadOp(const DeviceBase* device,
                     "The color attachment %s's sample count (%u) is not supported by %s.",
                     colorAttachment.view, textureSampleCount, wgpu::LoadOp::ExpandResolveTexture);
 
-    DAWN_INVALID_IF(colorAttachment.resolveTarget == nullptr, "%s is used without resolve target.",
-                    wgpu::LoadOp::ExpandResolveTexture);
+    // These should already be validated before entering this function.
+    DAWN_ASSERT(colorAttachment.resolveTarget != nullptr &&
+                !colorAttachment.resolveTarget->IsError());
+    DAWN_ASSERT(colorAttachment.view->GetFormat().supportsResolveTarget);
 
     DAWN_INVALID_IF((colorAttachment.resolveTarget->GetTexture()->GetUsage() &
                      wgpu::TextureUsage::TextureBinding) == 0,
                     "Resolve target %s was not created with %s usage, which is required for "
                     "%s.",
                     colorAttachment.resolveTarget, wgpu::TextureUsage::TextureBinding,
-                    wgpu::LoadOp::ExpandResolveTexture);
-
-    DAWN_INVALID_IF(!colorAttachment.view->GetFormat().supportsResolveTarget,
-                    "The color attachment %s format (%s) does not support being used with "
-                    "%s. The format does not support resolve.",
-                    colorAttachment.view, colorAttachment.view->GetFormat().format,
                     wgpu::LoadOp::ExpandResolveTexture);
 
     validationState->SetWillExpandResolveTexture(true);
@@ -575,7 +571,8 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
                             std::isnan(clearValue.b) || std::isnan(clearValue.a),
                         "Color clear value (%s) contains a NaN.", &clearValue);
     } else if (colorAttachment.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
-        DAWN_TRY(ValidateExpandResolveTextureLoadOp(device, colorAttachment, validationState));
+        DAWN_INVALID_IF(colorAttachment.resolveTarget == nullptr,
+                        "%s is used without resolve target.", wgpu::LoadOp::ExpandResolveTexture);
     }
 
     DAWN_TRY(ValidateColorAttachmentDepthSlice(attachment, colorAttachment.depthSlice));
@@ -588,6 +585,10 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
         // This step is skipped if implicitSampleCount > 1, because in that case, there shoudn't be
         // any explicit resolveTarget specified.
         DAWN_TRY(ValidateResolveTarget(device, colorAttachment, usageValidationMode));
+
+        if (colorAttachment.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
+            DAWN_TRY(ValidateExpandResolveTextureLoadOp(device, colorAttachment, validationState));
+        }
         // Add resolve target after adding color attachment to make sure there is already a color
         // attachment for the comparation of with and height.
         DAWN_TRY(validationState->AddAttachment(colorAttachment.resolveTarget,

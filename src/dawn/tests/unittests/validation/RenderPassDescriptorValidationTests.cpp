@@ -1968,7 +1968,8 @@ TEST_F(DawnLoadResolveTextureValidationTest, UnresolvableColorFormatError) {
     renderPass.cColorAttachments[0].view = multisampledTexture.CreateView();
     renderPass.cColorAttachments[0].resolveTarget = resolveTexture.CreateView();
     renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
-    AssertBeginRenderPassError(&renderPass, testing::HasSubstr("does not support resolve"));
+    AssertBeginRenderPassError(&renderPass,
+                               testing::HasSubstr("does not support being used as resolve target"));
 }
 
 // The LoadOp is NOT currently supported on depth/stencil attachment.
