@@ -61,7 +61,8 @@ class DevNull : public dawn::wire::CommandSerializer {
     std::vector<char> buf;
 };
 
-std::unique_ptr<dawn::native::Instance> sInstance;
+// We need this static function pointer to make AdapterSupported accessible in
+// instanceRequestAdapter
 static bool (*sAdapterSupported)(const dawn::native::Adapter&) = nullptr;
 #if DAWN_PLATFORM_IS(WINDOWS) && defined(ADDRESS_SANITIZER)
 static dawn::DynamicLib sVulkanLoader;
@@ -70,11 +71,6 @@ static dawn::DynamicLib sVulkanLoader;
 }  // namespace
 
 int DawnWireServerFuzzer::Initialize(int* argc, char*** argv) {
-    // TODO(crbug.com/1038952): The Instance must be static because destructing the vkInstance with
-    // Swiftshader crashes libFuzzer. When this is fixed, move this into Run so that error injection
-    // for adapter discovery can be fuzzed.
-    sInstance = std::make_unique<dawn::native::Instance>();
-
     // TODO(crbug.com/1038952): Although we keep a static instance, when discovering Vulkan
     // adapters, if no adapter is found, the vulkan loader DLL will be loaded and then unloaded,
     // resulting in ASAN false positives. We work around this by explicitly loading the loader
@@ -89,6 +85,8 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
                               size_t size,
                               bool (*AdapterSupported)(const dawn::native::Adapter&),
                               bool supportsErrorInjection) {
+    std::unique_ptr<dawn::native::Instance> instance = std::make_unique<dawn::native::Instance>();
+
     // We require at least the injected error index.
     if (size < sizeof(uint64_t)) {
         return 0;
@@ -116,7 +114,8 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     procs.instanceRequestAdapter = [](WGPUInstance cInstance,
                                       const WGPURequestAdapterOptions* options,
                                       WGPURequestAdapterCallback callback, void* userdata) {
-        std::vector<dawn::native::Adapter> adapters = sInstance->EnumerateAdapters();
+        std::vector<dawn::native::Adapter> adapters =
+            reinterpret_cast<dawn::native::Instance*>(cInstance)->EnumerateAdapters();
         for (dawn::native::Adapter adapter : adapters) {
             if (sAdapterSupported(adapter)) {
                 WGPUAdapter cAdapter = adapter.Get();
@@ -136,13 +135,13 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     serverDesc.serializer = &devNull;
 
     std::unique_ptr<dawn::wire::WireServer> wireServer(new dawn::wire::WireServer(serverDesc));
-    wireServer->InjectInstance(sInstance->Get(), {1, 0});
+    wireServer->InjectInstance(instance->Get(), {1, 0});
     wireServer->HandleCommands(reinterpret_cast<const char*>(data), size);
 
     // Flush remaining callbacks to avoid memory leaks.
     // TODO(crbug.com/dawn/1712): DeviceNull's APITick() will always return true so cannot
     // do a polling loop here.
-    dawn::native::InstanceProcessEvents(sInstance->Get());
+    dawn::native::InstanceProcessEvents(instance->Get());
 
     // Note: Deleting the server will release all created objects.
     // Deleted devices will wait for idle on destruction.

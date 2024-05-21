@@ -67,7 +67,8 @@ class DevNull : public dawn::wire::CommandSerializer {
     std::vector<char> buf;
 };
 
-std::unique_ptr<dawn::native::Instance> sInstance;
+// We need this static function pointer to make AdapterSupported accessible in
+// instanceRequestAdapter
 static bool (*sAdapterSupported)(const dawn::native::Adapter&) = nullptr;
 
 }  // namespace
@@ -75,23 +76,20 @@ static bool (*sAdapterSupported)(const dawn::native::Adapter&) = nullptr;
 namespace DawnLPMFuzzer {
 
 int Initialize(int* argc, char*** argv) {
-    // TODO(crbug.com/1038952): The Instance must be static because destructing the vkInstance with
-    // Swiftshader crashes libFuzzer. When this is fixed, move this into Run so that error injection
-    // for physical device discovery can be fuzzed.
-    sInstance = std::make_unique<dawn::native::Instance>();
     return 0;
 }
 
 int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::native::Adapter&)) {
+    std::unique_ptr<dawn::native::Instance> instance = std::make_unique<dawn::native::Instance>();
     sAdapterSupported = AdapterSupported;
-
     DawnProcTable procs = dawn::native::GetProcs();
 
     // Override requestAdapter to find an adapter that the fuzzer supports.
     procs.instanceRequestAdapter = [](WGPUInstance cInstance,
                                       const WGPURequestAdapterOptions* options,
                                       WGPURequestAdapterCallback callback, void* userdata) {
-        std::vector<dawn::native::Adapter> adapters = sInstance->EnumerateAdapters();
+        std::vector<dawn::native::Adapter> adapters =
+            reinterpret_cast<dawn::native::Instance*>(cInstance)->EnumerateAdapters();
         for (dawn::native::Adapter adapter : adapters) {
             if (sAdapterSupported(adapter)) {
                 WGPUAdapter cAdapter = adapter.Get();
@@ -111,7 +109,7 @@ int Run(const fuzzing::Program& program, bool (*AdapterSupported)(const dawn::na
     serverDesc.serializer = &devNull;
 
     std::unique_ptr<dawn::wire::WireServer> wireServer(new dawn::wire::WireServer(serverDesc));
-    wireServer->InjectInstance(sInstance->Get(), {kInstanceObjectId, 0});
+    wireServer->InjectInstance(instance->Get(), {kInstanceObjectId, 0});
 
     static dawn::utils::TerribleCommandBuffer* mCommandBuffer =
         new dawn::utils::TerribleCommandBuffer();
