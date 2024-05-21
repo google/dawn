@@ -39,9 +39,7 @@
 namespace tint::hlsl::writer {
 namespace {
 
-void ASTFuzzer(const tint::Program& program,
-               const fuzz::wgsl::Options& fuzz_options,
-               Options options) {
+void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context, Options options) {
     if (program.AST().HasOverrides()) {
         return;
     }
@@ -50,9 +48,9 @@ void ASTFuzzer(const tint::Program& program,
     if (res == Success) {
         const char* dxc_path = validate::kDxcDLLName;
         bool must_validate = false;
-        if (!fuzz_options.dxc.empty()) {
+        if (!context.options.dxc.empty()) {
             must_validate = true;
-            dxc_path = fuzz_options.dxc.c_str();
+            dxc_path = context.options.dxc.c_str();
         }
 
         auto dxc = tint::Command::LookPath(dxc_path);

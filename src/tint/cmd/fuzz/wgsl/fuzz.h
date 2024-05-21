@@ -35,6 +35,7 @@
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/utils/bytes/buffer_reader.h"
 #include "src/tint/utils/bytes/decoder.h"
+#include "src/tint/utils/containers/enum_set.h"
 #include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/macros/static_init.h"
 
@@ -53,17 +54,34 @@ struct Options {
     std::string dxc;
 };
 
+/// ProgramProperties is an enumerator of flags used to describe characteristics of the input
+/// program.
+enum class ProgramProperties {
+    /// The program has builtin functions which have been shadowed
+    kBuiltinFnsShadowed,
+    /// The program has builtin types which have been shadowed
+    kBuiltinTypesShadowed,
+};
+
+/// Context holds information about the fuzzer options and the input program.
+struct Context {
+    /// The options used for Run()
+    Options options;
+    /// The properties of the input program
+    EnumSet<ProgramProperties> program_properties;
+};
+
 /// ProgramFuzzer describes a fuzzer function that takes a WGSL program as input
 struct ProgramFuzzer {
     /// @param name the name of the fuzzer
-    /// @param fn the fuzzer function with the signature `void(const Program&, const Options&, ...)`
-    /// @returns a ProgramFuzzer that invokes the function @p fn with the Program, Options, along
+    /// @param fn the fuzzer function with the signature `void(const Program&, const Context&, ...)`
+    /// @returns a ProgramFuzzer that invokes the function @p fn with the Program, Context, along
     /// with any additional arguments which are deserialized from the fuzzer input.
     template <typename... ARGS>
     static ProgramFuzzer Create(std::string_view name,
-                                void (*fn)(const Program&, const Options&, ARGS...)) {
+                                void (*fn)(const Program&, const Context&, ARGS...)) {
         if constexpr (sizeof...(ARGS) > 0) {
-            auto fn_with_decode = [fn](const Program& program, const Options& options,
+            auto fn_with_decode = [fn](const Program& program, const Context& context,
                                        Slice<const std::byte> data) {
                 if (!data.data) {
                     return;
@@ -72,7 +90,7 @@ struct ProgramFuzzer {
                 auto data_args = bytes::Decode<std::tuple<std::decay_t<ARGS>...>>(reader);
                 if (data_args == Success) {
                     auto all_args =
-                        std::tuple_cat(std::tuple<const Program&, const Options&>{program, options},
+                        std::tuple_cat(std::tuple<const Program&, const Context&>{program, context},
                                        data_args.Get());
                     std::apply(*fn, all_args);
                 }
@@ -81,7 +99,7 @@ struct ProgramFuzzer {
         } else {
             return ProgramFuzzer{
                 name,
-                [fn](const Program& program, const Options& options, Slice<const std::byte>) {
+                [fn](const Program& program, const Context& options, Slice<const std::byte>) {
                     fn(program, options);
                 },
             };
@@ -95,7 +113,7 @@ struct ProgramFuzzer {
     template <typename... ARGS>
     static ProgramFuzzer Create(std::string_view name, void (*fn)(const Program&, ARGS...)) {
         if constexpr (sizeof...(ARGS) > 0) {
-            auto fn_with_decode = [fn](const Program& program, const Options&,
+            auto fn_with_decode = [fn](const Program& program, const Context&,
                                        Slice<const std::byte> data) {
                 if (!data.data) {
                     return;
@@ -112,7 +130,7 @@ struct ProgramFuzzer {
         } else {
             return ProgramFuzzer{
                 name,
-                [fn](const Program& program, const Options&, Slice<const std::byte>) {
+                [fn](const Program& program, const Context&, Slice<const std::byte>) {
                     fn(program);
                 },
             };
@@ -122,7 +140,7 @@ struct ProgramFuzzer {
     /// Name of the fuzzer function
     std::string_view name;
     /// The fuzzer function
-    std::function<void(const Program&, const Options&, Slice<const std::byte> data)> fn;
+    std::function<void(const Program&, const Context&, Slice<const std::byte> data)> fn;
 };
 
 /// Runs all the registered WGSL fuzzers with the supplied WGSL
@@ -142,9 +160,9 @@ void Register(const ProgramFuzzer& fuzzer);
 /// Where `...` is any number of deserializable parameters which are decoded from the base64
 /// content of the WGSL comments.
 /// @see bytes::Decode()
-#define TINT_WGSL_PROGRAM_FUZZER(FUNCTION)         \
+#define TINT_WGSL_PROGRAM_FUZZER(FUNCTION, ...)    \
     TINT_STATIC_INIT(::tint::fuzz::wgsl::Register( \
-        ::tint::fuzz::wgsl::ProgramFuzzer::Create(#FUNCTION, FUNCTION)))
+        ::tint::fuzz::wgsl::ProgramFuzzer::Create(#FUNCTION, FUNCTION, ##__VA_ARGS__)))
 
 }  // namespace tint::fuzz::wgsl
 

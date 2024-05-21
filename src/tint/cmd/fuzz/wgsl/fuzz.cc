@@ -28,14 +28,24 @@
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 
 #include <iostream>
+#include <string>
+#include <string_view>
 #include <thread>
 
+#include "src/tint/lang/core/builtin_type.h"
+#include "src/tint/lang/wgsl/ast/alias.h"
+#include "src/tint/lang/wgsl/ast/function.h"
+#include "src/tint/lang/wgsl/ast/identifier.h"
+#include "src/tint/lang/wgsl/ast/struct.h"
+#include "src/tint/lang/wgsl/ast/variable.h"
+#include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/common/allowed_features.h"
 #include "src/tint/lang/wgsl/reader/options.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/macros/static_init.h"
+#include "src/tint/utils/rtti/switch.h"
 
 #if TINT_BUILD_WGSL_WRITER
 #include "src/tint/lang/wgsl/program/program.h"
@@ -59,6 +69,42 @@ thread_local std::string_view currently_running;
     std::cerr << "ICE while running fuzzer: '" << currently_running << "'" << std::endl;
     std::cerr << err.Error() << std::endl;
     __builtin_trap();
+}
+
+bool IsBuiltinFn(std::string_view name) {
+    return tint::wgsl::ParseBuiltinFn(name) != tint::wgsl::BuiltinFn::kNone;
+}
+
+bool IsBuiltinType(std::string_view name) {
+    return tint::core::ParseBuiltinType(name) != tint::core::BuiltinType::kUndefined;
+}
+
+/// Scans @p program for patterns, returning a set of ProgramProperties.
+EnumSet<ProgramProperties> ScanProgramProperties(const Program& program) {
+    EnumSet<ProgramProperties> out;
+    auto check = [&](std::string_view name) {
+        if (IsBuiltinFn(name)) {
+            out.Add(ProgramProperties::kBuiltinFnsShadowed);
+        }
+        if (IsBuiltinType(name)) {
+            out.Add(ProgramProperties::kBuiltinTypesShadowed);
+        }
+    };
+
+    for (auto* node : program.ASTNodes().Objects()) {
+        tint::Switch(
+            node,  //
+            [&](const ast::Variable* variable) { check(variable->name->symbol.NameView()); },
+            [&](const ast::Function* fn) { check(fn->name->symbol.NameView()); },
+            [&](const ast::Struct* str) { check(str->name->symbol.NameView()); },
+            [&](const ast::Alias* alias) { check(alias->name->symbol.NameView()); });
+
+        if (out.Contains(ProgramProperties::kBuiltinFnsShadowed) &&
+            out.Contains(ProgramProperties::kBuiltinTypesShadowed)) {
+            break;  // Early exit - nothing more to find.
+        }
+    }
+    return out;
 }
 
 }  // namespace
@@ -100,6 +146,10 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
         return;
     }
 
+    Context context;
+    context.options = options;
+    context.program_properties = ScanProgramProperties(program);
+
     // Run each of the program fuzzer functions
     if (options.run_concurrently) {
         size_t n = Fuzzers().Length();
@@ -110,13 +160,13 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
                 Fuzzers()[i].name.find(options.filter) == std::string::npos) {
                 continue;
             }
-            threads.Push(std::thread([i, &program, &data, &options] {
+            threads.Push(std::thread([i, &program, &data, &context] {
                 auto& fuzzer = Fuzzers()[i];
                 currently_running = fuzzer.name;
-                if (options.verbose) {
+                if (context.options.verbose) {
                     std::cout << " • [" << i << "] Running: " << currently_running << std::endl;
                 }
-                fuzzer.fn(program, options, data);
+                fuzzer.fn(program, context, data);
             }));
         }
         for (auto& thread : threads) {
@@ -133,7 +183,7 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
             if (options.verbose) {
                 std::cout << " • Running: " << currently_running << std::endl;
             }
-            fuzzer.fn(program, options, data);
+            fuzzer.fn(program, context, data);
         }
     }
 }
