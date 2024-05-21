@@ -562,6 +562,8 @@ MaybeError ValidateTextureDescriptor(
     if (device->IsCompatibilityMode()) {
         const auto textureBindingViewDimension =
             ResolveDefaultCompatiblityTextureBindingViewDimension(device, descriptor);
+        DAWN_TRY_CONTEXT(ValidateTextureViewDimension(textureBindingViewDimension),
+                         "validating resolved compatibility textureBindingViewDimension");
 
         DAWN_INVALID_IF(
             !IsTextureViewDimensionCompatibleWithTextureDimension(textureBindingViewDimension,

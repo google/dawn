@@ -1156,6 +1156,25 @@ TEST_F(CompatValidationTest, DoNotResolveDefaultTextureBindingViewDimensionOnErr
     ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
 }
 
+// Regression test for crbug.com/341167195
+// Resolved default compatibility textureBindingViewDimension should be validated as it may come
+// from the TextureBindingViewDimensionDescriptor
+TEST_F(CompatValidationTest, InvalidTextureBindingViewDimensionDescriptorDescriptor) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {1, 1, 1};
+    descriptor.dimension = wgpu::TextureDimension::Undefined;
+    descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+
+    wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
+    descriptor.nextInChain = &textureBindingViewDimensionDesc;
+    // Forcefully set an invalid view dimension.
+    textureBindingViewDimensionDesc.textureBindingViewDimension =
+        static_cast<wgpu::TextureViewDimension>(99);
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+}
+
 class CompatTextureViewDimensionValidationTests : public CompatValidationTest {
   protected:
     void TestBindingTextureViewDimensions(
