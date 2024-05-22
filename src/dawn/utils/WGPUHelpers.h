@@ -204,8 +204,8 @@ struct ColorSpaceConversionInfo {
     std::array<float, 7> srcTransferFunctionParameters;
     std::array<float, 7> dstTransferFunctionParameters;
 };
-
 ColorSpaceConversionInfo GetYUVBT709ToRGBSRGBColorSpaceConversionInfo();
+ColorSpaceConversionInfo GetNoopRGBColorSpaceConversionInfo();
 
 }  // namespace dawn::utils
 

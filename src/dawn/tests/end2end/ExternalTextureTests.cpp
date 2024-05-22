@@ -52,6 +52,31 @@ wgpu::Texture Create2DTexture(wgpu::Device device,
     return device.CreateTexture(&descriptor);
 }
 
+struct YUVTestData {
+    float y;
+    float u;
+    float v;
+    std::array<float, 4> rgbaFloats;
+    utils::RGBA8 rgba;
+};
+static const YUVTestData kBlack = {
+    0.0, 0.5, 0.5, {0.0, 0.0, 0.0, 1.0}, utils::RGBA8::kBlack,
+};
+static const YUVTestData kRed = {
+    0.2126, 0.4172, 1.0, {1.0, 0.0, 0.0, 1.0}, utils::RGBA8::kRed,
+};
+static const YUVTestData kGreen = {
+    0.7152, 0.1402, 0.0175, {0.0, 1.0, 0.0, 1.0}, utils::RGBA8::kGreen,
+};
+static const YUVTestData kBlue = {
+    0.0722, 1.0, 0.4937, {0.0, 0.0, 1.0, 1.0}, utils::RGBA8::kBlue,
+};
+static const YUVTestData kColor1 = {0.6382,
+                                    0.3232,
+                                    0.6644,
+                                    {246 / 255.0, 169 / 255.0, 90 / 255.0, 1},
+                                    {246, 169, 90, 255}};
+
 template <typename Parent>
 class ExternalTextureTestsBase : public Parent {
   protected:
@@ -81,49 +106,111 @@ class ExternalTextureTestsBase : public Parent {
             })");
     }
 
-    wgpu::ExternalTextureDescriptor CreateDefaultExternalTextureDescriptor() {
+    wgpu::ExternalTextureDescriptor InitExternalTextureDescriptor(wgpu::TextureView plane0,
+                                                                  wgpu::TextureView plane1 = {}) {
         wgpu::ExternalTextureDescriptor desc;
-        desc.yuvToRgbConversionMatrix = yuvBT709ToRGBSRGB.yuvToRgbConversionMatrix.data();
-        desc.gamutConversionMatrix = yuvBT709ToRGBSRGB.gamutConversionMatrix.data();
-        desc.srcTransferFunctionParameters = yuvBT709ToRGBSRGB.srcTransferFunctionParameters.data();
-        desc.dstTransferFunctionParameters = yuvBT709ToRGBSRGB.dstTransferFunctionParameters.data();
+        desc.plane0 = plane0;
+        desc.plane1 = plane1;
+
+        const auto& conversion = plane1 == nullptr ? noopRGBConversion : bt709Conversion;
+        desc.yuvToRgbConversionMatrix = conversion.yuvToRgbConversionMatrix.data();
+        desc.gamutConversionMatrix = conversion.gamutConversionMatrix.data();
+        desc.srcTransferFunctionParameters = conversion.srcTransferFunctionParameters.data();
+        desc.dstTransferFunctionParameters = conversion.dstTransferFunctionParameters.data();
 
         return desc;
     }
 
-    void RenderToSourceTexture(wgpu::ShaderModule fragmentShader, wgpu::Texture texture) {
-        {
-            utils::ComboRenderPipelineDescriptor descriptor;
-            descriptor.vertex.module = vsModule;
-            descriptor.cFragment.module = fragmentShader;
-            descriptor.cTargets[0].format = texture.GetFormat();
-            wgpu::RenderPipeline pipeline1 = this->device.CreateRenderPipeline(&descriptor);
-
-            wgpu::Sampler sampler = this->device.CreateSampler();
-
-            wgpu::CommandEncoder encoder = this->device.CreateCommandEncoder();
-            wgpu::TextureView renderView = texture.CreateView();
-            utils::ComboRenderPassDescriptor renderPass({renderView}, nullptr);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-            {
-                pass.SetPipeline(pipeline1);
-                pass.Draw(6);
-                pass.End();
+    // Helper function to render a quad of data in a texture with a different color for each
+    // corner as well as an optional color for the outside of the quad. (the quad can be scaled
+    // to make it fill only parts of the texture).
+    struct QuadData {
+        std::array<float, 4> upperLeft;
+        std::array<float, 4> upperRight;
+        std::array<float, 4> lowerLeft;
+        std::array<float, 4> lowerRight;
+        std::array<float, 4> outsideData = {};
+        float scale = 1.0;
+        std::array<float, 3> padding = {};
+    };
+    void RenderQuad(const wgpu::Texture& texture, const QuadData& quad) {
+        // Make the pipeline drawing a quad in the texture, taking the colors as a uniform buffer.
+        wgpu::ShaderModule module = utils::CreateShaderModule(this->device, R"(
+            struct VsOut {
+                @builtin(position) pos : vec4f,
+                @interpolate(perspective) @location(0) ndc : vec4f,
             }
-            wgpu::CommandBuffer copy = encoder.Finish();
-            this->queue.Submit(1, &copy);
-        }
+            @vertex fn vs(@builtin(vertex_index) VertexIndex : u32) -> VsOut {
+                var pos = array(
+                    vec4f(-3, -1, 0, 1),
+                    vec4f( 3, -1, 0, 1),
+                    vec4f( 0,  2, 0, 1),
+                );
+                return VsOut(pos[VertexIndex], pos[VertexIndex]);
+            }
+
+            struct QuadData {
+                upperLeft : vec4f,
+                upperRight : vec4f,
+                lowerLeft : vec4f,
+                lowerRight : vec4f,
+                outside : vec4f,
+                scale : f32,
+            }
+            @group(0) @binding(0) var<storage> quad : QuadData;
+            @fragment fn fs(@interpolate(perspective) @location(0) ndc : vec4f)
+                                     -> @location(0) vec4f {
+                if abs(ndc.x) > quad.scale || abs(ndc.y) > quad.scale {
+                    return quad.outside;
+                }
+
+                if ndc.x <= 0 && ndc.y >= 0 {
+                    return quad.upperLeft;
+                } else if ndc.x >= 0 && ndc.y >= 0 {
+                    return quad.upperRight;
+                } else if ndc.x <= 0 && ndc.y <= 0 {
+                    return quad.lowerLeft;
+                } else {
+                    return quad.lowerRight;
+                }
+            })");
+
+        utils::ComboRenderPipelineDescriptor pDesc;
+        pDesc.vertex.module = module;
+        pDesc.cFragment.module = module;
+        pDesc.cTargets[0].format = texture.GetFormat();
+        wgpu::RenderPipeline quadPipeline = this->device.CreateRenderPipeline(&pDesc);
+
+        // Make the storage buffer and the bind group containing it.
+        wgpu::Buffer quadData = utils::CreateBufferFromData(this->device, &quad, sizeof(quad),
+                                                            wgpu::BufferUsage::Storage);
+        wgpu::BindGroup bg =
+            utils::MakeBindGroup(this->device, quadPipeline.GetBindGroupLayout(0), {{0, quadData}});
+
+        // Do the render.
+        wgpu::CommandEncoder encoder = this->device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPass({texture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(quadPipeline);
+        pass.SetBindGroup(0, bg);
+        pass.Draw(3);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        this->queue.Submit(1, &commands);
     }
 
     static constexpr uint32_t kWidth = 4;
     static constexpr uint32_t kHeight = 4;
     static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
     static constexpr wgpu::TextureUsage kSampledUsage = wgpu::TextureUsage::TextureBinding;
-    utils::ColorSpaceConversionInfo yuvBT709ToRGBSRGB =
-        utils::GetYUVBT709ToRGBSRGBColorSpaceConversionInfo();
 
     wgpu::ShaderModule vsModule;
     wgpu::ShaderModule fsSampleExternalTextureModule;
+
+    utils::ColorSpaceConversionInfo noopRGBConversion = utils::GetNoopRGBColorSpaceConversionInfo();
+    utils::ColorSpaceConversionInfo bt709Conversion =
+        utils::GetYUVBT709ToRGBSRGBColorSpaceConversionInfo();
 };
 
 class ExternalTextureTests : public ExternalTextureTestsBase<DawnTest> {
@@ -149,8 +236,7 @@ TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
     wgpu::TextureView view = texture.CreateView();
 
     // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-    externalDesc.plane0 = view;
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(view);
     externalDesc.visibleOrigin = {0, 0};
     externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -194,8 +280,7 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-    externalDesc.plane0 = externalView;
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(externalView);
     externalDesc.visibleOrigin = {0, 0};
     externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -211,7 +296,7 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     // Run the shader, which should sample from the external texture and draw a triangle into the
     // upper left corner of the render texture.
     wgpu::TextureView renderView = renderTexture.CreateView();
-    utils::ComboRenderPassDescriptor renderPass({renderView}, nullptr);
+    utils::ComboRenderPassDescriptor renderPass({renderView});
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
     {
@@ -271,8 +356,7 @@ TEST_P(ExternalTextureTests, SampleExternalTextureDifferingGroup) {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-    externalDesc.plane0 = externalView;
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(externalView);
     externalDesc.visibleOrigin = {0, 0};
     externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -326,24 +410,7 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
     wgpu::TextureView externalViewPlane0 = sampledTexturePlane0.CreateView();
     wgpu::TextureView externalViewPlane1 = sampledTexturePlane1.CreateView();
 
-    struct ConversionExpectation {
-        double y;
-        double u;
-        double v;
-        utils::RGBA8 rgba;
-    };
-
-    // Conversion expectations for BT.709 YUV source and sRGB destination.
-    std::array<ConversionExpectation, 7> expectations = {
-        {{0.0, .5, .5, utils::RGBA8::kBlack},
-         {0.2126, 0.4172, 1.0, utils::RGBA8::kRed},
-         {0.7152, 0.1402, 0.0175, utils::RGBA8::kGreen},
-         {0.0722, 1.0, 0.4937, utils::RGBA8::kBlue},
-         {0.6382, 0.3232, 0.6644, {246, 169, 90, 255}},
-         {0.5423, 0.5323, 0.4222, {120, 162, 169, 255}},
-         {0.2345, 0.4383, 0.6342, {126, 53, 33, 255}}}};
-
-    for (const ConversionExpectation& expectation : expectations) {
+    for (const auto& expectation : {kBlack, kRed, kGreen, kBlue, kColor1}) {
         // Initialize the texture planes with YUV data
         {
             utils::ComboRenderPassDescriptor renderPass({externalViewPlane0, externalViewPlane1},
@@ -367,9 +434,8 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture views
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = externalViewPlane0;
-        externalDesc.plane1 = externalViewPlane1;
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(externalViewPlane0, externalViewPlane1);
         externalDesc.visibleOrigin = {0, 0};
         externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -423,24 +489,7 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
     wgpu::TextureView externalViewPlane0 = sampledTexturePlane0.CreateView();
     wgpu::TextureView externalViewPlane1 = sampledTexturePlane1.CreateView();
 
-    struct ConversionExpectation {
-        double y;
-        double u;
-        double v;
-        utils::RGBA8 rgba;
-    };
-
-    // Conversion expectations for BT.709 YUV source and sRGB destination.
-    std::array<ConversionExpectation, 7> expectations = {
-        {{0.0, .5, .5, utils::RGBA8::kBlack},
-         {0.2126, 0.4172, 1.0, utils::RGBA8::kRed},
-         {0.7152, 0.1402, 0.0175, utils::RGBA8::kGreen},
-         {0.0722, 1.0, 0.4937, utils::RGBA8::kBlue},
-         {0.6382, 0.3232, 0.6644, {246, 169, 90, 255}},
-         {0.5423, 0.5323, 0.4222, {120, 162, 169, 255}},
-         {0.2345, 0.4383, 0.6342, {125, 53, 32, 255}}}};
-
-    for (const ConversionExpectation& expectation : expectations) {
+    for (const auto& expectation : {kBlack, kRed, kGreen, kBlue, kColor1}) {
         // Initialize the texture planes with YUV data
         {
             utils::ComboRenderPassDescriptor renderPass({externalViewPlane0, externalViewPlane1},
@@ -463,9 +512,8 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture views
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = externalViewPlane0;
-        externalDesc.plane1 = externalViewPlane1;
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(externalViewPlane0, externalViewPlane1);
         externalDesc.visibleOrigin = {0, 0};
         externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -501,33 +549,19 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
 // Test draws a green square in the upper left quadrant, a black square in the upper right, a red
 // square in the lower left and a blue square in the lower right. The image is then sampled as an
 // external texture and rotated 0, 90, 180, and 270 degrees with and without the y-axis flipped.
-TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
+TEST_P(ExternalTextureTests, RotateAndOrFlipSampleSinglePlane) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
-    const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-               return vec4f(0.0, 1.0, 0.0, 1.0);
-            }
-
-            if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-               return vec4f(0.0, 0.0, 1.0, 1.0);
-            }
-
-            if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-               return vec4f(0.0, 0.0, 0.0, 1.0);
-            }
-
-            return vec4f(1.0, 0.0, 0.0, 1.0);
-        })");
+    // TODO(41487285): Fails on OpenGL ANGLE D3D11 Intel (but not other configs). Suppress since we
+    // don't want to ship that configuration.
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11() && IsIntel());
 
     wgpu::Texture sourceTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
-
-    RenderToSourceTexture(sourceTextureFsModule, sourceTexture);
+    RenderQuad(sourceTexture,
+               {kGreen.rgbaFloats, kBlack.rgbaFloats, kRed.rgbaFloats, kBlue.rgbaFloats});
 
     wgpu::Texture renderTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
@@ -543,8 +577,8 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = sourceTexture.CreateView();
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sourceTexture.CreateView());
         externalDesc.visibleOrigin = {0, 0};
         externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -615,8 +649,8 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = sourceTexture.CreateView();
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sourceTexture.CreateView());
         externalDesc.rotation = exp.rotation;
         externalDesc.mirrored = exp.mirrored;
         externalDesc.visibleOrigin = {0, 0};
@@ -661,47 +695,13 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
 // Test draws a green square in the upper left quadrant, a black square in the upper right, a red
 // square in the lower left and a blue square in the lower right. The image is then sampled as an
 // external texture and rotated 0, 90, 180, and 270 degrees with and without the y-axis flipped.
-TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
+TEST_P(ExternalTextureTests, RotateAndOrFlipSampleMultiplanar) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
-    const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-
-            if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-               return vec4f(0.7152, 0.0, 0.0, 0.0);
-            }
-
-            if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-               return vec4f(0.0722, 0.0, 1.0, 1.0);
-            }
-
-            if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-               return vec4f(0.0, 0.0, 0.0, 0.0);
-            }
-
-            return vec4f(0.2126, 0.0, 0.0, 0.0);
-        })");
-
-    const wgpu::ShaderModule sourceTexturePlane1FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-
-            if(FragCoord.x < 2.0 && FragCoord.y < 2.0) {
-               return vec4f(0.1402, 0.0175, 0.0, 0.0);
-            }
-
-            if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-               return vec4f(1.0, 0.4937, 0.0, 0.0);
-            }
-
-            if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-               return vec4f(0.5, 0.5, 0.0, 0.0);
-            }
-
-            return vec4f(0.4172, 1.0, 0.0, 0.0);
-        })");
+    // TODO(41487285): Fails on OpenGL ANGLE D3D11 Intel (but not other configs). Suppress since we
+    // don't want to ship that configuration.
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11() && IsIntel());
 
     wgpu::Texture sourceTexturePlane0 =
         Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R8Unorm,
@@ -709,9 +709,9 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
     wgpu::Texture sourceTexturePlane1 =
         Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::RG8Unorm,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
-
-    RenderToSourceTexture(sourceTexturePlane0FsModule, sourceTexturePlane0);
-    RenderToSourceTexture(sourceTexturePlane1FsModule, sourceTexturePlane1);
+    RenderQuad(sourceTexturePlane0, {{kGreen.y}, {kBlack.y}, {kRed.y}, {kBlue.y}});
+    RenderQuad(sourceTexturePlane1,
+               {{kGreen.u, kGreen.v}, {kBlack.u, kBlack.v}, {kRed.u, kRed.v}, {kBlue.u, kBlue.v}});
 
     wgpu::Texture renderTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
@@ -727,9 +727,8 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = sourceTexturePlane0.CreateView();
-        externalDesc.plane1 = sourceTexturePlane1.CreateView();
+        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(
+            sourceTexturePlane0.CreateView(), sourceTexturePlane1.CreateView());
         externalDesc.visibleOrigin = {0, 0};
         externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -800,9 +799,8 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = sourceTexturePlane0.CreateView();
-        externalDesc.plane1 = sourceTexturePlane1.CreateView();
+        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(
+            sourceTexturePlane0.CreateView(), sourceTexturePlane1.CreateView());
         externalDesc.rotation = exp.rotation;
         externalDesc.mirrored = exp.mirrored;
         externalDesc.visibleOrigin = {0, 0};
@@ -850,35 +848,11 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
-    const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
-                if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-                   return vec4f(0.0, 1.0, 0.0, 1.0);
-                }
-
-                if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-                   return vec4f(1.0, 1.0, 1.0, 1.0);
-                }
-
-                if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
-                   return vec4f(1.0, 0.0, 0.0, 1.0);
-                }
-
-                if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-                   return vec4f(0.0, 0.0, 1.0, 1.0);
-                }
-            }
-
-            return vec4f(0.0, 0.0, 0.0, 1.0);
-        })");
-
     wgpu::Texture sourceTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
-
-    RenderToSourceTexture(sourceTextureFsModule, sourceTexture);
+    RenderQuad(sourceTexture, {kGreen.rgbaFloats, kColor1.rgbaFloats, kRed.rgbaFloats,
+                               kBlue.rgbaFloats, kBlack.rgbaFloats, 0.5});
 
     wgpu::Texture renderTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
@@ -912,10 +886,10 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
         {{kWidth / 2, kHeight / 4},
          {kWidth / 4, kHeight / 4},
          wgpu::ExternalTextureRotation::Rotate0Degrees,
-         utils::RGBA8::kWhite,
-         utils::RGBA8::kWhite,
-         utils::RGBA8::kWhite,
-         utils::RGBA8::kWhite},
+         kColor1.rgba,
+         kColor1.rgba,
+         kColor1.rgba,
+         kColor1.rgba},
         {{kWidth / 4, kHeight / 2},
          {kWidth / 4, kHeight / 4},
          wgpu::ExternalTextureRotation::Rotate0Degrees,
@@ -934,7 +908,7 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
          {kWidth / 2, kHeight / 2},
          wgpu::ExternalTextureRotation::Rotate0Degrees,
          utils::RGBA8::kGreen,
-         utils::RGBA8::kWhite,
+         kColor1.rgba,
          utils::RGBA8::kRed,
          utils::RGBA8::kBlue},
         {{kWidth / 4, kHeight / 4},
@@ -943,18 +917,18 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
          utils::RGBA8::kRed,
          utils::RGBA8::kGreen,
          utils::RGBA8::kBlue,
-         utils::RGBA8::kWhite},
+         kColor1.rgba},
         {{kWidth / 4, kHeight / 4},
          {kWidth / 2, kHeight / 2},
          wgpu::ExternalTextureRotation::Rotate180Degrees,
          utils::RGBA8::kBlue,
          utils::RGBA8::kRed,
-         utils::RGBA8::kWhite,
+         kColor1.rgba,
          utils::RGBA8::kGreen},
         {{kWidth / 4, kHeight / 4},
          {kWidth / 2, kHeight / 2},
          wgpu::ExternalTextureRotation::Rotate270Degrees,
-         utils::RGBA8::kWhite,
+         kColor1.rgba,
          utils::RGBA8::kBlue,
          utils::RGBA8::kGreen,
          utils::RGBA8::kRed},
@@ -969,8 +943,8 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = sourceTexture.CreateView();
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sourceTexture.CreateView());
         externalDesc.rotation = exp.rotation;
         externalDesc.visibleOrigin = exp.visibleOrigin;
         externalDesc.visibleSize = exp.visibleSize;
@@ -1013,63 +987,20 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
-    const wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
-                if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-                   return vec4f(0.7152, 0.0, 0.0, 0.0);
-                }
-
-                if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-                   return vec4f(1.0, 0.0, 0.0, 0.0);
-                }
-
-                if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
-                   return vec4f(0.2126, 0.0, 0.0, 0.0);
-                }
-
-                if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-                   return vec4f(0.0722, 0.0, 1.0, 1.0);
-                }
-            }
-
-            return vec4f(0.0, 0.0, 0.0, 0.0);
-        })");
-
-    const wgpu::ShaderModule sourceTexturePlane1FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            if(FragCoord.x >= 1.0 && FragCoord.x < 3.0 && FragCoord.y >= 1.0 && FragCoord.y < 3.0) {
-                if(FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-                    return vec4f(0.1402, 0.0175, 0.0, 0.0);
-                }
-
-                if(FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-                    return vec4f(0.5, 0.5, 0.0, 0.0);
-                }
-
-                if(FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
-                    return vec4f(0.4172, 1.0, 0.0, 0.0);
-                }
-
-                if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-                    return vec4f(1.0, 0.4937, 0.0, 0.0);
-                }
-            }
-
-            return vec4f(0.5, 0.5, 0.0, 0.0);
-        })");
-
     wgpu::Texture sourceTexturePlane0 =
         Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R8Unorm,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
     wgpu::Texture sourceTexturePlane1 =
         Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::RG8Unorm,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
-
-    RenderToSourceTexture(sourceTexturePlane0FsModule, sourceTexturePlane0);
-    RenderToSourceTexture(sourceTexturePlane1FsModule, sourceTexturePlane1);
+    RenderQuad(sourceTexturePlane0,
+               {{kGreen.y}, {kColor1.y}, {kRed.y}, {kBlue.y}, {kBlack.y}, 0.5});
+    RenderQuad(sourceTexturePlane1, {{kGreen.u, kGreen.v},
+                                     {kColor1.u, kColor1.v},
+                                     {kRed.u, kRed.v},
+                                     {kBlue.u, kBlue.v},
+                                     {kBlack.u, kBlack.v},
+                                     0.5});
 
     wgpu::Texture renderTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
@@ -1103,10 +1034,10 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
          {{kWidth / 2, kHeight / 4},
           {kWidth / 4, kHeight / 4},
           wgpu::ExternalTextureRotation::Rotate0Degrees,
-          utils::RGBA8::kWhite,
-          utils::RGBA8::kWhite,
-          utils::RGBA8::kWhite,
-          utils::RGBA8::kWhite},
+          kColor1.rgba,
+          kColor1.rgba,
+          kColor1.rgba,
+          kColor1.rgba},
          {{kWidth / 4, kHeight / 2},
           {kWidth / 4, kHeight / 4},
           wgpu::ExternalTextureRotation::Rotate0Degrees,
@@ -1125,7 +1056,7 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
           {kWidth / 2, kHeight / 2},
           wgpu::ExternalTextureRotation::Rotate0Degrees,
           utils::RGBA8::kGreen,
-          utils::RGBA8::kWhite,
+          kColor1.rgba,
           utils::RGBA8::kRed,
           utils::RGBA8::kBlue},
          {{kWidth / 4, kHeight / 4},
@@ -1134,18 +1065,18 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
           utils::RGBA8::kRed,
           utils::RGBA8::kGreen,
           utils::RGBA8::kBlue,
-          utils::RGBA8::kWhite},
+          kColor1.rgba},
          {{kWidth / 4, kHeight / 4},
           {kWidth / 2, kHeight / 2},
           wgpu::ExternalTextureRotation::Rotate180Degrees,
           utils::RGBA8::kBlue,
           utils::RGBA8::kRed,
-          utils::RGBA8::kWhite,
+          kColor1.rgba,
           utils::RGBA8::kGreen},
          {{kWidth / 4, kHeight / 4},
           {kWidth / 2, kHeight / 2},
           wgpu::ExternalTextureRotation::Rotate270Degrees,
-          utils::RGBA8::kWhite,
+          kColor1.rgba,
           utils::RGBA8::kBlue,
           utils::RGBA8::kGreen,
           utils::RGBA8::kRed}}};
@@ -1159,9 +1090,8 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = sourceTexturePlane0.CreateView();
-        externalDesc.plane1 = sourceTexturePlane1.CreateView();
+        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(
+            sourceTexturePlane0.CreateView(), sourceTexturePlane1.CreateView());
         externalDesc.rotation = exp.rotation;
         externalDesc.visibleOrigin = exp.visibleOrigin;
         externalDesc.visibleSize = exp.visibleSize;
@@ -1236,8 +1166,7 @@ TEST_P(ExternalTextureTests, SampleExternalTextureAlpha) {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-    externalDesc.plane0 = externalView;
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(externalView);
     externalDesc.visibleOrigin = {0, 0};
     externalDesc.visibleSize = {kWidth, kHeight};
 
@@ -1363,70 +1292,20 @@ class ExternalTextureOOBTests : public ExternalTextureTestsBase<DawnTestWithPara
   protected:
     void SetUp() override {
         ExternalTextureTestsBase<DawnTestWithParams<OOBTestParams>>::SetUp();
-        wgpu::ShaderModule sourceTexturePlane0FsModule = utils::CreateShaderModule(device, R"(
-         @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            if (any(clamp(FragCoord.xy, vec2f(1.0), vec2f(3.0)) != FragCoord.xy)) {
-                return vec4f(0.0, 0.0, 0.0, 0.0);
-            }
-
-            if (FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-                return vec4f(0.7152, 0.0, 0.0, 0.0);
-            }
-
-            if (FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-                return vec4f(1.0, 0.0, 0.0, 0.0);
-            }
-
-            if (FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
-                return vec4f(0.2126, 0.0, 0.0, 0.0);
-            }
-
-            if(FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-                return vec4f(0.0722, 0.0, 1.0, 1.0);
-            }
-
-            // Not reached
-            return vec4f(0.0, 0.0, 0.0, 0.0);
-        })");
-
-        wgpu::ShaderModule sourceTexturePlane1FsModule = utils::CreateShaderModule(device, R"(
-        @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            if (any(clamp(FragCoord.xy, vec2f(1.0), vec2f(3.0)) != FragCoord.xy)) {
-                return vec4f(0.5, 0.5, 0.0, 0.0);
-            }
-
-            if (FragCoord.y < 2.0 && FragCoord.x < 2.0) {
-                return vec4f(0.1402, 0.0175, 0.0, 0.0);
-            }
-
-            if (FragCoord.y < 2.0 && FragCoord.x >= 2.0) {
-                return vec4f(0.5, 0.5, 0.0, 0.0);
-            }
-
-            if (FragCoord.y >= 2.0 && FragCoord.x < 2.0) {
-                return vec4f(0.4172, 1.0, 0.0, 0.0);
-            }
-
-            if (FragCoord.y >= 2.0 && FragCoord.x >= 2.0) {
-                return vec4f(1.0, 0.4937, 0.0, 0.0);
-            }
-
-            // Not reached
-            return vec4f(0.0, 0.0, 0.0, 0.0);
-
-        })");
-
         sourceTexturePlane0 = Create2DTexture(
             device, kPlaneWidth, kPlaneHeight, wgpu::TextureFormat::R8Unorm,
             wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
         sourceTexturePlane1 = Create2DTexture(
             device, kPlaneWidth, kPlaneHeight, wgpu::TextureFormat::RG8Unorm,
             wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
-
-        RenderToSourceTexture(sourceTexturePlane0FsModule, sourceTexturePlane0);
-        RenderToSourceTexture(sourceTexturePlane1FsModule, sourceTexturePlane1);
+        RenderQuad(sourceTexturePlane0,
+                   {{kGreen.y}, {kColor1.y}, {kRed.y}, {kBlue.y}, {kBlack.y}, 0.5});
+        RenderQuad(sourceTexturePlane1, {{kGreen.u, kGreen.v},
+                                         {kColor1.u, kColor1.v},
+                                         {kRed.u, kRed.v},
+                                         {kBlue.u, kBlue.v},
+                                         {kBlack.u, kBlack.v},
+                                         0.5});
 
         renderTexture =
             Create2DTexture(device, kPlaneWidth, kPlaneHeight, kFormat,
@@ -1513,9 +1392,8 @@ class ExternalTextureOOBTests : public ExternalTextureTestsBase<DawnTestWithPara
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = sourceTexturePlane0.CreateView();
-        externalDesc.plane1 = sourceTexturePlane1.CreateView();
+        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(
+            sourceTexturePlane0.CreateView(), sourceTexturePlane1.CreateView());
         externalDesc.rotation = rotation;
         externalDesc.mirrored = flip == Flip::Mirrored;
 
