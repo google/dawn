@@ -297,7 +297,7 @@ deps = {
   },
 
   'third_party/webgpu-headers': {
-    'url': '{chromium_git}/external/github.com/webgpu-native/webgpu-headers@aef5e428a1fdab2ea770581ae7c95d8779984e0a',
+    'url': '{chromium_git}/external/github.com/webgpu-native/webgpu-headers@8049c324dc7b3c09dc96ea04cb02860f272c8686',
   },
 
   'third_party/khronos/OpenGL-Registry': {
