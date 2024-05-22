@@ -27,9 +27,11 @@
 
 #include "src/tint/lang/core/ir/validator.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "src/tint/lang/core/intrinsic/table.h"
@@ -81,8 +83,11 @@
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/text_style.h"
@@ -240,14 +245,56 @@ class Validator {
     /// @param src the source lines to highlight
     diag::Diagnostic& AddNote(Source src = {});
 
-    /// Adds a note to the diagnostics highlighting where the value was declared, if it has a source
+    /// Adds a note to the diagnostics highlighting where the value instruction or block is
+    /// declared, if it has a source location.
+    /// @param decl the value instruction or block
+    void AddDeclarationNote(const CastableBase* decl);
+
+    /// Adds a note to the diagnostics highlighting where the block is declared, if it has a source
     /// location.
-    /// @param value the value
-    void AddDeclarationNote(const Value* value);
+    /// @param block the block
+    void AddDeclarationNote(const Block* block);
+
+    /// Adds a note to the diagnostics highlighting where the block parameter is declared, if it
+    /// has a source location.
+    /// @param param the block parameter
+    void AddDeclarationNote(const BlockParam* param);
+
+    /// Adds a note to the diagnostics highlighting where the function is declared, if it has a
+    /// source location.
+    /// @param fn the function
+    void AddDeclarationNote(const Function* fn);
+
+    /// Adds a note to the diagnostics highlighting where the function parameter is declared, if it
+    /// has a source location.
+    /// @param param the function parameter
+    void AddDeclarationNote(const FunctionParam* param);
+
+    /// Adds a note to the diagnostics highlighting where the instruction is declared, if it has a
+    /// source location.
+    /// @param inst the inst
+    void AddDeclarationNote(const Instruction* inst);
+
+    /// Adds a note to the diagnostics highlighting where instruction result was declared, if it has
+    /// a source location.
+    /// @param res the res
+    void AddDeclarationNote(const InstructionResult* res);
+
+    /// @param decl the value, instruction or block to get the name for
+    /// @returns the styled name for the given value, instruction or block
+    StyledText NameOf(const CastableBase* decl);
 
     /// @param v the value to get the name for
-    /// @returns the name for the given value
+    /// @returns the styled name for the given value
     StyledText NameOf(const Value* v);
+
+    /// @param inst the instruction to get the name for
+    /// @returns the styled  name for the given instruction
+    StyledText NameOf(const Instruction* inst);
+
+    /// @param block the block to get the name for
+    /// @returns the styled  name for the given block
+    StyledText NameOf(const Block* block);
 
     /// Checks the given operand is not null
     /// @param inst the instruction
@@ -327,6 +374,10 @@ class Validator {
     /// @param b the terminator to validate
     void CheckTerminator(const Terminator* b);
 
+    /// Validates the break if instruction
+    /// @param b the break if to validate
+    void CheckBreakIf(const BreakIf* b);
+
     /// Validates the continue instruction
     /// @param c the continue to validate
     void CheckContinue(const Continue* c);
@@ -376,6 +427,19 @@ class Validator {
     /// Validates the given store vector element
     /// @param s the store vector element to validate
     void CheckStoreVectorElement(const StoreVectorElement* s);
+
+    /// Validates that the number and types of the source instruction operands match the target's
+    /// values.
+    /// @param source_inst the source instruction
+    /// @param source_operand_offset the index of the first operand of the source instruction
+    /// @param source_operand_count the number of operands of the source instruction
+    /// @param target the receiver of the operand values
+    /// @param target_values the receiver of the operand values
+    void CheckOperandsMatchTarget(const Instruction* source_inst,
+                                  size_t source_operand_offset,
+                                  size_t source_operand_count,
+                                  const CastableBase* target,
+                                  VectorRef<const Value*> target_values);
 
     /// @param inst the instruction
     /// @param idx the operand index
@@ -574,37 +638,81 @@ diag::Diagnostic& Validator::AddNote(Source src) {
     return diag;
 }
 
-void Validator::AddDeclarationNote(const Value* value) {
+void Validator::AddDeclarationNote(const CastableBase* decl) {
     tint::Switch(
-        value,  //
-        [&](const InstructionResult* res) {
-            if (auto* inst = res->Instruction()) {
-                auto results = inst->Results();
-                for (size_t i = 0; i < results.Length(); i++) {
-                    if (results[i] == value) {
-                        AddResultNote(res->Instruction(), i) << NameOf(value) << " declared here";
-                        return;
-                    }
-                }
+        decl,  //
+        [&](const Block* block) { AddDeclarationNote(block); },
+        [&](const BlockParam* param) { AddDeclarationNote(param); },
+        [&](const Function* fn) { AddDeclarationNote(fn); },
+        [&](const FunctionParam* param) { AddDeclarationNote(param); },
+        [&](const Instruction* inst) { AddDeclarationNote(inst); },
+        [&](const InstructionResult* res) { AddDeclarationNote(res); });
+}
+
+void Validator::AddDeclarationNote(const Block* block) {
+    auto src = Disassembly().BlockSource(block);
+    if (src.file) {
+        AddNote(src) << NameOf(block) << " declared here";
+    }
+}
+
+void Validator::AddDeclarationNote(const BlockParam* param) {
+    auto src = Disassembly().BlockParamSource(param);
+    if (src.file) {
+        AddNote(src) << NameOf(param) << " declared here";
+    }
+}
+
+void Validator::AddDeclarationNote(const Function* fn) {
+    AddNote(fn) << NameOf(fn) << " declared here";
+}
+
+void Validator::AddDeclarationNote(const FunctionParam* param) {
+    auto src = Disassembly().FunctionParamSource(param);
+    if (src.file) {
+        AddNote(src) << NameOf(param) << " declared here";
+    }
+}
+
+void Validator::AddDeclarationNote(const Instruction* inst) {
+    auto src = Disassembly().InstructionSource(inst);
+    if (src.file) {
+        AddNote(src) << NameOf(inst) << " declared here";
+    }
+}
+
+void Validator::AddDeclarationNote(const InstructionResult* res) {
+    if (auto* inst = res->Instruction()) {
+        auto results = inst->Results();
+        for (size_t i = 0; i < results.Length(); i++) {
+            if (results[i] == res) {
+                AddResultNote(res->Instruction(), i) << NameOf(res) << " declared here";
+                return;
             }
-        },
-        [&](const FunctionParam* param) {
-            auto src = Disassembly().FunctionParamSource(param);
-            if (src.file) {
-                AddNote(src) << NameOf(value) << " declared here";
-            }
-        },
-        [&](const BlockParam* param) {
-            auto src = Disassembly().BlockParamSource(param);
-            if (src.file) {
-                AddNote(src) << NameOf(value) << " declared here";
-            }
-        },
-        [&](const Function* fn) { AddNote(fn) << NameOf(value) << " declared here"; });
+        }
+    }
+}
+
+StyledText Validator::NameOf(const CastableBase* decl) {
+    return tint::Switch(
+        decl,  //
+        [&](const Value* value) { return NameOf(value); },
+        [&](const Instruction* inst) { return NameOf(inst); },
+        [&](const Block* block) { return NameOf(block); },  //
+        TINT_ICE_ON_NO_MATCH);
 }
 
 StyledText Validator::NameOf(const Value* value) {
     return Disassembly().NameOf(value);
+}
+
+StyledText Validator::NameOf(const Instruction* inst) {
+    return StyledText{} << style::Instruction(inst->FriendlyName());
+}
+
+StyledText Validator::NameOf(const Block* block) {
+    return StyledText{} << style::Instruction(block->Parent()->FriendlyName()) << " block "
+                        << Disassembly().NameOf(block);
 }
 
 void Validator::CheckOperandNotNull(const Instruction* inst, const ir::Value* operand, size_t idx) {
@@ -1160,7 +1268,7 @@ void Validator::CheckTerminator(const Terminator* b) {
 
     tint::Switch(
         b,                                                           //
-        [&](const ir::BreakIf*) {},                                  //
+        [&](const ir::BreakIf* i) { CheckBreakIf(i); },              //
         [&](const ir::Continue* c) { CheckContinue(c); },            //
         [&](const ir::Exit* e) { CheckExit(e); },                    //
         [&](const ir::NextIteration* n) { CheckNextIteration(n); },  //
@@ -1172,6 +1280,28 @@ void Validator::CheckTerminator(const Terminator* b) {
     if (b->next) {
         AddError(b) << "must be the last instruction in the block";
     }
+}
+
+void Validator::CheckBreakIf(const BreakIf* b) {
+    auto* loop = b->Loop();
+    if (loop == nullptr) {
+        AddError(b) << "has no associated loop";
+        return;
+    }
+
+    if (loop->Continuing() != b->Block()) {
+        AddError(b) << "must only be called directly from loop continuing";
+    }
+
+    auto next_iter_values = b->NextIterValues();
+    if (auto* body = loop->Body()) {
+        CheckOperandsMatchTarget(b, b->ArgsOperandOffset(), next_iter_values.Length(), body,
+                                 body->Params());
+    }
+
+    auto exit_values = b->ExitValues();
+    CheckOperandsMatchTarget(b, b->ArgsOperandOffset() + next_iter_values.Length(),
+                             exit_values.Length(), loop, loop->Results());
 }
 
 void Validator::CheckContinue(const Continue* c) {
@@ -1391,6 +1521,37 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
                     << " does not match vector pointer element type "
                     << style::Type(el_ty->FriendlyName());
             }
+        }
+    }
+}
+
+void Validator::CheckOperandsMatchTarget(const Instruction* source_inst,
+                                         size_t source_operand_offset,
+                                         size_t source_operand_count,
+                                         const CastableBase* target,
+                                         VectorRef<const Value*> target_values) {
+    if (source_operand_count != target_values.Length()) {
+        auto values = [&](size_t n) { return n == 1 ? " value" : " values"; };
+        AddError(source_inst) << "provides " << source_operand_count << values(source_operand_count)
+                              << " but " << NameOf(target) << " expects " << target_values.Length()
+                              << values(target_values.Length());
+        AddDeclarationNote(target);
+    }
+    size_t count = std::min(source_operand_count, target_values.Length());
+    for (size_t i = 0; i < count; i++) {
+        auto* source_value = source_inst->Operand(source_operand_offset + i);
+        auto* target_value = target_values[i];
+        if (!source_value || !target_value) {
+            continue;  // Caller should be checking operands are not null
+        }
+        auto* source_type = source_value->Type();
+        auto* target_type = target_value->Type();
+        if (source_type != target_type) {
+            AddError(source_inst, source_operand_offset + i)
+                << "operand with type " << style::Type(source_type->FriendlyName())
+                << " does not match " << NameOf(target) << " target type "
+                << style::Type(target_type->FriendlyName());
+            AddDeclarationNote(target_value);
         }
     }
 }

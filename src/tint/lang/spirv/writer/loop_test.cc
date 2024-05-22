@@ -410,7 +410,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
         b.Append(loop->Continuing(), [&] {
             auto* cmp = b.GreaterThan(ty.bool_(), cont_param_a, 5_i);
             auto* not_b = b.Not(ty.bool_(), cont_param_b);
-            b.BreakIf(loop, cmp, cont_param_a, not_b);
+            b.BreakIf(loop, cmp, b.Values(cont_param_a, not_b), Empty);
         });
 
         b.Return(func);

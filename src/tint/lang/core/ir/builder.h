@@ -1406,6 +1406,15 @@ class Builder {
         return BlockParam(name, type);
     }
 
+    /// Creates a new `BlockParam`
+    /// @tparam TYPE the parameter type
+    /// @returns the value
+    template <typename TYPE>
+    ir::BlockParam* BlockParam() {
+        auto* type = ir.Types().Get<TYPE>();
+        return BlockParam(type);
+    }
+
     /// Creates a new `FunctionParam`
     /// @param type the parameter type
     /// @returns the value
