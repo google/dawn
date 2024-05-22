@@ -49,6 +49,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/float_literal_expression.h"
@@ -612,6 +613,12 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     stage_variable.variable_name = variable_name;
     std::tie(stage_variable.component_type, stage_variable.composition_type) =
         CalculateComponentAndComposition(type);
+
+    if (auto* blend_src_attribute = ast::GetAttribute<ast::BlendSrcAttribute>(attributes)) {
+        TINT_ASSERT(blend_src_attribute->expr->Is<ast::IntLiteralExpression>());
+        stage_variable.attributes.blend_src = static_cast<uint32_t>(
+            blend_src_attribute->expr->As<ast::IntLiteralExpression>()->value);
+    }
 
     stage_variable.attributes.location = location;
     stage_variable.attributes.color = color;

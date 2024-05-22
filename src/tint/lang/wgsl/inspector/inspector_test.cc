@@ -143,6 +143,8 @@ class InspectorGetUsedExtensionNamesTest : public InspectorRunner, public testin
 
 class InspectorGetEnableDirectivesTest : public InspectorRunner, public testing::Test {};
 
+class InspectorGetBlendSrcTest : public InspectorBuilder, public testing::Test {};
+
 // This is a catch all for shaders that have demonstrated regressions/crashes in
 // the wild.
 class InspectorRegressionTest : public InspectorRunner, public testing::Test {};
@@ -4044,6 +4046,34 @@ TEST_F(InspectorTextureTest, TextureMultipleEPs) {
         EXPECT_EQ(0u, info2[1].group);
         EXPECT_EQ(4u, info2[1].binding);
     }
+}
+
+TEST_F(InspectorGetBlendSrcTest, Basic) {
+    Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
+
+    Structure("out_struct",
+              Vector{
+                  Member("output_color", ty.vec4<f32>(), Vector{Location(0_u), BlendSrc(0_u)}),
+                  Member("output_blend", ty.vec4<f32>(), Vector{Location(0_u), BlendSrc(1_u)}),
+              });
+
+    Func("ep_func", tint::Empty, ty("out_struct"),
+         Vector{
+             Decl(Var("out_var", ty("out_struct"))),
+             Return("out_var"),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kFragment),
+         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(2u, result[0].output_variables.size());
+    EXPECT_EQ(0u, result[0].output_variables[0].attributes.blend_src);
+    EXPECT_EQ(1u, result[0].output_variables[1].attributes.blend_src);
 }
 
 }  // namespace

@@ -92,6 +92,8 @@ struct StageVariable {
         std::optional<uint32_t> location;
         /// Value of the color attribute, if set.
         std::optional<uint32_t> color;
+        /// Value of the blend_src attribute, if set.
+        std::optional<uint32_t> blend_src;
     } attributes;
     /// Scalar type that the variable is composed of.
     ComponentType component_type = ComponentType::kUnknown;
