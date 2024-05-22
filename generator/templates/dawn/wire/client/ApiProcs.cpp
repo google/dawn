@@ -118,11 +118,6 @@ namespace dawn::wire::client {
         reinterpret_cast<{{Type}}*>(cObj)->AddRef();
     }
 
-    //* TODO(dawn:2234): Deprecated. Remove once no longer user.
-    DAWN_WIRE_EXPORT void {{as_cMethodNamespaced(type.name, Name("reference"), Name('dawn wire client'))}}({{cType}} cObj) {
-        {{as_cMethodNamespaced(type.name, Name("add ref"), Name('dawn wire client'))}}(cObj);
-    }
-
 {% endfor %}
 
 namespace {
