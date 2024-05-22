@@ -1337,24 +1337,9 @@ void Validator::CheckExit(const Exit* e) {
         return;
     }
 
-    auto results = e->ControlInstruction()->Results();
     auto args = e->Args();
-    if (results.Length() != args.Length()) {
-        AddError(e) << ("args count (") << args.Length()
-                    << ") does not match control instruction result count (" << results.Length()
-                    << ")";
-        AddNote(e->ControlInstruction()) << "control instruction";
-        return;
-    }
-
-    for (size_t i = 0; i < results.Length(); ++i) {
-        if (results[i] && args[i] && results[i]->Type() != args[i]->Type()) {
-            AddError(e, i) << "argument type " << style::Type(results[i]->Type()->FriendlyName())
-                           << " does not match control instruction type "
-                           << style::Type(args[i]->Type()->FriendlyName());
-            AddNote(e->ControlInstruction()) << "control instruction";
-        }
-    }
+    CheckOperandsMatchTarget(e, e->ArgsOperandOffset(), args.Length(), e->ControlInstruction(),
+                             e->ControlInstruction()->Results());
 
     tint::Switch(
         e,                                                     //

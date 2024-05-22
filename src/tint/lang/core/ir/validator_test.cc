@@ -1914,9 +1914,8 @@ TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:5:9 error: exit_if: args count (1) does not match control instruction result count (2)
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:9 error: exit_if: provides 1 value but 'if' expects 2 values
         exit_if 1i  # if_1
         ^^^^^^^^^^
 
@@ -1924,7 +1923,7 @@ TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
       $B2: {  # true
       ^^^
 
-:3:5 note: control instruction
+:3:5 note: 'if' declared here
     %2:i32, %3:f32 = if true [t: $B2] {  # if_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1958,9 +1957,8 @@ TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:5:9 error: exit_if: args count (3) does not match control instruction result count (2)
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:9 error: exit_if: provides 3 values but 'if' expects 2 values
         exit_if 1i, 2.0f, 3i  # if_1
         ^^^^^^^^^^^^^^^^^^^^
 
@@ -1968,7 +1966,7 @@ TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
       $B2: {  # true
       ^^^
 
-:3:5 note: control instruction
+:3:5 note: 'if' declared here
     %2:i32, %3:f32 = if true [t: $B2] {  # if_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2019,9 +2017,8 @@ TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:5:21 error: exit_if: argument type 'f32' does not match control instruction type 'i32'
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:21 error: exit_if: operand with type 'i32' does not match 'if' target type 'f32'
         exit_if 1i, 2i  # if_1
                     ^^
 
@@ -2029,9 +2026,9 @@ TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
       $B2: {  # true
       ^^^
 
-:3:5 note: control instruction
+:3:13 note: %3 declared here
     %2:i32, %3:f32 = if true [t: $B2] {  # if_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            ^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
@@ -2307,9 +2304,8 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:5:9 error: exit_switch: args count (1) does not match control instruction result count (2)
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:9 error: exit_switch: provides 1 value but 'switch' expects 2 values
         exit_switch 1i  # switch_1
         ^^^^^^^^^^^^^^
 
@@ -2317,7 +2313,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
       $B2: {  # case
       ^^^
 
-:3:5 note: control instruction
+:3:5 note: 'switch' declared here
     %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2351,9 +2347,8 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:5:9 error: exit_switch: args count (3) does not match control instruction result count (2)
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:9 error: exit_switch: provides 3 values but 'switch' expects 2 values
         exit_switch 1i, 2.0f, 3i  # switch_1
         ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2361,7 +2356,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
       $B2: {  # case
       ^^^
 
-:3:5 note: control instruction
+:3:5 note: 'switch' declared here
     %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -2415,7 +2410,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:25 error: exit_switch: argument type 'f32' does not match control instruction type 'i32'
+        R"(:5:25 error: exit_switch: operand with type 'i32' does not match 'switch' target type 'f32'
         exit_switch 1i, 2i  # switch_1
                         ^^
 
@@ -2423,9 +2418,9 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
       $B2: {  # case
       ^^^
 
-:3:5 note: control instruction
+:3:13 note: %3 declared here
     %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            ^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
@@ -3601,9 +3596,8 @@ TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:5:9 error: exit_loop: args count (1) does not match control instruction result count (2)
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:9 error: exit_loop: provides 1 value but 'loop' expects 2 values
         exit_loop 1i  # loop_1
         ^^^^^^^^^^^^
 
@@ -3611,7 +3605,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
       $B2: {  # body
       ^^^
 
-:3:5 note: control instruction
+:3:5 note: 'loop' declared here
     %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -3648,9 +3642,8 @@ TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:5:9 error: exit_loop: args count (3) does not match control instruction result count (2)
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:9 error: exit_loop: provides 3 values but 'loop' expects 2 values
         exit_loop 1i, 2.0f, 3i  # loop_1
         ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -3658,7 +3651,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
       $B2: {  # body
       ^^^
 
-:3:5 note: control instruction
+:3:5 note: 'loop' declared here
     %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -3715,7 +3708,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:23 error: exit_loop: argument type 'f32' does not match control instruction type 'i32'
+        R"(:5:23 error: exit_loop: operand with type 'i32' does not match 'loop' target type 'f32'
         exit_loop 1i, 2i  # loop_1
                       ^^
 
@@ -3723,9 +3716,9 @@ TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
       $B2: {  # body
       ^^^
 
-:3:5 note: control instruction
+:3:13 note: %3 declared here
     %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            ^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
