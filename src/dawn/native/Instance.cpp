@@ -494,10 +494,6 @@ BackendValidationLevel InstanceBase::GetBackendValidationLevel() const {
     return mBackendValidationLevel;
 }
 
-void InstanceBase::EnableBeginCaptureOnStartup(bool beginCaptureOnStartup) {
-    mBeginCaptureOnStartup = beginCaptureOnStartup;
-}
-
 bool InstanceBase::IsBeginCaptureOnStartupEnabled() const {
     return mBeginCaptureOnStartup;
 }

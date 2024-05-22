@@ -119,7 +119,6 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount 
     void SetBackendValidationLevel(BackendValidationLevel level);
     BackendValidationLevel GetBackendValidationLevel() const;
 
-    void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
     bool IsBeginCaptureOnStartupEnabled() const;
 
     // Testing only API that is NOT thread-safe.
