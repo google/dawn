@@ -491,6 +491,8 @@ class Validator {
     Vector<const Block*, 8> block_stack_;
     ScopeStack scope_stack_;
     Vector<std::function<void()>, 16> tasks_;
+    SymbolTable symbols_ = SymbolTable::Wrap(mod_.symbols);
+    type::Manager type_mgr_ = type::Manager::Wrap(mod_.Types());
 };
 
 Validator::Validator(const Module& mod, Capabilities capabilities)
@@ -963,14 +965,11 @@ void Validator::CheckCall(const Call* call) {
 }
 
 void Validator::CheckBuiltinCall(const BuiltinCall* call) {
-    auto symbols = SymbolTable::Wrap(mod_.symbols);
-    auto type_mgr = type::Manager::Wrap(mod_.Types());
-
     auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
     intrinsic::Context context{
         call->TableData(),
-        type_mgr,
-        symbols,
+        type_mgr_,
+        symbols_,
     };
 
     auto result = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
@@ -1118,9 +1117,7 @@ void Validator::CheckAccess(const Access* a) {
 void Validator::CheckBinary(const Binary* b) {
     CheckOperandsNotNull(b, Binary::kLhsOperandOffset, Binary::kRhsOperandOffset);
     if (b->LHS() && b->RHS()) {
-        auto symbols = SymbolTable::Wrap(mod_.symbols);
-        auto type_mgr = type::Manager::Wrap(mod_.Types());
-        intrinsic::Context context{b->TableData(), type_mgr, symbols};
+        intrinsic::Context context{b->TableData(), type_mgr_, symbols_};
 
         auto overload =
             core::intrinsic::LookupBinary(context, b->Op(), b->LHS()->Type(), b->RHS()->Type(),
@@ -1144,9 +1141,7 @@ void Validator::CheckBinary(const Binary* b) {
 void Validator::CheckUnary(const Unary* u) {
     CheckOperandNotNull(u, u->Val(), Unary::kValueOperandOffset);
     if (u->Val()) {
-        auto symbols = SymbolTable::Wrap(mod_.symbols);
-        auto type_mgr = type::Manager::Wrap(mod_.Types());
-        intrinsic::Context context{u->TableData(), type_mgr, symbols};
+        intrinsic::Context context{u->TableData(), type_mgr_, symbols_};
 
         auto overload = core::intrinsic::LookupUnary(context, u->Op(), u->Val()->Type(),
                                                      core::EvaluationStage::kRuntime);
