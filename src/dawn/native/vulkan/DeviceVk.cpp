@@ -377,7 +377,7 @@ void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
 ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysicalDevice) {
     VulkanDeviceKnobs usedKnobs = {};
 
-    // Default to asking for all avilable known extensions.
+    // Default to asking for all available known extensions.
     usedKnobs.extensions = mDeviceInfo.extensions;
 
     // However only request the extensions that haven't been promoted in the device's apiVersion

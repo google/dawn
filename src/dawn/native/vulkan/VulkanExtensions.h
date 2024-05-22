@@ -120,6 +120,7 @@ enum class DeviceExt {
     QueueFamilyForeign,
     Robustness2,
     ShaderSubgroupUniformControlFlow,
+    DisplayTiming,
 
     // External* extensions
     ExternalMemoryAndroidHardwareBuffer,
