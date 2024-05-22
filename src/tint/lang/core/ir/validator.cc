@@ -1377,6 +1377,11 @@ void Validator::CheckNextIteration(const NextIteration* n) {
             AddError(n) << "called outside of associated loop";
         }
     }
+
+    if (auto* body = loop->Body()) {
+        CheckOperandsMatchTarget(n, NextIteration::kArgsOperandOffset, n->Args().Length(), body,
+                                 body->Params());
+    }
 }
 
 void Validator::CheckExitIf(const ExitIf* e) {
