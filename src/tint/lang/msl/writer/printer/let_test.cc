@@ -114,7 +114,7 @@ void foo() {
 TEST_F(MslPrinterTest, LetVec3F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("l", b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f));
+        b.Let("l", b.Composite<vec3<f32>>(1_f, 2_f, 3_f));
         b.Return(func);
     });
 
@@ -130,7 +130,7 @@ TEST_F(MslPrinterTest, LetVec3F16) {
     // Enable f16?
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("l", b.Composite(ty.vec3<f16>(), 1_h, 2_h, 3_h));
+        b.Let("l", b.Composite<vec3<f16>>(1_h, 2_h, 3_h));
         b.Return(func);
     });
 
@@ -145,9 +145,8 @@ void foo() {
 TEST_F(MslPrinterTest, LetMat2x3F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("l", b.Composite(ty.mat2x3<f32>(),  //
-                               b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f),
-                               b.Composite(ty.vec3<f32>(), 4_f, 5_f, 6_f)));
+        b.Let("l", b.Composite<mat2x3<f32>>(b.Composite<vec3<f32>>(1_f, 2_f, 3_f),
+                                            b.Composite<vec3<f32>>(4_f, 5_f, 6_f)));
         b.Return(func);
     });
 
@@ -163,9 +162,8 @@ TEST_F(MslPrinterTest, LetMat2x3F16) {
     // Enable f16?
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("l", b.Composite(ty.mat2x3<f16>(),  //
-                               b.Composite(ty.vec3<f16>(), 1_h, 2_h, 3_h),
-                               b.Composite(ty.vec3<f16>(), 4_h, 5_h, 6_h)));
+        b.Let("l", b.Composite<mat2x3<f16>>(b.Composite<vec3<f16>>(1_h, 2_h, 3_h),
+                                            b.Composite<vec3<f16>>(4_h, 5_h, 6_h)));
         b.Return(func);
     });
 
@@ -180,7 +178,7 @@ void foo() {
 TEST_F(MslPrinterTest, LetArrF32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("l", b.Composite(ty.array<f32, 3>(), 1_f, 2_f, 3_f));
+        b.Let("l", b.Composite<array<f32, 3>>(1_f, 2_f, 3_f));
         b.Return(func);
     });
 
@@ -195,10 +193,9 @@ void foo() {
 TEST_F(MslPrinterTest, LetArrVec2Bool) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Let("l", b.Composite(ty.array<vec2<bool>, 3>(),  //
-                               b.Composite(ty.vec2<bool>(), true, false),
-                               b.Composite(ty.vec2<bool>(), false, true),
-                               b.Composite(ty.vec2<bool>(), true, false)));
+        b.Let("l", b.Composite<array<vec2<bool>, 3>>(b.Composite<vec2<bool>>(true, false),
+                                                     b.Composite<vec2<bool>>(false, true),
+                                                     b.Composite<vec2<bool>>(true, false)));
         b.Return(func);
     });
 
