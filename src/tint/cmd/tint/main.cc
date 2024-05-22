@@ -71,6 +71,8 @@
 
 #if TINT_BUILD_IR_BINARY
 #include "src/tint/lang/core/ir/binary/encode.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #endif  // TINT_BUILD_IR_BINARY
 
 #endif  // TINT_BUILD_WGSL_READER
@@ -1259,6 +1261,37 @@ bool GenerateIr([[maybe_unused]] const tint::Program& program,
 #endif
 }
 
+/// Generate an IR module for a program, performs checking for unsupported
+/// enables, needed transforms, and validation.
+/// @param program the program to generate
+/// @param options the options that Tint was invoked with
+/// @returns generated module on success, tint::failure on failure
+#if WGSL_READER_AND_IR_BINARY
+tint::Result<tint::core::ir::Module> GenerateIrModule([[maybe_unused]] const tint::Program& program,
+                                                      [[maybe_unused]] const Options& options) {
+    if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
+        return tint::Failure{"Unsupported enable used in shader"};
+    }
+
+    auto transformed = tint::wgsl::ApplySubstituteOverrides(program);
+    auto& src = transformed ? transformed.value() : program;
+    if (!src.IsValid()) {
+        return tint::Failure{src.Diagnostics()};
+    }
+
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(src);
+    if (ir != tint::Success) {
+        return ir.Failure();
+    }
+
+    if (auto val = tint::core::ir::Validate(ir.Get()); val != tint::Success) {
+        return val.Failure();
+    }
+
+    return ir;
+}
+#endif  // WGSL_READER_AND_IR_BINARY
+
 /// Generate IR binary protobuf for a program.
 /// @param program the program to generate
 /// @param options the options that Tint was invoked with
@@ -1272,11 +1305,12 @@ bool GenerateIrProtoBinary([[maybe_unused]] const tint::Program& program,
     std::cerr << "IR binary not enabled in tint build" << std::endl;
     return false;
 #else
-    auto module = tint::wgsl::reader::ProgramToLoweredIR(program);
+    auto module = GenerateIrModule(program, options);
     if (module != tint::Success) {
-        std::cerr << "Failed to build IR from program: " << module.Failure() << "\n";
+        std::cerr << "Failed to generate lowered IR from program: " << module.Failure() << "\n";
         return false;
     }
+
     auto pb = tint::core::ir::binary::Encode(module.Get());
     if (pb != tint::Success) {
         std::cerr << "Failed to encode IR module to protobuf: " << pb.Failure() << "\n";
@@ -1300,11 +1334,12 @@ bool GenerateIrProtoBinary([[maybe_unused]] const tint::Program& program,
 #if WGSL_READER_AND_IR_BINARY
 bool GenerateIrProtoDebug([[maybe_unused]] const tint::Program& program,
                           [[maybe_unused]] const Options& options) {
-    auto module = tint::wgsl::reader::ProgramToLoweredIR(program);
+    auto module = GenerateIrModule(program, options);
     if (module != tint::Success) {
-        std::cerr << "Failed to build IR from program: " << module.Failure() << "\n";
+        std::cerr << "Failed to generate lowered IR from program: " << module.Failure() << "\n";
         return false;
     }
+
     auto pb = tint::core::ir::binary::EncodeDebug(module.Get());
     if (pb != tint::Success) {
         std::cerr << "Failed to encode IR module to protobuf: " << pb.Failure() << "\n";

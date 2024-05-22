@@ -275,13 +275,30 @@ source_set("dxc-include") {
 if (tint_has_fuzzers) {
   action("tint_generate_wgsl_corpus") {
     script = "${tint_src_dir}/cmd/fuzz/wgsl/generate_wgsl_corpus.py"
-    sources = [ "${tint_src_dir}/cmd/fuzz/wgsl/generate_wgsl_corpus.py" ]
+    sources = [ "${script}" ]
     args = [
       "--stamp=" + rebase_path(fuzzer_corpus_wgsl_stamp, root_build_dir),
       rebase_path("${tint_root_dir}/test", root_build_dir),
       rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
     ]
     outputs = [ fuzzer_corpus_wgsl_stamp ]
+  }
+
+  if (tint_build_cmds) {
+    if (tint_build_wgsl_reader && tint_build_ir_binary) {
+      action("tint_generate_ir_corpus") {
+        script = "${tint_src_dir}/cmd/fuzz/wgsl/generate_ir_corpus.py"
+        sources = [ "${script}" ]
+        deps = [ "${tint_src_dir}/cmd/tint" ]
+        args = [
+          "--stamp=" + rebase_path(fuzzer_corpus_ir_stamp, root_build_dir),
+          rebase_path("${root_build_dir}/tint", root_build_dir),
+          rebase_path("${tint_root_dir}/test", root_build_dir),
+          rebase_path(fuzzer_corpus_ir_dir, root_build_dir),
+        ]
+        outputs = [ fuzzer_corpus_ir_stamp ]
+      }
+    }
   }
 }
 
