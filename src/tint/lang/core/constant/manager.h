@@ -108,11 +108,8 @@ class Manager final {
     /// Constructs a splat constant.
     /// @param type the splat type
     /// @param element the splat element
-    /// @param n the number of elements
     /// @returns the value pointer
-    const constant::Splat* Splat(const core::type::Type* type,
-                                 const constant::Value* element,
-                                 size_t n);
+    const constant::Splat* Splat(const core::type::Type* type, const constant::Value* element);
 
     /// @param value the constant value
     /// @return a Scalar holding the i32 value @p value

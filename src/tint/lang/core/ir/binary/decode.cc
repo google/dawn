@@ -836,7 +836,7 @@ struct Decoder {
     const core::constant::Value* CreateConstantSplat(const pb::ConstantValueSplat& splat_in) {
         auto* type = Type(splat_in.type());
         auto* elem = ConstantValue(splat_in.elements());
-        return mod_out_.constant_values.Splat(type, elem, splat_in.count());
+        return mod_out_.constant_values.Splat(type, elem);
     }
 
     const core::constant::Value* ConstantValue(uint32_t id) {

@@ -1082,7 +1082,7 @@ TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Builtin) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        b.Store(position, b.Splat<vec4<f32>>(1_f, 4));
+        b.Store(position, b.Splat<vec4<f32>>(1_f));
         b.Return(ep);
     });
 
@@ -1137,7 +1137,7 @@ TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Builtin_WithInvariant) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        b.Store(position, b.Splat<vec4<f32>>(1_f, 4));
+        b.Store(position, b.Splat<vec4<f32>>(1_f));
         b.Return(ep);
     });
 
@@ -1191,7 +1191,7 @@ TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Location) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(ep->Block(), [&] {  //
-        b.Store(color, b.Splat<vec4<f32>>(1_f, 4));
+        b.Store(color, b.Splat<vec4<f32>>(1_f));
         b.Return(ep);
     });
 
@@ -1247,7 +1247,7 @@ TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Location_WithInterpolation) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(ep->Block(), [&] {  //
-        b.Store(color, b.Splat<vec4<f32>>(1_f, 4));
+        b.Store(color, b.Splat<vec4<f32>>(1_f));
         b.Return(ep);
     });
 
@@ -1318,9 +1318,9 @@ TEST_F(SpirvReader_ShaderIOTest, MultipleOutputs) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
-        b.Store(position, b.Splat<vec4<f32>>(1_f, 4));
-        b.Store(color1, b.Splat<vec4<f32>>(0.5_f, 4));
-        b.Store(color2, b.Splat<vec4<f32>>(0.25_f, 4));
+        b.Store(position, b.Splat<vec4<f32>>(1_f));
+        b.Store(color1, b.Splat<vec4<f32>>(0.5_f));
+        b.Store(color2, b.Splat<vec4<f32>>(0.25_f));
         b.Return(ep);
     });
 
@@ -1413,9 +1413,9 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnEachMember) {
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
         auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
-        b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f, 4));
-        b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f, 4));
-        b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f, 4));
+        b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
+        b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f));
+        b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f));
         b.Return(ep);
     });
 
@@ -1545,9 +1545,9 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnVariable) {
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
         auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
-        b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f, 4));
-        b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f, 4));
-        b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f, 4));
+        b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
+        b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f));
+        b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f));
         b.Return(ep);
     });
 
@@ -1670,9 +1670,9 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_InterpolateOnVariable) {
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep->Block(), [&] {  //
         auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
-        b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f, 4));
-        b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f, 4));
-        b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f, 4));
+        b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
+        b.Store(b.Access(ptr, colors, 0_u), b.Splat<vec4<f32>>(0.5_f));
+        b.Store(b.Access(ptr, colors, 1_u), b.Splat<vec4<f32>>(0.25_f));
         b.Return(ep);
     });
 
@@ -1785,21 +1785,21 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_UsedByMultipleEntryPoints) {
 
     auto* ep1 = b.Function("main1", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep1->Block(), [&] {  //
-        b.Store(position, b.Splat<vec4<f32>>(1_f, 4));
+        b.Store(position, b.Splat<vec4<f32>>(1_f));
         b.Return(ep1);
     });
 
     auto* ep2 = b.Function("main2", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep2->Block(), [&] {  //
-        b.Store(position, b.Splat<vec4<f32>>(1_f, 4));
-        b.Store(color1, b.Splat<vec4<f32>>(0.5_f, 4));
+        b.Store(position, b.Splat<vec4<f32>>(1_f));
+        b.Store(color1, b.Splat<vec4<f32>>(0.5_f));
         b.Return(ep2);
     });
 
     auto* ep3 = b.Function("main3", ty.void_(), core::ir::Function::PipelineStage::kVertex);
     b.Append(ep3->Block(), [&] {  //
-        b.Store(position, b.Splat<vec4<f32>>(1_f, 4));
-        b.Store(color2, b.Splat<vec4<f32>>(0.25_f, 4));
+        b.Store(position, b.Splat<vec4<f32>>(1_f));
+        b.Store(color2, b.Splat<vec4<f32>>(0.25_f));
         b.Return(ep3);
     });
 
@@ -1913,7 +1913,7 @@ TEST_F(SpirvReader_ShaderIOTest, Output_LoadAndStore) {
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(ep->Block(), [&] {  //
-        b.Store(color, b.Splat<vec4<f32>>(1_f, 4));
+        b.Store(color, b.Splat<vec4<f32>>(1_f));
         auto* load = b.Load(color);
         auto* mul = b.Multiply<vec4<f32>>(load, 2_f);
         b.Store(color, mul);
@@ -1976,7 +1976,7 @@ TEST_F(SpirvReader_ShaderIOTest, Output_LoadVectorElementAndStoreVectorElement) 
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(ep->Block(), [&] {  //
-        b.Store(color, b.Splat<vec4<f32>>(1_f, 4));
+        b.Store(color, b.Splat<vec4<f32>>(1_f));
         auto* load = b.LoadVectorElement(color, 2_u);
         auto* mul = b.Multiply<f32>(load, 2_f);
         b.StoreVectorElement(color, 2_u, mul);
@@ -2042,7 +2042,7 @@ TEST_F(SpirvReader_ShaderIOTest, Output_AccessChain) {
         auto* access_1 = b.Access(ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()), color);
         auto* access_2 = b.Access(ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()), access_1);
         auto* load = b.LoadVectorElement(access_2, 2_u);
-        auto* mul = b.Multiply<vec4<f32>>(b.Splat<vec4<f32>>(1_f, 4), load);
+        auto* mul = b.Multiply<vec4<f32>>(b.Splat<vec4<f32>>(1_f), load);
         b.Store(access_2, mul);
         b.Return(ep);
     });

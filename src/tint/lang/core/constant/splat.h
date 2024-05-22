@@ -44,8 +44,7 @@ class Splat : public Castable<Splat, Value> {
     /// Constructor
     /// @param t the splat type
     /// @param e the splat element
-    /// @param n the number of items in the splat
-    Splat(const core::type::Type* t, const Value* e, size_t n);
+    Splat(const core::type::Type* t, const Value* e);
     ~Splat() override;
 
     /// @returns the type of the splat

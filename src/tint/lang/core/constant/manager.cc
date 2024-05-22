@@ -65,7 +65,7 @@ const constant::Value* Manager::Composite(const core::type::Type* type,
     bool all_equal = true;
     auto* first = elements.Front();
     for (auto* el : elements) {
-        if (!el) {
+        if (TINT_UNLIKELY(!el)) {
             return nullptr;
         }
         if (!any_zero && el->AnyZero()) {
@@ -79,16 +79,15 @@ const constant::Value* Manager::Composite(const core::type::Type* type,
         }
     }
     if (all_equal) {
-        return Splat(type, elements.Front(), elements.Length());
+        return Splat(type, elements.Front());
     }
 
     return Get<constant::Composite>(type, std::move(elements), all_zero, any_zero);
 }
 
 const constant::Splat* Manager::Splat(const core::type::Type* type,
-                                      const constant::Value* element,
-                                      size_t n) {
-    return Get<constant::Splat>(type, element, n);
+                                      const constant::Value* element) {
+    return Get<constant::Splat>(type, element);
 }
 
 const Scalar<i32>* Manager::Get(i32 value) {
@@ -124,16 +123,16 @@ const Value* Manager::Zero(const core::type::Type* type) {
         type,  //
         [&](const core::type::Vector* v) -> const Value* {
             auto* zero_el = Zero(v->type());
-            return Splat(type, zero_el, v->Width());
+            return Splat(type, zero_el);
         },
         [&](const core::type::Matrix* m) -> const Value* {
             auto* zero_el = Zero(m->ColumnType());
-            return Splat(type, zero_el, m->columns());
+            return Splat(type, zero_el);
         },
         [&](const core::type::Array* a) -> const Value* {
-            if (auto n = a->ConstantCount()) {
+            if (a->ConstantCount()) {
                 if (auto* zero_el = Zero(a->ElemType())) {
-                    return Splat(type, zero_el, n.value());
+                    return Splat(type, zero_el);
                 }
             }
             return nullptr;
@@ -152,7 +151,7 @@ const Value* Manager::Zero(const core::type::Type* type) {
             }
             if (zero_by_type.Count() == 1) {
                 // All members were of the same type, so the zero value is the same for all members.
-                return Splat(type, zeros[0], s->Members().Length());
+                return Splat(type, zeros[0]);
             }
             return Composite(s, std::move(zeros));
         },

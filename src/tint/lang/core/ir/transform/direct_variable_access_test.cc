@@ -1393,7 +1393,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, Param_ptr_arr_i32_Via_struct_write
         b.FunctionParam("post", ty.i32()),
     });
     b.Append(fn_a->Block(), [&] {
-        b.Store(fn_a_p, b.Splat(ty.array<i32, 4>(), 0_i, 4));
+        b.Store(fn_a_p, b.Splat<array<i32, 4>>(0_i));
         b.Return(fn_a);
     });
 
@@ -1475,7 +1475,7 @@ TEST_F(IR_DirectVariableAccessTest_StorageAS, Param_ptr_vec4i32_Via_array_Dynami
         b.FunctionParam("post", ty.i32()),
     });
     b.Append(fn_a->Block(), [&] {
-        b.Store(fn_a_p, b.Splat(ty.vec4<i32>(), 0_i, 4));
+        b.Store(fn_a_p, b.Splat<vec4<i32>>(0_i));
         b.Return(fn_a);
     });
 
@@ -2068,7 +2068,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, Param_ptr_vec4i32_Via_array_Stat
         b.FunctionParam("post", ty.i32()),
     });
     b.Append(fn_a->Block(), [&] {
-        b.Store(fn_a_p, b.Splat(ty.vec4<i32>(), 0_i, 4));
+        b.Store(fn_a_p, b.Splat<vec4<i32>>(0_i));
         b.Return(fn_a);
     });
 
@@ -2870,7 +2870,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Enabled_Param_ptr_arr_i32_Via_stru
         b.FunctionParam("post", ty.i32()),
     });
     b.Append(fn_a->Block(), [&] {
-        b.Store(fn_a_p, b.Splat(ty.array<i32, 4>(), 0_i, 4));
+        b.Store(fn_a_p, b.Splat<array<i32, 4>>(0_i));
         b.Return(fn_a);
     });
 
@@ -2956,7 +2956,7 @@ TEST_F(IR_DirectVariableAccessTest_PrivateAS, Disabled_Param_ptr_arr_i32_Via_str
         b.FunctionParam("post", ty.i32()),
     });
     b.Append(fn_a->Block(), [&] {
-        b.Store(fn_a_p, b.Splat(ty.array<i32, 4>(), 0_i, 4));
+        b.Store(fn_a_p, b.Splat<array<i32, 4>>(0_i));
         b.Return(fn_a);
     });
 
@@ -4138,7 +4138,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_arr_i32_Via_str
         b.FunctionParam("post", ty.i32()),
     });
     b.Append(fn_a->Block(), [&] {
-        b.Store(fn_a_p, b.Splat(ty.array<i32, 4>(), 0_i, 4));
+        b.Store(fn_a_p, b.Splat<array<i32, 4>>(0_i));
         b.Return(fn_a);
     });
 
@@ -4373,7 +4373,7 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_Param_ptr_arr_i32_Via_st
         b.FunctionParam("post", ty.i32()),
     });
     b.Append(fn_a->Block(), [&] {
-        b.Store(fn_a_p, b.Splat(ty.array<i32, 4>(), 0_i, 4));
+        b.Store(fn_a_p, b.Splat<array<i32, 4>>(0_i));
         b.Return(fn_a);
     });
 

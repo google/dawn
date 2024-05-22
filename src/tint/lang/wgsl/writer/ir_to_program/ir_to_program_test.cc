@@ -151,7 +151,7 @@ TEST_F(IRToProgramTest, EntryPoint_Vertex) {
     auto* fn = b.Function("f", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
     fn->SetReturnBuiltin(core::BuiltinValue::kPosition);
 
-    fn->Block()->Append(b.Return(fn, b.Splat(ty.vec4<f32>(), 0_f, 4)));
+    fn->Block()->Append(b.Return(fn, b.Splat<vec4<f32>>(0_f)));
 
     EXPECT_WGSL(R"(
 @vertex
@@ -194,7 +194,7 @@ TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_Invariant) {
     fn->SetReturnBuiltin(core::BuiltinValue::kPosition);
     fn->SetReturnInvariant(true);
 
-    fn->Block()->Append(b.Return(fn, b.Splat(ty.vec4<f32>(), 0_f, 4)));
+    fn->Block()->Append(b.Return(fn, b.Splat<vec4<f32>>(0_f)));
 
     EXPECT_WGSL(R"(
 @vertex
@@ -208,7 +208,7 @@ TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_Location) {
     auto* fn = b.Function("f", ty.vec4<f32>(), core::ir::Function::PipelineStage::kFragment);
     fn->SetReturnLocation(1, std::nullopt);
 
-    fn->Block()->Append(b.Return(fn, b.Splat(ty.vec4<f32>(), 0_f, 4)));
+    fn->Block()->Append(b.Return(fn, b.Splat<vec4<f32>>(0_f)));
 
     EXPECT_WGSL(R"(
 @fragment

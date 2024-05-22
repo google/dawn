@@ -134,7 +134,7 @@ void foo() {
 }
 
 TEST_F(MslPrinterTest, Constant_Vector_Splat) {
-    auto* c = b.Splat(ty.vec3<f32>(), 1.5_f, 3);
+    auto* c = b.Splat<vec3<f32>>(1.5_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("a", c);
@@ -198,7 +198,7 @@ void foo() {
 }
 
 TEST_F(MslPrinterTest, Constant_Matrix_Splat) {
-    auto* c = b.Splat(ty.mat3x2<f32>(), 1.5_f, 3);
+    auto* c = b.Splat<mat3x2<f32>>(1.5_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("a", c);
@@ -270,7 +270,7 @@ void foo() {
 }
 
 TEST_F(MslPrinterTest, Constant_Array_Splat) {
-    auto* c = b.Splat(ty.array<f32, 3>(), 1.5_f, 3);
+    auto* c = b.Splat<array<f32, 3>>(1.5_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("a", c);
@@ -338,7 +338,7 @@ TEST_F(MslPrinterTest, Constant_Struct_Splat) {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
                                               });
-    auto* c = b.Splat(s, 1.5_f, 2);
+    auto* c = b.Splat(s, 1.5_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("a", c);

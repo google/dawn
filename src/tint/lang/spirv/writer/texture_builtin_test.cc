@@ -190,7 +190,7 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
             for (const auto& arg : params.args) {
                 auto* value = MakeScalarValue(arg.type, arg_value++);
                 if (arg.width > 1) {
-                    value = b.Splat(ty.vec(value->Type(), arg.width), value, arg.width);
+                    value = b.Splat(ty.vec(value->Type(), arg.width), value);
                 }
                 args.Push(value);
                 mod.SetName(value, arg.name);

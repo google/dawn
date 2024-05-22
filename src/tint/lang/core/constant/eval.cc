@@ -359,7 +359,7 @@ const Value* ConvertInternal(const Value* root_value,
         if (auto* build = std::get_if<ActionBuildSplat>(&next)) {
             TINT_ASSERT(value_stack.Length() >= 1);
             auto* el = value_stack.Pop();
-            value_stack.Push(ctx.mgr.Splat(build->type, el, build->count));
+            value_stack.Push(ctx.mgr.Splat(build->type, el));
             continue;
         }
 
@@ -1331,7 +1331,7 @@ Eval::Result Eval::VecSplat(const core::type::Type* ty,
                             VectorRef<const Value*> args,
                             const Source&) {
     if (auto* arg = args[0]) {
-        return mgr.Splat(ty, arg, static_cast<const core::type::Vector*>(ty)->Width());
+        return mgr.Splat(ty, arg);
     }
     return nullptr;
 }

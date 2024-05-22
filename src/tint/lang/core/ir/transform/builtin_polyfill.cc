@@ -225,7 +225,7 @@ struct State {
     /// @returns a value with the same number of vector components as @p match
     ir::Constant* MatchWidth(ir::Constant* element, const core::type::Type* match) {
         if (auto* vec = match->As<core::type::Vector>()) {
-            return b.Splat(MatchWidth(element->Type(), match), element, vec->Width());
+            return b.Splat(MatchWidth(element->Type(), match), element);
         }
         return element;
     }
@@ -575,13 +575,12 @@ struct State {
         auto* sampler = call->Args()[1];
         auto* coords = call->Args()[2];
         b.InsertBefore(call, [&] {
-            auto* vec2f = ty.vec2<f32>();
-            auto* dims = b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, texture);
-            auto* fdims = b.Convert(vec2f, dims);
-            auto* half_texel = b.Divide(vec2f, b.Splat(vec2f, 0.5_f, 2), fdims);
-            auto* one_minus_half_texel = b.Subtract(vec2f, b.Splat(vec2f, 1_f, 2), half_texel);
-            auto* clamped =
-                b.Call(vec2f, core::BuiltinFn::kClamp, coords, half_texel, one_minus_half_texel);
+            auto* dims = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, texture);
+            auto* fdims = b.Convert<vec2<f32>>(dims);
+            auto* half_texel = b.Divide<vec2<f32>>(b.Splat<vec2<f32>>(0.5_f), fdims);
+            auto* one_minus_half_texel = b.Subtract<vec2<f32>>(b.Splat<vec2<f32>>(1_f), half_texel);
+            auto* clamped = b.Call<vec2<f32>>(core::BuiltinFn::kClamp, coords, half_texel,
+                                              one_minus_half_texel);
             b.CallWithResult(call->DetachResult(), core::BuiltinFn::kTextureSampleLevel, texture,
                              sampler, clamped, 0_f);
         });

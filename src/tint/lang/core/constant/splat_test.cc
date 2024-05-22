@@ -46,9 +46,9 @@ TEST_F(ConstantTest_Splat, AllZero) {
     auto* fNeg0 = constants.Get(-0_f);
     auto* fPos1 = constants.Get(1_f);
 
-    auto* SpfPos0 = constants.Splat(vec3f, fPos0, 3);
-    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0, 3);
-    auto* SpfPos1 = constants.Splat(vec3f, fPos1, 3);
+    auto* SpfPos0 = constants.Splat(vec3f, fPos0);
+    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0);
+    auto* SpfPos1 = constants.Splat(vec3f, fPos1);
 
     EXPECT_TRUE(SpfPos0->AllZero());
     EXPECT_TRUE(SpfNeg0->AllZero());
@@ -62,9 +62,9 @@ TEST_F(ConstantTest_Splat, AnyZero) {
     auto* fNeg0 = constants.Get(-0_f);
     auto* fPos1 = constants.Get(1_f);
 
-    auto* SpfPos0 = constants.Splat(vec3f, fPos0, 3);
-    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0, 3);
-    auto* SpfPos1 = constants.Splat(vec3f, fPos1, 3);
+    auto* SpfPos0 = constants.Splat(vec3f, fPos0);
+    auto* SpfNeg0 = constants.Splat(vec3f, fNeg0);
+    auto* SpfPos1 = constants.Splat(vec3f, fPos1);
 
     EXPECT_TRUE(SpfPos0->AnyZero());
     EXPECT_TRUE(SpfNeg0->AnyZero());
@@ -75,20 +75,21 @@ TEST_F(ConstantTest_Splat, Index) {
     auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     auto* f1 = constants.Get(1_f);
-    auto* sp = constants.Splat(vec3f, f1, 2);
+    auto* sp = constants.Splat(vec3f, f1);
 
     ASSERT_NE(sp->Index(0), nullptr);
     ASSERT_NE(sp->Index(1), nullptr);
-    ASSERT_EQ(sp->Index(2), nullptr);
+    ASSERT_NE(sp->Index(2), nullptr);
 
     EXPECT_EQ(sp->Index(0)->As<Scalar<f32>>()->ValueOf(), 1.f);
     EXPECT_EQ(sp->Index(1)->As<Scalar<f32>>()->ValueOf(), 1.f);
+    EXPECT_EQ(sp->Index(2)->As<Scalar<f32>>()->ValueOf(), 1.f);
 }
 
 TEST_F(ConstantTest_Splat, Clone) {
-    auto* vec3i = create<core::type::Vector>(create<core::type::I32>(), 3u);
+    auto* vec2i = create<core::type::Vector>(create<core::type::I32>(), 2u);
     auto* val = constants.Get(12_i);
-    auto* sp = constants.Splat(vec3i, val, 2);
+    auto* sp = constants.Splat(vec2i, val);
 
     constant::Manager mgr;
     constant::CloneContext ctx{core::type::CloneContext{{nullptr}, {nullptr, &mgr.types}}, mgr};

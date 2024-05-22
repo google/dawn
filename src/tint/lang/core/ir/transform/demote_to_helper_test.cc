@@ -550,7 +550,7 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
             b.ExitIf(ifelse);
         });
         b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(texture), coord,
-               b.Splat(b.ir.Types().vec4<f32>(), 0.5_f, 4));
+               b.Splat(b.ir.Types().vec4<f32>(), 0.5_f));
         b.Return(ep, 0.5_f);
     });
 

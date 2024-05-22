@@ -1791,8 +1791,8 @@ class Printer {
 
             if (auto* vec = res_ty->As<core::type::Vector>()) {
                 // Splat the scalars into vectors.
-                one = b_.Splat(vec, one, vec->Width());
-                zero = b_.Splat(vec, zero, vec->Width());
+                one = b_.Splat(vec, one);
+                zero = b_.Splat(vec, zero);
             }
 
             op = spv::Op::OpSelect;

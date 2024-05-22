@@ -292,7 +292,7 @@ struct State {
             auto* one = b.Constant(1_u);
             if (auto* vec = args[idx]->Type()->As<type::Vector>()) {
                 type = ty.vec(type, vec->Width());
-                one = b.Splat(type, one, vec->Width());
+                one = b.Splat(type, one);
             }
             auto* dims = clamped_level ? b.Call(type, core::BuiltinFn::kTextureDimensions, args[0],
                                                 clamped_level)

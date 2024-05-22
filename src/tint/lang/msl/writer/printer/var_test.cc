@@ -183,7 +183,7 @@ TEST_F(MslPrinterTest, VarVecF32SplatZero) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec3<f32>>());
-        v->SetInitializer(b.Splat(ty.vec3<f32>(), 0_f, 3));
+        v->SetInitializer(b.Splat<vec3<f32>>(0_f));
         b.Return(func);
     });
 
@@ -200,7 +200,7 @@ TEST_F(MslPrinterTest, VarVecF16SplatZero) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec3<f16>>());
-        v->SetInitializer(b.Splat(ty.vec3<f16>(), 0_h, 3));
+        v->SetInitializer(b.Splat<vec3<f16>>(0_h));
         b.Return(func);
     });
 
@@ -216,8 +216,8 @@ TEST_F(MslPrinterTest, VarMatF32SplatZero) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat2x3<f32>>());
-        v->SetInitializer(b.Composite(ty.mat2x3<f32>(), b.Splat(ty.vec3<f32>(), 0_f, 3),
-                                      b.Splat(ty.vec3<f32>(), 0_f, 3)));
+        v->SetInitializer(
+            b.Composite(ty.mat2x3<f32>(), b.Splat<vec3<f32>>(0_f), b.Splat<vec3<f32>>(0_f)));
         b.Return(func);
     });
 
@@ -234,8 +234,8 @@ TEST_F(MslPrinterTest, VarMatF16SplatZero) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat2x3<f16>>());
-        v->SetInitializer(b.Composite(ty.mat2x3<f16>(), b.Splat(ty.vec3<f16>(), 0_h, 3),
-                                      b.Splat(ty.vec3<f16>(), 0_h, 3)));
+        v->SetInitializer(
+            b.Composite(ty.mat2x3<f16>(), b.Splat<vec3<f16>>(0_h), b.Splat<vec3<f16>>(0_h)));
         b.Return(func);
     });
 
