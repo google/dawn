@@ -198,7 +198,7 @@ void foo() {
 }
 
 TEST_F(MslPrinterTest, Constant_Matrix_Splat) {
-    auto* c = b.Splat<mat3x2<f32>>(1.5_f);
+    auto* c = b.Splat<mat3x2<f32>>(b.Splat<vec2<f32>>(1.5_f));
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("a", c);
@@ -208,7 +208,7 @@ TEST_F(MslPrinterTest, Constant_Matrix_Splat) {
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
-  float3x2 const a = float3x2(1.5f, 1.5f, 1.5f);
+  float3x2 const a = float3x2(float2(1.5f), float2(1.5f), float2(1.5f));
 }
 )");
 }

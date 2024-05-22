@@ -37,7 +37,11 @@ namespace tint::core::constant {
 
 Composite::Composite(const core::type::Type* t, VectorRef<const Value*> els, bool all_0, bool any_0)
     : type(t), elements(std::move(els)), all_zero(all_0), any_zero(any_0), hash(CalcHash()) {
-    TINT_ASSERT(!elements.IsEmpty());
+    const size_t n = elements.Length();
+    TINT_ASSERT(n == t->Elements().count);
+    for (size_t i = 0; i < n; i++) {
+        TINT_ASSERT(t->Element(static_cast<uint32_t>(i)) == elements[i]->Type());
+    }
 }
 
 Composite::~Composite() = default;

@@ -33,8 +33,22 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Splat);
 
 namespace tint::core::constant {
 
+namespace {
+
+/// Asserts that the element type of @p in_type matches the type of @p value, and that the type has
+/// at least one element.
+/// @returns the number of elements in @p in_type
+inline size_t GetCountAndAssertType(const core::type::Type* in_type, const constant::Value* value) {
+    auto elements = in_type->Elements();
+    TINT_ASSERT(!elements.type || elements.type == value->Type());
+    TINT_ASSERT(elements.count > 0);
+    return elements.count;
+}
+
+}  // namespace
+
 Splat::Splat(const core::type::Type* t, const constant::Value* e)
-    : type(t), el(e), count(t->Elements().count) {}
+    : type(t), el(e), count(GetCountAndAssertType(t, e)) {}
 
 Splat::~Splat() = default;
 
