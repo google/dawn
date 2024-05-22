@@ -68,6 +68,7 @@ VkPresentModeKHR ToVulkanPresentMode(wgpu::PresentMode mode) {
 uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
     switch (mode) {
         case VK_PRESENT_MODE_FIFO_KHR:
+        case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
         case VK_PRESENT_MODE_IMMEDIATE_KHR:
             return 2;
         case VK_PRESENT_MODE_MAILBOX_KHR:
@@ -264,9 +265,10 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
         };
 
         VkPresentModeKHR targetMode = ToVulkanPresentMode(GetPresentMode());
-        const std::array<VkPresentModeKHR, 3> kPresentModeFallbacks = {
+        const std::array<VkPresentModeKHR, 4> kPresentModeFallbacks = {
             VK_PRESENT_MODE_IMMEDIATE_KHR,
             VK_PRESENT_MODE_MAILBOX_KHR,
+            VK_PRESENT_MODE_FIFO_RELAXED_KHR,
             VK_PRESENT_MODE_FIFO_KHR,
         };
 
