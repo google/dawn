@@ -212,7 +212,7 @@ TEST_F(SpirvWriterTest, Loop_UseResultFromBodyInContinuing) {
         auto* loop = b.Loop();
         b.Append(loop->Body(), [&] {
             auto* result = b.Equal(ty.bool_(), 1_i, 2_i);
-            b.Continue(loop, result);
+            b.Continue(loop);
 
             b.Append(loop->Continuing(), [&] {  //
                 b.BreakIf(loop, result);

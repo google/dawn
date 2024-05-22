@@ -1318,6 +1318,11 @@ void Validator::CheckContinue(const Continue* c) {
         }
     }
 
+    if (auto* cont = loop->Continuing()) {
+        CheckOperandsMatchTarget(c, Continue::kArgsOperandOffset, c->Args().Length(), cont,
+                                 cont->Params());
+    }
+
     first_continues_.Add(loop, c);
 }
 
