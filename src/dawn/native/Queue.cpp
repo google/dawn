@@ -200,43 +200,6 @@ class ErrorQueue : public QueueBase {
     MaybeError WaitForIdleForDestruction() override { DAWN_UNREACHABLE(); }
 };
 
-struct WorkDoneEvent final : public EventManager::TrackedEvent {
-    std::optional<wgpu::QueueWorkDoneStatus> mEarlyStatus;
-    WGPUQueueWorkDoneCallback mCallback;
-    raw_ptr<void> mUserdata;
-
-    // Create an event backed by the given queue execution serial.
-    WorkDoneEvent(const QueueWorkDoneCallbackInfo& callbackInfo,
-                  QueueBase* queue,
-                  ExecutionSerial serial)
-        : TrackedEvent(callbackInfo.mode, queue, serial),
-          mCallback(callbackInfo.callback),
-          mUserdata(callbackInfo.userdata) {}
-
-    // Create an event that's ready at creation (for errors, etc.)
-    WorkDoneEvent(const QueueWorkDoneCallbackInfo& callbackInfo,
-                  QueueBase* queue,
-                  wgpu::QueueWorkDoneStatus earlyStatus)
-        : TrackedEvent(callbackInfo.mode, queue, kBeginningOfGPUTime),
-          mEarlyStatus(earlyStatus),
-          mCallback(callbackInfo.callback),
-          mUserdata(callbackInfo.userdata) {}
-
-    ~WorkDoneEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
-
-    void Complete(EventCompletionType completionType) override {
-        // WorkDoneEvent has no error cases other than the mEarlyStatus ones.
-        wgpu::QueueWorkDoneStatus status = wgpu::QueueWorkDoneStatus::Success;
-        if (completionType == EventCompletionType::Shutdown) {
-            status = wgpu::QueueWorkDoneStatus::InstanceDropped;
-        } else if (mEarlyStatus) {
-            status = mEarlyStatus.value();
-        }
-
-        mCallback(ToAPI(status), mUserdata.ExtractAsDangling());
-    }
-};
-
 }  // namespace
 
 // TrackTaskCallback
@@ -316,6 +279,58 @@ void QueueBase::APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void*
 }
 
 Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo) {
+    return APIOnSubmittedWorkDone2(
+        {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
+         [](WGPUQueueWorkDoneStatus status, void* callback, void* userdata) {
+             auto cb = reinterpret_cast<WGPUQueueWorkDoneCallback>(callback);
+             cb(status, userdata);
+         },
+         reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
+}
+
+Future QueueBase::APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo) {
+    struct WorkDoneEvent final : public EventManager::TrackedEvent {
+        std::optional<WGPUQueueWorkDoneStatus> mEarlyStatus;
+        WGPUQueueWorkDoneCallback2 mCallback;
+        raw_ptr<void> mUserdata1;
+        raw_ptr<void> mUserdata2;
+
+        // Create an event backed by the given queue execution serial.
+        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo,
+                      QueueBase* queue,
+                      ExecutionSerial serial)
+            : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), queue, serial),
+              mCallback(callbackInfo.callback),
+              mUserdata1(callbackInfo.userdata1),
+              mUserdata2(callbackInfo.userdata2) {}
+
+        // Create an event that's ready at creation (for errors, etc.)
+        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo,
+                      QueueBase* queue,
+                      wgpu::QueueWorkDoneStatus earlyStatus)
+            : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
+                           queue,
+                           kBeginningOfGPUTime),
+              mEarlyStatus(ToAPI(earlyStatus)),
+              mCallback(callbackInfo.callback),
+              mUserdata1(callbackInfo.userdata1),
+              mUserdata2(callbackInfo.userdata2) {}
+
+        ~WorkDoneEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
+
+        void Complete(EventCompletionType completionType) override {
+            // WorkDoneEvent has no error cases other than the mEarlyStatus ones.
+            WGPUQueueWorkDoneStatus status = WGPUQueueWorkDoneStatus_Success;
+            if (completionType == EventCompletionType::Shutdown) {
+                status = WGPUQueueWorkDoneStatus_InstanceDropped;
+            } else if (mEarlyStatus) {
+                status = mEarlyStatus.value();
+            }
+
+            mCallback(status, mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
+        }
+    };
+
     // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
     // (note, not raise a validation error to the device) and return the null future.
     DAWN_ASSERT(callbackInfo.nextInChain == nullptr);

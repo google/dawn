@@ -2786,6 +2786,15 @@
                 ]
             },
             {
+                "name": "on submitted work done 2",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "callback info", "type": "queue work done callback info 2"}
+                ]
+            },
+            {
                 "name": "write buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
@@ -2849,6 +2858,12 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "queue work done callback 2": {
+        "category": "callback function",
+        "args": [
+            {"name": "status", "type": "queue work done status"}
+        ]
+    },
     "queue work done callback info": {
         "category": "structure",
         "extensible": "in",
@@ -2856,6 +2871,12 @@
             {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "queue work done callback"},
             {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "queue work done callback info 2": {
+        "category": "callback info",
+        "members": [
+            {"name": "callback", "type": "queue work done callback 2"}
         ]
     },
     "queue work done status": {

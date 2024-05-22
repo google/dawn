@@ -81,7 +81,8 @@
         "queue on submitted work done": [
             { "name": "queue id", "type": "ObjectId", "id_type": "queue" },
             { "name": "event manager handle", "type": "ObjectHandle" },
-            { "name": "future", "type": "future" }
+            { "name": "future", "type": "future" },
+            { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."}
         ],
         "queue write buffer": [
             {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
@@ -246,6 +247,7 @@
             "QuerySetGetCount",
             "QueueOnSubmittedWorkDone",
             "QueueOnSubmittedWorkDoneF",
+            "QueueOnSubmittedWorkDone2",
             "QueueWriteBuffer",
             "QueueWriteTexture",
             "SurfaceGetCapabilities",
