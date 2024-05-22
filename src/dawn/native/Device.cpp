@@ -644,6 +644,7 @@ void DeviceBase::Destroy() {
     mEmptyPipelineLayout = nullptr;
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
+    mTemporaryUniformBuffer = nullptr;
 
     // Note: mQueue is not released here since the application may still get it after calling
     // Destroy() via APIGetQueue.
@@ -2457,6 +2458,18 @@ void DeviceBase::DumpMemoryStatistics(dawn::native::MemoryDump* dump) const {
     GetObjectTrackingList(ObjectType::Buffer)->ForEach([&](const ApiObjectBase* buffer) {
         static_cast<const BufferBase*>(buffer)->DumpMemoryStatistics(dump, prefix.c_str());
     });
+}
+
+ResultOrError<Ref<BufferBase>> DeviceBase::GetOrCreateTemporaryUniformBuffer(size_t size) {
+    if (!mTemporaryUniformBuffer || mTemporaryUniformBuffer->GetSize() != size) {
+        BufferDescriptor desc;
+        desc.label = "Internal_TemporaryUniform";
+        desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
+        desc.size = size;
+        DAWN_TRY_ASSIGN(mTemporaryUniformBuffer, CreateBuffer(&desc));
+    }
+
+    return mTemporaryUniformBuffer;
 }
 
 IgnoreLazyClearCountScope::IgnoreLazyClearCountScope(DeviceBase* device)

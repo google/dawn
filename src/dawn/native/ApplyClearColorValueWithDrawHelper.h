@@ -28,9 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_APPLYCLEARVALUEWITHDRAWHELPER_H_
 #define SRC_DAWN_NATIVE_APPLYCLEARVALUEWITHDRAWHELPER_H_
 
-#include <bitset>
-
 #include "absl/container/flat_hash_map.h"
+#include "dawn/common/Ref.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
@@ -38,6 +37,7 @@
 
 namespace dawn::native {
 class BufferBase;
+class CommandEncoder;
 class RenderPassEncoder;
 struct RenderPassDescriptor;
 
@@ -62,8 +62,20 @@ using ApplyClearColorValueWithDrawPipelinesCache =
                         KeyOfApplyClearColorValueWithDrawPipelinesHashFunc,
                         KeyOfApplyClearColorValueWithDrawPipelinesEqualityFunc>;
 
-MaybeError ApplyClearWithDraw(RenderPassEncoder* renderPassEncoder,
-                              const RenderPassDescriptor* renderPassDescriptor);
+class ClearWithDrawHelper {
+  public:
+    ClearWithDrawHelper();
+    ~ClearWithDrawHelper();
+
+    MaybeError Initialize(CommandEncoder* encoder,
+                          const RenderPassDescriptor* renderPassDescriptor);
+    MaybeError Apply(RenderPassEncoder* renderPassEncoder);
+
+  private:
+    bool mShouldRun = false;
+    KeyOfApplyClearColorValueWithDrawPipelines mKey;
+    Ref<BufferBase> mUniformBufferWithClearColorValues;
+};
 
 }  // namespace dawn::native
 

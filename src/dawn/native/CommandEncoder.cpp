@@ -1206,6 +1206,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
     };
 
     UnpackedPtr<RenderPassDescriptor> descriptor;
+    ClearWithDrawHelper clearWithDrawHelper;
     bool success = mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
@@ -1214,6 +1215,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                                                          mUsageValidationMode, &validationState));
 
             DAWN_ASSERT(validationState.IsValidState());
+
+            DAWN_TRY(clearWithDrawHelper.Initialize(this, *descriptor));
 
             mEncodingContext.WillBeginRenderPass();
             BeginRenderPassCmd* cmd =
@@ -1407,10 +1410,10 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             if (validationState.WillExpandResolveTexture()) {
                 DAWN_TRY(ApplyExpandResolveTextureLoadOp(device, passEncoder.Get(), *descriptor));
             }
-            // ApplyClearWithDraw() applies clear with draw if clear_color_with_draw or
+            // clearWithDrawHelper.Apply() applies clear with draw if clear_color_with_draw or
             // apply_clear_big_integer_color_value_with_draw toggle is enabled, and the render pass
             // attachments need to be cleared.
-            DAWN_TRY(ApplyClearWithDraw(passEncoder.Get(), *descriptor));
+            DAWN_TRY(clearWithDrawHelper.Apply(passEncoder.Get()));
 
             return {};
         }();
