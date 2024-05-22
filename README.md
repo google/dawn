@@ -25,8 +25,8 @@ Dawn provides several WebGPU building blocks:
 
 Helpful links:
 
- - [Dawn bug tracker](https://bugs.chromium.org/p/dawn/issues/entry) if you find issues with Dawn.
- - [Tint bug tracker](https://bugs.chromium.org/p/tint/issues/entry) if you find issues with Tint.
+ - [Dawn bug tracker](https://issues.chromium.org/issues?q=componentid:1570784%2B%20-componentid:1571063%2B) if you find issues with Dawn.
+ - [Tint bug tracker](https://issues.chromium.org/issues?q=componentid:1571063%2B) if you find issues with Tint.
  - [Dawn's mailing list](https://groups.google.com/forum/#!members/dawn-graphics) for other discussions related to Dawn.
  - [Dawn's source code](https://dawn.googlesource.com/dawn)
  - [Dawn's Matrix chatroom](https://matrix.to/#/#webgpu-dawn:matrix.org) for live discussion around contributing or using Dawn.
