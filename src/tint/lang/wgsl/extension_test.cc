@@ -64,6 +64,7 @@ static constexpr Case kValidCases[] = {
     {"chromium_experimental_subgroups", Extension::kChromiumExperimentalSubgroups},
     {"chromium_internal_dual_source_blending", Extension::kChromiumInternalDualSourceBlending},
     {"chromium_internal_graphite", Extension::kChromiumInternalGraphite},
+    {"chromium_internal_input_attachments", Extension::kChromiumInternalInputAttachments},
     {"chromium_internal_relaxed_uniform_layout", Extension::kChromiumInternalRelaxedUniformLayout},
     {"f16", Extension::kF16},
 };
@@ -90,12 +91,15 @@ static constexpr Case kInvalidCases[] = {
     {"chromi44m_internal_graphite", Extension::kUndefined},
     {"chromSSuVV_internal_graphite", Extension::kUndefined},
     {"cRromium_nternR22_graphite", Extension::kUndefined},
-    {"chromium_int9rnal_relaxed_Fnifor_layout", Extension::kUndefined},
-    {"chrmium_internal_relaxed_uniform_layout", Extension::kUndefined},
-    {"VRhHomium_internal_relaxd_uniform_OOayout", Extension::kUndefined},
-    {"y1", Extension::kUndefined},
-    {"l77rrn6", Extension::kUndefined},
-    {"4016", Extension::kUndefined},
+    {"chromium_int9rnaF_inpu_attachments", Extension::kUndefined},
+    {"chrmium_internal_input_attachments", Extension::kUndefined},
+    {"cOOromium_internVlHinput_ttachRRents", Extension::kUndefined},
+    {"chromium_internl_relaxyd_uniform_layout", Extension::kUndefined},
+    {"chromnnum_internrr77_Gelaxell_uniform_layout", Extension::kUndefined},
+    {"chromium_intern4l_relaxe00_uniform_layout", Extension::kUndefined},
+    {"5", Extension::kUndefined},
+    {"u16", Extension::kUndefined},
+    {"f", Extension::kUndefined},
 };
 
 using ExtensionParseTest = testing::TestWithParam<Case>;

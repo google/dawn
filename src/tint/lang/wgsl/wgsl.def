@@ -78,6 +78,9 @@ enum extension {
   chromium_experimental_subgroups
   // A Chromium-specific extension that enables features for graphite
   chromium_internal_graphite
+  // A Chromium-specific extension that enables features for input
+  // attachments
+  chromium_internal_input_attachments
   // A Chromium-specific extension that relaxes memory layout requirements for uniform storage.
   chromium_internal_relaxed_uniform_layout
   // A Chromium-specific extension that enables dual source blending.

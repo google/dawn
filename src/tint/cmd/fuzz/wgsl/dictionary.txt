@@ -159,6 +159,7 @@
 "chromium_experimental_subgroups"
 "chromium_internal_dual_source_blending"
 "chromium_internal_graphite"
+"chromium_internal_input_attachments"
 "chromium_internal_relaxed_uniform_layout"
 "chromium_testing_experimental"
 "chromium_testing_shipped"
