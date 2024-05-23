@@ -523,6 +523,10 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
         return {};
     }
 
+    DAWN_TRY(device->ValidateObject(attachment));
+    DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment,
+                              usageValidationMode));
+
     UnpackedPtr<RenderPassColorAttachment> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&colorAttachment));
 
@@ -536,10 +540,6 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
         // are the same. That already is done by indirectly comparing the sample count in
         // ValidateOrSetColorAttachmentSampleCount.
     }
-
-    DAWN_TRY(device->ValidateObject(attachment));
-    DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment,
-                              usageValidationMode));
 
     // Plane0, Plane1, and Plane2 aspects for multiplanar texture views should be allowed as color
     // attachments.
