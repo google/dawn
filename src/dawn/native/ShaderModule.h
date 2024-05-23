@@ -211,6 +211,7 @@ struct EntryPointMetadata {
     struct FragmentRenderAttachmentInfo {
         TextureComponentType baseType;
         uint8_t componentCount;
+        uint8_t blendSrc;
     };
     PerColorAttachment<FragmentRenderAttachmentInfo> fragmentOutputVariables;
     ColorAttachmentMask fragmentOutputMask;

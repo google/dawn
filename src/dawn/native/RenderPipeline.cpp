@@ -436,10 +436,35 @@ MaybeError ValidateBlendState(DeviceBase* device, const BlendState* descriptor) 
     return {};
 }
 
-bool BlendFactorContainsSrcAlpha(const wgpu::BlendFactor& blendFactor) {
+bool BlendFactorContainsSrcAlpha(wgpu::BlendFactor blendFactor) {
     return blendFactor == wgpu::BlendFactor::SrcAlpha ||
            blendFactor == wgpu::BlendFactor::OneMinusSrcAlpha ||
            blendFactor == wgpu::BlendFactor::SrcAlphaSaturated;
+}
+
+bool BlendFactorContainsSrc1Alpha(wgpu::BlendFactor blendFactor) {
+    return blendFactor == wgpu::BlendFactor::Src1Alpha ||
+           blendFactor == wgpu::BlendFactor::OneMinusSrc1Alpha;
+}
+
+bool BlendFactorContainsSrc1(wgpu::BlendFactor blendFactor) {
+    return blendFactor == wgpu::BlendFactor::Src1 ||
+           blendFactor == wgpu::BlendFactor::OneMinusSrc1 ||
+           BlendFactorContainsSrc1Alpha(blendFactor);
+}
+
+bool BlendStateUsesBlendFactorSrc1(const BlendState& blend) {
+    return BlendFactorContainsSrc1(blend.alpha.srcFactor) ||
+           BlendFactorContainsSrc1(blend.alpha.dstFactor) ||
+           BlendFactorContainsSrc1(blend.color.srcFactor) ||
+           BlendFactorContainsSrc1(blend.color.dstFactor);
+}
+
+bool BlendStateUsesBlendFactorSrc1Alpha(const BlendState& blend) {
+    return BlendFactorContainsSrc1Alpha(blend.alpha.srcFactor) ||
+           BlendFactorContainsSrc1Alpha(blend.alpha.dstFactor) ||
+           BlendFactorContainsSrc1Alpha(blend.color.srcFactor) ||
+           BlendFactorContainsSrc1Alpha(blend.color.dstFactor);
 }
 
 MaybeError ValidateColorTargetState(
@@ -629,6 +654,9 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
         }
     }
 
+    bool usesSrc1 = false;
+    bool usesSrc1Alpha = false;
+    uint8_t blendSrc1ComponentCount = 0;
     ColorAttachmentFormats colorAttachmentFormats;
     for (auto i : IterateBitSet(targetMask)) {
         const Format* format;
@@ -640,11 +668,31 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
                          "validating targets[%u] framebuffer output.", i);
         colorAttachmentFormats.push_back(&device->GetValidInternalFormat(targets[i].format));
 
+        if (fragmentMetadata.fragmentOutputVariables[i].blendSrc == 1u) {
+            blendSrc1ComponentCount = fragmentMetadata.fragmentOutputVariables[i].componentCount;
+        }
+
         if (fragmentMetadata.fragmentInputMask[i]) {
             DAWN_TRY_CONTEXT(ValidateFramebufferInput(device, format,
                                                       fragmentMetadata.fragmentInputVariables[i]),
                              "validating targets[%u]'s framebuffer input.", i);
         }
+
+        if (targets[i].blend != nullptr) {
+            usesSrc1 |= BlendStateUsesBlendFactorSrc1(*targets[i].blend);
+            usesSrc1Alpha |= BlendStateUsesBlendFactorSrc1Alpha(*targets[i].blend);
+        }
+    }
+
+    if (usesSrc1) {
+        DAWN_INVALID_IF(blendSrc1ComponentCount == 0,
+                        "One of the blend factor uses `blend_src(1)` while `blend_src(1)` is "
+                        "missing from the fragment shader outputs.");
+
+        DAWN_INVALID_IF(usesSrc1Alpha && blendSrc1ComponentCount < 4u,
+                        "One of the blend factor is reading the alpha of the fragment shader "
+                        "output with `blend_src(1)` but it is missing from that fragment shader "
+                        "output.");
     }
 
     auto extraFramebufferInputs = fragmentMetadata.fragmentInputMask & ~targetMask;

@@ -788,6 +788,12 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 continue;
             }
 
+            if (outputVar.attributes.blend_src.has_value()) {
+                variable.blendSrc = *outputVar.attributes.blend_src;
+            } else {
+                variable.blendSrc = 0;
+            }
+
             ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));
             metadata->fragmentOutputVariables[attachment] = variable;
             metadata->fragmentOutputMask.set(attachment);

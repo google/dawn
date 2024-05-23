@@ -2578,23 +2578,42 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest, BindColorAttachmentAs
 
 class DualSourceBlendingFeatureTest : public RenderPipelineValidationTest {
   protected:
+    void SetUp() override {
+        RenderPipelineValidationTest::SetUp();
+
+        fsModuleWithBlendSrc1 = utils::CreateShaderModule(device, R"(
+        enable chromium_internal_dual_source_blending;
+        struct FragOut {
+            @location(0) @blend_src(0) color : vec4f,
+            @location(0) @blend_src(1) blend : vec4f,
+        }
+        @fragment fn main() -> FragOut {
+            var output : FragOut;
+            output.color = vec4f(0.0, 1.0, 0.0, 1.0);
+            output.blend = vec4f(0.0, 1.0, 0.0, 1.0);
+            return output;
+        })");
+    }
+
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::DualSourceBlending};
     }
+
+    wgpu::ShaderModule fsModuleWithBlendSrc1;
 };
 
 // Tests that enums associated with the DualSourceBlending feature are valid when the feature is
 // enabled.
 TEST_F(DualSourceBlendingFeatureTest, FeatureEnumsValidWithFeatureEnabled) {
-    std::array<wgpu::BlendFactor, 4> kBlendFactors = {
-        wgpu::BlendFactor::Src1, wgpu::BlendFactor::OneMinusSrc1, wgpu::BlendFactor::Src1Alpha,
-        wgpu::BlendFactor::OneMinusSrc1Alpha};
+    constexpr std::array kBlendFactors = {wgpu::BlendFactor::Src1, wgpu::BlendFactor::OneMinusSrc1,
+                                          wgpu::BlendFactor::Src1Alpha,
+                                          wgpu::BlendFactor::OneMinusSrc1Alpha};
 
     // Test color srcFactor
     for (wgpu::BlendFactor blendFactor : kBlendFactors) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = fsModule;
+        descriptor.cFragment.module = fsModuleWithBlendSrc1;
         descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
         descriptor.cTargets[0].blend = &descriptor.cBlends[0];
         descriptor.cBlends[0].color.srcFactor = blendFactor;
@@ -2607,7 +2626,7 @@ TEST_F(DualSourceBlendingFeatureTest, FeatureEnumsValidWithFeatureEnabled) {
     for (wgpu::BlendFactor blendFactor : kBlendFactors) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = fsModule;
+        descriptor.cFragment.module = fsModuleWithBlendSrc1;
         descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
         descriptor.cTargets[0].blend = &descriptor.cBlends[0];
         descriptor.cBlends[0].color.srcFactor = wgpu::BlendFactor::Src;
@@ -2620,7 +2639,7 @@ TEST_F(DualSourceBlendingFeatureTest, FeatureEnumsValidWithFeatureEnabled) {
     for (wgpu::BlendFactor blendFactor : kBlendFactors) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = fsModule;
+        descriptor.cFragment.module = fsModuleWithBlendSrc1;
         descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
         descriptor.cTargets[0].blend = &descriptor.cBlends[0];
         descriptor.cBlends[0].alpha.srcFactor = blendFactor;
@@ -2633,7 +2652,7 @@ TEST_F(DualSourceBlendingFeatureTest, FeatureEnumsValidWithFeatureEnabled) {
     for (wgpu::BlendFactor blendFactor : kBlendFactors) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = fsModule;
+        descriptor.cFragment.module = fsModuleWithBlendSrc1;
         descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
         descriptor.cTargets[0].blend = &descriptor.cBlends[0];
         descriptor.cBlends[0].alpha.srcFactor = wgpu::BlendFactor::SrcAlpha;
@@ -2675,6 +2694,169 @@ TEST_F(DualSourceBlendingFeatureTest, MultipleRenderTargetsNotAllowed) {
                     return output;)";
 
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, sstream.str().c_str()));
+    }
+}
+
+// Test that when any blend factor uses `src1` `@blend_src(1)` must be declared in the fragment
+// shader.
+TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1RequiresBlendSrc1InWGSL) {
+    constexpr std::array kBlendFactors = {wgpu::BlendFactor::Src1, wgpu::BlendFactor::OneMinusSrc1,
+                                          wgpu::BlendFactor::Src1Alpha,
+                                          wgpu::BlendFactor::OneMinusSrc1Alpha};
+
+    wgpu::ShaderModule fsModuleWithoutBlendSrc1 = fsModule;
+
+    auto CheckBlendFactorSrc1 = [&](utils::ComboRenderPipelineDescriptor* descriptor) {
+        descriptor->cFragment.module = fsModuleWithoutBlendSrc1;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(descriptor));
+
+        descriptor->cFragment.module = fsModuleWithBlendSrc1;
+        device.CreateRenderPipeline(descriptor);
+    };
+
+    // Test color srcFactor
+    for (wgpu::BlendFactor blendFactor : kBlendFactors) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cBlends[0].color.srcFactor = blendFactor;
+        descriptor.cBlends[0].color.dstFactor = wgpu::BlendFactor::Src;
+        descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
+
+        CheckBlendFactorSrc1(&descriptor);
+    }
+
+    // Test color dstFactor
+    for (wgpu::BlendFactor blendFactor : kBlendFactors) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cBlends[0].color.srcFactor = wgpu::BlendFactor::Src;
+        descriptor.cBlends[0].color.dstFactor = blendFactor;
+        descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
+
+        CheckBlendFactorSrc1(&descriptor);
+    }
+
+    // Test alpha srcFactor
+    for (wgpu::BlendFactor blendFactor : kBlendFactors) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cBlends[0].alpha.srcFactor = blendFactor;
+        descriptor.cBlends[0].alpha.dstFactor = wgpu::BlendFactor::SrcAlpha;
+        descriptor.cBlends[0].alpha.operation = wgpu::BlendOperation::Add;
+
+        CheckBlendFactorSrc1(&descriptor);
+    }
+
+    // Test alpha dstFactor
+    for (wgpu::BlendFactor blendFactor : kBlendFactors) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cBlends[0].alpha.srcFactor = wgpu::BlendFactor::SrcAlpha;
+        descriptor.cBlends[0].alpha.dstFactor = blendFactor;
+        descriptor.cBlends[0].alpha.operation = wgpu::BlendOperation::Add;
+
+        CheckBlendFactorSrc1(&descriptor);
+    }
+}
+
+// Test that when any blend factor uses the alpha channel of `src1` the fragment shader output with
+// `@blend_src(1)` must have an alpha channel.
+TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1AlphaInWGSL) {
+    constexpr std::array kBlendFactors = {wgpu::BlendFactor::Src1, wgpu::BlendFactor::OneMinusSrc1,
+                                          wgpu::BlendFactor::Src1Alpha,
+                                          wgpu::BlendFactor::OneMinusSrc1Alpha};
+
+    wgpu::ShaderModule fsModuleWithBlendSrc1NoAlpha = utils::CreateShaderModule(device, R"(
+        enable chromium_internal_dual_source_blending;
+        struct FragOut {
+            @location(0) @blend_src(0) color : vec2f,
+            @location(0) @blend_src(1) blend : vec2f,
+        }
+        @fragment fn main() -> FragOut {
+            var output : FragOut;
+            output.color = vec2f(0.0, 1.0);
+            output.blend = vec2f(0.0, 1.0);
+            return output;
+        })");
+
+    auto CheckBlendFactorSrc1Alpha = [&](const wgpu::RenderPipelineDescriptor* descriptor,
+                                         wgpu::BlendFactor blendFactor) {
+        switch (blendFactor) {
+            case wgpu::BlendFactor::Src1:
+            case wgpu::BlendFactor::OneMinusSrc1:
+                device.CreateRenderPipeline(descriptor);
+                break;
+            case wgpu::BlendFactor::Src1Alpha:
+            case wgpu::BlendFactor::OneMinusSrc1Alpha:
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(descriptor));
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    };
+
+    // Test color srcFactor
+    for (wgpu::BlendFactor blendFactor : kBlendFactors) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleWithBlendSrc1NoAlpha;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RG8Unorm;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cBlends[0].color.srcFactor = blendFactor;
+        descriptor.cBlends[0].color.dstFactor = wgpu::BlendFactor::Src;
+        descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
+
+        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor);
+    }
+
+    // Test color dstFactor
+    for (wgpu::BlendFactor blendFactor : kBlendFactors) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleWithBlendSrc1NoAlpha;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RG8Unorm;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cBlends[0].color.srcFactor = wgpu::BlendFactor::Src;
+        descriptor.cBlends[0].color.dstFactor = blendFactor;
+        descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
+
+        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor);
+    }
+
+    // Test alpha srcFactor
+    for (wgpu::BlendFactor blendFactor : kBlendFactors) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleWithBlendSrc1NoAlpha;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RG8Unorm;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cBlends[0].alpha.srcFactor = blendFactor;
+        descriptor.cBlends[0].alpha.dstFactor = wgpu::BlendFactor::SrcAlpha;
+        descriptor.cBlends[0].alpha.operation = wgpu::BlendOperation::Add;
+
+        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor);
+    }
+
+    // Test alpha dstFactor
+    for (wgpu::BlendFactor blendFactor : kBlendFactors) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleWithBlendSrc1NoAlpha;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RG8Unorm;
+        descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+        descriptor.cBlends[0].alpha.srcFactor = wgpu::BlendFactor::SrcAlpha;
+        descriptor.cBlends[0].alpha.dstFactor = blendFactor;
+        descriptor.cBlends[0].alpha.operation = wgpu::BlendOperation::Add;
+
+        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor);
     }
 }
 
