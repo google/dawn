@@ -221,13 +221,12 @@ struct MultiplanarExternalTexture::State {
 
         // Transform the external texture builtin calls into calls to the external texture
         // functions.
-        ctx.ReplaceAll([&](const CallExpression* expr) -> const CallExpression* {
+        ctx.ReplaceAll([&](const CallExpression* expr) -> const Expression* {
             auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>();
             auto* builtin = call->Target()->As<sem::BuiltinFn>();
 
             if (builtin && !builtin->Parameters().IsEmpty() &&
-                builtin->Parameters()[0]->Type()->Is<core::type::ExternalTexture>() &&
-                builtin->Fn() != wgsl::BuiltinFn::kTextureDimensions) {
+                builtin->Parameters()[0]->Type()->Is<core::type::ExternalTexture>()) {
                 if (auto* var_user =
                         sem.GetVal(expr->args[0])->UnwrapLoad()->As<sem::VariableUser>()) {
                     auto it = new_binding_symbols.find(var_user->Variable());
@@ -245,6 +244,8 @@ struct MultiplanarExternalTexture::State {
                             return createTextureLoad(call, syms);
                         case wgsl::BuiltinFn::kTextureSampleBaseClampToEdge:
                             return createTextureSampleBaseClampToEdge(expr, syms);
+                        case wgsl::BuiltinFn::kTextureDimensions:
+                            return createTextureDimensions(call, syms);
                         default:
                             break;
                     }
@@ -552,6 +553,19 @@ struct MultiplanarExternalTexture::State {
 
         return b.Call(texture_load_external_sym, plane_0_binding_arg, syms.plane_1,
                       ctx.Clone(args[1]->Declaration()), syms.params);
+    }
+
+    /// Returns the expression used to replace a textureDimensions call.
+    /// @param call the call expression being transformed
+    /// @param syms the expanded symbols to be used in the new call
+    /// @returns a load of params.visibleSize
+    const Expression* createTextureDimensions(const sem::Call* call, NewBindingSymbols syms) {
+        if (TINT_UNLIKELY(call->Arguments().Length() != 1)) {
+            TINT_ICE() << "expected textureDimensions call with a texture_external to have 1 "
+                          "arguments, found "
+                       << call->Arguments().Length() << " arguments";
+        }
+        return b.Add(b.MemberAccessor(syms.params, "visibleSize"), b.Call<vec2<u32>>(1_a));
     }
 };
 

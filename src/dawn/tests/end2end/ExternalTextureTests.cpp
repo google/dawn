@@ -692,6 +692,115 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleSinglePlane) {
     }
 }
 
+// Test for a bug found during review where the visibleSize was not correctly rotated during the
+// initialization of the ExternalTexture, which could lead to incorrect textureLoad operations when
+// rotating 90 and 270 degrees.
+TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    wgpu::Texture sourceTexture =
+        Create2DTexture(device, 2, 16, kFormat,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+    RenderQuad(sourceTexture,
+               {kGreen.rgbaFloats, kBlack.rgbaFloats, kRed.rgbaFloats, kBlue.rgbaFloats});
+
+    wgpu::Texture renderTexture = Create2DTexture(
+        device, 2, 2, kFormat, wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+
+    struct RotationExpectation {
+        wgpu::ExternalTextureRotation rotation;
+        bool mirrored;
+        utils::RGBA8 upperLeftColor;
+        utils::RGBA8 upperRightColor;
+        utils::RGBA8 lowerLeftColor;
+        utils::RGBA8 lowerRightColor;
+    };
+    std::array<RotationExpectation, 8> expectations = {
+        {{wgpu::ExternalTextureRotation::Rotate0Degrees, false, utils::RGBA8::kGreen,
+          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kBlue},
+         {wgpu::ExternalTextureRotation::Rotate90Degrees, false, utils::RGBA8::kRed,
+          utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kBlack},
+         {wgpu::ExternalTextureRotation::Rotate180Degrees, false, utils::RGBA8::kBlue,
+          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kGreen},
+         {wgpu::ExternalTextureRotation::Rotate270Degrees, false, utils::RGBA8::kBlack,
+          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kRed},
+         {wgpu::ExternalTextureRotation::Rotate0Degrees, true, utils::RGBA8::kBlack,
+          utils::RGBA8::kGreen, utils::RGBA8::kBlue, utils::RGBA8::kRed},
+         {wgpu::ExternalTextureRotation::Rotate90Degrees, true, utils::RGBA8::kGreen,
+          utils::RGBA8::kRed, utils::RGBA8::kBlack, utils::RGBA8::kBlue},
+         {wgpu::ExternalTextureRotation::Rotate180Degrees, true, utils::RGBA8::kRed,
+          utils::RGBA8::kBlue, utils::RGBA8::kGreen, utils::RGBA8::kBlack},
+         {wgpu::ExternalTextureRotation::Rotate270Degrees, true, utils::RGBA8::kBlue,
+          utils::RGBA8::kBlack, utils::RGBA8::kRed, utils::RGBA8::kGreen}}};
+
+    wgpu::ShaderModule loadModule = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<storage, read_write> dimension : vec2u;
+        @group(0) @binding(1) var t : texture_external;
+
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
+            dimension = textureDimensions(t);
+
+            var coords = textureDimensions(t) / 2 + vec2u(FragCoord.xy) - vec2(1, 1);
+            return textureLoad(t, coords);
+        })");
+
+    wgpu::BufferDescriptor dimensionBufferDesc;
+    dimensionBufferDesc.size = 8;
+    dimensionBufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer dimensionBuffer = device.CreateBuffer(&dimensionBufferDesc);
+
+    for (const RotationExpectation& exp : expectations) {
+        // Pipeline Creation
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = loadModule;
+        descriptor.cTargets[0].format = kFormat;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+        // Create an ExternalTextureDescriptor from the texture view
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sourceTexture.CreateView());
+        externalDesc.rotation = exp.rotation;
+        externalDesc.mirrored = exp.mirrored;
+        externalDesc.visibleOrigin = {0, 0};
+        externalDesc.visibleSize = {sourceTexture.GetWidth(), sourceTexture.GetHeight()};
+
+        // Import the external texture and make the bindgroup.
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+            device, pipeline.GetBindGroupLayout(0), {{1, externalTexture}, {0, dimensionBuffer}});
+
+        // Run the shader, which should sample from the external texture and draw a triangle into
+        // the upper left corner of the render texture.
+        utils::ComboRenderPassDescriptor renderPass({renderTexture.CreateView()});
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Draw(6);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(exp.upperLeftColor, renderTexture, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(exp.upperRightColor, renderTexture, 1, 0);
+        EXPECT_PIXEL_RGBA8_EQ(exp.lowerLeftColor, renderTexture, 0, 1);
+        EXPECT_PIXEL_RGBA8_EQ(exp.lowerRightColor, renderTexture, 1, 1);
+
+        if (exp.rotation == wgpu::ExternalTextureRotation::Rotate90Degrees ||
+            exp.rotation == wgpu::ExternalTextureRotation::Rotate270Degrees) {
+            EXPECT_BUFFER_U32_EQ(sourceTexture.GetHeight(), dimensionBuffer, 0);
+            EXPECT_BUFFER_U32_EQ(sourceTexture.GetWidth(), dimensionBuffer, 4);
+        } else {
+            EXPECT_BUFFER_U32_EQ(sourceTexture.GetWidth(), dimensionBuffer, 0);
+            EXPECT_BUFFER_U32_EQ(sourceTexture.GetHeight(), dimensionBuffer, 4);
+        }
+    }
+}
+
 // Test draws a green square in the upper left quadrant, a black square in the upper right, a red
 // square in the lower left and a blue square in the lower right. The image is then sampled as an
 // external texture and rotated 0, 90, 180, and 270 degrees with and without the y-axis flipped.

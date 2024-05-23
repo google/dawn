@@ -304,6 +304,7 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
         case wgpu::ExternalTextureRotation::Rotate0Degrees:
             break;
         case wgpu::ExternalTextureRotation::Rotate90Degrees:
+            std::swap(loadBounds[0], loadBounds[1]);
             sampleTransform = Mul(mat2x3{0, +1, 0,   // x' = y
                                          -1, 0, 0},  // y' = -x
                                   sampleTransform);
@@ -314,7 +315,7 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
                                   sampleTransform);
             break;
         case wgpu::ExternalTextureRotation::Rotate270Degrees:
-
+            std::swap(loadBounds[0], loadBounds[1]);
             sampleTransform = Mul(mat2x3{0, -1, 0,   // x' = -y
                                          +1, 0, 0},  // y' = x
                                   sampleTransform);

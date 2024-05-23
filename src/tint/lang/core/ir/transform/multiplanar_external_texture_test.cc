@@ -270,7 +270,8 @@ $B1: {  # root
     %5:texture_2d<f32> = load %texture_plane0
     %6:texture_2d<f32> = load %texture_plane1
     %7:tint_ExternalTextureParams = load %texture_params
-    %result:vec2<u32> = textureDimensions %5
+    %8:vec2<u32> = access %7, 12u
+    %result:vec2<u32> = add %8, vec2<u32>(1u)
     ret %result
   }
 }
@@ -1071,99 +1072,100 @@ $B1: {  # root
     %15:texture_2d<f32> = load %texture_plane0
     %16:texture_2d<f32> = load %texture_plane1
     %17:tint_ExternalTextureParams = load %texture_params
-    %18:vec2<u32> = textureDimensions %15
-    %19:texture_2d<f32> = load %texture_plane0
-    %20:texture_2d<f32> = load %texture_plane1
-    %21:tint_ExternalTextureParams = load %texture_params
-    %22:vec4<f32> = call %tint_TextureSampleExternal, %19, %20, %21, %sampler_1, %coords_1
-    %23:texture_2d<f32> = load %texture_plane0
-    %24:texture_2d<f32> = load %texture_plane1
-    %25:tint_ExternalTextureParams = load %texture_params
-    %26:vec4<f32> = call %tint_TextureSampleExternal, %23, %24, %25, %sampler_1, %coords_1
-    %27:texture_2d<f32> = load %texture_plane0
-    %28:texture_2d<f32> = load %texture_plane1
-    %29:tint_ExternalTextureParams = load %texture_params
-    %result_a:vec4<f32> = call %foo, %27, %28, %29, %sampler_1, %coords_1
-    %result_b:vec4<f32> = call %foo, %27, %28, %29, %sampler_1, %coords_1
-    %32:vec4<f32> = add %result_a, %result_b
-    ret %32
+    %18:vec2<u32> = access %17, 12u
+    %19:vec2<u32> = add %18, vec2<u32>(1u)
+    %20:texture_2d<f32> = load %texture_plane0
+    %21:texture_2d<f32> = load %texture_plane1
+    %22:tint_ExternalTextureParams = load %texture_params
+    %23:vec4<f32> = call %tint_TextureSampleExternal, %20, %21, %22, %sampler_1, %coords_1
+    %24:texture_2d<f32> = load %texture_plane0
+    %25:texture_2d<f32> = load %texture_plane1
+    %26:tint_ExternalTextureParams = load %texture_params
+    %27:vec4<f32> = call %tint_TextureSampleExternal, %24, %25, %26, %sampler_1, %coords_1
+    %28:texture_2d<f32> = load %texture_plane0
+    %29:texture_2d<f32> = load %texture_plane1
+    %30:tint_ExternalTextureParams = load %texture_params
+    %result_a:vec4<f32> = call %foo, %28, %29, %30, %sampler_1, %coords_1
+    %result_b:vec4<f32> = call %foo, %28, %29, %30, %sampler_1, %coords_1
+    %33:vec4<f32> = add %result_a, %result_b
+    ret %33
   }
 }
 %tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_2:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %sampler_2: 'sampler', %coords_2: 'coords'
   $B4: {
-    %38:u32 = access %params, 1u
-    %39:mat3x4<f32> = access %params, 2u
-    %40:mat3x2<f32> = access %params, 6u
-    %41:vec2<f32> = access %params, 8u
-    %42:vec2<f32> = access %params, 9u
-    %43:vec2<f32> = access %params, 10u
-    %44:vec2<f32> = access %params, 11u
-    %45:vec3<f32> = construct %coords_2, 1.0f
-    %46:vec2<f32> = mul %40, %45
-    %47:vec2<f32> = clamp %46, %41, %42
-    %48:u32 = access %params, 0u
-    %49:bool = eq %48, 1u
-    %50:vec3<f32>, %51:f32 = if %49 [t: $B5, f: $B6] {  # if_1
+    %39:u32 = access %params, 1u
+    %40:mat3x4<f32> = access %params, 2u
+    %41:mat3x2<f32> = access %params, 6u
+    %42:vec2<f32> = access %params, 8u
+    %43:vec2<f32> = access %params, 9u
+    %44:vec2<f32> = access %params, 10u
+    %45:vec2<f32> = access %params, 11u
+    %46:vec3<f32> = construct %coords_2, 1.0f
+    %47:vec2<f32> = mul %41, %46
+    %48:vec2<f32> = clamp %47, %42, %43
+    %49:u32 = access %params, 0u
+    %50:bool = eq %49, 1u
+    %51:vec3<f32>, %52:f32 = if %50 [t: $B5, f: $B6] {  # if_1
       $B5: {  # true
-        %52:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %47, 0.0f
-        %53:vec3<f32> = swizzle %52, xyz
-        %54:f32 = access %52, 3u
-        exit_if %53, %54  # if_1
+        %53:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %48, 0.0f
+        %54:vec3<f32> = swizzle %53, xyz
+        %55:f32 = access %53, 3u
+        exit_if %54, %55  # if_1
       }
       $B6: {  # false
-        %55:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %47, 0.0f
-        %56:f32 = access %55, 0u
-        %57:vec2<f32> = clamp %46, %43, %44
-        %58:vec4<f32> = textureSampleLevel %plane_1, %sampler_2, %57, 0.0f
-        %59:vec2<f32> = swizzle %58, xy
-        %60:vec4<f32> = construct %56, %59, 1.0f
-        %61:vec3<f32> = mul %60, %39
-        exit_if %61, 1.0f  # if_1
+        %56:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %48, 0.0f
+        %57:f32 = access %56, 0u
+        %58:vec2<f32> = clamp %47, %44, %45
+        %59:vec4<f32> = textureSampleLevel %plane_1, %sampler_2, %58, 0.0f
+        %60:vec2<f32> = swizzle %59, xy
+        %61:vec4<f32> = construct %57, %60, 1.0f
+        %62:vec3<f32> = mul %61, %40
+        exit_if %62, 1.0f  # if_1
       }
     }
-    %62:bool = eq %38, 0u
-    %63:vec3<f32> = if %62 [t: $B7, f: $B8] {  # if_2
+    %63:bool = eq %39, 0u
+    %64:vec3<f32> = if %63 [t: $B7, f: $B8] {  # if_2
       $B7: {  # true
-        %64:tint_GammaTransferParams = access %params, 3u
-        %65:tint_GammaTransferParams = access %params, 4u
-        %66:mat3x3<f32> = access %params, 5u
-        %67:vec3<f32> = call %tint_GammaCorrection, %50, %64
-        %69:vec3<f32> = mul %66, %67
-        %70:vec3<f32> = call %tint_GammaCorrection, %69, %65
-        exit_if %70  # if_2
+        %65:tint_GammaTransferParams = access %params, 3u
+        %66:tint_GammaTransferParams = access %params, 4u
+        %67:mat3x3<f32> = access %params, 5u
+        %68:vec3<f32> = call %tint_GammaCorrection, %51, %65
+        %70:vec3<f32> = mul %67, %68
+        %71:vec3<f32> = call %tint_GammaCorrection, %70, %66
+        exit_if %71  # if_2
       }
       $B8: {  # false
-        exit_if %50  # if_2
+        exit_if %51  # if_2
       }
     }
-    %71:vec4<f32> = construct %63, %51
-    ret %71
+    %72:vec4<f32> = construct %64, %52
+    ret %72
   }
 }
 %tint_GammaCorrection = func(%v:vec3<f32>, %params_1:tint_GammaTransferParams):vec3<f32> {  # %params_1: 'params'
   $B9: {
-    %74:f32 = access %params_1, 0u
-    %75:f32 = access %params_1, 1u
-    %76:f32 = access %params_1, 2u
-    %77:f32 = access %params_1, 3u
-    %78:f32 = access %params_1, 4u
-    %79:f32 = access %params_1, 5u
-    %80:f32 = access %params_1, 6u
-    %81:vec3<f32> = construct %74
-    %82:vec3<f32> = construct %78
-    %83:vec3<f32> = abs %v
-    %84:vec3<f32> = sign %v
-    %85:vec3<bool> = lt %83, %82
-    %86:vec3<f32> = mul %77, %83
-    %87:vec3<f32> = add %86, %80
-    %88:vec3<f32> = mul %84, %87
-    %89:vec3<f32> = mul %75, %83
-    %90:vec3<f32> = add %89, %76
-    %91:vec3<f32> = pow %90, %81
-    %92:vec3<f32> = add %91, %79
-    %93:vec3<f32> = mul %84, %92
-    %94:vec3<f32> = select %93, %88, %85
-    ret %94
+    %75:f32 = access %params_1, 0u
+    %76:f32 = access %params_1, 1u
+    %77:f32 = access %params_1, 2u
+    %78:f32 = access %params_1, 3u
+    %79:f32 = access %params_1, 4u
+    %80:f32 = access %params_1, 5u
+    %81:f32 = access %params_1, 6u
+    %82:vec3<f32> = construct %75
+    %83:vec3<f32> = construct %79
+    %84:vec3<f32> = abs %v
+    %85:vec3<f32> = sign %v
+    %86:vec3<bool> = lt %84, %83
+    %87:vec3<f32> = mul %78, %84
+    %88:vec3<f32> = add %87, %81
+    %89:vec3<f32> = mul %85, %88
+    %90:vec3<f32> = mul %76, %84
+    %91:vec3<f32> = add %90, %77
+    %92:vec3<f32> = pow %91, %82
+    %93:vec3<f32> = add %92, %80
+    %94:vec3<f32> = mul %85, %93
+    %95:vec3<f32> = select %94, %89, %86
+    ret %95
   }
 }
 )";

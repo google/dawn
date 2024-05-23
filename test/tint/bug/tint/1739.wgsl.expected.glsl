@@ -103,9 +103,9 @@ ExternalTextureParams conv_ExternalTextureParams(ExternalTextureParams_std140 va
 }
 
 void tint_symbol() {
-  vec4 red = textureLoadExternal(t_1, ext_tex_plane_1_1, clamp(ivec2(10), ivec2(0), ivec2((uvec2(textureSize(t_1, 0)) - uvec2(1u)))), conv_ExternalTextureParams(ext_tex_params.inner));
+  vec4 red = textureLoadExternal(t_1, ext_tex_plane_1_1, clamp(ivec2(10), ivec2(0), ivec2(((ext_tex_params.inner.visibleSize + uvec2(1u)) - uvec2(1u)))), conv_ExternalTextureParams(ext_tex_params.inner));
   imageStore(outImage, clamp(ivec2(0), ivec2(0), ivec2((uvec2(imageSize(outImage)) - uvec2(1u)))), red);
-  vec4 green = textureLoadExternal(t_1, ext_tex_plane_1_1, clamp(ivec2(70, 118), ivec2(0), ivec2((uvec2(textureSize(t_1, 0)) - uvec2(1u)))), conv_ExternalTextureParams(ext_tex_params.inner));
+  vec4 green = textureLoadExternal(t_1, ext_tex_plane_1_1, clamp(ivec2(70, 118), ivec2(0), ivec2(((ext_tex_params.inner.visibleSize + uvec2(1u)) - uvec2(1u)))), conv_ExternalTextureParams(ext_tex_params.inner));
   imageStore(outImage, clamp(ivec2(1, 0), ivec2(0), ivec2((uvec2(imageSize(outImage)) - uvec2(1u)))), green);
   return;
 }

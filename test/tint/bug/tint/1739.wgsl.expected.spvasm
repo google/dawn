@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 256
+; Bound: 259
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -195,15 +195,16 @@
      %int_10 = OpConstant %int 10
         %209 = OpConstantComposite %v2int %int_10 %int_10
         %210 = OpConstantNull %v2int
-      %int_0 = OpConstant %int 0
-        %215 = OpConstantComposite %v2uint %uint_1 %uint_1
      %uint_0 = OpConstant %uint 0
+    %uint_16 = OpConstant %uint 16
+%_ptr_Uniform_v2uint = OpTypePointer Uniform %v2uint
+        %217 = OpConstantComposite %v2uint %uint_1 %uint_1
 %_ptr_Uniform_ExternalTextureParams_std140 = OpTypePointer Uniform %ExternalTextureParams_std140
      %int_70 = OpConstant %int 70
     %int_118 = OpConstant %int 118
-        %237 = OpConstantComposite %v2int %int_70 %int_118
+        %239 = OpConstantComposite %v2int %int_70 %int_118
       %int_1 = OpConstant %int 1
-        %250 = OpConstantComposite %v2int %int_1 %118
+        %253 = OpConstantComposite %v2int %int_1 %118
   %tint_ftou = OpFunction %v2uint None %21
           %v = OpFunctionParameter %v2float
          %24 = OpLabel
@@ -382,43 +383,45 @@
       %green = OpVariable %_ptr_Function_v4float Function %110
         %205 = OpLoad %3 %t
         %206 = OpLoad %3 %ext_tex_plane_1
-        %213 = OpLoad %3 %t
-        %212 = OpImageQuerySizeLod %v2uint %213 %int_0
-        %216 = OpISub %v2uint %212 %215
-        %211 = OpBitcast %v2int %216
+        %215 = OpAccessChain %_ptr_Uniform_v2uint %ext_tex_params %uint_0 %uint_16
+        %216 = OpLoad %v2uint %215
+        %218 = OpIAdd %v2uint %216 %217
+        %219 = OpISub %v2uint %218 %217
+        %211 = OpBitcast %v2int %219
         %207 = OpFunctionCall %v2int %tint_clamp %209 %210 %211
-        %220 = OpAccessChain %_ptr_Uniform_ExternalTextureParams_std140 %ext_tex_params %uint_0
-        %221 = OpLoad %ExternalTextureParams_std140 %220
-        %217 = OpFunctionCall %ExternalTextureParams %conv_ExternalTextureParams %221
-        %204 = OpFunctionCall %v4float %textureLoadExternal %205 %206 %207 %217
+        %222 = OpAccessChain %_ptr_Uniform_ExternalTextureParams_std140 %ext_tex_params %uint_0
+        %223 = OpLoad %ExternalTextureParams_std140 %222
+        %220 = OpFunctionCall %ExternalTextureParams %conv_ExternalTextureParams %223
+        %204 = OpFunctionCall %v4float %textureLoadExternal %205 %206 %207 %220
                OpStore %red %204
-        %224 = OpLoad %20 %outImage
-        %228 = OpLoad %20 %outImage
-        %227 = OpImageQuerySize %v2uint %228
-        %229 = OpISub %v2uint %227 %215
-        %226 = OpBitcast %v2int %229
-        %225 = OpFunctionCall %v2int %tint_clamp %210 %210 %226
-        %230 = OpLoad %v4float %red
-               OpImageWrite %224 %225 %230
-        %232 = OpLoad %3 %t
-        %233 = OpLoad %3 %ext_tex_plane_1
-        %240 = OpLoad %3 %t
-        %239 = OpImageQuerySizeLod %v2uint %240 %int_0
-        %241 = OpISub %v2uint %239 %215
-        %238 = OpBitcast %v2int %241
-        %234 = OpFunctionCall %v2int %tint_clamp %237 %210 %238
-        %243 = OpAccessChain %_ptr_Uniform_ExternalTextureParams_std140 %ext_tex_params %uint_0
-        %244 = OpLoad %ExternalTextureParams_std140 %243
-        %242 = OpFunctionCall %ExternalTextureParams %conv_ExternalTextureParams %244
-        %231 = OpFunctionCall %v4float %textureLoadExternal %232 %233 %234 %242
-               OpStore %green %231
-        %247 = OpLoad %20 %outImage
-        %253 = OpLoad %20 %outImage
-        %252 = OpImageQuerySize %v2uint %253
-        %254 = OpISub %v2uint %252 %215
-        %251 = OpBitcast %v2int %254
-        %248 = OpFunctionCall %v2int %tint_clamp %250 %210 %251
-        %255 = OpLoad %v4float %green
-               OpImageWrite %247 %248 %255
+        %226 = OpLoad %20 %outImage
+        %230 = OpLoad %20 %outImage
+        %229 = OpImageQuerySize %v2uint %230
+        %231 = OpISub %v2uint %229 %217
+        %228 = OpBitcast %v2int %231
+        %227 = OpFunctionCall %v2int %tint_clamp %210 %210 %228
+        %232 = OpLoad %v4float %red
+               OpImageWrite %226 %227 %232
+        %234 = OpLoad %3 %t
+        %235 = OpLoad %3 %ext_tex_plane_1
+        %241 = OpAccessChain %_ptr_Uniform_v2uint %ext_tex_params %uint_0 %uint_16
+        %242 = OpLoad %v2uint %241
+        %243 = OpIAdd %v2uint %242 %217
+        %244 = OpISub %v2uint %243 %217
+        %240 = OpBitcast %v2int %244
+        %236 = OpFunctionCall %v2int %tint_clamp %239 %210 %240
+        %246 = OpAccessChain %_ptr_Uniform_ExternalTextureParams_std140 %ext_tex_params %uint_0
+        %247 = OpLoad %ExternalTextureParams_std140 %246
+        %245 = OpFunctionCall %ExternalTextureParams %conv_ExternalTextureParams %247
+        %233 = OpFunctionCall %v4float %textureLoadExternal %234 %235 %236 %245
+               OpStore %green %233
+        %250 = OpLoad %20 %outImage
+        %256 = OpLoad %20 %outImage
+        %255 = OpImageQuerySize %v2uint %256
+        %257 = OpISub %v2uint %255 %217
+        %254 = OpBitcast %v2int %257
+        %251 = OpFunctionCall %v2int %tint_clamp %253 %210 %254
+        %258 = OpLoad %v4float %green
+               OpImageWrite %250 %251 %258
                OpReturn
                OpFunctionEnd

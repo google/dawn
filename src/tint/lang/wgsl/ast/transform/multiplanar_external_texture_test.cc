@@ -171,7 +171,7 @@ struct ExternalTextureParams {
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   var dim : vec2<u32>;
-  dim = textureDimensions(ext_tex);
+  dim = (ext_tex_params.visibleSize + vec2<u32>(1));
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
 )";
@@ -318,7 +318,7 @@ struct ExternalTextureParams {
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   var dim : vec2<u32>;
-  dim = textureDimensions(ext_tex);
+  dim = (ext_tex_params.visibleSize + vec2<u32>(1));
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
 
@@ -1791,7 +1791,7 @@ struct ExternalTextureParams {
 }
 
 fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) -> vec2<u32> {
-  return textureDimensions(ext_tex);
+  return (ext_tex_params.visibleSize + vec2<u32>(1));
 }
 )";
 
