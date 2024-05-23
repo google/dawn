@@ -68,9 +68,14 @@ group("cmds") {
   }
 }
 
+group("android") {
+  deps = [ "tools/android" ]
+}
+
 group("all") {
   testonly = true
   deps = [
+    ":android",
     ":benchmarks",
     ":cmds",
     ":fuzzers",
