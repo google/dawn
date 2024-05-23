@@ -252,7 +252,7 @@ ResultOrError<Ref<BufferBase>> CommandRecordingContext::CreateInternalUniformBuf
     descriptor.size = sizeof(uint32_t) * kMaxNumBuiltinElements;
     descriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
     descriptor.mappedAtCreation = false;
-    descriptor.label = "builtin uniform buffer";
+    descriptor.label = "BuiltinUniform";
 
     Ref<BufferBase> uniformBuffer;
     // Lock the device to protect the clearing of the built-in uniform buffer.
