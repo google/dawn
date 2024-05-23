@@ -43,6 +43,8 @@ include(lang/core/ir/transform/common/BUILD.cmake)
 tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/add_empty_entry_point.cc
   lang/core/ir/transform/add_empty_entry_point.h
+  lang/core/ir/transform/array_length_from_uniform.cc
+  lang/core/ir/transform/array_length_from_uniform.h
   lang/core/ir/transform/bgra8unorm_polyfill.cc
   lang/core/ir/transform/bgra8unorm_polyfill.h
   lang/core/ir/transform/binary_polyfill.cc
@@ -109,6 +111,7 @@ tint_target_add_dependencies(tint_lang_core_ir_transform lib
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/add_empty_entry_point_test.cc
+  lang/core/ir/transform/array_length_from_uniform_test.cc
   lang/core/ir/transform/bgra8unorm_polyfill_test.cc
   lang/core/ir/transform/binary_polyfill_test.cc
   lang/core/ir/transform/binding_remapper_test.cc
@@ -189,6 +192,7 @@ endif(TINT_BUILD_WGSL_WRITER)
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/add_empty_entry_point_fuzz.cc
+  lang/core/ir/transform/array_length_from_uniform_fuzz.cc
   lang/core/ir/transform/bgra8unorm_polyfill_fuzz.cc
   lang/core/ir/transform/binary_polyfill_fuzz.cc
   lang/core/ir/transform/binding_remapper_fuzz.cc

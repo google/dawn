@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
@@ -93,6 +94,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, external_texture_options);
+    RUN_TRANSFORM(core::ir::transform::ArrayLengthFromUniform,
+                  BindingPoint{0u, array_length_from_uniform_options.ubo_binding},
+                  array_length_from_uniform_options.bindpoint_to_size_index);
 
     if (!options.disable_workgroup_init) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory);
