@@ -161,6 +161,8 @@ enum builtin_type {
   texture_storage_3d
   // https://www.w3.org/TR/WGSL/#external-texture-type
   texture_external
+  // chromium_internal_input_attachments
+  input_attachment
 
   // Internal types.
   __packed_vec3  // note: not core type, but used by legacy MSL writer

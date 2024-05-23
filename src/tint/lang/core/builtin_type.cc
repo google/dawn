@@ -141,6 +141,9 @@ BuiltinType ParseBuiltinType(std::string_view str) {
     if (str == "i32") {
         return BuiltinType::kI32;
     }
+    if (str == "input_attachment") {
+        return BuiltinType::kInputAttachment;
+    }
     if (str == "mat2x2") {
         return BuiltinType::kMat2X2;
     }
@@ -403,6 +406,8 @@ std::string_view ToString(BuiltinType value) {
             return "f32";
         case BuiltinType::kI32:
             return "i32";
+        case BuiltinType::kInputAttachment:
+            return "input_attachment";
         case BuiltinType::kMat2X2:
             return "mat2x2";
         case BuiltinType::kMat2X2F:

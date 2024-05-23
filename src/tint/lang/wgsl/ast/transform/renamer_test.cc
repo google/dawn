@@ -1866,7 +1866,8 @@ std::vector<std::string_view> ConstructableTypes() {
     std::vector<std::string_view> out;
     for (auto type : core::kBuiltinTypeStrings) {
         if (type != "ptr" && type != "atomic" && !tint::HasPrefix(type, "sampler") &&
-            !tint::HasPrefix(type, "texture") && !tint::HasPrefix(type, "__")) {
+            !tint::HasPrefix(type, "texture") && !tint::HasPrefix(type, "__") &&
+            !tint::HasPrefix(type, "input_attachment")) {
             out.push_back(type);
         }
     }

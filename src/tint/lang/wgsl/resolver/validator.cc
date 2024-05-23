@@ -441,6 +441,15 @@ bool Validator::MultisampledTexture(const core::type::MultisampledTexture* t,
     return true;
 }
 
+bool Validator::InputAttachment(const core::type::InputAttachment* t, const Source& source) const {
+    if (!t->type()->UnwrapRef()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+        AddError(source) << "input_attachment<type>: type must be f32, i32 or u32";
+        return false;
+    }
+
+    return true;
+}
+
 bool Validator::Materialize(const core::type::Type* to,
                             const core::type::Type* from,
                             const Source& source) const {

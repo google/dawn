@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -2654,6 +2655,8 @@ core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
             return StorageTexture(ident, core::type::TextureDimension::k2dArray);
         case core::BuiltinType::kTextureStorage3D:
             return StorageTexture(ident, core::type::TextureDimension::k3d);
+        case core::BuiltinType::kInputAttachment:
+            return InputAttachment(ident);
         case core::BuiltinType::kPackedVec3:
             return PackedVec3T(ident);
         case core::BuiltinType::kAtomicCompareExchangeResultI32:
@@ -2966,6 +2969,21 @@ core::type::StorageTexture* Resolver::StorageTexture(const ast::Identifier* iden
     }
 
     return tex;
+}
+
+core::type::InputAttachment* Resolver::InputAttachment(const ast::Identifier* ident) {
+    auto* tmpl_ident = TemplatedIdentifier(ident, 1);
+    if (TINT_UNLIKELY(!tmpl_ident)) {
+        return nullptr;
+    }
+
+    auto* ty_expr = sem_.GetType(tmpl_ident->arguments[0]);
+    if (TINT_UNLIKELY(!ty_expr)) {
+        return nullptr;
+    }
+
+    auto* out = b.create<core::type::InputAttachment>(ty_expr);
+    return validator_.InputAttachment(out, ident->source) ? out : nullptr;
 }
 
 core::type::Vector* Resolver::PackedVec3T(const ast::Identifier* ident) {

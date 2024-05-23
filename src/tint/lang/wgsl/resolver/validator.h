@@ -428,6 +428,12 @@ class Validator {
     /// @returns true on success, false otherwise
     bool MultisampledTexture(const core::type::MultisampledTexture* t, const Source& source) const;
 
+    /// Validates a input attachment
+    /// @param t the input attachment to validate
+    /// @param source the source of the input attachment
+    /// @returns true on success, false otherwise
+    bool InputAttachment(const core::type::InputAttachment* t, const Source& source) const;
+
     /// Validates a structure
     /// @param str the structure to validate
     /// @param stage the current pipeline stage

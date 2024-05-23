@@ -223,6 +223,9 @@ class Resolver {
     core::type::StorageTexture* StorageTexture(const ast::Identifier* ident,
                                                core::type::TextureDimension dim);
 
+    /// @returns an input attachment resolved from the templated identifier @p ident
+    core::type::InputAttachment* InputAttachment(const ast::Identifier* ident);
+
     /// @returns a packed vec3 resolved from the templated identifier @p ident.
     core::type::Vector* PackedVec3T(const ast::Identifier* ident);
 

@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -1297,6 +1298,12 @@ class Builder {
 
         /// @returns the external texture
         ast::Type external_texture() const { return (*this)("texture_external"); }
+
+        /// @param subtype the texture subtype.
+        /// @returns the input attachment
+        ast::Type input_attachment(ast::Type subtype) const {
+            return (*this)("input_attachment", subtype);
+        }
 
         /// @param source the Source of the node
         /// @returns the external texture
