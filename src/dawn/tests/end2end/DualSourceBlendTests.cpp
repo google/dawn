@@ -83,7 +83,127 @@ class DualSourceBlendTests : public DawnTest {
         utils::RGBA8 testColorIndex1;
     };
 
-    void RunTest(TestParams params, const utils::RGBA8& expectation) {
+    std::array<float, 4> RGBA8ToVec4F32(utils::RGBA8 rgba) {
+        return {rgba.r / 255.f, rgba.g / 255.f, rgba.b / 255.f, rgba.a / 255.f};
+    }
+
+    std::array<float, 4> ApplyBlendOperation(wgpu::BlendFactor blendFactor,
+                                             const std::array<float, 4>& currentBlendColorF32,
+                                             const std::array<float, 4>& dstF32,
+                                             const std::array<float, 4>& src0F32,
+                                             const std::array<float, 4>& src1F32) {
+        std::array<float, 4> idealBlendOutputF32;
+        // Currently in this test blendComponents are same for both color and alpha so we can
+        // compute them together.
+        switch (blendFactor) {
+            case wgpu::BlendFactor::Zero:
+                idealBlendOutputF32 = {};
+                break;
+            case wgpu::BlendFactor::One:
+                idealBlendOutputF32 = currentBlendColorF32;
+                break;
+            case wgpu::BlendFactor::Src:
+                for (uint32_t i = 0; i < idealBlendOutputF32.size(); ++i) {
+                    idealBlendOutputF32[i] = currentBlendColorF32[i] * src0F32[i];
+                }
+                break;
+            case wgpu::BlendFactor::Src1:
+                for (uint32_t i = 0; i < idealBlendOutputF32.size(); ++i) {
+                    idealBlendOutputF32[i] = currentBlendColorF32[i] * src1F32[i];
+                }
+                break;
+            case wgpu::BlendFactor::SrcAlpha:
+                for (uint32_t i = 0; i < idealBlendOutputF32.size(); ++i) {
+                    idealBlendOutputF32[i] = currentBlendColorF32[i] * src0F32[3];
+                }
+                break;
+            case wgpu::BlendFactor::Src1Alpha:
+                for (uint32_t i = 0; i < 4; ++i) {
+                    idealBlendOutputF32[i] = currentBlendColorF32[i] * src1F32[3];
+                }
+                break;
+            case wgpu::BlendFactor::OneMinusSrc:
+                for (uint32_t i = 0; i < 4; ++i) {
+                    idealBlendOutputF32[i] = currentBlendColorF32[i] * (1.f - src0F32[i]);
+                }
+                break;
+            case wgpu::BlendFactor::OneMinusSrc1:
+                for (uint32_t i = 0; i < 4; ++i) {
+                    idealBlendOutputF32[i] = currentBlendColorF32[i] * (1.f - src1F32[i]);
+                }
+                break;
+            case wgpu::BlendFactor::OneMinusSrcAlpha:
+                for (uint32_t i = 0; i < 4; ++i) {
+                    idealBlendOutputF32[i] = currentBlendColorF32[i] * (1.f - src0F32[3]);
+                }
+                break;
+            case wgpu::BlendFactor::OneMinusSrc1Alpha:
+                for (uint32_t i = 0; i < 4; ++i) {
+                    idealBlendOutputF32[i] = currentBlendColorF32[i] * (1.f - src1F32[3]);
+                }
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+        return idealBlendOutputF32;
+    }
+
+    std::array<utils::RGBA8, 2> GetRGBA8ExpectationRange(const TestParams& params) {
+        std::array dstF32 = RGBA8ToVec4F32(params.baseColor);
+        std::array src0F32 = RGBA8ToVec4F32(params.testColorIndex0);
+        std::array src1F32 = RGBA8ToVec4F32(params.testColorIndex1);
+
+        std::array idealBlendSrcOperationOutputF32 =
+            ApplyBlendOperation(params.srcBlendFactor, src0F32, dstF32, src0F32, src1F32);
+        std::array idealBlendDstOperationOutputF32 =
+            ApplyBlendOperation(params.dstBlendFactor, dstF32, dstF32, src0F32, src1F32);
+
+        std::array<utils::RGBA8, 2> rgba8ExpectationRange;
+        // In this test the blend operation is always `wgpu::BlendOperation::Add`.
+        for (uint32_t i = 0; i < 4; ++i) {
+            float idealBlendOperationUnorm8Unquantized =
+                (idealBlendSrcOperationOutputF32[i] + idealBlendDstOperationOutputF32[i]) * 255.f +
+                0.5f;
+
+            // The float-to-unorm conversion is permitted tolerance of 0.6f ULP (on the integer
+            // side). This means that after converting from float to integer scale, any value within
+            // 0.6f ULP of a representable target format value is permitted to map to that value.
+            // See the chapter "Integer Conversion / FLOAT->UNORM" in D3D SPEC for more details:
+            // https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm
+            switch (i) {
+                case 0:
+                    rgba8ExpectationRange[0].r =
+                        static_cast<uint8_t>(idealBlendOperationUnorm8Unquantized - 0.6f);
+                    rgba8ExpectationRange[1].r =
+                        static_cast<uint8_t>(idealBlendOperationUnorm8Unquantized + 0.6f);
+                    break;
+                case 1:
+                    rgba8ExpectationRange[0].g =
+                        static_cast<uint8_t>(idealBlendOperationUnorm8Unquantized - 0.6f);
+                    rgba8ExpectationRange[1].g =
+                        static_cast<uint8_t>(idealBlendOperationUnorm8Unquantized + 0.6f);
+                    break;
+                case 2:
+                    rgba8ExpectationRange[0].b =
+                        static_cast<uint8_t>(idealBlendOperationUnorm8Unquantized - 0.6f);
+                    rgba8ExpectationRange[1].b =
+                        static_cast<uint8_t>(idealBlendOperationUnorm8Unquantized + 0.6f);
+                    break;
+                case 3:
+                    rgba8ExpectationRange[0].a =
+                        static_cast<uint8_t>(idealBlendOperationUnorm8Unquantized - 0.6f);
+                    rgba8ExpectationRange[1].a =
+                        static_cast<uint8_t>(idealBlendOperationUnorm8Unquantized + 0.6f);
+                    break;
+                default:
+                    DAWN_UNREACHABLE();
+            }
+        }
+
+        return rgba8ExpectationRange;
+    }
+
+    void RunTest(TestParams params) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 enable chromium_internal_dual_source_blending;
 
@@ -157,10 +277,9 @@ class DualSourceBlendTests : public DawnTest {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        utils::RGBA8 expectationMinusOne = utils::RGBA8(expectation.r - 1, expectation.g - 1,
-                                                        expectation.b - 1, expectation.a - 1);
-        EXPECT_PIXEL_RGBA8_BETWEEN(expectation, expectationMinusOne, renderPass.color, kRTSize / 2,
-                                   kRTSize / 2);
+        std::array expectationRange = GetRGBA8ExpectationRange(params);
+        EXPECT_PIXEL_RGBA8_BETWEEN(expectationRange[0], expectationRange[1], renderPass.color,
+                                   kRTSize / 2, kRTSize / 2);
     }
 
     // Create a bind group to set the colors as a uniform buffer
@@ -188,9 +307,6 @@ class DualSourceBlendTests : public DawnTest {
 
 // Test that Src and Src1 BlendFactors work with dual source blending.
 TEST_P(DualSourceBlendTests, BlendFactorSrc1) {
-    // TODO(crbug.com/dawn/2543): diagnose this on Pixel 6 AP1A.240405.002
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsAndroid() && IsARM());
-
     // Test source blend factor with source index 0
     TestParams params;
     params.srcBlendFactor = wgpu::BlendFactor::Src;
@@ -198,27 +314,24 @@ TEST_P(DualSourceBlendTests, BlendFactorSrc1) {
     params.baseColor = utils::RGBA8(100, 150, 200, 250);
     params.testColorIndex0 = utils::RGBA8(100, 150, 200, 250);
     params.testColorIndex1 = utils::RGBA8(32, 64, 96, 128);
-    RunTest(params, utils::RGBA8(39, 88, 157, 245));
+    RunTest(params);
 
     // Test source blend factor with source index 1
     params.srcBlendFactor = wgpu::BlendFactor::Src1;
-    RunTest(params, utils::RGBA8(13, 38, 75, 125));
+    RunTest(params);
 
     // Test destination blend factor with source index 0
     params.srcBlendFactor = wgpu::BlendFactor::Zero;
     params.dstBlendFactor = wgpu::BlendFactor::Src;
-    RunTest(params, utils::RGBA8(39, 88, 157, 245));
+    RunTest(params);
 
     // Test destination blend factor with source index 1
     params.dstBlendFactor = wgpu::BlendFactor::Src1;
-    RunTest(params, utils::RGBA8(13, 38, 75, 125));
+    RunTest(params);
 }
 
 // Test that SrcAlpha and SrcAlpha1 BlendFactors work with dual source blending.
 TEST_P(DualSourceBlendTests, BlendFactorSrc1Alpha) {
-    // TODO(crbug.com/dawn/2543): diagnose this on Pixel 6 AP1A.240405.002
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsAndroid() && IsARM());
-
     // Test source blend factor with source alpha index 0
     TestParams params;
     params.srcBlendFactor = wgpu::BlendFactor::SrcAlpha;
@@ -226,20 +339,20 @@ TEST_P(DualSourceBlendTests, BlendFactorSrc1Alpha) {
     params.baseColor = utils::RGBA8(100, 150, 200, 250);
     params.testColorIndex0 = utils::RGBA8(100, 150, 200, 250);
     params.testColorIndex1 = utils::RGBA8(32, 64, 96, 128);
-    RunTest(params, utils::RGBA8(98, 147, 196, 245));
+    RunTest(params);
 
     // Test source blend factor with source alpha index 1
     params.srcBlendFactor = wgpu::BlendFactor::Src1Alpha;
-    RunTest(params, utils::RGBA8(50, 75, 100, 125));
+    RunTest(params);
 
     // Test destination blend factor with source alpha index 0
     params.srcBlendFactor = wgpu::BlendFactor::Zero;
     params.dstBlendFactor = wgpu::BlendFactor::SrcAlpha;
-    RunTest(params, utils::RGBA8(98, 147, 196, 245));
+    RunTest(params);
 
     // Test destination blend factor with source alpha index 1
     params.dstBlendFactor = wgpu::BlendFactor::Src1Alpha;
-    RunTest(params, utils::RGBA8(50, 75, 100, 125));
+    RunTest(params);
 }
 
 // Test that OneMinusSrc and OneMinusSrc1 BlendFactors work with dual source blending.
@@ -251,20 +364,20 @@ TEST_P(DualSourceBlendTests, BlendFactorOneMinusSrc1) {
     params.baseColor = utils::RGBA8(100, 150, 200, 250);
     params.testColorIndex0 = utils::RGBA8(100, 150, 200, 250);
     params.testColorIndex1 = utils::RGBA8(32, 64, 96, 128);
-    RunTest(params, utils::RGBA8(61, 62, 43, 5));
+    RunTest(params);
 
     // Test source blend factor with one minus source index 1
     params.srcBlendFactor = wgpu::BlendFactor::OneMinusSrc1;
-    RunTest(params, utils::RGBA8(87, 112, 125, 125));
+    RunTest(params);
 
     // Test destination blend factor with one minus source index 0
     params.srcBlendFactor = wgpu::BlendFactor::Zero;
     params.dstBlendFactor = wgpu::BlendFactor::OneMinusSrc;
-    RunTest(params, utils::RGBA8(61, 62, 43, 5));
+    RunTest(params);
 
     // Test destination blend factor with one minus source index 1
     params.dstBlendFactor = wgpu::BlendFactor::OneMinusSrc1;
-    RunTest(params, utils::RGBA8(87, 112, 125, 125));
+    RunTest(params);
 }
 
 // Test that OneMinusSrcAlpha and OneMinusSrc1Alpha BlendFactors work with dual source blending.
@@ -276,20 +389,20 @@ TEST_P(DualSourceBlendTests, BlendFactorOneMinusSrc1Alpha) {
     params.baseColor = utils::RGBA8(100, 150, 200, 250);
     params.testColorIndex0 = utils::RGBA8(100, 150, 200, 96);
     params.testColorIndex1 = utils::RGBA8(32, 64, 96, 160);
-    RunTest(params, utils::RGBA8(62, 94, 125, 60));
+    RunTest(params);
 
     // Test source blend factor with one minus source alpha index 1
     params.srcBlendFactor = wgpu::BlendFactor::OneMinusSrc1Alpha;
-    RunTest(params, utils::RGBA8(37, 56, 75, 36));
+    RunTest(params);
 
     // Test destination blend factor with one minus source alpha index 0
     params.srcBlendFactor = wgpu::BlendFactor::Zero;
     params.dstBlendFactor = wgpu::BlendFactor::OneMinusSrcAlpha;
-    RunTest(params, utils::RGBA8(62, 94, 125, 156));
+    RunTest(params);
 
     // Test destination blend factor with one minus source alpha index 1
     params.dstBlendFactor = wgpu::BlendFactor::OneMinusSrc1Alpha;
-    RunTest(params, utils::RGBA8(37, 56, 75, 93));
+    RunTest(params);
 }
 
 DAWN_INSTANTIATE_TEST(DualSourceBlendTests,
