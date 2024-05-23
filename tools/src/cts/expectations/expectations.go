@@ -147,6 +147,13 @@ func (c Content) String() string {
 	return sb.String()
 }
 
+// Format sorts each chunk of the Content in place.
+func (c *Content) Format() {
+	for _, chunk := range c.Chunks {
+		chunk.Expectations.Sort()
+	}
+}
+
 // IsCommentOnly returns true if the Chunk contains comments and no expectations.
 func (c Chunk) IsCommentOnly() bool {
 	return len(c.Comments) > 0 && len(c.Expectations) == 0
@@ -188,7 +195,7 @@ func (e Expectation) Clone() Expectation {
 //	 1 if a should come after b
 //	 0 if a and b are identical
 //
-// Note: Only comparing bug, query, and tags (in that order).
+// Note: Only comparing bug, tags, and query (in that order).
 func (e Expectation) Compare(b Expectation) int {
 	switch strings.Compare(e.Bug, b.Bug) {
 	case -1:

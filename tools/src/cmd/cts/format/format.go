@@ -72,10 +72,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 			return err
 		}
 
-		// Sort the expectations in each chunk.
-		for _, chunk := range ex.Chunks {
-			chunk.Expectations.Sort()
-		}
+		ex.Format()
 
 		if err := ex.Save(path); err != nil {
 			return err
