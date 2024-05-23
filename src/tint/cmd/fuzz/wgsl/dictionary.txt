@@ -232,6 +232,7 @@
 "id"
 "if"
 "info"
+"input_attachment"
 "insertBits"
 "instance_index"
 "interpolate"

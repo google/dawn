@@ -29,6 +29,7 @@
 
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/helper_test.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -64,6 +65,7 @@ TEST_F(ExternalTextureTest, IsTexture) {
     Texture* ty = &s;
     EXPECT_FALSE(ty->Is<DepthTexture>());
     EXPECT_TRUE(ty->Is<ExternalTexture>());
+    EXPECT_FALSE(ty->Is<InputAttachment>());
     EXPECT_FALSE(ty->Is<MultisampledTexture>());
     EXPECT_FALSE(ty->Is<SampledTexture>());
     EXPECT_FALSE(ty->Is<StorageTexture>());

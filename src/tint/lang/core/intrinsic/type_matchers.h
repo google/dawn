@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
@@ -530,6 +531,26 @@ inline bool MatchTextureExternal(intrinsic::MatchState&, const type::Type* ty) {
 inline const type::ExternalTexture* BuildTextureExternal(intrinsic::MatchState& state,
                                                          const type::Type*) {
     return state.types.Get<type::ExternalTexture>();
+}
+
+inline bool MatchInputAttachment(intrinsic::MatchState&,
+                                 const type::Type* ty,
+                                 const type::Type*& T) {
+    if (ty->Is<intrinsic::Any>()) {
+        T = ty;
+        return true;
+    }
+    if (auto* v = ty->As<type::InputAttachment>()) {
+        T = v->type();
+        return true;
+    }
+    return false;
+}
+
+inline const type::InputAttachment* BuildInputAttachment(intrinsic::MatchState& state,
+                                                         const type::Type*,
+                                                         const type::Type* T) {
+    return state.types.Get<type::InputAttachment>(T);
 }
 
 // Builtin types starting with a _ prefix cannot be declared in WGSL, so they

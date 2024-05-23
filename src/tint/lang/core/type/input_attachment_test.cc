@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,91 +25,85 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/helper_test.h"
-#include "src/tint/lang/core/type/input_attachment.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 
 namespace tint::core::type {
 namespace {
 
-using SampledTextureTest = TestHelper;
+using InputAttachmentTest = TestHelper;
 
-TEST_F(SampledTextureTest, Creation) {
-    auto* a = create<SampledTexture>(TextureDimension::kCube, create<F32>());
-    auto* b = create<SampledTexture>(TextureDimension::kCube, create<F32>());
-    auto* c = create<SampledTexture>(TextureDimension::k2d, create<F32>());
-    auto* d = create<SampledTexture>(TextureDimension::kCube, create<I32>());
-
-    EXPECT_TRUE(a->type()->Is<F32>());
-    EXPECT_EQ(a->dim(), TextureDimension::kCube);
-
+TEST_F(InputAttachmentTest, Creation) {
+    auto* a = create<InputAttachment>(create<F32>());
+    auto* b = create<InputAttachment>(create<F32>());
+    auto* c = create<InputAttachment>(create<U32>());
+    auto* d = create<InputAttachment>(create<I32>());
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
     EXPECT_NE(a, d);
+    EXPECT_NE(c, d);
 }
 
-TEST_F(SampledTextureTest, Hash) {
-    auto* a = create<SampledTexture>(TextureDimension::kCube, create<F32>());
-    auto* b = create<SampledTexture>(TextureDimension::kCube, create<F32>());
-
+TEST_F(InputAttachmentTest, Hash) {
+    auto* a = create<InputAttachment>(create<F32>());
+    auto* b = create<InputAttachment>(create<F32>());
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
-TEST_F(SampledTextureTest, Equals) {
-    auto* a = create<SampledTexture>(TextureDimension::kCube, create<F32>());
-    auto* b = create<SampledTexture>(TextureDimension::kCube, create<F32>());
-    auto* c = create<SampledTexture>(TextureDimension::k2d, create<F32>());
-    auto* d = create<SampledTexture>(TextureDimension::kCube, create<I32>());
-
+TEST_F(InputAttachmentTest, Equals) {
+    auto* a = create<InputAttachment>(create<F32>());
+    auto* b = create<InputAttachment>(create<F32>());
+    auto* c = create<InputAttachment>(create<I32>());
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
-    EXPECT_FALSE(a->Equals(*d));
     EXPECT_FALSE(a->Equals(Void{}));
 }
 
-TEST_F(SampledTextureTest, IsTexture) {
+TEST_F(InputAttachmentTest, IsTexture) {
     F32 f32;
-    SampledTexture s(TextureDimension::kCube, &f32);
+    InputAttachment s(&f32);
     Texture* ty = &s;
     EXPECT_FALSE(ty->Is<DepthTexture>());
     EXPECT_FALSE(ty->Is<ExternalTexture>());
-    EXPECT_FALSE(ty->Is<InputAttachment>());
-    EXPECT_TRUE(ty->Is<SampledTexture>());
+    EXPECT_TRUE(ty->Is<InputAttachment>());
+    EXPECT_FALSE(ty->Is<MultisampledTexture>());
+    EXPECT_FALSE(ty->Is<SampledTexture>());
     EXPECT_FALSE(ty->Is<StorageTexture>());
 }
 
-TEST_F(SampledTextureTest, Dim) {
+TEST_F(InputAttachmentTest, Dim) {
     F32 f32;
-    SampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.dim(), TextureDimension::k3d);
+    InputAttachment s(&f32);
+    EXPECT_EQ(s.dim(), TextureDimension::k2d);
 }
 
-TEST_F(SampledTextureTest, Type) {
+TEST_F(InputAttachmentTest, FriendlyName) {
     F32 f32;
-    SampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.type(), &f32);
+    InputAttachment s(&f32);
+    EXPECT_EQ(s.FriendlyName(), "input_attachment<f32>");
 }
 
-TEST_F(SampledTextureTest, FriendlyName) {
-    F32 f32;
-    SampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.FriendlyName(), "texture_3d<f32>");
-}
-
-TEST_F(SampledTextureTest, Clone) {
-    auto* a = create<SampledTexture>(TextureDimension::kCube, create<F32>());
+TEST_F(InputAttachmentTest, Clone) {
+    auto* a = create<InputAttachment>(create<F32>());
+    auto* b = create<InputAttachment>(create<I32>());
 
     core::type::Manager mgr;
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
-    auto* mt = a->Clone(ctx);
-    EXPECT_EQ(mt->dim(), TextureDimension::kCube);
-    EXPECT_TRUE(mt->type()->Is<F32>());
+    auto* c = a->Clone(ctx);
+    ASSERT_TRUE(c->Is<InputAttachment>());
+    EXPECT_TRUE(c->type()->Is<F32>());
+
+    auto* d = b->Clone(ctx);
+    ASSERT_TRUE(d->Is<InputAttachment>());
+    EXPECT_TRUE(d->type()->Is<I32>());
 }
 
 }  // namespace

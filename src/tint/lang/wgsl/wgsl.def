@@ -158,6 +158,7 @@ type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 type texture_external
 type packedVec3<T>
+type input_attachment<T>
 
 @display("__modf_result_{T}")        type __modf_result<T>
 @display("__modf_result_vec{N}_{T}") type __modf_result_vec<N: num, T>

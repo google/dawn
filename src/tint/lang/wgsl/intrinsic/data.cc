@@ -973,6 +973,26 @@ constexpr TypeMatcher kPackedVec3Matcher {
 };
 
 
+/// TypeMatcher for 'type input_attachment'
+constexpr TypeMatcher kInputAttachmentMatcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchInputAttachment(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildInputAttachment(state, ty, T);
+  },
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type("input_attachment", "<", T, ">");
+  }
+};
+
+
 /// TypeMatcher for 'type __modf_result'
 constexpr TypeMatcher kModfResultMatcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
@@ -1787,31 +1807,32 @@ constexpr TypeMatcher kTypeMatchers[] = {
   /* [46] */ kTextureStorage3DMatcher,
   /* [47] */ kTextureExternalMatcher,
   /* [48] */ kPackedVec3Matcher,
-  /* [49] */ kModfResultMatcher,
-  /* [50] */ kModfResultVecMatcher,
-  /* [51] */ kFrexpResultMatcher,
-  /* [52] */ kFrexpResultVecMatcher,
-  /* [53] */ kAtomicCompareExchangeResultMatcher,
-  /* [54] */ kScalarMatcher,
-  /* [55] */ kConcreteScalarMatcher,
-  /* [56] */ kScalarNoF32Matcher,
-  /* [57] */ kScalarNoF16Matcher,
-  /* [58] */ kScalarNoI32Matcher,
-  /* [59] */ kScalarNoU32Matcher,
-  /* [60] */ kScalarNoBoolMatcher,
-  /* [61] */ kFiaFiu32F16Matcher,
-  /* [62] */ kFiaFi32F16Matcher,
-  /* [63] */ kFiaFiu32Matcher,
-  /* [64] */ kFaF32Matcher,
-  /* [65] */ kFaF32F16Matcher,
-  /* [66] */ kIaIu32Matcher,
-  /* [67] */ kIaI32Matcher,
-  /* [68] */ kFiu32F16Matcher,
-  /* [69] */ kFiu32Matcher,
-  /* [70] */ kFi32F16Matcher,
-  /* [71] */ kFi32Matcher,
-  /* [72] */ kF32F16Matcher,
-  /* [73] */ kIu32Matcher,
+  /* [49] */ kInputAttachmentMatcher,
+  /* [50] */ kModfResultMatcher,
+  /* [51] */ kModfResultVecMatcher,
+  /* [52] */ kFrexpResultMatcher,
+  /* [53] */ kFrexpResultVecMatcher,
+  /* [54] */ kAtomicCompareExchangeResultMatcher,
+  /* [55] */ kScalarMatcher,
+  /* [56] */ kConcreteScalarMatcher,
+  /* [57] */ kScalarNoF32Matcher,
+  /* [58] */ kScalarNoF16Matcher,
+  /* [59] */ kScalarNoI32Matcher,
+  /* [60] */ kScalarNoU32Matcher,
+  /* [61] */ kScalarNoBoolMatcher,
+  /* [62] */ kFiaFiu32F16Matcher,
+  /* [63] */ kFiaFi32F16Matcher,
+  /* [64] */ kFiaFiu32Matcher,
+  /* [65] */ kFaF32Matcher,
+  /* [66] */ kFaF32F16Matcher,
+  /* [67] */ kIaIu32Matcher,
+  /* [68] */ kIaI32Matcher,
+  /* [69] */ kFiu32F16Matcher,
+  /* [70] */ kFiu32Matcher,
+  /* [71] */ kFi32F16Matcher,
+  /* [72] */ kFi32Matcher,
+  /* [73] */ kF32F16Matcher,
+  /* [74] */ kIu32Matcher,
 };
 
 /// The template numbers, and number matchers
@@ -1895,7 +1916,7 @@ constexpr MatcherIndex kMatcherIndices[] = {
   /* [58] */ MatcherIndex(0),
   /* [59] */ MatcherIndex(23),
   /* [60] */ MatcherIndex(1),
-  /* [61] */ MatcherIndex(69),
+  /* [61] */ MatcherIndex(70),
   /* [62] */ MatcherIndex(23),
   /* [63] */ MatcherIndex(1),
   /* [64] */ MatcherIndex(2),
@@ -1911,13 +1932,13 @@ constexpr MatcherIndex kMatcherIndices[] = {
   /* [74] */ MatcherIndex(23),
   /* [75] */ MatcherIndex(0),
   /* [76] */ MatcherIndex(9),
-  /* [77] */ MatcherIndex(52),
+  /* [77] */ MatcherIndex(53),
   /* [78] */ MatcherIndex(0),
   /* [79] */ MatcherIndex(1),
   /* [80] */ MatcherIndex(23),
   /* [81] */ MatcherIndex(0),
   /* [82] */ MatcherIndex(2),
-  /* [83] */ MatcherIndex(50),
+  /* [83] */ MatcherIndex(51),
   /* [84] */ MatcherIndex(0),
   /* [85] */ MatcherIndex(1),
   /* [86] */ MatcherIndex(43),
@@ -1953,16 +1974,16 @@ constexpr MatcherIndex kMatcherIndices[] = {
   /* [116] */ MatcherIndex(11),
   /* [117] */ MatcherIndex(10),
   /* [118] */ MatcherIndex(11),
-  /* [119] */ MatcherIndex(69),
+  /* [119] */ MatcherIndex(70),
   /* [120] */ MatcherIndex(13),
   /* [121] */ MatcherIndex(10),
   /* [122] */ MatcherIndex(11),
   /* [123] */ MatcherIndex(1),
   /* [124] */ MatcherIndex(12),
   /* [125] */ MatcherIndex(0),
-  /* [126] */ MatcherIndex(51),
+  /* [126] */ MatcherIndex(52),
   /* [127] */ MatcherIndex(0),
-  /* [128] */ MatcherIndex(49),
+  /* [128] */ MatcherIndex(50),
   /* [129] */ MatcherIndex(0),
   /* [130] */ MatcherIndex(11),
   /* [131] */ MatcherIndex(9),
@@ -2014,7 +2035,7 @@ constexpr MatcherIndex kMatcherIndices[] = {
   /* [177] */ MatcherIndex(0),
   /* [178] */ MatcherIndex(12),
   /* [179] */ MatcherIndex(1),
-  /* [180] */ MatcherIndex(53),
+  /* [180] */ MatcherIndex(54),
   /* [181] */ MatcherIndex(0),
   /* [182] */ MatcherIndex(11),
   /* [183] */ MatcherIndex(5),
@@ -2078,12 +2099,12 @@ constexpr MatcherIndex kMatcherIndices[] = {
   /* [241] */ MatcherIndex(10),
   /* [242] */ MatcherIndex(48),
   /* [243] */ MatcherIndex(0),
-  /* [244] */ MatcherIndex(61),
-  /* [245] */ MatcherIndex(65),
-  /* [246] */ MatcherIndex(73),
-  /* [247] */ MatcherIndex(67),
-  /* [248] */ MatcherIndex(54),
-  /* [249] */ MatcherIndex(62),
+  /* [244] */ MatcherIndex(62),
+  /* [245] */ MatcherIndex(66),
+  /* [246] */ MatcherIndex(74),
+  /* [247] */ MatcherIndex(68),
+  /* [248] */ MatcherIndex(55),
+  /* [249] */ MatcherIndex(63),
   /* [250] */ MatcherIndex(38),
   /* [251] */ MatcherIndex(39),
   /* [252] */ MatcherIndex(40),
@@ -2093,15 +2114,15 @@ constexpr MatcherIndex kMatcherIndices[] = {
   /* [256] */ MatcherIndex(29),
   /* [257] */ MatcherIndex(30),
   /* [258] */ MatcherIndex(6),
-  /* [259] */ MatcherIndex(68),
-  /* [260] */ MatcherIndex(66),
-  /* [261] */ MatcherIndex(58),
-  /* [262] */ MatcherIndex(59),
-  /* [263] */ MatcherIndex(56),
-  /* [264] */ MatcherIndex(57),
-  /* [265] */ MatcherIndex(60),
-  /* [266] */ MatcherIndex(55),
-  /* [267] */ MatcherIndex(72),
+  /* [259] */ MatcherIndex(69),
+  /* [260] */ MatcherIndex(67),
+  /* [261] */ MatcherIndex(59),
+  /* [262] */ MatcherIndex(60),
+  /* [263] */ MatcherIndex(57),
+  /* [264] */ MatcherIndex(58),
+  /* [265] */ MatcherIndex(61),
+  /* [266] */ MatcherIndex(56),
+  /* [267] */ MatcherIndex(73),
 };
 
 static_assert(MatcherIndicesIndex::CanIndex(kMatcherIndices),
