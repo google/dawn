@@ -63,6 +63,13 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @returns the function that this parameter belongs to, or nullptr
     const ir::Function* Function() const { return func_; }
 
+    /// Sets the index of the parameter in the function's parameter list
+    /// @param index the index
+    void SetIndex(uint32_t index) { index_ = index; }
+
+    /// @returns the index of the parameter in the function's parameter list
+    uint32_t Index() const { return index_; }
+
     /// @returns the type of the var
     const core::type::Type* Type() const override { return type_; }
 
@@ -121,6 +128,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
 
   private:
     ir::Function* func_ = nullptr;
+    uint32_t index_ = 0xffffffff;
     const core::type::Type* type_ = nullptr;
     std::optional<core::BuiltinValue> builtin_;
     std::optional<struct Location> location_;

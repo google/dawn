@@ -71,8 +71,10 @@ void Function::SetParams(VectorRef<FunctionParam*> params) {
     }
     params_ = std::move(params);
     TINT_ASSERT(!params_.Any(IsNull));
+    uint32_t index = 0;
     for (auto* param : params_) {
         param->SetFunction(this);
+        param->SetIndex(index++);
     }
 }
 
@@ -82,14 +84,17 @@ void Function::SetParams(std::initializer_list<FunctionParam*> params) {
     }
     params_ = params;
     TINT_ASSERT(!params_.Any(IsNull));
+    uint32_t index = 0;
     for (auto* param : params_) {
         param->SetFunction(this);
+        param->SetIndex(index++);
     }
 }
 
 void Function::AppendParam(FunctionParam* param) {
     params_.Push(param);
     param->SetFunction(this);
+    param->SetIndex(static_cast<uint32_t>(params_.Length() - 1u));
 }
 
 void Function::Destroy() {
