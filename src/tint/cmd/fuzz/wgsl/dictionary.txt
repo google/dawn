@@ -233,6 +233,7 @@
 "if"
 "info"
 "input_attachment"
+"input_attachment_index"
 "insertBits"
 "instance_index"
 "interpolate"

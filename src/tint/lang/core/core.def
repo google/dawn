@@ -217,6 +217,9 @@ enum attribute {
 
   // framebuffer-fetch input
   color
+
+  // chromium_internal_input_attachments
+  input_attachment_index
 }
 
 ////////////////////////////////////////////////////////////////////////////////

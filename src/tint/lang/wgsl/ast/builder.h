@@ -86,6 +86,7 @@
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
@@ -3238,6 +3239,24 @@ class Builder {
     template <typename EXPR>
     const ast::IdAttribute* Id(EXPR&& id) {
         return create<ast::IdAttribute>(Expr(std::forward<EXPR>(id)));
+    }
+
+    /// Creates an ast::InputAttachmentIndexAttribute
+    /// @param index the index value expression
+    /// @returns the index attribute pointer
+    template <typename EXPR>
+    const ast::InputAttachmentIndexAttribute* InputAttachmentIndex(EXPR&& index) {
+        return create<ast::InputAttachmentIndexAttribute>(source_, Expr(std::forward<EXPR>(index)));
+    }
+
+    /// Creates an ast::InputAttachmentIndexAttribute
+    /// @param source the source information
+    /// @param index the index value expression
+    /// @returns the index attribute pointer
+    template <typename EXPR>
+    const ast::InputAttachmentIndexAttribute* InputAttachmentIndex(const Source& source,
+                                                                   EXPR&& index) {
+        return create<ast::InputAttachmentIndexAttribute>(source, Expr(std::forward<EXPR>(index)));
     }
 
     /// Creates an ast::StageAttribute

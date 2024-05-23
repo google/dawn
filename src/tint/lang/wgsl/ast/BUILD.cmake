@@ -125,6 +125,8 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/increment_decrement_statement.h
   lang/wgsl/ast/index_accessor_expression.cc
   lang/wgsl/ast/index_accessor_expression.h
+  lang/wgsl/ast/input_attachment_index_attribute.cc
+  lang/wgsl/ast/input_attachment_index_attribute.h
   lang/wgsl/ast/int_literal_expression.cc
   lang/wgsl/ast/int_literal_expression.h
   lang/wgsl/ast/internal_attribute.cc
@@ -267,6 +269,7 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/if_statement_test.cc
   lang/wgsl/ast/increment_decrement_statement_test.cc
   lang/wgsl/ast/index_accessor_expression_test.cc
+  lang/wgsl/ast/input_attachment_index_attribute_test.cc
   lang/wgsl/ast/int_literal_expression_test.cc
   lang/wgsl/ast/interpolate_attribute_test.cc
   lang/wgsl/ast/location_attribute_test.cc
