@@ -61,7 +61,7 @@ if (!defined(dawn_googletest_dir)) {
 }
 
 if (!defined(dawn_spirv_tools_dir)) {
-  dawn_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
+  dawn_spirv_tools_dir = "//third_party/spirv-tools/src"
 }
 
 if (!defined(dawn_swiftshader_dir)) {
@@ -69,28 +69,21 @@ if (!defined(dawn_swiftshader_dir)) {
   dawn_swiftshader_dir = ""
 }
 
-if (!defined(dawn_vulkan_deps_dir)) {
-  dawn_vulkan_deps_dir = "//third_party/vulkan-deps"
-  if (dawn_standalone) {
-    dawn_vulkan_deps_dir = "${dawn_root}/third_party/vulkan-deps"
-  }
-}
-
 if (!defined(dawn_vulkan_headers_dir)) {
-  dawn_vulkan_headers_dir = "${dawn_vulkan_deps_dir}/vulkan-headers/src"
+  dawn_vulkan_headers_dir = "//third_party/vulkan-headers/src"
 }
 
 if (!defined(dawn_vulkan_loader_dir)) {
   # Default to the Vulkan loader not being available except in standalone.
   dawn_vulkan_loader_dir = ""
   if (dawn_standalone) {
-    dawn_vulkan_loader_dir = "//third_party/vulkan-deps/vulkan-loader/src"
+    dawn_vulkan_loader_dir = "//third_party/vulkan-loader/src"
   }
 }
 
 if (!defined(dawn_vulkan_utility_libraries_dir)) {
   dawn_vulkan_utility_libraries_dir =
-      "${dawn_vulkan_deps_dir}/vulkan-utility-libraries/src"
+      "//third_party/vulkan-utility-libraries/src"
 }
 
 if (!defined(dawn_vulkan_validation_layers_dir)) {

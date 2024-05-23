@@ -77,6 +77,42 @@
 	path = third_party/vulkan-deps
 	url = https://chromium.googlesource.com/vulkan-deps
 	gclient-condition = dawn_standalone
+[submodule "third_party/glslang/src"]
+	path = third_party/glslang/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/glslang
+	gclient-condition = dawn_standalone
+[submodule "third_party/spirv-cross/src"]
+	path = third_party/spirv-cross/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Cross
+	gclient-condition = dawn_standalone
+[submodule "third_party/spirv-headers/src"]
+	path = third_party/spirv-headers/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Headers
+	gclient-condition = dawn_standalone
+[submodule "third_party/spirv-tools/src"]
+	path = third_party/spirv-tools/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Tools
+	gclient-condition = dawn_standalone
+[submodule "third_party/vulkan-headers/src"]
+	path = third_party/vulkan-headers/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Headers
+	gclient-condition = dawn_standalone
+[submodule "third_party/vulkan-loader/src"]
+	path = third_party/vulkan-loader/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Loader
+	gclient-condition = dawn_standalone
+[submodule "third_party/vulkan-tools/src"]
+	path = third_party/vulkan-tools/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Tools
+	gclient-condition = dawn_standalone
+[submodule "third_party/vulkan-utility-libraries/src"]
+	path = third_party/vulkan-utility-libraries/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-Utility-Libraries
+	gclient-condition = dawn_standalone
+[submodule "third_party/vulkan-validation-layers/src"]
+	path = third_party/vulkan-validation-layers/src
+	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/Vulkan-ValidationLayers
+	gclient-condition = dawn_standalone
 [submodule "third_party/zlib"]
 	path = third_party/zlib
 	url = https://chromium.googlesource.com/chromium/src/third_party/zlib

@@ -52,12 +52,12 @@ local_repository(
 
 local_repository(
     name = "spirv_headers",
-    path = "third_party/vulkan-deps/spirv-headers/src",
+    path = "third_party/spirv-headers/src",
 )
 
 local_repository(
     name = "spirv_tools",
-    path = "third_party/vulkan-deps/spirv-tools/src",
+    path = "third_party/spirv-tools/src",
 )
 
 http_archive(

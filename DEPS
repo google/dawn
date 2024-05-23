@@ -276,6 +276,51 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  'third_party/glslang/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@541733a66b1cf4465559c78a8bd857606ac76123',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/spirv-cross/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Cross@b8fcf307f1f347089e3c46eb4451d27f32ebc8d3',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/spirv-headers/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Headers@49a1fceb9b1d087f3c25ad5ec077bb0e46231297',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/spirv-tools/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/SPIRV-Tools@199038f10cbe56bf7cbfeb5472eb0a25af2f09f5',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/vulkan-headers/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Headers@5677bafb820e476441e9e1f745371b72133407d3',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/vulkan-loader/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Loader@a1a73779649c0bfdaba6b856f7c9c96be6fc75cb',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/vulkan-tools/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Tools@137b3612d62f1c92da16537e5497a60fcf13b6dc',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/vulkan-utility-libraries/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@777358fdad21132866be4a835327fbc28eabc1a4',
+    'condition': 'dawn_standalone',
+  },
+
+  'third_party/vulkan-validation-layers/src': {
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@7a2c19e8681065645030b34dfe99835473f9303c',
+    'condition': 'dawn_standalone',
+  },
+
   'third_party/zlib': {
     'url': '{chromium_git}/chromium/src/third_party/zlib@526382e41c9c5275dc329db4328b54e4f344a204',
     'condition': 'dawn_standalone',
@@ -670,8 +715,4 @@ hooks = [
               '--quiet',
               ],
  },
-]
-
-recursedeps = [
-  'third_party/vulkan-deps',
 ]

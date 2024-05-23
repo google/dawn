@@ -39,12 +39,12 @@ default_args = {
   angle_build_tests = false
   angle_has_rapidjson = false
   angle_use_wayland = false
-  angle_vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
-  angle_vulkan_loader_dir = "//third_party/vulkan-deps/vulkan-loader/src"
-  angle_vulkan_tools_dir = "//third_party/vulkan-deps/vulkan-tools/src"
+  angle_vulkan_headers_dir = "//third_party/vulkan-headers/src"
+  angle_vulkan_loader_dir = "//third_party/vulkan-loader/src"
+  angle_vulkan_tools_dir = "//third_party/vulkan-tools/src"
   angle_vulkan_validation_layers_dir =
-      "//third_party/vulkan-deps/vulkan-validation-layers/src"
+      "//third_party/vulkan-validation-layers/src"
 
-  vma_vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
+  vma_vulkan_headers_dir = "//third_party/vulkan-headers/src"
   use_sysroot = true
 }

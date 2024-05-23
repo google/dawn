@@ -256,7 +256,6 @@ option_if_not_defined(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to de
 set(ABSL_PROPAGATE_CXX_STD ON)
 
 set_if_not_defined(DAWN_THIRD_PARTY_DIR "${Dawn_SOURCE_DIR}/third_party" "Directory in which to find third-party dependencies.")
-set_if_not_defined(DAWN_VULKAN_DEPS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-deps" "Directory in which to find vulkan-deps")
 
 set_if_not_defined(DAWN_ABSEIL_DIR "${DAWN_THIRD_PARTY_DIR}/abseil-cpp" "Directory in which to find Abseil")
 set_if_not_defined(DAWN_GLFW_DIR "${DAWN_THIRD_PARTY_DIR}/glfw" "Directory in which to find GLFW")
@@ -266,10 +265,10 @@ set_if_not_defined(DAWN_KHRONOS_DIR "${DAWN_THIRD_PARTY_DIR}/khronos" "Directory
 set_if_not_defined(DAWN_SWIFTSHADER_DIR "${DAWN_THIRD_PARTY_DIR}/swiftshader" "Directory in which to find swiftshader")
 set_if_not_defined(DAWN_PROTOBUF_DIR "${DAWN_THIRD_PARTY_DIR}/protobuf" "Directory in which to find protobuf")
 
-set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_VULKAN_DEPS_DIR}/spirv-tools/src" "Directory in which to find SPIRV-Tools")
-set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_VULKAN_DEPS_DIR}/spirv-headers/src" "Directory in which to find SPIRV-Headers")
-set_if_not_defined(DAWN_VULKAN_HEADERS_DIR "${DAWN_VULKAN_DEPS_DIR}/vulkan-headers/src" "Directory in which to find Vulkan-Headers")
-set_if_not_defined(DAWN_VULKAN_UTILITY_LIBRARIES_DIR "${DAWN_VULKAN_DEPS_DIR}/vulkan-utility-libraries/src" "Directory in which to find Vulkan-Utility-Libraries")
+set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-tools/src" "Directory in which to find SPIRV-Tools")
+set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-headers/src" "Directory in which to find SPIRV-Headers")
+set_if_not_defined(DAWN_VULKAN_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-headers/src" "Directory in which to find Vulkan-Headers")
+set_if_not_defined(DAWN_VULKAN_UTILITY_LIBRARIES_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-utility-libraries/src" "Directory in which to find Vulkan-Utility-Libraries")
 
 # Dependencies for DAWN_BUILD_NODE_BINDINGS
 set_if_not_defined(NODE_ADDON_API_DIR "${DAWN_THIRD_PARTY_DIR}/node-addon-api" "Directory in which to find node-addon-api")
