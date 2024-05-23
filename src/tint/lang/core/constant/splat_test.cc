@@ -80,6 +80,7 @@ TEST_F(ConstantTest_Splat, Index) {
     ASSERT_NE(sp->Index(0), nullptr);
     ASSERT_NE(sp->Index(1), nullptr);
     ASSERT_NE(sp->Index(2), nullptr);
+    EXPECT_EQ(sp->Index(3), nullptr);
 
     EXPECT_EQ(sp->Index(0)->As<Scalar<f32>>()->ValueOf(), 1.f);
     EXPECT_EQ(sp->Index(1)->As<Scalar<f32>>()->ValueOf(), 1.f);
@@ -95,6 +96,7 @@ TEST_F(ConstantTest_Splat, Clone) {
     constant::CloneContext ctx{core::type::CloneContext{{nullptr}, {nullptr, &mgr.types}}, mgr};
 
     auto* r = sp->Clone(ctx);
+    EXPECT_NE(r, sp);
     ASSERT_NE(r, nullptr);
     EXPECT_TRUE(r->type->Is<core::type::Vector>());
     EXPECT_TRUE(r->el->Is<Scalar<i32>>());
