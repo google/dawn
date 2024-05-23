@@ -80,6 +80,9 @@ class VulkanImageWrappingTestBase : public DawnTestWithParams<ImageWrappingParam
         DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && GetParam().mUseDedicatedAllocation &&
                               GetParam().mDetectDedicatedAllocation);
 
+        // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
+        DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsIntel() && IsBackendValidationEnabled());
+
         switch (GetParam().mExternalImageType) {
             case ExternalImageType::OpaqueFD:
                 mBackend = CreateOpaqueFDBackend(device);

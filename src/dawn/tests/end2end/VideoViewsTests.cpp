@@ -56,6 +56,8 @@ void VideoViewsTestsBase::SetUp() {
     DawnTestWithParams<Params>::SetUp();
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     DAWN_TEST_UNSUPPORTED_IF(!IsMultiPlanarFormatsSupported());
+    // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
+    DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel() && IsBackendValidationEnabled());
 }
 
 std::vector<wgpu::FeatureName> VideoViewsTestsBase::GetRequiredFeatures() {

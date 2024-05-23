@@ -956,6 +956,14 @@ bool DawnTestBase::IsAndroid() const {
 #endif
 }
 
+bool DawnTestBase::IsChromeOS() const {
+#if DAWN_PLATFORM_IS(CHROMEOS)
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool DawnTestBase::IsMesa(const std::string& mesaVersion) const {
 #if DAWN_PLATFORM_IS(LINUX)
     std::string mesaString = "Mesa " + mesaVersion;

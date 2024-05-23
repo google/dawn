@@ -117,6 +117,8 @@ void SharedTextureMemoryTests::SetUp() {
     DawnTestWithParams<SharedTextureMemoryTestParams>::SetUp();
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures(GetParam().mBackend->RequiredFeatures(GetAdapter().Get())));
+    // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
+    DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel() && IsBackendValidationEnabled());
     GetParam().mBackend->SetUp();
 }
 
