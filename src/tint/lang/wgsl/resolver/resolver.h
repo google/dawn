@@ -442,6 +442,11 @@ class Resolver {
     /// @returns the group value on success.
     tint::Result<uint32_t> GroupAttribute(const ast::GroupAttribute* attr);
 
+    /// Resolves the `@input_attachment_index` attribute @p attr
+    /// @returns the index value on success.
+    tint::Result<uint32_t> InputAttachmentIndexAttribute(
+        const ast::InputAttachmentIndexAttribute* attr);
+
     /// Resolves the `@workgroup_size` attribute @p attr
     /// @returns the workgroup size on success.
     tint::Result<sem::WorkgroupSize> WorkgroupAttribute(const ast::WorkgroupAttribute* attr);

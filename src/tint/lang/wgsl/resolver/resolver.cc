@@ -65,6 +65,7 @@
 #include "src/tint/lang/wgsl/ast/for_loop_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/if_statement.h"
+#include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
@@ -614,7 +615,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         bool has_io_address_space = sem->AddressSpace() == core::AddressSpace::kIn ||
                                     sem->AddressSpace() == core::AddressSpace::kOut;
 
-        std::optional<uint32_t> group, binding;
+        std::optional<uint32_t> group, binding, input_attachment_index;
         for (auto* attribute : var->attributes) {
             Mark(attribute);
             enum Status { kSuccess, kErrored, kInvalid };
@@ -634,6 +635,14 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                         return kErrored;
                     }
                     group = value.Get();
+                    return kSuccess;
+                },
+                [&](const ast::InputAttachmentIndexAttribute* attr) {
+                    auto value = InputAttachmentIndexAttribute(attr);
+                    if (value != Success) {
+                        return kErrored;
+                    }
+                    input_attachment_index = value.Get();
                     return kSuccess;
                 },
                 [&](const ast::LocationAttribute* attr) {
@@ -706,6 +715,10 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
         if (group && binding) {
             global->Attributes().binding_point = BindingPoint{group.value(), binding.value()};
+        }
+
+        if (input_attachment_index) {
+            global->Attributes().input_attachment_index = input_attachment_index;
         }
 
     } else {
@@ -3871,6 +3884,31 @@ tint::Result<uint32_t> Resolver::GroupAttribute(const ast::GroupAttribute* attr)
     auto value = const_value->ValueAs<AInt>();
     if (value < 0) {
         AddError(attr->source) << style::Attribute("@group") << " value must be non-negative";
+        return Failure{};
+    }
+    return static_cast<uint32_t>(value);
+}
+
+tint::Result<uint32_t> Resolver::InputAttachmentIndexAttribute(
+    const ast::InputAttachmentIndexAttribute* attr) {
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@input_attachment_index"};
+    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
+    auto* materialized = Materialize(ValueExpression(attr->expr));
+    if (!materialized) {
+        return Failure{};
+    }
+    if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
+        AddError(attr->source) << style::Attribute("@input_attachment_index") << " must be an "
+                               << style::Type("i32") << " or " << style::Type("u32") << " value";
+        return Failure{};
+    }
+
+    auto const_value = materialized->ConstantValue();
+    auto value = const_value->ValueAs<AInt>();
+    if (value < 0) {
+        AddError(attr->source) << style::Attribute("@input_attachment_index")
+                               << " value must be non-negative";
         return Failure{};
     }
     return static_cast<uint32_t>(value);

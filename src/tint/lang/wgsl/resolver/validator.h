@@ -434,6 +434,15 @@ class Validator {
     /// @returns true on success, false otherwise
     bool InputAttachment(const core::type::InputAttachment* t, const Source& source) const;
 
+    /// Validates a input attachment index attribute
+    /// @param attr the input attachment index attribute to validate
+    /// @param type the variable type
+    /// @param source the source of declaration using the attribute
+    /// @returns true on success, false otherwise.
+    bool InputAttachmentIndexAttribute(const ast::InputAttachmentIndexAttribute* attr,
+                                       const core::type::Type* type,
+                                       const Source& source) const;
+
     /// Validates a structure
     /// @param str the structure to validate
     /// @param stage the current pipeline stage

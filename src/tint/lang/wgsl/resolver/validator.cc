@@ -442,8 +442,37 @@ bool Validator::MultisampledTexture(const core::type::MultisampledTexture* t,
 }
 
 bool Validator::InputAttachment(const core::type::InputAttachment* t, const Source& source) const {
+    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalInputAttachments)) {
+        AddError(source) << "use of " << style::Type("input_attachment")
+                         << " requires enabling extension "
+                         << style::Code("chromium_internal_input_attachments");
+        return false;
+    }
     if (!t->type()->UnwrapRef()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         AddError(source) << "input_attachment<type>: type must be f32, i32 or u32";
+        return false;
+    }
+
+    return true;
+}
+
+bool Validator::InputAttachmentIndexAttribute(const ast::InputAttachmentIndexAttribute* attr,
+                                              const core::type::Type* type,
+                                              const Source& source) const {
+    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalInputAttachments)) {
+        AddError(source) << "use of " << style::Attribute("@input_attachment_index")
+                         << " requires enabling extension "
+                         << style::Code("chromium_internal_input_attachments");
+        return false;
+    }
+
+    if (!type->Is<core::type::InputAttachment>()) {
+        std::string invalid_type = sem_.TypeNameOf(type);
+        AddError(source) << "cannot apply " << style::Attribute("@input_attachment_index")
+                         << " to declaration of type " << style::Type(invalid_type);
+        AddNote(attr->source) << style::Attribute("@input_attachment_index")
+                              << " must only be applied to declarations of "
+                              << style::Type("input_attachment") << " type";
         return false;
     }
 
@@ -708,6 +737,13 @@ bool Validator::GlobalVariable(
         return false;
     }
 
+    auto* input_attachment_index_attr =
+        ast::GetAttribute<ast::InputAttachmentIndexAttribute>(decl->attributes);
+    if (input_attachment_index_attr &&
+        !InputAttachmentIndexAttribute(input_attachment_index_attr, global->Type()->UnwrapRef(),
+                                       decl->source)) {
+        return false;
+    }
     switch (global->AddressSpace()) {
         case core::AddressSpace::kUniform:
         case core::AddressSpace::kStorage:
@@ -718,6 +754,13 @@ bool Validator::GlobalVariable(
                 AddError(decl->source)
                     << "resource variables require " << style::Attribute("@group") << " and "
                     << style::Attribute("@binding") << " attributes";
+                return false;
+            }
+            if (global->Type()->UnwrapRef()->Is<core::type::InputAttachment>() &&
+                !input_attachment_index_attr) {
+                AddError(decl->source)
+                    << style::Type("input_attachment") << " variables require "
+                    << style::Attribute("@input_attachment_index") << " attribute";
                 return false;
             }
             break;

@@ -125,6 +125,7 @@ cc_library(
     "host_shareable_validation_test.cc",
     "increment_decrement_validation_test.cc",
     "inferred_type_test.cc",
+    "input_attachments_extension_test.cc",
     "is_host_shareable_test.cc",
     "is_storeable_test.cc",
     "language_features_test.cc",
