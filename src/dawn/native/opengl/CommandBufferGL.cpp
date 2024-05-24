@@ -1120,20 +1120,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                     gl.Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance,
                                   draw->firstInstance);
                 }
-                if (gl.DrawArraysInstancedBaseInstanceANGLE) {
-                    gl.DrawArraysInstancedBaseInstanceANGLE(
-                        lastPipeline->GetGLPrimitiveTopology(), draw->firstVertex,
-                        draw->vertexCount, draw->instanceCount, draw->firstInstance);
-                } else if (draw->firstInstance > 0) {
-                    gl.DrawArraysInstancedBaseInstance(lastPipeline->GetGLPrimitiveTopology(),
-                                                       draw->firstVertex, draw->vertexCount,
-                                                       draw->instanceCount, draw->firstInstance);
-                } else {
-                    // This branch is only needed on OpenGL < 4.2
-                    gl.DrawArraysInstanced(lastPipeline->GetGLPrimitiveTopology(),
-                                           draw->firstVertex, draw->vertexCount,
-                                           draw->instanceCount);
-                }
+                gl.DrawArraysInstanced(lastPipeline->GetGLPrimitiveTopology(), draw->firstVertex,
+                                       draw->vertexCount, draw->instanceCount);
                 break;
             }
 
