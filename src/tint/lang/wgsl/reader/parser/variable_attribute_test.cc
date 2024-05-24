@@ -647,5 +647,48 @@ TEST_F(WGSLParserTest, Attribute_Group_MissingInvalid) {
     EXPECT_EQ(p->error(), "1:7: expected expression for group");
 }
 
+TEST_F(WGSLParserTest, Attribute_InputAttachmentIndex) {
+    auto p = parser("input_attachment_index(4)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_FALSE(p->has_error());
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_TRUE(var_attr->Is<ast::InputAttachmentIndexAttribute>());
+
+    auto* group = var_attr->As<ast::InputAttachmentIndexAttribute>();
+    ASSERT_TRUE(group->expr->Is<ast::IntLiteralExpression>());
+    auto* expr = group->expr->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(expr->value, 4);
+    EXPECT_EQ(expr->suffix, ast::IntLiteralExpression::Suffix::kNone);
+}
+
+TEST_F(WGSLParserTest, Attribute_InputAttachmentIndex_expression) {
+    auto p = parser("input_attachment_index(4 + 5)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_FALSE(p->has_error());
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_TRUE(var_attr->Is<ast::InputAttachmentIndexAttribute>());
+
+    auto* group = var_attr->As<ast::InputAttachmentIndexAttribute>();
+    ASSERT_TRUE(group->expr->Is<ast::BinaryExpression>());
+    auto* expr = group->expr->As<ast::BinaryExpression>();
+
+    EXPECT_EQ(core::BinaryOp::kAdd, expr->op);
+    auto* v = expr->lhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 4u);
+
+    v = expr->rhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 5u);
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

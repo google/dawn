@@ -45,6 +45,7 @@
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
+#include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
@@ -3100,6 +3101,8 @@ Maybe<const ast::Attribute*> Parser::attribute() {
             return create<ast::GroupAttribute>(t.source(), args[0]);
         case core::Attribute::kId:
             return create<ast::IdAttribute>(t.source(), args[0]);
+        case core::Attribute::kInputAttachmentIndex:
+            return create<ast::InputAttachmentIndexAttribute>(t.source(), args[0]);
         case core::Attribute::kInterpolate:
             return create<ast::InterpolateAttribute>(t.source(), args[0],
                                                      args.Length() == 2 ? args[1] : nullptr);
