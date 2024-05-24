@@ -31,78 +31,98 @@ package resultsdb
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"cloud.google.com/go/bigquery"
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
-	"go.chromium.org/luci/auth"
-	"go.chromium.org/luci/grpc/prpc"
-	"go.chromium.org/luci/hardcoded/chromeinfra"
-	rdbpb "go.chromium.org/luci/resultdb/proto/v1"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
+	"google.golang.org/api/iterator"
 )
 
-// ResultsDB is the client to communicate with ResultDB.
-type ResultsDB struct {
-	client rdbpb.ResultDBClient
+// BigQueryClient is a wrapper around bigquery.Client so that we can define new
+// methods.
+type BigQueryClient struct {
+	client *bigquery.Client
 }
 
-// New creates a client to communicate with ResultDB.
-func New(ctx context.Context, credentials auth.Options) (*ResultsDB, error) {
-	http, err := auth.NewAuthenticator(ctx, auth.InteractiveLogin, credentials).Client()
+// QueryResult contains all of the data for a single test result from a ResultDB
+// BigQuery query.
+type QueryResult struct {
+	TestId string
+	Status string
+	Tags   []struct {
+		Key   string
+		Value string
+	}
+	Duration float64
+}
+
+// DefaultQueryProject is the default BigQuery project to use when running
+// queries.
+const DefaultQueryProject string = "chrome-unexpected-pass-data"
+
+// NewBigQueryClient creates a client for running BigQuery queries. The
+// intention is for this to be used for querying ResultDB tables, but there is
+// nothing ResultDB-specific about the resulting client.
+func NewBigQueryClient(ctx context.Context, project string) (*BigQueryClient, error) {
+	client, err := bigquery.NewClient(ctx, project)
 	if err != nil {
 		return nil, err
 	}
-	client, err := rdbpb.NewResultDBPRPCClient(
-		&prpc.Client{
-			C:       http,
-			Host:    chromeinfra.ResultDBHost,
-			Options: prpc.DefaultOptions(),
-		}), nil
+	// By default, results are retrieved in chunks as they're iterated over, but
+	// that results in slow performance. Enabling the Storage API allows us to get
+	// all results at once, resulting in a ~8-10x speed increase.
+	err = client.EnableStorageReadClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	return &ResultsDB{client}, nil
+	return &BigQueryClient{client}, nil
 }
 
-// QueryTestResults fetches the test results for the given builds.
-// f is called once per page of test variants.
-func (r *ResultsDB) QueryTestResults(
-	ctx context.Context,
-	builds []buildbucket.BuildID,
-	filterRegex string,
-	f func(*rdbpb.TestResult) error) error {
+// QueryTestResults fetches the test results for the given builds using
+// BigQuery.
+//
+// f is called once per result and is expected to handle any processing or
+// storage of results.
+func (bq *BigQueryClient) QueryTestResults(
+	ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f func(*QueryResult) error) error {
+	// test_id gets renamed since the column names need to match the struct names
+	// unless we want to get results in a generic bigquery.Value slice and
+	// manually copy data over.
+	base_query := `
+		SELECT
+		  test_id AS testid,
+		  status,
+		  tags,
+		  duration
+		FROM ` + "`chrome-luci-data.chromium.gpu_try_test_results`" + ` tr
+		WHERE
+		  exported.id IN UNNEST([%s])
+		  AND STARTS_WITH(tr.test_id, "%v")`
 
-	invocationNames := make([]string, len(builds))
-	for i, id := range builds {
-		invocationNames[i] = fmt.Sprintf("invocations/build-%v", id)
+	var buildIds []string
+	for _, id := range builds {
+		buildIds = append(buildIds, fmt.Sprintf(`"build-%v"`, id))
+	}
+	query := fmt.Sprintf(base_query, strings.Join(buildIds, ","), testPrefix)
+
+	q := bq.client.Query(query)
+	iter, err := q.Read(ctx)
+	if err != nil {
+		return err
 	}
 
-	pageToken := ""
+	var row QueryResult
 	for {
-		rsp, err := r.client.QueryTestResults(ctx, &rdbpb.QueryTestResultsRequest{
-			Invocations: invocationNames,
-			Predicate: &rdbpb.TestResultPredicate{
-				TestIdRegexp: filterRegex,
-			},
-			ReadMask: &fieldmaskpb.FieldMask{Paths: []string{
-				"test_id", "status", "tags", "duration",
-			}},
-			PageSize:  1000, // Maximum page size.
-			PageToken: pageToken,
-		})
+		err := iter.Next(&row)
+		if err == iterator.Done {
+			break
+		}
 		if err != nil {
 			return err
 		}
 
-		for _, res := range rsp.TestResults {
-			if err := f(res); err != nil {
-				return err
-			}
-		}
-
-		pageToken = rsp.GetNextPageToken()
-		if pageToken == "" {
-			break
+		if err := f(&row); err != nil {
+			return err
 		}
 	}
 

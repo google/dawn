@@ -171,7 +171,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
-	rdb, err := resultsdb.New(ctx, auth)
+	client, err := resultsdb.NewBigQueryClient(ctx, resultsdb.DefaultQueryProject)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		auth:                auth,
 		bb:                  bb,
 		parentSwarmingRunID: c.flags.parentSwarmingRunID,
-		rdb:                 rdb,
+		client:              client,
 		git:                 git,
 		gerrit:              gerrit,
 		gitiles:             gitilesRepos{dawn: dawn},
@@ -202,7 +202,7 @@ type roller struct {
 	auth                auth.Options
 	bb                  *buildbucket.Buildbucket
 	parentSwarmingRunID string
-	rdb                 *resultsdb.ResultsDB
+	client              *resultsdb.BigQueryClient
 	git                 *git.Git
 	gerrit              *gerrit.Gerrit
 	gitiles             gitilesRepos
@@ -413,7 +413,7 @@ func (r *roller) roll(ctx context.Context) error {
 
 		// Gather the build results
 		log.Println("gathering results...")
-		psResultsByExecutionMode, err = common.CacheResults(ctx, r.cfg, ps, r.flags.cacheDir, r.rdb, builds)
+		psResultsByExecutionMode, err = common.CacheResults(ctx, r.cfg, ps, r.flags.cacheDir, r.client, builds)
 		if err != nil {
 			return err
 		}
