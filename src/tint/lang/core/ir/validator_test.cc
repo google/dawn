@@ -250,7 +250,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithNullType) {
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:1:17 error: function parameter has nullptr type
 %my_func = func(%my_param:undef):void {
-                ^^^^^^^^^^^^^^^^^
+                ^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func(%my_param:undef):void {
