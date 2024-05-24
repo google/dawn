@@ -328,9 +328,9 @@ message InstructionSwitch {
 }
 
 message InstructionLoop {
-    optional uint32 initalizer = 1;  // Module.blocks
-    optional uint32 body = 2;        // Module.blocks
-    optional uint32 continuing = 3;  // Module.blocks
+    optional uint32 initializer = 1;  // Module.blocks
+    optional uint32 body = 2;         // Module.blocks
+    optional uint32 continuing = 3;   // Module.blocks
 }
 
 message InstructionExitIf {}

@@ -27,18 +27,29 @@
 
 #include "src/tint/lang/core/ir/binary/decode.h"
 
+#include <cmath>
+#include <cstdint>
+#include <string>
 #include <utility>
 
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/invalid.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/vector.h"
+#include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/text_style.h"
 
 TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS();
 #include "src/tint/lang/core/ir/binary/ir.pb.h"
@@ -66,6 +77,9 @@ struct Decoder {
     Vector<ir::BreakIf*, 32> break_ifs_{};
     Vector<ir::Continue*, 32> continues_{};
 
+    diag::List diags_{};
+    Hashset<std::string, 4> struct_names_{};
+
     Result<Module> Decode() {
         {
             const size_t n = static_cast<size_t>(mod_in_.types().size());
@@ -85,7 +99,7 @@ struct Decoder {
             const size_t n = static_cast<size_t>(mod_in_.blocks().size());
             blocks_.Reserve(n);
             for (size_t i = 0; i < n; i++) {
-                auto id = static_cast<uint32_t>(i + 1);
+                auto id = static_cast<uint32_t>(i);
                 if (id == mod_in_.root_block()) {
                     blocks_.Push(mod_out_.root_block);
                 } else {
@@ -115,26 +129,91 @@ struct Decoder {
             PopulateBlock(blocks_[i], mod_in_.blocks()[static_cast<int>(i)]);
         }
 
-        for (auto* exit : exit_ifs_) {
-            InferControlInstruction(exit, &ExitIf::SetIf);
-        }
-        for (auto* exit : exit_switches_) {
-            InferControlInstruction(exit, &ExitSwitch::SetSwitch);
-        }
-        for (auto* exit : exit_loops_) {
-            InferControlInstruction(exit, &ExitLoop::SetLoop);
-        }
-        for (auto* break_ifs : break_ifs_) {
-            InferControlInstruction(break_ifs, &BreakIf::SetLoop);
-        }
-        for (auto* next_iters : next_iterations_) {
-            InferControlInstruction(next_iters, &NextIteration::SetLoop);
-        }
-        for (auto* cont : continues_) {
-            InferControlInstruction(cont, &Continue::SetLoop);
+        if (diags_.ContainsErrors()) {
+            // Note: Its not safe to call InferControlInstruction() with a broken IR.
+            return Failure{std::move(diags_)};
         }
 
+        if (CheckBlocks()) {
+            for (auto* exit : exit_ifs_) {
+                InferControlInstruction(exit, &ExitIf::SetIf);
+            }
+            for (auto* exit : exit_switches_) {
+                InferControlInstruction(exit, &ExitSwitch::SetSwitch);
+            }
+            for (auto* exit : exit_loops_) {
+                InferControlInstruction(exit, &ExitLoop::SetLoop);
+            }
+            for (auto* break_ifs : break_ifs_) {
+                InferControlInstruction(break_ifs, &BreakIf::SetLoop);
+            }
+            for (auto* next_iters : next_iterations_) {
+                InferControlInstruction(next_iters, &NextIteration::SetLoop);
+            }
+            for (auto* cont : continues_) {
+                InferControlInstruction(cont, &Continue::SetLoop);
+            }
+        }
+
+        if (diags_.ContainsErrors()) {
+            return Failure{std::move(diags_)};
+        }
         return std::move(mod_out_);
+    }
+
+    /// Adds a new error to the diagnostics and returns a reference to it
+    diag::Diagnostic& Error() { return diags_.AddError(Source{}); }
+
+    /// Errors if @p number is not finite.
+    /// @returns @p number if finite, otherwise 0.
+    template <typename T>
+    Number<T> CheckFinite(Number<T> number) {
+        if (TINT_UNLIKELY(!std::isfinite(number.value))) {
+            Error() << "value must be finite";
+            return Number<T>{};
+        }
+        return number;
+    }
+
+    /// @returns true if all blocks are reachable, acyclic nesting depth is less than or equal to
+    /// kMaxBlockDepth.
+    bool CheckBlocks() {
+        const size_t kMaxBlockDepth = 128;
+        Vector<std::pair<const ir::Block*, size_t>, 32> pending;
+        pending.Push(std::make_pair(mod_out_.root_block, 0));
+        for (auto& fn : mod_out_.functions) {
+            pending.Push(std::make_pair(fn->Block(), 0));
+        }
+        Hashset<const ir::Block*, 32> seen;
+        while (!pending.IsEmpty()) {
+            const auto block_depth = pending.Pop();
+            const auto* block = block_depth.first;
+            const size_t depth = block_depth.second;
+            if (!seen.Add(block)) {
+                Error() << "cyclic nesting of blocks";
+                return false;
+            }
+            if (depth > kMaxBlockDepth) {
+                Error() << "block nesting exceeds " << kMaxBlockDepth;
+                return false;
+            }
+            for (auto* inst = block->Instructions(); inst; inst = inst->next) {
+                if (auto* ctrl = inst->As<ir::ControlInstruction>()) {
+                    ctrl->ForeachBlock([&](const ir::Block* child) {
+                        pending.Push(std::make_pair(child, depth + 1));
+                    });
+                }
+            }
+        }
+
+        for (auto* block : blocks_) {
+            if (!seen.Contains(block)) {
+                Error() << "unreachable block";
+                return false;
+            }
+        }
+
+        return true;
     }
 
     template <typename EXIT, typename CTRL_INST>
@@ -174,7 +253,10 @@ struct Decoder {
 
         Vector<FunctionParam*, 8> params_out;
         for (auto param_in : fn_in.parameters()) {
-            params_out.Push(ValueAs<ir::FunctionParam>(param_in));
+            auto* param_out = ValueAs<FunctionParam>(param_in);
+            if (TINT_LIKELY(param_out)) {
+                params_out.Push(param_out);
+            }
         }
         if (fn_in.has_return_location()) {
             fn_out->SetReturnLocation(Location(fn_in.return_location()));
@@ -189,7 +271,13 @@ struct Decoder {
         fn_out->SetBlock(Block(fn_in.block()));
     }
 
-    ir::Function* Function(uint32_t id) { return id > 0 ? mod_out_.functions[id - 1] : nullptr; }
+    ir::Function* Function(uint32_t id) {
+        if (TINT_UNLIKELY(id >= mod_out_.functions.Length())) {
+            Error() << "function id " << id << " out of range";
+            return nullptr;
+        }
+        return mod_out_.functions[id];
+    }
 
     Function::PipelineStage PipelineStage(pb::PipelineStage stage) {
         switch (stage) {
@@ -215,28 +303,37 @@ struct Decoder {
     }
 
     void PopulateBlock(ir::Block* block_out, const pb::Block& block_in) {
-        if (block_in.is_multi_in()) {
+        if (auto* mib = block_out->As<ir::MultiInBlock>()) {
             Vector<ir::BlockParam*, 8> params;
-            for (auto param : block_in.parameters()) {
-                params.Push(ValueAs<BlockParam>(param));
+            for (auto param_in : block_in.parameters()) {
+                auto* param_out = ValueAs<BlockParam>(param_in);
+                if (TINT_LIKELY(param_out)) {
+                    params.Push(param_out);
+                }
             }
-            block_out->As<ir::MultiInBlock>()->SetParams(std::move(params));
+            mib->SetParams(std::move(params));
         }
         for (auto& inst : block_in.instructions()) {
             block_out->Append(Instruction(inst));
         }
     }
 
-    ir::Block* Block(uint32_t id) { return id > 0 ? blocks_[id - 1] : nullptr; }
+    ir::Block* Block(uint32_t id) {
+        if (TINT_UNLIKELY(id >= blocks_.Length())) {
+            Error() << "block id " << id << " out of range";
+            return b.Block();
+        }
+        return blocks_[id];
+    }
 
     template <typename T>
     T* BlockAs(uint32_t id) {
         auto* block = Block(id);
-        if (auto cast = block->As<T>(); TINT_LIKELY(cast)) {
+        if (auto cast = As<T>(block); TINT_LIKELY(cast)) {
             return cast;
         }
-        TINT_ICE() << "block " << id << " is " << (block ? block->TypeInfo().name : "<null>")
-                   << " expected " << TypeInfo::Of<T>().name;
+        Error() << "block " << id << " is " << (block ? block->TypeInfo().name : "<null>")
+                << " expected " << TypeInfo::Of<T>().name;
         return nullptr;
     }
 
@@ -330,6 +427,11 @@ struct Decoder {
             case pb::Instruction::KindCase::KIND_NOT_SET:
                 break;
         }
+        if (!inst_out) {
+            Error() << "invalid Instruction.kind: " << std::to_string(inst_in.kind_case());
+            return b.Let(mod_out_.Types().invalid());
+        }
+
         TINT_ASSERT(inst_out);
 
         Vector<ir::Value*, 4> operands;
@@ -345,8 +447,15 @@ struct Decoder {
         inst_out->SetResults(std::move(results));
 
         if (inst_in.has_break_if()) {
-            static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(
-                inst_in.break_if().num_next_iter_values());
+            auto num_next_iter_values = inst_in.break_if().num_next_iter_values();
+            bool is_valid =
+                inst_out->Operands().Length() >= num_next_iter_values + BreakIf::kArgsOperandOffset;
+            if (TINT_LIKELY(is_valid)) {
+                static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(
+                    inst_in.break_if().num_next_iter_values());
+            } else {
+                Error() << "invalid value for num_next_iter_values()";
+            }
         }
 
         return inst_out;
@@ -416,12 +525,8 @@ struct Decoder {
 
     ir::If* CreateInstructionIf(const pb::InstructionIf& if_in) {
         auto* if_out = mod_out_.allocators.instructions.Create<ir::If>();
-        if (if_in.has_true_()) {
-            if_out->SetTrue(Block(if_in.true_()));
-        }
-        if (if_in.has_false_()) {
-            if_out->SetFalse(Block(if_in.false_()));
-        }
+        if_out->SetTrue(if_in.has_true_() ? Block(if_in.true_()) : b.Block());
+        if_out->SetFalse(if_in.has_false_() ? Block(if_in.false_()) : b.Block());
         return if_out;
     }
 
@@ -440,16 +545,16 @@ struct Decoder {
 
     ir::Loop* CreateInstructionLoop(const pb::InstructionLoop& loop_in) {
         auto* loop_out = mod_out_.allocators.instructions.Create<ir::Loop>();
-        if (loop_in.has_initalizer()) {
-            loop_out->SetInitializer(Block(loop_in.initalizer()));
+        if (loop_in.has_initializer()) {
+            loop_out->SetInitializer(Block(loop_in.initializer()));
         } else {
-            loop_out->SetInitializer(mod_out_.blocks.Create());
+            loop_out->SetInitializer(b.Block());
         }
         loop_out->SetBody(BlockAs<ir::MultiInBlock>(loop_in.body()));
         if (loop_in.has_continuing()) {
             loop_out->SetContinuing(BlockAs<ir::MultiInBlock>(loop_in.continuing()));
         } else {
-            loop_out->SetContinuing(mod_out_.blocks.Create<ir::MultiInBlock>());
+            loop_out->SetContinuing(b.MultiInBlock());
         }
         return loop_out;
     }
@@ -491,7 +596,7 @@ struct Decoder {
             case_out.block->SetParent(switch_out);
             for (auto selector_in : case_in.selectors()) {
                 ir::Switch::CaseSelector selector_out{};
-                selector_out.val = b.Constant(ConstantValue(selector_in));
+                selector_out.val = Constant(selector_in);
                 case_out.selectors.Push(std::move(selector_out));
             }
             if (case_in.is_default()) {
@@ -562,7 +667,9 @@ struct Decoder {
             case pb::Type::KindCase::KIND_NOT_SET:
                 break;
         }
-        TINT_ICE() << type_in.kind_case();
+
+        Error() << "invalid Type.kind: " << std::to_string(type_in.kind_case());
+        return mod_out_.Types().invalid();
     }
 
     const type::Type* CreateTypeBasic(pb::TypeBasic basic_in) {
@@ -584,15 +691,28 @@ struct Decoder {
             case pb::TypeBasic::TypeBasic_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
-        TINT_ICE() << "invalid TypeBasic: " << basic_in;
+
+        Error() << "invalid TypeBasic: " << std::to_string(basic_in);
+        return mod_out_.Types().invalid();
     }
 
-    const type::Vector* CreateTypeVector(const pb::TypeVector& vector_in) {
+    const type::Type* CreateTypeVector(const pb::TypeVector& vector_in) {
+        const auto width = vector_in.width();
+        if (TINT_UNLIKELY(width < 2 || width > 4)) {
+            Error() << "invalid vector width";
+            return mod_out_.Types().invalid();
+        }
         auto* el_ty = Type(vector_in.element_type());
         return mod_out_.Types().vec(el_ty, vector_in.width());
     }
 
-    const type::Matrix* CreateTypeMatrix(const pb::TypeMatrix& matrix_in) {
+    const type::Type* CreateTypeMatrix(const pb::TypeMatrix& matrix_in) {
+        const auto rows = matrix_in.num_rows();
+        const auto cols = matrix_in.num_columns();
+        if (TINT_UNLIKELY(rows < 2 || rows > 4 || cols < 2 || cols > 4)) {
+            Error() << "invalid matrix dimensions";
+            return mod_out_.Types().invalid();
+        }
         auto* el_ty = Type(matrix_in.element_type());
         auto* column_ty = mod_out_.Types().vec(el_ty, matrix_in.num_rows());
         return mod_out_.Types().mat(column_ty, matrix_in.num_columns());
@@ -605,15 +725,38 @@ struct Decoder {
         return mod_out_.Types().ptr(address_space, store_ty, access);
     }
 
-    const type::Struct* CreateTypeStruct(const pb::TypeStruct& struct_in) {
+    const type::Type* CreateTypeStruct(const pb::TypeStruct& struct_in) {
+        auto struct_name = struct_in.name();
+        if (TINT_UNLIKELY(struct_name.empty())) {
+            Error() << "struct must have a name";
+            return mod_out_.Types().invalid();
+        }
+        if (!struct_names_.Add(struct_name)) {
+            Error() << "duplicate struct name: " << style::Type(struct_name);
+            return mod_out_.Types().invalid();
+        }
+
         Vector<const core::type::StructMember*, 8> members_out;
         uint32_t offset = 0;
         for (auto& member_in : struct_in.member()) {
-            auto symbol = mod_out_.symbols.Register(member_in.name());
+            auto member_name = member_in.name();
+            if (TINT_UNLIKELY(member_name.empty())) {
+                Error() << "struct member must have a name";
+                return mod_out_.Types().invalid();
+            }
+            auto symbol = mod_out_.symbols.Register(member_name);
             auto* type = Type(member_in.type());
             auto index = static_cast<uint32_t>(members_out.Length());
             auto align = member_in.align();
             auto size = member_in.size();
+            if (TINT_UNLIKELY(align == 0)) {
+                Error() << "struct member must have non-zero alignment";
+                align = 1;
+            }
+            if (TINT_UNLIKELY(size == 0)) {
+                Error() << "struct member must have non-zero size";
+                size = 1;
+            }
             core::type::StructMemberAttributes attributes_out{};
             if (member_in.has_attributes()) {
                 auto& attributes_in = member_in.attributes();
@@ -641,7 +784,11 @@ struct Decoder {
             offset += size;
             members_out.Push(member_out);
         }
-        auto name = mod_out_.symbols.Register(struct_in.name());
+        if (TINT_UNLIKELY(members_out.IsEmpty())) {
+            Error() << "struct requires at least one member";
+            return mod_out_.Types().invalid();
+        }
+        auto name = mod_out_.symbols.Register(struct_name);
         return mod_out_.Types().Struct(name, std::move(members_out));
     }
 
@@ -649,16 +796,29 @@ struct Decoder {
         return mod_out_.Types().atomic(Type(atomic_in.type()));
     }
 
-    const type::Array* CreateTypeArray(const pb::TypeArray& array_in) {
+    const type::Type* CreateTypeArray(const pb::TypeArray& array_in) {
         auto* element = Type(array_in.element());
-        uint32_t stride = static_cast<uint32_t>(array_in.stride());
-        uint32_t count = static_cast<uint32_t>(array_in.count());
+        uint32_t stride = array_in.stride();
+        uint32_t count = array_in.count();
+        if (element->Align() == 0 || element->Size() == 0) {
+            Error() << "cannot create an array of an unsized type";
+            return mod_out_.Types().invalid();
+        }
+        uint32_t implicit_stride = tint::RoundUp(element->Align(), element->Size());
+        if (stride < implicit_stride) {
+            Error() << "array element stride is smaller than the implicit stride";
+            return mod_out_.Types().invalid();
+        }
         return count > 0 ? mod_out_.Types().array(element, count, stride)
                          : mod_out_.Types().runtime_array(element, stride);
     }
 
-    const type::DepthTexture* CreateTypeDepthTexture(const pb::TypeDepthTexture& texture_in) {
+    const type::Type* CreateTypeDepthTexture(const pb::TypeDepthTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
+        if (!type::DepthTexture::IsValidDimension(dimension)) {
+            Error() << "invalid DepthTexture dimension";
+            return mod_out_.Types().invalid();
+        }
         return mod_out_.Types().Get<type::DepthTexture>(dimension);
     }
 
@@ -675,9 +835,13 @@ struct Decoder {
         return mod_out_.Types().Get<type::MultisampledTexture>(dimension, sub_type);
     }
 
-    const type::DepthMultisampledTexture* CreateTypeDepthMultisampledTexture(
+    const type::Type* CreateTypeDepthMultisampledTexture(
         const pb::TypeDepthMultisampledTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
+        if (!type::DepthMultisampledTexture::IsValidDimension(dimension)) {
+            Error() << "invalid DepthMultisampledTexture dimension";
+            return mod_out_.Types().invalid();
+        }
         return mod_out_.Types().Get<type::DepthMultisampledTexture>(dimension);
     }
 
@@ -699,7 +863,13 @@ struct Decoder {
         return mod_out_.Types().Get<type::Sampler>(kind);
     }
 
-    const type::Type* Type(size_t id) { return id > 0 ? types_[id - 1] : nullptr; }
+    const type::Type* Type(size_t id) {
+        if (TINT_UNLIKELY(id >= types_.Length())) {
+            Error() << "type id " << id << " out of range";
+            return mod_out_.Types().invalid();
+        }
+        return types_[id];
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     // Values
@@ -720,14 +890,15 @@ struct Decoder {
                 value_out = BlockParameter(value_in.block_parameter());
                 break;
             case pb::Value::KindCase::kConstant:
-                value_out = b.Constant(ConstantValue(value_in.constant()));
+                value_out = Constant(value_in.constant());
                 break;
             case pb::Value::KindCase::KIND_NOT_SET:
                 break;
         }
 
         if (!value_out) {
-            TINT_ICE() << "invalid TypeDecl.kind: " << value_in.kind_case();
+            Error() << "invalid value kind: " << std::to_string(value_in.kind_case());
+            return b.InvalidConstant();
         }
 
         return value_out;
@@ -736,7 +907,7 @@ struct Decoder {
     ir::InstructionResult* InstructionResult(const pb::InstructionResult& res_in) {
         auto* type = Type(res_in.type());
         auto* res_out = b.InstructionResult(type);
-        if (res_in.has_name()) {
+        if (!res_in.name().empty()) {
             mod_out_.SetName(res_out, res_in.name());
         }
         return res_out;
@@ -745,7 +916,7 @@ struct Decoder {
     ir::FunctionParam* FunctionParameter(const pb::FunctionParameter& param_in) {
         auto* type = Type(param_in.type());
         auto* param_out = b.FunctionParam(type);
-        if (param_in.has_name()) {
+        if (!param_in.name().empty()) {
             mod_out_.SetName(param_out, param_in.name());
         }
 
@@ -772,22 +943,30 @@ struct Decoder {
     ir::BlockParam* BlockParameter(const pb::BlockParameter& param_in) {
         auto* type = Type(param_in.type());
         auto* param_out = b.BlockParam(type);
-        if (param_in.has_name()) {
+        if (!param_in.name().empty()) {
             mod_out_.SetName(param_out, param_in.name());
         }
         return param_out;
     }
 
-    ir::Value* Value(uint32_t id) { return id > 0 ? values_[id - 1] : nullptr; }
+    ir::Constant* Constant(uint32_t value_id) { return b.Constant(ConstantValue(value_id)); }
+
+    ir::Value* Value(uint32_t id) {
+        if (TINT_UNLIKELY(id > values_.Length())) {
+            Error() << "value id " << id << " out of range";
+            return nullptr;
+        }
+        return id > 0 ? values_[id - 1] : nullptr;
+    }
 
     template <typename T>
     T* ValueAs(uint32_t id) {
         auto* value = Value(id);
-        if (auto cast = value->As<T>(); TINT_LIKELY(cast)) {
+        if (auto cast = As<T>(value); TINT_LIKELY(cast)) {
             return cast;
         }
-        TINT_ICE() << "Value " << id << " is " << (value ? value->TypeInfo().name : "<null>")
-                   << " expected " << TypeInfo::Of<T>().name;
+        Error() << "value " << id << " is " << (value ? value->TypeInfo().name : "<null>")
+                << " expected " << TypeInfo::Of<T>().name;
         return nullptr;
     }
 
@@ -805,7 +984,8 @@ struct Decoder {
             case pb::ConstantValue::KindCase::KIND_NOT_SET:
                 break;
         }
-        TINT_ICE() << "invalid ConstantValue.kind: " << value_in.kind_case();
+        Error() << "invalid ConstantValue.kind: " << std::to_string(value_in.kind_case());
+        return b.InvalidConstant()->Value();
     }
 
     const core::constant::Value* CreateConstantScalar(const pb::ConstantValueScalar& value_in) {
@@ -817,33 +997,69 @@ struct Decoder {
             case pb::ConstantValueScalar::KindCase::kU32:
                 return b.ConstantValue(u32(value_in.u32()));
             case pb::ConstantValueScalar::KindCase::kF32:
-                return b.ConstantValue(f32(value_in.f32()));
+                return b.ConstantValue(CheckFinite(f32(value_in.f32())));
             case pb::ConstantValueScalar::KindCase::kF16:
-                return b.ConstantValue(f16(value_in.f16()));
+                return b.ConstantValue(CheckFinite(f16(value_in.f16())));
             case pb::ConstantValueScalar::KindCase::KIND_NOT_SET:
                 break;
         }
-        TINT_ICE() << "invalid ConstantValueScalar.kind: " << value_in.kind_case();
+        Error() << "invalid ConstantValueScalar.kind: " << std::to_string(value_in.kind_case());
+        return b.InvalidConstant()->Value();
     }
 
     const core::constant::Value* CreateConstantComposite(
         const pb::ConstantValueComposite& composite_in) {
         auto* type = Type(composite_in.type());
+        auto type_elements = type->Elements();
+        size_t num_values = static_cast<size_t>(composite_in.elements().size());
+        if (TINT_UNLIKELY(type_elements.count == 0)) {
+            Error() << "cannot create a composite of type " << type->FriendlyName();
+            return b.InvalidConstant()->Value();
+        }
+        if (TINT_UNLIKELY(type_elements.count != num_values)) {
+            Error() << "constant composite type " << type->FriendlyName() << " expects "
+                    << type_elements.count << " elements, but " << num_values << " values encoded";
+            return b.InvalidConstant()->Value();
+        }
         Vector<const core::constant::Value*, 8> elements_out;
         for (auto element_id : composite_in.elements()) {
-            elements_out.Push(ConstantValue(element_id));
+            uint32_t i = static_cast<uint32_t>(elements_out.Length());
+            auto* value = ConstantValue(element_id);
+            if (auto* el_type = type->Element(i); TINT_UNLIKELY(value->Type() != el_type)) {
+                Error() << "constant composite element value type " << value->Type()->FriendlyName()
+                        << " does not match element type " << el_type->FriendlyName();
+                return b.InvalidConstant()->Value();
+            }
+            elements_out.Push(value);
         }
         return mod_out_.constant_values.Composite(type, std::move(elements_out));
     }
 
     const core::constant::Value* CreateConstantSplat(const pb::ConstantValueSplat& splat_in) {
         auto* type = Type(splat_in.type());
-        auto* elem = ConstantValue(splat_in.elements());
-        return mod_out_.constant_values.Splat(type, elem);
+        uint32_t num_elements = type->Elements().count;
+        if (TINT_UNLIKELY(num_elements == 0)) {
+            Error() << "cannot create a splat of type " << type->FriendlyName();
+            return b.InvalidConstant()->Value();
+        }
+        auto* value = ConstantValue(splat_in.elements());
+        for (uint32_t i = 0; i < num_elements; i++) {
+            auto* el_type = type->Element(i);
+            if (TINT_UNLIKELY(el_type != value->Type())) {
+                Error() << "constant splat element value type " << value->Type()->FriendlyName()
+                        << " does not match element " << i << " type " << el_type->FriendlyName();
+                return b.InvalidConstant()->Value();
+            }
+        }
+        return mod_out_.constant_values.Splat(type, value);
     }
 
     const core::constant::Value* ConstantValue(uint32_t id) {
-        return id > 0 ? constant_values_[id - 1] : nullptr;
+        if (TINT_UNLIKELY(id >= constant_values_.Length())) {
+            Error() << "constant value id " << id << " out of range";
+            return b.InvalidConstant()->Value();
+        }
+        return constant_values_[id];
     }
 
     ////////////////////////////////////////////////////////////////////////////
