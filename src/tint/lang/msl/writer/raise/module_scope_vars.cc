@@ -88,14 +88,32 @@ struct State {
             ProcessFunction(*func);
         }
 
-        // Replace uses of each module-scope variable with pointers extracted from the structure.
+        // Replace uses of each module-scope variable with values extracted from the structure.
         uint32_t index = 0;
         for (auto& var : module_vars) {
-            var->Result(0)->ReplaceAllUsesWith([&](core::ir::Usage use) {  //
-                return GetPointerFromStruct(var, use.instruction, index);
+            Vector<core::ir::Instruction*, 16> to_destroy;
+            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+            var->Result(0)->ForEachUse([&](core::ir::Usage use) {  //
+                auto* extracted_variable = GetVariableFromStruct(var, use.instruction, index);
+
+                // We drop the pointer from handle variables and store them in the struct by value
+                // instead, so remove any load instructions for the handle address space.
+                if (use.instruction->Is<core::ir::Load>() &&
+                    ptr->AddressSpace() == core::AddressSpace::kHandle) {
+                    use.instruction->Result(0)->ReplaceAllUsesWith(extracted_variable);
+                    to_destroy.Push(use.instruction);
+                    return;
+                }
+
+                use.instruction->SetOperand(use.operand_index, extracted_variable);
             });
             var->Destroy();
             index++;
+
+            // Clean up instructions that need to be removed.
+            for (auto* inst : to_destroy) {
+                inst->Destroy();
+            }
         }
     }
 
@@ -106,6 +124,13 @@ struct State {
         for (auto* global : *ir.root_block) {
             if (auto* var = global->As<core::ir::Var>()) {
                 auto* type = var->Result(0)->Type();
+
+                // Handle types drop the pointer and are passed around by value.
+                auto* ptr = type->As<core::type::Pointer>();
+                if (ptr->AddressSpace() == core::AddressSpace::kHandle) {
+                    type = ptr->StoreType();
+                }
+
                 auto name = ir.NameOf(var);
                 if (!name) {
                     name = ir.symbols.New();
@@ -181,6 +206,14 @@ struct State {
                         decl = param;
                         break;
                     }
+                    case core::AddressSpace::kHandle: {
+                        // Handle types become function parameters and drop the pointer.
+                        auto* param = b.FunctionParam(ptr->UnwrapPtr());
+                        param->SetBindingPoint(var->BindingPoint());
+                        func->AppendParam(param);
+                        decl = param;
+                        break;
+                    }
                     default:
                         TINT_UNREACHABLE() << "unhandled address space: " << ptr->AddressSpace();
                 }
@@ -218,18 +251,26 @@ struct State {
         return param;
     }
 
-    /// Get a pointer from the module-scope variable replacement structure, inserting new access
+    /// Get a variable from the module-scope variable replacement structure, inserting new access
     /// instructions before @p inst.
     /// @param var the variable to get the replacement for
     /// @param inst the instruction that uses the variable
     /// @param index the index of the variable in the structure member list
-    /// @returns the pointer extracted from the structure
-    core::ir::Value* GetPointerFromStruct(core::ir::Var* var,
-                                          core::ir::Instruction* inst,
-                                          uint32_t index) {
+    /// @returns the variable extracted from the structure
+    core::ir::Value* GetVariableFromStruct(core::ir::Var* var,
+                                           core::ir::Instruction* inst,
+                                           uint32_t index) {
         auto* func = ContainingFunction(inst);
         auto* struct_value = function_to_struct_value.GetOr(func, nullptr);
-        auto* access = b.Access(var->Result(0)->Type(), struct_value, u32(index));
+        auto* type = var->Result(0)->Type();
+
+        // Handle types drop the pointer and are passed around by value.
+        auto* ptr = type->As<core::type::Pointer>();
+        if (ptr->AddressSpace() == core::AddressSpace::kHandle) {
+            type = ptr->StoreType();
+        }
+
+        auto* access = b.Access(type, struct_value, u32(index));
         access->InsertBefore(inst);
         return access->Result(0);
     }

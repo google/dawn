@@ -30,6 +30,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -296,6 +297,63 @@ tint_module_vars_struct = struct @align(1) {
     %8:ptr<uniform, i32, read> = access %tint_module_vars, 1u
     %9:i32 = load %8
     %10:i32 = add %7, %9
+    ret
+  }
+}
+)";
+
+    Run(ModuleScopeVars);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleScopeVarsTest, HandleTypes) {
+    auto* t = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* var_t = b.Var("t", ty.ptr<handle>(t));
+    auto* var_s = b.Var("s", ty.ptr<handle>(ty.sampler()));
+    var_t->SetBindingPoint(1, 2);
+    var_s->SetBindingPoint(3, 4);
+    mod.root_block->Append(var_t);
+    mod.root_block->Append(var_s);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* load_t = b.Load(var_t);
+        auto* load_s = b.Load(var_s);
+        b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, load_t, load_s, b.Splat<vec2<f32>>(0_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %t:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %s:ptr<handle, sampler, read> = var @binding_point(3, 4)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %t
+    %5:sampler = load %s
+    %6:vec4<f32> = textureSample %4, %5, vec2<f32>(0.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_module_vars_struct = struct @align(1) {
+  t:texture_2d<f32> @offset(0)
+  s:sampler @offset(0)
+}
+
+%foo = @fragment func(%t:texture_2d<f32> [@binding_point(1, 2)], %s:sampler [@binding_point(3, 4)]):void {
+  $B1: {
+    %4:tint_module_vars_struct = construct %t, %s
+    %tint_module_vars:tint_module_vars_struct = let %4
+    %6:texture_2d<f32> = access %tint_module_vars, 0u
+    %7:sampler = access %tint_module_vars, 1u
+    %8:vec4<f32> = textureSample %6, %7, vec2<f32>(0.0f)
     ret
   }
 }
@@ -597,6 +655,84 @@ tint_module_vars_struct = struct @align(1) {
     %14:tint_module_vars_struct = construct %a, %b
     %tint_module_vars_1:tint_module_vars_struct = let %14  # %tint_module_vars_1: 'tint_module_vars'
     %16:void = call %foo, 42i, %tint_module_vars_1
+    ret
+  }
+}
+)";
+
+    Run(ModuleScopeVars);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_HandleTypes) {
+    auto* t = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* var_t = b.Var("t", ty.ptr<handle>(t));
+    auto* var_s = b.Var("s", ty.ptr<handle>(ty.sampler()));
+    var_t->SetBindingPoint(1, 2);
+    var_s->SetBindingPoint(3, 4);
+    mod.root_block->Append(var_t);
+    mod.root_block->Append(var_s);
+
+    auto* foo = b.Function("foo", ty.vec4<f32>());
+    auto* param = b.FunctionParam<i32>("param");
+    foo->SetParams({param});
+    b.Append(foo->Block(), [&] {
+        auto* load_t = b.Load(var_t);
+        auto* load_s = b.Load(var_s);
+        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, load_t, load_s,
+                                         b.Splat<vec2<f32>>(0_f));
+        b.Return(foo, result);
+    });
+
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Call(foo, 42_i);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %t:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
+  %s:ptr<handle, sampler, read> = var @binding_point(3, 4)
+}
+
+%foo = func(%param:i32):vec4<f32> {
+  $B2: {
+    %5:texture_2d<f32> = load %t
+    %6:sampler = load %s
+    %7:vec4<f32> = textureSample %5, %6, vec2<f32>(0.0f)
+    ret %7
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    %9:vec4<f32> = call %foo, 42i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_module_vars_struct = struct @align(1) {
+  t:texture_2d<f32> @offset(0)
+  s:sampler @offset(0)
+}
+
+%foo = func(%param:i32, %tint_module_vars:tint_module_vars_struct):vec4<f32> {
+  $B1: {
+    %4:texture_2d<f32> = access %tint_module_vars, 0u
+    %5:sampler = access %tint_module_vars, 1u
+    %6:vec4<f32> = textureSample %4, %5, vec2<f32>(0.0f)
+    ret %6
+  }
+}
+%main = @fragment func(%t:texture_2d<f32> [@binding_point(1, 2)], %s:sampler [@binding_point(3, 4)]):void {
+  $B2: {
+    %10:tint_module_vars_struct = construct %t, %s
+    %tint_module_vars_1:tint_module_vars_struct = let %10  # %tint_module_vars_1: 'tint_module_vars'
+    %12:vec4<f32> = call %foo, 42i, %tint_module_vars_1
     ret
   }
 }

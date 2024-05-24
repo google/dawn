@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/msl/writer/printer/helper_test.h"
 
 namespace tint::msl::writer {
@@ -41,7 +42,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, EntryPointParameterBindingPoint) {
+TEST_F(MslPrinterTest, EntryPointParameterBufferBindingPoint) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* storage = b.FunctionParam("storage", ty.ptr(core::AddressSpace::kStorage, ty.i32()));
     auto* uniform = b.FunctionParam("uniform", ty.ptr(core::AddressSpace::kUniform, ty.i32()));
@@ -53,6 +54,23 @@ TEST_F(MslPrinterTest, EntryPointParameterBindingPoint) {
     ASSERT_TRUE(Generate()) << err_ << output_;
     EXPECT_EQ(output_, MetalHeader() + R"(
 fragment void foo(device int* storage [[buffer(1)]], const constant int* uniform [[buffer(2)]]) {
+}
+)");
+}
+
+TEST_F(MslPrinterTest, EntryPointParameterHandleBindingPoint) {
+    auto* t = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* texture = b.FunctionParam("texture", t);
+    auto* sampler = b.FunctionParam("sampler", ty.sampler());
+    texture->SetBindingPoint(0, 1);
+    sampler->SetBindingPoint(0, 2);
+    func->SetParams({texture, sampler});
+    func->Block()->Append(b.Return(func));
+
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
+fragment void foo(texture2d<float, access::sample> texture [[texture(1)]], sampler sampler [[sampler(2)]]) {
 }
 )");
 }
