@@ -63,6 +63,7 @@ using OptionalVertexPullingTransformConfig =
     X(std::string, entryPointName)                                                               \
     X(bool, disableSymbolRenaming)                                                               \
     X(tint::msl::writer::Options, tintOptions)                                                   \
+    X(bool, use_tint_ir)                                                                         \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)                         \
     X(std::optional<uint32_t>, maxSubgroupSizeForFullSubgroups)
 
@@ -272,6 +273,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.array_length_from_uniform = std::move(arrayLengthFromUniform);
     req.tintOptions.pixel_local_options = std::move(pixelLocal);
     req.tintOptions.bindings = std::move(bindings);
+    req.use_tint_ir = device->IsToggleEnabled(Toggle::UseTintIR);
     req.tintOptions.disable_polyfill_integer_div_mod =
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
@@ -347,7 +349,19 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             }
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
-            auto result = tint::msl::writer::Generate(program, r.tintOptions);
+            tint::Result<tint::msl::writer::Output> result;
+            if (r.use_tint_ir) {
+                // Convert the AST program to an IR module.
+                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+                DAWN_INVALID_IF(ir != tint::Success,
+                                "An error occurred while generating Tint IR\n%s",
+                                ir.Failure().reason.Str());
+
+                result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
+            } else {
+                result = tint::msl::writer::Generate(program, r.tintOptions);
+            }
+
             DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating MSL:\n%s",
                             result.Failure().reason.Str());
 
