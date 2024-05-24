@@ -30,14 +30,21 @@
 
 #include "src/tint/utils/result/result.h"
 
-// Forward declarartion
+// Forward declarations
 namespace tint::core::ir {
 class Module;
 }  // namespace tint::core::ir
+namespace tint::core::ir::binary::pb {
+class Module;
+}  // namespace tint::core::ir::binary::pb
 
 namespace tint::core::ir::binary {
 
+/// @returns the decoded Module from the serialized protobuf.
 Result<Module> Decode(Slice<const std::byte> encoded);
+
+/// @returns the decoded Module from the protobuf.
+Result<Module> Decode(const pb::Module& module);
 
 }  // namespace tint::core::ir::binary
 

@@ -50,8 +50,9 @@ namespace tint::core::ir::binary {
 namespace {
 
 struct Decoder {
-    pb::Module& mod_in_;
-    Module& mod_out_;
+    const pb::Module& mod_in_;
+
+    Module mod_out_{};
     Vector<ir::Block*, 32> blocks_{};
     Vector<const type::Type*, 32> types_{};
     Vector<const core::constant::Value*, 32> constant_values_{};
@@ -65,7 +66,7 @@ struct Decoder {
     Vector<ir::BreakIf*, 32> break_ifs_{};
     Vector<ir::Continue*, 32> continues_{};
 
-    void Decode() {
+    Result<Module> Decode() {
         {
             const size_t n = static_cast<size_t>(mod_in_.types().size());
             types_.Reserve(n);
@@ -132,6 +133,8 @@ struct Decoder {
         for (auto* cont : continues_) {
             InferControlInstruction(cont, &Continue::SetLoop);
         }
+
+        return std::move(mod_out_);
     }
 
     template <typename EXIT, typename CTRL_INST>
@@ -1395,10 +1398,11 @@ Result<Module> Decode(Slice<const std::byte> encoded) {
         return Failure{"failed to deserialize protobuf"};
     }
 
-    Module mod_out;
-    Decoder{mod_in, mod_out}.Decode();
+    return Decode(mod_in);
+}
 
-    return mod_out;
+Result<Module> Decode(const pb::Module& mod_in) {
+    return Decoder{mod_in}.Decode();
 }
 
 }  // namespace tint::core::ir::binary
