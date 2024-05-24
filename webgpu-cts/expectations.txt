@@ -11,8 +11,8 @@
 # tags: [ android-nexus-5x android-pixel-2 android-pixel-4
 #             android-pixel-6 android-shield-android-tv android-sm-a135m
 #             android-sm-a235m android-sm-s926b
-#         chromeos-board-amd64-generic chromeos-board-kevin chromeos-board-eve
-#             chromeos-board-jacuzzi chromeos-board-octopus
+#         chromeos-board-amd64-generic chromeos-board-eve chromeos-board-jacuzzi
+#             chromeos-board-octopus chromeos-board-volteer
 #         fuchsia-board-astro fuchsia-board-sherlock fuchsia-board-qemu-x64 ]
 # Platform
 # tags: [ desktop
@@ -645,6 +645,29 @@ crbug.com/341282613 [ win intel-0x4680 ] webgpu:shader,validation,expression,mat
 crbug.com/341282613 [ win intel-0x4680 ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:* [ Failure ]
 crbug.com/341282613 [ win intel-0x4680 ] webgpu:shader,validation,expression,matrix,mul:overflow_vec_f16:* [ Failure ]
 
+################################################################################
+# Failures from initially enabling tests on ChromeOS volteer
+# crbug.com/340815322
+################################################################################
+crbug.com/342554805 [ chromeos chromeos-board-volteer ] webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_unused_bind_group:inRenderPass=false;* [ Failure ]
+crbug.com/342602624 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,expression,access,array,index:matrix:inputSource="uniform";elementType="f16" [ Failure ]
+crbug.com/342602624 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,expression,access,array,index:matrix:inputSource="uniform";elementType="f32" [ Failure ]
+crbug.com/42251290 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/42251290 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/42251290 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/42251290 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/42251290 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/42251290 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/42251290 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/42251290 [ chromeos chromeos-board-volteer ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/341282612 [ chromeos chromeos-board-volteer ] webgpu:shader,validation,expression,call,builtin,normalize:values:stage="constant";* [ Failure ]
+crbug.com/341282612 [ chromeos chromeos-board-volteer ] webgpu:shader,validation,expression,call,builtin,normalize:values:stage="override";* [ Failure ]
+crbug.com/341282612 [ chromeos chromeos-board-volteer ] webgpu:shader,validation,expression,call,builtin,refract:values:stage="constant";* [ Failure ]
+crbug.com/341282612 [ chromeos chromeos-board-volteer ] webgpu:shader,validation,expression,call,builtin,refract:values:stage="override";* [ Failure ]
+crbug.com/341282613 [ chromeos chromeos-board-volteer ] webgpu:shader,validation,expression,matrix,add_sub:underflow_f16:* [ Failure ]
+crbug.com/341282613 [ chromeos chromeos-board-volteer ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:* [ Failure ]
+crbug.com/341282613 [ chromeos chromeos-board-volteer ] webgpu:shader,validation,expression,matrix,mul:overflow_vec_f16:* [ Failure ]
+crbug.com/342602625 [ chromeos chromeos-board-volteer ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba16float";* [ Failure ]
 
 ################################################################################
 # Intel failures for robust access on Windows
@@ -1263,17 +1286,18 @@ crbug.com/331237795 [ dawn-backend-validation graphite-enabled nvidia webgpu-ada
 ################################################################################
 # Tint validation failures
 ################################################################################
-crbug.com/tint/2218 [ amd-0x67ef mac ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ android-r qualcomm ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ android-t arm ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ intel-0x3e9b mac ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ intel ubuntu ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ intel webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ intel webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ nvidia-0x2184 ubuntu ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ nvidia-0x2184 webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ amd-0x67ef mac ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ android-r qualcomm ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ android-t arm ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ chromeos chromeos-board-volteer ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ intel-0x3e9b mac ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ intel ubuntu ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ intel webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ intel webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ nvidia-0x2184 ubuntu ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ nvidia-0x2184 webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/42251274 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
 crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:builtin_value_names:* [ Failure ]
 crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_sampling_names:* [ Failure ]
 crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_type_names:* [ Failure ]
