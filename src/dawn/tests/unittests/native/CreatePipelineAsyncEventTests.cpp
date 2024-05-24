@@ -30,11 +30,13 @@
 
 #include <chrono>
 #include <memory>
+#include <string>
 #include <thread>
 #include <utility>
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/Error.h"
+#include "dawn/tests/MockCallback.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "mocks/ComputePipelineMock.h"
 #include "mocks/DawnMockTest.h"
@@ -43,7 +45,17 @@
 namespace dawn::native {
 namespace {
 
+using ::testing::_;
+using ::testing::HasSubstr;
+using ::testing::IsNull;
+using ::testing::MockCppCallback;
+using ::testing::NotNull;
 using ::testing::Test;
+
+using MockComputePipelineAsyncCallback =
+    MockCppCallback<void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, const char*)>;
+using MockRenderPipelineAsyncCallback =
+    MockCppCallback<void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline, const char*)>;
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}
@@ -55,7 +67,13 @@ static constexpr std::string_view kVertexShader = R"(
         }
     )";
 
-class CreatePipelineAsyncEventTests : public DawnMockTest {};
+static constexpr std::string_view kErrorMessage = "Initialization error";
+
+class CreatePipelineAsyncEventTests : public DawnMockTest {
+  protected:
+    MockComputePipelineAsyncCallback mockComputePipelineCb;
+    MockRenderPipelineAsyncCallback mockRenderPipelineCb;
+};
 
 // Verify CreateRenderPipelineAsync and the internal CreateRenderPipelineAsyncEvent behavior
 // on creating compute pipeline with validation error.
@@ -67,21 +85,16 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRende
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(InternalErrorType::Validation, "Initialization Error"))));
+            DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
-    wgpu::CreateRenderPipelineAsyncCallbackInfo callbackInfo = {};
-    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
-    callbackInfo.callback =
-        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
-           const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_ValidationError,
-                      status);
-        };
-    callbackInfo.userdata = nullptr;
+    EXPECT_CALL(mockRenderPipelineCb, Call(wgpu::CreatePipelineAsyncStatus::ValidationError,
+                                           IsNull(), HasSubstr(kErrorMessage)))
+        .Times(1);
 
-    device.CreateRenderPipelineAsync(&desc, callbackInfo);
+    device.CreateRenderPipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                     mockRenderPipelineCb.Callback());
     ProcessEvents();
 
     EXPECT_CALL(*renderPipelineMock.Get(), DestroyImpl).Times(1);
@@ -97,21 +110,16 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateRenderP
 
     ON_CALL(*renderPipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(dawn::native::InternalErrorType::Internal, "Initialization Error"))));
+            DAWN_MAKE_ERROR(InternalErrorType::Internal, std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
-    wgpu::CreateRenderPipelineAsyncCallbackInfo callbackInfo = {};
-    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
-    callbackInfo.callback =
-        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
-           const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_InternalError,
-                      status);
-        };
-    callbackInfo.userdata = nullptr;
+    EXPECT_CALL(mockRenderPipelineCb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, IsNull(),
+                                           HasSubstr(kErrorMessage)))
+        .Times(1);
 
-    device.CreateRenderPipelineAsync(&desc, callbackInfo);
+    device.CreateRenderPipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                     mockRenderPipelineCb.Callback());
     ProcessEvents();
 
     EXPECT_CALL(*renderPipelineMock.Get(), DestroyImpl).Times(1);
@@ -133,24 +141,13 @@ TEST_F(CreatePipelineAsyncEventTests, LongAsyncTaskFinishesBeforeDeviceIsDropped
     ON_CALL(*mDeviceMock.get(), CreateUninitializedRenderPipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(renderPipelineMock)));
 
-    bool done = false;
+    EXPECT_CALL(mockRenderPipelineCb, Call(_, _, _)).Times(1);
 
-    wgpu::CreateRenderPipelineAsyncCallbackInfo callbackInfo = {};
-    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
-    callbackInfo.callback = [](WGPUCreatePipelineAsyncStatus status,
-                               WGPURenderPipeline returnPipeline, const char* message,
-                               void* userdata) {
-        wgpu::RenderPipeline::Acquire(returnPipeline);
-
-        *static_cast<bool*>(userdata) = true;
-    };
-    callbackInfo.userdata = &done;
-
-    device.CreateRenderPipelineAsync(&desc, callbackInfo);
+    device.CreateRenderPipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                     mockRenderPipelineCb.Callback());
     ProcessEvents();
     // Dropping the device should force the async task to finish.
     DropDevice();
-    EXPECT_TRUE(done);
 }
 
 // Verify CreateComputePipelineAsync and the internal CreateComputePipelineAsyncEvent behavior
@@ -163,21 +160,16 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateCompu
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
         .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(InternalErrorType::Validation, "Initialization Error"))));
+            DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
-    wgpu::CreateComputePipelineAsyncCallbackInfo callbackInfo = {};
-    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
-    callbackInfo.callback =
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
-           const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_ValidationError,
-                      status);
-        };
-    callbackInfo.userdata = nullptr;
+    EXPECT_CALL(mockComputePipelineCb, Call(wgpu::CreatePipelineAsyncStatus::ValidationError,
+                                            IsNull(), HasSubstr(kErrorMessage)))
+        .Times(1);
 
-    device.CreateComputePipelineAsync(&desc, callbackInfo);
+    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                      mockComputePipelineCb.Callback());
     ProcessEvents();
 
     EXPECT_CALL(*computePipelineMock.Get(), DestroyImpl).Times(1);
@@ -192,22 +184,17 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateCompute
         ComputePipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
     ON_CALL(*computePipelineMock.Get(), InitializeImpl)
-        .WillByDefault(testing::Return(testing::ByMove(
-            DAWN_MAKE_ERROR(dawn::native::InternalErrorType::Internal, "Initialization Error"))));
+        .WillByDefault(testing::Return(testing::ByMove(DAWN_MAKE_ERROR(
+            dawn::native::InternalErrorType::Internal, std::string(kErrorMessage)))));
     ON_CALL(*mDeviceMock.get(), CreateUninitializedComputePipelineImpl)
         .WillByDefault(testing::Return(testing::ByMove(computePipelineMock)));
 
-    wgpu::CreateComputePipelineAsyncCallbackInfo callbackInfo = {};
-    callbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
-    callbackInfo.callback =
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
-           const char* message, void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_InternalError,
-                      status);
-        };
-    callbackInfo.userdata = nullptr;
+    EXPECT_CALL(mockComputePipelineCb, Call(wgpu::CreatePipelineAsyncStatus::InternalError,
+                                            IsNull(), HasSubstr(kErrorMessage)))
+        .Times(1);
 
-    device.CreateComputePipelineAsync(&desc, callbackInfo);
+    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                      mockComputePipelineCb.Callback());
     ProcessEvents();
 
     EXPECT_CALL(*computePipelineMock.Get(), DestroyImpl).Times(1);

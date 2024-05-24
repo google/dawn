@@ -1149,6 +1149,14 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "create compute pipeline async callback 2": {
+        "category": "callback function",
+        "args": [
+            {"name": "status", "type": "create pipeline async status"},
+            {"name": "pipeline", "type": "compute pipeline", "optional": true},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
+        ]
+    },
     "create compute pipeline async callback info": {
         "category": "structure",
         "extensible": "in",
@@ -1156,6 +1164,12 @@
             {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "create compute pipeline async callback"},
             {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "create compute pipeline async callback info 2": {
+        "category": "callback info",
+        "members": [
+            {"name": "callback", "type": "create compute pipeline async callback 2"}
         ]
     },
     "create pipeline async status": {
@@ -1180,6 +1194,14 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "create render pipeline async callback 2": {
+        "category": "callback function",
+        "args": [
+            {"name": "status", "type": "create pipeline async status"},
+            {"name": "pipeline", "type": "render pipeline", "optional": true},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
+        ]
+    },
     "create render pipeline async callback info": {
         "category": "structure",
         "extensible": "in",
@@ -1187,6 +1209,12 @@
             {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "create render pipeline async callback"},
             {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "create render pipeline async callback info 2": {
+        "category": "callback info",
+        "members": [
+            {"name": "callback", "type": "create render pipeline async callback 2"}
         ]
     },
     "cull mode": {
@@ -1266,6 +1294,16 @@
                 ]
             },
             {
+                "name": "create compute pipeline async 2",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
+                    {"name": "callback info", "type": "create compute pipeline async callback info 2"}
+                ]
+            },
+            {
                 "name": "create external texture",
                 "returns": "external texture",
                 "tags": ["dawn"],
@@ -1309,6 +1347,16 @@
                 "args": [
                     {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
                     {"name": "callback info", "type": "create render pipeline async callback info"}
+                ]
+            },
+            {
+                "name": "create render pipeline async 2",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
+                    {"name": "callback info", "type": "create render pipeline async callback info 2"}
                 ]
             },
             {

@@ -49,18 +49,18 @@
 namespace dawn::native {
 
 template <>
-const char*
-    CreatePipelineAsyncEvent<ComputePipelineBase,
-                             CreateComputePipelineAsyncCallbackInfo>::kDawnHistogramMetricsSuccess =
-        "CreateComputePipelineSuccess";
+const char* CreatePipelineAsyncEvent<
+    ComputePipelineBase,
+    WGPUCreateComputePipelineAsyncCallbackInfo2>::kDawnHistogramMetricsSuccess =
+    "CreateComputePipelineSuccess";
 template <>
 const char*
     CreatePipelineAsyncEvent<ComputePipelineBase,
-                             CreateComputePipelineAsyncCallbackInfo>::kDawnHistogramMetricsUS =
+                             WGPUCreateComputePipelineAsyncCallbackInfo2>::kDawnHistogramMetricsUS =
         "CreateComputePipelineUS";
 template <>
-void CreatePipelineAsyncEvent<ComputePipelineBase,
-                              CreateComputePipelineAsyncCallbackInfo>::AddOrGetCachedPipeline() {
+void CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyncCallbackInfo2>::
+    AddOrGetCachedPipeline() {
     DeviceBase* device = mPipeline->GetDevice();
     auto deviceLock(device->GetScopedLock());
     if (device->GetState() == DeviceBase::State::Alive) {
@@ -69,18 +69,18 @@ void CreatePipelineAsyncEvent<ComputePipelineBase,
 }
 
 template <>
-const char*
-    CreatePipelineAsyncEvent<RenderPipelineBase,
-                             CreateRenderPipelineAsyncCallbackInfo>::kDawnHistogramMetricsSuccess =
-        "CreateRenderPipelineSuccess";
+const char* CreatePipelineAsyncEvent<
+    RenderPipelineBase,
+    WGPUCreateRenderPipelineAsyncCallbackInfo2>::kDawnHistogramMetricsSuccess =
+    "CreateRenderPipelineSuccess";
 template <>
 const char*
     CreatePipelineAsyncEvent<RenderPipelineBase,
-                             CreateRenderPipelineAsyncCallbackInfo>::kDawnHistogramMetricsUS =
+                             WGPUCreateRenderPipelineAsyncCallbackInfo2>::kDawnHistogramMetricsUS =
         "CreateRenderPipelineUS";
 template <>
-void CreatePipelineAsyncEvent<RenderPipelineBase,
-                              CreateRenderPipelineAsyncCallbackInfo>::AddOrGetCachedPipeline() {
+void CreatePipelineAsyncEvent<RenderPipelineBase, WGPUCreateRenderPipelineAsyncCallbackInfo2>::
+    AddOrGetCachedPipeline() {
     DeviceBase* device = mPipeline->GetDevice();
     auto deviceLock(device->GetScopedLock());
     if (device->GetState() == DeviceBase::State::Alive) {
@@ -94,9 +94,10 @@ CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreateP
     const CreatePipelineAsyncCallbackInfo& callbackInfo,
     Ref<PipelineType> pipeline,
     Ref<SystemEvent> systemEvent)
-    : TrackedEvent(callbackInfo.mode, std::move(systemEvent)),
+    : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), std::move(systemEvent)),
       mCallback(callbackInfo.callback),
-      mUserdata(callbackInfo.userdata),
+      mUserdata1(callbackInfo.userdata1),
+      mUserdata2(callbackInfo.userdata2),
       mPipeline(std::move(pipeline)),
       mScopedUseShaderPrograms(mPipeline->UseShaderPrograms()) {}
 
@@ -105,9 +106,10 @@ CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreateP
     DeviceBase* device,
     const CreatePipelineAsyncCallbackInfo& callbackInfo,
     Ref<PipelineType> pipeline)
-    : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+    : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), TrackedEvent::Completed{}),
       mCallback(callbackInfo.callback),
-      mUserdata(callbackInfo.userdata),
+      mUserdata1(callbackInfo.userdata1),
+      mUserdata2(callbackInfo.userdata2),
       mPipeline(std::move(pipeline)) {}
 
 template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
@@ -116,9 +118,10 @@ CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreateP
     const CreatePipelineAsyncCallbackInfo& callbackInfo,
     std::unique_ptr<ErrorData> error,
     const char* label)
-    : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+    : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), TrackedEvent::Completed{}),
       mCallback(callbackInfo.callback),
-      mUserdata(callbackInfo.userdata),
+      mUserdata1(callbackInfo.userdata1),
+      mUserdata2(callbackInfo.userdata2),
       mPipeline(PipelineType::MakeError(device, label)),
       mError(std::move(error)) {}
 
@@ -176,10 +179,13 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::In
 template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Complete(
     EventCompletionType completionType) {
+    auto userdata1 = mUserdata1.ExtractAsDangling();
+    auto userdata2 = mUserdata2.ExtractAsDangling();
+
     if (completionType == EventCompletionType::Shutdown) {
         if (mCallback) {
             mCallback(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr, "Instance dropped",
-                      mUserdata.ExtractAsDangling());
+                      userdata1, userdata2);
         }
         return;
     }
@@ -194,7 +200,7 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
         }
         if (mCallback) {
             mCallback(WGPUCreatePipelineAsyncStatus_Success,
-                      ToAPI(ReturnToAPI(std::move(mPipeline))), "", mUserdata.ExtractAsDangling());
+                      ToAPI(ReturnToAPI(std::move(mPipeline))), "", userdata1, userdata2);
         }
         return;
     }
@@ -210,8 +216,7 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
                 break;
         }
         if (mCallback) {
-            mCallback(status, nullptr, mError->GetFormattedMessage().c_str(),
-                      mUserdata.ExtractAsDangling());
+            mCallback(status, nullptr, mError->GetFormattedMessage().c_str(), userdata1, userdata2);
         }
         return;
     }
@@ -219,12 +224,13 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
     AddOrGetCachedPipeline();
     if (mCallback) {
         mCallback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(mPipeline))),
-                  "", mUserdata.ExtractAsDangling());
+                  "", userdata1, userdata2);
     }
 }
 
 template class CreatePipelineAsyncEvent<ComputePipelineBase,
-                                        CreateComputePipelineAsyncCallbackInfo>;
-template class CreatePipelineAsyncEvent<RenderPipelineBase, CreateRenderPipelineAsyncCallbackInfo>;
+                                        WGPUCreateComputePipelineAsyncCallbackInfo2>;
+template class CreatePipelineAsyncEvent<RenderPipelineBase,
+                                        WGPUCreateRenderPipelineAsyncCallbackInfo2>;
 
 }  // namespace dawn::native

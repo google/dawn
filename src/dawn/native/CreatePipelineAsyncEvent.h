@@ -91,7 +91,8 @@ class CreatePipelineAsyncEvent final : public EventManager::TrackedEvent {
     void InitializeImpl(bool isAsync);
 
     CallbackType mCallback;
-    raw_ptr<void> mUserdata;
+    raw_ptr<void> mUserdata1;
+    raw_ptr<void> mUserdata2;
     // For some errors (e.g. device lost) we still need to resolve and return a pipeline with
     // Pipeline::MakeError. So we need to hold the pipeline and the error separately.
     Ref<PipelineType> mPipeline;
@@ -101,9 +102,9 @@ class CreatePipelineAsyncEvent final : public EventManager::TrackedEvent {
 };
 
 using CreateComputePipelineAsyncEvent =
-    CreatePipelineAsyncEvent<ComputePipelineBase, CreateComputePipelineAsyncCallbackInfo>;
+    CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyncCallbackInfo2>;
 using CreateRenderPipelineAsyncEvent =
-    CreatePipelineAsyncEvent<RenderPipelineBase, CreateRenderPipelineAsyncCallbackInfo>;
+    CreatePipelineAsyncEvent<RenderPipelineBase, WGPUCreateRenderPipelineAsyncCallbackInfo2>;
 
 }  // namespace dawn::native
 

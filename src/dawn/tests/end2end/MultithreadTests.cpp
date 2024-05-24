@@ -307,18 +307,15 @@ TEST_P(MultithreadTests, CreateComputePipelineAsyncInParallel) {
             wgpu::ComputePipeline computePipeline;
             std::atomic<bool> isCompleted{false};
         } task;
-        device.CreateComputePipelineAsync(
-            &csDesc,
-            [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
-               const char* message, void* userdata) {
-                EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success,
-                          status);
+        device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
+                                          [&task](wgpu::CreatePipelineAsyncStatus status,
+                                                  wgpu::ComputePipeline pipeline, const char*) {
+                                              EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
+                                                        status);
 
-                auto task = static_cast<Task*>(userdata);
-                task->computePipeline = wgpu::ComputePipeline::Acquire(returnPipeline);
-                task->isCompleted = true;
-            },
-            &task);
+                                              task.computePipeline = std::move(pipeline);
+                                              task.isCompleted = true;
+                                          });
 
         while (!task.isCompleted.load()) {
             WaitABit();
@@ -477,17 +474,14 @@ TEST_P(MultithreadTests, CreateRenderPipelineAsyncInParallel) {
             std::atomic<bool> isCompleted{false};
         } task;
         device.CreateRenderPipelineAsync(
-            &renderPipelineDescriptor,
-            [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
-               const char* message, void* userdata) {
-                EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success,
-                          status);
+            &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
+            [&task](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
+                    const char*) {
+                EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
 
-                auto* task = static_cast<Task*>(userdata);
-                task->renderPipeline = wgpu::RenderPipeline::Acquire(returnPipeline);
-                task->isCompleted = true;
-            },
-            &task);
+                task.renderPipeline = std::move(pipeline);
+                task.isCompleted = true;
+            });
 
         while (!task.isCompleted) {
             WaitABit();

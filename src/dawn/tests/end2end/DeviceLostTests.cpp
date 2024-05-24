@@ -457,20 +457,14 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
     wgpu::ComputePipelineDescriptor descriptor;
     descriptor.compute.module = csModule;
 
-    auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
-                       const char* message, void* userdata) {
-        EXPECT_EQ(WGPUCreatePipelineAsyncStatus_Success, status);
-        EXPECT_NE(returnPipeline, nullptr);
-        wgpu::ComputePipeline::Acquire(returnPipeline);
-    };
+    device.CreateComputePipelineAsync(
+        &descriptor, wgpu::CallbackMode::AllowProcessEvents,
+        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, const char*) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+        });
 
-    device.CreateComputePipelineAsync(&descriptor, callback, nullptr);
     LoseDeviceForTesting();
-    // Need to call ProcessEvents, otherwise it will be an instance drop as LoseDeviceForTesting
-    // is the last statement of the test body.
-    // TODO(dawn:2353): Update to use WGPUCreateComputePipelineAsyncCallbackInfo version of
-    // CreateComputePipelineAsync and then we don't need to call ProcessEvents explicitly
-    GetInstance().ProcessEvents();
 }
 
 // This is a regression test for crbug.com/1212385 where Dawn didn't clean up all

@@ -254,11 +254,17 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     Future APICreateComputePipelineAsyncF(
         const ComputePipelineDescriptor* descriptor,
         const CreateComputePipelineAsyncCallbackInfo& callbackInfo);
+    Future APICreateComputePipelineAsync2(
+        const ComputePipelineDescriptor* descriptor,
+        const WGPUCreateComputePipelineAsyncCallbackInfo2& callbackInfo);
     void APICreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
                                       WGPUCreateRenderPipelineAsyncCallback callback,
                                       void* userdata);
     Future APICreateRenderPipelineAsyncF(const RenderPipelineDescriptor* descriptor,
                                          const CreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+    Future APICreateRenderPipelineAsync2(
+        const RenderPipelineDescriptor* descriptor,
+        const WGPUCreateRenderPipelineAsyncCallbackInfo2& callbackInfo);
     RenderBundleEncoder* APICreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor);
     RenderPipelineBase* APICreateRenderPipeline(const RenderPipelineDescriptor* descriptor);

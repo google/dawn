@@ -69,12 +69,18 @@ class Device final : public ObjectWithEventsBase {
     WGPUFuture CreateComputePipelineAsyncF(
         WGPUComputePipelineDescriptor const* descriptor,
         const WGPUCreateComputePipelineAsyncCallbackInfo& callbackInfo);
+    WGPUFuture CreateComputePipelineAsync2(
+        WGPUComputePipelineDescriptor const* descriptor,
+        const WGPUCreateComputePipelineAsyncCallbackInfo2& callbackInfo);
     void CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
                                    WGPUCreateRenderPipelineAsyncCallback callback,
                                    void* userdata);
     WGPUFuture CreateRenderPipelineAsyncF(
         WGPURenderPipelineDescriptor const* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+    WGPUFuture CreateRenderPipelineAsync2(
+        WGPURenderPipelineDescriptor const* descriptor,
+        const WGPUCreateRenderPipelineAsyncCallbackInfo2& callbackInfo);
 
     void HandleError(WGPUErrorType errorType, const char* message);
     void HandleLogging(WGPULoggingType loggingType, const char* message);

@@ -354,19 +354,13 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
 
     device.CreateComputePipelineAsync(
         &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
-           void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus_Success, status);
-            EXPECT_NE(cPipeline, nullptr);
-            wgpu::ComputePipeline::Acquire(cPipeline);
-        },
-        nullptr);
+        UsesWire() ? wgpu::CallbackMode::AllowSpontaneous : wgpu::CallbackMode::AllowProcessEvents,
+        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, const char*) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+        });
 
     device = nullptr;
-    // Need to call ProcessEvents, otherwise it will be an instance drop.
-    // TODO(dawn:2353): Update to use WGPUCreateComputePipelineAsyncCallbackInfo version of
-    // CreateComputePipelineAsync and then we don't need to call ProcessEvents explicitly.
-    instance.ProcessEvents();
 }
 
 // Test that the device can be dropped inside a createPipelineAsync callback
@@ -376,30 +370,16 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
     @compute @workgroup_size(1) fn main() {
     })");
 
-    struct Userdata {
-        wgpu::Device device;
-        bool done;
-    };
-    // Call CreateComputePipelineAsync and drop the device inside the callback.
-    Userdata data = Userdata{std::move(device), false};
-    data.device.CreateComputePipelineAsync(
-        &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
-           void* userdata) {
-            wgpu::ComputePipeline::Acquire(cPipeline);
-            EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_Success);
+    bool done = false;
+    device.CreateComputePipelineAsync(
+        &desc, wgpu::CallbackMode::AllowProcessEvents,
+        [this, &done](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline, const char*) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            device = nullptr;
+            done = true;
+        });
 
-            static_cast<Userdata*>(userdata)->device = nullptr;
-            static_cast<Userdata*>(userdata)->done = true;
-        },
-        &data);
-
-    while (!data.done) {
-        // WaitABit no longer can call tick since we've moved the device from the fixture into the
-        // userdata.
-        if (data.device) {
-            data.device.Tick();
-        }
+    while (!done) {
         WaitABit();
     }
 }
@@ -416,17 +396,14 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
 
     bool done = false;
-    device.CreateComputePipelineAsync(
-        &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char*,
-           void* userdata) {
-            wgpu::ComputePipeline::Acquire(cPipeline);
-            EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_Success);
-            EXPECT_NE(cPipeline, nullptr);
-
-            *static_cast<bool*>(userdata) = true;
-        },
-        &done);
+    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                      [&done](wgpu::CreatePipelineAsyncStatus status,
+                                              wgpu::ComputePipeline pipeline, const char*) {
+                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
+                                                    status);
+                                          EXPECT_NE(pipeline, nullptr);
+                                          done = true;
+                                      });
     device = nullptr;
 
     while (!done) {
@@ -445,32 +422,18 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
     // Create a pipeline ahead of time so it's in the cache.
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
 
-    struct Userdata {
-        wgpu::Device device;
-        bool done;
-    };
-    // Call CreateComputePipelineAsync and drop the device inside the callback.
-    Userdata data = Userdata{std::move(device), false};
-    data.device.CreateComputePipelineAsync(
-        &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
-           void* userdata) {
-            wgpu::ComputePipeline::Acquire(cPipeline);
-            // Success because it hits the frontend cache immediately.
-            EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_Success);
-            EXPECT_NE(cPipeline, nullptr);
+    bool done = false;
+    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                      [this, &done](wgpu::CreatePipelineAsyncStatus status,
+                                                    wgpu::ComputePipeline pipeline, const char*) {
+                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
+                                                    status);
+                                          EXPECT_NE(pipeline, nullptr);
+                                          device = nullptr;
+                                          done = true;
+                                      });
 
-            static_cast<Userdata*>(userdata)->device = nullptr;
-            static_cast<Userdata*>(userdata)->done = true;
-        },
-        &data);
-
-    while (!data.done) {
-        // WaitABit no longer can call tick since we've moved the device from the fixture into the
-        // userdata.
-        if (data.device) {
-            data.device.Tick();
-        }
+    while (!done) {
         WaitABit();
     }
 }
@@ -485,22 +448,16 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
 
     device.CreateComputePipelineAsync(
         &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
-           void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus_Success, status);
-            EXPECT_NE(cPipeline, nullptr);
-            wgpu::ComputePipeline::Acquire(cPipeline);
-        },
-        nullptr);
+        UsesWire() ? wgpu::CallbackMode::AllowSpontaneous : wgpu::CallbackMode::AllowProcessEvents,
+        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, const char*) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+        });
 
     // Create the same pipeline synchronously which will get added to the cache.
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
 
     device = nullptr;
-    // Need to call ProcessEvents, otherwise it will be an instance drop.
-    // TODO(dawn:2353): Update to use WGPUCreateComputePipelineAsyncCallbackInfo version of
-    // CreateComputePipelineAsync and then we don't need to call ProcessEvents explicitly
-    instance.ProcessEvents();
 }
 
 // Test that the device can be dropped inside a createPipelineAsync callback which will race
@@ -511,34 +468,21 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
     @compute @workgroup_size(1) fn main() {
     })");
 
-    struct Userdata {
-        wgpu::Device device;
-        bool done;
-    };
-    // Call CreateComputePipelineAsync and drop the device inside the callback.
-    Userdata data = Userdata{std::move(device), false};
-    data.device.CreateComputePipelineAsync(
-        &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
-           void* userdata) {
-            EXPECT_EQ(WGPUCreatePipelineAsyncStatus_Success, status);
-            EXPECT_NE(cPipeline, nullptr);
-            wgpu::ComputePipeline::Acquire(cPipeline);
-
-            static_cast<Userdata*>(userdata)->device = nullptr;
-            static_cast<Userdata*>(userdata)->done = true;
-        },
-        &data);
+    bool done = false;
+    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                      [this, &done](wgpu::CreatePipelineAsyncStatus status,
+                                                    wgpu::ComputePipeline pipeline, const char*) {
+                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
+                                                    status);
+                                          EXPECT_NE(pipeline, nullptr);
+                                          device = nullptr;
+                                          done = true;
+                                      });
 
     // Create the same pipeline synchronously which will get added to the cache.
-    wgpu::ComputePipeline p = data.device.CreateComputePipeline(&desc);
+    wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
 
-    while (!data.done) {
-        // WaitABit no longer can call tick since we've moved the device from the fixture into the
-        // userdata.
-        if (data.device) {
-            data.device.Tick();
-        }
+    while (!done) {
         WaitABit();
     }
 }

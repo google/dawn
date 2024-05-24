@@ -106,9 +106,11 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
     userdata->future = future;
     userdata->pipelineObjectID = pipeline.id;
 
-    mProcs.deviceCreateComputePipelineAsync(
-        device->handle, descriptor, ForwardToServer<&Server::OnCreateComputePipelineAsyncCallback>,
-        userdata.release());
+    mProcs.deviceCreateComputePipelineAsync2(
+        device->handle, descriptor,
+        {nullptr, WGPUCallbackMode_AllowProcessEvents,
+         ForwardToServer2<&Server::OnCreateComputePipelineAsyncCallback>, userdata.release(),
+         nullptr});
     return WireResult::Success;
 }
 
@@ -146,9 +148,11 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
     userdata->future = future;
     userdata->pipelineObjectID = pipeline.id;
 
-    mProcs.deviceCreateRenderPipelineAsync(
-        device->handle, descriptor, ForwardToServer<&Server::OnCreateRenderPipelineAsyncCallback>,
-        userdata.release());
+    mProcs.deviceCreateRenderPipelineAsync2(
+        device->handle, descriptor,
+        {nullptr, WGPUCallbackMode_AllowProcessEvents,
+         ForwardToServer2<&Server::OnCreateRenderPipelineAsyncCallback>, userdata.release(),
+         nullptr});
     return WireResult::Success;
 }
 
