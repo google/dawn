@@ -35,9 +35,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::FunctionParam);
 
 namespace tint::core::ir {
 
-FunctionParam::FunctionParam(const core::type::Type* ty) : type_(ty) {
-    TINT_ASSERT(ty != nullptr);
-}
+FunctionParam::FunctionParam(const core::type::Type* ty) : type_(ty) {}
 
 FunctionParam::~FunctionParam() = default;
 

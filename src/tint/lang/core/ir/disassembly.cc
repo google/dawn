@@ -320,7 +320,7 @@ void Disassembly::EmitFunction(const Function* func) {
             out_ << ", ";
         }
         SourceMarker sm(this);
-        out_ << NameOf(p) << ":" << StyleType(p->Type()->FriendlyName());
+        out_ << NameOf(p) << ":" << StyleType(p->Type() ? p->Type()->FriendlyName() : "undef");
         sm.Store(p);
 
         EmitParamAttributes(p);

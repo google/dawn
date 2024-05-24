@@ -73,6 +73,10 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @returns the type of the var
     const core::type::Type* Type() const override { return type_; }
 
+    /// Sets the type of the parameter to @p type
+    /// @param type the new type of the parameter
+    void SetType(const core::type::Type* type) { type_ = type; }
+
     /// @copydoc Value::Clone()
     FunctionParam* Clone(CloneContext& ctx) override;
 

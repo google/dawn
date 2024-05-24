@@ -769,6 +769,11 @@ void Validator::CheckFunction(const Function* func) {
             return;
         }
 
+        if (!param->Type()) {
+            AddError(param) << "function parameter has nullptr type";
+            return;
+        }
+
         // References not allowed on function signatures even with Capability::kAllowRefTypes
         if (HoldsType<type::Reference>(param->Type())) {
             AddError(param) << "references are not permitted as parameter types";

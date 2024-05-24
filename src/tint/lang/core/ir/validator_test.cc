@@ -239,6 +239,28 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_ParameterWithNullType) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", nullptr);
+    f->SetParams({p});
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:17 error: function parameter has nullptr type
+%my_func = func(%my_param:undef):void {
+                ^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func(%my_param:undef):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
     auto* f = b.Function("f", ty.void_());
     auto* g = b.Function("g", ty.void_());
