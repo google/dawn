@@ -41,6 +41,7 @@ cc_library(
   srcs = [
     "composite.cc",
     "eval.cc",
+    "invalid.cc",
     "manager.cc",
     "node.cc",
     "scalar.cc",
@@ -51,6 +52,7 @@ cc_library(
     "clone_context.h",
     "composite.h",
     "eval.h",
+    "invalid.h",
     "manager.h",
     "node.h",
     "scalar.h",
@@ -93,6 +95,7 @@ cc_library(
     "eval_test.h",
     "eval_unary_op_test.cc",
     "helper_test.h",
+    "invalid_test.cc",
     "manager_test.cc",
     "scalar_test.cc",
     "splat_test.cc",

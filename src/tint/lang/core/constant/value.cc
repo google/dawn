@@ -29,6 +29,7 @@
 
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/invalid.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/vector.h"
@@ -106,13 +107,8 @@ bool Value::Equal(const constant::Value* b) const {
             }
             return false;
         },
-        [&](Default) {
-            auto va = InternalValue();
-            auto vb = b->InternalValue();
-            TINT_ASSERT(!std::holds_alternative<std::monostate>(va));
-            TINT_ASSERT(!std::holds_alternative<std::monostate>(vb));
-            return va == vb;
-        });
+        [&](const core::type::Invalid*) { return true; },
+        [&](Default) { return InternalValue() == b->InternalValue(); });
 }
 
 }  // namespace tint::core::constant

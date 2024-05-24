@@ -30,6 +30,7 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/constant/invalid.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/manager.h"
@@ -143,6 +144,10 @@ class Manager final {
     /// @param type the constant type
     /// @returns a constant zero-value for the type
     const Value* Zero(const core::type::Type* type);
+
+    /// Constructs an invalid constant
+    /// @returns an invalid constant
+    const constant::Invalid* Invalid();
 
     /// The type manager
     core::type::Manager types;

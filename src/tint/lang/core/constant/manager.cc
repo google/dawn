@@ -28,6 +28,7 @@
 #include "src/tint/lang/core/constant/manager.h"
 
 #include "src/tint/lang/core/constant/composite.h"
+#include "src/tint/lang/core/constant/invalid.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/type/abstract_float.h"
@@ -162,7 +163,12 @@ const Value* Manager::Zero(const core::type::Type* type) {
         [&](const core::type::F32*) { return Get(f32(0)); },               //
         [&](const core::type::F16*) { return Get(f16(0)); },               //
         [&](const core::type::Bool*) { return Get(false); },               //
+        [&](const core::type::Invalid*) { return Invalid(); },             //
         TINT_ICE_ON_NO_MATCH);
+}
+
+const constant::Invalid* Manager::Invalid() {
+    return values_.Get<constant::Invalid>(types.invalid());
 }
 
 }  // namespace tint::core::constant

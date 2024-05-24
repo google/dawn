@@ -361,6 +361,10 @@ class Builder {
         return Constant(ConstantValue(v));
     }
 
+    /// Creates a new invalid ir::Constant
+    /// @returns the new constant
+    ir::Constant* InvalidConstant() { return Constant(ir.constant_values.Invalid()); }
+
     /// Retrieves the inner constant from an ir::Constant
     /// @param constant the ir constant
     /// @returns the core::constant::Value inside the constant
