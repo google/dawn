@@ -56,6 +56,9 @@ class DepthTexture final : public Castable<DepthTexture, Texture> {
     /// @param ctx the clone context
     /// @returns a clone of this type
     DepthTexture* Clone(CloneContext& ctx) const override;
+
+    /// @returns true iff @p dim is a valid TextureDimension for a DepthTexture
+    static bool IsValidDimension(TextureDimension dim);
 };
 
 }  // namespace tint::core::type

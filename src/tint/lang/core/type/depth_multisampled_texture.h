@@ -56,6 +56,9 @@ class DepthMultisampledTexture final : public Castable<DepthMultisampledTexture,
     /// @param ctx the clone context
     /// @returns a clone of this type
     DepthMultisampledTexture* Clone(CloneContext& ctx) const override;
+
+    /// @returns true if @p dim is a valid TextureDimension for a DepthMultisampledTexture
+    static bool IsValidDimension(TextureDimension dim);
 };
 
 }  // namespace tint::core::type

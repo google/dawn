@@ -37,17 +37,10 @@
 TINT_INSTANTIATE_TYPEINFO(tint::core::type::DepthMultisampledTexture);
 
 namespace tint::core::type {
-namespace {
-
-bool IsValidDepthDimension(TextureDimension dim) {
-    return dim == TextureDimension::k2d;
-}
-
-}  // namespace
 
 DepthMultisampledTexture::DepthMultisampledTexture(TextureDimension dim)
     : Base(Hash(TypeCode::Of<DepthMultisampledTexture>().bits, dim), dim) {
-    TINT_ASSERT(IsValidDepthDimension(dim));
+    TINT_ASSERT(IsValidDimension(dim));
 }
 
 DepthMultisampledTexture::~DepthMultisampledTexture() = default;
@@ -69,4 +62,7 @@ DepthMultisampledTexture* DepthMultisampledTexture::Clone(CloneContext& ctx) con
     return ctx.dst.mgr->Get<DepthMultisampledTexture>(dim());
 }
 
+bool DepthMultisampledTexture::IsValidDimension(TextureDimension dim) {
+    return dim == TextureDimension::k2d;
+}
 }  // namespace tint::core::type

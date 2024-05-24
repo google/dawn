@@ -37,18 +37,10 @@
 TINT_INSTANTIATE_TYPEINFO(tint::core::type::DepthTexture);
 
 namespace tint::core::type {
-namespace {
-
-bool IsValidDepthDimension(TextureDimension dim) {
-    return dim == TextureDimension::k2d || dim == TextureDimension::k2dArray ||
-           dim == TextureDimension::kCube || dim == TextureDimension::kCubeArray;
-}
-
-}  // namespace
 
 DepthTexture::DepthTexture(TextureDimension dim)
     : Base(Hash(TypeCode::Of<DepthTexture>().bits, dim), dim) {
-    TINT_ASSERT(IsValidDepthDimension(dim));
+    TINT_ASSERT(IsValidDimension(dim));
 }
 
 DepthTexture::~DepthTexture() = default;
@@ -68,6 +60,11 @@ std::string DepthTexture::FriendlyName() const {
 
 DepthTexture* DepthTexture::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<DepthTexture>(dim());
+}
+
+bool DepthTexture::IsValidDimension(TextureDimension dim) {
+    return dim == TextureDimension::k2d || dim == TextureDimension::k2dArray ||
+           dim == TextureDimension::kCube || dim == TextureDimension::kCubeArray;
 }
 
 }  // namespace tint::core::type
