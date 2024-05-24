@@ -43,7 +43,7 @@
 
 #include "{{c_header}}"
 #include "{{api}}/{{api}}_cpp_chained_struct.h"
-#include "{{api}}/{{api}}_enum_class_bitmasks.h"
+#include "{{api}}/{{api}}_enum_class_bitmasks.h"  // IWYU pragma: export
 
 namespace {{metadata.namespace}} {
 
