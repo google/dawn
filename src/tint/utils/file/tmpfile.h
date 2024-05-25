@@ -50,7 +50,7 @@ class TmpFile {
     ~TmpFile();
 
     /// @return true if the temporary file was successfully created.
-    operator bool() { return !path_.empty(); }
+    explicit operator bool() { return !path_.empty(); }
 
     /// @return the path to the temporary file
     std::string Path() const { return path_; }

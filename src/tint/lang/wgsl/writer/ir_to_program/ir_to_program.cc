@@ -1069,9 +1069,7 @@ class State {
     /// name.
     void Bind(const core::ir::Value* value, Symbol name) {
         TINT_ASSERT(value);
-
-        bool added = bindings_.Add(value, VariableValue{name});
-        if (TINT_UNLIKELY(!added)) {
+        if (TINT_UNLIKELY(!bindings_.Add(value, VariableValue{name}))) {
             TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
         }
     }

@@ -103,7 +103,7 @@ struct TypedExpression {
     TypedExpression& operator=(const TypedExpression&);
 
     /// @returns true if both type and expr are not nullptr
-    operator bool() const { return type && expr; }
+    explicit operator bool() const { return type && expr; }
 
     /// The type
     const Type* type = nullptr;

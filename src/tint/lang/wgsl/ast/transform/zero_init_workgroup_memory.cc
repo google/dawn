@@ -119,7 +119,7 @@ struct ZeroInitWorkgroupMemory::State {
         ArrayIndices array_indices;
 
         /// @returns true if the expr is not null (null usually indicates a failure)
-        operator bool() const { return expr != nullptr; }
+        explicit operator bool() const { return expr != nullptr; }
     };
 
     /// Statement holds information about a statement that will zero workgroup

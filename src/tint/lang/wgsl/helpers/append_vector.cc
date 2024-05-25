@@ -45,7 +45,7 @@ namespace {
 struct VectorConstructorInfo {
     const sem::Call* call = nullptr;
     const sem::ValueConstructor* ctor = nullptr;
-    operator bool() const { return call != nullptr; }
+    explicit operator bool() const { return call != nullptr; }
 };
 VectorConstructorInfo AsVectorConstructor(const sem::ValueExpression* expr) {
     if (auto* call = expr->As<sem::Call>()) {

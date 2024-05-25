@@ -90,7 +90,7 @@ struct GetResult {
     T* value = nullptr;
 
     /// @returns `true` if #value is not null.
-    operator bool() const { return value; }
+    explicit operator bool() const { return value; }
 
     /// @returns the dereferenced value, which must not be null.
     T& operator*() const { return *value; }
@@ -129,7 +129,7 @@ struct AddResult {
     bool added = false;
 
     /// @returns #added
-    operator bool() const { return added; }
+    explicit operator bool() const { return added; }
 };
 
 /// An unordered hashmap, with a fixed-size capacity that avoids heap allocations.

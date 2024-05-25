@@ -75,7 +75,7 @@ class File {
     operator int() { return handle_; }
 
     /// @returns true if the file is not closed
-    operator bool() { return handle_ != kClosed; }
+    explicit operator bool() { return handle_ != kClosed; }
 
   private:
     File(const File&) = delete;
@@ -103,7 +103,7 @@ class Pipe {
     }
 
     /// @returns true if the pipe has an open read or write file
-    operator bool() { return read || write; }
+    explicit operator bool() { return read || write; }
 
     /// The reader end of the pipe
     File read;

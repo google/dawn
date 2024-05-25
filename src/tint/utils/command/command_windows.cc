@@ -73,7 +73,7 @@ class Handle {
     operator HANDLE() { return handle_; }
 
     /// @returns true if the handle is not invalid
-    operator bool() { return handle_ != nullptr; }
+    explicit operator bool() { return handle_ != nullptr; }
 
   private:
     Handle(const Handle&) = delete;
@@ -106,7 +106,7 @@ class Pipe {
     }
 
     /// @returns true if the pipe has an open read or write file
-    operator bool() { return read || write; }
+    explicit operator bool() { return read || write; }
 
     /// The reader end of the pipe
     Handle read;

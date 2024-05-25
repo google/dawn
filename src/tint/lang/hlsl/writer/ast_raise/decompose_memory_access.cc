@@ -321,10 +321,10 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ast::Builder* builder,
 
 /// BufferAccess describes a single storage or uniform buffer access
 struct BufferAccess {
-    sem::GlobalVariable const* var = nullptr;  // Storage or uniform buffer variable
-    Offset const* offset = nullptr;            // The byte offset on var
-    core::type::Type const* type = nullptr;    // The type of the access
-    operator bool() const { return var; }      // Returns true if valid
+    sem::GlobalVariable const* var = nullptr;       // Storage or uniform buffer variable
+    Offset const* offset = nullptr;                 // The byte offset on var
+    core::type::Type const* type = nullptr;         // The type of the access
+    explicit operator bool() const { return var; }  // Returns true if valid
 };
 
 /// Store describes a single storage or uniform buffer write

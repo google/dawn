@@ -67,7 +67,7 @@ class GenerationID {
     uint32_t Value() const { return val; }
 
     /// @returns true if this GenerationID is valid
-    operator bool() const { return val != 0; }
+    explicit operator bool() const { return val != 0; }
 
   private:
     explicit GenerationID(uint32_t);

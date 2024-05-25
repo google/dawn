@@ -421,7 +421,7 @@ TEST(Hashmap, Soak) {
         switch (rnd() % 7) {
             case 0: {  // Add
                 auto expected = reference.emplace(key, value).second;
-                EXPECT_EQ(map.Add(key, value), expected) << "i:" << i;
+                EXPECT_EQ(map.Add(key, value).added, expected) << "i:" << i;
                 EXPECT_EQ(map.Get(key), value) << "i:" << i;
                 EXPECT_TRUE(map.Contains(key)) << "i:" << i;
                 break;
