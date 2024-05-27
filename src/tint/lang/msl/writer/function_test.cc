@@ -26,23 +26,23 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/type/sampled_texture.h"
-#include "src/tint/lang/msl/writer/printer/helper_test.h"
+#include "src/tint/lang/msl/writer/helper_test.h"
 
 namespace tint::msl::writer {
 namespace {
 
-TEST_F(MslPrinterTest, Function_Empty) {
+TEST_F(MslWriterTest, Function_Empty) {
     auto* func = b.Function("foo", ty.void_());
     func->Block()->Append(b.Return(func));
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EntryPointParameterBufferBindingPoint) {
+TEST_F(MslWriterTest, EntryPointParameterBufferBindingPoint) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* storage = b.FunctionParam("storage", ty.ptr(core::AddressSpace::kStorage, ty.i32()));
     auto* uniform = b.FunctionParam("uniform", ty.ptr(core::AddressSpace::kUniform, ty.i32()));
@@ -51,14 +51,14 @@ TEST_F(MslPrinterTest, EntryPointParameterBufferBindingPoint) {
     func->SetParams({storage, uniform});
     func->Block()->Append(b.Return(func));
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 fragment void foo(device int* storage [[buffer(1)]], const constant int* uniform [[buffer(2)]]) {
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EntryPointParameterHandleBindingPoint) {
+TEST_F(MslWriterTest, EntryPointParameterHandleBindingPoint) {
     auto* t = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* texture = b.FunctionParam("texture", t);
@@ -68,8 +68,8 @@ TEST_F(MslPrinterTest, EntryPointParameterHandleBindingPoint) {
     func->SetParams({texture, sampler});
     func->Block()->Append(b.Return(func));
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 fragment void foo(texture2d<float, access::sample> texture [[texture(1)]], sampler sampler [[sampler(2)]]) {
 }
 )");

@@ -118,8 +118,8 @@ cc_binary(
     ":tint_build_msl_writer": [
       "//src/tint/lang/msl/writer/ast_printer:test",
       "//src/tint/lang/msl/writer/common:test",
-      "//src/tint/lang/msl/writer/printer:test",
       "//src/tint/lang/msl/writer/raise:test",
+      "//src/tint/lang/msl/writer:test",
     ],
     "//conditions:default": [],
   }) + select({

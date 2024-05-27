@@ -28,7 +28,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
-#include "src/tint/lang/msl/writer/printer/helper_test.h"
+#include "src/tint/lang/msl/writer/helper_test.h"
 #include "src/tint/utils/text/string.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -37,7 +37,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::msl::writer {
 namespace {
 
-TEST_F(MslPrinterTest, Constant_Bool_True) {
+TEST_F(MslWriterTest, Constant_Bool_True) {
     auto* c = b.Constant(true);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -45,15 +45,15 @@ TEST_F(MslPrinterTest, Constant_Bool_True) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   bool const a = true;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Bool_False) {
+TEST_F(MslWriterTest, Constant_Bool_False) {
     auto* c = b.Constant(false);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -61,15 +61,15 @@ TEST_F(MslPrinterTest, Constant_Bool_False) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   bool const a = false;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_i32) {
+TEST_F(MslWriterTest, Constant_i32) {
     auto* c = b.Constant(-12345_i);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -77,15 +77,15 @@ TEST_F(MslPrinterTest, Constant_i32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   int const a = -12345;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_u32) {
+TEST_F(MslWriterTest, Constant_u32) {
     auto* c = b.Constant(12345_u);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -93,15 +93,15 @@ TEST_F(MslPrinterTest, Constant_u32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   uint const a = 12345u;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_F32) {
+TEST_F(MslWriterTest, Constant_F32) {
     auto* c = b.Constant(f32((1 << 30) - 4));
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -109,15 +109,15 @@ TEST_F(MslPrinterTest, Constant_F32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float const a = 1073741824.0f;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_F16) {
+TEST_F(MslWriterTest, Constant_F16) {
     auto* c = b.Constant(f16((1 << 15) - 8));
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -125,15 +125,15 @@ TEST_F(MslPrinterTest, Constant_F16) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   half const a = 32752.0h;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Vector_Splat) {
+TEST_F(MslWriterTest, Constant_Vector_Splat) {
     auto* c = b.Splat<vec3<f32>>(1.5_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -141,15 +141,15 @@ TEST_F(MslPrinterTest, Constant_Vector_Splat) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float3 const a = float3(1.5f);
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Vector_Composite) {
+TEST_F(MslWriterTest, Constant_Vector_Composite) {
     auto* c = b.Composite<vec3<f32>>(1.5_f, 1.0_f, 1.5_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -157,15 +157,15 @@ TEST_F(MslPrinterTest, Constant_Vector_Composite) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float3 const a = float3(1.5f, 1.0f, 1.5f);
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Vector_Composite_AnyZero) {
+TEST_F(MslWriterTest, Constant_Vector_Composite_AnyZero) {
     auto* c = b.Composite<vec3<f32>>(1.0_f, 0.0_f, 1.5_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -173,15 +173,15 @@ TEST_F(MslPrinterTest, Constant_Vector_Composite_AnyZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float3 const a = float3(1.0f, 0.0f, 1.5f);
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Vector_Composite_AllZero) {
+TEST_F(MslWriterTest, Constant_Vector_Composite_AllZero) {
     auto* c = b.Composite<vec3<f32>>(0.0_f, 0.0_f, 0.0_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -189,15 +189,15 @@ TEST_F(MslPrinterTest, Constant_Vector_Composite_AllZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float3 const a = float3(0.0f);
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Matrix_Splat) {
+TEST_F(MslWriterTest, Constant_Matrix_Splat) {
     auto* c = b.Splat<mat3x2<f32>>(b.Splat<vec2<f32>>(1.5_f));
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -205,15 +205,15 @@ TEST_F(MslPrinterTest, Constant_Matrix_Splat) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float3x2 const a = float3x2(float2(1.5f), float2(1.5f), float2(1.5f));
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Matrix_Composite) {
+TEST_F(MslWriterTest, Constant_Matrix_Composite) {
     auto* c = b.Composite<mat3x2<f32>>(        //
         b.Composite<vec2<f32>>(1.5_f, 1.0_f),  //
         b.Composite<vec2<f32>>(1.5_f, 2.0_f),  //
@@ -224,15 +224,15 @@ TEST_F(MslPrinterTest, Constant_Matrix_Composite) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float3x2 const a = float3x2(float2(1.5f, 1.0f), float2(1.5f, 2.0f), float2(2.5f, 3.5f));
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Matrix_Composite_AnyZero) {
+TEST_F(MslWriterTest, Constant_Matrix_Composite_AnyZero) {
     auto* c = b.Composite<mat2x2<f32>>(        //
         b.Composite<vec2<f32>>(1.0_f, 0.0_f),  //
         b.Composite<vec2<f32>>(1.5_f, 2.5_f));
@@ -242,15 +242,15 @@ TEST_F(MslPrinterTest, Constant_Matrix_Composite_AnyZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float2x2 const a = float2x2(float2(1.0f, 0.0f), float2(1.5f, 2.5f));
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Matrix_Composite_AllZero) {
+TEST_F(MslWriterTest, Constant_Matrix_Composite_AllZero) {
     auto* c = b.Composite<mat3x2<f32>>(        //
         b.Composite<vec2<f32>>(0.0_f, 0.0_f),  //
         b.Composite<vec2<f32>>(0.0_f, 0.0_f),  //
@@ -261,15 +261,15 @@ TEST_F(MslPrinterTest, Constant_Matrix_Composite_AllZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   float3x2 const a = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Array_Splat) {
+TEST_F(MslWriterTest, Constant_Array_Splat) {
     auto* c = b.Splat<array<f32, 3>>(1.5_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -277,15 +277,15 @@ TEST_F(MslPrinterTest, Constant_Array_Splat) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
   tint_array<float, 3> const a = tint_array<float, 3>{1.5f, 1.5f, 1.5f};
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Array_Composite) {
+TEST_F(MslWriterTest, Constant_Array_Composite) {
     auto* c = b.Composite<array<f32, 3>>(1.5_f, 1.0_f, 2.0_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -293,15 +293,15 @@ TEST_F(MslPrinterTest, Constant_Array_Composite) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
   tint_array<float, 3> const a = tint_array<float, 3>{1.5f, 1.0f, 2.0f};
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Array_Composite_AnyZero) {
+TEST_F(MslWriterTest, Constant_Array_Composite_AnyZero) {
     auto* c = b.Composite<array<f32, 2>>(1.0_f, 0.0_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -309,15 +309,15 @@ TEST_F(MslPrinterTest, Constant_Array_Composite_AnyZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
   tint_array<float, 2> const a = tint_array<float, 2>{1.0f, 0.0f};
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Array_Composite_AllZero) {
+TEST_F(MslWriterTest, Constant_Array_Composite_AllZero) {
     auto* c = b.Composite<array<f32, 3>>(0.0_f, 0.0_f, 0.0_f);
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -325,15 +325,15 @@ TEST_F(MslPrinterTest, Constant_Array_Composite_AllZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
   tint_array<float, 3> const a = tint_array<float, 3>{};
 }
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Struct_Splat) {
+TEST_F(MslWriterTest, Constant_Struct_Splat) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
@@ -345,8 +345,8 @@ TEST_F(MslPrinterTest, Constant_Struct_Splat) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(struct S {
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
   float a;
   float b;
 };
@@ -357,7 +357,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Struct_Composite) {
+TEST_F(MslWriterTest, Constant_Struct_Composite) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
@@ -369,8 +369,8 @@ TEST_F(MslPrinterTest, Constant_Struct_Composite) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(struct S {
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
   float a;
   float b;
 };
@@ -381,7 +381,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Struct_Composite_AnyZero) {
+TEST_F(MslWriterTest, Constant_Struct_Composite_AnyZero) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
@@ -393,8 +393,8 @@ TEST_F(MslPrinterTest, Constant_Struct_Composite_AnyZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(struct S {
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
   float a;
   float b;
 };
@@ -405,7 +405,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, Constant_Struct_Composite_AllZero) {
+TEST_F(MslWriterTest, Constant_Struct_Composite_AllZero) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
@@ -417,8 +417,8 @@ TEST_F(MslPrinterTest, Constant_Struct_Composite_AllZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(struct S {
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
   float a;
   float b;
 };

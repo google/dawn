@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/printer/helper_test.h"
+#include "src/tint/lang/msl/writer/helper_test.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::msl::writer {
 namespace {
 
-TEST_F(MslPrinterTest, If) {
+TEST_F(MslWriterTest, If) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
@@ -40,8 +40,8 @@ TEST_F(MslPrinterTest, If) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   if (true) {
   }
@@ -49,7 +49,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, IfWithElseIf) {
+TEST_F(MslWriterTest, IfWithElseIf) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
@@ -62,8 +62,8 @@ TEST_F(MslPrinterTest, IfWithElseIf) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   if (true) {
   } else {
@@ -74,7 +74,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, IfWithElse) {
+TEST_F(MslWriterTest, IfWithElse) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
@@ -83,8 +83,8 @@ TEST_F(MslPrinterTest, IfWithElse) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   if (true) {
   } else {
@@ -94,7 +94,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, IfBothBranchesReturn) {
+TEST_F(MslWriterTest, IfBothBranchesReturn) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
@@ -103,8 +103,8 @@ TEST_F(MslPrinterTest, IfBothBranchesReturn) {
         b.Unreachable();
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   if (true) {
     return;
@@ -117,7 +117,7 @@ void foo() {
 }
 
 // Requires a transform to turn PHIs into lets
-TEST_F(MslPrinterTest, DISABLED_IfWithSinglePhi) {
+TEST_F(MslWriterTest, DISABLED_IfWithSinglePhi) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -131,8 +131,8 @@ TEST_F(MslPrinterTest, DISABLED_IfWithSinglePhi) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   int tint_symbol;
   if (true) {
@@ -145,7 +145,7 @@ void foo() {
 }
 
 // Requires a transform to turn PHIs into lets
-TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhi) {
+TEST_F(MslWriterTest, DISABLED_IfWithMultiPhi) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -159,8 +159,8 @@ TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhi) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   int tint_symbol;
   bool tint_symbol_1;
@@ -176,7 +176,7 @@ void foo() {
 }
 
 // Requires a transform to turn PHIs into lets
-TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhiReturn1) {
+TEST_F(MslWriterTest, DISABLED_IfWithMultiPhiReturn1) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -190,8 +190,8 @@ TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhiReturn1) {
         b.Return(func, i->Result(0));
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 int foo() {
   int tint_symbol;
   bool tint_symbol_1;
@@ -208,7 +208,7 @@ int foo() {
 }
 
 // Requires a transform to turn PHIs into lets
-TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhiReturn2) {
+TEST_F(MslWriterTest, DISABLED_IfWithMultiPhiReturn2) {
     auto* func = b.Function("foo", ty.bool_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -222,8 +222,8 @@ TEST_F(MslPrinterTest, DISABLED_IfWithMultiPhiReturn2) {
         b.Return(func, i->Result(1));
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 bool foo() {
   int tint_symbol;
   bool tint_symbol_1;

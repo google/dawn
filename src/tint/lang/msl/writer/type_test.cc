@@ -35,7 +35,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
-#include "src/tint/lang/msl/writer/printer/helper_test.h"
+#include "src/tint/lang/msl/writer/helper_test.h"
 #include "src/tint/utils/text/string.h"
 
 namespace tint::msl::writer {
@@ -44,37 +44,37 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-TEST_F(MslPrinterTest, EmitType_Array) {
+TEST_F(MslWriterTest, EmitType_Array) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.array<bool, 4>()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
   thread tint_array<bool, 4> a = {};
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_ArrayOfArray) {
+TEST_F(MslWriterTest, EmitType_ArrayOfArray) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.array(ty.array<bool, 4>(), 5)));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
   thread tint_array<tint_array<bool, 4>, 5> a = {};
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_ArrayOfArrayOfArray) {
+TEST_F(MslWriterTest, EmitType_ArrayOfArrayOfArray) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a",
@@ -82,134 +82,134 @@ TEST_F(MslPrinterTest, EmitType_ArrayOfArrayOfArray) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
   thread tint_array<tint_array<tint_array<bool, 4>, 5>, 6> a = {};
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_RuntimeArray) {
+TEST_F(MslWriterTest, EmitType_RuntimeArray) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.array<bool, 0>()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
   thread tint_array<bool, 1> a = {};
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Bool) {
+TEST_F(MslWriterTest, EmitType_Bool) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.bool_()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   thread bool a = false;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_F32) {
+TEST_F(MslWriterTest, EmitType_F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.f32()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   thread float a = 0.0f;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_F16) {
+TEST_F(MslWriterTest, EmitType_F16) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.f16()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   thread half a = 0.0h;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_I32) {
+TEST_F(MslWriterTest, EmitType_I32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.i32()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   thread int a = 0;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Matrix_F32) {
+TEST_F(MslWriterTest, EmitType_Matrix_F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x3<f32>()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   thread float2x3 a = float2x3(0.0f);
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Matrix_F16) {
+TEST_F(MslWriterTest, EmitType_Matrix_F16) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x3<f16>()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   thread half2x3 a = half2x3(0.0h);
 }
 )");
 }
-TEST_F(MslPrinterTest, EmitType_U32) {
+TEST_F(MslWriterTest, EmitType_U32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.u32()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   thread uint a = 0u;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Atomic_U32) {
+TEST_F(MslWriterTest, EmitType_Atomic_U32) {
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<u32>()));
     func->SetParams({param});
@@ -217,14 +217,14 @@ TEST_F(MslPrinterTest, EmitType_Atomic_U32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo(threadgroup atomic_uint* const a) {
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Atomic_I32) {
+TEST_F(MslWriterTest, EmitType_Atomic_I32) {
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<i32>()));
     func->SetParams({param});
@@ -232,67 +232,67 @@ TEST_F(MslPrinterTest, EmitType_Atomic_I32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo(threadgroup atomic_int* const a) {
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Vector) {
+TEST_F(MslWriterTest, EmitType_Vector) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec3<f32>()));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   thread float3 a = 0.0f;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_VectorPacked) {
+TEST_F(MslWriterTest, EmitType_VectorPacked) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.packed_vec(ty.f32(), 3)));
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   packed_float3 a = 0.0f;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Void) {
+TEST_F(MslWriterTest, EmitType_Void) {
     // Tested via the function return type.
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
 }
 )");
 }
 
 // TODO(dsinclair): How do we create a pointer type ... ?
-TEST_F(MslPrinterTest, DISABLED_EmitType_Pointer_Workgroup) {
+TEST_F(MslWriterTest, DISABLED_EmitType_Pointer_Workgroup) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr<workgroup, f32, read_write>());
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   threadgroup float* a;
 }
@@ -300,22 +300,22 @@ void foo() {
 }
 
 // TODO(dsinclair): How do we create a pointer type ... ?
-TEST_F(MslPrinterTest, DISABLED_EmitType_Pointer_Const) {
+TEST_F(MslWriterTest, DISABLED_EmitType_Pointer_Const) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr<function, f32>());
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
   const thread float* a = 0.0f;
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Struct) {
+TEST_F(MslWriterTest, EmitType_Struct) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.i32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
@@ -326,8 +326,8 @@ TEST_F(MslPrinterTest, EmitType_Struct) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(struct S {
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
   int a;
   float b;
 };
@@ -338,7 +338,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_Struct_Dedup) {
+TEST_F(MslWriterTest, EmitType_Struct_Dedup) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.i32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
@@ -350,8 +350,8 @@ TEST_F(MslPrinterTest, EmitType_Struct_Dedup) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(struct S {
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
   int a;
   float b;
 };
@@ -448,7 +448,7 @@ core::type::Struct* MkStruct(core::ir::Module& mod,
                                       tint::RoundUp(align, size), size);
 }
 
-TEST_F(MslPrinterTest, EmitType_Struct_Layout_NonComposites) {
+TEST_F(MslWriterTest, EmitType_Struct_Layout_NonComposites) {
     Vector<MemberData, 26> data = {{mod.symbols.Register("a"), ty.i32(), 32},        //
                                    {mod.symbols.Register("b"), ty.f32(), 128, 128},  //
                                    {mod.symbols.Register("c"), ty.vec2<f32>()},      //
@@ -542,8 +542,8 @@ void foo() {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, expect.str());
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, expect.str());
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -568,7 +568,7 @@ void foo() {
 #undef ALL_FIELDS
 }
 
-TEST_F(MslPrinterTest, EmitType_Struct_Layout_Structures) {
+TEST_F(MslWriterTest, EmitType_Struct_Layout_Structures) {
     // inner_x: size(1024), align(512)
     Vector<MemberData, 2> inner_x_data = {{{mod.symbols.Register("a"), ty.i32()},  //
                                            {mod.symbols.Register("b"), ty.f32(), 0, 512}}};
@@ -628,8 +628,8 @@ void foo() {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, expect.str());
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, expect.str());
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -667,7 +667,7 @@ void foo() {
 #undef ALL_FIELDS
 }
 
-TEST_F(MslPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
+TEST_F(MslWriterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     // inner: size(1024), align(512)
     Vector<MemberData, 2> inner_data = {{mod.symbols.Register("a"), ty.i32()},
                                         {mod.symbols.Register("b"), ty.f32(), 0, 512}};
@@ -730,8 +730,8 @@ void foo() {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, expect.str());
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, expect.str());
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -775,7 +775,7 @@ void foo() {
 #undef ALL_FIELDS
 }
 
-TEST_F(MslPrinterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
+TEST_F(MslWriterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     // array: size(64), align(16)
     auto array = ty.array<vec3<f32>, 4>();
 
@@ -816,11 +816,11 @@ void foo() {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, expect.str());
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, expect.str());
 }
 
-TEST_F(MslPrinterTest, AttemptTintPadSymbolCollision) {
+TEST_F(MslWriterTest, AttemptTintPadSymbolCollision) {
     Vector<MemberData, 26> data = {// uses symbols tint_pad_[0..9] and tint_pad_[20..35]
                                    {mod.symbols.Register("tint_pad_2"), ty.i32(), 32},         //
                                    {mod.symbols.Register("tint_pad_20"), ty.f32(), 128, 128},  //
@@ -905,11 +905,11 @@ void foo() {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, expect);
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, expect);
 }
 
-TEST_F(MslPrinterTest, EmitType_Sampler) {
+TEST_F(MslWriterTest, EmitType_Sampler) {
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ty.sampler());
     func->SetParams({param});
@@ -917,14 +917,14 @@ TEST_F(MslPrinterTest, EmitType_Sampler) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo(sampler a) {
 }
 )");
 }
 
-TEST_F(MslPrinterTest, EmitType_SamplerComparison) {
+TEST_F(MslWriterTest, EmitType_SamplerComparison) {
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ty.comparison_sampler());
     func->SetParams({param});
@@ -932,8 +932,8 @@ TEST_F(MslPrinterTest, EmitType_SamplerComparison) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo(sampler a) {
 }
 )");
@@ -949,8 +949,8 @@ inline std::ostream& operator<<(std::ostream& out, MslDepthTextureData data) {
     out << str.str();
     return out;
 }
-using MslPrinterDepthTexturesTest = MslPrinterTestWithParam<MslDepthTextureData>;
-TEST_P(MslPrinterDepthTexturesTest, Emit) {
+using MslWriterDepthTexturesTest = MslWriterTestWithParam<MslDepthTextureData>;
+TEST_P(MslWriterDepthTexturesTest, Emit) {
     auto params = GetParam();
 
     auto* t = ty.Get<core::type::DepthTexture>(params.dim);
@@ -961,16 +961,16 @@ TEST_P(MslPrinterDepthTexturesTest, Emit) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo()" + params.result +
-                           R"( a) {
+                               R"( a) {
 }
 )");
 }
 INSTANTIATE_TEST_SUITE_P(
-    MslPrinterTest,
-    MslPrinterDepthTexturesTest,
+    MslWriterTest,
+    MslWriterDepthTexturesTest,
     testing::Values(MslDepthTextureData{core::type::TextureDimension::k2d,
                                         "depth2d<float, access::sample>"},
                     MslDepthTextureData{core::type::TextureDimension::k2dArray,
@@ -980,7 +980,7 @@ INSTANTIATE_TEST_SUITE_P(
                     MslDepthTextureData{core::type::TextureDimension::kCubeArray,
                                         "depthcube_array<float, access::sample>"}));
 
-TEST_F(MslPrinterTest, EmitType_DepthMultisampledTexture) {
+TEST_F(MslWriterTest, EmitType_DepthMultisampledTexture) {
     auto* t = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", t);
@@ -989,8 +989,8 @@ TEST_F(MslPrinterTest, EmitType_DepthMultisampledTexture) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo(depth2d_ms<float, access::read> a) {
 }
 )");
@@ -1006,8 +1006,8 @@ inline std::ostream& operator<<(std::ostream& out, MslTextureData data) {
     out << str.str();
     return out;
 }
-using MslPrinterSampledtexturesTest = MslPrinterTestWithParam<MslTextureData>;
-TEST_P(MslPrinterSampledtexturesTest, Emit) {
+using MslWriterSampledtexturesTest = MslWriterTestWithParam<MslTextureData>;
+TEST_P(MslWriterSampledtexturesTest, Emit) {
     auto params = GetParam();
 
     auto* t = ty.Get<core::type::SampledTexture>(params.dim, ty.f32());
@@ -1018,16 +1018,16 @@ TEST_P(MslPrinterSampledtexturesTest, Emit) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo()" + params.result +
-                           R"( a) {
+                               R"( a) {
 }
 )");
 }
 INSTANTIATE_TEST_SUITE_P(
-    MslPrinterTest,
-    MslPrinterSampledtexturesTest,
+    MslWriterTest,
+    MslWriterSampledtexturesTest,
     testing::Values(
         MslTextureData{core::type::TextureDimension::k1d, "texture1d<float, access::sample>"},
         MslTextureData{core::type::TextureDimension::k2d, "texture2d<float, access::sample>"},
@@ -1038,7 +1038,7 @@ INSTANTIATE_TEST_SUITE_P(
         MslTextureData{core::type::TextureDimension::kCubeArray,
                        "texturecube_array<float, access::sample>"}));
 
-TEST_F(MslPrinterTest, EmitType_MultisampledTexture) {
+TEST_F(MslWriterTest, EmitType_MultisampledTexture) {
     auto* ms = ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.u32());
     auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ms);
@@ -1047,8 +1047,8 @@ TEST_F(MslPrinterTest, EmitType_MultisampledTexture) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo(texture2d_ms<uint, access::read> a) {
 }
 )");
@@ -1063,8 +1063,8 @@ inline std::ostream& operator<<(std::ostream& out, MslStorageTextureData data) {
     str << data.dim;
     return out << str.str();
 }
-using MslPrinterStorageTexturesTest = MslPrinterTestWithParam<MslStorageTextureData>;
-TEST_P(MslPrinterStorageTexturesTest, Emit) {
+using MslWriterStorageTexturesTest = MslWriterTestWithParam<MslStorageTextureData>;
+TEST_P(MslWriterStorageTexturesTest, Emit) {
     auto params = GetParam();
 
     auto* f32 = const_cast<core::type::F32*>(ty.f32());
@@ -1077,15 +1077,15 @@ TEST_P(MslPrinterStorageTexturesTest, Emit) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo()" + params.result +
-                           R"( a) {
+                               R"( a) {
 }
 )");
 }
-INSTANTIATE_TEST_SUITE_P(MslPrinterTest,
-                         MslPrinterStorageTexturesTest,
+INSTANTIATE_TEST_SUITE_P(MslWriterTest,
+                         MslWriterStorageTexturesTest,
                          testing::Values(MslStorageTextureData{core::type::TextureDimension::k1d,
                                                                "texture1d<float, access::write>"},
                                          MslStorageTextureData{core::type::TextureDimension::k2d,

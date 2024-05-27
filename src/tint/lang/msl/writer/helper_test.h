@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_PRINTER_HELPER_TEST_H_
-#define SRC_TINT_LANG_MSL_WRITER_PRINTER_HELPER_TEST_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_HELPER_TEST_H_
+#define SRC_TINT_LANG_MSL_WRITER_HELPER_TEST_H_
 
 #include <iostream>
 #include <string>
@@ -35,8 +35,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/validate/validate.h"
-#include "src/tint/lang/msl/writer/printer/printer.h"
-#include "src/tint/lang/msl/writer/raise/raise.h"
+#include "src/tint/lang/msl/writer/writer.h"
 
 namespace tint::msl::writer {
 
@@ -60,9 +59,9 @@ struct tint_array {
 
 )";
 
-/// Base helper class for testing the MSL generator implementation.
+/// Base helper class for testing the MSL writer implementation.
 template <typename BASE>
-class MslPrinterTestHelperBase : public BASE {
+class MslWriterTestHelperBase : public BASE {
   public:
     /// The test module.
     core::ir::Module mod;
@@ -76,17 +75,13 @@ class MslPrinterTestHelperBase : public BASE {
     std::string err_;
 
     /// Generated MSL
-    std::string output_;
+    Output output_;
 
     /// Run the writer on the IR module and validate the result.
     /// @returns true if generation and validation succeeded
     bool Generate() {
-        if (auto raised = Raise(mod, {}); raised != Success) {
-            err_ = raised.Failure().reason.Str();
-            return false;
-        }
-
-        auto result = Print(mod);
+        Options options;
+        auto result = writer::Generate(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason.Str();
             return false;
@@ -94,7 +89,8 @@ class MslPrinterTestHelperBase : public BASE {
         output_ = result.Get();
 
 #if TINT_BUILD_IS_MAC
-        auto msl_validation = validate::ValidateUsingMetal(output_, validate::MslVersion::kMsl_2_3);
+        auto msl_validation =
+            validate::ValidateUsingMetal(output_.msl, validate::MslVersion::kMsl_2_3);
         if (msl_validation.failed) {
             err_ = msl_validation.output;
             return false;
@@ -111,12 +107,12 @@ class MslPrinterTestHelperBase : public BASE {
 };
 
 /// Printer tests
-using MslPrinterTest = MslPrinterTestHelperBase<testing::Test>;
+using MslWriterTest = MslWriterTestHelperBase<testing::Test>;
 
 /// Printer param tests
 template <typename T>
-using MslPrinterTestWithParam = MslPrinterTestHelperBase<testing::TestWithParam<T>>;
+using MslWriterTestWithParam = MslWriterTestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_PRINTER_HELPER_TEST_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_HELPER_TEST_H_

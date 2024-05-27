@@ -49,7 +49,7 @@ TEST_P(MslBuiltinConversionTest, Emit) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    MslPrinterTest,
+    MslWriterTest,
     MslBuiltinConversionTest,
     testing::Values(
         MslBuiltinData{core::BuiltinValue::kPosition, "position"},

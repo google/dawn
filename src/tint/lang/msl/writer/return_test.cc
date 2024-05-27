@@ -25,47 +25,50 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/printer/helper_test.h"
+#include "src/tint/lang/msl/writer/helper_test.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::msl::writer {
 namespace {
 
-TEST_F(MslPrinterTest, Discard) {
+TEST_F(MslWriterTest, Return) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
-        b.Append(if_->True(), [&] {
-            b.Discard();
-            b.ExitIf(if_);
-        });
+        b.Append(if_->True(), [&] { b.Return(func); });
         b.Return(func);
     });
 
-    auto* ep = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(ep->Block(), [&] {
-        b.Call(func);
-        b.Return(ep);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(struct tint_module_vars_struct {
-  thread bool* continue_execution;
-};
-
-void foo(tint_module_vars_struct tint_module_vars) {
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
   if (true) {
-    (*tint_module_vars.continue_execution) = false;
+    return;
   }
 }
-fragment void frag_main() {
-  thread bool continue_execution = true;
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};
-  foo(tint_module_vars);
-  if (!((*tint_module_vars.continue_execution))) {
-    discard_fragment();
-  }
+)");
+}
+
+TEST_F(MslWriterTest, ReturnAtEndOfVoidDropped) {
+    auto* func = b.Function("foo", ty.void_());
+    func->Block()->Append(b.Return(func));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+}
+)");
+}
+
+TEST_F(MslWriterTest, ReturnWithValue) {
+    auto* func = b.Function("foo", ty.i32());
+    func->Block()->Append(b.Return(func, 123_i));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+int foo() {
+  return 123;
 }
 )");
 }
