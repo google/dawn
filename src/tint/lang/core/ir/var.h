@@ -73,9 +73,9 @@ class Var final : public Castable<Var, OperandInstruction<1, 1>> {
     /// @param initializer the initializer
     void SetInitializer(Value* initializer);
     /// @returns the initializer
-    Value* Initializer() { return operands_[kInitializerOperandOffset]; }
+    Value* Initializer() { return Operand(kInitializerOperandOffset); }
     /// @returns the initializer
-    const Value* Initializer() const { return operands_[kInitializerOperandOffset]; }
+    const Value* Initializer() const { return Operand(kInitializerOperandOffset); }
 
     /// Sets the binding point
     /// @param group the group

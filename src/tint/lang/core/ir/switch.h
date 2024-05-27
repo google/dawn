@@ -105,10 +105,10 @@ class Switch final : public Castable<Switch, ControlInstruction> {
     VectorRef<Case> Cases() const { return cases_; }
 
     /// @returns the condition
-    Value* Condition() { return operands_[kConditionOperandOffset]; }
+    Value* Condition() { return Operand(kConditionOperandOffset); }
 
     /// @returns the condition
-    const Value* Condition() const { return operands_[kConditionOperandOffset]; }
+    const Value* Condition() const { return Operand(kConditionOperandOffset); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "switch"; }

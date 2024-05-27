@@ -59,11 +59,11 @@ Return* Return::Clone(CloneContext& ctx) {
 }
 
 Function* Return::Func() {
-    return tint::As<Function>(operands_[kFunctionOperandOffset]);
+    return tint::As<Function>(Operand(kFunctionOperandOffset));
 }
 
 const Function* Return::Func() const {
-    return tint::As<Function>(operands_[kFunctionOperandOffset]);
+    return tint::As<Function>(Operand(kFunctionOperandOffset));
 }
 
 }  // namespace tint::core::ir

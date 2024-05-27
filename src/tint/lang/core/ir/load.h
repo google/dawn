@@ -55,10 +55,10 @@ class Load final : public Castable<Load, OperandInstruction<1, 1>> {
     Load* Clone(CloneContext& ctx) override;
 
     /// @returns the value being loaded from
-    Value* From() { return operands_[kFromOperandOffset]; }
+    Value* From() { return Operand(kFromOperandOffset); }
 
     /// @returns the value being loaded from
-    const Value* From() const { return operands_[kFromOperandOffset]; }
+    const Value* From() const { return Operand(kFromOperandOffset); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "load"; }

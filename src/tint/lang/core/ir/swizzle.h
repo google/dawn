@@ -56,10 +56,10 @@ class Swizzle final : public Castable<Swizzle, OperandInstruction<1, 1>> {
     Swizzle* Clone(CloneContext& ctx) override;
 
     /// @returns the object used for the access
-    Value* Object() { return operands_[kObjectOperandOffset]; }
+    Value* Object() { return Operand(kObjectOperandOffset); }
 
     /// @returns the object used for the access
-    const Value* Object() const { return operands_[kObjectOperandOffset]; }
+    const Value* Object() const { return Operand(kObjectOperandOffset); }
 
     /// @returns the swizzle indices
     VectorRef<uint32_t> Indices() const { return indices_; }

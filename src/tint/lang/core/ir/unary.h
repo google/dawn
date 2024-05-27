@@ -57,10 +57,10 @@ class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
     ~Unary() override;
 
     /// @returns the value for the instruction
-    Value* Val() { return operands_[kValueOperandOffset]; }
+    Value* Val() { return Operand(kValueOperandOffset); }
 
     /// @returns the value for the instruction
-    const Value* Val() const { return operands_[kValueOperandOffset]; }
+    const Value* Val() const { return Operand(kValueOperandOffset); }
 
     /// @returns the unary operator
     UnaryOp Op() const { return op_; }

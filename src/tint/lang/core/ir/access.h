@@ -58,10 +58,10 @@ class Access final : public Castable<Access, OperandInstruction<3, 1>> {
     Access* Clone(CloneContext& ctx) override;
 
     /// @returns the object used for the access
-    Value* Object() { return operands_[kObjectOperandOffset]; }
+    Value* Object() { return Operand(kObjectOperandOffset); }
 
     /// @returns the object used for the access
-    const Value* Object() const { return operands_[kObjectOperandOffset]; }
+    const Value* Object() const { return Operand(kObjectOperandOffset); }
 
     /// Adds the given index to the end of the access chain
     /// @param idx the index to add

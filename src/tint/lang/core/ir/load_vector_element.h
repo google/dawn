@@ -58,16 +58,16 @@ class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstru
     LoadVectorElement* Clone(CloneContext& ctx) override;
 
     /// @returns the vector pointer value
-    ir::Value* From() { return operands_[kFromOperandOffset]; }
+    ir::Value* From() { return Operand(kFromOperandOffset); }
 
     /// @returns the vector pointer value
-    const ir::Value* From() const { return operands_[kFromOperandOffset]; }
+    const ir::Value* From() const { return Operand(kFromOperandOffset); }
 
     /// @returns the new vector element index
-    ir::Value* Index() { return operands_[kIndexOperandOffset]; }
+    ir::Value* Index() { return Operand(kIndexOperandOffset); }
 
     /// @returns the new vector element index
-    const ir::Value* Index() const { return operands_[kIndexOperandOffset]; }
+    const ir::Value* Index() const { return Operand(kIndexOperandOffset); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "load_vector_element"; }

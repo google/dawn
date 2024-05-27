@@ -567,7 +567,7 @@ void Disassembly::EmitInstruction(const Instruction* inst) {
 
 void Disassembly::EmitOperand(const Instruction* inst, size_t index) {
     SourceMarker marker(this);
-    EmitValue(inst->Operands()[index]);
+    EmitValue(inst->Operand(index));
     marker.Store(IndexedValue{inst, static_cast<uint32_t>(index)});
 }
 

@@ -67,16 +67,16 @@ class Binary : public Castable<Binary, OperandInstruction<2, 1>> {
     void SetOp(BinaryOp op) { op_ = op; }
 
     /// @returns the left-hand-side value for the instruction
-    Value* LHS() { return operands_[kLhsOperandOffset]; }
+    Value* LHS() { return Operand(kLhsOperandOffset); }
 
     /// @returns the left-hand-side value for the instruction
-    const Value* LHS() const { return operands_[kLhsOperandOffset]; }
+    const Value* LHS() const { return Operand(kLhsOperandOffset); }
 
     /// @returns the right-hand-side value for the instruction
-    Value* RHS() { return operands_[kRhsOperandOffset]; }
+    Value* RHS() { return Operand(kRhsOperandOffset); }
 
     /// @returns the right-hand-side value for the instruction
-    const Value* RHS() const { return operands_[kRhsOperandOffset]; }
+    const Value* RHS() const { return Operand(kRhsOperandOffset); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "binary"; }

@@ -57,19 +57,19 @@ class Store final : public Castable<Store, OperandInstruction<2, 0>> {
     Store* Clone(CloneContext& ctx) override;
 
     /// @returns the value being stored too
-    Value* To() { return operands_[kToOperandOffset]; }
+    Value* To() { return Operand(kToOperandOffset); }
 
     /// @returns the value being stored too
-    const Value* To() const { return operands_[kToOperandOffset]; }
+    const Value* To() const { return Operand(kToOperandOffset); }
 
     /// @param to the value being stored too
     void SetTo(Value* to) { SetOperand(kToOperandOffset, to); }
 
     /// @returns the value being stored
-    Value* From() { return operands_[kFromOperandOffset]; }
+    Value* From() { return Operand(kFromOperandOffset); }
 
     /// @returns the value being stored
-    const Value* From() const { return operands_[kFromOperandOffset]; }
+    const Value* From() const { return Operand(kFromOperandOffset); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "store"; }

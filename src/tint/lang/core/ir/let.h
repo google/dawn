@@ -57,10 +57,10 @@ class Let final : public Castable<Let, OperandInstruction<1, 1>> {
     void SetValue(ir::Value* value) { SetOperand(kValueOperandOffset, value); }
 
     /// @returns the value
-    ir::Value* Value() { return operands_[kValueOperandOffset]; }
+    ir::Value* Value() { return Operand(kValueOperandOffset); }
 
     /// @returns the value
-    const ir::Value* Value() const { return operands_[kValueOperandOffset]; }
+    const ir::Value* Value() const { return Operand(kValueOperandOffset); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "let"; }

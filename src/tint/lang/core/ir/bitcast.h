@@ -54,10 +54,10 @@ class Bitcast final : public Castable<Bitcast, Call> {
     Bitcast* Clone(CloneContext& ctx) override;
 
     /// @returns the operand value
-    Value* Val() { return operands_[kValueOperandOffset]; }
+    Value* Val() { return Operand(kValueOperandOffset); }
 
     /// @returns the operand value
-    const Value* Val() const { return operands_[kValueOperandOffset]; }
+    const Value* Val() const { return Operand(kValueOperandOffset); }
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "bitcast"; }

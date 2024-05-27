@@ -74,10 +74,10 @@ class BreakIf final : public Castable<BreakIf, Terminator> {
     size_t ArgsOperandOffset() const override { return kArgsOperandOffset; }
 
     /// @returns the break condition
-    Value* Condition() { return operands_[kConditionOperandOffset]; }
+    Value* Condition() { return Operand(kConditionOperandOffset); }
 
     /// @returns the break condition
-    const Value* Condition() const { return operands_[kConditionOperandOffset]; }
+    const Value* Condition() const { return Operand(kConditionOperandOffset); }
 
     /// @returns the loop containing the break-if
     ir::Loop* Loop() { return loop_; }
