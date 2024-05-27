@@ -426,7 +426,7 @@ fn f(a : i32, b : i32) {
 
 TEST_F(IRToProgramRoundtripTest, CoreBuiltinCall_PtrArg) {
     RUN_TEST(R"(
-@group(0) @binding(0) var<storage, read> v : array<u32>;
+@group(0u) @binding(0u) var<storage, read> v : array<u32>;
 
 fn foo() -> u32 {
   return arrayLength(&(v));
@@ -1888,7 +1888,7 @@ fn f() {
 
 TEST_F(IRToProgramRoundtripTest, PhonyAssign_HandleVar) {
     RUN_TEST(R"(
-@group(0) @binding(0) var t : texture_2d<f32>;
+@group(0u) @binding(0u) var t : texture_2d<f32>;
 
 fn f() {
   _ = t;
@@ -2143,36 +2143,36 @@ var<private> v : mat2x3<f32> = mat2x3<f32>(vec3<f32>(4.0f), vec3<f32>(4.0f));
 
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Uniform_vec4i) {
     RUN_TEST(R"(
-@group(10) @binding(20) var<uniform> v : vec4<i32>;
+@group(10u) @binding(20u) var<uniform> v : vec4<i32>;
 )");
 }
 
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_StorageRead_u32) {
     RUN_TEST(R"(
-@group(10) @binding(20) var<storage, read> v : u32;
+@group(10u) @binding(20u) var<storage, read> v : u32;
 )");
 }
 
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_StorageReadWrite_i32) {
     RUN_TEST(R"(
-@group(10) @binding(20) var<storage, read_write> v : i32;
+@group(10u) @binding(20u) var<storage, read_write> v : i32;
 )");
 }
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Handle_Texture2D) {
     RUN_TEST(R"(
-@group(0) @binding(0) var t : texture_2d<f32>;
+@group(0u) @binding(0u) var t : texture_2d<f32>;
 )");
 }
 
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Handle_Sampler) {
     RUN_TEST(R"(
-@group(0) @binding(0) var s : sampler;
+@group(0u) @binding(0u) var s : sampler;
 )");
 }
 
 TEST_F(IRToProgramRoundtripTest, ModuleScopeVar_Handle_SamplerCmp) {
     RUN_TEST(R"(
-@group(0) @binding(0) var s : sampler_comparison;
+@group(0u) @binding(0u) var s : sampler_comparison;
 )");
 }
 
@@ -3310,6 +3310,43 @@ fn f() -> i32 {
       return i;
     }
   }
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, WorkgroupSizeLargerThanI32) {
+    RUN_TEST(R"(
+@compute @workgroup_size(4294967295u, 1u, 1u)
+fn main() {
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, BindingLargerThanI32) {
+    RUN_TEST(R"(
+@group(0u) @binding(4000000000u) var s : sampler;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, GroupLargerThanI32) {
+    RUN_TEST(R"(
+@group(4000000000u) @binding(0u) var s : sampler;
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, LocationInputLargerThanI32) {
+    RUN_TEST(R"(
+@fragment
+fn main(@location(4000000000u) color : vec4<f32>) {
+}
+)");
+}
+
+TEST_F(IRToProgramRoundtripTest, LocationOutputLargerThanI32) {
+    RUN_TEST(R"(
+@fragment
+fn main() -> @location(4000000000u) vec4<f32> {
+  return vec4<f32>();
 }
 )");
 }

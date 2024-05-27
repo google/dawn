@@ -129,7 +129,7 @@ TEST_F(IRToProgramTest, EntryPoint_Compute) {
     fn->Block()->Append(b.Return(fn));
 
     EXPECT_WGSL(R"(
-@compute @workgroup_size(3, 4, 5)
+@compute @workgroup_size(3u, 4u, 5u)
 fn f() {
 }
 )");
@@ -212,7 +212,7 @@ TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_Location) {
 
     EXPECT_WGSL(R"(
 @fragment
-fn f() -> @location(1) vec4<f32> {
+fn f() -> @location(1u) vec4<f32> {
   return vec4<f32>();
 }
 )");
@@ -246,7 +246,7 @@ TEST_F(IRToProgramTest, EntryPoint_ParameterAttribute_Compute) {
     EXPECT_WGSL(R"(
 enable chromium_experimental_subgroups;
 
-@compute @workgroup_size(3, 4, 5)
+@compute @workgroup_size(3u, 4u, 5u)
 fn f(@builtin(local_invocation_id) v : vec3<u32>, @builtin(local_invocation_index) v_1 : u32, @builtin(global_invocation_id) v_2 : vec3<u32>, @builtin(workgroup_id) v_3 : vec3<u32>, @builtin(num_workgroups) v_4 : vec3<u32>, @builtin(subgroup_invocation_id) v_5 : u32, @builtin(subgroup_size) v_6 : u32) {
 }
 )");
@@ -2226,7 +2226,7 @@ TEST_F(IRToProgramTest, For_IncInInit_Cmp) {
     });
 
     EXPECT_WGSL(R"(
-@group(0) @binding(0) var<storage, read_write> v : u32;
+@group(0u) @binding(0u) var<storage, read_write> v : u32;
 
 fn f() {
   for(v = (v + 1u); (v < 10u); ) {
@@ -2647,7 +2647,7 @@ TEST_F(IRToProgramTest, Enable_ChromiumInternalGraphite_SubgroupBallot) {
     EXPECT_WGSL(R"(
 enable chromium_internal_graphite;
 
-@group(0) @binding(0) var T : texture_storage_2d<r8unorm, read>;
+@group(0u) @binding(0u) var T : texture_storage_2d<r8unorm, read>;
 )");
 }
 

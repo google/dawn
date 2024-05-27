@@ -252,7 +252,7 @@ class State {
                 }
             }
             if (auto loc = param->Location()) {
-                attrs.Push(b.Location(AInt(loc->value)));
+                attrs.Push(b.Location(u32(loc->value)));
                 if (auto interp = loc->interpolation) {
                     attrs.Push(b.Interpolate(interp->type, interp->sampling));
                 }
@@ -277,7 +277,7 @@ class State {
             case core::ir::Function::PipelineStage::kCompute: {
                 auto wgsize = fn->WorkgroupSize().value();
                 attrs.Push(b.Stage(ast::PipelineStage::kCompute));
-                attrs.Push(b.WorkgroupSize(AInt(wgsize[0]), AInt(wgsize[1]), AInt(wgsize[2])));
+                attrs.Push(b.WorkgroupSize(u32(wgsize[0]), u32(wgsize[1]), u32(wgsize[2])));
                 break;
             }
             case core::ir::Function::PipelineStage::kFragment:
@@ -305,7 +305,7 @@ class State {
             }
         }
         if (auto loc = fn->ReturnLocation()) {
-            ret_attrs.Push(b.Location(AInt(loc->value)));
+            ret_attrs.Push(b.Location(u32(loc->value)));
             if (auto interp = loc->interpolation) {
                 ret_attrs.Push(b.Interpolate(interp->type, interp->sampling));
             }
@@ -557,8 +557,8 @@ class State {
 
         Vector<const ast::Attribute*, 4> attrs;
         if (auto bp = var->BindingPoint()) {
-            attrs.Push(b.Group(AInt(bp->group)));
-            attrs.Push(b.Binding(AInt(bp->binding)));
+            attrs.Push(b.Group(u32(bp->group)));
+            attrs.Push(b.Binding(u32(bp->binding)));
         }
 
         const ast::Expression* init = nullptr;
