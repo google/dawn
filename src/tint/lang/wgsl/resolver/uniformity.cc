@@ -1188,12 +1188,19 @@ class UniformityGraph {
                                                    const ast::IdentifierExpression* ident,
                                                    bool load_rule = false) {
         // Helper to check if the entry point attribute of `obj` indicates non-uniformity.
-        auto has_nonuniform_entry_point_attribute = [&](auto* obj) {
-            // Only the num_workgroups and workgroup_id builtins are uniform.
+        auto has_nonuniform_entry_point_attribute = [&](auto* obj, auto* entry_point) {
+            // Only the num_workgroups and workgroup_id builtins, and subgroup_size builtin used in
+            // compute stage are uniform.
             if (auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(obj->attributes)) {
                 auto builtin = b.Sem().Get(builtin_attr)->Value();
                 if (builtin == core::BuiltinValue::kNumWorkgroups ||
                     builtin == core::BuiltinValue::kWorkgroupId) {
+                    return false;
+                }
+                if (builtin == core::BuiltinValue::kSubgroupSize) {
+                    // Currently Tint only allow using subgroup_size builtin as a compute shader
+                    // input.
+                    TINT_ASSERT(entry_point->PipelineStage() == ast::PipelineStage::kCompute);
                     return false;
                 }
             }
@@ -1216,14 +1223,16 @@ class UniformityGraph {
                         // is non-uniform.
                         bool uniform = true;
                         for (auto* member : str->Members()) {
-                            if (has_nonuniform_entry_point_attribute(member->Declaration())) {
+                            if (has_nonuniform_entry_point_attribute(member->Declaration(),
+                                                                     user_func->Declaration())) {
                                 uniform = false;
                             }
                         }
                         node->AddEdge(uniform ? cf : current_function_->may_be_non_uniform);
                         return std::make_pair(cf, node);
                     } else {
-                        if (has_nonuniform_entry_point_attribute(param->Declaration())) {
+                        if (has_nonuniform_entry_point_attribute(param->Declaration(),
+                                                                 user_func->Declaration())) {
                             node->AddEdge(current_function_->may_be_non_uniform);
                         } else {
                             node->AddEdge(cf);

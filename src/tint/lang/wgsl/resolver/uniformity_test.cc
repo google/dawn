@@ -514,7 +514,11 @@ struct BuiltinEntry {
 class ComputeBuiltin : public UniformityAnalysisTestBase,
                        public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(ComputeBuiltin, AsParam) {
-    std::string src = R"(
+    std::string src = std::string((GetParam().name == "subgroup_size")
+                                      ? R"(enable chromium_experimental_subgroups;
+)"
+                                      : "") +
+                      R"(
 @compute @workgroup_size(64)
 fn main(@builtin()" + GetParam().name +
                       R"() b : )" + GetParam().type + R"() {
@@ -545,7 +549,11 @@ test:4:16 note: builtin 'b' of 'main' may be non-uniform
 }
 
 TEST_P(ComputeBuiltin, InStruct) {
-    std::string src = R"(
+    std::string src = std::string((GetParam().name == "subgroup_size")
+                                      ? R"(enable chromium_experimental_subgroups;
+)"
+                                      : "") +
+                      R"(
 struct S {
   @builtin()" + GetParam().name +
                       R"() b : )" + GetParam().type + R"(
@@ -585,7 +593,8 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                                            BuiltinEntry{"local_invocation_index", "u32", false},
                                            BuiltinEntry{"global_invocation_id", "vec3<u32>", false},
                                            BuiltinEntry{"workgroup_id", "vec3<u32>", true},
-                                           BuiltinEntry{"num_workgroups", "vec3<u32>", true}),
+                                           BuiltinEntry{"num_workgroups", "vec3<u32>", true},
+                                           BuiltinEntry{"subgroup_size", "u32", true}),
                          [](const ::testing::TestParamInfo<ComputeBuiltin::ParamType>& p) {
                              return p.param.name;
                          });
