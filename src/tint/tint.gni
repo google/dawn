@@ -79,6 +79,7 @@ template("tint_proto_library") {
   }
   proto_library(target_name) {
     forward_variables_from(invoker, "*", [ "configs" ])
+    proto_in_dir = "${tint_root_dir}"
     generate_cc = true
     generate_python = false
     use_protobuf_full = true
