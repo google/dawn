@@ -32,6 +32,7 @@
 /third_party/khronos/OpenGL-Registry
 /third_party/libc++/src
 /third_party/libc++abi/src
+/third_party/libprotobuf-mutator/src
 /third_party/llvm-build
 /third_party/markupsafe
 /third_party/ninja

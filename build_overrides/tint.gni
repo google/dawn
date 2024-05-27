@@ -29,6 +29,7 @@
 tint_standalone = true
 tint_has_build = true
 
+tint_lpm_dir = "//third_party/libprotobuf-mutator"
 tint_spirv_tools_dir = "//third_party/spirv-tools/src"
 tint_spirv_headers_dir = "//third_party/spirv-headers/src"
 tint_glslang_dir = "//third_party/glslang/src"

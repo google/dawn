@@ -423,6 +423,11 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  'third_party/libprotobuf-mutator/src': {
+    'url': '{chromium_git}/external/github.com/google/libprotobuf-mutator.git@a304ec48dcf15d942607032151f7e9ee504b5dcf',
+    'condition': 'dawn_standalone',
+  },
+
   # Dependencies for tintd.
   'third_party/jsoncpp': {
     'url': '{github_git}/open-source-parsers/jsoncpp.git@69098a18b9af0c47549d9a271c054d13ca92b006',
