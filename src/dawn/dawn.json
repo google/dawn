@@ -459,7 +459,7 @@
             {"name": "usage", "type": "texture usage", "default": "render attachment"},
             {"name": "view format count", "type": "size_t", "default": 0},
             {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count"},
-            {"name": "alpha mode", "type": "composite alpha mode", "default": "opaque"},
+            {"name": "alpha mode", "type": "composite alpha mode", "default": "auto"},
             {"name": "width", "type": "uint32_t"},
             {"name": "height", "type": "uint32_t"},
             {"name": "present mode", "type": "present mode", "default": "fifo"}
