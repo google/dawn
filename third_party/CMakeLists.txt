@@ -103,6 +103,11 @@ if (NOT TARGET libabsl)
     add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
 endif()
 
+if (NOT TARGET libprotobuf-mutator)
+    message(STATUS "Dawn: using LPM at ${DAWN_LPM_DIR}")
+    include("libprotobuf-mutator/BUILD.cmake")
+endif()
+
 if (NOT TARGET Vulkan-Headers)
     message(STATUS "Dawn: using Vulkan-Headers at ${DAWN_VULKAN_HEADERS_DIR}")
     add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers")
