@@ -1,63 +1,49 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %p:ptr<private, f32, read_write> = var
-  %w:ptr<workgroup, f32, read_write> = var
-  %uniforms:ptr<storage, vec2<f32>, read> = var @binding_point(0, 1)
-  %storages:ptr<storage, array<f32>, read_write> = var @binding_point(0, 0)
-}
+struct tint_module_vars_struct {
+  thread float* p;
+  threadgroup float* w;
+  const device float2* uniforms;
+  device tint_array<float, 1>* storages;
+};
+struct tint_symbol_2 {
+  float tint_symbol_1;
+};
 
-%no_uses = func():void {
-  $B2: {
-    ret
-  }
+void no_uses() {
 }
-%zoo = func():void {
-  $B3: {
-    %7:f32 = load %p
-    %8:f32 = mul %7, 2.0f
-    store %p, %8
-    ret
-  }
+void zoo(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.p) = ((*tint_module_vars.p) * 2.0f);
 }
-%bar = func(%a:f32, %b:f32):void {
-  $B4: {
-    store %p, %a
-    store %w, %b
-    %12:ptr<storage, f32, read_write> = access %storages, 0i
-    %13:f32 = load_vector_element %uniforms, 0u
-    store %12, %13
-    %14:void = call %zoo
-    ret
-  }
+void bar(float a, float b, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.p) = a;
+  (*tint_module_vars.w) = b;
+  (*tint_module_vars.storages)[0] = (*tint_module_vars.uniforms)[0u];
+  zoo(tint_module_vars);
 }
-%foo = func(%a_1:f32):void {  # %a_1: 'a'
-  $B5: {
-    %b_1:f32 = let 2.0f  # %b_1: 'b'
-    %18:void = call %bar, %a_1, %b_1
-    %19:void = call %no_uses
-    ret
-  }
+void foo(float a, tint_module_vars_struct tint_module_vars) {
+  float const b = 2.0f;
+  bar(a, b, tint_module_vars);
+  no_uses();
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  $B6: {
-    %22:bool = eq %tint_local_index, 0u
-    if %22 [t: $B7] {  # if_1
-      $B7: {  # true
-        store %w, 0.0f
-        exit_if  # if_1
-      }
-    }
-    %23:void = msl.threadgroup_barrier 4u
-    %24:void = call %foo, 1.0f
-    ret
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v, const device float2* uniforms [[buffer(1)]], device tint_array<float, 1>* storages [[buffer(0)]]) {
+  thread float p = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v).tint_symbol_1), .uniforms=uniforms, .storages=storages};
+  if ((tint_local_index == 0u)) {
+    (*tint_module_vars.w) = 0.0f;
   }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  foo(1.0f, tint_module_vars);
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

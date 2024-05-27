@@ -282,8 +282,7 @@ fragment void frag() {
 )");
 }
 
-// TODO(jrprice): Requires ModuleScopeVarToEntryPointParam transform
-TEST_F(MslPrinterTest, DISABLED_VarGlobalWorkgroup) {
+TEST_F(MslPrinterTest, VarGlobalWorkgroup) {
     core::ir::Var* v = nullptr;
     b.Append(mod.root_block,
              [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kWorkgroup, f32>()); });
@@ -297,10 +296,12 @@ TEST_F(MslPrinterTest, DISABLED_VarGlobalWorkgroup) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, MetalHeader() + R"(
-threadgroup float v;
-void foo() {
-  float a = v;
+    EXPECT_EQ(output_, MetalHeader() + R"(struct tint_module_vars_struct {
+  threadgroup float* v;
+};
+
+void foo(tint_module_vars_struct tint_module_vars) {
+  float a = (*tint_module_vars.v);
 }
 )");
 }

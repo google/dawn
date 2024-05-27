@@ -1,43 +1,22 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_symbol_2 {
+  float tint_symbol_1;
+};
+struct tint_module_vars_struct {
+  thread float* p;
+  threadgroup float* w;
+};
 
-thread float p = 0.0f;
-threadgroup float w;
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]]) {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v) {
+  thread float p = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v).tint_symbol_1)};
   if ((tint_local_index == 0u)) {
-    w = 0.0f;
+    (*tint_module_vars.w) = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  thread float* const p_ptr = p;
-  threadgroup float* const w_ptr = w;
-  float const x = (p_ptr + w_ptr);
-  p_ptr = x;
+  thread float* const p_ptr = tint_module_vars.p;
+  threadgroup float* const w_ptr = tint_module_vars.w;
+  float const x = ((*p_ptr) + (*w_ptr));
+  (*p_ptr) = x;
 }
-program_source:4:14: error: program scope variable must reside in constant address space
-thread float p = 0.0f;
-             ^
-program_source:5:19: error: program scope variable must reside in constant address space
-threadgroup float w;
-                  ^
-program_source:7:25: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
-  if ((tint_local_index == 0u)) {
-       ~~~~~~~~~~~~~~~~~^~~~~
-program_source:7:25: note: remove extraneous parentheses around the comparison to silence this warning
-  if ((tint_local_index == 0u)) {
-      ~                 ^    ~
-program_source:7:25: note: use '=' to turn this equality comparison into an assignment
-  if ((tint_local_index == 0u)) {
-                        ^~
-                        =
-program_source:13:26: error: invalid operands to binary expression ('float *const' and 'threadgroup float *const')
-  float const x = (p_ptr + w_ptr);
-                   ~~~~~ ^ ~~~~~
-program_source:14:9: error: cannot assign to variable 'p_ptr' with const-qualified type 'float *const'
-  p_ptr = x;
-  ~~~~~ ^
-program_source:11:23: note: variable 'p_ptr' declared const here
-  thread float* const p_ptr = p;
-  ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~
-

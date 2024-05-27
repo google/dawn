@@ -1,36 +1,20 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_symbol_2 {
+  float4 tint_symbol_1;
+};
+struct tint_module_vars_struct {
+  threadgroup float4* S;
+};
 
-threadgroup float4 S;
 float4 func(threadgroup float4* const pointer) {
-  return pointer;
+  return (*pointer);
 }
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]]) {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=(&(*v).tint_symbol_1)};
   if ((tint_local_index == 0u)) {
-    S = float4(0.0f);
+    (*tint_module_vars.S) = float4(0.0f);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  float4 const r = func(S);
+  float4 const r = func(tint_module_vars.S);
 }
-program_source:4:20: error: program scope variable must reside in constant address space
-threadgroup float4 S;
-                   ^
-program_source:6:10: error: cannot initialize return object of type 'float4' (vector of 4 'float' values) with an lvalue of type 'threadgroup float4 *const'
-  return pointer;
-         ^~~~~~~
-program_source:9:25: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
-  if ((tint_local_index == 0u)) {
-       ~~~~~~~~~~~~~~~~~^~~~~
-program_source:9:25: note: remove extraneous parentheses around the comparison to silence this warning
-  if ((tint_local_index == 0u)) {
-      ~                 ^    ~
-program_source:9:25: note: use '=' to turn this equality comparison into an assignment
-  if ((tint_local_index == 0u)) {
-                        ^~
-                        =
-program_source:13:16: warning: unused variable 'r' [-Wunused-variable]
-  float4 const r = func(S);
-               ^
-

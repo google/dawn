@@ -1,30 +1,17 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_symbol_2 {
+  int tint_symbol_1;
+};
+struct tint_module_vars_struct {
+  threadgroup int* v;
+};
 
-threadgroup int v;
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]]) {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_1) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_1).tint_symbol_1)};
   if ((tint_local_index == 0u)) {
-    v = 0;
+    (*tint_module_vars.v) = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  int const i = v;
+  int const i = (*tint_module_vars.v);
 }
-program_source:4:17: error: program scope variable must reside in constant address space
-threadgroup int v;
-                ^
-program_source:6:25: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
-  if ((tint_local_index == 0u)) {
-       ~~~~~~~~~~~~~~~~~^~~~~
-program_source:6:25: note: remove extraneous parentheses around the comparison to silence this warning
-  if ((tint_local_index == 0u)) {
-      ~                 ^    ~
-program_source:6:25: note: use '=' to turn this equality comparison into an assignment
-  if ((tint_local_index == 0u)) {
-                        ^~
-                        =
-program_source:10:13: warning: unused variable 'i' [-Wunused-variable]
-  int const i = v;
-            ^
-

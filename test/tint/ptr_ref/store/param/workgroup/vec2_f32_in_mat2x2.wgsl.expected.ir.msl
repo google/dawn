@@ -1,36 +1,20 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_symbol_2 {
+  float2x2 tint_symbol_1;
+};
+struct tint_module_vars_struct {
+  threadgroup float2x2* S;
+};
 
-threadgroup float2x2 S;
 void func(threadgroup float2* const pointer) {
-  pointer = float2(0.0f);
+  (*pointer) = float2(0.0f);
 }
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]]) {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=(&(*v).tint_symbol_1)};
   if ((tint_local_index == 0u)) {
-    S = float2x2(float2(0.0f), float2(0.0f));
+    (*tint_module_vars.S) = float2x2(float2(0.0f), float2(0.0f));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  func(S[1]);
+  func((&(*tint_module_vars.S)[1]));
 }
-program_source:4:22: error: program scope variable must reside in constant address space
-threadgroup float2x2 S;
-                     ^
-program_source:6:11: error: cannot assign to variable 'pointer' with const-qualified type 'threadgroup float2 *const'
-  pointer = float2(0.0f);
-  ~~~~~~~ ^
-program_source:5:37: note: variable 'pointer' declared const here
-void func(threadgroup float2* const pointer) {
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~
-program_source:9:25: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
-  if ((tint_local_index == 0u)) {
-       ~~~~~~~~~~~~~~~~~^~~~~
-program_source:9:25: note: remove extraneous parentheses around the comparison to silence this warning
-  if ((tint_local_index == 0u)) {
-      ~                 ^    ~
-program_source:9:25: note: use '=' to turn this equality comparison into an assignment
-  if ((tint_local_index == 0u)) {
-                        ^~
-                        =
-

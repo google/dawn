@@ -364,6 +364,73 @@ tint_module_vars_struct = struct @align(1) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_ModuleScopeVarsTest, Workgroup) {
+    auto* var_a = b.Var("a", ty.ptr<workgroup, i32>());
+    auto* var_b = b.Var("b", ty.ptr<workgroup, i32>());
+    mod.root_block->Append(var_a);
+    mod.root_block->Append(var_b);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array<uint32_t, 3>{1u, 1u, 1u});
+    b.Append(func->Block(), [&] {
+        auto* load_a = b.Load(var_a);
+        auto* load_b = b.Load(var_b);
+        b.Store(var_a, b.Add<i32>(load_a, load_b));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %a:ptr<workgroup, i32, read_write> = var
+  %b:ptr<workgroup, i32, read_write> = var
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %4:i32 = load %a
+    %5:i32 = load %b
+    %6:i32 = add %4, %5
+    store %a, %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_module_vars_struct = struct @align(1) {
+  a:ptr<workgroup, i32, read_write> @offset(0)
+  b:ptr<workgroup, i32, read_write> @offset(0)
+}
+
+tint_symbol_2 = struct @align(4) {
+  tint_symbol:i32 @offset(0)
+  tint_symbol_1:i32 @offset(4)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func(%2:ptr<workgroup, tint_symbol_2, read_write>):void {
+  $B1: {
+    %a:ptr<workgroup, i32, read_write> = access %2, 0u
+    %b:ptr<workgroup, i32, read_write> = access %2, 1u
+    %5:tint_module_vars_struct = construct %a, %b
+    %tint_module_vars:tint_module_vars_struct = let %5
+    %7:ptr<workgroup, i32, read_write> = access %tint_module_vars, 0u
+    %8:i32 = load %7
+    %9:ptr<workgroup, i32, read_write> = access %tint_module_vars, 1u
+    %10:i32 = load %9
+    %11:i32 = add %8, %10
+    %12:ptr<workgroup, i32, read_write> = access %tint_module_vars, 0u
+    store %12, %11
+    ret
+  }
+}
+)";
+
+    Run(ModuleScopeVars);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_ModuleScopeVarsTest, MultipleAddressSpaces) {
     auto* var_a = b.Var("a", ty.ptr<uniform, i32, core::Access::kRead>());
     auto* var_b = b.Var("b", ty.ptr<storage, i32, core::Access::kReadWrite>());
