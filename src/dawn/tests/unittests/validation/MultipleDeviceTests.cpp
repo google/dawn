@@ -27,6 +27,7 @@
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 
+#include "dawn/native/DawnNative.h"
 #include "dawn/tests/MockCallback.h"
 
 namespace dawn {

@@ -33,6 +33,8 @@
 #include <utility>
 
 #include "src/tint/lang/core/evaluation_stage.h"
+#include "src/tint/lang/core/type/input_attachment.h"
+#include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/lang/wgsl/common/allowed_features.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"

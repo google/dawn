@@ -45,6 +45,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "dawn/webgpu.h"
 
 namespace dawn::native {
 

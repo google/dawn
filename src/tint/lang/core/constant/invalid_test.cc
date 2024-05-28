@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/constant/helper_test.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/type/clone_context.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
