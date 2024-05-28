@@ -48,7 +48,6 @@ namespace tint::msl::writer {
 ///   copied to the module-scope var before calling the 'inner' function.
 /// * The outer function will have a new struct return type which holds both the pixel local members
 ///   and the returned value(s) of the 'inner' function.
-/// @note PixelLocal requires that the SingleEntryPoint transform has already been run
 class PixelLocal final : public Castable<PixelLocal, ast::transform::Transform> {
   public:
     /// Transform configuration options

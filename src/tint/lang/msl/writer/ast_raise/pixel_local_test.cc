@@ -84,7 +84,7 @@ var<private> P : PixelLocal;
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PixelLocalTest, UseInEntryPoint) {
+TEST_F(PixelLocalTest, UsedInSingleEntryPoint) {
     auto* src = R"(
 enable chromium_experimental_pixel_local;
 
@@ -125,6 +125,231 @@ var<private> P : PixelLocal;
 
 fn F_inner() {
   P.a += 42;
+}
+)";
+
+    auto got = Run<PixelLocal>(src, Bindings({{0, 1}}));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PixelLocalTest, SameVarUsedInMultipleEntryPoints) {
+    auto* src = R"(
+enable chromium_experimental_pixel_local;
+
+struct PixelLocal {
+  a : u32,
+}
+
+var<pixel_local> P : PixelLocal;
+
+@fragment
+fn F1() {
+  P.a += 10;
+}
+
+@fragment
+fn F2() {
+  P.a += 20;
+}
+)";
+
+    auto* expect =
+        R"(
+enable chromium_experimental_framebuffer_fetch;
+
+struct F1_res {
+  @location(1)
+  output_0 : u32,
+}
+
+@fragment
+fn F1(pixel_local_1 : PixelLocal) -> F1_res {
+  P = pixel_local_1;
+  F1_inner();
+  return F1_res(P.a);
+}
+
+struct F2_res {
+  @location(1)
+  output_0 : u32,
+}
+
+@fragment
+fn F2(pixel_local_2 : PixelLocal) -> F2_res {
+  P = pixel_local_2;
+  F2_inner();
+  return F2_res(P.a);
+}
+
+struct PixelLocal {
+  @color(1u) @internal(disable_validation__entry_point_parameter)
+  a : u32,
+}
+
+var<private> P : PixelLocal;
+
+fn F1_inner() {
+  P.a += 10;
+}
+
+fn F2_inner() {
+  P.a += 20;
+}
+)";
+
+    auto got = Run<PixelLocal>(src, Bindings({{0, 1}}));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PixelLocalTest, DifferentVarUsedInMultipleEntryPoints) {
+    auto* src = R"(
+enable chromium_experimental_pixel_local;
+
+struct PixelLocal {
+  a : u32,
+}
+
+var<pixel_local> P1 : PixelLocal;
+var<pixel_local> P2 : PixelLocal;
+
+@fragment
+fn F1() {
+  P1.a += 10;
+}
+
+@fragment
+fn F2() {
+  P2.a += 20;
+}
+)";
+
+    auto* expect =
+        R"(
+enable chromium_experimental_framebuffer_fetch;
+
+struct F1_res {
+  @location(1)
+  output_0 : u32,
+}
+
+@fragment
+fn F1(pixel_local_1 : PixelLocal) -> F1_res {
+  P1 = pixel_local_1;
+  F1_inner();
+  return F1_res(P1.a);
+}
+
+struct F2_res {
+  @location(1)
+  output_0 : u32,
+}
+
+@fragment
+fn F2(pixel_local_2 : PixelLocal) -> F2_res {
+  P2 = pixel_local_2;
+  F2_inner();
+  return F2_res(P2.a);
+}
+
+struct PixelLocal {
+  @color(1u) @internal(disable_validation__entry_point_parameter)
+  a : u32,
+}
+
+var<private> P1 : PixelLocal;
+
+var<private> P2 : PixelLocal;
+
+fn F1_inner() {
+  P1.a += 10;
+}
+
+fn F2_inner() {
+  P2.a += 20;
+}
+)";
+
+    auto got = Run<PixelLocal>(src, Bindings({{0, 1}}));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PixelLocalTest, DifferentStructUsedInMultipleEntryPoints) {
+    auto* src = R"(
+enable chromium_experimental_pixel_local;
+
+struct PixelLocal1 {
+  a : u32,
+}
+
+struct PixelLocal2 {
+  a : u32,
+}
+
+var<pixel_local> P1 : PixelLocal1;
+var<pixel_local> P2 : PixelLocal2;
+
+@fragment
+fn F1() {
+  P1.a += 10;
+}
+
+@fragment
+fn F2() {
+  P2.a += 20;
+}
+)";
+
+    auto* expect =
+        R"(
+enable chromium_experimental_framebuffer_fetch;
+
+struct F1_res {
+  @location(1)
+  output_0 : u32,
+}
+
+@fragment
+fn F1(pixel_local_1 : PixelLocal1) -> F1_res {
+  P1 = pixel_local_1;
+  F1_inner();
+  return F1_res(P1.a);
+}
+
+struct F2_res {
+  @location(1)
+  output_0 : u32,
+}
+
+@fragment
+fn F2(pixel_local_2 : PixelLocal2) -> F2_res {
+  P2 = pixel_local_2;
+  F2_inner();
+  return F2_res(P2.a);
+}
+
+struct PixelLocal1 {
+  @color(1u) @internal(disable_validation__entry_point_parameter)
+  a : u32,
+}
+
+struct PixelLocal2 {
+  @color(1u) @internal(disable_validation__entry_point_parameter)
+  a : u32,
+}
+
+var<private> P1 : PixelLocal1;
+
+var<private> P2 : PixelLocal2;
+
+fn F1_inner() {
+  P1.a += 10;
+}
+
+fn F2_inner() {
+  P2.a += 20;
 }
 )";
 
@@ -793,12 +1018,96 @@ struct PixelLocal {
 var<private> P : PixelLocal;
 
 struct Output {
+  @location(0)
   x : vec4f,
+  @location(2)
   y : vec4f,
 }
 
 fn F_inner() -> Output {
   P.a += 42;
+  return Output(vec4f(1), vec4f(9));
+}
+)";
+
+    auto got = Run<PixelLocal>(src, Bindings({{0, 1}, {1, 5}}));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PixelLocalTest, OutputStructUsedByMultipleEntryPoints) {
+    auto* src = R"(
+enable chromium_experimental_pixel_local;
+
+struct PixelLocal {
+  a : u32,
+  b : u32,
+}
+
+var<pixel_local> P : PixelLocal;
+
+struct Output {
+  @location(0) x : vec4f,
+  @location(2) y : vec4f,
+}
+
+@fragment
+fn F1() -> Output {
+  P.a += 42;
+  return Output(vec4f(1), vec4f(9));
+}
+
+@fragment
+fn F2() -> Output {
+  return Output(vec4f(1), vec4f(9));
+}
+)";
+
+    auto* expect =
+        R"(
+enable chromium_experimental_framebuffer_fetch;
+
+struct F1_res {
+  @location(1)
+  output_0 : u32,
+  @location(5)
+  output_1 : u32,
+  @location(0)
+  output_2 : vec4<f32>,
+  @location(2)
+  output_3 : vec4<f32>,
+}
+
+@fragment
+fn F1(pixel_local_1 : PixelLocal) -> F1_res {
+  P = pixel_local_1;
+  let result = F1_inner();
+  return F1_res(P.a, P.b, result.x, result.y);
+}
+
+struct PixelLocal {
+  @color(1u) @internal(disable_validation__entry_point_parameter)
+  a : u32,
+  @color(5u) @internal(disable_validation__entry_point_parameter)
+  b : u32,
+}
+
+var<private> P : PixelLocal;
+
+struct Output {
+  @location(0)
+  x : vec4f,
+  @location(2)
+  y : vec4f,
+}
+
+fn F1_inner() -> Output {
+  P.a += 42;
+  return Output(vec4f(1), vec4f(9));
+}
+
+@fragment
+fn F2() -> Output {
   return Output(vec4f(1), vec4f(9));
 }
 )";
