@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -862,13 +863,24 @@ struct State {
     /// @param builtin the builtin call instruction
     void InputAttachmentLoad(core::ir::CoreBuiltinCall* builtin) {
         TINT_ASSERT(builtin->Args().Length() == 1);
-        // TODO(b/341117913): implement this
 
+        auto* texture = builtin->Args()[0];
+        // coords for input_attachment are always (0, 0)
+        auto* coords = b.Composite(ty.vec2<i32>(), 0_i, 0_i);
+
+        // Start building the argument list for the builtin.
+        // The first two operands are always the texture and then the coordinates.
+        Vector<core::ir::Value*, 8> builtin_args;
+        builtin_args.Push(texture);
+        builtin_args.Push(coords);
+
+        // Call the builtin.
+        // The result is always a vec4 in SPIR-V.
         auto* result_ty = builtin->Result(0)->Type();
+        TINT_ASSERT(result_ty->Is<core::type::Vector>());
 
-        // Create placeholder result
-        auto* result = b.Construct(result_ty, b.Zero(result_ty));
-
+        core::ir::Instruction* result = b.Call<spirv::ir::BuiltinCall>(
+            result_ty, spirv::BuiltinFn::kImageRead, std::move(builtin_args));
         result->InsertBefore(builtin);
 
         result->SetResults(Vector{builtin->DetachResult()});

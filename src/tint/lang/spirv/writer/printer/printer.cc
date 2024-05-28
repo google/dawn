@@ -632,7 +632,12 @@ class Printer {
                 break;
             }
             case core::type::TextureDimension::k2d: {
-                dim = SpvDim2D;
+                if (texture->Is<core::type::InputAttachment>()) {
+                    module_.PushCapability(SpvCapabilityInputAttachment);
+                    dim = SpvDimSubpassData;
+                } else {
+                    dim = SpvDim2D;
+                }
                 break;
             }
             case core::type::TextureDimension::k2dArray: {
@@ -2119,6 +2124,14 @@ class Printer {
                         module_.PushAnnot(spv::Op::OpDecorate,
                                           {id, U32Operand(SpvDecorationNonReadable)});
                     }
+                }
+
+                auto iidx = var->InputAttachmentIndex();
+                if (iidx) {
+                    TINT_ASSERT(store_ty->Is<core::type::InputAttachment>());
+                    module_.PushAnnot(
+                        spv::Op::OpDecorate,
+                        {id, U32Operand(SpvDecorationInputAttachmentIndex), iidx.value()});
                 }
                 break;
             }

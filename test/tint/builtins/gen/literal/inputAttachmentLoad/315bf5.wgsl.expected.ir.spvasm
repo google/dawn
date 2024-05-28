@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 25
+; Bound: 27
 ; Schema: 0
                OpCapability Shader
+               OpCapability InputAttachment
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
@@ -15,12 +16,13 @@
                OpName %fragment_main "fragment_main"
                OpDecorate %arg_0 DescriptorSet 1
                OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_0 InputAttachmentIndex 3
                OpMemberDecorate %tint_symbol_1 0 Offset 0
                OpDecorate %tint_symbol_1 Block
                OpDecorate %5 DescriptorSet 2
                OpDecorate %5 Binding 0
         %int = OpTypeInt 32 1
-          %3 = OpTypeImage %int 2D 0 0 0 2 Unknown
+          %3 = OpTypeImage %int SubpassData 0 0 0 2 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
       %arg_0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
       %v4int = OpTypeVector %int 4
@@ -29,7 +31,8 @@
           %5 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
        %void = OpTypeVoid
          %11 = OpTypeFunction %void
-         %14 = OpConstantNull %v4int
+      %v2int = OpTypeVector %int 2
+         %15 = OpConstantNull %v2int
 %_ptr_Function_v4int = OpTypePointer Function %v4int
 %_ptr_StorageBuffer_v4int = OpTypePointer StorageBuffer %v4int
        %uint = OpTypeInt 32 0
@@ -38,14 +41,15 @@
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_v4int Function
          %13 = OpLoad %3 %arg_0
+         %14 = OpImageRead %v4int %13 %15
                OpStore %res %14
-         %17 = OpLoad %v4int %res
-         %18 = OpAccessChain %_ptr_StorageBuffer_v4int %5 %uint_0
-               OpStore %18 %17
+         %19 = OpLoad %v4int %res
+         %20 = OpAccessChain %_ptr_StorageBuffer_v4int %5 %uint_0
+               OpStore %20 %19
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %11
-         %23 = OpLabel
-         %24 = OpFunctionCall %void %inputAttachmentLoad_315bf5
+         %25 = OpLabel
+         %26 = OpFunctionCall %void %inputAttachmentLoad_315bf5
                OpReturn
                OpFunctionEnd

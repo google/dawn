@@ -78,6 +78,7 @@ type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 type ptr<S: address_space, T, A: access>
+type input_attachment<T>
 
 type struct_with_runtime_array
 type sampled_image<T>
@@ -219,6 +220,7 @@ fn image_read[F: u32_texel_format, A: readable, C: iu32, S: iu32](texture_storag
 fn image_read[F: f32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_3d<F, A>, vec3<C>, S) -> vec4<f32>
 fn image_read[F: i32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_3d<F, A>, vec3<C>, S) -> vec4<i32>
 fn image_read[F: u32_texel_format, A: readable, C: iu32, S: iu32](texture_storage_3d<F, A>, vec3<C>, S) -> vec4<u32>
+fn image_read[T: fiu32, C: iu32](input_attachment: input_attachment<T>, vec2<C>) -> vec4<T>
 
 fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_1d<T> >, f32, C) -> vec4<f32>
 fn image_sample_implicit_lod[T: fiu32, C: iu32](sampled_image<texture_2d<T> >, vec2<f32>, C) -> vec4<f32>
