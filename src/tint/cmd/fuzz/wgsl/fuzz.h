@@ -61,6 +61,8 @@ enum class ProgramProperties {
     kBuiltinFnsShadowed,
     /// The program has builtin types which have been shadowed
     kBuiltinTypesShadowed,
+    /// The program has multiple entry points
+    kMultipleEntryPoints,
 };
 
 /// Context holds information about the fuzzer options and the input program.

@@ -36,6 +36,7 @@
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/variable.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
@@ -104,6 +105,19 @@ EnumSet<ProgramProperties> ScanProgramProperties(const Program& program) {
             break;  // Early exit - nothing more to find.
         }
     }
+
+    // Check for multiple entry points
+    bool entry_point_found = false;
+    for (auto* fn : program.AST().Functions()) {
+        if (fn->IsEntryPoint()) {
+            if (entry_point_found) {
+                out.Add(ProgramProperties::kMultipleEntryPoints);
+                break;
+            }
+            entry_point_found = true;
+        }
+    }
+
     return out;
 }
 
