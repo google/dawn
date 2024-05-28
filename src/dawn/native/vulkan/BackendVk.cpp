@@ -511,6 +511,7 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
 
     DAWN_TRY(CheckVkSuccess(mFunctions.CreateInstance(&createInfo, nullptr, &mInstance),
                             "vkCreateInstance"));
+    DAWN_INVALID_IF(mInstance == VK_NULL_HANDLE, "Failed to create VkInstance");
 
     return usedKnobs;
 }
