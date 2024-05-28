@@ -44,6 +44,7 @@
 #endif
 
 #include "absl/container/inlined_vector.h"
+#include "dawn/common/Log.h"
 #include "dawn/native/SystemEvent.h"
 
 namespace dawn::native {
@@ -100,7 +101,20 @@ template <typename It>
     for (auto it = begin; it != end; ++it) {
         pollfds.push_back(pollfd{static_cast<int>((*it).first.mPrimitive.Get()), POLLIN, 0});
     }
-    int status = poll(pollfds.data(), pollfds.size(), ToMilliseconds(timeout));
+    int status;
+    bool retry;
+    do {
+        retry = false;
+        status = poll(pollfds.data(), pollfds.size(), ToMilliseconds(timeout));
+        if (status < 0) {
+            int lErrno = errno;
+            if (EAGAIN == lErrno || EINTR == lErrno) {
+                retry = true;
+            } else {
+                dawn::ErrorLog() << "poll errno=" << lErrno;
+            }
+        }
+    } while (retry);
 
     DAWN_CHECK(status >= 0);
     if (status == 0) {
