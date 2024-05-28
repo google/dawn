@@ -62,7 +62,11 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     if (result != Success) {
         return result.Failure();
     }
-    output.msl = result.Get();
+    output.msl = result->msl;
+    output.workgroup_allocations = std::move(result->workgroup_allocations);
+    // TODO(crbug.com/42251016): Set has_invariant.
+    // TODO(crbug.com/42251016): Set needs_storage_buffer_sizes.
+    // TODO(crbug.com/42251016): Set used_array_length_from_uniform_indices.
     return output;
 }
 

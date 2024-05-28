@@ -7,7 +7,7 @@ struct tint_module_vars_struct {
   threadgroup int* i;
 };
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v) {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.i=(&(*v).tint_symbol_1)};
   if ((tint_local_index == 0u)) {
     (*tint_module_vars.i) = 0;

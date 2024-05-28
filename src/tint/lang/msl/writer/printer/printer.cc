@@ -106,7 +106,7 @@ class Printer : public tint::TextGenerator {
     explicit Printer(core::ir::Module& module) : ir_(module) {}
 
     /// @returns the generated MSL shader
-    tint::Result<std::string> Generate() {
+    tint::Result<PrintResult> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "MSL writer");
         if (valid != Success) {
             return std::move(valid.Failure());
@@ -128,10 +128,15 @@ class Printer : public tint::TextGenerator {
 
         StringStream ss;
         ss << preamble_buffer_.String() << std::endl << main_buffer_.String();
-        return ss.str();
+        result_.msl = ss.str();
+
+        return std::move(result_);
     }
 
   private:
+    /// The result of printing the module.
+    PrintResult result_;
+
     /// Map of builtin structure to unique generated name
     std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
 
@@ -253,6 +258,8 @@ class Printer : public tint::TextGenerator {
         {
             auto out = Line();
 
+            auto func_name = NameOf(func);
+
             switch (func->Stage()) {
                 case core::ir::Function::PipelineStage::kCompute:
                     out << "kernel ";
@@ -266,11 +273,14 @@ class Printer : public tint::TextGenerator {
                 case core::ir::Function::PipelineStage::kUndefined:
                     break;
             }
+            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+                result_.workgroup_allocations.insert({func_name, {}});
+            }
 
             // TODO(dsinclair): Handle return type attributes
 
             EmitType(out, func->ReturnType());
-            out << " " << NameOf(func) << "(";
+            out << " " << func_name << "(";
 
             size_t i = 0;
             for (auto* param : func->Params()) {
@@ -328,9 +338,10 @@ class Printer : public tint::TextGenerator {
                     out << "]]";
                 }
 
+                auto ptr = param->Type()->As<core::type::Pointer>();
                 if (auto binding_point = param->BindingPoint()) {
                     TINT_ASSERT(binding_point->group == 0);
-                    if (auto ptr = param->Type()->As<core::type::Pointer>()) {
+                    if (ptr) {
                         switch (ptr->AddressSpace()) {
                             case core::AddressSpace::kStorage:
                             case core::AddressSpace::kUniform:
@@ -352,6 +363,12 @@ class Printer : public tint::TextGenerator {
                             },
                             TINT_ICE_ON_NO_MATCH);
                     }
+                }
+                if (ptr && ptr->AddressSpace() == core::AddressSpace::kWorkgroup &&
+                    func->Stage() == core::ir::Function::PipelineStage::kCompute) {
+                    auto& allocations = result_.workgroup_allocations.at(func_name);
+                    out << " [[threadgroup(" << allocations.size() << ")]]";
+                    allocations.push_back(ptr->StoreType()->Size());
                 }
             }
 
@@ -1502,8 +1519,16 @@ class Printer : public tint::TextGenerator {
 
 }  // namespace
 
-Result<std::string> Print(core::ir::Module& module) {
+Result<PrintResult> Print(core::ir::Module& module) {
     return Printer{module}.Generate();
 }
+
+PrintResult::PrintResult() = default;
+
+PrintResult::~PrintResult() = default;
+
+PrintResult::PrintResult(const PrintResult&) = default;
+
+PrintResult& PrintResult::operator=(const PrintResult&) = default;
 
 }  // namespace tint::msl::writer

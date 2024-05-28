@@ -104,6 +104,7 @@ cc_library(
     "return_test.cc",
     "type_test.cc",
     "var_test.cc",
+    "writer_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

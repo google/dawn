@@ -29,6 +29,8 @@
 #define SRC_TINT_LANG_MSL_WRITER_PRINTER_PRINTER_H_
 
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "src/tint/utils/result/result.h"
 
@@ -39,9 +41,33 @@ class Module;
 
 namespace tint::msl::writer {
 
-/// @returns the generated MSL shader on success, or failure
+/// The output produced when printing MSL.
+struct PrintResult {
+    /// Constructor
+    PrintResult();
+
+    /// Destructor
+    ~PrintResult();
+
+    /// Copy constructor
+    PrintResult(const PrintResult&);
+
+    /// Copy assignment
+    /// @returns this
+    PrintResult& operator=(const PrintResult&);
+
+    /// The generated MSL.
+    std::string msl = "";
+
+    /// A map from entry point name to a list of dynamic workgroup allocations.
+    /// Each element of the vector is the size of the workgroup allocation that should be created
+    /// for that index.
+    std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations;
+};
+
 /// @param module the Tint IR module to generate
-Result<std::string> Print(core::ir::Module& module);
+/// @returns the result of printing the MSL shader on success, or failure
+Result<PrintResult> Print(core::ir::Module& module);
 
 }  // namespace tint::msl::writer
 

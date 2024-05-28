@@ -106,6 +106,7 @@ if (tint_build_unittests) {
         "return_test.cc",
         "type_test.cc",
         "var_test.cc",
+        "writer_test.cc",
       ]
       deps = [
         "${tint_src_dir}:gmock_and_gtest",

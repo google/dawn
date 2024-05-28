@@ -7,7 +7,7 @@ struct tint_module_vars_struct {
   threadgroup float2x2* W;
 };
 
-kernel void F(uint mat2x2 [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v) {
+kernel void F(uint mat2x2 [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.W=(&(*v).tint_symbol)};
   if ((mat2x2 == 0u)) {
     (*tint_module_vars.W) = float2x2(float2(0.0f), float2(0.0f));

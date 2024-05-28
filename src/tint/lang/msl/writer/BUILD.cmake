@@ -116,6 +116,7 @@ tint_add_target(tint_lang_msl_writer_test test
   lang/msl/writer/return_test.cc
   lang/msl/writer/type_test.cc
   lang/msl/writer/var_test.cc
+  lang/msl/writer/writer_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_msl_writer_test test

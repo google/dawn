@@ -32,7 +32,7 @@ struct tint_module_vars_struct {
   threadgroup float* wg_var;
 };
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v) {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   thread bool bool_var = false;
   thread int i32_var = 0;
   thread uint u32_var = 0u;

@@ -10,7 +10,7 @@ struct tint_module_vars_struct {
 void func(threadgroup float2* const pointer) {
   (*pointer) = float2(0.0f);
 }
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v) {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=(&(*v).tint_symbol_1)};
   if ((tint_local_index == 0u)) {
     (*tint_module_vars.S) = float2x2(float2(0.0f), float2(0.0f));

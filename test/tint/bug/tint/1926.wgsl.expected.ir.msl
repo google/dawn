@@ -8,7 +8,7 @@ struct tint_module_vars_struct {
   device uint* output;
 };
 
-kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], uint3 local_id [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v, device uint* output [[buffer(4)]]) {
+kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], uint3 local_id [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]], device uint* output [[buffer(4)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sh_atomic_failed=(&(*v).tint_symbol_1), .output=output};
   if ((tint_local_index == 0u)) {
     (*tint_module_vars.sh_atomic_failed) = 0u;
