@@ -57,13 +57,14 @@ class SpirvReader_ShaderIOTest : public core::ir::transform::TransformTest {
 TEST_F(SpirvReader_ShaderIOTest, NoInputsOrOutputs) {
     auto* ep = b.Function("foo", ty.void_());
     ep->SetStage(core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(1, 1, 1);
 
     b.Append(ep->Block(), [&] {  //
         b.Return(ep);
     });
 
     auto* src = R"(
-%foo = @compute func():void {
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     ret
   }
@@ -342,6 +343,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper) {
 
     // Use a different subset of the inputs in the entry point.
     auto* ep = b.Function("main1", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(1, 1, 1);
     b.Append(ep->Block(), [&] {
         auto* group_value = b.Load(group_id);
         auto* gid_value = b.Load(gid);
@@ -365,7 +367,7 @@ $B1: {  # root
     ret
   }
 }
-%main1 = @compute func():void {
+%main1 = @compute @workgroup_size(1, 1, 1) func():void {
   $B3: {
     %9:vec3<u32> = load %group_id
     %10:vec3<u32> = load %gid
@@ -384,7 +386,7 @@ $B1: {  # root
     ret
   }
 }
-%main1 = @compute func(%gid_1:vec3<u32> [@global_invocation_id], %lid_1:vec3<u32> [@local_invocation_id], %group_id:vec3<u32> [@workgroup_id]):void {  # %gid_1: 'gid', %lid_1: 'lid'
+%main1 = @compute @workgroup_size(1, 1, 1) func(%gid_1:vec3<u32> [@global_invocation_id], %lid_1:vec3<u32> [@local_invocation_id], %group_id:vec3<u32> [@workgroup_id]):void {  # %gid_1: 'gid', %lid_1: 'lid'
   $B2: {
     %9:vec3<u32> = add %group_id, %gid_1
     %10:void = call %foo, %gid_1, %lid_1
@@ -422,6 +424,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper_ForwardReference
     mod.root_block->Append(group_id);
 
     auto* ep = b.Function("main1", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(1, 1, 1);
     auto* foo = b.Function("foo", ty.void_());
 
     // Use a subset of the inputs in the entry point.
@@ -448,7 +451,7 @@ $B1: {  # root
   %group_id:ptr<__in, vec3<u32>, read> = var @builtin(workgroup_id)
 }
 
-%main1 = @compute func():void {
+%main1 = @compute @workgroup_size(1, 1, 1) func():void {
   $B2: {
     %5:vec3<u32> = load %group_id
     %6:vec3<u32> = load %gid
@@ -469,7 +472,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%main1 = @compute func(%gid:vec3<u32> [@global_invocation_id], %lid:vec3<u32> [@local_invocation_id], %group_id:vec3<u32> [@workgroup_id]):void {
+%main1 = @compute @workgroup_size(1, 1, 1) func(%gid:vec3<u32> [@global_invocation_id], %lid:vec3<u32> [@local_invocation_id], %group_id:vec3<u32> [@workgroup_id]):void {
   $B1: {
     %5:vec3<u32> = add %group_id, %gid
     %6:void = call %foo, %gid, %lid
@@ -523,6 +526,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByMultipleEntryPoints) {
 
     // Call the helper without directly referencing any inputs.
     auto* ep1 = b.Function("main1", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep1->SetWorkgroupSize(1, 1, 1);
     b.Append(ep1->Block(), [&] {
         b.Call(foo);
         b.Return(ep1);
@@ -530,6 +534,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByMultipleEntryPoints) {
 
     // Reference another input and then call the helper.
     auto* ep2 = b.Function("main2", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep2->SetWorkgroupSize(1, 1, 1);
     b.Append(ep2->Block(), [&] {
         auto* group_value = b.Load(group_id);
         b.Add(ty.vec3<u32>(), group_value, group_value);
@@ -552,13 +557,13 @@ $B1: {  # root
     ret
   }
 }
-%main1 = @compute func():void {
+%main1 = @compute @workgroup_size(1, 1, 1) func():void {
   $B3: {
     %9:void = call %foo
     ret
   }
 }
-%main2 = @compute func():void {
+%main2 = @compute @workgroup_size(1, 1, 1) func():void {
   $B4: {
     %11:vec3<u32> = load %group_id
     %12:vec3<u32> = add %11, %11
@@ -576,13 +581,13 @@ $B1: {  # root
     ret
   }
 }
-%main1 = @compute func(%gid_1:vec3<u32> [@global_invocation_id], %lid_1:vec3<u32> [@local_invocation_id]):void {  # %gid_1: 'gid', %lid_1: 'lid'
+%main1 = @compute @workgroup_size(1, 1, 1) func(%gid_1:vec3<u32> [@global_invocation_id], %lid_1:vec3<u32> [@local_invocation_id]):void {  # %gid_1: 'gid', %lid_1: 'lid'
   $B2: {
     %8:void = call %foo, %gid_1, %lid_1
     ret
   }
 }
-%main2 = @compute func(%gid_2:vec3<u32> [@global_invocation_id], %lid_2:vec3<u32> [@local_invocation_id], %group_id:vec3<u32> [@workgroup_id]):void {  # %gid_2: 'gid', %lid_2: 'lid'
+%main2 = @compute @workgroup_size(1, 1, 1) func(%gid_2:vec3<u32> [@global_invocation_id], %lid_2:vec3<u32> [@local_invocation_id], %group_id:vec3<u32> [@workgroup_id]):void {  # %gid_2: 'gid', %lid_2: 'lid'
   $B3: {
     %13:vec3<u32> = add %group_id, %group_id
     %14:void = call %foo, %gid_2, %lid_2
@@ -606,6 +611,7 @@ TEST_F(SpirvReader_ShaderIOTest, Input_LoadVectorElement) {
     mod.root_block->Append(lid);
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(1, 1, 1);
     b.Append(ep->Block(), [&] {
         b.LoadVectorElement(lid, 2_u);
         b.Return(ep);
@@ -616,7 +622,7 @@ $B1: {  # root
   %lid:ptr<__in, vec3<u32>, read> = var @builtin(local_invocation_id)
 }
 
-%foo = @compute func():void {
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
   $B2: {
     %3:u32 = load_vector_element %lid, 2u
     ret
@@ -626,7 +632,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = @compute func(%lid:vec3<u32> [@local_invocation_id]):void {
+%foo = @compute @workgroup_size(1, 1, 1) func(%lid:vec3<u32> [@local_invocation_id]):void {
   $B1: {
     %3:u32 = access %lid, 2u
     ret
@@ -649,6 +655,7 @@ TEST_F(SpirvReader_ShaderIOTest, Input_AccessChains) {
     mod.root_block->Append(lid);
 
     auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(1, 1, 1);
     b.Append(ep->Block(), [&] {
         auto* access_1 = b.Access(ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()), lid);
         auto* access_2 = b.Access(ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()), access_1);
@@ -663,7 +670,7 @@ $B1: {  # root
   %lid:ptr<__in, vec3<u32>, read> = var @builtin(local_invocation_id)
 }
 
-%foo = @compute func():void {
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
   $B2: {
     %3:ptr<__in, vec3<u32>, read> = access %lid
     %4:ptr<__in, vec3<u32>, read> = access %3
@@ -677,7 +684,7 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = @compute func(%lid:vec3<u32> [@local_invocation_id]):void {
+%foo = @compute @workgroup_size(1, 1, 1) func(%lid:vec3<u32> [@local_invocation_id]):void {
   $B1: {
     %3:u32 = access %lid, 2u
     %4:vec3<u32> = mul %lid, %3

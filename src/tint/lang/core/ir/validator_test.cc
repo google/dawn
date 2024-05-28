@@ -261,6 +261,26 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_MissingWorkgroupSize) {
+    auto* f = b.Function("f", ty.void_(), Function::PipelineStage::kCompute);
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: compute entry point requires workgroup size attribute
+%f = @compute func():void {
+^^
+
+note: # Disassembly
+%f = @compute func():void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
     auto* f = b.Function("f", ty.void_());
     auto* g = b.Function("g", ty.void_());
@@ -296,6 +316,7 @@ note: # Disassembly
 TEST_F(IR_ValidatorTest, CallToEntryPointFunction) {
     auto* f = b.Function("f", ty.void_());
     auto* g = b.Function("g", ty.void_(), Function::PipelineStage::kCompute);
+    g->SetWorkgroupSize(1, 1, 1);
 
     b.Append(f->Block(), [&] {
         b.Call(g);
@@ -321,7 +342,7 @@ note: # Disassembly
     ret
   }
 }
-%g = @compute func():void {
+%g = @compute @workgroup_size(1, 1, 1) func():void {
   $B2: {
     ret
   }

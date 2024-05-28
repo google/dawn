@@ -781,6 +781,13 @@ void Validator::CheckFunction(const Function* func) {
 
         scope_stack_.Add(param);
     }
+
+    if (func->Stage() == Function::PipelineStage::kCompute) {
+        if (TINT_UNLIKELY(!func->WorkgroupSize().has_value())) {
+            AddError(func) << "compute entry point requires workgroup size attribute";
+        }
+    }
+
     if (HoldsType<type::Reference>(func->ReturnType())) {
         AddError(func) << "references are not permitted as return types";
     }

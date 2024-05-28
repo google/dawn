@@ -90,6 +90,10 @@ class Function : public Castable<Function, Value> {
     /// @param z the z size
     void SetWorkgroupSize(uint32_t x, uint32_t y, uint32_t z) { workgroup_size_ = {x, y, z}; }
 
+    /// Sets the workgroup size
+    /// @param size the new size
+    void SetWorkgroupSize(std::array<uint32_t, 3> size) { workgroup_size_ = size; }
+
     /// Clears the workgroup size.
     void ClearWorkgroupSize() { workgroup_size_ = {}; }
 
