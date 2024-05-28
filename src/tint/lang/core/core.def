@@ -270,6 +270,7 @@ type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 type texture_external
+type input_attachment<T>
 
 @display("__modf_result_{T}")        type __modf_result<T>
 @display("__modf_result_vec{N}_{T}") type __modf_result_vec<N: num, T>
@@ -667,6 +668,8 @@ fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>
 @must_use fn textureLoad[C: iu32](texture: texture_storage_3d<f32_texel_format, readable>, coords: vec3<C>) -> vec4<f32>
 @must_use fn textureLoad[C: iu32](texture: texture_storage_3d<i32_texel_format, readable>, coords: vec3<C>) -> vec4<i32>
 @must_use fn textureLoad[C: iu32](texture: texture_storage_3d<u32_texel_format, readable>, coords: vec3<C>) -> vec4<u32>
+
+@stage("fragment") fn inputAttachmentLoad[T: fiu32](input_attachment: input_attachment<T>) -> vec4<T>
 
 @stage("fragment", "compute") fn atomicLoad[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>) -> T
 @stage("fragment", "compute") fn atomicStore[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T)

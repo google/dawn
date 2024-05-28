@@ -54,6 +54,7 @@ enum class ParameterUsage : uint8_t {
     kDdx,
     kDdy,
     kDepthRef,
+    kInputAttachment,
     kLevel,
     kOffset,
     kSampleIndex,

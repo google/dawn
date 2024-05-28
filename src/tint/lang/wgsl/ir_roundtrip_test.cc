@@ -3314,6 +3314,22 @@ fn f() -> i32 {
 )");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// chromium_internal_input_attachments
+////////////////////////////////////////////////////////////////////////////////
+TEST_F(IRToProgramRoundtripTest, Call_InputAttachmentLoad) {
+    RUN_TEST(R"(
+enable chromium_internal_input_attachments;
+
+@group(0u) @binding(0u) @input_attachment_index(3u) var input_tex : input_attachment<f32>;
+
+@fragment
+fn main() -> @location(0u) vec4<f32> {
+  return inputAttachmentLoad(input_tex);
+}
+)");
+}
+
 TEST_F(IRToProgramRoundtripTest, WorkgroupSizeLargerThanI32) {
     RUN_TEST(R"(
 @compute @workgroup_size(4294967295u, 1u, 1u)

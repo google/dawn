@@ -81,6 +81,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -611,7 +612,8 @@ class Printer {
             texture,  //
             [&](const core::type::SampledTexture* t) { return Type(t->type()); },
             [&](const core::type::MultisampledTexture* t) { return Type(t->type()); },
-            [&](const core::type::StorageTexture* t) { return Type(t->type()); },  //
+            [&](const core::type::StorageTexture* t) { return Type(t->type()); },
+            [&](const core::type::InputAttachment* t) { return Type(t->type()); },  //
             TINT_ICE_ON_NO_MATCH);
 
         uint32_t dim = SpvDimMax;

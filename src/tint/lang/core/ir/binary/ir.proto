@@ -57,6 +57,7 @@ message Type {
         TypeStorageTexture storage_texture = 12;
         TypeExternalTexture external_texture = 13;
         TypeSampler sampler = 14;
+        TypeInputAttachment input_attachment = 15;
     }
 }
 
@@ -138,6 +139,10 @@ message TypeExternalTexture {}
 
 message TypeSampler {
     SamplerKind kind = 1;
+}
+
+message TypeInputAttachment {
+    uint32 sub_type = 1;  // Module.types
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -294,6 +299,7 @@ message InstructionLet {}
 
 message InstructionVar {
     optional BindingPoint binding_point = 1;
+    optional uint32 input_attachment_index = 2;
 }
 
 message InstructionConvert {}
@@ -625,4 +631,5 @@ enum BuiltinFn {
     atomic_compare_exchange_weak = 118;
     subgroup_ballot = 119;
     subgroup_broadcast = 120;
+    input_attachment_load = 121;
 }

@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -729,6 +730,20 @@ TEST_F(IRBinaryRoundtripTest, LoopBlockParams) {
 TEST_F(IRBinaryRoundtripTest, Unreachable) {
     auto* fn = b.Function("Function", ty.i32());
     b.Append(fn->Block(), [&] { b.Unreachable(); });
+    RUN_TEST();
+}
+
+TEST_F(IRBinaryRoundtripTest, InputAttachment) {
+    b.Append(b.ir.root_block, [&] {
+        auto* input_type = ty.Get<core::type::InputAttachment>(ty.i32());
+        auto* v = b.Var(ty.ptr(handle, input_type, read));
+        v->SetBindingPoint(10, 20);
+        v->SetInputAttachmentIndex(11);
+
+        auto* fn = b.Function("Function", ty.vec4<i32>());
+        b.Append(fn->Block(),
+                 [&] { b.Return(fn, b.Call<i32>(core::BuiltinFn::kInputAttachmentLoad, v)); });
+    });
     RUN_TEST();
 }
 

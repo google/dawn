@@ -56,6 +56,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "ddy";
         case ParameterUsage::kDepthRef:
             return "depth_ref";
+        case ParameterUsage::kInputAttachment:
+            return "input_attachment";
         case ParameterUsage::kLevel:
             return "level";
         case ParameterUsage::kOffset:

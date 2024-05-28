@@ -72,6 +72,7 @@
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -561,6 +562,10 @@ class State {
             attrs.Push(b.Binding(u32(bp->binding)));
         }
 
+        if (auto ii = var->InputAttachmentIndex()) {
+            attrs.Push(b.InputAttachmentIndex(u32(ii.value())));
+        }
+
         const ast::Expression* init = nullptr;
         if (var->Initializer()) {
             init = Expr(var->Initializer());
@@ -984,6 +989,11 @@ class State {
             },
             [&](const core::type::Reference*) -> ast::Type {
                 TINT_ICE() << "reference types should never appear in the IR";
+            },
+            [&](const core::type::InputAttachment* i) {
+                Enable(wgsl::Extension::kChromiumInternalInputAttachments);
+                auto el = Type(i->type());
+                return b.ty.input_attachment(el);
             },  //
             TINT_ICE_ON_NO_MATCH);
     }

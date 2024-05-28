@@ -170,6 +170,7 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kAtomicCompareExchangeWeak)
         CASE(kSubgroupBallot)
         CASE(kSubgroupBroadcast)
+        CASE(kInputAttachmentLoad)
         case core::BuiltinFn::kNone:
             break;
     }

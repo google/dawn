@@ -232,6 +232,7 @@
 "id"
 "if"
 "info"
+"inputAttachmentLoad"
 "input_attachment"
 "input_attachment_index"
 "insertBits"

@@ -84,6 +84,12 @@ class Var final : public Castable<Var, OperandInstruction<1, 1>> {
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
     std::optional<struct BindingPoint> BindingPoint() const { return binding_point_; }
 
+    /// Sets the input attachment index
+    /// @param index the index
+    void SetInputAttachmentIndex(uint32_t index) { input_attachment_index_ = index; }
+    /// @returns the input attachment index if any
+    std::optional<uint32_t> InputAttachmentIndex() const { return input_attachment_index_; }
+
     /// Sets the IO attributes
     /// @param attrs the attributes
     void SetAttributes(const IOAttributes& attrs) { attributes_ = attrs; }
@@ -98,6 +104,7 @@ class Var final : public Castable<Var, OperandInstruction<1, 1>> {
 
   private:
     std::optional<struct BindingPoint> binding_point_;
+    std::optional<uint32_t> input_attachment_index_;
     IOAttributes attributes_;
 };
 

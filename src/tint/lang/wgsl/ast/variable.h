@@ -37,6 +37,7 @@
 #include "src/tint/lang/wgsl/ast/binding_attribute.h"
 #include "src/tint/lang/wgsl/ast/expression.h"
 #include "src/tint/lang/wgsl/ast/group_attribute.h"
+#include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
 #include "src/tint/lang/wgsl/ast/node.h"
 #include "src/tint/lang/wgsl/ast/type.h"
 
@@ -79,6 +80,11 @@ class Variable : public Castable<Variable, Node> {
     bool HasBindingPoint() const {
         return HasAttribute<BindingAttribute>(attributes) &&
                HasAttribute<GroupAttribute>(attributes);
+    }
+
+    /// @returns true if the variable has an input_attachment_index attribute
+    bool HasInputAttachmentIndex() const {
+        return HasAttribute<InputAttachmentIndexAttribute>(attributes);
     }
 
     /// @returns the kind of the variable, which can be used in diagnostics

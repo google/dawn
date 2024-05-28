@@ -369,6 +369,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "textureLoad") {
         return BuiltinFn::kTextureLoad;
     }
+    if (name == "inputAttachmentLoad") {
+        return BuiltinFn::kInputAttachmentLoad;
+    }
     if (name == "atomicLoad") {
         return BuiltinFn::kAtomicLoad;
     }
@@ -638,6 +641,8 @@ const char* str(BuiltinFn i) {
             return "textureStore";
         case BuiltinFn::kTextureLoad:
             return "textureLoad";
+        case BuiltinFn::kInputAttachmentLoad:
+            return "inputAttachmentLoad";
         case BuiltinFn::kAtomicLoad:
             return "atomicLoad";
         case BuiltinFn::kAtomicStore:

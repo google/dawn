@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/invalid.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -624,6 +625,9 @@ struct Decoder {
             auto& bp_in = var_in.binding_point();
             var_out->SetBindingPoint(bp_in.group(), bp_in.binding());
         }
+        if (var_in.has_input_attachment_index()) {
+            var_out->SetInputAttachmentIndex(var_in.input_attachment_index());
+        }
         return var_out;
     }
 
@@ -664,6 +668,8 @@ struct Decoder {
                 return CreateTypeExternalTexture(type_in.external_texture());
             case pb::Type::KindCase::kSampler:
                 return CreateTypeSampler(type_in.sampler());
+            case pb::Type::KindCase::kInputAttachment:
+                return CreateTypeInputAttachment(type_in.input_attachment());
             case pb::Type::KindCase::KIND_NOT_SET:
                 break;
         }
@@ -861,6 +867,12 @@ struct Decoder {
     const type::Sampler* CreateTypeSampler(const pb::TypeSampler& sampler_in) {
         auto kind = SamplerKind(sampler_in.kind());
         return mod_out_.Types().Get<type::Sampler>(kind);
+    }
+
+    const type::InputAttachment* CreateTypeInputAttachment(
+        const pb::TypeInputAttachment& input_in) {
+        auto sub_type = Type(input_in.sub_type());
+        return mod_out_.Types().Get<type::InputAttachment>(sub_type);
     }
 
     const type::Type* Type(size_t id) {
@@ -1595,6 +1607,8 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupBallot;
             case pb::BuiltinFn::subgroup_broadcast:
                 return core::BuiltinFn::kSubgroupBroadcast;
+            case pb::BuiltinFn::input_attachment_load:
+                return core::BuiltinFn::kInputAttachmentLoad;
 
             case pb::BuiltinFn::BuiltinFn_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::BuiltinFn::BuiltinFn_INT_MAX_SENTINEL_DO_NOT_USE_:

@@ -99,6 +99,7 @@ struct State {
                     case core::BuiltinFn::kTextureSampleGrad:
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
+                    case core::BuiltinFn::kInputAttachmentLoad:
                         worklist.Push(builtin);
                         break;
                     case core::BuiltinFn::kQuantizeToF16:
@@ -167,6 +168,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kQuantizeToF16:
                     QuantizeToF16Vec(builtin);
+                    break;
+                case core::BuiltinFn::kInputAttachmentLoad:
+                    InputAttachmentLoad(builtin);
                     break;
                 default:
                     break;
@@ -851,6 +855,23 @@ struct State {
         }
         auto* construct = b.ConstructWithResult(builtin->DetachResult(), std::move(args));
         construct->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Handle an inputAttachmentLoad() builtin.
+    /// @param builtin the builtin call instruction
+    void InputAttachmentLoad(core::ir::CoreBuiltinCall* builtin) {
+        TINT_ASSERT(builtin->Args().Length() == 1);
+        // TODO(b/341117913): implement this
+
+        auto* result_ty = builtin->Result(0)->Type();
+
+        // Create placeholder result
+        auto* result = b.Construct(result_ty, b.Zero(result_ty));
+
+        result->InsertBefore(builtin);
+
+        result->SetResults(Vector{builtin->DetachResult()});
         builtin->Destroy();
     }
 };

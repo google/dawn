@@ -1247,9 +1247,15 @@ class Impl {
                 }
                 current_block_->Append(val);
 
-                if (auto* gv = sem->As<sem::GlobalVariable>(); gv && var->HasBindingPoint()) {
-                    val->SetBindingPoint(gv->Attributes().binding_point->group,
-                                         gv->Attributes().binding_point->binding);
+                if (auto* gv = sem->As<sem::GlobalVariable>(); gv) {
+                    if (var->HasBindingPoint()) {
+                        val->SetBindingPoint(gv->Attributes().binding_point->group,
+                                             gv->Attributes().binding_point->binding);
+                    }
+                    if (var->HasInputAttachmentIndex()) {
+                        val->SetInputAttachmentIndex(
+                            gv->Attributes().input_attachment_index.value());
+                    }
                 }
 
                 // Store the declaration so we can get the instruction to store too

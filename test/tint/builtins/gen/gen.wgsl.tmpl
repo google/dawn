@@ -92,6 +92,9 @@ struct UB {
 {{-     if eq "ptr" $p.Type.Target.Name -}}
 {{-       $el_type := Eval "Type" (index $p.Type.TemplateArguments 1)}}
 {{-       if eq "handle" $class -}}
+{{-         if HasPrefix $el_type "input_attachment" -}}
+              @input_attachment_index(3)
+{{          end -}}
             @group(1) @binding({{$i}}) var arg_{{$i}}: {{$el_type}};
 {{          $args.Put $i (printf "&arg_%v" $i) -}}
 {{-       else if eq "workgroup" $class -}}
@@ -104,6 +107,9 @@ struct UB {
 {{-     else -}}
 {{-       $type := Eval "Type" $p.Type}}
 {{-       if eq "handle" $class -}}
+{{-         if HasPrefix $type "input_attachment" -}}
+              @input_attachment_index(3)
+{{          end -}}
             @group(1) @binding({{$i}}) var arg_{{$i}}: {{$type}};
 {{          $args.Put $i (printf "arg_%v" $i) -}}
 {{-       else if eq "workgroup" $class -}}
@@ -230,6 +236,12 @@ fn compute_main() {
 enable chromium_experimental_subgroups;
 {{    end -}}
 
+
+{{- /* Emit 'enable chromium_internal_input_attachments' if required */ -}}
+{{-   if eq "inputAttachmentLoad" $builtin_name}}
+enable chromium_internal_input_attachments;
+{{    end -}}
+
 {{- /* Emit 'enable f16' if required */ -}}
 {{-   if OverloadUsesType $overload "f16"}}
 enable f16;
@@ -283,6 +295,7 @@ enable chromium_internal_graphite;
 {{-   if             eq $name "array"   -}}storage
 {{-   else if HasPrefix $name "texture" -}}handle
 {{-   else if HasPrefix $name "sampler" -}}handle
+{{-   else if HasPrefix $name "input_attachment" -}}handle
 {{-   else if        eq $name "ptr"     -}}{{(index .TemplateArguments 0).Target.Name}}
 {{-   else                              -}}function
 {{-   end -}}

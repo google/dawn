@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
@@ -185,6 +186,9 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::T
         auto access =
             address_space == core::AddressSpace::kStorage ? p->Access() : core::Access::kUndefined;
         return ctx.dst->ty.ptr(address_space, CreateASTTypeFor(ctx, p->StoreType()), access);
+    }
+    if (auto* i = ty->As<core::type::InputAttachment>()) {
+        return ctx.dst->ty.input_attachment(CreateASTTypeFor(ctx, i->type()));
     }
     TINT_UNREACHABLE() << "Unhandled type: " << ty->TypeInfo().name;
 }
