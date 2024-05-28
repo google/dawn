@@ -112,6 +112,14 @@ ast::transform::Transform::ApplyResult TruncateInterstageVariables::Apply(
 
         for (auto* member : str->Members()) {
             if (auto location = member->Attributes().location) {
+                const size_t kMaxLocation = data->interstage_locations.size() - 1u;
+                if (location.value() > kMaxLocation) {
+                    b.Diagnostics().AddError(Source{})
+                        << "The location (" << location.value() << ") of " << member->Name().Name()
+                        << " in " << str->Name().Name() << " exceeds the maximum value ("
+                        << kMaxLocation << ").";
+                    return resolver::Resolve(b);
+                }
                 if (!data->interstage_locations.test(location.value())) {
                     omit_members.Add(member);
                 }
