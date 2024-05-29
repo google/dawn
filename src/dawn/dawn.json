@@ -2023,17 +2023,6 @@
             {"name": "signaled values", "type": "uint64_t", "annotation": "const*", "length": "fence count"}
         ]
     },
-    "shared texture memory vk image descriptor": {
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["shared texture memory descriptor"],
-        "tags": ["dawn", "native"],
-        "members": [
-            {"name": "vk format", "type": "int32_t"},
-            {"name": "vk usage flags", "type": "int32_t"},
-            {"name": "vk extent 3D", "type": "extent 3D"}
-        ]
-    },
     "shared texture memory vk dedicated allocation descriptor": {
         "category": "structure",
         "chained": "in",
@@ -3888,7 +3877,6 @@
             {"value": 1026, "name": "shader module compilation options", "tags": ["dawn"]},
             {"value": 1027, "name": "color target state expand resolve texture dawn", "tags": ["dawn"]},
 
-            {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
             {"value": 1102, "name": "shared texture memory a hardware buffer descriptor", "tags": ["dawn", "native"]},
             {"value": 1103, "name": "shared texture memory dma buf descriptor", "tags": ["dawn", "native"]},
