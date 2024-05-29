@@ -164,22 +164,23 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "ExternalDependencyTargets"}}
-{{-        if eq $.Name "abseil"             -}}"${tint_src_dir}:abseil",
-{{-   else if eq $.Name "dl"                 -}}"${tint_src_dir}:dl",
-{{-   else if eq $.Name "dxc-include"        -}}"${tint_src_dir}:dxc-include",
-{{-   else if eq $.Name "glslang-res-limits" -}}"${tint_glslang_dir}:glslang_default_resource_limits_sources",
-{{-   else if eq $.Name "glslang"            -}}"${tint_glslang_dir}:glslang_lib_sources",
-{{-   else if eq $.Name "google-benchmark"   -}}"${tint_src_dir}:google_benchmark",
-{{-   else if eq $.Name "gtest"              -}}"${tint_src_dir}:gmock_and_gtest",
-{{-   else if eq $.Name "jsoncpp"            -}}"${tint_src_dir}:jsoncpp",
-{{-   else if eq $.Name "langsvr"            -}}"${tint_src_dir}:langsvr",
-{{-   else if eq $.Name "metal"              -}}"${tint_src_dir}:metal",
-{{-   else if eq $.Name "spirv-headers"      -}}"${tint_spirv_headers_dir}:spv_headers",
-{{-   else if eq $.Name "spirv-opt-internal" -}}"${tint_spirv_tools_dir}:spvtools", "${tint_spirv_tools_dir}:spvtools_opt", "${tint_spirv_tools_dir}:spvtools_val",
-{{-   else if eq $.Name "spirv-tools"        -}}"${tint_spirv_tools_dir}:spvtools_headers", "${tint_spirv_tools_dir}:spvtools_val",
-{{-   else if eq $.Name "thread"             -}}"${tint_src_dir}:thread",
-{{-   else if eq $.Name "winsock"            -}}"${tint_src_dir}:winsock",
-{{-   else                                   -}}{{Error (printf "unhandled external dependency '%v'" $.Name)}}
+{{-        if eq $.Name "abseil"               -}}"${tint_src_dir}:abseil",
+{{-   else if eq $.Name "dl"                   -}}"${tint_src_dir}:dl",
+{{-   else if eq $.Name "dxc-include"          -}}"${tint_src_dir}:dxc-include",
+{{-   else if eq $.Name "glslang-res-limits"   -}}"${tint_glslang_dir}:glslang_default_resource_limits_sources",
+{{-   else if eq $.Name "glslang"              -}}"${tint_glslang_dir}:glslang_lib_sources",
+{{-   else if eq $.Name "google-benchmark"     -}}"${tint_src_dir}:google_benchmark",
+{{-   else if eq $.Name "gtest"                -}}"${tint_src_dir}:gmock_and_gtest",
+{{-   else if eq $.Name "jsoncpp"              -}}"${tint_src_dir}:jsoncpp",
+{{-   else if eq $.Name "langsvr"              -}}"${tint_src_dir}:langsvr",
+{{-   else if eq $.Name "libprotobuf-mutator"  -}}"${tint_lpm_dir}:libprotobuf-mutator",
+{{-   else if eq $.Name "metal"                -}}"${tint_src_dir}:metal",
+{{-   else if eq $.Name "spirv-headers"        -}}"${tint_spirv_headers_dir}:spv_headers",
+{{-   else if eq $.Name "spirv-opt-internal"   -}}"${tint_spirv_tools_dir}:spvtools", "${tint_spirv_tools_dir}:spvtools_opt", "${tint_spirv_tools_dir}:spvtools_val",
+{{-   else if eq $.Name "spirv-tools"          -}}"${tint_spirv_tools_dir}:spvtools_headers", "${tint_spirv_tools_dir}:spvtools_val",
+{{-   else if eq $.Name "thread"               -}}"${tint_src_dir}:thread",
+{{-   else if eq $.Name "winsock"              -}}"${tint_src_dir}:winsock",
+{{-   else                                     -}}{{Error (printf "unhandled external dependency '%v'" $.Name)}}
 {{-   end}}
 {{- end}}
 

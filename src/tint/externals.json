@@ -89,5 +89,10 @@
             "winsock2.h"
         ],
         "Condition": "tint_build_is_win"
+    },
+    "libprotobuf-mutator": {
+      "IncludePatterns": [
+          "libprotobuf-mutator/**"
+      ]
     }
 }
