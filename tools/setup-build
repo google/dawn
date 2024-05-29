@@ -34,16 +34,18 @@ ROOT_DIR="$( cd "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd )"
 POSSIBLE_BUILD_SYSTEMS="[gn|cmake]"
 POSSIBLE_BUILD_TYPES="[debug|release]"
 POSSIBLE_BUILD_ARCHS="[native|x86]"
+BUILD_FUZZER=""
 
 BUILD_SYSTEM=""
 BUILD_TYPE=""
 BUILD_ARCH=""
 
 function show_usage() {
-  echo "setup-build $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS"
+  echo "setup-build $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz|fuzzer]"
   echo
   echo "creates a build directory in <dawn>/out using either GN or CMake, then"
   echo "updates the '<dawn>/out/active' symlink to point to the build directory"
+  echo "Specifying 'fuzz' or 'fuzzer' forces Clang to be used"
   if [[ ! -z "$1" ]]; then
     echo
     echo "$1"
@@ -95,6 +97,9 @@ for arg in "$@"; do
     ;;
     "native")
     ;;
+    "fuzz" | "fuzzer")
+      BUILD_FUZZER=1
+    ;;
     "--help" | "-help" | "-h")
       show_usage
     ;;
@@ -115,6 +120,9 @@ fi
 BUILD_DIR="$BUILD_SYSTEM-$BUILD_TYPE"
 if [[ ! -z "$BUILD_ARCH" ]]; then
   BUILD_DIR+="-$BUILD_ARCH"
+fi
+if [[ ! -z "$BUILD_FUZZER" ]]; then
+  BUILD_DIR+="-fuzz"
 fi
 
 function generate() {
@@ -150,6 +158,9 @@ case $BUILD_SYSTEM in
         show_usage "invalid build architecture '$BUILD_ARCH'"
       ;;
     esac
+    if [[ -n "$BUILD_FUZZER" ]]; then
+        GN_ARGS+=" use_libfuzzer=true"
+    fi
     if [ -f "$ROOT_DIR/out/$BUILD_DIR/args.gn" ]; then
       generate "gn" "gen" "out/active" # keep existing args
     else
@@ -165,6 +176,11 @@ case $BUILD_SYSTEM in
     CMAKE_FLAGS+=("-DTINT_BUILD_WGSL_WRITER=1")
     CMAKE_FLAGS+=("-DTINT_BUILD_TINTD=1")
     CMAKE_FLAGS+=("-DDAWN_BUILD_NODE_BINDINGS=1")
+    if [[ -n "$BUILD_FUZZER" ]]; then
+        CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER=clang++")
+        CMAKE_FLAGS+=("-DCMAKE_C_COMPILER=clang")
+        CMAKE_FLAGS+=("-DTINT_BUILD_FUZZERS=ON")
+    fi
     if [[ -x $(command -v ccache) ]]; then
       CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER_LAUNCHER=ccache")
     fi
