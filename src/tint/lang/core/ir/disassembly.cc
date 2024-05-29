@@ -576,7 +576,7 @@ void Disassembly::EmitOperandList(const Instruction* inst, size_t start_index /*
 }
 
 void Disassembly::EmitOperandList(const Instruction* inst, size_t start_index, size_t count) {
-    size_t n = std::min(count, inst->Operands().Length());
+    size_t n = std::min(start_index + count, inst->Operands().Length());
     for (size_t i = start_index; i < n; i++) {
         if (i != start_index) {
             out_ << ", ";

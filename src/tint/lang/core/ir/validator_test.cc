@@ -3319,8 +3319,8 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterUnexpectedValues) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:8:9 error: break_if: provides 2 values but 'loop' block $B2 expects 0 values
-        break_if true next_iteration: [ 1i ]  # -> [t: exit_loop loop_1, f: $B2]
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        break_if true next_iteration: [ 1i, 2i ]  # -> [t: exit_loop loop_1, f: $B2]
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :7:7 note: in block
       $B3: {  # continuing
@@ -3338,7 +3338,7 @@ note: # Disassembly
         continue  # -> $B3
       }
       $B3: {  # continuing
-        break_if true next_iteration: [ 1i ]  # -> [t: exit_loop loop_1, f: $B2]
+        break_if true next_iteration: [ 1i, 2i ]  # -> [t: exit_loop loop_1, f: $B2]
       }
     }
     ret
@@ -3412,7 +3412,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
     EXPECT_EQ(
         res.Failure().reason.Str(),
         R"(:11:45 error: break_if: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
-        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B3]
+        break_if true next_iteration: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
                                             ^^
 
 :10:7 note: in block
@@ -3424,7 +3424,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
                    ^^
 
 :11:49 error: break_if: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
-        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B3]
+        break_if true next_iteration: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
                                                 ^^^^
 
 :10:7 note: in block
@@ -3446,7 +3446,7 @@ note: # Disassembly
         continue  # -> $B4
       }
       $B4: {  # continuing
-        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B3]
+        break_if true next_iteration: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret
