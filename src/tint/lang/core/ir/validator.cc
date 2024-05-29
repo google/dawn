@@ -362,6 +362,10 @@ class Validator {
     /// @param l the loop to validate
     void CheckLoop(const Loop* l);
 
+    /// Validates the loop body block
+    /// @param l the loop to validate
+    void CheckLoopBody(const Loop* l);
+
     /// Validates the loop continuing block
     /// @param l the loop to validate
     void CheckLoopContinuing(const Loop* l);
@@ -1217,11 +1221,23 @@ void Validator::CheckLoop(const Loop* l) {
         });
     }
 
-    tasks_.Push([this, l] { BeginBlock(l->Body()); });
+    tasks_.Push([this, l] {
+        CheckLoopBody(l);
+        BeginBlock(l->Body());
+    });
     if (!l->Initializer()->IsEmpty()) {
         tasks_.Push([this, l] { BeginBlock(l->Initializer()); });
     }
     tasks_.Push([this, l] { control_stack_.Push(l); });
+}
+
+void Validator::CheckLoopBody(const Loop* loop) {
+    // If the body block has parameters, there must be an initializer block.
+    if (!loop->Body()->Params().IsEmpty()) {
+        if (!loop->HasInitializer()) {
+            AddError(loop) << "loop with body block parameters must have an initializer";
+        }
+    }
 }
 
 void Validator::CheckLoopContinuing(const Loop* loop) {

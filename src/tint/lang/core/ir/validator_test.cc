@@ -528,6 +528,7 @@ TEST_F(IR_ValidatorTest, Block_DeadParameter) {
     auto* p = b.BlockParam("my_param", ty.f32());
     b.Append(f->Block(), [&] {
         auto* l = b.Loop();
+        b.Append(l->Initializer(), [&] { b.NextIteration(l, nullptr); });
         l->Body()->SetParams({p});
         b.Append(l->Body(), [&] { b.ExitLoop(l); });
         b.Return(f);
@@ -538,15 +539,18 @@ TEST_F(IR_ValidatorTest, Block_DeadParameter) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:12 error: destroyed parameter found in block parameter list
-      $B2 (%my_param:f32): {  # body
+              R"(:7:12 error: destroyed parameter found in block parameter list
+      $B3 (%my_param:f32): {  # body
            ^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    loop [b: $B2] {  # loop_1
-      $B2 (%my_param:f32): {  # body
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        next_iteration undef  # -> $B3
+      }
+      $B3 (%my_param:f32): {  # body
         exit_loop  # loop_1
       }
     }
@@ -562,6 +566,7 @@ TEST_F(IR_ValidatorTest, Block_ParameterWithNullBlock) {
     auto* p = b.BlockParam("my_param", ty.f32());
     b.Append(f->Block(), [&] {
         auto* l = b.Loop();
+        b.Append(l->Initializer(), [&] { b.NextIteration(l, nullptr); });
         l->Body()->SetParams({p});
         b.Append(l->Body(), [&] { b.ExitLoop(l); });
         b.Return(f);
@@ -572,15 +577,18 @@ TEST_F(IR_ValidatorTest, Block_ParameterWithNullBlock) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:12 error: block parameter has nullptr parent block
-      $B2 (%my_param:f32): {  # body
+              R"(:7:12 error: block parameter has nullptr parent block
+      $B3 (%my_param:f32): {  # body
            ^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    loop [b: $B2] {  # loop_1
-      $B2 (%my_param:f32): {  # body
+    loop [i: $B2, b: $B3] {  # loop_1
+      $B2: {  # initializer
+        next_iteration undef  # -> $B3
+      }
+      $B3 (%my_param:f32): {  # body
         exit_loop  # loop_1
       }
     }
@@ -596,6 +604,7 @@ TEST_F(IR_ValidatorTest, Block_ParameterUsedInMultipleBlocks) {
     auto* p = b.BlockParam("my_param", ty.f32());
     b.Append(f->Block(), [&] {
         auto* l = b.Loop();
+        b.Append(l->Initializer(), [&] { b.NextIteration(l, nullptr); });
         l->Body()->SetParams({p});
         b.Append(l->Body(), [&] { b.Continue(l, p); });
         l->Continuing()->SetParams({p});
@@ -606,23 +615,26 @@ TEST_F(IR_ValidatorTest, Block_ParameterUsedInMultipleBlocks) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:12 error: block parameter has incorrect parent block
-      $B2 (%my_param:f32): {  # body
+              R"(:7:12 error: block parameter has incorrect parent block
+      $B3 (%my_param:f32): {  # body
            ^^^^^^^^^
 
-:7:7 note: parent block declared here
-      $B3 (%my_param:f32): {  # continuing
+:10:7 note: parent block declared here
+      $B4 (%my_param:f32): {  # continuing
       ^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2 (%my_param:f32): {  # body
-        continue %my_param  # -> $B3
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration undef  # -> $B3
       }
-      $B3 (%my_param:f32): {  # continuing
-        next_iteration %my_param  # -> $B2
+      $B3 (%my_param:f32): {  # body
+        continue %my_param  # -> $B4
+      }
+      $B4 (%my_param:f32): {  # continuing
+        next_iteration %my_param  # -> $B3
       }
     }
     ret
@@ -3179,6 +3191,40 @@ TEST_F(IR_ValidatorTest, NextIteration_MatchedTypes) {
     ASSERT_EQ(res, Success);
 }
 
+TEST_F(IR_ValidatorTest, LoopBodyParamsWithoutInitializer) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Body()->SetParams({b.BlockParam<i32>(), b.BlockParam<i32>()});
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: loop: loop with body block parameters must have an initializer
+    loop [b: $B2] {  # loop_1
+    ^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2 (%2:i32, %3:i32): {  # body
+        exit_loop  # loop_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, ContinuingUseValueBeforeContinue) {
     auto* f = b.Function("my_func", ty.void_());
     auto* value = b.Let("value", 1_i);
@@ -3306,6 +3352,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMissingValues) {
     b.Append(f->Block(), [&] {
         auto* loop = b.Loop();
         loop->Body()->SetParams({b.BlockParam<i32>(), b.BlockParam<i32>()});
+        b.Append(loop->Initializer(), [&] { b.NextIteration(loop, nullptr, nullptr); });
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(), [&] { b.BreakIf(loop, true, Empty, Empty); });
         b.Return(f);
@@ -3314,27 +3361,30 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMissingValues) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:9 error: break_if: provides 0 values but 'loop' block $B2 expects 2 values
-        break_if true  # -> [t: exit_loop loop_1, f: $B2]
+              R"(:11:9 error: break_if: provides 0 values but 'loop' block $B3 expects 2 values
+        break_if true  # -> [t: exit_loop loop_1, f: $B3]
         ^^^^^^^^^^^^^
 
-:7:7 note: in block
-      $B3: {  # continuing
+:10:7 note: in block
+      $B4: {  # continuing
       ^^^
 
-:4:7 note: 'loop' block $B2 declared here
-      $B2 (%2:i32, %3:i32): {  # body
+:7:7 note: 'loop' block $B3 declared here
+      $B3 (%2:i32, %3:i32): {  # body
       ^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2 (%2:i32, %3:i32): {  # body
-        continue  # -> $B3
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration undef, undef  # -> $B3
       }
-      $B3: {  # continuing
-        break_if true  # -> [t: exit_loop loop_1, f: $B2]
+      $B3 (%2:i32, %3:i32): {  # body
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        break_if true  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret
@@ -3349,6 +3399,8 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
         auto* loop = b.Loop();
         loop->Body()->SetParams(
             {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
+        b.Append(loop->Initializer(),
+                 [&] { b.NextIteration(loop, nullptr, nullptr, nullptr, nullptr); });
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(),
                  [&] { b.BreakIf(loop, true, b.Values(1_i, 2_i, 3_f, false), Empty); });
@@ -3359,39 +3411,42 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:8:45 error: break_if: operand with type 'i32' does not match 'loop' block $B2 target type 'f32'
-        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B2]
+        R"(:11:45 error: break_if: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
+        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B3]
                                             ^^
 
-:7:7 note: in block
-      $B3: {  # continuing
+:10:7 note: in block
+      $B4: {  # continuing
       ^^^
 
-:4:20 note: %3 declared here
-      $B2 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
+:7:20 note: %3 declared here
+      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
                    ^^
 
-:8:49 error: break_if: operand with type 'f32' does not match 'loop' block $B2 target type 'u32'
-        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B2]
+:11:49 error: break_if: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
+        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B3]
                                                 ^^^^
 
-:7:7 note: in block
-      $B3: {  # continuing
+:10:7 note: in block
+      $B4: {  # continuing
       ^^^
 
-:4:28 note: %4 declared here
-      $B2 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
+:7:28 note: %4 declared here
+      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
                            ^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
-        continue  # -> $B3
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration undef, undef, undef, undef  # -> $B3
       }
-      $B3: {  # continuing
-        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B2]
+      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        break_if true next_iteration: [ 1i, 2i, 3.0f ]  # -> [t: exit_loop loop_1, f: $B3]
       }
     }
     ret
@@ -3406,6 +3461,8 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMatchedTypes) {
         auto* loop = b.Loop();
         loop->Body()->SetParams(
             {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
+        b.Append(loop->Initializer(),
+                 [&] { b.NextIteration(loop, nullptr, nullptr, nullptr, nullptr); });
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(),
                  [&] { b.BreakIf(loop, true, b.Values(1_i, 2_f, 3_u, false), Empty); });
