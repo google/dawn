@@ -266,6 +266,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
                 switch (sampleTypes) {
                     case SampleTypeBit::Float:
                     case SampleTypeBit::UnfilterableFloat:
+                    case SampleTypeBit::External:
                         firstAspect->baseType = TextureComponentType::Float;
                         break;
                     case SampleTypeBit::Sint:

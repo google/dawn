@@ -64,6 +64,9 @@ enum class Aspect : uint8_t;
 class DeviceBase;
 
 // This mirrors wgpu::TextureSampleType as a bitmask instead.
+// NOTE: SampleTypeBit::External does not have an equivalent TextureSampleType. All future
+// additions to SampleTypeBit that have an equivalent TextureSampleType should use
+// SampleTypeBit::External's value and update SampleTypeBit::External to a higher value.
 enum class SampleTypeBit : uint8_t {
     None = 0x0,
     Float = 0x1,
@@ -71,6 +74,7 @@ enum class SampleTypeBit : uint8_t {
     Depth = 0x4,
     Sint = 0x8,
     Uint = 0x10,
+    External = 0x20,
 };
 
 // Converts a wgpu::TextureSampleType to its bitmask representation.
