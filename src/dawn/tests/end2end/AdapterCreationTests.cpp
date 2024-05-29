@@ -180,6 +180,12 @@ TEST_P(AdapterCreationTest, FallbackAdapter) {
 
         EXPECT_EQ(properties.adapterType, wgpu::AdapterType::CPU);
         EXPECT_TRUE(gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID));
+
+        wgpu::AdapterInfo info;
+        adapter.GetInfo(&info);
+
+        EXPECT_EQ(info.adapterType, wgpu::AdapterType::CPU);
+        EXPECT_TRUE(gpu_info::IsGoogleSwiftshader(info.vendorID, info.deviceID));
     }
 }
 
@@ -209,6 +215,10 @@ TEST_P(AdapterCreationTest, PreferHighPerformance) {
         adapter.GetProperties(&properties);
         EXPECT_EQ(properties.adapterType, wgpu::AdapterType::DiscreteGPU);
         EXPECT_EQ(powerPreferenceProperties.powerPreference, options.powerPreference);
+
+        wgpu::AdapterInfo info;
+        adapter.GetInfo(&info);
+        EXPECT_EQ(info.adapterType, wgpu::AdapterType::DiscreteGPU);
     }
 }
 
@@ -238,6 +248,10 @@ TEST_P(AdapterCreationTest, PreferLowPower) {
         adapter.GetProperties(&properties);
         EXPECT_EQ(properties.adapterType, wgpu::AdapterType::IntegratedGPU);
         EXPECT_EQ(powerPreferenceProperties.powerPreference, options.powerPreference);
+
+        wgpu::AdapterInfo info;
+        adapter.GetInfo(&info);
+        EXPECT_EQ(info.adapterType, wgpu::AdapterType::IntegratedGPU);
     }
 }
 
@@ -470,6 +484,175 @@ TEST_P(AdapterCreationTest, PropertiesOutliveAdapter) {
     std::string architecture = properties.architecture;
     std::string name = properties.name;
     std::string driverDescription = properties.driverDescription;
+}
+
+// Test that calling AdapterGetInfo returns separate allocations for strings.
+// However, the string contents are equivalent.
+TEST_P(AdapterCreationTest, InfoUnique) {
+    wgpu::RequestAdapterOptions options = {};
+
+    MockCallback<WGPURequestAdapterCallback> cb;
+
+    WGPUAdapter cAdapter = nullptr;
+    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+        .WillOnce(SaveArg<1>(&cAdapter));
+    RequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
+
+    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+    if (!adapter) {
+        return;
+    }
+
+    wgpu::AdapterInfo info1;
+    wgpu::AdapterInfo info2;
+    adapter.GetInfo(&info1);
+    adapter.GetInfo(&info2);
+
+    EXPECT_NE(info1.vendor, info2.vendor);
+    EXPECT_STREQ(info1.vendor, info2.vendor);
+    EXPECT_NE(info1.architecture, info2.architecture);
+    EXPECT_STREQ(info1.architecture, info2.architecture);
+    EXPECT_NE(info1.device, info2.device);
+    EXPECT_STREQ(info1.device, info2.device);
+    EXPECT_NE(info1.description, info2.description);
+    EXPECT_STREQ(info1.description, info2.description);
+}
+
+// Test move assignment of the adapter info.
+TEST_P(AdapterCreationTest, InfoMoveAssign) {
+    wgpu::RequestAdapterOptions options = {};
+
+    MockCallback<WGPURequestAdapterCallback> cb;
+
+    WGPUAdapter cAdapter = nullptr;
+    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+        .WillOnce(SaveArg<1>(&cAdapter));
+    RequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
+
+    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+    if (!adapter) {
+        return;
+    }
+
+    wgpu::AdapterInfo info1;
+    wgpu::AdapterInfo info2;
+    adapter.GetInfo(&info1);
+    adapter.GetInfo(&info2);
+
+    std::string vendor = info1.vendor;
+    std::string architecture = info1.architecture;
+    std::string device = info1.device;
+    std::string description = info1.description;
+    wgpu::BackendType backendType = info1.backendType;
+    wgpu::AdapterType adapterType = info1.adapterType;
+    uint32_t vendorID = info1.vendorID;
+    uint32_t deviceID = info1.deviceID;
+
+    info2 = std::move(info1);
+
+    // Expect info2 to have info1's old contents.
+    EXPECT_STREQ(info2.vendor, vendor.c_str());
+    EXPECT_STREQ(info2.architecture, architecture.c_str());
+    EXPECT_STREQ(info2.device, device.c_str());
+    EXPECT_STREQ(info2.description, description.c_str());
+    EXPECT_EQ(info2.backendType, backendType);
+    EXPECT_EQ(info2.adapterType, adapterType);
+    EXPECT_EQ(info2.vendorID, vendorID);
+    EXPECT_EQ(info2.deviceID, deviceID);
+
+    // Expect info1 to be empty.
+    EXPECT_EQ(info1.vendor, nullptr);
+    EXPECT_EQ(info1.architecture, nullptr);
+    EXPECT_EQ(info1.device, nullptr);
+    EXPECT_EQ(info1.description, nullptr);
+    EXPECT_EQ(info1.backendType, static_cast<wgpu::BackendType>(0));
+    EXPECT_EQ(info1.adapterType, static_cast<wgpu::AdapterType>(0));
+    EXPECT_EQ(info1.vendorID, 0u);
+    EXPECT_EQ(info1.deviceID, 0u);
+}
+
+// Test move construction of the adapter info.
+TEST_P(AdapterCreationTest, InfoMoveConstruct) {
+    wgpu::RequestAdapterOptions options = {};
+
+    MockCallback<WGPURequestAdapterCallback> cb;
+
+    WGPUAdapter cAdapter = nullptr;
+    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+        .WillOnce(SaveArg<1>(&cAdapter));
+    RequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
+
+    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+    if (!adapter) {
+        return;
+    }
+
+    wgpu::AdapterInfo info1;
+    adapter.GetInfo(&info1);
+
+    std::string vendor = info1.vendor;
+    std::string architecture = info1.architecture;
+    std::string device = info1.device;
+    std::string description = info1.description;
+    wgpu::BackendType backendType = info1.backendType;
+    wgpu::AdapterType adapterType = info1.adapterType;
+    uint32_t vendorID = info1.vendorID;
+    uint32_t deviceID = info1.deviceID;
+
+    wgpu::AdapterInfo info2(std::move(info1));
+
+    // Expect info2 to have info1's old contents.
+    EXPECT_STREQ(info2.vendor, vendor.c_str());
+    EXPECT_STREQ(info2.architecture, architecture.c_str());
+    EXPECT_STREQ(info2.device, device.c_str());
+    EXPECT_STREQ(info2.description, description.c_str());
+    EXPECT_EQ(info2.backendType, backendType);
+    EXPECT_EQ(info2.adapterType, adapterType);
+    EXPECT_EQ(info2.vendorID, vendorID);
+    EXPECT_EQ(info2.deviceID, deviceID);
+
+    // Expect info1 to be empty.
+    EXPECT_EQ(info1.vendor, nullptr);
+    EXPECT_EQ(info1.architecture, nullptr);
+    EXPECT_EQ(info1.device, nullptr);
+    EXPECT_EQ(info1.description, nullptr);
+    EXPECT_EQ(info1.backendType, static_cast<wgpu::BackendType>(0));
+    EXPECT_EQ(info1.adapterType, static_cast<wgpu::AdapterType>(0));
+    EXPECT_EQ(info1.vendorID, 0u);
+    EXPECT_EQ(info1.deviceID, 0u);
+}
+
+// Test that the adapter info can outlive the adapter.
+TEST_P(AdapterCreationTest, InfoOutliveAdapter) {
+    wgpu::RequestAdapterOptions options = {};
+
+    MockCallback<WGPURequestAdapterCallback> cb;
+
+    WGPUAdapter cAdapter = nullptr;
+    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
+        .WillOnce(SaveArg<1>(&cAdapter));
+    RequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
+
+    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
+    if (!adapter) {
+        return;
+    }
+
+    wgpu::AdapterInfo info;
+    adapter.GetInfo(&info);
+
+    // Copy the info to std::string, this should not be a use-after-free.
+    std::string vendor = info.vendor;
+    std::string architecture = info.architecture;
+    std::string device = info.device;
+    std::string description = info.description;
+
+    // Release the adapter.
+    adapter = nullptr;
 }
 
 }  // anonymous namespace

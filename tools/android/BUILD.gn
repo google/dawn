@@ -30,6 +30,7 @@ import("//generator/dawn_generator.gni")
 dawn_json_generator("kotlin_gen") {
   target = "kotlin"
   outputs = [
+    "java/android/dawn/AdapterInfo.kt",
     "java/android/dawn/AdapterProperties.kt",
     "java/android/dawn/AdapterType.kt",
     "java/android/dawn/AddressMode.kt",

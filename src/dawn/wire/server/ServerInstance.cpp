@@ -98,6 +98,10 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     cmd.featuresCount = std::distance(features.begin(), it);
     cmd.features = features.data();
 
+    WGPUAdapterInfo info = {};
+    mProcs.adapterGetInfo(adapter, &info);
+    cmd.info = &info;
+
     // Query and report the adapter properties.
     WGPUAdapterProperties properties = {};
     WGPUChainedStructOut** propertiesChain = &properties.nextInChain;
@@ -140,6 +144,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     cmd.limits = &limits;
 
     SerializeCommand(cmd);
+    mProcs.adapterInfoFreeMembers(info);
     mProcs.adapterPropertiesFreeMembers(properties);
     mProcs.adapterPropertiesMemoryHeapsFreeMembers(memoryHeapProperties);
 }

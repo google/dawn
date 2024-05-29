@@ -66,6 +66,7 @@ class RequestAdapterEvent : public TrackedEvent {
     WireResult ReadyHook(FutureID futureID,
                          WGPURequestAdapterStatus status,
                          const char* message,
+                         const WGPUAdapterInfo* info,
                          const WGPUAdapterProperties* properties,
                          const WGPUSupportedLimits* limits,
                          uint32_t featuresCount,
@@ -76,6 +77,7 @@ class RequestAdapterEvent : public TrackedEvent {
             mMessage = message;
         }
         if (status == WGPURequestAdapterStatus_Success) {
+            mAdapter->SetInfo(info);
             mAdapter->SetProperties(properties);
             mAdapter->SetLimits(limits);
             mAdapter->SetFeatures(features, featuresCount);
@@ -248,12 +250,13 @@ WireResult Client::DoInstanceRequestAdapterCallback(ObjectHandle eventManager,
                                                     WGPUFuture future,
                                                     WGPURequestAdapterStatus status,
                                                     const char* message,
+                                                    const WGPUAdapterInfo* info,
                                                     const WGPUAdapterProperties* properties,
                                                     const WGPUSupportedLimits* limits,
                                                     uint32_t featuresCount,
                                                     const WGPUFeatureName* features) {
     return GetEventManager(eventManager)
-        .SetFutureReady<RequestAdapterEvent>(future.id, status, message, properties, limits,
+        .SetFutureReady<RequestAdapterEvent>(future.id, status, message, info, properties, limits,
                                              featuresCount, features);
 }
 

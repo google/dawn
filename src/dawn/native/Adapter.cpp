@@ -119,6 +119,42 @@ wgpu::Status AdapterBase::APIGetLimits(SupportedLimits* limits) const {
     return wgpu::Status::Success;
 }
 
+wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
+    DAWN_ASSERT(info != nullptr);
+
+    // Get lengths, with null terminators.
+    size_t vendorCLen = mPhysicalDevice->GetVendorName().length() + 1;
+    size_t architectureCLen = mPhysicalDevice->GetArchitectureName().length() + 1;
+    size_t deviceCLen = mPhysicalDevice->GetName().length() + 1;
+    size_t descriptionCLen = mPhysicalDevice->GetDriverDescription().length() + 1;
+
+    // Allocate space for all strings.
+    char* ptr = new char[vendorCLen + architectureCLen + deviceCLen + descriptionCLen];
+
+    info->vendor = ptr;
+    memcpy(ptr, mPhysicalDevice->GetVendorName().c_str(), vendorCLen);
+    ptr += vendorCLen;
+
+    info->architecture = ptr;
+    memcpy(ptr, mPhysicalDevice->GetArchitectureName().c_str(), architectureCLen);
+    ptr += architectureCLen;
+
+    info->device = ptr;
+    memcpy(ptr, mPhysicalDevice->GetName().c_str(), deviceCLen);
+    ptr += deviceCLen;
+
+    info->description = ptr;
+    memcpy(ptr, mPhysicalDevice->GetDriverDescription().c_str(), descriptionCLen);
+    ptr += descriptionCLen;
+
+    info->backendType = mPhysicalDevice->GetBackendType();
+    info->adapterType = mPhysicalDevice->GetAdapterType();
+    info->vendorID = mPhysicalDevice->GetVendorId();
+    info->deviceID = mPhysicalDevice->GetDeviceId();
+
+    return wgpu::Status::Success;
+}
+
 wgpu::Status AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     DAWN_ASSERT(properties != nullptr);
     UnpackedPtr<AdapterProperties> unpacked;
@@ -184,6 +220,11 @@ wgpu::Status AdapterBase::APIGetProperties(AdapterProperties* properties) const 
     ptr += driverDescriptionCLen;
 
     return wgpu::Status::Success;
+}
+
+void APIAdapterInfoFreeMembers(WGPUAdapterInfo info) {
+    // This single delete is enough because everything is a single allocation.
+    delete[] info.vendor;
 }
 
 void APIAdapterPropertiesFreeMembers(WGPUAdapterProperties properties) {

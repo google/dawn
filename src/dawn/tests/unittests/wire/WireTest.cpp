@@ -98,6 +98,16 @@ void WireTest::SetUp() {
     EXPECT_CALL(api, OnInstanceRequestAdapter2(apiInstance, NotNull(), _)).WillOnce([&]() {
         EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
+        EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
+            .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterInfo* info) {
+                *info = {};
+                info->vendor = "";
+                info->architecture = "";
+                info->device = "";
+                info->description = "";
+                return WGPUStatus_Success;
+            })));
+
         EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
             .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
                 *properties = {};

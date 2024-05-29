@@ -132,6 +132,13 @@
                 ]
             },
             {
+                "name": "get info",
+                "returns": "status",
+                "args": [
+                    {"name": "info", "type": "adapter info", "annotation": "*"}
+                ]
+            },
+            {
                 "name": "get properties",
                 "returns": "status",
                 "args": [
@@ -197,6 +204,20 @@
                     {"name": "capabilities", "type": "format capabilities", "annotation": "*"}
                 ]
             }
+        ]
+    },
+    "adapter info": {
+        "category": "structure",
+        "extensible": "out",
+        "members": [
+            {"name": "vendor", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
+            {"name": "architecture", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
+            {"name": "device", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
+            {"name": "description", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
+            {"name": "backend type", "type": "backend type"},
+            {"name": "adapter type", "type": "adapter type"},
+            {"name": "vendor ID", "type": "uint32_t"},
+            {"name": "device ID", "type": "uint32_t"}
         ]
     },
     "adapter properties": {

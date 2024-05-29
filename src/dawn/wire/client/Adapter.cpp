@@ -157,6 +157,10 @@ void Adapter::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCoun
     return mLimitsAndFeatures.SetFeatures(features, featuresCount);
 }
 
+void Adapter::SetInfo(const WGPUAdapterInfo* info) {
+    mInfo = *info;
+}
+
 void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
     mProperties = *properties;
     mProperties.nextInChain = nullptr;
@@ -190,6 +194,37 @@ void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
         }
         chain = chain->next;
     }
+}
+
+WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
+    *info = mInfo;
+
+    // Get lengths, with null terminators.
+    size_t vendorCLen = strlen(mInfo.vendor) + 1;
+    size_t architectureCLen = strlen(mInfo.architecture) + 1;
+    size_t deviceCLen = strlen(mInfo.device) + 1;
+    size_t descriptionCLen = strlen(mInfo.description) + 1;
+
+    // Allocate space for all strings.
+    char* ptr = new char[vendorCLen + architectureCLen + deviceCLen + descriptionCLen];
+
+    info->vendor = ptr;
+    memcpy(ptr, mInfo.vendor, vendorCLen);
+    ptr += vendorCLen;
+
+    info->architecture = ptr;
+    memcpy(ptr, mInfo.architecture, architectureCLen);
+    ptr += architectureCLen;
+
+    info->device = ptr;
+    memcpy(ptr, mInfo.device, deviceCLen);
+    ptr += deviceCLen;
+
+    info->description = ptr;
+    memcpy(ptr, mInfo.description, descriptionCLen);
+    ptr += descriptionCLen;
+
+    return WGPUStatus_Success;
 }
 
 WGPUStatus Adapter::GetProperties(WGPUAdapterProperties* properties) const {
@@ -366,6 +401,11 @@ WGPUStatus Adapter::GetFormatCapabilities(WGPUTextureFormat format,
 }
 
 }  // namespace dawn::wire::client
+
+DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterInfoFreeMembers(WGPUAdapterInfo info) {
+    // This single delete is enough because everything is a single allocation.
+    delete[] info.vendor;
+}
 
 DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterPropertiesFreeMembers(
     WGPUAdapterProperties properties) {
