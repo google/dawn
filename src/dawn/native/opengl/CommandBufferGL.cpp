@@ -184,7 +184,17 @@ class VertexStateBufferBindingTracker {
         mLastPipeline = pipeline;
     }
 
-    void Apply(const OpenGLFunctions& gl) {
+    void Apply(const OpenGLFunctions& gl, int32_t baseVertex, uint32_t firstInstance) {
+        if (mBaseVertex != baseVertex) {
+            mBaseVertex = baseVertex;
+            mDirtyVertexBuffers |= mLastPipeline->GetVertexBuffersUsedAsVertexBuffer();
+        }
+
+        if (mFirstInstance != firstInstance) {
+            mFirstInstance = firstInstance;
+            mDirtyVertexBuffers |= mLastPipeline->GetVertexBuffersUsedAsInstanceBuffer();
+        }
+
         if (mIndexBufferDirty && mIndexBuffer != nullptr) {
             gl.BindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->GetHandle());
             mIndexBufferDirty = false;
@@ -198,9 +208,15 @@ class VertexStateBufferBindingTracker {
 
                 GLuint attribIndex = static_cast<GLuint>(static_cast<uint8_t>(location));
                 GLuint buffer = mVertexBuffers[slot]->GetHandle();
-                uint64_t offset = mVertexBufferOffsets[slot];
+                intptr_t offset = mVertexBufferOffsets[slot];
 
                 const VertexBufferInfo& vertexBuffer = mLastPipeline->GetVertexBuffer(slot);
+
+                if (vertexBuffer.stepMode == wgpu::VertexStepMode::Vertex) {
+                    offset += mBaseVertex * vertexBuffer.arrayStride;
+                } else if (vertexBuffer.stepMode == wgpu::VertexStepMode::Instance) {
+                    offset += mFirstInstance * vertexBuffer.arrayStride;
+                }
                 uint32_t components = GetVertexFormatInfo(attribute.format).componentCount;
                 GLenum formatType = VertexFormatType(attribute.format);
 
@@ -209,11 +225,11 @@ class VertexStateBufferBindingTracker {
                 if (VertexFormatIsInt(attribute.format)) {
                     gl.VertexAttribIPointer(
                         attribIndex, components, formatType, vertexBuffer.arrayStride,
-                        reinterpret_cast<void*>(static_cast<intptr_t>(offset + attribute.offset)));
+                        reinterpret_cast<void*>(offset + static_cast<intptr_t>(attribute.offset)));
                 } else {
                     gl.VertexAttribPointer(
                         attribIndex, components, formatType, normalized, vertexBuffer.arrayStride,
-                        reinterpret_cast<void*>(static_cast<intptr_t>(offset + attribute.offset)));
+                        reinterpret_cast<void*>(offset + static_cast<intptr_t>(attribute.offset)));
                 }
             }
         }
@@ -229,6 +245,8 @@ class VertexStateBufferBindingTracker {
     PerVertexBuffer<Buffer*> mVertexBuffers;
     PerVertexBuffer<uint64_t> mVertexBufferOffsets;
 
+    int32_t mBaseVertex = 0;
+    uint32_t mFirstInstance = 0;
     raw_ptr<RenderPipelineBase> mLastPipeline = nullptr;
 };
 
@@ -1113,7 +1131,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
         switch (type) {
             case Command::Draw: {
                 DrawCmd* draw = iter->NextCommand<DrawCmd>();
-                vertexStateBufferBindingTracker.Apply(gl);
+                vertexStateBufferBindingTracker.Apply(gl, 0, draw->firstInstance);
                 bindGroupTracker.Apply(gl);
 
                 if (lastPipeline->UsesInstanceIndex()) {
@@ -1127,7 +1145,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
 
             case Command::DrawIndexed: {
                 DrawIndexedCmd* draw = iter->NextCommand<DrawIndexedCmd>();
-                vertexStateBufferBindingTracker.Apply(gl);
+                vertexStateBufferBindingTracker.Apply(gl, draw->baseVertex, draw->firstInstance);
                 bindGroupTracker.Apply(gl);
 
                 const auto topology = lastPipeline->GetGLPrimitiveTopology();
@@ -1137,39 +1155,19 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                     gl.Disable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
                 }
 
+                if (lastPipeline->UsesVertexIndex()) {
+                    gl.Uniform1ui(PipelineLayout::PushConstantLocation::FirstVertex,
+                                  draw->baseVertex);
+                }
                 if (lastPipeline->UsesInstanceIndex()) {
                     gl.Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance,
                                   draw->firstInstance);
                 }
-                if (gl.DrawElementsInstancedBaseVertexBaseInstanceANGLE) {
-                    gl.DrawElementsInstancedBaseVertexBaseInstanceANGLE(
-                        topology, draw->indexCount, indexBufferFormat,
-                        reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
-                                                indexBufferBaseOffset),
-                        draw->instanceCount, draw->baseVertex, draw->firstInstance);
-                } else if (draw->firstInstance > 0) {
-                    gl.DrawElementsInstancedBaseVertexBaseInstance(
-                        topology, draw->indexCount, indexBufferFormat,
-                        reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
-                                                indexBufferBaseOffset),
-                        draw->instanceCount, draw->baseVertex, draw->firstInstance);
-                } else {
-                    // This branch is only needed on OpenGL < 4.2; ES < 3.2
-                    if (draw->baseVertex != 0) {
-                        gl.DrawElementsInstancedBaseVertex(
-                            topology, draw->indexCount, indexBufferFormat,
-                            reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
-                                                    indexBufferBaseOffset),
-                            draw->instanceCount, draw->baseVertex);
-                    } else {
-                        // This branch is only needed on OpenGL < 3.2; ES < 3.2
-                        gl.DrawElementsInstanced(
-                            topology, draw->indexCount, indexBufferFormat,
-                            reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
-                                                    indexBufferBaseOffset),
-                            draw->instanceCount);
-                    }
-                }
+                gl.DrawElementsInstanced(
+                    topology, draw->indexCount, indexBufferFormat,
+                    reinterpret_cast<void*>(draw->firstIndex * indexFormatSize +
+                                            indexBufferBaseOffset),
+                    draw->instanceCount);
                 break;
             }
 
@@ -1178,7 +1176,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 if (lastPipeline->UsesInstanceIndex()) {
                     gl.Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance, 0);
                 }
-                vertexStateBufferBindingTracker.Apply(gl);
+                vertexStateBufferBindingTracker.Apply(gl, 0, 0);
                 bindGroupTracker.Apply(gl);
 
                 uint64_t indirectBufferOffset = draw->indirectOffset;
@@ -1198,7 +1196,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 if (lastPipeline->UsesInstanceIndex()) {
                     gl.Uniform1ui(PipelineLayout::PushConstantLocation::FirstInstance, 0);
                 }
-                vertexStateBufferBindingTracker.Apply(gl);
+                vertexStateBufferBindingTracker.Apply(gl, 0, 0);
                 bindGroupTracker.Apply(gl);
 
                 Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());

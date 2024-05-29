@@ -74,6 +74,7 @@ class PipelineGL {
     MaybeError InitializeBase(const OpenGLFunctions& gl,
                               const PipelineLayout* layout,
                               const PerStage<ProgrammableStage>& stages,
+                              bool usesVertexIndex,
                               bool usesInstanceIndex,
                               bool usesFragDepth);
     void DeleteProgram(const OpenGLFunctions& gl);

@@ -334,10 +334,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
                                                TogglesState* deviceToggles) const {
     const OpenGLFunctions& gl = mFunctions;
 
-    bool supportsBaseVertex = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 2);
-
-    bool supportsBaseInstance = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(4, 2);
-
     // TODO(crbug.com/dawn/582): Use OES_draw_buffers_indexed where available.
     bool supportsIndexedDrawBuffers = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 0);
 
@@ -363,28 +359,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     bool supportsStencilWriteTexture =
         gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_OES_texture_stencil8");
 
-    // TODO(crbug.com/dawn/343): We can support the extension variants, but need to load the EXT
-    // procs without the extension suffix.
-    // We'll also need emulation of shader builtins gl_BaseVertex and gl_BaseInstance.
-
-    // supportsBaseVertex |=
-    //     (gl.IsAtLeastGLES(2, 0) &&
-    //      (gl.IsGLExtensionSupported("OES_draw_elements_base_vertex") ||
-    //       gl.IsGLExtensionSupported("EXT_draw_elements_base_vertex"))) ||
-    //     (gl.IsAtLeastGL(3, 1) && gl.IsGLExtensionSupported("ARB_draw_elements_base_vertex"));
-
-    // supportsBaseInstance |=
-    //     (gl.IsAtLeastGLES(3, 1) && gl.IsGLExtensionSupported("EXT_base_instance")) ||
-    //     (gl.IsAtLeastGL(3, 1) && gl.IsGLExtensionSupported("ARB_base_instance"));
-
-    if (gl.IsAtLeastGLES(3, 1) && gl.IsGLExtensionSupported("GL_ANGLE_base_vertex_base_instance")) {
-        supportsBaseVertex = true;
-        supportsBaseInstance = true;
-    }
-
     // TODO(crbug.com/dawn/343): Investigate emulation.
-    deviceToggles->Default(Toggle::DisableBaseVertex, !supportsBaseVertex);
-    deviceToggles->Default(Toggle::DisableBaseInstance, !supportsBaseInstance);
     deviceToggles->Default(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
     deviceToggles->Default(Toggle::DisableDepthRead, !supportsDepthRead);
     deviceToggles->Default(Toggle::DisableStencilRead, !supportsStencilRead);

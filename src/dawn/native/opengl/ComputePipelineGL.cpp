@@ -47,7 +47,8 @@ void ComputePipeline::DestroyImpl() {
 
 MaybeError ComputePipeline::InitializeImpl() {
     DAWN_TRY(InitializeBase(ToBackend(GetDevice())->GetGL(), ToBackend(GetLayout()), GetAllStages(),
-                            /* usesInstanceIndex */ false, /* usesFragDepth */ false));
+                            /* usesVertexIndex */ false, /* usesInstanceIndex */ false,
+                            /* usesFragDepth */ false));
     return {};
 }
 

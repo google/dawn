@@ -163,6 +163,21 @@ TEST_P(DrawIndexedTest, BaseVertex) {
     Test(3, 1, 0, 4, 0, 0, notFilled, filled);
     // Test a draw with only the last 3 indices of the second quad (bottom left triangle)
     Test(3, 1, 3, 4, 0, 0, filled, notFilled);
+}
+
+// Test the parameter 'baseVertex' of DrawIndexed() works.
+TEST_P(DrawIndexedTest, NegativeBaseVertex) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_base_vertex"));
+
+    // TODO(crbug.com/343178421): ANGLE/SwiftShader and ANGLE/D3D11 fail with negative baseVertex.
+    DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
+    // Also failing on Qualcomm GLES.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test negative baseVertex
     // Test a draw with only the first 3 indices of the first quad (bottom left triangle)

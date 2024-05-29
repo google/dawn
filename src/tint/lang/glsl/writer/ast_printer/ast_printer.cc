@@ -257,7 +257,8 @@ SanitizedResult Sanitize(const Program& in,
     data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
         ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
 
-    data.Add<ast::transform::OffsetFirstIndex::Config>(std::nullopt, options.first_instance_offset);
+    data.Add<ast::transform::OffsetFirstIndex::Config>(options.first_vertex_offset,
+                                                       options.first_instance_offset);
 
     data.Add<ast::transform::ClampFragDepth::Config>(options.depth_range_offsets);
 

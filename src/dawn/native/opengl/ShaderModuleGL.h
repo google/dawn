@@ -89,6 +89,7 @@ class ShaderModule final : public ShaderModuleBase {
     ResultOrError<GLuint> CompileShader(const OpenGLFunctions& gl,
                                         const ProgrammableStage& programmableStage,
                                         SingleShaderStage stage,
+                                        bool usesVertexIndex,
                                         bool usesInstanceIndex,
                                         bool usesFragDepth,
                                         CombinedSamplerInfo* combinedSamplers,
