@@ -28,15 +28,15 @@
 package expectations
 
 import (
-  "testing"
+	"testing"
 
-  "github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp"
 )
 
 // Tests behavior of Content.Format()
 func TestContentFormat(t *testing.T) {
-  // Intentionally includes extra whitespace since that should be removed.
-  content := `# OS
+	// Intentionally includes extra whitespace since that should be removed.
+	content := `# OS
 # tags: [ linux mac win ]
 # GPU
 # tags: [ amd intel nvidia ]
@@ -77,7 +77,7 @@ crbug.com/3 [ intel ] d [ Failure ]
 crbug.com/2 [ amd ] b [ Failure ]
 `
 
-  expected_content := `# OS
+	expected_content := `# OS
 # tags: [ linux mac win ]
 # GPU
 # tags: [ amd intel nvidia ]
@@ -113,13 +113,13 @@ crbug.com/2 [ intel ] a [ Failure ]
 crbug.com/3 [ intel ] c [ Failure ]
 crbug.com/3 [ intel ] d [ Failure ]
 `
-  expectations, err := Parse("", content)
-  if err != nil {
-    t.Errorf("Parsing content failed: %s", err.Error())
-  }
-  expectations.Format()
+	expectations, err := Parse("", content)
+	if err != nil {
+		t.Errorf("Parsing content failed: %s", err.Error())
+	}
+	expectations.Format()
 
-  if diff := cmp.Diff(expectations.String(), expected_content); diff != "" {
-    t.Errorf("Format produced unexpected output: %v", diff)
-  }
+	if diff := cmp.Diff(expectations.String(), expected_content); diff != "" {
+		t.Errorf("Format produced unexpected output: %v", diff)
+	}
 }

@@ -163,7 +163,7 @@ func CacheResults(
 	cfg Config,
 	ps gerrit.Patchset,
 	cacheDir string,
-	client *resultsdb.BigQueryClient,
+	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
 	var cachePath string
@@ -202,7 +202,7 @@ func CacheResults(
 func GetResults(
 	ctx context.Context,
 	cfg Config,
-	client *resultsdb.BigQueryClient,
+	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
 	resultsByExecutionMode, err := GetRawResults(ctx, cfg, client, builds)
@@ -225,7 +225,7 @@ func GetResults(
 func GetRawResults(
 	ctx context.Context,
 	cfg Config,
-	client *resultsdb.BigQueryClient,
+	client resultsdb.Querier,
 	builds BuildsByName) (result.ResultsByExecutionMode, error) {
 
 	fmt.Printf("fetching results from resultdb...")
@@ -350,7 +350,7 @@ func MostRecentResultsForChange(
 	cacheDir string,
 	g *gerrit.Gerrit,
 	bb *buildbucket.Buildbucket,
-	client *resultsdb.BigQueryClient,
+	client resultsdb.Querier,
 	change int) (result.ResultsByExecutionMode, gerrit.Patchset, error) {
 
 	ps, err := LatestPatchset(g, change)

@@ -38,6 +38,10 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+type Querier interface {
+	QueryTestResults(ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f func(*QueryResult) error) error
+}
+
 // BigQueryClient is a wrapper around bigquery.Client so that we can define new
 // methods.
 type BigQueryClient struct {
@@ -47,13 +51,16 @@ type BigQueryClient struct {
 // QueryResult contains all of the data for a single test result from a ResultDB
 // BigQuery query.
 type QueryResult struct {
-	TestId string
-	Status string
-	Tags   []struct {
-		Key   string
-		Value string
-	}
+	TestId   string
+	Status   string
+	Tags     []TagPair
 	Duration float64
+}
+
+// TagPair is a key/value pair representing a ResultDB tag.
+type TagPair struct {
+	Key   string
+	Value string
 }
 
 // DefaultQueryProject is the default BigQuery project to use when running
@@ -83,7 +90,7 @@ func NewBigQueryClient(ctx context.Context, project string) (*BigQueryClient, er
 //
 // f is called once per result and is expected to handle any processing or
 // storage of results.
-func (bq *BigQueryClient) QueryTestResults(
+func (bq BigQueryClient) QueryTestResults(
 	ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f func(*QueryResult) error) error {
 	// test_id gets renamed since the column names need to match the struct names
 	// unless we want to get results in a generic bigquery.Value slice and
