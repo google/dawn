@@ -701,7 +701,7 @@ bool IsTexture(BuiltinFn f) {
            f == BuiltinFn::kTextureSampleCompareLevel ||     //
            f == BuiltinFn::kTextureSampleGrad ||             //
            f == BuiltinFn::kTextureSampleLevel ||            //
-           f == BuiltinFn::kTextureStore;
+           f == BuiltinFn::kTextureStore || f == BuiltinFn::kInputAttachmentLoad;
 }
 
 bool IsImageQuery(BuiltinFn f) {

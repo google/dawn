@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -281,6 +282,7 @@ bool Builder::Build() {
                 wgsl::Extension::kChromiumExperimentalSubgroups,
                 wgsl::Extension::kChromiumInternalDualSourceBlending,
                 wgsl::Extension::kChromiumInternalGraphite,
+                wgsl::Extension::kChromiumInternalInputAttachments,
                 wgsl::Extension::kF16,
             })) {
         return false;
@@ -350,6 +352,9 @@ bool Builder::GenerateExtension(wgsl::Extension extension) {
             module_.PushCapability(SpvCapabilityFloat16);
             module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
             module_.PushCapability(SpvCapabilityStorageBuffer16BitAccess);
+            break;
+        case wgsl::Extension::kChromiumInternalInputAttachments:
+            module_.PushCapability(SpvCapabilityInputAttachment);
             break;
         default:
             return false;
@@ -843,7 +848,14 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             },
             [&](const ast::InternalAttribute*) {
                 return true;  // ignored
-            },                //
+            },
+            [&](const ast::InputAttachmentIndexAttribute*) {
+                auto iidx = sem->Attributes().input_attachment_index;
+                module_.PushAnnot(spv::Op::OpDecorate,
+                                  {Operand(var_id), U32Operand(SpvDecorationInputAttachmentIndex),
+                                   Operand(iidx.value())});
+                return true;
+            },  //
             TINT_ICE_ON_NO_MATCH);
         if (!ok) {
             return false;
@@ -2617,7 +2629,13 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
         return gen(argument);
     };
 
-    auto* texture = arg(Usage::kTexture);
+    Usage textureUsage;
+    if (builtin->Fn() == wgsl::BuiltinFn::kInputAttachmentLoad) {
+        textureUsage = Usage::kInputAttachment;
+    } else {
+        textureUsage = Usage::kTexture;
+    }
+    auto* texture = arg(textureUsage);
     if (TINT_UNLIKELY(!texture)) {
         TINT_ICE() << "missing texture argument";
     }
@@ -2965,6 +2983,18 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             image_operands.emplace_back(
                 ImageOperand{SpvImageOperandsLodMask,
                              Operand(GenerateConstantIfNeeded(ScalarConstant::F32(0.0)))});
+            break;
+        }
+        case wgsl::BuiltinFn::kInputAttachmentLoad: {
+            op = spv::Op::OpImageRead;
+            append_result_type_and_id_to_spirv_params_for_read();
+            spirv_params.emplace_back(gen_arg(Usage::kInputAttachment));
+
+            // coords for input_attachment are always (0, 0)
+            auto* vec2i =
+                builder_.create<core::type::Vector>(builder_.create<core::type::I32>(), 2u);
+            spirv_params.emplace_back(Operand(GenerateConstantNullIfNeeded(vec2i)));
+
             break;
         }
         default:
@@ -3759,6 +3789,10 @@ bool Builder::GenerateTextureType(const core::type::Texture* texture, const Oper
         dim_literal = SpvDimCube;
     }
 
+    if (texture->Is<core::type::InputAttachment>()) {
+        dim_literal = SpvDimSubpassData;
+    }
+
     uint32_t ms_literal = 0u;
     if (texture->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture>()) {
         ms_literal = 1u;
@@ -3791,7 +3825,8 @@ bool Builder::GenerateTextureType(const core::type::Texture* texture, const Oper
         },
         [&](const core::type::SampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
         [&](const core::type::MultisampledTexture* t) { return GenerateTypeIfNeeded(t->type()); },
-        [&](const core::type::StorageTexture* t) { return GenerateTypeIfNeeded(t->type()); },  //
+        [&](const core::type::StorageTexture* t) { return GenerateTypeIfNeeded(t->type()); },
+        [&](const core::type::InputAttachment* t) { return GenerateTypeIfNeeded(t->type()); },  //
         TINT_ICE_ON_NO_MATCH);
     if (type_id == 0u) {
         return false;

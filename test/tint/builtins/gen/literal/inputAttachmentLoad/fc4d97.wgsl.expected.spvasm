@@ -1,23 +1,57 @@
-SKIP: FAILED
-
-
-enable chromium_internal_input_attachments;
-
-@input_attachment_index(3) @group(1) @binding(0) var arg_0 : input_attachment<u32>;
-
-fn inputAttachmentLoad_fc4d97() {
-  var res : vec4<u32> = inputAttachmentLoad(arg_0);
-  prevent_dce = res;
-}
-
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
-
-@fragment
-fn fragment_main() {
-  inputAttachmentLoad_fc4d97();
-}
-
-Failed to generate: <dawn>/test/tint/builtins/gen/literal/inputAttachmentLoad/fc4d97.wgsl:38:8 error: SPIR-V backend does not support extension 'chromium_internal_input_attachments'
-enable chromium_internal_input_attachments;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 28
+; Schema: 0
+               OpCapability Shader
+               OpCapability InputAttachment
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpName %arg_0 "arg_0"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
+               OpName %inputAttachmentLoad_fc4d97 "inputAttachmentLoad_fc4d97"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpDecorate %arg_0 InputAttachmentIndex 3
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce Binding 0
+       %uint = OpTypeInt 32 0
+          %3 = OpTypeImage %uint SubpassData 0 0 0 2 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+      %arg_0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+     %v4uint = OpTypeVector %uint 4
+%prevent_dce_block = OpTypeStruct %v4uint
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+         %17 = OpConstantNull %v2int
+%_ptr_Function_v4uint = OpTypePointer Function %v4uint
+         %20 = OpConstantNull %v4uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v4uint = OpTypePointer StorageBuffer %v4uint
+%inputAttachmentLoad_fc4d97 = OpFunction %void None %9
+         %12 = OpLabel
+        %res = OpVariable %_ptr_Function_v4uint Function %20
+         %14 = OpLoad %3 %arg_0
+         %13 = OpImageRead %v4uint %14 %17
+               OpStore %res %13
+         %23 = OpAccessChain %_ptr_StorageBuffer_v4uint %prevent_dce %uint_0
+         %24 = OpLoad %v4uint %res
+               OpStore %23 %24
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %9
+         %26 = OpLabel
+         %27 = OpFunctionCall %void %inputAttachmentLoad_fc4d97
+               OpReturn
+               OpFunctionEnd

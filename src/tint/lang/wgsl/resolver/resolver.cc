@@ -3072,6 +3072,12 @@ size_t Resolver::NestDepth(const core::type::Type* ty) const {
 
 void Resolver::CollectTextureSamplerPairs(const sem::BuiltinFn* builtin,
                                           VectorRef<const sem::ValueExpression*> args) const {
+    if (builtin->Fn() == wgsl::BuiltinFn::kInputAttachmentLoad) {
+        // inputAttachmentLoad() is considered a texture function, however it doesn't need sampler,
+        // and its parameter has ParameterUsage::kInputAttachment, so return early.
+        return;
+    }
+
     // Collect a texture/sampler pair for this builtin.
     const auto& signature = builtin->Signature();
     int texture_index = signature.IndexOf(core::ParameterUsage::kTexture);

@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/spirv/writer/ast_printer/helper_test.h"
 #include "src/tint/lang/spirv/writer/common/spv_dump_test.h"
@@ -4247,6 +4248,61 @@ OpFunctionEnd
 }
 
 }  // namespace Packed_4x8_integer_dot_product_builtin_tests
+
+namespace InputAttachments_builtin_tests {
+
+TEST_F(BuiltinSpirvASTPrinterTest, Call_InputAttachmentLoad) {
+    // enable chromium_internal_input_attachments;
+    // @group(0) @binding(0) @input_attachment_index(3)
+    // var input_tex : input_attachment<f32>;
+    // fn f() -> vec4f {
+    //    return inputAttachmentLoad(input_tex);
+    // }
+
+    Enable(wgsl::Extension::kChromiumInternalInputAttachments);
+
+    auto* input_tex = GlobalVar("input_tex", ty.input_attachment(ty.Of<f32>()),
+                                Vector{Binding(0_u), Group(0_u), InputAttachmentIndex(3_u)});
+
+    auto* func = Func("f", Empty, ty.vec4<f32>(),
+                      Vector{
+                          Return(Call("inputAttachmentLoad", "input_tex")),
+                      });
+
+    Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateExtension(wgsl::Extension::kChromiumInternalInputAttachments))
+        << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateGlobalVariable(input_tex)) << b.Diagnostics();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.Diagnostics();
+
+    auto got = DumpModule(b.Module());
+    auto expect = R"(OpCapability InputAttachment
+OpName %1 "input_tex"
+OpName %7 "f"
+OpDecorate %1 Binding 0
+OpDecorate %1 DescriptorSet 0
+OpDecorate %1 InputAttachmentIndex 3
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 SubpassData 0 0 0 2 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%6 = OpTypeVector %4 4
+%5 = OpTypeFunction %6
+%12 = OpTypeInt 32 1
+%11 = OpTypeVector %12 2
+%13 = OpConstantNull %11
+%7 = OpFunction %6 None %5
+%8 = OpLabel
+%10 = OpLoad %3 %1
+%9 = OpImageRead %6 %10 %13
+OpReturnValue %9
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+}  // namespace InputAttachments_builtin_tests
 
 }  // namespace
 }  // namespace tint::spirv::writer
