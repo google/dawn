@@ -36,6 +36,7 @@
 #include "gtest/gtest.h"
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -241,6 +242,10 @@ class SpirvWriterTestHelperBase : public BASE {
         }
         return nullptr;
     }
+
+    /// Helper to dump the disassembly of the Tint IR module.
+    /// @returns the disassembly (with a leading newline)
+    std::string IR() { return "\n" + core::ir::Disassemble(mod).Plain(); }
 };
 
 using SpirvWriterTest = SpirvWriterTestHelperBase<testing::Test>;

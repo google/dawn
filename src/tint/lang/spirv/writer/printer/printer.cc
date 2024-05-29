@@ -2191,11 +2191,13 @@ class Printer {
             branches.Sort();  // Sort the branches by label to ensure deterministic output
 
             // Also add phi nodes from implicit exit blocks.
-            inst->ForeachBlock([&](core::ir::Block* block) {
-                if (block->IsEmpty()) {
-                    branches.Push(Branch{Label(block), nullptr});
-                }
-            });
+            if (inst->Is<core::ir::If>()) {
+                inst->ForeachBlock([&](core::ir::Block* block) {
+                    if (block->IsEmpty()) {
+                        branches.Push(Branch{Label(block), nullptr});
+                    }
+                });
+            }
 
             OperandList ops{Type(ty), Value(result)};
             for (auto& branch : branches) {

@@ -621,5 +621,48 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIfWithResultAndImplicitFalse_InContinuing
 )");
 }
 
+TEST_F(SpirvWriterTest, Loop_ExitValue) {
+    auto* func = b.Function("foo", ty.i32());
+    b.Append(func->Block(), [&] {
+        auto* result = b.InstructionResult(ty.i32());
+        auto* loop = b.Loop();
+        loop->SetResults(Vector{result});
+        b.Append(loop->Body(), [&] {  //
+            b.ExitLoop(loop, 42_i);
+        });
+        b.Return(func, result);
+    });
+
+    EXPECT_EQ(IR(), R"(
+%foo = func():i32 {
+  $B1: {
+    %2:i32 = loop [b: $B2] {  # loop_1
+      $B2: {  # body
+        exit_loop 42i  # loop_1
+      }
+    }
+    ret %2
+  }
+}
+)");
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %8
+          %6 = OpLabel
+               OpBranch %7
+          %8 = OpLabel
+          %9 = OpPhi %int %int_42 %5
+               OpReturnValue %9
+               OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer
