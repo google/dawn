@@ -281,6 +281,7 @@ bool ASTPrinter::Generate() {
                 wgsl::Extension::kChromiumInternalDualSourceBlending,
                 wgsl::Extension::kChromiumInternalGraphite,
                 wgsl::Extension::kF16,
+                wgsl::Extension::kDualSourceBlending,
             })) {
         return false;
     }
@@ -379,7 +380,8 @@ void ASTPrinter::RecordExtension(const ast::Enable* enable) {
         requires_f16_extension_ = true;
     }
 
-    if (enable->HasExtension(wgsl::Extension::kChromiumInternalDualSourceBlending)) {
+    if (enable->HasExtension(wgsl::Extension::kChromiumInternalDualSourceBlending) ||
+        enable->HasExtension(wgsl::Extension::kDualSourceBlending)) {
         requires_dual_source_blending_extension_ = true;
     }
 }

@@ -4131,7 +4131,7 @@ fn main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Spirv) {
     auto* src = R"(
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 struct FragOutput {
   @location(0) @blend_src(0) color : vec4<f32>,
@@ -4152,7 +4152,7 @@ fn frag_main() -> FragOutput {
 )";
 
     auto* expect = R"(
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 @location(0) @blend_src(0) @internal(disable_validation__ignore_address_space) var<__out> color_1 : vec4<f32>;
 
@@ -4197,7 +4197,7 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Msl) {
     auto* src = R"(
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 struct FragOutput {
   @location(0) @blend_src(0) color : vec4<f32>,
@@ -4218,7 +4218,7 @@ fn frag_main() -> FragOutput {
 )";
 
     auto* expect = R"(
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 struct FragOutput {
   color : vec4<f32>,
@@ -4268,7 +4268,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Index_Attribute_Hlsl) {
     auto* src = R"(
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 struct FragOutput {
   @location(0) @blend_src(0) color : vec4<f32>,
@@ -4289,7 +4289,7 @@ fn frag_main() -> FragOutput {
 )";
 
     auto* expect = R"(
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 struct FragOutput {
   color : vec4<f32>,

@@ -1014,7 +1014,7 @@ class State {
                     ast_attrs.Push(b.Location(u32(*location)));
                 }
                 if (auto blend_src = ir_attrs.blend_src) {
-                    Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
+                    Enable(wgsl::Extension::kDualSourceBlending);
                     ast_attrs.Push(b.BlendSrc(u32(*blend_src)));
                 }
                 if (auto builtin = ir_attrs.builtin) {

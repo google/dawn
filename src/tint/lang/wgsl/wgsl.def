@@ -70,6 +70,8 @@ enum diagnostic_severity {
 enum extension {
   // WGSL Extension "f16"
   f16
+  // WGSL Extension "dual_source_blending"
+  dual_source_blending
   // A Chromium-specific extension for disabling uniformity analysis.
   chromium_disable_uniformity_analysis
   // A Chromium-specific extension for push constants
@@ -84,6 +86,8 @@ enum extension {
   // A Chromium-specific extension that relaxes memory layout requirements for uniform storage.
   chromium_internal_relaxed_uniform_layout
   // A Chromium-specific extension that enables dual source blending.
+  // TODO(chromium:341973423): Remove `chromium_internal_dual_source_blending` when it is totally
+  // replaced with `dual_source_blending`.
   chromium_internal_dual_source_blending
   // A Chromium-specific extension that enables pixel local storage.
   // Cannot be used with chromium_experimental_framebuffer_fetch

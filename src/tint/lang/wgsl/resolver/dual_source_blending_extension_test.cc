@@ -39,8 +39,7 @@ namespace {
 
 using DualSourceBlendingExtensionTest = ResolverTest;
 
-// Using the @blend_src attribute without chromium_internal_dual_source_blending enabled should
-// fail.
+// Using the @blend_src attribute without dual_source_blending enabled should fail.
 TEST_F(DualSourceBlendingExtensionTest, UseBlendSrcAttribWithoutExtensionError) {
     Structure("Output", Vector{
                             Member("a", ty.vec4<f32>(),
@@ -50,14 +49,12 @@ TEST_F(DualSourceBlendingExtensionTest, UseBlendSrcAttribWithoutExtensionError) 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: use of '@blend_src' requires enabling extension 'chromium_internal_dual_source_blending')");
+        R"(12:34 error: use of '@blend_src' requires enabling extension 'dual_source_blending')");
 }
 
 class DualSourceBlendingExtensionTests : public ResolverTest {
   public:
-    DualSourceBlendingExtensionTests() {
-        Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
-    }
+    DualSourceBlendingExtensionTests() { Enable(wgsl::Extension::kDualSourceBlending); }
 };
 
 // Using an F32 as an index value should fail.
@@ -260,9 +257,7 @@ note: while analyzing entry point 'F')");
 
 class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<int> {
   public:
-    DualSourceBlendingExtensionTestWithParams() {
-        Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
-    }
+    DualSourceBlendingExtensionTestWithParams() { Enable(wgsl::Extension::kDualSourceBlending); }
 };
 
 // Rendering to multiple render targets while using dual source blending should fail.

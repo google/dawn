@@ -260,7 +260,7 @@ var<private> v : S;
 
 TEST_F(IRToProgramRoundtripTest, StructDecl_MemberIndex) {
     RUN_TEST(R"(
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 struct S {
   a : i32,

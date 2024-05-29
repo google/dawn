@@ -271,7 +271,7 @@ struct TestWithParams : ResolverTestWithParam<TestParams> {
                 Enable(wgsl::Extension::kChromiumExperimentalFramebufferFetch);
                 break;
             case AttributeKind::kBlendSrc:
-                Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
+                Enable(wgsl::Extension::kDualSourceBlending);
                 break;
             case AttributeKind::kInputAttachmentIndex:
                 Enable(wgsl::Extension::kChromiumInternalInputAttachments);

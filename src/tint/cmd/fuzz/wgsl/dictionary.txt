@@ -195,6 +195,7 @@
 "dpdy"
 "dpdyCoarse"
 "dpdyFine"
+"dual_source_blending"
 "else"
 "enable"
 "error"

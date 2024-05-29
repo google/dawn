@@ -66,6 +66,7 @@ static constexpr Case kValidCases[] = {
     {"chromium_internal_graphite", Extension::kChromiumInternalGraphite},
     {"chromium_internal_input_attachments", Extension::kChromiumInternalInputAttachments},
     {"chromium_internal_relaxed_uniform_layout", Extension::kChromiumInternalRelaxedUniformLayout},
+    {"dual_source_blending", Extension::kDualSourceBlending},
     {"f16", Extension::kF16},
 };
 
@@ -97,9 +98,12 @@ static constexpr Case kInvalidCases[] = {
     {"chromium_internl_relaxyd_uniform_layout", Extension::kUndefined},
     {"chromnnum_internrr77_Gelaxell_uniform_layout", Extension::kUndefined},
     {"chromium_intern4l_relaxe00_uniform_layout", Extension::kUndefined},
-    {"5", Extension::kUndefined},
-    {"u16", Extension::kUndefined},
-    {"f", Extension::kUndefined},
+    {"dua_ource_bledoong", Extension::kUndefined},
+    {"dualsorce_blendzzng", Extension::kUndefined},
+    {"ua_sopiirce_bl11nding", Extension::kUndefined},
+    {"f1XX", Extension::kUndefined},
+    {"55199II", Extension::kUndefined},
+    {"frSSHHa", Extension::kUndefined},
 };
 
 using ExtensionParseTest = testing::TestWithParam<Case>;

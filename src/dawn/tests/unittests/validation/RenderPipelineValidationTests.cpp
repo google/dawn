@@ -2582,7 +2582,7 @@ class DualSourceBlendingFeatureTest : public RenderPipelineValidationTest {
         RenderPipelineValidationTest::SetUp();
 
         fsModuleWithBlendSrc1 = utils::CreateShaderModule(device, R"(
-        enable chromium_internal_dual_source_blending;
+        enable dual_source_blending;
         struct FragOut {
             @location(0) @blend_src(0) color : vec4f,
             @location(0) @blend_src(1) blend : vec4f,
@@ -2671,7 +2671,7 @@ TEST_F(DualSourceBlendingFeatureTest, MultipleRenderTargetsNotAllowed) {
     for (uint32_t location = 1; location < limits.limits.maxColorAttachments; location++) {
         std::ostringstream sstream;
         sstream << R"(
-                enable chromium_internal_dual_source_blending;
+                enable dual_source_blending;
 
                 struct TestData {
                     color : vec4f,
@@ -2775,7 +2775,7 @@ TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1Alpha
                                           wgpu::BlendFactor::OneMinusSrc1Alpha};
 
     wgpu::ShaderModule fsModuleWithBlendSrc1NoAlpha = utils::CreateShaderModule(device, R"(
-        enable chromium_internal_dual_source_blending;
+        enable dual_source_blending;
         struct FragOut {
             @location(0) @blend_src(0) color : vec2f,
             @location(0) @blend_src(1) blend : vec2f,

@@ -55,6 +55,7 @@ enum class Extension : uint8_t {
     kChromiumInternalGraphite,
     kChromiumInternalInputAttachments,
     kChromiumInternalRelaxedUniformLayout,
+    kDualSourceBlending,
     kF16,
 };
 
@@ -85,6 +86,7 @@ constexpr std::string_view kExtensionStrings[] = {
     "chromium_internal_graphite",
     "chromium_internal_input_attachments",
     "chromium_internal_relaxed_uniform_layout",
+    "dual_source_blending",
     "f16",
 };
 
@@ -99,6 +101,7 @@ static constexpr Extension kAllExtensions[] = {
     Extension::kChromiumInternalGraphite,
     Extension::kChromiumInternalInputAttachments,
     Extension::kChromiumInternalRelaxedUniformLayout,
+    Extension::kDualSourceBlending,
     Extension::kF16,
 };
 

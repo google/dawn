@@ -2483,10 +2483,11 @@ bool Validator::ColorAttribute(const ast::ColorAttribute* attr,
 bool Validator::BlendSrcAttribute(const ast::BlendSrcAttribute* attr,
                                   ast::PipelineStage stage,
                                   const std::optional<bool> is_input) const {
-    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalDualSourceBlending)) {
+    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalDualSourceBlending) &&
+        !enabled_extensions_.Contains(wgsl::Extension::kDualSourceBlending)) {
         AddError(attr->source) << "use of " << style::Attribute("@blend_src")
                                << " requires enabling extension "
-                               << style::Code("chromium_internal_dual_source_blending");
+                               << style::Code("dual_source_blending");
         return false;
     }
 

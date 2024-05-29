@@ -69,6 +69,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_internal_relaxed_uniform_layout") {
         return Extension::kChromiumInternalRelaxedUniformLayout;
     }
+    if (str == "dual_source_blending") {
+        return Extension::kDualSourceBlending;
+    }
     if (str == "f16") {
         return Extension::kF16;
     }
@@ -97,6 +100,8 @@ std::string_view ToString(Extension value) {
             return "chromium_internal_input_attachments";
         case Extension::kChromiumInternalRelaxedUniformLayout:
             return "chromium_internal_relaxed_uniform_layout";
+        case Extension::kDualSourceBlending:
+            return "dual_source_blending";
         case Extension::kF16:
             return "f16";
     }

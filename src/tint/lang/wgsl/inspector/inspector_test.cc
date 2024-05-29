@@ -4049,7 +4049,7 @@ TEST_F(InspectorTextureTest, TextureMultipleEPs) {
 }
 
 TEST_F(InspectorGetBlendSrcTest, Basic) {
-    Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
+    Enable(wgsl::Extension::kDualSourceBlending);
 
     Structure("out_struct",
               Vector{

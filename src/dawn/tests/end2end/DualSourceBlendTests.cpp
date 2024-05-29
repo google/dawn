@@ -205,7 +205,7 @@ class DualSourceBlendTests : public DawnTest {
 
     void RunTest(TestParams params) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-                enable chromium_internal_dual_source_blending;
+                enable dual_source_blending;
 
                 struct TestData {
                     color : vec4f,
