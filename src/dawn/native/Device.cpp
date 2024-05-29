@@ -2345,6 +2345,9 @@ ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateTextureView(
 
 ResultOrError<wgpu::TextureUsage> DeviceBase::GetSupportedSurfaceUsage(
     const Surface* surface) const {
+    GetInstance()->EmitDeprecationWarning(
+        "GetSupportedSurfaceUsage is deprecated, use surface.GetCapabilities(adapter).usages.");
+
     DAWN_TRY(ValidateIsAlive());
 
     if (IsValidationEnabled()) {
@@ -2352,7 +2355,9 @@ ResultOrError<wgpu::TextureUsage> DeviceBase::GetSupportedSurfaceUsage(
                         wgpu::FeatureName::SurfaceCapabilities);
     }
 
-    return GetSupportedSurfaceUsageImpl(surface);
+    PhysicalDeviceSurfaceCapabilities caps;
+    DAWN_TRY_ASSIGN(caps, GetPhysicalDevice()->GetSurfaceCapabilities(GetInstance(), surface));
+    return caps.usages;
 }
 
 // Other implementation details

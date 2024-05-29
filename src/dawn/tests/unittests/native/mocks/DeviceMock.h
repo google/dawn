@@ -135,11 +135,6 @@ class DeviceMock : public DeviceBase {
                 (TextureBase*, const UnpackedPtr<TextureViewDescriptor>&),
                 (override));
 
-    MOCK_METHOD(ResultOrError<wgpu::TextureUsage>,
-                GetSupportedSurfaceUsageImpl,
-                (const Surface*),
-                (const, override));
-
     MOCK_METHOD(MaybeError, TickImpl, (), (override));
 
     MOCK_METHOD(void, DestroyImpl, (), (override));

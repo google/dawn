@@ -82,41 +82,6 @@ uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
 }  // anonymous namespace
 
 // static
-ResultOrError<wgpu::TextureUsage> SwapChain::GetSupportedSurfaceUsage(const Device* device,
-                                                                      const Surface* surface) {
-    PhysicalDevice* physicalDevice = ToBackend(device->GetPhysicalDevice());
-    const VulkanFunctions& fn = physicalDevice->GetVulkanInstance()->GetFunctions();
-    VkInstance instanceVk = physicalDevice->GetVulkanInstance()->GetVkInstance();
-    VkPhysicalDevice vkPhysicalDevice = physicalDevice->GetVkPhysicalDevice();
-
-    VkSurfaceKHR surfaceVk;
-    VkSurfaceCapabilitiesKHR surfaceCapsVk;
-    DAWN_TRY_ASSIGN(surfaceVk, CreateVulkanSurface(device->GetInstance(), physicalDevice, surface));
-
-    DAWN_TRY(CheckVkSuccess(
-        fn.GetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, surfaceVk, &surfaceCapsVk),
-        "GetPhysicalDeviceSurfaceCapabilitiesKHR"));
-
-    wgpu::TextureUsage supportedUsages = wgpu::TextureUsage::None;
-    if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) {
-        supportedUsages |= wgpu::TextureUsage::CopySrc;
-    }
-    if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
-        supportedUsages |= wgpu::TextureUsage::CopyDst;
-    }
-    if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
-        supportedUsages |= wgpu::TextureUsage::RenderAttachment;
-    }
-    if (surfaceCapsVk.supportedUsageFlags & VK_IMAGE_USAGE_SAMPLED_BIT) {
-        supportedUsages |= wgpu::TextureUsage::TextureBinding;
-    }
-
-    fn.DestroySurfaceKHR(instanceVk, surfaceVk, nullptr);
-
-    return supportedUsages;
-}
-
-// static
 ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
                                                 Surface* surface,
                                                 SwapChainBase* previousSwapChain,

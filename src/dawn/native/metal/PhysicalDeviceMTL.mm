@@ -364,7 +364,9 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 
-    // Formats
+    capabilities.usages = wgpu::TextureUsage::RenderAttachment |
+                          wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
+                          wgpu::TextureUsage::CopyDst;
 
     capabilities.formats = {
         wgpu::TextureFormat::BGRA8Unorm,
@@ -375,15 +377,11 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     capabilities.formats.push_back(wgpu::TextureFormat::RGB10A2Unorm);
 #endif  // DAWN_PLATFORM_IS(MACOS)
 
-    // Present Modes
-
     capabilities.presentModes = {
         wgpu::PresentMode::Fifo,
         wgpu::PresentMode::Immediate,
         wgpu::PresentMode::Mailbox,
     };
-
-    // Alpha Modes
 
     capabilities.alphaModes = {
         wgpu::CompositeAlphaMode::Opaque,

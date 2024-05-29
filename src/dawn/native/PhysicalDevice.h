@@ -51,6 +51,7 @@ class DeviceBase;
 
 // Structure that holds surface capabilities for a (Surface, PhysicalDevice) pair.
 struct PhysicalDeviceSurfaceCapabilities {
+    wgpu::TextureUsage usages;
     std::vector<wgpu::TextureFormat> formats;
     std::vector<wgpu::PresentMode> presentModes;
     std::vector<wgpu::CompositeAlphaMode> alphaModes;

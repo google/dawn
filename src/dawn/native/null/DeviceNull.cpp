@@ -69,6 +69,7 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     InstanceBase* instance,
     const Surface* surface) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
+    capabilities.usages = wgpu::TextureUsage::RenderAttachment;
     capabilities.formats = {wgpu::TextureFormat::BGRA8Unorm};
     capabilities.presentModes = {wgpu::PresentMode::Fifo};
     capabilities.alphaModes = {wgpu::CompositeAlphaMode::Auto};
@@ -245,11 +246,6 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     TextureBase* texture,
     const UnpackedPtr<TextureViewDescriptor>& descriptor) {
     return AcquireRef(new TextureView(texture, descriptor));
-}
-
-ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
-    const Surface* surface) const {
-    return wgpu::TextureUsage::RenderAttachment;
 }
 
 void Device::DestroyImpl() {

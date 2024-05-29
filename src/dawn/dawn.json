@@ -456,6 +456,7 @@
         "category": "structure",
         "extensible": "out",
         "members": [
+            {"name": "usages", "type": "texture usage"},
             {"name": "format count", "type": "size_t"},
             {"name": "formats", "type": "texture format", "annotation": "const*", "length": "format count"},
             {"name": "present mode count", "type": "size_t"},

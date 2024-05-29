@@ -430,7 +430,9 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 
-    // Formats
+    capabilities.usages = wgpu::TextureUsage::RenderAttachment |
+                          wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
+                          wgpu::TextureUsage::CopyDst;
 
     // This is the only supported format in native mode (see crbug.com/dawn/160).
 #if DAWN_PLATFORM_IS(ANDROID)
@@ -439,15 +441,11 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     capabilities.formats.push_back(wgpu::TextureFormat::BGRA8Unorm);
 #endif  // !DAWN_PLATFORM_IS(ANDROID)
 
-    // Present Modes
-
     capabilities.presentModes = {
         wgpu::PresentMode::Fifo,
         wgpu::PresentMode::Immediate,
         wgpu::PresentMode::Mailbox,
     };
-
-    // Alpha Modes
 
     capabilities.alphaModes = {
         wgpu::CompositeAlphaMode::Opaque,

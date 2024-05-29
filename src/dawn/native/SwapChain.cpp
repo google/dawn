@@ -75,8 +75,11 @@ MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
                     descriptor->format, kRequireSwapChainFormat);
 
     if (device->HasFeature(Feature::SurfaceCapabilities)) {
-        wgpu::TextureUsage validUsage;
-        DAWN_TRY_ASSIGN(validUsage, device->GetSupportedSurfaceUsage(surface));
+        PhysicalDeviceSurfaceCapabilities caps;
+        DAWN_TRY_ASSIGN(caps, device->GetPhysicalDevice()->GetSurfaceCapabilities(
+                                  device->GetInstance(), surface));
+        wgpu::TextureUsage validUsage = caps.usages;
+
         DAWN_INVALID_IF(
             (descriptor->usage | validUsage) != validUsage,
             "Usage (%s) is not supported, %s are (currently) the only accepted usage flags.",

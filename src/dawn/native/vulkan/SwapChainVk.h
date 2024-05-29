@@ -48,9 +48,6 @@ class SwapChain : public SwapChainBase {
                                                 SwapChainBase* previousSwapChain,
                                                 const SurfaceConfiguration* config);
 
-    static ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsage(const Device* device,
-                                                                      const Surface* surface);
-
     ~SwapChain() override;
 
   private:

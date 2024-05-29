@@ -96,10 +96,8 @@ class SurfaceTests : public DawnTest {
         wgpu::SurfaceCapabilities capabilities;
         surface.GetCapabilities(adapter, &capabilities);
 
-        wgpu::TextureFormat preferredFormat = surface.GetPreferredFormat(adapter);
-
         wgpu::SurfaceConfiguration config = baseConfig;
-        config.format = preferredFormat;
+        config.format = capabilities.formats[0];
         config.alphaMode = capabilities.alphaModes[0];
         config.presentMode = capabilities.presentModes[0];
         return config;
@@ -122,6 +120,72 @@ class SurfaceTests : public DawnTest {
 
         wgpu::CommandBuffer commands = encoder.Finish();
         preferredDevice.GetQueue().Submit(1, &commands);
+    }
+
+    void SampleLoadTexture(wgpu::Texture texture, utils::RGBA8 expectedColor) {
+        LoadTexture(texture, expectedColor, "texture_2d<f32>", ", 0");
+    }
+
+    void StorageLoadTexture(wgpu::Texture texture, utils::RGBA8 expectedColor) {
+        LoadTexture(texture, expectedColor,
+                    "texture_storage_2d<" +
+                        std::string(utils::GetWGSLImageFormatQualifier(texture.GetFormat())) +
+                        ", read>",
+                    "");
+    }
+
+    void LoadTexture(wgpu::Texture texture,
+                     utils::RGBA8 expectedColor,
+                     std::string wgslType,
+                     std::string extraLoadArgs) {
+        wgpu::TextureDescriptor texDescriptor;
+        texDescriptor.size = {texture.GetWidth(), texture.GetHeight()};
+        texDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        texDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture dstTexture = device.CreateTexture(&texDescriptor);
+
+        // Create the storage load blit render pipeline.
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            @vertex fn vs(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0, -3.0),
+                    vec2f(-1.0,  3.0),
+                    vec2f( 2.0,  0.0)
+                );
+                return vec4f(pos[VertexIndex], 0.0, 1.0);
+            }
+
+            @group(0) @binding(0) var texture : )" + wgslType + R"(;
+            @fragment fn fs(@builtin(position) coord: vec4f) -> @location(0) vec4f {
+                return textureLoad(texture, vec2i(coord.xy))" + extraLoadArgs +
+                                                                          R"();
+            }
+        )");
+
+        utils::ComboRenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.vertex.module = module;
+        pipelineDesc.cFragment.module = module;
+        pipelineDesc.cTargets[0].format = texDescriptor.format;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+
+        // Submit the commands for the blit.
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, texture.CreateView()}});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassInfo({dstTexture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassInfo);
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Draw(6);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_TEXTURE_EQ(expectedColor, dstTexture, {0, 0});
+        EXPECT_TEXTURE_EQ(expectedColor, dstTexture,
+                          {texture.GetWidth() - 1, texture.GetHeight() - 1});
     }
 
     bool SupportsPresentMode(const wgpu::SurfaceCapabilities& capabilities,
@@ -358,23 +422,6 @@ TEST_P(SurfaceTests, SwitchingDevice) {
     }
 }
 
-// Test that configuring with TextureBinding usage without enabling SurfaceCapabilities
-// feature should fail.
-TEST_P(SurfaceTests, ErrorCreateWithTextureBindingUsage) {
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
-    EXPECT_FALSE(device.HasFeature(wgpu::FeatureName::SurfaceCapabilities));
-
-    wgpu::Surface surface = CreateTestSurface();
-    wgpu::SurfaceTexture surfaceTexture;
-
-    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
-    config.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
-
-    ASSERT_DEVICE_ERROR_MSG(
-        { surface.Configure(&config); },
-        testing::HasSubstr("require enabling FeatureName::SurfaceCapabilities"));
-}
-
 // Getting current texture without configuring returns an invalid surface texture
 // It cannot raise a device error at this stage since it has never been configured with a device
 TEST_P(SurfaceTests, GetWithoutConfigure) {
@@ -426,12 +473,147 @@ TEST_P(SurfaceTests, PresentWithoutGet) {
     ASSERT_DEVICE_ERROR(surface.Present());
 }
 
+// Check that all surfaces must support RenderAttachment.
+TEST_P(SurfaceTests, RenderAttachmentAlwaysSupported) {
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+
+    ASSERT_TRUE(caps.usages & wgpu::TextureUsage::RenderAttachment);
+}
+
+// Test sampling from the surface when it is supported.
+TEST_P(SurfaceTests, Sampling) {
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+
+    // Skip all tests if readable surface doesn't support texture binding
+    DAWN_TEST_UNSUPPORTED_IF(!(caps.usages & wgpu::TextureUsage::TextureBinding));
+
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    config.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+    surface.Configure(&config);
+
+    // Clear and sample from the texture
+    wgpu::SurfaceTexture t;
+    surface.GetCurrentTexture(&t);
+    ClearTexture(t.texture, {1.0, 0.0, 0.0, 1.0});
+    SampleLoadTexture(t.texture, utils::RGBA8::kRed);
+
+    surface.Present();
+}
+
+// Test copying from the surface when it is supported.
+TEST_P(SurfaceTests, CopyFrom) {
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+
+    // Skip all tests if readable surface doesn't support copy src
+    DAWN_TEST_UNSUPPORTED_IF(!(caps.usages & wgpu::TextureUsage::CopySrc));
+
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    config.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+    surface.Configure(&config);
+
+    // Clear and copy from the texture
+    wgpu::SurfaceTexture t;
+    surface.GetCurrentTexture(&t);
+    ClearTexture(t.texture, {1.0, 0.0, 0.0, 1.0});
+
+    if (t.texture.GetFormat() == wgpu::TextureFormat::BGRA8Unorm ||
+        t.texture.GetFormat() == wgpu::TextureFormat::BGRA8UnormSrgb) {
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kBlue, t.texture, 0, 0);
+    } else {
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, t.texture, 0, 0);
+    }
+
+    surface.Present();
+}
+
+// Test copying to the surface when it is supported.
+TEST_P(SurfaceTests, CopyTo) {
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+
+    // Skip all tests if readable surface doesn't support copy dst or if we can't read back.
+    DAWN_TEST_UNSUPPORTED_IF(!(caps.usages & wgpu::TextureUsage::CopyDst));
+    DAWN_TEST_UNSUPPORTED_IF(
+        !(caps.usages & (wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding)));
+
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    config.usage = caps.usages & (wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
+                                  wgpu::TextureUsage::TextureBinding);
+    config.width = 1;
+    config.height = 1;
+    surface.Configure(&config);
+
+    // Write to the texture and read it back somehow.
+    wgpu::SurfaceTexture t;
+    surface.GetCurrentTexture(&t);
+
+    wgpu::Extent3D writeSize = {1, 1, 1};
+    wgpu::ImageCopyTexture dest = {};
+    dest.texture = t.texture;
+    wgpu::TextureDataLayout dataLayout = {};
+    queue.WriteTexture(&dest, &utils::RGBA8::kRed, sizeof(utils::RGBA8), &dataLayout, &writeSize);
+
+    if (t.texture.GetUsage() & wgpu::TextureUsage::TextureBinding) {
+        if (t.texture.GetFormat() == wgpu::TextureFormat::BGRA8Unorm ||
+            t.texture.GetFormat() == wgpu::TextureFormat::BGRA8UnormSrgb) {
+            SampleLoadTexture(t.texture, utils::RGBA8::kBlue);
+        } else {
+            SampleLoadTexture(t.texture, utils::RGBA8::kRed);
+        }
+    }
+
+    if (t.texture.GetUsage() & wgpu::TextureUsage::CopySrc) {
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, t.texture, 0, 0);
+    }
+
+    surface.Present();
+}
+
+// Test using the surface as a storage texture when supported.
+TEST_P(SurfaceTests, Storage) {
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+
+    // Skip all tests if readable surface doesn't support storage or if we can't find a storage-read
+    // capable format.
+    DAWN_TEST_UNSUPPORTED_IF(!(caps.usages & wgpu::TextureUsage::StorageBinding));
+
+    wgpu::TextureFormat storageCapableFormat = wgpu::TextureFormat::Undefined;
+    for (uint32_t i = 0; i < caps.formatCount; i++) {
+        if (utils::TextureFormatSupportsStorageTexture(caps.formats[i], device, false)) {
+            storageCapableFormat = caps.formats[i];
+            break;
+        }
+    }
+    DAWN_TEST_UNSUPPORTED_IF(storageCapableFormat == wgpu::TextureFormat::Undefined);
+
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    config.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::StorageBinding;
+    config.format = storageCapableFormat;
+    surface.Configure(&config);
+
+    // Clear and storage load from the texture
+    wgpu::SurfaceTexture t;
+    surface.GetCurrentTexture(&t);
+    ClearTexture(t.texture, {1.0, 0.0, 0.0, 1.0});
+    StorageLoadTexture(t.texture, utils::RGBA8::kRed);
+
+    surface.Present();
+}
+
 // TODO(dawn:2320): Enable D3D tests (though they are not enabled in SwapChainTests neither)
 DAWN_INSTANTIATE_TEST(SurfaceTests,
                       // D3D11Backend(),
                       // D3D12Backend(),
                       MetalBackend(),
-                      NullBackend(),
                       VulkanBackend());
 
 }  // anonymous namespace

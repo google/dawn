@@ -172,9 +172,6 @@ class Device final : public DeviceBase {
         TextureBase* texture,
         const UnpackedPtr<TextureViewDescriptor>& descriptor) override;
 
-    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
-        const Surface* surface) const override;
-
     void DestroyImpl() override;
 
     std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;

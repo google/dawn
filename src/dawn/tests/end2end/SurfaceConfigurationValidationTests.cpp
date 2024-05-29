@@ -45,8 +45,9 @@ static constexpr std::array<wgpu::CompositeAlphaMode, 5> kAllAlphaModes = {
     wgpu::CompositeAlphaMode::Premultiplied, wgpu::CompositeAlphaMode::Unpremultiplied,
     wgpu::CompositeAlphaMode::Inherit,
 };
-static constexpr std::array<wgpu::PresentMode, 3> kAllPresentModes = {
+static constexpr std::array<wgpu::PresentMode, 4> kAllPresentModes = {
     wgpu::PresentMode::Fifo,
+    wgpu::PresentMode::FifoRelaxed,
     wgpu::PresentMode::Immediate,
     wgpu::PresentMode::Mailbox,
 };
@@ -290,6 +291,47 @@ TEST_P(SurfaceConfigurationValidationTests, UnconfigureNonConfiguredSurfaceFails
     // TODO(dawn:2320): This cannot throw a device error since the surface is
     // not aware of the device at this stage.
     /*ASSERT_DEVICE_ERROR(*/ CreateTestSurface().Unconfigure() /*)*/;
+}
+
+// Test that including unsupported usage flag will result in error.
+TEST_P(SurfaceConfigurationValidationTests, ErrorIncludeUnsupportedUsage) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+
+    // Assuming StorageAttachment is not supported.
+    DAWN_TEST_UNSUPPORTED_IF(caps.usages & wgpu::TextureUsage::StorageAttachment);
+
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    config.usage = wgpu::TextureUsage::StorageAttachment;
+    ASSERT_DEVICE_ERROR_MSG(surface.Configure(&config), testing::HasSubstr("Usages requested"));
+}
+
+// Test that validation of format capabilities still happens.
+TEST_P(SurfaceConfigurationValidationTests, StorageRequiresCapableFormat) {
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceCapabilities caps;
+    surface.GetCapabilities(adapter, &caps);
+
+    // Assuming StorageAttachment is not supported.
+    DAWN_TEST_UNSUPPORTED_IF(!(caps.usages & wgpu::TextureUsage::StorageBinding));
+
+    for (uint32_t i = 0; i < caps.formatCount; i++) {
+        wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+        config.usage = wgpu::TextureUsage::StorageBinding;
+        config.format = caps.formats[i];
+
+        if (utils::TextureFormatSupportsStorageTexture(config.format, device, false)) {
+            surface.Configure(&config);
+        } else {
+            ASSERT_DEVICE_ERROR_MSG(surface.Configure(&config),
+                                    testing::HasSubstr("TextureUsage::StorageBinding"));
+        }
+    }
 }
 
 DAWN_INSTANTIATE_TEST(SurfaceConfigurationValidationTests,

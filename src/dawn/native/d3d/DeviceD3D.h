@@ -46,9 +46,6 @@ class Device : public DeviceBase {
            Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
     ~Device() override;
 
-    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
-        const Surface* surface) const override;
-
     const PlatformFunctions* GetFunctions() const;
     ComPtr<IDXGIFactory4> GetFactory() const;
 
