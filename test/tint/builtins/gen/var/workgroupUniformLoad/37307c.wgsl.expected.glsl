@@ -1,18 +1,18 @@
 #version 310 es
 
 shared uint arg_0;
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
-    arg_0 = 0u;
-  }
-  barrier();
-}
-
 uint tint_workgroupUniformLoad_arg_0() {
   barrier();
   uint result = arg_0;
   barrier();
   return result;
+}
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  if ((local_idx < 1u)) {
+    arg_0 = 0u;
+  }
+  barrier();
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

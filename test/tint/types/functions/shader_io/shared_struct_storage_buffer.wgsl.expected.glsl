@@ -72,7 +72,7 @@ layout(binding = 0, std430) buffer tint_symbol_block_ssbo {
   S inner;
 } tint_symbol;
 
-void assign_and_preserve_padding_tint_symbol(S value) {
+void assign_and_preserve_padding_tint_symbol_inner(S value) {
   tint_symbol.inner.f = value.f;
   tint_symbol.inner.u = value.u;
   tint_symbol.inner.v = value.v;
@@ -82,7 +82,7 @@ void frag_main(S tint_symbol_1) {
   float f = tint_symbol_1.f;
   uint u = tint_symbol_1.u;
   vec4 v = tint_symbol_1.v;
-  assign_and_preserve_padding_tint_symbol(tint_symbol_1);
+  assign_and_preserve_padding_tint_symbol_inner(tint_symbol_1);
 }
 
 void main() {

@@ -1,19 +1,5 @@
 #version 310 es
 
-shared uint wg[3][2][1];
-void tint_zero_workgroup_memory(uint local_idx) {
-  {
-    for(uint idx_1 = local_idx; (idx_1 < 6u); idx_1 = (idx_1 + 1u)) {
-      uint i = (idx_1 / 2u);
-      uint i_1 = (idx_1 % 2u);
-      uint i_2 = (idx_1 % 1u);
-      atomicExchange(wg[i][i_1][i_2], 0u);
-    }
-  }
-  barrier();
-}
-
-uint local_invocation_index_1 = 0u;
 uint tint_div(uint lhs, uint rhs) {
   return (lhs / ((rhs == 0u) ? 1u : rhs));
 }
@@ -22,6 +8,20 @@ uint tint_mod(uint lhs, uint rhs) {
   return (lhs % ((rhs == 0u) ? 1u : rhs));
 }
 
+shared uint wg[3][2][1];
+void tint_zero_workgroup_memory(uint local_idx) {
+  {
+    for(uint idx_1 = local_idx; (idx_1 < 6u); idx_1 = (idx_1 + 1u)) {
+      uint i = tint_div(idx_1, 2u);
+      uint i_1 = tint_mod(idx_1, 2u);
+      uint i_2 = tint_mod(idx_1, 1u);
+      atomicExchange(wg[i][i_1][i_2], 0u);
+    }
+  }
+  barrier();
+}
+
+uint local_invocation_index_1 = 0u;
 void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
   idx = local_invocation_index_2;

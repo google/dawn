@@ -312,13 +312,13 @@ layout(binding = 0, std430) buffer data_block_ssbo {
   Data inner;
 } data;
 
-void assign_and_preserve_padding_data_b(mat2x3 value) {
+void assign_and_preserve_padding_data_inner_b(mat2x3 value) {
   data.inner.b[0] = value[0u];
   data.inner.b[1] = value[1u];
 }
 
 void tint_symbol() {
-  assign_and_preserve_padding_data_b(mat2x3(vec3(0.0f), vec3(0.0f)));
+  assign_and_preserve_padding_data_inner_b(mat2x3(vec3(0.0f), vec3(0.0f)));
 }
 
 void main() {

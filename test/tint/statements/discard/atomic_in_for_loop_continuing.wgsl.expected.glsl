@@ -2,14 +2,14 @@
 precision highp float;
 precision highp int;
 
-bool tint_discarded = false;
-layout(location = 0) in float tint_symbol_2;
-layout(location = 1) in vec2 coord_1;
-layout(location = 0) out int value;
 int tint_ftoi(float v) {
   return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
 }
 
+bool tint_discarded = false;
+layout(location = 0) in float tint_symbol_2;
+layout(location = 1) in vec2 coord_1;
+layout(location = 0) out int value;
 layout(binding = 2, std430) buffer a_block_ssbo {
   int inner;
 } a;

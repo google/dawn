@@ -5,7 +5,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   f16mat2x3 inner;
 } prevent_dce;
 
-void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
+void assign_and_preserve_padding_prevent_dce_inner(f16mat2x3 value) {
   prevent_dce.inner[0] = value[0u];
   prevent_dce.inner[1] = value[1u];
 }
@@ -13,7 +13,7 @@ void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
 void transpose_b9ad1f() {
   f16mat3x2 arg_0 = f16mat3x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x3 res = transpose(arg_0);
-  assign_and_preserve_padding_prevent_dce(res);
+  assign_and_preserve_padding_prevent_dce_inner(res);
 }
 
 vec4 vertex_main() {
@@ -38,7 +38,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   f16mat2x3 inner;
 } prevent_dce;
 
-void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
+void assign_and_preserve_padding_prevent_dce_inner(f16mat2x3 value) {
   prevent_dce.inner[0] = value[0u];
   prevent_dce.inner[1] = value[1u];
 }
@@ -46,7 +46,7 @@ void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
 void transpose_b9ad1f() {
   f16mat3x2 arg_0 = f16mat3x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x3 res = transpose(arg_0);
-  assign_and_preserve_padding_prevent_dce(res);
+  assign_and_preserve_padding_prevent_dce_inner(res);
 }
 
 void fragment_main() {
@@ -64,7 +64,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   f16mat2x3 inner;
 } prevent_dce;
 
-void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
+void assign_and_preserve_padding_prevent_dce_inner(f16mat2x3 value) {
   prevent_dce.inner[0] = value[0u];
   prevent_dce.inner[1] = value[1u];
 }
@@ -72,7 +72,7 @@ void assign_and_preserve_padding_prevent_dce(f16mat2x3 value) {
 void transpose_b9ad1f() {
   f16mat3x2 arg_0 = f16mat3x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x3 res = transpose(arg_0);
-  assign_and_preserve_padding_prevent_dce(res);
+  assign_and_preserve_padding_prevent_dce_inner(res);
 }
 
 void compute_main() {

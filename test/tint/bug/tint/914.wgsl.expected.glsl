@@ -1,12 +1,20 @@
 #version 310 es
 
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % ((rhs == 0u) ? 1u : rhs));
+}
+
 shared float mm_Asub[64][64];
 shared float mm_Bsub[64][64];
 void tint_zero_workgroup_memory(uint local_idx) {
   {
     for(uint idx = local_idx; (idx < 4096u); idx = (idx + 256u)) {
-      uint i = (idx / 64u);
-      uint i_1 = (idx % 64u);
+      uint i = tint_div(idx, 64u);
+      uint i_1 = tint_mod(idx, 64u);
       mm_Asub[i][i_1] = 0.0f;
       mm_Bsub[i][i_1] = 0.0f;
     }
@@ -70,10 +78,6 @@ void mm_write(uint row, uint col, float value) {
     uint index = (col + (row * uniforms.inner.dimBOuter));
     resultMatrix.numbers[index] = value;
   }
-}
-
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
 }
 
 void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {

@@ -1,5 +1,9 @@
 #version 310 es
 
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+}
+
 layout(location = 0) in vec3 a_Position_1;
 layout(location = 1) in vec2 a_UV_1;
 layout(location = 2) in vec4 a_Color_1;
@@ -7,10 +11,6 @@ layout(location = 3) in vec3 a_Normal_1;
 layout(location = 4) in float a_PosMtxIdx_1;
 layout(location = 0) out vec4 v_Color_1;
 layout(location = 1) out vec2 v_TexCoord_1;
-int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
-}
-
 struct Mat4x4_ {
   vec4 mx;
   vec4 my;

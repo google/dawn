@@ -1,5 +1,13 @@
 #version 310 es
 
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % ((rhs == 0u) ? 1u : rhs));
+}
+
 shared ivec4 dst[4];
 shared ivec4 src_workgroup[4];
 shared int dst_nested[4][3][2];
@@ -13,9 +21,9 @@ void tint_zero_workgroup_memory(uint local_idx) {
   }
   {
     for(uint idx_1 = local_idx; (idx_1 < 24u); idx_1 = (idx_1 + 1u)) {
-      uint i_1 = (idx_1 / 6u);
-      uint i_2 = ((idx_1 % 6u) / 2u);
-      uint i_3 = (idx_1 % 2u);
+      uint i_1 = tint_div(idx_1, 6u);
+      uint i_2 = tint_div(tint_mod(idx_1, 6u), 2u);
+      uint i_3 = tint_mod(idx_1, 2u);
       dst_nested[i_1][i_2][i_3] = 0;
     }
   }

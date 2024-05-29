@@ -1,11 +1,19 @@
 #version 310 es
 
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % ((rhs == 0u) ? 1u : rhs));
+}
+
 shared int zero[2][3];
 void tint_zero_workgroup_memory(uint local_idx) {
   {
     for(uint idx = local_idx; (idx < 6u); idx = (idx + 1u)) {
-      uint i = (idx / 3u);
-      uint i_1 = (idx % 3u);
+      uint i = tint_div(idx, 3u);
+      uint i_1 = tint_mod(idx, 3u);
       zero[i][i_1] = 0;
     }
   }

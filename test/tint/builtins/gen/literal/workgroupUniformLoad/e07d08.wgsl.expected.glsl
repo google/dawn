@@ -2,18 +2,18 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 shared float16_t arg_0;
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
-    arg_0 = 0.0hf;
-  }
-  barrier();
-}
-
 float16_t tint_workgroupUniformLoad_arg_0() {
   barrier();
   float16_t result = arg_0;
   barrier();
   return result;
+}
+
+void tint_zero_workgroup_memory(uint local_idx) {
+  if ((local_idx < 1u)) {
+    arg_0 = 0.0hf;
+  }
+  barrier();
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {

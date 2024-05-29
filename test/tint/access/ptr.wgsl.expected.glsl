@@ -1,15 +1,15 @@
 #version 310 es
 
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+}
+
 shared int g1;
 void tint_zero_workgroup_memory(uint local_idx) {
   if ((local_idx < 1u)) {
     atomicExchange(g1, 0);
   }
   barrier();
-}
-
-int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
 }
 
 layout(binding = 0, std430) buffer s_block_ssbo {
