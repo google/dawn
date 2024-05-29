@@ -33,10 +33,10 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Load);
 
 namespace tint::sem {
-Load::Load(const ValueExpression* ref, const Statement* statement)
+Load::Load(const ValueExpression* ref, const Statement* statement, core::EvaluationStage stage)
     : Base(/* declaration */ ref->Declaration(),
            /* type */ ref->Type()->UnwrapRef(),
-           /* stage */ core::EvaluationStage::kRuntime,  // Loads can only be runtime
+           /* stage */ stage,
            /* statement */ statement,
            /* constant */ nullptr,
            /* has_side_effects */ ref->HasSideEffects(),

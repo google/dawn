@@ -41,7 +41,8 @@ class Load final : public Castable<Load, ValueExpression> {
     /// Constructor
     /// @param reference the reference expression being loaded
     /// @param statement the statement that owns this expression
-    Load(const ValueExpression* reference, const Statement* statement);
+    /// @param stage the earliest evaluation stage for the expression
+    Load(const ValueExpression* reference, const Statement* statement, core::EvaluationStage stage);
 
     /// Destructor
     ~Load() override;

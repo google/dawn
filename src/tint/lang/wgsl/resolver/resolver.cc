@@ -1594,7 +1594,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                     // Mark entire expression tree to not const-evaluate
                     auto r = ast::TraverseExpressions(  //
                         (*binary)->rhs, [&](const ast::Expression* e) {
-                            skip_const_eval_.Add(e);
+                            not_evaluated_.Add(e);
                             return ast::TraverseAction::Descend;
                         });
                     if (!r) {
@@ -1878,7 +1878,7 @@ const sem::ValueExpression* Resolver::Load(const sem::ValueExpression* expr) {
         return expr;
     }
 
-    auto* load = b.create<sem::Load>(expr, current_statement_);
+    auto* load = b.create<sem::Load>(expr, current_statement_, expr->Stage());
     load->Behaviors() = expr->Behaviors();
     b.Sem().Replace(expr->Declaration(), load);
 
@@ -1909,7 +1909,7 @@ const sem::ValueExpression* Resolver::Materialize(
     }
 
     const core::constant::Value* materialized_val = nullptr;
-    if (!skip_const_eval_.Contains(decl)) {
+    if (!not_evaluated_.Contains(decl)) {
         auto expr_val = expr->ConstantValue();
         if (TINT_UNLIKELY(!expr_val)) {
             ICE(decl->source) << "Materialize(" << decl->TypeInfo().name
@@ -2046,7 +2046,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
 
     const core::constant::Value* val = nullptr;
     auto stage = core::EarliestStage(obj->Stage(), idx->Stage());
-    if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+    if (not_evaluated_.Contains(expr)) {
         stage = core::EvaluationStage::kNotEvaluated;
     } else {
         if (auto* idx_val = idx->ConstantValue()) {
@@ -2139,7 +2139,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
         const core::constant::Value* value = nullptr;
         auto stage = core::EarliestStage(overload_stage, args_stage);
-        if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+        if (not_evaluated_.Contains(expr)) {
             stage = core::EvaluationStage::kNotEvaluated;
         }
         if (stage == core::EvaluationStage::kConstant) {
@@ -2165,7 +2165,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                const sem::CallTarget* call_target) -> sem::Call* {
         auto stage = args_stage;                       // The evaluation stage of the call
         const core::constant::Value* value = nullptr;  // The constant value for the call
-        if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+        if (not_evaluated_.Contains(expr)) {
             stage = core::EvaluationStage::kNotEvaluated;
         }
         if (stage == core::EvaluationStage::kConstant) {
@@ -2432,7 +2432,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     // now.
     const core::constant::Value* value = nullptr;
     auto stage = core::EarliestStage(arg_stage, target->Stage());
-    if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+    if (not_evaluated_.Contains(expr)) {
         stage = core::EvaluationStage::kNotEvaluated;
     }
     if (stage == core::EvaluationStage::kConstant) {
@@ -3109,8 +3109,8 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
         return nullptr;
     }
 
-    auto stage = skip_const_eval_.Contains(expr) ? core::EvaluationStage::kNotEvaluated
-                                                 : core::EvaluationStage::kRuntime;
+    auto stage = not_evaluated_.Contains(expr) ? core::EvaluationStage::kNotEvaluated
+                                               : core::EvaluationStage::kRuntime;
 
     // TODO(crbug.com/tint/1420): For now, assume all function calls have side effects.
     bool has_side_effects = true;
@@ -3238,7 +3238,7 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
 
     const core::constant::Value* val = nullptr;
     auto stage = core::EvaluationStage::kConstant;
-    if (skip_const_eval_.Contains(literal)) {
+    if (not_evaluated_.Contains(literal)) {
         stage = core::EvaluationStage::kNotEvaluated;
     }
     if (stage == core::EvaluationStage::kConstant) {
@@ -3292,7 +3292,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
 
                 auto stage = variable->Stage();
                 const core::constant::Value* value = variable->ConstantValue();
-                if (skip_const_eval_.Contains(expr)) {
+                if (not_evaluated_.Contains(expr)) {
                     // This expression is short-circuited by an ancestor expression.
                     // Do not const-eval.
                     stage = core::EvaluationStage::kNotEvaluated;
@@ -3632,7 +3632,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     }
 
     const core::constant::Value* value = nullptr;
-    if (skip_const_eval_.Contains(expr)) {
+    if (not_evaluated_.Contains(expr)) {
         // This expression is short-circuited by an ancestor expression.
         // Do not const-eval.
         stage = core::EvaluationStage::kNotEvaluated;

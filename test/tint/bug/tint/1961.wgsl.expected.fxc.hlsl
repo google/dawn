@@ -8,11 +8,7 @@ void f() {
   bool y = false;
   bool tint_tmp = x;
   if (tint_tmp) {
-    bool tint_tmp_1 = true;
-    if (!tint_tmp_1) {
-      tint_tmp_1 = y;
-    }
-    tint_tmp = (tint_tmp_1);
+    tint_tmp = true;
   }
   if ((tint_tmp)) {
   }
