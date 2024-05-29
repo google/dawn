@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include "src/tint/lang/core/ir/terminator.h"
+#include "src/tint/lang/core/ir/exit.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/containers/const_propagating_ptr.h"
 #include "src/tint/utils/rtti/castable.h"
@@ -42,8 +42,8 @@ class Loop;
 
 namespace tint::core::ir {
 
-/// A break-if iteration instruction.
-class BreakIf final : public Castable<BreakIf, Terminator> {
+/// A break-if terminator instruction.
+class BreakIf final : public Castable<BreakIf, Exit> {
   public:
     /// The offset in Operands() for the condition
     static constexpr size_t kConditionOperandOffset = 0;

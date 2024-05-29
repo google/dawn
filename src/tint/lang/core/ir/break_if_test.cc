@@ -113,5 +113,20 @@ TEST_F(IR_BreakIfTest, CloneNoArgs) {
     EXPECT_EQ(0u, args.Length());
 }
 
+TEST_F(IR_BreakIfTest, SetLoop) {
+    auto* loop1 = b.Loop();
+    auto* loop2 = b.Loop();
+    auto* cond = b.Constant(true);
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+
+    auto* brk = b.BreakIf(loop1, cond, arg1, arg2);
+    EXPECT_THAT(loop1->Exits(), testing::ElementsAre(brk));
+
+    brk->SetLoop(loop2);
+    EXPECT_TRUE(loop1->Exits().IsEmpty());
+    EXPECT_THAT(loop2->Exits(), testing::ElementsAre(brk));
+}
+
 }  // namespace
 }  // namespace tint::core::ir

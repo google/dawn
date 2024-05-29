@@ -55,6 +55,7 @@ BreakIf::BreakIf(Value* condition,
 
     if (loop_) {
         loop_->Body()->AddInboundSiblingBranch(this);
+        SetControlInstruction(loop_);
     }
 }
 
@@ -72,6 +73,7 @@ void BreakIf::SetLoop(ir::Loop* loop) {
         loop_->Body()->RemoveInboundSiblingBranch(this);
     }
     loop_ = loop;
+    SetControlInstruction(loop);
     if (loop) {
         loop->Body()->AddInboundSiblingBranch(this);
     }

@@ -664,5 +664,69 @@ TEST_F(SpirvWriterTest, Loop_ExitValue) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Loop_ExitValue_BreakIf) {
+    auto* func = b.Function("foo", ty.i32());
+    b.Append(func->Block(), [&] {
+        auto* result = b.InstructionResult(ty.i32());
+        auto* loop = b.Loop();
+        loop->SetResults(Vector{result});
+        b.Append(loop->Body(), [&] {  //
+            auto* if_ = b.If(false);
+            b.Append(if_->True(), [&] {  //
+                b.ExitLoop(loop, 1_i);
+            });
+            b.Continue(loop);
+
+            b.Append(loop->Continuing(), [&] {  //
+                b.BreakIf(loop, true, Empty, 42_i);
+            });
+        });
+        b.Return(func, result);
+    });
+
+    EXPECT_EQ(IR(), R"(
+%foo = func():i32 {
+  $B1: {
+    %2:i32 = loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if false [t: $B4] {  # if_1
+          $B4: {  # true
+            exit_loop 1i  # loop_1
+          }
+        }
+        continue  # -> $B3
+      }
+      $B3: {  # continuing
+        break_if true exit_loop: [ 42i ]  # -> [t: exit_loop loop_1, f: $B2]
+      }
+    }
+    ret %2
+  }
+}
+)");
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpSelectionMerge %9 None
+               OpBranchConditional %false %10 %9
+         %10 = OpLabel
+               OpBranch %8
+          %9 = OpLabel
+               OpBranch %6
+          %6 = OpLabel
+               OpBranchConditional %true %8 %7
+          %8 = OpLabel
+         %14 = OpPhi %int %int_42 %6 %int_1 %10
+               OpReturnValue %14
+               OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer
