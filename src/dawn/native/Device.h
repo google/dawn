@@ -294,6 +294,8 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     AdapterBase* APIGetAdapter();
     QueueBase* APIGetQueue();
 
+    wgpu::Status APIGetAHardwareBufferProperties(void* handle,
+                                                 AHardwareBufferProperties* properties);
     wgpu::Status APIGetLimits(SupportedLimits* limits) const;
     bool APIHasFeature(wgpu::FeatureName feature) const;
     size_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
@@ -464,6 +466,12 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     MaybeError Initialize(Ref<QueueBase> defaultQueue);
     void DestroyObjects();
     void Destroy();
+
+    virtual MaybeError GetAHardwareBufferPropertiesImpl(
+        void* handle,
+        AHardwareBufferProperties* properties) const {
+        DAWN_UNREACHABLE();
+    }
 
     // Device lost event needs to be protected for now because mock device needs it.
     // TODO(dawn:1702) Make this private and move the class in the implementation file when we mock

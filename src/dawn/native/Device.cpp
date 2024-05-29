@@ -1902,6 +1902,23 @@ void DeviceBase::EmitLog(WGPULoggingType loggingType, const char* message) {
     }
 }
 
+wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
+                                                         AHardwareBufferProperties* properties) {
+    if (!HasFeature(Feature::SharedTextureMemoryAHardwareBuffer)) {
+        ConsumeError(
+            DAWN_VALIDATION_ERROR("Queried APIGetAHardwareBufferProperties() on %s "
+                                  "without the %s feature being set.",
+                                  this, ToAPI(Feature::SharedTextureMemoryAHardwareBuffer)));
+        return wgpu::Status::Error;
+    }
+
+    if (ConsumedError(GetAHardwareBufferPropertiesImpl(handle, properties))) {
+        return wgpu::Status::Error;
+    }
+
+    return wgpu::Status::Success;
+}
+
 wgpu::Status DeviceBase::APIGetLimits(SupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     InstanceBase* instance = GetAdapter()->GetInstance();

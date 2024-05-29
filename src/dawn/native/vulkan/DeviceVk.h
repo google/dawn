@@ -177,6 +177,8 @@ class Device final : public DeviceBase {
     void CheckDebugMessagesAfterDestruction() const;
 
     void DestroyImpl() override;
+    MaybeError GetAHardwareBufferPropertiesImpl(void* handle, AHardwareBufferProperties* properties)
+        const override;
 
     // To make it easier to use fn it is a public const member. However
     // the Device is allowed to mutate them through these private methods.

@@ -1247,6 +1247,13 @@
             {"value": 3, "name": "back"}
         ]
     },
+    "a hardware buffer properties": {
+        "category": "structure",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "y cb cr info", "type": "y cb cr vk descriptor"}
+        ]
+    },
     "device": {
         "category": "object",
         "methods": [
@@ -1469,6 +1476,15 @@
             },
             {
                 "name": "destroy"
+            },
+            {
+                "name": "get a hardware buffer properties",
+                "tags": ["dawn", "native"],
+                "returns": "status",
+                "args": [
+                    {"name": "handle", "type": "void *"},
+                    {"name": "properties", "type": "a hardware buffer properties", "annotation": "*"}
+                ]
             },
             {
                 "name": "get limits",
@@ -3925,7 +3941,8 @@
             {"value": 1215, "name": "shared buffer memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
             {"value": 1216, "name": "static sampler binding layout", "tags": ["dawn"]},
             {"value": 1217, "name": "y cb cr vk descriptor", "tags": ["dawn"]},
-            {"value": 1218, "name": "shared texture memory a hardware buffer properties", "tags": ["dawn", "native"]}
+            {"value": 1218, "name": "shared texture memory a hardware buffer properties", "tags": ["dawn", "native"]},
+            {"value": 1219, "name": "a hardware buffer properties", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {
