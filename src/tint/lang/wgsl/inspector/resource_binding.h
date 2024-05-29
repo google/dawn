@@ -98,7 +98,8 @@ struct ResourceBinding {
         kReadWriteStorageTexture,
         kDepthTexture,
         kDepthMultisampledTexture,
-        kExternalTexture
+        kExternalTexture,
+        kInputAttachment,
     };
 
     /// Type of resource that is bound.
@@ -107,6 +108,8 @@ struct ResourceBinding {
     uint32_t bind_group;
     /// Identifier to identify this binding within the bind group
     uint32_t binding;
+    /// Input attachment index. Only available for input attachments.
+    uint32_t input_attachmnt_index;
     /// Size for this binding, in bytes, if defined.
     uint64_t size;
     /// Size for this binding without trailing structure padding, in bytes, if

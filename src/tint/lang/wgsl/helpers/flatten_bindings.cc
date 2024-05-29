@@ -73,6 +73,9 @@ std::optional<Program> FlattenBindings(const Program& program) {
                 case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
                     binding_points.emplace(src, BindingPoint{0, next_texture_idx++});
                     break;
+                case tint::inspector::ResourceBinding::ResourceType::kInputAttachment:
+                    // flattening is not supported for input attachments.
+                    TINT_UNREACHABLE();
             }
         }
     }

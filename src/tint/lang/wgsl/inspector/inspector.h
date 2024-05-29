@@ -131,6 +131,13 @@ class Inspector {
     /// @returns vector of all of the bindings for external textures.
     std::vector<ResourceBinding> GetExternalTextureResourceBindings(const std::string& entry_point);
 
+    /// Gathers all the resource bindings of the input attachment type for the given
+    /// entry point.
+    /// @param entry_point name of the entry point to get information about.
+    /// texture type.
+    /// @returns vector of all of the bindings for input attachments.
+    std::vector<ResourceBinding> GetInputAttachmentResourceBindings(const std::string& entry_point);
+
     /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the sampler/texture sampling pairs that are used
     /// by that entry point.

@@ -498,6 +498,8 @@ std::string ResourceTypeToString(tint::inspector::ResourceBinding::ResourceType 
             return "DepthMultisampledTexture";
         case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
             return "ExternalTexture";
+        case tint::inspector::ResourceBinding::ResourceType::kInputAttachment:
+            return "InputAttachment";
     }
 
     return "Unknown";
