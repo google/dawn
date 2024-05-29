@@ -1,10 +1,13 @@
 #include <metal_stdlib>
 using namespace metal;
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
 void atanh_7f2874() {
   float3 res = float3(0.54930615425109863281f);
 }
-vertex float4 vertex_main() {
+float4 vertex_main_inner() {
   atanh_7f2874();
   return float4(0.0f);
 }
@@ -13,4 +16,7 @@ fragment void fragment_main() {
 }
 kernel void compute_main() {
   atanh_7f2874();
+}
+vertex vertex_main_outputs vertex_main() {
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner()};
 }

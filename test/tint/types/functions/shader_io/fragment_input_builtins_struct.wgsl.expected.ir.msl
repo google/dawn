@@ -1,39 +1,18 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct FragmentInputs {
-  float4 position [[position]];
-  bool front_facing [[front_facing]];
-  uint sample_index [[sample_id]];
-  uint sample_mask [[sample_mask]];
+  float4 position;
+  bool front_facing;
+  uint sample_index;
+  uint sample_mask;
 };
 
-fragment void tint_symbol(FragmentInputs inputs) {
+void tint_symbol_inner(FragmentInputs inputs) {
   if (inputs.front_facing) {
     float4 const foo = inputs.position;
     uint const bar = (inputs.sample_index + inputs.sample_mask);
   }
 }
-program_source:10:27: error: invalid type 'FragmentInputs' for input declaration in a fragment function
-fragment void tint_symbol(FragmentInputs inputs) {
-                          ^~~~~~~~~~~~~~~~~~~~~
-program_source:4:3: note: type 'float4' (vector of 4 'float' values) cannot be used in struct of resources/colors
-  float4 position [[position]];
-  ^
-program_source:5:3: note: type 'bool' cannot be used in struct of resources/colors
-  bool front_facing [[front_facing]];
-  ^
-program_source:6:3: note: type 'uint' (aka 'unsigned int') cannot be used in struct of resources/colors
-  uint sample_index [[sample_id]];
-  ^
-program_source:7:3: note: type 'uint' (aka 'unsigned int') cannot be used in struct of resources/colors
-  uint sample_mask [[sample_mask]];
-  ^
-program_source:12:18: warning: unused variable 'foo' [-Wunused-variable]
-    float4 const foo = inputs.position;
-                 ^
-program_source:13:16: warning: unused variable 'bar' [-Wunused-variable]
-    uint const bar = (inputs.sample_index + inputs.sample_mask);
-               ^
-
+fragment void tint_symbol(float4 FragmentInputs_position [[position]], bool FragmentInputs_front_facing [[front_facing]], uint FragmentInputs_sample_index [[sample_id]], uint FragmentInputs_sample_mask [[sample_mask]]) {
+  tint_symbol_inner(FragmentInputs{.position=FragmentInputs_position, .front_facing=FragmentInputs_front_facing, .sample_index=FragmentInputs_sample_index, .sample_mask=FragmentInputs_sample_mask});
+}

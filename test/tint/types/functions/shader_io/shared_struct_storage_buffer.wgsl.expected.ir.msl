@@ -1,46 +1,30 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  float f;
+  uint u;
+  float4 v;
+};
+struct tint_module_vars_struct {
+  device S* output;
+};
+struct frag_main_inputs {
+  float S_f [[user(locn0)]];
+  uint S_u [[user(locn1)]] [[flat]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(128) {
-  f:f32 @offset(0), @location(0)
-  u:u32 @offset(4), @location(1), @interpolate(flat)
-  v:vec4<f32> @offset(128), @builtin(position)
+void tint_store_and_preserve_padding(device S* const target, S value_param) {
+  (*target).f = value_param.f;
+  (*target).u = value_param.u;
+  (*target).v = value_param.v;
 }
-
-$B1: {  # root
-  %output:ptr<storage, S, read_write> = var @binding_point(0, 0)
+void frag_main_inner(S input, tint_module_vars_struct tint_module_vars) {
+  float const f = input.f;
+  uint const u = input.u;
+  float4 const v = input.v;
+  tint_store_and_preserve_padding(tint_module_vars.output, input);
 }
-
-%frag_main = @fragment func(%input:S):void {
-  $B2: {
-    %4:f32 = access %input, 0u
-    %f:f32 = let %4
-    %6:u32 = access %input, 1u
-    %u:u32 = let %6
-    %8:vec4<f32> = access %input, 2u
-    %v:vec4<f32> = let %8
-    %10:void = call %tint_store_and_preserve_padding, %output, %input
-    ret
-  }
+fragment void frag_main(frag_main_inputs inputs [[stage_in]], float4 S_v [[position]], device S* output [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.output=output};
+  frag_main_inner(S{.f=inputs.S_f, .u=inputs.S_u, .v=S_v}, tint_module_vars);
 }
-%tint_store_and_preserve_padding = func(%target:ptr<storage, S, read_write>, %value_param:S):void {
-  $B3: {
-    %14:ptr<storage, f32, read_write> = access %target, 0u
-    %15:f32 = access %value_param, 0u
-    store %14, %15
-    %16:ptr<storage, u32, read_write> = access %target, 1u
-    %17:u32 = access %value_param, 1u
-    store %16, %17
-    %18:ptr<storage, vec4<f32>, read_write> = access %target, 2u
-    %19:vec4<f32> = access %value_param, 2u
-    store %18, %19
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -1,32 +1,36 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Output {
+  float4 Position;
+  float4 color;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: Output = struct @align(16) {
-  Position:vec4<f32> @offset(0), @builtin(position)
-  color:vec4<f32> @offset(16), @location(0)
+struct tint_symbol_outputs {
+  float4 Output_Position [[position]];
+  float4 Output_color [[user(locn0)]];
+};
+
+Output tint_symbol_inner(uint VertexIndex, uint InstanceIndex) {
+  tint_array<float2, 4> const zv = tint_array<float2, 4>{float2(0.20000000298023223877f), float2(0.30000001192092895508f), float2(-0.10000000149011611938f), float2(1.10000002384185791016f)};
+  float const z = zv[InstanceIndex][0u];
+  Output output = {};
+  output.Position = float4(0.5f, 0.5f, z, 1.0f);
+  tint_array<float4, 4> const colors = tint_array<float4, 4>{float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f)};
+  output.color = colors[InstanceIndex];
+  return output;
 }
-
-%tint_symbol = @vertex func(%VertexIndex:u32 [@vertex_index], %InstanceIndex:u32 [@instance_index]):Output {
-  $B1: {
-    %zv:array<vec2<f32>, 4> = let array<vec2<f32>, 4>(vec2<f32>(0.20000000298023223877f), vec2<f32>(0.30000001192092895508f), vec2<f32>(-0.10000000149011611938f), vec2<f32>(1.10000002384185791016f))
-    %5:f32 = access %zv, %InstanceIndex, 0u
-    %z:f32 = let %5
-    %output:ptr<function, Output, read_write> = var
-    %8:ptr<function, vec4<f32>, read_write> = access %output, 0u
-    %9:vec4<f32> = construct 0.5f, 0.5f, %z, 1.0f
-    store %8, %9
-    %colors:array<vec4<f32>, 4> = let array<vec4<f32>, 4>(vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f), vec4<f32>(0.0f, 1.0f, 0.0f, 1.0f), vec4<f32>(0.0f, 0.0f, 1.0f, 1.0f), vec4<f32>(1.0f))
-    %11:ptr<function, vec4<f32>, read_write> = access %output, 1u
-    %12:vec4<f32> = access %colors, %InstanceIndex
-    store %11, %12
-    %13:Output = load %output
-    ret %13
-  }
+vertex tint_symbol_outputs tint_symbol(uint VertexIndex [[vertex_id]], uint InstanceIndex [[instance_id]]) {
+  Output const v = tint_symbol_inner(VertexIndex, InstanceIndex);
+  return tint_symbol_outputs{.Output_Position=v.Position, .Output_color=v.color};
 }
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

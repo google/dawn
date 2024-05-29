@@ -47,6 +47,8 @@ tint_add_target(tint_lang_msl_writer_raise lib
   lang/msl/writer/raise/module_scope_vars.h
   lang/msl/writer/raise/raise.cc
   lang/msl/writer/raise/raise.h
+  lang/msl/writer/raise/shader_io.cc
+  lang/msl/writer/raise/shader_io.h
 )
 
 tint_target_add_dependencies(tint_lang_msl_writer_raise lib
@@ -93,6 +95,7 @@ if(TINT_BUILD_MSL_WRITER)
 tint_add_target(tint_lang_msl_writer_raise_test test
   lang/msl/writer/raise/builtin_polyfill_test.cc
   lang/msl/writer/raise/module_scope_vars_test.cc
+  lang/msl/writer/raise/shader_io_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_msl_writer_raise_test test

@@ -1,41 +1,31 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct FragmentInputs0 {
+  float4 position;
+  int loc0;
+};
+struct FragmentInputs1 {
+  float4 loc3;
+  uint sample_mask;
+};
+struct tint_symbol_inputs {
+  int FragmentInputs0_loc0 [[user(locn0)]] [[flat]];
+  uint loc1 [[user(locn1)]] [[flat]];
+  float4 FragmentInputs1_loc3 [[user(locn3)]];
+  float loc2 [[user(locn2)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: FragmentInputs0 = struct @align(16) {
-  position:vec4<f32> @offset(0), @builtin(position)
-  loc0:i32 @offset(16), @location(0), @interpolate(flat)
-}
-
-FragmentInputs1 = struct @align(16) {
-  loc3:vec4<f32> @offset(0), @location(3)
-  sample_mask:u32 @offset(16), @builtin(sample_mask)
-}
-
-%tint_symbol = @fragment func(%inputs0:FragmentInputs0, %front_facing:bool [@front_facing], %loc1:u32 [@location(1), @interpolate(flat)], %sample_index:u32 [@sample_index], %inputs1:FragmentInputs1, %loc2:f32 [@location(2)]):void {
-  $B1: {
-    if %front_facing [t: $B2] {  # if_1
-      $B2: {  # true
-        %8:vec4<f32> = access %inputs0, 0u
-        %foo:vec4<f32> = let %8
-        %10:u32 = access %inputs1, 1u
-        %11:u32 = add %sample_index, %10
-        %bar:u32 = let %11
-        %13:i32 = access %inputs0, 1u
-        %i:i32 = let %13
-        %u:u32 = let %loc1
-        %f:f32 = let %loc2
-        %17:vec4<f32> = access %inputs1, 0u
-        %v:vec4<f32> = let %17
-        exit_if  # if_1
-      }
-    }
-    ret
+void tint_symbol_inner(FragmentInputs0 inputs0, bool front_facing, uint loc1, uint sample_index, FragmentInputs1 inputs1, float loc2) {
+  if (front_facing) {
+    float4 const foo = inputs0.position;
+    uint const bar = (sample_index + inputs1.sample_mask);
+    int const i = inputs0.loc0;
+    uint const u = loc1;
+    float const f = loc2;
+    float4 const v = inputs1.loc3;
   }
 }
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+fragment void tint_symbol(float4 FragmentInputs0_position [[position]], tint_symbol_inputs inputs [[stage_in]], bool front_facing [[front_facing]], uint sample_index [[sample_id]], uint FragmentInputs1_sample_mask [[sample_mask]]) {
+  FragmentInputs0 const v_1 = FragmentInputs0{.position=FragmentInputs0_position, .loc0=inputs.FragmentInputs0_loc0};
+  tint_symbol_inner(v_1, front_facing, inputs.loc1, sample_index, FragmentInputs1{.loc3=inputs.FragmentInputs1_loc3, .sample_mask=FragmentInputs1_sample_mask}, inputs.loc2);
+}

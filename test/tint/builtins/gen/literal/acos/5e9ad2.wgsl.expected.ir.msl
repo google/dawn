@@ -1,10 +1,13 @@
 #include <metal_stdlib>
 using namespace metal;
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
 void acos_5e9ad2() {
   float res = 0.25f;
 }
-vertex float4 vertex_main() {
+float4 vertex_main_inner() {
   acos_5e9ad2();
   return float4(0.0f);
 }
@@ -13,4 +16,7 @@ fragment void fragment_main() {
 }
 kernel void compute_main() {
   acos_5e9ad2();
+}
+vertex vertex_main_outputs vertex_main() {
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner()};
 }

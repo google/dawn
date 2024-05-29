@@ -1,45 +1,39 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
+struct tint_module_vars_struct {
+  thread bool* continue_execution;
+};
+struct tint_symbol_outputs {
+  int tint_symbol_1 [[color(2)]];
+};
+struct tint_symbol_inputs {
+  int3 x [[user(locn1)]] [[flat]];
+};
 
-thread bool continue_execution = true;
-int f(int x) {
+int f(int x, tint_module_vars_struct tint_module_vars) {
   if ((x == 10)) {
-    continue_execution = false;
+    (*tint_module_vars.continue_execution) = false;
   }
   return x;
 }
-fragment int tint_symbol(int3 x) {
+int tint_symbol_inner(int3 x, tint_module_vars_struct tint_module_vars) {
   int y = x[0u];
   {
     while(true) {
-      int const r = f(y);
+      int const r = f(y, tint_module_vars);
       if ((r == 0)) {
         break;
       }
       continue;
     }
   }
-  if (!(continue_execution)) {
+  if (!((*tint_module_vars.continue_execution))) {
     discard_fragment();
   }
   return y;
 }
-program_source:4:13: error: program scope variable must reside in constant address space
-thread bool continue_execution = true;
-            ^
-program_source:6:10: warning: equality comparison with extraneous parentheses [-Wparentheses-equality]
-  if ((x == 10)) {
-       ~~^~~~~
-program_source:6:10: note: remove extraneous parentheses around the comparison to silence this warning
-  if ((x == 10)) {
-      ~  ^    ~
-program_source:6:10: note: use '=' to turn this equality comparison into an assignment
-  if ((x == 10)) {
-         ^~
-         =
-program_source:11:26: error: invalid type 'int3' (vector of 3 'int' values) for input declaration in a fragment function
-fragment int tint_symbol(int3 x) {
-                         ^~~~~~
-
+fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};
+  return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner(inputs.x, tint_module_vars)};
+}

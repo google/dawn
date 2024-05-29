@@ -4,11 +4,14 @@ struct modf_result_f32 {
   float fract;
   float whole;
 };
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
 void modf_c15f48() {
   modf_result_f32 res = modf_result_f32{.fract=-0.5f, .whole=-1.0f};
 }
-vertex float4 vertex_main() {
+float4 vertex_main_inner() {
   modf_c15f48();
   return float4(0.0f);
 }
@@ -17,4 +20,7 @@ fragment void fragment_main() {
 }
 kernel void compute_main() {
   modf_c15f48();
+}
+vertex vertex_main_outputs vertex_main() {
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner()};
 }

@@ -1,30 +1,31 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Interface {
+  float col1;
+  half col2;
+  float4 pos;
+};
+struct vert_main_outputs {
+  float Interface_col1 [[user(locn1)]];
+  half Interface_col2 [[user(locn2)]];
+  float4 Interface_pos [[position]];
+};
+struct frag_main_inputs {
+  float Interface_col1 [[user(locn1)]];
+  half Interface_col2 [[user(locn2)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: Interface = struct @align(16) {
-  col1:f32 @offset(0), @location(1)
-  col2:f16 @offset(4), @location(2)
-  pos:vec4<f32> @offset(16), @builtin(position)
+Interface vert_main_inner() {
+  return Interface{.col1=0.40000000596046447754f, .col2=0.599609375h, .pos=float4(0.0f)};
 }
-
-%vert_main = @vertex func():Interface {
-  $B1: {
-    ret Interface(0.40000000596046447754f, 0.599609375h, vec4<f32>(0.0f))
-  }
+void frag_main_inner(Interface colors) {
+  float const r = colors.col1;
+  half const g = colors.col2;
 }
-%frag_main = @fragment func(%colors:Interface):void {
-  $B2: {
-    %4:f32 = access %colors, 0u
-    %r:f32 = let %4
-    %6:f16 = access %colors, 1u
-    %g:f16 = let %6
-    ret
-  }
+vertex vert_main_outputs vert_main() {
+  Interface const v = vert_main_inner();
+  return vert_main_outputs{.Interface_col1=v.col1, .Interface_col2=v.col2, .Interface_pos=v.pos};
 }
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+fragment void frag_main(frag_main_inputs inputs [[stage_in]], float4 Interface_pos [[position]]) {
+  frag_main_inner(Interface{.col1=inputs.Interface_col1, .col2=inputs.Interface_col2, .pos=Interface_pos});
+}

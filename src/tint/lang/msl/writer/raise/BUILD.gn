@@ -50,6 +50,8 @@ if (tint_build_msl_writer) {
       "module_scope_vars.h",
       "raise.cc",
       "raise.h",
+      "shader_io.cc",
+      "shader_io.h",
     ]
     deps = [
       "${tint_src_dir}/api/common",
@@ -90,6 +92,7 @@ if (tint_build_unittests) {
       sources = [
         "builtin_polyfill_test.cc",
         "module_scope_vars_test.cc",
+        "shader_io_test.cc",
       ]
       deps = [
         "${tint_src_dir}:gmock_and_gtest",

@@ -58,17 +58,16 @@ TEST_F(MslWriterTest, WorkgroupAllocations) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
-struct tint_symbol_2 {
-  int tint_symbol;
-  int tint_symbol_1;
-};
 struct tint_module_vars_struct {
   threadgroup int* a;
   threadgroup int* b;
 };
+struct tint_symbol_2 {
+  int tint_symbol;
+  int tint_symbol_1;
+};
 
-kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol), .b=(&(*v).tint_symbol_1)};
+void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index == 0u)) {
     (*tint_module_vars.a) = 0;
     (*tint_module_vars.b) = 0;
@@ -77,6 +76,10 @@ kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgro
   (*tint_module_vars.a) = ((*tint_module_vars.a) + (*tint_module_vars.b));
 }
 kernel void bar() {
+}
+kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol), .b=(&(*v).tint_symbol_1)};
+  foo_inner(tint_local_index, tint_module_vars);
 }
 )");
     ASSERT_EQ(output_.workgroup_allocations.size(), 2u);

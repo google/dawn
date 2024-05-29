@@ -17,10 +17,13 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-kernel void tint_symbol_1(uint tint_symbol_2 [[thread_index_in_threadgroup]], const device tint_array<uint, 1>* tint_symbol [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_symbol=tint_symbol, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+void tint_symbol_1_inner(uint tint_symbol_2, tint_module_vars_struct tint_module_vars) {
   int const tint_symbol_3 = 0;
   int const tint_symbol_4 = 0;
   int const tint_symbol_5 = 0;
   uint const tint_symbol_6 = (*tint_module_vars.tint_symbol)[min(tint_symbol_2, (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 4u) - 1u))];
+}
+kernel void tint_symbol_1(uint tint_symbol_2 [[thread_index_in_threadgroup]], const device tint_array<uint, 1>* tint_symbol [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_symbol=tint_symbol, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  tint_symbol_1_inner(tint_symbol_2, tint_module_vars);
 }

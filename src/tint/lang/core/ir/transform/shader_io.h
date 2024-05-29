@@ -75,8 +75,8 @@ struct ShaderIOBackendState {
     virtual Vector<FunctionParam*, 4> FinalizeInputs() = 0;
 
     /// Finalize the shader outputs and create state needed for the new entry point function.
-    /// @returns the return value for the new entry point
-    virtual Value* FinalizeOutputs() = 0;
+    /// @returns the return type for the new entry point
+    virtual const type::Type* FinalizeOutputs() = 0;
 
     /// Get the value of the input at index @p idx
     /// @param builder the IR builder for new instructions
@@ -89,6 +89,11 @@ struct ShaderIOBackendState {
     /// @param idx the index of the output
     /// @param value the value to set
     virtual void SetOutput(Builder& builder, uint32_t idx, Value* value) = 0;
+
+    /// Create the return value for the entry point, based on the output values that have been set.
+    /// @param builder the IR builder for new instructions
+    /// @returns the return value for the new entry point
+    virtual Value* MakeReturnValue([[maybe_unused]] Builder& builder) { return nullptr; }
 
     /// @returns true if a vertex point size builtin should be added
     virtual bool NeedsVertexPointSize() const { return false; }

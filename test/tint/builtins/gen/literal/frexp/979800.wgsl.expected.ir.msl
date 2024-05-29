@@ -4,11 +4,14 @@ struct frexp_result_vec3_f32 {
   float3 fract;
   int3 exp;
 };
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
 void frexp_979800() {
   frexp_result_vec3_f32 res = frexp_result_vec3_f32{.fract=float3(0.5f), .exp=int3(1)};
 }
-vertex float4 vertex_main() {
+float4 vertex_main_inner() {
   frexp_979800();
   return float4(0.0f);
 }
@@ -17,4 +20,7 @@ fragment void fragment_main() {
 }
 kernel void compute_main() {
   frexp_979800();
+}
+vertex vertex_main_outputs vertex_main() {
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner()};
 }

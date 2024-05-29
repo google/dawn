@@ -1,36 +1,30 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct FragmentInputs {
+  int loc0;
+  uint loc1;
+  float loc2;
+  float4 loc3;
+  half loc4;
+  half3 loc5;
+};
+struct tint_symbol_inputs {
+  int FragmentInputs_loc0 [[user(locn0)]] [[flat]];
+  uint FragmentInputs_loc1 [[user(locn1)]] [[flat]];
+  float FragmentInputs_loc2 [[user(locn2)]];
+  float4 FragmentInputs_loc3 [[user(locn3)]];
+  half FragmentInputs_loc4 [[user(locn4)]];
+  half3 FragmentInputs_loc5 [[user(locn5)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: FragmentInputs = struct @align(16) {
-  loc0:i32 @offset(0), @location(0), @interpolate(flat)
-  loc1:u32 @offset(4), @location(1), @interpolate(flat)
-  loc2:f32 @offset(8), @location(2)
-  loc3:vec4<f32> @offset(16), @location(3)
-  loc4:f16 @offset(32), @location(4)
-  loc5:vec3<f16> @offset(40), @location(5)
+void tint_symbol_inner(FragmentInputs inputs) {
+  int const i = inputs.loc0;
+  uint const u = inputs.loc1;
+  float const f = inputs.loc2;
+  float4 const v = inputs.loc3;
+  half const x = inputs.loc4;
+  half3 const y = inputs.loc5;
 }
-
-%tint_symbol = @fragment func(%inputs:FragmentInputs):void {
-  $B1: {
-    %3:i32 = access %inputs, 0u
-    %i:i32 = let %3
-    %5:u32 = access %inputs, 1u
-    %u:u32 = let %5
-    %7:f32 = access %inputs, 2u
-    %f:f32 = let %7
-    %9:vec4<f32> = access %inputs, 3u
-    %v:vec4<f32> = let %9
-    %11:f16 = access %inputs, 4u
-    %x:f16 = let %11
-    %13:vec3<f16> = access %inputs, 5u
-    %y:vec3<f16> = let %13
-    ret
-  }
+fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
+  tint_symbol_inner(FragmentInputs{.loc0=inputs.FragmentInputs_loc0, .loc1=inputs.FragmentInputs_loc1, .loc2=inputs.FragmentInputs_loc2, .loc3=inputs.FragmentInputs_loc3, .loc4=inputs.FragmentInputs_loc4, .loc5=inputs.FragmentInputs_loc5});
 }
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -28,6 +28,8 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/msl/writer/helper_test.h"
 
+using namespace tint::core::fluent_types;  // NOLINT
+
 namespace tint::msl::writer {
 namespace {
 
@@ -43,34 +45,58 @@ void foo() {
 }
 
 TEST_F(MslWriterTest, EntryPointParameterBufferBindingPoint) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    auto* storage = b.FunctionParam("storage", ty.ptr(core::AddressSpace::kStorage, ty.i32()));
-    auto* uniform = b.FunctionParam("uniform", ty.ptr(core::AddressSpace::kUniform, ty.i32()));
+    auto* storage = b.Var("storage_var", ty.ptr(core::AddressSpace::kStorage, ty.i32()));
+    auto* uniform = b.Var("uniform_var", ty.ptr(core::AddressSpace::kUniform, ty.i32()));
     storage->SetBindingPoint(0, 1);
     uniform->SetBindingPoint(0, 2);
-    func->SetParams({storage, uniform});
-    func->Block()->Append(b.Return(func));
+    mod.root_block->Append(storage);
+    mod.root_block->Append(uniform);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Load(storage);
+        b.Load(uniform);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(
-fragment void foo(device int* storage [[buffer(1)]], const constant int* uniform [[buffer(2)]]) {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct tint_module_vars_struct {
+  device int* storage_var;
+  const constant int* uniform_var;
+};
+
+fragment void foo(device int* storage_var [[buffer(1)]], const constant int* uniform_var [[buffer(2)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.storage_var=storage_var, .uniform_var=uniform_var};
 }
 )");
 }
 
 TEST_F(MslWriterTest, EntryPointParameterHandleBindingPoint) {
     auto* t = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    auto* texture = b.FunctionParam("texture", t);
-    auto* sampler = b.FunctionParam("sampler", ty.sampler());
+    auto* texture = b.Var("texture", ty.ptr<handle>(t));
+    auto* sampler = b.Var("sampler", ty.ptr<handle>(ty.sampler()));
     texture->SetBindingPoint(0, 1);
     sampler->SetBindingPoint(0, 2);
-    func->SetParams({texture, sampler});
-    func->Block()->Append(b.Return(func));
+    mod.root_block->Append(texture);
+    mod.root_block->Append(sampler);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Load(texture);
+        b.Load(sampler);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> texture;
+  sampler sampler;
+};
+
 fragment void foo(texture2d<float, access::sample> texture [[texture(1)]], sampler sampler [[sampler(2)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.texture=texture, .sampler=sampler};
 }
 )");
 }

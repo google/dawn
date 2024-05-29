@@ -289,7 +289,6 @@ class Printer : public tint::TextGenerator {
                 }
                 ++i;
 
-                // TODO(dsinclair): Handle parameter attributes
                 EmitType(out, param->Type());
                 out << " ";
 
@@ -301,41 +300,15 @@ class Printer : public tint::TextGenerator {
 
                 out << NameOf(param);
 
-                if (param->Builtin().has_value()) {
-                    out << " [[";
-                    switch (param->Builtin().value()) {
-                        case core::BuiltinValue::kFrontFacing:
-                            out << "front_facing";
-                            break;
-                        case core::BuiltinValue::kGlobalInvocationId:
-                            out << "thread_position_in_grid";
-                            break;
-                        case core::BuiltinValue::kLocalInvocationId:
-                            out << "thread_position_in_threadgroup";
-                            break;
-                        case core::BuiltinValue::kLocalInvocationIndex:
-                            out << "thread_index_in_threadgroup";
-                            break;
-                        case core::BuiltinValue::kNumWorkgroups:
-                            out << "threadgroups_per_grid";
-                            break;
-                        case core::BuiltinValue::kPosition:
-                            out << "position";
-                            break;
-                        case core::BuiltinValue::kSampleIndex:
-                            out << "sample_id";
-                            break;
-                        case core::BuiltinValue::kSampleMask:
-                            out << "sample_mask";
-                            break;
-                        case core::BuiltinValue::kWorkgroupId:
-                            out << "threadgroup_position_in_grid";
-                            break;
+                if (auto builtin = param->Builtin()) {
+                    auto name = BuiltinToAttribute(builtin.value());
+                    TINT_ASSERT(!name.empty());
+                    out << " [[" << name << "]]";
+                }
 
-                        default:
-                            break;
-                    }
-                    out << "]]";
+                if (param->Type()->Is<core::type::Struct>() &&
+                    func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+                    out << " [[stage_in]]";
                 }
 
                 auto ptr = param->Type()->As<core::type::Pointer>();

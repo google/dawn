@@ -1,16 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
-struct tint_symbol_2 {
-  float tint_symbol_1;
-};
 struct tint_module_vars_struct {
   thread float* p;
   threadgroup float* w;
 };
+struct tint_symbol_2 {
+  float tint_symbol_1;
+};
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
-  thread float p = 0.0f;
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v).tint_symbol_1)};
+void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index == 0u)) {
     (*tint_module_vars.w) = 0.0f;
   }
@@ -19,4 +17,9 @@ kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], t
   threadgroup float* const w_ptr = tint_module_vars.w;
   float const x = ((*p_ptr) + (*w_ptr));
   (*p_ptr) = x;
+}
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
+  thread float p = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v).tint_symbol_1)};
+  tint_symbol_inner(tint_local_index, tint_module_vars);
 }

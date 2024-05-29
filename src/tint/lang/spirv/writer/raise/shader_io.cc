@@ -145,9 +145,9 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeOutputs
-    core::ir::Value* FinalizeOutputs() override {
+    const core::type::Type* FinalizeOutputs() override {
         MakeVars(output_vars, outputs, core::AddressSpace::kOut, core::Access::kWrite, "_Output");
-        return nullptr;
+        return ty.void_();
     }
 
     /// @copydoc ShaderIO::BackendState::GetInput

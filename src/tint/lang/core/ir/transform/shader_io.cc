@@ -86,7 +86,7 @@ struct State {
         }
 
         auto new_params = backend->FinalizeInputs();
-        auto* new_ret_val = backend->FinalizeOutputs();
+        auto* new_ret_ty = backend->FinalizeOutputs();
 
         // Rename the old function and remove its pipeline stage and workgroup size, as we will be
         // wrapping it with a new entry point.
@@ -98,7 +98,8 @@ struct State {
         func->ClearWorkgroupSize();
 
         // Create the entry point wrapper function.
-        auto* ep = b.Function(name, new_ret_val ? new_ret_val->Type() : ty.void_());
+        auto* ep = b.Function(name, new_ret_ty);
+        ep->SetParams(std::move(new_params));
         ep->SetStage(stage);
         if (wgsize) {
             ep->SetWorkgroupSize((*wgsize)[0], (*wgsize)[1], (*wgsize)[2]);
@@ -114,7 +115,7 @@ struct State {
         }
 
         // Return the new result.
-        wrapper.Return(ep, new_ret_val);
+        wrapper.Return(ep, backend->MakeReturnValue(wrapper));
     }
 
     /// Gather the shader inputs.

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/if_statement_attribute.wgsl:8:14 warning: 'dpdx' must only be called from uniform control flow
   } else if (dpdx(1.0) > 0)  {
              ^^^^^^^^^
@@ -14,24 +12,17 @@ SKIP: FAILED
 
 #include <metal_stdlib>
 using namespace metal;
+struct tint_symbol_inputs {
+  float x [[user(locn0)]];
+};
 
-texture2d<float, access::sample> t;
-sampler s;
-fragment void tint_symbol(float x) {
+void tint_symbol_inner(float x) {
   if ((x > 0.0f)) {
   } else {
     if ((dfdx(1.0f) > 0.0f)) {
     }
   }
 }
-program_source:4:34: error: program scope variable must reside in constant address space
-texture2d<float, access::sample> t;
-                                 ^
-program_source:5:1: error: constant sampler must be declared constexpr
-sampler s;
-^
-constexpr 
-program_source:6:27: error: invalid type 'float' for input declaration in a fragment function
-fragment void tint_symbol(float x) {
-                          ^~~~~~~
-
+fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
+  tint_symbol_inner(inputs.x);
+}

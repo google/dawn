@@ -44,6 +44,7 @@
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
+#include "src/tint/lang/msl/writer/raise/shader_io.h"
 
 namespace tint::msl::writer {
 
@@ -108,6 +109,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper);
 
+    RUN_TRANSFORM(raise::ShaderIO, raise::ShaderIOConfig{options.emit_vertex_point_size});
     RUN_TRANSFORM(raise::ModuleScopeVars);
     RUN_TRANSFORM(core::ir::transform::ValueToLet);
     RUN_TRANSFORM(raise::BuiltinPolyfill);

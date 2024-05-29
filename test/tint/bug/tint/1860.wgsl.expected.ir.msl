@@ -6,8 +6,14 @@ struct DeclaredAfterUsage {
 struct tint_module_vars_struct {
   const constant DeclaredAfterUsage* declared_after_usage;
 };
+struct tint_symbol_outputs {
+  float4 tint_symbol_1 [[position]];
+};
 
-vertex float4 tint_symbol(const constant DeclaredAfterUsage* declared_after_usage [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.declared_after_usage=declared_after_usage};
+float4 tint_symbol_inner(tint_module_vars_struct tint_module_vars) {
   return float4((*tint_module_vars.declared_after_usage).f);
+}
+vertex tint_symbol_outputs tint_symbol(const constant DeclaredAfterUsage* declared_after_usage [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.declared_after_usage=declared_after_usage};
+  return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner(tint_module_vars)};
 }

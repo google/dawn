@@ -1,33 +1,16 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 struct ComputeInputs0 {
-  uint3 local_invocation_id [[thread_position_in_threadgroup]];
+  uint3 local_invocation_id;
 };
 struct ComputeInputs1 {
-  uint3 workgroup_id [[threadgroup_position_in_grid]];
+  uint3 workgroup_id;
 };
 
-kernel void tint_symbol(ComputeInputs0 inputs0, uint local_invocation_index [[thread_index_in_threadgroup]], uint3 global_invocation_id [[thread_position_in_grid]], ComputeInputs1 inputs1) {
+void tint_symbol_inner(ComputeInputs0 inputs0, uint local_invocation_index, uint3 global_invocation_id, ComputeInputs1 inputs1) {
   uint const foo = (((inputs0.local_invocation_id[0u] + local_invocation_index) + global_invocation_id[0u]) + inputs1.workgroup_id[0u]);
 }
-program_source:4:31: error: 'thread_position_in_threadgroup' attribute only applies to parameters and global builtin variables
-  uint3 local_invocation_id [[thread_position_in_threadgroup]];
-                              ^
-program_source:7:24: error: 'threadgroup_position_in_grid' attribute only applies to parameters and global builtin variables
-  uint3 workgroup_id [[threadgroup_position_in_grid]];
-                       ^
-program_source:10:25: error: invalid type 'ComputeInputs0' for input declaration in a kernel function
-kernel void tint_symbol(ComputeInputs0 inputs0, uint local_invocation_index [[thread_index_in_threadgroup]], uint3 global_invocation_id [[thread_position_in_grid]], ComputeInputs1 inputs1) {
-                        ^~~~~~~~~~~~~~~~~~~~~~
-program_source:4:3: note: type 'uint3' (vector of 3 'unsigned int' values) cannot be used in struct of resources/colors
-  uint3 local_invocation_id [[thread_position_in_threadgroup]];
-  ^
-program_source:10:166: error: invalid type 'ComputeInputs1' for input declaration in a kernel function
-kernel void tint_symbol(ComputeInputs0 inputs0, uint local_invocation_index [[thread_index_in_threadgroup]], uint3 global_invocation_id [[thread_position_in_grid]], ComputeInputs1 inputs1) {
-                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~
-program_source:7:3: note: type 'uint3' (vector of 3 'unsigned int' values) cannot be used in struct of resources/colors
-  uint3 workgroup_id [[threadgroup_position_in_grid]];
-  ^
-
+kernel void tint_symbol(uint3 ComputeInputs0_local_invocation_id [[thread_position_in_threadgroup]], uint local_invocation_index [[thread_index_in_threadgroup]], uint3 global_invocation_id [[thread_position_in_grid]], uint3 ComputeInputs1_workgroup_id [[threadgroup_position_in_grid]]) {
+  ComputeInputs0 const v = ComputeInputs0{.local_invocation_id=ComputeInputs0_local_invocation_id};
+  tint_symbol_inner(v, local_invocation_index, global_invocation_id, ComputeInputs1{.workgroup_id=ComputeInputs1_workgroup_id});
+}

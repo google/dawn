@@ -1,28 +1,32 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct In {
+  float none;
+  float flat;
+  float perspective_center;
+  float perspective_centroid;
+  float perspective_sample;
+  float linear_center;
+  float linear_centroid;
+  float linear_sample;
+  float perspective_default;
+  float linear_default;
+};
+struct tint_symbol_inputs {
+  float In_none [[user(locn0)]];
+  float In_flat [[user(locn1)]] [[flat]];
+  float In_perspective_center [[user(locn2)]] [[center_perspective]];
+  float In_perspective_centroid [[user(locn3)]] [[centroid_perspective]];
+  float In_perspective_sample [[user(locn4)]] [[sample_perspective]];
+  float In_linear_center [[user(locn5)]] [[center_no_perspective]];
+  float In_linear_centroid [[user(locn6)]] [[centroid_no_perspective]];
+  float In_linear_sample [[user(locn7)]] [[sample_no_perspective]];
+  float In_perspective_default [[user(locn8)]] [[center_perspective]];
+  float In_linear_default [[user(locn9)]] [[center_no_perspective]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: In = struct @align(4) {
-  none:f32 @offset(0), @location(0)
-  flat:f32 @offset(4), @location(1), @interpolate(flat)
-  perspective_center:f32 @offset(8), @location(2), @interpolate(perspective, center)
-  perspective_centroid:f32 @offset(12), @location(3), @interpolate(perspective, centroid)
-  perspective_sample:f32 @offset(16), @location(4), @interpolate(perspective, sample)
-  linear_center:f32 @offset(20), @location(5), @interpolate(linear, center)
-  linear_centroid:f32 @offset(24), @location(6), @interpolate(linear, centroid)
-  linear_sample:f32 @offset(28), @location(7), @interpolate(linear, sample)
-  perspective_default:f32 @offset(32), @location(8), @interpolate(perspective)
-  linear_default:f32 @offset(36), @location(9), @interpolate(linear)
+void tint_symbol_inner(In in) {
 }
-
-%tint_symbol = @fragment func(%in:In):void {
-  $B1: {
-    ret
-  }
+fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
+  tint_symbol_inner(In{.none=inputs.In_none, .flat=inputs.In_flat, .perspective_center=inputs.In_perspective_center, .perspective_centroid=inputs.In_perspective_centroid, .perspective_sample=inputs.In_perspective_sample, .linear_center=inputs.In_linear_center, .linear_centroid=inputs.In_linear_centroid, .linear_sample=inputs.In_linear_sample, .perspective_default=inputs.In_perspective_default, .linear_default=inputs.In_linear_default});
 }
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -38,12 +38,15 @@ void foo(float a, tint_module_vars_struct tint_module_vars) {
   bar(a, b, tint_module_vars);
   no_uses();
 }
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]], const device float2* uniforms [[buffer(1)]], device tint_array<float, 1>* storages [[buffer(0)]]) {
-  thread float p = 0.0f;
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v).tint_symbol_1), .uniforms=uniforms, .storages=storages};
+void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index == 0u)) {
     (*tint_module_vars.w) = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   foo(1.0f, tint_module_vars);
+}
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]], const device float2* uniforms [[buffer(1)]], device tint_array<float, 1>* storages [[buffer(0)]]) {
+  thread float p = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v).tint_symbol_1), .uniforms=uniforms, .storages=storages};
+  tint_symbol_inner(tint_local_index, tint_module_vars);
 }

@@ -1,6 +1,19 @@
+SKIP: FAILED
+
 #include <metal_stdlib>
 using namespace metal;
+struct tint_symbol_outputs {
+  float4 tint_symbol_1 [[position]] TINT_INVARIANT;
+};
 
-vertex float4 tint_symbol() {
+float4 tint_symbol_inner() {
   return float4(0.0f);
 }
+vertex tint_symbol_outputs tint_symbol() {
+  return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner()};
+}
+program_source:4:36: error: expected ';' at end of declaration list
+  float4 tint_symbol_1 [[position]] TINT_INVARIANT;
+                                   ^
+                                   ;
+

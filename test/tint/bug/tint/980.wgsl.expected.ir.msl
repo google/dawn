@@ -13,7 +13,10 @@ float3 Bad(uint index, float3 rd) {
   normal[index] = -(sign(rd[index]));
   return normalize(normal);
 }
+void tint_symbol_inner(uint idx, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.io).v = Bad((*tint_module_vars.io).i, (*tint_module_vars.io).v);
+}
 kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], device S* io [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.io=io};
-  (*tint_module_vars.io).v = Bad((*tint_module_vars.io).i, (*tint_module_vars.io).v);
+  tint_symbol_inner(idx, tint_module_vars);
 }

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/switch_body_attribute.wgsl:5:11 warning: 'dpdx' must only be called from uniform control flow
       _ = dpdx(1.0);
           ^^^^^^^^^
@@ -14,8 +12,14 @@ SKIP: FAILED
 
 #include <metal_stdlib>
 using namespace metal;
+struct tint_symbol_inputs {
+  float x [[user(locn0)]];
+};
 
-fragment void tint_symbol(float x) {
+int tint_f32_to_i32(float value) {
+  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+}
+void tint_symbol_inner(float x) {
   switch(tint_f32_to_i32(x)) {
     default:
     {
@@ -24,10 +28,6 @@ fragment void tint_symbol(float x) {
     }
   }
 }
-int tint_f32_to_i32(float value) {
-  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
+  tint_symbol_inner(inputs.x);
 }
-program_source:4:27: error: invalid type 'float' for input declaration in a fragment function
-fragment void tint_symbol(float x) {
-                          ^~~~~~~
-

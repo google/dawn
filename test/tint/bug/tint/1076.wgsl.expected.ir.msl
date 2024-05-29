@@ -1,28 +1,25 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct FragIn {
+  float a;
+  uint mask;
+};
+struct tint_symbol_outputs {
+  float FragIn_a [[color(0)]];
+  uint FragIn_mask [[sample_mask]];
+};
+struct tint_symbol_inputs {
+  float FragIn_a [[user(locn0)]];
+  float b [[user(locn1)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: FragIn = struct @align(4) {
-  a:f32 @offset(0), @location(0)
-  mask:u32 @offset(4), @builtin(sample_mask)
-}
-
-%tint_symbol = @fragment func(%in:FragIn, %b:f32 [@location(1)]):FragIn {
-  $B1: {
-    %4:u32 = access %in, 1u
-    %5:bool = eq %4, 0u
-    if %5 [t: $B2] {  # if_1
-      $B2: {  # true
-        ret %in
-      }
-    }
-    %6:FragIn = construct %b, 1u
-    ret %6
+FragIn tint_symbol_inner(FragIn in, float b) {
+  if ((in.mask == 0u)) {
+    return in;
   }
+  return FragIn{.a=b, .mask=1u};
 }
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], uint FragIn_mask [[sample_mask]]) {
+  FragIn const v = tint_symbol_inner(FragIn{.a=inputs.FragIn_a, .mask=FragIn_mask}, inputs.b);
+  return tint_symbol_outputs{.FragIn_a=v.a, .FragIn_mask=v.mask};
+}

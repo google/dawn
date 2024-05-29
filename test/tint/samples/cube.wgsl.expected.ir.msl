@@ -1,49 +1,48 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct VertexOutput {
+  float4 vtxFragColor;
+  float4 Position;
+};
+struct VertexInput {
+  float4 cur_position;
+  float4 color;
+};
+struct Uniforms {
+  float4x4 modelViewProjectionMatrix;
+};
+struct tint_module_vars_struct {
+  const constant Uniforms* uniforms;
+};
+struct vtx_main_outputs {
+  float4 VertexOutput_vtxFragColor [[user(locn0)]];
+  float4 VertexOutput_Position [[position]];
+};
+struct vtx_main_inputs {
+  float4 VertexInput_cur_position [[attribute(0)]];
+  float4 VertexInput_color [[attribute(1)]];
+};
+struct frag_main_outputs {
+  float4 tint_symbol [[color(0)]];
+};
+struct frag_main_inputs {
+  float4 fragColor [[user(locn0)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Uniforms = struct @align(16) {
-  modelViewProjectionMatrix:mat4x4<f32> @offset(0)
+VertexOutput vtx_main_inner(VertexInput input, tint_module_vars_struct tint_module_vars) {
+  VertexOutput output = {};
+  output.Position = ((*tint_module_vars.uniforms).modelViewProjectionMatrix * input.cur_position);
+  output.vtxFragColor = input.color;
+  return output;
 }
-
-VertexOutput = struct @align(16) {
-  vtxFragColor:vec4<f32> @offset(0), @location(0)
-  Position:vec4<f32> @offset(16), @builtin(position)
+float4 frag_main_inner(float4 fragColor) {
+  return fragColor;
 }
-
-VertexInput = struct @align(16) {
-  cur_position:vec4<f32> @offset(0), @location(0)
-  color:vec4<f32> @offset(16), @location(1)
+vertex vtx_main_outputs vtx_main(vtx_main_inputs inputs [[stage_in]], const constant Uniforms* uniforms [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
+  VertexOutput const v = vtx_main_inner(VertexInput{.cur_position=inputs.VertexInput_cur_position, .color=inputs.VertexInput_color}, tint_module_vars);
+  return vtx_main_outputs{.VertexOutput_vtxFragColor=v.vtxFragColor, .VertexOutput_Position=v.Position};
 }
-
-$B1: {  # root
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 0)
+fragment frag_main_outputs frag_main(frag_main_inputs inputs [[stage_in]]) {
+  return frag_main_outputs{.tint_symbol=frag_main_inner(inputs.fragColor)};
 }
-
-%vtx_main = @vertex func(%input:VertexInput):VertexOutput {
-  $B2: {
-    %output:ptr<function, VertexOutput, read_write> = var
-    %5:ptr<function, vec4<f32>, read_write> = access %output, 1u
-    %6:ptr<uniform, mat4x4<f32>, read> = access %uniforms, 0u
-    %7:mat4x4<f32> = load %6
-    %8:vec4<f32> = access %input, 0u
-    %9:vec4<f32> = mul %7, %8
-    store %5, %9
-    %10:ptr<function, vec4<f32>, read_write> = access %output, 0u
-    %11:vec4<f32> = access %input, 1u
-    store %10, %11
-    %12:VertexOutput = load %output
-    ret %12
-  }
-}
-%frag_main = @fragment func(%fragColor:vec4<f32> [@location(0)]):vec4<f32> [@location(0)] {
-  $B3: {
-    ret %fragColor
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

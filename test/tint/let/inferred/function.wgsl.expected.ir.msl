@@ -15,6 +15,9 @@ struct tint_array {
   T elements[N];
 };
 
+struct tint_symbol_outputs {
+  float4 tint_symbol_1 [[color(0)]];
+};
 
 int ret_i32() {
   return 1;
@@ -48,6 +51,9 @@ void let_decls() {
   MyStruct const v14 = ret_MyStruct();
   tint_array<float, 10> const v15 = ret_MyArray();
 }
-fragment float4 tint_symbol() {
+float4 tint_symbol_inner() {
   return float4(0.0f);
+}
+fragment tint_symbol_outputs tint_symbol() {
+  return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner()};
 }

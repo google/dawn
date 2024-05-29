@@ -1,11 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
 void select_2c96d4() {
   bool3 arg_2 = bool3(true);
   float3 res = select(float3(1.0f), float3(1.0f), arg_2);
 }
-vertex float4 vertex_main() {
+float4 vertex_main_inner() {
   select_2c96d4();
   return float4(0.0f);
 }
@@ -14,4 +17,7 @@ fragment void fragment_main() {
 }
 kernel void compute_main() {
   select_2c96d4();
+}
+vertex vertex_main_outputs vertex_main() {
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner()};
 }

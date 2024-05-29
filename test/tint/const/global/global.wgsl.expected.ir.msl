@@ -12,8 +12,11 @@ struct tint_array {
   T elements[N];
 };
 
+struct tint_symbol_outputs {
+  float4 tint_symbol_1 [[color(0)]];
+};
 
-fragment float4 tint_symbol() {
+float4 tint_symbol_inner() {
   int v1 = 1;
   uint v2 = 1u;
   float v3 = 1.0f;
@@ -23,4 +26,7 @@ fragment float4 tint_symbol() {
   float3x3 v7 = float3x3(float3(1.0f), float3(1.0f), float3(1.0f));
   tint_array<float, 10> v9 = tint_array<float, 10>{};
   return float4(0.0f);
+}
+fragment tint_symbol_outputs tint_symbol() {
+  return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner()};
 }
