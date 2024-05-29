@@ -32,6 +32,7 @@
 #include "spirv/unified1/GLSL.std.450.h"
 #include "spirv/unified1/spirv.h"
 
+#include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/constant/scalar.h"
@@ -156,6 +157,10 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
         },
         [&](const core::type::DepthMultisampledTexture* depth) {
             return types.Get<core::type::MultisampledTexture>(depth->dim(), types.f32());
+        },
+        [&](const core::type::StorageTexture* st) -> const core::type::Type* {
+            return types.Get<core::type::StorageTexture>(st->dim(), st->texel_format(),
+                                                         core::Access::kRead, st->type());
         },
 
         // Both sampler types are the same in SPIR-V.
