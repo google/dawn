@@ -28,34 +28,17 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_BUILDER_H_
 #define SRC_TINT_LANG_WGSL_AST_BUILDER_H_
 
-#include <string>
-#include <unordered_set>
 #include <utility>
 
 #include "src/tint/api/common/override_id.h"
 
-#include "src/tint/lang/core/constant/manager.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/number.h"
-#include "src/tint/lang/core/type/array.h"
-#include "src/tint/lang/core/type/bool.h"
-#include "src/tint/lang/core/type/depth_texture.h"
-#include "src/tint/lang/core/type/external_texture.h"
-#include "src/tint/lang/core/type/f16.h"
-#include "src/tint/lang/core/type/f32.h"
-#include "src/tint/lang/core/type/i32.h"
-#include "src/tint/lang/core/type/matrix.h"
-#include "src/tint/lang/core/type/multisampled_texture.h"
-#include "src/tint/lang/core/type/pointer.h"
-#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/sampler_kind.h"
-#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
-#include "src/tint/lang/core/type/u32.h"
-#include "src/tint/lang/core/type/vector.h"
-#include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
@@ -117,6 +100,8 @@
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/utils/id/generation_id.h"
+#include "src/tint/utils/memory/block_allocator.h"
+#include "src/tint/utils/symbol/symbol_table.h"
 #include "src/tint/utils/text/string.h"
 
 #ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER

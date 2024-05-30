@@ -38,7 +38,6 @@
 #define SRC_TINT_LANG_WGSL_DIAGNOSTIC_RULE_H_
 
 #include <cstdint>
-#include <string>
 #include <variant>
 
 #include "src/tint/utils/traits/traits.h"
