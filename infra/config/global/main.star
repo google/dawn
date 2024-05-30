@@ -187,6 +187,11 @@ cmake_msvc_file_exclusions = [
         path_regexp = "tools/src/.+",
         exclude = True,
     ),
+    # Go dependencies.
+    cq.location_filter(
+        path_regexp = "go\\.(mod|sum)",
+        exclude = True,
+    ),
 ]
 
 luci.notifier(
