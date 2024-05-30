@@ -31,9 +31,13 @@ import sys
 def _DoCommonChecks(input_api, output_api):
     sys.path += [input_api.change.RepositoryRoot()]
 
-    from go_presubmit_support import RunGoTests
+    import go_presubmit_support
 
-    return RunGoTests(input_api, output_api)
+    results = go_presubmit_support.RunGoTests(input_api, output_api)
+    results.extend(
+        go_presubmit_support.EnforceGoFormatting('src', input_api, output_api))
+
+    return results
 
 
 CheckChangeOnUpload = _DoCommonChecks
