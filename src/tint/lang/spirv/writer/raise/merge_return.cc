@@ -129,6 +129,7 @@ struct State {
     /// @param block the block to process
     void ProcessBlock(core::ir::Block* block) {
         core::ir::If* inner_if = nullptr;
+        Vector<core::ir::If*, 4> inner_if_stack;
         for (auto* inst = *block->begin(); inst;) {  // For each instruction in 'block'
             // As we're modifying the block that we're iterating over, grab the pointer to the next
             // instruction before (potentially) moving 'inst' to another block.
@@ -167,6 +168,7 @@ struct State {
                     if (next && (next != fn_return || fn_return->Value()) &&
                         !tint::IsAnyOf<core::ir::Exit, core::ir::Unreachable>(next)) {
                         inner_if = CreateIfContinueExecution(ctrl);
+                        inner_if_stack.Push(inner_if);
                     }
                 }
             }
@@ -195,9 +197,10 @@ struct State {
                 inner_if->True()->Append(b.ExitIf(inner_if));
             }
 
-            // Loop over the 'if' instructions, starting with the inner-most, and add any missing
-            // terminating instructions to the blocks holding the 'if'.
-            for (auto* i = inner_if; i; i = tint::As<core::ir::If>(i->Block()->Parent())) {
+            // Walk back down the stack of 'if' instructions that were created, and add any missing
+            // terminating instructions to the blocks holding them.
+            while (!inner_if_stack.IsEmpty()) {
+                auto* i = inner_if_stack.Pop();
                 if (!i->Block()->Terminator() && i->Block()->Parent()) {
                     // Append the exit instruction to the block holding the 'if'.
                     Vector<core::ir::InstructionResult*, 8> exit_args = i->Results();

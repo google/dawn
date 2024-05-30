@@ -1413,6 +1413,306 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Consecutive_ThenUnreachable) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_NestedConsecutives) {
+    auto* value = b.FunctionParam(ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({value});
+
+    b.Append(func->Block(), [&] {
+        auto* outer = b.If(b.Equal(ty.bool_(), value, 1_i));
+        b.Append(outer->True(), [&] {
+            auto* middle_first = b.If(b.Equal(ty.bool_(), value, 2_i));
+            b.Append(middle_first->True(), [&] {  //
+                b.Return(func, 202_i);
+            });
+
+            auto* middle_second = b.If(b.Equal(ty.bool_(), value, 3_i));
+            b.Append(middle_second->True(), [&] {
+                auto* inner_first = b.If(b.Equal(ty.bool_(), value, 4_i));
+                b.Append(inner_first->True(), [&] {  //
+                    b.Return(func, 404_i);
+                });
+
+                auto* inner_second = b.If(b.Equal(ty.bool_(), value, 5_i));
+                b.Append(inner_second->True(), [&] {  //
+                    b.Return(func, 505_i);
+                });
+
+                b.ExitIf(middle_second);
+            });
+
+            b.ExitIf(outer);
+        });
+
+        b.Return(func, 606_i);
+    });
+
+    auto* src = R"(
+%foo = func(%2:i32):i32 {
+  $B1: {
+    %3:bool = eq %2, 1i
+    if %3 [t: $B2] {  # if_1
+      $B2: {  # true
+        %4:bool = eq %2, 2i
+        if %4 [t: $B3] {  # if_2
+          $B3: {  # true
+            ret 202i
+          }
+        }
+        %5:bool = eq %2, 3i
+        if %5 [t: $B4] {  # if_3
+          $B4: {  # true
+            %6:bool = eq %2, 4i
+            if %6 [t: $B5] {  # if_4
+              $B5: {  # true
+                ret 404i
+              }
+            }
+            %7:bool = eq %2, 5i
+            if %7 [t: $B6] {  # if_5
+              $B6: {  # true
+                ret 505i
+              }
+            }
+            exit_if  # if_3
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    ret 606i
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%2:i32):i32 {
+  $B1: {
+    %return_value:ptr<function, i32, read_write> = var
+    %continue_execution:ptr<function, bool, read_write> = var, true
+    %5:bool = eq %2, 1i
+    if %5 [t: $B2] {  # if_1
+      $B2: {  # true
+        %6:bool = eq %2, 2i
+        if %6 [t: $B3] {  # if_2
+          $B3: {  # true
+            store %continue_execution, false
+            store %return_value, 202i
+            exit_if  # if_2
+          }
+        }
+        %7:bool = load %continue_execution
+        if %7 [t: $B4] {  # if_3
+          $B4: {  # true
+            %8:bool = eq %2, 3i
+            if %8 [t: $B5] {  # if_4
+              $B5: {  # true
+                %9:bool = eq %2, 4i
+                if %9 [t: $B6] {  # if_5
+                  $B6: {  # true
+                    store %continue_execution, false
+                    store %return_value, 404i
+                    exit_if  # if_5
+                  }
+                }
+                %10:bool = load %continue_execution
+                if %10 [t: $B7] {  # if_6
+                  $B7: {  # true
+                    %11:bool = eq %2, 5i
+                    if %11 [t: $B8] {  # if_7
+                      $B8: {  # true
+                        store %continue_execution, false
+                        store %return_value, 505i
+                        exit_if  # if_7
+                      }
+                    }
+                    exit_if  # if_6
+                  }
+                }
+                exit_if  # if_4
+              }
+            }
+            exit_if  # if_3
+          }
+        }
+        exit_if  # if_1
+      }
+    }
+    %12:bool = load %continue_execution
+    if %12 [t: $B9] {  # if_8
+      $B9: {  # true
+        store %return_value, 606i
+        exit_if  # if_8
+      }
+    }
+    %13:i32 = load %return_value
+    ret %13
+  }
+}
+)";
+
+    Run(MergeReturn);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_NestedConsecutives_WithResults) {
+    auto* value = b.FunctionParam(ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({value});
+
+    b.Append(func->Block(), [&] {
+        auto* outer_result = b.InstructionResult(ty.i32());
+        auto* outer = b.If(b.Equal(ty.bool_(), value, 1_i));
+        outer->SetResults(Vector{outer_result});
+        b.Append(outer->True(), [&] {
+            auto* middle_first = b.If(b.Equal(ty.bool_(), value, 2_i));
+            b.Append(middle_first->True(), [&] {  //
+                b.Return(func, 202_i);
+            });
+
+            auto middle_result = b.InstructionResult(ty.i32());
+            auto* middle_second = b.If(b.Equal(ty.bool_(), value, 3_i));
+            middle_second->SetResults(Vector{middle_result});
+            b.Append(middle_second->True(), [&] {
+                auto* inner_first = b.If(b.Equal(ty.bool_(), value, 4_i));
+                b.Append(inner_first->True(), [&] {  //
+                    b.Return(func, 404_i);
+                });
+
+                auto inner_result = b.InstructionResult(ty.i32());
+                auto* inner_second = b.If(b.Equal(ty.bool_(), value, 5_i));
+                inner_second->SetResults(Vector{inner_result});
+                b.Append(inner_second->True(), [&] {  //
+                    b.ExitIf(inner_second, 505_i);
+                });
+
+                b.ExitIf(middle_second, inner_result);
+            });
+
+            b.ExitIf(outer, middle_result);
+        });
+
+        b.Return(func, outer_result);
+    });
+
+    auto* src = R"(
+%foo = func(%2:i32):i32 {
+  $B1: {
+    %3:bool = eq %2, 1i
+    %4:i32 = if %3 [t: $B2] {  # if_1
+      $B2: {  # true
+        %5:bool = eq %2, 2i
+        if %5 [t: $B3] {  # if_2
+          $B3: {  # true
+            ret 202i
+          }
+        }
+        %6:bool = eq %2, 3i
+        %7:i32 = if %6 [t: $B4] {  # if_3
+          $B4: {  # true
+            %8:bool = eq %2, 4i
+            if %8 [t: $B5] {  # if_4
+              $B5: {  # true
+                ret 404i
+              }
+            }
+            %9:bool = eq %2, 5i
+            %10:i32 = if %9 [t: $B6] {  # if_5
+              $B6: {  # true
+                exit_if 505i  # if_5
+              }
+              # implicit false block: exit_if undef
+            }
+            exit_if %10  # if_3
+          }
+          # implicit false block: exit_if undef
+        }
+        exit_if %7  # if_1
+      }
+      # implicit false block: exit_if undef
+    }
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%2:i32):i32 {
+  $B1: {
+    %return_value:ptr<function, i32, read_write> = var
+    %continue_execution:ptr<function, bool, read_write> = var, true
+    %5:bool = eq %2, 1i
+    %6:i32 = if %5 [t: $B2] {  # if_1
+      $B2: {  # true
+        %7:bool = eq %2, 2i
+        if %7 [t: $B3] {  # if_2
+          $B3: {  # true
+            store %continue_execution, false
+            store %return_value, 202i
+            exit_if  # if_2
+          }
+        }
+        %8:bool = load %continue_execution
+        %9:i32 = if %8 [t: $B4] {  # if_3
+          $B4: {  # true
+            %10:bool = eq %2, 3i
+            %11:i32 = if %10 [t: $B5] {  # if_4
+              $B5: {  # true
+                %12:bool = eq %2, 4i
+                if %12 [t: $B6] {  # if_5
+                  $B6: {  # true
+                    store %continue_execution, false
+                    store %return_value, 404i
+                    exit_if  # if_5
+                  }
+                }
+                %13:bool = load %continue_execution
+                %14:i32 = if %13 [t: $B7] {  # if_6
+                  $B7: {  # true
+                    %15:bool = eq %2, 5i
+                    %16:i32 = if %15 [t: $B8] {  # if_7
+                      $B8: {  # true
+                        exit_if 505i  # if_7
+                      }
+                      # implicit false block: exit_if undef
+                    }
+                    exit_if %16  # if_6
+                  }
+                  # implicit false block: exit_if undef
+                }
+                exit_if %14  # if_4
+              }
+              # implicit false block: exit_if undef
+            }
+            exit_if %11  # if_3
+          }
+          # implicit false block: exit_if undef
+        }
+        exit_if %9  # if_1
+      }
+      # implicit false block: exit_if undef
+    }
+    %17:bool = load %continue_execution
+    if %17 [t: $B9] {  # if_8
+      $B9: {  # true
+        store %return_value, %6
+        exit_if  # if_8
+      }
+    }
+    %18:i32 = load %return_value
+    ret %18
+  }
+}
+)";
+
+    Run(MergeReturn);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_MergeReturnTest, Loop_UnconditionalReturnInBody) {
     auto* func = b.Function("foo", ty.i32());
 
