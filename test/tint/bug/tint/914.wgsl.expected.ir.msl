@@ -1,567 +1,257 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Matrix = struct @align(4) {
-  numbers:array<f32> @offset(0)
+struct Matrix {
+  tint_array<float, 1> numbers;
+};
+struct Uniforms {
+  uint dimAOuter;
+  uint dimInner;
+  uint dimBOuter;
+};
+struct tint_module_vars_struct {
+  const device Matrix* firstMatrix;
+  const device Matrix* secondMatrix;
+  device Matrix* resultMatrix;
+  const constant Uniforms* uniforms;
+  threadgroup tint_array<tint_array<float, 64>, 64>* mm_Asub;
+  threadgroup tint_array<tint_array<float, 64>, 64>* mm_Bsub;
+};
+struct tint_symbol_3 {
+  tint_array<tint_array<float, 64>, 64> tint_symbol_1;
+  tint_array<tint_array<float, 64>, 64> tint_symbol_2;
+};
+
+float mm_readA(uint row, uint col, tint_module_vars_struct tint_module_vars) {
+  bool v = false;
+  if ((row < (*tint_module_vars.uniforms).dimAOuter)) {
+    v = (col < (*tint_module_vars.uniforms).dimInner);
+  } else {
+    v = false;
+  }
+  if (v) {
+    float const result = (*tint_module_vars.firstMatrix).numbers[((row * (*tint_module_vars.uniforms).dimInner) + col)];
+    return result;
+  }
+  return 0.0f;
 }
-
-Uniforms = struct @align(4) {
-  dimAOuter:u32 @offset(0)
-  dimInner:u32 @offset(4)
-  dimBOuter:u32 @offset(8)
+float mm_readB(uint row, uint col, tint_module_vars_struct tint_module_vars) {
+  bool v_1 = false;
+  if ((row < (*tint_module_vars.uniforms).dimInner)) {
+    v_1 = (col < (*tint_module_vars.uniforms).dimBOuter);
+  } else {
+    v_1 = false;
+  }
+  if (v_1) {
+    float const result = (*tint_module_vars.secondMatrix).numbers[((row * (*tint_module_vars.uniforms).dimBOuter) + col)];
+    return result;
+  }
+  return 0.0f;
 }
-
-$B1: {  # root
-  %firstMatrix:ptr<storage, Matrix, read> = var @binding_point(0, 0)
-  %secondMatrix:ptr<storage, Matrix, read> = var @binding_point(0, 1)
-  %resultMatrix:ptr<storage, Matrix, read_write> = var @binding_point(0, 2)
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 3)
-  %mm_Asub:ptr<workgroup, array<array<f32, 64>, 64>, read_write> = var
-  %mm_Bsub:ptr<workgroup, array<array<f32, 64>, 64>, read_write> = var
-}
-
-%mm_readA = func(%row:u32, %col:u32):f32 {
-  $B2: {
-    %10:ptr<uniform, u32, read> = access %uniforms, 0u
-    %11:u32 = load %10
-    %12:bool = lt %row, %11
-    %13:bool = if %12 [t: $B3, f: $B4] {  # if_1
-      $B3: {  # true
-        %14:ptr<uniform, u32, read> = access %uniforms, 1u
-        %15:u32 = load %14
-        %16:bool = lt %col, %15
-        exit_if %16  # if_1
-      }
-      $B4: {  # false
-        exit_if false  # if_1
-      }
-    }
-    if %13 [t: $B5] {  # if_2
-      $B5: {  # true
-        %17:ptr<uniform, u32, read> = access %uniforms, 1u
-        %18:u32 = load %17
-        %19:u32 = mul %row, %18
-        %20:u32 = add %19, %col
-        %21:ptr<storage, f32, read> = access %firstMatrix, 0u, %20
-        %22:f32 = load %21
-        %result:f32 = let %22
-        ret %result
-      }
-    }
-    ret 0.0f
+void mm_write(uint row, uint col, float value, tint_module_vars_struct tint_module_vars) {
+  bool v_2 = false;
+  if ((row < (*tint_module_vars.uniforms).dimAOuter)) {
+    v_2 = (col < (*tint_module_vars.uniforms).dimBOuter);
+  } else {
+    v_2 = false;
+  }
+  if (v_2) {
+    uint const index = (col + (row * (*tint_module_vars.uniforms).dimBOuter));
+    (*tint_module_vars.resultMatrix).numbers[index] = value;
   }
 }
-%mm_readB = func(%row_1:u32, %col_1:u32):f32 {  # %row_1: 'row', %col_1: 'col'
-  $B6: {
-    %27:ptr<uniform, u32, read> = access %uniforms, 1u
-    %28:u32 = load %27
-    %29:bool = lt %row_1, %28
-    %30:bool = if %29 [t: $B7, f: $B8] {  # if_3
-      $B7: {  # true
-        %31:ptr<uniform, u32, read> = access %uniforms, 2u
-        %32:u32 = load %31
-        %33:bool = lt %col_1, %32
-        exit_if %33  # if_3
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / select(rhs, 1u, (rhs == 0u)));
+}
+void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v_3 = 0u;
+    v_3 = tint_local_index;
+    while(true) {
+      uint const v_4 = v_3;
+      if ((v_4 >= 4096u)) {
+        break;
       }
-      $B8: {  # false
-        exit_if false  # if_3
-      }
+      (*tint_module_vars.mm_Asub)[(v_4 / 64u)][(v_4 % 64u)] = 0.0f;
+      (*tint_module_vars.mm_Bsub)[(v_4 / 64u)][(v_4 % 64u)] = 0.0f;
+      v_3 = (v_4 + 256u);
+      continue;
     }
-    if %30 [t: $B9] {  # if_4
-      $B9: {  # true
-        %34:ptr<uniform, u32, read> = access %uniforms, 2u
-        %35:u32 = load %34
-        %36:u32 = mul %row_1, %35
-        %37:u32 = add %36, %col_1
-        %38:ptr<storage, f32, read> = access %secondMatrix, 0u, %37
-        %39:f32 = load %38
-        %result_1:f32 = let %39  # %result_1: 'result'
-        ret %result_1
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  uint const tileRow = (local_id[1u] * 4u);
+  uint const tileCol = (local_id[0u] * 4u);
+  uint const globalRow = (global_id[1u] * 4u);
+  uint const globalCol = (global_id[0u] * 4u);
+  uint const numTiles = (tint_div_u32(((*tint_module_vars.uniforms).dimInner - 1u), 64u) + 1u);
+  tint_array<float, 16> acc = {};
+  float ACached = 0.0f;
+  tint_array<float, 4> BCached = {};
+  {
+    uint index = 0u;
+    while(true) {
+      if ((index < 16u)) {
+      } else {
+        break;
       }
+      acc[index] = 0.0f;
+      index = (index + 1u);
+      continue;
     }
-    ret 0.0f
+  }
+  uint const ColPerThreadA = 4u;
+  uint const tileColA = (local_id[0u] * ColPerThreadA);
+  uint const RowPerThreadB = 4u;
+  uint const tileRowB = (local_id[1u] * RowPerThreadB);
+  {
+    uint t = 0u;
+    while(true) {
+      if ((t < numTiles)) {
+      } else {
+        break;
+      }
+      {
+        uint innerRow = 0u;
+        while(true) {
+          if ((innerRow < 4u)) {
+          } else {
+            break;
+          }
+          {
+            uint innerCol = 0u;
+            while(true) {
+              if ((innerCol < ColPerThreadA)) {
+              } else {
+                break;
+              }
+              uint const inputRow = (tileRow + innerRow);
+              uint const inputCol = (tileColA + innerCol);
+              (*tint_module_vars.mm_Asub)[inputRow][inputCol] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol), tint_module_vars);
+              innerCol = (innerCol + 1u);
+              continue;
+            }
+          }
+          innerRow = (innerRow + 1u);
+          continue;
+        }
+      }
+      {
+        uint innerRow = 0u;
+        while(true) {
+          if ((innerRow < RowPerThreadB)) {
+          } else {
+            break;
+          }
+          {
+            uint innerCol = 0u;
+            while(true) {
+              if ((innerCol < 4u)) {
+              } else {
+                break;
+              }
+              uint const inputRow = (tileRowB + innerRow);
+              uint const inputCol = (tileCol + innerCol);
+              threadgroup float* const v_5 = (&(*tint_module_vars.mm_Bsub)[innerCol][inputCol]);
+              (*v_5) = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol), tint_module_vars);
+              innerCol = (innerCol + 1u);
+              continue;
+            }
+          }
+          innerRow = (innerRow + 1u);
+          continue;
+        }
+      }
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+      {
+        uint k = 0u;
+        while(true) {
+          if ((k < 64u)) {
+          } else {
+            break;
+          }
+          {
+            uint inner = 0u;
+            while(true) {
+              if ((inner < 4u)) {
+              } else {
+                break;
+              }
+              BCached[inner] = (*tint_module_vars.mm_Bsub)[k][(tileCol + inner)];
+              inner = (inner + 1u);
+              continue;
+            }
+          }
+          {
+            uint innerRow = 0u;
+            while(true) {
+              if ((innerRow < 4u)) {
+              } else {
+                break;
+              }
+              ACached = (*tint_module_vars.mm_Asub)[(tileRow + innerRow)][k];
+              {
+                uint innerCol = 0u;
+                while(true) {
+                  if ((innerCol < 4u)) {
+                  } else {
+                    break;
+                  }
+                  uint const index = ((innerRow * 4u) + innerCol);
+                  acc[index] = (acc[index] + (ACached * BCached[innerCol]));
+                  innerCol = (innerCol + 1u);
+                  continue;
+                }
+              }
+              innerRow = (innerRow + 1u);
+              continue;
+            }
+          }
+          k = (k + 1u);
+          continue;
+        }
+      }
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+      t = (t + 1u);
+      continue;
+    }
+  }
+  {
+    uint innerRow = 0u;
+    while(true) {
+      if ((innerRow < 4u)) {
+      } else {
+        break;
+      }
+      {
+        uint innerCol = 0u;
+        while(true) {
+          if ((innerCol < 4u)) {
+          } else {
+            break;
+          }
+          uint const index = ((innerRow * 4u) + innerCol);
+          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index], tint_module_vars);
+          innerCol = (innerCol + 1u);
+          continue;
+        }
+      }
+      innerRow = (innerRow + 1u);
+      continue;
+    }
   }
 }
-%mm_write = func(%row_2:u32, %col_2:u32, %value:f32):void {  # %row_2: 'row', %col_2: 'col'
-  $B10: {
-    %45:ptr<uniform, u32, read> = access %uniforms, 0u
-    %46:u32 = load %45
-    %47:bool = lt %row_2, %46
-    %48:bool = if %47 [t: $B11, f: $B12] {  # if_5
-      $B11: {  # true
-        %49:ptr<uniform, u32, read> = access %uniforms, 2u
-        %50:u32 = load %49
-        %51:bool = lt %col_2, %50
-        exit_if %51  # if_5
-      }
-      $B12: {  # false
-        exit_if false  # if_5
-      }
-    }
-    if %48 [t: $B13] {  # if_6
-      $B13: {  # true
-        %52:ptr<uniform, u32, read> = access %uniforms, 2u
-        %53:u32 = load %52
-        %54:u32 = mul %row_2, %53
-        %55:u32 = add %col_2, %54
-        %index:u32 = let %55
-        %57:ptr<storage, f32, read_write> = access %resultMatrix, 0u, %index
-        store %57, %value
-        exit_if  # if_6
-      }
-    }
-    ret
-  }
+kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint tint_local_index [[thread_index_in_threadgroup]], const device Matrix* firstMatrix [[buffer(0)]], const device Matrix* secondMatrix [[buffer(1)]], device Matrix* resultMatrix [[buffer(2)]], const constant Uniforms* uniforms [[buffer(3)]], threadgroup tint_symbol_3* v_6 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .mm_Asub=(&(*v_6).tint_symbol_1), .mm_Bsub=(&(*v_6).tint_symbol_2)};
+  tint_symbol_inner(local_id, global_id, tint_local_index, tint_module_vars);
 }
-%tint_symbol = @compute @workgroup_size(16, 16, 1) func(%local_id:vec3<u32> [@local_invocation_id], %global_id:vec3<u32> [@global_invocation_id], %tint_local_index:u32 [@local_invocation_index]):void {
-  $B14: {
-    loop [i: $B15, b: $B16, c: $B17] {  # loop_1
-      $B15: {  # initializer
-        next_iteration %tint_local_index  # -> $B16
-      }
-      $B16 (%idx:u32): {  # body
-        %63:bool = gte %idx, 4096u
-        if %63 [t: $B18] {  # if_7
-          $B18: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %64:u32 = mod %idx, 64u
-        %65:u32 = div %idx, 64u
-        %66:ptr<workgroup, f32, read_write> = access %mm_Asub, %65, %64
-        store %66, 0.0f
-        %67:u32 = mod %idx, 64u
-        %68:u32 = div %idx, 64u
-        %69:ptr<workgroup, f32, read_write> = access %mm_Bsub, %68, %67
-        store %69, 0.0f
-        continue  # -> $B17
-      }
-      $B17: {  # continuing
-        %70:u32 = add %idx, 256u
-        next_iteration %70  # -> $B16
-      }
-    }
-    %71:void = msl.threadgroup_barrier 4u
-    %72:u32 = access %local_id, 1u
-    %73:u32 = mul %72, 4u
-    %tileRow:u32 = let %73
-    %75:u32 = access %local_id, 0u
-    %76:u32 = mul %75, 4u
-    %tileCol:u32 = let %76
-    %78:u32 = access %global_id, 1u
-    %79:u32 = mul %78, 4u
-    %globalRow:u32 = let %79
-    %81:u32 = access %global_id, 0u
-    %82:u32 = mul %81, 4u
-    %globalCol:u32 = let %82
-    %84:ptr<uniform, u32, read> = access %uniforms, 1u
-    %85:u32 = load %84
-    %86:u32 = sub %85, 1u
-    %87:u32 = call %tint_div_u32, %86, 64u
-    %89:u32 = add %87, 1u
-    %numTiles:u32 = let %89
-    %acc:ptr<function, array<f32, 16>, read_write> = var
-    %ACached:ptr<function, f32, read_write> = var
-    %BCached:ptr<function, array<f32, 4>, read_write> = var
-    loop [i: $B19, b: $B20, c: $B21] {  # loop_2
-      $B19: {  # initializer
-        %index_1:ptr<function, u32, read_write> = var, 0u  # %index_1: 'index'
-        next_iteration  # -> $B20
-      }
-      $B20: {  # body
-        %95:u32 = load %index_1
-        %96:bool = lt %95, 16u
-        if %96 [t: $B22, f: $B23] {  # if_8
-          $B22: {  # true
-            exit_if  # if_8
-          }
-          $B23: {  # false
-            exit_loop  # loop_2
-          }
-        }
-        %97:u32 = load %index_1
-        %98:ptr<function, f32, read_write> = access %acc, %97
-        store %98, 0.0f
-        continue  # -> $B21
-      }
-      $B21: {  # continuing
-        %99:u32 = load %index_1
-        %100:u32 = add %99, 1u
-        store %index_1, %100
-        next_iteration  # -> $B20
-      }
-    }
-    %ColPerThreadA:u32 = let 4u
-    %102:u32 = access %local_id, 0u
-    %103:u32 = mul %102, %ColPerThreadA
-    %tileColA:u32 = let %103
-    %RowPerThreadB:u32 = let 4u
-    %106:u32 = access %local_id, 1u
-    %107:u32 = mul %106, %RowPerThreadB
-    %tileRowB:u32 = let %107
-    loop [i: $B24, b: $B25, c: $B26] {  # loop_3
-      $B24: {  # initializer
-        %t:ptr<function, u32, read_write> = var, 0u
-        next_iteration  # -> $B25
-      }
-      $B25: {  # body
-        %110:u32 = load %t
-        %111:bool = lt %110, %numTiles
-        if %111 [t: $B27, f: $B28] {  # if_9
-          $B27: {  # true
-            exit_if  # if_9
-          }
-          $B28: {  # false
-            exit_loop  # loop_3
-          }
-        }
-        loop [i: $B29, b: $B30, c: $B31] {  # loop_4
-          $B29: {  # initializer
-            %innerRow:ptr<function, u32, read_write> = var, 0u
-            next_iteration  # -> $B30
-          }
-          $B30: {  # body
-            %113:u32 = load %innerRow
-            %114:bool = lt %113, 4u
-            if %114 [t: $B32, f: $B33] {  # if_10
-              $B32: {  # true
-                exit_if  # if_10
-              }
-              $B33: {  # false
-                exit_loop  # loop_4
-              }
-            }
-            loop [i: $B34, b: $B35, c: $B36] {  # loop_5
-              $B34: {  # initializer
-                %innerCol:ptr<function, u32, read_write> = var, 0u
-                next_iteration  # -> $B35
-              }
-              $B35: {  # body
-                %116:u32 = load %innerCol
-                %117:bool = lt %116, %ColPerThreadA
-                if %117 [t: $B37, f: $B38] {  # if_11
-                  $B37: {  # true
-                    exit_if  # if_11
-                  }
-                  $B38: {  # false
-                    exit_loop  # loop_5
-                  }
-                }
-                %118:u32 = load %innerRow
-                %119:u32 = add %tileRow, %118
-                %inputRow:u32 = let %119
-                %121:u32 = load %innerCol
-                %122:u32 = add %tileColA, %121
-                %inputCol:u32 = let %122
-                %124:ptr<workgroup, f32, read_write> = access %mm_Asub, %inputRow, %inputCol
-                %125:u32 = load %innerRow
-                %126:u32 = add %globalRow, %125
-                %127:u32 = load %t
-                %128:u32 = mul %127, 64u
-                %129:u32 = add %128, %inputCol
-                %130:f32 = call %mm_readA, %126, %129
-                store %124, %130
-                continue  # -> $B36
-              }
-              $B36: {  # continuing
-                %131:u32 = load %innerCol
-                %132:u32 = add %131, 1u
-                store %innerCol, %132
-                next_iteration  # -> $B35
-              }
-            }
-            continue  # -> $B31
-          }
-          $B31: {  # continuing
-            %133:u32 = load %innerRow
-            %134:u32 = add %133, 1u
-            store %innerRow, %134
-            next_iteration  # -> $B30
-          }
-        }
-        loop [i: $B39, b: $B40, c: $B41] {  # loop_6
-          $B39: {  # initializer
-            %innerRow_1:ptr<function, u32, read_write> = var, 0u  # %innerRow_1: 'innerRow'
-            next_iteration  # -> $B40
-          }
-          $B40: {  # body
-            %136:u32 = load %innerRow_1
-            %137:bool = lt %136, %RowPerThreadB
-            if %137 [t: $B42, f: $B43] {  # if_12
-              $B42: {  # true
-                exit_if  # if_12
-              }
-              $B43: {  # false
-                exit_loop  # loop_6
-              }
-            }
-            loop [i: $B44, b: $B45, c: $B46] {  # loop_7
-              $B44: {  # initializer
-                %innerCol_1:ptr<function, u32, read_write> = var, 0u  # %innerCol_1: 'innerCol'
-                next_iteration  # -> $B45
-              }
-              $B45: {  # body
-                %139:u32 = load %innerCol_1
-                %140:bool = lt %139, 4u
-                if %140 [t: $B47, f: $B48] {  # if_13
-                  $B47: {  # true
-                    exit_if  # if_13
-                  }
-                  $B48: {  # false
-                    exit_loop  # loop_7
-                  }
-                }
-                %141:u32 = load %innerRow_1
-                %142:u32 = add %tileRowB, %141
-                %inputRow_1:u32 = let %142  # %inputRow_1: 'inputRow'
-                %144:u32 = load %innerCol_1
-                %145:u32 = add %tileCol, %144
-                %inputCol_1:u32 = let %145  # %inputCol_1: 'inputCol'
-                %147:u32 = load %innerCol_1
-                %148:ptr<workgroup, f32, read_write> = access %mm_Bsub, %147, %inputCol_1
-                %149:ptr<workgroup, f32, read_write> = let %148
-                %150:u32 = load %t
-                %151:u32 = mul %150, 64u
-                %152:u32 = add %151, %inputRow_1
-                %153:u32 = load %innerCol_1
-                %154:u32 = add %globalCol, %153
-                %155:f32 = call %mm_readB, %152, %154
-                store %149, %155
-                continue  # -> $B46
-              }
-              $B46: {  # continuing
-                %156:u32 = load %innerCol_1
-                %157:u32 = add %156, 1u
-                store %innerCol_1, %157
-                next_iteration  # -> $B45
-              }
-            }
-            continue  # -> $B41
-          }
-          $B41: {  # continuing
-            %158:u32 = load %innerRow_1
-            %159:u32 = add %158, 1u
-            store %innerRow_1, %159
-            next_iteration  # -> $B40
-          }
-        }
-        %160:void = msl.threadgroup_barrier 4u
-        loop [i: $B49, b: $B50, c: $B51] {  # loop_8
-          $B49: {  # initializer
-            %k:ptr<function, u32, read_write> = var, 0u
-            next_iteration  # -> $B50
-          }
-          $B50: {  # body
-            %162:u32 = load %k
-            %163:bool = lt %162, 64u
-            if %163 [t: $B52, f: $B53] {  # if_14
-              $B52: {  # true
-                exit_if  # if_14
-              }
-              $B53: {  # false
-                exit_loop  # loop_8
-              }
-            }
-            loop [i: $B54, b: $B55, c: $B56] {  # loop_9
-              $B54: {  # initializer
-                %inner:ptr<function, u32, read_write> = var, 0u
-                next_iteration  # -> $B55
-              }
-              $B55: {  # body
-                %165:u32 = load %inner
-                %166:bool = lt %165, 4u
-                if %166 [t: $B57, f: $B58] {  # if_15
-                  $B57: {  # true
-                    exit_if  # if_15
-                  }
-                  $B58: {  # false
-                    exit_loop  # loop_9
-                  }
-                }
-                %167:u32 = load %inner
-                %168:ptr<function, f32, read_write> = access %BCached, %167
-                %169:u32 = load %k
-                %170:u32 = load %inner
-                %171:u32 = add %tileCol, %170
-                %172:ptr<workgroup, f32, read_write> = access %mm_Bsub, %169, %171
-                %173:f32 = load %172
-                store %168, %173
-                continue  # -> $B56
-              }
-              $B56: {  # continuing
-                %174:u32 = load %inner
-                %175:u32 = add %174, 1u
-                store %inner, %175
-                next_iteration  # -> $B55
-              }
-            }
-            loop [i: $B59, b: $B60, c: $B61] {  # loop_10
-              $B59: {  # initializer
-                %innerRow_2:ptr<function, u32, read_write> = var, 0u  # %innerRow_2: 'innerRow'
-                next_iteration  # -> $B60
-              }
-              $B60: {  # body
-                %177:u32 = load %innerRow_2
-                %178:bool = lt %177, 4u
-                if %178 [t: $B62, f: $B63] {  # if_16
-                  $B62: {  # true
-                    exit_if  # if_16
-                  }
-                  $B63: {  # false
-                    exit_loop  # loop_10
-                  }
-                }
-                %179:u32 = load %innerRow_2
-                %180:u32 = add %tileRow, %179
-                %181:u32 = load %k
-                %182:ptr<workgroup, f32, read_write> = access %mm_Asub, %180, %181
-                %183:f32 = load %182
-                store %ACached, %183
-                loop [i: $B64, b: $B65, c: $B66] {  # loop_11
-                  $B64: {  # initializer
-                    %innerCol_2:ptr<function, u32, read_write> = var, 0u  # %innerCol_2: 'innerCol'
-                    next_iteration  # -> $B65
-                  }
-                  $B65: {  # body
-                    %185:u32 = load %innerCol_2
-                    %186:bool = lt %185, 4u
-                    if %186 [t: $B67, f: $B68] {  # if_17
-                      $B67: {  # true
-                        exit_if  # if_17
-                      }
-                      $B68: {  # false
-                        exit_loop  # loop_11
-                      }
-                    }
-                    %187:u32 = load %innerRow_2
-                    %188:u32 = mul %187, 4u
-                    %189:u32 = load %innerCol_2
-                    %190:u32 = add %188, %189
-                    %index_2:u32 = let %190  # %index_2: 'index'
-                    %192:ptr<function, f32, read_write> = access %acc, %index_2
-                    %193:ptr<function, f32, read_write> = access %acc, %index_2
-                    %194:f32 = load %193
-                    %195:f32 = load %ACached
-                    %196:u32 = load %innerCol_2
-                    %197:ptr<function, f32, read_write> = access %BCached, %196
-                    %198:f32 = load %197
-                    %199:f32 = mul %195, %198
-                    %200:f32 = add %194, %199
-                    store %192, %200
-                    continue  # -> $B66
-                  }
-                  $B66: {  # continuing
-                    %201:u32 = load %innerCol_2
-                    %202:u32 = add %201, 1u
-                    store %innerCol_2, %202
-                    next_iteration  # -> $B65
-                  }
-                }
-                continue  # -> $B61
-              }
-              $B61: {  # continuing
-                %203:u32 = load %innerRow_2
-                %204:u32 = add %203, 1u
-                store %innerRow_2, %204
-                next_iteration  # -> $B60
-              }
-            }
-            continue  # -> $B51
-          }
-          $B51: {  # continuing
-            %205:u32 = load %k
-            %206:u32 = add %205, 1u
-            store %k, %206
-            next_iteration  # -> $B50
-          }
-        }
-        %207:void = msl.threadgroup_barrier 4u
-        continue  # -> $B26
-      }
-      $B26: {  # continuing
-        %208:u32 = load %t
-        %209:u32 = add %208, 1u
-        store %t, %209
-        next_iteration  # -> $B25
-      }
-    }
-    loop [i: $B69, b: $B70, c: $B71] {  # loop_12
-      $B69: {  # initializer
-        %innerRow_3:ptr<function, u32, read_write> = var, 0u  # %innerRow_3: 'innerRow'
-        next_iteration  # -> $B70
-      }
-      $B70: {  # body
-        %211:u32 = load %innerRow_3
-        %212:bool = lt %211, 4u
-        if %212 [t: $B72, f: $B73] {  # if_18
-          $B72: {  # true
-            exit_if  # if_18
-          }
-          $B73: {  # false
-            exit_loop  # loop_12
-          }
-        }
-        loop [i: $B74, b: $B75, c: $B76] {  # loop_13
-          $B74: {  # initializer
-            %innerCol_3:ptr<function, u32, read_write> = var, 0u  # %innerCol_3: 'innerCol'
-            next_iteration  # -> $B75
-          }
-          $B75: {  # body
-            %214:u32 = load %innerCol_3
-            %215:bool = lt %214, 4u
-            if %215 [t: $B77, f: $B78] {  # if_19
-              $B77: {  # true
-                exit_if  # if_19
-              }
-              $B78: {  # false
-                exit_loop  # loop_13
-              }
-            }
-            %216:u32 = load %innerRow_3
-            %217:u32 = mul %216, 4u
-            %218:u32 = load %innerCol_3
-            %219:u32 = add %217, %218
-            %index_3:u32 = let %219  # %index_3: 'index'
-            %221:u32 = load %innerRow_3
-            %222:u32 = add %globalRow, %221
-            %223:u32 = load %innerCol_3
-            %224:u32 = add %globalCol, %223
-            %225:ptr<function, f32, read_write> = access %acc, %index_3
-            %226:f32 = load %225
-            %227:void = call %mm_write, %222, %224, %226
-            continue  # -> $B76
-          }
-          $B76: {  # continuing
-            %228:u32 = load %innerCol_3
-            %229:u32 = add %228, 1u
-            store %innerCol_3, %229
-            next_iteration  # -> $B75
-          }
-        }
-        continue  # -> $B71
-      }
-      $B71: {  # continuing
-        %230:u32 = load %innerRow_3
-        %231:u32 = add %230, 1u
-        store %innerRow_3, %231
-        next_iteration  # -> $B70
-      }
-    }
-    ret
-  }
-}
-%tint_div_u32 = func(%lhs:u32, %rhs:u32):u32 {
-  $B79: {
-    %234:bool = eq %rhs, 0u
-    %235:u32 = select %rhs, 1u, %234
-    %236:u32 = div %lhs, %235
-    ret %236
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

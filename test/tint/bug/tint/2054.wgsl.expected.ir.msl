@@ -1,43 +1,24 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device float* out;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %out:ptr<storage, f32, read_write> = var @binding_point(0, 0)
-}
-
-%bar = func(%p:ptr<function, f32, read_write>):void {
-  $B2: {
-    %a:f32 = let 1.0f
-    %b:f32 = let 2.0f
-    %6:bool = gte %a, 0.0f
-    %7:bool = if %6 [t: $B3, f: $B4] {  # if_1
-      $B3: {  # true
-        %8:bool = gte %b, 0.0f
-        exit_if %8  # if_1
-      }
-      $B4: {  # false
-        exit_if false  # if_1
-      }
-    }
-    %cond:bool = let %7
-    %10:f32 = select %a, %b, %cond
-    store %p, %10
-    ret
+void bar(thread float* const p) {
+  float const a = 1.0f;
+  float const b = 2.0f;
+  bool v = false;
+  if ((a >= 0.0f)) {
+    v = (b >= 0.0f);
+  } else {
+    v = false;
   }
+  bool const cond = v;
+  (*p) = select(a, b, cond);
 }
-%foo = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %param:ptr<function, f32, read_write> = var
-    %13:void = call %bar, %param
-    %14:f32 = load %param
-    store %out, %14
-    ret
-  }
+kernel void foo(device float* out [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out=out};
+  float param = 0.0f;
+  bar((&param));
+  (*tint_module_vars.out) = param;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

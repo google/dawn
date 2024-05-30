@@ -1,244 +1,146 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Inner = struct @align(16) {
-  scalar_f32:f32 @offset(0)
-  scalar_i32:i32 @offset(4)
-  scalar_u32:u32 @offset(8)
-  scalar_f16:f16 @offset(12)
-  vec2_f32:vec2<f32> @offset(16)
-  vec2_i32:vec2<i32> @offset(24)
-  vec2_u32:vec2<u32> @offset(32)
-  vec2_f16:vec2<f16> @offset(40)
-  vec3_f32:vec3<f32> @offset(48)
-  vec3_i32:vec3<i32> @offset(64)
-  vec3_u32:vec3<u32> @offset(80)
-  vec3_f16:vec3<f16> @offset(96)
-  vec4_f32:vec4<f32> @offset(112)
-  vec4_i32:vec4<i32> @offset(128)
-  vec4_u32:vec4<u32> @offset(144)
-  vec4_f16:vec4<f16> @offset(160)
-  mat2x2_f32:mat2x2<f32> @offset(168)
-  mat2x3_f32:mat2x3<f32> @offset(192)
-  mat2x4_f32:mat2x4<f32> @offset(224)
-  mat3x2_f32:mat3x2<f32> @offset(256)
-  mat3x3_f32:mat3x3<f32> @offset(288)
-  mat3x4_f32:mat3x4<f32> @offset(336)
-  mat4x2_f32:mat4x2<f32> @offset(384)
-  mat4x3_f32:mat4x3<f32> @offset(416)
-  mat4x4_f32:mat4x4<f32> @offset(480)
-  mat2x2_f16:mat2x2<f16> @offset(544)
-  mat2x3_f16:mat2x3<f16> @offset(552)
-  mat2x4_f16:mat2x4<f16> @offset(568)
-  mat3x2_f16:mat3x2<f16> @offset(584)
-  mat3x3_f16:mat3x3<f16> @offset(600)
-  mat3x4_f16:mat3x4<f16> @offset(624)
-  mat4x2_f16:mat4x2<f16> @offset(648)
-  mat4x3_f16:mat4x3<f16> @offset(664)
-  mat4x4_f16:mat4x4<f16> @offset(696)
-  arr2_vec3_f32:array<vec3<f32>, 2> @offset(736)
-  arr2_mat4x2_f16:array<mat4x2<f16>, 2> @offset(768)
-}
+struct Inner {
+  float scalar_f32;
+  int scalar_i32;
+  uint scalar_u32;
+  half scalar_f16;
+  float2 vec2_f32;
+  int2 vec2_i32;
+  uint2 vec2_u32;
+  half2 vec2_f16;
+  float3 vec3_f32;
+  int3 vec3_i32;
+  uint3 vec3_u32;
+  half3 vec3_f16;
+  float4 vec4_f32;
+  int4 vec4_i32;
+  uint4 vec4_u32;
+  half4 vec4_f16;
+  float2x2 mat2x2_f32;
+  float2x3 mat2x3_f32;
+  float2x4 mat2x4_f32;
+  float3x2 mat3x2_f32;
+  float3x3 mat3x3_f32;
+  float3x4 mat3x4_f32;
+  float4x2 mat4x2_f32;
+  float4x3 mat4x3_f32;
+  float4x4 mat4x4_f32;
+  half2x2 mat2x2_f16;
+  half2x3 mat2x3_f16;
+  half2x4 mat2x4_f16;
+  half3x2 mat3x2_f16;
+  half3x3 mat3x3_f16;
+  half3x4 mat3x4_f16;
+  half4x2 mat4x2_f16;
+  half4x3 mat4x3_f16;
+  half4x4 mat4x4_f16;
+  tint_array<float3, 2> arr2_vec3_f32;
+  tint_array<half4x2, 2> arr2_mat4x2_f16;
+};
+struct S {
+  tint_array<Inner, 1> arr;
+};
+struct tint_module_vars_struct {
+  device S* sb;
+};
 
-S = struct @align(16) {
-  arr:array<Inner> @offset(0)
-}
-
-$B1: {  # root
-  %sb:ptr<storage, S, read_write> = var @binding_point(0, 0)
-}
-
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%idx:u32 [@local_invocation_index]):void {
-  $B2: {
-    %4:ptr<storage, f32, read_write> = access %sb, 0u, %idx, 0u
-    store %4, 0.0f
-    %5:ptr<storage, i32, read_write> = access %sb, 0u, %idx, 1u
-    store %5, 0i
-    %6:ptr<storage, u32, read_write> = access %sb, 0u, %idx, 2u
-    store %6, 0u
-    %7:ptr<storage, f16, read_write> = access %sb, 0u, %idx, 3u
-    store %7, 0.0h
-    %8:ptr<storage, vec2<f32>, read_write> = access %sb, 0u, %idx, 4u
-    store %8, vec2<f32>(0.0f)
-    %9:ptr<storage, vec2<i32>, read_write> = access %sb, 0u, %idx, 5u
-    store %9, vec2<i32>(0i)
-    %10:ptr<storage, vec2<u32>, read_write> = access %sb, 0u, %idx, 6u
-    store %10, vec2<u32>(0u)
-    %11:ptr<storage, vec2<f16>, read_write> = access %sb, 0u, %idx, 7u
-    store %11, vec2<f16>(0.0h)
-    %12:ptr<storage, vec3<f32>, read_write> = access %sb, 0u, %idx, 8u
-    store %12, vec3<f32>(0.0f)
-    %13:ptr<storage, vec3<i32>, read_write> = access %sb, 0u, %idx, 9u
-    store %13, vec3<i32>(0i)
-    %14:ptr<storage, vec3<u32>, read_write> = access %sb, 0u, %idx, 10u
-    store %14, vec3<u32>(0u)
-    %15:ptr<storage, vec3<f16>, read_write> = access %sb, 0u, %idx, 11u
-    store %15, vec3<f16>(0.0h)
-    %16:ptr<storage, vec4<f32>, read_write> = access %sb, 0u, %idx, 12u
-    store %16, vec4<f32>(0.0f)
-    %17:ptr<storage, vec4<i32>, read_write> = access %sb, 0u, %idx, 13u
-    store %17, vec4<i32>(0i)
-    %18:ptr<storage, vec4<u32>, read_write> = access %sb, 0u, %idx, 14u
-    store %18, vec4<u32>(0u)
-    %19:ptr<storage, vec4<f16>, read_write> = access %sb, 0u, %idx, 15u
-    store %19, vec4<f16>(0.0h)
-    %20:ptr<storage, mat2x2<f32>, read_write> = access %sb, 0u, %idx, 16u
-    store %20, mat2x2<f32>(vec2<f32>(0.0f))
-    %21:ptr<storage, mat2x3<f32>, read_write> = access %sb, 0u, %idx, 17u
-    %22:void = call %tint_store_and_preserve_padding, %21, mat2x3<f32>(vec3<f32>(0.0f))
-    %24:ptr<storage, mat2x4<f32>, read_write> = access %sb, 0u, %idx, 18u
-    store %24, mat2x4<f32>(vec4<f32>(0.0f))
-    %25:ptr<storage, mat3x2<f32>, read_write> = access %sb, 0u, %idx, 19u
-    store %25, mat3x2<f32>(vec2<f32>(0.0f))
-    %26:ptr<storage, mat3x3<f32>, read_write> = access %sb, 0u, %idx, 20u
-    %27:void = call %tint_store_and_preserve_padding_1, %26, mat3x3<f32>(vec3<f32>(0.0f))
-    %29:ptr<storage, mat3x4<f32>, read_write> = access %sb, 0u, %idx, 21u
-    store %29, mat3x4<f32>(vec4<f32>(0.0f))
-    %30:ptr<storage, mat4x2<f32>, read_write> = access %sb, 0u, %idx, 22u
-    store %30, mat4x2<f32>(vec2<f32>(0.0f))
-    %31:ptr<storage, mat4x3<f32>, read_write> = access %sb, 0u, %idx, 23u
-    %32:void = call %tint_store_and_preserve_padding_2, %31, mat4x3<f32>(vec3<f32>(0.0f))
-    %34:ptr<storage, mat4x4<f32>, read_write> = access %sb, 0u, %idx, 24u
-    store %34, mat4x4<f32>(vec4<f32>(0.0f))
-    %35:ptr<storage, mat2x2<f16>, read_write> = access %sb, 0u, %idx, 25u
-    store %35, mat2x2<f16>(vec2<f16>(0.0h))
-    %36:ptr<storage, mat2x3<f16>, read_write> = access %sb, 0u, %idx, 26u
-    %37:void = call %tint_store_and_preserve_padding_3, %36, mat2x3<f16>(vec3<f16>(0.0h))
-    %39:ptr<storage, mat2x4<f16>, read_write> = access %sb, 0u, %idx, 27u
-    store %39, mat2x4<f16>(vec4<f16>(0.0h))
-    %40:ptr<storage, mat3x2<f16>, read_write> = access %sb, 0u, %idx, 28u
-    store %40, mat3x2<f16>(vec2<f16>(0.0h))
-    %41:ptr<storage, mat3x3<f16>, read_write> = access %sb, 0u, %idx, 29u
-    %42:void = call %tint_store_and_preserve_padding_4, %41, mat3x3<f16>(vec3<f16>(0.0h))
-    %44:ptr<storage, mat3x4<f16>, read_write> = access %sb, 0u, %idx, 30u
-    store %44, mat3x4<f16>(vec4<f16>(0.0h))
-    %45:ptr<storage, mat4x2<f16>, read_write> = access %sb, 0u, %idx, 31u
-    store %45, mat4x2<f16>(vec2<f16>(0.0h))
-    %46:ptr<storage, mat4x3<f16>, read_write> = access %sb, 0u, %idx, 32u
-    %47:void = call %tint_store_and_preserve_padding_5, %46, mat4x3<f16>(vec3<f16>(0.0h))
-    %49:ptr<storage, mat4x4<f16>, read_write> = access %sb, 0u, %idx, 33u
-    store %49, mat4x4<f16>(vec4<f16>(0.0h))
-    %50:ptr<storage, array<vec3<f32>, 2>, read_write> = access %sb, 0u, %idx, 34u
-    %51:void = call %tint_store_and_preserve_padding_6, %50, array<vec3<f32>, 2>(vec3<f32>(0.0f))
-    %53:ptr<storage, array<mat4x2<f16>, 2>, read_write> = access %sb, 0u, %idx, 35u
-    store %53, array<mat4x2<f16>, 2>(mat4x2<f16>(vec2<f16>(0.0h)))
-    ret
-  }
-}
-%tint_store_and_preserve_padding = func(%target:ptr<storage, mat2x3<f32>, read_write>, %value_param:mat2x3<f32>):void {
-  $B3: {
-    %56:ptr<storage, vec3<f32>, read_write> = access %target, 0u
-    %57:vec3<f32> = access %value_param, 0u
-    store %56, %57
-    %58:ptr<storage, vec3<f32>, read_write> = access %target, 1u
-    %59:vec3<f32> = access %value_param, 1u
-    store %58, %59
-    ret
-  }
-}
-%tint_store_and_preserve_padding_1 = func(%target_1:ptr<storage, mat3x3<f32>, read_write>, %value_param_1:mat3x3<f32>):void {  # %tint_store_and_preserve_padding_1: 'tint_store_and_preserve_padding', %target_1: 'target', %value_param_1: 'value_param'
-  $B4: {
-    %62:ptr<storage, vec3<f32>, read_write> = access %target_1, 0u
-    %63:vec3<f32> = access %value_param_1, 0u
-    store %62, %63
-    %64:ptr<storage, vec3<f32>, read_write> = access %target_1, 1u
-    %65:vec3<f32> = access %value_param_1, 1u
-    store %64, %65
-    %66:ptr<storage, vec3<f32>, read_write> = access %target_1, 2u
-    %67:vec3<f32> = access %value_param_1, 2u
-    store %66, %67
-    ret
-  }
-}
-%tint_store_and_preserve_padding_2 = func(%target_2:ptr<storage, mat4x3<f32>, read_write>, %value_param_2:mat4x3<f32>):void {  # %tint_store_and_preserve_padding_2: 'tint_store_and_preserve_padding', %target_2: 'target', %value_param_2: 'value_param'
-  $B5: {
-    %70:ptr<storage, vec3<f32>, read_write> = access %target_2, 0u
-    %71:vec3<f32> = access %value_param_2, 0u
-    store %70, %71
-    %72:ptr<storage, vec3<f32>, read_write> = access %target_2, 1u
-    %73:vec3<f32> = access %value_param_2, 1u
-    store %72, %73
-    %74:ptr<storage, vec3<f32>, read_write> = access %target_2, 2u
-    %75:vec3<f32> = access %value_param_2, 2u
-    store %74, %75
-    %76:ptr<storage, vec3<f32>, read_write> = access %target_2, 3u
-    %77:vec3<f32> = access %value_param_2, 3u
-    store %76, %77
-    ret
-  }
-}
-%tint_store_and_preserve_padding_3 = func(%target_3:ptr<storage, mat2x3<f16>, read_write>, %value_param_3:mat2x3<f16>):void {  # %tint_store_and_preserve_padding_3: 'tint_store_and_preserve_padding', %target_3: 'target', %value_param_3: 'value_param'
-  $B6: {
-    %80:ptr<storage, vec3<f16>, read_write> = access %target_3, 0u
-    %81:vec3<f16> = access %value_param_3, 0u
-    store %80, %81
-    %82:ptr<storage, vec3<f16>, read_write> = access %target_3, 1u
-    %83:vec3<f16> = access %value_param_3, 1u
-    store %82, %83
-    ret
-  }
-}
-%tint_store_and_preserve_padding_4 = func(%target_4:ptr<storage, mat3x3<f16>, read_write>, %value_param_4:mat3x3<f16>):void {  # %tint_store_and_preserve_padding_4: 'tint_store_and_preserve_padding', %target_4: 'target', %value_param_4: 'value_param'
-  $B7: {
-    %86:ptr<storage, vec3<f16>, read_write> = access %target_4, 0u
-    %87:vec3<f16> = access %value_param_4, 0u
-    store %86, %87
-    %88:ptr<storage, vec3<f16>, read_write> = access %target_4, 1u
-    %89:vec3<f16> = access %value_param_4, 1u
-    store %88, %89
-    %90:ptr<storage, vec3<f16>, read_write> = access %target_4, 2u
-    %91:vec3<f16> = access %value_param_4, 2u
-    store %90, %91
-    ret
-  }
-}
-%tint_store_and_preserve_padding_5 = func(%target_5:ptr<storage, mat4x3<f16>, read_write>, %value_param_5:mat4x3<f16>):void {  # %tint_store_and_preserve_padding_5: 'tint_store_and_preserve_padding', %target_5: 'target', %value_param_5: 'value_param'
-  $B8: {
-    %94:ptr<storage, vec3<f16>, read_write> = access %target_5, 0u
-    %95:vec3<f16> = access %value_param_5, 0u
-    store %94, %95
-    %96:ptr<storage, vec3<f16>, read_write> = access %target_5, 1u
-    %97:vec3<f16> = access %value_param_5, 1u
-    store %96, %97
-    %98:ptr<storage, vec3<f16>, read_write> = access %target_5, 2u
-    %99:vec3<f16> = access %value_param_5, 2u
-    store %98, %99
-    %100:ptr<storage, vec3<f16>, read_write> = access %target_5, 3u
-    %101:vec3<f16> = access %value_param_5, 3u
-    store %100, %101
-    ret
-  }
-}
-%tint_store_and_preserve_padding_6 = func(%target_6:ptr<storage, array<vec3<f32>, 2>, read_write>, %value_param_6:array<vec3<f32>, 2>):void {  # %tint_store_and_preserve_padding_6: 'tint_store_and_preserve_padding', %target_6: 'target', %value_param_6: 'value_param'
-  $B9: {
-    loop [i: $B10, b: $B11, c: $B12] {  # loop_1
-      $B10: {  # initializer
-        next_iteration 0u  # -> $B11
+void tint_store_and_preserve_padding(device tint_array<float3, 2>* const target, tint_array<float3, 2> value_param) {
+  {
+    uint v = 0u;
+    v = 0u;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 2u)) {
+        break;
       }
-      $B11 (%idx_1:u32): {  # body
-        %105:bool = gte %idx_1, 2u
-        if %105 [t: $B13] {  # if_1
-          $B13: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %106:ptr<storage, vec3<f32>, read_write> = access %target_6, %idx_1
-        %107:vec3<f32> = access %value_param_6, %idx_1
-        store %106, %107
-        continue  # -> $B12
-      }
-      $B12: {  # continuing
-        %108:u32 = add %idx_1, 1u
-        next_iteration %108  # -> $B11
-      }
+      (*target)[v_1] = value_param[v_1];
+      v = (v_1 + 1u);
+      continue;
     }
-    ret
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void tint_store_and_preserve_padding(device half4x3* const target, half4x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+  (*target)[2u] = value_param[2u];
+  (*target)[3u] = value_param[3u];
+}
+void tint_store_and_preserve_padding(device half3x3* const target, half3x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+  (*target)[2u] = value_param[2u];
+}
+void tint_store_and_preserve_padding(device half2x3* const target, half2x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+}
+void tint_store_and_preserve_padding(device float4x3* const target, float4x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+  (*target)[2u] = value_param[2u];
+  (*target)[3u] = value_param[3u];
+}
+void tint_store_and_preserve_padding(device float3x3* const target, float3x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+  (*target)[2u] = value_param[2u];
+}
+void tint_store_and_preserve_padding(device float2x3* const target, float2x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+}
+void tint_symbol_inner(uint idx, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.sb).arr[idx].scalar_f32 = 0.0f;
+  (*tint_module_vars.sb).arr[idx].scalar_i32 = 0;
+  (*tint_module_vars.sb).arr[idx].scalar_u32 = 0u;
+  (*tint_module_vars.sb).arr[idx].scalar_f16 = 0.0h;
+  (*tint_module_vars.sb).arr[idx].vec2_f32 = float2(0.0f);
+  (*tint_module_vars.sb).arr[idx].vec2_i32 = int2(0);
+  (*tint_module_vars.sb).arr[idx].vec2_u32 = uint2(0u);
+  (*tint_module_vars.sb).arr[idx].vec2_f16 = half2(0.0h);
+  (*tint_module_vars.sb).arr[idx].vec3_f32 = float3(0.0f);
+  (*tint_module_vars.sb).arr[idx].vec3_i32 = int3(0);
+  (*tint_module_vars.sb).arr[idx].vec3_u32 = uint3(0u);
+  (*tint_module_vars.sb).arr[idx].vec3_f16 = half3(0.0h);
+  (*tint_module_vars.sb).arr[idx].vec4_f32 = float4(0.0f);
+  (*tint_module_vars.sb).arr[idx].vec4_i32 = int4(0);
+  (*tint_module_vars.sb).arr[idx].vec4_u32 = uint4(0u);
+  (*tint_module_vars.sb).arr[idx].vec4_f16 = half4(0.0h);
+  (*tint_module_vars.sb).arr[idx].mat2x2_f32 = float2x2(float2(0.0f), float2(0.0f));
+  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[idx].mat2x3_f32), float2x3(float3(0.0f), float3(0.0f)));
+  (*tint_module_vars.sb).arr[idx].mat2x4_f32 = float2x4(float4(0.0f), float4(0.0f));
+  (*tint_module_vars.sb).arr[idx].mat3x2_f32 = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
+  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[idx].mat3x3_f32), float3x3(float3(0.0f), float3(0.0f), float3(0.0f)));
+  (*tint_module_vars.sb).arr[idx].mat3x4_f32 = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
+  (*tint_module_vars.sb).arr[idx].mat4x2_f32 = float4x2(float2(0.0f), float2(0.0f), float2(0.0f), float2(0.0f));
+  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[idx].mat4x3_f32), float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f)));
+  (*tint_module_vars.sb).arr[idx].mat4x4_f32 = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));
+  (*tint_module_vars.sb).arr[idx].mat2x2_f16 = half2x2(half2(0.0h), half2(0.0h));
+  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[idx].mat2x3_f16), half2x3(half3(0.0h), half3(0.0h)));
+  (*tint_module_vars.sb).arr[idx].mat2x4_f16 = half2x4(half4(0.0h), half4(0.0h));
+  (*tint_module_vars.sb).arr[idx].mat3x2_f16 = half3x2(half2(0.0h), half2(0.0h), half2(0.0h));
+  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[idx].mat3x3_f16), half3x3(half3(0.0h), half3(0.0h), half3(0.0h)));
+  (*tint_module_vars.sb).arr[idx].mat3x4_f16 = half3x4(half4(0.0h), half4(0.0h), half4(0.0h));
+  (*tint_module_vars.sb).arr[idx].mat4x2_f16 = half4x2(half2(0.0h), half2(0.0h), half2(0.0h), half2(0.0h));
+  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[idx].mat4x3_f16), half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h)));
+  (*tint_module_vars.sb).arr[idx].mat4x4_f16 = half4x4(half4(0.0h), half4(0.0h), half4(0.0h), half4(0.0h));
+  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr[idx].arr2_vec3_f32), tint_array<float3, 2>{});
+  (*tint_module_vars.sb).arr[idx].arr2_mat4x2_f16 = tint_array<half4x2, 2>{};
+}
+kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], device S* sb [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
+  tint_symbol_inner(idx, tint_module_vars);
+}

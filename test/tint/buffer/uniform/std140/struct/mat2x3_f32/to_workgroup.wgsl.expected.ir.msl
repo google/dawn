@@ -1,62 +1,51 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(64) {
-  before:i32 @offset(0)
-  m:mat2x3<f32> @offset(16)
-  after:i32 @offset(64)
-}
+struct S {
+  int before;
+  float2x3 m;
+  int after;
+};
+struct tint_module_vars_struct {
+  const constant tint_array<S, 4>* u;
+  threadgroup tint_array<S, 4>* w;
+};
+struct tint_symbol_1 {
+  tint_array<S, 4> tint_symbol;
+};
 
-$B1: {  # root
-  %u:ptr<uniform, array<S, 4>, read> = var @binding_point(0, 0)
-  %w:ptr<workgroup, array<S, 4>, read_write> = var
-}
-
-%f = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  $B2: {
-    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
-      $B3: {  # initializer
-        next_iteration %tint_local_index  # -> $B4
+void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 4u)) {
+        break;
       }
-      $B4 (%idx:u32): {  # body
-        %6:bool = gte %idx, 4u
-        if %6 [t: $B6] {  # if_1
-          $B6: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %7:ptr<workgroup, S, read_write> = access %w, %idx
-        store %7, S(0i, mat2x3<f32>(vec3<f32>(0.0f)), 0i)
-        continue  # -> $B5
-      }
-      $B5: {  # continuing
-        %8:u32 = add %idx, 1u
-        next_iteration %8  # -> $B4
-      }
+      (*tint_module_vars.w)[v_1] = S{};
+      v = (v_1 + 1u);
+      continue;
     }
-    %9:void = msl.threadgroup_barrier 4u
-    %10:array<S, 4> = load %u
-    store %w, %10
-    %11:ptr<workgroup, S, read_write> = access %w, 1i
-    %12:ptr<uniform, S, read> = access %u, 2i
-    %13:S = load %12
-    store %11, %13
-    %14:ptr<workgroup, mat2x3<f32>, read_write> = access %w, 3i, 1u
-    %15:ptr<uniform, mat2x3<f32>, read> = access %u, 2i, 1u
-    %16:mat2x3<f32> = load %15
-    store %14, %16
-    %17:ptr<workgroup, vec3<f32>, read_write> = access %w, 1i, 1u, 0i
-    %18:ptr<uniform, vec3<f32>, read> = access %u, 0i, 1u, 1i
-    %19:vec3<f32> = load %18
-    %20:vec3<f32> = swizzle %19, zxy
-    store %17, %20
-    ret
   }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  (*tint_module_vars.w) = (*tint_module_vars.u);
+  (*tint_module_vars.w)[1] = (*tint_module_vars.u)[2];
+  (*tint_module_vars.w)[3].m = (*tint_module_vars.u)[2].m;
+  (*tint_module_vars.w)[1].m[0] = (*tint_module_vars.u)[0].m[1].zxy;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<S, 4>* u [[buffer(0)]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .w=(&(*v_2).tint_symbol)};
+  f_inner(tint_local_index, tint_module_vars);
+}

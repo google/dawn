@@ -67,6 +67,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/multiplanar_external_texture.h
   lang/core/ir/transform/preserve_padding.cc
   lang/core/ir/transform/preserve_padding.h
+  lang/core/ir/transform/remove_terminator_args.cc
+  lang/core/ir/transform/remove_terminator_args.h
   lang/core/ir/transform/robustness.cc
   lang/core/ir/transform/robustness.h
   lang/core/ir/transform/shader_io.cc
@@ -124,6 +126,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/helper_test.h
   lang/core/ir/transform/multiplanar_external_texture_test.cc
   lang/core/ir/transform/preserve_padding_test.cc
+  lang/core/ir/transform/remove_terminator_args_test.cc
   lang/core/ir/transform/robustness_test.cc
   lang/core/ir/transform/std140_test.cc
   lang/core/ir/transform/value_to_let_test.cc
@@ -204,6 +207,7 @@ tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
   lang/core/ir/transform/direct_variable_access_fuzz.cc
   lang/core/ir/transform/multiplanar_external_texture_fuzz.cc
   lang/core/ir/transform/preserve_padding_fuzz.cc
+  lang/core/ir/transform/remove_terminator_args_fuzz.cc
   lang/core/ir/transform/robustness_fuzz.cc
   lang/core/ir/transform/std140_fuzz.cc
   lang/core/ir/transform/value_to_let_fuzz.cc

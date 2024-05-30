@@ -1,147 +1,90 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct strided_arr {
+  float el;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
-  el:f32 @offset(0)
-}
+struct strided_arr_1 {
+  tint_array<tint_array<strided_arr, 2>, 3> el;
+};
+struct S {
+  tint_array<strided_arr_1, 4> a;
+};
+struct tint_module_vars_struct {
+  device S* s;
+};
 
-strided_arr_1 = struct @align(4) {
-  el:array<array<strided_arr, 2>, 3> @offset(0)
+void tint_store_and_preserve_padding(device strided_arr* const target, strided_arr value_param) {
+  (*target).el = value_param.el;
 }
-
-S = struct @align(4) {
-  a:array<strided_arr_1, 4> @offset(0)
-}
-
-$B1: {  # root
-  %s:ptr<storage, S, read_write> = var @binding_point(0, 0)
-}
-
-%f_1 = func():void {
-  $B2: {
-    %3:ptr<storage, array<strided_arr_1, 4>, read_write> = access %s, 0u
-    %4:array<strided_arr_1, 4> = load %3
-    %x_19:array<strided_arr_1, 4> = let %4
-    %6:ptr<storage, array<array<strided_arr, 2>, 3>, read_write> = access %s, 0u, 3i, 0u
-    %7:array<array<strided_arr, 2>, 3> = load %6
-    %x_24:array<array<strided_arr, 2>, 3> = let %7
-    %9:ptr<storage, array<strided_arr, 2>, read_write> = access %s, 0u, 3i, 0u, 2i
-    %10:array<strided_arr, 2> = load %9
-    %x_28:array<strided_arr, 2> = let %10
-    %12:ptr<storage, f32, read_write> = access %s, 0u, 3i, 0u, 2i, 1i, 0u
-    %13:f32 = load %12
-    %x_32:f32 = let %13
-    %15:ptr<storage, array<strided_arr_1, 4>, read_write> = access %s, 0u
-    %16:void = call %tint_store_and_preserve_padding, %15, array<strided_arr_1, 4>(strided_arr_1(array<array<strided_arr, 2>, 3>(array<strided_arr, 2>(strided_arr(0.0f)))))
-    %18:ptr<storage, f32, read_write> = access %s, 0u, 3i, 0u, 2i, 1i, 0u
-    store %18, 5.0f
-    ret
-  }
-}
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %20:void = call %f_1
-    ret
-  }
-}
-%tint_store_and_preserve_padding = func(%target:ptr<storage, array<strided_arr_1, 4>, read_write>, %value_param:array<strided_arr_1, 4>):void {
-  $B4: {
-    loop [i: $B5, b: $B6, c: $B7] {  # loop_1
-      $B5: {  # initializer
-        next_iteration 0u  # -> $B6
+void tint_store_and_preserve_padding(device tint_array<strided_arr, 2>* const target, tint_array<strided_arr, 2> value_param) {
+  {
+    uint v = 0u;
+    v = 0u;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 2u)) {
+        break;
       }
-      $B6 (%idx:u32): {  # body
-        %24:bool = gte %idx, 4u
-        if %24 [t: $B8] {  # if_1
-          $B8: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %25:ptr<storage, strided_arr_1, read_write> = access %target, %idx
-        %26:strided_arr_1 = access %value_param, %idx
-        %27:void = call %tint_store_and_preserve_padding_1, %25, %26
-        continue  # -> $B7
-      }
-      $B7: {  # continuing
-        %29:u32 = add %idx, 1u
-        next_iteration %29  # -> $B6
-      }
+      tint_store_and_preserve_padding((&(*target)[v_1]), value_param[v_1]);
+      v = (v_1 + 1u);
+      continue;
     }
-    ret
   }
 }
-%tint_store_and_preserve_padding_1 = func(%target_1:ptr<storage, strided_arr_1, read_write>, %value_param_1:strided_arr_1):void {  # %tint_store_and_preserve_padding_1: 'tint_store_and_preserve_padding', %target_1: 'target', %value_param_1: 'value_param'
-  $B9: {
-    %32:ptr<storage, array<array<strided_arr, 2>, 3>, read_write> = access %target_1, 0u
-    %33:array<array<strided_arr, 2>, 3> = access %value_param_1, 0u
-    %34:void = call %tint_store_and_preserve_padding_2, %32, %33
-    ret
-  }
-}
-%tint_store_and_preserve_padding_2 = func(%target_2:ptr<storage, array<array<strided_arr, 2>, 3>, read_write>, %value_param_2:array<array<strided_arr, 2>, 3>):void {  # %tint_store_and_preserve_padding_2: 'tint_store_and_preserve_padding', %target_2: 'target', %value_param_2: 'value_param'
-  $B10: {
-    loop [i: $B11, b: $B12, c: $B13] {  # loop_2
-      $B11: {  # initializer
-        next_iteration 0u  # -> $B12
+void tint_store_and_preserve_padding(device tint_array<tint_array<strided_arr, 2>, 3>* const target, tint_array<tint_array<strided_arr, 2>, 3> value_param) {
+  {
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint const v_3 = v_2;
+      if ((v_3 >= 3u)) {
+        break;
       }
-      $B12 (%idx_1:u32): {  # body
-        %39:bool = gte %idx_1, 3u
-        if %39 [t: $B14] {  # if_2
-          $B14: {  # true
-            exit_loop  # loop_2
-          }
-        }
-        %40:ptr<storage, array<strided_arr, 2>, read_write> = access %target_2, %idx_1
-        %41:array<strided_arr, 2> = access %value_param_2, %idx_1
-        %42:void = call %tint_store_and_preserve_padding_3, %40, %41
-        continue  # -> $B13
-      }
-      $B13: {  # continuing
-        %44:u32 = add %idx_1, 1u
-        next_iteration %44  # -> $B12
-      }
+      tint_store_and_preserve_padding((&(*target)[v_3]), value_param[v_3]);
+      v_2 = (v_3 + 1u);
+      continue;
     }
-    ret
   }
 }
-%tint_store_and_preserve_padding_3 = func(%target_3:ptr<storage, array<strided_arr, 2>, read_write>, %value_param_3:array<strided_arr, 2>):void {  # %tint_store_and_preserve_padding_3: 'tint_store_and_preserve_padding', %target_3: 'target', %value_param_3: 'value_param'
-  $B15: {
-    loop [i: $B16, b: $B17, c: $B18] {  # loop_3
-      $B16: {  # initializer
-        next_iteration 0u  # -> $B17
+void tint_store_and_preserve_padding(device strided_arr_1* const target, strided_arr_1 value_param) {
+  tint_store_and_preserve_padding((&(*target).el), value_param.el);
+}
+void tint_store_and_preserve_padding(device tint_array<strided_arr_1, 4>* const target, tint_array<strided_arr_1, 4> value_param) {
+  {
+    uint v_4 = 0u;
+    v_4 = 0u;
+    while(true) {
+      uint const v_5 = v_4;
+      if ((v_5 >= 4u)) {
+        break;
       }
-      $B17 (%idx_2:u32): {  # body
-        %48:bool = gte %idx_2, 2u
-        if %48 [t: $B19] {  # if_3
-          $B19: {  # true
-            exit_loop  # loop_3
-          }
-        }
-        %49:ptr<storage, strided_arr, read_write> = access %target_3, %idx_2
-        %50:strided_arr = access %value_param_3, %idx_2
-        %51:void = call %tint_store_and_preserve_padding_4, %49, %50
-        continue  # -> $B18
-      }
-      $B18: {  # continuing
-        %53:u32 = add %idx_2, 1u
-        next_iteration %53  # -> $B17
-      }
+      tint_store_and_preserve_padding((&(*target)[v_5]), value_param[v_5]);
+      v_4 = (v_5 + 1u);
+      continue;
     }
-    ret
   }
 }
-%tint_store_and_preserve_padding_4 = func(%target_4:ptr<storage, strided_arr, read_write>, %value_param_4:strided_arr):void {  # %tint_store_and_preserve_padding_4: 'tint_store_and_preserve_padding', %target_4: 'target', %value_param_4: 'value_param'
-  $B20: {
-    %56:ptr<storage, f32, read_write> = access %target_4, 0u
-    %57:f32 = access %value_param_4, 0u
-    store %56, %57
-    ret
-  }
+void f_1(tint_module_vars_struct tint_module_vars) {
+  tint_array<strided_arr_1, 4> const x_19 = (*tint_module_vars.s).a;
+  tint_array<tint_array<strided_arr, 2>, 3> const x_24 = (*tint_module_vars.s).a[3].el;
+  tint_array<strided_arr, 2> const x_28 = (*tint_module_vars.s).a[3].el[2];
+  float const x_32 = (*tint_module_vars.s).a[3].el[2][1].el;
+  tint_store_and_preserve_padding((&(*tint_module_vars.s).a), tint_array<strided_arr_1, 4>{});
+  (*tint_module_vars.s).a[3].el[2][1].el = 5.0f;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+kernel void f(device S* s [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
+  f_1(tint_module_vars);
+}
