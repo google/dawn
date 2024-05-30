@@ -2232,6 +2232,8 @@ ResultOrError<Ref<CommandBufferBase>> CommandEncoder::Finish(
     const CommandBufferDescriptor* descriptor) {
     DeviceBase* device = GetDevice();
 
+    TRACE_EVENT0(device->GetPlatform(), Recording, "CommandEncoder::Finish");
+
     // Even if mEncodingContext.Finish() validation fails, calling it will mutate the internal
     // state of the encoding context. The internal state is set to finished, and subsequent
     // calls to encode commands will generate errors.

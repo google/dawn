@@ -414,6 +414,8 @@ MaybeError Queue::SubmitPendingCommands() {
 
     VkFence fence = VK_NULL_HANDLE;
     DAWN_TRY_ASSIGN(fence, GetUnusedFence());
+
+    TRACE_EVENT_BEGIN0(device->GetPlatform(), Recording, "vkQueueSubmit");
     DAWN_TRY_WITH_CLEANUP(
         CheckVkSuccess(device->fn.QueueSubmit(mQueue, 1, &submitInfo, fence), "vkQueueSubmit"), {
             // If submitting to the queue fails, move the fence back into the unused fence
@@ -421,6 +423,7 @@ MaybeError Queue::SubmitPendingCommands() {
             // it would be neither in the unused list nor in the in-flight list.
             mUnusedFences.push_back(fence);
         });
+    TRACE_EVENT_END0(device->GetPlatform(), Recording, "vkQueueSubmit");
 
     // Enqueue the semaphores before incrementing the serial, so that they can be deleted as
     // soon as the current submission is finished.
