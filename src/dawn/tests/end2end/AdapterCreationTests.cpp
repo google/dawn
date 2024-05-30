@@ -476,14 +476,22 @@ TEST_P(AdapterCreationTest, PropertiesOutliveAdapter) {
     wgpu::AdapterProperties properties;
     adapter.GetProperties(&properties);
 
-    // Release the adapter.
-    adapter = nullptr;
-
-    // Copy the properties to std::string, this should not be a use-after-free.
+    // Make a copy of the properties.
     std::string vendorName = properties.vendorName;
     std::string architecture = properties.architecture;
     std::string name = properties.name;
     std::string driverDescription = properties.driverDescription;
+
+    // Release the adapter.
+    adapter = nullptr;
+
+    // Ensure we still read the properties (pointers are still valid).
+    // Check the values are equal to make sure they haven't been overwritten,
+    // and to make sure the compiler can't elide no-op pointer reads.
+    EXPECT_EQ(properties.vendorName, vendorName);
+    EXPECT_EQ(properties.architecture, architecture);
+    EXPECT_EQ(properties.name, name);
+    EXPECT_EQ(properties.driverDescription, driverDescription);
 }
 
 // Test that calling AdapterGetInfo returns separate allocations for strings.
@@ -645,7 +653,7 @@ TEST_P(AdapterCreationTest, InfoOutliveAdapter) {
     wgpu::AdapterInfo info;
     adapter.GetInfo(&info);
 
-    // Copy the info to std::string, this should not be a use-after-free.
+    // Make a copy of the info.
     std::string vendor = info.vendor;
     std::string architecture = info.architecture;
     std::string device = info.device;
@@ -653,6 +661,14 @@ TEST_P(AdapterCreationTest, InfoOutliveAdapter) {
 
     // Release the adapter.
     adapter = nullptr;
+
+    // Ensure we still read the info (pointers are still valid).
+    // Check the values are equal to make sure they haven't been overwritten,
+    // and to make sure the compiler can't elide no-op pointer reads.
+    EXPECT_EQ(info.vendor, vendor);
+    EXPECT_EQ(info.architecture, architecture);
+    EXPECT_EQ(info.device, device);
+    EXPECT_EQ(info.description, description);
 }
 
 }  // anonymous namespace
