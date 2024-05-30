@@ -108,8 +108,16 @@ See:
 {{- /* =========================== Base64 comments =========================== */ -}}
 {{- $tokens = Append $tokens
     "// AAAA"
-    "// BAAA"
     "// AAAB"
+    "// ABBB"
+    "// BAAA"
+    "// BBBA"
+    "// BBBB"
+-}}
+
+{{- /* ========================= Interesting patterns ======================== */ -}}
+{{- $tokens = Append $tokens
+    "for (;true;) {}"
 -}}
 
 {{- /* ========================== Builtin functions ========================== */ -}}
