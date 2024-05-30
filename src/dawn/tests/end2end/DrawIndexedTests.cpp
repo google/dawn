@@ -173,8 +173,8 @@ TEST_P(DrawIndexedTest, NegativeBaseVertex) {
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
     DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
-    // Also failing on Qualcomm GLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // Also failing on Qualcomm and ARM GLES.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && (IsQualcomm() || IsARM()));
 
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
