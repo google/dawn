@@ -4510,9 +4510,9 @@ TEST_F(IR_ValidatorTest, Store_TargetNotMemoryView) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:15 error: store: store target operand is not a memory view
+              R"(:4:11 error: store: store target operand is not a memory view
     store %l, 42u
-              ^^^
+          ^^
 
 :2:3 note: in block
   $B1: {

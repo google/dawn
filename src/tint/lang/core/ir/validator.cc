@@ -1495,8 +1495,7 @@ void Validator::CheckStore(const Store* s) {
         if (auto* to = s->To()) {
             auto* mv = to->Type()->As<core::type::MemoryView>();
             if (!mv) {
-                AddError(s, Store::kFromOperandOffset)
-                    << "store target operand is not a memory view";
+                AddError(s, Store::kToOperandOffset) << "store target operand is not a memory view";
                 return;
             }
             auto* value_type = from->Type();
