@@ -51,8 +51,10 @@ std::vector<size_t> LineOffsets(std::string_view str) {
 
 langsvr::Result<langsvr::SuccessType> Server::Handle(
     const lsp::TextDocumentDidOpenNotification& n) {
+    wgsl::reader::Options options;
+    options.allowed_features = wgsl::AllowedFeatures::Everything();
     auto source = std::make_unique<Source::File>(n.text_document.uri, n.text_document.text);
-    auto program = wgsl::reader::Parse(source.get());
+    auto program = wgsl::reader::Parse(source.get(), options);
     auto file =
         std::make_shared<File>(std::move(source), n.text_document.version, std::move(program));
     files_.Add(n.text_document.uri, file);
@@ -82,8 +84,10 @@ langsvr::Result<langsvr::SuccessType> Server::Handle(
             utf8 = utf8.substr(0, utf8_start) + edit->text + utf8.substr(utf8_end);
         }
     }
+    wgsl::reader::Options options;
+    options.allowed_features = wgsl::AllowedFeatures::Everything();
     auto source = std::make_unique<Source::File>(n.text_document.uri, utf8);
-    auto program = wgsl::reader::Parse(source.get());
+    auto program = wgsl::reader::Parse(source.get(), options);
     *file = std::make_shared<File>(std::move(source), n.text_document.version, std::move(program));
     return PublishDiagnostics(**file);
 }
