@@ -135,36 +135,6 @@ D3D12_RESOURCE_DIMENSION D3D12TextureDimension(wgpu::TextureDimension dimension)
 
 }  // namespace
 
-MaybeError ValidateTextureCanBeWrapped(ID3D12Resource* d3d12Resource,
-                                       const UnpackedPtr<TextureDescriptor>& dawnDescriptor) {
-    const D3D12_RESOURCE_DESC d3dDescriptor = d3d12Resource->GetDesc();
-    DAWN_INVALID_IF(
-        (dawnDescriptor->size.width != d3dDescriptor.Width) ||
-            (dawnDescriptor->size.height != d3dDescriptor.Height) ||
-            (dawnDescriptor->size.depthOrArrayLayers != 1),
-        "D3D12 texture size (Width: %u, Height: %u, DepthOrArraySize: 1) doesn't match Dawn "
-        "descriptor size (width: %u, height: %u, depthOrArrayLayers: %u).",
-        d3dDescriptor.Width, d3dDescriptor.Height, dawnDescriptor->size.width,
-        dawnDescriptor->size.height, dawnDescriptor->size.depthOrArrayLayers);
-
-    const DXGI_FORMAT dxgiFormatFromDescriptor = d3d::DXGITextureFormat(dawnDescriptor->format);
-    DAWN_INVALID_IF(dxgiFormatFromDescriptor != d3dDescriptor.Format,
-                    "D3D12 texture format (%x) is not compatible with Dawn descriptor format (%s).",
-                    d3dDescriptor.Format, dawnDescriptor->format);
-
-    DAWN_INVALID_IF(d3dDescriptor.MipLevels != 1,
-                    "D3D12 texture number of miplevels (%u) is not 1.", d3dDescriptor.MipLevels);
-
-    DAWN_INVALID_IF(d3dDescriptor.DepthOrArraySize != 1, "D3D12 texture array size (%u) is not 1.",
-                    d3dDescriptor.DepthOrArraySize);
-
-    // Shared textures cannot be multi-sample so no need to check those.
-    DAWN_ASSERT(d3dDescriptor.SampleDesc.Count == 1);
-    DAWN_ASSERT(d3dDescriptor.SampleDesc.Quality == 0);
-
-    return {};
-}
-
 // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_shared_resource_compatibility_tier
 MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFormat) {
     const bool supportsSharedResourceCapabilityTier1 =
