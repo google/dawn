@@ -43,7 +43,11 @@ bool CanRun(const tint::Program& program, const Options& options) {
     // Excessive values can cause OOM / timeouts in the PadStructs transform.
     static constexpr uint32_t kMaxOffset = 0x1000;
 
-    if (options.first_instance_offset > kMaxOffset) {
+    if (options.first_instance_offset && options.first_instance_offset > kMaxOffset) {
+        return false;
+    }
+
+    if (options.first_vertex_offset && options.first_vertex_offset > kMaxOffset) {
         return false;
     }
 
