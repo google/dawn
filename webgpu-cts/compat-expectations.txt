@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-05-30 01:03:07AM
+# Last rolled: 2024-05-31 11:11:07AM
 
 # Flaky on all platforms
 # KEEP
@@ -487,9 +487,8 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ################################################################################
 # New failures. Please triage:
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,createTexture:mipLevelCount,bound_check:format="bc1-rgba-unorm" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createTexture:texture_size,3d_texture,compressed_format:* [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createTexture:texture_size,default_value_and_smallest_size,compressed_format:* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,adapter,info:* [ Failure ]
+crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="private";access_mode="";trailing_comma=true [ Failure ]
