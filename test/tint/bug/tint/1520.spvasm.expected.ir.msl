@@ -1,278 +1,163 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct UniformBuffer {
+  float unknownInput_S1_c0;
+  float4 ucolorRed_S1_c0;
+  float4 ucolorGreen_S1_c0;
+  float3x3 umatrix_S1;
+};
+struct tint_module_vars_struct {
+  const constant UniformBuffer* x_4;
+  thread float4* sk_FragColor;
+  thread bool* sk_Clockwise;
+  thread float4* vcolor_S0;
+};
+struct main_out {
+  float4 sk_FragColor_1;
+};
+struct tint_symbol_outputs {
+  float4 main_out_sk_FragColor_1 [[color(0)]];
+};
+struct tint_symbol_inputs {
+  float4 vcolor_S0_param [[user(locn0)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: UniformBuffer = struct @align(16) {
-  unknownInput_S1_c0:f32 @offset(16)
-  ucolorRed_S1_c0:vec4<f32> @offset(32)
-  ucolorGreen_S1_c0:vec4<f32> @offset(48)
-  umatrix_S1:mat3x3<f32> @offset(64)
+int4 tint_div_v4i32(int4 lhs, int4 rhs) {
+  return (lhs / select(rhs, int4(1), ((rhs == int4(0)) | ((lhs == int4((-2147483647 - 1))) & (rhs == int4(-1))))));
 }
-
-main_out = struct @align(16) {
-  sk_FragColor_1:vec4<f32> @offset(0), @location(0)
+int tint_f32_to_i32(float value) {
+  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
-
-$B1: {  # root
-  %x_4:ptr<uniform, UniformBuffer, read> = var @binding_point(0, 0)
-  %sk_FragColor:ptr<private, vec4<f32>, read_write> = var
-  %sk_Clockwise:ptr<private, bool, read_write> = var
-  %vcolor_S0:ptr<private, vec4<f32>, read_write> = var
-}
-
-%test_int_S1_c0_b = func():bool {
-  $B2: {
-    %unknown:ptr<function, i32, read_write> = var
-    %ok:ptr<function, bool, read_write> = var
-    %val:ptr<function, vec4<i32>, read_write> = var
-    %x_40:ptr<function, bool, read_write> = var
-    %x_41:ptr<function, bool, read_write> = var
-    %x_54:ptr<function, bool, read_write> = var
-    %x_55:ptr<function, bool, read_write> = var
-    %x_65:ptr<function, bool, read_write> = var
-    %x_66:ptr<function, bool, read_write> = var
-    %15:ptr<uniform, f32, read> = access %x_4, 0u
-    %16:f32 = load %15
-    %17:i32 = call %tint_f32_to_i32, %16
-    %x_27:i32 = let %17
-    store %unknown, %x_27
-    store %ok, true
-    store %x_41, false
-    if true [t: $B3] {  # if_1
-      $B3: {  # true
-        %20:vec4<i32> = construct %x_27
-        %21:vec4<i32> = call %tint_div_v4i32, vec4<i32>(0i), %20
-        %23:vec4<bool> = eq %21, vec4<i32>(0i)
-        %24:bool = all %23
-        store %x_40, %24
-        %25:bool = load %x_40
-        store %x_41, %25
-        exit_if  # if_1
-      }
-    }
-    %26:bool = load %x_41
-    store %ok, %26
-    %27:vec4<i32> = construct %x_27
-    %x_44:vec4<i32> = let %27
-    store %val, %x_44
-    %29:vec4<i32> = add %x_44, vec4<i32>(1i)
-    %x_47:vec4<i32> = let %29
-    store %val, %x_47
-    %31:vec4<i32> = sub %x_47, vec4<i32>(1i)
-    %x_48:vec4<i32> = let %31
-    store %val, %x_48
-    %33:vec4<i32> = add %x_48, vec4<i32>(1i)
-    %x_49:vec4<i32> = let %33
-    store %val, %x_49
-    %35:vec4<i32> = sub %x_49, vec4<i32>(1i)
-    %x_50:vec4<i32> = let %35
-    store %val, %x_50
-    store %x_55, false
-    %37:bool = load %x_41
-    if %37 [t: $B4] {  # if_2
-      $B4: {  # true
-        %38:vec4<bool> = eq %x_50, %x_44
-        %39:bool = all %38
-        store %x_54, %39
-        %40:bool = load %x_54
-        store %x_55, %40
-        exit_if  # if_2
-      }
-    }
-    %41:bool = load %x_55
-    store %ok, %41
-    %42:vec4<i32> = mul %x_50, vec4<i32>(2i)
-    %x_58:vec4<i32> = let %42
-    store %val, %x_58
-    %44:vec4<i32> = call %tint_div_v4i32, %x_58, vec4<i32>(2i)
-    %x_59:vec4<i32> = let %44
-    store %val, %x_59
-    %46:vec4<i32> = mul %x_59, vec4<i32>(2i)
-    %x_60:vec4<i32> = let %46
-    store %val, %x_60
-    %48:vec4<i32> = call %tint_div_v4i32, %x_60, vec4<i32>(2i)
-    %x_61:vec4<i32> = let %48
-    store %val, %x_61
-    store %x_66, false
-    %50:bool = load %x_55
-    if %50 [t: $B5] {  # if_3
-      $B5: {  # true
-        %51:vec4<bool> = eq %x_61, %x_44
-        %52:bool = all %51
-        store %x_65, %52
-        %53:bool = load %x_65
-        store %x_66, %53
-        exit_if  # if_3
-      }
-    }
-    %54:bool = load %x_66
-    store %ok, %54
-    %55:bool = load %x_66
-    ret %55
+bool test_int_S1_c0_b(tint_module_vars_struct tint_module_vars) {
+  int unknown = 0;
+  bool ok = false;
+  int4 val = 0;
+  bool x_40 = false;
+  bool x_41 = false;
+  bool x_54 = false;
+  bool x_55 = false;
+  bool x_65 = false;
+  bool x_66 = false;
+  int const x_27 = tint_f32_to_i32((*tint_module_vars.x_4).unknownInput_S1_c0);
+  unknown = x_27;
+  ok = true;
+  x_41 = false;
+  if (true) {
+    x_40 = all((tint_div_v4i32(int4(0), int4(x_27)) == int4(0)));
+    x_41 = x_40;
   }
-}
-%main_1 = func():void {
-  $B6: {
-    %outputColor_S0:ptr<function, vec4<f32>, read_write> = var
-    %output_S1:ptr<function, vec4<f32>, read_write> = var
-    %x_8_unknown:ptr<function, f32, read_write> = var
-    %x_9_ok:ptr<function, bool, read_write> = var
-    %x_10_val:ptr<function, vec4<f32>, read_write> = var
-    %x_116:ptr<function, vec4<f32>, read_write> = var
-    %x_86:ptr<function, bool, read_write> = var
-    %x_87:ptr<function, bool, read_write> = var
-    %x_99:ptr<function, bool, read_write> = var
-    %x_100:ptr<function, bool, read_write> = var
-    %x_110:ptr<function, bool, read_write> = var
-    %x_111:ptr<function, bool, read_write> = var
-    %x_114:ptr<function, bool, read_write> = var
-    %x_115:ptr<function, bool, read_write> = var
-    %71:vec4<f32> = load %vcolor_S0
-    store %outputColor_S0, %71
-    %72:ptr<uniform, f32, read> = access %x_4, 0u
-    %73:f32 = load %72
-    %x_77:f32 = let %73
-    store %x_8_unknown, %x_77
-    store %x_9_ok, true
-    store %x_87, false
-    if true [t: $B7] {  # if_4
-      $B7: {  # true
-        %75:vec4<f32> = construct %x_77
-        %76:vec4<f32> = div vec4<f32>(0.0f), %75
-        %77:vec4<bool> = eq %76, vec4<f32>(0.0f)
-        %78:bool = all %77
-        store %x_86, %78
-        %79:bool = load %x_86
-        store %x_87, %79
-        exit_if  # if_4
-      }
-    }
-    %80:bool = load %x_87
-    store %x_9_ok, %80
-    %81:vec4<f32> = construct %x_77
-    %x_89:vec4<f32> = let %81
-    store %x_10_val, %x_89
-    %83:vec4<f32> = add %x_89, vec4<f32>(1.0f)
-    %x_92:vec4<f32> = let %83
-    store %x_10_val, %x_92
-    %85:vec4<f32> = sub %x_92, vec4<f32>(1.0f)
-    %x_93:vec4<f32> = let %85
-    store %x_10_val, %x_93
-    %87:vec4<f32> = add %x_93, vec4<f32>(1.0f)
-    %x_94:vec4<f32> = let %87
-    store %x_10_val, %x_94
-    %89:vec4<f32> = sub %x_94, vec4<f32>(1.0f)
-    %x_95:vec4<f32> = let %89
-    store %x_10_val, %x_95
-    store %x_100, false
-    %91:bool = load %x_87
-    if %91 [t: $B8] {  # if_5
-      $B8: {  # true
-        %92:vec4<bool> = eq %x_95, %x_89
-        %93:bool = all %92
-        store %x_99, %93
-        %94:bool = load %x_99
-        store %x_100, %94
-        exit_if  # if_5
-      }
-    }
-    %95:bool = load %x_100
-    store %x_9_ok, %95
-    %96:vec4<f32> = mul %x_95, vec4<f32>(2.0f)
-    %x_103:vec4<f32> = let %96
-    store %x_10_val, %x_103
-    %98:vec4<f32> = div %x_103, vec4<f32>(2.0f)
-    %x_104:vec4<f32> = let %98
-    store %x_10_val, %x_104
-    %100:vec4<f32> = mul %x_104, vec4<f32>(2.0f)
-    %x_105:vec4<f32> = let %100
-    store %x_10_val, %x_105
-    %102:vec4<f32> = div %x_105, vec4<f32>(2.0f)
-    %x_106:vec4<f32> = let %102
-    store %x_10_val, %x_106
-    store %x_111, false
-    %104:bool = load %x_100
-    if %104 [t: $B9] {  # if_6
-      $B9: {  # true
-        %105:vec4<bool> = eq %x_106, %x_89
-        %106:bool = all %105
-        store %x_110, %106
-        %107:bool = load %x_110
-        store %x_111, %107
-        exit_if  # if_6
-      }
-    }
-    %108:bool = load %x_111
-    store %x_9_ok, %108
-    store %x_115, false
-    %109:bool = load %x_111
-    if %109 [t: $B10] {  # if_7
-      $B10: {  # true
-        %110:bool = call %test_int_S1_c0_b
-        store %x_114, %110
-        %111:bool = load %x_114
-        store %x_115, %111
-        exit_if  # if_7
-      }
-    }
-    %112:bool = load %x_115
-    if %112 [t: $B11, f: $B12] {  # if_8
-      $B11: {  # true
-        %113:ptr<uniform, vec4<f32>, read> = access %x_4, 2u
-        %114:vec4<f32> = load %113
-        store %x_116, %114
-        exit_if  # if_8
-      }
-      $B12: {  # false
-        %115:ptr<uniform, vec4<f32>, read> = access %x_4, 1u
-        %116:vec4<f32> = load %115
-        store %x_116, %116
-        exit_if  # if_8
-      }
-    }
-    %117:vec4<f32> = load %x_116
-    %x_125:vec4<f32> = let %117
-    %119:vec4<f32> = load %x_116
-    store %output_S1, %119
-    store %sk_FragColor, %x_125
-    ret
+  ok = x_41;
+  int4 const x_44 = int4(x_27);
+  val = x_44;
+  int4 const x_47 = (x_44 + int4(1));
+  val = x_47;
+  int4 const x_48 = (x_47 - int4(1));
+  val = x_48;
+  int4 const x_49 = (x_48 + int4(1));
+  val = x_49;
+  int4 const x_50 = (x_49 - int4(1));
+  val = x_50;
+  x_55 = false;
+  if (x_41) {
+    x_54 = all((x_50 == x_44));
+    x_55 = x_54;
   }
-}
-%tint_symbol = @fragment func(%sk_Clockwise_param:bool [@front_facing], %vcolor_S0_param:vec4<f32> [@location(0)]):main_out {
-  $B13: {
-    store %sk_Clockwise, %sk_Clockwise_param
-    store %vcolor_S0, %vcolor_S0_param
-    %123:void = call %main_1
-    %124:vec4<f32> = load %sk_FragColor
-    %125:main_out = construct %124
-    ret %125
+  ok = x_55;
+  int4 const x_58 = (x_50 * int4(2));
+  val = x_58;
+  int4 const x_59 = tint_div_v4i32(x_58, int4(2));
+  val = x_59;
+  int4 const x_60 = (x_59 * int4(2));
+  val = x_60;
+  int4 const x_61 = tint_div_v4i32(x_60, int4(2));
+  val = x_61;
+  x_66 = false;
+  if (x_55) {
+    x_65 = all((x_61 == x_44));
+    x_66 = x_65;
   }
+  ok = x_66;
+  return x_66;
 }
-%tint_div_v4i32 = func(%lhs:vec4<i32>, %rhs:vec4<i32>):vec4<i32> {
-  $B14: {
-    %128:vec4<bool> = eq %rhs, vec4<i32>(0i)
-    %129:vec4<bool> = eq %lhs, vec4<i32>(-2147483648i)
-    %130:vec4<bool> = eq %rhs, vec4<i32>(-1i)
-    %131:vec4<bool> = and %129, %130
-    %132:vec4<bool> = or %128, %131
-    %133:vec4<i32> = select %rhs, vec4<i32>(1i), %132
-    %134:vec4<i32> = div %lhs, %133
-    ret %134
+void main_1(tint_module_vars_struct tint_module_vars) {
+  float4 outputColor_S0 = 0.0f;
+  float4 output_S1 = 0.0f;
+  float x_8_unknown = 0.0f;
+  bool x_9_ok = false;
+  float4 x_10_val = 0.0f;
+  float4 x_116 = 0.0f;
+  bool x_86 = false;
+  bool x_87 = false;
+  bool x_99 = false;
+  bool x_100 = false;
+  bool x_110 = false;
+  bool x_111 = false;
+  bool x_114 = false;
+  bool x_115 = false;
+  outputColor_S0 = (*tint_module_vars.vcolor_S0);
+  float const x_77 = (*tint_module_vars.x_4).unknownInput_S1_c0;
+  x_8_unknown = x_77;
+  x_9_ok = true;
+  x_87 = false;
+  if (true) {
+    x_86 = all(((float4(0.0f) / float4(x_77)) == float4(0.0f)));
+    x_87 = x_86;
   }
-}
-%tint_f32_to_i32 = func(%value:f32):i32 {
-  $B15: {
-    %136:i32 = convert %value
-    %137:bool = gte %value, -2147483648.0f
-    %138:i32 = select -2147483648i, %136, %137
-    %139:bool = lte %value, 2147483520.0f
-    %140:i32 = select 2147483647i, %138, %139
-    ret %140
+  x_9_ok = x_87;
+  float4 const x_89 = float4(x_77);
+  x_10_val = x_89;
+  float4 const x_92 = (x_89 + float4(1.0f));
+  x_10_val = x_92;
+  float4 const x_93 = (x_92 - float4(1.0f));
+  x_10_val = x_93;
+  float4 const x_94 = (x_93 + float4(1.0f));
+  x_10_val = x_94;
+  float4 const x_95 = (x_94 - float4(1.0f));
+  x_10_val = x_95;
+  x_100 = false;
+  if (x_87) {
+    x_99 = all((x_95 == x_89));
+    x_100 = x_99;
   }
+  x_9_ok = x_100;
+  float4 const x_103 = (x_95 * float4(2.0f));
+  x_10_val = x_103;
+  float4 const x_104 = (x_103 / float4(2.0f));
+  x_10_val = x_104;
+  float4 const x_105 = (x_104 * float4(2.0f));
+  x_10_val = x_105;
+  float4 const x_106 = (x_105 / float4(2.0f));
+  x_10_val = x_106;
+  x_111 = false;
+  if (x_100) {
+    x_110 = all((x_106 == x_89));
+    x_111 = x_110;
+  }
+  x_9_ok = x_111;
+  x_115 = false;
+  if (x_111) {
+    x_114 = test_int_S1_c0_b(tint_module_vars);
+    x_115 = x_114;
+  }
+  if (x_115) {
+    x_116 = (*tint_module_vars.x_4).ucolorGreen_S1_c0;
+  } else {
+    x_116 = (*tint_module_vars.x_4).ucolorRed_S1_c0;
+  }
+  float4 const x_125 = x_116;
+  output_S1 = x_116;
+  (*tint_module_vars.sk_FragColor) = x_125;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+main_out tint_symbol_inner(bool sk_Clockwise_param, float4 vcolor_S0_param, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.sk_Clockwise) = sk_Clockwise_param;
+  (*tint_module_vars.vcolor_S0) = vcolor_S0_param;
+  main_1(tint_module_vars);
+  return main_out{.sk_FragColor_1=(*tint_module_vars.sk_FragColor)};
+}
+fragment tint_symbol_outputs tint_symbol(bool sk_Clockwise_param [[front_facing]], tint_symbol_inputs inputs [[stage_in]], const constant UniformBuffer* x_4 [[buffer(0)]]) {
+  thread float4 sk_FragColor = 0.0f;
+  thread bool sk_Clockwise = false;
+  thread float4 vcolor_S0 = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_4=x_4, .sk_FragColor=(&sk_FragColor), .sk_Clockwise=(&sk_Clockwise), .vcolor_S0=(&vcolor_S0)};
+  return tint_symbol_outputs{.main_out_sk_FragColor_1=tint_symbol_inner(sk_Clockwise_param, inputs.vcolor_S0_param, tint_module_vars).sk_FragColor_1};
+}

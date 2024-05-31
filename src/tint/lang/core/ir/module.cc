@@ -43,7 +43,7 @@ namespace {
 template <typename F>
 struct FunctionSorter {
     /// The dependency-ordered list of functions.
-    Vector<F*, 16> ordered_functions{};
+    UniqueVector<F*, 16> ordered_functions{};
 
     /// The functions that have been visited and checked for dependencies.
     Hashset<F*, 16> visited{};
@@ -70,7 +70,7 @@ struct FunctionSorter {
             // unvisited dependencies. We can now add it to the ordered list, and walk back down the
             // stack until we find the next unvisited function.
             while (!function_stack.IsEmpty() && visited.Contains(function_stack.Back())) {
-                ordered_functions.Push(function_stack.Pop());
+                ordered_functions.Add(function_stack.Pop());
             }
         }
     }
@@ -106,7 +106,7 @@ struct FunctionSorter {
         for (auto& func : mod.functions) {
             sorter.Visit(func.Get());
         }
-        return std::move(sorter.ordered_functions);
+        return std::move(sorter.ordered_functions.Release());
     }
 };
 

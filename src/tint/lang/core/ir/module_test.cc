@@ -68,6 +68,8 @@ TEST_F(IR_ModuleTest, DependencyOrderedFunctions) {
         auto* ifelse = b.If(true);
         b.Append(ifelse->True(), [&] {
             b.Call(fc);
+            b.Call(fc);
+            b.Call(fc);
             b.ExitIf(ifelse);
         });
         b.Append(ifelse->False(), [&] {

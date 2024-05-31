@@ -6,13 +6,7 @@ void f() {
   bool y = false;
   bool v = false;
   if (x) {
-    bool v_1 = false;
-    if (true) {
-      v_1 = true;
-    } else {
-      v_1 = y;
-    }
-    v = v_1;
+    v = true;
   } else {
     v = false;
   }
