@@ -155,7 +155,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     core::ir::Value* GetInput(core::ir::Builder& builder, uint32_t idx) override {
         auto index = input_indices[idx];
         auto* param = input_params[index.param_index];
-        if (auto* str = param->Type()->As<core::type::Struct>()) {
+        if (param->Type()->Is<core::type::Struct>()) {
             return builder.Access(inputs[idx].type, param, u32(index.member_index))->Result(0);
         } else {
             return param;

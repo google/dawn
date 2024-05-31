@@ -41,7 +41,7 @@ bool CanRun(const Program& program, const ArrayLengthFromUniform::Config& config
     for (auto* node : program.ASTNodes().Objects()) {
         if (auto* let = node->As<ast::Let>()) {
             if (auto* sem = program.Sem().Get(let)) {
-                if (auto* ptr = sem->Type()->As<core::type::Pointer>()) {
+                if (sem->Type()->Is<core::type::Pointer>()) {
                     return false;
                 }
             }

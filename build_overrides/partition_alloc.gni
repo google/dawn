@@ -20,7 +20,22 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import("//build/config/android/config.gni")
+import("//build/config/cast.gni")
+import("//build/config/chromeos/ui_mode.gni")
+import("//build/config/compiler/compiler.gni")
+import("//build/config/cronet/config.gni")
+import("//build/config/dcheck_always_on.gni")
+import("//build/config/logging.gni")
 import("//build/config/sanitizers/sanitizers.gni")
+
+partition_alloc_enable_arc_config = "//build/config/compiler:enable_arc"
+
+# partition_alloc is performance critical and it should generally be optimized for speed, even in
+# debug mode. Dawn doesn't really need its debug version.
+partition_alloc_remove_configs =
+    [ "//build/config/compiler:default_optimization" ]
+partition_alloc_add_configs = [ "//build/config/compiler:optimize_speed" ]
 
 # MSVC's cl.exe compiler is not supported.
 _compiler_supported = is_clang || !is_win
@@ -48,3 +63,8 @@ enable_dangling_raw_ptr_checks_default = _supported
 raw_ptr_zero_on_construct_default = true
 raw_ptr_zero_on_move_default = true
 raw_ptr_zero_on_destruct_default = false
+
+# Allow embedders to opt-out of C++20 build which is set as default.
+#
+# Dawn still uses C++17 only, because of Skia.
+assert_cpp20_default = false

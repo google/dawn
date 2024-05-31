@@ -154,7 +154,7 @@ function(tint_default_compile_options TARGET)
     endif()
 
     # Some versions of MSVC ignores the [[noreturn]] on ~InternalCompilerError(), triggering a
-    # warning if its the last statement on a function that has a return value.
+    # warning if it is the last statement on a function that has a return value.
     target_compile_options(${TARGET} PRIVATE
       /wd4715 # not all control paths return a value
     )

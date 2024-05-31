@@ -50,6 +50,13 @@ config("tint_common_config") {
     "${tint_root_dir}",
     "${tint_gen_dir}",
   ]
+
+  # Some versions of MSVC ignores the [[noreturn]] on ~InternalCompilerError(),
+  # triggering a warning if it is the last statement on a function that has a
+  # return value.
+  if (!is_clang && is_win) {
+    cflags = [ "/wd4715" ]
+  }
 }
 
 config("tint_public_config") {
