@@ -39,6 +39,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO(crbug.com/342554800): Add test coverage for:
+//   ResultSource.GetResults (requires breaking out into helper functions)
+//   CacheResults
+//   LatestCTSRoll
+//   LatestPatchset
+//   MostRecentResultsForChange
+
 /*******************************************************************************
  * Fake implementations
  ******************************************************************************/
@@ -59,10 +66,10 @@ func (bq mockedBigQueryClient) QueryTestResults(
 }
 
 /*******************************************************************************
- * GetRawResults tests
+ * GetResults tests
  ******************************************************************************/
 
-func generateGoodGetRawResultsInputs() (context.Context, Config, *mockedBigQueryClient, BuildsByName) {
+func generateGoodGetResultsInputs() (context.Context, Config, *mockedBigQueryClient, BuildsByName) {
 	ctx := context.Background()
 
 	cfg := Config{
@@ -90,9 +97,85 @@ func generateGoodGetRawResultsInputs() (context.Context, Config, *mockedBigQuery
 	return ctx, cfg, client, builds
 }
 
+// Tests that valid results are properly cleaned, sorted, and returned.
+func TestGetResultsHappyPath(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetResultsInputs()
+
+	cfg.Tag.Remove = []string{
+		"remove_me",
+	}
+
+	client.returnValues = []resultsdb.QueryResult{
+		resultsdb.QueryResult{
+			TestId: "prefix_test_2",
+			Status: "PASS",
+			Tags: []resultsdb.TagPair{
+				resultsdb.TagPair{
+					Key:   "typ_tag",
+					Value: "remove_me",
+				},
+				resultsdb.TagPair{
+					Key:   "typ_tag",
+					Value: "win",
+				},
+			},
+			Duration: 2.0,
+		},
+		resultsdb.QueryResult{
+			TestId: "prefix_test_1",
+			Status: "PASS",
+			Tags: []resultsdb.TagPair{
+				resultsdb.TagPair{
+					Key:   "typ_tag",
+					Value: "linux",
+				},
+			},
+			Duration: 1.0,
+		},
+	}
+
+	expectedResultsList := result.List{
+		result.Result{
+			Query:        query.Parse("_test_1"),
+			Status:       result.Pass,
+			Tags:         result.NewTags("linux"),
+			Duration:     time.Second,
+			MayExonerate: false,
+		},
+		result.Result{
+			Query:        query.Parse("_test_2"),
+			Status:       result.Pass,
+			Tags:         result.NewTags("win"),
+			Duration:     2 * time.Second,
+			MayExonerate: false,
+		},
+	}
+
+	expectedResults := make(result.ResultsByExecutionMode)
+	expectedResults["execution_mode"] = expectedResultsList
+
+	results, err := GetResults(ctx, cfg, client, builds)
+	assert.Nil(t, err)
+	assert.Equal(t, results, expectedResults)
+}
+
+// Tests that errors from GetRawResults are properly surfaced.
+func TestGetResultsGetRawResultsErrorSurfaced(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetResultsInputs()
+	client.returnValues[0].TestId = "bad_test"
+
+	results, err := GetResults(ctx, cfg, client, builds)
+	assert.Nil(t, results)
+	assert.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
+}
+
+/*******************************************************************************
+ * GetRawResults tests
+ ******************************************************************************/
+
 // Tests that valid results are properly parsed and returned.
 func TestGetRawResultsHappyPath(t *testing.T) {
-	ctx, cfg, client, builds := generateGoodGetRawResultsInputs()
+	ctx, cfg, client, builds := generateGoodGetResultsInputs()
 	client.returnValues = []resultsdb.QueryResult{
 		resultsdb.QueryResult{
 			TestId:   "prefix_test_1",
@@ -180,7 +263,7 @@ func TestGetRawResultsHappyPath(t *testing.T) {
 
 // Tests that a mismatched prefix results in an error.
 func TestGetRawResultsPrefixMismatch(t *testing.T) {
-	ctx, cfg, client, builds := generateGoodGetRawResultsInputs()
+	ctx, cfg, client, builds := generateGoodGetResultsInputs()
 	client.returnValues[0].TestId = "bad_test"
 
 	results, err := GetRawResults(ctx, cfg, client, builds)
@@ -190,7 +273,7 @@ func TestGetRawResultsPrefixMismatch(t *testing.T) {
 
 // Tests that a JavaScript duration that cannot be parsed results in an error.
 func TestGetRawResultsBadJavaScriptDuration(t *testing.T) {
-	ctx, cfg, client, builds := generateGoodGetRawResultsInputs()
+	ctx, cfg, client, builds := generateGoodGetResultsInputs()
 	client.returnValues[0].Tags = []resultsdb.TagPair{
 		resultsdb.TagPair{
 			Key:   "javascript_duration",
@@ -205,7 +288,7 @@ func TestGetRawResultsBadJavaScriptDuration(t *testing.T) {
 
 // Tests that a non-boolean may_exonerate value results in an error.
 func TestGetRawResultsBadMayExonerate(t *testing.T) {
-	ctx, cfg, client, builds := generateGoodGetRawResultsInputs()
+	ctx, cfg, client, builds := generateGoodGetResultsInputs()
 	client.returnValues[0].Tags = []resultsdb.TagPair{
 		resultsdb.TagPair{
 			Key:   "may_exonerate",
@@ -216,4 +299,195 @@ func TestGetRawResultsBadMayExonerate(t *testing.T) {
 	results, err := GetRawResults(ctx, cfg, client, builds)
 	assert.Nil(t, results)
 	assert.ErrorContains(t, err, `strconv.ParseBool: parsing "yesnt": invalid syntax`)
+}
+
+/*******************************************************************************
+ * CleanResults tests
+ ******************************************************************************/
+
+// Tests that tags specified for removal are properly removed.
+func TestCleanResultsTagRemoval(t *testing.T) {
+	cfg := Config{}
+	cfg.Tag.Remove = []string{
+		"remove_1",
+		"remove_2",
+		"remove_3",
+		"missing",
+	}
+
+	results := result.List{
+		result.Result{
+			Query:        query.Parse("test_1"),
+			Status:       result.Pass,
+			Tags:         result.NewTags("remove_1", "remove_2", "linux"),
+			Duration:     time.Second,
+			MayExonerate: false,
+		},
+		result.Result{
+			Query:        query.Parse("test_2"),
+			Status:       result.Pass,
+			Tags:         result.NewTags("remove_2", "remove_3"),
+			Duration:     time.Second,
+			MayExonerate: false,
+		},
+	}
+
+	expectedResults := result.List{
+		result.Result{
+			Query:        query.Parse("test_1"),
+			Status:       result.Pass,
+			Tags:         result.NewTags("linux"),
+			Duration:     time.Second,
+			MayExonerate: false,
+		},
+		result.Result{
+			Query:        query.Parse("test_2"),
+			Status:       result.Pass,
+			Tags:         result.NewTags(),
+			Duration:     time.Second,
+			MayExonerate: false,
+		},
+	}
+
+	CleanResults(cfg, &results)
+	assert.Equal(t, results, expectedResults)
+}
+
+// Tests that duplicate results with the same status always use that status.
+func TestCleanResultsDuplicateResultSameStatus(t *testing.T) {
+	cfg := Config{}
+	for _, status := range []result.Status{result.Abort, result.Crash,
+		result.Failure, result.Pass, result.RetryOnFailure, result.Skip, result.Slow, result.Unknown} {
+		results := result.List{
+			result.Result{
+				Query:        query.Parse("test_1"),
+				Status:       status,
+				Tags:         result.NewTags(),
+				Duration:     time.Second,
+				MayExonerate: false,
+			},
+			result.Result{
+				Query:        query.Parse("test_1"),
+				Status:       status,
+				Tags:         result.NewTags(),
+				Duration:     3 * time.Second,
+				MayExonerate: false,
+			},
+		}
+
+		expectedResults := result.List{
+			result.Result{
+				Query:        query.Parse("test_1"),
+				Status:       status,
+				Tags:         result.NewTags(),
+				Duration:     2 * time.Second,
+				MayExonerate: false,
+			},
+		}
+
+		CleanResults(cfg, &results)
+		assert.Equal(t, results, expectedResults)
+	}
+}
+
+func runPriorityTest(t *testing.T, testedStatus result.Status, lowerPriorityStatuses *[]result.Status) {
+	cfg := Config{}
+	for _, status := range *lowerPriorityStatuses {
+		results := result.List{
+			result.Result{
+				Query:        query.Parse("test_1"),
+				Status:       status,
+				Tags:         result.NewTags(),
+				Duration:     time.Second,
+				MayExonerate: false,
+			},
+			result.Result{
+				Query:        query.Parse("test_1"),
+				Status:       testedStatus,
+				Tags:         result.NewTags(),
+				Duration:     3 * time.Second,
+				MayExonerate: false,
+			},
+		}
+
+		expectedResults := result.List{
+			result.Result{
+				Query:        query.Parse("test_1"),
+				Status:       testedStatus,
+				Tags:         result.NewTags(),
+				Duration:     2 * time.Second,
+				MayExonerate: false,
+			},
+		}
+
+		CleanResults(cfg, &results)
+		assert.Equal(t, results, expectedResults)
+	}
+}
+
+// Tests that Crash has the highest priority among statuses.
+func TestCleanResultsReplaceResultCrash(t *testing.T) {
+	lowerPriorityStatuses := []result.Status{result.Abort, result.Failure, result.Slow, result.Pass, result.RetryOnFailure, result.Skip, result.Unknown}
+	runPriorityTest(t, result.Crash, &lowerPriorityStatuses)
+}
+
+// Tests that Abort has the second highest priority among statuses.
+func TestCleanResultsReplaceResultAbort(t *testing.T) {
+	lowerPriorityStatuses := []result.Status{result.Failure, result.Slow, result.Pass, result.RetryOnFailure, result.Skip, result.Unknown}
+	runPriorityTest(t, result.Abort, &lowerPriorityStatuses)
+}
+
+// Tests that Failure has the third highest priority among statuses.
+func TestCleanResultsReplaceResultFailure(t *testing.T) {
+	lowerPriorityStatuses := []result.Status{result.Slow, result.Pass, result.RetryOnFailure, result.Skip, result.Unknown}
+	runPriorityTest(t, result.Failure, &lowerPriorityStatuses)
+}
+
+// Tests that Slow has the fourth highest priority among statuses.
+func TestCleanResultsReplaceResultSlow(t *testing.T) {
+	lowerPriorityStatuses := []result.Status{result.Pass, result.RetryOnFailure, result.Skip, result.Unknown}
+	runPriorityTest(t, result.Slow, &lowerPriorityStatuses)
+}
+
+// Tests that statuses without explicit priority default to Failure.
+func TestCleanResultsReplacEresultDefault(t *testing.T) {
+	cfg := Config{}
+	statuses := []result.Status{result.Pass, result.RetryOnFailure, result.Skip, result.Unknown}
+	for i, leftStatus := range statuses {
+		for j, rightStatus := range statuses {
+			if i == j {
+				continue
+			}
+
+			results := result.List{
+				result.Result{
+					Query:        query.Parse("test_1"),
+					Status:       leftStatus,
+					Tags:         result.NewTags(),
+					Duration:     time.Second,
+					MayExonerate: false,
+				},
+				result.Result{
+					Query:        query.Parse("test_1"),
+					Status:       rightStatus,
+					Tags:         result.NewTags(),
+					Duration:     3 * time.Second,
+					MayExonerate: false,
+				},
+			}
+
+			expectedResults := result.List{
+				result.Result{
+					Query:        query.Parse("test_1"),
+					Status:       result.Failure,
+					Tags:         result.NewTags(),
+					Duration:     2 * time.Second,
+					MayExonerate: false,
+				},
+			}
+
+			CleanResults(cfg, &results)
+			assert.Equal(t, results, expectedResults)
+		}
+	}
 }
