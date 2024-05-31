@@ -282,40 +282,39 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
     messages->AddMessageForTesting("Complete Message", wgpu::CompilationMessageType::Info, 3, 4, 5,
                                    6);
 
-    auto callback = [](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo* info,
-                       void* userdata) {
-        ASSERT_EQ(WGPUCompilationInfoRequestStatus_Success, status);
-        ASSERT_NE(nullptr, info);
-        ASSERT_EQ(4u, info->messageCount);
+    shaderModule.GetCompilationInfo(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [](wgpu::CompilationInfoRequestStatus status, const wgpu::CompilationInfo* info) {
+            ASSERT_EQ(wgpu::CompilationInfoRequestStatus::Success, status);
+            ASSERT_NE(nullptr, info);
+            ASSERT_EQ(4u, info->messageCount);
 
-        const WGPUCompilationMessage* message = &info->messages[0];
-        ASSERT_STREQ("Info Message", message->message);
-        ASSERT_EQ(WGPUCompilationMessageType_Info, message->type);
-        ASSERT_EQ(0u, message->lineNum);
-        ASSERT_EQ(0u, message->linePos);
+            const wgpu::CompilationMessage* message = &info->messages[0];
+            ASSERT_STREQ("Info Message", message->message);
+            ASSERT_EQ(wgpu::CompilationMessageType::Info, message->type);
+            ASSERT_EQ(0u, message->lineNum);
+            ASSERT_EQ(0u, message->linePos);
 
-        message = &info->messages[1];
-        ASSERT_STREQ("Warning Message", message->message);
-        ASSERT_EQ(WGPUCompilationMessageType_Warning, message->type);
-        ASSERT_EQ(0u, message->lineNum);
-        ASSERT_EQ(0u, message->linePos);
+            message = &info->messages[1];
+            ASSERT_STREQ("Warning Message", message->message);
+            ASSERT_EQ(wgpu::CompilationMessageType::Warning, message->type);
+            ASSERT_EQ(0u, message->lineNum);
+            ASSERT_EQ(0u, message->linePos);
 
-        message = &info->messages[2];
-        ASSERT_STREQ("Error Message", message->message);
-        ASSERT_EQ(WGPUCompilationMessageType_Error, message->type);
-        ASSERT_EQ(3u, message->lineNum);
-        ASSERT_EQ(4u, message->linePos);
+            message = &info->messages[2];
+            ASSERT_STREQ("Error Message", message->message);
+            ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
+            ASSERT_EQ(3u, message->lineNum);
+            ASSERT_EQ(4u, message->linePos);
 
-        message = &info->messages[3];
-        ASSERT_STREQ("Complete Message", message->message);
-        ASSERT_EQ(WGPUCompilationMessageType_Info, message->type);
-        ASSERT_EQ(3u, message->lineNum);
-        ASSERT_EQ(4u, message->linePos);
-        ASSERT_EQ(5u, message->offset);
-        ASSERT_EQ(6u, message->length);
-    };
-
-    shaderModule.GetCompilationInfo(callback, nullptr);
+            message = &info->messages[3];
+            ASSERT_STREQ("Complete Message", message->message);
+            ASSERT_EQ(wgpu::CompilationMessageType::Info, message->type);
+            ASSERT_EQ(3u, message->lineNum);
+            ASSERT_EQ(4u, message->linePos);
+            ASSERT_EQ(5u, message->offset);
+            ASSERT_EQ(6u, message->length);
+        });
 }
 
 // Validate the maximum location of effective inter-stage variables cannot be greater than 16
@@ -737,20 +736,19 @@ TEST_F(ShaderModuleValidationTest, CreateErrorShaderModule) {
     ASSERT_DEVICE_ERROR(errorShaderModule = device.CreateErrorShaderModule(
                             &descriptor, "Shader compilation error"));
 
-    auto callback = [](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo* info,
-                       void* userdata) {
-        ASSERT_EQ(WGPUCompilationInfoRequestStatus_Success, status);
-        ASSERT_NE(nullptr, info);
-        ASSERT_EQ(1u, info->messageCount);
+    errorShaderModule.GetCompilationInfo(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [](wgpu::CompilationInfoRequestStatus status, const wgpu::CompilationInfo* info) {
+            ASSERT_EQ(wgpu::CompilationInfoRequestStatus::Success, status);
+            ASSERT_NE(nullptr, info);
+            ASSERT_EQ(1u, info->messageCount);
 
-        const WGPUCompilationMessage* message = &info->messages[0];
-        ASSERT_STREQ("Shader compilation error", message->message);
-        ASSERT_EQ(WGPUCompilationMessageType_Error, message->type);
-        ASSERT_EQ(0u, message->lineNum);
-        ASSERT_EQ(0u, message->linePos);
-    };
-
-    errorShaderModule.GetCompilationInfo(callback, nullptr);
+            const wgpu::CompilationMessage* message = &info->messages[0];
+            ASSERT_STREQ("Shader compilation error", message->message);
+            ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
+            ASSERT_EQ(0u, message->lineNum);
+            ASSERT_EQ(0u, message->linePos);
+        });
 
     FlushWire();
 }

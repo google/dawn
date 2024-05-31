@@ -247,6 +247,7 @@
             "InstanceRequestAdapter2",
             "ShaderModuleGetCompilationInfo",
             "ShaderModuleGetCompilationInfoF",
+            "ShaderModuleGetCompilationInfo2",
             "QuerySetGetType",
             "QuerySetGetCount",
             "QueueOnSubmittedWorkDone",

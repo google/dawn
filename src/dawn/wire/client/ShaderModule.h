@@ -46,6 +46,7 @@ class ShaderModule final : public ObjectWithEventsBase {
 
     void GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata);
     WGPUFuture GetCompilationInfoF(const WGPUCompilationInfoCallbackInfo& callbackInfo);
+    WGPUFuture GetCompilationInfo2(const WGPUCompilationInfoCallbackInfo2& callbackInfo);
 
   private:
     friend class Client;

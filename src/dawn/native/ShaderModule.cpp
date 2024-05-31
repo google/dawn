@@ -1420,29 +1420,64 @@ int ShaderModuleBase::GetTintProgramRecreateCountForTesting() const {
     return mTintData.Use([&](auto tintData) { return tintData->tintProgramRecreateCount; });
 }
 
+namespace {
+
+void DefaultGetCompilationInfoCallback(WGPUCompilationInfoRequestStatus status,
+                                       const WGPUCompilationInfo* compilationInfo,
+                                       void* callback,
+                                       void* userdata) {
+    if (callback == nullptr) {
+        DAWN_ASSERT(userdata == nullptr);
+        return;
+    }
+    auto cb = reinterpret_cast<WGPUCompilationInfoCallback>(callback);
+    cb(status, compilationInfo, userdata);
+}
+
+}  // anonymous namespace
+
 void ShaderModuleBase::APIGetCompilationInfo(wgpu::CompilationInfoCallback callback,
                                              void* userdata) {
+    GetInstance()->EmitDeprecationWarning(
+        "Old GetCompilationInfo APIs are deprecated. If using C please pass a CallbackInfo struct "
+        "that has two userdatas. Otherwise, if using C++, please use templated helpers.");
+
     if (callback == nullptr) {
         return;
     }
-    CompilationInfoCallbackInfo callbackInfo = {nullptr, wgpu::CallbackMode::AllowSpontaneous,
-                                                callback, userdata};
-    APIGetCompilationInfoF(callbackInfo);
+    APIGetCompilationInfo2({nullptr, WGPUCallbackMode_AllowSpontaneous,
+                            &DefaultGetCompilationInfoCallback, reinterpret_cast<void*>(callback),
+                            userdata});
 }
 
 Future ShaderModuleBase::APIGetCompilationInfoF(const CompilationInfoCallbackInfo& callbackInfo) {
+    GetInstance()->EmitDeprecationWarning(
+        "Old GetCompilationInfo APIs are deprecated. If using C please pass a CallbackInfo struct "
+        "that has two userdatas. Otherwise, if using C++, please use templated helpers.");
+
+    return APIGetCompilationInfo2({ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
+                                   &DefaultGetCompilationInfoCallback,
+                                   reinterpret_cast<void*>(callbackInfo.callback),
+                                   callbackInfo.userdata});
+}
+
+Future ShaderModuleBase::APIGetCompilationInfo2(
+    const WGPUCompilationInfoCallbackInfo2& callbackInfo) {
     struct CompilationInfoEvent final : public EventManager::TrackedEvent {
-        WGPUCompilationInfoCallback mCallback;
-        raw_ptr<void> mUserdata;
+        WGPUCompilationInfoCallback2 mCallback;
+        raw_ptr<void> mUserdata1;
+        raw_ptr<void> mUserdata2;
         // Need to keep a Ref of the compilation messages in case the ShaderModule goes away before
         // the callback happens.
         Ref<ShaderModuleBase> mShaderModule;
 
-        CompilationInfoEvent(const CompilationInfoCallbackInfo& callbackInfo,
+        CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo2& callbackInfo,
                              Ref<ShaderModuleBase> shaderModule)
-            : TrackedEvent(callbackInfo.mode, TrackedEvent::Completed{}),
+            : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
+                           TrackedEvent::Completed{}),
               mCallback(callbackInfo.callback),
-              mUserdata(callbackInfo.userdata),
+              mUserdata1(callbackInfo.userdata1),
+              mUserdata2(callbackInfo.userdata2),
               mShaderModule(std::move(shaderModule)) {}
 
         ~CompilationInfoEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
@@ -1455,11 +1490,9 @@ Future ShaderModuleBase::APIGetCompilationInfoF(const CompilationInfoCallbackInf
                 status = WGPUCompilationInfoRequestStatus_Success;
                 compilationInfo = mShaderModule->mCompilationMessages->GetCompilationInfo();
             }
-            if (mCallback) {
-                mCallback(status, compilationInfo, mUserdata.ExtractAsDangling());
-            } else {
-                DAWN_ASSERT(mUserdata == nullptr);
-            }
+
+            mCallback(status, compilationInfo, mUserdata1.ExtractAsDangling(),
+                      mUserdata2.ExtractAsDangling());
         }
     };
     FutureID futureID = GetDevice()->GetInstance()->GetEventManager()->TrackEvent(

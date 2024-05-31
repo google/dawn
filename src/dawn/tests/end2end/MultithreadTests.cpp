@@ -260,13 +260,15 @@ TEST_P(MultithreadTests, CreateShaderModuleInParallel) {
     for (uint32_t index = 0; index < shaderModules.size(); ++index) {
         uint32_t sourceIndex = index / kCacheHitFactor;
         shaderModules[index].GetCompilationInfo(
-            [](WGPUCompilationInfoRequestStatus, const WGPUCompilationInfo* info, void* userdata) {
+            wgpu::CallbackMode::AllowProcessEvents,
+            [sourceIndex](wgpu::CompilationInfoRequestStatus status,
+                          const wgpu::CompilationInfo* info) {
+                ASSERT_EQ(wgpu::CompilationInfoRequestStatus::Success, status);
                 for (size_t i = 0; i < info->messageCount; ++i) {
                     EXPECT_THAT(info->messages[i].message, testing::HasSubstr("unreachable"));
-                    EXPECT_EQ(info->messages[i].lineNum, 5u + *static_cast<uint32_t*>(userdata));
+                    EXPECT_EQ(info->messages[i].lineNum, 5u + sourceIndex);
                 }
-            },
-            &sourceIndex);
+            });
     }
 }
 
