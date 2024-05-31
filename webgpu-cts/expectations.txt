@@ -561,6 +561,12 @@ crbug.com/dawn/2500 [ android-14 android-pixel-6 ] webgpu:shader,execution,shade
 crbug.com/dawn/2500 [ android-14 android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
 crbug.com/dawn/2500 [ android-14 android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/tint/2218 [ android-14 arm ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,createTexture:texture_size,3d_texture,compressed_format:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,createTexture:texture_size,3d_texture,compressed_format:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,createTexture:texture_size,default_value_and_smallest_size,compressed_format:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,createTexture:texture_size,default_value_and_smallest_size,compressed_format:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 dawn-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,* [ Failure ]
+crbug.com/dawn/0000 [ android-14 dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords,* [ Failure ]
 
 ################################################################################
 # Failures due to M2 Macbook OS upgrade
