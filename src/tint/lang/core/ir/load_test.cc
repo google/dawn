@@ -27,7 +27,6 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {

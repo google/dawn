@@ -162,3 +162,7 @@ Checks: "-*,\
           -readability-uppercase-literal-suffix,\
           -readability-use-anyofallof
           "
+
+CheckOptions:
+  - key: cppcoreguidelines-avoid-do-while.IgnoreMacros
+    value: true
