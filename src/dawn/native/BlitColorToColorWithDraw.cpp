@@ -75,7 +75,7 @@ std::string GenerateFS(const BlitColorToColorWithDrawPipelineKey& pipelineKey) {
             "\toutputColor.output%u = textureLoad(srcTex%u, vec2u(position.xy), 0);\n", i, i);
     }
 
-    finalStream << "struct OutputColor {\n" << outputStructStream.str() << "}\n" << std::endl;
+    finalStream << "struct OutputColor {\n" << outputStructStream.str() << "}\n\n";
     finalStream << R"(
 @fragment fn blit_to_color(@builtin(position) position : vec4f) -> OutputColor {
     var outputColor : OutputColor;

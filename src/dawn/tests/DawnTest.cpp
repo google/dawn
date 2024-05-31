@@ -90,7 +90,7 @@ void printBuffer(testing::AssertionResult& result, const T* buffer, const size_t
             result << buf;
         }
     }
-    result << std::endl;
+    result << "\n";
 }
 
 // A helper class to create DawnTogglesDescriptor from test params
@@ -1785,7 +1785,7 @@ void DawnTestBase::ResolveExpectations() {
         testing::AssertionResult result = expectation.expectation->Check(data, size);
         if (!result) {
             result << " Expectation created at " << expectation.file << ":" << expectation.line
-                   << std::endl;
+                   << "\n";
             result << expectation.message->str();
         }
 
@@ -1932,7 +1932,7 @@ testing::AssertionResult ExpectConstant<T>::Check(const void* data, size_t size)
         if (actual[i] != mConstant) {
             return testing::AssertionFailure()
                    << "Expected data[" << i << "] to match constant value " << mConstant
-                   << ", actual " << actual[i] << std::endl;
+                   << ", actual " << actual[i] << "\n";
         }
     }
 
@@ -1951,13 +1951,13 @@ testing::AssertionResult ExpectEq<T, U>::Check(const void* data, size_t size) {
         if (!check) {
             testing::AssertionResult result = testing::AssertionFailure()
                                               << "Expected data[" << i << "] to be "
-                                              << check.message() << std::endl;
+                                              << check.message() << "\n";
 
             if (mExpected.size() <= 1024) {
-                result << "Expected:" << std::endl;
+                result << "Expected:\n";
                 printBuffer(result, mExpected.data(), mExpected.size());
 
-                result << "Actual:" << std::endl;
+                result << "Actual:\n";
                 printBuffer(result, actual, mExpected.size());
             }
 
@@ -2010,15 +2010,15 @@ testing::AssertionResult ExpectBetweenColors<T>::Check(const void* data, size_t 
             testing::AssertionResult result = testing::AssertionFailure()
                                               << "Expected data[" << i << "] to be between "
                                               << mValues0[i] << " and " << mValues1[i]
-                                              << ", actual " << actual[i] << std::endl;
+                                              << ", actual " << actual[i] << "\n";
 
             if (mLowerColorChannels.size() <= 1024) {
-                result << "Expected between:" << std::endl;
+                result << "Expected between:\n";
                 printBuffer(result, mValues0.data(), mLowerColorChannels.size());
-                result << "and" << std::endl;
+                result << "and\n";
                 printBuffer(result, mValues1.data(), mLowerColorChannels.size());
 
-                result << "Actual:" << std::endl;
+                result << "Actual:\n";
                 printBuffer(result, actual, mLowerColorChannels.size());
             }
 

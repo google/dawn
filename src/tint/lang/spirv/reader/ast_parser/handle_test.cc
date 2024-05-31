@@ -956,9 +956,9 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, FunctionParam) {
      OpFunctionEnd
   )";
     auto p = parser(test::Assemble(assembly));
-    ASSERT_TRUE(p->BuildInternalModule()) << p->error() << assembly << std::endl;
-    EXPECT_TRUE(p->RegisterHandleUsage()) << p->error() << assembly << std::endl;
-    EXPECT_TRUE(p->error().empty()) << p->error() << assembly << std::endl;
+    ASSERT_TRUE(p->BuildInternalModule()) << p->error() << assembly << "\n";
+    EXPECT_TRUE(p->RegisterHandleUsage()) << p->error() << assembly << "\n";
+    EXPECT_TRUE(p->error().empty()) << p->error() << assembly << "\n";
     Usage su = p->GetHandleUsage(10);
     Usage iu = p->GetHandleUsage(20);
 
@@ -3087,7 +3087,7 @@ inline std::ostream& operator<<(std::ostream& out, const ImageCoordsCase& c) {
     for (auto e : c.expected_expressions) {
         out << e << ",";
     }
-    out << ")" << std::endl;
+    out << ")\n";
     return out;
 }
 

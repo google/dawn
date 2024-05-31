@@ -127,7 +127,7 @@ class Printer : public tint::TextGenerator {
         }
 
         StringStream ss;
-        ss << preamble_buffer_.String() << std::endl << main_buffer_.String();
+        ss << preamble_buffer_.String() << "\n" << main_buffer_.String();
         result_.msl = ss.str();
 
         return std::move(result_);

@@ -1478,7 +1478,7 @@ class TimestampExpectation : public detail::Expectation {
         for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
             if (timestamps[i] == 0) {
                 return testing::AssertionFailure()
-                       << "Expected data[" << i << "] to be greater than 0." << std::endl;
+                       << "Expected data[" << i << "] to be greater than 0.\n";
             }
         }
 

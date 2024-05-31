@@ -147,13 +147,13 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
         if (arg == "--format") {
             ++i;
             if (i >= args.size()) {
-                std::cerr << "Missing value for --format argument." << std::endl;
+                std::cerr << "Missing value for --format argument.\n";
                 return false;
             }
             opts->format = parse_format(args[i]);
 
             if (opts->format == Format::kUnknown) {
-                std::cerr << "Unknown output format: " << args[i] << std::endl;
+                std::cerr << "Unknown output format: " << args[i] << "\n";
                 return false;
             }
         } else if (arg == "-h" || arg == "--help") {
@@ -161,7 +161,7 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
         } else if (arg == "--loop") {
             ++i;
             if (i >= args.size()) {
-                std::cerr << "Missing value for --loop argument." << std::endl;
+                std::cerr << "Missing value for --loop argument.\n";
                 return false;
             }
             if (args[i] == "load") {
@@ -171,29 +171,29 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
             } else if (args[i] == "writer") {
                 opts->loop = Looper::kWriter;
             } else {
-                std::cerr << "Invalid loop value" << std::endl;
+                std::cerr << "Invalid loop value\n";
                 return false;
             }
         } else if (arg == "--loop-count") {
             ++i;
             if (i >= args.size()) {
-                std::cerr << "Missing value for --loop-count argument." << std::endl;
+                std::cerr << "Missing value for --loop-count argument.\n";
                 return false;
             }
             int32_t val = atoi(args[i].c_str());
             if (val <= 0) {
-                std::cerr << "Loop count must be greater then 0" << std::endl;
+                std::cerr << "Loop count must be greater then 0\n";
                 return false;
             }
             opts->loop_count = static_cast<uint32_t>(val);
         } else if (!arg.empty()) {
             if (arg[0] == '-') {
-                std::cerr << "Unrecognized option: " << arg << std::endl;
+                std::cerr << "Unrecognized option: " << arg << "\n";
                 return false;
             }
             if (!opts->input_filename.empty()) {
                 std::cerr << "More than one input file specified: '" << opts->input_filename
-                          << "' and '" << arg << "'" << std::endl;
+                          << "' and '" << arg << "'\n";
                 return false;
             }
             opts->input_filename = arg;
@@ -212,13 +212,13 @@ bool GenerateSpirv(const tint::Program& program) {
     auto result = tint::spirv::writer::Generate(program, gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
     }
     return true;
 #else
     (void)program;
-    std::cerr << "SPIR-V writer not enabled in tint build" << std::endl;
+    std::cerr << "SPIR-V writer not enabled in tint build\n";
     return false;
 #endif  // TINT_BUILD_SPV_WRITER
 }
@@ -231,14 +231,14 @@ bool GenerateWgsl(const tint::Program& program) {
     tint::wgsl::writer::Options gen_options;
     auto result = tint::wgsl::writer::Generate(program, gen_options);
     if (result != tint::Success) {
-        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
     }
 
     return true;
 #else
     (void)program;
-    std::cerr << "WGSL writer not enabled in tint build" << std::endl;
+    std::cerr << "WGSL writer not enabled in tint build\n";
     return false;
 #endif  // TINT_BUILD_WGSL_WRITER
 }
@@ -248,7 +248,7 @@ bool GenerateWgsl(const tint::Program& program) {
 /// @returns true on success
 bool GenerateMsl([[maybe_unused]] const tint::Program& program) {
 #if !TINT_BUILD_MSL_WRITER
-    std::cerr << "MSL writer not enabled in tint build" << std::endl;
+    std::cerr << "MSL writer not enabled in tint build\n";
     return false;
 #else
     // Remap resource numbers to a flat namespace.
@@ -269,7 +269,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program) {
     auto result = tint::msl::writer::Generate(*input_program, gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
     }
 
@@ -287,14 +287,14 @@ bool GenerateHlsl(const tint::Program& program) {
     auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
     }
 
     return true;
 #else
     (void)program;
-    std::cerr << "HLSL writer not enabled in tint build" << std::endl;
+    std::cerr << "HLSL writer not enabled in tint build\n";
     return false;
 #endif  // TINT_BUILD_HLSL_WRITER
 }
@@ -310,7 +310,7 @@ bool GenerateGlsl(const tint::Program& program) {
     auto result = tint::glsl::writer::Generate(program, gen_options, "");
     if (result == tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
     }
 
@@ -318,7 +318,7 @@ bool GenerateGlsl(const tint::Program& program) {
 
 #else
     (void)program;
-    std::cerr << "GLSL writer not enabled in tint build" << std::endl;
+    std::cerr << "GLSL writer not enabled in tint build\n";
     return false;
 #endif  // TINT_BUILD_GLSL_WRITER
 }
@@ -333,12 +333,12 @@ int main(int argc, const char** argv) {
     tint::SetInternalCompilerErrorReporter(&tint::cmd::TintInternalCompilerErrorReporter);
 
     if (!ParseArgs(args, &options)) {
-        std::cerr << "Failed to parse arguments." << std::endl;
+        std::cerr << "Failed to parse arguments.\n";
         return 1;
     }
 
     if (options.show_help) {
-        std::cout << kUsage << std::endl;
+        std::cout << kUsage << "\n";
         return 0;
     }
 
@@ -367,7 +367,7 @@ int main(int argc, const char** argv) {
                     std::make_unique<tint::Program>(tint::wgsl::reader::Parse(source_file.get()));
             }
 #else
-            std::cerr << "Tint not built with the WGSL reader enabled" << std::endl;
+            std::cerr << "Tint not built with the WGSL reader enabled\n";
             exit(1);
 #endif  // TINT_BUILD_WGSL_READER
         } else {
@@ -382,7 +382,7 @@ int main(int argc, const char** argv) {
                 program = std::make_unique<tint::Program>(tint::spirv::reader::Read(data, {}));
             }
 #else
-            std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
+            std::cerr << "Tint not built with the SPIR-V reader enabled\n";
             exit(1);
 #endif  // TINT_BUILD_SPV_READER
         }
@@ -402,7 +402,7 @@ int main(int argc, const char** argv) {
         for (uint32_t i = 0; i < loop_count; ++i) {
             auto result = tint::wgsl::reader::ProgramToIR(info.program);
             if (result != tint::Success) {
-                std::cerr << "Failed to build IR from program: " << result.Failure() << std::endl;
+                std::cerr << "Failed to build IR from program: " << result.Failure() << "\n";
             }
         }
     }
@@ -444,7 +444,7 @@ int main(int argc, const char** argv) {
             case Format::kNone:
                 break;
             default:
-                std::cerr << "Unknown output format specified" << std::endl;
+                std::cerr << "Unknown output format specified\n";
                 return 1;
         }
     }

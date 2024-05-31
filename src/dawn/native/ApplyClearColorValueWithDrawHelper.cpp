@@ -83,8 +83,8 @@ std::string ConstructFragmentShader(DeviceBase* device,
     std::ostringstream clearValueUniformBufferDeclarationStream;
     std::ostringstream assignOutputColorStream;
 
-    outputColorDeclarationStream << "struct OutputColor {" << std::endl;
-    clearValueUniformBufferDeclarationStream << "struct ClearColors {" << std::endl;
+    outputColorDeclarationStream << "struct OutputColor {\n";
+    clearValueUniformBufferDeclarationStream << "struct ClearColors {\n";
 
     // Only generate the assignments we need.
     for (auto i : IterateBitSet(key.colorTargetsToApplyClearColorValue)) {
@@ -100,8 +100,8 @@ std::string ConstructFragmentShader(DeviceBase* device,
         assignOutputColorStream << absl::StrFormat(
             "    outputColor.output%u = clearColors.color%u;\n", i, i);
     }
-    outputColorDeclarationStream << "}" << std::endl;
-    clearValueUniformBufferDeclarationStream << "}" << std::endl;
+    outputColorDeclarationStream << "}\n";
+    clearValueUniformBufferDeclarationStream << "}\n";
 
     std::ostringstream fragmentShaderStream;
     fragmentShaderStream << outputColorDeclarationStream.str()

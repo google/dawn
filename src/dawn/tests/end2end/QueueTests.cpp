@@ -368,7 +368,7 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
                 << textureSpec.copyOrigin.x + copySize.width << ", "
                 << textureSpec.copyOrigin.y + copySize.height << ")) region of "
                 << textureSpec.textureSize.width << " x " << textureSpec.textureSize.height
-                << " texture at mip level " << textureSpec.level << " layer " << slice << std::endl;
+                << " texture at mip level " << textureSpec.level << " layer " << slice << "\n";
 
             dataOffset += bytesPerImage;
         }

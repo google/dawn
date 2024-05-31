@@ -299,7 +299,7 @@ std::ostream& operator<<(std::ostream& o, const {{$.Name}}& dict) {
     o << {{if $i}}", "{{else}}" "{{end}} << "{{$m.Name}}: ";
     utils::Write(o, dict.{{$m.Name}});
 {{-    end          }}
-    o << "}" << std::endl;
+    o << "}\n";
     return o;
 }
 {{ end}}

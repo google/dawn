@@ -457,7 +457,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;
-        dumpedMsg << "/* Dumped generated GLSL */" << std::endl << compilationResult->glsl;
+        dumpedMsg << "/* Dumped generated GLSL */\n" << compilationResult->glsl;
 
         GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
     }

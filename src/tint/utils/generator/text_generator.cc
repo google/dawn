@@ -109,7 +109,7 @@ std::string TextGenerator::TextBuffer::String(uint32_t indent /* = 0 */) const {
             }
             ss << line.content;
         }
-        ss << std::endl;
+        ss << "\n";
     }
     return ss.str();
 }

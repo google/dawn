@@ -53,18 +53,16 @@ Program Manager::Run(const Program& program_in, const DataMap& inputs, DataMap& 
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
     auto print_program = [&](const char* msg, const Transform* transform) {
         auto wgsl = Program::printer(*program);
-        std::cout << "=========================================================" << std::endl;
+        std::cout << "=========================================================\n";
         std::cout << "== " << msg << " "
-                  << (transform ? transform->TypeInfo().name : "transform manager") << ":"
-                  << std::endl;
-        std::cout << "=========================================================" << std::endl;
-        std::cout << wgsl << std::endl;
+                  << (transform ? transform->TypeInfo().name : "transform manager") << ":\n";
+        std::cout << "=========================================================\n";
+        std::cout << wgsl << "\n";
         if (!program->IsValid()) {
-            std::cout << "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --" << std::endl;
-            std::cout << program->Diagnostics() << std::endl;
+            std::cout << "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --\n"
+                      << program->Diagnostics() << "\n";
         }
-        std::cout << "=========================================================" << std::endl
-                  << std::endl;
+        std::cout << "=========================================================\n\n";
     };
 #endif
 
@@ -84,8 +82,7 @@ Program Manager::Run(const Program& program_in, const DataMap& inputs, DataMap& 
 
             TINT_IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
         } else {
-            TINT_IF_PRINT_PROGRAM(std::cout << "Skipped " << transform->TypeInfo().name
-                                            << std::endl);
+            TINT_IF_PRINT_PROGRAM(std::cout << "Skipped " << transform->TypeInfo().name << "\n");
         }
     }
 

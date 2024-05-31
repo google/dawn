@@ -356,7 +356,7 @@ MaybeError PipelineLayout::Initialize() {
         // TODO(crbug.com/1512318): Add some telemetry so we log how often/when this happens.
         std::ostringstream messageStream;
         if (error) {
-            messageStream << static_cast<const char*>(error->GetBufferPointer()) << std::endl;
+            messageStream << static_cast<const char*>(error->GetBufferPointer()) << "\n";
         }
         HRESULT hr = SerializeRootParameter1_0(device, versionedRootSignatureDescriptor,
                                                &mRootSignatureBlob, &error);
@@ -364,7 +364,7 @@ MaybeError PipelineLayout::Initialize() {
             return {};
         }
         if (error) {
-            messageStream << static_cast<const char*>(error->GetBufferPointer()) << std::endl;
+            messageStream << static_cast<const char*>(error->GetBufferPointer()) << "\n";
         }
         messageStream << "D3D12 serialize root signature";
         DAWN_TRY(CheckHRESULT(hr, messageStream.str().c_str()));

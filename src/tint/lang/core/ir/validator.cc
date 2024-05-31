@@ -1609,9 +1609,9 @@ Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
                                             [[maybe_unused]] Capabilities capabilities) {
 #if TINT_DUMP_IR_WHEN_VALIDATING
     auto printer = StyledTextPrinter::Create(stdout);
-    std::cout << "=========================================================" << std::endl;
-    std::cout << "== IR dump before " << msg << ":" << std::endl;
-    std::cout << "=========================================================" << std::endl;
+    std::cout << "=========================================================\n";
+    std::cout << "== IR dump before " << msg << ":\n";
+    std::cout << "=========================================================\n";
     printer->Print(Disassemble(ir).Text());
 #endif
 

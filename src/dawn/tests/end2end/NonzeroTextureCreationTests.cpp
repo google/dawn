@@ -68,13 +68,13 @@ class ExpectNonZero : public detail::CustomTextureExpectation {
         T value = *actual;
         if (value == T(0)) {
             return testing::AssertionFailure()
-                   << "Expected data to be non-zero, was " << value << std::endl;
+                   << "Expected data to be non-zero, was " << value << "\n";
         }
         for (size_t i = 0; i < size / DataSize(); ++i) {
             if (actual[i] != value) {
                 return testing::AssertionFailure()
                        << "Expected data[" << i << "] to match non-zero value " << value
-                       << ", actual " << actual[i] << std::endl;
+                       << ", actual " << actual[i] << "\n";
             }
         }
 

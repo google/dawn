@@ -270,7 +270,7 @@ void OwnedCompilationMessages::AddFormattedTintMessages(const tint::diag::List& 
     if (warningCount > 0) {
         t << warningCount << " warning(s) ";
     }
-    t << "generated while compiling the shader:" << std::endl
+    t << "generated while compiling the shader:\n"
       << tint::diag::Formatter{style}.Format(messageList).Plain();
     mFormattedTintMessages.push_back(t.str());
 }

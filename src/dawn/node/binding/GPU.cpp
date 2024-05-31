@@ -185,8 +185,7 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
             nativeOptions.backendType = parsed.value();
         } else {
             std::stringstream msg;
-            msg << "unrecognised backend '" + forceBackend + "'" << std::endl
-                << "Possible backends: ";
+            msg << "unrecognised backend '" << forceBackend << "'\nPossible backends : ";
             for (auto& info : kBackends) {
                 if (&info != &kBackends[0]) {
                     msg << ", ";
@@ -243,12 +242,11 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
         } else {
             msg << "no suitable backends found";
         }
-        msg << std::endl << "Available adapters:";
+        msg << "\nAvailable adapters:";
         for (auto& a : adapters) {
             wgpu::AdapterProperties props;
             a.GetProperties(&props);
-            msg << std::endl
-                << " * backend: '" << BackendName(props.backendType) << "', name: '" << props.name
+            msg << "\n * backend: '" << BackendName(props.backendType) << "', name: '" << props.name
                 << "'";
         }
         promise.Reject(msg.str());

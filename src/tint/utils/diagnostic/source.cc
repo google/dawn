@@ -151,7 +151,7 @@ std::string ToString(const Source& source) {
         }
 
         if (source.file) {
-            out << std::endl << std::endl;
+            out << "\n\n";
 
             auto repeat = [&](char c, size_t n) {
                 while (n--) {
@@ -163,9 +163,7 @@ std::string ToString(const Source& source) {
                 if (line < source.file->content.lines.size() + 1) {
                     auto len = source.file->content.lines[line - 1].size();
 
-                    out << source.file->content.lines[line - 1];
-
-                    out << std::endl;
+                    out << source.file->content.lines[line - 1] << "\n";
 
                     if (line == rng.begin.line && line == rng.end.line) {
                         // Single line
@@ -183,7 +181,7 @@ std::string ToString(const Source& source) {
                         repeat('^', len);
                     }
 
-                    out << std::endl;
+                    out << "\n";
                 }
             }
         }

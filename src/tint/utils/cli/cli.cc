@@ -115,7 +115,7 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
                     if (left_lines[i].length() > left_width) {
                         // Left exceeds column width.
                         // Insert a new line and indent to the right
-                        s_out << std::endl;
+                        s_out << "\n";
                         pad(left_width);
                     } else {
                         pad(left_width - left_lines[i].length());
@@ -127,7 +127,7 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
             if (has_right) {
                 s_out << "  " << right_lines[i];
             }
-            s_out << std::endl;
+            s_out << "\n";
         }
     }
 }

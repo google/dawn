@@ -61,16 +61,15 @@ void DumpDXCCompiledShader(Device* device,
     std::ostringstream dumpedMsg;
     // The HLSL may be empty if compilation failed.
     if (!compiledShader.hlslSource.empty()) {
-        dumpedMsg << "/* Dumped generated HLSL */" << std::endl
-                  << compiledShader.hlslSource << std::endl;
+        dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
     }
 
     // The blob may be empty if DXC compilation failed.
     const Blob& shaderBlob = compiledShader.shaderBlob;
     if (!shaderBlob.Empty()) {
-        dumpedMsg << "/* DXC compile flags */ " << std::endl
-                  << dawn::native::d3d::CompileFlagsToString(compileFlags) << std::endl;
-        dumpedMsg << "/* Dumped disassembled DXIL */" << std::endl;
+        dumpedMsg << "/* DXC compile flags */\n"
+                  << dawn::native::d3d::CompileFlagsToString(compileFlags) << "\n";
+        dumpedMsg << "/* Dumped disassembled DXIL */\n";
         DxcBuffer dxcBuffer;
         dxcBuffer.Encoding = DXC_CP_UTF8;
         dxcBuffer.Ptr = shaderBlob.Data();
@@ -86,7 +85,7 @@ void DumpDXCCompiledShader(Device* device,
             dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
                                           disassembly->GetBufferSize());
         } else {
-            dumpedMsg << "DXC disassemble failed" << std::endl;
+            dumpedMsg << "DXC disassemble failed\n";
             ComPtr<IDxcBlobEncoding> errors;
             if (dxcResult && dxcResult->HasOutput(DXC_OUT_ERRORS) &&
                 SUCCEEDED(dxcResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr))) {

@@ -465,8 +465,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MemberDecorate_RelaxedPre
      OpFunctionEnd
   )";
     auto p = parser(test::Assemble(assembly));
-    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-        << assembly << p->error() << std::endl;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error() << "\n";
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitFunctionVariables());
 

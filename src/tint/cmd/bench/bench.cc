@@ -116,7 +116,7 @@ bool FindBenchmarkInputDir() {
 
 bool Initialize() {
     if (!FindBenchmarkInputDir()) {
-        std::cerr << "failed to locate benchmark input files" << std::endl;
+        std::cerr << "failed to locate benchmark input files\n";
         return false;
     }
     return true;

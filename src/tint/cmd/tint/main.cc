@@ -638,13 +638,13 @@ Options:
             auto values = tint::Split(binding_format, "=");
             if (values.Length() != 2) {
                 std::cerr << "Invalid binding format " << pixel_local_attachment_formats.name
-                          << ": " << binding_format << std::endl;
+                          << ": " << binding_format << "\n";
                 return false;
             }
             auto member_index = tint::strconv::ParseUint32(values[0]);
             if (member_index != tint::Success) {
                 std::cerr << "Invalid member index for " << pixel_local_attachment_formats.name
-                          << ": " << values[0] << std::endl;
+                          << ": " << values[0] << "\n";
                 return false;
             }
             auto format = values[1];
@@ -658,7 +658,7 @@ Options:
                 texel_format = tint::PixelLocalOptions::TexelFormat::kR32Float;
             } else {
                 std::cerr << "Invalid texel format for " << pixel_local_attachments.name << ": "
-                          << format << std::endl;
+                          << format << "\n";
                 return false;
             }
             opts->pixel_local_options.attachment_formats.emplace(member_index.Get(), texel_format);
@@ -669,8 +669,7 @@ Options:
     if (hlsl_shader_model.value.has_value()) {
         uint32_t shader_model = *hlsl_shader_model.value;
         if (shader_model < kMinShaderModelForDXC || shader_model > kMaxSupportedShaderModelForDXC) {
-            std::cerr << "Invalid HLSL shader model "
-                      << ": " << shader_model << std::endl;
+            std::cerr << "Invalid HLSL shader model: " << shader_model << "\n";
             return false;
         }
         opts->hlsl_shader_model = shader_model;
@@ -837,7 +836,7 @@ bool GenerateSpirv(const tint::Program& program, const Options& options) {
 #else
     (void)program;
     (void)options;
-    std::cerr << "SPIR-V writer not enabled in tint build" << std::endl;
+    std::cerr << "SPIR-V writer not enabled in tint build\n";
     return false;
 #endif  // TINT_BUILD_SPV_WRITER
 }
@@ -883,7 +882,7 @@ bool GenerateWgsl([[maybe_unused]] const tint::Program& program,
 
     return true;
 #else
-    std::cerr << "WGSL writer not enabled in tint build" << std::endl;
+    std::cerr << "WGSL writer not enabled in tint build\n";
     return false;
 #endif  // TINT_BUILD_WGSL_WRITER
 }
@@ -895,7 +894,7 @@ bool GenerateWgsl([[maybe_unused]] const tint::Program& program,
 bool GenerateMsl([[maybe_unused]] const tint::Program& program,
                  [[maybe_unused]] const Options& options) {
 #if !TINT_BUILD_MSL_WRITER
-    std::cerr << "MSL writer not enabled in tint build" << std::endl;
+    std::cerr << "MSL writer not enabled in tint build\n";
     return false;
 #else
     // Remap resource numbers to a flat namespace.
@@ -1021,7 +1020,7 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
     auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
     }
 
@@ -1092,28 +1091,24 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
         }
 
         if (fxc_res.failed) {
-            std::cerr << "FXC validation failure:" << std::endl << fxc_res.output << std::endl;
+            std::cerr << "FXC validation failure:\n" << fxc_res.output << "\n";
         }
         if (dxc_res.failed) {
-            std::cerr << "DXC validation failure:" << std::endl << dxc_res.output << std::endl;
+            std::cerr << "DXC validation failure:\n" << dxc_res.output << "\n";
         }
         if (fxc_res.failed || dxc_res.failed) {
             return false;
         }
         if (!fxc_found && !dxc_found) {
-            std::cerr << "Couldn't find FXC or DXC. Cannot validate" << std::endl;
+            std::cerr << "Couldn't find FXC or DXC. Cannot validate\n";
             return false;
         }
         if (options.verbose) {
             if (fxc_found && !fxc_res.failed) {
-                std::cout << "Passed FXC validation" << std::endl;
-                std::cout << fxc_res.output;
-                std::cout << std::endl;
+                std::cout << "Passed FXC validation\n" << fxc_res.output << "\n";
             }
             if (dxc_found && !dxc_res.failed) {
-                std::cout << "Passed DXC validation" << std::endl;
-                std::cout << dxc_res.output;
-                std::cout << std::endl;
+                std::cout << "Passed DXC validation\n" << dxc_res.output << "\n";
             }
         }
     }
@@ -1134,7 +1129,7 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
 bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
                   [[maybe_unused]] const Options& options) {
 #if !TINT_BUILD_GLSL_WRITER
-    std::cerr << "GLSL writer not enabled in tint build" << std::endl;
+    std::cerr << "GLSL writer not enabled in tint build\n";
     return false;
 #else
     tint::inspector::Inspector inspector(program);
@@ -1196,7 +1191,7 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 
         if (options.validate && options.skip_hash.count(hash) == 0) {
 #if !TINT_BUILD_GLSL_VALIDATOR
-            std::cerr << "GLSL validator not enabled in tint build" << std::endl;
+            std::cerr << "GLSL validator not enabled in tint build\n";
             return false;
 #else
             // If there is no entry point name there is nothing to validate
@@ -1245,7 +1240,7 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 bool GenerateIr([[maybe_unused]] const tint::Program& program,
                 [[maybe_unused]] const Options& options) {
 #if !TINT_BUILD_WGSL_READER
-    std::cerr << "WGSL reader not enabled in tint build" << std::endl;
+    std::cerr << "WGSL reader not enabled in tint build\n";
     return false;
 #else
     auto result = tint::wgsl::reader::ProgramToLoweredIR(program);
@@ -1299,10 +1294,10 @@ tint::Result<tint::core::ir::Module> GenerateIrModule([[maybe_unused]] const tin
 bool GenerateIrProtoBinary([[maybe_unused]] const tint::Program& program,
                            [[maybe_unused]] const Options& options) {
 #if !TINT_BUILD_WGSL_READER
-    std::cerr << "WGSL reader not enabled in tint build" << std::endl;
+    std::cerr << "WGSL reader not enabled in tint build\n";
     return false;
 #elif !TINT_BUILD_IR_BINARY
-    std::cerr << "IR binary not enabled in tint build" << std::endl;
+    std::cerr << "IR binary not enabled in tint build\n";
     return false;
 #else
     auto module = GenerateIrModule(program, options);

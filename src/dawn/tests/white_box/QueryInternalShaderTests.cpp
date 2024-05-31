@@ -75,8 +75,7 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
             if (mExpected[i] == 0) {
                 if (actual[i] != 0) {
                     return testing::AssertionFailure()
-                           << "Expected data[" << i << "] to be 0, actual " << actual[i]
-                           << std::endl;
+                           << "Expected data[" << i << "] to be 0, actual " << actual[i] << "\n";
                 }
                 continue;
             }
@@ -96,13 +95,13 @@ class InternalShaderExpectation : public ::dawn::detail::Expectation {
                        << "Expected data[" << i << "] to be " << expected << ", actual "
                        << actual[i] << ". Error rate is larger than " << kErrorToleranceRatio
                        << ". Upper limit is " << upperLimit << ". Lower limit is " << lowerLimit
-                       << std::endl;
+                       << "\n";
             }
 
             if ((actual[i] & ~quantizationMask64) != 0) {
                 return testing::AssertionFailure() << "Actual data 0x" << std::hex << actual[i]
                                                    << " does not match quantization mask 0x"
-                                                   << std::hex << mQuantizationMask << std::endl;
+                                                   << std::hex << mQuantizationMask << "\n";
             }
         }
 

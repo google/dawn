@@ -67,8 +67,8 @@ Vector<ProgramFuzzer, 32>& Fuzzers() {
 thread_local std::string_view currently_running;
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
-    std::cerr << "ICE while running fuzzer: '" << currently_running << "'" << std::endl;
-    std::cerr << err.Error() << std::endl;
+    std::cerr << "ICE while running fuzzer: '" << currently_running << "'\n";
+    std::cerr << err.Error() << "\n";
     __builtin_trap();
 }
 
@@ -154,8 +154,7 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
     auto program = tint::wgsl::reader::Parse(&file, parse_options);
     if (!program.IsValid()) {
         if (options.verbose) {
-            std::cerr << "invalid WGSL program: " << std::endl
-                      << program.Diagnostics() << std::endl;
+            std::cerr << "invalid WGSL program:\n" << program.Diagnostics() << "\n";
         }
         return;
     }
@@ -178,7 +177,7 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
                 auto& fuzzer = Fuzzers()[i];
                 currently_running = fuzzer.name;
                 if (context.options.verbose) {
-                    std::cout << " • [" << i << "] Running: " << currently_running << std::endl;
+                    std::cout << " • [" << i << "] Running: " << currently_running << "\n";
                 }
                 fuzzer.fn(program, context, data);
             }));
@@ -195,7 +194,7 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
 
             currently_running = fuzzer.name;
             if (options.verbose) {
-                std::cout << " • Running: " << currently_running << std::endl;
+                std::cout << " • Running: " << currently_running << "\n";
             }
             fuzzer.fn(program, context, data);
         }

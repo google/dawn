@@ -67,7 +67,7 @@ class ExpectFloatWithTolerance : public detail::Expectation {
                 testing::AssertionResult result = testing::AssertionFailure()
                                                   << "Expected data[" << i << "] to be close to "
                                                   << expectedValue << ", actual " << actualValue
-                                                  << std::endl;
+                                                  << "\n";
                 return result;
             }
         }
@@ -114,7 +114,7 @@ class ExpectFloat16 : public detail::Expectation {
                 testing::AssertionResult result = testing::AssertionFailure()
                                                   << "Expected data[" << i << "] to be "
                                                   << expectedValue << ", actual " << actualValue
-                                                  << std::endl;
+                                                  << "\n";
                 return result;
             }
         }
@@ -151,7 +151,7 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
                 testing::AssertionResult result = testing::AssertionFailure()
                                                   << "Expected data[" << i << "] to be "
                                                   << expectedValue << ", actual " << actualValue
-                                                  << std::endl;
+                                                  << "\n";
                 return result;
             }
         }

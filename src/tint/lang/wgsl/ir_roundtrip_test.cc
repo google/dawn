@@ -118,32 +118,28 @@ class IRToProgramRoundtripTest : public testing::Test {
 
 std::ostream& operator<<(std::ostream& o, const IRToProgramRoundtripTest::Result& res) {
     if (!res.err.empty()) {
-        o << "============================" << std::endl
-          << "== Error                  ==" << std::endl
-          << "============================" << std::endl
-          << res.err << std::endl
-          << std::endl;
+        o << "============================\n"
+          << "== Error                  ==\n"
+          << "============================\n"
+          << res.err << "\n\n";
     }
     if (!res.ir_pre_raise.empty()) {
-        o << "============================" << std::endl
-          << "== IR (pre-raise)         ==" << std::endl
-          << "============================" << std::endl
-          << res.ir_pre_raise << std::endl
-          << std::endl;
+        o << "============================\n"
+          << "== IR (pre-raise)         ==\n"
+          << "============================\n"
+          << res.ir_pre_raise << "\n\n";
     }
     if (!res.ir_post_raise.empty()) {
-        o << "============================" << std::endl
-          << "== IR (post-raise)        ==" << std::endl
-          << "============================" << std::endl
-          << res.ir_post_raise << std::endl
-          << std::endl;
+        o << "============================\n"
+          << "== IR (post-raise)        ==\n"
+          << "============================\n"
+          << res.ir_post_raise << "\n\n";
     }
     if (!res.ast.empty()) {
-        o << "============================" << std::endl
-          << "== AST                    ==" << std::endl
-          << "============================" << std::endl
-          << res.ast << std::endl
-          << std::endl;
+        o << "============================\n"
+          << "== AST                    ==\n"
+          << "============================\n"
+          << res.ast << "\n\n";
     }
     return o;
 }

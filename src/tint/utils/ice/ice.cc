@@ -53,7 +53,7 @@ InternalCompilerError::~InternalCompilerError() {
     if (ice_reporter) {
         ice_reporter(*this);
     } else {
-        std::cerr << Error() << std::endl << std::endl;
+        std::cerr << Error() << "\n\n";
     }
 
     debugger::Break();

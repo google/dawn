@@ -399,7 +399,7 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
                 << textureSpec.textureSize.width << " x " << textureSpec.textureSize.height
                 << " texture at mip level " << textureSpec.copyLevel << " layer " << layer << " to "
                 << bufferSpec.size << "-byte buffer with offset " << bufferOffset
-                << " and bytes per row " << bufferSpec.bytesPerRow << std::endl;
+                << " and bytes per row " << bufferSpec.bytesPerRow << "\n";
 
             bufferOffset += bufferSpec.bytesPerRow * bufferSpec.rowsPerImage;
         }
@@ -488,8 +488,7 @@ class CopyTests_B2T : public CopyTests, public DawnTest {
                 << textureSpec.copyOrigin.y << "), (" << textureSpec.copyOrigin.x + copySize.width
                 << ", " << textureSpec.copyOrigin.y + copySize.height << ")) region of "
                 << textureSpec.textureSize.width << " x " << textureSpec.textureSize.height
-                << " texture at mip level " << textureSpec.copyLevel << " layer " << layer
-                << std::endl;
+                << " texture at mip level " << textureSpec.copyLevel << " layer " << layer << "\n";
             bufferOffset += copyLayout.bytesPerImage;
         }
     }

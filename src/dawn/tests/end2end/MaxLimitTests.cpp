@@ -895,14 +895,13 @@ class MaxInterStageLimitTests : public MaxLimitTests {
     std::string GetInterStageVariableDeclarations(uint32_t interStageVariableCount) {
         std::stringstream stream;
 
-        stream << "struct VertexOut {" << std::endl;
+        stream << "struct VertexOut {\n";
 
         for (uint32_t location = 0; location < interStageVariableCount; ++location) {
-            stream << "@location(" << location << ") color" << location << " : vec4f, "
-                   << std::endl;
+            stream << "@location(" << location << ") color" << location << " : vec4f, \n";
         }
 
-        stream << "@builtin(position) pos : vec4f" << std::endl << "}" << std::endl;
+        stream << "@builtin(position) pos : vec4f\n}\n";
 
         return stream.str();
     }
@@ -911,9 +910,9 @@ class MaxInterStageLimitTests : public MaxLimitTests {
         std::stringstream stream;
 
         uint32_t interStageVariableCount = GetInterStageVariableCount(spec);
-        stream << GetInterStageVariableDeclarations(interStageVariableCount) << std::endl
-               << GetVertexShaderForTest(interStageVariableCount) << std::endl
-               << GetFragmentShaderForTest(interStageVariableCount, spec) << std::endl;
+        stream << GetInterStageVariableDeclarations(interStageVariableCount) << "\n"
+               << GetVertexShaderForTest(interStageVariableCount) << "\n"
+               << GetFragmentShaderForTest(interStageVariableCount, spec) << "\n";
         return utils::CreateShaderModule(device, stream.str().c_str());
     }
 
@@ -939,9 +938,9 @@ class MaxInterStageLimitTests : public MaxLimitTests {
                     stream << ", ";
                 }
             }
-            stream << ");" << std::endl;
+            stream << ");\n";
         }
-        stream << "return output;" << std::endl << "}" << std::endl;
+        stream << "return output;\n}\n";
         return stream.str();
     }
 
@@ -961,7 +960,7 @@ class MaxInterStageLimitTests : public MaxLimitTests {
         }
         // Ensure every inter-stage shader variable and built-in variable is used instead of being
         // optimized out.
-        stream << ") -> @location(0) vec4f {" << std::endl << "return input.pos";
+        stream << ") -> @location(0) vec4f {\nreturn input.pos";
         if (spec.hasFrontFacing) {
             stream << " + vec4f(f32(isFront), 0, 0, 1)";
         }
@@ -1142,15 +1141,15 @@ class MaxVertexAttributesPipelineCreationTests : public MaxLimitTests {
 
     wgpu::ShaderModule GetShaderModuleForTest(uint32_t maxVertexAttributes, const TestSpec& spec) {
         std::ostringstream sstream;
-        sstream << "struct VertexIn {" << std::endl;
+        sstream << "struct VertexIn {\n";
         for (uint32_t i = 0; i < maxVertexAttributes; ++i) {
-            sstream << "    @location(" << i << ") input" << i << " : vec4f," << std::endl;
+            sstream << "    @location(" << i << ") input" << i << " : vec4f,\n";
         }
         if (spec.hasVertexIndex) {
-            sstream << "    @builtin(vertex_index) VertexIndex : u32," << std::endl;
+            sstream << "    @builtin(vertex_index) VertexIndex : u32,\n";
         }
         if (spec.hasInstanceIndex) {
-            sstream << "    @builtin(instance_index) InstanceIndex : u32," << std::endl;
+            sstream << "    @builtin(instance_index) InstanceIndex : u32,\n";
         }
         sstream << R"(
             }
@@ -1168,7 +1167,7 @@ class MaxVertexAttributesPipelineCreationTests : public MaxLimitTests {
         if (spec.hasInstanceIndex) {
             sstream << " + vec4f(f32(input.InstanceIndex))";
         }
-        sstream << ";}" << std::endl;
+        sstream << ";}\n";
 
         sstream << R"(
             @fragment

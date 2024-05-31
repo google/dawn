@@ -163,8 +163,7 @@ void DawnPerfTestEnvironment::TearDown() {
 
         std::ofstream outFile;
         outFile.open(mTraceFile, std::ios_base::app);
-        outFile << "]}";
-        outFile << std::endl;
+        outFile << "]}\n";
         outFile.close();
     }
 

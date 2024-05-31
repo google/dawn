@@ -140,7 +140,7 @@ std::string OverrideTypeToString(tint::inspector::Override::Type type);
 template <typename T>
 bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
     if (!buffer) {
-        std::cerr << "The buffer pointer was null" << std::endl;
+        std::cerr << "The buffer pointer was null\n";
         return false;
     }
 
@@ -151,7 +151,7 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
     file = fopen(input_file.c_str(), "rb");
 #endif
     if (!file) {
-        std::cerr << "Failed to open " << input_file << std::endl;
+        std::cerr << "Failed to open " << input_file << "\n";
         return false;
     }
 
@@ -160,8 +160,7 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
     if (0 != (file_size % sizeof(T))) {
         std::cerr << "File " << input_file
                   << " does not contain an integral number of objects: " << file_size
-                  << " bytes in the file, require " << sizeof(T) << " bytes per object"
-                  << std::endl;
+                  << " bytes in the file, require " << sizeof(T) << " bytes per object\n";
         fclose(file);
         return false;
     }
@@ -173,7 +172,7 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
     size_t bytes_read = fread(buffer->data(), 1, file_size, file);
     fclose(file);
     if (bytes_read != file_size) {
-        std::cerr << "Failed to read " << input_file << std::endl;
+        std::cerr << "Failed to read " << input_file << "\n";
         return false;
     }
 

@@ -324,9 +324,9 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
                                  wgpu::ShaderStage failingShaderStage) {
         // Build the ShaderIO struct containing variables up to maximumOutputLocation.
         std::ostringstream stream;
-        stream << "struct ShaderIO {" << std::endl;
+        stream << "struct ShaderIO {\n";
         for (uint32_t location = 1; location <= maximumOutputLocation; ++location) {
-            stream << "@location(" << location << ") var" << location << ": f32," << std::endl;
+            stream << "@location(" << location << ") var" << location << ": f32,\n";
         }
 
         if (failingShaderStage == wgpu::ShaderStage::Vertex) {
@@ -427,11 +427,11 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         // components. Components are added in two parts, a bunch of vec4s, then one additional
         // variable for the remaining components.
         std::ostringstream stream;
-        stream << "struct ShaderIO {" << std::endl << extraBuiltInDeclarations << std::endl;
+        stream << "struct ShaderIO {\n" << extraBuiltInDeclarations << "\n";
         uint32_t vec4InputLocations = totalUserDefinedInterStageShaderComponentCount / 4;
 
         for (uint32_t location = 0; location < vec4InputLocations; ++location) {
-            stream << "@location(" << location << ") var" << location << ": vec4f," << std::endl;
+            stream << "@location(" << location << ") var" << location << ": vec4f,\n";
         }
 
         uint32_t lastComponentCount = totalUserDefinedInterStageShaderComponentCount % 4;
@@ -442,13 +442,13 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
             } else {
                 stream << " vec" << lastComponentCount << "f,";
             }
-            stream << std::endl;
+            stream << "\n";
         }
 
         if (failingShaderStage == wgpu::ShaderStage::Vertex) {
-            stream << " @builtin(position) pos: vec4f," << std::endl;
+            stream << " @builtin(position) pos: vec4f,\n";
         }
-        stream << "}" << std::endl;
+        stream << "}\n";
 
         std::string ioStruct = stream.str();
 

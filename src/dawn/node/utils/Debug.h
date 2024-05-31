@@ -130,7 +130,7 @@ template <typename... MSG_ARGS>
         msg << " ";
         Write(msg, std::forward<MSG_ARGS>(msg_args)...);
     }
-    std::cout << msg.str() << std::endl;
+    std::cout << msg.str() << "\n";
     abort();
 }
 
@@ -139,7 +139,7 @@ template <typename... MSG_ARGS>
 #define LOG(...)                                                                                  \
     ::wgpu::utils::Write(std::cout << __FILE__ << ":" << __LINE__ << " " << __FUNCTION__ << ": ", \
                          ##__VA_ARGS__)                                                           \
-        << std::endl
+        << "\n";
 
 // UNIMPLEMENTED(env) raises a JS exception. Used to stub code that has not yet been implemented.
 #define UNIMPLEMENTED(env, ...)                                              \

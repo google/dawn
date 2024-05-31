@@ -2028,8 +2028,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
         std::string interfaceDeclaration;
         {
             std::ostringstream sstream;
-            sstream << "struct A { @location(0) @interpolate(flat) a: " << kTypes[i] << ","
-                    << std::endl;
+            sstream << "struct A { @location(0) @interpolate(flat) a: " << kTypes[i] << ",\n";
             interfaceDeclaration = sstream.str();
         }
 
@@ -2130,7 +2129,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
                 }
                 sstream << ")";
             }
-            sstream << " a : vec4f," << std::endl;
+            sstream << " a : vec4f,\n";
             interfaceDeclaration = sstream.str();
         }
         {

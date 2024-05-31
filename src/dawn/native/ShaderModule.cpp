@@ -1117,7 +1117,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;
-        dumpedMsg << "// Dumped WGSL:" << std::endl << wgslDesc->code << std::endl;
+        dumpedMsg << "// Dumped WGSL:\n" << wgslDesc->code << "\n";
         device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
     }
 

@@ -3603,7 +3603,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                 }
                 out << std::to_string(wgsize[i].value());
             }
-            out << ")]" << std::endl;
+            out << ")]\n";
         }
 
         if (!EmitTypeAndName(out, func_sem->ReturnType(), core::AddressSpace::kUndefined,

@@ -2613,7 +2613,7 @@ TEST_F(SpvParserCFGTest, VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDom
     EXPECT_FALSE(fe.VerifyHeaderContinueMergeOrder());
 
     tint::StringStream result;
-    result << *fe.GetBlockInfo(50) << std::endl << *fe.GetBlockInfo(20) << std::endl;
+    result << *fe.GetBlockInfo(50) << "\n" << *fe.GetBlockInfo(20) << "\n";
     EXPECT_THAT(p->error(), Eq("Header 50 does not strictly dominate its merge block 20"))
         << result.str() << Dump(fe.block_order());
 }
@@ -2649,7 +2649,7 @@ TEST_F(SpvParserCFGTest,
     fe.RegisterMerges();
     EXPECT_FALSE(fe.VerifyHeaderContinueMergeOrder());
     tint::StringStream str;
-    str << *fe.GetBlockInfo(50) << std::endl << *fe.GetBlockInfo(20) << std::endl;
+    str << *fe.GetBlockInfo(50) << "\n" << *fe.GetBlockInfo(20) << "\n";
     EXPECT_THAT(p->error(), Eq("Loop header 50 does not dominate its continue target 20"))
         << str.str() << Dump(fe.block_order());
 }
