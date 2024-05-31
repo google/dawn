@@ -50,6 +50,7 @@ struct BlitColorToColorWithDrawPipelineKey {
 
     PerColorAttachment<wgpu::TextureFormat> colorTargetFormats;
     ColorAttachmentMask attachmentsToExpandResolve;
+    ColorAttachmentMask resolveTargetsMask;
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
     uint32_t sampleCount = 1;
 

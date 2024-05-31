@@ -2329,6 +2329,19 @@ class LoadResolveTexturePipelineDescriptorValidationTest : public RenderPipeline
             @fragment fn main() -> @location(1) vec4f {
                 return textureLoad(src_tex, vec2u(0, 0), 0);
             })");
+
+        fs2TargetsModule = utils::CreateShaderModule(device, R"(
+            struct FragmentOut {
+                @location(0) color0 : vec4f,
+                @location(1) color1 : vec4f,
+            }
+
+            @fragment fn main() -> FragmentOut {
+                var output : FragmentOut;
+                output.color0 = vec4f(0.85);
+                output.color1 = output.color0 * 0.5;
+                return output;
+            })");
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -2349,6 +2362,7 @@ class LoadResolveTexturePipelineDescriptorValidationTest : public RenderPipeline
 
     wgpu::ShaderModule fsWithTextureModule;
     wgpu::ShaderModule fsWithTextureToTarget1Module;
+    wgpu::ShaderModule fs2TargetsModule;
 };
 
 // Test that creating and using a render pipeline with ColorTargetStateExpandResolveTextureDawn
@@ -2527,6 +2541,172 @@ TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
     renderPass.End();
 
     ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
+// Test that the following scenario works:
+// - Render pipeline and render pass both have two color outputs with resolve targets.
+// - Only second output uses ExpandResolveTexture.
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
+       RenderPipelineAndRenderPassTwoOuputsLoadColor1) {
+    constexpr uint32_t kSampleCount = 4;
+
+    auto msaaTexture1 = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
+    auto msaaTexture2 = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
+
+    // Create single sampled textures.
+    auto texture1 =
+        CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
+    auto texture2 =
+        CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
+
+    // Create render pass with two outputs. Second one uses ExpandResolveTexture.
+    utils::ComboRenderPassDescriptor renderPassDescriptor(
+        {msaaTexture1.CreateView(), msaaTexture2.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
+    renderPassDescriptor.cColorAttachments[0].resolveTarget = texture1.CreateView();
+    renderPassDescriptor.cColorAttachments[1].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPassDescriptor.cColorAttachments[1].resolveTarget = texture2.CreateView();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+
+    // Create render pipeline with two chained ColorTargetStateExpandResolveTextureDawn.
+    // The first one's enabled flag = true.
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fs2TargetsModule;
+    pipelineDescriptor.multisample.count = kSampleCount;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc[2];
+    pipelineMSAAExpandResolveDesc[0].enabled = false;
+    pipelineDescriptor.cTargets[0].format = kColorFormat;
+    pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc[0];
+    pipelineMSAAExpandResolveDesc[1].enabled = true;
+    pipelineDescriptor.cTargets[1].format = kColorFormat;
+    pipelineDescriptor.cTargets[1].nextInChain = &pipelineMSAAExpandResolveDesc[1];
+    pipelineDescriptor.cFragment.targetCount = 2;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+    renderPass.SetPipeline(pipeline);
+    renderPass.End();
+
+    encoder.Finish();
+}
+
+// Test that the following render pipeline and render pass are incompatible.
+// - Render pass:
+//   - colorAttachments[0]
+//     - has resolveTarget.
+//     - loadOp = ExpandResolveTexture.
+//   - colorAttachments[1]
+//     - has resolveTarget.
+//     - loadOp = Load.
+// - Render pipeline:
+//   - colorTargets[0].nextInChain contains ColorTargetStateExpandResolveTextureDawn.
+//     - ColorTargetStateExpandResolveTextureDawn.enabled = true.
+//   - colorTargets[1].nextInChain = null.
+// They are incompatible by spec's requirements.
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
+       RenderPipelineAndRenderPassMismatchResolveTargetsError) {
+    constexpr uint32_t kSampleCount = 4;
+
+    auto msaaTexture1 = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
+    auto msaaTexture2 = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
+
+    // Create single sampled textures.
+    auto texture1 =
+        CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
+    auto texture2 =
+        CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
+
+    // Create render pass with two resolve targets. First one uses ExpandResolveTexture.
+    utils::ComboRenderPassDescriptor renderPassDescriptor(
+        {msaaTexture1.CreateView(), msaaTexture2.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPassDescriptor.cColorAttachments[0].resolveTarget = texture1.CreateView();
+    renderPassDescriptor.cColorAttachments[1].loadOp = wgpu::LoadOp::Load;
+    renderPassDescriptor.cColorAttachments[1].resolveTarget = texture2.CreateView();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+
+    // Create render pipeline (without ColorTargetStateExpandResolveTextureDawn chained to
+    // colorTargets[1])
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fs2TargetsModule;
+    pipelineDescriptor.multisample.count = kSampleCount;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc;
+    pipelineMSAAExpandResolveDesc.enabled = true;
+    pipelineDescriptor.cTargets[0].format = kColorFormat;
+    pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc;
+    pipelineDescriptor.cTargets[1].format = kColorFormat;
+    pipelineDescriptor.cFragment.targetCount = 2;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+    renderPass.SetPipeline(pipeline);
+    renderPass.End();
+
+    ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("not compatible"));
+}
+
+// Test that the following render pipeline and render pass are incompatible.
+// - Render pass:
+//   - colorAttachments[0]
+//     - has resolveTarget.
+//     - loadOp = ExpandResolveTexture.
+//   - colorAttachments[1]
+//     - has **no** resolveTarget.
+// - Render pipeline:
+//   - colorTargets[0].nextInChain = ColorTargetStateExpandResolveTextureDawn.
+//     - ColorTargetStateExpandResolveTextureDawn.enabled = true.
+//   - colorTargets[1].nextInChain = ColorTargetStateExpandResolveTextureDawn.
+//     - ColorTargetStateExpandResolveTextureDawn.enabled = false.
+// They are incompatible by spec's requirements.
+TEST_F(LoadResolveTexturePipelineDescriptorValidationTest,
+       RenderPipelineAndRenderPassMismatchResolveTargetsError2) {
+    constexpr uint32_t kSampleCount = 4;
+
+    auto msaaTexture1 = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
+    auto msaaTexture2 = CreateTexture(wgpu::TextureUsage::RenderAttachment, kSampleCount);
+
+    // Create single sampled textures.
+    auto texture1 =
+        CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding, 1);
+
+    // Create render pass with two outputs but one resolve target. First one uses
+    // ExpandResolveTexture.
+    utils::ComboRenderPassDescriptor renderPassDescriptor(
+        {msaaTexture1.CreateView(), msaaTexture2.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].loadOp = wgpu::LoadOp::ExpandResolveTexture;
+    renderPassDescriptor.cColorAttachments[0].resolveTarget = texture1.CreateView();
+    renderPassDescriptor.cColorAttachments[1].loadOp = wgpu::LoadOp::Load;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+
+    // Create render pipeline with two chained ColorTargetStateExpandResolveTextureDawn.
+    // The first one's enabled flag = true.
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fs2TargetsModule;
+    pipelineDescriptor.multisample.count = kSampleCount;
+
+    wgpu::ColorTargetStateExpandResolveTextureDawn pipelineMSAAExpandResolveDesc[2];
+    pipelineMSAAExpandResolveDesc[0].enabled = true;
+    pipelineDescriptor.cTargets[0].format = kColorFormat;
+    pipelineDescriptor.cTargets[0].nextInChain = &pipelineMSAAExpandResolveDesc[0];
+    pipelineMSAAExpandResolveDesc[1].enabled = false;
+    pipelineDescriptor.cTargets[1].format = kColorFormat;
+    pipelineDescriptor.cTargets[1].nextInChain = &pipelineMSAAExpandResolveDesc[1];
+    pipelineDescriptor.cFragment.targetCount = 2;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+    renderPass.SetPipeline(pipeline);
+    renderPass.End();
+
+    ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("not compatible"));
 }
 
 // Bind resolve attachment in a ExpandResolveTexture render pass as texture should result

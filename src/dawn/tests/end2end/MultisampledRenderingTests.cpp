@@ -26,7 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
-#include <bitset>
+#include <array>
 #include <vector>
 
 #include "dawn/common/Assert.h"
@@ -37,7 +37,12 @@
 namespace dawn {
 namespace {
 
-using AttachmentMask = std::bitset<16>;
+enum class PipelineMultisampleLoadOp {
+    Ignore,
+    ExpandResolveTarget,
+    HasResolveTargetButLoadMultisampled,
+};
+using PipelineMultisampleLoadOps = std::array<PipelineMultisampleLoadOp, 16>;
 
 class MultisampledRenderingTest : public DawnTest {
   protected:
@@ -97,18 +102,20 @@ class MultisampledRenderingTest : public DawnTest {
 
         const char* fs = testDepth ? kFsOneOutputWithDepth : kFsOneOutputWithoutDepth;
 
-        AttachmentMask enableExpandResolveLoadOps;
-        enableExpandResolveLoadOps.set(0, enableExpandResolveLoadOp);
+        PipelineMultisampleLoadOps multisampleLoadOps{};
+        if (enableExpandResolveLoadOp) {
+            multisampleLoadOps[0] = PipelineMultisampleLoadOp::ExpandResolveTarget;
+        }
         return CreateRenderPipelineForTest(fs, 1, testDepth, sampleMask, alphaToCoverageEnabled,
-                                           flipTriangle, enableExpandResolveLoadOps);
+                                           flipTriangle, multisampleLoadOps);
     }
 
     wgpu::RenderPipeline CreateRenderPipelineWithTwoOutputsForTest(
         uint32_t sampleMask = 0xFFFFFFFF,
         bool alphaToCoverageEnabled = false,
         bool depthTest = false,
-        bool enableExpandResolveLoadOpForColor0 = false,
-        bool enableExpandResolveLoadOpForColor1 = false) {
+        PipelineMultisampleLoadOp loadOpForColor0 = PipelineMultisampleLoadOp::Ignore,
+        PipelineMultisampleLoadOp loadOpForColor1 = PipelineMultisampleLoadOp::Ignore) {
         const char* kFsTwoOutputs = R"(
             struct U {
                 color0 : vec4f,
@@ -128,13 +135,13 @@ class MultisampledRenderingTest : public DawnTest {
                 return output;
             })";
 
-        AttachmentMask enableExpandResolveLoadOps;
-        enableExpandResolveLoadOps.set(0, enableExpandResolveLoadOpForColor0);
-        enableExpandResolveLoadOps.set(1, enableExpandResolveLoadOpForColor1);
+        PipelineMultisampleLoadOps multisampleLoadOps{};
+        multisampleLoadOps[0] = loadOpForColor0;
+        multisampleLoadOps[1] = loadOpForColor1;
 
         return CreateRenderPipelineForTest(kFsTwoOutputs, 2, depthTest, sampleMask,
                                            alphaToCoverageEnabled, /*flipTriangle=*/false,
-                                           enableExpandResolveLoadOps);
+                                           multisampleLoadOps);
     }
 
     wgpu::RenderPipeline CreateRenderPipelineWithNonZeroLocationOutputForTest(
@@ -151,11 +158,13 @@ class MultisampledRenderingTest : public DawnTest {
                 return uBuffer.color;
             })";
 
-        AttachmentMask enableExpandResolveLoadOps = {};
-        enableExpandResolveLoadOps.set(1, enableExpandResolveLoadOp);
+        PipelineMultisampleLoadOps multisampleLoadOps{};
+        if (enableExpandResolveLoadOp) {
+            multisampleLoadOps[1] = PipelineMultisampleLoadOp::ExpandResolveTarget;
+        }
         return CreateRenderPipelineForTest(kFsNonZeroLocationOutputs, 1, false, sampleMask,
                                            alphaToCoverageEnabled, /*flipTriangle=*/false,
-                                           enableExpandResolveLoadOps, 1);
+                                           multisampleLoadOps, 1);
     }
 
     wgpu::Texture CreateTextureForRenderAttachment(wgpu::TextureFormat format,
@@ -278,14 +287,15 @@ class MultisampledRenderingTest : public DawnTest {
     wgpu::Texture mDepthStencilTexture;
     wgpu::TextureView mDepthStencilView;
 
-    wgpu::RenderPipeline CreateRenderPipelineForTest(const char* fs,
-                                                     uint32_t numColorAttachments,
-                                                     bool hasDepthStencilAttachment,
-                                                     uint32_t sampleMask = 0xFFFFFFFF,
-                                                     bool alphaToCoverageEnabled = false,
-                                                     bool flipTriangle = false,
-                                                     AttachmentMask enableExpandResolveLoadOps = {},
-                                                     uint32_t firstAttachmentLocation = 0) {
+    wgpu::RenderPipeline CreateRenderPipelineForTest(
+        const char* fs,
+        uint32_t numColorAttachments,
+        bool hasDepthStencilAttachment,
+        uint32_t sampleMask = 0xFFFFFFFF,
+        bool alphaToCoverageEnabled = false,
+        bool flipTriangle = false,
+        PipelineMultisampleLoadOps multisampleLoadOps = {},
+        uint32_t firstAttachmentLocation = 0) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         // Draw a bottom-right triangle. In standard 4xMSAA pattern, for the pixels on diagonal,
@@ -334,16 +344,17 @@ class MultisampledRenderingTest : public DawnTest {
 
         pipelineDescriptor.cFragment.targetCount = numColorAttachments + firstAttachmentLocation;
 
-        wgpu::ColorTargetStateExpandResolveTextureDawn msaaExpandResolveDesc;
-        msaaExpandResolveDesc.enabled = true;
+        std::array<wgpu::ColorTargetStateExpandResolveTextureDawn, 16> msaaExpandResolveDescs;
         for (uint32_t i = 0; i < numColorAttachments + firstAttachmentLocation; ++i) {
             if (i < firstAttachmentLocation) {
                 pipelineDescriptor.cTargets[i].writeMask = wgpu::ColorWriteMask::None;
                 pipelineDescriptor.cTargets[i].format = wgpu::TextureFormat::Undefined;
             } else {
                 pipelineDescriptor.cTargets[i].format = kColorFormat;
-                if (enableExpandResolveLoadOps.test(i)) {
-                    pipelineDescriptor.cTargets[i].nextInChain = &msaaExpandResolveDesc;
+                if (multisampleLoadOps[i] != PipelineMultisampleLoadOp::Ignore) {
+                    msaaExpandResolveDescs[i].enabled =
+                        multisampleLoadOps[i] == PipelineMultisampleLoadOp::ExpandResolveTarget;
+                    pipelineDescriptor.cTargets[i].nextInChain = &msaaExpandResolveDescs[i];
                 }
             }
         }
@@ -1982,8 +1993,8 @@ TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawWithDepthTestColor0AndColor1) {
     wgpu::RenderPipeline pipeline = CreateRenderPipelineWithTwoOutputsForTest(
         /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
         /*depthTest=*/true,
-        /*enableExpandResolveLoadOpForColor0=*/true,
-        /*enableExpandResolveLoadOpForColor1=*/true);
+        /*loadOpForColor0=*/PipelineMultisampleLoadOp::ExpandResolveTarget,
+        /*loadOpForColor1=*/PipelineMultisampleLoadOp::ExpandResolveTarget);
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
 

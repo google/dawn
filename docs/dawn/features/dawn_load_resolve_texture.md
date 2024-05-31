@@ -65,7 +65,12 @@ renderPassEncoder2.End();
 
 Notes:
  - If a resolve texture is used in a `wgpu::LoadOp::ExpandResolveTexture` operation, it must have `wgpu::TextureUsage::TextureBinding` usage.
- - If `wgpu::ColorTargetStateExpandResolveTextureDawn` chained struct is not included in a `wgpu::RenderPipelineDescriptor::FragmentState::ColorTargetState`  or if it is included but `enabled` boolean flag is false, then the result render pipeline cannot be used in a render pass using `ExpandResolveTexture` load op for that respective color attachment.
-   - Similarly, a render pipeline created with `wgpu::ColorTargetStateExpandResolveTextureDawn`'s `enabled` flag = `true` won't be able to be used in render passes that don't use `ExpandResolveTexture` load op for the respective color attachment.
+ - The `wgpu::ColorTargetStateExpandResolveTextureDawn` chained struct controls the compatibility between a render pipeline and a render pass:
+  - If the chained struct is not included in any `wgpu::RenderPipelineDescriptor::FragmentState::ColorTargetState` then the render pipeline **can only** be used on any render pass not using any `ExpandResolveTexture` load op. Whether the render pass has any resolve target doesn't matter.
+  - If the chained struct is included in some color targets but **none** of their `enabled` boolean flags are true, then it's the same as above case.
+  - If at least one included chained struct has `enabled` = true, then the compatibility's requirements are stricter:
+    - If render pipeline's color target `i` has `wgpu::ColorTargetStateExpandResolveTextureDawn.enabled` = true, then the compatible render pass **must** have `ExpandResolveTexture` load op on attachment `i`.
+    - If render pipeline's color target `i` has `wgpu::ColorTargetStateExpandResolveTextureDawn.enabled` = false, then the compatible render pass's attachment `i` must have a resolve target and its load op **must not** be `ExpandResolveTexture`.
+    - If render pipeline's color target `i` has no `wgpu::ColorTargetStateExpandResolveTextureDawn` included, then the compatible render pass's attachment `i` **must not** have any resolve target.
  - Currently the `ExpandResolveTexture` LoadOp only works on color attachment, this could be changed in future.
  - The texture is not supported if it is not resolvable by WebGPU standard. This means this feature currently doesn't work with integer textures.

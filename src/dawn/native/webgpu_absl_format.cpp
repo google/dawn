@@ -336,16 +336,20 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         }
 
         while (nextColorIndex < i) {
-            s->Append(absl::StrFormat("{format: %s}, ", wgpu::TextureFormat::Undefined));
+            s->Append(absl::StrFormat("%d={format: %s}, ", nextColorIndex,
+                                      wgpu::TextureFormat::Undefined));
             nextColorIndex++;
             needsComma = false;
         }
 
-        s->Append(absl::StrFormat("{format:%s", value->GetColorAttachmentFormat(i)));
+        s->Append(absl::StrFormat("%d={format:%s", i, value->GetColorAttachmentFormat(i)));
 
-        if (value->GetDevice()->HasFeature(Feature::DawnLoadResolveTexture)) {
-            s->Append(absl::StrFormat(", expandResolveTexture:%v",
-                                      value->GetExpandResolveUsingAttachmentsMask().test(i)));
+        if (value->GetDevice()->HasFeature(Feature::DawnLoadResolveTexture) &&
+            value->GetExpandResolveInfo().attachmentsToExpandResolve.any()) {
+            s->Append(
+                absl::StrFormat(", resolve:%v, expandResolve:%v",
+                                value->GetExpandResolveInfo().resolveTargetsMask.test(i),
+                                value->GetExpandResolveInfo().attachmentsToExpandResolve.test(i)));
         }
         s->Append("}");
 
