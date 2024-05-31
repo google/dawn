@@ -52,7 +52,7 @@ ObjectBase::ObjectBase(DeviceBase* device) : ErrorMonad(), mDevice(device) {}
 ObjectBase::ObjectBase(DeviceBase* device, ErrorTag) : ErrorMonad(kError), mDevice(device) {}
 
 InstanceBase* ObjectBase::GetInstance() const {
-    return mDevice->GetAdapter()->GetInstance();
+    return mDevice->GetInstance();
 }
 
 DeviceBase* ObjectBase::GetDevice() const {
