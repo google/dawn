@@ -52,6 +52,14 @@ cd <build-output-path>
 cmake <dawn-root-path> -DDAWN_BUILD_NODE_BINDINGS=1
 cmake --build . --target dawn_node
 ```
+
+If building with ASan on macOS:
+
+1. Open dawn/third_party/abseil-cpp/absl/copts/copts.py
+2. Add "-fsanitize=address" to the List corresponding to the compiler you are using (GCC or LLVM)
+3. Run dawn/third_party/abseil-cpp/absl/copts/generate_copts.py
+4. Continue with build steps outlined above
+
 ### Running JavaScript that uses `navigator.gpu`
 
 To use `node` to run JavaScript that uses `navigator.gpu`:
@@ -60,14 +68,25 @@ To use `node` to run JavaScript that uses `navigator.gpu`:
 2. Add the following to the top of the JS file:
 
 ```js
-const { create, globals } = require('./dawn.node');
+const { create, globals } = require("./dawn.node");
 Object.assign(globalThis, globals); // Provides constants like GPUBufferUsage.MAP_READ
-let navigator = { gpu: create([]), };
+let navigator = { gpu: create([]) };
 ```
 
 You can specify Dawn options to the `create` method. For example:
+
 ```js
-let navigator = { gpu: create(['enable-dawn-features=allow_unsafe_apis,dump_shaders,disable_symbol_renaming']), };
+let navigator = {
+  gpu: create([
+    "enable-dawn-features=allow_unsafe_apis,dump_shaders,disable_symbol_renaming",
+  ]),
+};
+```
+
+If running with ASan on macOS:
+
+```sh
+DYLD_INSERT_LIBRARIES=<path-to-ASan-dynamic-runtime> node <file>
 ```
 
 ### Running WebGPU CTS
@@ -323,4 +342,3 @@ See https://bugs.chromium.org/p/dawn/issues/list?q=component%3ADawnNode&can=2 fo
 - Generated includes live in `src/` for `dawn/node`, but outside for Dawn. [discussion](https://dawn-review.googlesource.com/c/dawn/+/64903/9/src/dawn/node/interop/CMakeLists.txt#56)
 - Hook up to presubmit bots (CQ / Kokoro)
 - `binding::GPU` will require significant rework [once Dawn implements the device / adapter creation path properly](https://dawn-review.googlesource.com/c/dawn/+/64916/4/src/dawn/node/binding/GPU.cpp).
-
