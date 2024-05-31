@@ -45,8 +45,6 @@ class Metadata:
         self.impl_dir = metadata.get('impl_dir', '')
         self.native_namespace = metadata['native_namespace']
         self.copyright_year = metadata.get('copyright_year', None)
-        self.kotlin_package = 'android.dawn'
-        self.kotlin_path = self.kotlin_package.replace('.', '/')
 
 class Name:
     def __init__(self, name, native=False):
@@ -794,29 +792,60 @@ def unreachable_code():
 ############################################################
 
 
-def compute_kotlin_params(loaded_json):
+def compute_kotlin_params(loaded_json, kotlin_json):
     params_kotlin = parse_json(loaded_json, enabled_tags=['art'])
-    by_category = params_kotlin['by_category']
+    params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
+    kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
 
     # The 'length' members are removed as Kotlin can infer that from the container.
     # 'length' members are identified when some *other* member specifies its name as the
     # length parameter. Void pointer members refer to binary structures that cannot be used by
     # clients without conversion to ART types in handwritten code, so we don't convert those.
-    for structure in by_category['structure']:
-        structure.members = [
-            member for member in structure.members
-            if member.type.name.get() not in ['void *', 'void const *'] and
-            not [1 for other in structure.members if other.length == member]
-        ]
+    def include_structure_member(structure, member):
+        if member.type.category == 'function pointer':
+            return False
+        if member.type.name.get() in ['void *', 'void const *']:
+            return False
+        for other in structure.members:
+            if other.length == member:
+                return False
+        return True
+
+    def include_method(method):
+        if method.return_type.name.get() in ['void *', 'void const *']:
+            # All methods that return binary data are handwritten.
+            return False
+        if method.return_type.category == 'function pointer':
+            # Kotlin doesn't support returning functions.
+            return False
+        for argument in method.arguments:
+            if argument.annotation == '*':
+                # Dawn uses 'annotation = *' for output parameters, for example to return arrays.
+                # Kotlin doesn't support that at the moment
+                return False
+            if argument.annotation == 'value' and argument.type.category == 'structure':
+                # Passing structures by value is not supported at the moment.
+                return False
+            if argument.type.category == 'function pointer':
+                # Currently returning structures in callbacks is not supported.
+                for callback_arg in argument.type.arguments:
+                    if callback_arg.type.category == 'structure':
+                        return False
+        return True
+
+    def jni_name(type):
+        return kt_file_path + '/' + type.name.CamelCase()
 
     # A structure may need to know which other structures listed it as a chain root, e.g.
     # to know whether to mark the generated class 'open'.
     chain_children = defaultdict(list)
-    for structure in by_category['structure']:
+    for structure in params_kotlin['by_category']['structure']:
         for chain_root in structure.chain_roots:
             chain_children[chain_root.name.get()].append(structure)
     params_kotlin['chain_children'] = chain_children
-    params_kotlin['unreachable_code'] = unreachable_code
+    params_kotlin['include_structure_member'] = include_structure_member
+    params_kotlin['include_method'] = include_method
+    params_kotlin['jni_name'] = jni_name
     return params_kotlin
 
 
@@ -1056,6 +1085,7 @@ def make_base_render_params(metadata):
             'decorate': decorate,
             'as_ktName': as_ktName,
             'has_callbackInfoStruct': has_callbackInfoStruct,
+            'unreachable_code': unreachable_code
         }
 
 
@@ -1077,6 +1107,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                             default=None,
                             type=str,
                             help='The DAWN WIRE JSON definition to use.')
+        parser.add_argument('--kotlin-json',
+                            default=None,
+                            type=str,
+                            help='The KOTLIN JSON definition to use.')
         parser.add_argument("--lpm-json",
                             default=None,
                             type=str,
@@ -1099,6 +1133,11 @@ class MultiGeneratorFromDawnJSON(Generator):
         if args.wire_json:
             with open(args.wire_json) as f:
                 wire_json = json.loads(f.read())
+
+        kotlin_json = None
+        if args.kotlin_json:
+            with open(args.kotlin_json) as f:
+                kotlin_json = json.loads(f.read())
 
         lpm_json = None
         if args.lpm_json:
@@ -1408,8 +1447,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             lpm_params = [
                 RENDER_PARAMS_BASE, params_dawn_wire, {
-                    'as_protobufMemberName': as_protobufMemberNameLPM,
-                    'unreachable_code': unreachable_code
+                    'as_protobufMemberName': as_protobufMemberNameLPM
                 }, api_and_wire_params, fuzzer_params
             ]
 
@@ -1432,33 +1470,52 @@ class MultiGeneratorFromDawnJSON(Generator):
                     lpm_params))
 
         if 'kotlin' in targets:
-            params_kotlin = compute_kotlin_params(loaded_json)
+            params_kotlin = compute_kotlin_params(loaded_json, kotlin_json)
+            kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
+            jni_name = params_kotlin['jni_name']
             by_category = params_kotlin['by_category']
             for structure in by_category['structure']:
                 renders.append(
+                    FileRender('art/api_kotlin_structure.kt',
+                               'java/' + jni_name(structure) + '.kt', [
+                                   RENDER_PARAMS_BASE, params_kotlin, {
+                                       'structure': structure
+                                   }
+                               ]))
+            for obj in by_category['object']:
+                renders.append(
                     FileRender(
-                        'art/api_kotlin_structure.kt',
-                        'java/' + metadata.kotlin_path + '/' +
-                        structure.name.CamelCase() + '.kt', [
-                            RENDER_PARAMS_BASE, params_kotlin, {
-                                'structure': structure
-                            }
-                        ]))
+                        'art/api_kotlin_object.kt',
+                        'java/' + jni_name(obj) + '.kt',
+                        [RENDER_PARAMS_BASE, params_kotlin, {
+                            'obj': obj
+                        }]))
+            for function_pointer in by_category['function pointer']:
+                renders.append(
+                    FileRender('art/api_kotlin_function_pointer.kt',
+                               'java/' + jni_name(function_pointer) + '.kt', [
+                                   RENDER_PARAMS_BASE, params_kotlin, {
+                                       'function_pointer': function_pointer
+                                   }
+                               ]))
+            renders.append(
+                FileRender('art/api_kotlin_functions.kt',
+                           'java/' + kt_file_path + '/Functions.kt',
+                           [RENDER_PARAMS_BASE, params_kotlin]))
 
             for enum in (params_kotlin['by_category']['bitmask'] +
                          params_kotlin['by_category']['enum']):
                 renders.append(
                     FileRender(
                         'art/api_kotlin_enum.kt',
-                        'java/' + metadata.kotlin_path + '/' +
-                        enum.name.CamelCase() + '.kt',
+                        'java/' + jni_name(enum) + '.kt',
                         [RENDER_PARAMS_BASE, params_kotlin, {
                             'enum': enum
                         }]))
 
             renders.append(
                 FileRender('art/api_kotlin_constants.kt',
-                           'java/' + metadata.kotlin_path + '/Constants.kt',
+                           'java/' + kt_file_path + '/Constants.kt',
                            [RENDER_PARAMS_BASE, params_kotlin]))
 
         return renders
@@ -1467,6 +1524,8 @@ class MultiGeneratorFromDawnJSON(Generator):
         deps = [os.path.abspath(args.dawn_json)]
         if args.wire_json != None:
             deps += [os.path.abspath(args.wire_json)]
+        if args.kotlin_json != None:
+            deps += [os.path.abspath(args.kotlin_json)]
         if args.lpm_json != None:
             deps += [os.path.abspath(args.lpm_json)]
         return deps

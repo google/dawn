@@ -137,6 +137,8 @@ function(DawnJSONGenerator)
              "${Dawn_SOURCE_DIR}/src/dawn/dawn.json"
              --wire-json
              "${Dawn_SOURCE_DIR}/src/dawn/dawn_wire.json"
+             --kotlin-json
+             "${Dawn_SOURCE_DIR}/src/dawn/dawn_kotlin.json"
              --targets
              ${G_TARGET}
         RESULT_VARIABLE RET

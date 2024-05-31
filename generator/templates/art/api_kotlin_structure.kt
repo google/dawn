@@ -24,17 +24,17 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-package {{ metadata.kotlin_package }}
-{% from 'art/api_kotlin_types.kt' import kotlin_declaration with context %}
+package {{ kotlin_package }}
+{% from 'art/api_kotlin_types.kt' import kotlin_definition with context %}
 
 class {{ structure.name.CamelCase() }}(
-    {% for member in structure.members %}
+    {% for member in structure.members if include_structure_member(structure, member) %}
         {# We supply a getter that is excluded from name manging to allow Inline Value Classed
            enums/bitmasks to be accessible as integers from the JVM adapter layer. #}
         {%- if member.type.category in ['bitmask', 'enum'] -%}
             @get:JvmName("get{{ member.name.CamelCase() }}")
         {% endif %}
-        var {{ member.name.camelCase() }}: {{ kotlin_declaration(member) }},
+        var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
     {% endfor %}
     {% for structure in chain_children[structure.name.get()] %}
         var {{ structure.name.camelCase() }}: {{ structure.name.CamelCase() }}? = null,

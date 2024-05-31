@@ -86,6 +86,8 @@ template("dawn_json_generator") {
       rebase_path("${dawn_root}/src/dawn/dawn.json", root_build_dir),
       "--wire-json",
       rebase_path("${dawn_root}/src/dawn/dawn_wire.json", root_build_dir),
+      "--kotlin-json",
+      rebase_path("${dawn_root}/src/dawn/dawn_kotlin.json", root_build_dir),
       "--targets",
       invoker.target,
     ]
