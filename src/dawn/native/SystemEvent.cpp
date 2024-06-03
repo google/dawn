@@ -30,7 +30,7 @@
 #include "dawn/common/Assert.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include <windows.h>
+#include "dawn/common/windows_with_undefs.h"
 #elif DAWN_PLATFORM_IS(FUCHSIA)
 #include <poll.h>
 #include <unistd.h>

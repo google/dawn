@@ -37,7 +37,7 @@
 #include <android/log.h>
 #endif
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include <windows.h>
+#include "dawn/common/windows_with_undefs.h"
 #endif
 
 namespace dawn {
