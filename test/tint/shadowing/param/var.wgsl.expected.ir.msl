@@ -1,16 +1,7 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void f(int a) {
-  int a = a;
-  int b = a;
+  int a_1 = a;
+  int b = a_1;
 }
-program_source:5:7: error: redefinition of 'a'
-  int a = a;
-      ^
-program_source:4:12: note: previous definition is here
-void f(int a) {
-           ^
-

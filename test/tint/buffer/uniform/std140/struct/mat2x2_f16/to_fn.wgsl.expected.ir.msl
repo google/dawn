@@ -21,7 +21,7 @@ struct tint_module_vars_struct {
   const constant tint_array<S, 4>* u;
 };
 
-void a(tint_array<S, 4> a) {
+void a(tint_array<S, 4> a_1) {
 }
 void b(S s) {
 }

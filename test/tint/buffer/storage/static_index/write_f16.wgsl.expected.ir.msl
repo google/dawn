@@ -61,12 +61,12 @@ struct tint_module_vars_struct {
   device S* sb;
 };
 
-void tint_store_and_preserve_padding(device Inner* const target, Inner value_param) {
+void tint_store_and_preserve_padding_7(device Inner* const target, Inner value_param) {
   (*target).scalar_i32 = value_param.scalar_i32;
   (*target).scalar_f32 = value_param.scalar_f32;
   (*target).scalar_f16 = value_param.scalar_f16;
 }
-void tint_store_and_preserve_padding(device tint_array<Inner, 4>* const target, tint_array<Inner, 4> value_param) {
+void tint_store_and_preserve_padding_8(device tint_array<Inner, 4>* const target, tint_array<Inner, 4> value_param) {
   {
     uint v = 0u;
     v = 0u;
@@ -75,13 +75,13 @@ void tint_store_and_preserve_padding(device tint_array<Inner, 4>* const target, 
       if ((v_1 >= 4u)) {
         break;
       }
-      tint_store_and_preserve_padding((&(*target)[v_1]), value_param[v_1]);
+      tint_store_and_preserve_padding_7((&(*target)[v_1]), value_param[v_1]);
       v = (v_1 + 1u);
       continue;
     }
   }
 }
-void tint_store_and_preserve_padding(device tint_array<float3, 2>* const target, tint_array<float3, 2> value_param) {
+void tint_store_and_preserve_padding_6(device tint_array<float3, 2>* const target, tint_array<float3, 2> value_param) {
   {
     uint v_2 = 0u;
     v_2 = 0u;
@@ -96,28 +96,28 @@ void tint_store_and_preserve_padding(device tint_array<float3, 2>* const target,
     }
   }
 }
-void tint_store_and_preserve_padding(device half4x3* const target, half4x3 value_param) {
+void tint_store_and_preserve_padding_5(device half4x3* const target, half4x3 value_param) {
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
   (*target)[2u] = value_param[2u];
   (*target)[3u] = value_param[3u];
 }
-void tint_store_and_preserve_padding(device half3x3* const target, half3x3 value_param) {
+void tint_store_and_preserve_padding_4(device half3x3* const target, half3x3 value_param) {
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
   (*target)[2u] = value_param[2u];
 }
-void tint_store_and_preserve_padding(device half2x3* const target, half2x3 value_param) {
+void tint_store_and_preserve_padding_3(device half2x3* const target, half2x3 value_param) {
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
 }
-void tint_store_and_preserve_padding(device float4x3* const target, float4x3 value_param) {
+void tint_store_and_preserve_padding_2(device float4x3* const target, float4x3 value_param) {
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
   (*target)[2u] = value_param[2u];
   (*target)[3u] = value_param[3u];
 }
-void tint_store_and_preserve_padding(device float3x3* const target, float3x3 value_param) {
+void tint_store_and_preserve_padding_1(device float3x3* const target, float3x3 value_param) {
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
   (*target)[2u] = value_param[2u];
@@ -148,22 +148,22 @@ kernel void tint_symbol(device S* sb [[buffer(0)]]) {
   tint_store_and_preserve_padding((&(*tint_module_vars.sb).mat2x3_f32), float2x3(float3(0.0f), float3(0.0f)));
   (*tint_module_vars.sb).mat2x4_f32 = float2x4(float4(0.0f), float4(0.0f));
   (*tint_module_vars.sb).mat3x2_f32 = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).mat3x3_f32), float3x3(float3(0.0f), float3(0.0f), float3(0.0f)));
+  tint_store_and_preserve_padding_1((&(*tint_module_vars.sb).mat3x3_f32), float3x3(float3(0.0f), float3(0.0f), float3(0.0f)));
   (*tint_module_vars.sb).mat3x4_f32 = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
   (*tint_module_vars.sb).mat4x2_f32 = float4x2(float2(0.0f), float2(0.0f), float2(0.0f), float2(0.0f));
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).mat4x3_f32), float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f)));
+  tint_store_and_preserve_padding_2((&(*tint_module_vars.sb).mat4x3_f32), float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f)));
   (*tint_module_vars.sb).mat4x4_f32 = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));
   (*tint_module_vars.sb).mat2x2_f16 = half2x2(half2(0.0h), half2(0.0h));
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).mat2x3_f16), half2x3(half3(0.0h), half3(0.0h)));
+  tint_store_and_preserve_padding_3((&(*tint_module_vars.sb).mat2x3_f16), half2x3(half3(0.0h), half3(0.0h)));
   (*tint_module_vars.sb).mat2x4_f16 = half2x4(half4(0.0h), half4(0.0h));
   (*tint_module_vars.sb).mat3x2_f16 = half3x2(half2(0.0h), half2(0.0h), half2(0.0h));
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).mat3x3_f16), half3x3(half3(0.0h), half3(0.0h), half3(0.0h)));
+  tint_store_and_preserve_padding_4((&(*tint_module_vars.sb).mat3x3_f16), half3x3(half3(0.0h), half3(0.0h), half3(0.0h)));
   (*tint_module_vars.sb).mat3x4_f16 = half3x4(half4(0.0h), half4(0.0h), half4(0.0h));
   (*tint_module_vars.sb).mat4x2_f16 = half4x2(half2(0.0h), half2(0.0h), half2(0.0h), half2(0.0h));
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).mat4x3_f16), half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h)));
+  tint_store_and_preserve_padding_5((&(*tint_module_vars.sb).mat4x3_f16), half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h)));
   (*tint_module_vars.sb).mat4x4_f16 = half4x4(half4(0.0h), half4(0.0h), half4(0.0h), half4(0.0h));
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).arr2_vec3_f32), tint_array<float3, 2>{});
+  tint_store_and_preserve_padding_6((&(*tint_module_vars.sb).arr2_vec3_f32), tint_array<float3, 2>{});
   (*tint_module_vars.sb).arr2_mat4x2_f16 = tint_array<half4x2, 2>{};
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).struct_inner), Inner{});
-  tint_store_and_preserve_padding((&(*tint_module_vars.sb).array_struct_inner), tint_array<Inner, 4>{});
+  tint_store_and_preserve_padding_7((&(*tint_module_vars.sb).struct_inner), Inner{});
+  tint_store_and_preserve_padding_8((&(*tint_module_vars.sb).array_struct_inner), tint_array<Inner, 4>{});
 }

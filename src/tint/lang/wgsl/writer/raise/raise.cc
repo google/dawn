@@ -33,12 +33,13 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/load.h"
+#include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/writer/raise/ptr_to_ref.h"
-#include "src/tint/lang/wgsl/writer/raise/rename_conflicts.h"
 #include "src/tint/lang/wgsl/writer/raise/value_to_let.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::wgsl::writer {
 namespace {
@@ -236,7 +237,7 @@ Result<SuccessType> Raise(core::ir::Module& mod) {
         }
     }
 
-    if (auto result = raise::RenameConflicts(mod); result != Success) {
+    if (auto result = core::ir::transform::RenameConflicts(mod); result != Success) {
         return result.Failure();
     }
     if (auto result = raise::ValueToLet(mod); result != Success) {

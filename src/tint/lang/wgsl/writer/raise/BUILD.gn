@@ -48,8 +48,6 @@ libtint_source_set("raise") {
     "ptr_to_ref.h",
     "raise.cc",
     "raise.h",
-    "rename_conflicts.cc",
-    "rename_conflicts.h",
     "value_to_let.cc",
     "value_to_let.h",
   ]
@@ -59,6 +57,7 @@ libtint_source_set("raise") {
     "${tint_src_dir}/lang/core/constant",
     "${tint_src_dir}/lang/core/intrinsic",
     "${tint_src_dir}/lang/core/ir",
+    "${tint_src_dir}/lang/core/ir/transform",
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/intrinsic",
@@ -83,7 +82,6 @@ if (tint_build_unittests) {
     sources = [
       "ptr_to_ref_test.cc",
       "raise_test.cc",
-      "rename_conflicts_test.cc",
       "value_to_let_test.cc",
     ]
     deps = [
@@ -117,7 +115,6 @@ tint_fuzz_source_set("fuzz") {
   sources = [
     "ptr_to_ref_fuzz.cc",
     "raise_fuzz.cc",
-    "rename_conflicts_fuzz.cc",
     "value_to_let_fuzz.cc",
   ]
   deps = [

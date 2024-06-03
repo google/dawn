@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/writer/raise/rename_conflicts.h"
+#include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 
 #include <string>
 #include <utility>
@@ -36,7 +36,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/matrix.h"
 
-namespace tint::wgsl::writer::raise {
+namespace tint::core::ir::transform {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -1149,4 +1149,4 @@ $B1: {  # root
 }
 
 }  // namespace
-}  // namespace tint::wgsl::writer::raise
+}  // namespace tint::core::ir::transform

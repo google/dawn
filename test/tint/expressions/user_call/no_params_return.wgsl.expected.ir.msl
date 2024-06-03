@@ -7,6 +7,6 @@ int c() {
   return a;
 }
 void b() {
-  int b = c();
-  b = (b + c());
+  int b_1 = c();
+  b_1 = (b_1 + c());
 }

@@ -17,8 +17,8 @@ struct tint_module_vars_struct {
   device half* s;
 };
 
-half a(tint_array<half4x3, 4> a) {
-  return a[0][0][0u];
+half a(tint_array<half4x3, 4> a_1) {
+  return a_1[0][0][0u];
 }
 half b(half4x3 m) {
   return m[0][0u];

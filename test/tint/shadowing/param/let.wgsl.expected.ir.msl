@@ -1,16 +1,7 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
 void f(int a) {
-  int const a = a;
-  int const b = a;
+  int const a_1 = a;
+  int const b = a_1;
 }
-program_source:5:13: error: redefinition of 'a' with a different type: 'const int' vs 'int'
-  int const a = a;
-            ^
-program_source:4:12: note: previous definition is here
-void f(int a) {
-           ^
-

@@ -29,7 +29,7 @@ tint_array<strided_arr, 2> mat2x2_stride_16_to_arr(float2x2 m) {
 float2x2 arr_to_mat2x2_stride_16(tint_array<strided_arr, 2> arr) {
   return float2x2(arr[0u].el, arr[1u].el);
 }
-void tint_store_and_preserve_padding(device strided_arr* const target, strided_arr value_param) {
+void tint_store_and_preserve_padding_1(device strided_arr* const target, strided_arr value_param) {
   (*target).el = value_param.el;
 }
 void tint_store_and_preserve_padding(device tint_array<strided_arr, 2>* const target, tint_array<strided_arr, 2> value_param) {
@@ -41,7 +41,7 @@ void tint_store_and_preserve_padding(device tint_array<strided_arr, 2>* const ta
       if ((v_2 >= 2u)) {
         break;
       }
-      tint_store_and_preserve_padding((&(*target)[v_2]), value_param[v_2]);
+      tint_store_and_preserve_padding_1((&(*target)[v_2]), value_param[v_2]);
       v_1 = (v_2 + 1u);
       continue;
     }

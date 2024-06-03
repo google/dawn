@@ -8,5 +8,5 @@ int c(uint u) {
   return 1;
 }
 void a() {
-  float a = b(c(2u));
+  float a_1 = b(c(2u));
 }

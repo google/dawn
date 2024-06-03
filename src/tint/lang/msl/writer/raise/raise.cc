@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
+#include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
@@ -113,6 +114,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::ShaderIO, raise::ShaderIOConfig{options.emit_vertex_point_size});
     RUN_TRANSFORM(raise::ModuleScopeVars);
     RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
+    RUN_TRANSFORM(core::ir::transform::RenameConflicts);
     RUN_TRANSFORM(core::ir::transform::ValueToLet);
     RUN_TRANSFORM(raise::BuiltinPolyfill);
 

@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -19,32 +19,31 @@
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 // DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
 // FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT\ OF SUBSTITUTE GOODS OR
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
 // SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/writer/raise/rename_conflicts.h"
+#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_H_
+#define SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_H_
 
-#include "src/tint/cmd/fuzz/ir/fuzz.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/utils/result/result.h"
 
-namespace tint::wgsl::writer::raise {
-namespace {
-
-void RenameConflictsFuzzer(core::ir::Module& module) {
-    if (auto res = RenameConflicts(module); res != Success) {
-        return;
-    }
-
-    core::ir::Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of RenameConflicts failed IR validation\n" << res.Failure();
-    }
+// Forward declarations.
+namespace tint::core::ir {
+class Module;
 }
 
-}  // namespace
-}  // namespace tint::wgsl::writer::raise
+namespace tint::core::ir::transform {
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::RenameConflictsFuzzer);
+/// RenameConflicts is a transform that renames declarations which prevent identifiers from
+/// resolving to the correct declaration, and those with identical identifiers declared in the same
+/// scope.
+/// @param module the module to transform
+/// @returns success or failure
+Result<SuccessType> RenameConflicts(core::ir::Module& module);
+
+}  // namespace tint::core::ir::transform
+
+#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_H_

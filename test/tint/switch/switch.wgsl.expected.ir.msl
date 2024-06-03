@@ -2,8 +2,8 @@
 using namespace metal;
 
 void a() {
-  int a = 0;
-  switch(a) {
+  int a_1 = 0;
+  switch(a_1) {
     case 0:
     {
       break;
@@ -14,7 +14,7 @@ void a() {
     }
     default:
     {
-      a = (a + 2);
+      a_1 = (a_1 + 2);
       break;
     }
   }

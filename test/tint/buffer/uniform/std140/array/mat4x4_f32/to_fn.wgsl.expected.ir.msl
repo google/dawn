@@ -17,8 +17,8 @@ struct tint_module_vars_struct {
   device float* s;
 };
 
-float a(tint_array<float4x4, 4> a) {
-  return a[0][0][0u];
+float a(tint_array<float4x4, 4> a_1) {
+  return a_1[0][0][0u];
 }
 float b(float4x4 m) {
   return m[0][0u];
