@@ -680,6 +680,23 @@ crbug.com/dawn/2479 [ webgpu-no-worker ] webgpu:api,validation,buffer,mapping:ge
 crbug.com/dawn/2479 [ webgpu-no-worker ] webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
 
 ################################################################################
+# Failures due to enabling codecs on bots (crbug.com/41490478)
+################################################################################
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-hflip.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-rotate-180.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-rotate-270.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-rotate-90.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601-vflip.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:videoName="four-colors-h264-bt601.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-hflip.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-rotate-180.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-rotate-270.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-rotate-90.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601-vflip.mp4";* [ Failure ]
+crbug.com/41490478 [ mac ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601.mp4";* [ Failure ]
+crbug.com/41490478 [ mac amd ] webgpu:web_platform,copyToTexture,video:copy_from_video:videoName="four-colors-h264-bt601.mp4";sourceType="VideoFrame";srcDoFlipYDuringCopy=true;dstColorSpace="display-p3" [ Failure ]
+
+################################################################################
 # video tests fail on SwiftShader. Due to multiplanar formatted textures not
 # being handled properly in Chrome's WebGPU decoder.
 ################################################################################
