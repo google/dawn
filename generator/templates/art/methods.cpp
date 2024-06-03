@@ -281,6 +281,17 @@ struct UserData {
     {% for method in obj.methods if include_method(method) %}
         {{ render_method(method, obj) }}
     {% endfor %}
+
+    //* Every object gets a Release method, to supply a Kotlin AutoCloseable.
+    extern "C"
+    JNIEXPORT void JNICALL
+    Java_{{ kotlin_package.replace('.', '_') }}_{{ obj.name.CamelCase() }}_close(
+            JNIEnv *env, jobject obj) {
+        jclass clz = env->FindClass("{{ jni_name(obj) }}");
+        const {{ as_cType(obj.name) }} handle = reinterpret_cast<{{ as_cType(obj.name) }}>(
+                env->CallLongMethod(obj, env->GetMethodID(clz, "getHandle", "()J")));
+        wgpu{{ obj.name.CamelCase() }}Release(handle);
+    }
 {% endfor %}
 
 //* Global functions don't have an associated class.

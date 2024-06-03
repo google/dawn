@@ -27,7 +27,7 @@
 package {{ kotlin_package }}
 {% from 'art/api_kotlin_types.kt' import kotlin_type_declaration, kotlin_definition with context %}
 
-class {{ obj.name.CamelCase() }}(val handle: Long) {
+class {{ obj.name.CamelCase() }}(val handle: Long): AutoCloseable {
     {% for method in obj.methods if include_method(method) %}
         @JvmName("{{ method.name.camelCase() }}") external fun {{ method.name.camelCase() }}(
         //* userdata parameter omitted because Kotlin clients can achieve the same with closures.
@@ -46,4 +46,5 @@ class {{ obj.name.CamelCase() }}(val handle: Long) {
             val {{ name }} get() = {{ method.name.camelCase() }}()
         {% endif %}
     {% endfor %}
+    external override fun close();
 }
