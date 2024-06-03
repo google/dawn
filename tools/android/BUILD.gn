@@ -30,6 +30,9 @@ import("//generator/dawn_generator.gni")
 dawn_json_generator("kotlin_gen") {
   target = "kotlin"
   outputs = [
+    "cpp/methods.cpp",
+    "cpp/structures.cpp",
+    "cpp/structures.h",
     "java/android/dawn/Adapter.kt",
     "java/android/dawn/AdapterInfo.kt",
     "java/android/dawn/AdapterProperties.kt",

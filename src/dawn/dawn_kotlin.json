@@ -30,5 +30,15 @@
 
     "_doc": "See docs/dawn/codegen.md",
 
-    "kotlin_package": "android.dawn"
+    "kotlin_package": "android.dawn",
+
+    "to_jni_type" : {
+        "bool": "jboolean",
+        "float": "jfloat",
+        "int32_t": "jint",
+        "size_t": "jlong",
+        "uint32_t": "jint",
+        "uint64_t": "jlong",
+        "void": "void"
+    }
 }
