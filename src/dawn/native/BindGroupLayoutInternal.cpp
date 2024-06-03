@@ -373,6 +373,11 @@ bool operator!=(const BindingInfo& a, const BindingInfo& b) {
             return layoutA.access != layoutB.access ||
                    layoutA.viewDimension != layoutB.viewDimension ||
                    layoutA.format != layoutB.format;
+        },
+        [&](const InputAttachmentBindingInfo& layoutA) -> bool {
+            const InputAttachmentBindingInfo& layoutB =
+                std::get<InputAttachmentBindingInfo>(b.bindingLayout);
+            return layoutA.sampleType != layoutB.sampleType;
         });
 }
 
@@ -397,8 +402,12 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
     } else if (binding->sampler.type != wgpu::SamplerBindingType::Undefined) {
         bindingInfo.bindingLayout = SamplerBindingInfo(binding->sampler);
     } else if (binding->texture.sampleType != wgpu::TextureSampleType::Undefined) {
-        bindingInfo.bindingLayout =
-            TextureBindingInfo(binding->texture.WithTrivialFrontendDefaults());
+        if (binding->texture.viewDimension == kInternalInputAttachmentDim) {
+            bindingInfo.bindingLayout = InputAttachmentBindingInfo(binding->texture.sampleType);
+        } else {
+            bindingInfo.bindingLayout =
+                TextureBindingInfo(binding->texture.WithTrivialFrontendDefaults());
+        }
     } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
         bindingInfo.bindingLayout =
             StorageTextureBindingInfo(binding->storageTexture.WithTrivialFrontendDefaults());
@@ -513,6 +522,14 @@ bool SortBindingsCompare(const UnpackedPtr<BindGroupLayoutEntry>& a,
         case BindingInfoType::ExternalTexture:
             DAWN_UNREACHABLE();
             break;
+        case BindingInfoType::InputAttachment: {
+            const auto& aLayout = std::get<InputAttachmentBindingInfo>(aInfo.bindingLayout);
+            const auto& bLayout = std::get<InputAttachmentBindingInfo>(bInfo.bindingLayout);
+            if (aLayout.sampleType != bLayout.sampleType) {
+                return aLayout.sampleType < bLayout.sampleType;
+            }
+            break;
+        }
     }
     return a->binding < b->binding;
 }
@@ -641,6 +658,9 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
             },
             [&](const StaticSamplerBindingInfo& layout) {
                 recorder.Record(BindingInfoType::StaticSampler, layout.sampler->GetContentHash());
+            },
+            [&](const InputAttachmentBindingInfo& layout) {
+                recorder.Record(BindingInfoType::InputAttachment, layout.sampleType);
             });
     }
 

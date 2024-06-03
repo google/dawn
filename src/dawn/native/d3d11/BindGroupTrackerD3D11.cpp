@@ -234,6 +234,10 @@ MaybeError BindGroupTracker::Apply() {
                         // D3D11.
                         DAWN_UNREACHABLE();
                         return {};
+                    },
+                    [](const InputAttachmentBindingInfo&) -> MaybeError {
+                        DAWN_UNREACHABLE();
+                        return {};
                     }));
             }
         }
@@ -446,6 +450,10 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         DAWN_UNREACHABLE();
                 }
                 return {};
+            },
+            [](const InputAttachmentBindingInfo&) -> MaybeError {
+                DAWN_UNREACHABLE();
+                return {};
             }));
     }
     return {};
@@ -578,7 +586,8 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                     default:
                         DAWN_UNREACHABLE();
                 }
-            });
+            },
+            [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
     }
 }
 

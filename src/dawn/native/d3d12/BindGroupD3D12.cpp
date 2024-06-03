@@ -201,7 +201,8 @@ BindGroup::BindGroup(Device* device,
                 DAWN_UNREACHABLE();
             },
             // No-op as samplers will be later initialized by CreateSamplers().
-            [](const SamplerBindingInfo&) {});
+            [](const SamplerBindingInfo&) {},
+            [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
     }
 
     // Loop through the dynamic storage buffers and build a flat map from the index of the

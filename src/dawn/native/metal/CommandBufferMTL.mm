@@ -668,7 +668,8 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                     if (hasComputeStage) {
                         [compute setTexture:textureView->GetMTLTexture() atIndex:computeIndex];
                     }
-                });
+                },
+                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
     }
 

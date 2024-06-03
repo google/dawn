@@ -166,7 +166,8 @@ struct ShaderBindingInfo {
                  SamplerBindingInfo,
                  TextureBindingInfo,
                  StorageTextureBindingInfo,
-                 ExternalTextureBindingInfo>
+                 ExternalTextureBindingInfo,
+                 InputAttachmentBindingInfo>
         bindingInfo;
 };
 

@@ -139,6 +139,10 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         [&](const StorageTextureBindingInfo& layout) {
             s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
                                       BindingInfoType::StorageTexture, layout));
+        },
+        [&](const InputAttachmentBindingInfo& layout) {
+            s->Append(absl::StrFormat(*fmt, static_cast<uint32_t>(value.binding), value.visibility,
+                                      BindingInfoType::InputAttachment, layout));
         });
     return {true};
 }
@@ -215,6 +219,14 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {
     s->Append(absl::StrFormat("{sampler: %s}", value.sampler.Get()));
+    return {true};
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const InputAttachmentBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    s->Append(absl::StrFormat("{sampleType: %s}", value.sampleType));
     return {true};
 }
 
@@ -535,6 +547,9 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
             break;
         case BindingInfoType::StaticSampler:
             s->Append("staticSampler");
+            break;
+        case BindingInfoType::InputAttachment:
+            s->Append("inputAttachment");
             break;
     }
     return {true};

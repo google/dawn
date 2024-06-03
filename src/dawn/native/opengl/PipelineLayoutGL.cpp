@@ -82,7 +82,8 @@ PipelineLayout::PipelineLayout(Device* device,
                 [&](const StorageTextureBindingInfo&) {
                     mIndexInfo[group][bindingIndex] = storageTextureIndex;
                     storageTextureIndex++;
-                });
+                },
+                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
     }
 

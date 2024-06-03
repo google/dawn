@@ -76,6 +76,10 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                 case wgpu::StorageTextureAccess::Undefined:
                     DAWN_UNREACHABLE();
             }
+        },
+        [](const InputAttachmentBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+            DAWN_UNREACHABLE();
+            return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
         });
 }
 }  // anonymous namespace
@@ -155,6 +159,10 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
                 return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
             },
             [](const StorageTextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+                return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+            },
+            [](const InputAttachmentBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+                DAWN_UNREACHABLE();
                 return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
             });
 

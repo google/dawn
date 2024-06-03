@@ -151,6 +151,24 @@ BindGroup::BindGroup(Device* device,
 
                 write.pImageInfo = &writeImageInfo[numWrites];
                 return true;
+            },
+            [&](const InputAttachmentBindingInfo&) -> bool {
+                TextureView* view = ToBackend(GetBindingAsTextureView(bindingIndex));
+
+                VkImageView handle = view->GetHandle();
+                if (handle == VK_NULL_HANDLE) {
+                    // The Texture was destroyed before the TextureView was created.
+                    // Skip this descriptor write since it would be
+                    // a Vulkan Validation Layers error. This bind group won't be used as it
+                    // is an error to submit a command buffer that references destroyed
+                    // resources.
+                    return false;
+                }
+                writeImageInfo[numWrites].imageView = handle;
+                writeImageInfo[numWrites].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+                write.pImageInfo = &writeImageInfo[numWrites];
+                return true;
             });
 
         if (shouldWriteDescriptor) {

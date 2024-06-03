@@ -90,6 +90,8 @@ BindingInfoType TintResourceTypeToBindingInfoType(
             return BindingInfoType::StorageTexture;
         case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
             return BindingInfoType::ExternalTexture;
+        case tint::inspector::ResourceBinding::ResourceType::kInputAttachment:
+            return BindingInfoType::InputAttachment;
 
         default:
             DAWN_UNREACHABLE();
@@ -433,7 +435,8 @@ BindingInfoType GetShaderBindingType(const ShaderBindingInfo& shaderInfo) {
         [](const SamplerBindingInfo&) { return BindingInfoType::Sampler; },
         [](const TextureBindingInfo&) { return BindingInfoType::Texture; },
         [](const StorageTextureBindingInfo&) { return BindingInfoType::StorageTexture; },
-        [](const ExternalTextureBindingInfo&) { return BindingInfoType::ExternalTexture; });
+        [](const ExternalTextureBindingInfo&) { return BindingInfoType::ExternalTexture; },
+        [](const InputAttachmentBindingInfo&) { return BindingInfoType::InputAttachment; });
 }
 
 MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* device,
@@ -585,6 +588,15 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
         },
         [](const ExternalTextureBindingInfo&) -> MaybeError {
             DAWN_UNREACHABLE();
+            return {};
+        },
+        [&](const InputAttachmentBindingInfo& bindingInfo) -> MaybeError {
+            // Internal use only, no validation, only assertions.
+            const InputAttachmentBindingInfo& bindingLayout =
+                std::get<InputAttachmentBindingInfo>(layoutInfo.bindingLayout);
+
+            DAWN_ASSERT(bindingLayout.sampleType == bindingInfo.sampleType);
+
             return {};
         });
 }
@@ -916,6 +928,12 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             }
             case BindingInfoType::StaticSampler: {
                 return DAWN_VALIDATION_ERROR("Static samplers not supported in WGSL");
+            }
+            case BindingInfoType::InputAttachment: {
+                InputAttachmentBindingInfo bindingInfo = {};
+                bindingInfo.sampleType = TintSampledKindToSampleType(resource.sampled_kind);
+                info.bindingInfo = bindingInfo;
+                break;
             }
             default:
                 return DAWN_VALIDATION_ERROR("Unknown binding type in Shader");

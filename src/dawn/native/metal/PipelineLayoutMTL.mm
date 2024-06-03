@@ -84,7 +84,8 @@ PipelineLayout::PipelineLayout(Device* device,
                         // TODO(crbug.com/dawn/2482): Implement static samplers in the
                         // Metal backend.
                         DAWN_UNREACHABLE();
-                    });
+                    },
+                    [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
             }
         }
 

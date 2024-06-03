@@ -307,6 +307,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                     bindings.external_texture.emplace(
                         srcBindingPoint,
                         tint::spirv::writer::binding::ExternalTexture{metadata, plane0, plane1});
+                },
+                [&](const InputAttachmentBindingInfo& bindingInfo) {
+                    // TODO(341117913): implement input attachment binding.
+                    DAWN_UNREACHABLE();
                 });
         }
     }

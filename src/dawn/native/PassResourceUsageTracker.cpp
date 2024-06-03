@@ -161,7 +161,11 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                 }
             },
             [&](const SamplerBindingInfo&) {},  //
-            [&](const StaticSamplerBindingInfo&) {});
+            [&](const StaticSamplerBindingInfo&) {},
+            [&](const InputAttachmentBindingInfo&) {
+                // This binding is not supposed to be used on front-end.
+                DAWN_UNREACHABLE();
+            });
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
@@ -226,7 +230,8 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
                 mUsage.referencedTextures.insert(
                     group->GetBindingAsTextureView(index)->GetTexture());
             },
-            [](const SamplerBindingInfo&) {}, [](const StaticSamplerBindingInfo&) {});
+            [](const SamplerBindingInfo&) {}, [](const StaticSamplerBindingInfo&) {},
+            [&](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {

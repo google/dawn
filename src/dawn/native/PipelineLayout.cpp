@@ -260,6 +260,10 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
             },
             [&](const ExternalTextureBindingInfo&) {
                 entry.nextInChain = externalTextureBindingEntry;
+            },
+            [&](const InputAttachmentBindingInfo& bindingInfo) {
+                entry.texture.sampleType = bindingInfo.sampleType;
+                entry.texture.viewDimension = kInternalInputAttachmentDim;
             });
 
         return entry;

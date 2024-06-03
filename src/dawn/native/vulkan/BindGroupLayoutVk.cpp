@@ -88,7 +88,8 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
         [](const SamplerBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
         [](const StaticSamplerBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
         [](const TextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; },
-        [](const StorageTextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; });
+        [](const StorageTextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; },
+        [](const InputAttachmentBindingInfo&) { return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; });
 }
 
 // static

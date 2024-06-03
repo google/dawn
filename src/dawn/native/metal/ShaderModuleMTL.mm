@@ -205,7 +205,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                     bindings.external_texture.emplace(
                         srcBindingPoint,
                         tint::msl::writer::binding::ExternalTexture{metadata, plane0, plane1});
-                });
+                },
+                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
     }
 

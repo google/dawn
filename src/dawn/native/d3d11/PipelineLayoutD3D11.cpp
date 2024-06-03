@@ -105,7 +105,8 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                         case wgpu::StorageTextureAccess::Undefined:
                             DAWN_UNREACHABLE();
                     }
-                });
+                },
+                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
     }
     mUnusedUAVBindingCount = unorderedAccessViewIndex;

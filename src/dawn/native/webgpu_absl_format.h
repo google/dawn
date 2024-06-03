@@ -132,6 +132,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+struct InputAttachmentBindingInfo;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const InputAttachmentBindingInfo& value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 struct StaticSamplerBindingInfo;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const StaticSamplerBindingInfo& value,
