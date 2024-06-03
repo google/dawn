@@ -22,7 +22,9 @@ bool func_3(tint_module_vars_struct tint_module_vars) {
           return false;
         }
       }
-      i = (i + 1);
+      {
+        i = (i + 1);
+      }
       continue;
     }
   }

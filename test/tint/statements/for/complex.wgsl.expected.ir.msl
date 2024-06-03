@@ -20,7 +20,9 @@ void f() {
       }
       some_loop_body();
       j = (i * 30);
-      i = (i + 1);
+      {
+        i = (i + 1);
+      }
       continue;
     }
   }

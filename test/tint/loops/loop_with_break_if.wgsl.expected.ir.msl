@@ -8,8 +8,10 @@ int f() {
       if ((i > 4)) {
         return i;
       }
-      i = (i + 1);
-      if (i == 4) { break; }
+      {
+        i = (i + 1);
+        if (i == 4) { break; }
+      }
       continue;
     }
   }

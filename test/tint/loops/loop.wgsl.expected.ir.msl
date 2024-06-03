@@ -9,6 +9,8 @@ int f() {
       if ((i > 4)) {
         return i;
       }
+      {
+      }
       continue;
     }
   }

@@ -40,7 +40,9 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
         break;
       }
       (*tint_module_vars.s).data[v_1] = 0;
-      v = (v_1 + 1u);
+      {
+        v = (v_1 + 1u);
+      }
       continue;
     }
   }

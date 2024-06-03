@@ -10,6 +10,8 @@ int f() {
         break;
       }
       i = (i + 1);
+      {
+      }
       continue;
     }
   }

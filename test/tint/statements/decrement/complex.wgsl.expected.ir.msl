@@ -55,10 +55,12 @@ void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
       } else {
         break;
       }
-      int const v_4 = idx4(tint_module_vars);
-      device int4* const v_5 = (&(*tint_module_vars.tint_symbol)[v_4].a[idx5(tint_module_vars)]);
-      int const v_6 = idx6(tint_module_vars);
-      (*v_5)[v_6] = ((*v_5)[v_6] - 1);
+      {
+        int const v_4 = idx4(tint_module_vars);
+        device int4* const v_5 = (&(*tint_module_vars.tint_symbol)[v_4].a[idx5(tint_module_vars)]);
+        int const v_6 = idx6(tint_module_vars);
+        (*v_5)[v_6] = ((*v_5)[v_6] - 1);
+      }
       continue;
     }
   }

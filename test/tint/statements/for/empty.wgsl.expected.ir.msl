@@ -8,6 +8,8 @@ void f() {
       } else {
         break;
       }
+      {
+      }
       continue;
     }
   }

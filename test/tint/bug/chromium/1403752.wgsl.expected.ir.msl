@@ -9,6 +9,8 @@ void d() {
       } else {
         break;
       }
+      {
+      }
       continue;
     }
   }

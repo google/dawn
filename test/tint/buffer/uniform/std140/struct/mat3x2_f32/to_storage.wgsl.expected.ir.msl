@@ -37,7 +37,9 @@ void tint_store_and_preserve_padding(device tint_array<S, 4>* const target, tint
         break;
       }
       tint_store_and_preserve_padding_1((&(*target)[v_1]), value_param[v_1]);
-      v = (v_1 + 1u);
+      {
+        v = (v_1 + 1u);
+      }
       continue;
     }
   }

@@ -13,7 +13,9 @@ kernel void tint_symbol() {
       switch(i) {
         case 0:
         {
-          i = (i + 1);
+          {
+            i = (i + 1);
+          }
           continue;
         }
         default:
@@ -24,7 +26,9 @@ kernel void tint_symbol() {
       switch(i) {
         case 0:
         {
-          i = (i + 1);
+          {
+            i = (i + 1);
+          }
           continue;
         }
         default:
@@ -32,7 +36,9 @@ kernel void tint_symbol() {
           break;
         }
       }
-      i = (i + 1);
+      {
+        i = (i + 1);
+      }
       continue;
     }
   }

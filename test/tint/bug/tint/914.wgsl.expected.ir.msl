@@ -85,7 +85,9 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
       }
       (*tint_module_vars.mm_Asub)[(v_4 / 64u)][(v_4 % 64u)] = 0.0f;
       (*tint_module_vars.mm_Bsub)[(v_4 / 64u)][(v_4 % 64u)] = 0.0f;
-      v_3 = (v_4 + 256u);
+      {
+        v_3 = (v_4 + 256u);
+      }
       continue;
     }
   }
@@ -106,7 +108,9 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
         break;
       }
       acc[index] = 0.0f;
-      index = (index + 1u);
+      {
+        index = (index + 1u);
+      }
       continue;
     }
   }
@@ -138,11 +142,15 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
               uint const inputRow = (tileRow + innerRow);
               uint const inputCol = (tileColA + innerCol);
               (*tint_module_vars.mm_Asub)[inputRow][inputCol] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol), tint_module_vars);
-              innerCol = (innerCol + 1u);
+              {
+                innerCol = (innerCol + 1u);
+              }
               continue;
             }
           }
-          innerRow = (innerRow + 1u);
+          {
+            innerRow = (innerRow + 1u);
+          }
           continue;
         }
       }
@@ -164,11 +172,15 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
               uint const inputCol = (tileCol + innerCol);
               threadgroup float* const v_5 = (&(*tint_module_vars.mm_Bsub)[innerCol][inputCol]);
               (*v_5) = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol), tint_module_vars);
-              innerCol = (innerCol + 1u);
+              {
+                innerCol = (innerCol + 1u);
+              }
               continue;
             }
           }
-          innerRow = (innerRow + 1u);
+          {
+            innerRow = (innerRow + 1u);
+          }
           continue;
         }
       }
@@ -188,7 +200,9 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
                 break;
               }
               BCached[inner] = (*tint_module_vars.mm_Bsub)[k][(tileCol + inner)];
-              inner = (inner + 1u);
+              {
+                inner = (inner + 1u);
+              }
               continue;
             }
           }
@@ -209,20 +223,28 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
                   }
                   uint const index = ((innerRow * 4u) + innerCol);
                   acc[index] = (acc[index] + (ACached * BCached[innerCol]));
-                  innerCol = (innerCol + 1u);
+                  {
+                    innerCol = (innerCol + 1u);
+                  }
                   continue;
                 }
               }
-              innerRow = (innerRow + 1u);
+              {
+                innerRow = (innerRow + 1u);
+              }
               continue;
             }
           }
-          k = (k + 1u);
+          {
+            k = (k + 1u);
+          }
           continue;
         }
       }
       threadgroup_barrier(mem_flags::mem_threadgroup);
-      t = (t + 1u);
+      {
+        t = (t + 1u);
+      }
       continue;
     }
   }
@@ -242,11 +264,15 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
           }
           uint const index = ((innerRow * 4u) + innerCol);
           mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index], tint_module_vars);
-          innerCol = (innerCol + 1u);
+          {
+            innerCol = (innerCol + 1u);
+          }
           continue;
         }
       }
-      innerRow = (innerRow + 1u);
+      {
+        innerRow = (innerRow + 1u);
+      }
       continue;
     }
   }

@@ -44,8 +44,10 @@ void foo(tint_module_vars_struct tint_module_vars) {
       } else {
         break;
       }
-      thread float* const v_2 = (&a[idx3(tint_module_vars)]);
-      (*v_2) = ((*v_2) + 1.0f);
+      {
+        thread float* const v_2 = (&a[idx3(tint_module_vars)]);
+        (*v_2) = ((*v_2) + 1.0f);
+      }
       continue;
     }
   }

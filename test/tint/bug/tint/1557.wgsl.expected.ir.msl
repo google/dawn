@@ -16,6 +16,8 @@ void g() {
       }
       j = (j + 1);
       int k = f();
+      {
+      }
       continue;
     }
   }

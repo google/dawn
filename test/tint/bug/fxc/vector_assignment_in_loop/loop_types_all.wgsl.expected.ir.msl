@@ -33,7 +33,9 @@ kernel void tint_symbol() {
       v2b[i] = true;
       v3b[i] = true;
       v4b[i] = true;
-      i = (i + 1);
+      {
+        i = (i + 1);
+      }
       continue;
     }
   }

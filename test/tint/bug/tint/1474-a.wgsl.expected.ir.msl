@@ -13,6 +13,8 @@ kernel void tint_symbol() {
       } else {
         return;
       }
+      {
+      }
       continue;
     }
   }

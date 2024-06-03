@@ -25,7 +25,9 @@ kernel void tint_symbol() {
       v2i[i] = 1;
       v2u[i] = 1u;
       v2b[i] = true;
-      i = (i + 1);
+      {
+        i = (i + 1);
+      }
       continue;
     }
   }

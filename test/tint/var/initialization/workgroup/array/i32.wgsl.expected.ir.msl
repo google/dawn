@@ -29,7 +29,9 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
         break;
       }
       (*tint_module_vars.zero)[v_2] = 0;
-      v_1 = (v_2 + 1u);
+      {
+        v_1 = (v_2 + 1u);
+      }
       continue;
     }
   }

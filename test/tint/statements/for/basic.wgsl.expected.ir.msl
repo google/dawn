@@ -12,7 +12,9 @@ void f() {
         break;
       }
       some_loop_body();
-      i = (i + 1);
+      {
+        i = (i + 1);
+      }
       continue;
     }
   }

@@ -12,6 +12,8 @@ void tint_symbol(tint_module_vars_struct tint_module_vars) {
       } else {
         break;
       }
+      {
+      }
       continue;
     }
   }

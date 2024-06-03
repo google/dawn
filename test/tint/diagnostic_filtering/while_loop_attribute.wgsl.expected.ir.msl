@@ -30,6 +30,8 @@ void tint_symbol_inner(float x) {
       } else {
         break;
       }
+      {
+      }
       continue;
     }
   }

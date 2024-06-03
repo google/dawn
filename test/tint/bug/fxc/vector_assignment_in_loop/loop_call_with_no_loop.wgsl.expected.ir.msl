@@ -28,7 +28,9 @@ kernel void tint_symbol() {
         break;
       }
       foo(tint_module_vars);
-      i = (i + 1);
+      {
+        i = (i + 1);
+      }
       continue;
     }
   }

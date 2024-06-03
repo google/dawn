@@ -591,7 +591,14 @@ class Printer : public tint::TextGenerator {
         //   }
         // }
 
-        auto emit_continuing = [&] { EmitBlock(l->Continuing()); };
+        auto emit_continuing = [&] {
+            Line() << "{";
+            {
+                const ScopedIndent si(current_buffer_);
+                EmitBlock(l->Continuing());
+            }
+            Line() << "}";
+        };
         TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
 
         Line() << "{";

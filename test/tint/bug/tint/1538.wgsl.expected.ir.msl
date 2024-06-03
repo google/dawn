@@ -38,6 +38,8 @@ kernel void tint_symbol(device tint_array<uint, 1>* buf [[buffer(1)]]) {
       }
       int s = f();
       (*tint_module_vars.buf)[0] = 0u;
+      {
+      }
       continue;
     }
   }

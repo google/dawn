@@ -30,7 +30,9 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
         break;
       }
       (*tint_module_vars.w)[v_1] = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));
-      v = (v_1 + 1u);
+      {
+        v = (v_1 + 1u);
+      }
       continue;
     }
   }

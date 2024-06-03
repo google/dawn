@@ -16,6 +16,8 @@ int f() {
           if ((j > 4)) {
             return 2;
           }
+          {
+          }
           continue;
         }
       }

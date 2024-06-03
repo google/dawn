@@ -42,7 +42,9 @@ void tint_symbol_inner(uint3 global_id, tint_module_vars_struct tint_module_vars
       uint const a = (i + (resultCell[0u] * dimInner));
       uint const b = (resultCell[1u] + (i * dimOutter));
       result = (result + ((*tint_module_vars.firstMatrix).numbers[a] * (*tint_module_vars.secondMatrix).numbers[b]));
-      i = (i + 1u);
+      {
+        i = (i + 1u);
+      }
       continue;
     }
   }
