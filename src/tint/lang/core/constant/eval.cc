@@ -195,16 +195,15 @@ std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs) {
 template <typename VALUE_TY>
 std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
     StringStream ss;
-    ss << "value " << value << " cannot be represented as "
-       << "'" << target_ty << "'";
+    ss << "value " << value << " cannot be represented as " << "'" << target_ty << "'";
     return ss.str();
 }
 
 template <typename NumberT>
 std::string OverflowExpErrorMessage(std::string_view base, NumberT exp) {
     StringStream ss;
-    ss << base << "^" << exp << " cannot be represented as "
-       << "'" << FriendlyName<NumberT>() << "'";
+    ss << base << "^" << exp << " cannot be represented as " << "'" << FriendlyName<NumberT>()
+       << "'";
     return ss.str();
 }
 

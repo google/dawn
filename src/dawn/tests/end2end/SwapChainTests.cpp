@@ -431,8 +431,9 @@ TEST_P(SwapChainWithAdditionalUsageTests, ErrorIncludeUnsupportedUsage) {
     auto desc = baseDescriptor;
     desc.usage = supportedUsages | wgpu::TextureUsage::StorageBinding;
 
-    ASSERT_DEVICE_ERROR_MSG({ auto swapchain = CreateSwapChain(surface, &desc); },
-                            testing::HasSubstr("is not supported"));
+    ASSERT_DEVICE_ERROR_MSG(
+        { auto swapchain = CreateSwapChain(surface, &desc); },
+        testing::HasSubstr("is not supported"));
 }
 
 // Test copying to a swapchain texture when it is supported.

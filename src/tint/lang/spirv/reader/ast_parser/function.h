@@ -198,8 +198,8 @@ struct BlockInfo {
 /// @returns the stream so calls can be chained
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
 auto& operator<<(STREAM& o, const BlockInfo& bi) {
-    o << "BlockInfo{"
-      << " id: " << bi.id << " pos: " << bi.pos << " merge_for_header: " << bi.merge_for_header
+    o << "BlockInfo{" << " id: " << bi.id << " pos: " << bi.pos
+      << " merge_for_header: " << bi.merge_for_header
       << " continue_for_header: " << bi.continue_for_header
       << " header_for_merge: " << bi.header_for_merge
       << " is_continue_entire_loop: " << int(bi.is_continue_entire_loop) << "}";
@@ -374,8 +374,7 @@ struct DefInfo {
 /// @returns the stream so calls can be chained
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
 auto& operator<<(STREAM& o, const DefInfo& di) {
-    o << "DefInfo{"
-      << " inst.result_id: " << di.inst.result_id();
+    o << "DefInfo{" << " inst.result_id: " << di.inst.result_id();
     if (di.local.has_value()) {
         const auto& dil = di.local.value();
         o << " block_pos: " << dil.block_pos << " num_uses: " << dil.num_uses

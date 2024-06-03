@@ -1189,10 +1189,9 @@ Case::Create<AFloat,     AFloat,     AFloat,     AInt,       AFloat>(),
 Case::Create<AInt,       AInt,       AInt,       AInt,       AInt>()
                              ));  // clang-format on
 
-INSTANTIATE_TEST_SUITE_P(
-    VecAFloat_VecAInt,
-    IntrinsicTableAbstractBinaryTest,
-    testing::Values(  // clang-format off
+INSTANTIATE_TEST_SUITE_P(VecAFloat_VecAInt,
+                         IntrinsicTableAbstractBinaryTest,
+                         testing::Values(  // clang-format off
 //            result   | param lhs | param rhs |  arg lhs  |  arg rhs
 Case::Create<AFloatV,    AFloatV,    AFloatV,    AFloatV,    AFloatV>(),
 Case::Create<AFloatV,    AFloatV,    AFloatV,    AFloatV,    AIntV>(),
@@ -1216,37 +1215,33 @@ Case::Create<f32V,       f32V,       f32V,       AFloatV,    f32V>(),
 Case::Create<f32V,       f32V,       f32V,       f32V,       AFloatV>()
                              ));  // clang-format on
 
-INSTANTIATE_TEST_SUITE_P(
-    AFloat_i32,
-    IntrinsicTableAbstractBinaryTest,
-    testing::Values(  // clang-format off
+INSTANTIATE_TEST_SUITE_P(AFloat_i32,
+                         IntrinsicTableAbstractBinaryTest,
+                         testing::Values(  // clang-format off
 //            result   | param lhs | param rhs |  arg lhs  |  arg rhs
 Case::Create<void,        void,        void,        AFloat,     i32>(false),
 Case::Create<void,        void,        void,        i32,        AFloat>(false)
                              ));  // clang-format on
 
-INSTANTIATE_TEST_SUITE_P(
-    VecAFloat_Veci32,
-    IntrinsicTableAbstractBinaryTest,
-    testing::Values(  // clang-format off
+INSTANTIATE_TEST_SUITE_P(VecAFloat_Veci32,
+                         IntrinsicTableAbstractBinaryTest,
+                         testing::Values(  // clang-format off
 //            result   | param lhs | param rhs |  arg lhs  |  arg rhs
 Case::Create<void,        void,        void,        AFloatV,    i32V>(false),
 Case::Create<void,        void,        void,        i32V,       AFloatV>(false)
                              ));  // clang-format on
 
-INSTANTIATE_TEST_SUITE_P(
-    AFloat_u32,
-    IntrinsicTableAbstractBinaryTest,
-    testing::Values(  // clang-format off
+INSTANTIATE_TEST_SUITE_P(AFloat_u32,
+                         IntrinsicTableAbstractBinaryTest,
+                         testing::Values(  // clang-format off
 //            result   | param lhs | param rhs |  arg lhs  |  arg rhs
 Case::Create<void,        void,        void,        AFloat,     u32>(false),
 Case::Create<void,        void,        void,        u32,        AFloat>(false)
                              ));  // clang-format on
 
-INSTANTIATE_TEST_SUITE_P(
-    VecAFloat_Vecu32,
-    IntrinsicTableAbstractBinaryTest,
-    testing::Values(  // clang-format off
+INSTANTIATE_TEST_SUITE_P(VecAFloat_Vecu32,
+                         IntrinsicTableAbstractBinaryTest,
+                         testing::Values(  // clang-format off
 //            result   | param lhs | param rhs |  arg lhs  |  arg rhs
 Case::Create<void,        void,        void,        AFloatV,    u32V>(false),
 Case::Create<void,        void,        void,        u32V,       AFloatV>(false)

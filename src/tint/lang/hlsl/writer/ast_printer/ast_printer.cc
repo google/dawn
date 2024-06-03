@@ -2367,8 +2367,7 @@ bool ASTPrinter::EmitQuantizeToF16Call(StringStream& out,
     if (auto* vec = builtin->ReturnType()->As<core::type::Vector>()) {
         width = std::to_string(vec->Width());
     }
-    out << "f16tof32(f32tof16"
-        << "(";
+    out << "f16tof32(f32tof16" << "(";
     if (!EmitExpression(out, expr->args[0])) {
         return false;
     }

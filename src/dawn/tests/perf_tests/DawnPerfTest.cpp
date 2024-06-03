@@ -69,15 +69,10 @@ void DumpTraceEventsToJSONFile(
 
         uint64_t microseconds = static_cast<uint64_t>(traceEvent.timestamp * 1000.0 * 1000.0);
 
-        outFile << ", { "
-                << "\"name\": \"" << traceEvent.name << "\", "
-                << "\"cat\": \"" << category << "\", "
-                << "\"ph\": \"" << traceEvent.phase << "\", "
-                << "\"id\": " << traceEvent.id << ", "
-                << "\"tid\": " << traceEvent.threadId << ", "
-                << "\"ts\": " << microseconds << ", "
-                << "\"pid\": \"Dawn\""
-                << " }";
+        outFile << ", { " << "\"name\": \"" << traceEvent.name << "\", " << "\"cat\": \""
+                << category << "\", " << "\"ph\": \"" << traceEvent.phase << "\", "
+                << "\"id\": " << traceEvent.id << ", " << "\"tid\": " << traceEvent.threadId << ", "
+                << "\"ts\": " << microseconds << ", " << "\"pid\": \"Dawn\"" << " }";
     }
     outFile.close();
 }

@@ -1313,8 +1313,7 @@ bool GenerateIrProtoBinary([[maybe_unused]] const tint::Program& program,
     }
 
     if (!WriteFile(options.output_file, "wb", ToStdVector(pb.Get()))) {
-        std::cerr << "Failed to write protobuf binary out to file"
-                  << "\n";
+        std::cerr << "Failed to write protobuf binary out to file" << "\n";
         return false;
     }
 
@@ -1342,8 +1341,7 @@ bool GenerateIrProtoDebug([[maybe_unused]] const tint::Program& program,
     }
 
     if (!WriteFile(options.output_file, "w", pb.Get())) {
-        std::cerr << "Failed to write protobuf debug text out to file"
-                  << "\n";
+        std::cerr << "Failed to write protobuf debug text out to file" << "\n";
         return false;
     }
 

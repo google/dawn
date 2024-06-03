@@ -254,10 +254,9 @@ void ValidateCopySplit(const TextureSpec& textureSpec,
 }
 
 std::ostream& operator<<(std::ostream& os, const TextureSpec& textureSpec) {
-    os << "TextureSpec("
-       << "[(" << textureSpec.x << ", " << textureSpec.y << ", " << textureSpec.z << "), ("
-       << textureSpec.width << ", " << textureSpec.height << ", " << textureSpec.depthOrArrayLayers
-       << ")], " << textureSpec.texelBlockSizeInBytes << ")";
+    os << "TextureSpec(" << "[(" << textureSpec.x << ", " << textureSpec.y << ", " << textureSpec.z
+       << "), (" << textureSpec.width << ", " << textureSpec.height << ", "
+       << textureSpec.depthOrArrayLayers << ")], " << textureSpec.texelBlockSizeInBytes << ")";
     return os;
 }
 

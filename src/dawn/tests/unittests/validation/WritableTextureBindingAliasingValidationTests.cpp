@@ -71,8 +71,8 @@ std::string GenerateBindingString(const BindingDescriptorGroups& descriptors) {
     for (const auto& entries : descriptors) {
         for (uint32_t bindingIndex = 0; bindingIndex < entries.size(); bindingIndex++) {
             // All texture view binding format uses RGBA8Unorm in this test.
-            ostream << "@group(" << groupIndex << ") @binding(" << bindingIndex << ") "
-                    << "var b" << index << " : texture_storage_2d_array<rgba8unorm, write>;\n";
+            ostream << "@group(" << groupIndex << ") @binding(" << bindingIndex << ") " << "var b"
+                    << index << " : texture_storage_2d_array<rgba8unorm, write>;\n";
 
             index++;
         }

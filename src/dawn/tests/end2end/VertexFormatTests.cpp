@@ -391,8 +391,8 @@ class VertexFormatTest : public DawnTest {
             vs << "    var " << testVal << " : " << expectedDataType << ";\n";
             vs << "    var " << expectedVal << " : " << expectedDataType << ";\n";
             vs << "    " << testVal << " = input.test" << suffix << ";\n";
-            vs << "    " << expectedVal << " = expected[input.VertexIndex]"
-               << "[" << component << "];\n";
+            vs << "    " << expectedVal << " = expected[input.VertexIndex]" << "[" << component
+               << "];\n";
             if (!isInputTypeFloat) {  // Integer / unsigned integer need to match exactly.
                 vs << "    success = success && (" << testVal << " == " << expectedVal << ");\n";
             } else {

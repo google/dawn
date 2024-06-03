@@ -344,8 +344,7 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
                 "@builtin(subgroup_size) sg_size : u32, "
                 "@builtin(subgroup_invocation_id) sg_id : u32"
                 ") {\n";
-        code << "  var sum : vec4<AccType>"
-             << ";\n";
+        code << "  var sum : vec4<AccType>" << ";\n";
         code << GenerateSubgroupCase(4) << " else " << GenerateSubgroupCase(8) << " else "
              << GenerateSubgroupCase(16) << " else " << GenerateSubgroupCase(32) << " else "
              << GenerateSubgroupCase(64);
@@ -354,10 +353,8 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
     } else {
         code << "@compute @workgroup_size(64) fn main(@builtin(global_invocation_id) global_id  : "
                 "vec3u) {\n";
-        code << "  var sum : vec4<AccType>"
-             << ";\n";
-        code << "  for (var col = 0u; col < uniforms.packedCols; col++) {"
-             << ";\n";
+        code << "  var sum : vec4<AccType>" << ";\n";
+        code << "  for (var col = 0u; col < uniforms.packedCols; col++) {" << ";\n";
         code << "    let v = " << valueLoad("col") << ";\n";
         code << "    " << loopBody("") << "\n";
         code << "  }\n";

@@ -594,13 +594,13 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
             wgpu::TextureFormat::R8Unorm, expectedValue, wgpu::TextureUsage::TextureBinding);
         bgEntries.push_back({nullptr, binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
-        interface << "@group(0) @binding(" << binding++ << ") "
-                  << "var tex" << i << " : texture_2d<f32>;\n";
+        interface << "@group(0) @binding(" << binding++ << ") " << "var tex" << i
+                  << " : texture_2d<f32>;\n";
 
         bgEntries.push_back({nullptr, binding, nullptr, 0, 0, device.CreateSampler(), nullptr});
 
-        interface << "@group(0) @binding(" << binding++ << ")"
-                  << "var samp" << i << " : sampler;\n";
+        interface << "@group(0) @binding(" << binding++ << ")" << "var samp" << i
+                  << " : sampler;\n";
 
         body << "if (abs(textureSampleLevel(tex" << i << ", samp" << i
              << ", vec2f(0.5, 0.5), 0.0).r - " << expectedValue++ << ".0 / 255.0) > 0.0001) {\n";
@@ -612,8 +612,8 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
             wgpu::TextureFormat::R32Uint, expectedValue, wgpu::TextureUsage::StorageBinding);
         bgEntries.push_back({nullptr, binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
-        interface << "@group(0) @binding(" << binding++ << ") "
-                  << "var image" << i << " : texture_storage_2d<r32uint, write>;\n";
+        interface << "@group(0) @binding(" << binding++ << ") " << "var image" << i
+                  << " : texture_storage_2d<r32uint, write>;\n";
 
         body << "_ = image" << i << ";";
     }
@@ -627,8 +627,8 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
                 value : u32
             }
         )";
-        interface << "@group(0) @binding(" << binding++ << ") "
-                  << "var<uniform> ubuf" << i << " : UniformBuffer" << i << ";\n";
+        interface << "@group(0) @binding(" << binding++ << ") " << "var<uniform> ubuf" << i
+                  << " : UniformBuffer" << i << ";\n";
 
         body << "if (ubuf" << i << ".value != " << expectedValue++ << "u) {\n";
         body << "    return;\n";
@@ -644,8 +644,8 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
                 value : u32
             }
         )";
-        interface << "@group(0) @binding(" << binding++ << ") "
-                  << "var<storage, read> sbuf" << i << " : ReadOnlyStorageBuffer" << i << ";\n";
+        interface << "@group(0) @binding(" << binding++ << ") " << "var<storage, read> sbuf" << i
+                  << " : ReadOnlyStorageBuffer" << i << ";\n";
 
         body << "if (sbuf" << i << ".value != " << expectedValue++ << "u) {\n";
         body << "    return;\n";

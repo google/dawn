@@ -1543,8 +1543,7 @@ TEST_P(DepthStencilCopyTests_RegressionDawn1083, Run) {
                         ExpectAttachmentDepthTestData(dst, GetParam().mTextureFormat, mipWidth,
                                                       mipHeight, dstArrayLayer + z, mipLevel,
                                                       GetExpectedDepthData(mipLevel))
-                            << "depth aspect"
-                            << "\nmipLevelCount: " << mipLevelCount
+                            << "depth aspect" << "\nmipLevelCount: " << mipLevelCount
                             << "\narrayLayerCount: " << arrayLayerCount
                             << "\nmipLevel: " << mipLevel
                             << "\nsrcArrayLayer: " << srcArrayLayer + z
@@ -1555,8 +1554,7 @@ TEST_P(DepthStencilCopyTests_RegressionDawn1083, Run) {
                             ExpectAttachmentStencilTestData(dst, GetParam().mTextureFormat,
                                                             mipWidth, mipHeight, dstArrayLayer + z,
                                                             mipLevel, stencilValue)
-                                << "stencil aspect"
-                                << "\nmipLevelCount: " << mipLevelCount
+                                << "stencil aspect" << "\nmipLevelCount: " << mipLevelCount
                                 << "\narrayLayerCount: " << arrayLayerCount
                                 << "\nmipLevel: " << mipLevel
                                 << "\nsrcArrayLayer: " << srcArrayLayer + z

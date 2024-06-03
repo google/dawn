@@ -365,8 +365,8 @@ TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16
                         std::vector<uint16_t> data(mipWidth * mipHeight, 0xCCCC);
                         EXPECT_TEXTURE_EQ(data.data(), tex, {0, 0, layer}, {mipWidth, mipHeight},
                                           level)
-                            << "cleared texture data should have been 0xCCCC at:"
-                            << "\nlayer: " << layer << "\nlevel: " << level;
+                            << "cleared texture data should have been 0xCCCC at:" << "\nlayer: "
+                            << layer << "\nlevel: " << level;
                     } else {
                         // Otherwise, check the other subresources have the orignal contents.
                         // Without the workaround, they are 0.
@@ -375,8 +375,8 @@ TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16
                         std::vector<uint16_t> data(mipWidth * mipHeight, value);
                         EXPECT_TEXTURE_EQ(data.data(), tex, {0, 0, layer}, {mipWidth, mipHeight},
                                           level)
-                            << "written texture data should still be " << value << " at:"
-                            << "\nlayer: " << layer << "\nlevel: " << level;
+                            << "written texture data should still be " << value
+                            << " at:" << "\nlayer: " << layer << "\nlevel: " << level;
                     }
                 }
             }

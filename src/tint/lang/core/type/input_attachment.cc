@@ -54,8 +54,7 @@ bool InputAttachment::Equals(const UniqueNode& other) const {
 
 std::string InputAttachment::FriendlyName() const {
     StringStream out;
-    out << "input_attachment"
-        << "<" << type_->FriendlyName() << ">";
+    out << "input_attachment" << "<" << type_->FriendlyName() << ">";
     return out.str();
 }
 

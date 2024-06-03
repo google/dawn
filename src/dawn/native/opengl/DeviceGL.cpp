@@ -103,10 +103,9 @@ void KHRONOS_APIENTRY OnGLDebugMessage(GLenum source,
     }
 
     if (type == GL_DEBUG_TYPE_ERROR) {
-        dawn::WarningLog() << "OpenGL error:"
-                           << "\n    Source: " << sourceText      //
-                           << "\n    ID: " << id                  //
-                           << "\n    Severity: " << severityText  //
+        dawn::WarningLog() << "OpenGL error:" << "\n    Source: " << sourceText  //
+                           << "\n    ID: " << id                                 //
+                           << "\n    Severity: " << severityText                 //
                            << "\n    Message: " << message;
 
         // Abort on an error when in Debug mode.

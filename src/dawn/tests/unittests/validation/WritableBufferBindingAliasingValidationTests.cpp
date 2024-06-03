@@ -62,9 +62,7 @@ std::string GenerateBindingString(const BindingDescriptorGroups& bindingsGroups)
     size_t groupIndex = 0;
     for (const auto& bindings : bindingsGroups) {
         for (const BindingDescriptor& b : bindings) {
-            ostream << "struct S" << index << " { "
-                    << "buffer : array<f32>"
-                    << "}\n";
+            ostream << "struct S" << index << " { " << "buffer : array<f32>" << "}\n";
             ostream << "@group(" << groupIndex << ") @binding(" << b.binding.binding << ") ";
             switch (b.type) {
                 case wgpu::BufferBindingType::Uniform:
@@ -93,9 +91,7 @@ std::string GenerateReferenceString(const BindingDescriptorGroups& bindingsGroup
     for (const auto& bindings : bindingsGroups) {
         for (const BindingDescriptor& b : bindings) {
             if (b.visibility & stage) {
-                ostream << "_ = b" << index << "."
-                        << "buffer[0]"
-                        << ";\n";
+                ostream << "_ = b" << index << "." << "buffer[0]" << ";\n";
             }
             index++;
         }

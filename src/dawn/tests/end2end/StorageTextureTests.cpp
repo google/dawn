@@ -190,8 +190,8 @@ class StorageTextureTests : public DawnTest {
                                     wgpu::TextureViewDimension dimension,
                                     uint32_t binding) {
         std::ostringstream ostream;
-        ostream << "@group(0) @binding(" << binding << ") "
-                << "var storageImage" << binding << " : ";
+        ostream << "@group(0) @binding(" << binding << ") " << "var storageImage" << binding
+                << " : ";
         switch (dimension) {
             case wgpu::TextureViewDimension::e1D:
                 ostream << "texture_storage_1d";

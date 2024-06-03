@@ -465,13 +465,11 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 return testing::AssertionSuccess();
             }
 
-            return testing::AssertionFailure() << "Expected stencil data to be "
-                                               << "(" << ssss[0] << ", " << ssss[1] << ", "
-                                               << ssss[2] << ", " << ssss[3] << ") or "
-                                               << "(" << s001[0] << ", " << s001[1] << ", "
-                                               << s001[2] << ", " << s001[3] << "). Got "
-                                               << "(" << data[0] << ", " << data[1] << ", "
-                                               << data[2] << ", " << data[3] << ").";
+            return testing::AssertionFailure()
+                   << "Expected stencil data to be " << "(" << ssss[0] << ", " << ssss[1] << ", "
+                   << ssss[2] << ", " << ssss[3] << ") or " << "(" << s001[0] << ", " << s001[1]
+                   << ", " << s001[2] << ", " << s001[3] << "). Got " << "(" << data[0] << ", "
+                   << data[1] << ", " << data[2] << ", " << data[3] << ").";
         }
 
       private:
