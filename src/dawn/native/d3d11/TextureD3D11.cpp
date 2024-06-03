@@ -728,14 +728,20 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
     dstBox.top = origin.y;
     dstBox.bottom = origin.y + size.height;
 
+    bool isCompleteSubresourceCopiedTo =
+        IsCompleteSubresourceCopiedTo(this, size, subresources.baseMipLevel, subresources.aspects);
+    DAWN_ASSERT(subresources.levelCount == 1);
+    bool writeCompleteTexture = isCompleteSubresourceCopiedTo && GetNumMipLevels() == 1 &&
+                                GetArrayLayers() == subresources.layerCount;
+
     if (GetDimension() == wgpu::TextureDimension::e3D) {
         dstBox.front = origin.z;
         dstBox.back = origin.z + size.depthOrArrayLayers;
         uint32_t subresource =
             GetSubresourceIndex(subresources.baseMipLevel, 0, D3D11Aspect(subresources.aspects));
+        UINT copyFlag = writeCompleteTexture ? D3D11_COPY_DISCARD : 0;
         commandContext->UpdateSubresource1(GetD3D11Resource(), subresource, &dstBox, data,
-                                           bytesPerRow, bytesPerRow * rowsPerImage,
-                                           /*CopyFlags=*/0);
+                                           bytesPerRow, bytesPerRow * rowsPerImage, copyFlag);
     } else {
         dstBox.front = 0;
         dstBox.back = 1;
@@ -744,8 +750,9 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
                 GetSubresourceIndex(subresources.baseMipLevel, subresources.baseArrayLayer + layer,
                                     D3D11Aspect(subresources.aspects));
             D3D11_BOX* pDstBox = GetFormat().HasDepthOrStencil() ? nullptr : &dstBox;
+            UINT copyFlag = (writeCompleteTexture && layer == 0) ? D3D11_COPY_DISCARD : 0;
             commandContext->UpdateSubresource1(GetD3D11Resource(), subresource, pDstBox, data,
-                                               bytesPerRow, 0, /*CopyFlags=*/0);
+                                               bytesPerRow, 0, copyFlag);
             data += rowsPerImage * bytesPerRow;
         }
     }
