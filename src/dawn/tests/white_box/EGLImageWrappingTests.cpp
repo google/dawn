@@ -25,13 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <EGL/egl.h>
-
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "dawn/common/DynamicLib.h"
+#include "dawn/common/egl_platform.h"
 #include "dawn/native/OpenGLBackend.h"
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/tests/DawnTest.h"

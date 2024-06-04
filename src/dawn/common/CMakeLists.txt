@@ -104,6 +104,7 @@ target_sources(dawn_common PRIVATE
     "WeakRef.h"
     "WeakRefSupport.cpp"
     "WeakRefSupport.h"
+    "egl_platform.h"
     "ityp_array.h"
     "ityp_bitset.h"
     "ityp_span.h"

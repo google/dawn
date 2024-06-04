@@ -28,8 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_UTILSEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_UTILSEGL_H_
 
-#include <EGL/egl.h>
-
+#include "dawn/common/egl_platform.h"
 #include "dawn/native/Error.h"
 
 namespace dawn::native::opengl {

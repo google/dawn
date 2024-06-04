@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,41 +25,30 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_OPENGL_CONTEXTEGL_H_
-#define SRC_DAWN_NATIVE_OPENGL_CONTEXTEGL_H_
+#ifndef SRC_DAWN_COMMON_EGL_PLATFORM_H_
+#define SRC_DAWN_COMMON_EGL_PLATFORM_H_
 
-#include <memory>
+#if !defined(DAWN_ENABLE_BACKEND_OPENGL)
+#error "egl_platform.h included without the OpenGL backend enabled"
+#endif
+#if defined(__egl_platform_h)
+#error "EGL/egl.h included before egl_platform.h"
+#endif
 
-#include "dawn/common/egl_platform.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/EGLFunctions.h"
+#include "dawn/common/Platform.h"
 
-namespace dawn::native::opengl {
+// Import headers with undefs prior to importing EGL on configurations where it is needed.
+#if DAWN_PLATFORM_IS(WINDOWS)
+#include "dawn/common/windows_with_undefs.h"
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
-class ContextEGL : public Device::Context {
-  public:
-    static ResultOrError<std::unique_ptr<ContextEGL>> Create(const EGLFunctions& functions,
-                                                             EGLenum api,
-                                                             EGLDisplay display,
-                                                             bool useANGLETextureSharing);
-    void MakeCurrent() override;
-    EGLDisplay GetEGLDisplay() const override;
-    const EGLFunctions& GetEGL() const override;
-    const EGLExtensionSet& GetExtensions() const override;
-    ~ContextEGL() override;
+#if defined(DAWN_USE_X11)
+#include "dawn/common/xlib_with_undefs.h"
+#endif  // defined(DAWN_USE_X11)
 
-  private:
-    ContextEGL(const EGLFunctions& functions,
-               EGLDisplay display,
-               EGLContext context,
-               EGLExtensionSet extensions);
+// The actual inclusion of EGL.h!
+#define VK_NO_PROTOTYPES
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 
-    const EGLFunctions mEgl;
-    EGLDisplay mDisplay;
-    EGLContext mContext;
-    EGLExtensionSet mExtensions;
-};
-
-}  // namespace dawn::native::opengl
-
-#endif  // SRC_DAWN_NATIVE_OPENGL_CONTEXTEGL_H_
+#endif  // SRC_DAWN_COMMON_EGL_PLATFORM_H_
