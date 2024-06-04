@@ -666,6 +666,7 @@ bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) 
         case wgpu::TextureFormat::RG16Unorm:
         case wgpu::TextureFormat::RGBA16Snorm:
         case wgpu::TextureFormat::RGBA16Unorm:
+        case wgpu::TextureFormat::External:
 
         case wgpu::TextureFormat::Undefined:
             return false;

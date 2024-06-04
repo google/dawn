@@ -87,16 +87,19 @@ SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
     : SharedResourceMemory(device, label), mProperties(properties) {
     // Reify properties to ensure we don't expose capabilities not supported by the device.
     const Format& internalFormat = device->GetValidInternalFormat(mProperties.format);
-    if (!internalFormat.supportsStorageUsage || internalFormat.IsMultiPlanar()) {
-        mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::StorageBinding;
-    }
-    if (!internalFormat.isRenderable || (internalFormat.IsMultiPlanar() &&
-                                         !device->HasFeature(Feature::MultiPlanarRenderTargets))) {
-        mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::RenderAttachment;
-    }
-    if (internalFormat.IsMultiPlanar() &&
-        !device->HasFeature(Feature::MultiPlanarFormatExtendedUsages)) {
-        mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::CopyDst;
+    if (internalFormat.format != wgpu::TextureFormat::External) {
+        if (!internalFormat.supportsStorageUsage || internalFormat.IsMultiPlanar()) {
+            mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::StorageBinding;
+        }
+        if (!internalFormat.isRenderable ||
+            (internalFormat.IsMultiPlanar() &&
+             !device->HasFeature(Feature::MultiPlanarRenderTargets))) {
+            mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::RenderAttachment;
+        }
+        if (internalFormat.IsMultiPlanar() &&
+            !device->HasFeature(Feature::MultiPlanarFormatExtendedUsages)) {
+            mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::CopyDst;
+        }
     }
 
     GetObjectTrackingList()->Track(this);

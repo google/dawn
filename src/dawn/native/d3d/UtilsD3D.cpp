@@ -255,6 +255,7 @@ DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
+        case wgpu::TextureFormat::External:
         case wgpu::TextureFormat::Undefined:
             DAWN_UNREACHABLE();
     }
@@ -405,6 +406,7 @@ DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
+        case wgpu::TextureFormat::External:
 
         case wgpu::TextureFormat::Undefined:
             DAWN_UNREACHABLE();

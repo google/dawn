@@ -67,6 +67,7 @@ class DeviceBase;
 // NOTE: SampleTypeBit::External does not have an equivalent TextureSampleType. All future
 // additions to SampleTypeBit that have an equivalent TextureSampleType should use
 // SampleTypeBit::External's value and update SampleTypeBit::External to a higher value.
+// TODO(crbug.com/dawn/2476): Validate SampleTypeBit::External is compatible with Sampler.
 enum class SampleTypeBit : uint8_t {
     None = 0x0,
     Float = 0x1,
@@ -117,7 +118,7 @@ struct AspectInfo {
 
 // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
 // exact number of known format.
-static constexpr uint32_t kKnownFormatCount = 108;
+static constexpr uint32_t kKnownFormatCount = 109;
 
 using FormatIndex = TypedInteger<struct FormatIndexT, uint32_t>;
 

@@ -39,18 +39,19 @@ constexpr uint32_t kHeight = 32u;
 constexpr uint32_t kDefaultMipLevels = 1u;
 constexpr uint32_t kDefaultLayerCount = 1u;
 constexpr uint32_t kDefaultSampleCount = 1u;
-constexpr wgpu::TextureFormat kDefaultTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+constexpr wgpu::TextureFormat kDefaultTextureFormat = wgpu::TextureFormat::External;
 
-wgpu::Texture Create2DTexture(wgpu::Device& device) {
+wgpu::Texture Create2DTexture(wgpu::Device& device,
+                              wgpu::TextureFormat format = kDefaultTextureFormat) {
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = kWidth;
     descriptor.size.height = kHeight;
     descriptor.size.depthOrArrayLayers = kDefaultLayerCount;
     descriptor.sampleCount = kDefaultSampleCount;
-    descriptor.format = kDefaultTextureFormat;
+    descriptor.format = format;
     descriptor.mipLevelCount = kDefaultMipLevels;
-    descriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
     return device.CreateTexture(&descriptor);
 }
 
@@ -84,10 +85,16 @@ TEST_F(YCbCrInfoWithoutFeatureValidationTest, YCbCrSamplerNotSupported) {
     ASSERT_DEVICE_ERROR(device.CreateSampler(&samplerDesc));
 }
 
+// Tests that creating a texture with External format raises an error if the required feature is not
+// enabled.
+TEST_F(YCbCrInfoWithoutFeatureValidationTest, ExternalTextureNotSupported) {
+    ASSERT_DEVICE_ERROR(Create2DTexture(device));
+}
+
 // Tests that creating a texture view with a valid ycbcr vulkan descriptor raises an error
 // if the required feature is not enabled.
 TEST_F(YCbCrInfoWithoutFeatureValidationTest, YCbCrTextureViewNotSupported) {
-    wgpu::Texture texture = Create2DTexture(device);
+    wgpu::Texture texture = Create2DTexture(device, wgpu::TextureFormat::RGBA8Unorm);
 
     wgpu::TextureViewDescriptor descriptor =
         CreateDefaultViewDescriptor(wgpu::TextureViewDimension::e2D);

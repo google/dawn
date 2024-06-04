@@ -2089,7 +2089,8 @@
         "chain roots": ["shared texture memory descriptor"],
         "tags": ["dawn", "native"],
         "members": [
-            {"name": "handle", "type": "void *"}
+            {"name": "handle", "type": "void *"},
+            {"name": "use external format", "type" : "bool"}
         ]
     },
     "shared texture memory dma buf plane": {
@@ -4216,7 +4217,8 @@
             {"value": 105, "name": "R8 BG8 Biplanar 422 unorm", "tags": ["dawn"]},
             {"value": 106, "name": "R8 BG8 Biplanar 444 unorm", "tags": ["dawn"]},
             {"value": 107, "name": "R10X6 BG10X6 Biplanar 422 unorm", "tags": ["dawn"]},
-            {"value": 108, "name": "R10X6 BG10X6 Biplanar 444 unorm", "tags": ["dawn"]}
+            {"value": 108, "name": "R10X6 BG10X6 Biplanar 444 unorm", "tags": ["dawn"]},
+            {"value": 109, "name": "External", "tags": ["dawn"]}
         ]
     },
     "texture usage": {
