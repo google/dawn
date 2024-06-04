@@ -64,6 +64,26 @@ TEST_F(ConstEvalTest, Vec3_Index_OOB_Low) {
     EXPECT_EQ(r()->error(), "12:34 error: index -3 out of bounds [0..2]");
 }
 
+TEST_F(ConstEvalTest, Vec3_Index_Via_Ptr_OOB_High) {
+    auto* a = Var("a", ty.vec3(ty.i32()));
+    auto* p = Let("p", ty.ptr(function, ty.vec3(ty.i32())), AddressOf(a));
+    auto* expr = IndexAccessor("p", Expr(Source{{12, 34}}, 12_i));
+    WrapInFunction(a, p, expr);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index 12 out of bounds [0..2]");
+}
+
+TEST_F(ConstEvalTest, Vec3_Index_Via_Ptr_OOB_Low) {
+    auto* a = Var("a", ty.vec3(ty.i32()));
+    auto* p = Let("p", ty.ptr(function, ty.vec3(ty.i32())), AddressOf(a));
+    auto* expr = IndexAccessor("p", Expr(Source{{12, 34}}, -3_i));
+    WrapInFunction(a, p, expr);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index -3 out of bounds [0..2]");
+}
+
 namespace Swizzle {
 struct Case {
     Value input;

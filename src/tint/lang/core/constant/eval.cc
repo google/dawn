@@ -1394,7 +1394,7 @@ Eval::Result Eval::Index(const Value* obj_val,
                          const core::type::Type* obj_ty,
                          const Value* idx_val,
                          const Source& idx_source) {
-    auto el = obj_ty->UnwrapRef()->Elements();
+    auto el = obj_ty->UnwrapPtrOrRef()->Elements();
 
     AInt idx = idx_val->ValueAs<AInt>();
     if (idx < 0 || (el.count > 0 && idx >= el.count)) {
