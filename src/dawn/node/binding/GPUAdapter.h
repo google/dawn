@@ -48,10 +48,9 @@ class GPUAdapter final : public interop::GPUAdapter {
     interop::Promise<interop::Interface<interop::GPUDevice>> requestDevice(
         Napi::Env env,
         interop::GPUDeviceDescriptor descriptor) override;
-    interop::Promise<interop::Interface<interop::GPUAdapterInfo>> requestAdapterInfo(
-        Napi::Env) override;
     interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
     interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;
+    interop::Interface<interop::GPUAdapterInfo> getInfo(Napi::Env) override;
     bool getIsFallbackAdapter(Napi::Env) override;
     bool getIsCompatibilityMode(Napi::Env) override;
 

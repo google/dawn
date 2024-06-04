@@ -89,6 +89,10 @@ Adapter& Adapter::operator=(const Adapter& other) {
     return *this;
 }
 
+wgpu::Status Adapter::GetInfo(WGPUAdapterInfo* info) const {
+    return mImpl->APIGetInfo(FromAPI(info));
+}
+
 wgpu::Status Adapter::GetProperties(wgpu::AdapterProperties* properties) const {
     return GetProperties(reinterpret_cast<WGPUAdapterProperties*>(properties));
 }
