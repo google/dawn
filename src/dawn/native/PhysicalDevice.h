@@ -36,6 +36,7 @@
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
+#include "dawn/common/WeakRefSupport.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Error.h"
@@ -67,7 +68,7 @@ struct FeatureValidationResult {
     std::string errorMessage;
 };
 
-class PhysicalDeviceBase : public RefCounted {
+class PhysicalDeviceBase : public RefCounted, public WeakRefSupport<PhysicalDeviceBase> {
   public:
     explicit PhysicalDeviceBase(wgpu::BackendType backend);
     ~PhysicalDeviceBase() override;

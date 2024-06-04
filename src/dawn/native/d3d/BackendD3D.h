@@ -102,6 +102,7 @@ class Backend : public BackendConnection {
     ResultOrError<Ref<PhysicalDeviceBase>> GetOrCreatePhysicalDeviceFromLUID(LUID luid);
     ResultOrError<Ref<PhysicalDeviceBase>> GetOrCreatePhysicalDeviceFromIDXGIAdapter(
         ComPtr<IDXGIAdapter> dxgiAdapter);
+    Ref<PhysicalDeviceBase> FindPhysicalDevice(const LUID& luid);
 
     // Acquiring DXC version information and store the result in mDxcVersionInfo. This function
     // should be called only once, during startup in `Initialize`.
@@ -133,9 +134,13 @@ class Backend : public BackendConnection {
     };
 
     // Map of LUID to physical device.
-    // The LUID is guaranteed to be uniquely identify an adapter on the local
-    // machine until restart.
-    absl::flat_hash_map<LUID, Ref<PhysicalDeviceBase>, LUIDHashFunc, LUIDEqualFunc>
+    // The LUID is guaranteed to be uniquely identify an adapter on the local machine until restart.
+    // A WeakRef prevents the PhysicalDeviceBase (and its D3D Device) from being kept alive if there
+    // are no longer any external references. Any references to a D3D Device keeps its corresponding
+    // physical adapter powered on. Since `DiscoverPhysicalDevices` may enumerate and add all
+    // available adapters, we should release the ones that the caller does not take a strong
+    // reference on. Otherwise, all adapters on the system will be kept powered on indefinitely.
+    absl::flat_hash_map<LUID, WeakRef<PhysicalDeviceBase>, LUIDHashFunc, LUIDEqualFunc>
         mPhysicalDevices;
 };
 
