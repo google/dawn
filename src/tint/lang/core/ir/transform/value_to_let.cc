@@ -141,6 +141,7 @@ struct State {
 
             if (accesses.Contains(Access::kStore)) {  // Note: Also handles load + store
                 put_pending_in_lets();
+                pending_access = Access::kStore;
                 maybe_put_in_let(inst);
             } else if (accesses.Contains(Access::kLoad)) {
                 if (pending_access != Access::kLoad) {

@@ -8,5 +8,6 @@ int c() {
 }
 void b() {
   int b_1 = c();
-  b_1 = (b_1 + c());
+  int const v = c();
+  b_1 = (b_1 + v);
 }

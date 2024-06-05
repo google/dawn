@@ -114,10 +114,11 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   (*tint_module_vars.fClipDistance3) = fClipDistance3_param;
   (*tint_module_vars.fClipDistance4) = fClipDistance4_param;
   main_1(tint_module_vars);
+  main_out const v_3 = main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
   if (!((*tint_module_vars.continue_execution))) {
     discard_fragment();
   }
-  return main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
+  return v_3;
 }
 fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant Scene* x_29 [[buffer(0)]], const constant Material* x_49 [[buffer(1)]], const constant Mesh* x_137 [[buffer(2)]]) {
   thread float fClipDistance3 = 0.0f;
