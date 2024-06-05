@@ -66,6 +66,7 @@ using Storage = BindingInfo;
 using Texture = BindingInfo;
 using StorageTexture = BindingInfo;
 using Sampler = BindingInfo;
+using InputAttachment = BindingInfo;
 
 /// An external texture
 struct ExternalTexture {
@@ -94,6 +95,8 @@ using StorageTextureBindings = std::unordered_map<BindingPoint, binding::Storage
 using SamplerBindings = std::unordered_map<BindingPoint, binding::Sampler>;
 // Maps the WGSL binding point to the plane0, plane1, and metadata information for external textures
 using ExternalTextureBindings = std::unordered_map<BindingPoint, binding::ExternalTexture>;
+// Maps the WGSL binding point to the SPIR-V group,binding for input attachments
+using InputAttachmentBindings = std::unordered_map<BindingPoint, binding::InputAttachment>;
 
 /// Binding information
 struct Bindings {
@@ -109,9 +112,18 @@ struct Bindings {
     SamplerBindings sampler{};
     /// External bindings
     ExternalTextureBindings external_texture{};
+    /// Input attachment bindings
+    InputAttachmentBindings input_attachment{};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(Bindings, uniform, storage, texture, storage_texture, sampler, external_texture);
+    TINT_REFLECT(Bindings,
+                 uniform,
+                 storage,
+                 texture,
+                 storage_texture,
+                 sampler,
+                 external_texture,
+                 input_attachment);
 };
 
 /// Configuration options used for generating SPIR-V.

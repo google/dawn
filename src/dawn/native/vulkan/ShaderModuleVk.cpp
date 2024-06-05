@@ -114,7 +114,8 @@ class ShaderModule::ConcurrentTransformedShaderModuleCache {
     }
     ModuleAndSpirv AddOrGet(const TransformedShaderModuleCacheKey& key,
                             VkShaderModule module,
-                            CompiledSpirv compilation) {
+                            CompiledSpirv compilation,
+                            bool hasInputAttachment) {
         DAWN_ASSERT(module != VK_NULL_HANDLE);
         std::lock_guard<std::mutex> lock(mMutex);
 
@@ -123,7 +124,7 @@ class ShaderModule::ConcurrentTransformedShaderModuleCache {
             bool added = false;
             std::tie(iter, added) = mTransformedShaderModuleCache.emplace(
                 key, Entry{module, std::move(compilation.spirv),
-                           std::move(compilation.remappedEntryPoint)});
+                           std::move(compilation.remappedEntryPoint), hasInputAttachment});
             DAWN_ASSERT(added);
         } else {
             // No need to use FencedDeleter since this shader module was just created and does
@@ -139,13 +140,12 @@ class ShaderModule::ConcurrentTransformedShaderModuleCache {
         VkShaderModule vkModule;
         std::vector<uint32_t> spirv;
         std::string remappedEntryPoint;
+        bool hasInputAttachment;
 
         ModuleAndSpirv AsRefs() const {
             return {
-                vkModule,
-                spirv.data(),
-                spirv.size(),
-                remappedEntryPoint.c_str(),
+                vkModule,           spirv.data(), spirv.size(), remappedEntryPoint.c_str(),
+                hasInputAttachment,
             };
         }
     };
@@ -309,11 +309,14 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                         tint::spirv::writer::binding::ExternalTexture{metadata, plane0, plane1});
                 },
                 [&](const InputAttachmentBindingInfo& bindingInfo) {
-                    // TODO(341117913): implement input attachment binding.
-                    DAWN_UNREACHABLE();
+                    bindings.input_attachment.emplace(
+                        srcBindingPoint, tint::spirv::writer::binding::InputAttachment{
+                                             dstBindingPoint.group, dstBindingPoint.binding});
                 });
         }
     }
+
+    const bool hasInputAttachment = !bindings.input_attachment.empty();
 
     std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
@@ -479,8 +482,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         // Set the label on `newHandle` now, and not on `moduleAndSpirv.module` later
         // since `moduleAndSpirv.module` may be in use by multiple threads.
         SetDebugName(ToBackend(GetDevice()), newHandle, "Dawn_ShaderModule", GetLabel());
-        moduleAndSpirv =
-            mTransformedShaderModuleCache->AddOrGet(cacheKey, newHandle, compilation.Acquire());
+        moduleAndSpirv = mTransformedShaderModuleCache->AddOrGet(
+            cacheKey, newHandle, compilation.Acquire(), hasInputAttachment);
     }
 
     return std::move(moduleAndSpirv);

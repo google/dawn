@@ -220,9 +220,11 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     ResultOrError<Ref<RenderBundleEncoder>> CreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor);
     ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipeline(
-        const RenderPipelineDescriptor* descriptor);
+        const RenderPipelineDescriptor* descriptor,
+        bool allowInternalBinding = false);
     ResultOrError<Ref<RenderPipelineBase>> CreateUninitializedRenderPipeline(
-        const RenderPipelineDescriptor* descriptor);
+        const RenderPipelineDescriptor* descriptor,
+        bool allowInternalBinding = false);
     ResultOrError<Ref<SamplerBase>> CreateSampler(const SamplerDescriptor* descriptor = nullptr);
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
@@ -398,9 +400,9 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     // See https://crbug.com/dawn/161
     virtual bool ShouldApplyIndexBufferOffsetToFirstIndex() const;
 
-    // Whether the backend supports blitting the resolve texture with draw calls in the same render
-    // pass that it will be resolved into.
-    virtual bool IsResolveTextureBlitWithDrawSupported() const;
+    // Whether the backend can use textureLoad() on a resolve target in the same render pass that it
+    // will be resolved into.
+    virtual bool CanTextureLoadResolveTargetInTheSameRenderpass() const;
 
     bool HasFeature(Feature feature) const;
 
@@ -466,6 +468,8 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     MaybeError Initialize(Ref<QueueBase> defaultQueue);
     void DestroyObjects();
     void Destroy();
+
+    void EnableAdditionalWGSLExtension(tint::wgsl::Extension extension);
 
     virtual MaybeError GetAHardwareBufferPropertiesImpl(
         void* handle,
@@ -630,7 +634,8 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescri
 ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
     DeviceBase* device,
     const RenderPipelineDescriptor& descriptor,
-    RenderPipelineDescriptor* outDescriptor);
+    RenderPipelineDescriptor* outDescriptor,
+    bool allowInternalBinding = false);
 
 class IgnoreLazyClearCountScope : public NonMovable, public StackAllocated {
   public:

@@ -408,7 +408,7 @@ uint64_t Device::GetBufferCopyOffsetAlignmentForDepthStencil() const {
     return DeviceBase::GetBufferCopyOffsetAlignmentForDepthStencil();
 }
 
-bool Device::IsResolveTextureBlitWithDrawSupported() const {
+bool Device::CanTextureLoadResolveTargetInTheSameRenderpass() const {
     return true;
 }
 

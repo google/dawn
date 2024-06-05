@@ -90,7 +90,10 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
     } else if (entry->sampler.type != wgpu::SamplerBindingType::Undefined) {
         perStageBindingCountMember = &PerStageBindingCounts::samplerCount;
     } else if (entry->texture.sampleType != wgpu::TextureSampleType::Undefined) {
-        if (entry->texture.viewDimension != kInternalInputAttachmentDim) {
+        if (entry->texture.viewDimension == kInternalInputAttachmentDim) {
+            // Internal use only.
+            return;
+        } else {
             perStageBindingCountMember = &PerStageBindingCounts::sampledTextureCount;
         }
     } else if (entry->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {

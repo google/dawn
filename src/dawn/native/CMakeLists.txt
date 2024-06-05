@@ -679,6 +679,8 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/RenderPassCache.h"
         "vulkan/RenderPipelineVk.cpp"
         "vulkan/RenderPipelineVk.h"
+        "vulkan/ResolveTextureLoadingUtilsVk.cpp"
+        "vulkan/ResolveTextureLoadingUtilsVk.h"
         "vulkan/ResourceHeapVk.cpp"
         "vulkan/ResourceHeapVk.h"
         "vulkan/ResourceMemoryAllocatorVk.cpp"

@@ -78,7 +78,7 @@ class Device final : public DeviceBase {
 
     float GetTimestampPeriodInNS() const override;
 
-    bool IsResolveTextureBlitWithDrawSupported() const override;
+    bool CanTextureLoadResolveTargetInTheSameRenderpass() const override;
 
     bool UseCounterSamplingAtCommandBoundary() const;
     bool UseCounterSamplingAtStageBoundary() const;

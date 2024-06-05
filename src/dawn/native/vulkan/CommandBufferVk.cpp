@@ -49,6 +49,7 @@
 #include "dawn/native/vulkan/QueueVk.h"
 #include "dawn/native/vulkan/RenderPassCache.h"
 #include "dawn/native/vulkan/RenderPipelineVk.h"
+#include "dawn/native/vulkan/ResolveTextureLoadingUtilsVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
@@ -389,7 +390,9 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
 
         query.SetSampleCount(renderPass->attachmentState->GetSampleCount());
 
-        DAWN_TRY_ASSIGN(renderPassVK, device->GetRenderPassCache()->GetRenderPass(query));
+        RenderPassCache::RenderPassInfo renderPassInfo;
+        DAWN_TRY_ASSIGN(renderPassInfo, device->GetRenderPassCache()->GetRenderPass(query));
+        renderPassVK = renderPassInfo.renderPass;
     }
 
     // Create a framebuffer that will be used once for the render pass and gather the clear
@@ -501,7 +504,12 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
     beginInfo.clearValueCount = attachmentCount;
     beginInfo.pClearValues = clearValues.data();
 
-    device->fn.CmdBeginRenderPass(commands, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    if (renderPass->attachmentState->GetExpandResolveInfo().attachmentsToExpandResolve.any()) {
+        DAWN_TRY(BeginRenderPassAndExpandResolveTextureWithDraw(device, recordingContext,
+                                                                renderPass, beginInfo));
+    } else {
+        device->fn.CmdBeginRenderPass(commands, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+    }
 
     return {};
 }

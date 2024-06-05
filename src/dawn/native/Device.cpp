@@ -261,14 +261,16 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescri
     *outDescriptor = descriptor;
 
     if (outDescriptor->layout == nullptr) {
-        DAWN_TRY_ASSIGN(layoutRef, PipelineLayoutBase::CreateDefault(
-                                       device, {{
-                                                   SingleShaderStage::Compute,
-                                                   outDescriptor->compute.module,
-                                                   outDescriptor->compute.entryPoint,
-                                                   outDescriptor->compute.constantCount,
-                                                   outDescriptor->compute.constants,
-                                               }}));
+        DAWN_TRY_ASSIGN(layoutRef,
+                        PipelineLayoutBase::CreateDefault(device,
+                                                          {{
+                                                              SingleShaderStage::Compute,
+                                                              outDescriptor->compute.module,
+                                                              outDescriptor->compute.entryPoint,
+                                                              outDescriptor->compute.constantCount,
+                                                              outDescriptor->compute.constants,
+                                                          }},
+                                                          /*allowInternalBinding=*/false));
         outDescriptor->layout = layoutRef.Get();
     }
 
@@ -278,7 +280,8 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescri
 ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
     DeviceBase* device,
     const RenderPipelineDescriptor& descriptor,
-    RenderPipelineDescriptor* outDescriptor) {
+    RenderPipelineDescriptor* outDescriptor,
+    bool allowInternalBinding) {
     Ref<PipelineLayoutBase> layoutRef;
     *outDescriptor = descriptor;
 
@@ -287,7 +290,8 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescrip
         // the pipeline will take another reference.
         DAWN_TRY_ASSIGN(layoutRef,
                         PipelineLayoutBase::CreateDefault(
-                            device, GetRenderStagesAndSetPlaceholderShader(device, &descriptor)));
+                            device, GetRenderStagesAndSetPlaceholderShader(device, &descriptor),
+                            allowInternalBinding));
         outDescriptor->layout = layoutRef.Get();
     }
 
@@ -1825,6 +1829,10 @@ const tint::wgsl::AllowedFeatures& DeviceBase::GetWGSLAllowedFeatures() const {
     return mWGSLAllowedFeatures;
 }
 
+void DeviceBase::EnableAdditionalWGSLExtension(tint::wgsl::Extension extension) {
+    mWGSLAllowedFeatures.extensions.insert(extension);
+}
+
 bool DeviceBase::IsValidationEnabled() const {
     return !IsToggleEnabled(Toggle::SkipValidation);
 }
@@ -2162,12 +2170,14 @@ ResultOrError<Ref<RenderBundleEncoder>> DeviceBase::CreateRenderBundleEncoder(
 }
 
 ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipeline(
-    const RenderPipelineDescriptor* descriptor) {
+    const RenderPipelineDescriptor* descriptor,
+    bool allowInternalBinding) {
     // If a pipeline layout is not specified, we cannot use cached pipelines.
     bool useCache = descriptor->layout != nullptr;
 
     Ref<RenderPipelineBase> uninitializedRenderPipeline;
-    DAWN_TRY_ASSIGN(uninitializedRenderPipeline, CreateUninitializedRenderPipeline(descriptor));
+    DAWN_TRY_ASSIGN(uninitializedRenderPipeline,
+                    CreateUninitializedRenderPipeline(descriptor, allowInternalBinding));
 
     if (useCache) {
         Ref<RenderPipelineBase> cachedRenderPipeline =
@@ -2190,7 +2200,8 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipeline(
 }
 
 ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateUninitializedRenderPipeline(
-    const RenderPipelineDescriptor* descriptor) {
+    const RenderPipelineDescriptor* descriptor,
+    bool allowInternalBinding) {
     DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
         DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
@@ -2205,7 +2216,7 @@ ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateUninitializedRenderPipe
     Ref<PipelineLayoutBase> layoutRef;
     RenderPipelineDescriptor appliedDescriptor;
     DAWN_TRY_ASSIGN(layoutRef, ValidateLayoutAndGetRenderPipelineDescriptorWithDefaults(
-                                   this, *descriptor, &appliedDescriptor));
+                                   this, *descriptor, &appliedDescriptor, allowInternalBinding));
 
     return CreateUninitializedRenderPipelineImpl(Unpack(&appliedDescriptor));
 }
@@ -2462,7 +2473,7 @@ bool DeviceBase::ShouldApplyIndexBufferOffsetToFirstIndex() const {
     return false;
 }
 
-bool DeviceBase::IsResolveTextureBlitWithDrawSupported() const {
+bool DeviceBase::CanTextureLoadResolveTargetInTheSameRenderpass() const {
     return false;
 }
 

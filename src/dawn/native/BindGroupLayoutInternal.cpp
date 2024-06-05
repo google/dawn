@@ -143,7 +143,16 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         // viewDimension defaults to 2D if left undefined, needs validation otherwise.
         wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D;
         if (texture.viewDimension != wgpu::TextureViewDimension::Undefined) {
-            DAWN_TRY(ValidateTextureViewDimension(texture.viewDimension));
+            switch (texture.viewDimension) {
+                case kInternalInputAttachmentDim:
+                    if (allowInternalBinding) {
+                        break;
+                    }
+                    // should return validation error.
+                    [[fallthrough]];
+                default:
+                    DAWN_TRY(ValidateTextureViewDimension(texture.viewDimension));
+            }
             viewDimension = texture.viewDimension;
         }
 

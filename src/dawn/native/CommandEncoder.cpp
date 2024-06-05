@@ -509,6 +509,10 @@ MaybeError ValidateExpandResolveTextureLoadOp(const DeviceBase* device,
                     colorAttachment.resolveTarget, wgpu::TextureUsage::TextureBinding,
                     wgpu::LoadOp::ExpandResolveTexture);
 
+    // TODO(42240662): multiplanar textures are not supported as resolve target.
+    // The RenderPassValidationState currently rejects such usage.
+    DAWN_ASSERT(!colorAttachment.resolveTarget->GetTexture()->GetFormat().IsMultiPlanar());
+
     validationState->SetWillExpandResolveTexture(true);
 
     return {};
@@ -930,9 +934,11 @@ MaybeError EncodeTimestampsToNanosecondsConversion(CommandEncoder* encoder,
 MaybeError ApplyExpandResolveTextureLoadOp(DeviceBase* device,
                                            RenderPassEncoder* renderPassEncoder,
                                            const RenderPassDescriptor* renderPassDescriptor) {
-    // TODO(dawn:1710): support loading resolve texture on platforms that don't support reading
-    // it in fragment shader such as vulkan.
-    DAWN_ASSERT(device->IsResolveTextureBlitWithDrawSupported());
+    // If backend doesn't support textureLoad on resolve targets, then it should handle the load op
+    // internally.
+    if (!device->CanTextureLoadResolveTargetInTheSameRenderpass()) {
+        return {};
+    }
 
     // Read implicit resolve texture in fragment shader and copy to the implicit MSAA attachment.
     return ExpandResolveTextureWithDraw(device, renderPassEncoder, renderPassDescriptor);

@@ -51,7 +51,9 @@ VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format);
 // properties of the Device.
 VkFormat ColorVulkanImageFormat(wgpu::TextureFormat format);
 ResultOrError<wgpu::TextureFormat> FormatFromVkFormat(const Device* device, VkFormat vkFormat);
-VkImageUsageFlags VulkanImageUsage(wgpu::TextureUsage usage, const Format& format);
+VkImageUsageFlags VulkanImageUsage(const DeviceBase* device,
+                                   wgpu::TextureUsage usage,
+                                   const Format& format);
 VkImageLayout VulkanImageLayout(const Format& format, wgpu::TextureUsage usage);
 VkImageLayout VulkanImageLayoutForDepthStencilAttachment(const Format& format,
                                                          bool depthReadOnly,
@@ -106,6 +108,13 @@ class Texture final : public TextureBase {
                                 std::vector<VkImageMemoryBarrier>* imageBarriers,
                                 VkPipelineStageFlags* srcStages,
                                 VkPipelineStageFlags* dstStages);
+    // Change the texture to be used as `usage`. Note: this function assumes the barriers are
+    // already invoked before calling it. Typical use case is an input attachment, at the beginning
+    // of render pass, its usage is transitioned to TextureBinding. Then subpass' dependency
+    // automatically transitions the texture to RenderAttachment without any explicit barrier call.
+    void UpdateUsage(wgpu::TextureUsage usage,
+                     wgpu::ShaderStage shaderStages,
+                     const SubresourceRange& range);
 
     // Eagerly transition the texture for export.
     void TransitionEagerlyForExport(CommandRecordingContext* recordingContext);

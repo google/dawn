@@ -106,6 +106,10 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
         diagnostics.AddNote(Source{}) << "when processing sampler";
         return Failure{std::move(diagnostics)};
     }
+    if (!valid(options.bindings.input_attachment)) {
+        diagnostics.AddNote(Source{}) << "when processing input_attachment";
+        return Failure{std::move(diagnostics)};
+    }
 
     for (const auto& it : options.bindings.external_texture) {
         const auto& src_binding = it.first;
@@ -201,6 +205,7 @@ void PopulateRemapperAndMultiplanarOptions(const Options& options,
     create_remappings(options.bindings.texture);
     create_remappings(options.bindings.storage_texture);
     create_remappings(options.bindings.sampler);
+    create_remappings(options.bindings.input_attachment);
 
     // External textures are re-bound to their plane0 location
     for (const auto& it : options.bindings.external_texture) {

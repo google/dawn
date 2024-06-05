@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,50 +25,29 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_VULKAN_RENDERPIPELINEVK_H_
-#define SRC_DAWN_NATIVE_VULKAN_RENDERPIPELINEVK_H_
-
-#include "dawn/native/RenderPipeline.h"
+#ifndef SRC_DAWN_NATIVE_VULKAN_RESOLVETEXTURELOADINGUTILSVK_H_
+#define SRC_DAWN_NATIVE_VULKAN_RESOLVETEXTURELOADINGUTILSVK_H_
 
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
 
-namespace dawn::native::vulkan {
+namespace dawn::native {
 
+struct BeginRenderPassCmd;
+
+namespace vulkan {
+
+struct CommandRecordingContext;
 class Device;
 
-class RenderPipeline final : public RenderPipelineBase {
-  public:
-    static Ref<RenderPipeline> CreateUninitialized(
-        Device* device,
-        const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
+// This function begins render pass then performs the ExpandResolveTexture load operation for the
+// render pass by blitting the resolve target to the MSAA attachment.
+MaybeError BeginRenderPassAndExpandResolveTextureWithDraw(Device* device,
+                                                          CommandRecordingContext* commandContext,
+                                                          const BeginRenderPassCmd* renderPass,
+                                                          const VkRenderPassBeginInfo& beginInfo);
 
-    VkPipeline GetHandle() const;
+}  // namespace vulkan
+}  // namespace dawn::native
 
-    MaybeError InitializeImpl() override;
-
-    // Dawn API
-    void SetLabelImpl() override;
-
-  private:
-    ~RenderPipeline() override;
-    void DestroyImpl() override;
-    using RenderPipelineBase::RenderPipelineBase;
-
-    struct PipelineVertexInputStateCreateInfoTemporaryAllocations {
-        std::array<VkVertexInputBindingDescription, kMaxVertexBuffers> bindings;
-        std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes> attributes;
-    };
-    VkPipelineVertexInputStateCreateInfo ComputeVertexInputDesc(
-        PipelineVertexInputStateCreateInfoTemporaryAllocations* temporaryAllocations);
-    VkPipelineDepthStencilStateCreateInfo ComputeDepthStencilDesc();
-
-    VkPipeline mHandle = VK_NULL_HANDLE;
-
-    // Whether the pipeline has any input attachment being used in the frag shader.
-    bool mHasInputAttachment = false;
-};
-
-}  // namespace dawn::native::vulkan
-
-#endif  // SRC_DAWN_NATIVE_VULKAN_RENDERPIPELINEVK_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_RESOLVETEXTURELOADINGUTILSVK_H_

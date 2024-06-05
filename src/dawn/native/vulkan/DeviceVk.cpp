@@ -168,7 +168,15 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue, mMainQueueFamily));
 
-    return DeviceBase::Initialize(std::move(queue));
+    DAWN_TRY(DeviceBase::Initialize(std::move(queue)));
+
+    if (HasFeature(Feature::DawnLoadResolveTexture)) {
+        // TODO(42240662): Add a way to add additional extensions when compiling specific shader
+        // modules only.
+        EnableAdditionalWGSLExtension(tint::wgsl::Extension::kChromiumInternalInputAttachments);
+    }
+
+    return {};
 }
 
 Device::~Device() {
@@ -673,12 +681,13 @@ MaybeError Device::ImportExternalImage(const ExternalImageDescriptorVk* descript
     DAWN_INVALID_IF(!mExternalSemaphoreService->Supported(),
                     "External semaphore usage not supported");
 
-    DAWN_INVALID_IF(!mExternalMemoryService->SupportsImportMemory(
-                        descriptor->GetType(), VulkanImageFormat(this, textureDescriptor->format),
-                        VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL,
-                        VulkanImageUsage(usage, GetValidInternalFormat(textureDescriptor->format)),
-                        VK_IMAGE_CREATE_ALIAS_BIT_KHR),
-                    "External memory usage not supported");
+    DAWN_INVALID_IF(
+        !mExternalMemoryService->SupportsImportMemory(
+            descriptor->GetType(), VulkanImageFormat(this, textureDescriptor->format),
+            VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL,
+            VulkanImageUsage(this, usage, GetValidInternalFormat(textureDescriptor->format)),
+            VK_IMAGE_CREATE_ALIAS_BIT_KHR),
+        "External memory usage not supported");
 
     // Import the external image's memory
     external_memory::MemoryImportParams importParams;

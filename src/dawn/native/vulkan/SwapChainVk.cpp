@@ -265,7 +265,7 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
 
     // Choose the target usage or do a blit.
     VkImageUsageFlags targetUsages =
-        VulkanImageUsage(GetUsage(), GetDevice()->GetValidInternalFormat(GetFormat()));
+        VulkanImageUsage(GetDevice(), GetUsage(), GetDevice()->GetValidInternalFormat(GetFormat()));
     VkImageUsageFlags supportedUsages = surfaceInfo.capabilities.supportedUsageFlags;
     if (!IsSubset(targetUsages, supportedUsages)) {
         config.needsBlit = true;

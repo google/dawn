@@ -69,6 +69,7 @@ class ShaderModule final : public ShaderModuleBase {
         const uint32_t* spirv;
         size_t wordCount;
         std::string remappedEntryPoint;
+        bool hasInputAttachment;
     };
 
     static ResultOrError<Ref<ShaderModule>> Create(

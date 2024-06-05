@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "dawn/common/Assert.h"
+#include "dawn/native/DawnNative.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -1542,6 +1543,7 @@ TEST_P(MultisampledRenderToSingleSampledTest, DrawWithDepthTest) {
 }
 
 class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
+  protected:
     void SetUp() override {
         MultisampledRenderingTest::SetUp();
 
@@ -1558,6 +1560,10 @@ class DawnLoadResolveTextureTest : public MultisampledRenderingTest {
             requiredFeatures.push_back(wgpu::FeatureName::TransientAttachments);
         }
         return requiredFeatures;
+    }
+
+    bool HasResolveMultipleAttachmentInSeparatePassesToggle() {
+        return HasToggleEnabled("resolve_multiple_attachments_in_separate_passes");
     }
 };
 
@@ -1662,10 +1668,13 @@ TEST_P(DawnLoadResolveTextureTest, DrawThenLoadNonZeroIndexedAttachment) {
 // Test rendering into 2 attachments. The 1st attachment will use
 // LoadOp::ExpandResolveTexture.
 TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawThenLoadColor0) {
-    auto multiSampledTexture1 = CreateTextureForRenderAttachment(
-        kColorFormat, 4, 1, 1,
-        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
-        /*supportsTextureBinding=*/false);
+    // TODO(42240662): "resolve_multiple_attachments_in_separate_passes" is currently not working
+    // with DawnLoadResolveTexture feature if there are more than one attachment.
+    DAWN_TEST_UNSUPPORTED_IF(HasResolveMultipleAttachmentInSeparatePassesToggle());
+
+    auto multiSampledTexture1 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
+                                                                 /*transientAttachment=*/false,
+                                                                 /*supportsTextureBinding=*/false);
     auto multiSampledTextureView1 = multiSampledTexture1.CreateView();
 
     auto multiSampledTexture2 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
@@ -1740,15 +1749,18 @@ TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawThenLoadColor0) {
 // Test rendering into 2 attachments. The 2nd attachment will use
 // LoadOp::ExpandResolveTexture.
 TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawThenLoadColor1) {
+    // TODO(42240662): "resolve_multiple_attachments_in_separate_passes" is currently not working
+    // with DawnLoadResolveTexture feature if there are more than one attachment.
+    DAWN_TEST_UNSUPPORTED_IF(HasResolveMultipleAttachmentInSeparatePassesToggle());
+
     auto multiSampledTexture1 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
                                                                  /*transientAttachment=*/false,
                                                                  /*supportsTextureBinding=*/false);
     auto multiSampledTextureView1 = multiSampledTexture1.CreateView();
 
-    auto multiSampledTexture2 = CreateTextureForRenderAttachment(
-        kColorFormat, 4, 1, 1,
-        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
-        /*supportsTextureBinding=*/false);
+    auto multiSampledTexture2 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
+                                                                 /*transientAttachment=*/false,
+                                                                 /*supportsTextureBinding=*/false);
     auto multiSampledTextureView2 = multiSampledTexture2.CreateView();
 
     auto singleSampledTexture1 =
@@ -1817,16 +1829,18 @@ TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawThenLoadColor1) {
 // Test rendering into 2 attachments. The both attachments will use
 // LoadOp::ExpandResolveTexture.
 TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawThenLoadColor0AndColor1) {
-    auto multiSampledTexture1 = CreateTextureForRenderAttachment(
-        kColorFormat, 4, 1, 1,
-        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
-        /*supportsTextureBinding=*/false);
+    // TODO(42240662): "resolve_multiple_attachments_in_separate_passes" is currently not working
+    // with DawnLoadResolveTexture feature if there are more than one attachment.
+    DAWN_TEST_UNSUPPORTED_IF(HasResolveMultipleAttachmentInSeparatePassesToggle());
+
+    auto multiSampledTexture1 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
+                                                                 /*transientAttachment=*/false,
+                                                                 /*supportsTextureBinding=*/false);
     auto multiSampledTextureView1 = multiSampledTexture1.CreateView();
 
-    auto multiSampledTexture2 = CreateTextureForRenderAttachment(
-        kColorFormat, 4, 1, 1,
-        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
-        /*supportsTextureBinding=*/false);
+    auto multiSampledTexture2 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
+                                                                 /*transientAttachment=*/false,
+                                                                 /*supportsTextureBinding=*/false);
     auto multiSampledTextureView2 = multiSampledTexture2.CreateView();
 
     auto singleSampledTexture1 =
@@ -1968,16 +1982,18 @@ TEST_P(DawnLoadResolveTextureTest, DrawWithDepthTest) {
 // Test ExpandResolveTexture load op rendering with depth test works correctly with
 // two outputs both use ExpandResolveTexture load op.
 TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawWithDepthTestColor0AndColor1) {
-    auto multiSampledTexture1 = CreateTextureForRenderAttachment(
-        kColorFormat, 4, 1, 1,
-        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
-        /*supportsTextureBinding=*/false);
+    // TODO(42240662): "resolve_multiple_attachments_in_separate_passes" is currently not working
+    // with DawnLoadResolveTexture feature if there are more than one attachment.
+    DAWN_TEST_UNSUPPORTED_IF(HasResolveMultipleAttachmentInSeparatePassesToggle());
+
+    auto multiSampledTexture1 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
+                                                                 /*transientAttachment=*/false,
+                                                                 /*supportsTextureBinding=*/false);
     auto multiSampledTextureView1 = multiSampledTexture1.CreateView();
 
-    auto multiSampledTexture2 = CreateTextureForRenderAttachment(
-        kColorFormat, 4, 1, 1,
-        /*transientAttachment=*/device.HasFeature(wgpu::FeatureName::TransientAttachments),
-        /*supportsTextureBinding=*/false);
+    auto multiSampledTexture2 = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
+                                                                 /*transientAttachment=*/false,
+                                                                 /*supportsTextureBinding=*/false);
     auto multiSampledTextureView2 = multiSampledTexture2.CreateView();
 
     auto singleSampledTexture1 =
@@ -2127,6 +2143,7 @@ DAWN_INSTANTIATE_TEST(DawnLoadResolveTextureTest,
                       OpenGLESBackend(),
                       VulkanBackend(),
                       VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
+                      VulkanBackend({"resolve_multiple_attachments_in_separate_passes"}),
                       MetalBackend({"emulate_store_and_msaa_resolve"}),
                       MetalBackend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend({"always_resolve_into_zero_level_and_layer",

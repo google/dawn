@@ -251,7 +251,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     VkFormat vkFormat = VulkanImageFormat(device, properties.format);
 
     // Usage flags to create the image with.
-    VkImageUsageFlags vkUsageFlags = VulkanImageUsage(properties.usage, *internalFormat);
+    VkImageUsageFlags vkUsageFlags = VulkanImageUsage(device, properties.usage, *internalFormat);
 
     // Number of memory planes in the image which will be queried from the DRM modifier.
     uint32_t memoryPlaneCount;
@@ -595,7 +595,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     sharedTextureMemory->APIGetProperties(&properties);
 
     // Compute the Vulkan usage flags to create the image with.
-    VkImageUsageFlags vkUsageFlags = VulkanImageUsage(properties.usage, *internalFormat);
+    VkImageUsageFlags vkUsageFlags = VulkanImageUsage(device, properties.usage, *internalFormat);
 
     const auto& compatibleViewFormats = device->GetCompatibleViewFormats(*internalFormat);
 

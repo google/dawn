@@ -75,7 +75,7 @@ using BlitColorToColorWithDrawPipelinesCache =
 //
 // The function assumes that the render pass is already started. It won't break the render pass,
 // just performing a draw call to blit.
-// This is only valid if the device's IsResolveTextureBlitWithDrawSupported() is true.
+// This is only valid if the device's CanTextureLoadResolveTargetInTheSameRenderpass() is true.
 MaybeError ExpandResolveTextureWithDraw(DeviceBase* device,
                                         RenderPassEncoder* renderEncoder,
                                         const RenderPassDescriptor* renderPassDescriptor);

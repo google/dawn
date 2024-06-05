@@ -161,7 +161,8 @@ Ref<PipelineLayoutBase> PipelineLayoutBase::MakeError(DeviceBase* device, const 
 // static
 ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     DeviceBase* device,
-    std::vector<StageAndDescriptor> stages) {
+    std::vector<StageAndDescriptor> stages,
+    bool allowInternalBinding) {
     using EntryMap = std::map<BindingNumber, BindGroupLayoutEntry>;
 
     // Merges two entries at the same location, if they are allowed to be merged.
@@ -271,8 +272,8 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
 
     // Creates the BGL from the entries for a stage, checking it is valid.
     auto CreateBGL = [](DeviceBase* device, const EntryMap& entries,
-                        PipelineCompatibilityToken pipelineCompatibilityToken)
-        -> ResultOrError<Ref<BindGroupLayoutBase>> {
+                        PipelineCompatibilityToken pipelineCompatibilityToken,
+                        bool allowInternalBinding) -> ResultOrError<Ref<BindGroupLayoutBase>> {
         std::vector<BindGroupLayoutEntry> entryVec;
         entryVec.reserve(entries.size());
         for (auto& [_, entry] : entries) {
@@ -284,8 +285,8 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         desc.entryCount = entryVec.size();
 
         if (device->IsValidationEnabled()) {
-            DAWN_TRY_CONTEXT(ValidateBindGroupLayoutDescriptor(device, &desc), "validating %s",
-                             &desc);
+            DAWN_TRY_CONTEXT(ValidateBindGroupLayoutDescriptor(device, &desc, allowInternalBinding),
+                             "validating %s", &desc);
         }
         return device->GetOrCreateBindGroupLayout(&desc, pipelineCompatibilityToken);
     };
@@ -350,8 +351,9 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     BindGroupIndex pipelineBGLCount = BindGroupIndex(0);
     PerBindGroup<Ref<BindGroupLayoutBase>> bindGroupLayouts = {};
     for (auto group : Range(kMaxBindGroupsTyped)) {
-        DAWN_TRY_ASSIGN(bindGroupLayouts[group],
-                        CreateBGL(device, entryData[group], pipelineCompatibilityToken));
+        DAWN_TRY_ASSIGN(
+            bindGroupLayouts[group],
+            CreateBGL(device, entryData[group], pipelineCompatibilityToken, allowInternalBinding));
         if (entryData[group].size() != 0) {
             pipelineBGLCount = ityp::PlusOne(group);
         }
