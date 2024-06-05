@@ -43,12 +43,19 @@ bool IsDepthStencil(DXGI_FORMAT format);
 
 uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion);
 
-DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format);
+DXGI_FORMAT DXGITypelessTextureFormat(const DeviceBase* device, wgpu::TextureFormat format);
+DXGI_FORMAT DXGITextureFormat(const DeviceBase* device, wgpu::TextureFormat format);
 
-DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format);
 ResultOrError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format);
 
 DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format);
+
+// Returns the DXGI format to use as the SRV format for a texture view. Returns
+// DXGI_FORMAT_UNKNOWN if a single aspect is not selected.
+DXGI_FORMAT D3DShaderResourceViewFormat(const DeviceBase* device,
+                                        const Format& textureFormat,
+                                        const Format& viewFormat,
+                                        Aspect aspects);
 
 }  // namespace dawn::native::d3d
 

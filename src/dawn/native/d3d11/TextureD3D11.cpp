@@ -236,9 +236,11 @@ T Texture::GetD3D11TextureDesc() const {
     // We need to use the typeless format if it's a staging texture for writting to depth-stencil
     // textures.
     needsTypelessFormat |=
-        d3d::IsDepthStencil(d3d::DXGITextureFormat(GetFormat().format)) && mKind == Kind::Staging;
-    desc.Format = needsTypelessFormat ? d3d::DXGITypelessTextureFormat(GetFormat().format)
-                                      : d3d::DXGITextureFormat(GetFormat().format);
+        d3d::IsDepthStencil(d3d::DXGITextureFormat(GetDevice(), GetFormat().format)) &&
+        mKind == Kind::Staging;
+    desc.Format = needsTypelessFormat
+                      ? d3d::DXGITypelessTextureFormat(GetDevice(), GetFormat().format)
+                      : d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
     desc.Usage = mKind == Kind::Staging ? D3D11_USAGE_STAGING : D3D11_USAGE_DEFAULT;
     desc.BindFlags = D3D11TextureBindFlags(GetInternalUsage(), GetFormat());
     constexpr UINT kCPUReadWriteFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
@@ -348,7 +350,7 @@ ResultOrError<ComPtr<ID3D11RenderTargetView>> Texture::CreateD3D11RenderTargetVi
     uint32_t sliceCount,
     uint32_t planeSlice) const {
     D3D11_RENDER_TARGET_VIEW_DESC1 rtvDesc;
-    rtvDesc.Format = d3d::DXGITextureFormat(format);
+    rtvDesc.Format = d3d::DXGITextureFormat(GetDevice(), format);
     if (IsMultisampledTexture()) {
         DAWN_ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
         DAWN_ASSERT(GetNumMipLevels() == 1);
@@ -402,7 +404,7 @@ ResultOrError<ComPtr<ID3D11DepthStencilView>> Texture::CreateD3D11DepthStencilVi
     bool stencilReadOnly) const {
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
     DAWN_ASSERT(singleLevelRange.levelCount == 1);
-    dsvDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
+    dsvDesc.Format = d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
     dsvDesc.Flags = 0;
     if (depthReadOnly && singleLevelRange.aspects & Aspect::Depth) {
         dsvDesc.Flags |= D3D11_DSV_READ_ONLY_DEPTH;
@@ -716,7 +718,7 @@ MaybeError Texture::WriteInternal(const ScopedCommandRecordingContext* commandCo
     DAWN_ASSERT(size.width != 0 && size.height != 0 && size.depthOrArrayLayers != 0);
     DAWN_ASSERT(subresources.levelCount == 1);
 
-    if (d3d::IsDepthStencil(d3d::DXGITextureFormat(GetFormat().format))) {
+    if (d3d::IsDepthStencil(d3d::DXGITextureFormat(GetDevice(), GetFormat().format))) {
         DAWN_TRY(WriteDepthStencilInternal(commandContext, subresources, origin, size, data,
                                            bytesPerRow, rowsPerImage));
         return {};
@@ -807,8 +809,8 @@ MaybeError Texture::WriteDepthStencilInternal(const ScopedCommandRecordingContex
         DAWN_TRY(Texture::CopyInternal(commandContext, &copyCmd));
     }
 
-    const auto aspectLayout =
-        DepthStencilAspectLayout(d3d::DXGITextureFormat(GetFormat().format), subresources.aspects);
+    const auto aspectLayout = DepthStencilAspectLayout(
+        d3d::DXGITextureFormat(GetDevice(), GetFormat().format), subresources.aspects);
 
     // Map and write to the staging texture.
     D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -891,7 +893,7 @@ MaybeError Texture::ReadStaging(const ScopedCommandRecordingContext* commandCont
                 // We need to read texel by texel for depth-stencil formats.
                 std::vector<uint8_t> depthOrStencilData(size.width * blockInfo.byteSize);
                 const auto aspectLayout = DepthStencilAspectLayout(
-                    d3d::DXGITextureFormat(GetFormat().format), subresources.aspects);
+                    d3d::DXGITextureFormat(GetDevice(), GetFormat().format), subresources.aspects);
                 DAWN_ASSERT(blockInfo.byteSize == aspectLayout.componentSize);
                 for (uint32_t y = 0; y < rowsPerImage; ++y) {
                     // Filter the depth/stencil data out.
@@ -1189,71 +1191,8 @@ ResultOrError<ID3D11ShaderResourceView*> TextureView::GetOrCreateD3D11ShaderReso
 
     Device* device = ToBackend(GetDevice());
     D3D11_SHADER_RESOURCE_VIEW_DESC1 srvDesc;
-    srvDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
-
-    const Format& textureFormat = GetTexture()->GetFormat();
-    // TODO(dawn:1705): share below code with D3D12?
-    if (textureFormat.HasDepthOrStencil()) {
-        // Configure the SRV descriptor to reinterpret the texture allocated as
-        // TYPELESS as a single-plane shader-accessible view.
-        switch (textureFormat.format) {
-            case wgpu::TextureFormat::Depth32Float:
-            case wgpu::TextureFormat::Depth24Plus:
-                srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-                break;
-            case wgpu::TextureFormat::Depth16Unorm:
-                srvDesc.Format = DXGI_FORMAT_R16_UNORM;
-                break;
-            case wgpu::TextureFormat::Stencil8: {
-                Aspect aspects = GetAspects();
-                DAWN_ASSERT(aspects != Aspect::None);
-                if (!HasZeroOrOneBits(aspects)) {
-                    // A single aspect is not selected. The texture view must not be
-                    // sampled.
-                    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-                    break;
-                }
-                switch (aspects) {
-                    case Aspect::Depth:
-                        srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-                        break;
-                    case Aspect::Stencil:
-                        srvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
-                        break;
-                    default:
-                        DAWN_UNREACHABLE();
-                        break;
-                }
-                break;
-            }
-            case wgpu::TextureFormat::Depth24PlusStencil8:
-            case wgpu::TextureFormat::Depth32FloatStencil8: {
-                Aspect aspects = GetAspects();
-                DAWN_ASSERT(aspects != Aspect::None);
-                if (!HasZeroOrOneBits(aspects)) {
-                    // A single aspect is not selected. The texture view must not be
-                    // sampled.
-                    srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-                    break;
-                }
-                switch (aspects) {
-                    case Aspect::Depth:
-                        srvDesc.Format = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
-                        break;
-                    case Aspect::Stencil:
-                        srvDesc.Format = DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
-                        break;
-                    default:
-                        DAWN_UNREACHABLE();
-                        break;
-                }
-                break;
-            }
-            default:
-                DAWN_UNREACHABLE();
-                break;
-        }
-    }
+    srvDesc.Format = d3d::D3DShaderResourceViewFormat(GetDevice(), GetTexture()->GetFormat(),
+                                                      GetFormat(), GetAspects());
 
     // Currently we always use D3D11_TEX2D_ARRAY_SRV because we cannot specify base array
     // layer and layer count in D3D11_TEX2D_SRV. For 2D texture views, we treat them as
@@ -1371,7 +1310,7 @@ ResultOrError<ID3D11UnorderedAccessView*> TextureView::GetOrCreateD3D11Unordered
     }
 
     D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
-    uavDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
+    uavDesc.Format = d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
 
     DAWN_ASSERT(!GetTexture()->IsMultisampledTexture());
     switch (GetDimension()) {

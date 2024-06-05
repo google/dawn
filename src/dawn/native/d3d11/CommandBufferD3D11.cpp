@@ -807,7 +807,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                     d3d11DeviceContext->ResolveSubresource(
                         resolveTexture->GetD3D11Resource(), dstSubresource,
                         colorTexture->GetD3D11Resource(), srcSubresource,
-                        d3d::DXGITextureFormat(attachment.resolveTarget->GetFormat().format));
+                        d3d::DXGITextureFormat(GetDevice(),
+                                               attachment.resolveTarget->GetFormat().format));
                 }
 
                 return {};

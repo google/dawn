@@ -768,6 +768,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
             deviceToggles->Default(Toggle::DisableResourceSuballocation, true);
         }
     }
+
+    if (gpu_info::IsNvidia(vendorId)) {
+        deviceToggles->Default(Toggle::D3D12ForceStencilComponentReplicateSwizzle, true);
+    }
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(

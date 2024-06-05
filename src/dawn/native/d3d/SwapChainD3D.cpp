@@ -109,7 +109,7 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
 
     // Precompute the configuration parameters we want for the DXGI swapchain.
     mConfig.bufferCount = PresentModeToBufferCount(GetPresentMode());
-    mConfig.format = d3d::DXGITextureFormat(GetFormat());
+    mConfig.format = d3d::DXGITextureFormat(GetDevice(), GetFormat());
     mConfig.swapChainFlags = PresentModeToSwapChainFlags(GetPresentMode());
     mConfig.usage = ToDXGIUsage(GetUsage());
 

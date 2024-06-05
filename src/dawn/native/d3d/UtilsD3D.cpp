@@ -29,6 +29,8 @@
 
 #include <utility>
 
+#include "dawn/native/Device.h"
+
 namespace dawn::native::d3d {
 
 ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s) {
@@ -97,7 +99,7 @@ uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion) {
     return (majorVersion << 32) + minorVersion;
 }
 
-DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format) {
+DXGI_FORMAT DXGITypelessTextureFormat(const DeviceBase* device, wgpu::TextureFormat format) {
     switch (format) {
         case wgpu::TextureFormat::R8Unorm:
         case wgpu::TextureFormat::R8Snorm:
@@ -176,7 +178,12 @@ DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format) {
         // for which the typeless equivalent is DXGI_FORMAT_R24G8_TYPELESS.
         case wgpu::TextureFormat::Stencil8:
             return DXGI_FORMAT_R24G8_TYPELESS;
+
         case wgpu::TextureFormat::Depth24PlusStencil8:
+            return device->IsToggleEnabled(Toggle::UsePackedDepth24UnormStencil8Format)
+                       ? DXGI_FORMAT_R24G8_TYPELESS
+                       : DXGI_FORMAT_R32G8X24_TYPELESS;
+
         case wgpu::TextureFormat::Depth32FloatStencil8:
             return DXGI_FORMAT_R32G8X24_TYPELESS;
 
@@ -313,7 +320,7 @@ DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format) {
     X(wgpu::TextureFormat::R8BG8Biplanar420Unorm, DXGI_FORMAT_NV12)         \
     X(wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm, DXGI_FORMAT_P010)
 
-DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format) {
+DXGI_FORMAT DXGITextureFormat(const DeviceBase* device, wgpu::TextureFormat format) {
     switch (format) {
 #define X(wgpuFormat, dxgiFormat) \
     case wgpuFormat:              \
@@ -330,6 +337,9 @@ DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::Stencil8:
             return DXGI_FORMAT_D24_UNORM_S8_UINT;
         case wgpu::TextureFormat::Depth24PlusStencil8:
+            return device->IsToggleEnabled(Toggle::UsePackedDepth24UnormStencil8Format)
+                       ? DXGI_FORMAT_D24_UNORM_S8_UINT
+                       : DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
         case wgpu::TextureFormat::Depth32FloatStencil8:
             return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 
@@ -495,6 +505,63 @@ DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format) {
         default:
             DAWN_UNREACHABLE();
     }
+}
+
+DXGI_FORMAT D3DShaderResourceViewFormat(const DeviceBase* device,
+                                        const Format& textureFormat,
+                                        const Format& viewFormat,
+                                        Aspect aspects) {
+    DAWN_ASSERT(aspects != Aspect::None);
+    if (!HasZeroOrOneBits(aspects)) {
+        // A single aspect is not selected. The texture view must not be sampled.
+        return DXGI_FORMAT_UNKNOWN;
+    }
+    // Note that this will configure the SRV descriptor to reinterpret the texture allocated as
+    // TYPELESS as a single-plane shader-accessible view.
+    DXGI_FORMAT srvFormat = DXGITextureFormat(device, viewFormat.format);
+    if (textureFormat.HasDepthOrStencil()) {
+        // Depth-stencil formats must be mapped to compatible shader-accessible view format.
+        switch (DXGITextureFormat(device, textureFormat.format)) {
+            case DXGI_FORMAT_D32_FLOAT:
+                srvFormat = DXGI_FORMAT_R32_FLOAT;
+                break;
+            case DXGI_FORMAT_D16_UNORM:
+                srvFormat = DXGI_FORMAT_R16_UNORM;
+                break;
+            case DXGI_FORMAT_D24_UNORM_S8_UINT: {
+                switch (aspects) {
+                    case Aspect::Depth:
+                        srvFormat = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+                        break;
+                    case Aspect::Stencil:
+                        srvFormat = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+                        break;
+                    default:
+                        DAWN_UNREACHABLE();
+                        break;
+                }
+                break;
+            }
+            case DXGI_FORMAT_D32_FLOAT_S8X24_UINT: {
+                switch (aspects) {
+                    case Aspect::Depth:
+                        srvFormat = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+                        break;
+                    case Aspect::Stencil:
+                        srvFormat = DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
+                        break;
+                    default:
+                        DAWN_UNREACHABLE();
+                        break;
+                }
+                break;
+            }
+            default:
+                DAWN_UNREACHABLE();
+                break;
+        }
+    }
+    return srvFormat;
 }
 
 }  // namespace dawn::native::d3d

@@ -132,6 +132,8 @@ enum class Toggle {
     EnableImmediateErrorHandling,
     VulkanUseStorageInputOutput16,
     D3D12DontUseShaderModel66OrHigher,
+    UsePackedDepth24UnormStencil8Format,
+    D3D12ForceStencilComponentReplicateSwizzle,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

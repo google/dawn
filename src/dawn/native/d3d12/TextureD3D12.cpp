@@ -103,15 +103,17 @@ D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& 
 D3D12_RESOURCE_FLAGS D3D12ResourceFlags(wgpu::TextureUsage usage, const Format& format) {
     D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE;
 
-    if (usage & wgpu::TextureUsage::StorageBinding) {
-        flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-    }
-
-    if (usage & wgpu::TextureUsage::RenderAttachment) {
-        if (format.HasDepthOrStencil()) {
-            flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-        } else {
+    // Always set the depth stencil flags on depth stencil format textures since some formats like
+    // D24_UNORM_S8_UINT don't support copying for lazy clear. Also, setting depth stencil flags
+    // precludes setting other resource flags like render target or unordered access.
+    if (format.HasDepthOrStencil()) {
+        flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+    } else {
+        if (usage & wgpu::TextureUsage::RenderAttachment) {
             flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+        }
+        if (usage & wgpu::TextureUsage::StorageBinding) {
+            flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
         }
     }
 
@@ -246,8 +248,8 @@ MaybeError Texture::InitializeAsInternalTexture() {
          (GetInternalUsage() & wgpu::TextureUsage::TextureBinding) != 0);
 
     DXGI_FORMAT dxgiFormat = needsTypelessFormat
-                                 ? d3d::DXGITypelessTextureFormat(GetFormat().format)
-                                 : d3d::DXGITextureFormat(GetFormat().format);
+                                 ? d3d::DXGITypelessTextureFormat(device, GetFormat().format)
+                                 : d3d::DXGITextureFormat(device, GetFormat().format);
 
     resourceDescriptor.MipLevels = static_cast<UINT16>(GetNumMipLevels());
     resourceDescriptor.Format = dxgiFormat;
@@ -343,7 +345,7 @@ ResultOrError<ExecutionSerial> Texture::EndAccess() {
 }
 
 DXGI_FORMAT Texture::GetD3D12Format() const {
-    return d3d::DXGITextureFormat(GetFormat().format);
+    return d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
 }
 
 ID3D12Resource* Texture::GetD3D12Resource() const {
@@ -357,12 +359,17 @@ D3D12_RESOURCE_FLAGS Texture::GetD3D12ResourceFlags() const {
 DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
     DAWN_ASSERT(GetFormat().aspects & aspect);
 
-    switch (GetFormat().format) {
+    wgpu::TextureFormat format = GetFormat().format;
+    switch (format) {
         case wgpu::TextureFormat::Depth24PlusStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8:
         case wgpu::TextureFormat::Stencil8:
             switch (aspect) {
                 case Aspect::Depth:
+                    // The depth24 part of a D24_UNORM_S8_UINT texture cannot be copied with D3D and
+                    // is also not supported by WebGPU.
+                    // See https://gpuweb.github.io/gpuweb/#depth-formats
+                    DAWN_ASSERT(format == wgpu::TextureFormat::Depth32FloatStencil8);
                     return DXGI_FORMAT_R32_FLOAT;
                 case Aspect::Stencil:
                     return DXGI_FORMAT_R8_UINT;
@@ -645,7 +652,7 @@ D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(const Format& format,
                                                         uint32_t sliceCount,
                                                         uint32_t planeSlice) const {
     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
-    rtvDesc.Format = d3d::DXGITextureFormat(format.format);
+    rtvDesc.Format = d3d::DXGITextureFormat(GetDevice(), format.format);
     if (IsMultisampledTexture()) {
         DAWN_ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
         DAWN_ASSERT(GetNumMipLevels() == 1);
@@ -905,167 +912,104 @@ Ref<TextureView> TextureView::Create(TextureBase* texture,
 
 TextureView::TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor)
     : TextureViewBase(texture, descriptor) {
-    mSrvDesc.Format = d3d::DXGITextureFormat(descriptor->format);
-    mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-
-    UINT planeSlice = 0;
+    const Aspect aspects = GetAspects();
     const Format& textureFormat = texture->GetFormat();
-    if (textureFormat.HasDepthOrStencil()) {
-        // Configure the SRV descriptor to reinterpret the texture allocated as
-        // TYPELESS as a single-plane shader-accessible view.
-        switch (textureFormat.format) {
-            case wgpu::TextureFormat::Depth32Float:
-            case wgpu::TextureFormat::Depth24Plus:
-                mSrvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-                break;
-            case wgpu::TextureFormat::Depth16Unorm:
-                mSrvDesc.Format = DXGI_FORMAT_R16_UNORM;
-                break;
-            case wgpu::TextureFormat::Stencil8: {
-                Aspect aspects = SelectFormatAspects(textureFormat, descriptor->aspect);
-                DAWN_ASSERT(aspects != Aspect::None);
-                if (!HasZeroOrOneBits(aspects)) {
-                    // A single aspect is not selected. The texture view must not be
-                    // sampled.
-                    mSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-                    break;
-                }
-                switch (aspects) {
-                    case Aspect::Depth:
-                        planeSlice = 0;
-                        mSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-                        break;
-                    case Aspect::Stencil:
-                        planeSlice = 1;
-                        mSrvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
-                        // Stencil is accessed using the .g component in the shader.
-                        // Map it to the zeroth component to match other APIs.
-                        mSrvDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
-                            D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1,
-                            D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
-                            D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
-                            D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
-                        break;
-                    default:
-                        DAWN_UNREACHABLE();
-                        break;
-                }
-                break;
+
+    mSrvDesc.Format =
+        d3d::D3DShaderResourceViewFormat(GetDevice(), textureFormat, GetFormat(), aspects);
+    if (mSrvDesc.Format != DXGI_FORMAT_UNKNOWN) {
+        mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+        // Stencil is accessed using the .g component in the shader. Map it to the zeroth component
+        // to match other APIs.
+        DXGI_FORMAT textureDxgiFormat = d3d::DXGITextureFormat(GetDevice(), textureFormat.format);
+        if (d3d::IsDepthStencil(textureDxgiFormat) && aspects == Aspect::Stencil) {
+            if (GetDevice()->IsToggleEnabled(Toggle::D3D12ForceStencilComponentReplicateSwizzle) &&
+                textureDxgiFormat == DXGI_FORMAT_D24_UNORM_S8_UINT) {
+                // Swizzle (ssss)
+                mSrvDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
+                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1,
+                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1,
+                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1,
+                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1);
+            } else {
+                // Swizzle (s001)
+                mSrvDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
+                    D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1,
+                    D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
+                    D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
+                    D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
             }
-            case wgpu::TextureFormat::Depth24PlusStencil8:
-            case wgpu::TextureFormat::Depth32FloatStencil8: {
-                Aspect aspects = SelectFormatAspects(textureFormat, descriptor->aspect);
-                DAWN_ASSERT(aspects != Aspect::None);
-                if (!HasZeroOrOneBits(aspects)) {
-                    // A single aspect is not selected. The texture view must not be
-                    // sampled.
-                    mSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+        }
+
+        // Currently we always use D3D12_TEX2D_ARRAY_SRV because we cannot specify base array layer
+        // and layer count in D3D12_TEX2D_SRV. For 2D texture views, we treat them as 1-layer 2D
+        // array textures.
+        // Multisampled textures may only be one array layer, so we use
+        // D3D12_SRV_DIMENSION_TEXTURE2DMS.
+        // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_srv
+        // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array_srv
+        if (GetTexture()->IsMultisampledTexture()) {
+            switch (descriptor->dimension) {
+                case wgpu::TextureViewDimension::e2DArray:
+                    DAWN_ASSERT(texture->GetArrayLayers() == 1);
+                    [[fallthrough]];
+                case wgpu::TextureViewDimension::e2D:
+                    DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
                     break;
-                }
-                switch (aspects) {
-                    case Aspect::Depth:
-                        planeSlice = 0;
-                        mSrvDesc.Format = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
-                        break;
-                    case Aspect::Stencil:
-                        planeSlice = 1;
-                        mSrvDesc.Format = DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
-                        // Stencil is accessed using the .g component in the shader.
-                        // Map it to the zeroth component to match other APIs.
-                        mSrvDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
-                            D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1,
-                            D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
-                            D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
-                            D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
-                        break;
-                    default:
-                        DAWN_UNREACHABLE();
-                        break;
-                }
-                break;
+
+                default:
+                    DAWN_UNREACHABLE();
             }
-            default:
-                DAWN_UNREACHABLE();
-                break;
-        }
-    }
+        } else {
+            switch (descriptor->dimension) {
+                case wgpu::TextureViewDimension::e1D:
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
+                    mSrvDesc.Texture1D.MipLevels = descriptor->mipLevelCount;
+                    mSrvDesc.Texture1D.MostDetailedMip = descriptor->baseMipLevel;
+                    mSrvDesc.Texture1D.ResourceMinLODClamp = 0;
+                    break;
 
-    // Per plane view formats must have the plane slice number be the index of the plane in the
-    // array of textures.
-    if (texture->GetFormat().IsMultiPlanar()) {
-        const Aspect planeAspect = ConvertViewAspect(GetFormat(), descriptor->aspect);
-        planeSlice = GetAspectIndex(planeAspect);
-        mSrvDesc.Format =
-            d3d::DXGITextureFormat(texture->GetFormat().GetAspectInfo(planeAspect).format);
-    }
+                case wgpu::TextureViewDimension::e2D:
+                case wgpu::TextureViewDimension::e2DArray:
+                    DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+                    mSrvDesc.Texture2DArray.ArraySize = descriptor->arrayLayerCount;
+                    mSrvDesc.Texture2DArray.FirstArraySlice = descriptor->baseArrayLayer;
+                    mSrvDesc.Texture2DArray.MipLevels = descriptor->mipLevelCount;
+                    mSrvDesc.Texture2DArray.MostDetailedMip = descriptor->baseMipLevel;
+                    mSrvDesc.Texture2DArray.PlaneSlice = GetAspectIndex(aspects);
+                    mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
+                    break;
+                case wgpu::TextureViewDimension::Cube:
+                case wgpu::TextureViewDimension::CubeArray:
+                    DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    DAWN_ASSERT(descriptor->arrayLayerCount % 6 == 0);
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
+                    mSrvDesc.TextureCubeArray.First2DArrayFace = descriptor->baseArrayLayer;
+                    mSrvDesc.TextureCubeArray.NumCubes = descriptor->arrayLayerCount / 6;
+                    mSrvDesc.TextureCubeArray.MostDetailedMip = descriptor->baseMipLevel;
+                    mSrvDesc.TextureCubeArray.MipLevels = descriptor->mipLevelCount;
+                    mSrvDesc.TextureCubeArray.ResourceMinLODClamp = 0;
+                    break;
+                case wgpu::TextureViewDimension::e3D:
+                    DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e3D);
+                    mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
+                    mSrvDesc.Texture3D.MostDetailedMip = descriptor->baseMipLevel;
+                    mSrvDesc.Texture3D.MipLevels = descriptor->mipLevelCount;
+                    mSrvDesc.Texture3D.ResourceMinLODClamp = 0;
+                    break;
 
-    // Currently we always use D3D12_TEX2D_ARRAY_SRV because we cannot specify base array layer
-    // and layer count in D3D12_TEX2D_SRV. For 2D texture views, we treat them as 1-layer 2D
-    // array textures.
-    // Multisampled textures may only be one array layer, so we use
-    // D3D12_SRV_DIMENSION_TEXTURE2DMS.
-    // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_srv
-    // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ns-d3d12-d3d12_tex2d_array_srv
-    if (GetTexture()->IsMultisampledTexture()) {
-        switch (descriptor->dimension) {
-            case wgpu::TextureViewDimension::e2DArray:
-                DAWN_ASSERT(texture->GetArrayLayers() == 1);
-                [[fallthrough]];
-            case wgpu::TextureViewDimension::e2D:
-                DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
-                break;
-
-            default:
-                DAWN_UNREACHABLE();
-        }
-    } else {
-        switch (descriptor->dimension) {
-            case wgpu::TextureViewDimension::e1D:
-                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
-                mSrvDesc.Texture1D.MipLevels = descriptor->mipLevelCount;
-                mSrvDesc.Texture1D.MostDetailedMip = descriptor->baseMipLevel;
-                mSrvDesc.Texture1D.ResourceMinLODClamp = 0;
-                break;
-
-            case wgpu::TextureViewDimension::e2D:
-            case wgpu::TextureViewDimension::e2DArray:
-                DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-                mSrvDesc.Texture2DArray.ArraySize = descriptor->arrayLayerCount;
-                mSrvDesc.Texture2DArray.FirstArraySlice = descriptor->baseArrayLayer;
-                mSrvDesc.Texture2DArray.MipLevels = descriptor->mipLevelCount;
-                mSrvDesc.Texture2DArray.MostDetailedMip = descriptor->baseMipLevel;
-                mSrvDesc.Texture2DArray.PlaneSlice = planeSlice;
-                mSrvDesc.Texture2DArray.ResourceMinLODClamp = 0;
-                break;
-            case wgpu::TextureViewDimension::Cube:
-            case wgpu::TextureViewDimension::CubeArray:
-                DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                DAWN_ASSERT(descriptor->arrayLayerCount % 6 == 0);
-                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
-                mSrvDesc.TextureCubeArray.First2DArrayFace = descriptor->baseArrayLayer;
-                mSrvDesc.TextureCubeArray.NumCubes = descriptor->arrayLayerCount / 6;
-                mSrvDesc.TextureCubeArray.MostDetailedMip = descriptor->baseMipLevel;
-                mSrvDesc.TextureCubeArray.MipLevels = descriptor->mipLevelCount;
-                mSrvDesc.TextureCubeArray.ResourceMinLODClamp = 0;
-                break;
-            case wgpu::TextureViewDimension::e3D:
-                DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e3D);
-                mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
-                mSrvDesc.Texture3D.MostDetailedMip = descriptor->baseMipLevel;
-                mSrvDesc.Texture3D.MipLevels = descriptor->mipLevelCount;
-                mSrvDesc.Texture3D.ResourceMinLODClamp = 0;
-                break;
-
-            case wgpu::TextureViewDimension::Undefined:
-                DAWN_UNREACHABLE();
+                case wgpu::TextureViewDimension::Undefined:
+                    DAWN_UNREACHABLE();
+            }
         }
     }
 }
 
 DXGI_FORMAT TextureView::GetD3D12Format() const {
-    return d3d::DXGITextureFormat(GetFormat().format);
+    return d3d::DXGITextureFormat(GetDevice(), GetFormat().format);
 }
 
 const D3D12_SHADER_RESOURCE_VIEW_DESC& TextureView::GetSRVDescriptor() const {
