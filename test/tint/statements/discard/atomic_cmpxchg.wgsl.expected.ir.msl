@@ -1,52 +1,40 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct atomic_compare_exchange_result_i32 {
+  int old_value;
+  bool exchanged;
+};
+struct tint_module_vars_struct {
+  device atomic_int* a;
+  thread bool* continue_execution;
+};
+struct foo_outputs {
+  int tint_symbol [[color(0)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: __atomic_compare_exchange_result_i32 = struct @align(4) {
-  old_value:i32 @offset(0)
-  exchanged:bool @offset(4)
+atomic_compare_exchange_result_i32 v(device atomic_int* const atomic_ptr, int cmp, int val) {
+  int old_value = cmp;
+  bool const v_1 = atomic_compare_exchange_weak_explicit(atomic_ptr, (&old_value), val, memory_order_relaxed, memory_order_relaxed);
+  return atomic_compare_exchange_result_i32{.old_value=old_value, .exchanged=v_1};
 }
-
-$B1: {  # root
-  %a:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
-  %continue_execution:ptr<private, bool, read_write> = var, true
-}
-
-%foo = @fragment func():i32 [@location(0)] {
-  $B2: {
-    store %continue_execution, false
-    %x:ptr<function, i32, read_write> = var, 0i
-    %5:bool = load %continue_execution
-    %6:__atomic_compare_exchange_result_i32 = if %5 [t: $B3] {  # if_1
-      $B3: {  # true
-        %7:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %a, 0i, 1i
-        exit_if %7  # if_1
-      }
-      # implicit false block: exit_if undef
-    }
-    %result:__atomic_compare_exchange_result_i32 = let %6
-    %9:bool = access %result, 1u
-    if %9 [t: $B4] {  # if_2
-      $B4: {  # true
-        %10:i32 = access %result, 0u
-        store %x, %10
-        exit_if  # if_2
-      }
-    }
-    %11:i32 = load %x
-    %12:bool = load %continue_execution
-    %13:bool = eq %12, false
-    if %13 [t: $B5] {  # if_3
-      $B5: {  # true
-        terminate_invocation
-      }
-    }
-    ret %11
+int foo_inner(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.continue_execution) = false;
+  int x = 0;
+  atomic_compare_exchange_result_i32 v_2 = {};
+  if ((*tint_module_vars.continue_execution)) {
+    v_2 = v(tint_module_vars.a, 0, 1);
   }
+  atomic_compare_exchange_result_i32 const result = v_2;
+  if (result.exchanged) {
+    x = result.old_value;
+  }
+  if (!((*tint_module_vars.continue_execution))) {
+    discard_fragment();
+  }
+  return x;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+fragment foo_outputs foo(device atomic_int* a [[buffer(0)]]) {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .continue_execution=(&continue_execution)};
+  return foo_outputs{.tint_symbol=foo_inner(tint_module_vars)};
+}

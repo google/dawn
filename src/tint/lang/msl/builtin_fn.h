@@ -47,6 +47,7 @@ namespace tint::msl {
 
 /// Enumerator of all builtin functions
 enum class BuiltinFn : uint8_t {
+    kAtomicCompareExchangeWeakExplicit,
     kAtomicExchangeExplicit,
     kAtomicFetchAddExplicit,
     kAtomicFetchAndExplicit,

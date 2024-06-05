@@ -1,28 +1,20 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
+struct tint_module_vars_struct {
+  device atomic_uint* a;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: __atomic_compare_exchange_result_u32 = struct @align(4) {
-  old_value:u32 @offset(0)
-  exchanged:bool @offset(4)
+atomic_compare_exchange_result_u32 v(device atomic_uint* const atomic_ptr, uint cmp, uint val) {
+  uint old_value = cmp;
+  bool const v_1 = atomic_compare_exchange_weak_explicit(atomic_ptr, (&old_value), val, memory_order_relaxed, memory_order_relaxed);
+  return atomic_compare_exchange_result_u32{.old_value=old_value, .exchanged=v_1};
 }
-
-$B1: {  # root
-  %a:ptr<storage, atomic<u32>, read_write> = var @binding_point(0, 0)
+kernel void tint_symbol(device atomic_uint* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+  uint value = 42u;
+  atomic_compare_exchange_result_u32 const result = v(tint_module_vars.a, 0u, value);
 }
-
-%tint_symbol = @compute @workgroup_size(16, 1, 1) func():void {
-  $B2: {
-    %value:ptr<function, u32, read_write> = var, 42u
-    %4:u32 = load %value
-    %5:__atomic_compare_exchange_result_u32 = atomicCompareExchangeWeak %a, 0u, %4
-    %result:__atomic_compare_exchange_result_u32 = let %5
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

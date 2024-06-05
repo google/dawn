@@ -44,6 +44,7 @@ import "src/tint/lang/core/address_space.def"
 
 match read_write: access.read_write
 
+match function: address_space.function
 match workgroup_or_storage
   : address_space.workgroup
   | address_space.storage
@@ -52,6 +53,7 @@ match workgroup_or_storage
 // Types                                                                      //
 ////////////////////////////////////////////////////////////////////////////////
 
+type bool
 type i32
 type u32
 type atomic<T>
@@ -66,6 +68,7 @@ match iu32: i32 | u32
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
+@stage("fragment", "compute") fn atomic_compare_exchange_weak_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, ptr<function, T, read_write>, T, u32, u32) -> bool
 @stage("fragment", "compute") fn atomic_exchange_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
 @stage("fragment", "compute") fn atomic_fetch_add_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
 @stage("fragment", "compute") fn atomic_fetch_and_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T

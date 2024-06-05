@@ -1,74 +1,48 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
+struct SB_RW_atomic {
+  atomic_uint arg_0;
+};
+struct tint_module_vars_struct {
+  device SB_RW_atomic* sb_rw;
+};
+struct x__atomic_compare_exchange_resultu32 {
+  uint old_value;
+  bool exchanged;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SB_RW_atomic = struct @align(4) {
-  arg_0:atomic<u32> @offset(0)
+atomic_compare_exchange_result_u32 v(device atomic_uint* const atomic_ptr, uint cmp, uint val) {
+  uint old_value = cmp;
+  bool const v_1 = atomic_compare_exchange_weak_explicit(atomic_ptr, (&old_value), val, memory_order_relaxed, memory_order_relaxed);
+  return atomic_compare_exchange_result_u32{.old_value=old_value, .exchanged=v_1};
 }
-
-x__atomic_compare_exchange_resultu32 = struct @align(4) {
-  old_value:u32 @offset(0)
-  exchanged:bool @offset(4)
+void atomicCompareExchangeWeak_63d8e6(tint_module_vars_struct tint_module_vars) {
+  uint arg_1 = 0u;
+  uint arg_2 = 0u;
+  x__atomic_compare_exchange_resultu32 res = x__atomic_compare_exchange_resultu32{};
+  arg_1 = 1u;
+  arg_2 = 1u;
+  uint const x_21 = arg_2;
+  uint const x_22 = arg_1;
+  uint const old_value_1 = v((&(*tint_module_vars.sb_rw).arg_0), x_22, x_21).old_value;
+  uint const x_23 = old_value_1;
+  res = x__atomic_compare_exchange_resultu32{.old_value=x_23, .exchanged=(x_23 == x_21)};
 }
-
-__atomic_compare_exchange_result_u32 = struct @align(4) {
-  old_value:u32 @offset(0)
-  exchanged:bool @offset(4)
+void fragment_main_1(tint_module_vars_struct tint_module_vars) {
+  atomicCompareExchangeWeak_63d8e6(tint_module_vars);
 }
-
-$B1: {  # root
-  %sb_rw:ptr<storage, SB_RW_atomic, read_write> = var @binding_point(0, 0)
+fragment void fragment_main(device SB_RW_atomic* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  fragment_main_1(tint_module_vars);
 }
-
-%atomicCompareExchangeWeak_63d8e6 = func():void {
-  $B2: {
-    %arg_1:ptr<function, u32, read_write> = var, 0u
-    %arg_2:ptr<function, u32, read_write> = var, 0u
-    %res:ptr<function, x__atomic_compare_exchange_resultu32, read_write> = var, x__atomic_compare_exchange_resultu32(0u, false)
-    store %arg_1, 1u
-    store %arg_2, 1u
-    %6:u32 = load %arg_2
-    %x_21:u32 = let %6
-    %8:u32 = load %arg_1
-    %x_22:u32 = let %8
-    %10:ptr<storage, atomic<u32>, read_write> = access %sb_rw, 0u
-    %11:__atomic_compare_exchange_result_u32 = atomicCompareExchangeWeak %10, %x_22, %x_21
-    %12:u32 = access %11, 0u
-    %old_value_1:u32 = let %12
-    %x_23:u32 = let %old_value_1
-    %15:bool = eq %x_23, %x_21
-    %16:x__atomic_compare_exchange_resultu32 = construct %x_23, %15
-    store %res, %16
-    ret
-  }
+void compute_main_1(tint_module_vars_struct tint_module_vars) {
+  atomicCompareExchangeWeak_63d8e6(tint_module_vars);
 }
-%fragment_main_1 = func():void {
-  $B3: {
-    %18:void = call %atomicCompareExchangeWeak_63d8e6
-    ret
-  }
+kernel void compute_main(device SB_RW_atomic* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  compute_main_1(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %20:void = call %fragment_main_1
-    ret
-  }
-}
-%compute_main_1 = func():void {
-  $B5: {
-    %22:void = call %atomicCompareExchangeWeak_63d8e6
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B6: {
-    %24:void = call %compute_main_1
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

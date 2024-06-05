@@ -1,47 +1,31 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct atomic_compare_exchange_result_i32 {
+  int old_value;
+  bool exchanged;
+};
+struct SB_RW {
+  atomic_int arg_0;
+};
+struct tint_module_vars_struct {
+  device SB_RW* sb_rw;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SB_RW = struct @align(4) {
-  arg_0:atomic<i32> @offset(0)
+atomic_compare_exchange_result_i32 v(device atomic_int* const atomic_ptr, int cmp, int val) {
+  int old_value = cmp;
+  bool const v_1 = atomic_compare_exchange_weak_explicit(atomic_ptr, (&old_value), val, memory_order_relaxed, memory_order_relaxed);
+  return atomic_compare_exchange_result_i32{.old_value=old_value, .exchanged=v_1};
 }
-
-__atomic_compare_exchange_result_i32 = struct @align(4) {
-  old_value:i32 @offset(0)
-  exchanged:bool @offset(4)
+void atomicCompareExchangeWeak_1bd40a(tint_module_vars_struct tint_module_vars) {
+  int arg_1 = 1;
+  int arg_2 = 1;
+  atomic_compare_exchange_result_i32 res = v((&(*tint_module_vars.sb_rw).arg_0), arg_1, arg_2);
 }
-
-$B1: {  # root
-  %sb_rw:ptr<storage, SB_RW, read_write> = var @binding_point(0, 0)
+fragment void fragment_main(device SB_RW* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  atomicCompareExchangeWeak_1bd40a(tint_module_vars);
 }
-
-%atomicCompareExchangeWeak_1bd40a = func():void {
-  $B2: {
-    %arg_1:ptr<function, i32, read_write> = var, 1i
-    %arg_2:ptr<function, i32, read_write> = var, 1i
-    %5:ptr<storage, atomic<i32>, read_write> = access %sb_rw, 0u
-    %6:i32 = load %arg_1
-    %7:i32 = load %arg_2
-    %8:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %5, %6, %7
-    %res:ptr<function, __atomic_compare_exchange_result_i32, read_write> = var, %8
-    ret
-  }
+kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  atomicCompareExchangeWeak_1bd40a(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B3: {
-    %11:void = call %atomicCompareExchangeWeak_1bd40a
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B4: {
-    %13:void = call %atomicCompareExchangeWeak_1bd40a
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

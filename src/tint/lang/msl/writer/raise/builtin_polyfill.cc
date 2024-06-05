@@ -34,11 +34,13 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
+#include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/barrier_type.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
+#include "src/tint/utils/containers/hashmap.h"
 
 namespace tint::msl::writer::raise {
 namespace {
@@ -56,6 +58,9 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
+    /// A map from an atomic pointer type to an atomicCompareExchangeWeak polyfill.
+    Hashmap<const core::type::Type*, core::ir::Function*, 2> atomic_compare_exchange_polyfills{};
+
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
@@ -65,6 +70,7 @@ struct State {
                 switch (builtin->Func()) {
                     case core::BuiltinFn::kAtomicAdd:
                     case core::BuiltinFn::kAtomicAnd:
+                    case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     case core::BuiltinFn::kAtomicExchange:
                     case core::BuiltinFn::kAtomicLoad:
                     case core::BuiltinFn::kAtomicMax:
@@ -92,6 +98,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kAtomicAnd:
                     AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchAndExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                    AtomicCompareExchangeWeak(builtin);
                     break;
                 case core::BuiltinFn::kAtomicExchange:
                     AtomicCall(builtin, msl::BuiltinFn::kAtomicExchangeExplicit);
@@ -140,6 +149,47 @@ struct State {
             b.ConstantValue(u32(std::memory_order_relaxed))));
         auto* call = b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(), intrinsic,
                                                             std::move(args));
+        call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Replace an atomicCompareExchangeWeak builtin call with an equivalent MSL polyfill.
+    /// @param builtin the builtin call instruction
+    void AtomicCompareExchangeWeak(core::ir::CoreBuiltinCall* builtin) {
+        // Get or generate a polyfill function.
+        auto* atomic_ptr = builtin->Args()[0]->Type();
+        auto* polyfill = atomic_compare_exchange_polyfills.GetOrAdd(atomic_ptr, [&] {
+            // The polyfill function performs the equivalent to the following:
+            //     int old_value = cmp;
+            //     bool exchanged = atomic_compare_exchange_weak_explicit(
+            //                         atomic_ptr, old_value, val,
+            //                         memory_order_relaxed, memory_order_relaxed);
+            //     return __atomic_compare_exchange_result_i32(old_value, exchanged);
+            auto* ptr = b.FunctionParam("atomic_ptr", atomic_ptr);
+            auto* cmp = b.FunctionParam("cmp", builtin->Args()[1]->Type());
+            auto* val = b.FunctionParam("val", builtin->Args()[2]->Type());
+            auto* func = b.Function(builtin->Result(0)->Type());
+            func->SetParams({ptr, cmp, val});
+            b.Append(func->Block(), [&] {
+                auto* old_value = b.Var<function>("old_value", cmp)->Result(0);
+                auto* order = ir.allocators.values.Create<msl::ir::MemoryOrder>(
+                    b.ConstantValue(u32(std::memory_order_relaxed)));
+                auto* call = b.Call<msl::ir::BuiltinCall>(
+                    ty.bool_(), BuiltinFn::kAtomicCompareExchangeWeakExplicit,
+                    Vector{ptr, old_value, val, order, order});
+                auto* result =
+                    b.Construct(builtin->Result(0)->Type(), Vector{
+                                                                b.Load(old_value)->Result(0),
+                                                                call->Result(0),
+                                                            });
+                b.Return(func, result);
+            });
+            return func;
+        });
+
+        // Call the polyfill function.
+        auto args = Vector<core::ir::Value*, 4>{builtin->Args()};
+        auto* call = b.CallWithResult(builtin->DetachResult(), polyfill, std::move(args));
         call->InsertBefore(builtin);
         builtin->Destroy();
     }

@@ -42,6 +42,8 @@ const char* str(BuiltinFn i) {
     switch (i) {
         case BuiltinFn::kNone:
             return "<none>";
+        case BuiltinFn::kAtomicCompareExchangeWeakExplicit:
+            return "atomic_compare_exchange_weak_explicit";
         case BuiltinFn::kAtomicExchangeExplicit:
             return "atomic_exchange_explicit";
         case BuiltinFn::kAtomicFetchAddExplicit:

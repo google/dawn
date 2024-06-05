@@ -1023,7 +1023,7 @@ class Printer : public tint::TextGenerator {
             },
             [&](const core::type::Struct* struct_ty) {
                 EmitStructType(struct_ty);
-                out << struct_ty->Name().Name();
+                out << StructName(struct_ty);
                 out << "{";
                 size_t i = 0;
                 for (auto* arg : c->Args()) {

@@ -113,10 +113,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(raise::ShaderIO, raise::ShaderIOConfig{options.emit_vertex_point_size});
     RUN_TRANSFORM(raise::ModuleScopeVars);
+    RUN_TRANSFORM(raise::BuiltinPolyfill);
+
+    // These transforms need to be run last as various transforms introduce terminator arguments,
+    // naming conflicts, and expressions that need to be explicitly not inlined.
     RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
     RUN_TRANSFORM(core::ir::transform::RenameConflicts);
     RUN_TRANSFORM(core::ir::transform::ValueToLet);
-    RUN_TRANSFORM(raise::BuiltinPolyfill);
 
     return Success;
 }
