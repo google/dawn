@@ -1395,6 +1395,13 @@ crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,val
 crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,call,builtin,normalize:values:stage="override";type="vec3%3Cf16%3E" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,call,builtin,normalize:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
 
+
+################################################################################
+# Will be fixed by the MSL IR conversion
+# KEEP
+################################################################################
+crbug.com/dawn/344983134 [ mac ] webgpu:shader,execution,limits:function_parameters: [ Failure ]
+
 ################################################################################
 # New flakes. Please triage:
 ################################################################################
@@ -1612,7 +1619,6 @@ crbug.com/dawn/0000 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,vali
 crbug.com/dawn/0000 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:lhs=1;c=4;r=2 [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:lhs=1;c=4;r=3 [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:lhs=1;c=4;r=4 [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,limits:function_parameters: [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize="_undef_";non_uniform_discard=true [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize=2;non_uniform_discard=true [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize=3;non_uniform_discard=true [ Failure ]
