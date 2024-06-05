@@ -102,10 +102,8 @@ class SurfaceConfigurationValidationTests : public DawnTest {
         wgpu::SurfaceCapabilities capabilities;
         surface.GetCapabilities(adapter, &capabilities);
 
-        wgpu::TextureFormat preferredFormat = surface.GetPreferredFormat(adapter);
-
         wgpu::SurfaceConfiguration config = baseConfig;
-        config.format = preferredFormat;
+        config.format = capabilities.formats[0];
         config.alphaMode = capabilities.alphaModes[0];
         config.presentMode = capabilities.presentModes[0];
         return config;
@@ -201,21 +199,6 @@ TEST_P(SurfaceConfigurationValidationTests, AnyCombinationOfCapabilities) {
             }
         }
     }
-}
-
-// Preferred format is always valid.
-TEST_P(SurfaceConfigurationValidationTests, PreferredFormatIsValid) {
-    wgpu::Surface surface = CreateTestSurface();
-
-    wgpu::SurfaceCapabilities capabilities;
-    surface.GetCapabilities(adapter, &capabilities);
-
-    wgpu::TextureFormat preferredFormat = surface.GetPreferredFormat(adapter);
-    bool found = false;
-    for (size_t i = 0; i < capabilities.formatCount; ++i) {
-        found = found || capabilities.formats[i] == preferredFormat;
-    }
-    ASSERT_TRUE(found);
 }
 
 // Invalid view format fails
