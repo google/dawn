@@ -44,6 +44,16 @@ class Module;
 
 namespace tint::fuzz::ir {
 
+/// Options for Run()
+struct Options {
+    /// If not empty, only run the fuzzers with the given substring.
+    std::string filter;
+    /// If true, the fuzzers will be run concurrently on separate threads.
+    bool run_concurrently = false;
+    /// If true, print the fuzzer name to stdout before running.
+    bool verbose = false;
+};
+
 /// IRFuzzer describes a fuzzer function that takes a IR module as input
 struct IRFuzzer {
     /// @param name the name of the fuzzer
@@ -83,6 +93,14 @@ struct IRFuzzer {
 /// Registers the fuzzer function with the IR fuzzer executable.
 /// @param fuzzer the fuzzer
 void Register([[maybe_unused]] const IRFuzzer& fuzzer);
+
+/// Runs all the registered IR fuzzers with the supplied IR module
+/// @param acquire_module a function to obtain an IR module
+/// @param options the options for running the fuzzers
+/// @param data additional data used for fuzzing
+void Run(const std::function<tint::core::ir::Module()>& acquire_module,
+         const Options& options,
+         Slice<const std::byte> data);
 
 /// TINT_IR_MODULE_FUZZER registers the fuzzer function.
 #define TINT_IR_MODULE_FUZZER(FUNCTION) \

@@ -35,6 +35,105 @@
 ################################################################################
 
 ################################################################################
+# Target:    tint_cmd_fuzz_ir_proto
+# Kind:      proto
+################################################################################
+tint_add_target(tint_cmd_fuzz_ir_proto proto
+  cmd/fuzz/ir/fuzz.proto
+)
+
+if(TINT_BUILD_IR_FUZZER)
+################################################################################
+# Target:    tint_cmd_fuzz_ir_fuzz_cmd
+# Kind:      fuzz_cmd
+# Condition: TINT_BUILD_IR_FUZZER
+################################################################################
+tint_add_target(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+  cmd/fuzz/ir/main_fuzz.cc
+)
+
+tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+  tint_api_common
+  tint_cmd_fuzz_ir_fuzz
+  tint_cmd_fuzz_ir_proto
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_ir
+  tint_lang_core_ir_transform_fuzz
+  tint_lang_core_type
+  tint_lang_wgsl_program_fuzz
+  tint_lang_wgsl_writer_raise_fuzz
+  tint_lang_wgsl_fuzz
+  tint_utils_bytes
+  tint_utils_cli
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_strconv
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+  "libprotobuf-mutator"
+)
+
+if(TINT_BUILD_GLSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+    tint_lang_glsl_writer_fuzz
+  )
+endif(TINT_BUILD_GLSL_WRITER)
+
+if(TINT_BUILD_HLSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+    tint_lang_hlsl_writer_fuzz
+  )
+endif(TINT_BUILD_HLSL_WRITER)
+
+if(TINT_BUILD_IR_BINARY)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+    tint_lang_core_ir_binary
+    tint_lang_core_ir_binary_fuzz
+  )
+endif(TINT_BUILD_IR_BINARY)
+
+if(TINT_BUILD_MSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+    tint_lang_msl_writer_fuzz
+  )
+endif(TINT_BUILD_MSL_WRITER)
+
+if(TINT_BUILD_SPV_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+    tint_lang_spirv_writer_fuzz
+  )
+endif(TINT_BUILD_SPV_WRITER)
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+    tint_cmd_fuzz_wgsl_fuzz
+    tint_lang_wgsl_ast_transform_fuzz
+  )
+endif(TINT_BUILD_WGSL_READER)
+
+if(TINT_BUILD_WGSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+    tint_lang_wgsl_writer_fuzz
+  )
+endif(TINT_BUILD_WGSL_WRITER)
+
+tint_target_set_output_name(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd "tint_ir_fuzzer")
+
+endif(TINT_BUILD_IR_FUZZER)
+################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz
 # Kind:      fuzz
 ################################################################################
@@ -70,6 +169,10 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_cmd_fuzz_ir_fuzz fuzz
+  "thread"
 )
 
 if(TINT_BUILD_WGSL_READER)

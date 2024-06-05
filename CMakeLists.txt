@@ -236,10 +236,10 @@ option_if_not_defined(TINT_BUILD_SYNTAX_TREE_WRITER "Build the syntax tree write
 
 option_if_not_defined(TINT_BUILD_IR_BINARY "Build IR binary format support" ON)
 
-
 option_if_not_defined(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
 option_if_not_defined(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
 option_if_not_defined(TINT_BUILD_REGEX_FUZZER "Build regex fuzzer" OFF)
+option_if_not_defined(TINT_BUILD_IR_FUZZER "Build IR fuzzer" OFF)
 option_if_not_defined(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
 option_if_not_defined(TINT_BUILD_TESTS "Build tests" ON)
 option_if_not_defined(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
