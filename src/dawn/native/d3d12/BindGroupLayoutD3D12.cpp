@@ -143,17 +143,19 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
                 // point to data.
                 return D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
             },
-            [](const BufferBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+            [&](const BufferBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 // In Dawn it's allowed to do state transitions on the buffers or textures after
-                // binding
-                // them on the current command list, which indicates a change to its data (or
-                // possibly resource metadata), so we cannot bind them as DATA_STATIC. We cannot
+                // binding them on the current command list, which indicates a change to its data
+                // (or possibly resource metadata), so we cannot bind them as DATA_STATIC. We cannot
                 // bind them as DATA_STATIC_WHILE_SET_AT_EXECUTE either because it is required to be
                 // rebound to the command list before the next (this) Draw/Dispatch call, while
                 // currently we may not rebind these resources if the current bind group is not
                 // changed.
-                return D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_STATIC_KEEPING_BUFFER_BOUNDS_CHECKS |
-                       D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+                if (GetDevice()->IsRobustnessEnabled()) {
+                    return D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_STATIC_KEEPING_BUFFER_BOUNDS_CHECKS |
+                           D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+                }
+                return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
             },
             [](const TextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
