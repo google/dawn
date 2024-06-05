@@ -1,28 +1,18 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct DrawIndirectArgs {
+  atomic_uint vertexCount;
+};
+struct tint_module_vars_struct {
+  device DrawIndirectArgs* drawOut;
+  thread uint* cubeVerts;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: DrawIndirectArgs = struct @align(4) {
-  vertexCount:atomic<u32> @offset(0)
+void computeMain_inner(uint3 global_id, tint_module_vars_struct tint_module_vars) {
+  uint const firstVertex = atomic_fetch_add_explicit((&(*tint_module_vars.drawOut).vertexCount), (*tint_module_vars.cubeVerts), memory_order_relaxed);
 }
-
-$B1: {  # root
-  %drawOut:ptr<storage, DrawIndirectArgs, read_write> = var @binding_point(0, 5)
-  %cubeVerts:ptr<private, u32, read_write> = var, 0u
+kernel void computeMain(uint3 global_id [[thread_position_in_grid]], device DrawIndirectArgs* drawOut [[buffer(5)]]) {
+  thread uint cubeVerts = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.drawOut=drawOut, .cubeVerts=(&cubeVerts)};
+  computeMain_inner(global_id, tint_module_vars);
 }
-
-%computeMain = @compute @workgroup_size(1, 1, 1) func(%global_id:vec3<u32> [@global_invocation_id]):void {
-  $B2: {
-    %5:ptr<storage, atomic<u32>, read_write> = access %drawOut, 0u
-    %6:u32 = load %cubeVerts
-    %7:u32 = atomicAdd %5, %6
-    %firstVertex:u32 = let %7
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

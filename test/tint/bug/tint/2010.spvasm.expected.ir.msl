@@ -1,271 +1,168 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(8) {
-  field0:vec2<f32> @offset(0)
-  field1:u32 @offset(8)
-}
+struct S {
+  float2 field0;
+  uint field1;
+};
+struct S_1 {
+  uint field0;
+};
+struct S_2 {
+  S_1 field0;
+};
+struct S_3 {
+  tint_array<float4, 1> field0;
+};
+struct S_4 {
+  tint_array<float4, 1> field0;
+};
+struct tint_module_vars_struct {
+  threadgroup tint_array<S, 4096>* x_28;
+  threadgroup atomic_uint* x_34;
+  threadgroup atomic_uint* x_35;
+  threadgroup atomic_uint* x_36;
+  threadgroup atomic_uint* x_37;
+  thread uint3* x_3;
+  const constant S_2* x_6;
+  const device S_3* x_9;
+  device S_4* x_12;
+};
+struct tint_symbol_6 {
+  tint_array<S, 4096> tint_symbol_1;
+  atomic_uint tint_symbol_2;
+  atomic_uint tint_symbol_3;
+  atomic_uint tint_symbol_4;
+  atomic_uint tint_symbol_5;
+};
 
-S_1 = struct @align(4) {
-  field0:u32 @offset(0)
-}
-
-S_2 = struct @align(4) {
-  field0:S_1 @offset(0)
-}
-
-S_3 = struct @align(16) {
-  field0:array<vec4<f32>> @offset(0)
-}
-
-S_4 = struct @align(16) {
-  field0:array<vec4<f32>> @offset(0)
-}
-
-$B1: {  # root
-  %x_28:ptr<workgroup, array<S, 4096>, read_write> = var
-  %x_34:ptr<workgroup, atomic<u32>, read_write> = var
-  %x_35:ptr<workgroup, atomic<u32>, read_write> = var
-  %x_36:ptr<workgroup, atomic<u32>, read_write> = var
-  %x_37:ptr<workgroup, atomic<u32>, read_write> = var
-  %x_3:ptr<private, vec3<u32>, read_write> = var
-  %x_6:ptr<uniform, S_2, read> = var @binding_point(0, 1)
-  %x_9:ptr<storage, S_3, read> = var @binding_point(0, 2)
-  %x_12:ptr<storage, S_4, read_write> = var @binding_point(0, 3)
-}
-
-%main_1 = func():void {
-  $B2: {
-    %x_54:ptr<function, u32, read_write> = var
-    %x_58:ptr<function, u32, read_write> = var
-    %x_85:ptr<function, vec4<f32>, read_write> = var
-    %x_88:ptr<function, u32, read_write> = var
-    %15:u32 = load_vector_element %x_3, 0u
-    %x_52:u32 = let %15
-    store %x_54, 0u
-    loop [b: $B3, c: $B4] {  # loop_1
-      $B3: {  # body
-        %x_55:ptr<function, u32, read_write> = var
-        %18:ptr<uniform, u32, read> = access %x_6, 0u, 0u
-        %19:u32 = load %18
-        store %x_58, %19
-        %20:u32 = load %x_54
-        %21:u32 = load %x_58
-        %22:bool = lt %20, %21
-        if %22 [t: $B5, f: $B6] {  # if_1
-          $B5: {  # true
-            exit_if  # if_1
-          }
-          $B6: {  # false
-            exit_loop  # loop_1
-          }
-        }
-        %23:u32 = load %x_54
-        %24:u32 = add %23, %x_52
-        %x_62:u32 = let %24
-        %26:u32 = load %x_58
-        %27:bool = gte %x_62, %26
-        if %27 [t: $B7] {  # if_2
-          $B7: {  # true
-            %28:ptr<storage, vec4<f32>, read> = access %x_9, 0u, %x_62
-            %29:vec4<f32> = load %28
-            %x_67:vec4<f32> = let %29
-            %31:ptr<workgroup, S, read_write> = access %x_28, %x_62
-            %32:vec2<f32> = swizzle %x_67, xy
-            %33:vec2<f32> = swizzle %x_67, zw
-            %34:vec2<f32> = add %32, %33
-            %35:vec2<f32> = mul %34, 0.5f
-            %36:S = construct %35, %x_62
-            store %31, %36
-            exit_if  # if_2
-          }
-        }
-        continue  # -> $B4
+void main_1(tint_module_vars_struct tint_module_vars) {
+  uint x_54 = 0u;
+  uint x_58 = 0u;
+  float4 x_85 = 0.0f;
+  uint x_88 = 0u;
+  uint const x_52 = (*tint_module_vars.x_3)[0u];
+  x_54 = 0u;
+  {
+    while(true) {
+      uint x_55 = 0u;
+      x_58 = (*tint_module_vars.x_6).field0.field0;
+      if ((x_54 < x_58)) {
+      } else {
+        break;
       }
-      $B4: {  # continuing
-        %37:u32 = load %x_54
-        %38:u32 = add %37, 32u
-        store %x_55, %38
-        %39:u32 = load %x_55
-        store %x_54, %39
-        next_iteration  # -> $B3
+      uint const x_62 = (x_54 + x_52);
+      if ((x_62 >= x_58)) {
+        float4 const x_67 = (*tint_module_vars.x_9).field0[x_62];
+        (*tint_module_vars.x_28)[x_62] = S{.field0=((x_67.xy + x_67.zw) * 0.5f), .field1=x_62};
       }
+      {
+        x_55 = (x_54 + 32u);
+        x_54 = x_55;
+      }
+      continue;
     }
-    %40:void = msl.threadgroup_barrier 4u
-    %41:u32 = load %x_58
-    %42:i32 = bitcast %41
-    %x_74:i32 = let %42
-    %44:ptr<workgroup, vec2<f32>, read_write> = access %x_28, 0i, 0u
-    %45:vec2<f32> = load %44
-    %x_76:vec2<f32> = let %45
-    %47:bool = eq %x_52, 0u
-    if %47 [t: $B8] {  # if_3
-      $B8: {  # true
-        %48:vec2<u32> = bitcast %x_76
-        %x_80:vec2<u32> = let %48
-        %50:u32 = access %x_80, 0u
-        %x_81:u32 = let %50
-        %52:void = atomicStore %x_34, %x_81
-        %53:u32 = access %x_80, 1u
-        %x_82:u32 = let %53
-        %55:void = atomicStore %x_35, %x_82
-        %56:void = atomicStore %x_36, %x_81
-        %57:void = atomicStore %x_37, %x_82
-        exit_if  # if_3
-      }
-    }
-    %58:vec4<f32> = swizzle %x_76, xyxy
-    store %x_85, %58
-    store %x_88, 1u
-    loop [b: $B9, c: $B10] {  # loop_2
-      $B9: {  # body
-        %x_111:ptr<function, vec4<f32>, read_write> = var
-        %x_86:ptr<function, vec4<f32>, read_write> = var
-        %x_89:ptr<function, u32, read_write> = var
-        %62:u32 = bitcast %x_74
-        %x_90:u32 = let %62
-        %64:u32 = load %x_88
-        %65:bool = lt %64, %x_90
-        if %65 [t: $B11, f: $B12] {  # if_4
-          $B11: {  # true
-            exit_if  # if_4
-          }
-          $B12: {  # false
-            exit_loop  # loop_2
-          }
-        }
-        %66:u32 = load %x_88
-        %67:u32 = add %66, %x_52
-        %x_94:u32 = let %67
-        %69:vec4<f32> = load %x_85
-        store %x_86, %69
-        %70:bool = gte %x_94, %x_90
-        if %70 [t: $B13] {  # if_5
-          $B13: {  # true
-            %71:ptr<workgroup, vec2<f32>, read_write> = access %x_28, %x_94, 0u
-            %72:vec2<f32> = load %71
-            %x_99:vec2<f32> = let %72
-            %74:vec4<f32> = load %x_85
-            %75:vec2<f32> = swizzle %74, xy
-            %76:vec2<f32> = min %75, %x_99
-            %x_101:vec2<f32> = let %76
-            %78:vec4<f32> = load %x_85
-            %x_103_1:ptr<function, vec4<f32>, read_write> = var, %78
-            %80:f32 = access %x_101, 0u
-            store_vector_element %x_103_1, 0u, %80
-            %81:vec4<f32> = load %x_103_1
-            %x_103:vec4<f32> = let %81
-            %x_105_1:ptr<function, vec4<f32>, read_write> = var, %x_103
-            %84:f32 = access %x_101, 1u
-            store_vector_element %x_105_1, 1u, %84
-            %85:vec4<f32> = load %x_105_1
-            %x_105:vec4<f32> = let %85
-            %87:vec4<f32> = load %x_105_1
-            %88:vec2<f32> = swizzle %87, zw
-            %89:vec2<f32> = max %88, %x_99
-            %x_107:vec2<f32> = let %89
-            %x_109_1:ptr<function, vec4<f32>, read_write> = var, %x_105
-            %92:f32 = access %x_107, 0u
-            store_vector_element %x_109_1, 2u, %92
-            %93:vec4<f32> = load %x_109_1
-            store %x_111, %93
-            %94:f32 = access %x_107, 1u
-            store_vector_element %x_111, 3u, %94
-            %95:vec4<f32> = load %x_111
-            store %x_86, %95
-            exit_if  # if_5
-          }
-        }
-        continue  # -> $B10
-      }
-      $B10: {  # continuing
-        %96:u32 = load %x_88
-        %97:u32 = add %96, 32u
-        store %x_89, %97
-        %98:vec4<f32> = load %x_86
-        store %x_85, %98
-        %99:u32 = load %x_89
-        store %x_88, %99
-        next_iteration  # -> $B9
-      }
-    }
-    %100:void = msl.threadgroup_barrier 4u
-    %101:f32 = load_vector_element %x_85, 0u
-    %102:u32 = bitcast %101
-    %103:u32 = atomicMin %x_34, %102
-    %x_114:u32 = let %103
-    %105:f32 = load_vector_element %x_85, 1u
-    %106:u32 = bitcast %105
-    %107:u32 = atomicMin %x_35, %106
-    %x_117:u32 = let %107
-    %109:f32 = load_vector_element %x_85, 2u
-    %110:u32 = bitcast %109
-    %111:u32 = atomicMax %x_36, %110
-    %x_120:u32 = let %111
-    %113:f32 = load_vector_element %x_85, 3u
-    %114:u32 = bitcast %113
-    %115:u32 = atomicMax %x_37, %114
-    %x_123:u32 = let %115
-    %117:void = msl.threadgroup_barrier 4u
-    %118:ptr<storage, vec4<f32>, read_write> = access %x_12, 0u, 0i
-    %119:u32 = atomicLoad %x_34
-    %120:f32 = bitcast %119
-    %121:f32 = let %120
-    %122:u32 = atomicLoad %x_35
-    %123:f32 = bitcast %122
-    %124:f32 = let %123
-    %125:u32 = atomicLoad %x_36
-    %126:f32 = bitcast %125
-    %127:f32 = let %126
-    %128:u32 = atomicLoad %x_37
-    %129:f32 = bitcast %128
-    %130:vec4<f32> = construct %121, %124, %127, %129
-    store %118, %130
-    ret
   }
-}
-%tint_symbol = @compute @workgroup_size(32, 1, 1) func(%x_3_param:vec3<u32> [@local_invocation_id], %tint_local_index:u32 [@local_invocation_index]):void {
-  $B14: {
-    %134:bool = eq %tint_local_index, 0u
-    if %134 [t: $B15] {  # if_6
-      $B15: {  # true
-        %135:void = atomicStore %x_34, 0u
-        %136:void = atomicStore %x_35, 0u
-        %137:void = atomicStore %x_36, 0u
-        %138:void = atomicStore %x_37, 0u
-        exit_if  # if_6
-      }
-    }
-    loop [i: $B16, b: $B17, c: $B18] {  # loop_3
-      $B16: {  # initializer
-        next_iteration %tint_local_index  # -> $B17
-      }
-      $B17 (%idx:u32): {  # body
-        %140:bool = gte %idx, 4096u
-        if %140 [t: $B19] {  # if_7
-          $B19: {  # true
-            exit_loop  # loop_3
-          }
-        }
-        %141:ptr<workgroup, S, read_write> = access %x_28, %idx
-        store %141, S(vec2<f32>(0.0f), 0u)
-        continue  # -> $B18
-      }
-      $B18: {  # continuing
-        %142:u32 = add %idx, 32u
-        next_iteration %142  # -> $B17
-      }
-    }
-    %143:void = msl.threadgroup_barrier 4u
-    store %x_3, %x_3_param
-    %144:void = call %main_1
-    ret
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  int const x_74 = as_type<int>(x_58);
+  float2 const x_76 = (*tint_module_vars.x_28)[0].field0;
+  if ((x_52 == 0u)) {
+    uint2 const x_80 = as_type<uint2>(x_76);
+    uint const x_81 = x_80[0u];
+    atomic_store_explicit(tint_module_vars.x_34, x_81, memory_order_relaxed);
+    uint const x_82 = x_80[1u];
+    atomic_store_explicit(tint_module_vars.x_35, x_82, memory_order_relaxed);
+    atomic_store_explicit(tint_module_vars.x_36, x_81, memory_order_relaxed);
+    atomic_store_explicit(tint_module_vars.x_37, x_82, memory_order_relaxed);
   }
+  x_85 = x_76.xyxy;
+  x_88 = 1u;
+  {
+    while(true) {
+      float4 x_111 = 0.0f;
+      float4 x_86 = 0.0f;
+      uint x_89 = 0u;
+      uint const x_90 = as_type<uint>(x_74);
+      if ((x_88 < x_90)) {
+      } else {
+        break;
+      }
+      uint const x_94 = (x_88 + x_52);
+      x_86 = x_85;
+      if ((x_94 >= x_90)) {
+        float2 const x_99 = (*tint_module_vars.x_28)[x_94].field0;
+        float2 const x_101 = min(x_85.xy, x_99);
+        float4 x_103_1 = x_85;
+        x_103_1[0u] = x_101[0u];
+        float4 const x_103 = x_103_1;
+        float4 x_105_1 = x_103;
+        x_105_1[1u] = x_101[1u];
+        float4 const x_105 = x_105_1;
+        float2 const x_107 = max(x_105_1.zw, x_99);
+        float4 x_109_1 = x_105;
+        x_109_1[2u] = x_107[0u];
+        x_111 = x_109_1;
+        x_111[3u] = x_107[1u];
+        x_86 = x_111;
+      }
+      {
+        x_89 = (x_88 + 32u);
+        x_85 = x_86;
+        x_88 = x_89;
+      }
+      continue;
+    }
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  uint const x_114 = atomic_fetch_min_explicit(tint_module_vars.x_34, as_type<uint>(x_85[0u]), memory_order_relaxed);
+  uint const x_117 = atomic_fetch_min_explicit(tint_module_vars.x_35, as_type<uint>(x_85[1u]), memory_order_relaxed);
+  uint const x_120 = atomic_fetch_max_explicit(tint_module_vars.x_36, as_type<uint>(x_85[2u]), memory_order_relaxed);
+  uint const x_123 = atomic_fetch_max_explicit(tint_module_vars.x_37, as_type<uint>(x_85[3u]), memory_order_relaxed);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  float const v = as_type<float>(atomic_load_explicit(tint_module_vars.x_34, memory_order_relaxed));
+  float const v_1 = as_type<float>(atomic_load_explicit(tint_module_vars.x_35, memory_order_relaxed));
+  float const v_2 = as_type<float>(atomic_load_explicit(tint_module_vars.x_36, memory_order_relaxed));
+  (*tint_module_vars.x_12).field0[0] = float4(v, v_1, v_2, as_type<float>(atomic_load_explicit(tint_module_vars.x_37, memory_order_relaxed)));
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void tint_symbol_inner(uint3 x_3_param, uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index == 0u)) {
+    atomic_store_explicit(tint_module_vars.x_34, 0u, memory_order_relaxed);
+    atomic_store_explicit(tint_module_vars.x_35, 0u, memory_order_relaxed);
+    atomic_store_explicit(tint_module_vars.x_36, 0u, memory_order_relaxed);
+    atomic_store_explicit(tint_module_vars.x_37, 0u, memory_order_relaxed);
+  }
+  {
+    uint v_3 = 0u;
+    v_3 = tint_local_index;
+    while(true) {
+      uint const v_4 = v_3;
+      if ((v_4 >= 4096u)) {
+        break;
+      }
+      (*tint_module_vars.x_28)[v_4] = S{};
+      {
+        v_3 = (v_4 + 32u);
+      }
+      continue;
+    }
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  (*tint_module_vars.x_3) = x_3_param;
+  main_1(tint_module_vars);
+}
+kernel void tint_symbol(uint3 x_3_param [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_6* v_5 [[threadgroup(0)]], const constant S_2* x_6 [[buffer(1)]], const device S_3* x_9 [[buffer(2)]], device S_4* x_12 [[buffer(3)]]) {
+  thread uint3 x_3 = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_28=(&(*v_5).tint_symbol_1), .x_34=(&(*v_5).tint_symbol_2), .x_35=(&(*v_5).tint_symbol_3), .x_36=(&(*v_5).tint_symbol_4), .x_37=(&(*v_5).tint_symbol_5), .x_3=(&x_3), .x_6=x_6, .x_9=x_9, .x_12=x_12};
+  tint_symbol_inner(x_3_param, tint_local_index, tint_module_vars);
+}

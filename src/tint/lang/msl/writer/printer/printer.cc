@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/msl/writer/printer/printer.h"
 
+#include <atomic>
+#include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -85,7 +87,9 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/msl/barrier_type.h"
+#include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/memory_order.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
@@ -814,33 +818,40 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitMslBuiltinCall(StringStream& out, const msl::ir::BuiltinCall* c) {
-        switch (c->Func()) {
-            case msl::BuiltinFn::kThreadgroupBarrier: {
-                auto flags = c->Args()[0]->As<core::ir::Constant>()->Value()->ValueAs<uint8_t>();
-                out << "threadgroup_barrier(";
-                bool emitted_flag = false;
+        if (c->Func() == msl::BuiltinFn::kThreadgroupBarrier) {
+            auto flags = c->Args()[0]->As<core::ir::Constant>()->Value()->ValueAs<uint8_t>();
+            out << "threadgroup_barrier(";
+            bool emitted_flag = false;
 
-                auto emit = [&](BarrierType type, const std::string& name) {
-                    if ((flags & type) != type) {
-                        return;
-                    }
+            auto emit = [&](BarrierType type, const std::string& name) {
+                if ((flags & type) != type) {
+                    return;
+                }
 
-                    if (emitted_flag) {
-                        out << " | ";
-                    }
-                    emitted_flag = true;
-                    out << "mem_flags::mem_" << name;
-                };
-                emit(BarrierType::kDevice, "device");
-                emit(BarrierType::kThreadGroup, "threadgroup");
-                emit(BarrierType::kTexture, "texture");
+                if (emitted_flag) {
+                    out << " | ";
+                }
+                emitted_flag = true;
+                out << "mem_flags::mem_" << name;
+            };
+            emit(BarrierType::kDevice, "device");
+            emit(BarrierType::kThreadGroup, "threadgroup");
+            emit(BarrierType::kTexture, "texture");
 
-                out << ")";
-                return;
-            }
-            default:
-                TINT_ICE() << "undefined MSL ir function";
+            out << ")";
+            return;
         }
+
+        out << c->Func() << "(";
+        bool needs_comma = false;
+        for (const auto* arg : c->Args()) {
+            if (needs_comma) {
+                out << ", ";
+            }
+            EmitAndTakeAddressIfNeeded(out, arg);
+            needs_comma = true;
+        }
+        out << ")";
     }
 
     void EmitCoreBuiltinCall(StringStream& out, const core::ir::CoreBuiltinCall* c) {
@@ -1368,6 +1379,14 @@ class Printer : public tint::TextGenerator {
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
     void EmitConstant(StringStream& out, const core::ir::Constant* c) {
+        // Special case for memory_order enum values.
+        if (auto* order = c->As<msl::ir::MemoryOrder>()) {
+            TINT_ASSERT(order->Value()->ValueAs<u32>() ==
+                        static_cast<u32>(std::memory_order_relaxed));
+            out << "memory_order_relaxed";
+            return;
+        }
+
         EmitConstant(out, c->Value());
     }
 

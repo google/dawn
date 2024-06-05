@@ -42,6 +42,26 @@ const char* str(BuiltinFn i) {
     switch (i) {
         case BuiltinFn::kNone:
             return "<none>";
+        case BuiltinFn::kAtomicExchangeExplicit:
+            return "atomic_exchange_explicit";
+        case BuiltinFn::kAtomicFetchAddExplicit:
+            return "atomic_fetch_add_explicit";
+        case BuiltinFn::kAtomicFetchAndExplicit:
+            return "atomic_fetch_and_explicit";
+        case BuiltinFn::kAtomicFetchMaxExplicit:
+            return "atomic_fetch_max_explicit";
+        case BuiltinFn::kAtomicFetchMinExplicit:
+            return "atomic_fetch_min_explicit";
+        case BuiltinFn::kAtomicFetchOrExplicit:
+            return "atomic_fetch_or_explicit";
+        case BuiltinFn::kAtomicFetchSubExplicit:
+            return "atomic_fetch_sub_explicit";
+        case BuiltinFn::kAtomicFetchXorExplicit:
+            return "atomic_fetch_xor_explicit";
+        case BuiltinFn::kAtomicLoadExplicit:
+            return "atomic_load_explicit";
+        case BuiltinFn::kAtomicStoreExplicit:
+            return "atomic_store_explicit";
         case BuiltinFn::kThreadgroupBarrier:
             return "threadgroup_barrier";
     }

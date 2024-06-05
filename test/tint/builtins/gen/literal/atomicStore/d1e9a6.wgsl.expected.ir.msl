@@ -1,37 +1,20 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct SB_RW {
+  atomic_int arg_0;
+};
+struct tint_module_vars_struct {
+  device SB_RW* sb_rw;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SB_RW = struct @align(4) {
-  arg_0:atomic<i32> @offset(0)
+void atomicStore_d1e9a6(tint_module_vars_struct tint_module_vars) {
+  atomic_store_explicit((&(*tint_module_vars.sb_rw).arg_0), 1, memory_order_relaxed);
 }
-
-$B1: {  # root
-  %sb_rw:ptr<storage, SB_RW, read_write> = var @binding_point(0, 0)
+fragment void fragment_main(device SB_RW* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  atomicStore_d1e9a6(tint_module_vars);
 }
-
-%atomicStore_d1e9a6 = func():void {
-  $B2: {
-    %3:ptr<storage, atomic<i32>, read_write> = access %sb_rw, 0u
-    %4:void = atomicStore %3, 1i
-    ret
-  }
+kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  atomicStore_d1e9a6(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B3: {
-    %6:void = call %atomicStore_d1e9a6
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B4: {
-    %8:void = call %atomicStore_d1e9a6
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

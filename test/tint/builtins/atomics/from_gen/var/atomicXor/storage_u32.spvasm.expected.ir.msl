@@ -1,56 +1,31 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct SB_RW_atomic {
+  atomic_uint arg_0;
+};
+struct tint_module_vars_struct {
+  device SB_RW_atomic* sb_rw;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SB_RW_atomic = struct @align(4) {
-  arg_0:atomic<u32> @offset(0)
+void atomicXor_54510e(tint_module_vars_struct tint_module_vars) {
+  uint arg_1 = 0u;
+  uint res = 0u;
+  arg_1 = 1u;
+  uint const x_18 = arg_1;
+  uint const x_13 = atomic_fetch_xor_explicit((&(*tint_module_vars.sb_rw).arg_0), x_18, memory_order_relaxed);
+  res = x_13;
 }
-
-$B1: {  # root
-  %sb_rw:ptr<storage, SB_RW_atomic, read_write> = var @binding_point(0, 0)
+void fragment_main_1(tint_module_vars_struct tint_module_vars) {
+  atomicXor_54510e(tint_module_vars);
 }
-
-%atomicXor_54510e = func():void {
-  $B2: {
-    %arg_1:ptr<function, u32, read_write> = var, 0u
-    %res:ptr<function, u32, read_write> = var, 0u
-    store %arg_1, 1u
-    %5:u32 = load %arg_1
-    %x_18:u32 = let %5
-    %7:ptr<storage, atomic<u32>, read_write> = access %sb_rw, 0u
-    %8:u32 = atomicXor %7, %x_18
-    %x_13:u32 = let %8
-    store %res, %x_13
-    ret
-  }
+fragment void fragment_main(device SB_RW_atomic* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  fragment_main_1(tint_module_vars);
 }
-%fragment_main_1 = func():void {
-  $B3: {
-    %11:void = call %atomicXor_54510e
-    ret
-  }
+void compute_main_1(tint_module_vars_struct tint_module_vars) {
+  atomicXor_54510e(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %13:void = call %fragment_main_1
-    ret
-  }
+kernel void compute_main(device SB_RW_atomic* sb_rw [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
+  compute_main_1(tint_module_vars);
 }
-%compute_main_1 = func():void {
-  $B5: {
-    %15:void = call %atomicXor_54510e
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B6: {
-    %17:void = call %compute_main_1
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

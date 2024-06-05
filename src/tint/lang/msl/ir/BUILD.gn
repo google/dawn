@@ -46,6 +46,8 @@ libtint_source_set("ir") {
   sources = [
     "builtin_call.cc",
     "builtin_call.h",
+    "memory_order.cc",
+    "memory_order.h",
   ]
   deps = [
     "${tint_src_dir}/api/common",

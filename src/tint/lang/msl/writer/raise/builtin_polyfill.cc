@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
 
+#include <atomic>
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"
@@ -35,7 +36,9 @@
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/barrier_type.h"
+#include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/memory_order.h"
 
 namespace tint::msl::writer::raise {
 namespace {
@@ -60,6 +63,16 @@ struct State {
         for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
+                    case core::BuiltinFn::kAtomicAdd:
+                    case core::BuiltinFn::kAtomicAnd:
+                    case core::BuiltinFn::kAtomicExchange:
+                    case core::BuiltinFn::kAtomicLoad:
+                    case core::BuiltinFn::kAtomicMax:
+                    case core::BuiltinFn::kAtomicMin:
+                    case core::BuiltinFn::kAtomicOr:
+                    case core::BuiltinFn::kAtomicStore:
+                    case core::BuiltinFn::kAtomicSub:
+                    case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kWorkgroupBarrier:
                     case core::BuiltinFn::kTextureBarrier:
@@ -74,6 +87,36 @@ struct State {
         // Replace the builtins that we found.
         for (auto* builtin : worklist) {
             switch (builtin->Func()) {
+                case core::BuiltinFn::kAtomicAdd:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchAddExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicAnd:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchAndExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicExchange:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicExchangeExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicLoad:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicLoadExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicMax:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchMaxExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicMin:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchMinExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicOr:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchOrExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicStore:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicStoreExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicSub:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchSubExplicit);
+                    break;
+                case core::BuiltinFn::kAtomicXor:
+                    AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchXorExplicit);
+                    break;
                 case core::BuiltinFn::kStorageBarrier:
                     ThreadgroupBarrier(builtin, BarrierType::kDevice);
                     break;
@@ -87,6 +130,18 @@ struct State {
                     break;
             }
         }
+    }
+
+    /// Replace an atomic builtin call with an equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void AtomicCall(core::ir::CoreBuiltinCall* builtin, msl::BuiltinFn intrinsic) {
+        auto args = Vector<core::ir::Value*, 4>{builtin->Args()};
+        args.Push(ir.allocators.values.Create<msl::ir::MemoryOrder>(
+            b.ConstantValue(u32(std::memory_order_relaxed))));
+        auto* call = b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(), intrinsic,
+                                                            std::move(args));
+        call->InsertBefore(builtin);
+        builtin->Destroy();
     }
 
     /// Replace a barrier builtin with the `threadgroupBarrier()` intrinsic.
