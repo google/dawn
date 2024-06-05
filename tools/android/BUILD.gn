@@ -113,6 +113,7 @@ dawn_json_generator("kotlin_gen") {
     "java/android/dawn/InstanceFeatures.kt",
     "java/android/dawn/Limits.kt",
     "java/android/dawn/LoadOp.kt",
+    "java/android/dawn/MapAsyncStatus.kt",
     "java/android/dawn/MapMode.kt",
     "java/android/dawn/MipmapFilterMode.kt",
     "java/android/dawn/MultisampleState.kt",

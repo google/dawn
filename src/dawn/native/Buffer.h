@@ -128,6 +128,10 @@ class BufferBase : public SharedResource {
                         size_t offset,
                         size_t size,
                         const BufferMapCallbackInfo& callbackInfo);
+    Future APIMapAsync2(wgpu::MapMode mode,
+                        size_t offset,
+                        size_t size,
+                        const WGPUBufferMapCallbackInfo2& callbackInfo);
     void* APIGetMappedRange(size_t offset, size_t size);
     const void* APIGetConstMappedRange(size_t offset, size_t size);
     void APIUnmap();
@@ -190,6 +194,8 @@ class BufferBase : public SharedResource {
     size_t mMapSize = 0;
 
     struct MapAsyncEvent;
+    struct MapAsyncEvent1;
+    struct MapAsyncEvent2;
     Ref<MapAsyncEvent> mPendingMapEvent;
 };
 

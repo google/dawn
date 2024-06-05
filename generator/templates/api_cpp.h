@@ -280,7 +280,7 @@ class ObjectBase {
                 {{as_annotated_cppType(arg)}}{{ ", "}}
             {%- endif -%}
         {%- endfor -%}
-    {{as_cppType(types["callback mode"].name)}} mode, F callback, T userdata) const
+    {{as_cppType(types["callback mode"].name)}} callbackMode, F callback, T userdata) const
 {%- endmacro %}
 
 //* This rendering macro should ONLY be used for callback info type functions.
@@ -313,7 +313,7 @@ class ObjectBase {
                 {{as_annotated_cppType(arg)}}{{ ", "}}
             {%- endif -%}
         {%- endfor -%}
-    {{as_cppType(types["callback mode"].name)}} mode, L callback) const
+    {{as_cppType(types["callback mode"].name)}} callbackMode, L callback) const
 {%- endmacro %}
 
 //* This rendering macro should NOT be used for callback info type functions.
@@ -366,7 +366,7 @@ class ObjectBase {
         {% set CallbackInfoType = (method.arguments|last).type %}
         {% set CallbackType = (CallbackInfoType.members|first).type %}
         {{as_cType(CallbackInfoType.name)}} callbackInfo = {};
-        callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(mode);
+        callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(callbackMode);
         callbackInfo.callback = [](
             {%- for arg in CallbackType.arguments -%}
                 {{as_annotated_cType(arg)}}{{", "}}
@@ -402,7 +402,7 @@ class ObjectBase {
         );
 
         {{as_cType(CallbackInfoType.name)}} callbackInfo = {};
-        callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(mode);
+        callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(callbackMode);
         if constexpr (std::is_convertible_v<L, F*>) {
             callbackInfo.callback = [](
             {%- for arg in CallbackType.arguments -%}

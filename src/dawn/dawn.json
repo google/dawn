@@ -618,6 +618,18 @@
                 ]
             },
             {
+                "name": "map async 2",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "mode", "type": "map mode"},
+                    {"name": "offset", "type": "size_t"},
+                    {"name": "size", "type": "size_t"},
+                    {"name": "callback info", "type": "buffer map callback info 2"}
+                ]
+            },
+            {
                 "name": "get mapped range",
                 "returns": "void *",
                 "args": [
@@ -697,6 +709,13 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "buffer map callback 2": {
+        "category": "callback function",
+        "args": [
+            {"name": "status", "type": "map async status"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
+        ]
+    },
     "buffer map callback info": {
         "category": "structure",
         "extensible": "in",
@@ -704,6 +723,12 @@
             {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "buffer map callback"},
             {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "buffer map callback info 2": {
+        "category": "callback info",
+        "members": [
+            {"name": "callback", "type": "buffer map callback 2"}
         ]
     },
     "buffer map async status": {
@@ -720,6 +745,17 @@
             {"value": 7, "name": "mapping already pending"},
             {"value": 8, "name": "offset out of range"},
             {"value": 9, "name": "size out of range"}
+        ]
+    },
+    "map async status": {
+        "category": "enum",
+        "emscripten_no_enum_table": true,
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "instance dropped"},
+            {"value": 2, "name": "error"},
+            {"value": 3, "name": "aborted"},
+            {"value": 4, "name": "unknown"}
         ]
     },
     "buffer map state": {
