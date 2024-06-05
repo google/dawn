@@ -420,6 +420,7 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOn2DArrayTexture) {
 
 // Test sampling from a 2D array texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOn2DArrayTexture) {
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
     Texture2DArrayViewTest(6, 1, 2, 0);
 }
 

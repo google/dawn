@@ -297,16 +297,6 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
              ++bindingIndex) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
-
-            if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout)) {
-                TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
-                view->CopyIfNeeded();
-            }
-        }
-
-        for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
-             ++bindingIndex) {
-            const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
             MatchVariant(
                 bindingInfo.bindingLayout,
                 [&](const BufferBindingInfo& layout) {
@@ -418,7 +408,6 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     gl.BindImageTexture(imageIndex, handle, view->GetBaseMipLevel(), isLayered,
                                         view->GetBaseArrayLayer(), access,
                                         texture->GetGLFormat().internalFormat);
-                    texture->Touch();
                 },
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
@@ -525,7 +514,6 @@ void ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
             resolveView->BindToFramebuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
             gl.BlitFramebuffer(0, 0, renderPass->width, renderPass->height, 0, 0, renderPass->width,
                                renderPass->height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-            ToBackend(resolveView->GetTexture())->Touch();
         }
     }
 
@@ -669,7 +657,6 @@ MaybeError CommandBuffer::Execute() {
                 DoTexSubImage(gl, dst, reinterpret_cast<void*>(src.offset), dataLayout,
                               copy->copySize);
                 gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-                ToBackend(dst.texture)->Touch();
 
                 buffer->TrackUsage();
                 break;
@@ -811,7 +798,6 @@ MaybeError CommandBuffer::Execute() {
                 CopyImageSubData(gl, src.aspect, srcTexture->GetHandle(), srcTexture->GetGLTarget(),
                                  src.mipLevel, src.origin, dstTexture->GetHandle(),
                                  dstTexture->GetGLTarget(), dst.mipLevel, dst.origin, copySize);
-                ToBackend(dst.texture)->Touch();
                 break;
             }
 
@@ -1283,17 +1269,6 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
             case Command::EndRenderPass: {
                 mCommands.NextCommand<EndRenderPassCmd>();
 
-                for (auto i :
-                     IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                    TextureView* textureView =
-                        ToBackend(renderPass->colorAttachments[i].view.Get());
-                    ToBackend(textureView->GetTexture())->Touch();
-                }
-                if (renderPass->attachmentState->HasDepthStencilAttachment()) {
-                    TextureView* textureView =
-                        ToBackend(renderPass->depthStencilAttachment.view.Get());
-                    ToBackend(textureView->GetTexture())->Touch();
-                }
                 if (renderPass->attachmentState->GetSampleCount() > 1) {
                     ResolveMultisampledRenderTargets(gl, renderPass);
                 }

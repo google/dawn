@@ -140,7 +140,6 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
         DAWN_TRY(ToBackend(destination.texture)->EnsureSubresourceContentInitialized(range));
     }
     DoTexSubImage(ToBackend(GetDevice())->GetGL(), textureCopy, data, dataLayout, writeSizePixel);
-    ToBackend(destination.texture)->Touch();
     return {};
 }
 

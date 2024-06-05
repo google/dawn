@@ -641,7 +641,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 // Repro test for crbug.com/dawn/1187 where sampling a depth texture returns values not in [0, 1]
 TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
     // TODO(crbug.com/dawn/1187): The test fails on ANGLE D3D11, investigate why.
-    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
@@ -751,11 +751,6 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
 // Test that sampling a depth/stencil texture at components 1, 2, and 3 yield 0, 0, and 1
 // respectively
 TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
-    // This test fails on ANGLE (both SwiftShader and D3D11).
-    DAWN_SUPPRESS_TEST_IF(IsANGLE());
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
     DoSamplingExtraStencilComponentsRenderTest(TestAspectAndSamplerType::StencilAsUint, format,
@@ -961,12 +956,6 @@ class StencilSamplingTest : public DepthStencilSamplingTest {};
 
 // Test that sampling a stencil texture with a render/compute pipeline works
 TEST_P(StencilSamplingTest, SampleStencilOnly) {
-    // This test fails on SwANGLE (although it passes on other ANGLE backends).
-    DAWN_TEST_UNSUPPORTED_IF(IsANGLE());
-
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
     DoSamplingTest(TestAspectAndSamplerType::StencilAsUint,
