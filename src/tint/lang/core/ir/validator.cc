@@ -338,6 +338,10 @@ class Validator {
     /// @param call the call to validate
     void CheckBuiltinCall(const BuiltinCall* call);
 
+    /// Validates the given construct
+    /// @param construct the construct to validate
+    void CheckConstruct(const Construct* construct);
+
     /// Validates the given user call
     /// @param call the call to validate
     void CheckUserCall(const UserCall* call);
@@ -971,7 +975,7 @@ void Validator::CheckCall(const Call* call) {
         call,                                                //
         [&](const Bitcast*) {},                              //
         [&](const BuiltinCall* c) { CheckBuiltinCall(c); },  //
-        [&](const Construct*) {},                            //
+        [&](const Construct* c) { CheckConstruct(c); },      //
         [&](const Convert*) {},                              //
         [&](const Discard*) {},                              //
         [&](const UserCall* c) { CheckUserCall(c); },        //
@@ -997,6 +1001,32 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
     if (result->return_type != call->Result(0)->Type()) {
         AddError(call) << "call result type does not match builtin return type";
+    }
+}
+
+void Validator::CheckConstruct(const Construct* construct) {
+    auto args = construct->Args();
+    if (args.IsEmpty()) {
+        // Zero-value constructors are valid for all constructible types.
+        return;
+    }
+
+    if (auto* str = construct->Result(0)->Type()->As<type::Struct>()) {
+        auto members = str->Members();
+        if (args.Length() != str->Members().Length()) {
+            AddError(construct) << "structure has " << members.Length()
+                                << " members, but construct provides " << args.Length()
+                                << " arguments";
+            return;
+        }
+        for (size_t i = 0; i < args.Length(); i++) {
+            if (args[i] && args[i]->Type() != members[i]->Type()) {
+                AddError(construct, Construct::kArgsOperandOffset + i)
+                    << "sructure member " << i << " is of type "
+                    << style::Type(members[i]->Type()->FriendlyName())
+                    << ", but argument is of type " << style::Type(args[i]->Type()->FriendlyName());
+            }
+        }
     }
 }
 

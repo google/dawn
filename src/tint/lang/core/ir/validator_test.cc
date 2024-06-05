@@ -30,13 +30,14 @@
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
@@ -456,6 +457,153 @@ note: # Disassembly
 %f = func():void {
   $B2: {
     %6:void = call %g, 1i, 2.0f, 3i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(str_ty);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_Struct_ValidArgs) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(str_ty, 1_i, 2_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_Struct_NotEnoughArgs) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(str_ty, 1_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:19 error: construct: structure has 2 members, but construct provides 1 arguments
+    %2:MyStruct = construct 1i
+                  ^^^^^^^^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+%f = func():void {
+  $B1: {
+    %2:MyStruct = construct 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Construct_Struct_TooManyArgs) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(str_ty, 1_i, 2_u, 3_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:19 error: construct: structure has 2 members, but construct provides 3 arguments
+    %2:MyStruct = construct 1i, 2u, 3i
+                  ^^^^^^^^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+%f = func():void {
+  $B1: {
+    %2:MyStruct = construct 1i, 2u, 3i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Construct_Struct_WrongArgType) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(str_ty, 1_i, 2_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:8:33 error: construct: sructure member 1 is of type 'u32', but argument is of type 'i32'
+    %2:MyStruct = construct 1i, 2i
+                                ^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+%f = func():void {
+  $B1: {
+    %2:MyStruct = construct 1i, 2i
     ret
   }
 }
