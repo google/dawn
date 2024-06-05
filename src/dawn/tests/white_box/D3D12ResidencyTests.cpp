@@ -229,13 +229,12 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferRead) {
 
     // Calling MapAsync for reading should make the buffer resident.
     bool done = false;
-    buffer.MapAsync(
-        wgpu::MapMode::Read, 0, sizeof(uint32_t),
-        [](WGPUBufferMapAsyncStatus status, void* userdata) {
-            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-            *static_cast<bool*>(userdata) = true;
-        },
-        &done);
+    buffer.MapAsync(wgpu::MapMode::Read, 0, sizeof(uint32_t),
+                    wgpu::CallbackMode::AllowProcessEvents,
+                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                        ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                        done = true;
+                    });
     EXPECT_TRUE(CheckIfBufferIsResident(buffer));
 
     while (!done) {
@@ -275,13 +274,12 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferWrite) {
 
     // Calling MapAsync for writing should make the buffer resident.
     bool done = false;
-    buffer.MapAsync(
-        wgpu::MapMode::Write, 0, sizeof(uint32_t),
-        [](WGPUBufferMapAsyncStatus status, void* userdata) {
-            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-            *static_cast<bool*>(userdata) = true;
-        },
-        &done);
+    buffer.MapAsync(wgpu::MapMode::Write, 0, sizeof(uint32_t),
+                    wgpu::CallbackMode::AllowProcessEvents,
+                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                        ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                        done = true;
+                    });
     EXPECT_TRUE(CheckIfBufferIsResident(buffer));
 
     while (!done) {

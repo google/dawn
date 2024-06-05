@@ -220,19 +220,10 @@ TEST_P(DestroyTest, GetQueueAfterDeviceDestroy) {
     DestroyDevice();
 
     wgpu::Queue queue = device.GetQueue();
-    queue.OnSubmittedWorkDone(
-        [](WGPUQueueWorkDoneStatus status, void* userdata) {
-            // TODO(crbug.com/dawn/2021): Wire and native differ slightly for now. Unify once we
-            // decide on the correct result. In theory maybe we want to pretend that things succeed
-            // when the device is lost.
-            DestroyTest* test = static_cast<DestroyTest*>(userdata);
-            if (test->UsesWire()) {
-                EXPECT_EQ(status, WGPUQueueWorkDoneStatus_Success);
-            } else {
-                EXPECT_EQ(status, WGPUQueueWorkDoneStatus_DeviceLost);
-            }
-        },
-        this);
+    queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
+                              [](wgpu::QueueWorkDoneStatus status) {
+                                  EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
+                              });
 }
 
 DAWN_INSTANTIATE_TEST(DestroyTest,

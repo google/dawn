@@ -43,42 +43,39 @@ class DeviceInitializationTest : public testing::Test {
 
     void TearDown() override { dawnProcSetProcs(nullptr); }
 
-    // Test that the device can still be used by testing a buffer copy.
+    // Test that the device can still be used by creating an async pipeline. Note that this test
+    // would be better if we did something like a buffer copy instead, but that can only be done
+    // once wgpu::CallbackMode::AllowSpontaneous is completely implemented.
+    // TODO(crbug.com/42241003): Update this test do a buffer copy instead.
     void ExpectDeviceUsable(wgpu::Device device) {
-        wgpu::Buffer src =
-            utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::CopySrc, {1, 2, 3, 4});
+        device.PushErrorScope(wgpu::ErrorFilter::Validation);
 
-        wgpu::Buffer dst = utils::CreateBufferFromData<uint32_t>(
-            device, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead, {0, 0, 0, 0});
+        wgpu::ComputePipelineDescriptor desc;
+        desc.compute.module = utils::CreateShaderModule(device, R"(
+            @compute @workgroup_size(1) fn main() {}
+        )");
 
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToBuffer(src, 0, dst, 0, 4 * sizeof(uint32_t));
+        std::atomic<uint8_t> callbacks = 0;
+        device.CreateComputePipelineAsync(
+            &desc, wgpu::CallbackMode::AllowSpontaneous,
+            [&callbacks](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+                         const char*) {
+                EXPECT_EQ(status, wgpu::CreatePipelineAsyncStatus::Success);
+                EXPECT_NE(pipeline, nullptr);
+                callbacks++;
+            });
 
-        wgpu::CommandBuffer commands = encoder.Finish();
-        device.GetQueue().Submit(1, &commands);
+        device.PopErrorScope(
+            wgpu::CallbackMode::AllowSpontaneous,
+            [&callbacks](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*) {
+                EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
+                EXPECT_EQ(type, wgpu::ErrorType::NoError);
+                callbacks++;
+            });
 
-        bool done = false;
-        dst.MapAsync(
-            wgpu::MapMode::Read, 0, 4 * sizeof(uint32_t),
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                EXPECT_EQ(status, WGPUBufferMapAsyncStatus_Success);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done);
-
-        // Note: we can't actually test this if Tick moves over to
-        // wgpuInstanceProcessEvents. We can still test that object creation works
-        // without crashing.
-        while (!done) {
-            device.Tick();
+        while (callbacks != 2) {
             utils::USleep(100);
         }
-
-        const uint32_t* mapping = static_cast<const uint32_t*>(dst.GetConstMappedRange());
-        EXPECT_EQ(mapping[0], 1u);
-        EXPECT_EQ(mapping[1], 2u);
-        EXPECT_EQ(mapping[2], 3u);
-        EXPECT_EQ(mapping[3], 4u);
     }
 };
 

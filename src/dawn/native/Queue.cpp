@@ -257,6 +257,10 @@ void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* comma
 }
 
 void QueueBase::APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata) {
+    GetInstance()->EmitDeprecationWarning(
+        "Old OnSubmittedWorkDone APIs are deprecated. If using C please pass a CallbackInfo "
+        "struct that has two userdatas. Otherwise, if using C++, please use templated helpers.");
+
     // The error status depends on the type of error so we let the validation function choose it
     wgpu::QueueWorkDoneStatus status;
     if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&status))) {
@@ -279,6 +283,10 @@ void QueueBase::APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void*
 }
 
 Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo) {
+    GetInstance()->EmitDeprecationWarning(
+        "Old OnSubmittedWorkDone APIs are deprecated. If using C please pass a CallbackInfo "
+        "struct that has two userdatas. Otherwise, if using C++, please use templated helpers.");
+
     return APIOnSubmittedWorkDone2(
         {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
          [](WGPUQueueWorkDoneStatus status, void* callback, void* userdata) {

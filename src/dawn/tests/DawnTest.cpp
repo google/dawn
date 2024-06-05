@@ -48,6 +48,7 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/dawn_platform.h"
+#include "dawn/tests/MockCallback.h"
 #include "dawn/tests/PartitionAllocSupport.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/PlatformDebugLogger.h"
@@ -69,11 +70,7 @@ namespace {
 
 using testing::_;
 using testing::AtMost;
-
-struct MapReadUserdata {
-    raw_ptr<DawnTestBase> test;
-    size_t slot;
-};
+using testing::MockCppCallback;
 
 DawnTestEnvironment* gTestEnv = nullptr;
 DawnTestBase* gCurrentTest = nullptr;
@@ -808,15 +805,6 @@ DawnTestBase::~DawnTestBase() {
     // callbacks. Instead, for each test, we make sure to clear all events.
     WaitForAllOperations();
     instance = nullptr;
-
-    // Since the native instance is a global, we can't rely on it's destruction to clean up all
-    // callbacks. Instead, for each test, we make sure to clear all events. Note that we use a
-    // do-while loop here because we need to flush the wire via WaitABit before we start processing
-    // the native events to ensure that any remaining client side commands, i.e. destructions, are
-    // flushed to the server.
-    do {
-        WaitABit();
-    } while (dawn::native::InstanceProcessEvents(gTestEnv->GetInstance()->Get()));
 
     // D3D11 and D3D12's GPU-based validation will accumulate objects over time if the backend
     // device is not destroyed and recreated, so we reset it here.
@@ -1648,6 +1636,35 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
     return EXPECT_TEXTURE_EQ(colorData.data(), colorTexture, {0, 0}, {width, height});
 }
 
+void DawnTestBase::MapAsyncAndWait(const wgpu::Buffer& buffer,
+                                   wgpu::MapMode mapMode,
+                                   uint64_t offset,
+                                   uint64_t size) {
+    DAWN_ASSERT(mapMode == wgpu::MapMode::Read || mapMode == wgpu::MapMode::Write);
+
+    if (!UsesWire()) {
+        // We use a new mock callback here so that the validation on the call happens as soon as the
+        // scope of this call ends.
+        MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)> mockCb;
+        EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
+
+        wgpu::FutureWaitInfo waitInfo = {buffer.MapAsync(
+            mapMode, offset, size, wgpu::CallbackMode::WaitAnyOnly, mockCb.Callback())};
+        ASSERT_EQ(instance.WaitAny(1, &waitInfo, UINT64_MAX), wgpu::WaitStatus::Success);
+    } else {
+        bool done = false;
+        buffer.MapAsync(mapMode, offset, size, wgpu::CallbackMode::AllowProcessEvents,
+                        [&done](wgpu::MapAsyncStatus status, const char*) {
+                            ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                            done = true;
+                        });
+
+        while (!done) {
+            WaitABit();
+        }
+    }
+}
+
 void DawnTestBase::WaitABit(wgpu::Instance targetInstance) {
     if (targetInstance == nullptr) {
         targetInstance = instance;
@@ -1670,22 +1687,6 @@ void DawnTestBase::FlushWire() {
 }
 
 void DawnTestBase::WaitForAllOperations() {
-    // TODO: crbug.com/42241461 - This block should be removed once we have migrated all tests to
-    // use the new entry points.
-    if (device != nullptr) {
-        // Callback might be invoked on another thread that calls the same WaitABit() method, not
-        // necessarily the current thread. So we need to use atomic here.
-        std::atomic<bool> done(false);
-        device.GetQueue().OnSubmittedWorkDone(
-            [](WGPUQueueWorkDoneStatus, void* userdata) {
-                *static_cast<std::atomic<bool>*>(userdata) = true;
-            },
-            &done);
-        while (!done.load()) {
-            WaitABit();
-        }
-    }
-
     do {
         FlushWire();
         if (UsesWire() && instance != nullptr) {
@@ -1727,38 +1728,30 @@ void DawnTestBase::MapSlotsSynchronously() {
     mNumPendingMapOperations = mReadbackSlots.size();
 
     // Map all readback slots
-    for (size_t i = 0; i < mReadbackSlots.size(); ++i) {
-        MapReadUserdata* userdata = new MapReadUserdata{this, i};
+    for (size_t slotIndex = 0; slotIndex < mReadbackSlots.size(); ++slotIndex) {
+        auto& slot = mReadbackSlots[slotIndex];
 
-        const ReadbackSlot& slot = mReadbackSlots[i];
-        slot.buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize, SlotMapCallback,
-                             userdata);
+        slot.buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
+                             wgpu::CallbackMode::AllowProcessEvents,
+                             [this, &slot](wgpu::MapAsyncStatus status, const char*) {
+                                 DAWN_ASSERT(status == wgpu::MapAsyncStatus::Success);
+                                 Mutex::AutoLock lg(&mMutex);
+
+                                 if (status == wgpu::MapAsyncStatus::Success) {
+                                     slot.mappedData = slot.buffer.GetConstMappedRange();
+                                     DAWN_ASSERT(slot.mappedData != nullptr);
+                                 } else {
+                                     slot.mappedData = nullptr;
+                                 }
+
+                                 mNumPendingMapOperations.fetch_sub(1, std::memory_order_release);
+                             });
     }
 
     // Busy wait until all map operations are done.
     while (mNumPendingMapOperations.load(std::memory_order_acquire) != 0) {
         WaitABit();
     }
-}
-
-// static
-void DawnTestBase::SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userdata_) {
-    DAWN_ASSERT(status == WGPUBufferMapAsyncStatus_Success ||
-                status == WGPUBufferMapAsyncStatus_DeviceLost);
-    std::unique_ptr<MapReadUserdata> userdata(static_cast<MapReadUserdata*>(userdata_));
-    DawnTestBase* test = userdata->test;
-
-    Mutex::AutoLock lg(&test->mMutex);
-
-    ReadbackSlot* slot = &test->mReadbackSlots[userdata->slot];
-    if (status == WGPUBufferMapAsyncStatus_Success) {
-        slot->mappedData = slot->buffer.GetConstMappedRange();
-        DAWN_ASSERT(slot->mappedData != nullptr);
-    } else {
-        slot->mappedData = nullptr;
-    }
-
-    test->mNumPendingMapOperations.fetch_sub(1, std::memory_order_release);
 }
 
 void DawnTestBase::ResolveExpectations() {

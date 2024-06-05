@@ -586,6 +586,11 @@ class DawnTestBase {
                                                     mipLevel, {}, &expectedStencil);
     }
 
+    void MapAsyncAndWait(const wgpu::Buffer& buffer,
+                         wgpu::MapMode mapMode,
+                         uint64_t offset,
+                         uint64_t size);
+
     void WaitABit(wgpu::Instance = nullptr);
     void FlushWire();
     void WaitForAllOperations();
@@ -659,7 +664,6 @@ class DawnTestBase {
 
     // Maps all the buffers and fill ReadbackSlot::mappedData
     void MapSlotsSynchronously();
-    static void SlotMapCallback(WGPUBufferMapAsyncStatus status, void* userdata);
     std::atomic<size_t> mNumPendingMapOperations = 0;
 
     // Reserve space where the data for an expectation can be copied

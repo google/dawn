@@ -27,36 +27,28 @@
 
 #include <memory>
 
+#include "dawn/tests/MockCallback.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "gmock/gmock.h"
 
-class MockQueueWorkDoneCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPUQueueWorkDoneStatus status, void* userdata));
-};
+namespace dawn {
+namespace {
 
-static std::unique_ptr<MockQueueWorkDoneCallback> mockQueueWorkDoneCallback;
-static void ToMockQueueWorkDone(WGPUQueueWorkDoneStatus status, void* userdata) {
-    mockQueueWorkDoneCallback->Call(status, userdata);
-}
+using testing::MockCppCallback;
 
 class QueueOnSubmittedWorkDoneValidationTests : public ValidationTest {
   protected:
-    void SetUp() override {
-        ValidationTest::SetUp();
-        mockQueueWorkDoneCallback = std::make_unique<MockQueueWorkDoneCallback>();
-    }
-
-    void TearDown() override {
-        mockQueueWorkDoneCallback = nullptr;
-        ValidationTest::TearDown();
-    }
+    MockCppCallback<void (*)(wgpu::QueueWorkDoneStatus)> mWorkDoneCb;
 };
 
 // Test that OnSubmittedWorkDone can be called as soon as the queue is created.
 TEST_F(QueueOnSubmittedWorkDoneValidationTests, CallBeforeSubmits) {
-    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this)).Times(1);
-    device.GetQueue().OnSubmittedWorkDone(ToMockQueueWorkDone, this);
+    EXPECT_CALL(mWorkDoneCb, Call(wgpu::QueueWorkDoneStatus::Success)).Times(1);
+    device.GetQueue().OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
+                                          mWorkDoneCb.Callback());
 
     WaitForAllOperations();
 }
+
+}  // anonymous namespace
+}  // namespace dawn

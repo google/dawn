@@ -64,9 +64,6 @@ class SharedBufferMemoryTests : public DawnTestWithParams<SharedBufferMemoryTest
   public:
     void SetUp() override;
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
-
-  protected:
-    void MapAsyncAndWait(const wgpu::Buffer& buffer, wgpu::MapMode mode, uint32_t bufferSize);
 };
 }  // namespace dawn
 

@@ -49,23 +49,6 @@ std::vector<wgpu::FeatureName> SharedBufferMemoryTests::GetRequiredFeatures() {
     return features;
 }
 
-void SharedBufferMemoryTests::MapAsyncAndWait(const wgpu::Buffer& buffer,
-                                              wgpu::MapMode mode,
-                                              uint32_t bufferSize) {
-    bool done = false;
-    buffer.MapAsync(
-        mode, 0, bufferSize,
-        [](WGPUBufferMapAsyncStatus status, void* userdata) {
-            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-            *static_cast<bool*>(userdata) = true;
-        },
-        &done);
-
-    while (!done) {
-        WaitABit();
-    }
-}
-
 wgpu::Texture Create2DTexture(wgpu::Device device,
                               uint32_t width,
                               uint32_t height,
@@ -231,13 +214,12 @@ TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
     memory.BeginAccess(buffer, &desc);
 
     bool done = false;
-    buffer.MapAsync(
-        wgpu::MapMode::Write, 0, sizeof(uint32_t),
-        [](WGPUBufferMapAsyncStatus status, void* userdata) {
-            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-            *static_cast<bool*>(userdata) = true;
-        },
-        &done);
+    buffer.MapAsync(wgpu::MapMode::Write, 0, sizeof(uint32_t),
+                    wgpu::CallbackMode::AllowProcessEvents,
+                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                        ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                        done = true;
+                    });
 
     // Calling EndAccess should generate an error even if the buffer has not completed being mapped.
     wgpu::SharedBufferMemoryEndAccessState state;
@@ -279,7 +261,11 @@ TEST_P(SharedBufferMemoryTests, EnsureNoMapUsageBeforeBeginAccess) {
     wgpu::Buffer sharedBuffer = memory.CreateBuffer();
 
     // Mapping a buffer without calling BeginAccess should cause an error.
-    ASSERT_DEVICE_ERROR(sharedBuffer.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr));
+    ASSERT_DEVICE_ERROR(sharedBuffer.MapAsync(wgpu::MapMode::Write, 0, 4,
+                                              wgpu::CallbackMode::AllowProcessEvents,
+                                              [](wgpu::MapAsyncStatus status, const char*) {
+                                                  ASSERT_EQ(status, wgpu::MapAsyncStatus::Error);
+                                              }));
 }
 
 // Ensure multiple buffers created from a SharedBufferMemory cannot be accessed simultaneously.
@@ -362,7 +348,7 @@ TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     beginAccessDesc.initialized = false;
     memory.BeginAccess(buffer, &beginAccessDesc);
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, kBufferSize);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, kBufferSize);
 
     uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
     memcpy(mappedData, &kBufferData, kBufferSize);
@@ -441,7 +427,7 @@ TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapWriteBuffer) {
     memory.BeginAccess(buffer, &beginAccessDesc);
     EXPECT_BUFFER_U32_EQ(kBufferData, buffer, 0);
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, kBufferSize);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, kBufferSize);
 
     uint32_t* mappedData = static_cast<uint32_t*>(buffer.GetMappedRange(0, kBufferSize));
     memcpy(mappedData, &kBufferData2, kBufferSize);
@@ -462,7 +448,7 @@ TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapReadBuffer) {
     beginAccessDesc.initialized = true;
     memory.BeginAccess(buffer, &beginAccessDesc);
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Read, kBufferSize);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, kBufferSize);
 
     const uint32_t* mappedData =
         static_cast<const uint32_t*>(buffer.GetConstMappedRange(0, kBufferSize));
@@ -478,7 +464,7 @@ TEST_P(SharedBufferMemoryTests, ReadWriteSharedMapReadBuffer) {
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    MapAsyncAndWait(buffer, wgpu::MapMode::Read, kBufferSize);
+    MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, kBufferSize);
 
     mappedData = static_cast<const uint32_t*>(buffer.GetConstMappedRange(0, kBufferSize));
     ASSERT_EQ(*mappedData, kBufferData2);

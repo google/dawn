@@ -3094,12 +3094,11 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
 
     // Ensure the underlying ID3D12Resource of bigBuffer is deleted.
     bool submittedWorkDone = false;
-    queue.OnSubmittedWorkDone(
-        [](WGPUQueueWorkDoneStatus status, void* userdata) {
-            EXPECT_EQ(status, WGPUQueueWorkDoneStatus_Success);
-            *static_cast<bool*>(userdata) = true;
-        },
-        &submittedWorkDone);
+    queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
+                              [&submittedWorkDone](wgpu::QueueWorkDoneStatus status) {
+                                  EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
+                                  submittedWorkDone = true;
+                              });
     while (!submittedWorkDone) {
         WaitABit();
     }
@@ -3133,13 +3132,12 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
         bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
         wgpu::Buffer uploadBuffer = device.CreateBuffer(&bufferDescriptor);
         bool done = false;
-        uploadBuffer.MapAsync(
-            wgpu::MapMode::Write, 0, static_cast<uint32_t>(expectedData.size()),
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done);
+        uploadBuffer.MapAsync(wgpu::MapMode::Write, 0, static_cast<uint32_t>(expectedData.size()),
+                              wgpu::CallbackMode::AllowProcessEvents,
+                              [&done](wgpu::MapAsyncStatus status, const char*) {
+                                  ASSERT_EQ(wgpu::MapAsyncStatus::Success, status);
+                                  done = true;
+                              });
         while (!done) {
             WaitABit();
         }
@@ -3339,13 +3337,12 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
 
         // Check the data in readback buffer
         bool done = false;
-        readbackBuffer.MapAsync(
-            wgpu::MapMode::Read, 0, kBufferSize,
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done);
+        readbackBuffer.MapAsync(wgpu::MapMode::Read, 0, kBufferSize,
+                                wgpu::CallbackMode::AllowProcessEvents,
+                                [&done](wgpu::MapAsyncStatus status, const char*) {
+                                    ASSERT_EQ(wgpu::MapAsyncStatus::Success, status);
+                                    done = true;
+                                });
         while (!done) {
             WaitABit();
         }
@@ -3365,12 +3362,11 @@ class T2TCopyFromDirtyHeapTests : public DawnTest {
 
     void EnsureSubmittedWorkDone() {
         bool submittedWorkDone = false;
-        queue.OnSubmittedWorkDone(
-            [](WGPUQueueWorkDoneStatus status, void* userdata) {
-                EXPECT_EQ(status, WGPUQueueWorkDoneStatus_Success);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &submittedWorkDone);
+        queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
+                                  [&submittedWorkDone](wgpu::QueueWorkDoneStatus status) {
+                                      EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
+                                      submittedWorkDone = true;
+                                  });
         while (!submittedWorkDone) {
             WaitABit();
         }

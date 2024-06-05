@@ -78,26 +78,6 @@ class BufferZeroInitTest : public DawnTest {
         return device.CreateBuffer(&descriptor);
     }
 
-    void MapAsyncAndWait(wgpu::Buffer buffer,
-                         wgpu::MapMode mapMode,
-                         uint64_t offset,
-                         uint64_t size) {
-        DAWN_ASSERT(mapMode == wgpu::MapMode::Read || mapMode == wgpu::MapMode::Write);
-
-        bool done = false;
-        buffer.MapAsync(
-            mapMode, offset, size,
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done);
-
-        while (!done) {
-            WaitABit();
-        }
-    }
-
     wgpu::Texture CreateAndInitializeTexture(const wgpu::Extent3D& size,
                                              wgpu::TextureFormat format,
                                              wgpu::Color color = {0.f, 0.f, 0.f, 0.f}) {

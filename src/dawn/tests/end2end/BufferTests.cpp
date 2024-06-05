@@ -34,12 +34,18 @@
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
+#include "dawn/tests/MockCallback.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn {
 namespace {
+
+using testing::_;
+using testing::MockCppCallback;
+
+using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>;
 
 using FutureCallbackMode = std::optional<wgpu::CallbackMode>;
 DAWN_TEST_PARAM_STRUCT(BufferMappingTestParams, FutureCallbackMode);
@@ -60,26 +66,26 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
                          size_t size,
                          wgpu::BufferMapCallback cb = nullptr,
                          void* ud = nullptr) {
-        struct Userdata {
-            wgpu::BufferMapCallback cb;
-            raw_ptr<void> ud;
-            bool done = false;
-        };
-        Userdata userdata = Userdata{cb, ud};
-        auto callback = [](WGPUBufferMapAsyncStatus status, void* rawUserdata) {
-            auto* userdata = static_cast<Userdata*>(rawUserdata);
-            userdata->done = true;
-            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-            auto cb = userdata->cb;
-            auto ud = userdata->ud;
-            if (cb) {
-                cb(status, ud);
-            }
-        };
-
         // Legacy MapAsync
         if (!GetParam().mFutureCallbackMode) {
-            buffer.MapAsync(mode, offset, size, callback, &userdata);
+            struct Userdata {
+                wgpu::BufferMapCallback cb;
+                raw_ptr<void> ud;
+                bool done = false;
+            };
+            Userdata userdata = Userdata{cb, ud};
+            auto callback = [](WGPUBufferMapAsyncStatus status, void* rawUserdata) {
+                auto* userdata = static_cast<Userdata*>(rawUserdata);
+                userdata->done = true;
+                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+                auto cb = userdata->cb;
+                auto ud = userdata->ud;
+                if (cb) {
+                    cb(status, ud);
+                }
+            };
+
+            EXPECT_DEPRECATION_WARNING(buffer.MapAsync(mode, offset, size, callback, &userdata));
             while (!userdata.done) {
                 // Flush wire and call instance process events.
                 WaitABit();
@@ -87,19 +93,27 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
             return;
         }
 
-        wgpu::Future future = buffer.MapAsync(
-            mode, offset, size, {nullptr, *GetParam().mFutureCallbackMode, callback, &userdata});
+        bool done = false;
+        wgpu::Future future =
+            buffer.MapAsync(mode, offset, size, *GetParam().mFutureCallbackMode,
+                            [cb, ud, &done](wgpu::MapAsyncStatus status, const char*) {
+                                done = true;
+                                ASSERT_EQ(wgpu::MapAsyncStatus::Success, status);
+                                if (cb) {
+                                    cb(WGPUBufferMapAsyncStatus_Success, ud);
+                                }
+                            });
         switch (*GetParam().mFutureCallbackMode) {
             case wgpu::CallbackMode::WaitAnyOnly: {
                 wgpu::FutureWaitInfo waitInfo = {future};
                 GetInstance().WaitAny(1, &waitInfo, UINT64_MAX);
                 ASSERT_TRUE(waitInfo.completed);
-                ASSERT_TRUE(userdata.done);
+                ASSERT_TRUE(done);
                 break;
             }
             case wgpu::CallbackMode::AllowProcessEvents:
             case wgpu::CallbackMode::AllowSpontaneous:
-                while (!userdata.done) {
+                while (!done) {
                     // Flush wire and call instance process events.
                     WaitABit();
                 }
@@ -448,13 +462,13 @@ TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
     if (!GetParam().mFutureCallbackMode) {
         // Map all the buffers.
         for (uint32_t i = 0; i < kBuffers; ++i) {
-            buffers[i].MapAsync(
+            EXPECT_DEPRECATION_WARNING(buffers[i].MapAsync(
                 wgpu::MapMode::Write, 0, descriptor.size,
                 [](WGPUBufferMapAsyncStatus status, void* userdata) {
                     ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
                     (*static_cast<uint32_t*>(userdata))++;
                 },
-                &mapCompletedCount);
+                &mapCompletedCount));
         }
 
         // Wait for all mappings to complete
@@ -464,14 +478,12 @@ TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
     } else {
         std::array<wgpu::Future, kBuffers> futures;
         for (uint32_t i = 0; i < kBuffers; ++i) {
-            futures[i] =
-                buffers[i].MapAsync(wgpu::MapMode::Write, 0, descriptor.size,
-                                    {nullptr, *GetParam().mFutureCallbackMode,
-                                     [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                                         ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-                                         (*static_cast<uint32_t*>(userdata))++;
-                                     },
-                                     &mapCompletedCount});
+            futures[i] = buffers[i].MapAsync(
+                wgpu::MapMode::Write, 0, descriptor.size, *GetParam().mFutureCallbackMode,
+                [&mapCompletedCount](wgpu::MapAsyncStatus status, const char*) {
+                    ASSERT_EQ(wgpu::MapAsyncStatus::Success, status);
+                    mapCompletedCount++;
+                });
         }
 
         switch (*GetParam().mFutureCallbackMode) {
@@ -521,78 +533,78 @@ TEST_P(BufferMappingTests, OffsetNotUpdatedOnError) {
     wgpu::Buffer buffer = CreateMapReadBuffer(sizeof(data));
     queue.WriteBuffer(buffer, 0, data, sizeof(data));
 
-    bool done1 = false;
-    bool done2 = false;
-    auto cb1 = [](WGPUBufferMapAsyncStatus status, void* userdata) {
-        ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-        *static_cast<bool*>(userdata) = true;
-    };
-    // Calling MapAsync another time, will reject the callback with error status
-    // and mMapOffset is not updated because the buffer is already being mapped and it doesn't allow
-    // multiple MapAsync requests.
-    auto cb2 = [](WGPUBufferMapAsyncStatus status, void* userdata) {
-        ASSERT_EQ(WGPUBufferMapAsyncStatus_MappingAlreadyPending, status);
-        *static_cast<bool*>(userdata) = true;
-    };
-    // Calling MapAsync when the buffer is already mapped (as opposed to pending mapping) will cause
-    // a validation error.
-    auto cb2Mapped = [](WGPUBufferMapAsyncStatus status, void* userdata) {
-        ASSERT_EQ(WGPUBufferMapAsyncStatus_ValidationError, status);
-        *static_cast<bool*>(userdata) = true;
-    };
-
     // Legacy MapAsync
     if (!GetParam().mFutureCallbackMode) {
+        bool done1 = false;
+        bool done2 = false;
+        auto cb1 = [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
+            *static_cast<bool*>(userdata) = true;
+        };
+        // Calling MapAsync another time, will reject the callback with error status
+        // and mMapOffset is not updated because the buffer is already being mapped and it doesn't
+        // allow multiple MapAsync requests.
+        auto cb2 = [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            ASSERT_EQ(WGPUBufferMapAsyncStatus_MappingAlreadyPending, status);
+            *static_cast<bool*>(userdata) = true;
+        };
+        // Calling MapAsync when the buffer is already mapped (as opposed to pending mapping) will
+        // cause a validation error.
+        auto cb2Mapped = [](WGPUBufferMapAsyncStatus status, void* userdata) {
+            ASSERT_EQ(WGPUBufferMapAsyncStatus_ValidationError, status);
+            *static_cast<bool*>(userdata) = true;
+        };
+
         // Map the buffer but do not wait on the result yet.
-        buffer.MapAsync(wgpu::MapMode::Read, 8, 4, cb1, &done1);
+        EXPECT_DEPRECATION_WARNING(buffer.MapAsync(wgpu::MapMode::Read, 8, 4, cb1, &done1));
 
         // Call MapAsync another time, the callback will be rejected with error status
         // and mMapOffset is not updated because the buffer is already being mapped and it doesn't
         // allow multiple MapAsync requests.
         if (buffer.GetMapState() == wgpu::BufferMapState::Mapped) {
-            ASSERT_DEVICE_ERROR(buffer.MapAsync(wgpu::MapMode::Read, 0, 4, cb2Mapped, &done2));
+            ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(
+                buffer.MapAsync(wgpu::MapMode::Read, 0, 4, cb2Mapped, &done2)));
         } else {
-            buffer.MapAsync(wgpu::MapMode::Read, 0, 4, cb2, &done2);
+            EXPECT_DEPRECATION_WARNING(buffer.MapAsync(wgpu::MapMode::Read, 0, 4, cb2, &done2));
         }
 
         while (!done1 || !done2) {
             WaitABit();
         }
     } else {
+        MockMapAsyncCallback cb1;
+        MockMapAsyncCallback cb2;
+        EXPECT_CALL(cb1, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
+        EXPECT_CALL(cb2, Call(wgpu::MapAsyncStatus::Error, _)).Times(1);
+
         // Map the buffer but do not wait on the result yet.
-        wgpu::Future f1 = buffer.MapAsync(wgpu::MapMode::Read, 8, 4,
-                                          {nullptr, *GetParam().mFutureCallbackMode, cb1, &done1});
+        wgpu::FutureWaitInfo f1 = {buffer.MapAsync(
+            wgpu::MapMode::Read, 8, 4, *GetParam().mFutureCallbackMode, cb1.Callback())};
 
         // Call MapAsync another time, the callback will be rejected with error status
         // and mMapOffset is not updated because the buffer is already being mapped and it doesn't
         // allow multiple MapAsync requests.
-        wgpu::Future f2;
-        if (buffer.GetMapState() == wgpu::BufferMapState::Mapped) {
-            ASSERT_DEVICE_ERROR(f2 = buffer.MapAsync(
-                                    wgpu::MapMode::Read, 0, 4,
-                                    {nullptr, *GetParam().mFutureCallbackMode, cb2Mapped, &done2}));
+        wgpu::FutureWaitInfo f2;
+        if (!UsesWire()) {
+            ASSERT_DEVICE_ERROR(
+                f2 = {buffer.MapAsync(wgpu::MapMode::Read, 0, 4, *GetParam().mFutureCallbackMode,
+                                      cb2.Callback())});
         } else {
-            f2 = buffer.MapAsync(wgpu::MapMode::Read, 0, 4,
-                                 {nullptr, *GetParam().mFutureCallbackMode, cb2, &done2});
+            f2 = {buffer.MapAsync(wgpu::MapMode::Read, 0, 4, *GetParam().mFutureCallbackMode,
+                                  cb2.Callback())};
         }
 
         switch (*GetParam().mFutureCallbackMode) {
             case wgpu::CallbackMode::WaitAnyOnly: {
-                wgpu::FutureWaitInfo waitInfo[] = {{f1}, {f2}};
-                GetInstance().WaitAny(2, waitInfo, UINT64_MAX);
-
-                if (!waitInfo[0].completed) {
-                    GetInstance().WaitAny(1, &waitInfo[0], UINT64_MAX);
-                } else if (!waitInfo[1].completed) {
-                    GetInstance().WaitAny(1, &waitInfo[1], UINT64_MAX);
-                }
+                ASSERT_EQ(GetInstance().WaitAny(1, &f1, UINT64_MAX), wgpu::WaitStatus::Success);
+                ASSERT_EQ(GetInstance().WaitAny(1, &f2, UINT64_MAX), wgpu::WaitStatus::Success);
+                EXPECT_TRUE(f1.completed);
+                EXPECT_TRUE(f2.completed);
                 break;
             }
             case wgpu::CallbackMode::AllowProcessEvents:
             case wgpu::CallbackMode::AllowSpontaneous:
-                while (!done1 || !done2) {
-                    WaitABit();
-                }
+                WaitForAllOperations();
                 break;
         }
     }
@@ -708,11 +720,19 @@ class BufferMappingCallbackTests : public BufferMappingTests {
                             wgpu::BufferMapCallback callback,
                             void* userdata) {
         if (!GetParam().mFutureCallbackMode) {
-            buffer.MapAsync(mapMode, offset, size, callback, userdata);
+            EXPECT_DEPRECATION_WARNING(buffer.MapAsync(mapMode, offset, size, callback, userdata));
             return {0};
         } else {
-            return buffer.MapAsync(mapMode, offset, size,
-                                   {nullptr, *GetParam().mFutureCallbackMode, callback, userdata});
+            return buffer.MapAsync(mapMode, offset, size, *GetParam().mFutureCallbackMode,
+                                   [callback, userdata](wgpu::MapAsyncStatus status, const char*) {
+                                       // Note that technically this cast should eventually be
+                                       // removed once we update all tests to use the new callback
+                                       // status. This currently works only because this is only
+                                       // used for success cases which cast to the same underlying
+                                       // value.
+                                       ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                                       callback(WGPUBufferMapAsyncStatus_Success, userdata);
+                                   });
         }
     }
 
@@ -720,11 +740,14 @@ class BufferMappingCallbackTests : public BufferMappingTests {
                                        wgpu::QueueWorkDoneCallback callback,
                                        void* userdata) {
         if (!GetParam().mFutureCallbackMode) {
-            queueObj.OnSubmittedWorkDone(callback, userdata);
+            EXPECT_DEPRECATION_WARNING(queueObj.OnSubmittedWorkDone(callback, userdata));
             return {0};
         } else {
             return queueObj.OnSubmittedWorkDone(
-                {nullptr, *GetParam().mFutureCallbackMode, callback, userdata});
+                *GetParam().mFutureCallbackMode,
+                [callback, userdata](wgpu::QueueWorkDoneStatus status) {
+                    callback(static_cast<WGPUQueueWorkDoneStatus>(status), userdata);
+                });
         }
     }
 
@@ -925,7 +948,11 @@ class BufferMappedAtCreationTests : public DawnTest {
 
     const void* MapAsyncAndWait(const wgpu::Buffer& buffer, wgpu::MapMode mode, size_t size) {
         bool done = false;
-        buffer.MapAsync(mode, 0, size, MapCallback, &done);
+        buffer.MapAsync(mode, 0, size, wgpu::CallbackMode::AllowProcessEvents,
+                        [&done](wgpu::MapAsyncStatus status, const char*) {
+                            EXPECT_EQ(wgpu::MapAsyncStatus::Success, status);
+                            done = true;
+                        });
 
         while (!done) {
             WaitABit();
@@ -1053,13 +1080,11 @@ TEST_P(BufferMappedAtCreationTests, CreateThenMapSuccess) {
     EXPECT_BUFFER_U32_EQ(myData, buffer, 0);
 
     bool done = false;
-    buffer.MapAsync(
-        wgpu::MapMode::Write, 0, 4,
-        [](WGPUBufferMapAsyncStatus status, void* userdata) {
-            ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-            *static_cast<bool*>(userdata) = true;
-        },
-        &done);
+    buffer.MapAsync(wgpu::MapMode::Write, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
+                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                        EXPECT_EQ(wgpu::MapAsyncStatus::Success, status);
+                        done = true;
+                    });
 
     while (!done) {
         WaitABit();
@@ -1076,13 +1101,11 @@ TEST_P(BufferMappedAtCreationTests, CreateThenMapBeforeUnmapFailure) {
 
     ASSERT_DEVICE_ERROR([&] {
         bool done = false;
-        buffer.MapAsync(
-            wgpu::MapMode::Write, 0, 4,
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                ASSERT_EQ(WGPUBufferMapAsyncStatus_ValidationError, status);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done);
+        buffer.MapAsync(wgpu::MapMode::Write, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
+                        [&done](wgpu::MapAsyncStatus status, const char*) {
+                            EXPECT_EQ(wgpu::MapAsyncStatus::Error, status);
+                            done = true;
+                        });
 
         while (!done) {
             WaitABit();
@@ -1287,13 +1310,12 @@ TEST_P(BufferTests, CreateBufferOOMMapAsync) {
         ASSERT_DEVICE_ERROR(buffer = device.CreateBuffer(&descriptor));
 
         bool done = false;
-        ASSERT_DEVICE_ERROR(buffer.MapAsync(
-            wgpu::MapMode::Write, 0, 4,
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                EXPECT_EQ(status, WGPUBufferMapAsyncStatus_ValidationError);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done));
+        ASSERT_DEVICE_ERROR(buffer.MapAsync(wgpu::MapMode::Write, 0, 4,
+                                            wgpu::CallbackMode::AllowProcessEvents,
+                                            [&done](wgpu::MapAsyncStatus status, const char*) {
+                                                EXPECT_EQ(wgpu::MapAsyncStatus::Error, status);
+                                                done = true;
+                                            }));
 
         while (!done) {
             WaitABit();

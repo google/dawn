@@ -202,25 +202,18 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
     constexpr uint32_t kSize = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
 
     utils::RunInParallel(10, [=, &myData = std::as_const(myData)](uint32_t) {
-        wgpu::Buffer buffer;
-        std::atomic<bool> mapCompleted(false);
-
         // Create buffer and request mapping.
-        buffer = CreateBuffer(kSize, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
+        wgpu::Buffer buffer =
+            CreateBuffer(kSize, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
 
-        buffer.MapAsync(
-            wgpu::MapMode::Write, 0, kSize,
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                EXPECT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-                (*static_cast<std::atomic<bool>*>(userdata)) = true;
-            },
-            &mapCompleted);
+        wgpu::FutureWaitInfo waitInfo = {
+            buffer.MapAsync(wgpu::MapMode::Write, 0, kSize, wgpu::CallbackMode::AllowProcessEvents,
+                            [](wgpu::MapAsyncStatus status, const char*) {
+                                ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                            })};
 
         // Wait for the mapping to complete
-        while (!mapCompleted.load()) {
-            device.Tick();
-            FlushWire();
-        }
+        ASSERT_EQ(instance.WaitAny(1, &waitInfo, UINT64_MAX), wgpu::WaitStatus::Success);
 
         // Buffer is mapped, write into it and unmap .
         memcpy(buffer.GetMappedRange(0, kSize), myData.data(), kSize);

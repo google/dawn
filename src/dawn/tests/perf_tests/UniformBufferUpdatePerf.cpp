@@ -310,17 +310,13 @@ void UniformBufferUpdatePerf::Step() {
 
         // Return the staging buffer once it's done with the last usage and re-mapped.
         if (GetParam().uploadMethod == UploadMethod::MultipleStagingBuffer) {
-            CallbackData* callbackData = new CallbackData({this, stagingBuffer});
-            stagingBuffer.MapAsync(
-                wgpu::MapMode::Write, 0, GetBufferSize(),
-                [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                    CallbackData* data = static_cast<CallbackData*>(userdata);
-                    if (status == WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_Success) {
-                        data->self->ReturnStagingBuffer(data->buffer);
-                    }
-                    delete data;
-                },
-                callbackData);
+            stagingBuffer.MapAsync(wgpu::MapMode::Write, 0, GetBufferSize(),
+                                   wgpu::CallbackMode::AllowProcessEvents,
+                                   [this, stagingBuffer](wgpu::MapAsyncStatus status, const char*) {
+                                       if (status == wgpu::MapAsyncStatus::Success) {
+                                           this->ReturnStagingBuffer(stagingBuffer);
+                                       }
+                                   });
         }
 
         switch (GetParam().uniformBuffer) {
@@ -330,16 +326,12 @@ void UniformBufferUpdatePerf::Step() {
                 break;
             case UniformBuffer::Multiple:
                 // Return the uniform buffer once it's done with the last submit.
-                CallbackData* callbackData = new CallbackData({this, uniformBuffer});
-                queue.OnSubmittedWorkDone(
-                    [](WGPUQueueWorkDoneStatus status, void* userdata) {
-                        CallbackData* data = static_cast<CallbackData*>(userdata);
-                        if (status == WGPUQueueWorkDoneStatus::WGPUQueueWorkDoneStatus_Success) {
-                            data->self->ReturnUniformBuffer(data->buffer);
-                        }
-                        delete data;
-                    },
-                    callbackData);
+                queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
+                                          [this, uniformBuffer](wgpu::QueueWorkDoneStatus status) {
+                                              if (status == wgpu::QueueWorkDoneStatus::Success) {
+                                                  this->ReturnUniformBuffer(uniformBuffer);
+                                              }
+                                          });
                 break;
         }
 

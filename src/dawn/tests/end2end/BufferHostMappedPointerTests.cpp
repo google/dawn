@@ -263,9 +263,10 @@ TEST_P(BufferHostMappedPointerTests, Mapping) {
     ASSERT_DEVICE_ERROR(buffer.Unmap());
 
     // Invalid to map a persistently host mapped buffer.
-    ASSERT_DEVICE_ERROR_MSG(
-        buffer.MapAsync(wgpu::MapMode::Write, 0, wgpu::kWholeMapSize, nullptr, nullptr),
-        testing::HasSubstr("cannot be mapped"));
+    ASSERT_DEVICE_ERROR_MSG(buffer.MapAsync(wgpu::MapMode::Write, 0, wgpu::kWholeMapSize,
+                                            wgpu::CallbackMode::AllowSpontaneous,
+                                            [](wgpu::MapAsyncStatus, const char*) {}),
+                            testing::HasSubstr("cannot be mapped"));
 
     // Still invalid to GetMappedRange() or Unmap.
     ASSERT_EQ(buffer.GetMappedRange(), nullptr);

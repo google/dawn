@@ -41,17 +41,11 @@ namespace {
 
 using testing::_;
 using testing::Exactly;
-using testing::MockCallback;
+using testing::HasSubstr;
+using testing::MockCppCallback;
 
-class MockQueueWorkDoneCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPUQueueWorkDoneStatus status, void* userdata));
-};
-
-static std::unique_ptr<MockQueueWorkDoneCallback> mockQueueWorkDoneCallback;
-static void ToMockQueueWorkDone(WGPUQueueWorkDoneStatus status, void* userdata) {
-    mockQueueWorkDoneCallback->Call(status, userdata);
-}
+using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>;
+using MockQueueWorkDoneCallback = MockCppCallback<void (*)(wgpu::QueueWorkDoneStatus)>;
 
 static const int fakeUserData = 0;
 
@@ -60,12 +54,10 @@ class DeviceLostTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-        mockQueueWorkDoneCallback = std::make_unique<MockQueueWorkDoneCallback>();
     }
 
     void TearDown() override {
         instance.ProcessEvents();  // Flush all callbacks.
-        mockQueueWorkDoneCallback = nullptr;
         DawnTest::TearDown();
     }
 
@@ -74,28 +66,13 @@ class DeviceLostTest : public DawnTest {
         EXPECT_EQ(&fakeUserData, userdata);
     }
 
-    void MapAsyncAndWait(const wgpu::Buffer& buffer,
-                         wgpu::MapMode mode,
-                         size_t offset,
-                         size_t size) {
-        bool done = false;
-        buffer.MapAsync(
-            mode, offset, size,
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done);
-
-        while (!done) {
-            WaitABit();
-        }
-    }
-
     template <typename T>
     void ExpectObjectIsError(const T& object) {
         EXPECT_TRUE(dawn::native::CheckIsErrorForTesting(object.Get()));
     }
+
+    MockQueueWorkDoneCallback mWorkDoneCb;
+    MockMapAsyncCallback mMapAsyncCb;
 };
 
 // Test that DeviceLostCallback is invoked when LostForTestimg is called
@@ -259,10 +236,13 @@ TEST_P(DeviceLostTest, BufferMapAsyncFailsForWriting) {
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     LoseDeviceForTesting();
-    buffer.MapAsync(wgpu::MapMode::Write, 0, 4, MapFailCallback, const_cast<int*>(&fakeUserData));
+
+    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("is lost"))).Times(1);
+    buffer.MapAsync(wgpu::MapMode::Write, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
+                    mMapAsyncCb.Callback());
 }
 
-// Test that BufferMapAsync for writing calls back with device lost status when device lost after
+// Test that BufferMapAsync for writing calls back with success when device lost after
 // mapping
 TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForWriting) {
     wgpu::BufferDescriptor bufferDescriptor;
@@ -270,9 +250,12 @@ TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForWriting) {
     bufferDescriptor.usage = wgpu::BufferUsage::MapWrite;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    buffer.MapAsync(wgpu::MapMode::Write, 0, 4, MapFailCallback, const_cast<int*>(&fakeUserData));
+    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
+    buffer.MapAsync(wgpu::MapMode::Write, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
+                    mMapAsyncCb.Callback());
 
     LoseDeviceForTesting();
+    WaitForAllOperations();
 }
 
 // Test that buffer.Unmap after device is lost
@@ -307,10 +290,13 @@ TEST_P(DeviceLostTest, BufferMapAsyncFailsForReading) {
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
     LoseDeviceForTesting();
-    buffer.MapAsync(wgpu::MapMode::Read, 0, 4, MapFailCallback, const_cast<int*>(&fakeUserData));
+
+    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("is lost"))).Times(1);
+    buffer.MapAsync(wgpu::MapMode::Read, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
+                    mMapAsyncCb.Callback());
 }
 
-// Test that BufferMapAsync for reading calls back with device lost status when device lost after
+// Test that BufferMapAsync for reading calls back with success when device lost after
 // mapping
 TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForReading) {
     wgpu::BufferDescriptor bufferDescriptor;
@@ -319,9 +305,12 @@ TEST_P(DeviceLostTest, BufferMapAsyncBeforeLossFailsForReading) {
 
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    buffer.MapAsync(wgpu::MapMode::Read, 0, 4, MapFailCallback, const_cast<int*>(&fakeUserData));
+    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
+    buffer.MapAsync(wgpu::MapMode::Read, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
+                    mMapAsyncCb.Callback());
 
     LoseDeviceForTesting();
+    WaitForAllOperations();
 }
 
 // Test that WriteBuffer after device is lost
@@ -412,22 +401,20 @@ TEST_P(DeviceLostTest, CommandEncoderFinishFails) {
     ExpectObjectIsError(encoder.Finish());
 }
 
-// Test that QueueOnSubmittedWorkDone after device is lost.
+// Test QueueOnSubmittedWorkDone after device is lost.
 TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneAfterDeviceLost) {
     LoseDeviceForTesting();
 
-    // callback should have device lost status
-    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_DeviceLost, nullptr))
-        .Times(1);
-    queue.OnSubmittedWorkDone(ToMockQueueWorkDone, nullptr);
+    // Callback should have success status
+    EXPECT_CALL(mWorkDoneCb, Call(wgpu::QueueWorkDoneStatus::Success));
+    queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents, mWorkDoneCb.Callback());
 }
 
-// Test that QueueOnSubmittedWorkDone when the device is lost after calling OnSubmittedWorkDone
+// Test QueueOnSubmittedWorkDone when the device is lost after calling OnSubmittedWorkDone
 TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneBeforeLossFails) {
-    // callback should have device lost status
-    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_DeviceLost, nullptr))
-        .Times(1);
-    queue.OnSubmittedWorkDone(ToMockQueueWorkDone, nullptr);
+    // Callback should have success status
+    EXPECT_CALL(mWorkDoneCb, Call(wgpu::QueueWorkDoneStatus::Success));
+    queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents, mWorkDoneCb.Callback());
 
     LoseDeviceForTesting();
 }

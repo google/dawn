@@ -106,24 +106,6 @@ static_assert(kClearStencil != kGarbageStencil);
 
 class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestParams> {
   protected:
-    void MapAsyncAndWait(const wgpu::Buffer& buffer,
-                         wgpu::MapMode mode,
-                         size_t offset,
-                         size_t size) {
-        bool done = false;
-        buffer.MapAsync(
-            mode, offset, size,
-            [](WGPUBufferMapAsyncStatus status, void* userdata) {
-                ASSERT_EQ(WGPUBufferMapAsyncStatus_Success, status);
-                *static_cast<bool*>(userdata) = true;
-            },
-            &done);
-
-        while (!done) {
-            WaitABit();
-        }
-    }
-
     void SetUp() override {
         DawnTestWithParams<DepthStencilCopyTestParams>::SetUp();
 

@@ -62,11 +62,14 @@ using ::testing::_;
 using ::testing::ByMove;
 using ::testing::InSequence;
 using ::testing::Mock;
-using testing::MockCallback;
+using testing::MockCppCallback;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::StrictMock;
 using ::testing::Test;
+
+using MockMapAsyncCallback =
+    StrictMock<MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>>;
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}
@@ -235,7 +238,7 @@ TEST_F(DestroyObjectTests, MappedBufferApiExplicit) {
     desc.size = 16;
     desc.usage = wgpu::BufferUsage::MapRead;
 
-    StrictMock<MockCallback<wgpu::BufferMapCallback>> cb;
+    MockMapAsyncCallback cb;
     EXPECT_CALL(cb, Call).Times(1);
     Ref<BufferMock> bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
     {
@@ -247,8 +250,9 @@ TEST_F(DestroyObjectTests, MappedBufferApiExplicit) {
     {
         EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(bufferMock))));
         wgpu::Buffer buffer = device.CreateBuffer(ToCppAPI(&desc));
-        buffer.MapAsync(wgpu::MapMode::Read, 0, 16, cb.Callback(), cb.MakeUserdata(this));
-        device.Tick();
+        buffer.MapAsync(wgpu::MapMode::Read, 0, 16, wgpu::CallbackMode::AllowProcessEvents,
+                        cb.Callback());
+        ProcessEvents();
 
         EXPECT_TRUE(FromAPI(buffer.Get())->IsAlive());
         buffer.Destroy();
@@ -263,7 +267,7 @@ TEST_F(DestroyObjectTests, MappedBufferImplicit) {
     desc.size = 16;
     desc.usage = wgpu::BufferUsage::MapRead;
 
-    StrictMock<MockCallback<wgpu::BufferMapCallback>> cb;
+    MockMapAsyncCallback cb;
     EXPECT_CALL(cb, Call).Times(1);
     Ref<BufferMock> bufferMock = AcquireRef(new BufferMock(mDeviceMock, &desc));
     {
@@ -277,8 +281,9 @@ TEST_F(DestroyObjectTests, MappedBufferImplicit) {
 
         EXPECT_CALL(*mDeviceMock, CreateBufferImpl).WillOnce(Return(ByMove(std::move(bufferMock))));
         wgpu::Buffer buffer = device.CreateBuffer(ToCppAPI(&desc));
-        buffer.MapAsync(wgpu::MapMode::Read, 0, 16, cb.Callback(), cb.MakeUserdata(this));
-        device.Tick();
+        buffer.MapAsync(wgpu::MapMode::Read, 0, 16, wgpu::CallbackMode::AllowProcessEvents,
+                        cb.Callback());
+        ProcessEvents();
 
         EXPECT_TRUE(FromAPI(buffer.Get())->IsAlive());
     }
