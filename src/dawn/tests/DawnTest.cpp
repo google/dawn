@@ -803,6 +803,10 @@ DawnTestBase::~DawnTestBase() {
     queue = nullptr;
     device = nullptr;
     adapter = nullptr;
+
+    // Since the native instance is a global, we can't rely on it's destruction to clean up all
+    // callbacks. Instead, for each test, we make sure to clear all events.
+    WaitForAllOperations();
     instance = nullptr;
 
     // Since the native instance is a global, we can't rely on it's destruction to clean up all
@@ -1666,17 +1670,29 @@ void DawnTestBase::FlushWire() {
 }
 
 void DawnTestBase::WaitForAllOperations() {
-    // Callback might be invoked on another thread that calls the same WaitABit() method, not
-    // necessarily the current thread. So we need to use atomic here.
-    std::atomic<bool> done(false);
-    device.GetQueue().OnSubmittedWorkDone(
-        [](WGPUQueueWorkDoneStatus, void* userdata) {
-            *static_cast<std::atomic<bool>*>(userdata) = true;
-        },
-        &done);
-    while (!done.load()) {
-        WaitABit();
+    // TODO: crbug.com/42241461 - This block should be removed once we have migrated all tests to
+    // use the new entry points.
+    if (device != nullptr) {
+        // Callback might be invoked on another thread that calls the same WaitABit() method, not
+        // necessarily the current thread. So we need to use atomic here.
+        std::atomic<bool> done(false);
+        device.GetQueue().OnSubmittedWorkDone(
+            [](WGPUQueueWorkDoneStatus, void* userdata) {
+                *static_cast<std::atomic<bool>*>(userdata) = true;
+            },
+            &done);
+        while (!done.load()) {
+            WaitABit();
+        }
     }
+
+    do {
+        FlushWire();
+        if (UsesWire() && instance != nullptr) {
+            instance.ProcessEvents();
+        }
+    } while (dawn::native::InstanceProcessEvents(gTestEnv->GetInstance()->Get()) ||
+             !mWireHelper->IsIdle());
 }
 
 DawnTestBase::ReadbackReservation DawnTestBase::ReserveReadback(wgpu::Device targetDevice,

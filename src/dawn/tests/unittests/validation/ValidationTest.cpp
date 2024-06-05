@@ -257,6 +257,15 @@ void ValidationTest::FlushWire() {
     EXPECT_TRUE(mWireHelper->FlushServer());
 }
 
+void ValidationTest::WaitForAllOperations() {
+    do {
+        FlushWire();
+        if (UsesWire()) {
+            instance.ProcessEvents();
+        }
+    } while (dawn::native::InstanceProcessEvents(mDawnInstance->Get()) || !mWireHelper->IsIdle());
+}
+
 void ValidationTest::WaitForAllOperations(const wgpu::Device& waitDevice) {
     bool done = false;
     waitDevice.GetQueue().OnSubmittedWorkDone(

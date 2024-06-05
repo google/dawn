@@ -118,6 +118,8 @@ class WireHelperDirect : public WireHelper {
 
     bool FlushServer() override { return true; }
 
+    bool IsIdle() override { return true; }
+
   private:
     const DawnProcTable& mProcs;
 };
@@ -186,6 +188,8 @@ class WireHelperProxy : public WireHelper {
     bool FlushClient() override { return mC2sBuf->Flush(); }
 
     bool FlushServer() override { return mS2cBuf->Flush(); }
+
+    bool IsIdle() override { return mC2sBuf->Empty() && mS2cBuf->Empty(); }
 
   private:
     const DawnProcTable& mBackendProcs;

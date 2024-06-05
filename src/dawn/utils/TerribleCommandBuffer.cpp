@@ -67,4 +67,8 @@ bool TerribleCommandBuffer::Flush() {
     return success;
 }
 
+bool TerribleCommandBuffer::Empty() {
+    return mOffset == 0;
+}
+
 }  // namespace dawn::utils

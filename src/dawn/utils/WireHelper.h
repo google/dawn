@@ -69,6 +69,8 @@ class WireHelper {
 
     virtual bool FlushClient() = 0;
     virtual bool FlushServer() = 0;
+
+    virtual bool IsIdle() = 0;
 };
 
 std::unique_ptr<WireHelper> CreateWireHelper(const DawnProcTable& procs,

@@ -44,6 +44,7 @@ class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
 
     void* GetCmdSpace(size_t size) override;
     bool Flush() override;
+    bool Empty();
 
   private:
     raw_ptr<dawn::wire::CommandHandler> mHandler = nullptr;

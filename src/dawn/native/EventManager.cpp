@@ -376,6 +376,13 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
         if (!events->has_value()) {
             return;
         }
+        if (event->mCallbackMode != wgpu::CallbackMode::WaitAnyOnly) {
+            FutureID lastProcessedEventID = mLastProcessEventID.load(std::memory_order_acquire);
+            while (lastProcessedEventID < futureID &&
+                   !mLastProcessEventID.compare_exchange_weak(lastProcessedEventID, futureID,
+                                                              std::memory_order_acq_rel)) {
+            }
+        }
         (*events)->emplace(futureID, std::move(event));
     });
     return futureID;
@@ -462,13 +469,16 @@ bool EventManager::ProcessPollEvents() {
         return readyEnd != futures.end();
     });
 
-    // Finally, call callbacks.
+    // Finally, call callbacks while comparing the last process event id with any new ones that may
+    // have been created via the callbacks.
+    FutureID lastProcessEventID = mLastProcessEventID.load(std::memory_order_acquire);
     for (auto& event : completable) {
         event->EnsureComplete(EventCompletionType::Ready);
     }
     // Note that in the event of all progressing events completing, but there exists non-progressing
     // events, we will return true one extra time.
-    return hasIncompleteEvents && hasProgressingEvents;
+    return hasIncompleteEvents && hasProgressingEvents &&
+           (lastProcessEventID != mLastProcessEventID.load(std::memory_order_acquire));
 }
 
 wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nanoseconds timeout) {

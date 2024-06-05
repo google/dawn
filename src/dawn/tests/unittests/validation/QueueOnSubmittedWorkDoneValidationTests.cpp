@@ -58,5 +58,5 @@ TEST_F(QueueOnSubmittedWorkDoneValidationTests, CallBeforeSubmits) {
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this)).Times(1);
     device.GetQueue().OnSubmittedWorkDone(ToMockQueueWorkDone, this);
 
-    WaitForAllOperations(device);
+    WaitForAllOperations();
 }

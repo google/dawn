@@ -78,7 +78,7 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
                                                      : wgpu::CallbackMode::AllowProcessEvents,
                                           creationCallback.Callback());
 
-        WaitForAllOperations(device);
+        WaitForAllOperations();
     }
 
     // CreateComputePipelineAsync errors if the shader module is created on a different device.
@@ -98,7 +98,7 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
                                                      : wgpu::CallbackMode::AllowProcessEvents,
                                           creationCallback.Callback());
 
-        WaitForAllOperations(device);
+        WaitForAllOperations();
     }
 }
 

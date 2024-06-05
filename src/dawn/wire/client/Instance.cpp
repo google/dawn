@@ -262,24 +262,6 @@ WireResult Client::DoInstanceRequestAdapterCallback(ObjectHandle eventManager,
 
 void Instance::ProcessEvents() {
     GetEventManager().ProcessPollEvents();
-
-    // TODO(crbug.com/dawn/1987): The responsibility of ProcessEvents here is a bit mixed. It both
-    // processes events coming in from the server, and also prompts the server to check for and
-    // forward over new events - which won't be received until *after* this client-side
-    // ProcessEvents completes.
-    //
-    // Fixing this nicely probably requires the server to more self-sufficiently
-    // forward the events, which is half of making the wire fully invisible to use (which we might
-    // like to do, someday, but not soon). This is easy for immediate events (like requestDevice)
-    // and thread-driven events (async pipeline creation), but harder for queue fences where we have
-    // to wait on the backend and then trigger Dawn code to forward the event.
-    //
-    // In the meantime, we could maybe do this on client->server flush to keep this concern in the
-    // wire instead of in the API itself, but otherwise it's not significantly better so we just
-    // keep it here for now for backward compatibility.
-    InstanceProcessEventsCmd cmd;
-    cmd.self = ToAPI(this);
-    GetClient()->SerializeCommand(cmd);
 }
 
 WGPUWaitStatus Instance::WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS) {

@@ -144,6 +144,10 @@ class ValidationTest : public testing::Test {
     bool UsesWire() const;
 
     void FlushWire();
+
+    // TODO: crbug.com/42241461 - Remove overload that passes a device once we update tests to use
+    // new entry points.
+    void WaitForAllOperations();
     void WaitForAllOperations(const wgpu::Device& device);
 
     // Helper functions to create objects to test validation.
