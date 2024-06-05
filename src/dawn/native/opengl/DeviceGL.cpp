@@ -443,10 +443,6 @@ const EGLFunctions& Device::GetEGL(bool makeCurrent) const {
     return mContext->GetEGL();
 }
 
-const EGLExtensionSet& Device::GetEGLExtensions() const {
-    return mContext->GetExtensions();
-}
-
 EGLDisplay Device::GetEGLDisplay() const {
     return mContext->GetEGLDisplay();
 }

@@ -45,19 +45,14 @@ class ContextEGL : public Device::Context {
     void MakeCurrent() override;
     EGLDisplay GetEGLDisplay() const override;
     const EGLFunctions& GetEGL() const override;
-    const EGLExtensionSet& GetExtensions() const override;
     ~ContextEGL() override;
 
   private:
-    ContextEGL(const EGLFunctions& functions,
-               EGLDisplay display,
-               EGLContext context,
-               EGLExtensionSet extensions);
+    ContextEGL(const EGLFunctions& functions, EGLDisplay display, EGLContext context);
 
     const EGLFunctions mEgl;
     EGLDisplay mDisplay;
     EGLContext mContext;
-    EGLExtensionSet mExtensions;
 };
 
 }  // namespace dawn::native::opengl

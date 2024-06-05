@@ -30,30 +30,115 @@
 
 #include "dawn/common/egl_platform.h"
 
+#include "dawn/common/ityp_bitset.h"
+#include "dawn/native/Error.h"
+
 namespace dawn::native::opengl {
 
-struct EGLFunctions {
-    void Init(void* (*getProc)(const char*));
-    PFNEGLBINDAPIPROC BindAPI;
+enum class EGLExt {
+    // Promoted to EGL 1.5
+    ClientExtensions,
+    PlatformBase,
+    FenceSync,
+    CLEvent2,
+    WaitSync,
+    ImageBase,
+    GLTexture2DImage,
+    GLTexture3DImage,
+    GLTextureCubemapImage,
+    GLRenderBufferImage,
+    CreateContext,
+    CreateContextRobustness,
+    GetAllProcAddresses,
+    ClientGetAllProcAddresses,
+    GLColorSpace,
+    SurfacelessContext,
+
+    // Other extensions,
+    DisplayTextureShareGroup,
+    ReusableSync,
+
+    EnumCount,
+};
+
+// An EGL function loader that also takes care of discovering which extensions are available.
+// (taking into account the ones that have been promoted to core EGL versions).
+class EGLFunctions {
+  public:
+    MaybeError LoadClientProcs(void* (*getProc)(const char*));
+    MaybeError LoadDisplayProcs(EGLDisplay display);
+
+    uint32_t GetMajorVersion() const;
+    uint32_t GetMinorVersion() const;
+    bool HasExt(EGLExt extension) const;
+
+    // EGL 1.0
+    PFNEGLGETPROCADDRESSPROC GetProcAddress;
+
     PFNEGLCHOOSECONFIGPROC ChooseConfig;
+    PFNEGLCOPYBUFFERSPROC CopyBuffers;
     PFNEGLCREATECONTEXTPROC CreateContext;
-    PFNEGLCREATEPLATFORMWINDOWSURFACEPROC CreatePlatformWindowSurface;
     PFNEGLCREATEPBUFFERSURFACEPROC CreatePbufferSurface;
+    PFNEGLCREATEPIXMAPSURFACEPROC CreatePixmapSurface;
+    PFNEGLCREATEWINDOWSURFACEPROC CreateWindowSurface;
     PFNEGLDESTROYCONTEXTPROC DestroyContext;
+    PFNEGLDESTROYSURFACEPROC DestroySurface;
+    PFNEGLGETCONFIGATTRIBPROC GetConfigAttrib;
     PFNEGLGETCONFIGSPROC GetConfigs;
-    PFNEGLGETCURRENTCONTEXTPROC GetCurrentContext;
     PFNEGLGETCURRENTDISPLAYPROC GetCurrentDisplay;
     PFNEGLGETCURRENTSURFACEPROC GetCurrentSurface;
     PFNEGLGETDISPLAYPROC GetDisplay;
     PFNEGLGETERRORPROC GetError;
-    PFNEGLGETPROCADDRESSPROC GetProcAddress;
     PFNEGLINITIALIZEPROC Initialize;
     PFNEGLMAKECURRENTPROC MakeCurrent;
+    PFNEGLQUERYCONTEXTPROC QueryContext;
     PFNEGLQUERYSTRINGPROC QueryString;
-    PFNEGLCREATESYNCKHRPROC CreateSyncKHR;
-    PFNEGLSIGNALSYNCKHRPROC SignalSyncKHR;
-    PFNEGLDESTROYSYNCKHRPROC DestroySyncKHR;
-    PFNEGLCLIENTWAITSYNCKHRPROC ClientWaitSyncKHR;
+    PFNEGLQUERYSURFACEPROC QuerySurface;
+    PFNEGLSWAPBUFFERSPROC SwapBuffers;
+    PFNEGLTERMINATEPROC Terminate;
+    PFNEGLWAITGLPROC WaitGL;
+    PFNEGLWAITNATIVEPROC WaitNative;
+
+    // EGL 1.1
+    PFNEGLBINDTEXIMAGEPROC BindTexImage;
+    PFNEGLRELEASETEXIMAGEPROC ReleaseTexImage;
+    PFNEGLSURFACEATTRIBPROC SurfaceAttrib;
+    PFNEGLSWAPINTERVALPROC SwapInterval;
+
+    // EGL 1.2
+    PFNEGLBINDAPIPROC BindAPI;
+    PFNEGLQUERYAPIPROC QueryAPI;
+    PFNEGLCREATEPBUFFERFROMCLIENTBUFFERPROC CreatePbufferFromClientBuffer;
+    PFNEGLRELEASETHREADPROC ReleaseThread;
+    PFNEGLWAITCLIENTPROC WaitClient;
+
+    // EGL 1.3 (no new procs)
+
+    // EGL 1.4
+    PFNEGLGETCURRENTCONTEXTPROC GetCurrentContext;
+
+    // EGL 1.5
+    PFNEGLCREATESYNCPROC CreateSync;
+    PFNEGLDESTROYSYNCPROC DestroySync;
+    PFNEGLCLIENTWAITSYNCPROC ClientWaitSync;
+    PFNEGLGETSYNCATTRIBPROC GetSyncAttrib;
+    PFNEGLCREATEIMAGEPROC CreateImage;
+    PFNEGLDESTROYIMAGEPROC DestroyImage;
+    PFNEGLGETPLATFORMDISPLAYPROC GetPlatformDisplay;
+    PFNEGLCREATEPLATFORMWINDOWSURFACEPROC CreatePlatformWindowSurface;
+    PFNEGLCREATEPLATFORMPIXMAPSURFACEPROC CreatePlatformPixmapSurface;
+    PFNEGLWAITSYNCPROC WaitSync;
+
+    // EGL_KHR_reusable_sync
+    PFNEGLSIGNALSYNCKHRPROC SignalSync;
+
+  private:
+    MaybeError LoadClientExtensions();
+
+    uint32_t mMajorVersion = 0;
+    uint32_t mMinorVersion = 0;
+
+    ityp::bitset<EGLExt, static_cast<size_t>(EGLExt::EnumCount)> mExtensions;
 };
 
 }  // namespace dawn::native::opengl
