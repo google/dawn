@@ -51,6 +51,7 @@ struct TransformedShaderModuleCacheKey {
     std::string entryPoint;
     PipelineConstantEntries constants;
     std::optional<uint32_t> maxSubgroupSizeForFullSubgroups;
+    bool emitPointSize;
 
     bool operator==(const TransformedShaderModuleCacheKey& other) const;
 };
