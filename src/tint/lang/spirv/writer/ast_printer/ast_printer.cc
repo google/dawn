@@ -29,7 +29,6 @@
 
 #include <unordered_map>
 
-#include "src/tint/api/options/depth_range_offsets.h"
 #include "src/tint/lang/spirv/writer/ast_raise/for_loop_to_loop.h"
 #include "src/tint/lang/spirv/writer/ast_raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/ast_raise/var_for_dynamic_index.h"
@@ -70,7 +69,8 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     if (options.clamp_frag_depth) {
         manager.Add<ast::transform::ClampFragDepth>();
-        data.Add<ast::transform::ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+        data.Add<ast::transform::ClampFragDepth::Config>(
+            ast::transform::ClampFragDepth::RangeOffsets{0, 4});
     }
 
     manager.Add<ast::transform::DisableUniformityAnalysis>();

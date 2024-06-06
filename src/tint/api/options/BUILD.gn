@@ -44,7 +44,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("options") {
   sources = [
-    "depth_range_offsets.h",
     "options.cc",
     "pixel_local.h",
     "texture_builtins_from_uniform.h",

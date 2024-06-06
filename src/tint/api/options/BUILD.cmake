@@ -39,7 +39,6 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_api_options lib
-  api/options/depth_range_offsets.h
   api/options/options.cc
   api/options/pixel_local.h
   api/options/texture_builtins_from_uniform.h

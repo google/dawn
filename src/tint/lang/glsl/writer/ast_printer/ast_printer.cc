@@ -215,7 +215,11 @@ SanitizedResult Sanitize(const Program& in,
     // ClampFragDepth must come before CanonicalizeEntryPointIO, or the assignments to FragDepth are
     // lost
     manager.Add<ast::transform::ClampFragDepth>();
-    data.Add<ast::transform::ClampFragDepth::Config>(options.depth_range_offsets);
+    std::optional<ast::transform::ClampFragDepth::RangeOffsets> range_offsets;
+    if (options.depth_range_offsets.has_value()) {
+        range_offsets = {options.depth_range_offsets->min, options.depth_range_offsets->max};
+    }
+    data.Add<ast::transform::ClampFragDepth::Config>(range_offsets);
 
     // CanonicalizeEntryPointIO must come after Robustness
     manager.Add<ast::transform::CanonicalizeEntryPointIO>();

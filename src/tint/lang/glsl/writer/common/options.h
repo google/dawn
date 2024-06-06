@@ -32,7 +32,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/tint/api/options/depth_range_offsets.h"
 #include "src/tint/api/options/texture_builtins_from_uniform.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
@@ -206,6 +205,16 @@ struct Bindings : public Castable<Bindings, tint::ast::transform::Data> {
 
 /// Configuration options used for generating GLSL.
 struct Options {
+    struct RangeOffsets {
+        /// The offset of the min_depth push constant
+        uint32_t min = 0;
+        /// The offset of the max_depth push constant
+        uint32_t max = 0;
+
+        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+        TINT_REFLECT(RangeOffsets, min, max);
+    };
+
     /// Constructor
     Options();
 
@@ -234,7 +243,7 @@ struct Options {
     std::optional<int32_t> first_instance_offset;
 
     /// Offsets of the minDepth and maxDepth push constants.
-    std::optional<DepthRangeOffsets> depth_range_offsets;
+    std::optional<RangeOffsets> depth_range_offsets;
 
     /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
     /// buffer values. If not specified, emits corresponding GLSL builtins

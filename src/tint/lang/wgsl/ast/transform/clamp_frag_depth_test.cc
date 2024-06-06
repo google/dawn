@@ -71,7 +71,7 @@ TEST_F(ClampFragDepthTest, ShouldRun) {
     )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
 
     EXPECT_TRUE(ShouldRun<ClampFragDepth>(src, config));
 }
@@ -119,7 +119,7 @@ fn main() -> @builtin(frag_depth) f32 {
 )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{4, 8});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{4, 8});
 
     auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
@@ -133,7 +133,7 @@ TEST_F(ClampFragDepthTest, ShouldRunFragDepthAsDirectReturn) {
     )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
 
     EXPECT_TRUE(ShouldRun<ClampFragDepth>(src, config));
 }
@@ -151,7 +151,7 @@ TEST_F(ClampFragDepthTest, ShouldRunFragDepthInStruct) {
     )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
 
     EXPECT_TRUE(ShouldRun<ClampFragDepth>(src, config));
 }
@@ -186,7 +186,7 @@ fn main() -> @builtin(frag_depth) f32 {
 )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
     auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
@@ -227,7 +227,7 @@ fn main() -> @builtin(frag_depth) f32 {
 )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
     auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
@@ -270,7 +270,7 @@ fn other() -> @location(0) f32 {
 )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
     auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
@@ -318,7 +318,7 @@ fn main() -> S {
 )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
     auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
@@ -396,7 +396,7 @@ fn returnS2() -> S2 {
 )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
     auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }
@@ -456,7 +456,7 @@ fn main() -> S {
 )";
 
     DataMap config;
-    config.Add<ClampFragDepth::Config>(tint::DepthRangeOffsets{0, 4});
+    config.Add<ClampFragDepth::Config>(ClampFragDepth::RangeOffsets{0, 4});
     auto got = Run<ClampFragDepth>(src, config);
     EXPECT_EQ(expect, str(got));
 }

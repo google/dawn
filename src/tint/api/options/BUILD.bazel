@@ -42,7 +42,6 @@ cc_library(
     "options.cc",
   ],
   hdrs = [
-    "depth_range_offsets.h",
     "pixel_local.h",
     "texture_builtins_from_uniform.h",
   ],
