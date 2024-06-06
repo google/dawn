@@ -77,7 +77,7 @@
         Short{{ '?' if optional }}{% if default_value %} = {{ default_value }}{% endif %}
     {%- elif type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
         Int
-        {%- if default_value -%}
+        {%- if default_value not in [None, undefined] -%}
             {%- if default_value is string and default_value.startswith('WGPU_') -%}
                 = {{ 'Constants.' + default_value | replace('WGPU_', '') }}
             {%- elif default_value == 'nullptr' -%}
@@ -90,7 +90,7 @@
         {% endif %}
     {%- elif type.name.get() in ['int64_t', 'uint64_t', 'size_t'] -%}
         Long
-        {%- if default_value %}
+        {%- if default_value not in [None, undefined] %}
             {%- if default_value is string and default_value.startswith('WGPU_') -%}
                 = {{ 'Constants.' + default_value | replace('WGPU_', '') }}
             {%- elif default_value == 'nullptr' -%}
