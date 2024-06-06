@@ -1,31 +1,15 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device float4* prevent_dce;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+void dpdy_699a05(tint_module_vars_struct tint_module_vars) {
+  float4 arg_0 = float4(1.0f);
+  float4 res = dfdy(arg_0);
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%dpdy_699a05 = func():void {
-  $B2: {
-    %arg_0:ptr<function, vec4<f32>, read_write> = var, vec4<f32>(1.0f)
-    %4:vec4<f32> = load %arg_0
-    %5:vec4<f32> = dpdy %4
-    %res:ptr<function, vec4<f32>, read_write> = var, %5
-    %7:vec4<f32> = load %res
-    store %prevent_dce, %7
-    ret
-  }
+fragment void fragment_main(device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  dpdy_699a05(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B3: {
-    %9:void = call %dpdy_699a05
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

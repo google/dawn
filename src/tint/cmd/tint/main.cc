@@ -929,7 +929,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
     tint::Result<tint::msl::writer::Output> result;
     if (options.use_ir) {
         // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(*input_program);
         if (ir != tint::Success) {
             std::cerr << "Failed to generate IR: " << ir << "\n";
             return false;

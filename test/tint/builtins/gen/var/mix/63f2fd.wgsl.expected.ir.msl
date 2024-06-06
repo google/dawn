@@ -1,47 +1,32 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device half3* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, vec3<f16>, read_write> = var @binding_point(2, 0)
+void mix_63f2fd(tint_module_vars_struct tint_module_vars) {
+  half3 arg_0 = half3(1.0h);
+  half3 arg_1 = half3(1.0h);
+  half3 arg_2 = half3(1.0h);
+  half3 res = mix(arg_0, arg_1, arg_2);
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%mix_63f2fd = func():void {
-  $B2: {
-    %arg_0:ptr<function, vec3<f16>, read_write> = var, vec3<f16>(1.0h)
-    %arg_1:ptr<function, vec3<f16>, read_write> = var, vec3<f16>(1.0h)
-    %arg_2:ptr<function, vec3<f16>, read_write> = var, vec3<f16>(1.0h)
-    %6:vec3<f16> = load %arg_0
-    %7:vec3<f16> = load %arg_1
-    %8:vec3<f16> = load %arg_2
-    %9:vec3<f16> = mix %6, %7, %8
-    %res:ptr<function, vec3<f16>, read_write> = var, %9
-    %11:vec3<f16> = load %res
-    store %prevent_dce, %11
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  mix_63f2fd(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %13:void = call %mix_63f2fd
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device half3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  mix_63f2fd(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %15:void = call %mix_63f2fd
-    ret
-  }
+kernel void compute_main(device half3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  mix_63f2fd(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %17:void = call %mix_63f2fd
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device half3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

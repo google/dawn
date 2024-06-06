@@ -1,43 +1,29 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
+void all_986c7b(tint_module_vars_struct tint_module_vars) {
+  bool res = true;
+  (*tint_module_vars.prevent_dce) = select(0, 1, all(!(res)));
 }
-
-%all_986c7b = func():void {
-  $B2: {
-    %res:ptr<function, bool, read_write> = var, true
-    %4:bool = load %res
-    %5:bool = eq %4, false
-    %6:bool = all %5
-    %7:i32 = select 0i, 1i, %6
-    store %prevent_dce, %7
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  all_986c7b(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %9:void = call %all_986c7b
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  all_986c7b(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %11:void = call %all_986c7b
-    ret
-  }
+kernel void compute_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  all_986c7b(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %13:void = call %all_986c7b
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -50,7 +50,7 @@ struct tint_module_vars_struct {
 int tint_f32_to_i32(float value) {
   return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
-kernel void tint_symbol(const device S* sb [[buffer(0)]], device int* s [[buffer(1)]]) {
+kernel void tint_symbol(const device S* sb [[buffer(1)]], device int* s [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .s=s};
   float const scalar_f32 = (*tint_module_vars.sb).scalar_f32;
   int const scalar_i32 = (*tint_module_vars.sb).scalar_i32;

@@ -89,7 +89,7 @@ void tint_symbol_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   int const v_16 = (v_15 + tint_f32_to_i32(mat4x4_f32[0][0u]));
   (*tint_module_vars.s) = (v_16 + tint_f32_to_i32(arr2_vec3_f32[0][0u]));
 }
-kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], const device S* sb [[buffer(0)]], device int* s [[buffer(1)]]) {
+kernel void tint_symbol(uint idx [[thread_index_in_threadgroup]], const device S* sb [[buffer(1)]], device int* s [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .s=s};
   tint_symbol_inner(idx, tint_module_vars);
 }

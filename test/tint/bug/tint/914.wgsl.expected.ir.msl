@@ -277,7 +277,7 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
     }
   }
 }
-kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint tint_local_index [[thread_index_in_threadgroup]], const device Matrix* firstMatrix [[buffer(0)]], const device Matrix* secondMatrix [[buffer(1)]], device Matrix* resultMatrix [[buffer(2)]], const constant Uniforms* uniforms [[buffer(3)]], threadgroup tint_symbol_3* v_6 [[threadgroup(0)]]) {
+kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint tint_local_index [[thread_index_in_threadgroup]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], threadgroup tint_symbol_3* v_6 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .mm_Asub=(&(*v_6).tint_symbol_1), .mm_Bsub=(&(*v_6).tint_symbol_2)};
   tint_symbol_inner(local_id, global_id, tint_local_index, tint_module_vars);
 }

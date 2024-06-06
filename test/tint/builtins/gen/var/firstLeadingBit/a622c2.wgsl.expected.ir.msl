@@ -1,78 +1,36 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int2* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, vec2<i32>, read_write> = var @binding_point(2, 0)
+void firstLeadingBit_a622c2(tint_module_vars_struct tint_module_vars) {
+  int2 arg_0 = int2(1);
+  uint2 const v = as_type<uint2>(arg_0);
+  uint2 const v_1 = select(~(v), v, (v < uint2(2147483648u)));
+  uint2 const v_2 = select(uint2(16u), uint2(0u), ((v_1 & uint2(4294901760u)) == uint2(0u)));
+  uint2 const v_3 = select(uint2(8u), uint2(0u), (((v_1 >> v_2) & uint2(65280u)) == uint2(0u)));
+  uint2 const v_4 = select(uint2(4u), uint2(0u), ((((v_1 >> v_2) >> v_3) & uint2(240u)) == uint2(0u)));
+  uint2 const v_5 = select(uint2(2u), uint2(0u), (((((v_1 >> v_2) >> v_3) >> v_4) & uint2(12u)) == uint2(0u)));
+  int2 res = as_type<int2>(select((v_2 | (v_3 | (v_4 | (v_5 | select(uint2(1u), uint2(0u), ((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) & uint2(2u)) == uint2(0u))))))), uint2(4294967295u), (((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) == uint2(0u))));
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%firstLeadingBit_a622c2 = func():void {
-  $B2: {
-    %arg_0:ptr<function, vec2<i32>, read_write> = var, vec2<i32>(1i)
-    %4:vec2<i32> = load %arg_0
-    %5:vec2<u32> = bitcast %4
-    %6:vec2<u32> = let %5
-    %7:vec2<u32> = complement %6
-    %8:vec2<bool> = lt %6, vec2<u32>(2147483648u)
-    %9:vec2<u32> = select %7, %6, %8
-    %10:vec2<u32> = let %9
-    %11:vec2<u32> = and %10, vec2<u32>(4294901760u)
-    %12:vec2<bool> = eq %11, vec2<u32>(0u)
-    %13:vec2<u32> = select vec2<u32>(16u), vec2<u32>(0u), %12
-    %14:vec2<u32> = let %13
-    %15:vec2<u32> = shr %10, %14
-    %16:vec2<u32> = and %15, vec2<u32>(65280u)
-    %17:vec2<bool> = eq %16, vec2<u32>(0u)
-    %18:vec2<u32> = select vec2<u32>(8u), vec2<u32>(0u), %17
-    %19:vec2<u32> = let %18
-    %20:vec2<u32> = shr %15, %19
-    %21:vec2<u32> = and %20, vec2<u32>(240u)
-    %22:vec2<bool> = eq %21, vec2<u32>(0u)
-    %23:vec2<u32> = select vec2<u32>(4u), vec2<u32>(0u), %22
-    %24:vec2<u32> = let %23
-    %25:vec2<u32> = shr %20, %24
-    %26:vec2<u32> = and %25, vec2<u32>(12u)
-    %27:vec2<bool> = eq %26, vec2<u32>(0u)
-    %28:vec2<u32> = select vec2<u32>(2u), vec2<u32>(0u), %27
-    %29:vec2<u32> = let %28
-    %30:vec2<u32> = shr %25, %29
-    %31:vec2<u32> = and %30, vec2<u32>(2u)
-    %32:vec2<bool> = eq %31, vec2<u32>(0u)
-    %33:vec2<u32> = select vec2<u32>(1u), vec2<u32>(0u), %32
-    %34:vec2<u32> = or %29, %33
-    %35:vec2<u32> = or %24, %34
-    %36:vec2<u32> = or %19, %35
-    %37:vec2<u32> = or %14, %36
-    %38:vec2<bool> = eq %30, vec2<u32>(0u)
-    %39:vec2<u32> = select %37, vec2<u32>(4294967295u), %38
-    %40:vec2<i32> = bitcast %39
-    %res:ptr<function, vec2<i32>, read_write> = var, %40
-    %42:vec2<i32> = load %res
-    store %prevent_dce, %42
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  firstLeadingBit_a622c2(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %44:void = call %firstLeadingBit_a622c2
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device int2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  firstLeadingBit_a622c2(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %46:void = call %firstLeadingBit_a622c2
-    ret
-  }
+kernel void compute_main(device int2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  firstLeadingBit_a622c2(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %48:void = call %firstLeadingBit_a622c2
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device int2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

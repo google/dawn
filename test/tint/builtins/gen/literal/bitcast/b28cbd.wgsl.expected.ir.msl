@@ -1,40 +1,29 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int3* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, vec3<i32>, read_write> = var @binding_point(2, 0)
+void bitcast_b28cbd(tint_module_vars_struct tint_module_vars) {
+  int3 res = int3(1065353216);
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%bitcast_b28cbd = func():void {
-  $B2: {
-    %res:ptr<function, vec3<i32>, read_write> = var, vec3<i32>(1065353216i)
-    %4:vec3<i32> = load %res
-    store %prevent_dce, %4
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  bitcast_b28cbd(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %6:void = call %bitcast_b28cbd
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device int3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  bitcast_b28cbd(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %8:void = call %bitcast_b28cbd
-    ret
-  }
+kernel void compute_main(device int3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  bitcast_b28cbd(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %10:void = call %bitcast_b28cbd
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device int3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

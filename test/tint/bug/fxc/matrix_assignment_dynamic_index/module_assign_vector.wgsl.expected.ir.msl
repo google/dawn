@@ -1,29 +1,16 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Uniforms {
+  uint i;
+  uint j;
+};
+struct tint_module_vars_struct {
+  const constant Uniforms* uniforms;
+  thread float2x4* m1;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Uniforms = struct @align(4) {
-  i:u32 @offset(0)
-  j:u32 @offset(4)
+kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
+  thread float2x4 m1 = float2x4(0.0f);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .m1=(&m1)};
+  (*tint_module_vars.m1)[(*tint_module_vars.uniforms).i] = float4(1.0f);
 }
-
-$B1: {  # root
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(1, 4)
-  %m1:ptr<private, mat2x4<f32>, read_write> = var
-}
-
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %4:ptr<uniform, u32, read> = access %uniforms, 0u
-    %5:u32 = load %4
-    %6:ptr<private, vec4<f32>, read_write> = access %m1, %5
-    store %6, vec4<f32>(1.0f)
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

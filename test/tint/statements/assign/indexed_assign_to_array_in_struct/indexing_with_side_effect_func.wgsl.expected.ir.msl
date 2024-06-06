@@ -1,54 +1,44 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Uniforms {
+  uint i;
+  uint j;
+};
+struct tint_module_vars_struct {
+  thread uint* nextIndex;
+  const constant Uniforms* uniforms;
+};
+struct InnerS {
+  int v;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Uniforms = struct @align(4) {
-  i:u32 @offset(0)
-  j:u32 @offset(4)
-}
+struct S1 {
+  tint_array<InnerS, 8> a2;
+};
+struct OuterS {
+  tint_array<S1, 8> a1;
+};
 
-InnerS = struct @align(4) {
-  v:i32 @offset(0)
+uint getNextIndex(tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.nextIndex) = ((*tint_module_vars.nextIndex) + 1u);
+  return (*tint_module_vars.nextIndex);
 }
-
-S1 = struct @align(4) {
-  a2:array<InnerS, 8> @offset(0)
+kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
+  thread uint nextIndex = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.nextIndex=(&nextIndex), .uniforms=uniforms};
+  InnerS v = {};
+  OuterS s = {};
+  uint const v_1 = getNextIndex(tint_module_vars);
+  s.a1[v_1].a2[(*tint_module_vars.uniforms).j] = v;
 }
-
-OuterS = struct @align(4) {
-  a1:array<S1, 8> @offset(0)
-}
-
-$B1: {  # root
-  %nextIndex:ptr<private, u32, read_write> = var
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(1, 4)
-}
-
-%getNextIndex = func():u32 {
-  $B2: {
-    %4:u32 = load %nextIndex
-    %5:u32 = add %4, 1u
-    store %nextIndex, %5
-    %6:u32 = load %nextIndex
-    ret %6
-  }
-}
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %v:ptr<function, InnerS, read_write> = var
-    %s:ptr<function, OuterS, read_write> = var
-    %10:u32 = call %getNextIndex
-    %11:ptr<uniform, u32, read> = access %uniforms, 1u
-    %12:u32 = load %11
-    %13:ptr<function, InnerS, read_write> = access %s, 0u, %10, 0u, %12
-    %14:InnerS = load %v
-    store %13, %14
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

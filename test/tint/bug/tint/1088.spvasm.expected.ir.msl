@@ -1,96 +1,76 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: strided_arr = struct @align(4) {
-  el:f32 @offset(0)
-}
+struct strided_arr {
+  float el;
+};
+struct LeftOver {
+  float4x4 worldViewProjection;
+  float time;
+  tint_array<float4x4, 2> test2;
+  tint_array<strided_arr, 4> test;
+};
+struct tint_module_vars_struct {
+  thread float3* position_1;
+  const constant LeftOver* x_14;
+  thread float2* vUV;
+  thread float2* uv;
+  thread float3* normal;
+  thread float4* gl_Position;
+};
+struct main_out {
+  float4 gl_Position;
+  float2 vUV_1;
+};
+struct tint_symbol_outputs {
+  float4 main_out_gl_Position [[position]];
+  float2 main_out_vUV_1 [[user(locn0)]];
+};
+struct tint_symbol_inputs {
+  float3 position_1_param [[attribute(0)]];
+  float2 uv_param [[attribute(2)]];
+  float3 normal_param [[attribute(1)]];
+};
 
-LeftOver = struct @align(16) {
-  worldViewProjection:mat4x4<f32> @offset(0)
-  time:f32 @offset(64)
-  test2:array<mat4x4<f32>, 2> @offset(80)
-  test:array<strided_arr, 4> @offset(208)
+void main_1(tint_module_vars_struct tint_module_vars) {
+  float4 q = 0.0f;
+  float3 p = 0.0f;
+  q = float4((*tint_module_vars.position_1)[0u], (*tint_module_vars.position_1)[1u], (*tint_module_vars.position_1)[2u], 1.0f);
+  p = q.xyz;
+  float const v = p[0u];
+  p[0u] = (v + sin((((*tint_module_vars.x_14).test[0].el * (*tint_module_vars.position_1)[1u]) + (*tint_module_vars.x_14).time)));
+  float const v_1 = p[1u];
+  p[1u] = (v_1 + sin(((*tint_module_vars.x_14).time + 4.0f)));
+  float4x4 const v_2 = (*tint_module_vars.x_14).worldViewProjection;
+  (*tint_module_vars.gl_Position) = (v_2 * float4(p[0u], p[1u], p[2u], 1.0f));
+  (*tint_module_vars.vUV) = (*tint_module_vars.uv);
+  (*tint_module_vars.gl_Position)[1u] = ((*tint_module_vars.gl_Position)[1u] * -1.0f);
 }
-
-main_out = struct @align(16) {
-  gl_Position:vec4<f32> @offset(0), @builtin(position)
-  vUV_1:vec2<f32> @offset(16), @location(0)
+main_out tint_symbol_inner(float3 position_1_param, float2 uv_param, float3 normal_param, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.position_1) = position_1_param;
+  (*tint_module_vars.uv) = uv_param;
+  (*tint_module_vars.normal) = normal_param;
+  main_1(tint_module_vars);
+  return main_out{.gl_Position=(*tint_module_vars.gl_Position), .vUV_1=(*tint_module_vars.vUV)};
 }
-
-$B1: {  # root
-  %position_1:ptr<private, vec3<f32>, read_write> = var
-  %x_14:ptr<uniform, LeftOver, read> = var @binding_point(2, 2)
-  %vUV:ptr<private, vec2<f32>, read_write> = var
-  %uv:ptr<private, vec2<f32>, read_write> = var
-  %normal:ptr<private, vec3<f32>, read_write> = var
-  %gl_Position:ptr<private, vec4<f32>, read_write> = var
+vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant LeftOver* x_14 [[buffer(0)]]) {
+  thread float3 position_1 = 0.0f;
+  thread float2 vUV = 0.0f;
+  thread float2 uv = 0.0f;
+  thread float3 normal = 0.0f;
+  thread float4 gl_Position = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.position_1=(&position_1), .x_14=x_14, .vUV=(&vUV), .uv=(&uv), .normal=(&normal), .gl_Position=(&gl_Position)};
+  main_out const v_3 = tint_symbol_inner(inputs.position_1_param, inputs.uv_param, inputs.normal_param, tint_module_vars);
+  return tint_symbol_outputs{.main_out_gl_Position=v_3.gl_Position, .main_out_vUV_1=v_3.vUV_1};
 }
-
-%main_1 = func():void {
-  $B2: {
-    %q:ptr<function, vec4<f32>, read_write> = var
-    %p:ptr<function, vec3<f32>, read_write> = var
-    %10:f32 = load_vector_element %position_1, 0u
-    %11:f32 = load_vector_element %position_1, 1u
-    %12:f32 = load_vector_element %position_1, 2u
-    %13:vec4<f32> = construct %10, %11, %12, 1.0f
-    store %q, %13
-    %14:vec4<f32> = load %q
-    %15:vec3<f32> = swizzle %14, xyz
-    store %p, %15
-    %16:f32 = load_vector_element %p, 0u
-    %17:f32 = let %16
-    %18:ptr<uniform, f32, read> = access %x_14, 3u, 0i, 0u
-    %19:f32 = load %18
-    %20:f32 = load_vector_element %position_1, 1u
-    %21:f32 = mul %19, %20
-    %22:ptr<uniform, f32, read> = access %x_14, 1u
-    %23:f32 = load %22
-    %24:f32 = add %21, %23
-    %25:f32 = sin %24
-    %26:f32 = add %17, %25
-    store_vector_element %p, 0u, %26
-    %27:f32 = load_vector_element %p, 1u
-    %28:f32 = let %27
-    %29:ptr<uniform, f32, read> = access %x_14, 1u
-    %30:f32 = load %29
-    %31:f32 = add %30, 4.0f
-    %32:f32 = sin %31
-    %33:f32 = add %28, %32
-    store_vector_element %p, 1u, %33
-    %34:ptr<uniform, mat4x4<f32>, read> = access %x_14, 0u
-    %35:mat4x4<f32> = load %34
-    %36:mat4x4<f32> = let %35
-    %37:f32 = load_vector_element %p, 0u
-    %38:f32 = load_vector_element %p, 1u
-    %39:f32 = load_vector_element %p, 2u
-    %40:vec4<f32> = construct %37, %38, %39, 1.0f
-    %41:vec4<f32> = mul %36, %40
-    store %gl_Position, %41
-    %42:vec2<f32> = load %uv
-    store %vUV, %42
-    %43:f32 = load_vector_element %gl_Position, 1u
-    %44:f32 = mul %43, -1.0f
-    store_vector_element %gl_Position, 1u, %44
-    ret
-  }
-}
-%tint_symbol = @vertex func(%position_1_param:vec3<f32> [@location(0)], %uv_param:vec2<f32> [@location(2)], %normal_param:vec3<f32> [@location(1)]):main_out {
-  $B3: {
-    store %position_1, %position_1_param
-    store %uv, %uv_param
-    store %normal, %normal_param
-    %49:void = call %main_1
-    %50:vec4<f32> = load %gl_Position
-    %51:vec2<f32> = load %vUV
-    %52:main_out = construct %50, %51
-    ret %52
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

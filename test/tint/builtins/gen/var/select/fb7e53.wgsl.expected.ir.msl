@@ -1,50 +1,32 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
+void select_fb7e53(tint_module_vars_struct tint_module_vars) {
+  bool2 arg_0 = bool2(true);
+  bool2 arg_1 = bool2(true);
+  bool arg_2 = true;
+  bool2 res = select(arg_0, arg_1, arg_2);
+  (*tint_module_vars.prevent_dce) = select(0, 1, all((res == bool2(false))));
 }
-
-%select_fb7e53 = func():void {
-  $B2: {
-    %arg_0:ptr<function, vec2<bool>, read_write> = var, vec2<bool>(true)
-    %arg_1:ptr<function, vec2<bool>, read_write> = var, vec2<bool>(true)
-    %arg_2:ptr<function, bool, read_write> = var, true
-    %6:vec2<bool> = load %arg_0
-    %7:vec2<bool> = load %arg_1
-    %8:bool = load %arg_2
-    %9:vec2<bool> = select %6, %7, %8
-    %res:ptr<function, vec2<bool>, read_write> = var, %9
-    %11:vec2<bool> = load %res
-    %12:vec2<bool> = eq %11, vec2<bool>(false)
-    %13:bool = all %12
-    %14:i32 = select 0i, 1i, %13
-    store %prevent_dce, %14
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  select_fb7e53(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %16:void = call %select_fb7e53
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  select_fb7e53(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %18:void = call %select_fb7e53
-    ret
-  }
+kernel void compute_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  select_fb7e53(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %20:void = call %select_fb7e53
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

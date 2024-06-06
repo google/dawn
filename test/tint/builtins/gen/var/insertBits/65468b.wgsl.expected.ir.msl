@@ -1,56 +1,37 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
+void insertBits_65468b(tint_module_vars_struct tint_module_vars) {
+  int arg_0 = 1;
+  int arg_1 = 1;
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  int const v = arg_0;
+  int const v_1 = arg_1;
+  uint const v_2 = arg_3;
+  uint const v_3 = min(arg_2, 32u);
+  int res = insert_bits(v, v_1, v_3, min(v_2, (32u - v_3)));
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%insertBits_65468b = func():void {
-  $B2: {
-    %arg_0:ptr<function, i32, read_write> = var, 1i
-    %arg_1:ptr<function, i32, read_write> = var, 1i
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %arg_3:ptr<function, u32, read_write> = var, 1u
-    %7:i32 = load %arg_0
-    %8:i32 = let %7
-    %9:i32 = load %arg_1
-    %10:i32 = let %9
-    %11:u32 = load %arg_2
-    %12:u32 = load %arg_3
-    %13:u32 = let %12
-    %14:u32 = min %11, 32u
-    %15:u32 = let %14
-    %16:u32 = sub 32u, %15
-    %17:u32 = min %13, %16
-    %18:i32 = insertBits %8, %10, %15, %17
-    %res:ptr<function, i32, read_write> = var, %18
-    %20:i32 = load %res
-    store %prevent_dce, %20
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  insertBits_65468b(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %22:void = call %insertBits_65468b
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  insertBits_65468b(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %24:void = call %insertBits_65468b
-    ret
-  }
+kernel void compute_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  insertBits_65468b(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %26:void = call %insertBits_65468b
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

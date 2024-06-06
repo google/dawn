@@ -1,57 +1,35 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device half4x3* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, mat4x3<f16>, read_write> = var @binding_point(2, 0)
+void tint_store_and_preserve_padding(device half4x3* const target, half4x3 value_param) {
+  (*target)[0u] = value_param[0u];
+  (*target)[1u] = value_param[1u];
+  (*target)[2u] = value_param[2u];
+  (*target)[3u] = value_param[3u];
 }
-
-%transpose_8c06ce = func():void {
-  $B2: {
-    %res:ptr<function, mat4x3<f16>, read_write> = var, mat4x3<f16>(vec3<f16>(1.0h))
-    %4:mat4x3<f16> = load %res
-    %5:void = call %tint_store_and_preserve_padding, %prevent_dce, %4
-    ret
-  }
+void transpose_8c06ce(tint_module_vars_struct tint_module_vars) {
+  half4x3 res = half4x3(half3(1.0h), half3(1.0h), half3(1.0h), half3(1.0h));
+  tint_store_and_preserve_padding(tint_module_vars.prevent_dce, res);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %8:void = call %transpose_8c06ce
-    ret vec4<f32>(0.0f)
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  transpose_8c06ce(tint_module_vars);
+  return float4(0.0f);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %10:void = call %transpose_8c06ce
-    ret
-  }
+fragment void fragment_main(device half4x3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  transpose_8c06ce(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %12:void = call %transpose_8c06ce
-    ret
-  }
+kernel void compute_main(device half4x3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  transpose_8c06ce(tint_module_vars);
 }
-%tint_store_and_preserve_padding = func(%target:ptr<storage, mat4x3<f16>, read_write>, %value_param:mat4x3<f16>):void {
-  $B6: {
-    %15:ptr<storage, vec3<f16>, read_write> = access %target, 0u
-    %16:vec3<f16> = access %value_param, 0u
-    store %15, %16
-    %17:ptr<storage, vec3<f16>, read_write> = access %target, 1u
-    %18:vec3<f16> = access %value_param, 1u
-    store %17, %18
-    %19:ptr<storage, vec3<f16>, read_write> = access %target, 2u
-    %20:vec3<f16> = access %value_param, 2u
-    store %19, %20
-    %21:ptr<storage, vec3<f16>, read_write> = access %target, 3u
-    %22:vec3<f16> = access %value_param, 3u
-    store %21, %22
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device half4x3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

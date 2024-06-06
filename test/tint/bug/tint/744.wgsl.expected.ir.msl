@@ -51,7 +51,7 @@ void tint_symbol_inner(uint3 global_id, tint_module_vars_struct tint_module_vars
   uint const index = (resultCell[1u] + (resultCell[0u] * dimOutter));
   (*tint_module_vars.resultMatrix).numbers[index] = result;
 }
-kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(0)]], const device Matrix* secondMatrix [[buffer(1)]], device Matrix* resultMatrix [[buffer(2)]], const constant Uniforms* uniforms [[buffer(3)]]) {
+kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms};
   tint_symbol_inner(global_id, tint_module_vars);
 }

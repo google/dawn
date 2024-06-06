@@ -1,53 +1,35 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
+void extractBits_249874(tint_module_vars_struct tint_module_vars) {
+  int arg_0 = 1;
+  uint arg_1 = 1u;
+  uint arg_2 = 1u;
+  int const v = arg_0;
+  uint const v_1 = arg_2;
+  uint const v_2 = min(arg_1, 32u);
+  int res = extract_bits(v, v_2, min(v_1, (32u - v_2)));
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%extractBits_249874 = func():void {
-  $B2: {
-    %arg_0:ptr<function, i32, read_write> = var, 1i
-    %arg_1:ptr<function, u32, read_write> = var, 1u
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %6:i32 = load %arg_0
-    %7:i32 = let %6
-    %8:u32 = load %arg_1
-    %9:u32 = load %arg_2
-    %10:u32 = let %9
-    %11:u32 = min %8, 32u
-    %12:u32 = let %11
-    %13:u32 = sub 32u, %12
-    %14:u32 = min %10, %13
-    %15:i32 = extractBits %7, %12, %14
-    %res:ptr<function, i32, read_write> = var, %15
-    %17:i32 = load %res
-    store %prevent_dce, %17
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  extractBits_249874(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %19:void = call %extractBits_249874
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  extractBits_249874(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %21:void = call %extractBits_249874
-    ret
-  }
+kernel void compute_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  extractBits_249874(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %23:void = call %extractBits_249874
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

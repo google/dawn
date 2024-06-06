@@ -21,7 +21,7 @@ void tint_symbol_inner(uint3 global_id, uint3 local_id, uint tint_local_index, t
     (*tint_module_vars.output) = failed;
   }
 }
-kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], uint3 local_id [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_1 [[threadgroup(0)]], device uint* output [[buffer(4)]]) {
+kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], uint3 local_id [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_1 [[threadgroup(0)]], device uint* output [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sh_atomic_failed=(&(*v_1).tint_symbol_1), .output=output};
   tint_symbol_inner(global_id, local_id, tint_local_index, tint_module_vars);
 }

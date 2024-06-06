@@ -1,43 +1,23 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct SB_RW {
+  atomic_int arg_0;
+};
+struct tint_module_vars_struct {
+  device SB_RW* sb_rw;
+  device int* prevent_dce;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SB_RW = struct @align(4) {
-  arg_0:atomic<i32> @offset(0)
+void atomicMax_92aa72(tint_module_vars_struct tint_module_vars) {
+  int arg_1 = 1;
+  int res = atomic_fetch_max_explicit((&(*tint_module_vars.sb_rw).arg_0), arg_1, memory_order_relaxed);
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-$B1: {  # root
-  %sb_rw:ptr<storage, SB_RW, read_write> = var @binding_point(0, 0)
-  %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
+fragment void fragment_main(device SB_RW* sb_rw [[buffer(0)]], device int* prevent_dce [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce};
+  atomicMax_92aa72(tint_module_vars);
 }
-
-%atomicMax_92aa72 = func():void {
-  $B2: {
-    %arg_1:ptr<function, i32, read_write> = var, 1i
-    %5:ptr<storage, atomic<i32>, read_write> = access %sb_rw, 0u
-    %6:i32 = load %arg_1
-    %7:i32 = atomicMax %5, %6
-    %res:ptr<function, i32, read_write> = var, %7
-    %9:i32 = load %res
-    store %prevent_dce, %9
-    ret
-  }
+kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]], device int* prevent_dce [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce};
+  atomicMax_92aa72(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B3: {
-    %11:void = call %atomicMax_92aa72
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B4: {
-    %13:void = call %atomicMax_92aa72
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -1,41 +1,28 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  threadgroup uint* arg_0;
+  device uint* prevent_dce;
+};
+struct tint_symbol_1 {
+  uint tint_symbol;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<workgroup, u32, read_write> = var
-  %prevent_dce:ptr<storage, u32, read_write> = var @binding_point(2, 0)
+void workgroupUniformLoad_37307c(tint_module_vars_struct tint_module_vars) {
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  uint const v = (*tint_module_vars.arg_0);
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  uint res = v;
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%workgroupUniformLoad_37307c = func():void {
-  $B2: {
-    %4:void = msl.threadgroup_barrier 4u
-    %5:u32 = load %arg_0
-    %6:u32 = let %5
-    %7:void = msl.threadgroup_barrier 4u
-    %res:ptr<function, u32, read_write> = var, %6
-    %9:u32 = load %res
-    store %prevent_dce, %9
-    ret
+void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index == 0u)) {
+    (*tint_module_vars.arg_0) = 0u;
   }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  workgroupUniformLoad_37307c(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  $B3: {
-    %12:bool = eq %tint_local_index, 0u
-    if %12 [t: $B4] {  # if_1
-      $B4: {  # true
-        store %arg_0, 0u
-        exit_if  # if_1
-      }
-    }
-    %13:void = msl.threadgroup_barrier 4u
-    %14:void = call %workgroupUniformLoad_37307c
-    ret
-  }
+kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]], device uint* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=(&(*v_1).tint_symbol), .prevent_dce=prevent_dce};
+  compute_main_inner(tint_local_index, tint_module_vars);
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

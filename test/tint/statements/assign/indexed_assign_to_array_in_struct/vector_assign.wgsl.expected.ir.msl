@@ -1,46 +1,34 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Uniforms {
+  uint i;
+};
+struct tint_module_vars_struct {
+  const constant Uniforms* uniforms;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Uniforms = struct @align(4) {
-  i:u32 @offset(0)
-}
+struct OuterS {
+  tint_array<uint, 8> a1;
+};
 
-OuterS = struct @align(4) {
-  a1:array<u32, 8> @offset(0)
+uint f(uint i) {
+  return (i + 1u);
 }
-
-$B1: {  # root
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(1, 4)
+kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
+  OuterS s1 = {};
+  float3 v = 0.0f;
+  v[s1.a1[(*tint_module_vars.uniforms).i]] = 1.0f;
+  v[f(s1.a1[(*tint_module_vars.uniforms).i])] = 1.0f;
 }
-
-%f = func(%i:u32):u32 {
-  $B2: {
-    %4:u32 = add %i, 1u
-    ret %4
-  }
-}
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %s1:ptr<function, OuterS, read_write> = var
-    %v:ptr<function, vec3<f32>, read_write> = var
-    %8:ptr<uniform, u32, read> = access %uniforms, 0u
-    %9:u32 = load %8
-    %10:ptr<function, u32, read_write> = access %s1, 0u, %9
-    %11:u32 = load %10
-    store_vector_element %v, %11, 1.0f
-    %12:ptr<uniform, u32, read> = access %uniforms, 0u
-    %13:u32 = load %12
-    %14:ptr<function, u32, read_write> = access %s1, 0u, %13
-    %15:u32 = load %14
-    %16:u32 = call %f, %15
-    store_vector_element %v, %16, 1.0f
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

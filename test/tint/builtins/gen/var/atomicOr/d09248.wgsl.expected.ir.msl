@@ -1,40 +1,26 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  threadgroup atomic_int* arg_0;
+  device int* prevent_dce;
+};
+struct tint_symbol_1 {
+  atomic_int tint_symbol;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<workgroup, atomic<i32>, read_write> = var
-  %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
+void atomicOr_d09248(tint_module_vars_struct tint_module_vars) {
+  int arg_1 = 1;
+  int res = atomic_fetch_or_explicit(tint_module_vars.arg_0, arg_1, memory_order_relaxed);
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%atomicOr_d09248 = func():void {
-  $B2: {
-    %arg_1:ptr<function, i32, read_write> = var, 1i
-    %5:i32 = load %arg_1
-    %6:i32 = atomicOr %arg_0, %5
-    %res:ptr<function, i32, read_write> = var, %6
-    %8:i32 = load %res
-    store %prevent_dce, %8
-    ret
+void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index == 0u)) {
+    atomic_store_explicit(tint_module_vars.arg_0, 0, memory_order_relaxed);
   }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  atomicOr_d09248(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func(%tint_local_index:u32 [@local_invocation_index]):void {
-  $B3: {
-    %11:bool = eq %tint_local_index, 0u
-    if %11 [t: $B4] {  # if_1
-      $B4: {  # true
-        %12:void = atomicStore %arg_0, 0i
-        exit_if  # if_1
-      }
-    }
-    %13:void = msl.threadgroup_barrier 4u
-    %14:void = call %atomicOr_d09248
-    ret
-  }
+kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]], device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=(&(*v).tint_symbol), .prevent_dce=prevent_dce};
+  compute_main_inner(tint_local_index, tint_module_vars);
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

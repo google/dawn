@@ -17,7 +17,7 @@ struct tint_module_vars_struct {
   device tint_array<float, 1>* out;
 };
 
-kernel void tint_symbol(const device tint_array<float, 1>* in [[buffer(0)]], device tint_array<float, 1>* out [[buffer(1)]]) {
+kernel void tint_symbol(const device tint_array<float, 1>* in [[buffer(1)]], device tint_array<float, 1>* out [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out};
   (*tint_module_vars.out)[0] = (*tint_module_vars.in)[0];
 }

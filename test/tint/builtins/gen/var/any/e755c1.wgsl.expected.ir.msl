@@ -1,46 +1,30 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device int* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, i32, read_write> = var @binding_point(2, 0)
+void any_e755c1(tint_module_vars_struct tint_module_vars) {
+  bool3 arg_0 = bool3(true);
+  bool res = any(arg_0);
+  (*tint_module_vars.prevent_dce) = select(0, 1, all(!(res)));
 }
-
-%any_e755c1 = func():void {
-  $B2: {
-    %arg_0:ptr<function, vec3<bool>, read_write> = var, vec3<bool>(true)
-    %4:vec3<bool> = load %arg_0
-    %5:bool = any %4
-    %res:ptr<function, bool, read_write> = var, %5
-    %7:bool = load %res
-    %8:bool = eq %7, false
-    %9:bool = all %8
-    %10:i32 = select 0i, 1i, %9
-    store %prevent_dce, %10
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  any_e755c1(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %12:void = call %any_e755c1
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  any_e755c1(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %14:void = call %any_e755c1
-    ret
-  }
+kernel void compute_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  any_e755c1(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %16:void = call %any_e755c1
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

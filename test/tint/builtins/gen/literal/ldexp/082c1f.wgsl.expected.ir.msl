@@ -1,40 +1,29 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device half* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, f16, read_write> = var @binding_point(2, 0)
+void ldexp_082c1f(tint_module_vars_struct tint_module_vars) {
+  half res = 2.0h;
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%ldexp_082c1f = func():void {
-  $B2: {
-    %res:ptr<function, f16, read_write> = var, 2.0h
-    %4:f16 = load %res
-    store %prevent_dce, %4
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  ldexp_082c1f(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %6:void = call %ldexp_082c1f
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device half* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  ldexp_082c1f(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %8:void = call %ldexp_082c1f
-    ret
-  }
+kernel void compute_main(device half* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  ldexp_082c1f(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %10:void = call %ldexp_082c1f
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device half* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -24,7 +24,7 @@ void push_output(uint value, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.outputs).data[(*tint_module_vars.count)] = value;
   (*tint_module_vars.count) = ((*tint_module_vars.count) + 1u);
 }
-kernel void tint_symbol(device Outputs* outputs [[buffer(1)]]) {
+kernel void tint_symbol(device Outputs* outputs [[buffer(0)]]) {
   thread uint count = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.count=(&count), .outputs=outputs};
   uint a = 0u;

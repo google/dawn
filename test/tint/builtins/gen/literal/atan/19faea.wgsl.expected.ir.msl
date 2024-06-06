@@ -1,40 +1,29 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  device half4* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, vec4<f16>, read_write> = var @binding_point(2, 0)
+void atan_19faea(tint_module_vars_struct tint_module_vars) {
+  half4 res = half4(0.78515625h);
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%atan_19faea = func():void {
-  $B2: {
-    %res:ptr<function, vec4<f16>, read_write> = var, vec4<f16>(0.78515625h)
-    %4:vec4<f16> = load %res
-    store %prevent_dce, %4
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  atan_19faea(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %6:void = call %atan_19faea
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(device half4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  atan_19faea(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %8:void = call %atan_19faea
-    ret
-  }
+kernel void compute_main(device half4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  atan_19faea(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %10:void = call %atan_19faea
-    ret
-  }
+vertex vertex_main_outputs vertex_main(device half4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

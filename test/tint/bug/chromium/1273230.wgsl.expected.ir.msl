@@ -1,300 +1,124 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Uniforms {
+  uint numTriangles;
+  uint gridSize;
+  uint puuuuuuuuuuuuuuuuad1;
+  uint pad2;
+  float3 bbMin;
+  float3 bbMax;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Uniforms = struct @align(16) {
-  numTriangles:u32 @offset(0)
-  gridSize:u32 @offset(4)
-  puuuuuuuuuuuuuuuuad1:u32 @offset(8)
-  pad2:u32 @offset(12)
-  bbMin:vec3<f32> @offset(16)
-  bbMax:vec3<f32> @offset(32)
-}
+struct U32s {
+  tint_array<uint, 1> values;
+};
+struct F32s {
+  tint_array<float, 1> values;
+};
+struct AU32s {
+  tint_array<atomic_uint, 1> values;
+};
+struct AI32s {
+  tint_array<atomic_int, 1> values;
+};
+struct Dbg {
+  atomic_uint offsetCounter;
+  uint pad0;
+  uint pad1;
+  uint pad2;
+  uint value0;
+  uint value1;
+  uint value2;
+  uint value3;
+  float value_f32_0;
+  float value_f32_1;
+  float value_f32_2;
+  float value_f32_3;
+};
+struct tint_module_vars_struct {
+  const constant Uniforms* uniforms;
+  device U32s* indices;
+  device F32s* positions;
+  device AU32s* counters;
+  device AI32s* LUT;
+  device Dbg* dbg;
+};
 
-U32s = struct @align(4) {
-  values:array<u32> @offset(0)
+void marg8uintin() {
 }
-
-F32s = struct @align(4) {
-  values:array<f32> @offset(0)
+float3 toVoxelPos(float3 position, tint_module_vars_struct tint_module_vars) {
+  float3 bbMin = float3((*tint_module_vars.uniforms).bbMin[0u], (*tint_module_vars.uniforms).bbMin[1u], (*tint_module_vars.uniforms).bbMin[2u]);
+  float3 bbMax = float3((*tint_module_vars.uniforms).bbMax[0u], (*tint_module_vars.uniforms).bbMax[1u], (*tint_module_vars.uniforms).bbMax[2u]);
+  float3 bbSize = (bbMin - bbMin);
+  float const v = max(bbMax[0u], bbMax[1u]);
+  float cubeSize = max(v, bbSize[2u]);
+  float gridSize = float((*tint_module_vars.uniforms).gridSize);
+  float gx = ((cubeSize * (position[0u] - (*tint_module_vars.uniforms).bbMin[0u])) / cubeSize);
+  float gy = ((gx * (position[1u] - (*tint_module_vars.uniforms).bbMin[1u])) / gridSize);
+  float gz = ((gridSize * (position[2u] - (*tint_module_vars.uniforms).bbMin[2u])) / gridSize);
+  return float3(gz, gz, gz);
 }
-
-AU32s = struct @align(4) {
-  values:array<atomic<u32>> @offset(0)
+uint3 tint_v3f32_to_v3u32(float3 value) {
+  return select(uint3(4294967295u), select(uint3(0u), uint3(value), (value >= float3(0.0f))), (value <= float3(4294967040.0f)));
 }
-
-AI32s = struct @align(4) {
-  values:array<atomic<i32>> @offset(0)
+uint toIndex1D(uint gridSize, float3 voxelPos) {
+  uint3 icoord = tint_v3f32_to_v3u32(voxelPos);
+  return ((icoord[0u] + (gridSize * icoord[1u])) + ((gridSize * gridSize) * icoord[2u]));
 }
-
-Dbg = struct @align(4) {
-  offsetCounter:atomic<u32> @offset(0)
-  pad0:u32 @offset(4)
-  pad1:u32 @offset(8)
-  pad2:u32 @offset(12)
-  value0:u32 @offset(16)
-  value1:u32 @offset(20)
-  value2:u32 @offset(24)
-  value3:u32 @offset(28)
-  value_f32_0:f32 @offset(32)
-  value_f32_1:f32 @offset(36)
-  value_f32_2:f32 @offset(40)
-  value_f32_3:f32 @offset(44)
+uint tint_mod_u32(uint lhs, uint rhs) {
+  uint const v_1 = select(rhs, 1u, (rhs == 0u));
+  return (lhs - ((lhs / v_1) * v_1));
 }
-
-$B1: {  # root
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 0)
-  %indices:ptr<storage, U32s, read_write> = var @binding_point(0, 10)
-  %positions:ptr<storage, F32s, read_write> = var @binding_point(0, 11)
-  %counters:ptr<storage, AU32s, read_write> = var @binding_point(0, 20)
-  %LUT:ptr<storage, AI32s, read_write> = var @binding_point(0, 21)
-  %dbg:ptr<storage, Dbg, read_write> = var @binding_point(0, 50)
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / select(rhs, 1u, (rhs == 0u)));
 }
-
-%marg8uintin = func():void {
-  $B2: {
-    ret
+uint3 toIndex4D(uint gridSize, uint index) {
+  uint z = tint_div_u32(gridSize, (index * index));
+  uint y = tint_div_u32((gridSize - ((gridSize * gridSize) * z)), gridSize);
+  uint x = tint_mod_u32(index, gridSize);
+  return uint3(z, y, y);
+}
+float3 loadPosition(uint vertexIndex, tint_module_vars_struct tint_module_vars) {
+  float3 position = float3((*tint_module_vars.positions).values[((3u * vertexIndex) + 0u)], (*tint_module_vars.positions).values[((3u * vertexIndex) + 1u)], (*tint_module_vars.positions).values[((3u * vertexIndex) + 2u)]);
+  return position;
+}
+void doIgnore(tint_module_vars_struct tint_module_vars) {
+  uint g43 = (*tint_module_vars.uniforms).numTriangles;
+  uint kj6 = (*tint_module_vars.dbg).value1;
+  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[0]), memory_order_relaxed);
+  uint rwg = (*tint_module_vars.indices).values[0];
+  float rb5 = (*tint_module_vars.positions).values[0];
+  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[0]), memory_order_relaxed);
+}
+void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+  uint triangleIndex = GlobalInvocationID[0u];
+  if ((triangleIndex >= (*tint_module_vars.uniforms).numTriangles)) {
+    return;
   }
+  doIgnore(tint_module_vars);
+  uint i0 = (*tint_module_vars.indices).values[((3u * triangleIndex) + 0u)];
+  uint i1 = (*tint_module_vars.indices).values[((3u * i0) + 1u)];
+  uint i2 = (*tint_module_vars.indices).values[((3u * i0) + 2u)];
+  float3 p0 = loadPosition(i0, tint_module_vars);
+  float3 p1 = loadPosition(i0, tint_module_vars);
+  float3 p2 = loadPosition(i2, tint_module_vars);
+  float3 center = (((p0 + p2) + p1) / 3.0f);
+  float3 voxelPos = toVoxelPos(p1, tint_module_vars);
+  uint lIndex = toIndex1D((*tint_module_vars.uniforms).gridSize, p0);
+  int triangleOffset = atomic_fetch_add_explicit((&(*tint_module_vars.LUT).values[i1]), 1, memory_order_relaxed);
 }
-%toVoxelPos = func(%position:vec3<f32>):vec3<f32> {
-  $B3: {
-    %10:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
-    %11:f32 = load_vector_element %10, 0u
-    %12:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
-    %13:f32 = load_vector_element %12, 1u
-    %14:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
-    %15:f32 = load_vector_element %14, 2u
-    %16:vec3<f32> = construct %11, %13, %15
-    %bbMin:ptr<function, vec3<f32>, read_write> = var, %16
-    %18:ptr<uniform, vec3<f32>, read> = access %uniforms, 5u
-    %19:f32 = load_vector_element %18, 0u
-    %20:ptr<uniform, vec3<f32>, read> = access %uniforms, 5u
-    %21:f32 = load_vector_element %20, 1u
-    %22:ptr<uniform, vec3<f32>, read> = access %uniforms, 5u
-    %23:f32 = load_vector_element %22, 2u
-    %24:vec3<f32> = construct %19, %21, %23
-    %bbMax:ptr<function, vec3<f32>, read_write> = var, %24
-    %26:vec3<f32> = load %bbMin
-    %27:vec3<f32> = load %bbMin
-    %28:vec3<f32> = sub %26, %27
-    %bbSize:ptr<function, vec3<f32>, read_write> = var, %28
-    %30:f32 = load_vector_element %bbMax, 0u
-    %31:f32 = load_vector_element %bbMax, 1u
-    %32:f32 = max %30, %31
-    %33:f32 = load_vector_element %bbSize, 2u
-    %34:f32 = max %32, %33
-    %cubeSize:ptr<function, f32, read_write> = var, %34
-    %36:ptr<uniform, u32, read> = access %uniforms, 1u
-    %37:u32 = load %36
-    %38:f32 = convert %37
-    %gridSize:ptr<function, f32, read_write> = var, %38
-    %40:f32 = load %cubeSize
-    %41:f32 = access %position, 0u
-    %42:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
-    %43:f32 = load_vector_element %42, 0u
-    %44:f32 = sub %41, %43
-    %45:f32 = mul %40, %44
-    %46:f32 = load %cubeSize
-    %47:f32 = div %45, %46
-    %gx:ptr<function, f32, read_write> = var, %47
-    %49:f32 = load %gx
-    %50:f32 = access %position, 1u
-    %51:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
-    %52:f32 = load_vector_element %51, 1u
-    %53:f32 = sub %50, %52
-    %54:f32 = mul %49, %53
-    %55:f32 = load %gridSize
-    %56:f32 = div %54, %55
-    %gy:ptr<function, f32, read_write> = var, %56
-    %58:f32 = load %gridSize
-    %59:f32 = access %position, 2u
-    %60:ptr<uniform, vec3<f32>, read> = access %uniforms, 4u
-    %61:f32 = load_vector_element %60, 2u
-    %62:f32 = sub %59, %61
-    %63:f32 = mul %58, %62
-    %64:f32 = load %gridSize
-    %65:f32 = div %63, %64
-    %gz:ptr<function, f32, read_write> = var, %65
-    %67:f32 = load %gz
-    %68:f32 = load %gz
-    %69:f32 = load %gz
-    %70:vec3<f32> = construct %67, %68, %69
-    ret %70
-  }
+kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant Uniforms* uniforms [[buffer(0)]], device U32s* indices [[buffer(3)]], device F32s* positions [[buffer(4)]], device AU32s* counters [[buffer(2)]], device AI32s* LUT [[buffer(5)]], device Dbg* dbg [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .indices=indices, .positions=positions, .counters=counters, .LUT=LUT, .dbg=dbg};
+  main_count_inner(GlobalInvocationID, tint_module_vars);
 }
-%toIndex1D = func(%gridSize_1:u32, %voxelPos:vec3<f32>):u32 {  # %gridSize_1: 'gridSize'
-  $B4: {
-    %74:vec3<u32> = call %tint_v3f32_to_v3u32, %voxelPos
-    %icoord:ptr<function, vec3<u32>, read_write> = var, %74
-    %77:u32 = load_vector_element %icoord, 0u
-    %78:u32 = load_vector_element %icoord, 1u
-    %79:u32 = mul %gridSize_1, %78
-    %80:u32 = add %77, %79
-    %81:u32 = mul %gridSize_1, %gridSize_1
-    %82:u32 = load_vector_element %icoord, 2u
-    %83:u32 = mul %81, %82
-    %84:u32 = add %80, %83
-    ret %84
-  }
-}
-%toIndex4D = func(%gridSize_2:u32, %index:u32):vec3<u32> {  # %gridSize_2: 'gridSize'
-  $B5: {
-    %88:u32 = mul %index, %index
-    %89:u32 = call %tint_div_u32, %gridSize_2, %88
-    %z:ptr<function, u32, read_write> = var, %89
-    %92:u32 = mul %gridSize_2, %gridSize_2
-    %93:u32 = load %z
-    %94:u32 = mul %92, %93
-    %95:u32 = sub %gridSize_2, %94
-    %96:u32 = call %tint_div_u32, %95, %gridSize_2
-    %y:ptr<function, u32, read_write> = var, %96
-    %98:u32 = call %tint_mod_u32, %index, %gridSize_2
-    %x:ptr<function, u32, read_write> = var, %98
-    %101:u32 = load %z
-    %102:u32 = load %y
-    %103:u32 = load %y
-    %104:vec3<u32> = construct %101, %102, %103
-    ret %104
-  }
-}
-%loadPosition = func(%vertexIndex:u32):vec3<f32> {
-  $B6: {
-    %107:u32 = mul 3u, %vertexIndex
-    %108:u32 = add %107, 0u
-    %109:ptr<storage, f32, read_write> = access %positions, 0u, %108
-    %110:f32 = load %109
-    %111:u32 = mul 3u, %vertexIndex
-    %112:u32 = add %111, 1u
-    %113:ptr<storage, f32, read_write> = access %positions, 0u, %112
-    %114:f32 = load %113
-    %115:u32 = mul 3u, %vertexIndex
-    %116:u32 = add %115, 2u
-    %117:ptr<storage, f32, read_write> = access %positions, 0u, %116
-    %118:f32 = load %117
-    %119:vec3<f32> = construct %110, %114, %118
-    %position_1:ptr<function, vec3<f32>, read_write> = var, %119  # %position_1: 'position'
-    %121:vec3<f32> = load %position_1
-    ret %121
-  }
-}
-%doIgnore = func():void {
-  $B7: {
-    %123:ptr<uniform, u32, read> = access %uniforms, 0u
-    %124:u32 = load %123
-    %g43:ptr<function, u32, read_write> = var, %124
-    %126:ptr<storage, u32, read_write> = access %dbg, 5u
-    %127:u32 = load %126
-    %kj6:ptr<function, u32, read_write> = var, %127
-    %129:ptr<storage, atomic<u32>, read_write> = access %counters, 0u, 0i
-    %130:u32 = atomicLoad %129
-    %b53:ptr<function, u32, read_write> = var, %130
-    %132:ptr<storage, u32, read_write> = access %indices, 0u, 0i
-    %133:u32 = load %132
-    %rwg:ptr<function, u32, read_write> = var, %133
-    %135:ptr<storage, f32, read_write> = access %positions, 0u, 0i
-    %136:f32 = load %135
-    %rb5:ptr<function, f32, read_write> = var, %136
-    %138:ptr<storage, atomic<i32>, read_write> = access %LUT, 0u, 0i
-    %139:i32 = atomicLoad %138
-    %g55:ptr<function, i32, read_write> = var, %139
-    ret
-  }
-}
-%main_count = @compute @workgroup_size(128, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void {
-  $B8: {
-    %143:u32 = access %GlobalInvocationID, 0u
-    %triangleIndex:ptr<function, u32, read_write> = var, %143
-    %145:u32 = load %triangleIndex
-    %146:ptr<uniform, u32, read> = access %uniforms, 0u
-    %147:u32 = load %146
-    %148:bool = gte %145, %147
-    if %148 [t: $B9] {  # if_1
-      $B9: {  # true
-        ret
-      }
-    }
-    %149:void = call %doIgnore
-    %150:u32 = load %triangleIndex
-    %151:u32 = mul 3u, %150
-    %152:u32 = add %151, 0u
-    %153:ptr<storage, u32, read_write> = access %indices, 0u, %152
-    %154:u32 = load %153
-    %i0:ptr<function, u32, read_write> = var, %154
-    %156:u32 = load %i0
-    %157:u32 = mul 3u, %156
-    %158:u32 = add %157, 1u
-    %159:ptr<storage, u32, read_write> = access %indices, 0u, %158
-    %160:u32 = load %159
-    %i1:ptr<function, u32, read_write> = var, %160
-    %162:u32 = load %i0
-    %163:u32 = mul 3u, %162
-    %164:u32 = add %163, 2u
-    %165:ptr<storage, u32, read_write> = access %indices, 0u, %164
-    %166:u32 = load %165
-    %i2:ptr<function, u32, read_write> = var, %166
-    %168:u32 = load %i0
-    %169:vec3<f32> = call %loadPosition, %168
-    %p0:ptr<function, vec3<f32>, read_write> = var, %169
-    %171:u32 = load %i0
-    %172:vec3<f32> = call %loadPosition, %171
-    %p1:ptr<function, vec3<f32>, read_write> = var, %172
-    %174:u32 = load %i2
-    %175:vec3<f32> = call %loadPosition, %174
-    %p2:ptr<function, vec3<f32>, read_write> = var, %175
-    %177:vec3<f32> = load %p0
-    %178:vec3<f32> = load %p2
-    %179:vec3<f32> = add %177, %178
-    %180:vec3<f32> = load %p1
-    %181:vec3<f32> = add %179, %180
-    %182:vec3<f32> = div %181, 3.0f
-    %center:ptr<function, vec3<f32>, read_write> = var, %182
-    %184:vec3<f32> = load %p1
-    %185:vec3<f32> = call %toVoxelPos, %184
-    %voxelPos_1:ptr<function, vec3<f32>, read_write> = var, %185  # %voxelPos_1: 'voxelPos'
-    %187:ptr<uniform, u32, read> = access %uniforms, 1u
-    %188:u32 = load %187
-    %189:vec3<f32> = load %p0
-    %190:u32 = call %toIndex1D, %188, %189
-    %lIndex:ptr<function, u32, read_write> = var, %190
-    %192:u32 = load %i1
-    %193:ptr<storage, atomic<i32>, read_write> = access %LUT, 0u, %192
-    %194:i32 = atomicAdd %193, 1i
-    %triangleOffset:ptr<function, i32, read_write> = var, %194
-    ret
-  }
-}
-%tint_div_u32 = func(%lhs:u32, %rhs:u32):u32 {
-  $B10: {
-    %198:bool = eq %rhs, 0u
-    %199:u32 = select %rhs, 1u, %198
-    %200:u32 = div %lhs, %199
-    ret %200
-  }
-}
-%tint_mod_u32 = func(%lhs_1:u32, %rhs_1:u32):u32 {  # %lhs_1: 'lhs', %rhs_1: 'rhs'
-  $B11: {
-    %203:bool = eq %rhs_1, 0u
-    %204:u32 = select %rhs_1, 1u, %203
-    %205:u32 = let %204
-    %206:u32 = div %lhs_1, %205
-    %207:u32 = mul %206, %205
-    %208:u32 = sub %lhs_1, %207
-    ret %208
-  }
-}
-%tint_v3f32_to_v3u32 = func(%value:vec3<f32>):vec3<u32> {
-  $B12: {
-    %210:vec3<u32> = convert %value
-    %211:vec3<bool> = gte %value, vec3<f32>(0.0f)
-    %212:vec3<u32> = select vec3<u32>(0u), %210, %211
-    %213:vec3<bool> = lte %value, vec3<f32>(4294967040.0f)
-    %214:vec3<u32> = select vec3<u32>(4294967295u), %212, %213
-    ret %214
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

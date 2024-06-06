@@ -1,29 +1,58 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_GammaTransferParams {
+  float G;
+  float A;
+  float B;
+  float C;
+  float D;
+  float E;
+  float F;
+  uint padding;
+};
+struct tint_ExternalTextureParams {
+  uint numPlanes;
+  uint doYuvToRgbConversionOnly;
+  float3x4 yuvToRgbConversionMatrix;
+  tint_GammaTransferParams gammaDecodeParams;
+  tint_GammaTransferParams gammaEncodeParams;
+  float3x3 gamutConversionMatrix;
+  float3x2 sampleTransform;
+  float3x2 loadTransform;
+  float2 samplePlane0RectMin;
+  float2 samplePlane0RectMax;
+  float2 samplePlane1RectMin;
+  float2 samplePlane1RectMax;
+  uint2 visibleSize;
+  float2 plane1CoordFactor;
+};
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> arg_0_plane0;
+  texture2d<float, access::sample> arg_0_plane1;
+  const constant tint_ExternalTextureParams* arg_0_params;
+  device uint2* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-
-@group(1) @binding(0) var arg_0 : texture_external;
-
-fn textureDimensions_cdc6c9() {
-  var res : vec2<u32> = textureDimensions(arg_0);
-  prevent_dce = res;
+void textureDimensions_cdc6c9(tint_module_vars_struct tint_module_vars) {
+  uint2 res = ((*tint_module_vars.arg_0_params).visibleSize + uint2(1u));
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureDimensions_cdc6c9();
-  return vec4<f32>();
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  textureDimensions_cdc6c9(tint_module_vars);
+  return float4(0.0f);
 }
-
-@fragment
-fn fragment_main() {
-  textureDimensions_cdc6c9();
+fragment void fragment_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams* arg_0_params [[buffer(2)]], device uint2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params, .prevent_dce=prevent_dce};
+  textureDimensions_cdc6c9(tint_module_vars);
 }
-
-@compute @workgroup_size(1)
-fn compute_main() {
-  textureDimensions_cdc6c9();
+kernel void compute_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams* arg_0_params [[buffer(2)]], device uint2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params, .prevent_dce=prevent_dce};
+  textureDimensions_cdc6c9(tint_module_vars);
 }
-
-Failed to generate: error: ExternalTextureOptions missing binding entry for [group: 1, binding: 0]
+vertex vertex_main_outputs vertex_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams* arg_0_params [[buffer(2)]], device uint2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params, .prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
+}

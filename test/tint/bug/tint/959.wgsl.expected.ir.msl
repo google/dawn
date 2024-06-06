@@ -1,118 +1,59 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct S {
+  float a;
+};
+struct tint_module_vars_struct {
+  const device S* b0;
+  const device S* b1;
+  const device S* b2;
+  const device S* b3;
+  const device S* b4;
+  const device S* b5;
+  const device S* b6;
+  const device S* b7;
+  const constant S* b8;
+  const constant S* b9;
+  const constant S* b10;
+  const constant S* b11;
+  const constant S* b12;
+  const constant S* b13;
+  const constant S* b14;
+  const constant S* b15;
+  texture2d<float, access::sample> t0;
+  texture2d<float, access::sample> t1;
+  texture2d<float, access::sample> t2;
+  texture2d<float, access::sample> t3;
+  texture2d<float, access::sample> t4;
+  texture2d<float, access::sample> t5;
+  texture2d<float, access::sample> t6;
+  texture2d<float, access::sample> t7;
+  depth2d<float, access::sample> t8;
+  depth2d<float, access::sample> t9;
+  depth2d<float, access::sample> t10;
+  depth2d<float, access::sample> t11;
+  depth2d<float, access::sample> t12;
+  depth2d<float, access::sample> t13;
+  depth2d<float, access::sample> t14;
+  depth2d<float, access::sample> t15;
+  sampler s0;
+  sampler s1;
+  sampler s2;
+  sampler s3;
+  sampler s4;
+  sampler s5;
+  sampler s6;
+  sampler s7;
+  sampler s8;
+  sampler s9;
+  sampler s10;
+  sampler s11;
+  sampler s12;
+  sampler s13;
+  sampler s14;
+  sampler s15;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(4) {
-  a:f32 @offset(0)
+fragment void tint_symbol(const device S* b0 [[buffer(8)]], const device S* b1 [[buffer(9)]], const device S* b2 [[buffer(10)]], const device S* b3 [[buffer(11)]], const device S* b4 [[buffer(12)]], const device S* b5 [[buffer(13)]], const device S* b6 [[buffer(14)]], const device S* b7 [[buffer(15)]], const constant S* b8 [[buffer(0)]], const constant S* b9 [[buffer(1)]], const constant S* b10 [[buffer(2)]], const constant S* b11 [[buffer(3)]], const constant S* b12 [[buffer(4)]], const constant S* b13 [[buffer(5)]], const constant S* b14 [[buffer(6)]], const constant S* b15 [[buffer(7)]], texture2d<float, access::sample> t0 [[texture(0)]], texture2d<float, access::sample> t1 [[texture(1)]], texture2d<float, access::sample> t2 [[texture(2)]], texture2d<float, access::sample> t3 [[texture(3)]], texture2d<float, access::sample> t4 [[texture(4)]], texture2d<float, access::sample> t5 [[texture(5)]], texture2d<float, access::sample> t6 [[texture(6)]], texture2d<float, access::sample> t7 [[texture(7)]], depth2d<float, access::sample> t8 [[texture(8)]], depth2d<float, access::sample> t9 [[texture(9)]], depth2d<float, access::sample> t10 [[texture(10)]], depth2d<float, access::sample> t11 [[texture(11)]], depth2d<float, access::sample> t12 [[texture(12)]], depth2d<float, access::sample> t13 [[texture(13)]], depth2d<float, access::sample> t14 [[texture(14)]], depth2d<float, access::sample> t15 [[texture(15)]], sampler s0 [[sampler(0)]], sampler s1 [[sampler(1)]], sampler s2 [[sampler(2)]], sampler s3 [[sampler(3)]], sampler s4 [[sampler(4)]], sampler s5 [[sampler(5)]], sampler s6 [[sampler(6)]], sampler s7 [[sampler(7)]], sampler s8 [[sampler(8)]], sampler s9 [[sampler(9)]], sampler s10 [[sampler(10)]], sampler s11 [[sampler(11)]], sampler s12 [[sampler(12)]], sampler s13 [[sampler(13)]], sampler s14 [[sampler(14)]], sampler s15 [[sampler(15)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b0=b0, .b1=b1, .b2=b2, .b3=b3, .b4=b4, .b5=b5, .b6=b6, .b7=b7, .b8=b8, .b9=b9, .b10=b10, .b11=b11, .b12=b12, .b13=b13, .b14=b14, .b15=b15, .t0=t0, .t1=t1, .t2=t2, .t3=t3, .t4=t4, .t5=t5, .t6=t6, .t7=t7, .t8=t8, .t9=t9, .t10=t10, .t11=t11, .t12=t12, .t13=t13, .t14=t14, .t15=t15, .s0=s0, .s1=s1, .s2=s2, .s3=s3, .s4=s4, .s5=s5, .s6=s6, .s7=s7, .s8=s8, .s9=s9, .s10=s10, .s11=s11, .s12=s12, .s13=s13, .s14=s14, .s15=s15};
 }
-
-$B1: {  # root
-  %b0:ptr<storage, S, read> = var @binding_point(0, 0)
-  %b1:ptr<storage, S, read> = var @binding_point(1, 0)
-  %b2:ptr<storage, S, read> = var @binding_point(2, 0)
-  %b3:ptr<storage, S, read> = var @binding_point(3, 0)
-  %b4:ptr<storage, S, read> = var @binding_point(4, 0)
-  %b5:ptr<storage, S, read> = var @binding_point(5, 0)
-  %b6:ptr<storage, S, read> = var @binding_point(6, 0)
-  %b7:ptr<storage, S, read> = var @binding_point(7, 0)
-  %b8:ptr<uniform, S, read> = var @binding_point(9, 1)
-  %b9:ptr<uniform, S, read> = var @binding_point(8, 1)
-  %b10:ptr<uniform, S, read> = var @binding_point(10, 1)
-  %b11:ptr<uniform, S, read> = var @binding_point(11, 1)
-  %b12:ptr<uniform, S, read> = var @binding_point(12, 1)
-  %b13:ptr<uniform, S, read> = var @binding_point(13, 1)
-  %b14:ptr<uniform, S, read> = var @binding_point(14, 1)
-  %b15:ptr<uniform, S, read> = var @binding_point(15, 1)
-  %t0:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
-  %t1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 1)
-  %t2:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 1)
-  %t3:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 1)
-  %t4:ptr<handle, texture_2d<f32>, read> = var @binding_point(4, 1)
-  %t5:ptr<handle, texture_2d<f32>, read> = var @binding_point(5, 1)
-  %t6:ptr<handle, texture_2d<f32>, read> = var @binding_point(6, 1)
-  %t7:ptr<handle, texture_2d<f32>, read> = var @binding_point(7, 1)
-  %t8:ptr<handle, texture_depth_2d, read> = var @binding_point(8, 200)
-  %t9:ptr<handle, texture_depth_2d, read> = var @binding_point(9, 200)
-  %t10:ptr<handle, texture_depth_2d, read> = var @binding_point(10, 200)
-  %t11:ptr<handle, texture_depth_2d, read> = var @binding_point(11, 200)
-  %t12:ptr<handle, texture_depth_2d, read> = var @binding_point(12, 200)
-  %t13:ptr<handle, texture_depth_2d, read> = var @binding_point(13, 200)
-  %t14:ptr<handle, texture_depth_2d, read> = var @binding_point(14, 200)
-  %t15:ptr<handle, texture_depth_2d, read> = var @binding_point(15, 200)
-  %s0:ptr<handle, sampler, read> = var @binding_point(0, 200)
-  %s1:ptr<handle, sampler, read> = var @binding_point(1, 200)
-  %s2:ptr<handle, sampler, read> = var @binding_point(2, 200)
-  %s3:ptr<handle, sampler, read> = var @binding_point(3, 200)
-  %s4:ptr<handle, sampler, read> = var @binding_point(4, 200)
-  %s5:ptr<handle, sampler, read> = var @binding_point(5, 200)
-  %s6:ptr<handle, sampler, read> = var @binding_point(6, 200)
-  %s7:ptr<handle, sampler, read> = var @binding_point(7, 200)
-  %s8:ptr<handle, sampler_comparison, read> = var @binding_point(8, 300)
-  %s9:ptr<handle, sampler_comparison, read> = var @binding_point(9, 300)
-  %s10:ptr<handle, sampler_comparison, read> = var @binding_point(10, 300)
-  %s11:ptr<handle, sampler_comparison, read> = var @binding_point(11, 300)
-  %s12:ptr<handle, sampler_comparison, read> = var @binding_point(12, 300)
-  %s13:ptr<handle, sampler_comparison, read> = var @binding_point(13, 300)
-  %s14:ptr<handle, sampler_comparison, read> = var @binding_point(14, 300)
-  %s15:ptr<handle, sampler_comparison, read> = var @binding_point(15, 300)
-}
-
-%tint_symbol = @fragment func():void {
-  $B2: {
-    %50:S = load %b0
-    %51:S = load %b1
-    %52:S = load %b2
-    %53:S = load %b3
-    %54:S = load %b4
-    %55:S = load %b5
-    %56:S = load %b6
-    %57:S = load %b7
-    %58:S = load %b8
-    %59:S = load %b9
-    %60:S = load %b10
-    %61:S = load %b11
-    %62:S = load %b12
-    %63:S = load %b13
-    %64:S = load %b14
-    %65:S = load %b15
-    %66:texture_2d<f32> = load %t0
-    %67:texture_2d<f32> = load %t1
-    %68:texture_2d<f32> = load %t2
-    %69:texture_2d<f32> = load %t3
-    %70:texture_2d<f32> = load %t4
-    %71:texture_2d<f32> = load %t5
-    %72:texture_2d<f32> = load %t6
-    %73:texture_2d<f32> = load %t7
-    %74:texture_depth_2d = load %t8
-    %75:texture_depth_2d = load %t9
-    %76:texture_depth_2d = load %t10
-    %77:texture_depth_2d = load %t11
-    %78:texture_depth_2d = load %t12
-    %79:texture_depth_2d = load %t13
-    %80:texture_depth_2d = load %t14
-    %81:texture_depth_2d = load %t15
-    %82:sampler = load %s0
-    %83:sampler = load %s1
-    %84:sampler = load %s2
-    %85:sampler = load %s3
-    %86:sampler = load %s4
-    %87:sampler = load %s5
-    %88:sampler = load %s6
-    %89:sampler = load %s7
-    %90:sampler_comparison = load %s8
-    %91:sampler_comparison = load %s9
-    %92:sampler_comparison = load %s10
-    %93:sampler_comparison = load %s11
-    %94:sampler_comparison = load %s12
-    %95:sampler_comparison = load %s13
-    %96:sampler_comparison = load %s14
-    %97:sampler_comparison = load %s15
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
