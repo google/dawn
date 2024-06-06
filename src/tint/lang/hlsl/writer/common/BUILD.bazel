@@ -50,6 +50,7 @@ cc_library(
     "//src/tint/api/common",
     "//src/tint/api/options",
     "//src/tint/lang/core",
+    "//src/tint/lang/core/common",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",

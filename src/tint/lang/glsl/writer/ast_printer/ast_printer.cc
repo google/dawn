@@ -187,9 +187,9 @@ SanitizedResult Sanitize(const Program& in,
         options.texture_builtins_from_uniform.ubo_binding,
         options.texture_builtins_from_uniform.ubo_bindingpoint_ordering);
 
-    ExternalTextureOptions external_texture_options{};
+    tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
-    PopulateBindingInfo(options, remapper_data, external_texture_options);
+    PopulateBindingInfo(options, remapper_data, multiplanar_map);
 
     data.Add<ast::transform::BindingRemapper::Remappings>(
         remapper_data, std::unordered_map<BindingPoint, core::Access>{},
@@ -199,7 +199,7 @@ SanitizedResult Sanitize(const Program& in,
     // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
     // Must come before builtin polyfills
     data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
-        external_texture_options.bindings_map, /* allow collisions */ true);
+        multiplanar_map, /* allow collisions */ true);
     manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     // Must be after multiplanar and must be before OffsetFirstindex

@@ -51,7 +51,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/api",
       "${tint_src_dir}/api/common:unittests",
       "${tint_src_dir}/api/options:unittests",
-      "${tint_src_dir}/cmd/common:unittests",
       "${tint_src_dir}/lang/core:unittests",
       "${tint_src_dir}/lang/core/constant:unittests",
       "${tint_src_dir}/lang/core/intrinsic:unittests",

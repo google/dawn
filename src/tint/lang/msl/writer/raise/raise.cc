@@ -59,10 +59,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }                                          \
     } while (false)
 
-    ExternalTextureOptions external_texture_options{};
+    tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
     ArrayLengthFromUniformOptions array_length_from_uniform_options{};
-    PopulateBindingRelatedOptions(options, remapper_data, external_texture_options,
+    PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
                                   array_length_from_uniform_options);
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, remapper_data);
 
@@ -96,7 +96,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::Robustness, config);
     }
 
-    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, external_texture_options);
+    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, multiplanar_map);
     RUN_TRANSFORM(core::ir::transform::ArrayLengthFromUniform,
                   BindingPoint{0u, array_length_from_uniform_options.ubo_binding},
                   array_length_from_uniform_options.bindpoint_to_size_index);

@@ -119,6 +119,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_transform lib
   tint_api_common
   tint_api_options
   tint_lang_core
+  tint_lang_core_common
   tint_lang_core_constant
   tint_lang_core_type
   tint_lang_wgsl
@@ -196,6 +197,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_transform_test test
   tint_api_common
   tint_api_options
   tint_lang_core
+  tint_lang_core_common
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
@@ -282,6 +284,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_transform_fuzz fuzz
   tint_api_common
   tint_api_options
   tint_lang_core
+  tint_lang_core_common
   tint_lang_core_constant
   tint_lang_core_type
   tint_lang_wgsl

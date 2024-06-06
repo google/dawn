@@ -34,8 +34,6 @@
 #include <vector>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/api/options/binding_remapper.h"
-#include "src/tint/api/options/external_texture.h"
 #include "src/tint/api/options/pixel_local.h"
 #include "src/tint/lang/core/access.h"
 #include "src/tint/utils/math/hash.h"

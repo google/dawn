@@ -65,9 +65,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }                                \
     } while (false)
 
-    ExternalTextureOptions external_texture_options{};
+    tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
-    PopulateRemapperAndMultiplanarOptions(options, remapper_data, external_texture_options);
+    PopulateRemapperAndMultiplanarOptions(options, remapper_data, multiplanar_map);
 
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
 
@@ -105,8 +105,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }
 
-    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module,
-                  external_texture_options);
+    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
 
     if (!options.disable_workgroup_init &&
         !options.use_zero_initialize_workgroup_memory_extension) {

@@ -25,16 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/api/options/binding_remapper.h"
+// CMake requires that targets contain at least on file. This file is used when we want to create
+// empty targets.
 
-#include <gtest/gtest.h>
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
+#endif
 
-namespace tint {
-namespace {
-
-TEST(TintCheckAllFieldsReflected, SrcTintApiOptionsBindingRemapperTest) {
-    TINT_ASSERT_ALL_FIELDS_REFLECTED(BindingRemapperOptions);
-}
-
-}  // namespace
-}  // namespace tint
+// A placeholder symbol used to emit a symbol for this lib target.
+int tint_core_common_symbol = 1;

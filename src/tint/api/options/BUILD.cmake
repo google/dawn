@@ -39,9 +39,7 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_api_options lib
-  api/options/binding_remapper.h
   api/options/depth_range_offsets.h
-  api/options/external_texture.h
   api/options/options.cc
   api/options/pixel_local.h
   api/options/texture_builtins_from_uniform.h
@@ -67,8 +65,6 @@ tint_target_add_dependencies(tint_api_options lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_api_options_test test
-  api/options/binding_remapper_test.cc
-  api/options/external_texture_test.cc
   api/options/pixel_local_test.cc
   api/options/texture_builtins_from_uniform_test.cc
 )

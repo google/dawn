@@ -38,7 +38,7 @@ TEST_F(MultiplanarExternalTextureTest, ShouldRunEmptyModule) {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
 
     EXPECT_FALSE(ShouldRun<MultiplanarExternalTexture>(src, data));
 }
@@ -50,7 +50,7 @@ alias ET = texture_external;
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
 
     EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src, data));
 }
@@ -61,7 +61,7 @@ TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureGlobal) {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
 
     EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src, data));
 }
@@ -73,7 +73,7 @@ fn f(ext_tex : texture_external) {}
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
 
     EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src, data));
 }
@@ -115,7 +115,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
     // This bindings map specifies 0,0 as the location of the texture_external,
     // which is incorrect.
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -178,7 +178,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -262,7 +262,7 @@ fn fragmentMain() -> @location(0) vec4f {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 0}}}},
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 0}}}},
         /* allow collisions */ true);
     auto got = Run<MultiplanarExternalTexture>(src, data);
 
@@ -327,7 +327,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -414,7 +414,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -501,7 +501,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -607,7 +607,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -713,7 +713,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -818,7 +818,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -923,7 +923,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1033,12 +1033,13 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 )";
 
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 1}, {{0, 4}, {0, 5}}},
-        {{0, 2}, {{0, 6}, {0, 7}}},
-        {{0, 3}, {{0, 8}, {0, 9}}},
-        {{1, 0}, {{1, 1}, {1, 2}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 1}, {{0, 4}, {0, 5}}},
+            {{0, 2}, {{0, 6}, {0, 7}}},
+            {{0, 3}, {{0, 8}, {0, 9}}},
+            {{1, 0}, {{1, 1}, {1, 2}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1132,9 +1133,10 @@ fn main() {
 }
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 2}, {0, 3}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 2}, {0, 3}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1228,9 +1230,10 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 @group(0) @binding(1) var smp : sampler;
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 2}, {0, 3}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 2}, {0, 3}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1324,9 +1327,10 @@ fn main() {
 }
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 2}, {0, 3}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 2}, {0, 3}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1429,10 +1433,11 @@ fn main() {
 }
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 3}, {0, 4}}},
-        {{0, 2}, {{0, 5}, {0, 6}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 3}, {0, 4}}},
+            {{0, 2}, {{0, 5}, {0, 6}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1536,10 +1541,11 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 
 @group(0) @binding(2) var ext_tex2 : texture_2d<f32>;
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 3}, {0, 4}}},
-        {{0, 2}, {{0, 5}, {0, 6}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 3}, {0, 4}}},
+            {{0, 2}, {{0, 5}, {0, 6}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1641,9 +1647,10 @@ fn main() {
 }
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 2}, {0, 3}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 2}, {0, 3}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1745,9 +1752,10 @@ fn main() {
 }
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 2}, {0, 3}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 2}, {0, 3}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1797,7 +1805,7 @@ fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_param
 
     DataMap data;
     data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+        tint::transform::multiplanar::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1894,9 +1902,10 @@ fn main() {
 }
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 2}, {0, 3}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 2}, {0, 3}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }
@@ -1993,9 +2002,10 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 alias ET = texture_external;
 )";
     DataMap data;
-    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
-        {{0, 0}, {{0, 2}, {0, 3}}},
-    });
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        tint::transform::multiplanar::BindingsMap{
+            {{0, 0}, {{0, 2}, {0, 3}}},
+        });
     auto got = Run<MultiplanarExternalTexture>(src, data);
     EXPECT_EQ(expect, str(got));
 }

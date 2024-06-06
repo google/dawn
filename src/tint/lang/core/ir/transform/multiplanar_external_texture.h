@@ -30,7 +30,8 @@
 
 #include <string>
 
-#include "src/tint/api/options/external_texture.h"
+#include "src/tint/api/common/binding_point.h"
+#include "src/tint/lang/core/common/multiplanar_options.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -46,8 +47,9 @@ namespace tint::core::ir::transform {
 /// @param module the module to transform
 /// @param options the external texture options
 /// @returns success or failure
-Result<SuccessType> MultiplanarExternalTexture(Module& module,
-                                               const ExternalTextureOptions& options);
+Result<SuccessType> MultiplanarExternalTexture(
+    Module& module,
+    const tint::transform::multiplanar::BindingsMap& options);
 
 }  // namespace tint::core::ir::transform
 

@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/common/multiplanar_options.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/external_texture.h"
 
@@ -52,8 +53,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, NoRootBlock) {
 }
 )";
 
-    ExternalTextureOptions options;
-    Run(MultiplanarExternalTexture, options);
+    Run(MultiplanarExternalTexture, tint::transform::multiplanar::BindingsMap{});
     EXPECT_EQ(expect, str());
 }
 
@@ -122,8 +122,8 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    tint::transform::multiplanar::BindingsMap options{};
+    options[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
     Run(MultiplanarExternalTexture, options);
     EXPECT_EQ(expect, str());
 }
@@ -198,9 +198,9 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    Run(MultiplanarExternalTexture, options);
+    tint::transform::multiplanar::BindingsMap map{};
+    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
 
@@ -279,9 +279,9 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    Run(MultiplanarExternalTexture, options);
+    tint::transform::multiplanar::BindingsMap map{};
+    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
 
@@ -440,9 +440,9 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    Run(MultiplanarExternalTexture, options);
+    tint::transform::multiplanar::BindingsMap map{};
+    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
 
@@ -602,9 +602,9 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    Run(MultiplanarExternalTexture, options);
+    tint::transform::multiplanar::BindingsMap map{};
+    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
 
@@ -763,9 +763,9 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    Run(MultiplanarExternalTexture, options);
+    tint::transform::multiplanar::BindingsMap map{};
+    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
 
@@ -951,9 +951,9 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    Run(MultiplanarExternalTexture, options);
+    tint::transform::multiplanar::BindingsMap map{};
+    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
 
@@ -1172,9 +1172,9 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    Run(MultiplanarExternalTexture, options);
+    tint::transform::multiplanar::BindingsMap map{};
+    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
 
@@ -1364,11 +1364,11 @@ $B1: {  # root
 
     EXPECT_EQ(src, str());
 
-    ExternalTextureOptions options;
-    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
-    options.bindings_map[{2u, 2u}] = {{2u, 3u}, {2u, 4u}};
-    options.bindings_map[{3u, 2u}] = {{3u, 3u}, {3u, 4u}};
-    Run(MultiplanarExternalTexture, options);
+    tint::transform::multiplanar::BindingsMap map{};
+    map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    map[{2u, 2u}] = {{2u, 3u}, {2u, 4u}};
+    map[{3u, 2u}] = {{3u, 3u}, {3u, 4u}};
+    Run(MultiplanarExternalTexture, map);
     EXPECT_EQ(expect, str());
 }
 

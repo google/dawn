@@ -53,6 +53,7 @@ tint_target_add_dependencies(tint_lang_msl_writer_common lib
   tint_api_common
   tint_api_options
   tint_lang_core
+  tint_lang_core_common
   tint_lang_core_type
   tint_utils_containers
   tint_utils_diagnostic

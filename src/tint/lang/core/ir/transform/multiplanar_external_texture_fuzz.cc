@@ -33,7 +33,8 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void MultiplanarExternalTextureFuzzer(Module& module, const ExternalTextureOptions& options) {
+void MultiplanarExternalTextureFuzzer(Module& module,
+                                      const tint::transform::multiplanar::BindingsMap& options) {
     if (auto res = MultiplanarExternalTexture(module, options); res != Success) {
         return;
     }

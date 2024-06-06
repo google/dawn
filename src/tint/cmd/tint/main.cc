@@ -41,7 +41,6 @@
 
 #include "src/tint/api/options/pixel_local.h"
 #include "src/tint/api/tint.h"
-#include "src/tint/cmd/common/generate_external_texture_bindings.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/module.h"

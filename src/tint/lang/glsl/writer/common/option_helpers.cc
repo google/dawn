@@ -143,7 +143,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 // `sampler` arrays.
 void PopulateBindingInfo(const Options& options,
                          RemapperData& remapper_data,
-                         ExternalTextureOptions& external_texture) {
+                         tint::transform::multiplanar::BindingsMap& multiplanar_map) {
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
@@ -173,14 +173,14 @@ void PopulateBindingInfo(const Options& options,
         const binding::BindingInfo& plane1 = it.second.plane1;
         const binding::BindingInfo& metadata = it.second.metadata;
 
-        BindingPoint plane0_binding_point{0, plane0.binding};
-        BindingPoint plane1_binding_point{0, plane1.binding};
-        BindingPoint metadata_binding_point{0, metadata.binding};
+        const BindingPoint plane0_binding_point{0, plane0.binding};
+        const BindingPoint plane1_binding_point{0, plane1.binding};
+        const BindingPoint metadata_binding_point{0, metadata.binding};
 
         // Use the re-bound glsl plane0 value for the lookup key.
-        external_texture.bindings_map.emplace(
-            BindingPoint{0, plane0_binding_point.binding},
-            ExternalTextureOptions::BindingPoints{plane1_binding_point, metadata_binding_point});
+        multiplanar_map.emplace(BindingPoint{0, plane0_binding_point.binding},
+                                tint::transform::multiplanar::BindingPoints{
+                                    plane1_binding_point, metadata_binding_point});
 
         // Bindings which go to the same slot in GLSL do not need to be re-bound.
         if (src_binding_point == plane0_binding_point) {

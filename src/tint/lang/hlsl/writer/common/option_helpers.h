@@ -31,7 +31,7 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/api/options/external_texture.h"
+#include "src/tint/lang/core/common/multiplanar_options.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
@@ -48,13 +48,13 @@ Result<SuccessType> ValidateBindingOptions(const Options& options);
 /// Populates binding-related option from the writer options
 /// @param options the writer options
 /// @param remapper_data where to put the remapper data
-/// @param external_texture where to store the external texture options
+/// @param multiplanar_map where to store the multiplanar texture options
 /// @param array_length_from_uniform_options where to store the ArrayLengthFromUniform options
 /// Note, these are populated together because there are dependencies between the two types of data.
 void PopulateBindingRelatedOptions(
     const Options& options,
     RemapperData& remapper_data,
-    ExternalTextureOptions& external_texture,
+    tint::transform::multiplanar::BindingsMap& multiplanar_map,
     ArrayLengthFromUniformOptions& array_length_from_uniform_options);
 
 }  // namespace tint::hlsl::writer

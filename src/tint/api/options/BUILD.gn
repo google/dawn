@@ -44,9 +44,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("options") {
   sources = [
-    "binding_remapper.h",
     "depth_range_offsets.h",
-    "external_texture.h",
     "options.cc",
     "pixel_local.h",
     "texture_builtins_from_uniform.h",
@@ -69,8 +67,6 @@ libtint_source_set("options") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
-      "binding_remapper_test.cc",
-      "external_texture_test.cc",
       "pixel_local_test.cc",
       "texture_builtins_from_uniform_test.cc",
     ]

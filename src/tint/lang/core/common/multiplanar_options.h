@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,27 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_API_OPTIONS_BINDING_REMAPPER_H_
-#define SRC_TINT_API_OPTIONS_BINDING_REMAPPER_H_
+#ifndef SRC_TINT_LANG_CORE_COMMON_MULTIPLANAR_OPTIONS_H_
+#define SRC_TINT_LANG_CORE_COMMON_MULTIPLANAR_OPTIONS_H_
 
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
 
-namespace tint {
+namespace tint::transform::multiplanar {
 
-/// Options used to specify mappings of binding points.
-struct BindingRemapperOptions {
-    /// BindingPoints is a map of old binding point to new binding point
-    using BindingPoints = std::unordered_map<BindingPoint, BindingPoint>;
-
-    /// A map of old binding point to new binding point
-    BindingPoints binding_points;
+/// This struct identifies the binding groups and locations for new bindings to
+/// use when transforming a texture_external instance.
+struct BindingPoints {
+    /// The desired binding location of the texture_2d representing plane #1 when
+    /// a texture_external binding is expanded.
+    BindingPoint plane_1;
+    /// The desired binding location of the ExternalTextureParams uniform when a
+    /// texture_external binding is expanded.
+    BindingPoint params;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(BindingRemapperOptions, binding_points);
+    TINT_REFLECT(BindingPoints, plane_1, params);
 };
 
-}  // namespace tint
+/// BindingsMap is a map where the key is the binding location of a
+/// texture_external and the value is a struct containing the desired
+/// locations for new bindings expanded from the texture_external instance.
+using BindingsMap = std::unordered_map<BindingPoint, BindingPoints>;
 
-#endif  // SRC_TINT_API_OPTIONS_BINDING_REMAPPER_H_
+}  // namespace tint::transform::multiplanar
+
+#endif  // SRC_TINT_LANG_CORE_COMMON_MULTIPLANAR_OPTIONS_H_

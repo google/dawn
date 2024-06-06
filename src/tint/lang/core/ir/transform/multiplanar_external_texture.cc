@@ -46,7 +46,7 @@ namespace {
 /// PIMPL state for the transform.
 struct State {
     /// The external texture options.
-    const ExternalTextureOptions& options;
+    const tint::transform::multiplanar::BindingsMap& multiplanar_map;
 
     /// The IR module.
     Module& ir;
@@ -122,8 +122,8 @@ struct State {
     Result<SuccessType> ReplaceVar(Var* old_var) {
         auto name = ir.NameOf(old_var);
         auto bp = old_var->BindingPoint();
-        auto itr = options.bindings_map.find(bp.value());
-        if (TINT_UNLIKELY(itr == options.bindings_map.end())) {
+        auto itr = multiplanar_map.find(bp.value());
+        if (TINT_UNLIKELY(itr == multiplanar_map.end())) {
             std::stringstream err;
             err << "ExternalTextureOptions missing binding entry for " << bp.value();
             return Failure{err.str()};
@@ -607,13 +607,15 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> MultiplanarExternalTexture(Module& ir, const ExternalTextureOptions& options) {
+Result<SuccessType> MultiplanarExternalTexture(
+    Module& ir,
+    const tint::transform::multiplanar::BindingsMap& multiplanar_map) {
     auto result = ValidateAndDumpIfNeeded(ir, "MultiplanarExternalTexture transform");
     if (result != Success) {
         return result;
     }
 
-    return State{options, ir}.Process();
+    return State{multiplanar_map, ir}.Process();
 }
 
 }  // namespace tint::core::ir::transform

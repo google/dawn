@@ -282,20 +282,6 @@ TEST(SerializeTests, TintSemBindingPoint) {
     EXPECT_CACHE_KEY_EQ(bp, expected);
 }
 
-// Test that ByteVectorSink serializes tint::ExternalTextureOptions::BindingPoints
-// as expected.
-TEST(SerializeTests, TintTransformBindingPoints) {
-    tint::ExternalTextureOptions::BindingPoints points{
-        tint::BindingPoint{1, 4},
-        tint::BindingPoint{3, 7},
-    };
-
-    ByteVectorSink expected;
-    StreamIn(&expected, uint32_t(1), uint32_t(4), uint32_t(3), uint32_t(7));
-
-    EXPECT_CACHE_KEY_EQ(points, expected);
-}
-
 // Test that serializing then deserializing a param pack yields the same values.
 TEST(StreamTests, SerializeDeserializeParamPack) {
     int a = 1;

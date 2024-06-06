@@ -224,10 +224,10 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         data.Add<ast::transform::Robustness::Config>(config);
     }
 
-    ExternalTextureOptions external_texture_options{};
+    tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
     ArrayLengthFromUniformOptions array_length_from_uniform_options{};
-    PopulateBindingRelatedOptions(options, remapper_data, external_texture_options,
+    PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
                                   array_length_from_uniform_options);
 
     manager.Add<ast::transform::BindingRemapper>();
@@ -239,8 +239,8 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
     // MultiplanarExternalTexture must come after BindingRemapper
-    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
-        external_texture_options.bindings_map, /* may_collide */ true);
+    data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(multiplanar_map,
+                                                                           /* may_collide */ true);
     manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     {  // Builtin polyfills

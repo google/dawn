@@ -53,6 +53,7 @@ libtint_source_set("common") {
     "${tint_src_dir}/api/common",
     "${tint_src_dir}/api/options",
     "${tint_src_dir}/lang/core",
+    "${tint_src_dir}/lang/core/common",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",

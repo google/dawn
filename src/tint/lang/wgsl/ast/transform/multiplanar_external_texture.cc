@@ -133,7 +133,8 @@ struct MultiplanarExternalTexture::State {
             // binding points into the passed map.
             BindingPoint bp = *sem_var->Attributes().binding_point;
 
-            BindingsMap::const_iterator it = new_binding_points->bindings_map.find(bp);
+            const tint::transform::multiplanar::BindingsMap::const_iterator it =
+                new_binding_points->bindings_map.find(bp);
             if (it == new_binding_points->bindings_map.end()) {
                 b.Diagnostics().AddError(Source{})
                     << "missing new binding points for texture_external at binding {" << bp.group
@@ -141,7 +142,7 @@ struct MultiplanarExternalTexture::State {
                 continue;
             }
 
-            BindingPoints bps = it->second;
+            const tint::transform::multiplanar::BindingPoints bps = it->second;
 
             // Symbols for the newly created bindings must be saved so they can be passed as
             // parameters later. These are placed in a map and keyed by the source symbol associated
@@ -570,8 +571,9 @@ struct MultiplanarExternalTexture::State {
 };
 
 MultiplanarExternalTexture::NewBindingPoints::NewBindingPoints() = default;
-MultiplanarExternalTexture::NewBindingPoints::NewBindingPoints(BindingsMap inputBindingsMap,
-                                                               bool may_collide)
+MultiplanarExternalTexture::NewBindingPoints::NewBindingPoints(
+    tint::transform::multiplanar::BindingsMap inputBindingsMap,
+    bool may_collide)
     : bindings_map(std::move(inputBindingsMap)), allow_collisions(may_collide) {}
 
 MultiplanarExternalTexture::NewBindingPoints::~NewBindingPoints() = default;
