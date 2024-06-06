@@ -55,7 +55,6 @@ if (tint_build_msl_writer) {
     ]
     deps = [
       "${tint_src_dir}/api/common",
-      "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/common",
       "${tint_src_dir}/lang/core/constant",

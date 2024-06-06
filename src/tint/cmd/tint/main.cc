@@ -909,7 +909,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
     tint::msl::writer::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
-    gen_options.pixel_local_options = options.pixel_local_options;
+    gen_options.pixel_local_attachments = options.pixel_local_options.attachments;
     gen_options.bindings = tint::msl::writer::GenerateBindings(*input_program);
     gen_options.array_length_from_uniform.ubo_binding = 30;
 
@@ -1312,7 +1312,7 @@ bool GenerateIrProtoBinary([[maybe_unused]] const tint::Program& program,
     }
 
     if (!WriteFile(options.output_file, "wb", ToStdVector(pb.Get()))) {
-        std::cerr << "Failed to write protobuf binary out to file" << "\n";
+        std::cerr << "Failed to write protobuf binary out to file\n";
         return false;
     }
 
@@ -1340,7 +1340,7 @@ bool GenerateIrProtoDebug([[maybe_unused]] const tint::Program& program,
     }
 
     if (!WriteFile(options.output_file, "w", pb.Get())) {
-        std::cerr << "Failed to write protobuf debug text out to file" << "\n";
+        std::cerr << "Failed to write protobuf debug text out to file\n";
         return false;
     }
 

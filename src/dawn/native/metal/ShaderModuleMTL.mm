@@ -240,7 +240,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     }
 
-    tint::PixelLocalOptions pixelLocal;
+    std::unordered_map<uint32_t, uint32_t> pixelLocalAttachments;
     if (stage == SingleShaderStage::Fragment && layout->HasPixelLocalStorage()) {
         const AttachmentState* attachmentState = renderPipeline->GetAttachmentState();
         const std::vector<wgpu::TextureFormat>& storageAttachmentSlots =
@@ -249,7 +249,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             attachmentState->ComputeStorageAttachmentPackingInColorAttachments();
 
         for (size_t i = 0; i < storageAttachmentSlots.size(); i++) {
-            pixelLocal.attachments[i] = uint8_t(storageAttachmentPacking[i]);
+            pixelLocalAttachments[i] = uint8_t(storageAttachmentPacking[i]);
         }
     }
 
@@ -272,7 +272,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         stage == SingleShaderStage::Vertex &&
         renderPipeline->GetPrimitiveTopology() == wgpu::PrimitiveTopology::PointList;
     req.tintOptions.array_length_from_uniform = std::move(arrayLengthFromUniform);
-    req.tintOptions.pixel_local_options = std::move(pixelLocal);
+    req.tintOptions.pixel_local_attachments = std::move(pixelLocalAttachments);
     req.tintOptions.bindings = std::move(bindings);
     req.use_tint_ir = device->IsToggleEnabled(Toggle::UseTintIR);
     req.tintOptions.disable_polyfill_integer_div_mod =

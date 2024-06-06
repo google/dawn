@@ -31,7 +31,6 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/api/options/pixel_local.h"
 #include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::msl::writer {
@@ -157,8 +156,8 @@ struct Options {
     /// Defaults to 0xFFFFFFFF.
     uint32_t fixed_sample_mask = 0xFFFFFFFF;
 
-    /// Options used for dealing with pixel local storage
-    PixelLocalOptions pixel_local_options = {};
+    /// Index of pixel_local structure member index to attachment index
+    std::unordered_map<uint32_t, uint32_t> pixel_local_attachments;
 
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
@@ -175,7 +174,7 @@ struct Options {
                  disable_polyfill_integer_div_mod,
                  buffer_size_ubo_index,
                  fixed_sample_mask,
-                 pixel_local_options,
+                 pixel_local_attachments,
                  array_length_from_uniform,
                  bindings);
 };

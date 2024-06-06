@@ -215,7 +215,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     {
         PixelLocal::Config cfg;
-        for (auto it : options.pixel_local_options.attachments) {
+        for (auto it : options.pixel_local_attachments) {
             cfg.attachments.Add(it.first, it.second);
         }
         data.Add<PixelLocal::Config>(cfg);
