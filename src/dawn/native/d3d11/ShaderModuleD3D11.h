@@ -61,7 +61,7 @@ class ShaderModule final : public ShaderModuleBase {
         uint32_t compileFlags,
         const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
             usedInterstageVariables = {},
-        const std::optional<tint::PixelLocalOptions>& pixelLocalOptions = {});
+        const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions = {});
 
   private:
     ShaderModule(Device* device, const UnpackedPtr<ShaderModuleDescriptor>& descriptor);

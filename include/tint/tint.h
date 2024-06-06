@@ -35,7 +35,6 @@
 //                headers will need to be moved to include/tint/.
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/api/options/pixel_local.h"
 #include "src/tint/api/options/texture_builtins_from_uniform.h"
 #include "src/tint/api/tint.h"
 #include "src/tint/lang/core/type/manager.h"

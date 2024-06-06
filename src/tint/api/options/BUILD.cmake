@@ -40,7 +40,6 @@
 ################################################################################
 tint_add_target(tint_api_options lib
   api/options/options.cc
-  api/options/pixel_local.h
   api/options/texture_builtins_from_uniform.h
 )
 
@@ -64,7 +63,6 @@ tint_target_add_dependencies(tint_api_options lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_api_options_test test
-  api/options/pixel_local_test.cc
   api/options/texture_builtins_from_uniform_test.cc
 )
 

@@ -48,7 +48,6 @@ cc_library(
   ],
   deps = [
     "//src/tint/api/common",
-    "//src/tint/api/options",
     "//src/tint/lang/core",
     "//src/tint/lang/core/common",
     "//src/tint/utils/containers",
@@ -74,7 +73,6 @@ cc_library(
   ],
   deps = [
     "//src/tint/api/common",
-    "//src/tint/api/options",
     "//src/tint/lang/core",
     "//src/tint/lang/hlsl/writer/common",
     "//src/tint/utils/containers",

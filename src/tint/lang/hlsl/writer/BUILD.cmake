@@ -54,7 +54,6 @@ tint_add_target(tint_lang_hlsl_writer lib
 
 tint_target_add_dependencies(tint_lang_hlsl_writer lib
   tint_api_common
-  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
@@ -101,7 +100,6 @@ tint_add_target(tint_lang_hlsl_writer_bench bench
 
 tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
   tint_api_common
-  tint_api_options
   tint_cmd_bench_bench
   tint_lang_core
   tint_lang_core_constant
@@ -148,7 +146,6 @@ tint_add_target(tint_lang_hlsl_writer_fuzz fuzz
 
 tint_target_add_dependencies(tint_lang_hlsl_writer_fuzz fuzz
   tint_api_common
-  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type

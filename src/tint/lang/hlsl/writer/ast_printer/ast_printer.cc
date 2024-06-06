@@ -285,10 +285,10 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     {
         PixelLocal::Config cfg;
-        for (auto it : options.pixel_local_options.attachments) {
+        for (auto it : options.pixel_local.attachments) {
             cfg.pls_member_to_rov_reg.Add(it.first, it.second);
         }
-        for (auto it : options.pixel_local_options.attachment_formats) {
+        for (auto it : options.pixel_local.attachment_formats) {
             core::TexelFormat format = core::TexelFormat::kUndefined;
             switch (it.second) {
                 case PixelLocalOptions::TexelFormat::kR32Sint:
@@ -305,7 +305,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
             }
             cfg.pls_member_to_rov_format.Add(it.first, format);
         }
-        cfg.rov_group_index = options.pixel_local_options.pixel_local_group_index;
+        cfg.rov_group_index = options.pixel_local.group_index;
         data.Add<PixelLocal::Config>(cfg);
         manager.Add<PixelLocal>();
     }
@@ -2366,7 +2366,7 @@ bool ASTPrinter::EmitQuantizeToF16Call(StringStream& out,
     if (auto* vec = builtin->ReturnType()->As<core::type::Vector>()) {
         width = std::to_string(vec->Width());
     }
-    out << "f16tof32(f32tof16" << "(";
+    out << "f16tof32(f32tof16(";
     if (!EmitExpression(out, expr->args[0])) {
         return false;
     }

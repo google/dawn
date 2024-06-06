@@ -39,7 +39,6 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
-#include "src/tint/api/options/pixel_local.h"
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/disassembly.h"
@@ -178,58 +177,32 @@ constexpr uint32_t kMinShaderModelForPackUnpack4x8InHLSL = 66u;
 #endif  // TINT_BUILD_HLSL_WRITER
 
 /// An enumerator of color-output modes
-enum class ColorMode { kPlain, kDark, kLight };
+enum class ColorMode : uint8_t { kPlain, kDark, kLight };
 
 struct Options {
-    bool verbose = false;
-
     std::unique_ptr<tint::StyledTextPrinter> printer;
 
     std::string input_filename;
     std::string output_file = "-";  // Default to stdout
 
+    std::unordered_set<uint32_t> skip_hash;
+    tint::Vector<std::string, 4> transforms;
+    tint::Hashmap<std::string, double, 8> overrides;
+
+    std::string ep_name;
+
+    Format format = Format::kUnknown;
+
+    bool verbose = false;
     bool parse_only = false;
     bool disable_workgroup_init = false;
     bool validate = false;
     bool print_hash = false;
     bool dump_inspector_bindings = false;
     bool enable_robustness = false;
-
-    std::unordered_set<uint32_t> skip_hash;
-
-    Format format = Format::kUnknown;
-
     bool emit_single_entry_point = false;
-    std::string ep_name;
 
     bool rename_all = false;
-
-#if TINT_BUILD_SPV_READER
-    tint::spirv::reader::Options spirv_reader_options;
-#endif  // TINT_BUILD_SPV_READER
-
-    tint::Vector<std::string, 4> transforms;
-
-#if TINT_BUILD_SPV_WRITER
-    bool use_storage_input_output_16 = true;
-#endif  // TINT_BULD_SPV_WRITER
-
-#if TINT_BUILD_HLSL_WRITER
-    std::string fxc_path;
-    std::string dxc_path;
-#endif  // TINT_BULD_HLSL_WRITER
-
-#if TINT_BUILD_MSL_WRITER
-    std::string xcrun_path;
-#endif  // TINT_BULD_MSL_WRITER
-
-    tint::Hashmap<std::string, double, 8> overrides;
-    tint::PixelLocalOptions pixel_local_options;
-
-#if TINT_BUILD_HLSL_WRITER
-    std::optional<tint::BindingPoint> hlsl_root_constant_binding_point;
-    uint32_t hlsl_shader_model = kMinShaderModelForDXC;
-#endif  // TINT_BUILD_HLSL_WRITER
 
     bool dump_ir = false;
     bool dump_ir_bin = false;
@@ -239,6 +212,32 @@ struct Options {
 #if TINT_BUILD_SYNTAX_TREE_WRITER
     bool dump_ast = false;
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
+
+#if TINT_BUILD_SPV_READER
+    tint::spirv::reader::Options spirv_reader_options;
+#endif  // TINT_BUILD_SPV_READER
+
+#if TINT_BUILD_SPV_WRITER
+    bool use_storage_input_output_16 = true;
+#endif  // TINT_BULD_SPV_WRITER
+
+#if TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
+    std::unordered_map<uint32_t, uint32_t> pixel_local_attachments;
+#endif
+
+#if TINT_BUILD_HLSL_WRITER
+    std::string fxc_path;
+    std::string dxc_path;
+
+    std::optional<tint::BindingPoint> hlsl_root_constant_binding_point;
+    uint32_t hlsl_shader_model = kMinShaderModelForDXC;
+
+    tint::hlsl::writer::PixelLocalOptions pixel_local_options;
+#endif  // TINT_BUILD_HLSL_WRITER
+
+#if TINT_BUILD_MSL_WRITER
+    std::string xcrun_path;
+#endif  // TINT_BULD_MSL_WRITER
 };
 
 /// @returns the default ColorMode when no `--color` flag is specified.
@@ -485,6 +484,8 @@ default to binding 0 of the largest used group plus 1,
 or group 0 if no resource bound)");
 #endif  // TINT_BUILD_HLSL_WRITER
 
+#if TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
+
     auto& pixel_local_attachments =
         options.Add<StringOption>("pixel_local_attachments",
                                   R"(Pixel local storage attachment bindings, comma-separated
@@ -494,6 +495,9 @@ index and ATTACHMENT_INDEX is the index of the emitted
 attachment.
 )");
 
+#endif
+
+#if TINT_BUILD_HLSL_WRITER
     auto& pixel_local_attachment_formats =
         options.Add<StringOption>("pixel_local_attachment_formats",
                                   R"(Pixel local storage attachment formats, comma-separated
@@ -507,6 +511,17 @@ R32Sint, R32Uint, R32Float.
     auto& pixel_local_group_index = options.Add<ValueOption<uint32_t>>(
         "pixel_local_group_index", "The bind group index of the pixel local attachments.",
         Default{0});
+
+    std::stringstream hlslShaderModelStream;
+    hlslShaderModelStream << R"(
+An integer value to set the HLSL shader model for the generated HLSL
+shader, which will only be used with option `--dxc`. Now only integers
+in the range [)" << kMinShaderModelForDXC
+                          << ", " << kMaxSupportedShaderModelForDXC
+                          << "] are accepted. The integer \"6x\" represents shader model 6.x.";
+    auto& hlsl_shader_model = options.Add<ValueOption<uint32_t>>(
+        "hlsl_shader_model", hlslShaderModelStream.str(), Default{kMinShaderModelForDXC});
+#endif  // TINT_BUILD_HLSL_WRITER
 
     auto& skip_hash = options.Add<StringOption>(
         "skip-hash", R"(Skips validation if the hash of the output is equal to any
@@ -525,18 +540,6 @@ of the hash codes in the comma separated list of hashes)");
             }
         }
     });
-
-#if TINT_BUILD_HLSL_WRITER
-    std::stringstream hlslShaderModelStream;
-    hlslShaderModelStream << R"(
-An integer value to set the HLSL shader model for the generated HLSL
-shader, which will only be used with option `--dxc`. Now only integers
-in the range [)" << kMinShaderModelForDXC
-                          << ", " << kMaxSupportedShaderModelForDXC
-                          << "] are accepted. The integer \"6x\" represents shader model 6.x.";
-    auto& hlsl_shader_model = options.Add<ValueOption<uint32_t>>(
-        "hlsl_shader_model", hlslShaderModelStream.str(), Default{kMinShaderModelForDXC});
-#endif  // TINT_BUILD_HLSL_WRITER
 
     auto& overrides = options.Add<StringOption>(
         "overrides", "Override values as IDENTIFIER=VALUE, comma-separated");
@@ -600,8 +603,55 @@ Options:
         }
         opts->hlsl_root_constant_binding_point = tint::BindingPoint{group.Get(), binding.Get()};
     }
+
+    if (pixel_local_group_index.value.has_value()) {
+        opts->pixel_local_options.group_index = *pixel_local_group_index.value;
+    }
+
+    if (pixel_local_attachment_formats.value.has_value()) {
+        auto binding_formats = tint::Split(*pixel_local_attachment_formats.value, ",");
+        for (auto& binding_format : binding_formats) {
+            auto values = tint::Split(binding_format, "=");
+            if (values.Length() != 2) {
+                std::cerr << "Invalid binding format " << pixel_local_attachment_formats.name
+                          << ": " << binding_format << "\n";
+                return false;
+            }
+            auto member_index = tint::strconv::ParseUint32(values[0]);
+            if (member_index != tint::Success) {
+                std::cerr << "Invalid member index for " << pixel_local_attachment_formats.name
+                          << ": " << values[0] << "\n";
+                return false;
+            }
+            auto format = values[1];
+            tint::hlsl::writer::PixelLocalOptions::TexelFormat texel_format =
+                tint::hlsl::writer::PixelLocalOptions::TexelFormat::kUndefined;
+            if (format == "R32Sint") {
+                texel_format = tint::hlsl::writer::PixelLocalOptions::TexelFormat::kR32Sint;
+            } else if (format == "R32Uint") {
+                texel_format = tint::hlsl::writer::PixelLocalOptions::TexelFormat::kR32Uint;
+            } else if (format == "R32Float") {
+                texel_format = tint::hlsl::writer::PixelLocalOptions::TexelFormat::kR32Float;
+            } else {
+                std::cerr << "Invalid texel format for " << pixel_local_attachments.name << ": "
+                          << format << "\n";
+                return false;
+            }
+            opts->pixel_local_options.attachment_formats.emplace(member_index.Get(), texel_format);
+        }
+    }
+
+    if (hlsl_shader_model.value.has_value()) {
+        const uint32_t shader_model = *hlsl_shader_model.value;
+        if (shader_model < kMinShaderModelForDXC || shader_model > kMaxSupportedShaderModelForDXC) {
+            std::cerr << "Invalid HLSL shader model: " << shader_model << "\n";
+            return false;
+        }
+        opts->hlsl_shader_model = shader_model;
+    }
 #endif  // TINT_BUILD_HLSL_WRITER
 
+#if TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
     if (pixel_local_attachments.value.has_value()) {
         auto bindings = tint::Split(*pixel_local_attachments.value, ",");
         for (auto& binding : bindings) {
@@ -623,58 +673,14 @@ Options:
                           << values[1] << "\n";
                 return false;
             }
-            opts->pixel_local_options.attachments.emplace(member_index.Get(),
-                                                          attachment_index.Get());
+            opts->pixel_local_attachments.emplace(member_index.Get(), attachment_index.Get());
         }
     }
-
-    if (pixel_local_group_index.value.has_value()) {
-        opts->pixel_local_options.pixel_local_group_index = *pixel_local_group_index.value;
-    }
-
-    if (pixel_local_attachment_formats.value.has_value()) {
-        auto binding_formats = tint::Split(*pixel_local_attachment_formats.value, ",");
-        for (auto& binding_format : binding_formats) {
-            auto values = tint::Split(binding_format, "=");
-            if (values.Length() != 2) {
-                std::cerr << "Invalid binding format " << pixel_local_attachment_formats.name
-                          << ": " << binding_format << "\n";
-                return false;
-            }
-            auto member_index = tint::strconv::ParseUint32(values[0]);
-            if (member_index != tint::Success) {
-                std::cerr << "Invalid member index for " << pixel_local_attachment_formats.name
-                          << ": " << values[0] << "\n";
-                return false;
-            }
-            auto format = values[1];
-            tint::PixelLocalOptions::TexelFormat texel_format =
-                tint::PixelLocalOptions::TexelFormat::kUndefined;
-            if (format == "R32Sint") {
-                texel_format = tint::PixelLocalOptions::TexelFormat::kR32Sint;
-            } else if (format == "R32Uint") {
-                texel_format = tint::PixelLocalOptions::TexelFormat::kR32Uint;
-            } else if (format == "R32Float") {
-                texel_format = tint::PixelLocalOptions::TexelFormat::kR32Float;
-            } else {
-                std::cerr << "Invalid texel format for " << pixel_local_attachments.name << ": "
-                          << format << "\n";
-                return false;
-            }
-            opts->pixel_local_options.attachment_formats.emplace(member_index.Get(), texel_format);
-        }
-    }
-
 #if TINT_BUILD_HLSL_WRITER
-    if (hlsl_shader_model.value.has_value()) {
-        uint32_t shader_model = *hlsl_shader_model.value;
-        if (shader_model < kMinShaderModelForDXC || shader_model > kMaxSupportedShaderModelForDXC) {
-            std::cerr << "Invalid HLSL shader model: " << shader_model << "\n";
-            return false;
-        }
-        opts->hlsl_shader_model = shader_model;
-    }
-#endif  // TINT_BUILD_HLSL_WRITER
+    opts->pixel_local_options.attachments = opts->pixel_local_attachments;
+#endif
+
+#endif
 
     auto files = result.Get();
     if (files.Length() > 1) {
@@ -909,7 +915,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
     tint::msl::writer::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
-    gen_options.pixel_local_attachments = options.pixel_local_options.attachments;
+    gen_options.pixel_local_attachments = options.pixel_local_attachments;
     gen_options.bindings = tint::msl::writer::GenerateBindings(*input_program);
     gen_options.array_length_from_uniform.ubo_binding = 30;
 
@@ -1013,7 +1019,7 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.bindings = tint::hlsl::writer::GenerateBindings(program);
     gen_options.root_constant_binding_point = options.hlsl_root_constant_binding_point;
-    gen_options.pixel_local_options = options.pixel_local_options;
+    gen_options.pixel_local = options.pixel_local_options;
     gen_options.polyfill_dot_4x8_packed = options.hlsl_shader_model < kMinShaderModelForDP4aInHLSL;
     gen_options.polyfill_pack_unpack_4x8 =
         options.hlsl_shader_model < kMinShaderModelForPackUnpack4x8InHLSL;

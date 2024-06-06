@@ -51,7 +51,6 @@ if (tint_build_hlsl_writer) {
     ]
     deps = [
       "${tint_src_dir}/api/common",
-      "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",
@@ -93,7 +92,6 @@ if (tint_build_benchmarks) {
       deps = [
         "${tint_src_dir}:google_benchmark",
         "${tint_src_dir}/api/common",
-        "${tint_src_dir}/api/options",
         "${tint_src_dir}/cmd/bench:bench",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
@@ -129,7 +127,6 @@ if (tint_build_hlsl_writer) {
     sources = []
     deps = [
       "${tint_src_dir}/api/common",
-      "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",

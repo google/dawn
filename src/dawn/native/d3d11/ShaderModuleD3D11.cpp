@@ -78,7 +78,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     const PipelineLayout* layout,
     uint32_t compileFlags,
     const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>& usedInterstageVariables,
-    const std::optional<tint::PixelLocalOptions>& pixelLocalOptions) {
+    const std::optional<tint::hlsl::writer::PixelLocalOptions>& pixelLocalOptions) {
     Device* device = ToBackend(GetDevice());
     TRACE_EVENT0(device->GetPlatform(), General, "ShaderModuleD3D11::Compile");
     DAWN_ASSERT(!IsError());
@@ -233,7 +233,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         req.hlsl.tintOptions.truncate_interstage_variables = true;
     } else if (stage == SingleShaderStage::Fragment) {
         if (pixelLocalOptions.has_value()) {
-            req.hlsl.tintOptions.pixel_local_options = *pixelLocalOptions;
+            req.hlsl.tintOptions.pixel_local = *pixelLocalOptions;
         }
     }
 

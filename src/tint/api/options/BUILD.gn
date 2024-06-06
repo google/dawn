@@ -45,7 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 libtint_source_set("options") {
   sources = [
     "options.cc",
-    "pixel_local.h",
     "texture_builtins_from_uniform.h",
   ]
   deps = [
@@ -65,10 +64,7 @@ libtint_source_set("options") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    sources = [
-      "pixel_local_test.cc",
-      "texture_builtins_from_uniform_test.cc",
-    ]
+    sources = [ "texture_builtins_from_uniform_test.cc" ]
     deps = [
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api/common",
