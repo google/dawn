@@ -188,30 +188,6 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithNonZeroLocation_ReturnValue
     EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
 }
 
-TEST_F(DualSourceBlendingExtensionTests, NoNonZeroCollisionsBetweenInAndOut) {
-    // struct NonZeroLocation {
-    //   @location(1) a : vec4<f32>,
-    // };
-    // struct NonZeroBlendSrc {
-    //   @location(0) @blend_src(1) a : vec4<f32>,
-    // };
-    // fn X(in : NonZeroLocation) -> NonZeroBlendSrc { return NonZeroBlendSrc(); }
-    // fn Y(in : NonZeroBlendSrc) -> NonZeroLocation { return NonZeroLocation(); }
-    Structure("NonZeroLocation", Vector{
-                                     Member("a", ty.vec4<f32>(), Vector{Location(1_a)}),
-                                 });
-    Structure("NonZeroBlendSrc",
-              Vector{
-                  Member("a", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(1_a)}),
-              });
-    Func("X", Vector{Param("in", ty("NonZeroLocation"))}, ty("NonZeroBlendSrc"),
-         Vector{Return(Call("NonZeroBlendSrc"))}, Vector{Stage(ast::PipelineStage::kFragment)});
-    Func("Y", Vector{Param("in", ty("NonZeroBlendSrc"))}, ty("NonZeroLocation"),
-         Vector{Return(Call("NonZeroLocation"))}, Vector{Stage(ast::PipelineStage::kFragment)});
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
 TEST_F(DualSourceBlendingExtensionTests, MixedBlendSrcAndNonBlendSrcOnLocationZero_Struct) {
     // struct S {
     //   @location(0) a : vec4<f32>,
@@ -290,6 +266,24 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcTypes_DifferentElementType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(1:2 error: Use of '@blend_src' requires all outputs have same type
+note: while analyzing entry point 'F')");
+}
+
+TEST_F(DualSourceBlendingExtensionTests, BlendSrcAsFragmentInput) {
+    // struct S {
+    //   @location(0) @blend_src(0) a : vec4<f32>,
+    //   @location(0) @blend_src(1) b : vec4<f32>,
+    // };
+    // @fragment fn F(s_in : S) -> S { return S(); }
+    Structure("S", Vector{
+                       Member("a", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(0_a)}),
+                       Member("b", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(1_a)}),
+                   });
+    Func("F", Vector{Param("s_in", ty("S"))}, ty("S"), Vector{Return(Call("S"))},
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: '@blend_src' can only be used for fragment shader output
 note: while analyzing entry point 'F')");
 }
 

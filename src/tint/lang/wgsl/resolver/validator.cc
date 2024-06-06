@@ -1287,7 +1287,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                         TINT_ICE() << "@blend_src has no value";
                     }
 
-                    return BlendSrcAttribute(blend_src_attr, stage);
+                    bool is_input = param_or_ret == ParamOrRetType::kParameter;
+                    return BlendSrcAttribute(blend_src_attr, stage, is_input);
                 },
                 [&](const ast::ColorAttribute* col_attr) {
                     color_attribute = col_attr;
@@ -2499,8 +2500,8 @@ bool Validator::BlendSrcAttribute(const ast::BlendSrcAttribute* attr,
 
     bool is_stage_non_fragment =
         stage != ast::PipelineStage::kNone && stage != ast::PipelineStage::kFragment;
-    bool is_output = is_input.value_or(false);
-    if (is_stage_non_fragment || is_output) {
+    bool is_input_param = is_input.value_or(false);
+    if (is_stage_non_fragment || is_input_param) {
         AddError(attr->source) << style::Attribute("@", attr->Name())
                                << " can only be used for fragment shader output";
         return false;
