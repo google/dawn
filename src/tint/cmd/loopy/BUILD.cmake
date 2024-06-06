@@ -82,6 +82,7 @@ if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
     tint_lang_glsl_writer
     tint_lang_glsl_writer_common
+    tint_lang_glsl_writer_helpers
   )
 endif(TINT_BUILD_GLSL_WRITER)
 

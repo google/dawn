@@ -89,6 +89,7 @@ tint_executable("tint") {
     deps += [
       "${tint_src_dir}/lang/glsl/writer",
       "${tint_src_dir}/lang/glsl/writer/common",
+      "${tint_src_dir}/lang/glsl/writer/helpers",
     ]
   }
 

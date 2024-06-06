@@ -50,6 +50,7 @@
 #include "src/tint/lang/glsl/writer/ast_raise/pad_structs.h"
 #include "src/tint/lang/glsl/writer/ast_raise/texture_1d_to_2d.h"
 #include "src/tint/lang/glsl/writer/ast_raise/texture_builtins_from_uniform.h"
+#include "src/tint/lang/glsl/writer/common/option_helpers.h"
 #include "src/tint/lang/glsl/writer/common/options.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
@@ -186,10 +187,19 @@ SanitizedResult Sanitize(const Program& in,
         options.texture_builtins_from_uniform.ubo_binding,
         options.texture_builtins_from_uniform.ubo_bindingpoint_ordering);
 
+    ExternalTextureOptions external_texture_options{};
+    RemapperData remapper_data{};
+    PopulateBindingInfo(options, remapper_data, external_texture_options);
+
+    data.Add<ast::transform::BindingRemapper::Remappings>(
+        remapper_data, std::unordered_map<BindingPoint, core::Access>{},
+        /* allow_collisions */ true);
+    manager.Add<ast::transform::BindingRemapper>();
+
     // Note: it is more efficient for MultiplanarExternalTexture to come after Robustness
     // Must come before builtin polyfills
     data.Add<ast::transform::MultiplanarExternalTexture::NewBindingPoints>(
-        options.external_texture_options.bindings_map);
+        external_texture_options.bindings_map, /* allow collisions */ true);
     manager.Add<ast::transform::MultiplanarExternalTexture>();
 
     // Must be after multiplanar and must be before OffsetFirstindex
@@ -242,15 +252,8 @@ SanitizedResult Sanitize(const Program& in,
     manager.Add<ast::transform::DirectVariableAccess>();
 
     // Must come after builtin polyfills (specifically texture_sample_base_clamp_to_edge_2d_f32)
-    data.Add<CombineSamplersInfo>(options.combined_samplers_info);
+    data.Add<Bindings>(options.bindings);
     manager.Add<CombineSamplers>();
-
-    // Must come after CombineSamplers
-    data.Add<ast::transform::BindingRemapper::Remappings>(
-        options.binding_remapper_options.binding_points,
-        std::unordered_map<BindingPoint, core::Access>{},
-        /* allow_collisions */ true);
-    manager.Add<ast::transform::BindingRemapper>();
 
     // PadStructs must come after CanonicalizeEntryPointIO and CombineSamplers
     manager.Add<PadStructs>();

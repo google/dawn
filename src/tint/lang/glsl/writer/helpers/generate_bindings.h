@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,20 +25,23 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef SRC_TINT_LANG_GLSL_WRITER_HELPERS_GENERATE_BINDINGS_H_
+#define SRC_TINT_LANG_GLSL_WRITER_HELPERS_GENERATE_BINDINGS_H_
+
 #include "src/tint/lang/glsl/writer/common/options.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::Bindings);
+// Forward declarations
+namespace tint {
+class Program;
+}
 
 namespace tint::glsl::writer {
 
-Bindings::Bindings() = default;
-
-Bindings::~Bindings() = default;
-
-Options::Options() = default;
-
-Options::~Options() = default;
-
-Options::Options(const Options&) = default;
+/// Generate the resource bindings
+/// @param program the program to generate from
+/// @returns the bindings
+Bindings GenerateBindings(const Program& program);
 
 }  // namespace tint::glsl::writer
+
+#endif  // SRC_TINT_LANG_GLSL_WRITER_HELPERS_GENERATE_BINDINGS_H_

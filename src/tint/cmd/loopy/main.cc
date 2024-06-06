@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/module.h"
 
 #if TINT_BUILD_GLSL_WRITER
+#include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 #endif  // TINT_BUILD_GLSL_WRITER
 
@@ -305,8 +306,8 @@ bool GenerateHlsl(const tint::Program& program) {
 bool GenerateGlsl(const tint::Program& program) {
 #if TINT_BUILD_GLSL_WRITER
     tint::glsl::writer::Options gen_options;
-    gen_options.external_texture_options.bindings_map =
-        tint::cmd::GenerateExternalTextureBindings(program);
+    gen_options.bindings = tint::glsl::writer::GenerateBindings(program);
+
     auto result = tint::glsl::writer::Generate(program, gen_options, "");
     if (result == tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);

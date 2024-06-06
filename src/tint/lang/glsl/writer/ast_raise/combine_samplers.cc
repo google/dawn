@@ -42,7 +42,6 @@
 #include "src/tint/utils/containers/map.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::CombineSamplers);
-TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::CombineSamplersInfo);
 
 namespace {
 
@@ -57,13 +56,6 @@ namespace tint::glsl::writer {
 
 using namespace tint::core::number_suffixes;  // NOLINT
                                               //
-CombineSamplersInfo::CombineSamplersInfo() = default;
-
-CombineSamplersInfo::CombineSamplersInfo(CombinedTextureSamplerInfo map, BindingPoint placeholder)
-    : sampler_texture_to_name(std::move(map)), placeholder_sampler_binding(placeholder) {}
-
-CombineSamplersInfo::~CombineSamplersInfo() = default;
-
 /// PIMPL state for the transform
 struct CombineSamplers::State {
     /// The source program
@@ -73,8 +65,8 @@ struct CombineSamplers::State {
     /// The clone context
     program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
 
-    /// The combined sampler information
-    const CombineSamplersInfo* combined_samplers_info;
+    /// The binding information
+    const Bindings* bindings;
 
     /// Map from a texture/sampler pair to the corresponding combined sampler
     /// variable
@@ -107,8 +99,7 @@ struct CombineSamplers::State {
     /// Constructor
     /// @param program the source program
     /// @param info the binding map information
-    State(const Program& program, const CombineSamplersInfo* info)
-        : src(program), combined_samplers_info(info) {}
+    State(const Program& program, const Bindings* info) : src(program), bindings(info) {}
 
     /// Creates a combined sampler global variables.
     /// (Note this is actually a Texture node at the AST level, but it will be
@@ -121,16 +112,23 @@ struct CombineSamplers::State {
                                               const sem::Variable* sampler_var,
                                               std::string name) {
         binding::CombinedTextureSamplerPair st_pair;
-        st_pair.texture = texture_var
-                              ? *texture_var->As<sem::GlobalVariable>()->Attributes().binding_point
-                              : combined_samplers_info->placeholder_sampler_binding;
-        st_pair.sampler = sampler_var
-                              ? *sampler_var->As<sem::GlobalVariable>()->Attributes().binding_point
-                              : combined_samplers_info->placeholder_sampler_binding;
-        auto it = combined_samplers_info->sampler_texture_to_name.find(st_pair);
-        if (it != combined_samplers_info->sampler_texture_to_name.end()) {
+        if (texture_var) {
+            st_pair.texture = *texture_var->As<sem::GlobalVariable>()->Attributes().binding_point;
+        } else {
+            st_pair.texture = bindings->placeholder_sampler_bind_point;
+        }
+
+        if (sampler_var) {
+            st_pair.sampler = *sampler_var->As<sem::GlobalVariable>()->Attributes().binding_point;
+        } else {
+            st_pair.sampler = bindings->placeholder_sampler_bind_point;
+        }
+
+        auto it = bindings->sampler_texture_to_name.find(st_pair);
+        if (it != bindings->sampler_texture_to_name.end()) {
             name = it->second;
         }
+
         ast::Type type = CreateCombinedASTTypeFor(texture_var, sampler_var);
         Symbol symbol = ctx.dst->Symbols().New(name);
         return ctx.dst->GlobalVar(symbol, type, Attributes());
@@ -162,14 +160,13 @@ struct CombineSamplers::State {
             const core::type::DepthTexture* depth = texture_type->As<core::type::DepthTexture>();
             if (depth && !sampler) {
                 return ctx.dst->ty.sampled_texture(depth->dim(), ctx.dst->ty.f32());
-            } else {
-                return CreateASTTypeFor(ctx, texture_type);
             }
-        } else {
-            TINT_ASSERT(sampler != nullptr);
-            const core::type::Type* sampler_type = sampler->Type()->UnwrapRef();
-            return CreateASTTypeFor(ctx, sampler_type);
+            return CreateASTTypeFor(ctx, texture_type);
         }
+
+        TINT_ASSERT(sampler != nullptr);
+        const core::type::Type* sampler_type = sampler->Type()->UnwrapRef();
+        return CreateASTTypeFor(ctx, sampler_type);
     }
 
     /// Insert a new texture/sampler pair into the combined samplers maps (global or local, as
@@ -183,6 +180,7 @@ struct CombineSamplers::State {
         const sem::Variable* texture_var = pair.first;
         const sem::Variable* sampler_var = pair.second;
         std::string name = "";
+
         if (texture_var) {
             name = texture_var->Declaration()->name->symbol.Name();
         }
@@ -316,6 +314,7 @@ struct CombineSamplers::State {
                     if (texture_index == -1) {
                         return nullptr;
                     }
+
                     const sem::ValueExpression* texture =
                         call->Arguments()[static_cast<size_t>(texture_index)];
                     // We don't want to combine storage textures with anything, since
@@ -323,6 +322,7 @@ struct CombineSamplers::State {
                     if (texture->Type()->UnwrapRef()->Is<core::type::StorageTexture>()) {
                         return nullptr;
                     }
+
                     const sem::ValueExpression* sampler =
                         sampler_index != -1 ? call->Arguments()[static_cast<size_t>(sampler_index)]
                                             : nullptr;
@@ -352,6 +352,7 @@ struct CombineSamplers::State {
                             args.Push(ctx.Clone(arg));
                         }
                     }
+
                     const ast::Expression* value = ctx.dst->Call(ctx.Clone(expr->target), args);
                     if (builtin->Fn() == wgsl::BuiltinFn::kTextureLoad &&
                         texture_var->Type()->UnwrapRef()->Is<core::type::DepthTexture>() &&
@@ -360,6 +361,7 @@ struct CombineSamplers::State {
                     }
                     return value;
                 }
+
                 // Replace all function calls.
                 if (auto* callee = call->Target()->As<sem::Function>()) {
                     auto make_arg = [&](const sem::Variable* texture_var,
@@ -442,7 +444,7 @@ CombineSamplers::~CombineSamplers() = default;
 ast::transform::Transform::ApplyResult CombineSamplers::Apply(const Program& src,
                                                               const ast::transform::DataMap& inputs,
                                                               ast::transform::DataMap&) const {
-    auto* info = inputs.Get<CombineSamplersInfo>();
+    auto* info = inputs.Get<Bindings>();
     if (!info) {
         ProgramBuilder b;
         b.Diagnostics().AddError(Source{}) << "missing transform data for " << TypeInfo().name;

@@ -79,6 +79,7 @@ cc_binary(
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer",
       "//src/tint/lang/glsl/writer/common",
+      "//src/tint/lang/glsl/writer/helpers",
     ],
     "//conditions:default": [],
   }) + select({

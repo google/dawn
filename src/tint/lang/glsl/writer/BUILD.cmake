@@ -37,6 +37,7 @@
 include(lang/glsl/writer/ast_printer/BUILD.cmake)
 include(lang/glsl/writer/ast_raise/BUILD.cmake)
 include(lang/glsl/writer/common/BUILD.cmake)
+include(lang/glsl/writer/helpers/BUILD.cmake)
 include(lang/glsl/writer/printer/BUILD.cmake)
 include(lang/glsl/writer/raise/BUILD.cmake)
 

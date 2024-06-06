@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,20 +25,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/glsl/writer/common/options.h"
+#ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTION_HELPERS_H_
+#define SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTION_HELPERS_H_
 
-TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::Bindings);
+#include <unordered_map>
+
+#include "src/tint/api/common/binding_point.h"
+#include "src/tint/api/options/external_texture.h"
+#include "src/tint/lang/glsl/writer/common/options.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result/result.h"
 
 namespace tint::glsl::writer {
+/// The remapper data
+using RemapperData = std::unordered_map<BindingPoint, BindingPoint>;
 
-Bindings::Bindings() = default;
+/// @param options the options
+/// @returns success or failure
+Result<SuccessType> ValidateBindingOptions(const Options& options);
 
-Bindings::~Bindings() = default;
-
-Options::Options() = default;
-
-Options::~Options() = default;
-
-Options::Options(const Options&) = default;
+/// Populates data from the writer options for the remapper and external texture.
+/// @param options the writer options
+/// @param remapper_data where to put the remapper data
+/// @param external_texture where to store the external texture options
+/// Note, these are populated together because there are dependencies between the two types
+/// of data.
+void PopulateBindingInfo(const Options& options,
+                         RemapperData& remapper_data,
+                         ExternalTextureOptions& external_texture);
 
 }  // namespace tint::glsl::writer
+
+#endif  // SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTION_HELPERS_H_
