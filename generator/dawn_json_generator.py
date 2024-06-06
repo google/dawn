@@ -813,9 +813,6 @@ def compute_kotlin_params(loaded_json, kotlin_json):
         return True
 
     def include_method(method):
-        if method.return_type.name.get() in ['void *', 'void const *']:
-            # All methods that return binary data are handwritten.
-            return False
         if method.return_type.category == 'function pointer':
             # Kotlin doesn't support returning functions.
             return False

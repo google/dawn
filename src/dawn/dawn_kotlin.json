@@ -39,6 +39,8 @@
         "size_t": "jlong",
         "uint32_t": "jint",
         "uint64_t": "jlong",
+        "void *": "jobject",
+        "void const *": "jobject",
         "void": "void"
     }
 }

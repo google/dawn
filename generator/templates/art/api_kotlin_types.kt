@@ -103,6 +103,8 @@
         {% endif %}
     {%- elif type.name.get() == 'void' %}
         {{- 'Long' if arg.annotation == '*' else 'Unit' }}
+    {%- elif type.name.get() in ['void *', 'void const *'] %}
+        ByteBuffer
     {%- else -%}
         {{ unreachable_code() }}
     {%- endif %}

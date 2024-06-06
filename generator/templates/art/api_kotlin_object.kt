@@ -25,6 +25,8 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package {{ kotlin_package }}
+
+import java.nio.ByteBuffer
 {% from 'art/api_kotlin_types.kt' import kotlin_type_declaration, kotlin_definition with context %}
 
 class {{ obj.name.CamelCase() }}(val handle: Long): AutoCloseable {

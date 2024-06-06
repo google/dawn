@@ -40,6 +40,27 @@ struct UserData {
     jobject callback;
 };
 
+jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
+    if (!address) {
+        return nullptr;
+    }
+    jclass byteBufferClass = env->FindClass("java/nio/ByteBuffer");
+
+    //* Dawn always uses little endian format, so we pre-convert for the client's convenience.
+    jclass byteOrderClass = env->FindClass("java/nio/ByteOrder");
+    jobject littleEndian = env->NewGlobalRef(env->GetStaticObjectField(
+            byteOrderClass, env->GetStaticFieldID(byteOrderClass, "LITTLE_ENDIAN",
+                                                  "Ljava/nio/ByteOrder;")));
+
+    jobject byteBuffer = env->NewDirectByteBuffer(const_cast<void *>(address), size);
+
+    env->CallObjectMethod(
+            byteBuffer, env->GetMethodID(byteBufferClass, "order",
+                                         "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;"),
+            littleEndian);
+    return byteBuffer;
+}
+
 {% macro render_method(method, object) %}
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
     DEFAULT extern "C"
@@ -271,6 +292,8 @@ struct UserData {
         jclass returnClass = env->FindClass("{{ jni_name(method.return_type) }}");
         auto constructor = env->GetMethodID(returnClass, "<init>", "(J)V");
         return env->NewObject(returnClass, constructor, reinterpret_cast<jlong>(result));
+    {% elif method.return_type.name.get() in ['void const *', 'void *'] %}
+        return toByteBuffer(env, result, size);
     {% elif method.return_type.name.get() != 'void' %}
         return result;  //* Primitives are implicitly converted by JNI.
     {% endif %}
