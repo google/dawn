@@ -160,7 +160,6 @@
 "chromium_experimental_pixel_local"
 "chromium_experimental_push_constant"
 "chromium_experimental_subgroups"
-"chromium_internal_dual_source_blending"
 "chromium_internal_graphite"
 "chromium_internal_input_attachments"
 "chromium_internal_relaxed_uniform_layout"

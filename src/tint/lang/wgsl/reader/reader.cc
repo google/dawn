@@ -83,7 +83,6 @@ bool IsUnsupportedByIR(const ast::Enable* enable) {
             case tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch:
             case tint::wgsl::Extension::kChromiumExperimentalPixelLocal:
             case tint::wgsl::Extension::kChromiumExperimentalPushConstant:
-            case tint::wgsl::Extension::kChromiumInternalDualSourceBlending:
             case tint::wgsl::Extension::kChromiumInternalRelaxedUniformLayout:
                 return true;
             default:

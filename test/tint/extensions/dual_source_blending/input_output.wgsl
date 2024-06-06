@@ -1,4 +1,4 @@
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 struct FragInput {
   @location(0) a : vec4<f32>,

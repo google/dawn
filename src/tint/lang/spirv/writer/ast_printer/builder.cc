@@ -280,7 +280,6 @@ bool Builder::Build() {
                 wgsl::Extension::kChromiumDisableUniformityAnalysis,
                 wgsl::Extension::kChromiumExperimentalPushConstant,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
-                wgsl::Extension::kChromiumInternalDualSourceBlending,
                 wgsl::Extension::kChromiumInternalGraphite,
                 wgsl::Extension::kChromiumInternalInputAttachments,
                 wgsl::Extension::kF16,

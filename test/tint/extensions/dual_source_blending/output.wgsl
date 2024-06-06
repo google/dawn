@@ -1,4 +1,4 @@
-enable chromium_internal_dual_source_blending;
+enable dual_source_blending;
 
 struct FragOutput {
   @location(0) @blend_src(0) color : vec4<f32>,

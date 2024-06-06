@@ -284,7 +284,6 @@ bool ASTPrinter::Generate() {
                 wgsl::Extension::kChromiumExperimentalFramebufferFetch,
                 wgsl::Extension::kChromiumExperimentalPixelLocal,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
-                wgsl::Extension::kChromiumInternalDualSourceBlending,
                 wgsl::Extension::kChromiumInternalGraphite,
                 wgsl::Extension::kChromiumInternalRelaxedUniformLayout,
                 wgsl::Extension::kF16,

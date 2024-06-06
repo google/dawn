@@ -85,10 +85,6 @@ enum extension {
   chromium_internal_input_attachments
   // A Chromium-specific extension that relaxes memory layout requirements for uniform storage.
   chromium_internal_relaxed_uniform_layout
-  // A Chromium-specific extension that enables dual source blending.
-  // TODO(chromium:341973423): Remove `chromium_internal_dual_source_blending` when it is totally
-  // replaced with `dual_source_blending`.
-  chromium_internal_dual_source_blending
   // A Chromium-specific extension that enables pixel local storage.
   // Cannot be used with chromium_experimental_framebuffer_fetch
   chromium_experimental_pixel_local

@@ -556,7 +556,6 @@
     },
     "blend factor": {
         "category": "enum",
-        "_comment": "TODO(github.com/gpuweb/gpuweb/issues/4283): make sure the dual source blending names match the spec when it lands, and remove the tags.",
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "zero"},
@@ -572,10 +571,10 @@
             {"value": 11, "name": "src alpha saturated"},
             {"value": 12, "name": "constant"},
             {"value": 13, "name": "one minus constant"},
-            {"value": 14, "name": "src1", "tags": ["dawn"]},
-            {"value": 15, "name": "one minus src1", "tags": ["dawn"]},
-            {"value": 16, "name": "src1 alpha", "tags": ["dawn"]},
-            {"value": 17, "name": "one minus src1 alpha", "tags": ["dawn"]}
+            {"value": 14, "name": "src1"},
+            {"value": 15, "name": "one minus src1"},
+            {"value": 16, "name": "src1 alpha"},
+            {"value": 17, "name": "one minus src1 alpha"}
         ]
     },
     "blend operation": {
