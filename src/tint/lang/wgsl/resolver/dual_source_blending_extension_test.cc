@@ -255,6 +255,44 @@ TEST_F(DualSourceBlendingExtensionTests,
 note: while analyzing entry point 'F')");
 }
 
+TEST_F(DualSourceBlendingExtensionTests, BlendSrcTypes_DifferentWidth) {
+    // struct S {
+    //   @location(0) @blend_src(0) a : vec4<f32>,
+    //   @location(0) @blend_src(1) b : vec2<f32>,
+    // };
+    // @fragment fn F() -> S { return S(); }
+    Structure("S",
+              Vector{
+                  Member("a", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(0_a)}),
+                  Member("b", ty.vec2<f32>(), Vector{Location(0_a), BlendSrc(Source{{1, 2}}, 1_a)}),
+              });
+    Func("F", Empty, ty("S"), Vector{Return(Call("S"))},
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(1:2 error: Use of '@blend_src' requires all outputs have same type
+note: while analyzing entry point 'F')");
+}
+
+TEST_F(DualSourceBlendingExtensionTests, BlendSrcTypes_DifferentElementType) {
+    // struct S {
+    //   @location(0) @blend_src(0) a : vec4<f32>,
+    //   @location(0) @blend_src(1) b : vec4<i32>,
+    // };
+    // @fragment fn F() -> S { return S(); }
+    Structure("S",
+              Vector{
+                  Member("a", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(0_a)}),
+                  Member("b", ty.vec4<i32>(), Vector{Location(0_a), BlendSrc(Source{{1, 2}}, 1_a)}),
+              });
+    Func("F", Empty, ty("S"), Vector{Return(Call("S"))},
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(1:2 error: Use of '@blend_src' requires all outputs have same type
+note: while analyzing entry point 'F')");
+}
+
 class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<int> {
   public:
     DualSourceBlendingExtensionTestWithParams() { Enable(wgsl::Extension::kDualSourceBlending); }

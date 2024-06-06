@@ -1207,6 +1207,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_blend_srcs;
     const ast::LocationAttribute* first_nonzero_location = nullptr;
     const ast::BlendSrcAttribute* first_blend_src = nullptr;
+    const core::type::Type* first_blend_src_type = nullptr;
     const ast::LocationAttribute* first_location_without_blend_src = nullptr;
     Hashset<uint32_t, 4> colors;
     enum class ParamOrRetType {
@@ -1359,14 +1360,19 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             }
 
             if (blend_src_attribute) {
-                // Because HLSL specifies dual source blending targets with SV_Target0 and 1, we
-                // should restrict targets with @blend_src to location 0 for easy translation
-                // in the backend writers.
                 if (location.value_or(1) != 0) {
                     AddError(blend_src_attribute->source)
                         << style::Attribute("@blend_src") << " can only be used with "
                         << style::Attribute("@location")
                         << style::Code("(", style::Literal("0"), ")");
+                    return false;
+                }
+                if (first_blend_src_type == nullptr) {
+                    first_blend_src_type = ty;
+                } else if (!first_blend_src_type->Equals(*ty)) {
+                    AddError(blend_src_attribute->source)
+                        << "Use of " << style::Attribute("@blend_src")
+                        << " requires all outputs have same type";
                     return false;
                 }
             }
@@ -1498,6 +1504,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     locations_and_blend_srcs.Clear();
     first_nonzero_location = nullptr;
     first_blend_src = nullptr;
+    first_blend_src_type = nullptr;
     first_location_without_blend_src = nullptr;
 
     if (!func->ReturnType()->Is<core::type::Void>()) {
