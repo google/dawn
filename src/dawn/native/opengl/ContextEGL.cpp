@@ -45,10 +45,13 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
                                                               bool useANGLETextureSharing) {
     EGLint renderableType = api == EGL_OPENGL_ES_API ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT;
 
-    // We require at least EGL 1.4.
-    DAWN_INVALID_IF(
-        egl.GetMajorVersion() < 1 || (egl.GetMajorVersion() == 1 && egl.GetMinorVersion() < 4),
-        "EGL version (%u.%u) must be at least 1.4", egl.GetMajorVersion(), egl.GetMinorVersion());
+    EGLint major, minor;
+
+    DAWN_TRY(CheckEGL(egl, egl.Initialize(display, &major, &minor), "eglInitialize"));
+
+    // We use EGLImage unconditionally, which only became core in 1.5.
+    DAWN_INVALID_IF(major < 1 || (major == 1 && minor < 5),
+                    "EGL version (%u.%u) must be at least 1.5", major, minor);
 
     // Since we're creating a surfaceless context, the only thing we really care
     // about is the RENDERABLE_TYPE.
@@ -63,18 +66,6 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
 
     DAWN_TRY(CheckEGL(egl, egl.BindAPI(api), "eglBindAPI"));
 
-    if (!egl.HasExt(EGLExt::ImageBase)) {
-        return DAWN_INTERNAL_ERROR("EGL_KHR_image_base is required.");
-    }
-    if (!egl.HasExt(EGLExt::CreateContextRobustness)) {
-        return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness is required.");
-    }
-
-    if (!egl.HasExt(EGLExt::FenceSync) && !egl.HasExt(EGLExt::ReusableSync)) {
-        return DAWN_INTERNAL_ERROR("EGL_KHR_fence_sync or EGL_KHR_reusable_sync must be supported");
-    }
-
-    int major, minor;
     if (api == EGL_OPENGL_ES_API) {
         major = 3;
         minor = 1;
@@ -82,6 +73,26 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
         major = 4;
         minor = 4;
     }
+
+    const char* extensions = egl.QueryString(display, EGL_EXTENSIONS);
+
+    EGLExtensionSet extensionSet;
+    extensionSet[EGLExtension::DisplayTextureShareGroupANGLE] =
+        strstr(extensions, "EGL_ANGLE_display_texture_share_group") != nullptr;
+    extensionSet[EGLExtension::CreateContextRobustnessEXT] =
+        strstr(extensions, "EGL_EXT_create_context_robustness") != nullptr;
+    extensionSet[EGLExtension::FenceSyncKHR] = strstr(extensions, "EGL_KHR_fence_sync") != nullptr;
+    extensionSet[EGLExtension::ReusableSyncKHR] =
+        strstr(extensions, "EGL_KHR_reusable_sync") != nullptr;
+
+    if (!extensionSet[EGLExtension::CreateContextRobustnessEXT]) {
+        return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness must be supported");
+    }
+
+    if (!extensionSet[EGLExtension::FenceSyncKHR] && !extensionSet[EGLExtension::ReusableSyncKHR]) {
+        return DAWN_INTERNAL_ERROR("EGL_KHR_fence_sync or EGL_KHR_reusable_sync must be supported");
+    }
+
     std::vector<EGLint> attrib_list{
         EGL_CONTEXT_MAJOR_VERSION,
         major,
@@ -91,7 +102,7 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
         EGL_TRUE,
     };
     if (useANGLETextureSharing) {
-        if (!egl.HasExt(EGLExt::DisplayTextureShareGroup)) {
+        if (!extensionSet[EGLExtension::DisplayTextureShareGroupANGLE]) {
             return DAWN_INTERNAL_ERROR(
                 "EGL_GL_ANGLE_display_texture_share_group must be supported to use GL texture "
                 "sharing");
@@ -104,11 +115,14 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
     EGLContext context = egl.CreateContext(display, config, EGL_NO_CONTEXT, attrib_list.data());
     DAWN_TRY(CheckEGL(egl, context != EGL_NO_CONTEXT, "eglCreateContext"));
 
-    return std::unique_ptr<ContextEGL>(new ContextEGL(egl, display, context));
+    return std::unique_ptr<ContextEGL>(new ContextEGL(egl, display, context, extensionSet));
 }
 
-ContextEGL::ContextEGL(const EGLFunctions& functions, EGLDisplay display, EGLContext context)
-    : mEgl(functions), mDisplay(display), mContext(context) {}
+ContextEGL::ContextEGL(const EGLFunctions& functions,
+                       EGLDisplay display,
+                       EGLContext context,
+                       EGLExtensionSet extensions)
+    : mEgl(functions), mDisplay(display), mContext(context), mExtensions(extensions) {}
 
 void ContextEGL::MakeCurrent() {
     EGLBoolean success = mEgl.MakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mContext);
@@ -121,6 +135,10 @@ EGLDisplay ContextEGL::GetEGLDisplay() const {
 
 const EGLFunctions& ContextEGL::GetEGL() const {
     return mEgl;
+}
+
+const EGLExtensionSet& ContextEGL::GetExtensions() const {
+    return mExtensions;
 }
 
 ContextEGL::~ContextEGL() {

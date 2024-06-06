@@ -94,18 +94,18 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
                                                           void* (*getProc)(const char*),
                                                           EGLDisplay display) {
     EGLFunctions egl;
-    DAWN_TRY(egl.LoadClientProcs(getProc));
+    egl.Init(getProc);
+
+    EGLenum api = backendType == wgpu::BackendType::OpenGLES ? EGL_OPENGL_ES_API : EGL_OPENGL_API;
 
     if (display == EGL_NO_DISPLAY) {
         display = egl.GetCurrentDisplay();
     }
+
     if (display == EGL_NO_DISPLAY) {
         display = egl.GetDisplay(EGL_DEFAULT_DISPLAY);
     }
 
-    DAWN_TRY(egl.LoadDisplayProcs(display));
-
-    EGLenum api = backendType == wgpu::BackendType::OpenGLES ? EGL_OPENGL_ES_API : EGL_OPENGL_API;
     std::unique_ptr<ContextEGL> context;
     DAWN_TRY_ASSIGN(context, ContextEGL::Create(egl, api, display, false));
 
@@ -128,8 +128,7 @@ PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType, EGLDisplay display
 
 MaybeError PhysicalDevice::InitializeGLFunctions(void* (*getProc)(const char*)) {
     // Use getProc to populate the dispatch table
-    DAWN_TRY(mEGLFunctions.LoadClientProcs(getProc));
-    DAWN_TRY(mEGLFunctions.LoadDisplayProcs(mDisplay));
+    mEGLFunctions.Init(getProc);
     return mFunctions.Initialize(getProc);
 }
 

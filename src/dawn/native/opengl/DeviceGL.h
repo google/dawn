@@ -35,12 +35,28 @@
 #include "dawn/common/Platform.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/QuerySet.h"
-#include "dawn/native/opengl/EGLFunctions.h"
 #include "dawn/native/opengl/Forward.h"
 #include "dawn/native/opengl/GLFormat.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
 
+// Remove windows.h macros after glad's include of windows.h
+#if DAWN_PLATFORM_IS(WINDOWS)
+#include "dawn/common/windows_with_undefs.h"
+#endif
+
 namespace dawn::native::opengl {
+
+struct EGLFunctions;
+
+enum class EGLExtension {
+    DisplayTextureShareGroupANGLE,
+    CreateContextRobustnessEXT,
+    FenceSyncKHR,
+    ReusableSyncKHR,
+
+    EnumCount,
+};
+using EGLExtensionSet = ityp::bitset<EGLExtension, static_cast<size_t>(EGLExtension::EnumCount)>;
 
 class Device final : public DeviceBase {
   public:
@@ -59,6 +75,7 @@ class Device final : public DeviceBase {
     // Context is current.
     const OpenGLFunctions& GetGL() const;
     const EGLFunctions& GetEGL(bool makeCurrent) const;
+    const EGLExtensionSet& GetEGLExtensions() const;
     EGLDisplay GetEGLDisplay() const;
 
     const GLFormat& GetGLFormat(const Format& format);
@@ -103,6 +120,7 @@ class Device final : public DeviceBase {
         // TODO(dawn:2544) Abstract EGL-isms for use with desktop GL.
         virtual EGLDisplay GetEGLDisplay() const = 0;
         virtual const EGLFunctions& GetEGL() const = 0;
+        virtual const EGLExtensionSet& GetExtensions() const = 0;
     };
 
   private:

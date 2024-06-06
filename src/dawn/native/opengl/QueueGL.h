@@ -69,7 +69,7 @@ class Queue final : public QueueBase {
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
 
-    uint32_t mEGLSyncType;
+    const uint32_t mEGLSyncType;
     MutexProtected<std::deque<std::pair<EGLSyncKHR, ExecutionSerial>>> mFencesInFlight;
 
     // Has pending GL commands which are not associated with a fence.
