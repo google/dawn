@@ -837,6 +837,17 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     def jni_name(type):
         return kt_file_path + '/' + type.name.CamelCase()
 
+    # We assume that if the final two parameters are named 'userdata' and 'callback' respectively
+    # that this is an async method that uses function pointer based callbacks.
+    def is_async_method(method):
+        if len(method.arguments) < 3:
+            return False  # Not enough parameters to be an async method.
+        if method.arguments[-1].name.get() != 'userdata':
+            return False
+        if method.arguments[-2].name.get() != 'callback':
+            return False
+        return True
+
     # A structure may need to know which other structures listed it as a chain root, e.g.
     # to know whether to mark the generated class 'open'.
     chain_children = defaultdict(list)
@@ -847,6 +858,7 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     params_kotlin['include_structure_member'] = include_structure_member
     params_kotlin['include_method'] = include_method
     params_kotlin['jni_name'] = jni_name
+    params_kotlin['is_async_method'] = is_async_method
     return params_kotlin
 
 
@@ -1502,6 +1514,10 @@ class MultiGeneratorFromDawnJSON(Generator):
             renders.append(
                 FileRender('art/api_kotlin_functions.kt',
                            'java/' + kt_file_path + '/Functions.kt',
+                           [RENDER_PARAMS_BASE, params_kotlin]))
+            renders.append(
+                FileRender('art/api_kotlin_async_helpers.kt',
+                           'java/' + kt_file_path + '/AsyncHelpers.kt',
                            [RENDER_PARAMS_BASE, params_kotlin]))
             renders.append(
                 FileRender('art/structures.h', 'cpp/structures.h',
