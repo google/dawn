@@ -161,10 +161,10 @@ struct GlobalVariableAttributes {
     /// @note a GlobalVariable generally doesn't have a `location` in WGSL, as it isn't allowed by
     /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
     std::optional<uint32_t> location;
-    /// The `index` attribute value for the variable, if set
-    /// @note a GlobalVariable generally doesn't have a `index` in WGSL, as it isn't allowed by
+    /// The `blend_src` attribute value for the variable, if set
+    /// @note a GlobalVariable generally doesn't have a `blend_src` in WGSL, as it isn't allowed by
     /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
-    std::optional<uint32_t> index;
+    std::optional<uint32_t> blend_src;
     /// The `color` attribute value for the variable, if set
     /// @note a GlobalVariable generally doesn't have a `color` in WGSL, as it isn't allowed by
     /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.

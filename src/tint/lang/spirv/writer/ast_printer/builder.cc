@@ -806,7 +806,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             [&](const ast::BlendSrcAttribute*) {
                 module_.PushAnnot(spv::Op::OpDecorate,
                                   {Operand(var_id), U32Operand(SpvDecorationIndex),
-                                   Operand(sem->Attributes().index.value())});
+                                   Operand(sem->Attributes().blend_src.value())});
                 return true;
             },
             [&](const ast::InterpolateAttribute* interpolate) {

@@ -664,7 +664,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     if (value != Success) {
                         return kErrored;
                     }
-                    global->Attributes().index = value.Get();
+                    global->Attributes().blend_src = value.Get();
                     return kSuccess;
                 },
                 [&](const ast::ColorAttribute* attr) {

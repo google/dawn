@@ -2164,8 +2164,8 @@ void ASTPrinter::EmitAttributes(StringStream& out, const sem::GlobalVariable* va
         out << "location = " << std::to_string(attrs.location.value());
         first = false;
     }
-    if (attrs.index.has_value()) {
-        out << ", index = " << std::to_string(attrs.index.value());
+    if (attrs.blend_src.has_value()) {
+        out << ", index = " << std::to_string(attrs.blend_src.value());
     }
     if (!first) {
         out << ") ";
