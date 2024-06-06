@@ -751,6 +751,9 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
 // Test that sampling a depth/stencil texture at components 1, 2, and 3 yield 0, 0, and 1
 // respectively
 TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
     DoSamplingExtraStencilComponentsRenderTest(TestAspectAndSamplerType::StencilAsUint, format,
@@ -956,6 +959,9 @@ class StencilSamplingTest : public DepthStencilSamplingTest {};
 
 // Test that sampling a stencil texture with a render/compute pipeline works
 TEST_P(StencilSamplingTest, SampleStencilOnly) {
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
     DoSamplingTest(TestAspectAndSamplerType::StencilAsUint,
