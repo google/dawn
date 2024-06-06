@@ -44,7 +44,6 @@ cc_binary(
   deps = [
     "//src/tint/api",
     "//src/tint/api/common:test",
-    "//src/tint/api/options:test",
     "//src/tint/lang/core/constant:test",
     "//src/tint/lang/core/intrinsic:test",
     "//src/tint/lang/core/ir/transform/common:test",

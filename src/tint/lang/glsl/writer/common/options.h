@@ -31,8 +31,9 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
-#include "src/tint/api/options/texture_builtins_from_uniform.h"
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
@@ -158,6 +159,21 @@ using ExternalTextureBindings = std::unordered_map<BindingPoint, binding::Extern
 using CombinedTextureSamplerInfo =
     std::unordered_map<binding::CombinedTextureSamplerPair, std::string>;
 
+/// Options used to specify a mapping of binding points to indices into a UBO
+/// from which to load buffer sizes.
+struct TextureBuiltinsFromUniformOptions {
+    /// The binding point to use to generate a uniform buffer from which to read
+    /// buffer sizes.
+    BindingPoint ubo_binding = {};
+
+    /// Ordered list of binding points in the uniform buffer for polyfilling `textureNumSamples` and
+    /// `textureNumLevels`
+    std::vector<BindingPoint> ubo_bindingpoint_ordering = {};
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(TextureBuiltinsFromUniformOptions, ubo_binding, ubo_bindingpoint_ordering);
+};
+
 /// Binding information
 struct Bindings : public Castable<Bindings, tint::ast::transform::Data> {
     /// Constructor
@@ -191,6 +207,11 @@ struct Bindings : public Castable<Bindings, tint::ast::transform::Data> {
     /// The binding point to use for placeholder samplers.
     BindingPoint placeholder_sampler_bind_point;
 
+    /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
+    /// buffer values. If not specified, emits corresponding GLSL builtins
+    /// textureQueryLevels/textureSamples directly.
+    TextureBuiltinsFromUniformOptions texture_builtins_from_uniform = {};
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Bindings,
                  uniform,
@@ -200,7 +221,8 @@ struct Bindings : public Castable<Bindings, tint::ast::transform::Data> {
                  sampler,
                  external_texture,
                  sampler_texture_to_name,
-                 placeholder_sampler_bind_point);
+                 placeholder_sampler_bind_point,
+                 texture_builtins_from_uniform);
 };
 
 /// Configuration options used for generating GLSL.
@@ -245,11 +267,6 @@ struct Options {
     /// Offsets of the minDepth and maxDepth push constants.
     std::optional<RangeOffsets> depth_range_offsets;
 
-    /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
-    /// buffer values. If not specified, emits corresponding GLSL builtins
-    /// textureQueryLevels/textureSamples directly.
-    TextureBuiltinsFromUniformOptions texture_builtins_from_uniform = {};
-
     /// The bindings
     Bindings bindings{};
 
@@ -262,7 +279,6 @@ struct Options {
                  first_vertex_offset,
                  first_instance_offset,
                  depth_range_offsets,
-                 texture_builtins_from_uniform,
                  bindings);
 };
 

@@ -45,7 +45,6 @@ tint_add_target(tint_cmd_loopy_cmd cmd
 tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
   tint_api
   tint_api_common
-  tint_api_options
   tint_cmd_common
   tint_lang_core
   tint_lang_core_constant

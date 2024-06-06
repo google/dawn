@@ -184,8 +184,8 @@ SanitizedResult Sanitize(const Program& in,
     // comes before BindingRemapper so the binding point info it reflects is before remapping.
     manager.Add<TextureBuiltinsFromUniform>();
     data.Add<TextureBuiltinsFromUniform::Config>(
-        options.texture_builtins_from_uniform.ubo_binding,
-        options.texture_builtins_from_uniform.ubo_bindingpoint_ordering);
+        options.bindings.texture_builtins_from_uniform.ubo_binding,
+        options.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering);
 
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};

@@ -1146,10 +1146,8 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
         gen_options.disable_robustness = !options.enable_robustness;
         gen_options.bindings = tint::glsl::writer::GenerateBindings(program);
 
-        tint::TextureBuiltinsFromUniformOptions textureBuiltinsFromUniform;
         constexpr uint32_t kMaxBindGroups = 4u;
-
-        textureBuiltinsFromUniform.ubo_binding = {kMaxBindGroups, 0u};
+        gen_options.bindings.texture_builtins_from_uniform.ubo_binding = {kMaxBindGroups, 0u};
 
         auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(entry_point_name);
         if (!textureBuiltinsFromUniformData.empty()) {
@@ -1158,11 +1156,10 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 
                 // This is the unmodified binding point from the WGSL shader.
                 tint::BindingPoint srcBindingPoint{info.group, info.binding};
-                textureBuiltinsFromUniform.ubo_bindingpoint_ordering.emplace_back(srcBindingPoint);
+                gen_options.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering
+                    .emplace_back(srcBindingPoint);
             }
         }
-
-        gen_options.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
 
         auto entry_point = inspector.GetEntryPoint(entry_point_name);
         uint32_t offset = entry_point.push_constant_size;

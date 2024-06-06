@@ -363,12 +363,11 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     // Some texture builtin functions are unsupported on GLSL ES. These are emulated with internal
     // uniforms.
-    tint::TextureBuiltinsFromUniformOptions textureBuiltinsFromUniform;
-    textureBuiltinsFromUniform.ubo_binding = {kMaxBindGroups + 1, 0};
+    bindings.texture_builtins_from_uniform.ubo_binding = {kMaxBindGroups + 1, 0};
 
     // Remap the internal ubo binding as well.
     bindings.uniform.emplace(
-        textureBuiltinsFromUniform.ubo_binding,
+        bindings.texture_builtins_from_uniform.ubo_binding,
         tint::glsl::writer::binding::Uniform{layout->GetInternalUniformBinding()});
 
     auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(programmableStage.entryPoint);
@@ -380,7 +379,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
             // This is the unmodified binding point from the WGSL shader.
             tint::BindingPoint srcBindingPoint{info.group, info.binding};
-            textureBuiltinsFromUniform.ubo_bindingpoint_ordering.emplace_back(srcBindingPoint);
+            bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering.emplace_back(
+                srcBindingPoint);
 
             // The remapped binding point is inserted into the Dawn data structure.
             const BindGroupLayoutInternalBase* bgl =
@@ -449,7 +449,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     }
 
     req.tintOptions.bindings = std::move(bindings);
-    req.tintOptions.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
     req.tintOptions.disable_polyfill_integer_div_mod =
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 

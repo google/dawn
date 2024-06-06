@@ -35,7 +35,6 @@
 ################################################################################
 
 include(api/common/BUILD.cmake)
-include(api/options/BUILD.cmake)
 
 ################################################################################
 # Target:    tint_api
@@ -48,7 +47,6 @@ tint_add_target(tint_api lib
 
 tint_target_add_dependencies(tint_api lib
   tint_api_common
-  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_ir

@@ -44,7 +44,6 @@ tint_executable("loopy") {
   deps = [
     "${tint_src_dir}/api",
     "${tint_src_dir}/api/common",
-    "${tint_src_dir}/api/options",
     "${tint_src_dir}/cmd/common",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
