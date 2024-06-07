@@ -633,13 +633,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // Vulkan SPEC and drivers.
     deviceToggles->Default(Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy, true);
 
-#if DAWN_PLATFORM_IS(ANDROID)
-    // Default to the IR backend on Android.
-    deviceToggles->Default(Toggle::UseTintIR, true);
-#else
-    // All other platforms default to the value corresponding to the feature flag.
+    // TODO(crbug.com/345276504): Remove this and associated ShaderModuleVK code after M128 branch.
+#if DAWN_PLATFORM_IS(CHROMEOS)
+    // ChromeOS is controlled by the feature flag (which defaults to `true`) for one more release.
     deviceToggles->Default(Toggle::UseTintIR,
                            platform->IsFeatureEnabled(platform::Features::kWebGPUUseTintIR));
+#else
+    // All other Vulkan platforms are not controlled by the feature flag and use the IR by default.
+    deviceToggles->Default(Toggle::UseTintIR, true);
 #endif
 
     if (IsAndroidQualcomm()) {
