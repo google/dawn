@@ -549,6 +549,10 @@ TEST_P(MaxLimitTests, MaxStorageBuffersPerShaderStage) {
 // used correctly. The test loads a different value from each binding, and writes 1 to a storage
 // buffer if all values are correct.
 TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
+    // TODO(crbug.com/345758016): VVL produces a false-positive WAR hazard for this test.
+    // Remove this suppression once the issue is fixed.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     wgpu::Limits limits = GetSupportedLimits().limits;
 

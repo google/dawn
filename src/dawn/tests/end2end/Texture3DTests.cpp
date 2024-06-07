@@ -137,6 +137,10 @@ TEST_P(Texture3DTests, Sampling) {
 // Regression test for crbug.com/dawn/2072 where the WSize of D3D UAV descriptor ends up being 0.
 // (which is invalid as noted by the debug layers)
 TEST_P(Texture3DTests, LatestMipClampsDepthSizeForStorageTextures) {
+    // TODO(crbug.com/345758016): VVL produces a false-positive WAR hazard for this test.
+    // Remove this suppression once the issue is fixed.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
+
     wgpu::TextureDescriptor tDesc;
     tDesc.dimension = wgpu::TextureDimension::e3D;
     tDesc.size = {2, 2, 1};
