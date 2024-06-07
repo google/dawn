@@ -3039,6 +3039,32 @@ TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1Alpha
     }
 }
 
+// Test that it is valid to declare `@blend_src(1)` before `@blend_src(0)`.
+TEST_F(DualSourceBlendingFeatureTest, BlendSrc1BeforeBlendSrc0) {
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        enable dual_source_blending;
+        struct FragOut {
+            @location(0) @blend_src(1) blend : vec4f,
+            @location(0) @blend_src(0) color : vec4f,
+        }
+        @fragment fn main() -> FragOut {
+            var output : FragOut;
+            output.color = vec4f(0.0, 1.0, 0.0, 1.0);
+            output.blend = vec4f(0.0, 1.0, 0.0, 1.0);
+            return output;
+        })");
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+    descriptor.cBlends[0].color.srcFactor = wgpu::BlendFactor::Src1;
+    descriptor.cBlends[0].color.dstFactor = wgpu::BlendFactor::Src;
+    descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
+    device.CreateRenderPipeline(&descriptor);
+}
+
 class FramebufferFetchFeatureTest : public RenderPipelineValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {

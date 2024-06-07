@@ -800,15 +800,23 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 continue;
             }
 
+            // Both `@blend_src(0)` and `@blend_src(1)` are related to color attachment 0 and must
+            // have the same type, so we just need to save the type information of `@blend_src(1)`
+            // in `metadata->fragmentOutputVariables[0]` so that when dual source blending is used
+            // `metadata->fragmentOutputVariables[0].blendSrc` is always 1.
+            bool isBlendSrc0 = false;
             if (outputVar.attributes.blend_src.has_value()) {
                 variable.blendSrc = *outputVar.attributes.blend_src;
+                isBlendSrc0 = variable.blendSrc == 0;
             } else {
                 variable.blendSrc = 0;
             }
 
-            ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));
-            metadata->fragmentOutputVariables[attachment] = variable;
-            metadata->fragmentOutputMask.set(attachment);
+            if (!isBlendSrc0) {
+                ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));
+                metadata->fragmentOutputVariables[attachment] = variable;
+                metadata->fragmentOutputMask.set(attachment);
+            }
         }
 
         // Fragment input reflection.
