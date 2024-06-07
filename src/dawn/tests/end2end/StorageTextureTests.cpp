@@ -706,13 +706,6 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
             continue;
         }
 
-        // TODO(crbug.com/dawn/676): investigate why this test fails with RGBA8Snorm on Linux
-        // Intel OpenGL and OpenGLES drivers.
-        if (format == wgpu::TextureFormat::RGBA8Snorm && IsIntel() &&
-            (IsOpenGL() || IsOpenGLES()) && IsLinux()) {
-            continue;
-        }
-
         // Prepare the write-only storage texture.
         wgpu::Texture writeonlyStorageTexture =
             CreateTexture(format, wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc,
@@ -745,13 +738,6 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
         // TODO(dawn:1503): ANGLE OpenGL fails blit emulation path when texture is not copied
         // explicitly via the mUseCopy = true workaround path.
         if (format == wgpu::TextureFormat::RGBA8Snorm && IsANGLE() && IsWindows()) {
-            continue;
-        }
-
-        // TODO(crbug.com/dawn/676): investigate why this test fails with RGBA8Snorm on Linux
-        // Intel OpenGL and OpenGLES drivers.
-        if (format == wgpu::TextureFormat::RGBA8Snorm && IsIntel() &&
-            (IsOpenGL() || IsOpenGLES()) && IsLinux()) {
             continue;
         }
 
