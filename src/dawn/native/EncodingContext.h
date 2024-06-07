@@ -93,38 +93,32 @@ class EncodingContext {
         return false;
     }
 
-    inline bool CheckCurrentEncoder(const ApiObjectBase* encoder) {
-        if (mDestroyed) {
-            HandleError(DAWN_VALIDATION_ERROR("Recording in a destroyed %s.", mCurrentEncoder));
-            return false;
-        }
+    inline MaybeError CheckCurrentEncoder(const ApiObjectBase* encoder) {
+        DAWN_INVALID_IF(mDestroyed, "Recording in a destroyed %s.", mCurrentEncoder);
+
         if (DAWN_UNLIKELY(encoder != mCurrentEncoder)) {
-            if (mCurrentEncoder != mTopLevelEncoder) {
-                // The top level encoder was used when a pass encoder was current.
-                HandleError(DAWN_VALIDATION_ERROR(
-                    "Command cannot be recorded while %s is locked and %s is currently open.",
-                    mTopLevelEncoder, mCurrentEncoder));
-            } else if (mTopLevelEncoder == nullptr) {
-                // Note: mTopLevelEncoder == nullptr is used as a flag for if Finish() has been
-                // called.
-                if (encoder->GetType() == ObjectType::CommandEncoder ||
-                    encoder->GetType() == ObjectType::RenderBundleEncoder) {
-                    HandleError(DAWN_VALIDATION_ERROR("%s is already finished.", encoder));
-                } else {
-                    HandleError(DAWN_VALIDATION_ERROR("Parent encoder of %s is already finished.",
-                                                      encoder));
-                }
-            } else {
-                HandleError(DAWN_VALIDATION_ERROR("Recording in an error %s.", encoder));
+            // The top level encoder was used when a pass encoder was current.
+            DAWN_INVALID_IF(
+                mCurrentEncoder != mTopLevelEncoder,
+                "Command cannot be recorded while %s is locked and %s is currently open.",
+                mTopLevelEncoder, mCurrentEncoder);
+
+            // Note: mTopLevelEncoder == nullptr is used as a flag for if Finish() has been called.
+            if (mTopLevelEncoder == nullptr) {
+                DAWN_INVALID_IF(encoder->GetType() == ObjectType::CommandEncoder ||
+                                    encoder->GetType() == ObjectType::RenderBundleEncoder,
+                                "%s is already finished.", encoder);
+
+                return DAWN_VALIDATION_ERROR("Parent encoder of %s is already finished.", encoder);
             }
-            return false;
+            return DAWN_VALIDATION_ERROR("Recording in an error %s.", encoder);
         }
-        return true;
+        return {};
     }
 
     template <typename EncodeFunction>
     inline bool TryEncode(const ApiObjectBase* encoder, EncodeFunction&& encodeFunction) {
-        if (!CheckCurrentEncoder(encoder)) {
+        if (ConsumedError(CheckCurrentEncoder(encoder))) {
             return false;
         }
         DAWN_ASSERT(!mWasMovedToIterator);
@@ -136,7 +130,7 @@ class EncodingContext {
                           EncodeFunction&& encodeFunction,
                           const char* formatStr,
                           const Args&... args) {
-        if (!CheckCurrentEncoder(encoder)) {
+        if (ConsumedError(CheckCurrentEncoder(encoder), formatStr, args...)) {
             return false;
         }
         DAWN_ASSERT(!mWasMovedToIterator);

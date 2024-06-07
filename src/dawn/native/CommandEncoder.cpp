@@ -139,7 +139,7 @@ class RenderPassValidationState final : public NonMovable {
         Extent3D renderSize = attachment->GetSingleSubresourceVirtualSize();
         Extent3D attachmentValidationSize = renderSize;
         if (attachment->GetTexture()->GetFormat().IsMultiPlanar()) {
-            // For multi-planar texture, D3D requires depth stencil buffer size mush be equal to the
+            // For multi-planar texture, D3D requires depth stencil buffer size must be equal to the
             // size of the plane 0 for the color attachment texture (`attachmentValidationSize`).
             // Vulkan, Metal and GL requires buffer size equal or bigger than render size. To make
             // all dawn backends work, dawn requires depth attachment's size equal to the
@@ -2065,7 +2065,8 @@ void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_
 }
 
 void CommandEncoder::APIInjectValidationError(const char* message) {
-    if (mEncodingContext.CheckCurrentEncoder(this)) {
+    if (!mEncodingContext.ConsumedError(mEncodingContext.CheckCurrentEncoder(this),
+                                        "injecting validation error: %s.", message)) {
         mEncodingContext.HandleError(DAWN_MAKE_ERROR(InternalErrorType::Validation, message));
     }
 }
