@@ -91,7 +91,7 @@ uint32_t GetDeviceIdFromRender(std::string_view render) {
 
 // static
 ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
-                                                          void* (*getProc)(const char*),
+                                                          EGLGetProcProc getProc,
                                                           EGLDisplay display) {
     EGLFunctions egl;
     egl.Init(getProc);
@@ -126,7 +126,7 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
 PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType, EGLDisplay display)
     : PhysicalDeviceBase(backendType), mDisplay(display) {}
 
-MaybeError PhysicalDevice::InitializeGLFunctions(void* (*getProc)(const char*)) {
+MaybeError PhysicalDevice::InitializeGLFunctions(EGLGetProcProc getProc) {
     // Use getProc to populate the dispatch table
     mEGLFunctions.Init(getProc);
     return mFunctions.Initialize(getProc);

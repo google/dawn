@@ -33,7 +33,7 @@
 namespace dawn::native::opengl {
 
 struct EGLFunctions {
-    void Init(void* (*getProc)(const char*));
+    void Init(EGLGetProcProc getProc);
     PFNEGLBINDAPIPROC BindAPI;
     PFNEGLCHOOSECONFIGPROC ChooseConfig;
     PFNEGLCREATECONTEXTPROC CreateContext;

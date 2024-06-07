@@ -30,7 +30,7 @@
 namespace dawn::native::opengl {
 
 template<typename T>
-MaybeError OpenGLFunctionsBase::LoadProc(GetProcAddress getProc, T* memberProc, const char* name) {
+MaybeError OpenGLFunctionsBase::LoadProc(GLGetProcProc getProc, T* memberProc, const char* name) {
     *memberProc = reinterpret_cast<T>(getProc(name));
     if (DAWN_UNLIKELY(memberProc == nullptr)) {
         return DAWN_INTERNAL_ERROR(std::string("Couldn't load GL proc: ") + name);
@@ -39,7 +39,7 @@ MaybeError OpenGLFunctionsBase::LoadProc(GetProcAddress getProc, T* memberProc, 
 }
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGLES)
-MaybeError OpenGLFunctionsBase::LoadOpenGLESProcs(GetProcAddress getProc, int majorVersion, int minorVersion) {
+MaybeError OpenGLFunctionsBase::LoadOpenGLESProcs(GLGetProcProc getProc, int majorVersion, int minorVersion) {
     {% for block in gles_blocks %}
         // OpenGL ES {{block.version.major}}.{{block.version.minor}}
         if (majorVersion > {{block.version.major}} || (majorVersion == {{block.version.major}} && minorVersion >= {{block.version.minor}})) {
@@ -66,7 +66,7 @@ MaybeError OpenGLFunctionsBase::LoadOpenGLESProcs(GetProcAddress getProc, int ma
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
-MaybeError OpenGLFunctionsBase::LoadDesktopGLProcs(GetProcAddress getProc, int majorVersion, int minorVersion) {
+MaybeError OpenGLFunctionsBase::LoadDesktopGLProcs(GLGetProcProc getProc, int majorVersion, int minorVersion) {
     {% for block in desktop_gl_blocks %}
         // Desktop OpenGL {{block.version.major}}.{{block.version.minor}}
         if (majorVersion > {{block.version.major}} || (majorVersion == {{block.version.major}} && minorVersion >= {{block.version.minor}})) {

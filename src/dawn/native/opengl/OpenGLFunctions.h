@@ -37,7 +37,7 @@ namespace dawn::native::opengl {
 
 struct OpenGLFunctions : OpenGLFunctionsBase {
   public:
-    MaybeError Initialize(GetProcAddress getProc);
+    MaybeError Initialize(GLGetProcProc getProc);
 
     const OpenGLVersion& GetVersion() const;
     bool IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion) const;

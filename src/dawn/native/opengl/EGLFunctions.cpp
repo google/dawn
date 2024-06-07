@@ -29,8 +29,8 @@
 
 namespace dawn::native::opengl {
 
-void EGLFunctions::Init(void* (*getProc)(const char*)) {
-    GetProcAddress = reinterpret_cast<PFNEGLGETPROCADDRESSPROC>(getProc);
+void EGLFunctions::Init(EGLGetProcProc getProc) {
+    GetProcAddress = getProc;
     BindAPI = reinterpret_cast<PFNEGLBINDAPIPROC>(GetProcAddress("eglBindAPI"));
     ChooseConfig = reinterpret_cast<PFNEGLCHOOSECONFIGPROC>(GetProcAddress("eglChooseConfig"));
     CreateContext = reinterpret_cast<PFNEGLCREATECONTEXTPROC>(GetProcAddress("eglCreateContext"));

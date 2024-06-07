@@ -32,6 +32,7 @@
 
 #include "dawn/common/DynamicLib.h"
 #include "dawn/native/BackendConnection.h"
+#include "dawn/native/OpenGLBackend.h"
 
 using EGLDisplay = void*;
 
@@ -46,12 +47,11 @@ class Backend : public BackendConnection {
         const UnpackedPtr<RequestAdapterOptions>& options) override;
 
   private:
-    std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevicesWithProcs(
-        void* (*getProc)(const char*),
-        EGLDisplay display);
+    std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevicesWithProcs(EGLGetProcProc getProc,
+                                                                          EGLDisplay display);
 
     Ref<PhysicalDevice> mPhysicalDevice = nullptr;
-    void* (*mGetProc)(const char*);
+    EGLGetProcProc mGetProc;
     EGLDisplay mDisplay;
     DynamicLib mLibEGL;
 };

@@ -31,7 +31,7 @@
 
 namespace dawn::native::opengl {
 
-MaybeError OpenGLFunctions::Initialize(GetProcAddress getProc) {
+MaybeError OpenGLFunctions::Initialize(GLGetProcProc getProc) {
     DAWN_TRY(mVersion.Initialize(getProc));
     if (mVersion.IsES()) {
 #if defined(DAWN_ENABLE_BACKEND_OPENGLES)

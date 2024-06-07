@@ -37,7 +37,7 @@ namespace dawn::native::opengl {
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
     static ResultOrError<Ref<PhysicalDevice>> Create(wgpu::BackendType backendType,
-                                                     void* (*getProc)(const char*),
+                                                     EGLGetProcProc getProc,
                                                      EGLDisplay display);
 
     ~PhysicalDevice() override = default;
@@ -51,7 +51,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
   private:
     PhysicalDevice(wgpu::BackendType backendType, EGLDisplay display);
-    MaybeError InitializeGLFunctions(void* (*getProc)(const char*));
+    MaybeError InitializeGLFunctions(EGLGetProcProc getProc);
 
     MaybeError InitializeImpl() override;
     void InitializeSupportedFeaturesImpl() override;

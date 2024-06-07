@@ -67,6 +67,9 @@ using GLDEBUGPROCAMD = void(KHRONOS_APIENTRY*)(GLuint id,
                                                const GLchar* message,
                                                void* userParam);
 
+using AnyGLProc = void (*)();
+using GLGetProcProc = AnyGLProc (KHRONOS_APIENTRY*) (const char*);
+
 {% for block in header_blocks %}
     // {{block.description}}
     {% for enum in block.enums %}

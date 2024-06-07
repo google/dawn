@@ -51,4 +51,6 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+using EGLGetProcProc = PFNEGLGETPROCADDRESSPROC;
+
 #endif  // SRC_DAWN_COMMON_EGL_PLATFORM_H_

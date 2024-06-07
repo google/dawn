@@ -39,7 +39,7 @@ struct OpenGLVersion {
         ES,
     };
 
-    MaybeError Initialize(GetProcAddress getProc);
+    MaybeError Initialize(GLGetProcProc getProc);
 
     bool IsDesktop() const;
     bool IsES() const;

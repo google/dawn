@@ -51,7 +51,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return std::vector<Ref<PhysicalDeviceBase>>{};
     }
 
-    void* (*getProc)(const char* name) = nullptr;
+    EGLGetProcProc getProc = nullptr;
     EGLDisplay display = EGL_NO_DISPLAY;
 
     if (auto* glGetProcOptions = options.Get<RequestAdapterOptionsGetGLProc>()) {
@@ -76,7 +76,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
             return {};
         }
 
-        getProc = reinterpret_cast<void* (*)(const char*)>(mLibEGL.GetProc("eglGetProcAddress"));
+        getProc = reinterpret_cast<decltype(getProc)>(mLibEGL.GetProc("eglGetProcAddress"));
         if (!getProc) {
             GetInstance()->ConsumedErrorAndWarnOnce(
                 DAWN_VALIDATION_ERROR("eglGetProcAddress return nullptr"));
@@ -88,7 +88,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
 }
 
 std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevicesWithProcs(
-    void* (*getProc)(const char*),
+    EGLGetProcProc getProc,
     EGLDisplay display) {
     // TODO(cwallez@chromium.org): For now only create a single OpenGL physicalDevice because don't
     // know how to handle MakeCurrent.
