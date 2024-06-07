@@ -33,6 +33,7 @@
 #include "dawn/common/GPUInfo.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/webgpu_cpp.h"
 #include "gtest/gtest.h"
@@ -47,6 +48,9 @@ using testing::SaveArg;
 class AdapterCreationTest : public ::testing::TestWithParam<std::optional<wgpu::CallbackMode>> {
   protected:
     void SetUp() override {
+        // TODO(345685638): these tests are timed out on TSAN bots.
+        DAWN_TEST_UNSUPPORTED_IF(DawnTest::IsTsan());
+
         dawnProcSetProcs(&native::GetProcs());
 
         {

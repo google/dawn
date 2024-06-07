@@ -285,8 +285,8 @@ class DawnTestBase {
 
     bool IsDXC() const;
 
-    bool IsAsan() const;
-    bool IsTsan() const;
+    static bool IsAsan();
+    static bool IsTsan();
 
     bool HasToggleEnabled(const char* workaround) const;
 
