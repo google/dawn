@@ -48,18 +48,13 @@ class ContextEGL : NonMovable {
     void MakeCurrent();
     EGLDisplay GetEGLDisplay() const;
     const EGLFunctions& GetEGL() const;
-    const EGLExtensionSet& GetExtensions() const;
 
   private:
-    ContextEGL(const EGLFunctions& functions,
-               EGLDisplay display,
-               EGLContext context,
-               EGLExtensionSet extensions);
+    ContextEGL(const EGLFunctions& functions, EGLDisplay display, EGLContext context);
 
     const EGLFunctions mEgl;
     EGLDisplay mDisplay;
     EGLContext mContext;
-    EGLExtensionSet mExtensions;
 };
 
 }  // namespace dawn::native::opengl

@@ -44,12 +44,11 @@ ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* d
     return AcquireRef(new Queue(device, descriptor));
 }
 
-Queue::Queue(Device* device, const QueueDescriptor* descriptor)
-    : QueueBase(device, descriptor),
-      mEGLSyncType(device->GetEGLExtensions()[EGLExtension::FenceSyncKHR] ? EGL_SYNC_FENCE_KHR
-                                                                          : EGL_SYNC_REUSABLE_KHR) {
-    DAWN_ASSERT(device->GetEGLExtensions()[EGLExtension::FenceSyncKHR] ||
-                device->GetEGLExtensions()[EGLExtension::ReusableSyncKHR]);
+Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {
+    const auto& egl = device->GetEGL(false);
+
+    DAWN_ASSERT(egl.HasExt(EGLExt::FenceSync) || egl.HasExt(EGLExt::ReusableSync));
+    mEGLSyncType = egl.HasExt(EGLExt::FenceSync) ? EGL_SYNC_FENCE : EGL_SYNC_REUSABLE_KHR;
 }
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
@@ -147,18 +146,18 @@ void Queue::OnGLUsed() {
     mHasPendingCommands = true;
 }
 
-GLenum Queue::ClientWaitSync(EGLSyncKHR sync, Nanoseconds timeout) {
+GLenum Queue::ClientWaitSync(EGLSync sync, Nanoseconds timeout) {
     const Device* device = ToBackend(GetDevice());
     const EGLFunctions& egl = device->GetEGL(/*makeCurrent=*/false);
 
-    return egl.ClientWaitSyncKHR(device->GetEGLDisplay(), sync, EGL_SYNC_FLUSH_COMMANDS_BIT_KHR,
-                                 uint64_t(timeout));
+    return egl.ClientWaitSync(device->GetEGLDisplay(), sync, EGL_SYNC_FLUSH_COMMANDS_BIT,
+                              uint64_t(timeout));
 }
 
 ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) {
     // Search for the first fence >= serial.
     return mFencesInFlight.Use([&](auto fencesInFlight) -> ResultOrError<bool> {
-        EGLSyncKHR waitSync = nullptr;
+        EGLSync waitSync = nullptr;
         for (auto it = fencesInFlight->begin(); it != fencesInFlight->end(); ++it) {
             if (it->second >= serial) {
                 waitSync = it->first;
@@ -174,9 +173,9 @@ ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanosecond
         // Wait for the fence sync.
         GLenum result = ClientWaitSync(waitSync, timeout);
         switch (result) {
-            case EGL_TIMEOUT_EXPIRED_KHR:
+            case EGL_TIMEOUT_EXPIRED:
                 return false;
-            case EGL_CONDITION_SATISFIED_KHR:
+            case EGL_CONDITION_SATISFIED:
                 return true;
             case EGL_FALSE:
                 return DAWN_INTERNAL_ERROR("glClientWaitSync failed");
@@ -194,13 +193,13 @@ void Queue::SubmitFenceSync() {
         const Device* device = ToBackend(GetDevice());
         const EGLFunctions& egl = device->GetEGL(/*makeCurrent=*/true);
 
-        EGLSyncKHR sync = egl.CreateSyncKHR(device->GetEGLDisplay(), mEGLSyncType, nullptr);
-        DAWN_ASSERT(sync != EGL_NO_SYNC_KHR);
+        EGLSync sync = egl.CreateSync(device->GetEGLDisplay(), mEGLSyncType, nullptr);
+        DAWN_ASSERT(sync != EGL_NO_SYNC);
 
         // Signal the sync if it is EGL_SYNC_REUSABLE_KHR. On the other hand,
         // EGL_SYNC_FENCE_KHR has its signal scheduled on creation.
         if (mEGLSyncType == EGL_SYNC_REUSABLE_KHR) {
-            EGLBoolean status = egl.SignalSyncKHR(device->GetEGLDisplay(), sync, EGL_SIGNALED_KHR);
+            EGLBoolean status = egl.SignalSync(device->GetEGLDisplay(), sync, EGL_SIGNALED);
             DAWN_ASSERT(status == EGL_TRUE);
         }
 
@@ -232,13 +231,13 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
             // Fence are added in order, so we can stop searching as soon
             // as we see one that's not ready.
             GLenum result = ClientWaitSync(sync, Nanoseconds(0));
-            if (result == EGL_TIMEOUT_EXPIRED_KHR) {
+            if (result == EGL_TIMEOUT_EXPIRED) {
                 return fenceSerial;
             }
             // Update fenceSerial since fence is ready.
             fenceSerial = tentativeSerial;
 
-            egl.DestroySyncKHR(display, sync);
+            egl.DestroySync(display, sync);
 
             fencesInFlight->pop_front();
 

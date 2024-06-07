@@ -48,7 +48,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
     }
     if (!options->compatibilityMode) {
         // Return an empty vector since GL physical devices can only support compatibility mode.
-        return std::vector<Ref<PhysicalDeviceBase>>{};
+        return {};
     }
 
     EGLGetProcProc getProc = nullptr;
