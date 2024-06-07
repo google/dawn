@@ -144,6 +144,7 @@ enum class Toggle {
     VulkanSkipDraw,
 
     D3D11UseUnmonitoredFence,
+    IgnoreImportedAHardwareBufferVulkanImageSize,
 
     EnumCount,
     InvalidEnum = EnumCount,

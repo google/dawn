@@ -676,19 +676,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 
     // Import the memory as VkDeviceMemory and bind to the VkImage.
     {
-        // Get the valid memory types for the VkImage.
+        // Choose the best memory type that satisfies the import's constraint.
         VkMemoryRequirements memoryRequirements;
-        device->fn.GetImageMemoryRequirements(vkDevice, sharedTextureMemory->mVkImage->Get(),
-                                              &memoryRequirements);
-
-        DAWN_INVALID_IF(memoryRequirements.size > bufferProperties.allocationSize,
-                        "Required texture memory size (%u) is larger than the AHardwareBuffer "
-                        "allocation size (%u).",
-                        memoryRequirements.size, bufferProperties.allocationSize);
-
-        // Choose the best memory type that satisfies both the image's constraint and the
-        // import's constraint.
-        memoryRequirements.memoryTypeBits &= bufferProperties.memoryTypeBits;
+        memoryRequirements.memoryTypeBits = bufferProperties.memoryTypeBits;
         int memoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
             memoryRequirements, MemoryKind::Opaque);
         DAWN_INVALID_IF(memoryTypeIndex == -1,
@@ -724,6 +714,22 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
             device->fn.BindImageMemory(vkDevice, sharedTextureMemory->mVkImage->Get(),
                                        sharedTextureMemory->mVkDeviceMemory->Get(), 0),
             "vkBindImageMemory"));
+
+        // Verify the texture memory requirements fit within the constraints of the AHardwareBuffer.
+        device->fn.GetImageMemoryRequirements(vkDevice, sharedTextureMemory->mVkImage->Get(),
+                                              &memoryRequirements);
+
+        DAWN_INVALID_IF((memoryRequirements.memoryTypeBits & bufferProperties.memoryTypeBits) == 0,
+                        "Required memory type bits (%u) do not overlap with AHardwareBuffer memory "
+                        "type bits (%u).",
+                        memoryRequirements.memoryTypeBits, bufferProperties.memoryTypeBits);
+
+        if (!device->IsToggleEnabled(Toggle::IgnoreImportedAHardwareBufferVulkanImageSize)) {
+            DAWN_INVALID_IF(memoryRequirements.size > bufferProperties.allocationSize,
+                            "Required texture memory size (%u) is larger than the AHardwareBuffer "
+                            "allocation size (%u).",
+                            memoryRequirements.size, bufferProperties.allocationSize);
+        }
     }
     return sharedTextureMemory;
 #else

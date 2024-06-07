@@ -60,6 +60,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     bool IsAndroidQualcomm() const;
     bool IsAndroidARM() const;
+    bool IsAndroidSamsung() const;
     bool IsIntelMesa() const;
 
     uint32_t GetDefaultComputeSubgroupSize() const;
