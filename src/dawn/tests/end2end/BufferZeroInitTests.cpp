@@ -983,9 +983,6 @@ TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // uniform buffer.
 TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
-    // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
-
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct UBO {
@@ -1022,9 +1019,6 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // read-only storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
-    // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
-
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct SSBO {
@@ -1061,9 +1055,6 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 // Test that the buffer will be lazy initialized correctly when its first use is to be bound as a
 // storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
-    // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
-
     constexpr uint32_t kBoundBufferSize = 32u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct SSBO {
@@ -1294,9 +1285,6 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
 // Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DispatchIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
-    // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
-
     // Bind the whole buffer as an indirect buffer.
     {
         constexpr uint64_t kOffset = 0u;
