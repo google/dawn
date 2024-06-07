@@ -407,7 +407,6 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
     EGLenum api =
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
-    std::unique_ptr<Device::Context> context;
     bool useANGLETextureSharing = false;
     for (size_t i = 0; i < descriptor->requiredFeatureCount; ++i) {
         if (descriptor->requiredFeatures[i] == wgpu::FeatureName::ANGLETextureSharing) {
@@ -415,8 +414,10 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
         }
     }
 
+    std::unique_ptr<ContextEGL> context;
     DAWN_TRY_ASSIGN(context,
                     ContextEGL::Create(mEGLFunctions, api, mDisplay, useANGLETextureSharing));
+
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
                           std::move(lostEvent));
 }

@@ -39,6 +39,7 @@
 #include "dawn/native/opengl/BufferGL.h"
 #include "dawn/native/opengl/CommandBufferGL.h"
 #include "dawn/native/opengl/ComputePipelineGL.h"
+#include "dawn/native/opengl/ContextEGL.h"
 #include "dawn/native/opengl/PipelineLayoutGL.h"
 #include "dawn/native/opengl/QuerySetGL.h"
 #include "dawn/native/opengl/QueueGL.h"
@@ -121,7 +122,7 @@ namespace dawn::native::opengl {
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const UnpackedPtr<DeviceDescriptor>& descriptor,
                                           const OpenGLFunctions& functions,
-                                          std::unique_ptr<Context> context,
+                                          std::unique_ptr<ContextEGL> context,
                                           const TogglesState& deviceToggles,
                                           Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
     Ref<Device> device = AcquireRef(new Device(adapter, descriptor, functions, std::move(context),
@@ -133,7 +134,7 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 Device::Device(AdapterBase* adapter,
                const UnpackedPtr<DeviceDescriptor>& descriptor,
                const OpenGLFunctions& functions,
-               std::unique_ptr<Context> context,
+               std::unique_ptr<ContextEGL> context,
                const TogglesState& deviceToggles,
                Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
     : DeviceBase(adapter, descriptor, deviceToggles, std::move(lostEvent)),
@@ -449,6 +450,10 @@ const EGLExtensionSet& Device::GetEGLExtensions() const {
 
 EGLDisplay Device::GetEGLDisplay() const {
     return mContext->GetEGLDisplay();
+}
+
+ContextEGL* Device::GetContext() const {
+    return mContext.get();
 }
 
 }  // namespace dawn::native::opengl

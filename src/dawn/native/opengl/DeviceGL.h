@@ -46,6 +46,7 @@
 
 namespace dawn::native::opengl {
 
+class ContextEGL;
 struct EGLFunctions;
 
 enum class EGLExtension {
@@ -64,19 +65,21 @@ class Device final : public DeviceBase {
     static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              const UnpackedPtr<DeviceDescriptor>& descriptor,
                                              const OpenGLFunctions& functions,
-                                             std::unique_ptr<Context> context,
+                                             std::unique_ptr<ContextEGL> context,
                                              const TogglesState& deviceToggles,
                                              Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
     ~Device() override;
 
     MaybeError Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor);
 
-    // Returns all the OpenGL entry points and ensures that the associated
-    // Context is current.
+    // Returns all the OpenGL entry points and ensures that the associated GL context is current.
     const OpenGLFunctions& GetGL() const;
+
+    // Helper functions to get access to relevant EGL objects.
     const EGLFunctions& GetEGL(bool makeCurrent) const;
     const EGLExtensionSet& GetEGLExtensions() const;
     EGLDisplay GetEGLDisplay() const;
+    ContextEGL* GetContext() const;
 
     const GLFormat& GetGLFormat(const Format& format);
 
@@ -113,21 +116,11 @@ class Device final : public DeviceBase {
     bool MayRequireDuplicationOfIndirectParameters() const override;
     bool ShouldApplyIndexBufferOffsetToFirstIndex() const override;
 
-    class Context {
-      public:
-        virtual ~Context() {}
-        virtual void MakeCurrent() = 0;
-        // TODO(dawn:2544) Abstract EGL-isms for use with desktop GL.
-        virtual EGLDisplay GetEGLDisplay() const = 0;
-        virtual const EGLFunctions& GetEGL() const = 0;
-        virtual const EGLExtensionSet& GetExtensions() const = 0;
-    };
-
   private:
     Device(AdapterBase* adapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
            const OpenGLFunctions& functions,
-           std::unique_ptr<Context> context,
+           std::unique_ptr<ContextEGL> context,
            const TogglesState& deviceToggles,
            Ref<DeviceBase::DeviceLostEvent>&& lostEvent);
 
@@ -166,7 +159,7 @@ class Device final : public DeviceBase {
     const OpenGLFunctions mGL;
 
     GLFormatTable mFormatTable;
-    std::unique_ptr<Context> mContext = nullptr;
+    std::unique_ptr<ContextEGL> mContext = nullptr;
     int mMaxTextureMaxAnisotropy = 0;
 };
 

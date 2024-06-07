@@ -30,23 +30,25 @@
 
 #include <memory>
 
+#include "dawn/common/NonMovable.h"
 #include "dawn/common/egl_platform.h"
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/native/opengl/EGLFunctions.h"
 
 namespace dawn::native::opengl {
 
-class ContextEGL : public Device::Context {
+class ContextEGL : NonMovable {
   public:
     static ResultOrError<std::unique_ptr<ContextEGL>> Create(const EGLFunctions& functions,
                                                              EGLenum api,
                                                              EGLDisplay display,
                                                              bool useANGLETextureSharing);
-    void MakeCurrent() override;
-    EGLDisplay GetEGLDisplay() const override;
-    const EGLFunctions& GetEGL() const override;
-    const EGLExtensionSet& GetExtensions() const override;
-    ~ContextEGL() override;
+    ~ContextEGL();
+
+    void MakeCurrent();
+    EGLDisplay GetEGLDisplay() const;
+    const EGLFunctions& GetEGL() const;
+    const EGLExtensionSet& GetExtensions() const;
 
   private:
     ContextEGL(const EGLFunctions& functions,
