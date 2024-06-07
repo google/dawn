@@ -874,6 +874,99 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_Std140Test, Mat3x2_Nested_AccessInstructionWithManyIndices_LoadMatrix) {
+    auto* mat = ty.mat3x2<f32>();
+    auto* inner = ty.Struct(mod.symbols.New("Inner"), {
+                                                          {mod.symbols.New("m"), ty.array(mat, 4)},
+                                                      });
+    auto* arr = ty.array(inner, 4u);
+    auto* outer = ty.Struct(mod.symbols.New("Outer"), {
+                                                          {mod.symbols.New("arr"), arr},
+                                                      });
+    outer->SetStructFlag(core::type::kBlock);
+
+    auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* mat_ptr = b.Access(ty.ptr(uniform, mat), buffer, 0_u, 1_u, 0_u, 2_u);
+        b.Let("mat", b.Load(mat_ptr));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+Inner = struct @align(8) {
+  m:array<mat3x2<f32>, 4> @offset(0)
+}
+
+Outer = struct @align(8), @block {
+  arr:array<Inner, 4> @offset(0)
+}
+
+$B1: {  # root
+  %buffer:ptr<uniform, Outer, read> = var @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<uniform, mat3x2<f32>, read> = access %buffer, 0u, 1u, 0u, 2u
+    %4:mat3x2<f32> = load %3
+    %mat:mat3x2<f32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Inner = struct @align(8) {
+  m:array<mat3x2<f32>, 4> @offset(0)
+}
+
+Outer = struct @align(8), @block {
+  arr:array<Inner, 4> @offset(0)
+}
+
+mat3x2_f32_std140 = struct @align(8) {
+  col0:vec2<f32> @offset(0)
+  col1:vec2<f32> @offset(8)
+  col2:vec2<f32> @offset(16)
+}
+
+Inner_std140 = struct @align(8) {
+  m:array<mat3x2_f32_std140, 4> @offset(0)
+}
+
+Outer_std140 = struct @align(8), @block {
+  arr:array<Inner_std140, 4> @offset(0)
+}
+
+$B1: {  # root
+  %buffer:ptr<uniform, Outer_std140, read> = var @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<uniform, vec2<f32>, read> = access %buffer, 0u, 1u, 0u, 2u, 0u
+    %4:vec2<f32> = load %3
+    %5:ptr<uniform, vec2<f32>, read> = access %buffer, 0u, 1u, 0u, 2u, 1u
+    %6:vec2<f32> = load %5
+    %7:ptr<uniform, vec2<f32>, read> = access %buffer, 0u, 1u, 0u, 2u, 2u
+    %8:vec2<f32> = load %7
+    %9:mat3x2<f32> = construct %4, %6, %8
+    %mat:mat3x2<f32> = let %9
+    ret
+  }
+}
+)";
+
+    Run(Std140);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_Std140Test, Mat3x2_Nested_ChainOfAccessInstructions) {
     auto* mat = ty.mat3x2<f32>();
     auto* inner = ty.Struct(mod.symbols.New("Inner"), {
