@@ -143,7 +143,7 @@ class Device final : public DeviceBase {
     const OpenGLFunctions mGL;
 
     GLFormatTable mFormatTable;
-    std::unique_ptr<ContextEGL> mContext = nullptr;
+    std::unique_ptr<ContextEGL> mContext;
     int mMaxTextureMaxAnisotropy = 0;
 };
 
