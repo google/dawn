@@ -46,7 +46,7 @@ bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format,
         case wgpu::TextureFormat::RGBA32Sint:
         case wgpu::TextureFormat::RGBA32Float:
             return true;
-            // TODO(crbug.com/dawn/595): 32-bit RG* formats are unsupported on OpenGL ES.
+            // 32-bit RG* formats are unsupported in Compatibility mode.
         case wgpu::TextureFormat::RG32Uint:
         case wgpu::TextureFormat::RG32Sint:
         case wgpu::TextureFormat::RG32Float:

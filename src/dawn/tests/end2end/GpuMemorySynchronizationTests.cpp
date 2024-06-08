@@ -551,10 +551,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 // buffer is composed of vertices, indices, uniforms and readonly storage. Data to be read in the
 // buffer in render pass depend on the write operation in compute pass.
 TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
-    // TODO(crbug.com/dawn/646): diagnose and fix this OpenGL ES failure.
-    // "Push constant block cannot be expressed as neither std430 nor std140. ES-targets do not
-    // support GL_ARB_enhanced_layouts."
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    // TODO(crbug.com/dawn/646): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
     // Create pipeline, bind group, and a complex buffer for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
