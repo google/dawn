@@ -1,6 +1,6 @@
-# Chromium Experimental Input Attachments
+# Chromium Internal Input Attachments
 
-The `chromium_experimental_input_attachments` extension adds support for input attachment global variables to WGSL.
+The `chromium_internal_input_attachments` extension adds support for input attachment global variables to WGSL.
 This is similar to Vulkan's `subpassInput` variable.
 
 ## Status

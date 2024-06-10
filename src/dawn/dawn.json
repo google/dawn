@@ -3535,16 +3535,6 @@
         ]
     },
 
-    "dawn multisample state render to single sampled": {
-        "tags": ["dawn", "deprecated"],
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["multisample state"],
-        "members": [
-            {"name": "enabled", "type": "bool", "default": "false"}
-        ]
-    },
-
     "fragment state": {
         "category": "structure",
         "extensible": "in",
@@ -3957,7 +3947,6 @@
             {"value": 1010, "name": "request adapter options LUID", "tags": ["dawn", "native"]},
             {"value": 1011, "name": "request adapter options get GL proc", "tags": ["dawn", "native"]},
             {"value": 1012, "name": "request adapter options D3D11 device", "tags": ["dawn", "native"]},
-            {"value": 1013, "name": "dawn multisample state render to single sampled", "tags": ["dawn", "deprecated"]},
             {"value": 1014, "name": "dawn render pass color attachment render to single sampled", "tags": ["dawn"]},
             {"value": 1015, "name": "render pass pixel local storage", "tags": ["dawn"]},
             {"value": 1016, "name": "pipeline layout pixel local storage", "tags": ["dawn"]},
