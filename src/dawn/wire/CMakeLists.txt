@@ -116,6 +116,7 @@ target_link_libraries(dawn_wire
       dawn_common
       dawn_internal_config
       partition_alloc
+      tint_lang_wgsl_features
 )
 
 install_if_enabled(dawn_wire)
