@@ -344,6 +344,8 @@ source_set("sources") {
     "RenderEncoderBase.h",
     "RenderPassEncoder.cpp",
     "RenderPassEncoder.h",
+    "RenderPassWorkaroundsHelper.cpp",
+    "RenderPassWorkaroundsHelper.h",
     "RenderPipeline.cpp",
     "RenderPipeline.h",
     "ResourceHeap.h",

@@ -195,6 +195,8 @@ target_sources(dawn_native
     "RenderEncoderBase.h"
     "RenderPassEncoder.cpp"
     "RenderPassEncoder.h"
+    "RenderPassWorkaroundsHelper.cpp"
+    "RenderPassWorkaroundsHelper.h"
     "RenderPipeline.cpp"
     "RenderPipeline.h"
     "ResourceHeap.h"

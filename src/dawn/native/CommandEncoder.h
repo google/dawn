@@ -136,12 +136,6 @@ class CommandEncoder final : public ApiObjectBase {
 
     void DestroyImpl() override;
 
-    ResultOrError<std::function<void()>> ApplyRenderPassWorkarounds(
-        DeviceBase* device,
-        RenderPassResourceUsageTracker* usageTracker,
-        BeginRenderPassCmd* cmd,
-        std::function<void()> passEndCallback = nullptr);
-
     MaybeError ValidateFinish() const;
 
     EncodingContext mEncodingContext;

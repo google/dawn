@@ -2087,6 +2087,58 @@ TEST_P(DawnLoadResolveTextureTest, TwoOutputsDrawWithDepthTestColor0AndColor1) {
     VerifyResolveTarget(kGreen, singleSampledTexture2);
 }
 
+// Test rendering into a layer of a 2D array texture and load op=LoadOp::ExpandResolveTexture.
+TEST_P(DawnLoadResolveTextureTest, DrawThenLoad2DArrayTextureLayer) {
+    auto multiSampledTexture = CreateTextureForRenderAttachment(kColorFormat, 4, 1, 1,
+                                                                /*transientAttachment=*/false,
+                                                                /*supportsTextureBinding=*/false);
+    auto multiSampledTextureView = multiSampledTexture.CreateView();
+
+    auto singleSampledTexture = CreateTextureForRenderAttachment(
+        kColorFormat, 1, 1, /*arrayCount=*/2, /*transientAttachment=*/false,
+        /*supportsTextureBinding=*/true);
+    wgpu::TextureViewDescriptor resolveViewDescriptor2;
+    resolveViewDescriptor2.dimension = wgpu::TextureViewDimension::e2D;
+    resolveViewDescriptor2.format = kColorFormat;
+    resolveViewDescriptor2.baseArrayLayer = 1;
+    resolveViewDescriptor2.baseMipLevel = 0;
+    auto singleSampledTextureView = singleSampledTexture.CreateView(&resolveViewDescriptor2);
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(
+        /*testDepth=*/false, /*sampleMask=*/0xFFFFFFFF, /*alphaToCoverageEnabled=*/false,
+        /*flipTriangle=*/false, /*enableExpandResolveLoadOp=*/false);
+
+    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+
+    // In first render pass we draw a green triangle. StoreOp=Discard to discard the MSAA texture's
+    // content.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {multiSampledTextureView}, {singleSampledTextureView}, wgpu::LoadOp::Clear,
+            wgpu::LoadOp::Clear,
+            /*testDepth=*/false);
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
+    }
+
+    // In second render pass, we only use LoadOp::ExpandResolveTexture with no draw call.
+    {
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {multiSampledTextureView}, {singleSampledTextureView},
+            wgpu::LoadOp::ExpandResolveTexture, wgpu::LoadOp::Load,
+            /*testDepth=*/false);
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+        wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
+        renderPassEncoder.End();
+    }
+
+    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    VerifyResolveTarget(kGreen, singleSampledTexture, 0, 1);
+}
+
 DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
                       D3D11Backend(),
                       D3D12Backend(),
