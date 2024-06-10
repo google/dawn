@@ -196,7 +196,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
                     const auto& bindingExpansion = expansion->second;
                     tint::msl::writer::binding::BindingInfo plane0{
-                        static_cast<uint32_t>(shaderIndex)};
+                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)]};
                     tint::msl::writer::binding::BindingInfo plane1{
                         bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
                     tint::msl::writer::binding::BindingInfo metadata{
