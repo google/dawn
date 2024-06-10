@@ -45,8 +45,7 @@ target_compile_definitions(webgpu_dawn PRIVATE WGPU_IMPLEMENTATION WGPU_SHARED_L
 
 add_library(native_dawn methods.cpp structures.cpp Util.cpp ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
 
-# It is not clear why abs::raw_hash_set is not part of the bundled dependency tree naturally.
-bundle_libraries(webgpu_c_bundled webgpu_dawn native_dawn absl::raw_hash_set)
+bundle_libraries(webgpu_c_bundled webgpu_dawn native_dawn)
 
 find_library(log-lib log)
 

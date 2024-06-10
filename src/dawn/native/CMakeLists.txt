@@ -257,11 +257,11 @@ target_link_libraries(dawn_native
             dawn_internal_config
             libtint
             SPIRV-Tools-opt
-            absl_strings
-            absl_str_format_internal
-            absl_flat_hash_map
-            absl_flat_hash_set
-            absl_inlined_vector
+            absl::strings
+            absl::str_format_internal
+            absl::flat_hash_map
+            absl::flat_hash_set
+            absl::inlined_vector
 )
 
 target_include_directories(dawn_native PRIVATE ${DAWN_ABSEIL_DIR})

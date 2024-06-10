@@ -131,7 +131,7 @@ endif()
 target_link_libraries(dawn_common
     PUBLIC dawncpp_headers
     PUBLIC partition_alloc
-    PRIVATE absl_inlined_vector
+    PRIVATE absl::inlined_vector
     PRIVATE dawn_internal_config
 )
 

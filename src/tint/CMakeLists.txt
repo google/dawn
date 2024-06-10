@@ -518,7 +518,7 @@ function(tint_target_add_external_dependencies TARGET KIND)
   foreach(DEPENDENCY ${DEPENDENCIES})  # Each external dependency requires special handling...
     if(${DEPENDENCY} STREQUAL "abseil")
       target_link_libraries(${TARGET} PRIVATE
-        absl_strings
+        absl::strings
       )
     elseif(${DEPENDENCY} STREQUAL "dl")
       target_link_libraries(${TARGET} PRIVATE ${CMAKE_DL_LIBS})

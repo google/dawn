@@ -111,8 +111,8 @@ target_link_libraries(dawn_wire
     PUBLIC
       dawn_headers
     PRIVATE
-      absl_flat_hash_map
-      absl_flat_hash_set
+      absl::flat_hash_map
+      absl::flat_hash_set
       dawn_common
       dawn_internal_config
       partition_alloc
