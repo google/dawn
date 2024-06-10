@@ -210,12 +210,12 @@ GPUDevice::~GPUDevice() {
     }
 }
 
-void GPUDevice::ForceLoss(interop::GPUDeviceLostReason reason, const char* message) {
+void GPUDevice::ForceLoss(wgpu::DeviceLostReason reason, const char* message) {
     if (lost_promise_.GetState() == interop::PromiseState::Pending) {
-        lost_promise_.Resolve(
-            interop::GPUDeviceLostInfo::Create<DeviceLostInfo>(env_, reason, message));
+        lost_promise_.Resolve(interop::GPUDeviceLostInfo::Create<DeviceLostInfo>(
+            env_, interop::GPUDeviceLostReason::kUnknown, message));
     }
-    device_.InjectError(wgpu::ErrorType::DeviceLost, message);
+    device_.ForceLoss(reason, message);
 }
 
 interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::Env env) {

@@ -46,7 +46,7 @@ class GPUDevice final : public interop::GPUDevice {
               std::shared_ptr<AsyncRunner> async);
     ~GPUDevice();
 
-    void ForceLoss(interop::GPUDeviceLostReason reason, const char* message);
+    void ForceLoss(wgpu::DeviceLostReason reason, const char* message);
 
     // interop::GPUDevice interface compliance
     interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;

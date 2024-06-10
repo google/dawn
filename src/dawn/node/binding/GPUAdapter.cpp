@@ -195,7 +195,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
 
     auto gpu_device = std::make_unique<GPUDevice>(env, desc, wgpu_device, async_);
     if (!valid_) {
-        gpu_device->ForceLoss(interop::GPUDeviceLostReason::kUnknown,
+        gpu_device->ForceLoss(wgpu::DeviceLostReason::FailedCreation,
                               "Device was marked as lost due to a stale adapter.");
     }
     valid_ = false;
