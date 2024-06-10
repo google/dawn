@@ -179,13 +179,11 @@ GPUDevice::GPUDevice(Napi::Env env,
                 // This case never happens with wgpu::Device::SetDeviceCallback, and is specific to
                 // wgpu::DeviceDescriptor::deviceLostCallback.
                 case WGPUDeviceLostReason_FailedCreation:
-                    UNREACHABLE("WGPUDeviceLostReason_Force32");
+                    UNREACHABLE("WGPUDeviceLostReason_Force32|FailedAtCreation");
                     break;
                 case WGPUDeviceLostReason_Destroyed:
-                    r = interop::GPUDeviceLostReason::kDestroyed;
-                    break;
                 case WGPUDeviceLostReason_InstanceDropped:
-                    UNREACHABLE("WGPUDeviceLostReason_InstanceDropped");
+                    r = interop::GPUDeviceLostReason::kDestroyed;
                     break;
                 case WGPUDeviceLostReason_Unknown:
                     r = interop::GPUDeviceLostReason::kUnknown;
