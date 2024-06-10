@@ -86,18 +86,12 @@ cc_library(
     "append_vector_test.cc",
     "check_supported_extensions_test.cc",
     "flatten_bindings_test.cc",
-  ] + select({
-    ":tint_build_wgsl_reader": [
-      "ir_program_test.h",
-    ],
-    "//conditions:default": [],
-  }),
+  ],
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
-    "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
@@ -107,7 +101,6 @@ cc_library(
     "//src/tint/lang/wgsl/helpers",
     "//src/tint/lang/wgsl/intrinsic",
     "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/reader/lower",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
@@ -124,19 +117,8 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
-  ] + select({
-    ":tint_build_wgsl_reader": [
-      "//src/tint/lang/wgsl/reader",
-      "//src/tint/lang/wgsl/reader/program_to_ir",
-    ],
-    "//conditions:default": [],
-  }),
+  ],
   copts = COPTS,
   visibility = ["//visibility:public"],
-)
-
-alias(
-  name = "tint_build_wgsl_reader",
-  actual = "//src/tint:tint_build_wgsl_reader_true",
 )
 

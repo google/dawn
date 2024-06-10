@@ -36,7 +36,7 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
-#include "src/tint/lang/wgsl/helpers/ir_program_test.h"
+#include "src/tint/lang/wgsl/reader/program_to_ir/ir_program_test.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 

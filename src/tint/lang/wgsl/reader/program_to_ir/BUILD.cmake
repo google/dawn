@@ -87,6 +87,7 @@ tint_add_target(tint_lang_wgsl_reader_program_to_ir_test test
   lang/wgsl/reader/program_to_ir/builtin_test.cc
   lang/wgsl/reader/program_to_ir/call_test.cc
   lang/wgsl/reader/program_to_ir/function_test.cc
+  lang/wgsl/reader/program_to_ir/ir_program_test.h
   lang/wgsl/reader/program_to_ir/let_test.cc
   lang/wgsl/reader/program_to_ir/literal_test.cc
   lang/wgsl/reader/program_to_ir/materialize_test.cc
@@ -107,7 +108,6 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_program_to_ir_test test
   tint_lang_wgsl_ast
   tint_lang_wgsl_common
   tint_lang_wgsl_features
-  tint_lang_wgsl_helpers_test
   tint_lang_wgsl_program
   tint_lang_wgsl_reader_lower
   tint_lang_wgsl_resolver

@@ -93,7 +93,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/intrinsic",
-      "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
@@ -103,7 +102,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/helpers",
       "${tint_src_dir}/lang/wgsl/intrinsic",
       "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/reader/lower",
       "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/containers",
@@ -120,13 +118,5 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
-
-    if (tint_build_wgsl_reader) {
-      sources += [ "ir_program_test.h" ]
-      deps += [
-        "${tint_src_dir}/lang/wgsl/reader",
-        "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
-      ]
-    }
   }
 }
