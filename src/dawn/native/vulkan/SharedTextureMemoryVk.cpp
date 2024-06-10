@@ -543,7 +543,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         // TODO(crbug.com/dawn/2476): Validate more as per
         // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageCreateInfo.html
         if (useExternalFormat) {
-            DAWN_ASSERT(bufferFormatProperties.externalFormat != 0);
+            DAWN_INVALID_IF(
+                bufferFormatProperties.externalFormat == 0,
+                "AHardwareBuffer with external sampler must have non-zero external format.");
             vkFormat = VK_FORMAT_UNDEFINED;
             externalFormatAndroid.externalFormat = bufferFormatProperties.externalFormat;
             properties.format = wgpu::TextureFormat::External;
@@ -999,8 +1001,10 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
     // TODO(dawn/2276): support concurrent read access.
-    // TODO(dawn/2476): Validate texture with TextureFormat::External is initialized.
     DAWN_INVALID_IF(descriptor->concurrentRead, "Vulkan backend doesn't support concurrent read.");
+    DAWN_INVALID_IF(
+        texture->GetFormat().format == wgpu::TextureFormat::External && !descriptor->initialized,
+        "BeginAccess with Texture format (%s) must be initialized", texture->GetFormat().format);
 
     wgpu::SType type;
     DAWN_TRY_ASSIGN(

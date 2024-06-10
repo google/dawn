@@ -560,6 +560,47 @@ TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoWithExternalFormat) {
     EXPECT_EQ(bufferFormatProperties.externalFormat, yCbCrInfo.externalFormat);
 }
 
+// Test BeginAccess on an uninitialized texture with external format fails.
+TEST_P(SharedTextureMemoryTests, GPUReadForUninitializedTextureWithExternalFormatFails) {
+    const AHardwareBuffer_Desc aHardwareBufferDesc = {
+        .width = 4,
+        .height = 4,
+        .layers = 1,
+        .format = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
+        .usage = AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
+    };
+    AHardwareBuffer* aHardwareBuffer;
+    EXPECT_EQ(AHardwareBuffer_allocate(&aHardwareBufferDesc, &aHardwareBuffer), 0);
+
+    wgpu::SharedTextureMemoryAHardwareBufferDescriptor stmAHardwareBufferDesc;
+    stmAHardwareBufferDesc.handle = aHardwareBuffer;
+    stmAHardwareBufferDesc.useExternalFormat = true;
+
+    wgpu::SharedTextureMemoryDescriptor desc;
+    desc.nextInChain = &stmAHardwareBufferDesc;
+
+    const wgpu::SharedTextureMemory memory = device.ImportSharedTextureMemory(&desc);
+
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size.width = 4;
+    descriptor.size.height = 4;
+    descriptor.size.depthOrArrayLayers = 1u;
+    descriptor.sampleCount = 1u;
+    descriptor.format = wgpu::TextureFormat::External;
+    descriptor.mipLevelCount = 1u;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+    auto texture = memory.CreateTexture(&descriptor);
+    AHardwareBuffer_release(aHardwareBuffer);
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    beginDesc.initialized = false;
+    wgpu::SharedTextureMemoryVkImageLayoutBeginState beginLayout{};
+    beginDesc.nextInChain = &beginLayout;
+
+    ASSERT_DEVICE_ERROR(memory.BeginAccess(texture, &beginDesc));
+}
+
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Vulkan,
                                  SharedTextureMemoryNoFeatureTests,
                                  {VulkanBackend()},
