@@ -542,8 +542,19 @@ void APISurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
 }
 
 MaybeError Surface::GetCurrentTexture(SurfaceTexture* surfaceTexture) const {
+    surfaceTexture->texture = nullptr;
+    surfaceTexture->suboptimal = false;
+
+    surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::Error;
     DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
     DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not configured.", this);
+
+    surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::DeviceLost;
+    DAWN_TRY(GetCurrentDevice()->ValidateIsAlive());
+
+    // Set an error status that will be overwritten if there is a success or some other more
+    // specific error.
+    surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::Error;
 
     auto deviceLock(GetCurrentDevice()->GetScopedLock());
     DAWN_TRY_ASSIGN(*surfaceTexture, mSwapChain->GetCurrentTexture());
@@ -610,13 +621,7 @@ wgpu::Status Surface::APIGetCapabilities(AdapterBase* adapter,
 void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const {
     MaybeError maybeError = GetCurrentTexture(surfaceTexture);
     if (!GetCurrentDevice()) {
-        if (mInstance->ConsumedError(std::move(maybeError))) {
-            // TODO(dawn:2320): This is the closest status to "surface was not configured so there
-            // is no associated device" but SurfaceTexture may change soon upstream.
-            surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::DeviceLost;
-            surfaceTexture->suboptimal = true;
-            surfaceTexture->texture = nullptr;
-        }
+        [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
     } else {
         [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError(std::move(maybeError));
     }

@@ -4074,7 +4074,8 @@
             {"value": 2, "name": "outdated"},
             {"value": 3, "name": "lost"},
             {"value": 4, "name": "out of memory"},
-            {"value": 5, "name": "device lost"}
+            {"value": 5, "name": "device lost"},
+            {"value": 6, "name": "error"}
         ]
     },
     "texture aspect": {

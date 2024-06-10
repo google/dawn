@@ -266,7 +266,7 @@ TEST_P(SurfaceTests, ReconfigureAfterUnconfigure) {
     surface.Present();
 }
 
-// Test destroying the swapchain after GetCurrentTexture
+// Test unconfiguring after GetCurrentTexture but before the Present
 TEST_P(SurfaceTests, UnconfigureAfterGet) {
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
@@ -426,22 +426,36 @@ TEST_P(SurfaceTests, SwitchingDevice) {
 // It cannot raise a device error at this stage since it has never been configured with a device
 TEST_P(SurfaceTests, GetWithoutConfigure) {
     wgpu::Surface surface = CreateTestSurface();
+
     wgpu::SurfaceTexture surfaceTexture;
     surface.GetCurrentTexture(&surfaceTexture);
-    EXPECT_NE(surfaceTexture.status, wgpu::SurfaceGetCurrentTextureStatus::Success);
+    EXPECT_EQ(surfaceTexture.status, wgpu::SurfaceGetCurrentTextureStatus::Error);
 }
 
 // Getting current texture after unconfiguring fails
 TEST_P(SurfaceTests, GetAfterUnconfigure) {
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
-    wgpu::SurfaceTexture surfaceTexture;
-
     surface.Configure(&config);
 
     surface.Unconfigure();
 
+    wgpu::SurfaceTexture surfaceTexture;
     ASSERT_DEVICE_ERROR(surface.GetCurrentTexture(&surfaceTexture));
+    EXPECT_EQ(surfaceTexture.status, wgpu::SurfaceGetCurrentTextureStatus::Error);
+}
+
+// Getting current texture after losing the device
+TEST_P(SurfaceTests, GetAfterDeviceLoss) {
+    wgpu::Surface surface = CreateTestSurface();
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    surface.Configure(&config);
+
+    LoseDeviceForTesting();
+
+    wgpu::SurfaceTexture surfaceTexture;
+    surface.GetCurrentTexture(&surfaceTexture);
+    EXPECT_EQ(surfaceTexture.status, wgpu::SurfaceGetCurrentTextureStatus::DeviceLost);
 }
 
 // Presenting without configuring fails
