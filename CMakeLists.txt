@@ -64,25 +64,14 @@ set(DAWN_TEMPLATE_DIR "${DAWN_GENERATOR_DIR}/templates")
 ################################################################################
 # Configuration options
 ################################################################################
-
-# option_if_not_defined(name description default)
-# Behaves like:
-#   option(name description default)
-# If a variable is not already defined with the given name, otherwise the
-# function does nothing.
-# Simplifies customization by projects that use Dawn as a dependency.
-function (option_if_not_defined name description default)
-    if(NOT DEFINED ${name})
-        option(${name} ${description} ${default})
-    endif()
-endfunction()
-
 # set_if_not_defined(name value description)
 # Behaves like:
 #   set(${name} ${value} CACHE STRING ${description})
 # If a variable is not already defined with the given name, otherwise the
 # function does nothing.
 # Simplifies customization by projects that use Dawn as a dependency.
+# Usages of set_if_not_defined can be safely replaced with `set` after
+# the minimum cmake version is bumped to >= 3.20
 function (set_if_not_defined name value description)
     if(NOT DEFINED ${name})
         set(${name} ${value} CACHE STRING ${description})
@@ -176,38 +165,38 @@ if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
     set(BUILD_SAMPLES ON)
 endif()
 
-option_if_not_defined(DAWN_ENABLE_ASAN "Enable address sanitizer" OFF)
-option_if_not_defined(DAWN_ENABLE_INSTALL "Enable install step for Dawn libraries" OFF)
-option_if_not_defined(DAWN_ENABLE_TSAN "Enable thread sanitizer" OFF)
-option_if_not_defined(DAWN_ENABLE_MSAN "Enable memory sanitizer" OFF)
-option_if_not_defined(DAWN_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
+option(DAWN_ENABLE_ASAN "Enable address sanitizer" OFF)
+option(DAWN_ENABLE_INSTALL "Enable install step for Dawn libraries" OFF)
+option(DAWN_ENABLE_TSAN "Enable thread sanitizer" OFF)
+option(DAWN_ENABLE_MSAN "Enable memory sanitizer" OFF)
+option(DAWN_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
 
-option_if_not_defined(DAWN_ENABLE_D3D11 "Enable compilation of the D3D11 backend" ${ENABLE_D3D11})
-option_if_not_defined(DAWN_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
-option_if_not_defined(DAWN_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_METAL})
-option_if_not_defined(DAWN_ENABLE_NULL "Enable compilation of the Null backend" ON)
-option_if_not_defined(DAWN_ENABLE_DESKTOP_GL "Enable compilation of the OpenGL backend" ${ENABLE_DESKTOP_GL})
-option_if_not_defined(DAWN_ENABLE_OPENGLES "Enable compilation of the OpenGL ES backend" ${ENABLE_OPENGLES})
-option_if_not_defined(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backend" ${ENABLE_VULKAN})
+option(DAWN_ENABLE_D3D11 "Enable compilation of the D3D11 backend" ${ENABLE_D3D11})
+option(DAWN_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
+option(DAWN_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_METAL})
+option(DAWN_ENABLE_NULL "Enable compilation of the Null backend" ON)
+option(DAWN_ENABLE_DESKTOP_GL "Enable compilation of the OpenGL backend" ${ENABLE_DESKTOP_GL})
+option(DAWN_ENABLE_OPENGLES "Enable compilation of the OpenGL ES backend" ${ENABLE_OPENGLES})
+option(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backend" ${ENABLE_VULKAN})
 
-option_if_not_defined(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
-option_if_not_defined(DAWN_USE_WAYLAND "Enable support for Wayland surface" ${USE_WAYLAND})
-option_if_not_defined(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
-option_if_not_defined(DAWN_USE_GLFW "Enable compilation of the GLFW windowing utils" ${DAWN_SUPPORTS_GLFW_FOR_WINDOWING})
-option_if_not_defined(DAWN_USE_WINDOWS_UI "Enable support for Windows UI surface" ${USE_WINDOWS_UI})
-option_if_not_defined(DAWN_USE_BUILT_DXC "Enable building and using DXC by the D3D12 backend" OFF)
-option_if_not_defined(DAWN_DXC_DISABLE_ASSERTS_DEBUG "Disable asserts in DXC in debug builds" OFF)
-option_if_not_defined(DAWN_TARGET_MACOS "Manually link Apple core frameworks" ${TARGET_MACOS})
+option(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
+option(DAWN_USE_WAYLAND "Enable support for Wayland surface" ${USE_WAYLAND})
+option(DAWN_USE_X11 "Enable support for X11 surface" ${USE_X11})
+option(DAWN_USE_GLFW "Enable compilation of the GLFW windowing utils" ${DAWN_SUPPORTS_GLFW_FOR_WINDOWING})
+option(DAWN_USE_WINDOWS_UI "Enable support for Windows UI surface" ${USE_WINDOWS_UI})
+option(DAWN_USE_BUILT_DXC "Enable building and using DXC by the D3D12 backend" OFF)
+option(DAWN_DXC_DISABLE_ASSERTS_DEBUG "Disable asserts in DXC in debug builds" OFF)
+option(DAWN_TARGET_MACOS "Manually link Apple core frameworks" ${TARGET_MACOS})
 
-option_if_not_defined(DAWN_BUILD_SAMPLES "Enables building Dawn's samples" ${BUILD_SAMPLES})
-option_if_not_defined(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
-option_if_not_defined(DAWN_ENABLE_SWIFTSHADER "Enables building Swiftshader as part of the build and Vulkan adapter discovery" OFF)
-option_if_not_defined(DAWN_BUILD_BENCHMARKS "Build Dawn benchmarks" OFF)
+option(DAWN_BUILD_SAMPLES "Enables building Dawn's samples" ${BUILD_SAMPLES})
+option(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
+option(DAWN_ENABLE_SWIFTSHADER "Enables building Swiftshader as part of the build and Vulkan adapter discovery" OFF)
+option(DAWN_BUILD_BENCHMARKS "Build Dawn benchmarks" OFF)
 
-option_if_not_defined(DAWN_WERROR "Build with -Werror (or equivalent)" OFF)
-option_if_not_defined(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
+option(DAWN_WERROR "Build with -Werror (or equivalent)" OFF)
+option(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
 
-option_if_not_defined(DAWN_EMIT_COVERAGE "Emit code coverage information" OFF)
+option(DAWN_EMIT_COVERAGE "Emit code coverage information" OFF)
 set_if_not_defined(LLVM_SOURCE_DIR "${Dawn_LLVM_SOURCE_DIR}" "Directory to an LLVM source checkout. Required to build turbo-cov")
 
 if (DAWN_ENABLE_OPENGLES OR DAWN_ENABLE_DESKTOP_GL)
@@ -216,41 +205,41 @@ else()
   set(TINT_DEFAULT_GLSL OFF)
 endif()
 
-option_if_not_defined(TINT_ENABLE_INSTALL "Enable install step for Tint libraries" OFF)
-option_if_not_defined(TINT_BUILD_CMD_TOOLS "Build the Tint command line tools" ON)
+option(TINT_ENABLE_INSTALL "Enable install step for Tint libraries" OFF)
+option(TINT_BUILD_CMD_TOOLS "Build the Tint command line tools" ON)
 
 if (NOT DAWN_USE_GLFW AND (TINT_BUILD_CMD_TOOLS OR DAWN_BUILD_SAMPLES))
   message(SEND_ERROR "Dawn samples require GLFW")
 endif()
 
-option_if_not_defined(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ${DAWN_ENABLE_VULKAN})
-option_if_not_defined(TINT_BUILD_WGSL_READER "Build the WGSL input reader" ON)
-option_if_not_defined(TINT_BUILD_GLSL_WRITER "Build the GLSL output writer" ${TINT_DEFAULT_GLSL})
-option_if_not_defined(TINT_BUILD_GLSL_VALIDATOR "Build the GLSL output validator" ON)
-option_if_not_defined(TINT_BUILD_HLSL_WRITER "Build the HLSL output writer" ${DAWN_ENABLE_D3D12})
-option_if_not_defined(TINT_BUILD_MSL_WRITER "Build the MSL output writer" ${DAWN_ENABLE_METAL})
-option_if_not_defined(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ${DAWN_ENABLE_VULKAN})
-option_if_not_defined(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
+option(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ${DAWN_ENABLE_VULKAN})
+option(TINT_BUILD_WGSL_READER "Build the WGSL input reader" ON)
+option(TINT_BUILD_GLSL_WRITER "Build the GLSL output writer" ${TINT_DEFAULT_GLSL})
+option(TINT_BUILD_GLSL_VALIDATOR "Build the GLSL output validator" ON)
+option(TINT_BUILD_HLSL_WRITER "Build the HLSL output writer" ${DAWN_ENABLE_D3D12})
+option(TINT_BUILD_MSL_WRITER "Build the MSL output writer" ${DAWN_ENABLE_METAL})
+option(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ${DAWN_ENABLE_VULKAN})
+option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 
-option_if_not_defined(TINT_BUILD_SYNTAX_TREE_WRITER "Build the syntax tree writer" OFF)
+option(TINT_BUILD_SYNTAX_TREE_WRITER "Build the syntax tree writer" OFF)
 
-option_if_not_defined(TINT_BUILD_IR_BINARY "Build IR binary format support" ON)
+option(TINT_BUILD_IR_BINARY "Build IR binary format support" ON)
 
-option_if_not_defined(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
-option_if_not_defined(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
-option_if_not_defined(TINT_BUILD_REGEX_FUZZER "Build regex fuzzer" OFF)
-option_if_not_defined(TINT_BUILD_IR_FUZZER "Build IR fuzzer" OFF)
-option_if_not_defined(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
-option_if_not_defined(TINT_BUILD_TESTS "Build tests" ON)
-option_if_not_defined(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
+option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
+option(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
+option(TINT_BUILD_REGEX_FUZZER "Build regex fuzzer" OFF)
+option(TINT_BUILD_IR_FUZZER "Build IR fuzzer" OFF)
+option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
+option(TINT_BUILD_TESTS "Build tests" ON)
+option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 
-option_if_not_defined(TINT_BUILD_TINTD "Build the WGSL language server" OFF)
+option(TINT_BUILD_TINTD "Build the WGSL language server" OFF)
 
 set_if_not_defined(TINT_EXTERNAL_BENCHMARK_CORPUS_DIR "" "Directory that holds a corpus of external shaders to benchmark.")
 
-option_if_not_defined(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
-option_if_not_defined(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
-option_if_not_defined(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to detect non-deterministic output" OFF)
+option(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
+option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
+option(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to detect non-deterministic output" OFF)
 
 # Recommended setting for compability with future abseil releases.
 set(ABSL_PROPAGATE_CXX_STD ON)
@@ -277,7 +266,7 @@ set_if_not_defined(NODE_API_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/node-api-header
 set_if_not_defined(WEBGPU_IDL_PATH "${DAWN_THIRD_PARTY_DIR}/gpuweb/webgpu.idl" "Path to the webgpu.idl definition file")
 set_if_not_defined(GO_EXECUTABLE "go" "Golang executable for running the IDL generator")
 
-option_if_not_defined(DAWN_FETCH_DEPENDENCIES "Use fetch_dawn_dependencies.py as an alternative to using depot_tools" OFF)
+option(DAWN_FETCH_DEPENDENCIES "Use fetch_dawn_dependencies.py as an alternative to using depot_tools" OFF)
 
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
 if (${DAWN_ENABLE_DESKTOP_GL} OR ${DAWN_ENABLE_OPENGLES})
