@@ -977,7 +977,6 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
         {VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR, wgpu::CompositeAlphaMode::Inherit},
     };
 
-    capabilities.alphaModes.push_back(wgpu::CompositeAlphaMode::Auto);
     for (auto mode : alphaModePairs) {
         if (vkCaps.capabilities.supportedCompositeAlpha & mode.vkBit) {
             capabilities.alphaModes.push_back(mode.webgpuEnum);

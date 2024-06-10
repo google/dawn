@@ -72,7 +72,7 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     capabilities.usages = wgpu::TextureUsage::RenderAttachment;
     capabilities.formats = {wgpu::TextureFormat::BGRA8Unorm};
     capabilities.presentModes = {wgpu::PresentMode::Fifo};
-    capabilities.alphaModes = {wgpu::CompositeAlphaMode::Auto};
+    capabilities.alphaModes = {wgpu::CompositeAlphaMode::Opaque};
     return capabilities;
 }
 

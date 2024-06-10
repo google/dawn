@@ -451,7 +451,6 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
 
     capabilities.alphaModes = {
         wgpu::CompositeAlphaMode::Opaque,
-        wgpu::CompositeAlphaMode::Auto,
     };
 
     return capabilities;

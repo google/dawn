@@ -444,9 +444,11 @@ uint32_t Surface::GetXWindow() const {
     return mXWindow;
 }
 
-MaybeError Surface::Configure(const SurfaceConfiguration* config) {
+MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
     DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
-    mCurrentDevice = config->device;  // next errors are routed to the new device
+
+    SurfaceConfiguration config = *configIn;
+    mCurrentDevice = config.device;  // next errors are routed to the new device
     DAWN_INVALID_IF(mIsSwapChainManagedBySurface == ManagesSwapChain::No,
                     "%s cannot be configured because it is used by legacy swapchain %s.", this,
                     mSwapChain.Get());
@@ -456,20 +458,25 @@ MaybeError Surface::Configure(const SurfaceConfiguration* config) {
     DAWN_TRY(mCapabilityCache->WithAdapterCapabilities(
         GetCurrentDevice()->GetAdapter(), this,
         [&](const PhysicalDeviceSurfaceCapabilities& caps) -> MaybeError {
-            return ValidateSurfaceConfiguration(GetCurrentDevice(), caps, config, this);
+            // The auto alphaMode default to alphaModes[0].
+            if (config.alphaMode == wgpu::CompositeAlphaMode::Auto) {
+                config.alphaMode = caps.alphaModes[0];
+            }
+
+            return ValidateSurfaceConfiguration(GetCurrentDevice(), caps, &config, this);
         }));
 
     // Reuse either the current swapchain, or the recycled swap chain
     SwapChainBase* previousSwapChain = mSwapChain.Get();
     if (previousSwapChain == nullptr && mRecycledSwapChain != nullptr &&
-        mRecycledSwapChain->GetDevice() == config->device) {
+        mRecycledSwapChain->GetDevice() == config.device) {
         previousSwapChain = mRecycledSwapChain.Get();
     }
 
     {
         auto deviceLock(GetCurrentDevice()->GetScopedLock());
         ResultOrError<Ref<SwapChainBase>> maybeNewSwapChain =
-            GetCurrentDevice()->CreateSwapChain(this, previousSwapChain, config);
+            GetCurrentDevice()->CreateSwapChain(this, previousSwapChain, &config);
 
         // Don't keep swap chains older than 1 call to Configure
         if (mRecycledSwapChain) {

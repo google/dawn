@@ -120,6 +120,10 @@ class SurfaceConfigurationValidationTests : public DawnTest {
 
     bool SupportsAlphaMode(const wgpu::SurfaceCapabilities& capabilities,
                            wgpu::CompositeAlphaMode mode) {
+        if (mode == wgpu::CompositeAlphaMode::Auto) {
+            return true;
+        }
+
         for (size_t i = 0; i < capabilities.alphaModeCount; ++i) {
             if (capabilities.alphaModes[i] == mode) {
                 return true;
@@ -161,6 +165,24 @@ TEST_P(SurfaceConfigurationValidationTests, AtLeastOneSupportedConfiguration) {
     ASSERT_GT(capabilities.formatCount, 0u);
     ASSERT_GT(capabilities.alphaModeCount, 0u);
     ASSERT_GT(capabilities.presentModeCount, 0u);
+}
+
+// AlphaMode::Auto should never be reported but always supported.
+TEST_P(SurfaceConfigurationValidationTests, AlphaModeAuto) {
+    wgpu::Surface surface = CreateTestSurface();
+
+    wgpu::SurfaceCapabilities capabilities;
+    surface.GetCapabilities(adapter, &capabilities);
+
+    // Auto is never reported.
+    for (size_t i = 0; i < capabilities.alphaModeCount; ++i) {
+        ASSERT_NE(capabilities.alphaModes[i], wgpu::CompositeAlphaMode::Auto);
+    }
+
+    // But always supported.
+    wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
+    config.alphaMode = wgpu::CompositeAlphaMode::Auto;
+    surface.Configure(&config);
 }
 
 // Using any combination of the reported capability is ok for configuring the surface.
