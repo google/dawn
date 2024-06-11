@@ -27,6 +27,9 @@
 
 #include "dawn/native/vulkan/QueueVk.h"
 
+#include <optional>
+#include <utility>
+
 #include "dawn/common/Math.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandValidation.h"
@@ -161,7 +164,7 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
             // Update fenceSerial since fence is ready.
             fenceSerial = tentativeSerial;
 
-            mUnusedFences.push_back(fence);
+            mUnusedFences->push_back(fence);
 
             DAWN_ASSERT(fenceSerial > GetCompletedCommandSerial());
             fencesInFlight->pop_front();
@@ -421,7 +424,7 @@ MaybeError Queue::SubmitPendingCommands() {
             // If submitting to the queue fails, move the fence back into the unused fence
             // list, as if it were never acquired. Not doing so would leak the fence since
             // it would be neither in the unused list nor in the in-flight list.
-            mUnusedFences.push_back(fence);
+            mUnusedFences->push_back(fence);
         });
     TRACE_EVENT_END0(device->GetPlatform(), Recording, "vkQueueSubmit");
 
@@ -464,12 +467,21 @@ ResultOrError<VkFence> Queue::GetUnusedFence() {
     Device* device = ToBackend(GetDevice());
     VkDevice vkDevice = device->GetVkDevice();
 
-    if (!mUnusedFences.empty()) {
-        VkFence fence = mUnusedFences.back();
-        DAWN_TRY(CheckVkSuccess(device->fn.ResetFences(vkDevice, 1, &*fence), "vkResetFences"));
+    auto result =
+        mUnusedFences.Use([&](auto unusedFences) -> std::optional<ResultOrError<VkFence>> {
+            if (!unusedFences->empty()) {
+                VkFence fence = unusedFences->back();
+                DAWN_ASSERT(fence != VK_NULL_HANDLE);
+                DAWN_TRY(
+                    CheckVkSuccess(device->fn.ResetFences(vkDevice, 1, &*fence), "vkResetFences"));
 
-        mUnusedFences.pop_back();
-        return fence;
+                unusedFences->pop_back();
+                return fence;
+            }
+            return std::nullopt;
+        });
+    if (result) {
+        return std::move(*result);
     }
 
     VkFenceCreateInfo createInfo;
@@ -520,10 +532,12 @@ void Queue::DestroyImpl() {
         }
     });
 
-    for (VkFence fence : mUnusedFences) {
-        device->fn.DestroyFence(vkDevice, fence, nullptr);
-    }
-    mUnusedFences.clear();
+    mUnusedFences.Use([&](auto unusedFences) {
+        for (VkFence fence : *unusedFences) {
+            device->fn.DestroyFence(vkDevice, fence, nullptr);
+        }
+        unusedFences->clear();
+    });
 
     QueueBase::DestroyImpl();
 }

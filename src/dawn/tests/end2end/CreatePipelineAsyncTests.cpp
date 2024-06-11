@@ -172,6 +172,9 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
 TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStress) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
+    // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
+
     for (size_t i = 0; i < 100; i++) {
         wgpu::ComputePipelineDescriptor csDesc;
         std::string shader = R"(
@@ -203,6 +206,9 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStressManyThreads) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     // eglMakeCurrent: Context can only be current on one thread
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
 
     auto f = [&](size_t t) {
         wgpu::ComputePipelineDescriptor csDesc;
@@ -335,6 +341,9 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStress) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
+    // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
+
     for (size_t i = 0; i < 100; i++) {
         utils::ComboRenderPipelineDescriptor desc;
         std::string shader = R"(
@@ -362,6 +371,9 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStressManyThreads) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     // eglMakeCurrent: Context can only be current on one thread
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
 
     auto f = [&](size_t t) {
         utils::ComboRenderPipelineDescriptor desc;
