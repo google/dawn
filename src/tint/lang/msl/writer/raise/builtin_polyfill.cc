@@ -36,6 +36,10 @@
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/texture.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/msl/barrier_type.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
@@ -80,6 +84,7 @@ struct State {
                     case core::BuiltinFn::kAtomicStore:
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicXor:
+                    case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureSample:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kWorkgroupBarrier:
@@ -131,6 +136,9 @@ struct State {
                     break;
 
                 // Texture builtins.
+                case core::BuiltinFn::kTextureDimensions:
+                    TextureDimensions(builtin);
+                    break;
                 case core::BuiltinFn::kTextureSample:
                     TextureSample(builtin);
                     break;
@@ -202,6 +210,52 @@ struct State {
         auto args = Vector<core::ir::Value*, 4>{builtin->Args()};
         auto* call = b.CallWithResult(builtin->DetachResult(), polyfill, std::move(args));
         call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Replace a textureDimensions call with the equivalent MSL intrinsics.
+    /// @param builtin the builtin call instruction
+    void TextureDimensions(core::ir::CoreBuiltinCall* builtin) {
+        auto* tex = builtin->Args()[0];
+        auto* type = tex->Type()->As<core::type::Texture>();
+        bool needs_lod_arg = type->dim() != core::type::TextureDimension::k1d &&
+                             !type->Is<core::type::MultisampledTexture>() &&
+                             !type->Is<core::type::DepthMultisampledTexture>();
+
+        b.InsertBefore(builtin, [&] {
+            // If we need a LOD argument, use the one provided or default to 0.
+            core::ir::Value* lod = nullptr;
+            if (needs_lod_arg) {
+                if (builtin->Args().Length() == 1) {
+                    lod = b.Value(u32(0));
+                } else {
+                    lod = builtin->Args()[1];
+                    if (lod->Type()->is_signed_integer_scalar()) {
+                        lod = b.Convert<u32>(lod)->Result(0);
+                    }
+                }
+            }
+
+            // Call MSL member functions to get the dimensions of the image.
+            Vector<core::ir::InstructionResult*, 4> values;
+            auto get_dim = [&](msl::BuiltinFn fn) {
+                auto* call = b.MemberCall<msl::ir::MemberBuiltinCall>(ty.u32(), fn, tex);
+                if (lod) {
+                    call->AppendArg(lod);
+                }
+                values.Push(call->Result(0));
+            };
+            get_dim(msl::BuiltinFn::kGetWidth);
+            if (type->dim() != core::type::TextureDimension::k1d) {
+                get_dim(msl::BuiltinFn::kGetHeight);
+                if (type->dim() == core::type::TextureDimension::k3d) {
+                    get_dim(msl::BuiltinFn::kGetDepth);
+                }
+            }
+
+            // Reconstruct the original result type from the individual dimensions.
+            b.ConstructWithResult(builtin->DetachResult(), std::move(values));
+        });
         builtin->Destroy();
     }
 

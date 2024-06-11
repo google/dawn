@@ -64,6 +64,12 @@ const char* str(BuiltinFn i) {
             return "atomic_load_explicit";
         case BuiltinFn::kAtomicStoreExplicit:
             return "atomic_store_explicit";
+        case BuiltinFn::kGetWidth:
+            return "get_width";
+        case BuiltinFn::kGetHeight:
+            return "get_height";
+        case BuiltinFn::kGetDepth:
+            return "get_depth";
         case BuiltinFn::kSample:
             return "sample";
         case BuiltinFn::kThreadgroupBarrier:

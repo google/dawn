@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -743,6 +744,151 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
     %23:i32 = load %old_value_1
     %24:__atomic_compare_exchange_result_i32 = construct %23, %22
     ret %24
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_1d) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:u32 = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:u32 = %t.get_width
+    %4:u32 = construct %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithoutLod) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> {
+  $B1: {
+    %3:vec2<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> {
+  $B1: {
+    %3:u32 = %t.get_width 0u
+    %4:u32 = %t.get_height 0u
+    %5:vec2<u32> = construct %3, %4
+    ret %5
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithI32Lod) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t, 3_i);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> {
+  $B1: {
+    %3:vec2<u32> = textureDimensions %t, 3i
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> {
+  $B1: {
+    %3:u32 = convert 3i
+    %4:u32 = %t.get_width %3
+    %5:u32 = %t.get_height %3
+    %6:vec2<u32> = construct %4, %5
+    ret %6
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_3d) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k3d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec3<u32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec3<u32>>(core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_3d<f32>):vec3<u32> {
+  $B1: {
+    %3:vec3<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_3d<f32>):vec3<u32> {
+  $B1: {
+    %3:u32 = %t.get_width 0u
+    %4:u32 = %t.get_height 0u
+    %5:u32 = %t.get_depth 0u
+    %6:vec3<u32> = construct %3, %4, %5
+    ret %6
   }
 }
 )";

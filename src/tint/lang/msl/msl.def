@@ -37,6 +37,7 @@
 
 import "src/tint/lang/core/access.def"
 import "src/tint/lang/core/address_space.def"
+import "src/tint/lang/core/texel_format.def"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Enum matchers                                                              //
@@ -73,12 +74,19 @@ type texture_depth_2d
 type texture_depth_2d_array
 type texture_depth_cube
 type texture_depth_cube_array
+type texture_depth_multisampled_2d
+type texture_multisampled_2d<T>
+type texture_storage_1d<F: texel_format, A: access>
+type texture_storage_2d<F: texel_format, A: access>
+type texture_storage_2d_array<F: texel_format, A: access>
+type texture_storage_3d<F: texel_format, A: access>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
 match iu32: i32 | u32
+match fiu32: f32 | i32 | u32
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
@@ -94,6 +102,41 @@ match iu32: i32 | u32
 @stage("fragment", "compute") fn atomic_fetch_xor_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
 @stage("fragment", "compute") fn atomic_load_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, u32) -> T
 @stage("fragment", "compute") fn atomic_store_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32)
+
+@member_function fn get_width[T: fiu32](texture: texture_1d<T>) -> u32
+@member_function fn get_width[T: fiu32](texture: texture_2d<T>, u32) -> u32
+@member_function fn get_width[T: fiu32](texture: texture_2d_array<T>, u32) -> u32
+@member_function fn get_width[T: fiu32](texture: texture_3d<T>, u32) -> u32
+@member_function fn get_width[T: fiu32](texture: texture_cube<T>, u32) -> u32
+@member_function fn get_width[T: fiu32](texture: texture_cube_array<T>, u32) -> u32
+@member_function fn get_width[T: fiu32](texture: texture_multisampled_2d<T>) -> u32
+@member_function fn get_width(texture: texture_depth_2d, u32) -> u32
+@member_function fn get_width(texture: texture_depth_2d_array, u32) -> u32
+@member_function fn get_width(texture: texture_depth_cube, u32) -> u32
+@member_function fn get_width(texture: texture_depth_cube_array, u32) -> u32
+@member_function fn get_width(texture: texture_depth_multisampled_2d) -> u32
+@member_function fn get_width[F: texel_format, A: access](texture: texture_storage_1d<F, A>) -> u32
+@member_function fn get_width[F: texel_format, A: access](texture: texture_storage_2d<F, A>, u32) -> u32
+@member_function fn get_width[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>, u32) -> u32
+@member_function fn get_width[F: texel_format, A: access](texture: texture_storage_3d<F, A>, u32) -> u32
+
+@member_function fn get_height[T: fiu32](texture: texture_2d<T>, u32) -> u32
+@member_function fn get_height[T: fiu32](texture: texture_2d_array<T>, u32) -> u32
+@member_function fn get_height[T: fiu32](texture: texture_3d<T>, u32) -> u32
+@member_function fn get_height[T: fiu32](texture: texture_cube<T>, u32) -> u32
+@member_function fn get_height[T: fiu32](texture: texture_cube_array<T>, u32) -> u32
+@member_function fn get_height[T: fiu32](texture: texture_multisampled_2d<T>) -> u32
+@member_function fn get_height(texture: texture_depth_2d, u32) -> u32
+@member_function fn get_height(texture: texture_depth_2d_array, u32) -> u32
+@member_function fn get_height(texture: texture_depth_cube, u32) -> u32
+@member_function fn get_height(texture: texture_depth_cube_array, u32) -> u32
+@member_function fn get_height(texture: texture_depth_multisampled_2d) -> u32
+@member_function fn get_height[F: texel_format, A: access](texture: texture_storage_2d<F, A>, u32) -> u32
+@member_function fn get_height[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>, u32) -> u32
+@member_function fn get_height[F: texel_format, A: access](texture: texture_storage_3d<F, A>, u32) -> u32
+
+@member_function fn get_depth[T: fiu32](texture: texture_3d<T>, u32) -> u32
+@member_function fn get_depth[F: texel_format, A: access](texture: texture_storage_3d<F, A>, u32) -> u32
 
 @member_function @stage("fragment") fn sample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
 @member_function @stage("fragment") fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
