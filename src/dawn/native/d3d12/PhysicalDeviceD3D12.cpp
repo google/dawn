@@ -145,6 +145,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::R8UnormStorage);
     EnableFeature(Feature::SharedBufferMemoryD3D12Resource);
     EnableFeature(Feature::ShaderModuleCompilationOptions);
+    EnableFeature(Feature::StaticSamplers);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);

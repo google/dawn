@@ -42,6 +42,8 @@ namespace dawn::native::d3d12 {
 
 D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func);
 
+D3D12_SHADER_VISIBILITY ShaderVisibilityType(wgpu::ShaderStage visibility);
+
 D3D12_TEXTURE_COPY_LOCATION ComputeTextureCopyLocationForTexture(const Texture* texture,
                                                                  uint32_t level,
                                                                  uint32_t layer,

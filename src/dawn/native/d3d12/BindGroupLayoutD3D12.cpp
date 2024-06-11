@@ -32,8 +32,10 @@
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/SamplerD3D12.h"
 #include "dawn/native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
+#include "dawn/native/d3d12/UtilsD3D12.h"
 
 namespace dawn::native::d3d12 {
 namespace {
@@ -54,10 +56,6 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
             }
         },
         [](const StaticSamplerBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
-            // Static samplers are handled in the frontend.
-            // TODO(crbug.com/dawn/2483): Implement static samplers in the
-            // D3D12 backend.
-            DAWN_UNREACHABLE();
             return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
         },
         [](const SamplerBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
@@ -104,6 +102,33 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
             WGPUBindingInfoToDescriptorRangeType(bindingInfo);
         mShaderRegisters[bindingIndex] = uint32_t(bindingInfo.binding);
 
+        // Static samplers aren't stored in the descriptor heap. Handle them separately.
+        if (std::holds_alternative<StaticSamplerBindingInfo>(bindingInfo.bindingLayout)) {
+            const StaticSamplerBindingInfo& staticSamplerBindingInfo =
+                std::get<StaticSamplerBindingInfo>(bindingInfo.bindingLayout);
+
+            Sampler* sampler = ToBackend(staticSamplerBindingInfo.sampler.Get());
+
+            const D3D12_SAMPLER_DESC desc = sampler->GetSamplerDescriptor();
+            D3D12_STATIC_SAMPLER_DESC staticSamplerDesc = {};
+            staticSamplerDesc.ShaderRegister = GetShaderRegister(bindingIndex);
+            staticSamplerDesc.RegisterSpace = kRegisterSpacePlaceholder;
+            staticSamplerDesc.ShaderVisibility = ShaderVisibilityType(bindingInfo.visibility);
+            staticSamplerDesc.AddressU = desc.AddressU;
+            staticSamplerDesc.AddressV = desc.AddressV;
+            staticSamplerDesc.AddressW = desc.AddressW;
+            staticSamplerDesc.Filter = desc.Filter;
+            staticSamplerDesc.MinLOD = desc.MinLOD;
+            staticSamplerDesc.MaxLOD = desc.MaxLOD;
+            staticSamplerDesc.MipLODBias = desc.MipLODBias;
+            staticSamplerDesc.MaxAnisotropy = desc.MaxAnisotropy;
+            staticSamplerDesc.ComparisonFunc = desc.ComparisonFunc;
+
+            mStaticSamplers.push_back(staticSamplerDesc);
+
+            continue;
+        }
+
         // For dynamic resources, Dawn uses root descriptor in D3D12 backend. So there is no
         // need to allocate the descriptor from descriptor heap or create descriptor ranges.
         if (bindingIndex < GetDynamicBufferCount()) {
@@ -132,9 +157,7 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
         range.Flags = MatchVariant(
             bindingInfo.bindingLayout,
             [](const StaticSamplerBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
-                // Static samplers are handled in the frontend.
-                // TODO(crbug.com/dawn/2483): Implement static samplers in the
-                // D3D12 backend.
+                // Static samplers should already be handled. This should never be reached.
                 DAWN_UNREACHABLE();
                 return D3D12_DESCRIPTOR_RANGE_FLAG_NONE;
             },
@@ -250,6 +273,10 @@ const std::vector<D3D12_DESCRIPTOR_RANGE1>& BindGroupLayout::GetCbvUavSrvDescrip
 
 const std::vector<D3D12_DESCRIPTOR_RANGE1>& BindGroupLayout::GetSamplerDescriptorRanges() const {
     return mSamplerDescriptorRanges;
+}
+
+const std::vector<D3D12_STATIC_SAMPLER_DESC>& BindGroupLayout::GetStaticSamplers() const {
+    return mStaticSamplers;
 }
 
 }  // namespace dawn::native::d3d12
