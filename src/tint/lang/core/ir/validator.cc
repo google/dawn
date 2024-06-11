@@ -46,7 +46,7 @@
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/convert.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
@@ -175,7 +175,7 @@ class Validator {
 
   private:
     /// @returns the IR disassembly, performing a disassemble if this is the first call.
-    ir::Disassembly& Disassembly();
+    ir::Disassembler& Disassemble();
 
     /// Adds an error for the @p inst and highlights the instruction in the disassembly
     /// @param inst the instruction
@@ -495,7 +495,7 @@ class Validator {
 
     const Module& mod_;
     Capabilities capabilities_;
-    std::optional<ir::Disassembly> disassembly_;  // Use Disassembly()
+    std::optional<ir::Disassembler> disassembler_;  // Use Disassemble()
     diag::List diagnostics_;
     Hashset<const Function*, 4> all_functions_;
     Hashset<const Instruction*, 4> visited_instructions_;
@@ -513,11 +513,11 @@ Validator::Validator(const Module& mod, Capabilities capabilities)
 
 Validator::~Validator() = default;
 
-Disassembly& Validator::Disassembly() {
-    if (!disassembly_) {
-        disassembly_.emplace(Disassemble(mod_));
+Disassembler& Validator::Disassemble() {
+    if (!disassembler_) {
+        disassembler_.emplace(ir::Disassembler(mod_));
     }
-    return *disassembly_;
+    return *disassembler_;
 }
 
 Result<SuccessType> Validator::Run() {
@@ -553,7 +553,7 @@ Result<SuccessType> Validator::Run() {
     }
 
     if (diagnostics_.ContainsErrors()) {
-        diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassembly().Text();
+        diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
         return Failure{std::move(diagnostics_)};
     }
     return Success;
@@ -561,7 +561,7 @@ Result<SuccessType> Validator::Run() {
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst) {
     diagnostics_.ReserveAdditional(2);  // Ensure diagnostics don't resize alive after AddNote()
-    auto src = Disassembly().InstructionSource(inst);
+    auto src = Disassemble().InstructionSource(inst);
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (!block_stack_.IsEmpty()) {
@@ -573,7 +573,7 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst) {
 diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
     diagnostics_.ReserveAdditional(2);  // Ensure diagnostics don't resize alive after AddNote()
     auto src =
-        Disassembly().OperandSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
+        Disassemble().OperandSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (!block_stack_.IsEmpty()) {
@@ -585,7 +585,7 @@ diag::Diagnostic& Validator::AddError(const Instruction* inst, size_t idx) {
 diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx) {
     diagnostics_.ReserveAdditional(2);  // Ensure diagnostics don't resize alive after AddNote()
     auto src =
-        Disassembly().ResultSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
+        Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     auto& diag = AddError(src) << inst->FriendlyName() << ": ";
 
     if (!block_stack_.IsEmpty()) {
@@ -595,61 +595,61 @@ diag::Diagnostic& Validator::AddResultError(const Instruction* inst, size_t idx)
 }
 
 diag::Diagnostic& Validator::AddError(const Block* blk) {
-    auto src = Disassembly().BlockSource(blk);
+    auto src = Disassemble().BlockSource(blk);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const BlockParam* param) {
-    auto src = Disassembly().BlockParamSource(param);
+    auto src = Disassemble().BlockParamSource(param);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const Function* func) {
-    auto src = Disassembly().FunctionSource(func);
+    auto src = Disassemble().FunctionSource(func);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddError(const FunctionParam* param) {
-    auto src = Disassembly().FunctionParamSource(param);
+    auto src = Disassemble().FunctionParamSource(param);
     return AddError(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
-    auto src = Disassembly().InstructionSource(inst);
+    auto src = Disassemble().InstructionSource(inst);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Function* func) {
-    auto src = Disassembly().FunctionSource(func);
+    auto src = Disassemble().FunctionSource(func);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddOperandNote(const Instruction* inst, size_t idx) {
     auto src =
-        Disassembly().OperandSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
+        Disassemble().OperandSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddResultNote(const Instruction* inst, size_t idx) {
     auto src =
-        Disassembly().ResultSource(Disassembly::IndexedValue{inst, static_cast<uint32_t>(idx)});
+        Disassemble().ResultSource(Disassembler::IndexedValue{inst, static_cast<uint32_t>(idx)});
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddNote(const Block* blk) {
-    auto src = Disassembly().BlockSource(blk);
+    auto src = Disassemble().BlockSource(blk);
     return AddNote(src);
 }
 
 diag::Diagnostic& Validator::AddError(Source src) {
     auto& diag = diagnostics_.AddError(src);
-    diag.owned_file = Disassembly().File();
+    diag.owned_file = Disassemble().File();
     return diag;
 }
 
 diag::Diagnostic& Validator::AddNote(Source src) {
     auto& diag = diagnostics_.AddNote(src);
-    diag.owned_file = Disassembly().File();
+    diag.owned_file = Disassemble().File();
     return diag;
 }
 
@@ -665,14 +665,14 @@ void Validator::AddDeclarationNote(const CastableBase* decl) {
 }
 
 void Validator::AddDeclarationNote(const Block* block) {
-    auto src = Disassembly().BlockSource(block);
+    auto src = Disassemble().BlockSource(block);
     if (src.file) {
         AddNote(src) << NameOf(block) << " declared here";
     }
 }
 
 void Validator::AddDeclarationNote(const BlockParam* param) {
-    auto src = Disassembly().BlockParamSource(param);
+    auto src = Disassemble().BlockParamSource(param);
     if (src.file) {
         AddNote(src) << NameOf(param) << " declared here";
     }
@@ -683,14 +683,14 @@ void Validator::AddDeclarationNote(const Function* fn) {
 }
 
 void Validator::AddDeclarationNote(const FunctionParam* param) {
-    auto src = Disassembly().FunctionParamSource(param);
+    auto src = Disassemble().FunctionParamSource(param);
     if (src.file) {
         AddNote(src) << NameOf(param) << " declared here";
     }
 }
 
 void Validator::AddDeclarationNote(const Instruction* inst) {
-    auto src = Disassembly().InstructionSource(inst);
+    auto src = Disassemble().InstructionSource(inst);
     if (src.file) {
         AddNote(src) << NameOf(inst) << " declared here";
     }
@@ -718,7 +718,7 @@ StyledText Validator::NameOf(const CastableBase* decl) {
 }
 
 StyledText Validator::NameOf(const Value* value) {
-    return Disassembly().NameOf(value);
+    return Disassemble().NameOf(value);
 }
 
 StyledText Validator::NameOf(const Instruction* inst) {
@@ -727,7 +727,7 @@ StyledText Validator::NameOf(const Instruction* inst) {
 
 StyledText Validator::NameOf(const Block* block) {
     return StyledText{} << style::Instruction(block->Parent()->FriendlyName()) << " block "
-                        << Disassembly().NameOf(block);
+                        << Disassemble().NameOf(block);
 }
 
 void Validator::CheckOperandNotNull(const Instruction* inst, const ir::Value* operand, size_t idx) {
@@ -1207,7 +1207,7 @@ void Validator::CheckBinary(const Binary* b) {
             if (overload->return_type != result->Type()) {
                 AddError(b) << "result value type " << style::Type(result->Type()->FriendlyName())
                             << " does not match "
-                            << style::Instruction(Disassembly().NameOf(b->Op())) << " result type "
+                            << style::Instruction(Disassemble().NameOf(b->Op())) << " result type "
                             << style::Type(overload->return_type->FriendlyName());
             }
         }
@@ -1230,7 +1230,7 @@ void Validator::CheckUnary(const Unary* u) {
             if (overload->return_type != result->Type()) {
                 AddError(u) << "result value type " << style::Type(result->Type()->FriendlyName())
                             << " does not match "
-                            << style::Instruction(Disassembly().NameOf(u->Op())) << " result type "
+                            << style::Instruction(Disassemble().NameOf(u->Op())) << " result type "
                             << style::Type(overload->return_type->FriendlyName());
             }
         }

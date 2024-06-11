@@ -28,7 +28,7 @@
 #include "src/tint/lang/spirv/writer/writer.h"
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 
@@ -47,7 +47,7 @@ void IRFuzzer(core::ir::Module& module, Options options) {
         TINT_ICE() << "output of SPIR-V writer failed to validate with SPIR-V Tools\n"
                    << res.Failure() << "\n\n"
                    << "IR:\n"
-                   << core::ir::Disassemble(module).Plain();
+                   << core::ir::Disassembler(module).Plain();
     }
 }
 

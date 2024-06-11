@@ -25,10 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gmock/gmock.h"
-#include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/wgsl/ast/case_selector.h"
-#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/ir_program_test.h"
 
 namespace tint::wgsl::reader {
@@ -45,7 +42,7 @@ TEST_F(ProgramToIRVarTest, Emit_GlobalVar_NoInit) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"($B1: {  # root
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"($B1: {  # root
   %a:ptr<private, u32, read_write> = var
 }
 
@@ -59,7 +56,7 @@ TEST_F(ProgramToIRVarTest, Emit_GlobalVar_Init) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"($B1: {  # root
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"($B1: {  # root
   %a:ptr<private, u32, read_write> = var, 2u
 }
 
@@ -72,7 +69,7 @@ TEST_F(ProgramToIRVarTest, Emit_GlobalVar_GroupBinding) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"($B1: {  # root
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"($B1: {  # root
   %a:ptr<storage, u32, read> = var @binding_point(2, 3)
 }
 
@@ -86,7 +83,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_NoInit) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, u32, read_write> = var
@@ -104,7 +101,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Init_Constant) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, u32, read_write> = var, 2u
@@ -122,7 +119,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Init_NonConstant) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, u32, read_write> = var
@@ -142,7 +139,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_42i) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, i32, read_write> = var
@@ -179,7 +176,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfArray_EvalOrder) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%f = func(%p:i32):i32 {
   $B1: {
     ret %p
@@ -225,7 +222,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfVec_EvalOrder) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%f = func(%p:i32):i32 {
   $B1: {
     ret %p
@@ -273,7 +270,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%f = func(%p:i32):i32 {
   $B1: {
     ret %p
@@ -305,7 +302,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_42i) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %a:ptr<function, i32, read_write> = var
@@ -344,7 +341,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%f = func(%p:i32):i32 {
   $B1: {
     ret %p
@@ -396,7 +393,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(),
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
               R"(%f = func(%p:i32):i32 {
   $B1: {
     ret %p

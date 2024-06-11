@@ -28,10 +28,7 @@
 #ifndef SRC_TINT_LANG_WGSL_READER_PROGRAM_TO_IR_PROGRAM_TO_IR_H_
 #define SRC_TINT_LANG_WGSL_READER_PROGRAM_TO_IR_PROGRAM_TO_IR_H_
 
-#include <string>
-
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward Declarations

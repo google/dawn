@@ -32,12 +32,11 @@
 
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
-#include "src/tint/lang/wgsl/ir/unary.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program_test.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
@@ -51,7 +50,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 IRToProgramTest::Result IRToProgramTest::Run() {
     Result result;
 
-    result.ir = tint::core::ir::Disassemble(mod).Plain();
+    result.ir = tint::core::ir::Disassembler(mod).Plain();
 
     ProgramOptions options;
     options.allowed_features = AllowedFeatures::Everything();

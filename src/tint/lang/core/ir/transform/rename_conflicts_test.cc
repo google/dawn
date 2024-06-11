@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/matrix.h"
 
@@ -65,7 +65,7 @@ class IRToProgramRenameConflictsTest : public testing::Test {
     }
 
     /// @returns the transformed module as a disassembled string
-    std::string str() { return "\n" + core::ir::Disassemble(mod).Plain(); }
+    std::string str() { return "\n" + core::ir::Disassembler(mod).Plain(); }
 
   protected:
     /// The test IR module.

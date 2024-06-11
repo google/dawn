@@ -29,7 +29,7 @@
 
 #include "src/tint/lang/core/ir/binary/decode.h"
 #include "src/tint/lang/core/ir/binary/encode.h"
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
@@ -48,7 +48,7 @@ template <typename T = testing::Test>
 class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
   public:
     std::pair<std::string, std::string> Roundtrip() {
-        auto pre = Disassemble(this->mod).Plain();
+        auto pre = Disassembler(this->mod).Plain();
         auto encoded = Encode(this->mod);
         if (encoded != Success) {
             return {pre, encoded.Failure().reason.Str()};
@@ -57,7 +57,7 @@ class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
         if (decoded != Success) {
             return {pre, decoded.Failure().reason.Str()};
         }
-        auto post = Disassemble(decoded.Get()).Plain();
+        auto post = Disassembler(decoded.Get()).Plain();
         return {pre, post};
     }
 };

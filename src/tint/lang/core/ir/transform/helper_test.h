@@ -35,7 +35,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/enum_set.h"
 
@@ -62,7 +62,7 @@ class TransformTestBase : public BASE {
     }
 
     /// @returns the transformed module as a disassembled string
-    std::string str() { return "\n" + ir::Disassemble(mod).Plain(); }
+    std::string str() { return "\n" + ir::Disassembler(mod).Plain(); }
 
   protected:
     /// The test IR module.

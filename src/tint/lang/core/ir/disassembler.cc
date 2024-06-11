@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 
 #include <algorithm>
 #include <memory>
@@ -102,11 +102,11 @@ class ScopedIndent {
 
 }  // namespace
 
-Disassembly::Disassembly(Disassembly&&) = default;
+Disassembler::Disassembler(Disassembler&&) = default;
 
-Disassembly::Disassembly(const Module& mod, std::string_view file_name) : mod_(mod) {
+Disassembler::Disassembler(const Module& mod) : mod_(mod) {
     Disassemble();
-    file_ = std::make_shared<Source::File>(std::string(file_name), Plain());
+    file_ = std::make_shared<Source::File>("", Plain());
 
     auto set_source_file = [&](auto& map) {
         for (auto& it : map) {
@@ -122,9 +122,9 @@ Disassembly::Disassembly(const Module& mod, std::string_view file_name) : mod_(m
     set_source_file(function_param_to_src_);
 }
 
-Disassembly::~Disassembly() = default;
+Disassembler::~Disassembler() = default;
 
-void Disassembly::Disassemble() {
+void Disassembler::Disassemble() {
     TINT_DEFER(out_ << StylePlain);
     out_.Clear();
     out_ << StyleCode;
@@ -145,27 +145,27 @@ void Disassembly::Disassemble() {
     }
 }
 
-StyledText& Disassembly::Indent() {
+StyledText& Disassembler::Indent() {
     for (uint32_t i = 0; i < indent_size_; i++) {
         out_ << " ";
     }
     return out_;
 }
 
-void Disassembly::EmitLine() {
+void Disassembler::EmitLine() {
     out_ << "\n";
     current_output_line_ += 1;
     current_output_start_pos_ = static_cast<uint32_t>(out_.Length());
 }
 
-Source::Location Disassembly::MakeCurrentLocation() {
+Source::Location Disassembler::MakeCurrentLocation() {
     return Source::Location{
         current_output_line_,
         static_cast<uint32_t>(out_.Length()) - current_output_start_pos_ + 1,
     };
 }
 
-void Disassembly::EmitBlock(const Block* blk, std::string_view comment /* = "" */) {
+void Disassembler::EmitBlock(const Block* blk, std::string_view comment /* = "" */) {
     Indent();
 
     SourceMarker sm(this);
@@ -207,12 +207,12 @@ void Disassembly::EmitBlock(const Block* blk, std::string_view comment /* = "" *
     EmitLine();
 }
 
-void Disassembly::EmitBindingPoint(BindingPoint p) {
+void Disassembler::EmitBindingPoint(BindingPoint p) {
     out_ << StyleAttribute("@binding_point") << "(" << StyleLiteral(p.group) << ", "
          << StyleLiteral(p.binding) << ")";
 }
 
-void Disassembly::EmitLocation(Location loc) {
+void Disassembler::EmitLocation(Location loc) {
     out_ << StyleAttribute("@location") << "(" << loc.value << ")";
     if (loc.interpolation.has_value()) {
         out_ << ", " << StyleAttribute("@interpolate") << "(";
@@ -225,7 +225,7 @@ void Disassembly::EmitLocation(Location loc) {
     }
 }
 
-void Disassembly::EmitParamAttributes(const FunctionParam* p) {
+void Disassembler::EmitParamAttributes(const FunctionParam* p) {
     if (!p->Invariant() && !p->Location().has_value() && !p->BindingPoint().has_value() &&
         !p->Builtin().has_value()) {
         return;
@@ -262,7 +262,7 @@ void Disassembly::EmitParamAttributes(const FunctionParam* p) {
     out_ << "]";
 }
 
-void Disassembly::EmitReturnAttributes(const Function* func) {
+void Disassembler::EmitReturnAttributes(const Function* func) {
     if (!func->ReturnInvariant() && !func->ReturnLocation().has_value() &&
         !func->ReturnBuiltin().has_value()) {
         return;
@@ -294,7 +294,7 @@ void Disassembly::EmitReturnAttributes(const Function* func) {
     out_ << "]";
 }
 
-void Disassembly::EmitFunction(const Function* func) {
+void Disassembler::EmitFunction(const Function* func) {
     in_function_ = true;
 
     auto fn_id = NameOf(func);
@@ -362,20 +362,20 @@ void Disassembly::EmitFunction(const Function* func) {
     EmitLine();
 }
 
-void Disassembly::EmitValueWithType(const Instruction* val) {
+void Disassembler::EmitValueWithType(const Instruction* val) {
     SourceMarker sm(this);
     EmitValueWithType(val->Result(0));
     sm.StoreResult(IndexedValue{val, 0});
 }
 
-void Disassembly::EmitValueWithType(const Value* val) {
+void Disassembler::EmitValueWithType(const Value* val) {
     EmitValue(val);
     if (val) {
         out_ << ":" << StyleType(val->Type()->FriendlyName());
     }
 }
 
-void Disassembly::EmitValue(const Value* val) {
+void Disassembler::EmitValue(const Value* val) {
     if (!val) {
         out_ << StyleLiteral("undef");
         return;
@@ -426,13 +426,13 @@ void Disassembly::EmitValue(const Value* val) {
         [&](Default) { out_ << NameOf(val); });
 }
 
-void Disassembly::EmitInstructionName(const Instruction* inst) {
+void Disassembler::EmitInstructionName(const Instruction* inst) {
     SourceMarker sm(this);
     out_ << StyleInstruction(inst->FriendlyName());
     sm.Store(inst);
 }
 
-void Disassembly::EmitInstruction(const Instruction* inst) {
+void Disassembler::EmitInstruction(const Instruction* inst) {
     TINT_DEFER(EmitLine());
 
     if (!inst->Alive()) {
@@ -572,13 +572,13 @@ void Disassembly::EmitInstruction(const Instruction* inst) {
     }
 }
 
-void Disassembly::EmitOperand(const Instruction* inst, size_t index) {
+void Disassembler::EmitOperand(const Instruction* inst, size_t index) {
     SourceMarker marker(this);
     EmitValue(inst->Operand(index));
     marker.Store(IndexedValue{inst, static_cast<uint32_t>(index)});
 }
 
-void Disassembly::EmitOperandList(const Instruction* inst, size_t start_index /* = 0 */) {
+void Disassembler::EmitOperandList(const Instruction* inst, size_t start_index /* = 0 */) {
     for (size_t i = start_index, n = inst->Operands().Length(); i < n; i++) {
         if (i != start_index) {
             out_ << ", ";
@@ -587,7 +587,7 @@ void Disassembly::EmitOperandList(const Instruction* inst, size_t start_index /*
     }
 }
 
-void Disassembly::EmitOperandList(const Instruction* inst, size_t start_index, size_t count) {
+void Disassembler::EmitOperandList(const Instruction* inst, size_t start_index, size_t count) {
     size_t n = std::min(start_index + count, inst->Operands().Length());
     for (size_t i = start_index; i < n; i++) {
         if (i != start_index) {
@@ -597,7 +597,7 @@ void Disassembly::EmitOperandList(const Instruction* inst, size_t start_index, s
     }
 }
 
-void Disassembly::EmitIf(const If* if_) {
+void Disassembler::EmitIf(const If* if_) {
     SourceMarker sm(this);
     if (auto results = if_->Results(); !results.IsEmpty()) {
         for (size_t i = 0; i < results.Length(); ++i) {
@@ -648,7 +648,7 @@ void Disassembly::EmitIf(const If* if_) {
     out_ << "}";
 }
 
-void Disassembly::EmitLoop(const Loop* l) {
+void Disassembler::EmitLoop(const Loop* l) {
     SourceMarker sm(this);
     if (auto results = l->Results(); !results.IsEmpty()) {
         for (size_t i = 0; i < results.Length(); ++i) {
@@ -701,7 +701,7 @@ void Disassembly::EmitLoop(const Loop* l) {
     out_ << "}";
 }
 
-void Disassembly::EmitSwitch(const Switch* s) {
+void Disassembler::EmitSwitch(const Switch* s) {
     SourceMarker sm(this);
     if (auto results = s->Results(); !results.IsEmpty()) {
         for (size_t i = 0; i < results.Length(); ++i) {
@@ -750,7 +750,7 @@ void Disassembly::EmitSwitch(const Switch* s) {
     out_ << "}";
 }
 
-void Disassembly::EmitTerminator(const Terminator* term) {
+void Disassembler::EmitTerminator(const Terminator* term) {
     SourceMarker sm(this);
     auto args_offset = tint::Switch<std::optional<size_t>>(
         term,
@@ -836,7 +836,7 @@ void Disassembly::EmitTerminator(const Terminator* term) {
         });
 }
 
-void Disassembly::EmitBinary(const Binary* b) {
+void Disassembler::EmitBinary(const Binary* b) {
     SourceMarker sm(this);
     EmitValueWithType(b);
     out_ << " = " << NameOf(b->Op()) << " ";
@@ -845,7 +845,7 @@ void Disassembly::EmitBinary(const Binary* b) {
     sm.Store(b);
 }
 
-void Disassembly::EmitUnary(const Unary* u) {
+void Disassembler::EmitUnary(const Unary* u) {
     SourceMarker sm(this);
     EmitValueWithType(u);
     out_ << " = " << NameOf(u->Op()) << " ";
@@ -854,7 +854,7 @@ void Disassembly::EmitUnary(const Unary* u) {
     sm.Store(u);
 }
 
-void Disassembly::EmitStructDecl(const core::type::Struct* str) {
+void Disassembler::EmitStructDecl(const core::type::Struct* str) {
     out_ << StyleType(str->Name().Name()) << " = " << StyleKeyword("struct") << " "
          << StyleAttribute("@align") << "(" << StyleLiteral(str->Align()) << ")";
     if (str->StructFlags().Contains(core::type::StructFlag::kBlock)) {
@@ -892,13 +892,13 @@ void Disassembly::EmitStructDecl(const core::type::Struct* str) {
     EmitLine();
 }
 
-StyledText Disassembly::NameOf(const Block* node) {
+StyledText Disassembler::NameOf(const Block* node) {
     TINT_ASSERT(node);
     auto id = block_ids_.GetOrAdd(node, [&] { return block_ids_.Count(); });
     return StyledText{} << StyleLabel("$B", id);
 }
 
-StyledText Disassembly::NameOf(const Value* value) {
+StyledText Disassembler::NameOf(const Value* value) {
     TINT_ASSERT(value);
     auto id = value_ids_.GetOrAdd(value, [&] {
         if (auto sym = mod_.NameOf(value)) {
@@ -923,7 +923,7 @@ StyledText Disassembly::NameOf(const Value* value) {
     return StyledText{} << style("%", id);
 }
 
-StyledText Disassembly::NameOf(const If* inst) {
+StyledText Disassembler::NameOf(const If* inst) {
     if (!inst) {
         return StyledText{} << StyleError("undef");
     }
@@ -932,7 +932,7 @@ StyledText Disassembly::NameOf(const If* inst) {
     return StyledText{} << StyleInstruction(name);
 }
 
-StyledText Disassembly::NameOf(const Loop* inst) {
+StyledText Disassembler::NameOf(const Loop* inst) {
     if (!inst) {
         return StyledText{} << StyleError("undef");
     }
@@ -942,7 +942,7 @@ StyledText Disassembly::NameOf(const Loop* inst) {
     return StyledText{} << StyleInstruction(name);
 }
 
-StyledText Disassembly::NameOf(const Switch* inst) {
+StyledText Disassembler::NameOf(const Switch* inst) {
     if (!inst) {
         return StyledText{} << StyleError("undef");
     }
@@ -952,7 +952,7 @@ StyledText Disassembly::NameOf(const Switch* inst) {
     return StyledText{} << StyleInstruction(name);
 }
 
-StyledText Disassembly::NameOf(BinaryOp op) {
+StyledText Disassembler::NameOf(BinaryOp op) {
     switch (op) {
         case BinaryOp::kAdd:
             return StyledText{} << StyleInstruction("add");
@@ -994,7 +994,7 @@ StyledText Disassembly::NameOf(BinaryOp op) {
     TINT_UNREACHABLE() << op;
 }
 
-StyledText Disassembly::NameOf(UnaryOp op) {
+StyledText Disassembler::NameOf(UnaryOp op) {
     switch (op) {
         case UnaryOp::kComplement:
             return StyledText{} << StyleInstruction("complement");

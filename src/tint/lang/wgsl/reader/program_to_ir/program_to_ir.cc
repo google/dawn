@@ -27,14 +27,10 @@
 
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 
-#include <iostream>
-#include <unordered_map>
 #include <utility>
 #include <variant>
-#include <vector>
 
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
@@ -43,19 +39,16 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/struct.h"
-#include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/wgsl/ast/accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/block_statement.h"
-#include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
@@ -67,16 +60,13 @@
 #include "src/tint/lang/wgsl/ast/diagnostic_directive.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/enable.h"
-#include "src/tint/lang/wgsl/ast/float_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/for_loop_statement.h"
 #include "src/tint/lang/wgsl/ast/function.h"
-#include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/identifier_expression.h"
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
-#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
 #include "src/tint/lang/wgsl/ast/let.h"
@@ -89,8 +79,6 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/statement.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
-#include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
-#include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
@@ -104,7 +92,6 @@
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/load.h"
-#include "src/tint/lang/wgsl/sem/materialize.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/switch_statement.h"

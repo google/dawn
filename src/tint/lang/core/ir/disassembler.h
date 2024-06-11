@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_DISASSEMBLY_H_
-#define SRC_TINT_LANG_CORE_IR_DISASSEMBLY_H_
+#ifndef SRC_TINT_LANG_CORE_IR_DISASSEMBLER_H_
+#define SRC_TINT_LANG_CORE_IR_DISASSEMBLER_H_
 
 #include <memory>
 #include <string>
@@ -52,8 +52,8 @@ class Struct;
 
 namespace tint::core::ir {
 
-/// Disassembly holds the disassembly of an IR module.
-class Disassembly {
+/// Disassembler is responsible for creating the disassembly of an IR module.
+class Disassembler {
   public:
     /// A reference to an instruction's operand or result.
     struct IndexedValue {
@@ -77,13 +77,13 @@ class Disassembly {
     /// Performs the disassembly of the module @p mod, constructing a Source::File with the name @p
     /// file_name.
     /// @param mod the module to disassemble
-    Disassembly(const Module& mod, std::string_view file_name);
+    explicit Disassembler(const Module& mod);
 
     /// Move constructor
-    Disassembly(Disassembly&&);
+    Disassembler(Disassembler&&);
 
     /// Destructor
-    ~Disassembly();
+    ~Disassembler();
 
     /// @returns the string representation of the module
     const StyledText& Text() const { return out_; }
@@ -154,6 +154,34 @@ class Disassembly {
     }
 
   private:
+    class SourceMarker {
+      public:
+        explicit SourceMarker(Disassembler* d) : dis_(d), begin_(dis_->MakeCurrentLocation()) {}
+        ~SourceMarker() = default;
+
+        void Store(const Instruction* inst) { dis_->SetSource(inst, MakeSource()); }
+
+        void Store(const Block* blk) { dis_->SetSource(blk, MakeSource()); }
+
+        void Store(const BlockParam* param) { dis_->SetSource(param, MakeSource()); }
+
+        void Store(const Function* func) { dis_->SetSource(func, MakeSource()); }
+
+        void Store(const FunctionParam* param) { dis_->SetSource(param, MakeSource()); }
+
+        void Store(IndexedValue operand) { dis_->SetSource(operand, MakeSource()); }
+
+        void StoreResult(IndexedValue result) { dis_->SetResultSource(result, MakeSource()); }
+
+        Source MakeSource() const {
+            return Source(Source::Range(begin_, dis_->MakeCurrentLocation()));
+        }
+
+      private:
+        Disassembler* dis_ = nullptr;
+        Source::Location begin_;
+    };
+
     /// Performs the disassembling of the module.
     void Disassemble();
 
@@ -196,34 +224,6 @@ class Disassembly {
 
     /// @returns the source location for the current emission location
     Source::Location MakeCurrentLocation();
-
-    class SourceMarker {
-      public:
-        explicit SourceMarker(Disassembly* d) : dis_(d), begin_(dis_->MakeCurrentLocation()) {}
-        ~SourceMarker() = default;
-
-        void Store(const Instruction* inst) { dis_->SetSource(inst, MakeSource()); }
-
-        void Store(const Block* blk) { dis_->SetSource(blk, MakeSource()); }
-
-        void Store(const BlockParam* param) { dis_->SetSource(param, MakeSource()); }
-
-        void Store(const Function* func) { dis_->SetSource(func, MakeSource()); }
-
-        void Store(const FunctionParam* param) { dis_->SetSource(param, MakeSource()); }
-
-        void Store(IndexedValue operand) { dis_->SetSource(operand, MakeSource()); }
-
-        void StoreResult(IndexedValue result) { dis_->SetResultSource(result, MakeSource()); }
-
-        Source MakeSource() const {
-            return Source(Source::Range(begin_, dis_->MakeCurrentLocation()));
-        }
-
-      private:
-        Disassembly* dis_ = nullptr;
-        Source::Location begin_;
-    };
 
     StyledText& Indent();
 
@@ -276,11 +276,6 @@ class Disassembly {
     Hashset<std::string, 32> ids_;
 };
 
-/// @returns the disassembly for the module @p mod, using the file name @p file_name
-inline Disassembly Disassemble(const Module& mod, std::string_view file_name = "") {
-    return Disassembly(mod, file_name);
-}
-
 }  // namespace tint::core::ir
 
-#endif  // SRC_TINT_LANG_CORE_IR_DISASSEMBLY_H_
+#endif  // SRC_TINT_LANG_CORE_IR_DISASSEMBLER_H_

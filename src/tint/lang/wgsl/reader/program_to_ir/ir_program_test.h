@@ -28,20 +28,16 @@
 #ifndef SRC_TINT_LANG_WGSL_READER_PROGRAM_TO_IR_IR_PROGRAM_TEST_H_
 #define SRC_TINT_LANG_WGSL_READER_PROGRAM_TO_IR_IR_PROGRAM_TEST_H_
 
-#include <memory>
 #include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/core/ir/disassembly.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/lower/lower.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
-#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::wgsl::helpers {
 

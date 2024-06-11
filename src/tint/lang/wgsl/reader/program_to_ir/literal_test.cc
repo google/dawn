@@ -25,14 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gmock/gmock.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/wgsl/ast/case_selector.h"
-#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/ir_program_test.h"
 
 using namespace tint::core::fluent_types;  // NOLINT

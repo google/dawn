@@ -25,9 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/wgsl/ast/case_selector.h"
-#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/ir_program_test.h"
 
 namespace tint::wgsl::reader {
@@ -45,7 +43,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"(%my_func = func():bool {
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"(%my_func = func():bool {
   $B1: {
     ret false
   }
@@ -69,7 +67,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not_Vector) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"(%my_func = func():vec4<bool> {
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"(%my_func = func():vec4<bool> {
   $B1: {
     ret vec4<bool>(false)
   }
@@ -93,7 +91,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Complement) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"(%my_func = func():u32 {
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"(%my_func = func():u32 {
   $B1: {
     ret 1u
   }
@@ -117,7 +115,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Negation) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"(%my_func = func():i32 {
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"(%my_func = func():i32 {
   $B1: {
     ret 1i
   }
@@ -142,7 +140,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"($B1: {  # root
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"($B1: {  # root
   %v1:ptr<private, i32, read_write> = var
 }
 
@@ -166,7 +164,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"($B1: {  # root
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"($B1: {  # root
   %v1:ptr<private, i32, read_write> = var
 }
 

@@ -30,7 +30,7 @@
 #include <string>
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::core::ir {
@@ -44,7 +44,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 class IR_ReferencedModuleVarsTest : public IRTestHelper {
   protected:
     /// @returns the module as a disassembled string
-    std::string Disassemble() const { return "\n" + ir::Disassemble(mod).Plain(); }
+    std::string Disassemble() const { return "\n" + ir::Disassembler(mod).Plain(); }
 };
 
 TEST_F(IR_ReferencedModuleVarsTest, EmptyRootBlock) {

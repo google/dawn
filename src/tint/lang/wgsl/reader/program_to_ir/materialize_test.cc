@@ -25,10 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gmock/gmock.h"
-#include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/wgsl/ast/case_selector.h"
-#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/ir_program_test.h"
 
 namespace tint::wgsl::reader {
@@ -46,7 +43,7 @@ TEST_F(ProgramToIRMaterializeTest, EmitExpression_MaterializedCall) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(Disassemble(m.Get()).Plain(), R"(%test_function = func():f32 {
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"(%test_function = func():f32 {
   $B1: {
     ret 2.0f
   }

@@ -28,7 +28,7 @@
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/binary/decode.h"
 #include "src/tint/lang/core/ir/binary/encode.h"
-#include "src/tint/lang/core/ir/disassembly.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 
 namespace tint::core::ir::binary {
 namespace {
@@ -44,8 +44,8 @@ void IRBinaryRoundtripFuzzer(core::ir::Module& module) {
         TINT_ICE() << "Decode() failed\n" << decoded.Failure();
     }
 
-    auto in = Disassemble(module).Plain();
-    auto out = Disassemble(decoded.Get()).Plain();
+    auto in = Disassembler(module).Plain();
+    auto out = Disassembler(decoded.Get()).Plain();
     if (in != out) {
         TINT_ICE() << "Roundtrip produced different disassembly\n"
                    << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n"
