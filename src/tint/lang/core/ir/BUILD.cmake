@@ -110,6 +110,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/location.h
   lang/core/ir/loop.cc
   lang/core/ir/loop.h
+  lang/core/ir/member_builtin_call.cc
+  lang/core/ir/member_builtin_call.h
   lang/core/ir/module.cc
   lang/core/ir/module.h
   lang/core/ir/multi_in_block.cc

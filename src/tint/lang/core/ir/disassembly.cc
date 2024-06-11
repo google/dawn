@@ -50,6 +50,7 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
@@ -470,6 +471,17 @@ void Disassembly::EmitInstruction(const Instruction* inst) {
                 out_ << ", ";
             }
             EmitOperandList(uc, UserCall::kArgsOperandOffset);
+        },
+        [&](const MemberBuiltinCall* c) {
+            EmitValueWithType(c);
+            out_ << " = ";
+            EmitOperand(c, MemberBuiltinCall::kObjectOperandOffset);
+            out_ << ".";
+            EmitInstructionName(c);
+            if (!c->Args().IsEmpty()) {
+                out_ << " ";
+                EmitOperandList(c, UserCall::kArgsOperandOffset);
+            }
         },
         [&](const Var* v) {
             EmitValueWithType(v);

@@ -60,6 +60,7 @@
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
@@ -337,6 +338,10 @@ class Validator {
     /// Validates the given builtin call
     /// @param call the call to validate
     void CheckBuiltinCall(const BuiltinCall* call);
+
+    /// Validates the given member builtin call
+    /// @param call the member call to validate
+    void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
 
     /// Validates the given construct
     /// @param construct the construct to validate
@@ -972,13 +977,14 @@ void Validator::CheckLet(const Let* let) {
 
 void Validator::CheckCall(const Call* call) {
     tint::Switch(
-        call,                                                //
-        [&](const Bitcast*) {},                              //
-        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },  //
-        [&](const Construct* c) { CheckConstruct(c); },      //
-        [&](const Convert*) {},                              //
-        [&](const Discard*) {},                              //
-        [&](const UserCall* c) { CheckUserCall(c); },        //
+        call,                                                            //
+        [&](const Bitcast*) {},                                          //
+        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
+        [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
+        [&](const Construct* c) { CheckConstruct(c); },                  //
+        [&](const Convert*) {},                                          //
+        [&](const Discard*) {},                                          //
+        [&](const UserCall* c) { CheckUserCall(c); },                    //
         [&](Default) {
             // Validation of custom IR instructions
         });
@@ -1001,6 +1007,30 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
     if (result->return_type != call->Result(0)->Type()) {
         AddError(call) << "call result type does not match builtin return type";
+    }
+}
+
+void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
+    auto args = Vector<const type::Type*, 8>({call->Object()->Type()});
+    for (auto* arg : call->Args()) {
+        args.Push(arg->Type());
+    }
+    intrinsic::Context context{
+        call->TableData(),
+        type_mgr_,
+        symbols_,
+    };
+
+    auto result =
+        core::intrinsic::LookupMemberFn(context, call->FriendlyName().c_str(), call->FuncId(),
+                                        Empty, std::move(args), core::EvaluationStage::kRuntime);
+    if (result != Success) {
+        AddError(call) << result.Failure();
+        return;
+    }
+
+    if (result->return_type != call->Result(0)->Type()) {
+        AddError(call) << "member call result type does not match builtin return type";
     }
 }
 

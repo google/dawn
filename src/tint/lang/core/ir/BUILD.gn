@@ -112,6 +112,8 @@ libtint_source_set("ir") {
     "location.h",
     "loop.cc",
     "loop.h",
+    "member_builtin_call.cc",
+    "member_builtin_call.h",
     "module.cc",
     "module.h",
     "multi_in_block.cc",
