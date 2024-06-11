@@ -395,6 +395,15 @@ func (r *resolver) intrinsic(
 			return fmt.Errorf("%v too many values for @const attribute", constEvalFn.Source)
 		}
 	}
+	if memberFunction := a.Attributes.Take("member_function"); memberFunction != nil {
+		overload.MemberFunction = true
+		if len(memberFunction.Values) != 0 {
+			return fmt.Errorf("%v unexpected value for member_function attribute", memberFunction.Source)
+		}
+		if len(a.Parameters) < 1 {
+			return fmt.Errorf("%v @member_function can only be used on a function with at least one parameter", memberFunction.Source)
+		}
+	}
 	if deprecated := a.Attributes.Take("deprecated"); deprecated != nil {
 		overload.IsDeprecated = true
 		if len(deprecated.Values) != 0 {

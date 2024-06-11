@@ -135,6 +135,7 @@ constexpr OverloadInfo kOverloads[] = {
         , OverloadFlag::kSupports{{Title $u}}Pipeline
 {{-   end }}
 {{-   if $o.MustUse}}, OverloadFlag::kMustUse{{end}}
+{{-   if $o.MemberFunction}}, OverloadFlag::kMemberFunction{{end}}
 {{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end -}}
     ),
     /* num_parameters */ {{$o.NumParameters}},

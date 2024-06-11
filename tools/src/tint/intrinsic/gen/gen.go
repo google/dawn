@@ -116,6 +116,8 @@ type Overload struct {
 	CanBeUsedInStage sem.StageUses
 	// True if the overload is marked as @must_use
 	MustUse bool
+	// True if the overload is marked as @member_function
+	MemberFunction bool
 	// True if the overload is marked as deprecated
 	IsDeprecated bool
 	// The kind of overload
@@ -315,6 +317,7 @@ func (b *overloadBuilder) build() (Overload, error) {
 		ReturnMatcherIndicesOffset: loadOrMinusOne(b.returnMatcherIndicesOffset),
 		CanBeUsedInStage:           b.overload.CanBeUsedInStage,
 		MustUse:                    b.overload.MustUse,
+		MemberFunction:             b.overload.MemberFunction,
 		IsDeprecated:               b.overload.IsDeprecated,
 		Kind:                       string(b.overload.Decl.Kind),
 	}, nil

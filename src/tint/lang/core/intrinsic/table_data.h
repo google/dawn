@@ -149,6 +149,7 @@ enum class OverloadFlag : uint8_t {
     kSupportsFragmentPipeline,  // The overload can be used in fragment shaders
     kSupportsComputePipeline,   // The overload can be used in compute shaders
     kMustUse,                   // The overload cannot be called as a statement
+    kMemberFunction,            // The overload is a member function
     kIsDeprecated,              // The overload is deprecated
 };
 

@@ -264,6 +264,7 @@ type Overload struct {
 	Parameters        []Parameter
 	CanBeUsedInStage  StageUses
 	MustUse           bool   // True if function cannot be used as a statement
+	MemberFunction    bool   // True if function is a member function
 	IsDeprecated      bool   // True if this overload is deprecated
 	ConstEvalFunction string // Name of the function used to evaluate the intrinsic at shader creation time
 }

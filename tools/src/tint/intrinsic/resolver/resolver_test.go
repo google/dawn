@@ -215,6 +215,11 @@ type f32
 		}, {
 			`
 type f32
+@member_function fn f(f32)`,
+			success,
+		}, {
+			`
+type f32
 type P<T>
 match m: f32
 fn f(m)`,
@@ -557,6 +562,15 @@ conv F[M: m](P<M>)`,
 			`
 @must_use fn f()`,
 			`file.txt:1:2 @must_use can only be used on a function with a return type`,
+		}, {
+			`
+type f32
+@member_function(0) fn f(f32)`,
+			`file.txt:2:2 unexpected value for member_function attribute`,
+		}, {
+			`
+@member_function fn f()`,
+			`file.txt:1:2 @member_function can only be used on a function with at least one parameter`,
 		}, {
 			`
 type f32
