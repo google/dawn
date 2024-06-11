@@ -102,6 +102,8 @@ static void PrintTypeList(StyledText& ss, VectorRef<const core::type::Type*> typ
 /// @param intrinsic_name the name of the intrinsic
 /// @param template_args the template argument types
 /// @param args the argument types
+/// @param earliest_eval_stage the the earliest evaluation stage that the call can be made
+/// @param member_function `true` if the builtin should be a member function
 /// @param on_no_match an error callback when no intrinsic overloads matched the provided
 ///                    arguments.
 /// @returns the matched intrinsic
@@ -111,6 +113,7 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
                                             VectorRef<const core::type::Type*> template_args,
                                             VectorRef<const core::type::Type*> args,
                                             EvaluationStage earliest_eval_stage,
+                                            bool member_function,
                                             const OnNoMatch& on_no_match);
 
 /// The scoring mode for ScoreOverload()
@@ -192,6 +195,7 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
                                             VectorRef<const core::type::Type*> template_args,
                                             VectorRef<const core::type::Type*> args,
                                             EvaluationStage earliest_eval_stage,
+                                            bool member_function,
                                             const OnNoMatch& on_no_match) {
     const size_t num_overloads = static_cast<size_t>(intrinsic.num_overloads);
     size_t num_matched = 0;
@@ -200,6 +204,12 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
     candidates.Reserve(intrinsic.num_overloads);
     for (size_t overload_idx = 0; overload_idx < num_overloads; overload_idx++) {
         auto& overload = context.data[intrinsic.overloads + overload_idx];
+
+        // Check that the overload is a member function iff we expect one.
+        if (overload.flags.Contains(OverloadFlag::kMemberFunction) != member_function) {
+            continue;
+        }
+
         auto candidate = ScoreOverload<ScoreMode::kEarlyReject>(context, overload, template_args,
                                                                 args, earliest_eval_stage);
         if (candidate.score == 0) {
@@ -214,6 +224,12 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
         // Perform the full scoring of each overload
         for (size_t overload_idx = 0; overload_idx < num_overloads; overload_idx++) {
             auto& overload = context.data[intrinsic.overloads + overload_idx];
+
+            // Check that the overload is a member function iff we expect one.
+            if (overload.flags.Contains(OverloadFlag::kMemberFunction) != member_function) {
+                continue;
+            }
+
             candidates[overload_idx] = ScoreOverload<ScoreMode::kFull>(
                 context, overload, template_args, args, earliest_eval_stage);
         }
@@ -656,7 +672,33 @@ Result<Overload, StyledText> LookupFn(Context& context,
 
     // Resolve the intrinsic overload
     return MatchIntrinsic(context, context.data.builtins[function_id], intrinsic_name,
-                          template_args, args, earliest_eval_stage, on_no_match);
+                          template_args, args, earliest_eval_stage, /* member_function */ false,
+                          on_no_match);
+}
+
+Result<Overload, StyledText> LookupMemberFn(Context& context,
+                                            std::string_view intrinsic_name,
+                                            size_t function_id,
+                                            VectorRef<const core::type::Type*> template_args,
+                                            VectorRef<const core::type::Type*> args,
+                                            EvaluationStage earliest_eval_stage) {
+    // Generates an error when no overloads match the provided arguments
+    auto on_no_match = [&](VectorRef<Candidate> candidates) {
+        StyledText err;
+        err << "no matching call to " << CallSignature(intrinsic_name, template_args, args) << "\n";
+        if (!candidates.IsEmpty()) {
+            err << "\n"
+                << candidates.Length() << " candidate function"
+                << (candidates.Length() > 1 ? "s:" : ":") << "\n";
+            PrintCandidates(err, context, candidates, intrinsic_name, template_args, args);
+        }
+        return err;
+    };
+
+    // Resolve the intrinsic overload
+    return MatchIntrinsic(context, context.data.builtins[function_id], intrinsic_name,
+                          template_args, args, earliest_eval_stage, /* member_function */ true,
+                          on_no_match);
 }
 
 Result<Overload, StyledText> LookupUnary(Context& context,
@@ -705,7 +747,7 @@ Result<Overload, StyledText> LookupUnary(Context& context,
 
     // Resolve the intrinsic overload
     return MatchIntrinsic(context, *intrinsic_info, intrinsic_name, Empty, args,
-                          earliest_eval_stage, on_no_match);
+                          earliest_eval_stage, /* member_function */ false, on_no_match);
 }
 
 Result<Overload, StyledText> LookupBinary(Context& context,
@@ -808,7 +850,7 @@ Result<Overload, StyledText> LookupBinary(Context& context,
 
     // Resolve the intrinsic overload
     return MatchIntrinsic(context, *intrinsic_info, intrinsic_name, Empty, args,
-                          earliest_eval_stage, on_no_match);
+                          earliest_eval_stage, /* member_function */ false, on_no_match);
 }
 
 Result<Overload, StyledText> LookupCtorConv(Context& context,
@@ -847,7 +889,7 @@ Result<Overload, StyledText> LookupCtorConv(Context& context,
 
     // Resolve the intrinsic overload
     return MatchIntrinsic(context, context.data.ctor_conv[type_id], type_name, template_args, args,
-                          earliest_eval_stage, on_no_match);
+                          earliest_eval_stage, /* member_function */ false, on_no_match);
 }
 
 }  // namespace tint::core::intrinsic

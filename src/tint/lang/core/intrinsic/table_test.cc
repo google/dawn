@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/utils/containers/vector.h"
 
 namespace tint::core::intrinsic {
 namespace {
@@ -951,6 +952,16 @@ TEST_F(CoreIntrinsicTableTest, Err257Arguments) {  // crbug.com/1323605
         table.Lookup(BuiltinFn::kAbs, Empty, std::move(arg_tys), EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
     ASSERT_THAT(result.Failure().Plain(), HasSubstr("no matching call"));
+}
+
+TEST_F(CoreIntrinsicTableTest, MemberFunctionDoesNotMatchNonMemberFunction) {
+    auto* arr =
+        create<type::Array>(create<type::F32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+    auto result =
+        table.Lookup(BuiltinFn::kArrayLength, arr, Empty, Empty, EvaluationStage::kConstant);
+    ASSERT_NE(result, Success);
+    EXPECT_EQ(result.Failure().Plain(), R"(no matching call to 'arrayLength(array<f32>)'
+)");
 }
 
 }  // namespace

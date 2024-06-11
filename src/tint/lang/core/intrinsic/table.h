@@ -167,6 +167,27 @@ Result<Overload, StyledText> LookupFn(Context& context,
                                       VectorRef<const core::type::Type*> args,
                                       EvaluationStage earliest_eval_stage);
 
+/// Lookup looks for the member builtin overload with the given signature, raising an error
+/// diagnostic if the builtin was not found.
+/// @param context the intrinsic context
+/// @param function_name the name of the function
+/// @param function_id the function identifier
+/// @param template_args the optional template arguments
+/// @param args the argument types passed to the builtin function
+/// @param earliest_eval_stage the the earliest evaluation stage that a call to
+///        the builtin can be made. This can alter the overloads considered.
+///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
+///        only overloads with concrete argument types will be considered, as all
+///        abstract-numerics will have been materialized after shader creation time
+///        (EvaluationStage::kConstant).
+/// @return the resolved builtin function overload
+Result<Overload, StyledText> LookupMemberFn(Context& context,
+                                            std::string_view function_name,
+                                            size_t function_id,
+                                            VectorRef<const core::type::Type*> template_args,
+                                            VectorRef<const core::type::Type*> args,
+                                            EvaluationStage earliest_eval_stage);
+
 /// Lookup looks for the unary op overload with the given signature, raising an error
 /// diagnostic if the operator was not found.
 /// @param context the intrinsic context
@@ -262,6 +283,35 @@ struct Table {
         size_t id = static_cast<size_t>(builtin_fn);
         return LookupFn(context, name, id, std::move(template_args), std::move(args),
                         earliest_eval_stage);
+    }
+
+    /// Lookup looks for the member builtin overload with the given signature, raising an error
+    /// diagnostic if the builtin was not found.
+    /// @param builtin_fn the builtin function
+    /// @param object the object type
+    /// @param template_args the optional template arguments
+    /// @param args the argument types passed to the builtin function
+    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    ///        the builtin can be made. This can alter the overloads considered.
+    ///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
+    ///        only overloads with concrete argument types will be considered, as all
+    ///        abstract-numerics will have been materialized after shader creation time
+    ///        (EvaluationStage::kConstant).
+    /// @return the resolved builtin function overload
+    Result<Overload, StyledText> Lookup(BuiltinFn builtin_fn,
+                                        const core::type::Type* object,
+                                        VectorRef<const core::type::Type*> template_args,
+                                        VectorRef<const core::type::Type*> args,
+                                        EvaluationStage earliest_eval_stage) {
+        // Push the object type into the argument list.
+        auto full_args = Vector<const core::type::Type*, 8>({object});
+        for (auto* arg : args) {
+            full_args.Push(arg);
+        }
+        std::string_view name = DIALECT::ToString(builtin_fn);
+        size_t id = static_cast<size_t>(builtin_fn);
+        return LookupMemberFn(context, name, id, std::move(template_args), std::move(full_args),
+                              earliest_eval_stage);
     }
 
     /// Lookup looks for the unary op overload with the given signature, raising an error
