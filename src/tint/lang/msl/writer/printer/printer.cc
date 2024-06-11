@@ -1241,6 +1241,8 @@ class Printer : public tint::TextGenerator {
                 std::string access_str;
                 if (storage->access() == core::Access::kRead) {
                     out << "access::read";
+                } else if (storage->access() == core::Access::kReadWrite) {
+                    out << "access::read_write";
                 } else if (storage->access() == core::Access::kWrite) {
                     out << "access::write";
                 } else {
