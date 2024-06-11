@@ -29,6 +29,7 @@
 #define SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_DEVICEMOCK_H_
 
 #include <memory>
+#include <vector>
 
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"
@@ -119,6 +120,7 @@ class DeviceMock : public DeviceBase {
     MOCK_METHOD(ResultOrError<Ref<ShaderModuleBase>>,
                 CreateShaderModuleImpl,
                 (const UnpackedPtr<ShaderModuleDescriptor>&,
+                 const std::vector<tint::wgsl::Extension>&,
                  ShaderModuleParseResult*,
                  OwnedCompilationMessages*),
                 (override));

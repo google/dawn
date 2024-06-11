@@ -168,15 +168,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue, mMainQueueFamily));
 
-    DAWN_TRY(DeviceBase::Initialize(std::move(queue)));
-
-    if (HasFeature(Feature::DawnLoadResolveTexture)) {
-        // TODO(42240662): Add a way to add additional extensions when compiling specific shader
-        // modules only.
-        EnableAdditionalWGSLExtension(tint::wgsl::Extension::kChromiumInternalInputAttachments);
-    }
-
-    return {};
+    return DeviceBase::Initialize(std::move(queue));
 }
 
 Device::~Device() {
@@ -220,9 +212,11 @@ ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescripto
 }
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+    const std::vector<tint::wgsl::Extension>& internalExtensions,
     ShaderModuleParseResult* parseResult,
     OwnedCompilationMessages* compilationMessages) {
-    return ShaderModule::Create(this, descriptor, parseResult, compilationMessages);
+    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult,
+                                compilationMessages);
 }
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
                                                               SwapChainBase* previousSwapChain,

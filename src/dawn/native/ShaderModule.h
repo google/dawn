@@ -130,10 +130,12 @@ struct ShaderModuleEntryPoint {
     std::string name;
 };
 
-MaybeError ValidateAndParseShaderModule(DeviceBase* device,
-                                        const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
-                                        ShaderModuleParseResult* parseResult,
-                                        OwnedCompilationMessages* outMessages);
+MaybeError ValidateAndParseShaderModule(
+    DeviceBase* device,
+    const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+    const std::vector<tint::wgsl::Extension>& internalExtensions,
+    ShaderModuleParseResult* parseResult,
+    OwnedCompilationMessages* outMessages);
 MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                    const EntryPointMetadata& entryPoint,
                                                    const PipelineLayoutBase* layout);
@@ -284,8 +286,11 @@ class ShaderModuleBase : public RefCountedWithExternalCountBase<ApiObjectBase>,
     using Base = RefCountedWithExternalCountBase<ApiObjectBase>;
     ShaderModuleBase(DeviceBase* device,
                      const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+                     std::vector<tint::wgsl::Extension> internalExtensions,
                      ApiObjectBase::UntrackedByDeviceTag tag);
-    ShaderModuleBase(DeviceBase* device, const UnpackedPtr<ShaderModuleDescriptor>& descriptor);
+    ShaderModuleBase(DeviceBase* device,
+                     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+                     std::vector<tint::wgsl::Extension> internalExtensions);
     ~ShaderModuleBase() override;
 
     static Ref<ShaderModuleBase> MakeError(DeviceBase* device, const char* label);
@@ -361,6 +366,8 @@ class ShaderModuleBase : public RefCountedWithExternalCountBase<ApiObjectBase>,
     MutexProtected<TintData> mTintData;
 
     std::unique_ptr<OwnedCompilationMessages> mCompilationMessages;
+
+    const std::vector<tint::wgsl::Extension> mInternalExtensions;
 };
 
 }  // namespace dawn::native

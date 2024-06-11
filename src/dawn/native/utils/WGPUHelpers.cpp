@@ -47,12 +47,15 @@
 
 namespace dawn::native::utils {
 
-ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(DeviceBase* device, const char* source) {
+ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
+    DeviceBase* device,
+    const char* source,
+    const std::vector<tint::wgsl::Extension>& internalExtensions) {
     ShaderModuleWGSLDescriptor wgslDesc;
     wgslDesc.code = source;
     ShaderModuleDescriptor descriptor;
     descriptor.nextInChain = &wgslDesc;
-    return device->CreateShaderModule(&descriptor);
+    return device->CreateShaderModule(&descriptor, internalExtensions);
 }
 
 ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,

@@ -116,7 +116,9 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     // fragment shader's source will depend on pipeline key.
     std::string fsCode = GenerateFS(pipelineKey);
     Ref<ShaderModuleBase> fshaderModule;
-    DAWN_TRY_ASSIGN(fshaderModule, utils::CreateShaderModule(device, fsCode.c_str()));
+    DAWN_TRY_ASSIGN(fshaderModule, utils::CreateShaderModule(
+                                       device, fsCode.c_str(),
+                                       {tint::wgsl::Extension::kChromiumInternalInputAttachments}));
 
     FragmentState fragmentState = {};
     fragmentState.module = fshaderModule.Get();

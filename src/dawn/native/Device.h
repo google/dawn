@@ -185,6 +185,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
 
     ResultOrError<Ref<ShaderModuleBase>> GetOrCreateShaderModule(
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+        const std::vector<tint::wgsl::Extension>& internalExtensions,
         ShaderModuleParseResult* parseResult,
         std::unique_ptr<OwnedCompilationMessages>* compilationMessages);
 
@@ -228,6 +229,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     ResultOrError<Ref<SamplerBase>> CreateSampler(const SamplerDescriptor* descriptor = nullptr);
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
+        const std::vector<tint::wgsl::Extension>& internalExtensions = {},
         std::unique_ptr<OwnedCompilationMessages>* compilationMessages = nullptr);
     // Deprecated: this was the way to create a SwapChain when it was explicitly manipulated by the
     // end user.
@@ -469,8 +471,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     void DestroyObjects();
     void Destroy();
 
-    void EnableAdditionalWGSLExtension(tint::wgsl::Extension extension);
-
     virtual MaybeError GetAHardwareBufferPropertiesImpl(
         void* handle,
         AHardwareBufferProperties* properties) const {
@@ -501,6 +501,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
         const SamplerDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
+        const std::vector<tint::wgsl::Extension>& internalExtensions,
         ShaderModuleParseResult* parseResult,
         OwnedCompilationMessages* compilationMessages) = 0;
     // Note that previousSwapChain may be nullptr, or come from a different backend.
