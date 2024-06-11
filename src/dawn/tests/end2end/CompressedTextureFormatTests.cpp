@@ -839,8 +839,8 @@ TEST_P(CompressedTextureFormatTest, CopyIntoSubRegion) {
 TEST_P(CompressedTextureFormatTest, CopyIntoNonZeroArrayLayer) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+    // Compatibility mode cannot bind a 2d-array texture as 2d.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
     constexpr uint32_t kArrayLayerCount = 3;
 
@@ -856,9 +856,6 @@ TEST_P(CompressedTextureFormatTest, CopyIntoNonZeroArrayLayer) {
 TEST_P(CompressedTextureFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     CopyConfig config = GetDefaultFullConfig();
     // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
     // dimensions so paddings are required in the copies.
@@ -871,8 +868,8 @@ TEST_P(CompressedTextureFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 TEST_P(CompressedTextureFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmapLevel) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+    // Compatibility mode does not support T2T copies of compressed textures.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
     // TODO(crbug.com/dawn/816): This consistently fails on with the 12th pixel being opaque
     // black instead of opaque red on Win10 FYI Release (NVIDIA GeForce GTX 1660).
@@ -910,9 +907,12 @@ TEST_P(CompressedTextureFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmap
 TEST_P(CompressedTextureFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
+    // Compatibility mode does not support T2T copies of compressed textures.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(crbug.com/dawn/817): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
 
     CopyConfig srcConfig = GetDefaultSubresourceConfig();
     srcConfig.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
@@ -950,9 +950,12 @@ TEST_P(CompressedTextureFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqualT
 TEST_P(CompressedTextureFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
+    // Compatibility mode does not support T2T copies of compressed textures.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(crbug.com/dawn/817): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
 
     CopyConfig srcConfig = GetDefaultFullConfig();
     srcConfig.textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
@@ -991,9 +994,12 @@ TEST_P(CompressedTextureFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqualT
 TEST_P(CompressedTextureFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVirtualSize) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
+    // Compatibility mode does not support T2T copies of compressed textures.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(crbug.com/dawn/817): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
 
     constexpr uint32_t kTotalCopyCount = 2;
     std::array<CopyConfig, kTotalCopyCount> srcConfigs;
@@ -1053,9 +1059,12 @@ TEST_P(CompressedTextureFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVirt
 TEST_P(CompressedTextureFormatTest, CopyWithMultipleLayerAndPhysicalSizeNotEqualToVirtualSize) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
+    // Compatibility mode cannot bind a 2d-array texture as 2d.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(crbug.com/dawn/817): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
 
     constexpr uint32_t kArrayLayerCount = 5;
 
@@ -1207,9 +1216,6 @@ TEST_P(CompressedTextureFormatTest, LargeImageHeight) {
 TEST_P(CompressedTextureFormatTest, LargeImageHeightAndClampedCopyExtent) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     CopyConfig config = GetDefaultFullConfig();
 
     // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
@@ -1226,8 +1232,8 @@ TEST_P(CompressedTextureFormatTest, LargeImageHeightAndClampedCopyExtent) {
 TEST_P(CompressedTextureFormatTest, CopyWhole2DArrayTexture) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+    // Compatibility mode does not support T2T copies of compressed textures.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
     constexpr uint32_t kArrayLayerCount = 3;
 
@@ -1243,8 +1249,8 @@ TEST_P(CompressedTextureFormatTest, CopyWhole2DArrayTexture) {
 TEST_P(CompressedTextureFormatTest, CopyMultiple2DArrayLayers) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
-    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+    // Compatibility mode cannot bind a 2d-array texture as 2d.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
     constexpr uint32_t kArrayLayerCount = 3;
 
@@ -1288,9 +1294,11 @@ class CompressedTextureFormatSpecificTest : public DawnTest {
 // Testing a special code path: clearing a non-renderable texture when DynamicUploader
 // is unaligned doesn't throw validation errors.
 TEST_P(CompressedTextureFormatSpecificTest, BC1RGBAUnorm_UnalignedDynamicUploader) {
+    // Compatibility mode cannot bind a 2d-array texture as 2d.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // CopyT2B for compressed texture formats is unimplemented on OpenGL.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
     DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     utils::UnalignDynamicUploader(device);
@@ -1390,11 +1398,11 @@ TEST_P(CompressedTextureWriteTextureTest, Basic) {
 
 // Test writing to multiple 2D texture array layers.
 TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
+    // Compatibility mode cannot bind a 2d-array texture as 2d.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
-
-    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // TODO(b/198674734): Width multiplier set to 7 because 5 results in square size for ASTC6x5.
     constexpr uint32_t kSizeWidthMultiplier = 7;
@@ -1425,9 +1433,6 @@ TEST_P(CompressedTextureWriteTextureTest,
        WriteIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
     // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
-
-    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     CopyConfig config = GetDefaultFullConfig();
 
