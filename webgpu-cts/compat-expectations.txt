@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-05-31 11:11:07AM
+# Last rolled: 2024-06-11 07:27:27AM
 
 # Flaky on all platforms
 # KEEP
@@ -171,9 +171,6 @@ crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,i
 crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
 crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
-
-# textureDimensions() failures, failing in textureNumLevels()
-crbug.com/dawn/2442 webgpu:shader,execution,expression,call,builtin,textureDimensions:sampled_and_multisampled:format="depth24plus-stencil8";aspect="stencil-only";samples=1 [ Failure ]
 
 # bitcast ai_to_f32 failures; precision issue?
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
@@ -498,7 +495,7 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ################################################################################
 # New failures. Please triage:
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,operation,adapter,info:* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,uncapturederror:iff_uncaptured:errorType="out-of-memory" [ Failure ]
 crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
