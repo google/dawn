@@ -25,27 +25,36 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/member_builtin_call.h"
 
 #include "gtest/gtest.h"
+
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/core/type/vector.h"
+#include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/utils/result/result.h"
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::msl::ir {
 namespace {
 
-using namespace tint::core::number_suffixes;  // NOLINT
-                                              //
-using IR_MslBuiltinCallTest = core::ir::IRTestHelper;
+using IR_MslMemberBuiltinCallTest = core::ir::IRTestHelper;
 
-TEST_F(IR_MslBuiltinCallTest, Clone) {
-    auto* builtin = b.Call<BuiltinCall>(mod.Types().void_(), BuiltinFn::kThreadgroupBarrier, 0_u);
+TEST_F(IR_MslMemberBuiltinCallTest, Clone) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* builtin =
+        b.MemberCall<MemberBuiltinCall>(mod.Types().void_(), BuiltinFn::kSample, t, s, coords);
 
     auto* new_b = clone_ctx.Clone(builtin);
 
@@ -53,24 +62,23 @@ TEST_F(IR_MslBuiltinCallTest, Clone) {
     EXPECT_NE(builtin->Result(0), new_b->Result(0));
     EXPECT_EQ(mod.Types().void_(), new_b->Result(0)->Type());
 
-    EXPECT_EQ(BuiltinFn::kThreadgroupBarrier, new_b->Func());
+    EXPECT_EQ(BuiltinFn::kSample, new_b->Func());
+
+    EXPECT_TRUE(new_b->Object()->Type()->Is<core::type::SampledTexture>());
 
     auto args = new_b->Args();
-    EXPECT_EQ(1u, args.Length());
-
-    auto* val0 = args[0]->As<core::ir::Constant>()->Value();
-    EXPECT_EQ(0_u, val0->As<core::constant::Scalar<core::u32>>()->ValueAs<core::u32>());
+    ASSERT_EQ(2u, args.Length());
+    EXPECT_TRUE(args[0]->Type()->Is<core::type::Sampler>());
+    EXPECT_TRUE(args[1]->Type()->Is<core::type::Vector>());
 }
 
-TEST_F(IR_MslBuiltinCallTest, DoesNotMatchMemberFunction) {
-    auto* t = b.FunctionParam(
-        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
-    auto* s = b.FunctionParam("s", ty.sampler());
-    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
-    auto* func = b.Function("foo", ty.vec4<f32>());
-    func->SetParams({t, s, coords});
+TEST_F(IR_MslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
+    auto* a = b.FunctionParam("t", ty.ptr<workgroup>(ty.atomic<u32>()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({a});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call<BuiltinCall>(ty.vec4<f32>(), msl::BuiltinFn::kSample, t, s, coords);
+        auto* result =
+            b.MemberCall<MemberBuiltinCall>(ty.u32(), msl::BuiltinFn::kAtomicLoadExplicit, a, 0_u);
         b.Return(func, result);
     });
 
@@ -78,20 +86,20 @@ TEST_F(IR_MslBuiltinCallTest, DoesNotMatchMemberFunction) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:20 error: msl.sample: no matching call to 'msl.sample(texture_2d<f32>, sampler, vec2<f32>)'
+        R"(:3:17 error: atomic_load_explicit: no matching call to 'atomic_load_explicit(ptr<workgroup, atomic<u32>, read_write>, u32)'
 
-    %5:vec4<f32> = msl.sample %t, %s, %coords
-                   ^^^^^^^^^^
+    %3:u32 = %t.atomic_load_explicit 0u
+                ^^^^^^^^^^^^^^^^^^^^
 
 :2:3 note: in block
   $B1: {
   ^^^
 
 note: # Disassembly
-%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
+%foo = func(%t:ptr<workgroup, atomic<u32>, read_write>):u32 {
   $B1: {
-    %5:vec4<f32> = msl.sample %t, %s, %coords
-    ret %5
+    %3:u32 = %t.atomic_load_explicit 0u
+    ret %3
   }
 }
 )");
