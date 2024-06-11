@@ -48,6 +48,9 @@ struct Output {
     /// Copy constructor
     Output(const Output&);
 
+    /// Copy assign
+    Output& operator=(const Output&);
+
     /// The generated HLSL.
     std::string hlsl = "";
 

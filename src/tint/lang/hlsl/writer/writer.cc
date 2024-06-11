@@ -31,8 +31,28 @@
 #include <utility>
 
 #include "src/tint/lang/hlsl/writer/ast_printer/ast_printer.h"
+#include "src/tint/lang/hlsl/writer/printer/printer.h"
+#include "src/tint/lang/hlsl/writer/raise/raise.h"
 
 namespace tint::hlsl::writer {
+
+Result<Output> Generate(core::ir::Module& ir, const Options& options) {
+    Output output;
+
+    // Raise the core-dialect to HLSL-dialect
+    auto res = Raise(ir, options);
+    if (res != Success) {
+        return res.Failure();
+    }
+
+    auto result = Print(ir);
+    if (result != Success) {
+        return result.Failure();
+    }
+    output.hlsl = result->hlsl;
+
+    return output;
+}
 
 Result<Output> Generate(const Program& program, const Options& options) {
     if (!program.IsValid()) {

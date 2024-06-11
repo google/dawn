@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,16 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/output.h"
+#ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_RAISE_H_
+#define SRC_TINT_LANG_HLSL_WRITER_RAISE_RAISE_H_
+
+#include "src/tint/lang/hlsl/writer/common/options.h"
+#include "src/tint/utils/result/result.h"
+
+// Forward declarations
+namespace tint::core::ir {
+class Module;
+}  // namespace tint::core::ir
 
 namespace tint::hlsl::writer {
 
-Output::Output() = default;
-
-Output::~Output() = default;
-
-Output::Output(const Output&) = default;
-
-Output& Output::operator=(const Output&) = default;
+/// Raise a core IR module to the HLSL dialect of the IR.
+/// @param module the core IR module to raise to HLSL dialect
+/// @param options the printer options
+/// @returns success or failure
+Result<SuccessType> Raise(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::hlsl::writer
+
+#endif  // SRC_TINT_LANG_HLSL_WRITER_RAISE_RAISE_H_

@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,16 +25,54 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/output.h"
+#include "src/tint/lang/hlsl/writer/printer/printer.h"
+
+#include <utility>
+
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/utils/generator/text_generator.h"
 
 namespace tint::hlsl::writer {
+namespace {
 
-Output::Output() = default;
+/// PIMPL class for the HLSL generator
+class Printer : public tint::TextGenerator {
+  public:
+    /// Constructor
+    /// @param module the IR module to generate
+    explicit Printer(core::ir::Module& module) : ir_(module) {}
 
-Output::~Output() = default;
+    /// @returns the generated HLSL shader
+    tint::Result<PrintResult> Generate() {
+        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "HLSL writer");
+        if (valid != Success) {
+            return std::move(valid.Failure());
+        }
 
-Output::Output(const Output&) = default;
+        // TODO(dsinclair): Flush out HLSL printer
 
-Output& Output::operator=(const Output&) = default;
+        return std::move(result_);
+    }
+
+  private:
+    /// The result of printing the module.
+    PrintResult result_;
+
+    core::ir::Module& ir_;
+};
+
+}  // namespace
+
+Result<PrintResult> Print(core::ir::Module& module) {
+    return Printer{module}.Generate();
+}
+
+PrintResult::PrintResult() = default;
+
+PrintResult::~PrintResult() = default;
+
+PrintResult::PrintResult(const PrintResult&) = default;
+
+PrintResult& PrintResult::operator=(const PrintResult&) = default;
 
 }  // namespace tint::hlsl::writer

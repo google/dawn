@@ -1023,7 +1023,20 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
     gen_options.polyfill_dot_4x8_packed = options.hlsl_shader_model < kMinShaderModelForDP4aInHLSL;
     gen_options.polyfill_pack_unpack_4x8 =
         options.hlsl_shader_model < kMinShaderModelForPackUnpack4x8InHLSL;
-    auto result = tint::hlsl::writer::Generate(program, gen_options);
+
+    tint::Result<tint::hlsl::writer::Output> result;
+    if (options.use_ir) {
+        // Convert the AST program to an IR module.
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+        if (ir != tint::Success) {
+            std::cerr << "Failed to generate IR: " << ir << "\n";
+            return false;
+        }
+        result = tint::hlsl::writer::Generate(ir.Get(), gen_options);
+    } else {
+        result = tint::hlsl::writer::Generate(program, gen_options);
+    }
+
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << "\n";

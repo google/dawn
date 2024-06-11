@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,16 +25,22 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/output.h"
+#include "src/tint/lang/hlsl/writer/raise/raise.h"
 
 namespace tint::hlsl::writer {
 
-Output::Output() = default;
+Result<SuccessType> Raise(core::ir::Module&, const Options&) {
+    /*
+  #define RUN_TRANSFORM(name, ...)                   \
+      do {                                           \
+          auto result = name(module, ##__VA_ARGS__); \
+          if (result != Success) {                   \
+              return result;                         \
+          }                                          \
+      } while (false)
+  */
 
-Output::~Output() = default;
-
-Output::Output(const Output&) = default;
-
-Output& Output::operator=(const Output&) = default;
+    return Success;
+}
 
 }  // namespace tint::hlsl::writer

@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,16 +25,43 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/output.h"
+#ifndef SRC_TINT_LANG_HLSL_WRITER_PRINTER_PRINTER_H_
+#define SRC_TINT_LANG_HLSL_WRITER_PRINTER_PRINTER_H_
+
+#include <string>
+
+#include "src/tint/utils/result/result.h"
+
+// Forward declarations
+namespace tint::core::ir {
+class Module;
+}  // namespace tint::core::ir
 
 namespace tint::hlsl::writer {
 
-Output::Output() = default;
+/// The output produced when printing HLSL.
+struct PrintResult {
+    /// Constructor
+    PrintResult();
 
-Output::~Output() = default;
+    /// Destructor
+    ~PrintResult();
 
-Output::Output(const Output&) = default;
+    /// Copy constructor
+    PrintResult(const PrintResult&);
 
-Output& Output::operator=(const Output&) = default;
+    /// Copy assignment
+    /// @returns this
+    PrintResult& operator=(const PrintResult&);
+
+    /// The generated HLSL.
+    std::string hlsl = "";
+};
+
+/// @param module the Tint IR module to generate
+/// @returns the result of printing the HLSL shader on success, or failure
+Result<PrintResult> Print(core::ir::Module& module);
 
 }  // namespace tint::hlsl::writer
+
+#endif  // SRC_TINT_LANG_HLSL_WRITER_PRINTER_PRINTER_H_
