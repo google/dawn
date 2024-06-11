@@ -55,6 +55,7 @@
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
@@ -1061,6 +1062,33 @@ class Builder {
     Call(const core::type::Type* type, FUNC func, ARGS&&... args) {
         return CallWithResult<KLASS>(InstructionResult(type), func,
                                      Values(std::forward<ARGS>(args)...));
+    }
+
+    /// Creates a member builtin call instruction with an existing instruction result.
+    /// @param result the instruction result to use
+    /// @param func the builtin function to call
+    /// @param obj the object
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename KLASS, typename FUNC, typename OBJ, typename... ARGS>
+    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>, KLASS*>
+    MemberCallWithResult(ir::InstructionResult* result, FUNC func, OBJ&& obj, ARGS&&... args) {
+        return Append(ir.allocators.instructions.Create<KLASS>(
+            result, func, Value(std::forward<OBJ>(obj)), Values(std::forward<ARGS>(args)...)));
+    }
+
+    /// Creates a member builtin call instruction.
+    /// @param type the return type of the call
+    /// @param func the builtin function to call
+    /// @param obj the object
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename KLASS, typename FUNC, typename OBJ, typename... ARGS>
+    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::MemberBuiltinCall>, KLASS*>
+    MemberCall(const core::type::Type* type, FUNC func, OBJ&& obj, ARGS&&... args) {
+        return MemberCallWithResult<KLASS>(InstructionResult(type), func,
+                                           Value(std::forward<OBJ>(obj)),
+                                           Values(std::forward<ARGS>(args)...));
     }
 
     /// Creates a value conversion instruction to the template type T

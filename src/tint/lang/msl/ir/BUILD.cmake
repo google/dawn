@@ -41,6 +41,8 @@
 tint_add_target(tint_lang_msl_ir lib
   lang/msl/ir/builtin_call.cc
   lang/msl/ir/builtin_call.h
+  lang/msl/ir/member_builtin_call.cc
+  lang/msl/ir/member_builtin_call.h
   lang/msl/ir/memory_order.cc
   lang/msl/ir/memory_order.h
 )

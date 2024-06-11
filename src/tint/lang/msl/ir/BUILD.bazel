@@ -40,10 +40,12 @@ cc_library(
   name = "ir",
   srcs = [
     "builtin_call.cc",
+    "member_builtin_call.cc",
     "memory_order.cc",
   ],
   hdrs = [
     "builtin_call.h",
+    "member_builtin_call.h",
     "memory_order.h",
   ],
   deps = [
