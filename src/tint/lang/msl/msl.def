@@ -56,8 +56,23 @@ match workgroup_or_storage
 type bool
 type i32
 type u32
+type f32
+type vec2<T>
+type vec3<T>
+type vec4<T>
 type atomic<T>
 type ptr<S: address_space, T, A: access>
+type sampler
+type texture_1d<T>
+type texture_2d<T>
+type texture_2d_array<T>
+type texture_3d<T>
+type texture_cube<T>
+type texture_cube_array<T>
+type texture_depth_2d
+type texture_depth_2d_array
+type texture_depth_cube
+type texture_depth_cube_array
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
@@ -79,5 +94,22 @@ match iu32: i32 | u32
 @stage("fragment", "compute") fn atomic_fetch_xor_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
 @stage("fragment", "compute") fn atomic_load_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, u32) -> T
 @stage("fragment", "compute") fn atomic_store_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32)
+
+@member_function @stage("fragment") fn sample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
+@member_function @stage("fragment") fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+@member_function @stage("fragment") fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<f32>
+@member_function @stage("fragment") fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A) -> vec4<f32>
+@member_function @stage("fragment") fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> vec4<f32>
+@member_function @stage("fragment") fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+@member_function @stage("fragment") fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, @const offset: vec3<i32>) -> vec4<f32>
+@member_function @stage("fragment") fn sample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+@member_function @stage("fragment") fn sample[A: iu32](texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<f32>
+@member_function @stage("fragment") fn sample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> f32
+@member_function @stage("fragment") fn sample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> f32
+@member_function @stage("fragment") fn sample[A: iu32](texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A) -> f32
+@member_function @stage("fragment") fn sample[A: iu32](texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> f32
+@member_function @stage("fragment") fn sample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
+@member_function @stage("fragment") fn sample[A: iu32](texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A) -> f32
+
 @stage("compute") fn threadgroup_barrier(u32)
 

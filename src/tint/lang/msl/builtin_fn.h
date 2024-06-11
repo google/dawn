@@ -58,6 +58,7 @@ enum class BuiltinFn : uint8_t {
     kAtomicFetchXorExplicit,
     kAtomicLoadExplicit,
     kAtomicStoreExplicit,
+    kSample,
     kThreadgroupBarrier,
     kNone,
 };

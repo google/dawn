@@ -1,88 +1,52 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> t;
+  sampler s;
+  device atomic_int* a;
+  thread bool* continue_execution;
+};
+struct foo_outputs {
+  int tint_symbol [[color(0)]];
+};
+struct foo_inputs {
+  float in [[user(locn0)]];
+  float2 coord [[user(locn1)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %t:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
-  %s:ptr<handle, sampler, read> = var @binding_point(0, 1)
-  %a:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 2)
-  %continue_execution:ptr<private, bool, read_write> = var, true
+int tint_f32_to_i32(float value) {
+  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
-
-%foo = @fragment func(%in:f32 [@location(0)], %coord:vec2<f32> [@location(1)]):i32 [@location(0)] {
-  $B2: {
-    %8:bool = eq %in, 0.0f
-    if %8 [t: $B3] {  # if_1
-      $B3: {  # true
-        store %continue_execution, false
-        exit_if  # if_1
-      }
-    }
-    %9:texture_2d<f32> = load %t
-    %10:sampler = load %s
-    %11:vec4<f32> = textureSample %9, %10, %coord
-    %12:f32 = access %11, 0u
-    %13:i32 = call %tint_f32_to_i32, %12
-    %result:ptr<function, i32, read_write> = var, %13
-    loop [i: $B4, b: $B5, c: $B6] {  # loop_1
-      $B4: {  # initializer
-        %i:ptr<function, i32, read_write> = var, 0i
-        next_iteration  # -> $B5
-      }
-      $B5: {  # body
-        %17:i32 = load %i
-        %18:bool = lt %17, 10i
-        if %18 [t: $B7, f: $B8] {  # if_2
-          $B7: {  # true
-            exit_if  # if_2
-          }
-          $B8: {  # false
-            exit_loop  # loop_1
-          }
-        }
-        %19:i32 = load %i
-        %20:i32 = load %result
-        %21:i32 = add %20, %19
-        store %result, %21
-        continue  # -> $B6
-      }
-      $B6: {  # continuing
-        %22:bool = load %continue_execution
-        %23:i32 = if %22 [t: $B9] {  # if_3
-          $B9: {  # true
-            %24:i32 = atomicAdd %a, 1i
-            exit_if %24  # if_3
-          }
-          # implicit false block: exit_if undef
-        }
-        store %i, %23
-        next_iteration  # -> $B5
-      }
-    }
-    %25:i32 = load %result
-    %26:bool = load %continue_execution
-    %27:bool = eq %26, false
-    if %27 [t: $B10] {  # if_4
-      $B10: {  # true
-        terminate_invocation
-      }
-    }
-    ret %25
+int foo_inner(float in, float2 coord, tint_module_vars_struct tint_module_vars) {
+  if ((in == 0.0f)) {
+    (*tint_module_vars.continue_execution) = false;
   }
-}
-%tint_f32_to_i32 = func(%value:f32):i32 {
-  $B11: {
-    %29:i32 = convert %value
-    %30:bool = gte %value, -2147483648.0f
-    %31:i32 = select -2147483648i, %29, %30
-    %32:bool = lte %value, 2147483520.0f
-    %33:i32 = select 2147483647i, %31, %32
-    ret %33
+  int result = tint_f32_to_i32(tint_module_vars.t.sample(tint_module_vars.s, coord)[0u]);
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 10)) {
+      } else {
+        break;
+      }
+      result = (result + i);
+      {
+        int v = 0;
+        if ((*tint_module_vars.continue_execution)) {
+          v = atomic_fetch_add_explicit(tint_module_vars.a, 1, memory_order_relaxed);
+        }
+        i = v;
+      }
+      continue;
+    }
   }
+  if (!((*tint_module_vars.continue_execution))) {
+    discard_fragment();
+  }
+  return result;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+fragment foo_outputs foo(foo_inputs inputs [[stage_in]], texture2d<float, access::sample> t [[texture(0)]], sampler s [[sampler(0)]], device atomic_int* a [[buffer(0)]]) {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=t, .s=s, .a=a, .continue_execution=(&continue_execution)};
+  return foo_outputs{.tint_symbol=foo_inner(inputs.in, inputs.coord, tint_module_vars)};
+}

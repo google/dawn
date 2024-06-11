@@ -39,6 +39,7 @@
 #include "src/tint/lang/msl/barrier_type.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
 #include "src/tint/utils/containers/hashmap.h"
 
@@ -79,6 +80,7 @@ struct State {
                     case core::BuiltinFn::kAtomicStore:
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicXor:
+                    case core::BuiltinFn::kTextureSample:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kWorkgroupBarrier:
                     case core::BuiltinFn::kTextureBarrier:
@@ -93,6 +95,7 @@ struct State {
         // Replace the builtins that we found.
         for (auto* builtin : worklist) {
             switch (builtin->Func()) {
+                // Atomics.
                 case core::BuiltinFn::kAtomicAdd:
                     AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchAddExplicit);
                     break;
@@ -126,6 +129,13 @@ struct State {
                 case core::BuiltinFn::kAtomicXor:
                     AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchXorExplicit);
                     break;
+
+                // Texture builtins.
+                case core::BuiltinFn::kTextureSample:
+                    TextureSample(builtin);
+                    break;
+
+                // Barriers.
                 case core::BuiltinFn::kStorageBarrier:
                     ThreadgroupBarrier(builtin, BarrierType::kDevice);
                     break;
@@ -135,6 +145,7 @@ struct State {
                 case core::BuiltinFn::kTextureBarrier:
                     ThreadgroupBarrier(builtin, BarrierType::kTexture);
                     break;
+
                 default:
                     break;
             }
@@ -190,6 +201,17 @@ struct State {
         // Call the polyfill function.
         auto args = Vector<core::ir::Value*, 4>{builtin->Args()};
         auto* call = b.CallWithResult(builtin->DetachResult(), polyfill, std::move(args));
+        call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Replace a textureSample call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureSample(core::ir::CoreBuiltinCall* builtin) {
+        // The MSL intrinsic is a member function, so we split the first argument off as the object.
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kSample, builtin->Args()[0], std::move(args));
         call->InsertBefore(builtin);
         builtin->Destroy();
     }

@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -742,6 +743,42 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
     %23:i32 = load %old_value_1
     %24:__atomic_compare_exchange_result_i32 = construct %23, %22
     ret %24
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSample) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, t, s, coords);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
+  $B1: {
+    %5:vec4<f32> = textureSample %t, %s, %coords
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
+  $B1: {
+    %5:vec4<f32> = %t.sample %s, %coords
+    ret %5
   }
 }
 )";

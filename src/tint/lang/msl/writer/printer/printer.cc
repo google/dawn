@@ -89,6 +89,7 @@
 #include "src/tint/lang/msl/barrier_type.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/utils/containers/map.h"
@@ -408,17 +409,20 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::Constant* c) { EmitConstant(out, c); },  //
             [&](const core::ir::InstructionResult* r) {
                 Switch(
-                    r->Instruction(),                                                          //
-                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },                //
-                    [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },                  //
-                    [&](const core::ir::Convert* b) { EmitConvert(out, b); },                  //
-                    [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },              //
-                    [&](const core::ir::Load* l) { EmitLoad(out, l); },                        //
-                    [&](const core::ir::Construct* c) { EmitConstruct(out, c); },              //
-                    [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },          //
-                    [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },                  //
-                    [&](const core::ir::Access* a) { EmitAccess(out, a); },                    //
-                    [&](const msl::ir::BuiltinCall* c) { EmitMslBuiltinCall(out, c); },        //
+                    r->Instruction(),                                                    //
+                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },          //
+                    [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },            //
+                    [&](const core::ir::Convert* b) { EmitConvert(out, b); },            //
+                    [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },        //
+                    [&](const core::ir::Load* l) { EmitLoad(out, l); },                  //
+                    [&](const core::ir::Construct* c) { EmitConstruct(out, c); },        //
+                    [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },    //
+                    [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },            //
+                    [&](const core::ir::Access* a) { EmitAccess(out, a); },              //
+                    [&](const msl::ir::BuiltinCall* c) { EmitMslBuiltinCall(out, c); },  //
+                    [&](const msl::ir::MemberBuiltinCall* c) {
+                        EmitMslMemberBuiltinCall(out, c);
+                    },                                                                         //
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },  //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },                //
                     [&](const core::ir::LoadVectorElement* e) {
@@ -843,6 +847,20 @@ class Printer : public tint::TextGenerator {
         }
 
         out << c->Func() << "(";
+        bool needs_comma = false;
+        for (const auto* arg : c->Args()) {
+            if (needs_comma) {
+                out << ", ";
+            }
+            EmitAndTakeAddressIfNeeded(out, arg);
+            needs_comma = true;
+        }
+        out << ")";
+    }
+
+    void EmitMslMemberBuiltinCall(StringStream& out, const msl::ir::MemberBuiltinCall* c) {
+        EmitValue(out, c->Object());
+        out << "." << c->Func() << "(";
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {
             if (needs_comma) {

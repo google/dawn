@@ -1,35 +1,17 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> arg_0;
+  sampler arg_1;
+  device float4* prevent_dce;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 0)
-  %arg_1:ptr<handle, sampler, read> = var @binding_point(1, 1)
-  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+void textureSample_51b514(tint_module_vars_struct tint_module_vars) {
+  float2 arg_2 = float2(1.0f);
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, arg_2);
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%textureSample_51b514 = func():void {
-  $B2: {
-    %arg_2:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(1.0f)
-    %6:texture_2d<f32> = load %arg_0
-    %7:sampler = load %arg_1
-    %8:vec2<f32> = load %arg_2
-    %9:vec4<f32> = textureSample %6, %7, %8
-    %res:ptr<function, vec4<f32>, read_write> = var, %9
-    %11:vec4<f32> = load %res
-    store %prevent_dce, %11
-    ret
-  }
+fragment void fragment_main(texture2d<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  textureSample_51b514(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B3: {
-    %13:void = call %textureSample_51b514
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

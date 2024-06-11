@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/function_body_attribute.wgsl:7:9 warning: 'textureSample' must only be called from uniform control flow
     _ = textureSample(t, s, vec2(0, 0));
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -12,10 +10,22 @@ SKIP: FAILED
   if (x > 0) {
       ^
 
-../../src/tint/lang/msl/writer/printer/printer.cc:924 internal compiler error: TINT_UNREACHABLE unhandled: textureSample
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> t;
+  sampler s;
+};
+struct tint_symbol_inputs {
+  float x [[user(locn0)]];
+};
+
+void tint_symbol_inner(float x, tint_module_vars_struct tint_module_vars) {
+  if ((x > 0.0f)) {
+    tint_module_vars.t.sample(tint_module_vars.s, float2(0.0f));
+  }
+}
+fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]], texture2d<float, access::sample> t [[texture(0)]], sampler s [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=t, .s=s};
+  tint_symbol_inner(inputs.x, tint_module_vars);
+}

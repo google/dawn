@@ -1,40 +1,30 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct FragmentOutput {
+  float4 color;
+};
+struct FragmentInput {
+  float2 vUv;
+};
+struct tint_module_vars_struct {
+  depth2d<float, access::sample> depthMap;
+  sampler texSampler;
+};
+struct tint_symbol_outputs {
+  float4 FragmentOutput_color [[color(0)]];
+};
+struct tint_symbol_inputs {
+  float2 FragmentInput_vUv [[user(locn2)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: FragmentOutput = struct @align(16) {
-  color:vec4<f32> @offset(0), @location(0)
+FragmentOutput tint_symbol_inner(FragmentInput fIn, tint_module_vars_struct tint_module_vars) {
+  float const sample = tint_module_vars.depthMap.sample(tint_module_vars.texSampler, fIn.vUv);
+  float3 const color = float3(sample, sample, sample);
+  FragmentOutput fOut = {};
+  fOut.color = float4(color, 1.0f);
+  return fOut;
 }
-
-FragmentInput = struct @align(8) {
-  vUv:vec2<f32> @offset(0), @location(2)
+fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], depth2d<float, access::sample> depthMap [[texture(0)]], sampler texSampler [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.depthMap=depthMap, .texSampler=texSampler};
+  return tint_symbol_outputs{.FragmentOutput_color=tint_symbol_inner(FragmentInput{.vUv=inputs.FragmentInput_vUv}, tint_module_vars).color};
 }
-
-$B1: {  # root
-  %depthMap:ptr<handle, texture_depth_2d, read> = var @binding_point(1, 5)
-  %texSampler:ptr<handle, sampler, read> = var @binding_point(1, 3)
-}
-
-%tint_symbol = @fragment func(%fIn:FragmentInput):FragmentOutput {
-  $B2: {
-    %5:texture_depth_2d = load %depthMap
-    %6:sampler = load %texSampler
-    %7:vec2<f32> = access %fIn, 0u
-    %8:f32 = textureSample %5, %6, %7
-    %sample:f32 = let %8
-    %10:vec3<f32> = construct %sample, %sample, %sample
-    %color:vec3<f32> = let %10
-    %fOut:ptr<function, FragmentOutput, read_write> = var
-    %13:ptr<function, vec4<f32>, read_write> = access %fOut, 0u
-    %14:vec4<f32> = construct %color, 1.0f
-    store %13, %14
-    %15:FragmentOutput = load %fOut
-    ret %15
-  }
-}
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
