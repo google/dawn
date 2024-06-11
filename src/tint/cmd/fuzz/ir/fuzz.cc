@@ -65,7 +65,7 @@ thread_local std::string_view currently_running;
     std::cerr << err.Error() << "\n";
     __builtin_trap();
 }
-#endif
+#endif  // TINT_BUILD_IR_BINARY
 
 void Register(const IRFuzzer& fuzzer) {
 #if TINT_BUILD_WGSL_READER
@@ -93,9 +93,12 @@ void Register(const IRFuzzer& fuzzer) {
     });
 #endif
 
+#if TINT_BUILD_IR_BINARY
     Fuzzers().Push(fuzzer);
+#endif  // TINT_BUILD_IR_BINARY
 }
 
+#if TINT_BUILD_IR_BINARY
 void Run(const std::function<tint::core::ir::Module()>& acquire_module,
          const Options& options,
          Slice<const std::byte> data) {
@@ -144,5 +147,6 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
         }
     }
 }
+#endif  // TINT_BUILD_IR_BINARY
 
 }  // namespace tint::fuzz::ir

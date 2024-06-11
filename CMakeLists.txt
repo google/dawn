@@ -192,6 +192,7 @@ option(DAWN_BUILD_SAMPLES "Enables building Dawn's samples" ${BUILD_SAMPLES})
 option(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
 option(DAWN_ENABLE_SWIFTSHADER "Enables building Swiftshader as part of the build and Vulkan adapter discovery" OFF)
 option(DAWN_BUILD_BENCHMARKS "Build Dawn benchmarks" OFF)
+option(DAWN_BUILD_PROTOBUF "Build the protobuf dependencies" OFF)
 
 option(DAWN_WERROR "Build with -Werror (or equivalent)" OFF)
 option(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
@@ -543,7 +544,7 @@ endif()
 ################################################################################
 # Run on all subdirectories
 ################################################################################
-if (EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
+if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
   if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
     set(protobuf_HAVE_BUILTIN_ATOMICS 1)
   endif()

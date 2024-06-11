@@ -42,7 +42,13 @@ if (!defined(tint_has_build)) {
 }
 
 tint_has_fuzzers = tint_has_build
-tint_has_protobuf = tint_standalone || build_with_chromium
+
+declare_args() {
+  # Is protobuf support present
+  if (!defined(tint_has_protobuf)) {
+    tint_has_protobuf = tint_standalone || build_with_chromium
+  }
+}
 
 declare_args() {
   # Path to tint checkout

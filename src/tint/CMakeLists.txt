@@ -41,7 +41,7 @@ if(NOT TINT_BUILD_AS_OTHER_OS)
   endif()
 endif()
 
-if (TARGET libprotobuf)
+if (DAWN_BUILD_PROTOBUF AND TARGET libprotobuf)
   set(TINT_BUILD_IR_BINARY 1)
 else()
   set(TINT_BUILD_IR_BINARY 0)
@@ -672,16 +672,17 @@ endif(TINT_BUILD_FUZZERS)
 ################################################################################
 # Generate protobuf sources
 ################################################################################
-foreach(PROTO_TARGET ${TINT_PROTO_TARGETS})
-  generate_protos(
-    TARGET ${PROTO_TARGET}
-    IMPORT_DIRS "${TINT_ROOT_SOURCE_DIR}"
-    PROTOC_OUT_DIR "${DAWN_BUILD_GEN_DIR}")
-  target_include_directories(${PROTO_TARGET} PRIVATE "${DAWN_BUILD_GEN_DIR}/src/tint/")
-  target_include_directories(${PROTO_TARGET} PUBLIC "${DAWN_BUILD_GEN_DIR}")
-  target_link_libraries(${PROTO_TARGET} libprotobuf)
-endforeach()
-
+if (DAWN_BUILD_PROTOBUF)
+  foreach(PROTO_TARGET ${TINT_PROTO_TARGETS})
+    generate_protos(
+      TARGET ${PROTO_TARGET}
+      IMPORT_DIRS "${TINT_ROOT_SOURCE_DIR}"
+      PROTOC_OUT_DIR "${DAWN_BUILD_GEN_DIR}")
+    target_include_directories(${PROTO_TARGET} PRIVATE "${DAWN_BUILD_GEN_DIR}/src/tint/")
+    target_include_directories(${PROTO_TARGET} PUBLIC "${DAWN_BUILD_GEN_DIR}")
+    target_link_libraries(${PROTO_TARGET} libprotobuf)
+  endforeach()
+endif()
 
 ################################################################################
 # tintd (VSCode WGSL language server)

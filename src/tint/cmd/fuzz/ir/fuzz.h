@@ -94,6 +94,7 @@ struct IRFuzzer {
 /// @param fuzzer the fuzzer
 void Register([[maybe_unused]] const IRFuzzer& fuzzer);
 
+#if TINT_BUILD_IR_BINARY
 /// Runs all the registered IR fuzzers with the supplied IR module
 /// @param acquire_module a function to obtain an IR module
 /// @param options the options for running the fuzzers
@@ -101,6 +102,7 @@ void Register([[maybe_unused]] const IRFuzzer& fuzzer);
 void Run(const std::function<tint::core::ir::Module()>& acquire_module,
          const Options& options,
          Slice<const std::byte> data);
+#endif  // TINT_BUILD_IR_BINARY
 
 /// TINT_IR_MODULE_FUZZER registers the fuzzer function.
 #define TINT_IR_MODULE_FUZZER(FUNCTION) \

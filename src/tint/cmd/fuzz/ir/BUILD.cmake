@@ -34,14 +34,17 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_IR_FUZZER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_proto
 # Kind:      proto
+# Condition: TINT_BUILD_IR_FUZZER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_proto proto
   cmd/fuzz/ir/fuzz.proto
 )
 
+endif(TINT_BUILD_IR_FUZZER)
 if(TINT_BUILD_IR_FUZZER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz_cmd
@@ -55,7 +58,6 @@ tint_add_target(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
 tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
   tint_api_common
   tint_cmd_fuzz_ir_fuzz
-  tint_cmd_fuzz_ir_proto
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_ir
@@ -104,6 +106,12 @@ if(TINT_BUILD_IR_BINARY)
     tint_lang_core_ir_binary_fuzz
   )
 endif(TINT_BUILD_IR_BINARY)
+
+if(TINT_BUILD_IR_FUZZER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
+    tint_cmd_fuzz_ir_proto
+  )
+endif(TINT_BUILD_IR_FUZZER)
 
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd

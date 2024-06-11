@@ -37,10 +37,11 @@
 import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
-
-tint_proto_library("proto") {
-  sources = [ "fuzz.proto" ]
-  deps = []
+if (tint_build_ir_fuzzer) {
+  tint_proto_library("proto") {
+    sources = [ "fuzz.proto" ]
+    deps = []
+  }
 }
 
 tint_fuzz_source_set("fuzz") {
@@ -93,7 +94,6 @@ if (tint_build_ir_fuzzer) {
       "${tint_lpm_dir}:libprotobuf-mutator",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
-      "${tint_src_dir}/cmd/fuzz/ir:proto",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/ir",
@@ -133,6 +133,10 @@ if (tint_build_ir_fuzzer) {
         "${tint_src_dir}/lang/core/ir/binary",
         "${tint_src_dir}/lang/core/ir/binary:fuzz",
       ]
+    }
+
+    if (tint_build_ir_fuzzer) {
+      deps += [ "${tint_src_dir}/cmd/fuzz/ir:proto" ]
     }
 
     if (tint_build_msl_writer) {
