@@ -41,6 +41,10 @@ if (tint_build_ir_fuzzer) {
   tint_proto_library("proto") {
     sources = [ "fuzz.proto" ]
     deps = []
+
+    if (tint_build_ir_binary) {
+      deps += [ "${tint_src_dir}/lang/core/ir/binary:proto" ]
+    }
   }
 }
 

@@ -44,6 +44,12 @@ tint_add_target(tint_cmd_fuzz_ir_proto proto
   cmd/fuzz/ir/fuzz.proto
 )
 
+if(TINT_BUILD_IR_BINARY)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_proto proto
+    tint_lang_core_ir_binary_proto
+  )
+endif(TINT_BUILD_IR_BINARY)
+
 endif(TINT_BUILD_IR_FUZZER)
 if(TINT_BUILD_IR_FUZZER)
 ################################################################################
