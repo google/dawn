@@ -1334,9 +1334,6 @@ TEST_P(ExternalTextureTests, RemappingBugDawn2472) {
 
 // Regression test for issue 346174896.
 TEST_P(ExternalTextureTests, Regression346174896) {
-    // TODO(346174896): Remove suppression once the issue in Tint MSL AST is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsMetal());
-
     auto wgslModule = utils::CreateShaderModule(device, R"(
         @vertex fn vertexMain() -> @builtin(position) vec4f {
             return vec4f(1);
@@ -1345,12 +1342,9 @@ TEST_P(ExternalTextureTests, Regression346174896) {
         @group(0) @binding(1) var<storage, read_write> dimension : vec2u;
         @group(0) @binding(0) var t : texture_external;
 
-        @fragment fn main(@builtin(position) FragCoord : vec4f)
-                                 -> @location(0) vec4f {
-            dimension = textureDimensions(t);
-
-            var coords = textureDimensions(t) / 2 + vec2u(FragCoord.xy) - vec2(1, 1);
-            return textureLoad(t, coords);
+        @fragment fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
+            _ = dimension;
+            return textureLoad(t, vec2u(0, 0));
         })");
 
     utils::ComboRenderPipelineDescriptor descriptor;

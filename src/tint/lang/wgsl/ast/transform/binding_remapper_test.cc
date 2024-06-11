@@ -41,9 +41,21 @@ TEST_F(BindingRemapperTest, ShouldRunEmptyRemappings) {
 
     DataMap data;
     data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
-                                          BindingRemapper::AccessControls{});
+                                          BindingRemapper::AccessControls{},
+                                          /* allow collisions */ false);
 
     EXPECT_FALSE(ShouldRun<BindingRemapper>(src, data));
+}
+
+TEST_F(BindingRemapperTest, ShouldRunEmptyRemappingsWithCollisions) {
+    auto* src = R"()";
+
+    DataMap data;
+    data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
+                                          BindingRemapper::AccessControls{},
+                                          /* allow collisions */ true);
+
+    EXPECT_TRUE(ShouldRun<BindingRemapper>(src, data));
 }
 
 TEST_F(BindingRemapperTest, ShouldRunBindingPointRemappings) {
@@ -71,7 +83,7 @@ TEST_F(BindingRemapperTest, ShouldRunAccessControlRemappings) {
     EXPECT_TRUE(ShouldRun<BindingRemapper>(src, data));
 }
 
-TEST_F(BindingRemapperTest, NoRemappings) {
+TEST_F(BindingRemapperTest, NoRemappingsWithoutCollisions) {
     auto* src = R"(
 struct S {
   a : f32,
@@ -90,7 +102,46 @@ fn f() {
 
     DataMap data;
     data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
-                                          BindingRemapper::AccessControls{});
+                                          BindingRemapper::AccessControls{},
+                                          /* allow_collisions */ false);
+    auto got = Run<BindingRemapper>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BindingRemapperTest, NoRemappingsWithCollisions) {
+    auto* src = R"(
+struct S {
+  a : f32,
+}
+
+@group(2) @binding(1) var<storage, read> a : S;
+
+@group(3) @binding(2) var<storage, read> b : S;
+
+@compute @workgroup_size(1)
+fn f() {
+}
+)";
+
+    auto* expect = R"(
+struct S {
+  a : f32,
+}
+
+@internal(disable_validation__binding_point_collision) @group(2) @binding(1) var<storage, read> a : S;
+
+@internal(disable_validation__binding_point_collision) @group(3) @binding(2) var<storage, read> b : S;
+
+@compute @workgroup_size(1)
+fn f() {
+}
+)";
+
+    DataMap data;
+    data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
+                                          BindingRemapper::AccessControls{},
+                                          /* allow_collisions */ true);
     auto got = Run<BindingRemapper>(src, data);
 
     EXPECT_EQ(expect, str(got));

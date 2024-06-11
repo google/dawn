@@ -71,7 +71,8 @@ Transform::ApplyResult BindingRemapper::Apply(const Program& src,
         return resolver::Resolve(b);
     }
 
-    if (remappings->binding_points.empty() && remappings->access_controls.empty()) {
+    if (!remappings->allow_collisions && remappings->binding_points.empty() &&
+        remappings->access_controls.empty()) {
         return SkipTransform;
     }
 
