@@ -33,9 +33,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "src/tint/utils/macros/concat.h"
 #include "src/tint/utils/macros/foreach.h"
-#include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/result/result.h"
 

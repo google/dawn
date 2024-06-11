@@ -31,6 +31,7 @@
 // The following includes are used by './tools/run gen' to add an implicit
 // dependency from 'tint/api' to the libraries used to make up the Tint API.
 ////////////////////////////////////////////////////////////////////////////////
+// IWYU pragma: begin_keep
 #include "src/tint/api/common/override_id.h"
 
 #if TINT_BUILD_GLSL_WRITER
@@ -60,6 +61,8 @@
 #if TINT_BUILD_WGSL_WRITER
 #include "src/tint/lang/wgsl/writer/writer.h"  // nogncheck
 #endif
+
+// IWYU pragma: end_keep
 
 namespace tint {
 
