@@ -546,18 +546,20 @@ def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan, experime
         builder = "try/" + name,
     )
 
-    luci.cq_tryjob_verifier(
-        experiment_percentage = 100 if experimental else None,
-        cq_group = "Dawn-CQ",
-        builder = "dawn:try/" + name,
-        location_filters = [
-            cq.location_filter(path_regexp = ".*"),
-            cq.location_filter(
-                path_regexp = "\\.github/.+",
-                exclude = True,
-            ),
-        ] + cmake_msvc_file_exclusions,
-    )
+    # Only add CQ verifiers for non-ASAN and non-UBSAN bots to minimize CQ load.
+    if not asan and not ubsan:
+        luci.cq_tryjob_verifier(
+            experiment_percentage = 100 if experimental else None,
+            cq_group = "Dawn-CQ",
+            builder = "dawn:try/" + name,
+            location_filters = [
+                cq.location_filter(path_regexp = ".*"),
+                cq.location_filter(
+                    path_regexp = "\\.github/.+",
+                    exclude = True,
+                ),
+            ] + cmake_msvc_file_exclusions,
+        )
 
     # These builders run fine unbranched on branch CLs, so add them to the
     # branch groups as well.
