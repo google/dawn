@@ -70,6 +70,8 @@ const char* str(BuiltinFn i) {
             return "get_height";
         case BuiltinFn::kGetDepth:
             return "get_depth";
+        case BuiltinFn::kRead:
+            return "read";
         case BuiltinFn::kSample:
             return "sample";
         case BuiltinFn::kThreadgroupBarrier:

@@ -1,47 +1,33 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texture2d_array<uint, access::read> arg_0;
+  device uint4* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<handle, texture_storage_2d_array<r32uint, read>, read> = var @binding_point(1, 0)
-  %prevent_dce:ptr<storage, vec4<u32>, read_write> = var @binding_point(2, 0)
+void textureLoad_970308(tint_module_vars_struct tint_module_vars) {
+  int2 arg_1 = int2(1);
+  uint arg_2 = 1u;
+  uint const v = arg_2;
+  uint4 res = tint_module_vars.arg_0.read(uint2(arg_1), v);
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%textureLoad_970308 = func():void {
-  $B2: {
-    %arg_1:ptr<function, vec2<i32>, read_write> = var, vec2<i32>(1i)
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %6:texture_storage_2d_array<r32uint, read> = load %arg_0
-    %7:vec2<i32> = load %arg_1
-    %8:u32 = load %arg_2
-    %9:vec4<u32> = textureLoad %6, %7, %8
-    %res:ptr<function, vec4<u32>, read_write> = var, %9
-    %11:vec4<u32> = load %res
-    store %prevent_dce, %11
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  textureLoad_970308(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %13:void = call %textureLoad_970308
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(texture2d_array<uint, access::read> arg_0 [[texture(0)]], device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .prevent_dce=prevent_dce};
+  textureLoad_970308(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %15:void = call %textureLoad_970308
-    ret
-  }
+kernel void compute_main(texture2d_array<uint, access::read> arg_0 [[texture(0)]], device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .prevent_dce=prevent_dce};
+  textureLoad_970308(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %17:void = call %textureLoad_970308
-    ret
-  }
+vertex vertex_main_outputs vertex_main(texture2d_array<uint, access::read> arg_0 [[texture(0)]], device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -61,6 +61,7 @@ enum class BuiltinFn : uint8_t {
     kGetWidth,
     kGetHeight,
     kGetDepth,
+    kRead,
     kSample,
     kThreadgroupBarrier,
     kNone,

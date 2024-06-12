@@ -44,11 +44,36 @@ import "src/tint/lang/core/texel_format.def"
 ////////////////////////////////////////////////////////////////////////////////
 
 match read_write: access.read_write
+match readable
+  : access.read
+  | access.read_write
 
 match function: address_space.function
 match workgroup_or_storage
   : address_space.workgroup
   | address_space.storage
+
+match f32_texel_format
+  : texel_format.r8unorm
+  | texel_format.bgra8unorm
+  | texel_format.rgba8unorm
+  | texel_format.rgba8snorm
+  | texel_format.rgba16float
+  | texel_format.r32float
+  | texel_format.rg32float
+  | texel_format.rgba32float
+match i32_texel_format
+  : texel_format.rgba8sint
+  | texel_format.rgba16sint
+  | texel_format.r32sint
+  | texel_format.rg32sint
+  | texel_format.rgba32sint
+match u32_texel_format
+  : texel_format.rgba8uint
+  | texel_format.rgba16uint
+  | texel_format.r32uint
+  | texel_format.rg32uint
+  | texel_format.rgba32uint
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types                                                                      //
@@ -137,6 +162,27 @@ match fiu32: f32 | i32 | u32
 
 @member_function fn get_depth[T: fiu32](texture: texture_3d<T>, u32) -> u32
 @member_function fn get_depth[F: texel_format, A: access](texture: texture_storage_3d<F, A>, u32) -> u32
+
+@member_function fn read[T: fiu32](texture: texture_1d<T>, coords: u32) -> vec4<T>
+@member_function fn read[T: fiu32, L: iu32](texture: texture_2d<T>, coords: vec2<u32>, level: L) -> vec4<T>
+@member_function fn read[T: fiu32, A: iu32, L: iu32](texture: texture_2d_array<T>, coords: vec2<u32>, array_index: A, level: L) -> vec4<T>
+@member_function fn read[T: fiu32, L: iu32](texture: texture_3d<T>, coords: vec3<u32>, level: L) -> vec4<T>
+@member_function fn read[T: fiu32, S: iu32](texture: texture_multisampled_2d<T>, coords: vec2<u32>, sample_index: S) -> vec4<T>
+@member_function fn read[L: iu32](texture: texture_depth_2d, coords: vec2<u32>, level: L) -> f32
+@member_function fn read[A: iu32, L: iu32](texture: texture_depth_2d_array, coords: vec2<u32>, array_index: A, level: L) -> f32
+@member_function fn read[S: iu32](texture: texture_depth_multisampled_2d, coords: vec2<u32>, sample_index: S) -> f32
+@member_function fn read(texture: texture_storage_1d<f32_texel_format, readable>, coords: u32) -> vec4<f32>
+@member_function fn read(texture: texture_storage_2d<f32_texel_format, readable>, coords: vec2<u32>) -> vec4<f32>
+@member_function fn read[A: iu32](texture: texture_storage_2d_array<f32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<f32>
+@member_function fn read(texture: texture_storage_3d<f32_texel_format, readable>, coords: vec3<u32>) -> vec4<f32>
+@member_function fn read(texture: texture_storage_1d<i32_texel_format, readable>, coords: u32) -> vec4<i32>
+@member_function fn read(texture: texture_storage_2d<i32_texel_format, readable>, coords: vec2<u32>) -> vec4<i32>
+@member_function fn read[A: iu32](texture: texture_storage_2d_array<i32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<i32>
+@member_function fn read(texture: texture_storage_3d<i32_texel_format, readable>, coords: vec3<u32>) -> vec4<i32>
+@member_function fn read(texture: texture_storage_1d<u32_texel_format, readable>, coords: u32) -> vec4<u32>
+@member_function fn read(texture: texture_storage_2d<u32_texel_format, readable>, coords: vec2<u32>) -> vec4<u32>
+@member_function fn read[A: iu32](texture: texture_storage_2d_array<u32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<u32>
+@member_function fn read(texture: texture_storage_3d<u32_texel_format, readable>, coords: vec3<u32>) -> vec4<u32>
 
 @member_function @stage("fragment") fn sample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
 @member_function @stage("fragment") fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>

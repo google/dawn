@@ -1,151 +1,82 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: OutputBuf = struct @align(4) {
-  result:array<u32> @offset(0)
+struct OutputBuf {
+  tint_array<uint, 1> result;
+};
+struct Uniforms {
+  uint dstTextureFlipY;
+  uint isFloat16;
+  uint isRGB10A2Unorm;
+  uint channelCount;
+};
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> src;
+  texture2d<float, access::sample> dst;
+  device OutputBuf* output;
+  const constant Uniforms* uniforms;
+};
+
+uint ConvertToFp16FloatValue(float fp32) {
+  return 1u;
 }
-
-Uniforms = struct @align(4) {
-  dstTextureFlipY:u32 @offset(0)
-  isFloat16:u32 @offset(4)
-  isRGB10A2Unorm:u32 @offset(8)
-  channelCount:u32 @offset(12)
+uint4 tint_v4f32_to_v4u32(float4 value) {
+  return select(uint4(4294967295u), select(uint4(0u), uint4(value), (value >= float4(0.0f))), (value <= float4(4294967040.0f)));
 }
-
-$B1: {  # root
-  %src:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
-  %dst:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
-  %output:ptr<storage, OutputBuf, read_write> = var @binding_point(0, 2)
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 3)
-}
-
-%ConvertToFp16FloatValue = func(%fp32:f32):u32 {
-  $B2: {
-    ret 1u
+void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+  uint const v = tint_module_vars.src.get_width(0u);
+  uint2 size = uint2(v, tint_module_vars.src.get_height(0u));
+  uint2 dstTexCoord = GlobalInvocationID.xy;
+  uint2 srcTexCoord = dstTexCoord;
+  if (((*tint_module_vars.uniforms).dstTextureFlipY == 1u)) {
+    srcTexCoord[1u] = ((size[1u] - dstTexCoord[1u]) - 1u);
+  }
+  float4 srcColor = tint_module_vars.src.read(srcTexCoord, 0);
+  float4 dstColor = tint_module_vars.dst.read(dstTexCoord, 0);
+  bool success = true;
+  uint4 srcColorBits = 0u;
+  uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
+  {
+    uint i = 0u;
+    while(true) {
+      if ((i < (*tint_module_vars.uniforms).channelCount)) {
+      } else {
+        break;
+      }
+      uint const v_1 = i;
+      srcColorBits[v_1] = ConvertToFp16FloatValue(srcColor[i]);
+      bool v_2 = false;
+      if (success) {
+        v_2 = (srcColorBits[i] == dstColorBits[i]);
+      } else {
+        v_2 = false;
+      }
+      success = v_2;
+      {
+        i = (i + 1u);
+      }
+      continue;
+    }
+  }
+  uint outputIndex = ((GlobalInvocationID[1u] * uint(size[0u])) + GlobalInvocationID[0u]);
+  if (success) {
+    (*tint_module_vars.output).result[outputIndex] = 1u;
+  } else {
+    (*tint_module_vars.output).result[outputIndex] = 0u;
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void {
-  $B3: {
-    %9:texture_2d<f32> = load %src
-    %10:vec2<u32> = textureDimensions %9
-    %size:ptr<function, vec2<u32>, read_write> = var, %10
-    %12:vec2<u32> = swizzle %GlobalInvocationID, xy
-    %dstTexCoord:ptr<function, vec2<u32>, read_write> = var, %12
-    %14:vec2<u32> = load %dstTexCoord
-    %srcTexCoord:ptr<function, vec2<u32>, read_write> = var, %14
-    %16:ptr<uniform, u32, read> = access %uniforms, 0u
-    %17:u32 = load %16
-    %18:bool = eq %17, 1u
-    if %18 [t: $B4] {  # if_1
-      $B4: {  # true
-        %19:u32 = load_vector_element %size, 1u
-        %20:u32 = load_vector_element %dstTexCoord, 1u
-        %21:u32 = sub %19, %20
-        %22:u32 = sub %21, 1u
-        store_vector_element %srcTexCoord, 1u, %22
-        exit_if  # if_1
-      }
-    }
-    %23:texture_2d<f32> = load %src
-    %24:vec2<u32> = load %srcTexCoord
-    %25:vec4<f32> = textureLoad %23, %24, 0i
-    %srcColor:ptr<function, vec4<f32>, read_write> = var, %25
-    %27:texture_2d<f32> = load %dst
-    %28:vec2<u32> = load %dstTexCoord
-    %29:vec4<f32> = textureLoad %27, %28, 0i
-    %dstColor:ptr<function, vec4<f32>, read_write> = var, %29
-    %success:ptr<function, bool, read_write> = var, true
-    %srcColorBits:ptr<function, vec4<u32>, read_write> = var
-    %33:vec4<f32> = load %dstColor
-    %34:vec4<u32> = call %tint_v4f32_to_v4u32, %33
-    %dstColorBits:ptr<function, vec4<u32>, read_write> = var, %34
-    loop [i: $B5, b: $B6, c: $B7] {  # loop_1
-      $B5: {  # initializer
-        %i:ptr<function, u32, read_write> = var, 0u
-        next_iteration  # -> $B6
-      }
-      $B6: {  # body
-        %38:u32 = load %i
-        %39:ptr<uniform, u32, read> = access %uniforms, 3u
-        %40:u32 = load %39
-        %41:bool = lt %38, %40
-        if %41 [t: $B8, f: $B9] {  # if_2
-          $B8: {  # true
-            exit_if  # if_2
-          }
-          $B9: {  # false
-            exit_loop  # loop_1
-          }
-        }
-        %42:u32 = load %i
-        %43:u32 = let %42
-        %44:u32 = load %i
-        %45:f32 = load_vector_element %srcColor, %44
-        %46:u32 = call %ConvertToFp16FloatValue, %45
-        store_vector_element %srcColorBits, %43, %46
-        %47:bool = load %success
-        %48:bool = if %47 [t: $B10, f: $B11] {  # if_3
-          $B10: {  # true
-            %49:u32 = load %i
-            %50:u32 = load_vector_element %srcColorBits, %49
-            %51:u32 = load %i
-            %52:u32 = load_vector_element %dstColorBits, %51
-            %53:bool = eq %50, %52
-            exit_if %53  # if_3
-          }
-          $B11: {  # false
-            exit_if false  # if_3
-          }
-        }
-        store %success, %48
-        continue  # -> $B7
-      }
-      $B7: {  # continuing
-        %54:u32 = load %i
-        %55:u32 = add %54, 1u
-        store %i, %55
-        next_iteration  # -> $B6
-      }
-    }
-    %56:u32 = access %GlobalInvocationID, 1u
-    %57:u32 = load_vector_element %size, 0u
-    %58:u32 = construct %57
-    %59:u32 = mul %56, %58
-    %60:u32 = access %GlobalInvocationID, 0u
-    %61:u32 = add %59, %60
-    %outputIndex:ptr<function, u32, read_write> = var, %61
-    %63:bool = load %success
-    if %63 [t: $B12, f: $B13] {  # if_4
-      $B12: {  # true
-        %64:u32 = load %outputIndex
-        %65:ptr<storage, u32, read_write> = access %output, 0u, %64
-        store %65, 1u
-        exit_if  # if_4
-      }
-      $B13: {  # false
-        %66:u32 = load %outputIndex
-        %67:ptr<storage, u32, read_write> = access %output, 0u, %66
-        store %67, 0u
-        exit_if  # if_4
-      }
-    }
-    ret
-  }
+kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms};
+  tint_symbol_inner(GlobalInvocationID, tint_module_vars);
 }
-%tint_v4f32_to_v4u32 = func(%value:vec4<f32>):vec4<u32> {
-  $B14: {
-    %69:vec4<u32> = convert %value
-    %70:vec4<bool> = gte %value, vec4<f32>(0.0f)
-    %71:vec4<u32> = select vec4<u32>(0u), %69, %70
-    %72:vec4<bool> = lte %value, vec4<f32>(4294967040.0f)
-    %73:vec4<u32> = select vec4<u32>(4294967295u), %71, %72
-    ret %73
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

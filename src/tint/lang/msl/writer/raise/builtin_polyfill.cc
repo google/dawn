@@ -28,6 +28,7 @@
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
 
 #include <atomic>
+#include <cstdint>
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"
@@ -38,8 +39,10 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/barrier_type.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
@@ -85,6 +88,7 @@ struct State {
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kTextureDimensions:
+                    case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureSample:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kWorkgroupBarrier:
@@ -138,6 +142,9 @@ struct State {
                 // Texture builtins.
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(builtin);
+                    break;
+                case core::BuiltinFn::kTextureLoad:
+                    TextureLoad(builtin);
                     break;
                 case core::BuiltinFn::kTextureSample:
                     TextureSample(builtin);
@@ -255,6 +262,49 @@ struct State {
 
             // Reconstruct the original result type from the individual dimensions.
             b.ConstructWithResult(builtin->DetachResult(), std::move(values));
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a textureLoad call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureLoad(core::ir::CoreBuiltinCall* builtin) {
+        uint32_t next_arg = 0;
+        auto* tex = builtin->Args()[next_arg++];
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+
+        // Extract the arguments from the core builtin call.
+        auto* coords = builtin->Args()[next_arg++];
+        core::ir::Value* index = nullptr;
+        core::ir::Value* lod_or_sample = nullptr;
+        if (tex_type->dim() == core::type::TextureDimension::k2dArray) {
+            index = builtin->Args()[next_arg++];
+        }
+        if (tex_type->dim() != core::type::TextureDimension::k1d &&
+            !tex_type->Is<core::type::StorageTexture>()) {
+            lod_or_sample = builtin->Args()[next_arg++];
+        }
+
+        b.InsertBefore(builtin, [&] {
+            // Convert the coordinates to unsigned integers if necessary.
+            if (coords->Type()->is_signed_integer_scalar_or_vector()) {
+                if (auto* vec = coords->Type()->As<core::type::Vector>()) {
+                    coords = b.Convert(ty.vec(ty.u32(), vec->Width()), coords)->Result(0);
+                } else {
+                    coords = b.Convert(ty.u32(), coords)->Result(0);
+                }
+            }
+
+            // Call the `read()` member function.
+            Vector<core::ir::Value*, 4> args{coords};
+            if (index) {
+                args.Push(index);
+            }
+            if (lod_or_sample) {
+                args.Push(lod_or_sample);
+            }
+            b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+                builtin->DetachResult(), msl::BuiltinFn::kRead, tex, std::move(args));
         });
         builtin->Destroy();
     }

@@ -1,9 +1,10 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texture1d<int, access::sample> arg_0;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:924 internal compiler error: TINT_UNREACHABLE unhandled: textureLoad
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void d(tint_module_vars_struct tint_module_vars) {
+  tint_module_vars.arg_0.read(uint(1));
+  float const l = 0.14112000167369842529f;
+}
