@@ -90,6 +90,7 @@ struct State {
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureSample:
+                    case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kWorkgroupBarrier:
                     case core::BuiltinFn::kTextureBarrier:
@@ -148,6 +149,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureSample:
                     TextureSample(builtin);
+                    break;
+                case core::BuiltinFn::kTextureStore:
+                    TextureStore(builtin);
                     break;
 
                 // Barriers.
@@ -317,6 +321,52 @@ struct State {
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kSample, builtin->Args()[0], std::move(args));
         call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Replace a textureStore call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureStore(core::ir::CoreBuiltinCall* builtin) {
+        auto* tex = builtin->Args()[0];
+        auto* tex_type = tex->Type()->As<core::type::StorageTexture>();
+
+        // Extract the arguments from the core builtin call.
+        auto* coords = builtin->Args()[1];
+        core::ir::Value* value = nullptr;
+        core::ir::Value* index = nullptr;
+        if (tex_type->dim() == core::type::TextureDimension::k2dArray) {
+            index = builtin->Args()[2];
+            value = builtin->Args()[3];
+        } else {
+            value = builtin->Args()[2];
+        }
+
+        b.InsertBefore(builtin, [&] {
+            // Convert the coordinates to unsigned integers if necessary.
+            if (coords->Type()->is_signed_integer_scalar_or_vector()) {
+                if (auto* vec = coords->Type()->As<core::type::Vector>()) {
+                    coords = b.Convert(ty.vec(ty.u32(), vec->Width()), coords)->Result(0);
+                } else {
+                    coords = b.Convert(ty.u32(), coords)->Result(0);
+                }
+            }
+
+            // Call the `write()` member function.
+            Vector<core::ir::Value*, 4> args;
+            args.Push(value);
+            args.Push(coords);
+            if (index) {
+                args.Push(index);
+            }
+            b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kWrite, tex,
+                                                     std::move(args));
+
+            // If we are writing to a read-write texture, add a fence to ensure that the written
+            // values are visible to subsequent reads from the same thread.
+            if (tex_type->access() == core::Access::kReadWrite) {
+                b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kFence, tex);
+            }
+        });
         builtin->Destroy();
     }
 

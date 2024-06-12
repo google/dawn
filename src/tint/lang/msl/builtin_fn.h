@@ -58,11 +58,13 @@ enum class BuiltinFn : uint8_t {
     kAtomicFetchXorExplicit,
     kAtomicLoadExplicit,
     kAtomicStoreExplicit,
+    kFence,
     kGetWidth,
     kGetHeight,
     kGetDepth,
     kRead,
     kSample,
+    kWrite,
     kThreadgroupBarrier,
     kNone,
 };

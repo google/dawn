@@ -1287,6 +1287,332 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSample) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_1d_U32Coord) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k1d, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* t = b.FunctionParam("t", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.u32());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, value});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_1d<rgba8unorm, write>, %coords:u32, %value:vec4<f32>):void {
+  $B1: {
+    %5:void = textureStore %t, %coords, %value
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_1d<rgba8unorm, write>, %coords:u32, %value:vec4<f32>):void {
+  $B1: {
+    %5:void = %t.write %value, %coords
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_1d_I32Coord) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k1d, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* t = b.FunctionParam("t", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.i32());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, value});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_1d<rgba8unorm, write>, %coords:i32, %value:vec4<f32>):void {
+  $B1: {
+    %5:void = textureStore %t, %coords, %value
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_1d<rgba8unorm, write>, %coords:i32, %value:vec4<f32>):void {
+  $B1: {
+    %5:u32 = convert %coords
+    %6:void = %t.write %value, %5
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_2d_U32Coords) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2d, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* t = b.FunctionParam("t", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, value});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d<rgba8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {
+  $B1: {
+    %5:void = textureStore %t, %coords, %value
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d<rgba8unorm, write>, %coords:vec2<u32>, %value:vec4<f32>):void {
+  $B1: {
+    %5:void = %t.write %value, %coords
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_2d_I32Coords) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2d, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* t = b.FunctionParam("t", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, value});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d<rgba8unorm, write>, %coords:vec2<i32>, %value:vec4<f32>):void {
+  $B1: {
+    %5:void = textureStore %t, %coords, %value
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d<rgba8unorm, write>, %coords:vec2<i32>, %value:vec4<f32>):void {
+  $B1: {
+    %5:vec2<u32> = convert %coords
+    %6:void = %t.write %value, %5
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_2darray_U32Index) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2dArray, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* t = b.FunctionParam("t", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* index = b.FunctionParam("index", ty.u32());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, index, value});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, index, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d_array<rgba8unorm, write>, %coords:vec2<i32>, %index:u32, %value:vec4<f32>):void {
+  $B1: {
+    %6:void = textureStore %t, %coords, %index, %value
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d_array<rgba8unorm, write>, %coords:vec2<i32>, %index:u32, %value:vec4<f32>):void {
+  $B1: {
+    %6:vec2<u32> = convert %coords
+    %7:void = %t.write %value, %6, %index
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_2darray_I32Index) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2dArray, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* t = b.FunctionParam("t", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* index = b.FunctionParam("index", ty.i32());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, index, value});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, index, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d_array<rgba8unorm, write>, %coords:vec2<i32>, %index:i32, %value:vec4<f32>):void {
+  $B1: {
+    %6:void = textureStore %t, %coords, %index, %value
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d_array<rgba8unorm, write>, %coords:vec2<i32>, %index:i32, %value:vec4<f32>):void {
+  $B1: {
+    %6:vec2<u32> = convert %coords
+    %7:void = %t.write %value, %6, %index
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_3d) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k3d, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* t = b.FunctionParam("t", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec3<i32>());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, value});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_3d<rgba8unorm, write>, %coords:vec3<i32>, %value:vec4<f32>):void {
+  $B1: {
+    %5:void = textureStore %t, %coords, %value
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_3d<rgba8unorm, write>, %coords:vec3<i32>, %value:vec4<f32>):void {
+  $B1: {
+    %5:vec3<u32> = convert %coords
+    %6:void = %t.write %value, %5
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+// Test that we insert a fence after the store to ensure that it is ordered before the load.
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureStoreToReadWriteBeforeLoad) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2d, format, core::Access::kReadWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+    auto* t = b.FunctionParam("t", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, coords, value});
+    b.Append(func->Block(), [&] {
+        b.Call<void>(core::BuiltinFn::kTextureStore, t, coords, value);
+        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, coords);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d<rgba8unorm, read_write>, %coords:vec2<i32>, %value:vec4<f32>):vec4<f32> {
+  $B1: {
+    %5:void = textureStore %t, %coords, %value
+    %6:vec4<f32> = textureLoad %t, %coords
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d<rgba8unorm, read_write>, %coords:vec2<i32>, %value:vec4<f32>):vec4<f32> {
+  $B1: {
+    %5:vec2<u32> = convert %coords
+    %6:void = %t.write %value, %5
+    %7:void = %t.fence
+    %8:vec2<u32> = convert %coords
+    %9:vec4<f32> = %t.read %8
+    ret %9
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, WorkgroupBarrier) {
     auto* func = b.Function("foo", ty.void_());
     func->SetStage(core::ir::Function::PipelineStage::kCompute);
