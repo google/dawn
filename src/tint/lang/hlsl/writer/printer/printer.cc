@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/value.h"
+#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/array_count.h"
@@ -156,9 +157,40 @@ class Printer : public tint::TextGenerator {
         for (auto* inst : *block) {
             Switch(
                 inst,                                               //
+                [&](const core::ir::Var* v) { EmitVar(v); },        //
+                [&](const core::ir::Let* i) { EmitLet(i); },        //
                 [&](const core::ir::Return* i) { EmitReturn(i); },  //
                 TINT_ICE_ON_NO_MATCH);
         }
+    }
+
+    void EmitVar(const core::ir::Var* var) {
+        auto out = Line();
+
+        // TODO(dsinclair): This isn't right, as some types contain their names
+        EmitType(out, var->Result(0)->Type());
+        out << " ";
+        out << NameOf(var->Result(0));
+
+        out << " = ";
+
+        // TODO(dsinclair): Add transform to create a 0-initializer if one not present
+        EmitValue(out, var->Initializer());
+        out << ";";
+    }
+
+    void EmitLet(const core::ir::Let* l) {
+        auto out = Line();
+
+        // TODO(dsinclair): This isn't right, as some types contain their names.
+        // TODO(dsinclair): Investigate using `const` here as well, the AST printer doesn't emit
+        //                  const with a let, but we should be able to.
+        EmitType(out, l->Result(0)->Type());
+        out << " ";
+        out << NameOf(l->Result(0));
+        out << " = ";
+        EmitValue(out, l->Value());
+        out << ";";
     }
 
     void EmitReturn(const core::ir::Return* r) {
