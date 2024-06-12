@@ -890,6 +890,7 @@ class Printer : public tint::TextGenerator {
 
     void EmitCoreBuiltinName(StringStream& out, core::BuiltinFn func) {
         switch (func) {
+            case core::BuiltinFn::kAbs:
             case core::BuiltinFn::kAcos:
             case core::BuiltinFn::kAcosh:
             case core::BuiltinFn::kAll:

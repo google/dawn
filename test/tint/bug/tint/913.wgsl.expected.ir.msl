@@ -1,254 +1,128 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: OutputBuf = struct @align(4) {
-  result:array<u32> @offset(0)
+struct OutputBuf {
+  tint_array<uint, 1> result;
+};
+struct Uniforms {
+  uint dstTextureFlipY;
+  uint channelCount;
+  uint2 srcCopyOrigin;
+  uint2 dstCopyOrigin;
+  uint2 copySize;
+};
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> src;
+  texture2d<float, access::sample> dst;
+  device OutputBuf* output;
+  const constant Uniforms* uniforms;
+};
+
+bool aboutEqual(float value, float expect) {
+  return (abs((value - expect)) < 0.00100000004749745131f);
 }
-
-Uniforms = struct @align(8) {
-  dstTextureFlipY:u32 @offset(0)
-  channelCount:u32 @offset(4)
-  srcCopyOrigin:vec2<u32> @offset(8)
-  dstCopyOrigin:vec2<u32> @offset(16)
-  copySize:vec2<u32> @offset(24)
-}
-
-$B1: {  # root
-  %src:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
-  %dst:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
-  %output:ptr<storage, OutputBuf, read_write> = var @binding_point(0, 2)
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(0, 3)
-}
-
-%aboutEqual = func(%value:f32, %expect:f32):bool {
-  $B2: {
-    %8:f32 = sub %value, %expect
-    %9:f32 = abs %8
-    %10:bool = lt %9, 0.00100000004749745131f
-    ret %10
+void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+  uint const v = tint_module_vars.src.get_width(0u);
+  uint2 const srcSize = uint2(v, tint_module_vars.src.get_height(0u));
+  uint const v_1 = tint_module_vars.dst.get_width(0u);
+  uint2 const dstSize = uint2(v_1, tint_module_vars.dst.get_height(0u));
+  uint2 const dstTexCoord = uint2(GlobalInvocationID.xy);
+  float4 const nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+  bool success = true;
+  bool v_2 = false;
+  if ((dstTexCoord[0u] < (*tint_module_vars.uniforms).dstCopyOrigin[0u])) {
+    v_2 = true;
+  } else {
+    v_2 = (dstTexCoord[1u] < (*tint_module_vars.uniforms).dstCopyOrigin[1u]);
+  }
+  bool v_3 = false;
+  if (v_2) {
+    v_3 = true;
+  } else {
+    v_3 = (dstTexCoord[0u] >= ((*tint_module_vars.uniforms).dstCopyOrigin[0u] + (*tint_module_vars.uniforms).copySize[0u]));
+  }
+  bool v_4 = false;
+  if (v_3) {
+    v_4 = true;
+  } else {
+    v_4 = (dstTexCoord[1u] >= ((*tint_module_vars.uniforms).dstCopyOrigin[1u] + (*tint_module_vars.uniforms).copySize[1u]));
+  }
+  if (v_4) {
+    bool v_5 = false;
+    if (success) {
+      v_5 = all((tint_module_vars.dst.read(uint2(int2(dstTexCoord)), 0) == nonCoveredColor));
+    } else {
+      v_5 = false;
+    }
+    success = v_5;
+  } else {
+    uint2 srcTexCoord = ((dstTexCoord - (*tint_module_vars.uniforms).dstCopyOrigin) + (*tint_module_vars.uniforms).srcCopyOrigin);
+    if (((*tint_module_vars.uniforms).dstTextureFlipY == 1u)) {
+      srcTexCoord[1u] = ((srcSize[1u] - srcTexCoord[1u]) - 1u);
+    }
+    float4 const srcColor = tint_module_vars.src.read(uint2(int2(srcTexCoord)), 0);
+    float4 const dstColor = tint_module_vars.dst.read(uint2(int2(dstTexCoord)), 0);
+    if (((*tint_module_vars.uniforms).channelCount == 2u)) {
+      bool v_6 = false;
+      if (success) {
+        v_6 = aboutEqual(dstColor[0u], srcColor[0u]);
+      } else {
+        v_6 = false;
+      }
+      bool v_7 = false;
+      if (v_6) {
+        v_7 = aboutEqual(dstColor[1u], srcColor[1u]);
+      } else {
+        v_7 = false;
+      }
+      success = v_7;
+    } else {
+      bool v_8 = false;
+      if (success) {
+        v_8 = aboutEqual(dstColor[0u], srcColor[0u]);
+      } else {
+        v_8 = false;
+      }
+      bool v_9 = false;
+      if (v_8) {
+        v_9 = aboutEqual(dstColor[1u], srcColor[1u]);
+      } else {
+        v_9 = false;
+      }
+      bool v_10 = false;
+      if (v_9) {
+        v_10 = aboutEqual(dstColor[2u], srcColor[2u]);
+      } else {
+        v_10 = false;
+      }
+      bool v_11 = false;
+      if (v_10) {
+        v_11 = aboutEqual(dstColor[3u], srcColor[3u]);
+      } else {
+        v_11 = false;
+      }
+      success = v_11;
+    }
+  }
+  uint const outputIndex = ((GlobalInvocationID[1u] * dstSize[0u]) + GlobalInvocationID[0u]);
+  if (success) {
+    (*tint_module_vars.output).result[outputIndex] = 1u;
+  } else {
+    (*tint_module_vars.output).result[outputIndex] = 0u;
   }
 }
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void {
-  $B3: {
-    %13:texture_2d<f32> = load %src
-    %14:vec2<u32> = textureDimensions %13
-    %srcSize:vec2<u32> = let %14
-    %16:texture_2d<f32> = load %dst
-    %17:vec2<u32> = textureDimensions %16
-    %dstSize:vec2<u32> = let %17
-    %19:vec2<u32> = swizzle %GlobalInvocationID, xy
-    %20:vec2<u32> = construct %19
-    %dstTexCoord:vec2<u32> = let %20
-    %nonCoveredColor:vec4<f32> = let vec4<f32>(0.0f, 1.0f, 0.0f, 1.0f)
-    %success:ptr<function, bool, read_write> = var, true
-    %24:u32 = access %dstTexCoord, 0u
-    %25:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
-    %26:u32 = load_vector_element %25, 0u
-    %27:bool = lt %24, %26
-    %28:bool = if %27 [t: $B4, f: $B5] {  # if_1
-      $B4: {  # true
-        exit_if true  # if_1
-      }
-      $B5: {  # false
-        %29:u32 = access %dstTexCoord, 1u
-        %30:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
-        %31:u32 = load_vector_element %30, 1u
-        %32:bool = lt %29, %31
-        exit_if %32  # if_1
-      }
-    }
-    %33:bool = if %28 [t: $B6, f: $B7] {  # if_2
-      $B6: {  # true
-        exit_if true  # if_2
-      }
-      $B7: {  # false
-        %34:u32 = access %dstTexCoord, 0u
-        %35:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
-        %36:u32 = load_vector_element %35, 0u
-        %37:ptr<uniform, vec2<u32>, read> = access %uniforms, 4u
-        %38:u32 = load_vector_element %37, 0u
-        %39:u32 = add %36, %38
-        %40:bool = gte %34, %39
-        exit_if %40  # if_2
-      }
-    }
-    %41:bool = if %33 [t: $B8, f: $B9] {  # if_3
-      $B8: {  # true
-        exit_if true  # if_3
-      }
-      $B9: {  # false
-        %42:u32 = access %dstTexCoord, 1u
-        %43:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
-        %44:u32 = load_vector_element %43, 1u
-        %45:ptr<uniform, vec2<u32>, read> = access %uniforms, 4u
-        %46:u32 = load_vector_element %45, 1u
-        %47:u32 = add %44, %46
-        %48:bool = gte %42, %47
-        exit_if %48  # if_3
-      }
-    }
-    if %41 [t: $B10, f: $B11] {  # if_4
-      $B10: {  # true
-        %49:bool = load %success
-        %50:bool = if %49 [t: $B12, f: $B13] {  # if_5
-          $B12: {  # true
-            %51:texture_2d<f32> = load %dst
-            %52:texture_2d<f32> = let %51
-            %53:vec2<i32> = convert %dstTexCoord
-            %54:vec4<f32> = textureLoad %52, %53, 0i
-            %55:vec4<bool> = eq %54, %nonCoveredColor
-            %56:bool = all %55
-            exit_if %56  # if_5
-          }
-          $B13: {  # false
-            exit_if false  # if_5
-          }
-        }
-        store %success, %50
-        exit_if  # if_4
-      }
-      $B11: {  # false
-        %57:ptr<uniform, vec2<u32>, read> = access %uniforms, 3u
-        %58:vec2<u32> = load %57
-        %59:vec2<u32> = sub %dstTexCoord, %58
-        %60:ptr<uniform, vec2<u32>, read> = access %uniforms, 2u
-        %61:vec2<u32> = load %60
-        %62:vec2<u32> = add %59, %61
-        %srcTexCoord:ptr<function, vec2<u32>, read_write> = var, %62
-        %64:ptr<uniform, u32, read> = access %uniforms, 0u
-        %65:u32 = load %64
-        %66:bool = eq %65, 1u
-        if %66 [t: $B14] {  # if_6
-          $B14: {  # true
-            %67:u32 = access %srcSize, 1u
-            %68:u32 = load_vector_element %srcTexCoord, 1u
-            %69:u32 = sub %67, %68
-            %70:u32 = sub %69, 1u
-            store_vector_element %srcTexCoord, 1u, %70
-            exit_if  # if_6
-          }
-        }
-        %71:texture_2d<f32> = load %src
-        %72:texture_2d<f32> = let %71
-        %73:vec2<u32> = load %srcTexCoord
-        %74:vec2<i32> = convert %73
-        %75:vec4<f32> = textureLoad %72, %74, 0i
-        %srcColor:vec4<f32> = let %75
-        %77:texture_2d<f32> = load %dst
-        %78:texture_2d<f32> = let %77
-        %79:vec2<i32> = convert %dstTexCoord
-        %80:vec4<f32> = textureLoad %78, %79, 0i
-        %dstColor:vec4<f32> = let %80
-        %82:ptr<uniform, u32, read> = access %uniforms, 1u
-        %83:u32 = load %82
-        %84:bool = eq %83, 2u
-        if %84 [t: $B15, f: $B16] {  # if_7
-          $B15: {  # true
-            %85:bool = load %success
-            %86:bool = if %85 [t: $B17, f: $B18] {  # if_8
-              $B17: {  # true
-                %87:f32 = access %dstColor, 0u
-                %88:f32 = access %srcColor, 0u
-                %89:bool = call %aboutEqual, %87, %88
-                exit_if %89  # if_8
-              }
-              $B18: {  # false
-                exit_if false  # if_8
-              }
-            }
-            %90:bool = if %86 [t: $B19, f: $B20] {  # if_9
-              $B19: {  # true
-                %91:f32 = access %dstColor, 1u
-                %92:f32 = access %srcColor, 1u
-                %93:bool = call %aboutEqual, %91, %92
-                exit_if %93  # if_9
-              }
-              $B20: {  # false
-                exit_if false  # if_9
-              }
-            }
-            store %success, %90
-            exit_if  # if_7
-          }
-          $B16: {  # false
-            %94:bool = load %success
-            %95:bool = if %94 [t: $B21, f: $B22] {  # if_10
-              $B21: {  # true
-                %96:f32 = access %dstColor, 0u
-                %97:f32 = access %srcColor, 0u
-                %98:bool = call %aboutEqual, %96, %97
-                exit_if %98  # if_10
-              }
-              $B22: {  # false
-                exit_if false  # if_10
-              }
-            }
-            %99:bool = if %95 [t: $B23, f: $B24] {  # if_11
-              $B23: {  # true
-                %100:f32 = access %dstColor, 1u
-                %101:f32 = access %srcColor, 1u
-                %102:bool = call %aboutEqual, %100, %101
-                exit_if %102  # if_11
-              }
-              $B24: {  # false
-                exit_if false  # if_11
-              }
-            }
-            %103:bool = if %99 [t: $B25, f: $B26] {  # if_12
-              $B25: {  # true
-                %104:f32 = access %dstColor, 2u
-                %105:f32 = access %srcColor, 2u
-                %106:bool = call %aboutEqual, %104, %105
-                exit_if %106  # if_12
-              }
-              $B26: {  # false
-                exit_if false  # if_12
-              }
-            }
-            %107:bool = if %103 [t: $B27, f: $B28] {  # if_13
-              $B27: {  # true
-                %108:f32 = access %dstColor, 3u
-                %109:f32 = access %srcColor, 3u
-                %110:bool = call %aboutEqual, %108, %109
-                exit_if %110  # if_13
-              }
-              $B28: {  # false
-                exit_if false  # if_13
-              }
-            }
-            store %success, %107
-            exit_if  # if_7
-          }
-        }
-        exit_if  # if_4
-      }
-    }
-    %111:u32 = access %GlobalInvocationID, 1u
-    %112:u32 = access %dstSize, 0u
-    %113:u32 = mul %111, %112
-    %114:u32 = access %GlobalInvocationID, 0u
-    %115:u32 = add %113, %114
-    %outputIndex:u32 = let %115
-    %117:bool = load %success
-    if %117 [t: $B29, f: $B30] {  # if_14
-      $B29: {  # true
-        %118:ptr<storage, u32, read_write> = access %output, 0u, %outputIndex
-        store %118, 1u
-        exit_if  # if_14
-      }
-      $B30: {  # false
-        %119:ptr<storage, u32, read_write> = access %output, 0u, %outputIndex
-        store %119, 0u
-        exit_if  # if_14
-      }
-    }
-    ret
-  }
+kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms};
+  tint_symbol_inner(GlobalInvocationID, tint_module_vars);
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
