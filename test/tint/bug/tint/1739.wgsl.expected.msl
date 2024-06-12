@@ -124,9 +124,9 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
 
 kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_1 [[texture(1)]], texture2d<float, access::sample> tint_symbol_2 [[texture(2)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_3 [[buffer(3)]], texture2d<float, access::write> tint_symbol_4 [[texture(0)]]) {
   float4 red = textureLoadExternal(tint_symbol_1, tint_symbol_2, tint_clamp(int2(10), int2(0), int2((((*(tint_symbol_3)).visibleSize + uint2(1u)) - uint2(1u)))), tint_unpack_vec3_in_composite_1(*(tint_symbol_3)));
-  tint_symbol_4.write(red, uint2(tint_clamp(int2(0), int2(0), int2((uint2(tint_symbol_4.get_width(), tint_symbol_4.get_height()) - uint2(1u))))));
+  tint_symbol_4.write(red, uint2(int2(0)));
   float4 green = textureLoadExternal(tint_symbol_1, tint_symbol_2, tint_clamp(int2(70, 118), int2(0), int2((((*(tint_symbol_3)).visibleSize + uint2(1u)) - uint2(1u)))), tint_unpack_vec3_in_composite_1(*(tint_symbol_3)));
-  tint_symbol_4.write(green, uint2(tint_clamp(int2(1, 0), int2(0), int2((uint2(tint_symbol_4.get_width(), tint_symbol_4.get_height()) - uint2(1u))))));
+  tint_symbol_4.write(green, uint2(int2(1, 0)));
   return;
 }
 

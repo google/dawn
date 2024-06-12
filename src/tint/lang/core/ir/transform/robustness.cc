@@ -99,8 +99,7 @@ struct State {
                     // Check if this is a texture builtin that needs to be clamped.
                     if (config.clamp_texture) {
                         if (call->Func() == core::BuiltinFn::kTextureDimensions ||
-                            call->Func() == core::BuiltinFn::kTextureLoad ||
-                            call->Func() == core::BuiltinFn::kTextureStore) {
+                            call->Func() == core::BuiltinFn::kTextureLoad) {
                             texture_calls.Push(call);
                         }
                     }

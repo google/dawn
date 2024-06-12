@@ -565,8 +565,7 @@ struct Robustness::State {
     /// @returns true if the given builtin is a texture function that requires predication or
     /// clamping of arguments.
     bool TextureBuiltinNeedsRobustness(wgsl::BuiltinFn type) {
-        return type == wgsl::BuiltinFn::kTextureLoad || type == wgsl::BuiltinFn::kTextureStore ||
-               type == wgsl::BuiltinFn::kTextureDimensions;
+        return type == wgsl::BuiltinFn::kTextureLoad || type == wgsl::BuiltinFn::kTextureDimensions;
     }
 
     /// @returns a bitwise and of the two expressions, or the other expression if one is null.

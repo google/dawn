@@ -3272,99 +3272,11 @@ $B1: {  # root
     EXPECT_EQ(GetParam() ? expect : src, str());
 }
 
-TEST_P(IR_RobustnessTest, TextureStore_Storage1D) {
-    auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle,
-                     ty.Get<type::StorageTexture>(type::TextureDimension::k1d, format, write,
-                                                  type::StorageTexture::SubtypeFor(format, ty)),
-                     read));
-    texture->SetBindingPoint(0, 0);
-    mod.root_block->Append(texture);
+////////////////////////////////////////////////////////////////
+// Test things that should not be clamped.
+////////////////////////////////////////////////////////////////
 
-    {
-        auto* func = b.Function("load_signed", ty.void_());
-        auto* coords = b.FunctionParam("coords", ty.i32());
-        auto* value = b.FunctionParam("value", ty.vec4<f32>());
-        func->SetParams({coords, value});
-        b.Append(func->Block(), [&] {
-            auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
-            b.Return(func);
-        });
-    }
-
-    {
-        auto* func = b.Function("load_unsigned", ty.void_());
-        auto* coords = b.FunctionParam("coords", ty.u32());
-        auto* value = b.FunctionParam("value", ty.vec4<f32>());
-        func->SetParams({coords, value});
-        b.Append(func->Block(), [&] {
-            auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
-            b.Return(func);
-        });
-    }
-
-    auto* src = R"(
-$B1: {  # root
-  %texture:ptr<handle, texture_storage_1d<rgba8unorm, write>, read> = var @binding_point(0, 0)
-}
-
-%load_signed = func(%coords:i32, %value:vec4<f32>):void {
-  $B2: {
-    %5:texture_storage_1d<rgba8unorm, write> = load %texture
-    %6:void = textureStore %5, %coords, %value
-    ret
-  }
-}
-%load_unsigned = func(%coords_1:u32, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  $B3: {
-    %10:texture_storage_1d<rgba8unorm, write> = load %texture
-    %11:void = textureStore %10, %coords_1, %value_1
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-$B1: {  # root
-  %texture:ptr<handle, texture_storage_1d<rgba8unorm, write>, read> = var @binding_point(0, 0)
-}
-
-%load_signed = func(%coords:i32, %value:vec4<f32>):void {
-  $B2: {
-    %5:texture_storage_1d<rgba8unorm, write> = load %texture
-    %6:u32 = textureDimensions %5
-    %7:u32 = sub %6, 1u
-    %8:u32 = convert %coords
-    %9:u32 = min %8, %7
-    %10:void = textureStore %5, %9, %value
-    ret
-  }
-}
-%load_unsigned = func(%coords_1:u32, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  $B3: {
-    %14:texture_storage_1d<rgba8unorm, write> = load %texture
-    %15:u32 = textureDimensions %14
-    %16:u32 = sub %15, 1u
-    %17:u32 = min %coords_1, %16
-    %18:void = textureStore %14, %17, %value_1
-    ret
-  }
-}
-)";
-
-    RobustnessConfig cfg;
-    cfg.clamp_texture = GetParam();
-    Run(Robustness, cfg);
-
-    EXPECT_EQ(GetParam() ? expect : src, str());
-}
-
-TEST_P(IR_RobustnessTest, TextureStore_Storage2D) {
+TEST_P(IR_RobustnessTest, NoModify_TextureStore) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* texture =
         b.Var("texture",
@@ -3375,272 +3287,32 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2D) {
     texture->SetBindingPoint(0, 0);
     mod.root_block->Append(texture);
 
-    {
-        auto* func = b.Function("load_signed", ty.void_());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
-        auto* value = b.FunctionParam("value", ty.vec4<f32>());
-        func->SetParams({coords, value});
-        b.Append(func->Block(), [&] {
-            auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
-            b.Return(func);
-        });
-    }
-
-    {
-        auto* func = b.Function("load_unsigned", ty.void_());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
-        auto* value = b.FunctionParam("value", ty.vec4<f32>());
-        func->SetParams({coords, value});
-        b.Append(func->Block(), [&] {
-            auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
-            b.Return(func);
-        });
-    }
+    auto* foo = b.Function("foo", ty.void_());
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    foo->SetParams({coords, value});
+    b.Append(foo->Block(), [&] {
+        auto* handle = b.Load(texture);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
+        b.Return(foo);
+    });
 
     auto* src = R"(
 $B1: {  # root
   %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(0, 0)
 }
 
-%load_signed = func(%coords:vec2<i32>, %value:vec4<f32>):void {
+%foo = func(%coords:vec2<i32>, %value:vec4<f32>):void {
   $B2: {
     %5:texture_storage_2d<rgba8unorm, write> = load %texture
     %6:void = textureStore %5, %coords, %value
     ret
   }
 }
-%load_unsigned = func(%coords_1:vec2<u32>, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  $B3: {
-    %10:texture_storage_2d<rgba8unorm, write> = load %texture
-    %11:void = textureStore %10, %coords_1, %value_1
-    ret
-  }
-}
 )";
     EXPECT_EQ(src, str());
 
-    auto* expect = R"(
-$B1: {  # root
-  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(0, 0)
-}
-
-%load_signed = func(%coords:vec2<i32>, %value:vec4<f32>):void {
-  $B2: {
-    %5:texture_storage_2d<rgba8unorm, write> = load %texture
-    %6:vec2<u32> = textureDimensions %5
-    %7:vec2<u32> = sub %6, vec2<u32>(1u)
-    %8:vec2<u32> = convert %coords
-    %9:vec2<u32> = min %8, %7
-    %10:void = textureStore %5, %9, %value
-    ret
-  }
-}
-%load_unsigned = func(%coords_1:vec2<u32>, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  $B3: {
-    %14:texture_storage_2d<rgba8unorm, write> = load %texture
-    %15:vec2<u32> = textureDimensions %14
-    %16:vec2<u32> = sub %15, vec2<u32>(1u)
-    %17:vec2<u32> = min %coords_1, %16
-    %18:void = textureStore %14, %17, %value_1
-    ret
-  }
-}
-)";
-
-    RobustnessConfig cfg;
-    cfg.clamp_texture = GetParam();
-    Run(Robustness, cfg);
-
-    EXPECT_EQ(GetParam() ? expect : src, str());
-}
-
-TEST_P(IR_RobustnessTest, TextureStore_Storage2DArray) {
-    auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle,
-                     ty.Get<type::StorageTexture>(type::TextureDimension::k2dArray, format, write,
-                                                  type::StorageTexture::SubtypeFor(format, ty)),
-                     read));
-    texture->SetBindingPoint(0, 0);
-    mod.root_block->Append(texture);
-
-    {
-        auto* func = b.Function("load_signed", ty.void_());
-        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
-        auto* layer = b.FunctionParam("layer", ty.i32());
-        auto* value = b.FunctionParam("value", ty.vec4<f32>());
-        func->SetParams({coords, layer, value});
-        b.Append(func->Block(), [&] {
-            auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, layer, value);
-            b.Return(func);
-        });
-    }
-
-    {
-        auto* func = b.Function("load_unsigned", ty.void_());
-        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
-        auto* layer = b.FunctionParam("layer", ty.u32());
-        auto* value = b.FunctionParam("value", ty.vec4<f32>());
-        func->SetParams({coords, layer, value});
-        b.Append(func->Block(), [&] {
-            auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, layer, value);
-            b.Return(func);
-        });
-    }
-
-    auto* src = R"(
-$B1: {  # root
-  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(0, 0)
-}
-
-%load_signed = func(%coords:vec2<i32>, %layer:i32, %value:vec4<f32>):void {
-  $B2: {
-    %6:texture_storage_2d_array<rgba8unorm, write> = load %texture
-    %7:void = textureStore %6, %coords, %layer, %value
-    ret
-  }
-}
-%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %layer_1: 'layer', %value_1: 'value'
-  $B3: {
-    %12:texture_storage_2d_array<rgba8unorm, write> = load %texture
-    %13:void = textureStore %12, %coords_1, %layer_1, %value_1
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-$B1: {  # root
-  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(0, 0)
-}
-
-%load_signed = func(%coords:vec2<i32>, %layer:i32, %value:vec4<f32>):void {
-  $B2: {
-    %6:texture_storage_2d_array<rgba8unorm, write> = load %texture
-    %7:vec2<u32> = textureDimensions %6
-    %8:vec2<u32> = sub %7, vec2<u32>(1u)
-    %9:vec2<u32> = convert %coords
-    %10:vec2<u32> = min %9, %8
-    %11:u32 = textureNumLayers %6
-    %12:u32 = sub %11, 1u
-    %13:u32 = convert %layer
-    %14:u32 = min %13, %12
-    %15:void = textureStore %6, %10, %14, %value
-    ret
-  }
-}
-%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %layer_1: 'layer', %value_1: 'value'
-  $B3: {
-    %20:texture_storage_2d_array<rgba8unorm, write> = load %texture
-    %21:vec2<u32> = textureDimensions %20
-    %22:vec2<u32> = sub %21, vec2<u32>(1u)
-    %23:vec2<u32> = min %coords_1, %22
-    %24:u32 = textureNumLayers %20
-    %25:u32 = sub %24, 1u
-    %26:u32 = min %layer_1, %25
-    %27:void = textureStore %20, %23, %26, %value_1
-    ret
-  }
-}
-)";
-
-    RobustnessConfig cfg;
-    cfg.clamp_texture = GetParam();
-    Run(Robustness, cfg);
-
-    EXPECT_EQ(GetParam() ? expect : src, str());
-}
-
-TEST_P(IR_RobustnessTest, TextureStore_Storage3D) {
-    auto format = core::TexelFormat::kRgba8Unorm;
-    auto* texture =
-        b.Var("texture",
-              ty.ptr(handle,
-                     ty.Get<type::StorageTexture>(type::TextureDimension::k3d, format, write,
-                                                  type::StorageTexture::SubtypeFor(format, ty)),
-                     read));
-    texture->SetBindingPoint(0, 0);
-    mod.root_block->Append(texture);
-
-    {
-        auto* func = b.Function("load_signed", ty.void_());
-        auto* coords = b.FunctionParam("coords", ty.vec3<i32>());
-        auto* value = b.FunctionParam("value", ty.vec4<f32>());
-        func->SetParams({coords, value});
-        b.Append(func->Block(), [&] {
-            auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
-            b.Return(func);
-        });
-    }
-
-    {
-        auto* func = b.Function("load_unsigned", ty.void_());
-        auto* coords = b.FunctionParam("coords", ty.vec3<u32>());
-        auto* value = b.FunctionParam("value", ty.vec4<f32>());
-        func->SetParams({coords, value});
-        b.Append(func->Block(), [&] {
-            auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
-            b.Return(func);
-        });
-    }
-
-    auto* src = R"(
-$B1: {  # root
-  %texture:ptr<handle, texture_storage_3d<rgba8unorm, write>, read> = var @binding_point(0, 0)
-}
-
-%load_signed = func(%coords:vec3<i32>, %value:vec4<f32>):void {
-  $B2: {
-    %5:texture_storage_3d<rgba8unorm, write> = load %texture
-    %6:void = textureStore %5, %coords, %value
-    ret
-  }
-}
-%load_unsigned = func(%coords_1:vec3<u32>, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  $B3: {
-    %10:texture_storage_3d<rgba8unorm, write> = load %texture
-    %11:void = textureStore %10, %coords_1, %value_1
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-$B1: {  # root
-  %texture:ptr<handle, texture_storage_3d<rgba8unorm, write>, read> = var @binding_point(0, 0)
-}
-
-%load_signed = func(%coords:vec3<i32>, %value:vec4<f32>):void {
-  $B2: {
-    %5:texture_storage_3d<rgba8unorm, write> = load %texture
-    %6:vec3<u32> = textureDimensions %5
-    %7:vec3<u32> = sub %6, vec3<u32>(1u)
-    %8:vec3<u32> = convert %coords
-    %9:vec3<u32> = min %8, %7
-    %10:void = textureStore %5, %9, %value
-    ret
-  }
-}
-%load_unsigned = func(%coords_1:vec3<u32>, %value_1:vec4<f32>):void {  # %coords_1: 'coords', %value_1: 'value'
-  $B3: {
-    %14:texture_storage_3d<rgba8unorm, write> = load %texture
-    %15:vec3<u32> = textureDimensions %14
-    %16:vec3<u32> = sub %15, vec3<u32>(1u)
-    %17:vec3<u32> = min %coords_1, %16
-    %18:void = textureStore %14, %17, %value_1
-    ret
-  }
-}
-)";
+    auto* expect = src;
 
     RobustnessConfig cfg;
     cfg.clamp_texture = GetParam();
