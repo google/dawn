@@ -123,22 +123,6 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithMissingLocationAttribute_St
     EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
 }
 
-// Using the index attribute without a location attribute should fail.
-TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithMissingLocationAttribute_ReturnValue) {
-    Func("F", Empty, ty.vec4<f32>(),
-         Vector{
-             Return(Call<vec4<f32>>()),
-         },
-         Vector{Stage(ast::PipelineStage::kFragment)},
-         Vector{
-             BlendSrc(Source{{12, 34}}, 1_a),
-             Builtin(core::BuiltinValue::kPointSize),
-         });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
-}
-
 // Using an index attribute on a struct member should pass.
 TEST_F(DualSourceBlendingExtensionTests, StructMemberBlendSrcAttribute) {
     Structure("Output", Vector{
@@ -167,22 +151,6 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithNonZeroLocation_Struct) {
                             Member("a", ty.vec4<f32>(),
                                    Vector{Location(1_a), BlendSrc(Source{{12, 34}}, 0_a)}),
                         });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
-}
-
-// Using the index attribute with a non-zero location should fail.
-TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithNonZeroLocation_ReturnValue) {
-    Func("F", Empty, ty.vec4<f32>(),
-         Vector{
-             Return(Call<vec4<f32>>()),
-         },
-         Vector{Stage(ast::PipelineStage::kFragment)},
-         Vector{
-             Location(1_a),
-             BlendSrc(Source{{12, 34}}, 1_a),
-         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' can only be used with '@location(0)'");
@@ -285,6 +253,20 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcAsFragmentInput) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: '@blend_src' can only be used for fragment shader output
 note: while analyzing entry point 'F')");
+}
+
+TEST_F(DualSourceBlendingExtensionTest, BlendSrcOnNonStructFragmentOutput) {
+    // enable dual_source_blending;
+    // @fragment fn F() -> @location(0) @blend_src(0) vec4<f32> {
+    //     return vec4<f32>();
+    // }
+    Enable(wgsl::Extension::kDualSourceBlending);
+    Func("F", Empty, ty.vec4<f32>(), Vector{Return(Call("vec4f"))},
+         Vector{Stage(ast::PipelineStage::kFragment)},
+         Vector{Location(0_a), BlendSrc(Source{{1, 2}}, 0_a)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(1:2 error: '@blend_src' is not valid for entry point return types)");
 }
 
 class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<int> {

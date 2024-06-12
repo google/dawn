@@ -1010,7 +1010,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kBlendSrc},
-            R"(1:2 error: '@blend_src' can only be used for fragment shader output)",
+            R"(1:2 error: '@blend_src' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kBuiltinPosition},
@@ -1100,11 +1100,11 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kBlendSrc},
-            R"(9:9 error: missing entry point IO attribute on return type)",
+            R"(1:2 error: '@blend_src' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kBlendSrc, AttributeKind::kLocation},
-            Pass,
+            R"(1:2 error: '@blend_src' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kBuiltinPosition},
@@ -1177,10 +1177,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kBinding, AttributeKind::kGroup},
             R"(1:2 error: '@binding' is not valid for entry point return types)",
-        },
-        TestParams{
-            {AttributeKind::kBlendSrc, AttributeKind::kLocation},
-            Pass,
         }));
 
 using VertexShaderReturnTypeAttributeTest = TestWithParams;
@@ -1216,7 +1212,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TestParams{
             {AttributeKind::kBlendSrc},
-            R"(1:2 error: '@blend_src' can only be used for fragment shader output)",
+            R"(1:2 error: '@blend_src' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kBuiltinPosition},

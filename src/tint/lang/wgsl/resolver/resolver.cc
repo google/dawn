@@ -1109,6 +1109,9 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                     return kSuccess;
                 },
                 [&](const ast::BlendSrcAttribute* attr) {
+                    if (!permissive) {
+                        return kInvalid;
+                    }
                     auto value = BlendSrcAttribute(attr);
                     if (value != Success) {
                         return kErrored;
