@@ -2884,6 +2884,57 @@ INSTANTIATE_TEST_SUITE_P(
         // Not in WebGPU
     }));
 
+INSTANTIATE_TEST_SUITE_P(ImageQuerySize_NonArrayed_UnsignedResult,
+                         // ImageQuerySize requires storage image or multisampled
+                         // For storage image, use another instruction to indicate whether it
+                         // is readonly or writeonly.
+                         SpvParserHandleTest_SampledImageAccessTest,
+                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
+                             // 1D storage image
+                             {"%float 1D 0 0 0 2 Rgba32f",
+                              "%99 = OpImageQuerySize %uint %im \n"
+                              "%98 = OpImageRead %v4float %im %i1\n",  // Implicitly mark as
+                                                                       // NonWritable
+                              R"(@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
+                              R"(let x_99 = textureDimensions(x_20);)"},
+                             // 2D storage image
+                             {"%float 2D 0 0 0 2 Rgba32f",
+                              "%99 = OpImageQuerySize %v2uint %im \n"
+                              "%98 = OpImageRead %v4float %im %vi12\n",  // Implicitly mark as
+                                                                         // NonWritable
+                              R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
+                              R"(let x_99 = textureDimensions(x_20);)"},
+                             // 3D storage image
+                             {"%float 3D 0 0 0 2 Rgba32f",
+                              "%99 = OpImageQuerySize %v3uint %im \n"
+                              "%98 = OpImageRead %v4float %im %vi123\n",  // Implicitly mark as
+                                                                          // NonWritable
+                              R"(@group(2) @binding(1) var x_20 : texture_3d<f32>;)",
+                              R"(let x_99 = textureDimensions(x_20);)"},
+
+                             // Multisampled
+                             {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySize %v2uint %im \n",
+                              R"(@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;)",
+                              R"(let x_99 = textureDimensions(x_20);)"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageQuerySize_Arrayed_UnsignedResult,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // 1D array storage image doesn't exist.
+
+        // 2D array storage image
+        {"%float 2D 0 1 0 2 Rgba32f",
+         "%99 = OpImageQuerySize %v3uint %im \n"
+         "%98 = OpImageRead %v4float %im %vi123\n",
+         R"(@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
+         R"(let x_99 = vec3u(textureDimensions(x_20), textureNumLayers(x_20));)"}
+        // 3D array storage image doesn't exist.
+
+        // Multisampled array
+        // Not in WebGPU
+    }));
+
 INSTANTIATE_TEST_SUITE_P(
     ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
     // From VUID-StandaloneSpirv-OpImageQuerySizeLod-04659:
@@ -2981,7 +3032,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         {"%float 1D 0 0 0 1 Unknown", "%99 = OpImageQuerySizeLod %uint %im %i1\n",
          R"(@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
-         R"(let x_99 = i32(textureDimensions(x_20, i1));)"}}));
+         R"(let x_99 = textureDimensions(x_20, i1);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(ImageQueryLevels_SignedResult,
                          SpvParserHandleTest_SampledImageAccessTest,

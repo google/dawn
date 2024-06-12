@@ -5834,7 +5834,9 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
                     : exprs[0],
             };
 
-            expr = ToSignedIfUnsigned(expr);
+            if (result_type->IsSignedScalarOrVector()) {
+                expr = ToSignedIfUnsigned(expr);
+            }
 
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
         }
