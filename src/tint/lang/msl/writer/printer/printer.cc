@@ -1046,10 +1046,15 @@ class Printer : public tint::TextGenerator {
                 out << "{";
                 size_t i = 0;
                 for (auto* arg : c->Args()) {
+                    if (arg == nullptr) {
+                        // Skip `undef` values.
+                        continue;
+                    }
                     if (i > 0) {
                         out << ", ";
                     }
-                    // Emit field designators for structures to account for padding members.
+                    // Emit field designators for structures so that we can skip padding members and
+                    // arguments that are `undef` values.
                     auto name = struct_ty->Members()[i]->Name().Name();
                     out << "." << name << "=";
                     EmitAndTakeAddressIfNeeded(out, arg);

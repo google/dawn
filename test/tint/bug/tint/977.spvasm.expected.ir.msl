@@ -1,110 +1,75 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: ResultMatrix = struct @align(4) {
-  numbers:array<f32> @offset(0)
-}
+struct ResultMatrix {
+  tint_array<float, 1> numbers;
+};
+struct FirstMatrix {
+  tint_array<float, 1> numbers;
+};
+struct SecondMatrix {
+  tint_array<float, 1> numbers;
+};
+struct Uniforms {
+  float tint_symbol;
+  int sizeA;
+  int sizeB;
+};
+struct tint_module_vars_struct {
+  thread uint3* gl_GlobalInvocationID;
+  device ResultMatrix* resultMatrix;
+  const device FirstMatrix* firstMatrix;
+  const device SecondMatrix* secondMatrix;
+  const constant Uniforms* x_46;
+};
 
-FirstMatrix = struct @align(4) {
-  numbers:array<f32> @offset(0)
-}
-
-SecondMatrix = struct @align(4) {
-  numbers:array<f32> @offset(0)
-}
-
-Uniforms = struct @align(4) {
-  tint_symbol:f32 @offset(0)
-  sizeA:i32 @offset(4)
-  sizeB:i32 @offset(8)
-}
-
-$B1: {  # root
-  %gl_GlobalInvocationID:ptr<private, vec3<u32>, read_write> = var
-  %resultMatrix:ptr<storage, ResultMatrix, read_write> = var @binding_point(0, 2)
-  %firstMatrix:ptr<storage, FirstMatrix, read> = var @binding_point(0, 0)
-  %secondMatrix:ptr<storage, SecondMatrix, read> = var @binding_point(0, 1)
-  %x_46:ptr<uniform, Uniforms, read> = var @binding_point(0, 3)
-}
-
-%binaryOperation_f1_f1_ = func(%a:ptr<function, f32, read_write>, %b:ptr<function, f32, read_write>):f32 {
-  $B2: {
-    %x_26:ptr<function, f32, read_write> = var
-    %10:f32 = load %b
-    %11:bool = eq %10, 0.0f
-    if %11 [t: $B3] {  # if_1
-      $B3: {  # true
-        ret 1.0f
-      }
-    }
-    %12:f32 = load %b
-    %x_21:f32 = let %12
-    %14:f32 = div %x_21, 2.0f
-    %15:f32 = floor %14
-    %16:f32 = mul 2.0f, %15
-    %17:f32 = sub %x_21, %16
-    %18:f32 = round %17
-    %19:bool = eq %18, 1.0f
-    %20:bool = eq %19, false
-    if %20 [t: $B4, f: $B5] {  # if_2
-      $B4: {  # true
-        %21:f32 = load %a
-        %22:f32 = abs %21
-        %23:f32 = load %b
-        %24:f32 = pow %22, %23
-        store %x_26, %24
-        exit_if  # if_2
-      }
-      $B5: {  # false
-        %25:f32 = load %a
-        %26:f32 = sign %25
-        %27:f32 = let %26
-        %28:f32 = load %a
-        %29:f32 = abs %28
-        %30:f32 = load %b
-        %31:f32 = pow %29, %30
-        %32:f32 = mul %27, %31
-        store %x_26, %32
-        exit_if  # if_2
-      }
-    }
-    %33:f32 = load %x_26
-    %x_41:f32 = let %33
-    ret %x_41
+float binaryOperation_f1_f1_(thread float* const a, thread float* const b) {
+  float x_26 = 0.0f;
+  if (((*b) == 0.0f)) {
+    return 1.0f;
   }
-}
-%main_1 = func():void {
-  $B6: {
-    %index:ptr<function, i32, read_write> = var
-    %a_1:ptr<function, i32, read_write> = var
-    %param:ptr<function, f32, read_write> = var
-    %param_1:ptr<function, f32, read_write> = var
-    %40:u32 = load_vector_element %gl_GlobalInvocationID, 0u
-    %41:i32 = bitcast %40
-    store %index, %41
-    store %a_1, -10i
-    %42:i32 = load %index
-    %x_63:i32 = let %42
-    store %param, -4.0f
-    store %param_1, -3.0f
-    %44:f32 = call %binaryOperation_f1_f1_, %param, %param_1
-    %x_68:f32 = let %44
-    %46:ptr<storage, f32, read_write> = access %resultMatrix, 0u, %x_63
-    store %46, %x_68
-    ret
+  float const x_21 = (*b);
+  if (!((rint((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
+    float const v = abs((*a));
+    x_26 = pow(v, (*b));
+  } else {
+    float const v_1 = sign((*a));
+    float const v_2 = abs((*a));
+    x_26 = (v_1 * pow(v_2, (*b)));
   }
+  float const x_41 = x_26;
+  return x_41;
 }
-%tint_symbol_1 = @compute @workgroup_size(1, 1, 1) func(%gl_GlobalInvocationID_param:vec3<u32> [@global_invocation_id]):void {
-  $B7: {
-    store %gl_GlobalInvocationID, %gl_GlobalInvocationID_param
-    %49:void = call %main_1
-    ret
-  }
+void main_1(tint_module_vars_struct tint_module_vars) {
+  int index = 0;
+  int a_1 = 0;
+  float param = 0.0f;
+  float param_1 = 0.0f;
+  index = as_type<int>((*tint_module_vars.gl_GlobalInvocationID)[0u]);
+  a_1 = -10;
+  int const x_63 = index;
+  param = -4.0f;
+  param_1 = -3.0f;
+  float const x_68 = binaryOperation_f1_f1_((&param), (&param_1));
+  (*tint_module_vars.resultMatrix).numbers[x_63] = x_68;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void tint_symbol_1_inner(uint3 gl_GlobalInvocationID_param, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.gl_GlobalInvocationID) = gl_GlobalInvocationID_param;
+  main_1(tint_module_vars);
+}
+kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], device ResultMatrix* resultMatrix [[buffer(0)]]) {
+  thread uint3 gl_GlobalInvocationID = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.gl_GlobalInvocationID=(&gl_GlobalInvocationID), .resultMatrix=resultMatrix};
+  tint_symbol_1_inner(gl_GlobalInvocationID_param, tint_module_vars);
+}
