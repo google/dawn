@@ -94,6 +94,7 @@ struct State {
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kWorkgroupBarrier:
                     case core::BuiltinFn::kTextureBarrier:
+                    case core::BuiltinFn::kUnpack2X16Float:
                         worklist.Push(builtin);
                         break;
                     default:
@@ -163,6 +164,11 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureBarrier:
                     ThreadgroupBarrier(builtin, BarrierType::kTexture);
+                    break;
+
+                // Pack/unpack builtins.
+                case core::BuiltinFn::kUnpack2X16Float:
+                    Unpack2x16Float(builtin);
                     break;
 
                 default:
@@ -379,6 +385,17 @@ struct State {
         auto* call = b.CallWithResult<msl::ir::BuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kThreadgroupBarrier, std::move(args));
         call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Polyfill an Unpack2x16Float call.
+    /// @param builtin the builtin call instruction
+    void Unpack2x16Float(core::ir::CoreBuiltinCall* builtin) {
+        // Replace the call with `float2(as_type<half2>(value))`.
+        b.InsertBefore(builtin, [&] {
+            auto* bitcast = b.Bitcast<vec2<f16>>(builtin->Args()[0]);
+            b.ConvertWithResult(builtin->DetachResult(), bitcast);
+        });
         builtin->Destroy();
     }
 };

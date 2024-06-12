@@ -1091,6 +1091,16 @@ class Builder {
                                            Values(std::forward<ARGS>(args)...));
     }
 
+    /// Creates a value conversion instruction with an existing instruction result.
+    /// @param result the instruction result to use
+    /// @param val the value to be converted
+    /// @returns the instruction
+    template <typename VAL>
+    ir::Convert* ConvertWithResult(ir::InstructionResult* result, VAL&& val) {
+        return Append(
+            ir.allocators.instructions.Create<ir::Convert>(result, Value(std::forward<VAL>(val))));
+    }
+
     /// Creates a value conversion instruction to the template type T
     /// @param val the value to be converted
     /// @returns the instruction
@@ -1106,8 +1116,7 @@ class Builder {
     /// @returns the instruction
     template <typename VAL>
     ir::Convert* Convert(const core::type::Type* to, VAL&& val) {
-        return Append(ir.allocators.instructions.Create<ir::Convert>(
-            InstructionResult(to), Value(std::forward<VAL>(val))));
+        return ConvertWithResult(InstructionResult(to), Value(std::forward<VAL>(val)));
     }
 
     /// Creates a value constructor instruction with an existing instruction result
