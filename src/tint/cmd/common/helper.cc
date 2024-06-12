@@ -191,6 +191,7 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
 
                 tint::wgsl::reader::Options options;
                 options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
+                options.mode = opts.mode;
 
                 auto file = std::make_unique<tint::Source::File>(
                     opts.filename, std::string(data.begin(), data.end()));
