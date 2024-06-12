@@ -3840,8 +3840,8 @@ tint::Result<uint32_t> Resolver::BlendSrcAttribute(const ast::BlendSrcAttribute*
     }
 
     if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
-        AddError(attr->source) << style::Attribute("@blend_src") << style::Type("i32") << " or "
-                               << style::Type("u32") << " value";
+        AddError(attr->source) << style::Attribute("@blend_src") << " value must be "
+                               << style::Type("i32") << " or " << style::Type("u32");
         return Failure{};
     }
 

@@ -57,7 +57,7 @@ class DualSourceBlendingExtensionTests : public ResolverTest {
     DualSourceBlendingExtensionTests() { Enable(wgsl::Extension::kDualSourceBlending); }
 };
 
-// Using an F32 as an index value should fail.
+// Using an F32 as a @blend_src value should fail.
 TEST_F(DualSourceBlendingExtensionTests, BlendSrcF32Error) {
     Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
@@ -65,17 +65,17 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcF32Error) {
                         });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: '@blend_srci32' or 'u32' value");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' value must be 'i32' or 'u32'");
 }
 
-// Using a floating point number as an index value should fail.
+// Using a floating point number as a @blend_src value should fail.
 TEST_F(DualSourceBlendingExtensionTests, BlendSrcFloatValueError) {
     Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
                                    Vector{Location(0_a), BlendSrc(Source{{12, 34}}, 1.0_a)}),
                         });
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: '@blend_srci32' or 'u32' value");
+    EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' value must be 'i32' or 'u32'");
 }
 
 // Using a number less than zero as an index value should fail.
