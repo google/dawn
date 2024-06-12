@@ -57,8 +57,6 @@ struct InstanceDescriptor;
 // There are various ways to optimize ProcessEvents/WaitAny:
 // - TODO(crbug.com/dawn/2059) Spontaneously set events as "early-ready" in other places when we see
 //   serials advance, e.g. Submit, or when checking a later wait before an earlier wait.
-// - TODO(crbug.com/dawn/2049) For thread-driven events (async pipeline compilation and Metal queue
-//   events), defer tracking for ProcessEvents until the event is already completed.
 class EventManager final : NonMovable {
   public:
     EventManager();
