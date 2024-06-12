@@ -153,3 +153,6 @@ lcov.info
 all_findings.json
 
 tint.dot
+
+### pyenv files
+/.python-version
