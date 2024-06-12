@@ -34,7 +34,6 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/IOSurfaceUtils.h"
-#include "dawn/native/MetalBackend.h"
 #include "dawn/utils/TextureUtils.h"
 
 namespace dawn {

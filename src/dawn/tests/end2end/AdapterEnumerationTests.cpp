@@ -45,10 +45,6 @@
 #include "dawn/native/D3D12Backend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
 
-#if defined(DAWN_ENABLE_BACKEND_METAL)
-#include "dawn/native/MetalBackend.h"
-#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
-
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
 #include "dawn/native/OpenGLBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)

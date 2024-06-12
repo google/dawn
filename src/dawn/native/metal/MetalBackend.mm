@@ -42,4 +42,9 @@ void WaitForCommandsToBeScheduled(WGPUDevice device) {
     ToBackend(backendDevice->GetQueue())->WaitForCommandsToBeScheduled();
 }
 
+id<MTLDevice> GetMTLDevice(WGPUDevice device) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    return backendDevice->GetMTLDevice();
+}
+
 }  // namespace dawn::native::metal
