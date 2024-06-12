@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/wgsl/common/allowed_features.h"
+#include "src/tint/lang/wgsl/common/validation_mode.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
@@ -100,7 +101,10 @@ class Resolver {
     /// Constructor
     /// @param builder the program builder
     /// @param allowed_features the extensions and features that are allowed to be used
-    explicit Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed_features);
+    /// @param mode the validation mode to use
+    Resolver(ProgramBuilder* builder,
+             const wgsl::AllowedFeatures& allowed_features,
+             wgsl::ValidationMode mode = wgsl::ValidationMode::kFull);
 
     /// Destructor
     ~Resolver();

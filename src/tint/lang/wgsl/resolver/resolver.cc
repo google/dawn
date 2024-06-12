@@ -132,7 +132,9 @@ constexpr size_t kMaxNestDepthOfCompositeType = 255;
 
 }  // namespace
 
-Resolver::Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed_features)
+Resolver::Resolver(ProgramBuilder* builder,
+                   const wgsl::AllowedFeatures& allowed_features,
+                   wgsl::ValidationMode mode)
     : b(*builder),
       diagnostics_(builder->Diagnostics()),
       const_eval_(builder->constants, diagnostics_),
@@ -142,6 +144,7 @@ Resolver::Resolver(ProgramBuilder* builder, const wgsl::AllowedFeatures& allowed
                  sem_,
                  enabled_extensions_,
                  allowed_features_,
+                 mode,
                  atomic_composite_info_,
                  valid_type_storage_layouts_),
       allowed_features_(allowed_features) {}

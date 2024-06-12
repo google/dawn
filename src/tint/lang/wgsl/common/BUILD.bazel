@@ -43,6 +43,7 @@ cc_library(
   ],
   hdrs = [
     "allowed_features.h",
+    "validation_mode.h",
   ],
   deps = [
     "//src/tint/lang/wgsl",

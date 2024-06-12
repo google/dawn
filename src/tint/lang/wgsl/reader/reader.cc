@@ -46,7 +46,7 @@ Program Parse(const Source::File* file, const Options& options) {
     }
     Parser parser(file);
     parser.Parse();
-    return resolver::Resolve(parser.builder(), options.allowed_features);
+    return resolver::Resolve(parser.builder(), options.allowed_features, options.mode);
 }
 
 Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {

@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,27 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_READER_OPTIONS_H_
-#define SRC_TINT_LANG_WGSL_READER_OPTIONS_H_
+#ifndef SRC_TINT_LANG_WGSL_COMMON_VALIDATION_MODE_H_
+#define SRC_TINT_LANG_WGSL_COMMON_VALIDATION_MODE_H_
 
-#include "src/tint/lang/wgsl/common/allowed_features.h"
-#include "src/tint/lang/wgsl/common/validation_mode.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include <cstdint>
 
-namespace tint::wgsl::reader {
+namespace tint::wgsl {
 
-/// Configuration options used for reading WGSL.
-struct Options {
-    /// The extensions and language features that are allowed to be used.
-    AllowedFeatures allowed_features{};
-
-    /// The validation mode to use.
-    ValidationMode mode = ValidationMode::kFull;
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField().
-    TINT_REFLECT(Options, allowed_features, mode);
+/// The validation mode to use for WGSL validation.
+enum class ValidationMode : uint8_t {
+    // Validate against the full WebGPU standard.
+    kFull,
+    // Validate against WebGPU's "compatibility mode".
+    kCompat,
 };
 
-}  // namespace tint::wgsl::reader
+}  // namespace tint::wgsl
 
-#endif  // SRC_TINT_LANG_WGSL_READER_OPTIONS_H_
+#endif  // SRC_TINT_LANG_WGSL_COMMON_VALIDATION_MODE_H_

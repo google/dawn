@@ -162,6 +162,7 @@ Validator::Validator(
     SemHelper& sem,
     const wgsl::Extensions& enabled_extensions,
     const wgsl::AllowedFeatures& allowed_features,
+    const wgsl::ValidationMode mode,
     const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
     Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts)
     : symbols_(builder->Symbols()),
@@ -169,6 +170,7 @@ Validator::Validator(
       sem_(sem),
       enabled_extensions_(enabled_extensions),
       allowed_features_(allowed_features),
+      mode_(mode),
       atomic_composite_info_(atomic_composite_info),
       valid_type_storage_layouts_(valid_type_storage_layouts) {
     // Set default severities for filterable diagnostic rules.
@@ -1026,6 +1028,12 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             }
             break;
         case core::BuiltinValue::kSampleMask:
+            if (mode_ == wgsl::ValidationMode::kCompat) {
+                AddError(attr->builtin->source) << "use of " << style::Attribute("@builtin")
+                                                << style::Code("(", style::Enum(builtin), ")")
+                                                << " is not allowed in compatibility mode";
+                return false;
+            }
             if (stage != ast::PipelineStage::kNone && !(stage == ast::PipelineStage::kFragment)) {
                 is_stage_mismatch = true;
             }
@@ -1035,6 +1043,12 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             }
             break;
         case core::BuiltinValue::kSampleIndex:
+            if (mode_ == wgsl::ValidationMode::kCompat) {
+                AddError(attr->builtin->source) << "use of " << style::Attribute("@builtin")
+                                                << style::Code("(", style::Enum(builtin), ")")
+                                                << " is not allowed in compatibility mode";
+                return false;
+            }
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && is_input)) {
                 is_stage_mismatch = true;

@@ -132,7 +132,7 @@ class TestHelper : public ProgramBuilder {
     /// declared in WGSL.
     std::string FriendlyName(const core::type::Type* type) { return type->FriendlyName(); }
 
-  private:
+  protected:
     std::unique_ptr<Resolver> resolver_;
 };
 

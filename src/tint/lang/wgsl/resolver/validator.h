@@ -37,6 +37,7 @@
 #include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/lang/wgsl/common/allowed_features.h"
+#include "src/tint/lang/wgsl/common/validation_mode.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
 #include "src/tint/utils/containers/hashmap.h"
@@ -118,12 +119,14 @@ class Validator {
     /// @param helper the SEM helper to validate with
     /// @param enabled_extensions all the extensions declared in current module
     /// @param allowed_features the allowed extensions and features
+    /// @param mode the validation mode to use
     /// @param atomic_composite_info atomic composite info of the module
     /// @param valid_type_storage_layouts a set of validated type layouts by address space
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
               const wgsl::Extensions& enabled_extensions,
               const wgsl::AllowedFeatures& allowed_features,
+              wgsl::ValidationMode mode,
               const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
               Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
@@ -626,6 +629,7 @@ class Validator {
     DiagnosticFilterStack diagnostic_filters_;
     const wgsl::Extensions& enabled_extensions_;
     const wgsl::AllowedFeatures& allowed_features_;
+    const wgsl::ValidationMode mode_;
     const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info_;
     Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };
