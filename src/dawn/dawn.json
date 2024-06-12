@@ -108,11 +108,11 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "instance dropped"},
-            {"value": 2, "name": "unavailable"},
-            {"value": 3, "name": "error"},
-            {"value": 4, "name": "unknown"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "unavailable"},
+            {"value": 4, "name": "error"},
+            {"value": 5, "name": "unknown"}
         ]
     },
     "adapter": {
@@ -734,27 +734,27 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "instance dropped"},
-            {"value": 2, "name": "validation error"},
-            {"value": 3, "name": "unknown"},
-            {"value": 4, "name": "device lost"},
-            {"value": 5, "name": "destroyed before callback"},
-            {"value": 6, "name": "unmapped before callback"},
-            {"value": 7, "name": "mapping already pending"},
-            {"value": 8, "name": "offset out of range"},
-            {"value": 9, "name": "size out of range"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "validation error"},
+            {"value": 4, "name": "unknown"},
+            {"value": 5, "name": "device lost"},
+            {"value": 6, "name": "destroyed before callback"},
+            {"value": 7, "name": "unmapped before callback"},
+            {"value": 8, "name": "mapping already pending"},
+            {"value": 9, "name": "offset out of range"},
+            {"value": 10, "name": "size out of range"}
         ]
     },
     "map async status": {
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "instance dropped"},
-            {"value": 2, "name": "error"},
-            {"value": 3, "name": "aborted"},
-            {"value": 4, "name": "unknown"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "error"},
+            {"value": 4, "name": "aborted"},
+            {"value": 5, "name": "unknown"}
         ]
     },
     "buffer map state": {
@@ -1019,11 +1019,11 @@
     "compilation info request status": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "instance dropped"},
-            {"value": 2, "name": "error"},
-            {"value": 3, "name": "device lost"},
-            {"value": 4, "name": "unknown"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "error"},
+            {"value": 4, "name": "device lost"},
+            {"value": 5, "name": "unknown"}
         ]
     },
     "compilation message": {
@@ -1131,11 +1131,11 @@
     "composite alpha mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "auto"},
-            {"value": 1, "name": "opaque"},
-            {"value": 2, "name": "premultiplied"},
-            {"value": 3, "name": "unpremultiplied"},
-            {"value": 4, "name": "inherit"}
+            {"value": 1, "name": "auto"},
+            {"value": 2, "name": "opaque"},
+            {"value": 3, "name": "premultiplied"},
+            {"value": 4, "name": "unpremultiplied"},
+            {"value": 5, "name": "inherit"}
         ]
     },
     "compute pass timestamp writes": {
@@ -1246,13 +1246,13 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "instance dropped"},
-            {"value": 2, "name": "validation error"},
-            {"value": 3, "name": "internal error"},
-            {"value": 4, "name": "device lost"},
-            {"value": 5, "name": "device destroyed"},
-            {"value": 6, "name": "unknown"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "validation error"},
+            {"value": 4, "name": "internal error"},
+            {"value": 5, "name": "device lost"},
+            {"value": 6, "name": "device destroyed"},
+            {"value": 7, "name": "unknown"}
         ]
     },
     "create render pipeline async callback": {
@@ -1727,8 +1727,8 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "instance dropped"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "instance dropped"}
         ]
     },
     "pop error scope callback": {
@@ -1846,12 +1846,12 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "no error"},
-            {"value": 1, "name": "validation"},
-            {"value": 2, "name": "out of memory"},
-            {"value": 3, "name": "internal"},
-            {"value": 4, "name": "unknown"},
-            {"value": 5, "name": "device lost"}
+            {"value": 1, "name": "no error"},
+            {"value": 2, "name": "validation"},
+            {"value": 3, "name": "out of memory"},
+            {"value": 4, "name": "internal"},
+            {"value": 5, "name": "unknown"},
+            {"value": 6, "name": "device lost"}
         ]
     },
     "logging type": {
@@ -1910,10 +1910,10 @@
         "tags": ["dawn"],
         "_comment": "ANGLEs are clockwise rotation degrees and not trigonometric.",
         "values": [
-            {"value": 0, "name": "rotate 0 degrees"},
-            {"value": 1, "name": "rotate 90 degrees"},
-            {"value": 2, "name": "rotate 180 degrees"},
-            {"value": 3, "name": "rotate 270 degrees"}
+            {"value": 1, "name": "rotate 0 degrees"},
+            {"value": 2, "name": "rotate 90 degrees"},
+            {"value": 3, "name": "rotate 180 degrees"},
+            {"value": 4, "name": "rotate 270 degrees"}
         ]
     },
     "external texture descriptor": {
@@ -1943,8 +1943,8 @@
     "status": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "error"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "error"}
         ]
     },
     "shared buffer memory": {
@@ -2629,12 +2629,12 @@
         "_comment": "TODO(crbug.com/dawn/2053): This could possibly be [[nodiscard]].",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "timed out"},
-            {"value": 2, "name": "unsupported timeout"},
-            {"value": 3, "name": "unsupported count"},
-            {"value": 4, "name": "unsupported mixed sources"},
-            {"value": 5, "name": "unknown"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "timed out"},
+            {"value": 3, "name": "unsupported timeout"},
+            {"value": 4, "name": "unsupported count"},
+            {"value": 5, "name": "unsupported mixed sources"},
+            {"value": 6, "name": "unknown"}
         ]
     },
     "future wait info": {
@@ -2807,10 +2807,10 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "fifo"},
-            {"value": 1, "name": "fifo relaxed"},
-            {"value": 2, "name": "immediate"},
-            {"value": 3, "name": "mailbox"}
+            {"value": 1, "name": "fifo"},
+            {"value": 2, "name": "fifo relaxed"},
+            {"value": 3, "name": "immediate"},
+            {"value": 4, "name": "mailbox"}
         ]
     },
     "programmable stage descriptor": {
@@ -3007,11 +3007,11 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "instance dropped"},
-            {"value": 2, "name": "error"},
-            {"value": 3, "name": "unknown"},
-            {"value": 4, "name": "device lost"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "error"},
+            {"value": 4, "name": "unknown"},
+            {"value": 5, "name": "device lost"}
         ]
     },
 
@@ -3458,10 +3458,10 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "instance dropped"},
-            {"value": 2, "name": "error"},
-            {"value": 3, "name": "unknown"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "error"},
+            {"value": 4, "name": "unknown"}
         ]
     },
 
@@ -3918,7 +3918,6 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "invalid", "valid": false},
             {"value": 1, "name": "surface descriptor from metal layer", "tags": ["native"]},
             {"value": 2, "name": "surface descriptor from windows HWND", "tags": ["native"]},
             {"value": 3, "name": "surface descriptor from xlib window", "tags": ["native"]},
@@ -4058,13 +4057,13 @@
     "surface get current texture status": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "success"},
-            {"value": 1, "name": "timeout"},
-            {"value": 2, "name": "outdated"},
-            {"value": 3, "name": "lost"},
-            {"value": 4, "name": "out of memory"},
-            {"value": 5, "name": "device lost"},
-            {"value": 6, "name": "error"}
+            {"value": 1, "name": "success"},
+            {"value": 2, "name": "timeout"},
+            {"value": 3, "name": "outdated"},
+            {"value": 4, "name": "lost"},
+            {"value": 5, "name": "out of memory"},
+            {"value": 6, "name": "device lost"},
+            {"value": 7, "name": "error"}
         ]
     },
     "texture aspect": {

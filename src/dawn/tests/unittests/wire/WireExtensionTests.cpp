@@ -149,7 +149,7 @@ TEST_F(WireExtensionTests, InvalidSType) {
     FlushClient();
 
     WGPUPrimitiveDepthClipControl clientExt = {};
-    clientExt.chain.sType = WGPUSType_Invalid;
+    clientExt.chain.sType = WGPUSType(0);
     clientExt.chain.next = nullptr;
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
@@ -160,7 +160,7 @@ TEST_F(WireExtensionTests, InvalidSType) {
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
+                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType(0));
                 EXPECT_EQ(serverDesc->primitive.nextInChain->next, nullptr);
                 return api.GetNewRenderPipeline();
             }));
@@ -187,7 +187,7 @@ TEST_F(WireExtensionTests, UnknownSType) {
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
+                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType(0));
                 EXPECT_EQ(serverDesc->primitive.nextInChain->next, nullptr);
                 return api.GetNewRenderPipeline();
             }));
@@ -204,7 +204,7 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     FlushClient();
 
     WGPUPrimitiveDepthClipControl clientExt2 = {};
-    clientExt2.chain.sType = WGPUSType_Invalid;
+    clientExt2.chain.sType = WGPUSType(0);
     clientExt2.chain.next = nullptr;
 
     WGPUPrimitiveDepthClipControl clientExt1 = {};
@@ -225,7 +225,7 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
                 EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
                 EXPECT_EQ(ext->unclippedDepth, true);
 
-                EXPECT_EQ(ext->chain.next->sType, WGPUSType_Invalid);
+                EXPECT_EQ(ext->chain.next->sType, WGPUSType(0));
                 EXPECT_EQ(ext->chain.next->next, nullptr);
                 return api.GetNewRenderPipeline();
             }));
@@ -240,7 +240,7 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
+                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType(0));
 
                 const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
                     serverDesc->primitive.nextInChain->next);

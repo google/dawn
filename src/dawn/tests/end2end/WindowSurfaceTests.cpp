@@ -119,7 +119,7 @@ TEST_F(WindowSurfaceInstanceTests, NoChainedDescriptors) {
 // Test that a chained descriptor with a garbage sType produces an error.
 TEST_F(WindowSurfaceInstanceTests, BadChainedDescriptors) {
     wgpu::ChainedStruct chainedDescriptor;
-    chainedDescriptor.sType = wgpu::SType::Invalid;  // The default but we set it for clarity.
+    chainedDescriptor.sType = wgpu::SType(0u);  // The default but we set it for clarity.
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = &chainedDescriptor;

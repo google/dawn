@@ -308,7 +308,7 @@ template <typename... Branches>
 ResultOrError<wgpu::SType> UnpackedPtr<T>::ValidateBranches() const {
     using Validator = detail::BranchesValidator<UnpackedPtr<T>, Branches...>;
 
-    wgpu::SType match = wgpu::SType::Invalid;
+    wgpu::SType match = wgpu::SType(0u);
     if (Validator::Validate(*this, mBitset, match)) {
         return match;
     }

@@ -566,8 +566,6 @@
                         break;
                     }
                 {% endfor %}
-                // Explicitly list the Invalid enum. MSVC complains about no case labels.
-                case WGPUSType_Invalid:
                 default:
                     // Invalid enum. Reserve space just for the transfer header (sType and hasNext).
                     result += WireAlignSizeof<WGPUChainedStructTransfer>();
@@ -602,18 +600,16 @@
                         chainedStruct = chainedStruct->next;
                     } break;
                 {% endfor %}
-                // Explicitly list the Invalid enum. MSVC complains about no case labels.
-                case WGPUSType_Invalid:
                 default: {
                     // Invalid enum. Serialize just the transfer header with Invalid as the sType.
                     // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
-                    if (chainedStruct->sType != WGPUSType_Invalid) {
+                    if (chainedStruct->sType != WGPUSType(0)) {
                         dawn::WarningLog() << "Unknown sType " << chainedStruct->sType << " discarded.";
                     }
 
                     WGPUChainedStructTransfer* transfer;
                     WIRE_TRY(buffer->Next(&transfer));
-                    transfer->sType = WGPUSType_Invalid;
+                    transfer->sType = WGPUSType(0);
                     transfer->hasNext = chainedStruct->next != nullptr;
 
                     // Still move on in case there are valid structs after this.
@@ -658,12 +654,10 @@
                         hasNext = transfer->chain.hasNext;
                     } break;
                 {% endfor %}
-                // Explicitly list the Invalid enum. MSVC complains about no case labels.
-                case WGPUSType_Invalid:
                 default: {
                     // Invalid enum. Deserialize just the transfer header with Invalid as the sType.
                     // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
-                    if (sType != WGPUSType_Invalid) {
+                    if (sType != WGPUSType(0)) {
                         dawn::WarningLog() << "Unknown sType " << sType << " discarded.";
                     }
 
@@ -672,7 +666,7 @@
 
                     {{ChainedStruct}}* outStruct;
                     WIRE_TRY(GetSpace(allocator, 1u, &outStruct));
-                    outStruct->sType = WGPUSType_Invalid;
+                    outStruct->sType = WGPUSType(0);
                     outStruct->next = nullptr;
 
                     // Still move on in case there are valid structs after this.
