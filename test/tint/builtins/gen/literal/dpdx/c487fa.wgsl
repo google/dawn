@@ -36,13 +36,13 @@
 
 
 // fn dpdx(vec<4, f32>) -> vec<4, f32>
-fn dpdx_c487fa() {
+fn dpdx_c487fa() -> vec4<f32>{
   var res: vec4<f32> = dpdx(vec4<f32>(1.f));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {
-  dpdx_c487fa();
+  prevent_dce = dpdx_c487fa();
 }

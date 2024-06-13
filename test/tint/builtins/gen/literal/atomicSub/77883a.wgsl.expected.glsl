@@ -8,18 +8,18 @@ void tint_zero_workgroup_memory(uint local_idx) {
   barrier();
 }
 
+int atomicSub_77883a() {
+  int res = atomicAdd(arg_0, -(1));
+  return res;
+}
+
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   int inner;
 } prevent_dce;
 
-void atomicSub_77883a() {
-  int res = atomicAdd(arg_0, -(1));
-  prevent_dce.inner = res;
-}
-
 void compute_main(uint local_invocation_index) {
   tint_zero_workgroup_memory(local_invocation_index);
-  atomicSub_77883a();
+  prevent_dce.inner = atomicSub_77883a();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

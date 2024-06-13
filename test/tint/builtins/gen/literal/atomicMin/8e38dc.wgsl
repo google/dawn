@@ -37,21 +37,21 @@
 struct SB_RW {
   arg_0: atomic<i32>,
 };
-@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
+@group(0) @binding(1) var<storage, read_write> sb_rw : SB_RW;
 
 // fn atomicMin(ptr<storage, atomic<i32>, read_write>, i32) -> i32
-fn atomicMin_8e38dc() {
+fn atomicMin_8e38dc() -> i32{
   var res: i32 = atomicMin(&sb_rw.arg_0, 1i);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {
-  atomicMin_8e38dc();
+  prevent_dce = atomicMin_8e38dc();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  atomicMin_8e38dc();
+  prevent_dce = atomicMin_8e38dc();
 }

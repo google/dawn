@@ -37,25 +37,32 @@
 @group(1) @binding(0) var arg_0: texture_cube<u32>;
 
 // fn textureDimensions(texture: texture_cube<u32>, level: i32) -> vec2<u32>
-fn textureDimensions_9cd4ca() {
+fn textureDimensions_9cd4ca() -> vec2<u32>{
   var arg_1 = 1i;
   var res: vec2<u32> = textureDimensions(arg_0, arg_1);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureDimensions_9cd4ca();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
 
 @fragment
 fn fragment_main() {
-  textureDimensions_9cd4ca();
+  prevent_dce = textureDimensions_9cd4ca();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  textureDimensions_9cd4ca();
+  prevent_dce = textureDimensions_9cd4ca();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec2<u32>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = textureDimensions_9cd4ca();
+  return out;
 }

@@ -118,35 +118,44 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
   return color;
 }
 
-void textureLoad_1bfdfb(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_3, device float4* const tint_symbol_4) {
+float4 textureLoad_1bfdfb(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_3) {
   uint2 arg_1 = uint2(1u);
   float4 res = textureLoadExternal(tint_symbol_1, tint_symbol_2, arg_1, tint_unpack_vec3_in_composite_1(*(tint_symbol_3)));
-  *(tint_symbol_4) = res;
+  return res;
 }
 
-struct tint_symbol {
-  float4 value [[position]];
+fragment void fragment_main(device float4* tint_symbol_4 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_5 [[texture(0)]], texture2d<float, access::sample> tint_symbol_6 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_7 [[buffer(2)]]) {
+  *(tint_symbol_4) = textureLoad_1bfdfb(tint_symbol_5, tint_symbol_6, tint_symbol_7);
+  return;
+}
+
+kernel void compute_main(device float4* tint_symbol_8 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_9 [[texture(0)]], texture2d<float, access::sample> tint_symbol_10 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_11 [[buffer(2)]]) {
+  *(tint_symbol_8) = textureLoad_1bfdfb(tint_symbol_9, tint_symbol_10, tint_symbol_11);
+  return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float4 prevent_dce;
 };
 
-float4 vertex_main_inner(texture2d<float, access::sample> tint_symbol_5, texture2d<float, access::sample> tint_symbol_6, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_7, device float4* const tint_symbol_8) {
-  textureLoad_1bfdfb(tint_symbol_5, tint_symbol_6, tint_symbol_7, tint_symbol_8);
-  return float4(0.0f);
+struct tint_symbol {
+  float4 prevent_dce [[user(locn0)]] [[flat]];
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner(texture2d<float, access::sample> tint_symbol_12, texture2d<float, access::sample> tint_symbol_13, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_14) {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = textureLoad_1bfdfb(tint_symbol_12, tint_symbol_13, tint_symbol_14);
+  return out;
 }
 
-vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_9 [[texture(0)]], texture2d<float, access::sample> tint_symbol_10 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_11 [[buffer(2)]], device float4* tint_symbol_12 [[buffer(0)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_9, tint_symbol_10, tint_symbol_11, tint_symbol_12);
+vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_15 [[texture(0)]], texture2d<float, access::sample> tint_symbol_16 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_17 [[buffer(2)]]) {
+  VertexOutput const inner_result = vertex_main_inner(tint_symbol_15, tint_symbol_16, tint_symbol_17);
   tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
   return wrapper_result;
-}
-
-fragment void fragment_main(texture2d<float, access::sample> tint_symbol_13 [[texture(0)]], texture2d<float, access::sample> tint_symbol_14 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_15 [[buffer(2)]], device float4* tint_symbol_16 [[buffer(0)]]) {
-  textureLoad_1bfdfb(tint_symbol_13, tint_symbol_14, tint_symbol_15, tint_symbol_16);
-  return;
-}
-
-kernel void compute_main(texture2d<float, access::sample> tint_symbol_17 [[texture(0)]], texture2d<float, access::sample> tint_symbol_18 [[texture(1)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_19 [[buffer(2)]], device float4* tint_symbol_20 [[buffer(0)]]) {
-  textureLoad_1bfdfb(tint_symbol_17, tint_symbol_18, tint_symbol_19, tint_symbol_20);
-  return;
 }
 

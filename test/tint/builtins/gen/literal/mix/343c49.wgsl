@@ -39,12 +39,6 @@
 fn mix_343c49() {
   var res = mix(vec3(1.), vec3(1.), vec3(1.));
 }
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  mix_343c49();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   mix_343c49();
@@ -53,4 +47,16 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   mix_343c49();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  mix_343c49();
+  return out;
 }

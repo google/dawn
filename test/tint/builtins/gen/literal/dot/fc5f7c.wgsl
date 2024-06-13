@@ -36,24 +36,31 @@
 
 
 // fn dot(vec<2, i32>, vec<2, i32>) -> i32
-fn dot_fc5f7c() {
+fn dot_fc5f7c() -> i32{
   var res: i32 = dot(vec2<i32>(1i), vec2<i32>(1i));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  dot_fc5f7c();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {
-  dot_fc5f7c();
+  prevent_dce = dot_fc5f7c();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  dot_fc5f7c();
+  prevent_dce = dot_fc5f7c();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : i32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = dot_fc5f7c();
+  return out;
 }

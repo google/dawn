@@ -1,12 +1,12 @@
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void fwidth_5d1b39() {
+float3 fwidth_5d1b39() {
   float3 arg_0 = (1.0f).xxx;
   float3 res = fwidth(arg_0);
-  prevent_dce.Store3(0u, asuint(res));
+  return res;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 void fragment_main() {
-  fwidth_5d1b39();
+  prevent_dce.Store3(0u, asuint(fwidth_5d1b39()));
   return;
 }

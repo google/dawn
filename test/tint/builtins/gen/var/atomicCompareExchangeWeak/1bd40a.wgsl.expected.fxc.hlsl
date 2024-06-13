@@ -2,7 +2,7 @@ struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
-RWByteAddressBuffer sb_rw : register(u0);
+RWByteAddressBuffer sb_rw : register(u1);
 
 atomic_compare_exchange_result_i32 sb_rwatomicCompareExchangeWeak(uint offset, int compare, int value) {
   atomic_compare_exchange_result_i32 result=(atomic_compare_exchange_result_i32)0;

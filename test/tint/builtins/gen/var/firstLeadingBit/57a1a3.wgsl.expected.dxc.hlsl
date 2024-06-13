@@ -13,37 +13,45 @@ int tint_first_leading_bit(int v) {
   return int((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void firstLeadingBit_57a1a3() {
+int firstLeadingBit_57a1a3() {
   int arg_0 = 1;
   int res = tint_first_leading_bit(arg_0);
-  prevent_dce.Store(0u, asuint(res));
+  return res;
 }
 
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  firstLeadingBit_57a1a3();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
+RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
-  firstLeadingBit_57a1a3();
+  prevent_dce.Store(0u, asuint(firstLeadingBit_57a1a3()));
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  firstLeadingBit_57a1a3();
+  prevent_dce.Store(0u, asuint(firstLeadingBit_57a1a3()));
   return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+struct tint_symbol_1 {
+  nointerpolation int prevent_dce : TEXCOORD0;
+  float4 pos : SV_Position;
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  tint_symbol.prevent_dce = firstLeadingBit_57a1a3();
+  return tint_symbol;
+}
+
+tint_symbol_1 vertex_main() {
+  VertexOutput inner_result = vertex_main_inner();
+  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
+  return wrapper_result;
 }

@@ -1,22 +1,31 @@
-fn countTrailingZeros_42fed6() {
+fn countTrailingZeros_42fed6() -> i32 {
   var res : i32 = countTrailingZeros(1i);
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  countTrailingZeros_42fed6();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {
-  countTrailingZeros_42fed6();
+  prevent_dce = countTrailingZeros_42fed6();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  countTrailingZeros_42fed6();
+  prevent_dce = countTrailingZeros_42fed6();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+  @location(0) @interpolate(flat)
+  prevent_dce : i32,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = countTrailingZeros_42fed6();
+  return out;
 }

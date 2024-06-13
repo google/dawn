@@ -17,22 +17,6 @@ void modf_995934() {
   modf_result_vec4_f16 res = tint_modf(arg_0);
 }
 
-struct tint_symbol {
-  float4 value [[position]];
-};
-
-float4 vertex_main_inner() {
-  modf_995934();
-  return float4(0.0f);
-}
-
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-
 fragment void fragment_main() {
   modf_995934();
   return;
@@ -41,5 +25,27 @@ fragment void fragment_main() {
 kernel void compute_main() {
   modf_995934();
   return;
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
+struct tint_symbol {
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  modf_995934();
+  return out;
+}
+
+vertex tint_symbol vertex_main() {
+  VertexOutput const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
 }
 

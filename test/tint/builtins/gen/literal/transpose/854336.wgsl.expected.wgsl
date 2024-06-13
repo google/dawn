@@ -1,22 +1,31 @@
-fn transpose_854336() {
+fn transpose_854336() -> i32 {
   var res : mat3x3<f32> = transpose(mat3x3<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f));
-  prevent_dce = res;
+  return select(0, 1, (res[0][0] == 0));
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : mat3x3<f32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  transpose_854336();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {
-  transpose_854336();
+  prevent_dce = transpose_854336();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  transpose_854336();
+  prevent_dce = transpose_854336();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+  @location(0) @interpolate(flat)
+  prevent_dce : i32,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = transpose_854336();
+  return out;
 }

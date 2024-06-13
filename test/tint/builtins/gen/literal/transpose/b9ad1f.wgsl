@@ -41,24 +41,32 @@
 enable f16;
 
 // fn transpose(mat<3, 2, f16>) -> mat<2, 3, f16>
-fn transpose_b9ad1f() {
+fn transpose_b9ad1f() -> i32{
   var res: mat2x3<f16> = transpose(mat3x2<f16>(1.h, 1.h, 1.h, 1.h, 1.h, 1.h));
-  prevent_dce = res;
+  return select(0, 1, res[0][0] == 0);
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : mat2x3<f16>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  transpose_b9ad1f();
-  return vec4<f32>();
-}
 
 @fragment
 fn fragment_main() {
-  transpose_b9ad1f();
+  prevent_dce = transpose_b9ad1f();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  transpose_b9ad1f();
+  prevent_dce = transpose_b9ad1f();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : i32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = transpose_b9ad1f();
+  return out;
 }

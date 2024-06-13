@@ -57,7 +57,7 @@ See:
 struct SB_RW {
 {{- $sb_rw_fields -}}
 };
-@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
+@group(0) @binding(1) var<storage, read_write> sb_rw : SB_RW;
 {{    end -}}
 
 {{- /* Generate RO storage buffer parameters */ -}}
@@ -125,7 +125,15 @@ struct UB {
 {{- /* Generate the function that calls the intrinsic */ -}}
 {{- /*newline*/}}
 // {{$.Overload}}
-fn {{$permutation}}() {
+fn {{$permutation}}() {{/* preserve space after () */ -}}
+{{-   if and $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
+{{- /* Matrices can't be assigned to shader outputs, so wrap them in a check and select */ -}}
+{{-     if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat")) -}}
+-> {{template "Type" $overload.ReturnType}}
+{{-     else -}}
+-> i32
+{{-     end -}}
+{{-   end -}}{
 {{/* Build the parameters either as 'var' or inline values */ -}}
 {{-   range $i, $p := $overload.Parameters -}}
 {{-     $class       := Eval "AddressSpace" $p.Type -}}
@@ -156,35 +164,32 @@ fn {{$permutation}}() {
 {{-     if $i -}}, {{end}}{{$args.Get $i -}}
 {{-   end -}}
   );
-{{- /* Ensure the call isn't dead-code eliminated */ -}}
+{{- /* Return the result to be stored somewhere that ensures it isn't dead-code eliminated */ -}}
 {{-   if and $overload.ReturnType (IsDeclarable $overload.ReturnType)}}
-{{-     if IsHostShareable $overload.ReturnType}}
-  prevent_dce = res;
+{{-     if HasPrefix $overload.ReturnType.Target.Name "mat"}}
+  return select(0, 1, res[0][0] == 0);
+{{-     else if IsHostShareable $overload.ReturnType}}
+  return res;
 {{-     else}}
-  prevent_dce = select(0, 1, all(res == {{template "Type" $overload.ReturnType}}()));
+  return select(0, 1, all(res == {{template "Type" $overload.ReturnType}}()));
 {{-     end}}
 {{-   end}}
 }
 
-{{-   if and $overload.ReturnType (IsDeclarable $overload.ReturnType)}}
-{{-     if IsHostShareable $overload.ReturnType}}
-@group(2) @binding(0) var<storage, read_write> prevent_dce : {{template "Type" $overload.ReturnType}};
+{{-   if and (or $overload.CanBeUsedInStage.Fragment $overload.CanBeUsedInStage.Compute) (and $overload.ReturnType (IsDeclarable $overload.ReturnType))}}
+{{-     if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : {{template "Type" $overload.ReturnType -}};
 {{-     else}}
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 {{      end}}
 {{    end}}
-
-{{- if $overload.CanBeUsedInStage.Vertex }}
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  {{$permutation}}();
-  return vec4<f32>();
-}
-{{ end -}}
 
 {{- if $overload.CanBeUsedInStage.Fragment }}
 @fragment
 fn fragment_main() {
+  {{   if and $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
+  prevent_dce = {{/* preserve space after = */ -}}
+  {{-   end -}}
   {{$permutation}}();
 }
 {{ end -}}
@@ -192,7 +197,35 @@ fn fragment_main() {
 {{- if $overload.CanBeUsedInStage.Compute }}
 @compute @workgroup_size(1)
 fn compute_main() {
+  {{   if and $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
+  prevent_dce = {{/* preserve space after = */ -}}
+  {{-   end -}}
   {{$permutation}}();
+}
+{{ end -}}
+
+{{- /* Vertex shader must be moved to the end due to crbug.com/42250109 */ -}}
+{{- if $overload.CanBeUsedInStage.Vertex }}
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+{{-   if and $overload.ReturnType (IsDeclarable $overload.ReturnType)}}
+{{-     if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
+    @location(0) @interpolate(flat) prevent_dce : {{template "Type" $overload.ReturnType}}
+{{-     else}}
+    @location(0) @interpolate(flat) prevent_dce : i32
+{{-     end}}
+{{-  end}}
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  {{   if and $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
+  out.prevent_dce = {{/* preserve space after = */ -}}
+  {{-   end -}}
+  {{$permutation}}();
+  return out;
 }
 {{ end -}}
 

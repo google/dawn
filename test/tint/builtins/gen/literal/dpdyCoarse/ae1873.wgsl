@@ -36,13 +36,13 @@
 
 
 // fn dpdyCoarse(vec<3, f32>) -> vec<3, f32>
-fn dpdyCoarse_ae1873() {
+fn dpdyCoarse_ae1873() -> vec3<f32>{
   var res: vec3<f32> = dpdyCoarse(vec3<f32>(1.f));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @fragment
 fn fragment_main() {
-  dpdyCoarse_ae1873();
+  prevent_dce = dpdyCoarse_ae1873();
 }

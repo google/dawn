@@ -1,22 +1,31 @@
-fn pack4x8unorm_95c456() {
+fn pack4x8unorm_95c456() -> u32 {
   var res : u32 = pack4x8unorm(vec4<f32>(1.0f));
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  pack4x8unorm_95c456();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {
-  pack4x8unorm_95c456();
+  prevent_dce = pack4x8unorm_95c456();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  pack4x8unorm_95c456();
+  prevent_dce = pack4x8unorm_95c456();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+  @location(0) @interpolate(flat)
+  prevent_dce : u32,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = pack4x8unorm_95c456();
+  return out;
 }

@@ -1,12 +1,12 @@
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void dpdx_e263de() {
+float dpdx_e263de() {
   float arg_0 = 1.0f;
   float res = ddx(arg_0);
-  prevent_dce.Store(0u, asuint(res));
+  return res;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 void fragment_main() {
-  dpdx_e263de();
+  prevent_dce.Store(0u, asuint(dpdx_e263de()));
   return;
 }

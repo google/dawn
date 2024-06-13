@@ -41,26 +41,33 @@
 enable f16;
 
 // fn max(vec<2, f16>, vec<2, f16>) -> vec<2, f16>
-fn max_34956e() {
+fn max_34956e() -> vec2<f16>{
   var arg_0 = vec2<f16>(1.h);
   var arg_1 = vec2<f16>(1.h);
   var res: vec2<f16> = max(arg_0, arg_1);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  max_34956e();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
 
 @fragment
 fn fragment_main() {
-  max_34956e();
+  prevent_dce = max_34956e();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  max_34956e();
+  prevent_dce = max_34956e();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec2<f16>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = max_34956e();
+  return out;
 }

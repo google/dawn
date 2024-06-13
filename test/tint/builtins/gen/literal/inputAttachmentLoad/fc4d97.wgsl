@@ -40,13 +40,13 @@ enable chromium_internal_input_attachments;
 @group(1) @binding(0) var arg_0: input_attachment<u32>;
 
 // fn inputAttachmentLoad(input_attachment: input_attachment<u32>) -> vec4<u32>
-fn inputAttachmentLoad_fc4d97() {
+fn inputAttachmentLoad_fc4d97() -> vec4<u32>{
   var res: vec4<u32> = inputAttachmentLoad(arg_0);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
 
 @fragment
 fn fragment_main() {
-  inputAttachmentLoad_fc4d97();
+  prevent_dce = inputAttachmentLoad_fc4d97();
 }

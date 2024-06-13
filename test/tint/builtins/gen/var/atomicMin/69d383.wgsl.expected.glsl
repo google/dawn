@@ -8,19 +8,19 @@ void tint_zero_workgroup_memory(uint local_idx) {
   barrier();
 }
 
+uint atomicMin_69d383() {
+  uint arg_1 = 1u;
+  uint res = atomicMin(arg_0, arg_1);
+  return res;
+}
+
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
-void atomicMin_69d383() {
-  uint arg_1 = 1u;
-  uint res = atomicMin(arg_0, arg_1);
-  prevent_dce.inner = res;
-}
-
 void compute_main(uint local_invocation_index) {
   tint_zero_workgroup_memory(local_invocation_index);
-  atomicMin_69d383();
+  prevent_dce.inner = atomicMin_69d383();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

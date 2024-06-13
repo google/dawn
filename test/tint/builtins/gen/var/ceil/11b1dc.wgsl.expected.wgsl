@@ -3,12 +3,6 @@ fn ceil_11b1dc() {
   var res = ceil(arg_0);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  ceil_11b1dc();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   ceil_11b1dc();
@@ -17,4 +11,17 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   ceil_11b1dc();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  ceil_11b1dc();
+  return out;
 }

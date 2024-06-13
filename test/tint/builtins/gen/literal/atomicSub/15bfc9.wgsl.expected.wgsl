@@ -2,21 +2,21 @@ struct SB_RW {
   arg_0 : atomic<u32>,
 }
 
-@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
+@group(0) @binding(1) var<storage, read_write> sb_rw : SB_RW;
 
-fn atomicSub_15bfc9() {
+fn atomicSub_15bfc9() -> u32 {
   var res : u32 = atomicSub(&(sb_rw.arg_0), 1u);
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {
-  atomicSub_15bfc9();
+  prevent_dce = atomicSub_15bfc9();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  atomicSub_15bfc9();
+  prevent_dce = atomicSub_15bfc9();
 }

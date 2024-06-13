@@ -36,24 +36,31 @@
 
 
 // fn select(vec<3, u32>, vec<3, u32>, vec<3, bool>) -> vec<3, u32>
-fn select_28a27e() {
+fn select_28a27e() -> vec3<u32>{
   var res: vec3<u32> = select(vec3<u32>(1u), vec3<u32>(1u), vec3<bool>(true));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  select_28a27e();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
 
 @fragment
 fn fragment_main() {
-  select_28a27e();
+  prevent_dce = select_28a27e();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  select_28a27e();
+  prevent_dce = select_28a27e();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec3<u32>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = select_28a27e();
+  return out;
 }

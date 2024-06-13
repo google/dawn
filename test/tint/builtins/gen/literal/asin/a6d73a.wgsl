@@ -39,12 +39,6 @@
 fn asin_a6d73a() {
   var res = asin(0.479425538604);
 }
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  asin_a6d73a();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   asin_a6d73a();
@@ -53,4 +47,16 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   asin_a6d73a();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  asin_a6d73a();
+  return out;
 }

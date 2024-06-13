@@ -36,25 +36,32 @@
 
 
 // fn bitcast<T: vec<2, u32>>(vec<2, u32>) -> vec<2, u32>
-fn bitcast_d29765() {
+fn bitcast_d29765() -> vec2<u32>{
   var arg_0 = vec2<u32>(1u);
   var res: vec2<u32> = bitcast<vec2<u32>>(arg_0);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  bitcast_d29765();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
 
 @fragment
 fn fragment_main() {
-  bitcast_d29765();
+  prevent_dce = bitcast_d29765();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  bitcast_d29765();
+  prevent_dce = bitcast_d29765();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec2<u32>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = bitcast_d29765();
+  return out;
 }

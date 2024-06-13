@@ -3,12 +3,6 @@ fn sign_3bdab6() {
   var res = sign(arg_0);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  sign_3bdab6();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   sign_3bdab6();
@@ -17,4 +11,17 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   sign_3bdab6();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  sign_3bdab6();
+  return out;
 }

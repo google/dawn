@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 24
+; Bound: 25
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,35 +16,36 @@
                OpName %fragment_main "fragment_main"
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
       %float = OpTypeFloat 32
 %prevent_dce_block = OpTypeStruct %float
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
-       %void = OpTypeVoid
-          %5 = OpTypeFunction %void
+          %5 = OpTypeFunction %float
     %float_1 = OpConstant %float 1
 %_ptr_Function_float = OpTypePointer Function %float
-         %12 = OpConstantNull %float
+         %11 = OpConstantNull %float
+       %void = OpTypeVoid
+         %16 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
-%dpdy_7f8d84 = OpFunction %void None %5
-          %8 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_float Function %12
-        %res = OpVariable %_ptr_Function_float Function %12
+%dpdy_7f8d84 = OpFunction %float None %5
+          %7 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_float Function %11
+        %res = OpVariable %_ptr_Function_float Function %11
                OpStore %arg_0 %float_1
-         %14 = OpLoad %float %arg_0
-         %13 = OpDPdy %float %14
-               OpStore %res %13
-         %19 = OpAccessChain %_ptr_StorageBuffer_float %prevent_dce %uint_0
-         %20 = OpLoad %float %res
-               OpStore %19 %20
-               OpReturn
+         %13 = OpLoad %float %arg_0
+         %12 = OpDPdy %float %13
+               OpStore %res %12
+         %15 = OpLoad %float %res
+               OpReturnValue %15
                OpFunctionEnd
-%fragment_main = OpFunction %void None %5
-         %22 = OpLabel
-         %23 = OpFunctionCall %void %dpdy_7f8d84
+%fragment_main = OpFunction %void None %16
+         %19 = OpLabel
+         %23 = OpAccessChain %_ptr_StorageBuffer_float %prevent_dce %uint_0
+         %24 = OpFunctionCall %float %dpdy_7f8d84
+               OpStore %23 %24
                OpReturn
                OpFunctionEnd

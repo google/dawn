@@ -37,13 +37,13 @@
 var<workgroup> arg_0: atomic<i32>;
 
 // fn atomicMin(ptr<workgroup, atomic<i32>, read_write>, i32) -> i32
-fn atomicMin_278235() {
+fn atomicMin_278235() -> i32{
   var res: i32 = atomicMin(&arg_0, 1i);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  atomicMin_278235();
+  prevent_dce = atomicMin_278235();
 }

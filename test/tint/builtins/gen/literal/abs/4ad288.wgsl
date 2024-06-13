@@ -36,24 +36,31 @@
 
 
 // fn abs(i32) -> i32
-fn abs_4ad288() {
+fn abs_4ad288() -> i32{
   var res: i32 = abs(1i);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  abs_4ad288();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {
-  abs_4ad288();
+  prevent_dce = abs_4ad288();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  abs_4ad288();
+  prevent_dce = abs_4ad288();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : i32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = abs_4ad288();
+  return out;
 }

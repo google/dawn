@@ -1,11 +1,11 @@
-fn fwidthFine_523fdc() {
+fn fwidthFine_523fdc() -> vec3<f32> {
   var res : vec3<f32> = fwidthFine(vec3<f32>(1.0f));
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @fragment
 fn fragment_main() {
-  fwidthFine_523fdc();
+  prevent_dce = fwidthFine_523fdc();
 }

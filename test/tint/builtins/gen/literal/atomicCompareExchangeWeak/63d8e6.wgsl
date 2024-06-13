@@ -37,7 +37,7 @@
 struct SB_RW {
   arg_0: atomic<u32>,
 };
-@group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
+@group(0) @binding(1) var<storage, read_write> sb_rw : SB_RW;
 
 // fn atomicCompareExchangeWeak(ptr<storage, atomic<u32>, read_write>, u32, u32) -> __atomic_compare_exchange_result<u32>
 fn atomicCompareExchangeWeak_63d8e6() {

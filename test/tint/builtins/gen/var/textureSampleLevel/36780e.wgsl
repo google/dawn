@@ -38,28 +38,35 @@
 @group(1) @binding(1) var arg_1: sampler;
 
 // fn textureSampleLevel(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, level: i32, @const offset: vec2<i32>) -> f32
-fn textureSampleLevel_36780e() {
+fn textureSampleLevel_36780e() -> f32{
   var arg_2 = vec2<f32>(1.f);
   var arg_3 = 1i;
   var arg_4 = 1i;
   const arg_5 = vec2<i32>(1i);
   var res: f32 = textureSampleLevel(arg_0, arg_1, arg_2, arg_3, arg_4, arg_5);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureSampleLevel_36780e();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {
-  textureSampleLevel_36780e();
+  prevent_dce = textureSampleLevel_36780e();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  textureSampleLevel_36780e();
+  prevent_dce = textureSampleLevel_36780e();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : f32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = textureSampleLevel_36780e();
+  return out;
 }

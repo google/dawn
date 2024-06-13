@@ -3,12 +3,6 @@ fn transpose_66fce8() {
   var res = transpose(arg_0);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  transpose_66fce8();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   transpose_66fce8();
@@ -17,4 +11,17 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   transpose_66fce8();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  transpose_66fce8();
+  return out;
 }

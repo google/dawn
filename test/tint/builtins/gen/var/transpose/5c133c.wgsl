@@ -40,12 +40,6 @@ fn transpose_5c133c() {
   const arg_0 = mat4x3(1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.);
   var res = transpose(arg_0);
 }
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  transpose_5c133c();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   transpose_5c133c();
@@ -54,4 +48,16 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   transpose_5c133c();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  transpose_5c133c();
+  return out;
 }

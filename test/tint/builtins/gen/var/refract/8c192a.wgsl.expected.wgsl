@@ -5,12 +5,6 @@ fn refract_8c192a() {
   var res = refract(arg_0, arg_1, arg_2);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  refract_8c192a();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   refract_8c192a();
@@ -19,4 +13,17 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   refract_8c192a();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  refract_8c192a();
+  return out;
 }

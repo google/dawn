@@ -36,24 +36,31 @@
 
 
 // fn reflect(vec<3, f32>, vec<3, f32>) -> vec<3, f32>
-fn reflect_f47fdb() {
+fn reflect_f47fdb() -> vec3<f32>{
   var res: vec3<f32> = reflect(vec3<f32>(1.f), vec3<f32>(1.f));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  reflect_f47fdb();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @fragment
 fn fragment_main() {
-  reflect_f47fdb();
+  prevent_dce = reflect_f47fdb();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  reflect_f47fdb();
+  prevent_dce = reflect_f47fdb();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec3<f32>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = reflect_f47fdb();
+  return out;
 }

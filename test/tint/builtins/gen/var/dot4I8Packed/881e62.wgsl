@@ -37,26 +37,33 @@
 
 // [hlsl-dxc] flags: --hlsl_shader_model 64
 // fn dot4I8Packed(u32, u32) -> i32
-fn dot4I8Packed_881e62() {
+fn dot4I8Packed_881e62() -> i32{
   var arg_0 = 1u;
   var arg_1 = 1u;
   var res: i32 = dot4I8Packed(arg_0, arg_1);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  dot4I8Packed_881e62();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {
-  dot4I8Packed_881e62();
+  prevent_dce = dot4I8Packed_881e62();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  dot4I8Packed_881e62();
+  prevent_dce = dot4I8Packed_881e62();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : i32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = dot4I8Packed_881e62();
+  return out;
 }

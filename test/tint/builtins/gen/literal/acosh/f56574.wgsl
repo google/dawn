@@ -41,24 +41,31 @@
 enable f16;
 
 // fn acosh(vec<3, f16>) -> vec<3, f16>
-fn acosh_f56574() {
+fn acosh_f56574() -> vec3<f16>{
   var res: vec3<f16> = acosh(vec3<f16>(1.5430806348h));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  acosh_f56574();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
 
 @fragment
 fn fragment_main() {
-  acosh_f56574();
+  prevent_dce = acosh_f56574();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  acosh_f56574();
+  prevent_dce = acosh_f56574();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec3<f16>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = acosh_f56574();
+  return out;
 }

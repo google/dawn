@@ -2,17 +2,17 @@
 precision highp float;
 precision highp int;
 
+float dpdx_e263de() {
+  float res = dFdx(1.0f);
+  return res;
+}
+
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   float inner;
 } prevent_dce;
 
-void dpdx_e263de() {
-  float res = dFdx(1.0f);
-  prevent_dce.inner = res;
-}
-
 void fragment_main() {
-  dpdx_e263de();
+  prevent_dce.inner = dpdx_e263de();
 }
 
 void main() {

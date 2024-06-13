@@ -6,21 +6,21 @@ struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+layout(binding = 1, std430) buffer sb_rw_block_ssbo {
   SB_RW inner;
 } sb_rw;
+
+uint atomicLoad_fe6cc3() {
+  uint res = atomicOr(sb_rw.inner.arg_0, 0u);
+  return res;
+}
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
-void atomicLoad_fe6cc3() {
-  uint res = atomicOr(sb_rw.inner.arg_0, 0u);
-  prevent_dce.inner = res;
-}
-
 void fragment_main() {
-  atomicLoad_fe6cc3();
+  prevent_dce.inner = atomicLoad_fe6cc3();
 }
 
 void main() {
@@ -33,21 +33,21 @@ struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+layout(binding = 1, std430) buffer sb_rw_block_ssbo {
   SB_RW inner;
 } sb_rw;
+
+uint atomicLoad_fe6cc3() {
+  uint res = atomicOr(sb_rw.inner.arg_0, 0u);
+  return res;
+}
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
-void atomicLoad_fe6cc3() {
-  uint res = atomicOr(sb_rw.inner.arg_0, 0u);
-  prevent_dce.inner = res;
-}
-
 void compute_main() {
-  atomicLoad_fe6cc3();
+  prevent_dce.inner = atomicLoad_fe6cc3();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

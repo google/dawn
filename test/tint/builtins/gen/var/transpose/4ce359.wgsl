@@ -36,25 +36,33 @@
 
 
 // fn transpose(mat<2, 4, f32>) -> mat<4, 2, f32>
-fn transpose_4ce359() {
+fn transpose_4ce359() -> i32{
   var arg_0 = mat2x4<f32>(1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f);
   var res: mat4x2<f32> = transpose(arg_0);
-  prevent_dce = res;
+  return select(0, 1, res[0][0] == 0);
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : mat4x2<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  transpose_4ce359();
-  return vec4<f32>();
-}
 
 @fragment
 fn fragment_main() {
-  transpose_4ce359();
+  prevent_dce = transpose_4ce359();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  transpose_4ce359();
+  prevent_dce = transpose_4ce359();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : i32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = transpose_4ce359();
+  return out;
 }

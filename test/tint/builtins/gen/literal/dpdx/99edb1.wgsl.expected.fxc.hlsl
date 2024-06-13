@@ -1,11 +1,11 @@
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void dpdx_99edb1() {
+float2 dpdx_99edb1() {
   float2 res = ddx((1.0f).xx);
-  prevent_dce.Store2(0u, asuint(res));
+  return res;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 void fragment_main() {
-  dpdx_99edb1();
+  prevent_dce.Store2(0u, asuint(dpdx_99edb1()));
   return;
 }

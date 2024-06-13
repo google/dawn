@@ -1,36 +1,45 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void min_c73147(device int* const tint_symbol_1) {
+int min_c73147() {
   int arg_0 = 1;
   int arg_1 = 1;
   int res = min(arg_0, arg_1);
-  *(tint_symbol_1) = res;
+  return res;
 }
 
-struct tint_symbol {
-  float4 value [[position]];
+fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = min_c73147();
+  return;
+}
+
+kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
+  *(tint_symbol_2) = min_c73147();
+  return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
 };
 
-float4 vertex_main_inner(device int* const tint_symbol_2) {
-  min_c73147(tint_symbol_2);
-  return float4(0.0f);
+struct tint_symbol {
+  int prevent_dce [[user(locn0)]] [[flat]];
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = min_c73147();
+  return out;
 }
 
-vertex tint_symbol vertex_main(device int* tint_symbol_3 [[buffer(0)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_3);
+vertex tint_symbol vertex_main() {
+  VertexOutput const inner_result = vertex_main_inner();
   tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
   return wrapper_result;
-}
-
-fragment void fragment_main(device int* tint_symbol_4 [[buffer(0)]]) {
-  min_c73147(tint_symbol_4);
-  return;
-}
-
-kernel void compute_main(device int* tint_symbol_5 [[buffer(0)]]) {
-  min_c73147(tint_symbol_5);
-  return;
 }
 

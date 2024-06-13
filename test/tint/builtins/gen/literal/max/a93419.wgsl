@@ -36,24 +36,31 @@
 
 
 // fn max(vec<4, f32>, vec<4, f32>) -> vec<4, f32>
-fn max_a93419() {
+fn max_a93419() -> vec4<f32>{
   var res: vec4<f32> = max(vec4<f32>(1.f), vec4<f32>(1.f));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  max_a93419();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {
-  max_a93419();
+  prevent_dce = max_a93419();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  max_a93419();
+  prevent_dce = max_a93419();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec4<f32>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = max_a93419();
+  return out;
 }

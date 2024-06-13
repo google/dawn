@@ -41,12 +41,6 @@ fn cross_1d7933() {
   const arg_1 = vec3(1.);
   var res = cross(arg_0, arg_1);
 }
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  cross_1d7933();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   cross_1d7933();
@@ -55,4 +49,16 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   cross_1d7933();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  cross_1d7933();
+  return out;
 }

@@ -1,25 +1,34 @@
 enable f16;
 
-fn fract_181aa9() {
+fn fract_181aa9() -> vec2<f16> {
   var arg_0 = vec2<f16>(1.25h);
   var res : vec2<f16> = fract(arg_0);
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  fract_181aa9();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
 
 @fragment
 fn fragment_main() {
-  fract_181aa9();
+  prevent_dce = fract_181aa9();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  fract_181aa9();
+  prevent_dce = fract_181aa9();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+  @location(0) @interpolate(flat)
+  prevent_dce : vec2<f16>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = fract_181aa9();
+  return out;
 }

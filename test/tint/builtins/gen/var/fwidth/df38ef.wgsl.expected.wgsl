@@ -1,12 +1,12 @@
-fn fwidth_df38ef() {
+fn fwidth_df38ef() -> f32 {
   var arg_0 = 1.0f;
   var res : f32 = fwidth(arg_0);
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {
-  fwidth_df38ef();
+  prevent_dce = fwidth_df38ef();
 }

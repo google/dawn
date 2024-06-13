@@ -36,24 +36,31 @@
 
 
 // fn distance(vec<4, f32>, vec<4, f32>) -> f32
-fn distance_9646ea() {
+fn distance_9646ea() -> f32{
   var res: f32 = distance(vec4<f32>(1.f), vec4<f32>(1.f));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  distance_9646ea();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {
-  distance_9646ea();
+  prevent_dce = distance_9646ea();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  distance_9646ea();
+  prevent_dce = distance_9646ea();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : f32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = distance_9646ea();
+  return out;
 }

@@ -38,16 +38,16 @@
 @group(1) @binding(1) var arg_1: sampler;
 
 // fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32, @const offset: vec2<i32>) -> vec4<f32>
-fn textureSampleBias_a161cf() {
+fn textureSampleBias_a161cf() -> vec4<f32>{
   var arg_2 = vec2<f32>(1.f);
   var arg_3 = 1.f;
   const arg_4 = vec2<i32>(1i);
   var res: vec4<f32> = textureSampleBias(arg_0, arg_1, arg_2, arg_3, arg_4);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {
-  textureSampleBias_a161cf();
+  prevent_dce = textureSampleBias_a161cf();
 }

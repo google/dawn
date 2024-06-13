@@ -38,13 +38,13 @@
 @group(1) @binding(1) var arg_1: sampler_comparison;
 
 // fn textureSampleCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
-fn textureSampleCompare_63fb83() {
+fn textureSampleCompare_63fb83() -> f32{
   var res: f32 = textureSampleCompare(arg_0, arg_1, vec3<f32>(1.f), 1.f);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {
-  textureSampleCompare_63fb83();
+  prevent_dce = textureSampleCompare_63fb83();
 }

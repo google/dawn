@@ -3,12 +3,6 @@ fn frexp_6fb3ad() {
   var res = frexp(arg_0);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  frexp_6fb3ad();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   frexp_6fb3ad();
@@ -17,4 +11,17 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   frexp_6fb3ad();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  frexp_6fb3ad();
+  return out;
 }

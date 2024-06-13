@@ -1,34 +1,42 @@
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void abs_5ae4fe() {
+vector<float16_t, 2> abs_5ae4fe() {
   vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = abs(arg_0);
-  prevent_dce.Store<vector<float16_t, 2> >(0u, res);
+  return res;
 }
 
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  abs_5ae4fe();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
+RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
-  abs_5ae4fe();
+  prevent_dce.Store<vector<float16_t, 2> >(0u, abs_5ae4fe());
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  abs_5ae4fe();
+  prevent_dce.Store<vector<float16_t, 2> >(0u, abs_5ae4fe());
   return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  vector<float16_t, 2> prevent_dce;
+};
+struct tint_symbol_1 {
+  nointerpolation vector<float16_t, 2> prevent_dce : TEXCOORD0;
+  float4 pos : SV_Position;
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  tint_symbol.prevent_dce = abs_5ae4fe();
+  return tint_symbol;
+}
+
+tint_symbol_1 vertex_main() {
+  VertexOutput inner_result = vertex_main_inner();
+  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
+  return wrapper_result;
 }

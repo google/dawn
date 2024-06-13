@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 26
+; Bound: 27
 ; Schema: 0
                OpCapability Shader
                OpCapability GroupNonUniformBallot
@@ -17,37 +17,38 @@
                OpName %compute_main "compute_main"
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
         %int = OpTypeInt 32 1
 %prevent_dce_block = OpTypeStruct %int
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
-       %void = OpTypeVoid
-          %5 = OpTypeFunction %void
+          %5 = OpTypeFunction %int
       %int_1 = OpConstant %int 1
 %_ptr_Function_int = OpTypePointer Function %int
-         %12 = OpConstantNull %int
+         %11 = OpConstantNull %int
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
      %uint_3 = OpConstant %uint 3
+       %void = OpTypeVoid
+         %19 = OpTypeFunction %void
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-%subgroupBroadcast_1d79c7 = OpFunction %void None %5
-          %8 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_int Function %12
-        %res = OpVariable %_ptr_Function_int Function %12
+%subgroupBroadcast_1d79c7 = OpFunction %int None %5
+          %7 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_int Function %11
+        %res = OpVariable %_ptr_Function_int Function %11
                OpStore %arg_0 %int_1
-         %14 = OpLoad %int %arg_0
-         %13 = OpGroupNonUniformBroadcast %int %uint_3 %14 %uint_1
-               OpStore %res %13
-         %21 = OpAccessChain %_ptr_StorageBuffer_int %prevent_dce %uint_0
-         %22 = OpLoad %int %res
-               OpStore %21 %22
-               OpReturn
+         %13 = OpLoad %int %arg_0
+         %12 = OpGroupNonUniformBroadcast %int %uint_3 %13 %uint_1
+               OpStore %res %12
+         %18 = OpLoad %int %res
+               OpReturnValue %18
                OpFunctionEnd
-%compute_main = OpFunction %void None %5
-         %24 = OpLabel
-         %25 = OpFunctionCall %void %subgroupBroadcast_1d79c7
+%compute_main = OpFunction %void None %19
+         %22 = OpLabel
+         %25 = OpAccessChain %_ptr_StorageBuffer_int %prevent_dce %uint_0
+         %26 = OpFunctionCall %int %subgroupBroadcast_1d79c7
+               OpStore %25 %26
                OpReturn
                OpFunctionEnd

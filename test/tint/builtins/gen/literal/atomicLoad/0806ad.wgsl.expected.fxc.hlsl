@@ -1,4 +1,4 @@
-RWByteAddressBuffer sb_rw : register(u0);
+RWByteAddressBuffer sb_rw : register(u1);
 
 int sb_rwatomicLoad(uint offset) {
   int value = 0;
@@ -7,20 +7,20 @@ int sb_rwatomicLoad(uint offset) {
 }
 
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void atomicLoad_0806ad() {
+int atomicLoad_0806ad() {
   int res = sb_rwatomicLoad(0u);
-  prevent_dce.Store(0u, asuint(res));
+  return res;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 void fragment_main() {
-  atomicLoad_0806ad();
+  prevent_dce.Store(0u, asuint(atomicLoad_0806ad()));
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  atomicLoad_0806ad();
+  prevent_dce.Store(0u, asuint(atomicLoad_0806ad()));
   return;
 }

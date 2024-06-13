@@ -65,34 +65,43 @@ struct ExternalTextureParams {
   float2 plane1CoordFactor;
 };
 
-void textureDimensions_cdc6c9(const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_1, device uint2* const tint_symbol_2) {
+uint2 textureDimensions_cdc6c9(const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_1) {
   uint2 res = ((*(tint_symbol_1)).visibleSize + uint2(1u));
-  *(tint_symbol_2) = res;
+  return res;
 }
 
-struct tint_symbol {
-  float4 value [[position]];
+fragment void fragment_main(device uint2* tint_symbol_2 [[buffer(0)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_3 [[buffer(2)]]) {
+  *(tint_symbol_2) = textureDimensions_cdc6c9(tint_symbol_3);
+  return;
+}
+
+kernel void compute_main(device uint2* tint_symbol_4 [[buffer(0)]], const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_5 [[buffer(2)]]) {
+  *(tint_symbol_4) = textureDimensions_cdc6c9(tint_symbol_5);
+  return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  uint2 prevent_dce;
 };
 
-float4 vertex_main_inner(const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_3, device uint2* const tint_symbol_4) {
-  textureDimensions_cdc6c9(tint_symbol_3, tint_symbol_4);
-  return float4(0.0f);
+struct tint_symbol {
+  uint2 prevent_dce [[user(locn0)]] [[flat]];
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner(const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_6) {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = textureDimensions_cdc6c9(tint_symbol_6);
+  return out;
 }
 
-vertex tint_symbol vertex_main(const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_5 [[buffer(2)]], device uint2* tint_symbol_6 [[buffer(0)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_5, tint_symbol_6);
+vertex tint_symbol vertex_main(const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_7 [[buffer(2)]]) {
+  VertexOutput const inner_result = vertex_main_inner(tint_symbol_7);
   tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
   return wrapper_result;
-}
-
-fragment void fragment_main(const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_7 [[buffer(2)]], device uint2* tint_symbol_8 [[buffer(0)]]) {
-  textureDimensions_cdc6c9(tint_symbol_7, tint_symbol_8);
-  return;
-}
-
-kernel void compute_main(const constant ExternalTextureParams_tint_packed_vec3* tint_symbol_9 [[buffer(2)]], device uint2* tint_symbol_10 [[buffer(0)]]) {
-  textureDimensions_cdc6c9(tint_symbol_9, tint_symbol_10);
-  return;
 }
 

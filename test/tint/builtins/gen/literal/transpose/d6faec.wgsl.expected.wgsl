@@ -1,24 +1,33 @@
 enable f16;
 
-fn transpose_d6faec() {
+fn transpose_d6faec() -> i32 {
   var res : mat3x2<f16> = transpose(mat2x3<f16>(1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h));
-  prevent_dce = res;
+  return select(0, 1, (res[0][0] == 0));
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : mat3x2<f16>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  transpose_d6faec();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {
-  transpose_d6faec();
+  prevent_dce = transpose_d6faec();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  transpose_d6faec();
+  prevent_dce = transpose_d6faec();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+  @location(0) @interpolate(flat)
+  prevent_dce : i32,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = transpose_d6faec();
+  return out;
 }

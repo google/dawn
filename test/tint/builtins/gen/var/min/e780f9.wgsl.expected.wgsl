@@ -1,26 +1,35 @@
 enable f16;
 
-fn min_e780f9() {
+fn min_e780f9() -> vec2<f16> {
   var arg_0 = vec2<f16>(1.0h);
   var arg_1 = vec2<f16>(1.0h);
   var res : vec2<f16> = min(arg_0, arg_1);
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  min_e780f9();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
 
 @fragment
 fn fragment_main() {
-  min_e780f9();
+  prevent_dce = min_e780f9();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  min_e780f9();
+  prevent_dce = min_e780f9();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+  @location(0) @interpolate(flat)
+  prevent_dce : vec2<f16>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = min_e780f9();
+  return out;
 }

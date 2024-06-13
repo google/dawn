@@ -1,4 +1,4 @@
-RWByteAddressBuffer sb_rw : register(u0);
+RWByteAddressBuffer sb_rw : register(u1);
 
 uint sb_rwatomicOr(uint offset, uint value) {
   uint original_value = 0;
@@ -7,21 +7,21 @@ uint sb_rwatomicOr(uint offset, uint value) {
 }
 
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void atomicOr_5e95d4() {
+uint atomicOr_5e95d4() {
   uint arg_1 = 1u;
   uint res = sb_rwatomicOr(0u, arg_1);
-  prevent_dce.Store(0u, asuint(res));
+  return res;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 void fragment_main() {
-  atomicOr_5e95d4();
+  prevent_dce.Store(0u, asuint(atomicOr_5e95d4()));
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  atomicOr_5e95d4();
+  prevent_dce.Store(0u, asuint(atomicOr_5e95d4()));
   return;
 }

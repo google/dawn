@@ -38,24 +38,31 @@
 @group(1) @binding(1) var arg_1: sampler;
 
 // fn textureSampleLevel(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, level: f32) -> vec4<f32>
-fn textureSampleLevel_0bdd9a() {
+fn textureSampleLevel_0bdd9a() -> vec4<f32>{
   var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec3<f32>(1.f), 1i, 1.f);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureSampleLevel_0bdd9a();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {
-  textureSampleLevel_0bdd9a();
+  prevent_dce = textureSampleLevel_0bdd9a();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  textureSampleLevel_0bdd9a();
+  prevent_dce = textureSampleLevel_0bdd9a();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec4<f32>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = textureSampleLevel_0bdd9a();
+  return out;
 }

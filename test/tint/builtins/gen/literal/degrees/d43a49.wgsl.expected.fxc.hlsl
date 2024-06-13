@@ -2,22 +2,6 @@ void degrees_d43a49() {
   float4 res = (57.295780181884765625f).xxxx;
 }
 
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  degrees_d43a49();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-
 void fragment_main() {
   degrees_d43a49();
   return;
@@ -27,4 +11,25 @@ void fragment_main() {
 void compute_main() {
   degrees_d43a49();
   return;
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+struct tint_symbol_1 {
+  float4 pos : SV_Position;
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  degrees_d43a49();
+  return tint_symbol;
+}
+
+tint_symbol_1 vertex_main() {
+  VertexOutput inner_result = vertex_main_inner();
+  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
 }

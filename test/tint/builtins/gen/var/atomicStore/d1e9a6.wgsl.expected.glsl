@@ -6,7 +6,7 @@ struct SB_RW {
   int arg_0;
 };
 
-layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+layout(binding = 1, std430) buffer sb_rw_block_ssbo {
   SB_RW inner;
 } sb_rw;
 
@@ -29,7 +29,7 @@ struct SB_RW {
   int arg_0;
 };
 
-layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+layout(binding = 1, std430) buffer sb_rw_block_ssbo {
   SB_RW inner;
 } sb_rw;
 

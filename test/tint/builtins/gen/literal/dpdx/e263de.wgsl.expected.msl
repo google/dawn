@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void dpdx_e263de(device float* const tint_symbol) {
+float dpdx_e263de() {
   float res = dfdx(1.0f);
-  *(tint_symbol) = res;
+  return res;
 }
 
-fragment void fragment_main(device float* tint_symbol_1 [[buffer(0)]]) {
-  dpdx_e263de(tint_symbol_1);
+fragment void fragment_main(device float* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = dpdx_e263de();
   return;
 }
 

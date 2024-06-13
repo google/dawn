@@ -38,24 +38,31 @@
 @group(1) @binding(2) var arg_2: sampler;
 
 // fn textureGather(@const component: u32, texture: texture_cube_array<u32>, sampler: sampler, coords: vec3<f32>, array_index: u32) -> vec4<u32>
-fn textureGather_e2acac() {
+fn textureGather_e2acac() -> vec4<u32>{
   var res: vec4<u32> = textureGather(1u, arg_1, arg_2, vec3<f32>(1.f), 1u);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureGather_e2acac();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
 
 @fragment
 fn fragment_main() {
-  textureGather_e2acac();
+  prevent_dce = textureGather_e2acac();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  textureGather_e2acac();
+  prevent_dce = textureGather_e2acac();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec4<u32>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = textureGather_e2acac();
+  return out;
 }

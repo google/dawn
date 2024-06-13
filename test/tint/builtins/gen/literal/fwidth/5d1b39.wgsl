@@ -36,13 +36,13 @@
 
 
 // fn fwidth(vec<3, f32>) -> vec<3, f32>
-fn fwidth_5d1b39() {
+fn fwidth_5d1b39() -> vec3<f32>{
   var res: vec3<f32> = fwidth(vec3<f32>(1.f));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @fragment
 fn fragment_main() {
-  fwidth_5d1b39();
+  prevent_dce = fwidth_5d1b39();
 }

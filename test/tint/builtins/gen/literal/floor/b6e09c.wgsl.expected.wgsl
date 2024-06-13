@@ -1,24 +1,33 @@
 enable f16;
 
-fn floor_b6e09c() {
+fn floor_b6e09c() -> f16 {
   var res : f16 = floor(1.5h);
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f16;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  floor_b6e09c();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {
-  floor_b6e09c();
+  prevent_dce = floor_b6e09c();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  floor_b6e09c();
+  prevent_dce = floor_b6e09c();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+  @location(0) @interpolate(flat)
+  prevent_dce : f16,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = floor_b6e09c();
+  return out;
 }

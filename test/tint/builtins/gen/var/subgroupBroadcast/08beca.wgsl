@@ -38,15 +38,15 @@
 enable chromium_experimental_subgroups;
 
 // fn subgroupBroadcast(value: f32, @const sourceLaneIndex: u32) -> f32
-fn subgroupBroadcast_08beca() {
+fn subgroupBroadcast_08beca() -> f32{
   var arg_0 = 1.f;
   const arg_1 = 1u;
   var res: f32 = subgroupBroadcast(arg_0, arg_1);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  subgroupBroadcast_08beca();
+  prevent_dce = subgroupBroadcast_08beca();
 }

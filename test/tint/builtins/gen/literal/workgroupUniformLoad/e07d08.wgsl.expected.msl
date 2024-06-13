@@ -15,19 +15,19 @@ half tint_workgroupUniformLoad(threadgroup half* const p) {
   return result;
 }
 
-void workgroupUniformLoad_e07d08(threadgroup half* const tint_symbol_1, device half* const tint_symbol_2) {
+half workgroupUniformLoad_e07d08(threadgroup half* const tint_symbol_1) {
   half res = tint_workgroupUniformLoad(tint_symbol_1);
-  *(tint_symbol_2) = res;
+  return res;
 }
 
-void compute_main_inner(uint local_invocation_index, threadgroup half* const tint_symbol_3, device half* const tint_symbol_4) {
-  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_3);
-  workgroupUniformLoad_e07d08(tint_symbol_3, tint_symbol_4);
+void compute_main_inner(uint local_invocation_index, threadgroup half* const tint_symbol_2, device half* const tint_symbol_3) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_2);
+  *(tint_symbol_3) = workgroupUniformLoad_e07d08(tint_symbol_2);
 }
 
-kernel void compute_main(device half* tint_symbol_6 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup half tint_symbol_5;
-  compute_main_inner(local_invocation_index, &(tint_symbol_5), tint_symbol_6);
+kernel void compute_main(device half* tint_symbol_5 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup half tint_symbol_4;
+  compute_main_inner(local_invocation_index, &(tint_symbol_4), tint_symbol_5);
   return;
 }
 

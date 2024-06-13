@@ -41,25 +41,32 @@
 enable f16;
 
 // fn cosh(vec<3, f16>) -> vec<3, f16>
-fn cosh_b1b8a0() {
+fn cosh_b1b8a0() -> vec3<f16>{
   var arg_0 = vec3<f16>(0.h);
   var res: vec3<f16> = cosh(arg_0);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  cosh_b1b8a0();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
 
 @fragment
 fn fragment_main() {
-  cosh_b1b8a0();
+  prevent_dce = cosh_b1b8a0();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  cosh_b1b8a0();
+  prevent_dce = cosh_b1b8a0();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec3<f16>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = cosh_b1b8a0();
+  return out;
 }

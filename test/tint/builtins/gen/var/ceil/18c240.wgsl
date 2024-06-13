@@ -41,25 +41,32 @@
 enable f16;
 
 // fn ceil(vec<2, f16>) -> vec<2, f16>
-fn ceil_18c240() {
+fn ceil_18c240() -> vec2<f16>{
   var arg_0 = vec2<f16>(1.5h);
   var res: vec2<f16> = ceil(arg_0);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  ceil_18c240();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
 
 @fragment
 fn fragment_main() {
-  ceil_18c240();
+  prevent_dce = ceil_18c240();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  ceil_18c240();
+  prevent_dce = ceil_18c240();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec2<f16>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = ceil_18c240();
+  return out;
 }

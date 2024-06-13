@@ -8,36 +8,45 @@ int tint_dot4I8Packed(uint param_0, uint param_1) {
   return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] * vec2[3];
 }
 
-void dot4I8Packed_881e62(device int* const tint_symbol_1) {
+int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   int res = tint_dot4I8Packed(arg_0, arg_1);
-  *(tint_symbol_1) = res;
+  return res;
 }
 
-struct tint_symbol {
-  float4 value [[position]];
+fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = dot4I8Packed_881e62();
+  return;
+}
+
+kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
+  *(tint_symbol_2) = dot4I8Packed_881e62();
+  return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
 };
 
-float4 vertex_main_inner(device int* const tint_symbol_2) {
-  dot4I8Packed_881e62(tint_symbol_2);
-  return float4(0.0f);
+struct tint_symbol {
+  int prevent_dce [[user(locn0)]] [[flat]];
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = dot4I8Packed_881e62();
+  return out;
 }
 
-vertex tint_symbol vertex_main(device int* tint_symbol_3 [[buffer(0)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_3);
+vertex tint_symbol vertex_main() {
+  VertexOutput const inner_result = vertex_main_inner();
   tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
   return wrapper_result;
-}
-
-fragment void fragment_main(device int* tint_symbol_4 [[buffer(0)]]) {
-  dot4I8Packed_881e62(tint_symbol_4);
-  return;
-}
-
-kernel void compute_main(device int* tint_symbol_5 [[buffer(0)]]) {
-  dot4I8Packed_881e62(tint_symbol_5);
-  return;
 }
 

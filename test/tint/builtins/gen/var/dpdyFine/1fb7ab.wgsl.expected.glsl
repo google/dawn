@@ -2,19 +2,19 @@
 precision highp float;
 precision highp int;
 
+vec3 dpdyFine_1fb7ab() {
+  vec3 arg_0 = vec3(1.0f);
+  vec3 res = dFdy(arg_0);
+  return res;
+}
+
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
   uint pad;
 } prevent_dce;
 
-void dpdyFine_1fb7ab() {
-  vec3 arg_0 = vec3(1.0f);
-  vec3 res = dFdy(arg_0);
-  prevent_dce.inner = res;
-}
-
 void fragment_main() {
-  dpdyFine_1fb7ab();
+  prevent_dce.inner = dpdyFine_1fb7ab();
 }
 
 void main() {

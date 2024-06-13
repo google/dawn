@@ -16,35 +16,44 @@ uint3 tint_first_trailing_bit(uint3 v) {
   return uint3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
-void firstTrailingBit_cb51ce(device packed_uint3* const tint_symbol_1) {
+uint3 firstTrailingBit_cb51ce() {
   uint3 arg_0 = uint3(1u);
   uint3 res = tint_first_trailing_bit(arg_0);
-  *(tint_symbol_1) = packed_uint3(res);
+  return res;
 }
 
-struct tint_symbol {
-  float4 value [[position]];
+fragment void fragment_main(device packed_uint3* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = packed_uint3(firstTrailingBit_cb51ce());
+  return;
+}
+
+kernel void compute_main(device packed_uint3* tint_symbol_2 [[buffer(0)]]) {
+  *(tint_symbol_2) = packed_uint3(firstTrailingBit_cb51ce());
+  return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  uint3 prevent_dce;
 };
 
-float4 vertex_main_inner(device packed_uint3* const tint_symbol_2) {
-  firstTrailingBit_cb51ce(tint_symbol_2);
-  return float4(0.0f);
+struct tint_symbol {
+  uint3 prevent_dce [[user(locn0)]] [[flat]];
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = firstTrailingBit_cb51ce();
+  return out;
 }
 
-vertex tint_symbol vertex_main(device packed_uint3* tint_symbol_3 [[buffer(0)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_3);
+vertex tint_symbol vertex_main() {
+  VertexOutput const inner_result = vertex_main_inner();
   tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
   return wrapper_result;
-}
-
-fragment void fragment_main(device packed_uint3* tint_symbol_4 [[buffer(0)]]) {
-  firstTrailingBit_cb51ce(tint_symbol_4);
-  return;
-}
-
-kernel void compute_main(device packed_uint3* tint_symbol_5 [[buffer(0)]]) {
-  firstTrailingBit_cb51ce(tint_symbol_5);
-  return;
 }
 

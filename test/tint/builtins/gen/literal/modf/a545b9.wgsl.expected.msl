@@ -10,22 +10,6 @@ void modf_a545b9() {
   modf_result_vec2_f16 res = modf_result_vec2_f16{.fract=half2(-0.5h), .whole=half2(-1.0h)};
 }
 
-struct tint_symbol {
-  float4 value [[position]];
-};
-
-float4 vertex_main_inner() {
-  modf_a545b9();
-  return float4(0.0f);
-}
-
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-
 fragment void fragment_main() {
   modf_a545b9();
   return;
@@ -34,5 +18,27 @@ fragment void fragment_main() {
 kernel void compute_main() {
   modf_a545b9();
   return;
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
+struct tint_symbol {
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  modf_a545b9();
+  return out;
+}
+
+vertex tint_symbol vertex_main() {
+  VertexOutput const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
 }
 

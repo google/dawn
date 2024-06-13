@@ -36,24 +36,31 @@
 
 
 // fn bitcast<T: i32>(f32) -> i32
-fn bitcast_16cba4() {
+fn bitcast_16cba4() -> i32{
   var res: i32 = bitcast<i32>(1.f);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  bitcast_16cba4();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {
-  bitcast_16cba4();
+  prevent_dce = bitcast_16cba4();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  bitcast_16cba4();
+  prevent_dce = bitcast_16cba4();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : i32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = bitcast_16cba4();
+  return out;
 }

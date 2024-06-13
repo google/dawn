@@ -41,24 +41,31 @@
 enable f16;
 
 // fn ldexp(f16, ia) -> f16
-fn ldexp_082c1f() {
+fn ldexp_082c1f() -> f16{
   var res: f16 = ldexp(1.h, 1);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f16;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  ldexp_082c1f();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {
-  ldexp_082c1f();
+  prevent_dce = ldexp_082c1f();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  ldexp_082c1f();
+  prevent_dce = ldexp_082c1f();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : f16
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = ldexp_082c1f();
+  return out;
 }

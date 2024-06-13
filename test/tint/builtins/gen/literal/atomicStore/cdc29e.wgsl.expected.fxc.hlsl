@@ -1,4 +1,4 @@
-RWByteAddressBuffer sb_rw : register(u0);
+RWByteAddressBuffer sb_rw : register(u1);
 
 void sb_rwatomicStore(uint offset, uint value) {
   uint ignored;

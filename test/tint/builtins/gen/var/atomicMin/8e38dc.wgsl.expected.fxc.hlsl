@@ -1,4 +1,4 @@
-RWByteAddressBuffer sb_rw : register(u0);
+RWByteAddressBuffer sb_rw : register(u1);
 
 int sb_rwatomicMin(uint offset, int value) {
   int original_value = 0;
@@ -7,21 +7,21 @@ int sb_rwatomicMin(uint offset, int value) {
 }
 
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void atomicMin_8e38dc() {
+int atomicMin_8e38dc() {
   int arg_1 = 1;
   int res = sb_rwatomicMin(0u, arg_1);
-  prevent_dce.Store(0u, asuint(res));
+  return res;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 void fragment_main() {
-  atomicMin_8e38dc();
+  prevent_dce.Store(0u, asuint(atomicMin_8e38dc()));
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  atomicMin_8e38dc();
+  prevent_dce.Store(0u, asuint(atomicMin_8e38dc()));
   return;
 }

@@ -36,13 +36,13 @@
 
 
 // fn fwidthCoarse(vec<4, f32>) -> vec<4, f32>
-fn fwidthCoarse_4e4fc4() {
+fn fwidthCoarse_4e4fc4() -> vec4<f32>{
   var res: vec4<f32> = fwidthCoarse(vec4<f32>(1.f));
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {
-  fwidthCoarse_4e4fc4();
+  prevent_dce = fwidthCoarse_4e4fc4();
 }

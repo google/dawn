@@ -41,27 +41,34 @@
 enable f16;
 
 // fn clamp(vec<3, f16>, vec<3, f16>, vec<3, f16>) -> vec<3, f16>
-fn clamp_b195eb() {
+fn clamp_b195eb() -> vec3<f16>{
   var arg_0 = vec3<f16>(1.h);
   var arg_1 = vec3<f16>(1.h);
   var arg_2 = vec3<f16>(1.h);
   var res: vec3<f16> = clamp(arg_0, arg_1, arg_2);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  clamp_b195eb();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
 
 @fragment
 fn fragment_main() {
-  clamp_b195eb();
+  prevent_dce = clamp_b195eb();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  clamp_b195eb();
+  prevent_dce = clamp_b195eb();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : vec3<f16>
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = clamp_b195eb();
+  return out;
 }

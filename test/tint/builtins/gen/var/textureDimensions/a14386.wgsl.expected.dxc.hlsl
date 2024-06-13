@@ -1,36 +1,45 @@
 RWTexture2D<float4> arg_0 : register(u0, space1);
-RWByteAddressBuffer prevent_dce : register(u0, space2);
 
-void textureDimensions_a14386() {
+uint2 textureDimensions_a14386() {
   uint2 tint_tmp;
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y);
   uint2 res = tint_tmp;
-  prevent_dce.Store2(0u, asuint(res));
+  return res;
 }
 
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  textureDimensions_a14386();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
+RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
-  textureDimensions_a14386();
+  prevent_dce.Store2(0u, asuint(textureDimensions_a14386()));
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  textureDimensions_a14386();
+  prevent_dce.Store2(0u, asuint(textureDimensions_a14386()));
   return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  uint2 prevent_dce;
+};
+struct tint_symbol_1 {
+  nointerpolation uint2 prevent_dce : TEXCOORD0;
+  float4 pos : SV_Position;
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  tint_symbol.prevent_dce = textureDimensions_a14386();
+  return tint_symbol;
+}
+
+tint_symbol_1 vertex_main() {
+  VertexOutput inner_result = vertex_main_inner();
+  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
+  return wrapper_result;
 }

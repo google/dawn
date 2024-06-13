@@ -27,7 +27,7 @@
                OpMemberDecorate %sb_rw_block 0 Offset 0
                OpMemberDecorate %SB_RW 0 Offset 0
                OpDecorate %sb_rw DescriptorSet 0
-               OpDecorate %sb_rw Binding 0
+               OpDecorate %sb_rw Binding 1
                OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0
                OpMemberDecorate %__atomic_compare_exchange_result_u32 1 Offset 4
        %uint = OpTypeInt 32 0

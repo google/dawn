@@ -2,18 +2,18 @@
 
 @group(1) @binding(1) var arg_1 : sampler;
 
-fn textureSampleBias_87915c() {
+fn textureSampleBias_87915c() -> vec4<f32> {
   var arg_2 = vec2<f32>(1.0f);
   var arg_3 = 1u;
   var arg_4 = 1.0f;
   const arg_5 = vec2<i32>(1i);
   var res : vec4<f32> = textureSampleBias(arg_0, arg_1, arg_2, arg_3, arg_4, arg_5);
-  prevent_dce = res;
+  return res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {
-  textureSampleBias_87915c();
+  prevent_dce = textureSampleBias_87915c();
 }

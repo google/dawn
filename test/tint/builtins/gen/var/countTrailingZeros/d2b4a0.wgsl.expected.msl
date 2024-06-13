@@ -1,35 +1,44 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void countTrailingZeros_d2b4a0(device uint4* const tint_symbol_1) {
+uint4 countTrailingZeros_d2b4a0() {
   uint4 arg_0 = uint4(1u);
   uint4 res = ctz(arg_0);
-  *(tint_symbol_1) = res;
+  return res;
 }
 
-struct tint_symbol {
-  float4 value [[position]];
+fragment void fragment_main(device uint4* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = countTrailingZeros_d2b4a0();
+  return;
+}
+
+kernel void compute_main(device uint4* tint_symbol_2 [[buffer(0)]]) {
+  *(tint_symbol_2) = countTrailingZeros_d2b4a0();
+  return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  uint4 prevent_dce;
 };
 
-float4 vertex_main_inner(device uint4* const tint_symbol_2) {
-  countTrailingZeros_d2b4a0(tint_symbol_2);
-  return float4(0.0f);
+struct tint_symbol {
+  uint4 prevent_dce [[user(locn0)]] [[flat]];
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = countTrailingZeros_d2b4a0();
+  return out;
 }
 
-vertex tint_symbol vertex_main(device uint4* tint_symbol_3 [[buffer(0)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_3);
+vertex tint_symbol vertex_main() {
+  VertexOutput const inner_result = vertex_main_inner();
   tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
   return wrapper_result;
-}
-
-fragment void fragment_main(device uint4* tint_symbol_4 [[buffer(0)]]) {
-  countTrailingZeros_d2b4a0(tint_symbol_4);
-  return;
-}
-
-kernel void compute_main(device uint4* tint_symbol_5 [[buffer(0)]]) {
-  countTrailingZeros_d2b4a0(tint_symbol_5);
-  return;
 }
 

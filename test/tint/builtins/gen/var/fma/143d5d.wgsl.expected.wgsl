@@ -5,12 +5,6 @@ fn fma_143d5d() {
   var res = fma(arg_0, arg_1, arg_2);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  fma_143d5d();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   fma_143d5d();
@@ -19,4 +13,17 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   fma_143d5d();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  fma_143d5d();
+  return out;
 }

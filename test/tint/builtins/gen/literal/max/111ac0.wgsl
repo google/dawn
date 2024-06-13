@@ -41,24 +41,31 @@
 enable f16;
 
 // fn max(f16, f16) -> f16
-fn max_111ac0() {
+fn max_111ac0() -> f16{
   var res: f16 = max(1.h, 1.h);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f16;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  max_111ac0();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {
-  max_111ac0();
+  prevent_dce = max_111ac0();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  max_111ac0();
+  prevent_dce = max_111ac0();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : f16
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = max_111ac0();
+  return out;
 }

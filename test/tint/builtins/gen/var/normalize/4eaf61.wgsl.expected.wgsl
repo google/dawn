@@ -3,12 +3,6 @@ fn normalize_4eaf61() {
   var res = normalize(arg_0);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  normalize_4eaf61();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   normalize_4eaf61();
@@ -17,4 +11,17 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   normalize_4eaf61();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  normalize_4eaf61();
+  return out;
 }

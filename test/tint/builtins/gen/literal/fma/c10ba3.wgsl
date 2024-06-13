@@ -36,24 +36,31 @@
 
 
 // fn fma(f32, f32, f32) -> f32
-fn fma_c10ba3() {
+fn fma_c10ba3() -> f32{
   var res: f32 = fma(1.f, 1.f, 1.f);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  fma_c10ba3();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {
-  fma_c10ba3();
+  prevent_dce = fma_c10ba3();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  fma_c10ba3();
+  prevent_dce = fma_c10ba3();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : f32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = fma_c10ba3();
+  return out;
 }

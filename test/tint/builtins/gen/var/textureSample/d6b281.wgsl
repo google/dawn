@@ -38,15 +38,15 @@
 @group(1) @binding(1) var arg_1: sampler;
 
 // fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: u32) -> vec4<f32>
-fn textureSample_d6b281() {
+fn textureSample_d6b281() -> vec4<f32>{
   var arg_2 = vec2<f32>(1.f);
   var arg_3 = 1u;
   var res: vec4<f32> = textureSample(arg_0, arg_1, arg_2, arg_3);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {
-  textureSample_d6b281();
+  prevent_dce = textureSample_d6b281();
 }

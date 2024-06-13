@@ -5,22 +5,6 @@ void smoothstep_66e4bd() {
   float3 res = float3(0.5f);
 }
 
-struct tint_symbol {
-  float4 value [[position]];
-};
-
-float4 vertex_main_inner() {
-  smoothstep_66e4bd();
-  return float4(0.0f);
-}
-
-vertex tint_symbol vertex_main() {
-  float4 const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-
 fragment void fragment_main() {
   smoothstep_66e4bd();
   return;
@@ -29,5 +13,27 @@ fragment void fragment_main() {
 kernel void compute_main() {
   smoothstep_66e4bd();
   return;
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
+struct tint_symbol {
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  smoothstep_66e4bd();
+  return out;
+}
+
+vertex tint_symbol vertex_main() {
+  VertexOutput const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
 }
 

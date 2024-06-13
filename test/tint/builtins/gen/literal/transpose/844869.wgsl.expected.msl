@@ -1,34 +1,43 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void transpose_844869(device half4x4* const tint_symbol_1) {
+int transpose_844869() {
   half4x4 res = half4x4(half4(1.0h), half4(1.0h), half4(1.0h), half4(1.0h));
-  *(tint_symbol_1) = res;
+  return select(0, 1, (res[0][0] == 0.0h));
 }
 
-struct tint_symbol {
-  float4 value [[position]];
+fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = transpose_844869();
+  return;
+}
+
+kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
+  *(tint_symbol_2) = transpose_844869();
+  return;
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
 };
 
-float4 vertex_main_inner(device half4x4* const tint_symbol_2) {
-  transpose_844869(tint_symbol_2);
-  return float4(0.0f);
+struct tint_symbol {
+  int prevent_dce [[user(locn0)]] [[flat]];
+  float4 pos [[position]];
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = transpose_844869();
+  return out;
 }
 
-vertex tint_symbol vertex_main(device half4x4* tint_symbol_3 [[buffer(0)]]) {
-  float4 const inner_result = vertex_main_inner(tint_symbol_3);
+vertex tint_symbol vertex_main() {
+  VertexOutput const inner_result = vertex_main_inner();
   tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
   return wrapper_result;
-}
-
-fragment void fragment_main(device half4x4* tint_symbol_4 [[buffer(0)]]) {
-  transpose_844869(tint_symbol_4);
-  return;
-}
-
-kernel void compute_main(device half4x4* tint_symbol_5 [[buffer(0)]]) {
-  transpose_844869(tint_symbol_5);
-  return;
 }
 

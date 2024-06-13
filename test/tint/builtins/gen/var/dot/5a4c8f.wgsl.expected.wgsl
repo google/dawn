@@ -4,12 +4,6 @@ fn dot_5a4c8f() {
   var res = dot(arg_0, arg_1);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  dot_5a4c8f();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   dot_5a4c8f();
@@ -18,4 +12,17 @@ fn fragment_main() {
 @compute @workgroup_size(1)
 fn compute_main() {
   dot_5a4c8f();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  dot_5a4c8f();
+  return out;
 }

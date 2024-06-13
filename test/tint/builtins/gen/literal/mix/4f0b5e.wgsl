@@ -36,24 +36,31 @@
 
 
 // fn mix(f32, f32, f32) -> f32
-fn mix_4f0b5e() {
+fn mix_4f0b5e() -> f32{
   var res: f32 = mix(1.f, 1.f, 1.f);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : f32;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  mix_4f0b5e();
-  return vec4<f32>();
-}
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {
-  mix_4f0b5e();
+  prevent_dce = mix_4f0b5e();
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  mix_4f0b5e();
+  prevent_dce = mix_4f0b5e();
+}
+
+struct VertexOutput {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) @interpolate(flat) prevent_dce : f32
+};
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  out.prevent_dce = mix_4f0b5e();
+  return out;
 }

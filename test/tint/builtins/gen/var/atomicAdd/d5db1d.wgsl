@@ -37,14 +37,14 @@
 var<workgroup> arg_0: atomic<u32>;
 
 // fn atomicAdd(ptr<workgroup, atomic<u32>, read_write>, u32) -> u32
-fn atomicAdd_d5db1d() {
+fn atomicAdd_d5db1d() -> u32{
   var arg_1 = 1u;
   var res: u32 = atomicAdd(&arg_0, arg_1);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  atomicAdd_d5db1d();
+  prevent_dce = atomicAdd_d5db1d();
 }

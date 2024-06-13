@@ -1,12 +1,12 @@
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void subgroupBallot_7e6d0e() {
+uint4 subgroupBallot_7e6d0e() {
   uint4 res = WaveActiveBallot(true);
-  prevent_dce.Store4(0u, asuint(res));
+  return res;
 }
+
+RWByteAddressBuffer prevent_dce : register(u0);
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupBallot_7e6d0e();
+  prevent_dce.Store4(0u, asuint(subgroupBallot_7e6d0e()));
   return;
 }

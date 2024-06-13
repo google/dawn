@@ -36,14 +36,14 @@
 
 
 // fn dpdy(vec<4, f32>) -> vec<4, f32>
-fn dpdy_699a05() {
+fn dpdy_699a05() -> vec4<f32>{
   var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = dpdy(arg_0);
-  prevent_dce = res;
+  return res;
 }
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {
-  dpdy_699a05();
+  prevent_dce = dpdy_699a05();
 }

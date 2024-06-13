@@ -23,7 +23,7 @@
                OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
@@ -41,10 +41,10 @@
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
          %23 = OpTypeFunction %uint
-         %29 = OpTypeFunction %void
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+         %43 = OpTypeFunction %void
 %tint_zero_workgroup_memory = OpFunction %void None %9
   %local_idx = OpFunctionParameter %uint
          %13 = OpLabel
@@ -65,24 +65,24 @@
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturnValue %27
                OpFunctionEnd
-%workgroupUniformLoad_37307c = OpFunction %void None %29
-         %31 = OpLabel
+%workgroupUniformLoad_37307c = OpFunction %uint None %23
+         %30 = OpLabel
         %res = OpVariable %_ptr_Function_uint Function %19
-         %32 = OpFunctionCall %uint %tint_workgroupUniformLoad_arg_0
-               OpStore %res %32
-         %37 = OpAccessChain %_ptr_StorageBuffer_uint %prevent_dce %uint_0
-         %38 = OpLoad %uint %res
-               OpStore %37 %38
-               OpReturn
+         %31 = OpFunctionCall %uint %tint_workgroupUniformLoad_arg_0
+               OpStore %res %31
+         %34 = OpLoad %uint %res
+               OpReturnValue %34
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %9
 %local_invocation_index = OpFunctionParameter %uint
-         %41 = OpLabel
-         %42 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
-         %43 = OpFunctionCall %void %workgroupUniformLoad_37307c
+         %37 = OpLabel
+         %38 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
+         %41 = OpAccessChain %_ptr_StorageBuffer_uint %prevent_dce %uint_0
+         %42 = OpFunctionCall %uint %workgroupUniformLoad_37307c
+               OpStore %41 %42
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %29
+%compute_main = OpFunction %void None %43
          %45 = OpLabel
          %47 = OpLoad %uint %local_invocation_index_1
          %46 = OpFunctionCall %void %compute_main_inner %47

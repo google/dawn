@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 29
+; Bound: 30
 ; Schema: 0
                OpCapability Shader
                OpCapability InputAttachment
@@ -20,7 +20,7 @@
                OpDecorate %arg_0 Binding 0
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float SubpassData 0 0 0 2 Unknown
@@ -30,29 +30,30 @@
 %prevent_dce_block = OpTypeStruct %v4float
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
-       %void = OpTypeVoid
-          %9 = OpTypeFunction %void
+          %9 = OpTypeFunction %v4float
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
-         %17 = OpConstantNull %v2int
+         %16 = OpConstantNull %v2int
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %20 = OpConstantNull %v4float
+         %19 = OpConstantNull %v4float
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
-%inputAttachmentLoad_c38b2f = OpFunction %void None %9
-         %12 = OpLabel
-        %res = OpVariable %_ptr_Function_v4float Function %20
-         %14 = OpLoad %3 %arg_0
-         %13 = OpImageRead %v4float %14 %17
-               OpStore %res %13
-         %24 = OpAccessChain %_ptr_StorageBuffer_v4float %prevent_dce %uint_0
-         %25 = OpLoad %v4float %res
-               OpStore %24 %25
-               OpReturn
+%inputAttachmentLoad_c38b2f = OpFunction %v4float None %9
+         %11 = OpLabel
+        %res = OpVariable %_ptr_Function_v4float Function %19
+         %13 = OpLoad %3 %arg_0
+         %12 = OpImageRead %v4float %13 %16
+               OpStore %res %12
+         %20 = OpLoad %v4float %res
+               OpReturnValue %20
                OpFunctionEnd
-%fragment_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %void %inputAttachmentLoad_c38b2f
+%fragment_main = OpFunction %void None %21
+         %24 = OpLabel
+         %28 = OpAccessChain %_ptr_StorageBuffer_v4float %prevent_dce %uint_0
+         %29 = OpFunctionCall %v4float %inputAttachmentLoad_c38b2f
+               OpStore %28 %29
                OpReturn
                OpFunctionEnd
