@@ -356,7 +356,7 @@ bool InitSample(int argc, const char** argv) {
     if (backendType == wgpu::BackendType::OpenGL || backendType == wgpu::BackendType::OpenGLES) {
         fprintf(stderr,
                 "The OpenGL(ES) backend is temporarily not supported for samples. See "
-                "https://crbug.com/dawn/810");
+                "https://crbug.com/dawn/810\n");
         return false;
     }
 
