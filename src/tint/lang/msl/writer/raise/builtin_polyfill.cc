@@ -94,6 +94,7 @@ struct State {
                     case core::BuiltinFn::kTextureNumLevels:
                     case core::BuiltinFn::kTextureSample:
                     case core::BuiltinFn::kTextureSampleBias:
+                    case core::BuiltinFn::kTextureSampleCompare:
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kStorageBarrier:
@@ -161,6 +162,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureSampleBias:
                     TextureSampleBias(builtin);
+                    break;
+                case core::BuiltinFn::kTextureSampleCompare:
+                    TextureSampleCompare(builtin);
                     break;
                 case core::BuiltinFn::kTextureSampleLevel:
                     TextureSampleLevel(builtin);
@@ -376,6 +380,18 @@ struct State {
             b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
                 builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
         });
+        builtin->Destroy();
+    }
+
+    /// Replace a textureSampleCompare call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureSampleCompare(core::ir::CoreBuiltinCall* builtin) {
+        // The MSL intrinsic is a member function, so we split the first argument off as the object.
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kSampleCompare, builtin->Args()[0],
+            std::move(args));
+        call->InsertBefore(builtin);
         builtin->Destroy();
     }
 

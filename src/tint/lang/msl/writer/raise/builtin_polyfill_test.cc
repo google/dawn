@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
+#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -1390,6 +1391,43 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleBias_Array) {
     %7:msl.bias = construct %bias
     %8:vec4<f32> = %t.sample %s, %coords, %index, %7
     ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleCompare) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t, s, coords, depth});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<f32>(core::BuiltinFn::kTextureSampleCompare, t, s, coords, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):f32 {
+  $B1: {
+    %6:f32 = textureSampleCompare %t, %s, %coords, %depth
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):f32 {
+  $B1: {
+    %6:f32 = %t.sample_compare %s, %coords, %depth
+    ret %6
   }
 }
 )";

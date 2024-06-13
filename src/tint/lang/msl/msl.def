@@ -92,6 +92,7 @@ type vec4<T>
 type atomic<T>
 type ptr<S: address_space, T, A: access>
 type sampler
+type sampler_comparison
 type texture_1d<T>
 type texture_2d<T>
 type texture_2d_array<T>
@@ -249,6 +250,13 @@ match fiu32: f32 | i32 | u32
 @member_function fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: bias, @const offset: vec3<i32>) -> vec4<f32>
 @member_function fn sample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, bias: bias) -> vec4<f32>
 @member_function fn sample[A: iu32](texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, bias: bias) -> vec4<f32>
+
+@member_function @stage("fragment") fn sample_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
+@member_function @stage("fragment") fn sample_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> f32
+@member_function @stage("fragment") fn sample_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> f32
+@member_function @stage("fragment") fn sample_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> f32
+@member_function @stage("fragment") fn sample_compare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
+@member_function @stage("fragment") fn sample_compare[A: iu32](texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> f32
 
 @member_function fn write(texture: texture_storage_1d<f32_texel_format, writable>, value: vec4<f32>, coords: u32)
 @member_function fn write(texture: texture_storage_2d<f32_texel_format, writable>, value: vec4<f32>, coords: vec2<u32>)

@@ -78,6 +78,8 @@ const char* str(BuiltinFn i) {
             return "read";
         case BuiltinFn::kSample:
             return "sample";
+        case BuiltinFn::kSampleCompare:
+            return "sample_compare";
         case BuiltinFn::kWrite:
             return "write";
         case BuiltinFn::kThreadgroupBarrier:

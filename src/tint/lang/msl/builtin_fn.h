@@ -65,6 +65,7 @@ enum class BuiltinFn : uint8_t {
     kGetNumMipLevels,
     kRead,
     kSample,
+    kSampleCompare,
     kWrite,
     kThreadgroupBarrier,
     kNone,
