@@ -255,17 +255,19 @@ const PlatformFunctions* Backend::GetFunctions() const {
 }
 
 ResultOrError<Ref<PhysicalDeviceBase>> Backend::GetOrCreatePhysicalDeviceFromLUID(LUID luid) {
-    Ref<PhysicalDeviceBase> physicalDevice = FindPhysicalDevice(luid);
-    if (physicalDevice == nullptr) {
-        ComPtr<IDXGIAdapter1> dxgiAdapter = nullptr;
-        DAWN_TRY(CheckHRESULT(GetFactory()->EnumAdapterByLuid(luid, IID_PPV_ARGS(&dxgiAdapter)),
-                              "EnumAdapterByLuid"));
-
-        DAWN_TRY_ASSIGN(physicalDevice, CreatePhysicalDeviceFromIDXGIAdapter(dxgiAdapter));
-        // The LUID may already exist in the map if the previous WeakRef has been invalidated. In
-        // that case, `insert_or_assign` will replace the old device with the new one.
-        mPhysicalDevices.insert_or_assign(luid, GetWeakRef(physicalDevice));
+    auto it = mPhysicalDevices.find(luid);
+    if (it != mPhysicalDevices.end()) {
+        // If we've already discovered this physical device, return it.
+        return it->second;
     }
+
+    ComPtr<IDXGIAdapter1> dxgiAdapter = nullptr;
+    DAWN_TRY(CheckHRESULT(GetFactory()->EnumAdapterByLuid(luid, IID_PPV_ARGS(&dxgiAdapter)),
+                          "EnumAdapterByLuid"));
+
+    Ref<PhysicalDeviceBase> physicalDevice;
+    DAWN_TRY_ASSIGN(physicalDevice, CreatePhysicalDeviceFromIDXGIAdapter(dxgiAdapter));
+    mPhysicalDevices.emplace(luid, physicalDevice);
     return physicalDevice;
 }
 
@@ -274,24 +276,16 @@ ResultOrError<Ref<PhysicalDeviceBase>> Backend::GetOrCreatePhysicalDeviceFromIDX
     DXGI_ADAPTER_DESC desc;
     DAWN_TRY(CheckHRESULT(dxgiAdapter->GetDesc(&desc), "IDXGIAdapter::GetDesc"));
 
-    Ref<PhysicalDeviceBase> physicalDevice = FindPhysicalDevice(desc.AdapterLuid);
-    if (physicalDevice == nullptr) {
-        DAWN_TRY_ASSIGN(physicalDevice, CreatePhysicalDeviceFromIDXGIAdapter(dxgiAdapter));
-        // The LUID may already exist in the map if the previous WeakRef has been invalidated. In
-        // that case, `insert_or_assign` will replace the old device with the new one.
-        mPhysicalDevices.insert_or_assign(desc.AdapterLuid, GetWeakRef(physicalDevice));
+    auto it = mPhysicalDevices.find(desc.AdapterLuid);
+    if (it != mPhysicalDevices.end()) {
+        // If we've already discovered this physical device, return it.
+        return it->second;
     }
-    return physicalDevice;
-}
 
-Ref<PhysicalDeviceBase> Backend::FindPhysicalDevice(const LUID& luid) {
-    auto it = mPhysicalDevices.find(luid);
-    if (it == mPhysicalDevices.end()) {
-        return nullptr;
-    }
-    // If we've already discovered this physical device, try to Promote the WeakRef to a Ref. If the
-    // WeakRef has been invalidated, nullptr is returned.
-    return it->second.Promote();
+    Ref<PhysicalDeviceBase> physicalDevice;
+    DAWN_TRY_ASSIGN(physicalDevice, CreatePhysicalDeviceFromIDXGIAdapter(dxgiAdapter));
+    mPhysicalDevices.emplace(desc.AdapterLuid, physicalDevice);
+    return physicalDevice;
 }
 
 std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
