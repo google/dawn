@@ -1672,7 +1672,7 @@ Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
     std::cout << "=========================================================\n";
     std::cout << "== IR dump before " << msg << ":\n";
     std::cout << "=========================================================\n";
-    printer->Print(Disassemble(ir).Text());
+    printer->Print(Disassembler(ir).Text());
 #endif
 
 #ifndef NDEBUG
