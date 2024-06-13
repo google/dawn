@@ -1,33 +1,16 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texturecube<float, access::sample> arg_0;
+  sampler arg_1;
+  device float4* prevent_dce;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<handle, texture_cube<f32>, read> = var @binding_point(1, 0)
-  %arg_1:ptr<handle, sampler, read> = var @binding_point(1, 1)
-  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+void textureSampleBias_53b9f7(tint_module_vars_struct tint_module_vars) {
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, float3(1.0f), bias(1.0f));
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%textureSampleBias_53b9f7 = func():void {
-  $B2: {
-    %5:texture_cube<f32> = load %arg_0
-    %6:sampler = load %arg_1
-    %7:vec4<f32> = textureSampleBias %5, %6, vec3<f32>(1.0f), 1.0f
-    %res:ptr<function, vec4<f32>, read_write> = var, %7
-    %9:vec4<f32> = load %res
-    store %prevent_dce, %9
-    ret
-  }
+fragment void fragment_main(texturecube<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  textureSampleBias_53b9f7(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B3: {
-    %11:void = call %textureSampleBias_53b9f7
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

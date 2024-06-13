@@ -91,6 +91,7 @@
 #include "src/tint/lang/msl/ir/builtin_call.h"
 #include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
+#include "src/tint/lang/msl/type/bias.h"
 #include "src/tint/lang/msl/type/level.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/utils/containers/map.h"
@@ -1131,6 +1132,7 @@ class Printer : public tint::TextGenerator {
             },  //
 
             // MSL builtin types.
+            [&](const msl::type::Bias*) { out << "bias"; },    //
             [&](const msl::type::Level*) { out << "level"; },  //
 
             TINT_ICE_ON_NO_MATCH);

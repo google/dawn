@@ -1287,6 +1287,84 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSample) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleBias) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* bias = b.FunctionParam("bias", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, bias});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, bias);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %bias:f32):vec4<f32> {
+  $B1: {
+    %6:vec4<f32> = textureSampleBias %t, %s, %coords, %bias
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %bias:f32):vec4<f32> {
+  $B1: {
+    %6:msl.bias = construct %bias
+    %7:vec4<f32> = %t.sample %s, %coords, %6
+    ret %7
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleBias_Array) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* index = b.FunctionParam("index", ty.u32());
+    auto* bias = b.FunctionParam("bias", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, index, bias});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleBias, t, s, coords, index, bias);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d_array<f32>, %s:sampler, %coords:vec2<f32>, %index:u32, %bias:f32):vec4<f32> {
+  $B1: {
+    %7:vec4<f32> = textureSampleBias %t, %s, %coords, %index, %bias
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d_array<f32>, %s:sampler, %coords:vec2<f32>, %index:u32, %bias:f32):vec4<f32> {
+  $B1: {
+    %7:msl.bias = construct %bias
+    %8:vec4<f32> = %t.sample %s, %coords, %index, %7
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));

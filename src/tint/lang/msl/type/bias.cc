@@ -25,40 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
-#define SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
-
-#include "src/tint/lang/core/intrinsic/table.h"
-#include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/msl/type/bias.h"
-#include "src/tint/lang/msl/type/level.h"
 
-namespace tint::msl::intrinsic {
+#include <cstddef>
+#include <string>
 
-inline bool MatchBias(core::intrinsic::MatchState&, const core::type::Type* ty) {
-    if (ty->Is<msl::type::Bias>()) {
-        return true;
-    }
-    return false;
+#include "src/tint/lang/core/type/clone_context.h"
+#include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/unique_node.h"
+#include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/rtti/castable.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::msl::type::Bias);
+
+namespace tint::msl::type {
+
+Bias::Bias()
+    : Base(static_cast<size_t>(Hash(tint::TypeCode::Of<Bias>().bits)), core::type::Flags{}) {}
+
+bool Bias::Equals(const UniqueNode& other) const {
+    return other.Is<Bias>();
 }
 
-inline const core::type::Type* BuildBias(core::intrinsic::MatchState& state,
-                                         const core::type::Type*) {
-    return state.types.Get<type::Bias>();
+std::string Bias::FriendlyName() const {
+    return "msl.bias";
 }
 
-inline bool MatchLevel(core::intrinsic::MatchState&, const core::type::Type* ty) {
-    if (ty->Is<msl::type::Level>()) {
-        return true;
-    }
-    return false;
+Bias* Bias::Clone(core::type::CloneContext& ctx) const {
+    return ctx.dst.mgr->Get<Bias>();
 }
 
-inline const core::type::Type* BuildLevel(core::intrinsic::MatchState& state,
-                                          const core::type::Type*) {
-    return state.types.Get<type::Level>();
-}
-
-}  // namespace tint::msl::intrinsic
-
-#endif  // SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
+}  // namespace tint::msl::type

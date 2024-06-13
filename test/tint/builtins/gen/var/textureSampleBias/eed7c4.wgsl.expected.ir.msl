@@ -1,39 +1,21 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texturecube_array<float, access::sample> arg_0;
+  sampler arg_1;
+  device float4* prevent_dce;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<handle, texture_cube_array<f32>, read> = var @binding_point(1, 0)
-  %arg_1:ptr<handle, sampler, read> = var @binding_point(1, 1)
-  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+void textureSampleBias_eed7c4(tint_module_vars_struct tint_module_vars) {
+  float3 arg_2 = float3(1.0f);
+  int arg_3 = 1;
+  float arg_4 = 1.0f;
+  float3 const v = arg_2;
+  int const v_1 = arg_3;
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, v, v_1, bias(arg_4));
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%textureSampleBias_eed7c4 = func():void {
-  $B2: {
-    %arg_2:ptr<function, vec3<f32>, read_write> = var, vec3<f32>(1.0f)
-    %arg_3:ptr<function, i32, read_write> = var, 1i
-    %arg_4:ptr<function, f32, read_write> = var, 1.0f
-    %8:texture_cube_array<f32> = load %arg_0
-    %9:sampler = load %arg_1
-    %10:vec3<f32> = load %arg_2
-    %11:i32 = load %arg_3
-    %12:f32 = load %arg_4
-    %13:vec4<f32> = textureSampleBias %8, %9, %10, %11, %12
-    %res:ptr<function, vec4<f32>, read_write> = var, %13
-    %15:vec4<f32> = load %res
-    store %prevent_dce, %15
-    ret
-  }
+fragment void fragment_main(texturecube_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  textureSampleBias_eed7c4(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B3: {
-    %17:void = call %textureSampleBias_eed7c4
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -48,6 +48,7 @@
 #include "src/tint/lang/msl/ir/builtin_call.h"
 #include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
+#include "src/tint/lang/msl/type/bias.h"
 #include "src/tint/lang/msl/type/level.h"
 #include "src/tint/utils/containers/hashmap.h"
 
@@ -91,6 +92,7 @@ struct State {
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureSample:
+                    case core::BuiltinFn::kTextureSampleBias:
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kStorageBarrier:
@@ -152,6 +154,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureSample:
                     TextureSample(builtin);
+                    break;
+                case core::BuiltinFn::kTextureSampleBias:
+                    TextureSampleBias(builtin);
                     break;
                 case core::BuiltinFn::kTextureSampleLevel:
                     TextureSampleLevel(builtin);
@@ -332,6 +337,30 @@ struct State {
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kSample, builtin->Args()[0], std::move(args));
         call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Replace a textureSampleBias call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureSampleBias(core::ir::CoreBuiltinCall* builtin) {
+        // The MSL intrinsic is a member function, so we split the first argument off as the object.
+        auto* tex = builtin->Args()[0];
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+
+        b.InsertBefore(builtin, [&] {
+            // Wrap the bias argument in a constructor for the MSL `bias` builtin type.
+            uint32_t bias_idx = 2;
+            if (tex_type->dim() == core::type::TextureDimension::k2dArray ||
+                tex_type->dim() == core::type::TextureDimension::kCubeArray) {
+                bias_idx = 3;
+            }
+            args[bias_idx] = b.Construct(ty.Get<msl::type::Bias>(), args[bias_idx])->Result(0);
+
+            // Call the `sample()` member function.
+            b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+                builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
+        });
         builtin->Destroy();
     }
 

@@ -39,9 +39,11 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "type",
   srcs = [
+    "bias.cc",
     "level.cc",
   ],
   hdrs = [
+    "bias.h",
     "level.h",
   ],
   deps = [
@@ -68,6 +70,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "bias_test.cc",
     "level_test.cc",
   ],
   deps = [

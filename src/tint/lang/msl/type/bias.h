@@ -25,40 +25,33 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
-#define SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
+#ifndef SRC_TINT_LANG_MSL_TYPE_BIAS_H_
+#define SRC_TINT_LANG_MSL_TYPE_BIAS_H_
 
-#include "src/tint/lang/core/intrinsic/table.h"
-#include "src/tint/lang/core/type/manager.h"
-#include "src/tint/lang/msl/type/bias.h"
-#include "src/tint/lang/msl/type/level.h"
+#include <string>
 
-namespace tint::msl::intrinsic {
+#include "src/tint/lang/core/type/type.h"
 
-inline bool MatchBias(core::intrinsic::MatchState&, const core::type::Type* ty) {
-    if (ty->Is<msl::type::Bias>()) {
-        return true;
-    }
-    return false;
-}
+namespace tint::msl::type {
 
-inline const core::type::Type* BuildBias(core::intrinsic::MatchState& state,
-                                         const core::type::Type*) {
-    return state.types.Get<type::Bias>();
-}
+/// Bias represents the `metal::bias` type.
+class Bias final : public Castable<Bias, core::type::Type> {
+  public:
+    /// Constructor
+    Bias();
 
-inline bool MatchLevel(core::intrinsic::MatchState&, const core::type::Type* ty) {
-    if (ty->Is<msl::type::Level>()) {
-        return true;
-    }
-    return false;
-}
+    /// @param other the other node to compare against
+    /// @returns true if the this type is equal to @p other
+    bool Equals(const UniqueNode& other) const override;
 
-inline const core::type::Type* BuildLevel(core::intrinsic::MatchState& state,
-                                          const core::type::Type*) {
-    return state.types.Get<type::Level>();
-}
+    /// @returns the friendly name for this type
+    std::string FriendlyName() const override;
 
-}  // namespace tint::msl::intrinsic
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    Bias* Clone(core::type::CloneContext& ctx) const override;
+};
 
-#endif  // SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
+}  // namespace tint::msl::type
+
+#endif  // SRC_TINT_LANG_MSL_TYPE_BIAS_H_

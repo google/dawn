@@ -1,66 +1,27 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  thread float4* my_global;
+  const constant float* my_uniform;
+  texture2d<float, access::sample> my_texture;
+  sampler my_sampler;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %my_global:ptr<private, vec4<f32>, read_write> = var
-  %my_uniform:ptr<uniform, f32, read> = var @binding_point(0, 0)
-  %my_texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 1)
-  %my_sampler:ptr<handle, sampler, read> = var @binding_point(0, 2)
-}
-
-%foo_member_initialize = func():void {
-  $B2: {
-    %vb2:ptr<function, vec2<bool>, read_write> = var
-    %7:f32 = load_vector_element %my_global, 2u
-    %8:bool = neq %7, 0.0f
-    store_vector_element %vb2, 0u, %8
-    %9:f32 = load %my_uniform
-    %10:bool = eq %9, -1.0f
-    store_vector_element %vb2, 0u, %10
-    %11:f32 = load %my_uniform
-    %12:bool = eq %11, -1.0f
-    %13:vec2<bool> = construct %12, false
-    store %vb2, %13
-    %14:bool = load_vector_element %vb2, 0u
-    if %14 [t: $B3] {  # if_1
-      $B3: {  # true
-        %15:texture_2d<f32> = load %my_texture
-        %16:sampler = load %my_sampler
-        %17:vec4<f32> = textureSampleBias %15, %16, vec2<f32>(0.0f), 0.0f
-        %r:vec4<f32> = let %17
-        exit_if  # if_1
-      }
-    }
-    ret
+void foo_member_initialize(tint_module_vars_struct tint_module_vars) {
+  bool2 vb2 = false;
+  vb2[0u] = ((*tint_module_vars.my_global)[2u] != 0.0f);
+  vb2[0u] = ((*tint_module_vars.my_uniform) == -1.0f);
+  vb2 = bool2(((*tint_module_vars.my_uniform) == -1.0f), false);
+  if (vb2[0u]) {
+    float4 const r = tint_module_vars.my_texture.sample(tint_module_vars.my_sampler, float2(0.0f), bias(0.0f));
   }
 }
-%foo_default_initialize = func():void {
-  $B4: {
-    %vb2_1:ptr<function, vec2<bool>, read_write> = var  # %vb2_1: 'vb2'
-    %21:f32 = load_vector_element %my_global, 2u
-    %22:bool = neq %21, 0.0f
-    store_vector_element %vb2_1, 0u, %22
-    %23:f32 = load %my_uniform
-    %24:bool = eq %23, -1.0f
-    store_vector_element %vb2_1, 0u, %24
-    store %vb2_1, vec2<bool>(false)
-    %25:bool = load_vector_element %vb2_1, 0u
-    if %25 [t: $B5] {  # if_2
-      $B5: {  # true
-        %26:texture_2d<f32> = load %my_texture
-        %27:sampler = load %my_sampler
-        %28:vec4<f32> = textureSampleBias %26, %27, vec2<f32>(0.0f), 0.0f
-        %r_1:vec4<f32> = let %28  # %r_1: 'r'
-        exit_if  # if_2
-      }
-    }
-    ret
+void foo_default_initialize(tint_module_vars_struct tint_module_vars) {
+  bool2 vb2 = false;
+  vb2[0u] = ((*tint_module_vars.my_global)[2u] != 0.0f);
+  vb2[0u] = ((*tint_module_vars.my_uniform) == -1.0f);
+  vb2 = bool2(false);
+  if (vb2[0u]) {
+    float4 const r = tint_module_vars.my_texture.sample(tint_module_vars.my_sampler, float2(0.0f), bias(0.0f));
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

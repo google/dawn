@@ -25,40 +25,28 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
-#define SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
-
-#include "src/tint/lang/core/intrinsic/table.h"
-#include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/msl/type/bias.h"
-#include "src/tint/lang/msl/type/level.h"
 
-namespace tint::msl::intrinsic {
+#include <gtest/gtest.h>
 
-inline bool MatchBias(core::intrinsic::MatchState&, const core::type::Type* ty) {
-    if (ty->Is<msl::type::Bias>()) {
-        return true;
-    }
-    return false;
+#include "src/tint/lang/core/type/f32.h"
+
+namespace tint::msl::type {
+namespace {
+
+TEST(BiasTest, Equals) {
+    const Bias a{};
+    const Bias b{};
+    const core::type::F32 c{};
+
+    EXPECT_TRUE(a.Equals(b));
+    EXPECT_FALSE(a.Equals(c));
 }
 
-inline const core::type::Type* BuildBias(core::intrinsic::MatchState& state,
-                                         const core::type::Type*) {
-    return state.types.Get<type::Bias>();
+TEST(BiasTest, FriendlyName) {
+    const Bias l;
+    EXPECT_EQ(l.FriendlyName(), "msl.bias");
 }
 
-inline bool MatchLevel(core::intrinsic::MatchState&, const core::type::Type* ty) {
-    if (ty->Is<msl::type::Level>()) {
-        return true;
-    }
-    return false;
-}
-
-inline const core::type::Type* BuildLevel(core::intrinsic::MatchState& state,
-                                          const core::type::Type*) {
-    return state.types.Get<type::Level>();
-}
-
-}  // namespace tint::msl::intrinsic
-
-#endif  // SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
+}  // namespace
+}  // namespace tint::msl::type
