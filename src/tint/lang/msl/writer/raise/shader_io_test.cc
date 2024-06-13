@@ -925,6 +925,92 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+// Test that IO attributes are stripped from structures that are not used for the shader interface.
+TEST_F(MslWriter_ShaderIOTest, StructWithAttributes_NotUsedForInterface) {
+    auto* vec4f = ty.vec4<f32>();
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {
+                                     mod.symbols.New("position"),
+                                     vec4f,
+                                     core::type::StructMemberAttributes{
+                                         /* location */ std::nullopt,
+                                         /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
+                                         /* builtin */ core::BuiltinValue::kPosition,
+                                         /* interpolation */ std::nullopt,
+                                         /* invariant */ false,
+                                     },
+                                 },
+                                 {
+                                     mod.symbols.New("color"),
+                                     vec4f,
+                                     core::type::StructMemberAttributes{
+                                         /* location */ 0u,
+                                         /* index */ std::nullopt,
+                                         /* color */ std::nullopt,
+                                         /* builtin */ std::nullopt,
+                                         /* interpolation */ std::nullopt,
+                                         /* invariant */ false,
+                                     },
+                                 },
+                             });
+
+    auto* buffer = mod.root_block->Append(b.Var(ty.ptr(storage, str_ty, read)));
+
+    auto* ep = b.Function("frag", ty.void_());
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Store(buffer, b.Construct(str_ty));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  color:vec4<f32> @offset(16), @location(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, Outputs, read> = var
+}
+
+%frag = @fragment func():void {
+  $B2: {
+    %3:Outputs = construct
+    store %1, %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  color:vec4<f32> @offset(16)
+}
+
+$B1: {  # root
+  %1:ptr<storage, Outputs, read> = var
+}
+
+%frag = @fragment func():void {
+  $B2: {
+    %3:Outputs = construct
+    store %1, %3
+    ret
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_ShaderIOTest, EmitVertexPointSize) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
