@@ -200,9 +200,9 @@ TEST_F(SpirvWriterTest, StorageVar_ReadOnly) {
                OpDecorate %1 NonWritable
 )");
     EXPECT_INST(R"(
-%tint_symbol_1 = OpTypeStruct %int
+%tint_symbol_1 = OpTypeStruct %int                  ; Block
 %_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer   ; DescriptorSet 0, Binding 0, NonWritable
 )");
 }
 
@@ -269,9 +269,9 @@ TEST_F(SpirvWriterTest, UniformVar) {
                OpDecorate %1 Binding 0
 )");
     EXPECT_INST(R"(
-%tint_symbol_1 = OpTypeStruct %int
+%tint_symbol_1 = OpTypeStruct %int                  ; Block
 %_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform   ; DescriptorSet 0, Binding 0, NonWritable
 )");
 }
 
@@ -304,7 +304,7 @@ TEST_F(SpirvWriterTest, PushConstantVar) {
                OpDecorate %tint_symbol_1 Block
 )");
     EXPECT_INST(R"(
-%tint_symbol_1 = OpTypeStruct %int
+%tint_symbol_1 = OpTypeStruct %int                  ; Block
 %_ptr_PushConstant_tint_symbol_1 = OpTypePointer PushConstant %tint_symbol_1
           %1 = OpVariable %_ptr_PushConstant_tint_symbol_1 PushConstant
 )");
@@ -342,7 +342,7 @@ TEST_F(SpirvWriterTest, SamplerVar) {
     EXPECT_INST(R"(
           %3 = OpTypeSampler
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0
 )");
 }
 
@@ -378,7 +378,7 @@ TEST_F(SpirvWriterTest, TextureVar) {
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0
 )");
 }
 
@@ -420,7 +420,7 @@ TEST_F(SpirvWriterTest, ReadOnlyStorageTextureVar) {
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, NonWritable
 )");
 }
 
@@ -442,7 +442,7 @@ TEST_F(SpirvWriterTest, ReadWriteStorageTextureVar) {
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0
 )");
 }
 
@@ -465,7 +465,7 @@ TEST_F(SpirvWriterTest, WriteOnlyStorageTextureVar) {
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, NonReadable
 )");
 }
 
