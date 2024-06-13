@@ -1251,6 +1251,40 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_3d) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureNumLevels) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureNumLevels, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>):u32 {
+  $B1: {
+    %3:u32 = textureNumLevels %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>):u32 {
+  $B1: {
+    %3:u32 = %t.get_num_mip_levels
+    ret %3
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, TextureSample) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));

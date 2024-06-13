@@ -91,6 +91,7 @@ struct State {
                     case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureLoad:
+                    case core::BuiltinFn::kTextureNumLevels:
                     case core::BuiltinFn::kTextureSample:
                     case core::BuiltinFn::kTextureSampleBias:
                     case core::BuiltinFn::kTextureSampleLevel:
@@ -151,6 +152,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureLoad:
                     TextureLoad(builtin);
+                    break;
+                case core::BuiltinFn::kTextureNumLevels:
+                    TextureNumLevels(builtin);
                     break;
                 case core::BuiltinFn::kTextureSample:
                     TextureSample(builtin);
@@ -326,6 +330,17 @@ struct State {
             b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
                 builtin->DetachResult(), msl::BuiltinFn::kRead, tex, std::move(args));
         });
+        builtin->Destroy();
+    }
+
+    /// Replace a textureNumLevels call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureNumLevels(core::ir::CoreBuiltinCall* builtin) {
+        // The MSL intrinsic is a member function, so we split the first argument off as the object.
+        auto* tex = builtin->Args()[0];
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kGetNumMipLevels, tex);
+        call->InsertBefore(builtin);
         builtin->Destroy();
     }
 
