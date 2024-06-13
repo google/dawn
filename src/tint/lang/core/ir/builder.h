@@ -440,6 +440,14 @@ class Builder {
     }
 
     /// Creates a new zero-value ir::Constant
+    /// @tparam TYPE the constant type
+    /// @returns the new constant
+    template <typename TYPE>
+    ir::Constant* Zero() {
+        return Constant(ir.constant_values.Zero(ir.Types().Get<TYPE>()));
+    }
+
+    /// Creates a new zero-value ir::Constant
     /// @param ty the constant type
     /// @returns the new constant
     ir::Constant* Zero(const core::type::Type* ty) { return Constant(ir.constant_values.Zero(ty)); }

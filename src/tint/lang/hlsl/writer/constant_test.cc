@@ -125,7 +125,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecF16) {
 
 TEST_F(HlslWriterTest, ConstantTypeVecEmptyF32) {
     auto* f = b.Function("a", ty.vec3<f32>());
-    b.Append(f->Block(), [&] { b.Return(f, b.Zero(ty.vec3<f32>())); });
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero<vec3<f32>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(float3 a() {
@@ -136,7 +136,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecEmptyF32) {
 
 TEST_F(HlslWriterTest, ConstantTypeVecEmptyF16) {
     auto* f = b.Function("a", ty.vec3<f16>());
-    b.Append(f->Block(), [&] { b.Return(f, b.Zero(ty.vec3<f16>())); });
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero<vec3<f16>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(vector<float16_t, 3> a() {
@@ -286,7 +286,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatComplexF32) {
     auto* f = b.Function("a", ty.mat4x4<f32>());
     b.Append(f->Block(), [&] {
         b.Return(f, b.Composite(ty.mat4x4<f32>(), b.Composite(ty.vec4<f32>(), 2_f, 3_f, 4_f, 8_f),
-                                b.Zero(ty.vec4<f32>()), b.Splat(ty.vec4<f32>(), 7_f),
+                                b.Zero<vec4<f32>>(), b.Splat(ty.vec4<f32>(), 7_f),
                                 b.Composite(ty.vec4<f32>(), 42_f, 21_f, 6_f, -5_f)));
     });
 
@@ -307,7 +307,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatComplexF16) {
     auto* f = b.Function("a", ty.mat4x4<f16>());
     b.Append(f->Block(), [&] {
         b.Return(f, b.Composite(ty.mat4x4<f16>(), b.Composite(ty.vec4<f16>(), 2_h, 3_h, 4_h, 8_h),
-                                b.Zero(ty.vec4<f16>()), b.Splat(ty.vec4<f16>(), 7_h),
+                                b.Zero<vec4<f16>>(), b.Splat(ty.vec4<f16>(), 7_h),
                                 b.Composite(ty.vec4<f16>(), 42_h, 21_h, 6_h, -5_h)));
     });
 
@@ -320,7 +320,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatComplexF16) {
 
 TEST_F(HlslWriterTest, ConstantTypeMatEmptyF32) {
     auto* f = b.Function("a", ty.mat2x3<f32>());
-    b.Append(f->Block(), [&] { b.Return(f, b.Zero(ty.mat2x3<f32>())); });
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero<mat2x3<f32>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(float2x3 a() {
@@ -331,7 +331,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatEmptyF32) {
 
 TEST_F(HlslWriterTest, ConstantTypeMatEmptyF16) {
     auto* f = b.Function("a", ty.mat2x3<f16>());
-    b.Append(f->Block(), [&] { b.Return(f, b.Zero(ty.mat2x3<f16>())); });
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero<mat2x3<f16>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(matrix<float16_t, 2, 3> a() {
@@ -349,7 +349,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF32) {
 
     auto* f = b.Function("a", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* m1 = b.Var("m_1", b.Zero(ty.mat4x4<f32>()));
+        auto* m1 = b.Var("m_1", b.Zero<mat4x4<f32>>());
         b.Var("m_2", b.Load(m1));
         b.Return(f);
     });
@@ -370,7 +370,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF16) {
 
     auto* f = b.Function("a", ty.void_());
     b.Append(f->Block(), [&] {
-        auto* m1 = b.Var("m_1", b.Zero(ty.mat4x4<f16>()));
+        auto* m1 = b.Var("m_1", b.Zero<mat4x4<f16>>());
         b.Var("m_2", b.Load(m1));
         b.Return(f);
     });
@@ -400,7 +400,7 @@ TEST_F(HlslWriterTest, ConstantTypeArray) {
 
 TEST_F(HlslWriterTest, ConstantType_Array_Empty) {
     auto* f = b.Function("a", ty.array<vec3<f32>, 3>());
-    b.Append(f->Block(), [&] { b.Return(f, b.Zero(ty.array<vec3<f32>, 3>())); });
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero<array<vec3<f32>, 3>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(float3[3] a() {

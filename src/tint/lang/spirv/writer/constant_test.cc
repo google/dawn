@@ -191,7 +191,7 @@ TEST_F(SpirvWriterTest, Constant_Array_Array_I32) {
 
 TEST_F(SpirvWriterTest, Constant_Array_LargeAllZero) {
     b.Append(b.ir.root_block,
-             [&] { b.Var<private_, read_write>("v", b.Zero(ty.array<i32, 65535>())); });
+             [&] { b.Var<private_, read_write>("v", b.Zero<array<i32, 65535>>()); });
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(" = OpConstantNull %_arr_int_uint_65535");
 }
