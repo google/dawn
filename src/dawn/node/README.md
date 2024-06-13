@@ -53,7 +53,7 @@ cmake <dawn-root-path> -DDAWN_BUILD_NODE_BINDINGS=1
 cmake --build . --target dawn_node
 ```
 
-If building with ASan on macOS:
+If building with ASan using Clang:
 
 1. Open dawn/third_party/abseil-cpp/absl/copts/copts.py
 2. Add "-fsanitize=address" to the List corresponding to the compiler you are using (GCC or LLVM)
