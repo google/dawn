@@ -495,7 +495,7 @@ MaybeError CommandBuffer::ExecuteComputePass(
 
                 DAWN_TRY(bindGroupTracker.Apply());
 
-                Buffer* indirectBuffer = ToBackend(dispatch->indirectBuffer.Get());
+                auto* indirectBuffer = ToGPUOnlyBuffer(dispatch->indirectBuffer.Get());
 
                 if (lastPipeline->UsesNumWorkgroups()) {
                     // Copy indirect args into the uniform buffer for built-in workgroup variables.
@@ -667,7 +667,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
             case Command::DrawIndirect: {
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
-                Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+                auto* indirectBuffer = ToGPUOnlyBuffer(draw->indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
 
                 DAWN_TRY(bindGroupTracker.Apply());
@@ -693,7 +693,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
             case Command::DrawIndexedIndirect: {
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
-                Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+                auto* indirectBuffer = ToGPUOnlyBuffer(draw->indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
 
                 DAWN_TRY(bindGroupTracker.Apply());
@@ -746,15 +746,16 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 DXGI_FORMAT indexBufferFormat = DXGIIndexFormat(cmd->format);
 
                 commandContext->GetD3D11DeviceContext4()->IASetIndexBuffer(
-                    ToBackend(cmd->buffer)->GetD3D11NonConstantBuffer(), indexBufferFormat,
-                    indexBufferBaseOffset);
+                    ToGPUOnlyBuffer(cmd->buffer.Get())->GetD3D11NonConstantBuffer(),
+                    indexBufferFormat, indexBufferBaseOffset);
 
                 break;
             }
 
             case Command::SetVertexBuffer: {
                 SetVertexBufferCmd* cmd = iter->NextCommand<SetVertexBufferCmd>();
-                ID3D11Buffer* buffer = ToBackend(cmd->buffer)->GetD3D11NonConstantBuffer();
+                ID3D11Buffer* buffer =
+                    ToGPUOnlyBuffer(cmd->buffer.Get())->GetD3D11NonConstantBuffer();
                 vertexBufferTracker.OnSetVertexBuffer(cmd->slot, buffer, cmd->offset);
                 break;
             }

@@ -166,10 +166,10 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     // called once through the exposed Destroy function.
     virtual void DestroyImpl() = 0;
 
+    virtual void SetLabelImpl();
+
   private:
     friend class ApiObjectList;
-
-    virtual void SetLabelImpl();
 
     std::string mLabel;
 };

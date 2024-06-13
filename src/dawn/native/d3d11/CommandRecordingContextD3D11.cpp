@@ -261,7 +261,7 @@ ResultOrError<Ref<BufferBase>> CommandRecordingContext::CreateInternalUniformBuf
 }
 
 void CommandRecordingContext::SetInternalUniformBuffer(Ref<BufferBase> uniformBuffer) {
-    mUniformBuffer = ToBackend(std::move(uniformBuffer));
+    mUniformBuffer = ToGPUOnlyBuffer(std::move(uniformBuffer));
 
     // Always bind the uniform buffer to the reserved slot for all pipelines.
     // This buffer will be updated with the correct values before each draw or dispatch call.
