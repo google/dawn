@@ -93,6 +93,7 @@ struct State {
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kTextureNumLevels:
+                    case core::BuiltinFn::kTextureNumSamples:
                     case core::BuiltinFn::kTextureSample:
                     case core::BuiltinFn::kTextureSampleBias:
                     case core::BuiltinFn::kTextureSampleCompare:
@@ -160,6 +161,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureNumLevels:
                     TextureNumLevels(builtin);
+                    break;
+                case core::BuiltinFn::kTextureNumSamples:
+                    TextureNumSamples(builtin);
                     break;
                 case core::BuiltinFn::kTextureSample:
                     TextureSample(builtin);
@@ -363,6 +367,12 @@ struct State {
     /// @param builtin the builtin call instruction
     void TextureNumLevels(core::ir::CoreBuiltinCall* builtin) {
         TextureNumHelper(builtin, msl::BuiltinFn::kGetNumMipLevels);
+    }
+
+    /// Replace a textureNumSamples call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureNumSamples(core::ir::CoreBuiltinCall* builtin) {
+        TextureNumHelper(builtin, msl::BuiltinFn::kGetNumSamples);
     }
 
     /// Replace a textureSample call with the equivalent MSL intrinsic.

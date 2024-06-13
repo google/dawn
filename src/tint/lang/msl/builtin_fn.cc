@@ -76,6 +76,8 @@ const char* str(BuiltinFn i) {
             return "get_array_size";
         case BuiltinFn::kGetNumMipLevels:
             return "get_num_mip_levels";
+        case BuiltinFn::kGetNumSamples:
+            return "get_num_samples";
         case BuiltinFn::kRead:
             return "read";
         case BuiltinFn::kSample:

@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -1310,6 +1311,40 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureNumLevels) {
 %foo = func(%t:texture_2d<f32>):u32 {
   $B1: {
     %3:u32 = %t.get_num_mip_levels
+    ret %3
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureNumSamples) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureNumSamples, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_multisampled_2d<f32>):u32 {
+  $B1: {
+    %3:u32 = textureNumSamples %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_multisampled_2d<f32>):u32 {
+  $B1: {
+    %3:u32 = %t.get_num_samples
     ret %3
   }
 }

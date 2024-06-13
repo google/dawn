@@ -64,6 +64,7 @@ enum class BuiltinFn : uint8_t {
     kGetDepth,
     kGetArraySize,
     kGetNumMipLevels,
+    kGetNumSamples,
     kRead,
     kSample,
     kSampleCompare,
