@@ -72,6 +72,8 @@ const char* str(BuiltinFn i) {
             return "get_height";
         case BuiltinFn::kGetDepth:
             return "get_depth";
+        case BuiltinFn::kGetArraySize:
+            return "get_array_size";
         case BuiltinFn::kGetNumMipLevels:
             return "get_num_mip_levels";
         case BuiltinFn::kRead:

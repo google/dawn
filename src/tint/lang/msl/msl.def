@@ -176,6 +176,12 @@ match fiu32: f32 | i32 | u32
 @member_function fn get_depth[T: fiu32](texture: texture_3d<T>, u32) -> u32
 @member_function fn get_depth[F: texel_format, A: access](texture: texture_storage_3d<F, A>, u32) -> u32
 
+@member_function fn get_array_size[T: fiu32](texture: texture_2d_array<T>) -> u32
+@member_function fn get_array_size[T: fiu32](texture: texture_cube_array<T>) -> u32
+@member_function fn get_array_size(texture: texture_depth_2d_array) -> u32
+@member_function fn get_array_size(texture: texture_depth_cube_array) -> u32
+@member_function fn get_array_size[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>) -> u32
+
 @member_function fn get_num_mip_levels[T: fiu32](texture: texture_1d<T>) -> u32
 @member_function fn get_num_mip_levels[T: fiu32](texture: texture_2d<T>) -> u32
 @member_function fn get_num_mip_levels[T: fiu32](texture: texture_2d_array<T>) -> u32
