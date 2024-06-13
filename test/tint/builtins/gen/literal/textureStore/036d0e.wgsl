@@ -40,12 +40,6 @@
 fn textureStore_036d0e() {
   textureStore(arg_0, vec3<i32>(1i), vec4<f32>(1.f));
 }
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureStore_036d0e();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   textureStore_036d0e();

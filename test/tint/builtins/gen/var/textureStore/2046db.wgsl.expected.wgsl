@@ -7,12 +7,6 @@ fn textureStore_2046db() {
   textureStore(arg_0, arg_1, arg_2, arg_3);
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureStore_2046db();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   textureStore_2046db();

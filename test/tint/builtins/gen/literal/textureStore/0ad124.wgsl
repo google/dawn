@@ -42,12 +42,6 @@ enable chromium_internal_graphite;
 fn textureStore_0ad124() {
   textureStore(arg_0, 1i, vec4<f32>(1.f));
 }
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureStore_0ad124();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   textureStore_0ad124();

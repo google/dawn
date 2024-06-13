@@ -4,12 +4,6 @@ fn textureStore_6d259f() {
   textureStore(arg_0, vec2<i32>(1i), vec4<u32>(1u));
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureStore_6d259f();
-  return vec4<f32>();
-}
-
 @fragment
 fn fragment_main() {
   textureStore_6d259f();

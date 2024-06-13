@@ -186,19 +186,13 @@ class StorageTextureValidationTests : public ValidationTest {
 TEST_F(StorageTextureValidationTests, RenderPipeline) {
     // Write-only storage textures cannot be declared in a vertex shader.
     {
-        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, write>;
             @vertex
             fn main(@builtin(vertex_index) vertex_index : u32) -> @builtin(position) vec4f {
                 textureStore(image0, vec2i(i32(vertex_index), 0), vec4f(1.0, 0.0, 0.0, 1.0));
                 return vec4f(0.0);
-            })");
-
-        utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.layout = nullptr;
-        descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = mDefaultFSModule;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            })"));
     }
 
     // Write-only storage textures can be declared in a fragment shader.

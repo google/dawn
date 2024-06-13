@@ -1,26 +1,4 @@
 #version 310 es
-
-layout(rgba32ui) uniform highp writeonly uimage3D arg_0;
-void textureStore_d4aa95() {
-  uvec3 arg_1 = uvec3(1u);
-  uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, ivec3(arg_1), arg_2);
-}
-
-vec4 vertex_main() {
-  textureStore_d4aa95();
-  return vec4(0.0f);
-}
-
-void main() {
-  gl_PointSize = 1.0;
-  vec4 inner_result = vertex_main();
-  gl_Position = inner_result;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
-}
-#version 310 es
 precision highp float;
 precision highp int;
 
