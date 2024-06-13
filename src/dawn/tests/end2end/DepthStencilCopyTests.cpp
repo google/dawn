@@ -1344,7 +1344,6 @@ TEST_P(StencilCopyTests, ToStencilAspectAtNonZeroOffset) {
 TEST_P(StencilCopyTests, CopyNonzeroMipThenReadWithStencilTest) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Create a stencil texture
     constexpr uint32_t kWidth = 4;
