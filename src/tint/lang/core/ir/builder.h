@@ -1298,7 +1298,7 @@ class Builder {
     /// @returns the instruction
     ir::Var* Var(std::string_view name,
                  core::AddressSpace space,
-                 core::type::Type* subtype,
+                 const core::type::Type* subtype,
                  core::Access access = core::Access::kUndefined) {
         return Var(name, ir.Types().ptr(space, subtype, access));
     }

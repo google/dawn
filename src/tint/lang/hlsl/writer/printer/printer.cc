@@ -174,8 +174,12 @@ class Printer : public tint::TextGenerator {
 
         out << " = ";
 
-        // TODO(dsinclair): Add transform to create a 0-initializer if one not present
-        EmitValue(out, var->Initializer());
+        if (var->Initializer()) {
+            EmitValue(out, var->Initializer());
+        } else {
+            TINT_UNREACHABLE();
+            // TODO(dsinclair): Add zero value emission
+        }
         out << ";";
     }
 

@@ -102,6 +102,7 @@ tint_add_target(tint_lang_hlsl_writer_test test
   lang/hlsl/writer/constant_test.cc
   lang/hlsl/writer/function_test.cc
   lang/hlsl/writer/helper_test.h
+  lang/hlsl/writer/var_let_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_writer_test test
