@@ -43,6 +43,7 @@ cc_library(
   ],
   hdrs = [
     "dialect.h",
+    "type_matchers.h",
   ],
   deps = [
     "//src/tint/lang/core",
@@ -50,6 +51,7 @@ cc_library(
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/type",
     "//src/tint/lang/msl",
+    "//src/tint/lang/msl/type",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",

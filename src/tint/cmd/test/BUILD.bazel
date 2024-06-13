@@ -53,6 +53,7 @@ cc_binary(
     "//src/tint/lang/core:test",
     "//src/tint/lang/hlsl/writer/common:test",
     "//src/tint/lang/msl/ir:test",
+    "//src/tint/lang/msl/type:test",
     "//src/tint/lang/spirv/ir:test",
     "//src/tint/lang/spirv/reader/lower:test",
     "//src/tint/lang/spirv/type:test",

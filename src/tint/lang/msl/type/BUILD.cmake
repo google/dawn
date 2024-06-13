@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2024 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -35,22 +35,17 @@
 ################################################################################
 
 ################################################################################
-# Target:    tint_lang_msl_intrinsic
+# Target:    tint_lang_msl_type
 # Kind:      lib
 ################################################################################
-tint_add_target(tint_lang_msl_intrinsic lib
-  lang/msl/intrinsic/data.cc
-  lang/msl/intrinsic/dialect.h
-  lang/msl/intrinsic/type_matchers.h
+tint_add_target(tint_lang_msl_type lib
+  lang/msl/type/level.cc
+  lang/msl/type/level.h
 )
 
-tint_target_add_dependencies(tint_lang_msl_intrinsic lib
+tint_target_add_dependencies(tint_lang_msl_type lib
   tint_lang_core
-  tint_lang_core_constant
-  tint_lang_core_intrinsic
   tint_lang_core_type
-  tint_lang_msl
-  tint_lang_msl_type
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -64,4 +59,28 @@ tint_target_add_dependencies(tint_lang_msl_intrinsic lib
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+################################################################################
+# Target:    tint_lang_msl_type_test
+# Kind:      test
+################################################################################
+tint_add_target(tint_lang_msl_type_test test
+  lang/msl/type/level_test.cc
+)
+
+tint_target_add_dependencies(tint_lang_msl_type_test test
+  tint_lang_core_type
+  tint_lang_msl_type
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_msl_type_test test
+  "gtest"
 )

@@ -1,321 +1,164 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Params {
+  uint filterDim;
+  uint blockDim;
+};
+struct Flip {
+  uint value;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Params = struct @align(4) {
-  filterDim:u32 @offset(0)
-  blockDim:u32 @offset(4)
+struct tint_module_vars_struct {
+  sampler samp;
+  const constant Params* params;
+  texture2d<float, access::sample> inputTex;
+  texture2d<float, access::write> outputTex;
+  const constant Flip* flip;
+  threadgroup tint_array<tint_array<float3, 256>, 4>* tile;
+};
+struct tint_symbol_2 {
+  tint_array<tint_array<float3, 256>, 4> tint_symbol_1;
+};
+
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / select(rhs, 1u, (rhs == 0u)));
 }
-
-Flip = struct @align(4) {
-  value:u32 @offset(0)
-}
-
-$B1: {  # root
-  %samp:ptr<handle, sampler, read> = var @binding_point(0, 0)
-  %params:ptr<uniform, Params, read> = var @binding_point(0, 1)
-  %inputTex:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 1)
-  %outputTex:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(1, 2)
-  %flip:ptr<uniform, Flip, read> = var @binding_point(1, 3)
-  %tile:ptr<workgroup, array<array<vec3<f32>, 256>, 4>, read_write> = var
-}
-
-%tint_symbol = @compute @workgroup_size(64, 1, 1) func(%WorkGroupID:vec3<u32> [@workgroup_id], %LocalInvocationID:vec3<u32> [@local_invocation_id], %tint_local_index:u32 [@local_invocation_index]):void {
-  $B2: {
-    loop [i: $B3, b: $B4, c: $B5] {  # loop_1
-      $B3: {  # initializer
-        next_iteration %tint_local_index  # -> $B4
+void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 1024u)) {
+        break;
       }
-      $B4 (%idx:u32): {  # body
-        %12:bool = gte %idx, 1024u
-        if %12 [t: $B6] {  # if_1
-          $B6: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %13:u32 = mod %idx, 256u
-        %14:u32 = div %idx, 256u
-        %15:ptr<workgroup, vec3<f32>, read_write> = access %tile, %14, %13
-        store %15, vec3<f32>(0.0f)
-        continue  # -> $B5
+      (*tint_module_vars.tile)[(v_1 / 256u)][(v_1 % 256u)] = float3(0.0f);
+      {
+        v = (v_1 + 64u);
       }
-      $B5: {  # continuing
-        %16:u32 = add %idx, 64u
-        next_iteration %16  # -> $B4
-      }
+      continue;
     }
-    %17:void = msl.threadgroup_barrier 4u
-    %18:ptr<uniform, u32, read> = access %params, 0u
-    %19:u32 = load %18
-    %20:u32 = sub %19, 1u
-    %21:u32 = call %tint_div_u32, %20, 2u
-    %filterOffset:u32 = let %21
-    %24:texture_2d<f32> = load %inputTex
-    %25:vec2<u32> = textureDimensions %24, 0i
-    %dims:vec2<u32> = let %25
-    %27:vec2<u32> = swizzle %WorkGroupID, xy
-    %28:ptr<uniform, u32, read> = access %params, 1u
-    %29:u32 = load %28
-    %30:vec2<u32> = construct %29, 4u
-    %31:vec2<u32> = mul %27, %30
-    %32:vec2<u32> = swizzle %LocalInvocationID, xy
-    %33:vec2<u32> = mul %32, vec2<u32>(4u, 1u)
-    %34:vec2<u32> = add %31, %33
-    %35:vec2<u32> = let %34
-    %36:vec2<u32> = construct %filterOffset, 0u
-    %37:vec2<u32> = sub %35, %36
-    %baseIndex:vec2<u32> = let %37
-    loop [i: $B7, b: $B8, c: $B9] {  # loop_2
-      $B7: {  # initializer
-        %r:ptr<function, u32, read_write> = var, 0u
-        next_iteration  # -> $B8
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  uint const filterOffset = tint_div_u32(((*tint_module_vars.params).filterDim - 1u), 2u);
+  uint const v_2 = uint(0);
+  uint const v_3 = tint_module_vars.inputTex.get_width(v_2);
+  uint2 const dims = uint2(v_3, tint_module_vars.inputTex.get_height(v_2));
+  uint2 const v_4 = ((WorkGroupID.xy * uint2((*tint_module_vars.params).blockDim, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)));
+  uint2 const baseIndex = (v_4 - uint2(filterOffset, 0u));
+  {
+    uint r = 0u;
+    while(true) {
+      if ((r < 4u)) {
+      } else {
+        break;
       }
-      $B8: {  # body
-        %40:u32 = load %r
-        %41:bool = lt %40, 4u
-        if %41 [t: $B10, f: $B11] {  # if_2
-          $B10: {  # true
-            exit_if  # if_2
+      {
+        uint c = 0u;
+        while(true) {
+          if ((c < 4u)) {
+          } else {
+            break;
           }
-          $B11: {  # false
-            exit_loop  # loop_2
+          uint2 loadIndex = (baseIndex + uint2(c, r));
+          if (((*tint_module_vars.flip).value != 0u)) {
+            loadIndex = loadIndex.yx;
           }
+          threadgroup float3* const v_5 = (&(*tint_module_vars.tile)[r][((4u * LocalInvocationID[0u]) + c)]);
+          float2 const v_6 = (float2(loadIndex) + float2(0.25f));
+          float2 const v_7 = (v_6 / float2(dims));
+          (*v_5) = tint_module_vars.inputTex.sample(tint_module_vars.samp, v_7, level(0.0f)).xyz;
+          {
+            c = (c + 1u);
+          }
+          continue;
         }
-        loop [i: $B12, b: $B13, c: $B14] {  # loop_3
-          $B12: {  # initializer
-            %c:ptr<function, u32, read_write> = var, 0u
-            next_iteration  # -> $B13
-          }
-          $B13: {  # body
-            %43:u32 = load %c
-            %44:bool = lt %43, 4u
-            if %44 [t: $B15, f: $B16] {  # if_3
-              $B15: {  # true
-                exit_if  # if_3
-              }
-              $B16: {  # false
-                exit_loop  # loop_3
-              }
-            }
-            %45:u32 = load %c
-            %46:u32 = load %r
-            %47:vec2<u32> = construct %45, %46
-            %48:vec2<u32> = add %baseIndex, %47
-            %loadIndex:ptr<function, vec2<u32>, read_write> = var, %48
-            %50:ptr<uniform, u32, read> = access %flip, 0u
-            %51:u32 = load %50
-            %52:bool = neq %51, 0u
-            if %52 [t: $B17] {  # if_4
-              $B17: {  # true
-                %53:vec2<u32> = load %loadIndex
-                %54:vec2<u32> = swizzle %53, yx
-                store %loadIndex, %54
-                exit_if  # if_4
-              }
-            }
-            %55:u32 = load %r
-            %56:u32 = access %LocalInvocationID, 0u
-            %57:u32 = mul 4u, %56
-            %58:u32 = load %c
-            %59:u32 = add %57, %58
-            %60:ptr<workgroup, vec3<f32>, read_write> = access %tile, %55, %59
-            %61:ptr<workgroup, vec3<f32>, read_write> = let %60
-            %62:texture_2d<f32> = load %inputTex
-            %63:texture_2d<f32> = let %62
-            %64:sampler = load %samp
-            %65:sampler = let %64
-            %66:vec2<u32> = load %loadIndex
-            %67:vec2<f32> = convert %66
-            %68:vec2<f32> = add %67, vec2<f32>(0.25f)
-            %69:vec2<f32> = let %68
-            %70:vec2<f32> = convert %dims
-            %71:vec2<f32> = div %69, %70
-            %72:vec4<f32> = textureSampleLevel %63, %65, %71, 0.0f
-            %73:vec3<f32> = swizzle %72, xyz
-            store %61, %73
-            continue  # -> $B14
-          }
-          $B14: {  # continuing
-            %74:u32 = load %c
-            %75:u32 = add %74, 1u
-            store %c, %75
-            next_iteration  # -> $B13
-          }
-        }
-        continue  # -> $B9
       }
-      $B9: {  # continuing
-        %76:u32 = load %r
-        %77:u32 = add %76, 1u
-        store %r, %77
-        next_iteration  # -> $B8
+      {
+        r = (r + 1u);
       }
+      continue;
     }
-    %78:void = msl.threadgroup_barrier 4u
-    loop [i: $B18, b: $B19, c: $B20] {  # loop_4
-      $B18: {  # initializer
-        %r_1:ptr<function, u32, read_write> = var, 0u  # %r_1: 'r'
-        next_iteration  # -> $B19
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  {
+    uint r = 0u;
+    while(true) {
+      if ((r < 4u)) {
+      } else {
+        break;
       }
-      $B19: {  # body
-        %80:u32 = load %r_1
-        %81:bool = lt %80, 4u
-        if %81 [t: $B21, f: $B22] {  # if_5
-          $B21: {  # true
-            exit_if  # if_5
+      {
+        uint c = 0u;
+        while(true) {
+          if ((c < 4u)) {
+          } else {
+            break;
           }
-          $B22: {  # false
-            exit_loop  # loop_4
+          uint2 writeIndex = (baseIndex + uint2(c, r));
+          if (((*tint_module_vars.flip).value != 0u)) {
+            writeIndex = writeIndex.yx;
           }
-        }
-        loop [i: $B23, b: $B24, c: $B25] {  # loop_5
-          $B23: {  # initializer
-            %c_1:ptr<function, u32, read_write> = var, 0u  # %c_1: 'c'
-            next_iteration  # -> $B24
+          uint const center = ((4u * LocalInvocationID[0u]) + c);
+          bool v_8 = false;
+          if ((center >= filterOffset)) {
+            v_8 = (center < (256u - filterOffset));
+          } else {
+            v_8 = false;
           }
-          $B24: {  # body
-            %83:u32 = load %c_1
-            %84:bool = lt %83, 4u
-            if %84 [t: $B26, f: $B27] {  # if_6
-              $B26: {  # true
-                exit_if  # if_6
-              }
-              $B27: {  # false
-                exit_loop  # loop_5
-              }
-            }
-            %85:u32 = load %c_1
-            %86:u32 = load %r_1
-            %87:vec2<u32> = construct %85, %86
-            %88:vec2<u32> = add %baseIndex, %87
-            %writeIndex:ptr<function, vec2<u32>, read_write> = var, %88
-            %90:ptr<uniform, u32, read> = access %flip, 0u
-            %91:u32 = load %90
-            %92:bool = neq %91, 0u
-            if %92 [t: $B28] {  # if_7
-              $B28: {  # true
-                %93:vec2<u32> = load %writeIndex
-                %94:vec2<u32> = swizzle %93, yx
-                store %writeIndex, %94
-                exit_if  # if_7
-              }
-            }
-            %95:u32 = access %LocalInvocationID, 0u
-            %96:u32 = mul 4u, %95
-            %97:u32 = load %c_1
-            %98:u32 = add %96, %97
-            %center:u32 = let %98
-            %100:bool = gte %center, %filterOffset
-            %101:bool = if %100 [t: $B29, f: $B30] {  # if_8
-              $B29: {  # true
-                %102:u32 = sub 256u, %filterOffset
-                %103:bool = lt %center, %102
-                exit_if %103  # if_8
-              }
-              $B30: {  # false
-                exit_if false  # if_8
-              }
-            }
-            %104:bool = if %101 [t: $B31, f: $B32] {  # if_9
-              $B31: {  # true
-                %105:vec2<u32> = load %writeIndex
-                %106:vec2<bool> = lt %105, %dims
-                %107:bool = all %106
-                exit_if %107  # if_9
-              }
-              $B32: {  # false
-                exit_if false  # if_9
-              }
-            }
-            if %104 [t: $B33] {  # if_10
-              $B33: {  # true
-                %acc:ptr<function, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
-                loop [i: $B34, b: $B35, c: $B36] {  # loop_6
-                  $B34: {  # initializer
-                    %f:ptr<function, u32, read_write> = var, 0u
-                    next_iteration  # -> $B35
-                  }
-                  $B35: {  # body
-                    %110:u32 = load %f
-                    %111:ptr<uniform, u32, read> = access %params, 0u
-                    %112:u32 = load %111
-                    %113:bool = lt %110, %112
-                    if %113 [t: $B37, f: $B38] {  # if_11
-                      $B37: {  # true
-                        exit_if  # if_11
-                      }
-                      $B38: {  # false
-                        exit_loop  # loop_6
-                      }
-                    }
-                    %114:u32 = load %f
-                    %115:u32 = add %center, %114
-                    %116:u32 = sub %115, %filterOffset
-                    %i:ptr<function, u32, read_write> = var, %116
-                    %118:vec3<f32> = load %acc
-                    %119:vec3<f32> = let %118
-                    %120:ptr<uniform, u32, read> = access %params, 0u
-                    %121:u32 = load %120
-                    %122:f32 = convert %121
-                    %123:f32 = div 1.0f, %122
-                    %124:u32 = load %r_1
-                    %125:u32 = load %i
-                    %126:ptr<workgroup, vec3<f32>, read_write> = access %tile, %124, %125
-                    %127:vec3<f32> = load %126
-                    %128:vec3<f32> = mul %123, %127
-                    %129:vec3<f32> = add %119, %128
-                    store %acc, %129
-                    continue  # -> $B36
-                  }
-                  $B36: {  # continuing
-                    %130:u32 = load %f
-                    %131:u32 = add %130, 1u
-                    store %f, %131
-                    next_iteration  # -> $B35
-                  }
+          bool v_9 = false;
+          if (v_8) {
+            v_9 = all((writeIndex < dims));
+          } else {
+            v_9 = false;
+          }
+          if (v_9) {
+            float3 acc = float3(0.0f);
+            {
+              uint f = 0u;
+              while(true) {
+                if ((f < (*tint_module_vars.params).filterDim)) {
+                } else {
+                  break;
                 }
-                %132:texture_storage_2d<rgba8unorm, write> = load %outputTex
-                %133:texture_storage_2d<rgba8unorm, write> = let %132
-                %134:vec2<u32> = load %writeIndex
-                %135:vec2<u32> = let %134
-                %136:vec3<f32> = load %acc
-                %137:vec4<f32> = construct %136, 1.0f
-                %138:void = textureStore %133, %135, %137
-                exit_if  # if_10
+                uint i = ((center + f) - filterOffset);
+                float3 const v_10 = acc;
+                float const v_11 = (1.0f / float((*tint_module_vars.params).filterDim));
+                acc = (v_10 + (v_11 * (*tint_module_vars.tile)[r][i]));
+                {
+                  f = (f + 1u);
+                }
+                continue;
               }
             }
-            continue  # -> $B25
+            uint2 const v_12 = writeIndex;
+            tint_module_vars.outputTex.write(float4(acc, 1.0f), v_12);
           }
-          $B25: {  # continuing
-            %139:u32 = load %c_1
-            %140:u32 = add %139, 1u
-            store %c_1, %140
-            next_iteration  # -> $B24
+          {
+            c = (c + 1u);
           }
+          continue;
         }
-        continue  # -> $B20
       }
-      $B20: {  # continuing
-        %141:u32 = load %r_1
-        %142:u32 = add %141, 1u
-        store %r_1, %142
-        next_iteration  # -> $B19
+      {
+        r = (r + 1u);
       }
+      continue;
     }
-    ret
   }
 }
-%tint_div_u32 = func(%lhs:u32, %rhs:u32):u32 {
-  $B39: {
-    %145:bool = eq %rhs, 0u
-    %146:u32 = select %rhs, 1u, %145
-    %147:u32 = div %lhs, %146
-    ret %147
-  }
+kernel void tint_symbol(uint3 WorkGroupID [[threadgroup_position_in_grid]], uint3 LocalInvocationID [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], sampler samp [[sampler(0)]], const constant Params* params [[buffer(0)]], texture2d<float, access::sample> inputTex [[texture(0)]], texture2d<float, access::write> outputTex [[texture(1)]], const constant Flip* flip [[buffer(1)]], threadgroup tint_symbol_2* v_13 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.samp=samp, .params=params, .inputTex=inputTex, .outputTex=outputTex, .flip=flip, .tile=(&(*v_13).tint_symbol_1)};
+  tint_symbol_inner(WorkGroupID, LocalInvocationID, tint_local_index, tint_module_vars);
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -1,56 +1,36 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> arg_0;
+  sampler arg_1;
+  device float4* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 0)
-  %arg_1:ptr<handle, sampler, read> = var @binding_point(1, 1)
-  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+void textureSampleBaseClampToEdge_9ca02c(tint_module_vars_struct tint_module_vars) {
+  float2 arg_2 = float2(1.0f);
+  float2 const v = arg_2;
+  uint const v_1 = tint_module_vars.arg_0.get_width(0u);
+  float2 const v_2 = (float2(0.5f) / float2(uint2(v_1, tint_module_vars.arg_0.get_height(0u))));
+  float2 const v_3 = clamp(v, v_2, (float2(1.0f) - v_2));
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, v_3, level(0.0f));
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-%textureSampleBaseClampToEdge_9ca02c = func():void {
-  $B2: {
-    %arg_2:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(1.0f)
-    %6:texture_2d<f32> = load %arg_0
-    %7:texture_2d<f32> = let %6
-    %8:sampler = load %arg_1
-    %9:sampler = let %8
-    %10:vec2<f32> = load %arg_2
-    %11:vec2<f32> = let %10
-    %12:vec2<u32> = textureDimensions %7
-    %13:vec2<f32> = convert %12
-    %14:vec2<f32> = div vec2<f32>(0.5f), %13
-    %15:vec2<f32> = let %14
-    %16:vec2<f32> = sub vec2<f32>(1.0f), %15
-    %17:vec2<f32> = clamp %11, %15, %16
-    %18:vec4<f32> = textureSampleLevel %7, %9, %17, 0.0f
-    %res:ptr<function, vec4<f32>, read_write> = var, %18
-    %20:vec4<f32> = load %res
-    store %prevent_dce, %20
-    ret
-  }
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  textureSampleBaseClampToEdge_9ca02c(tint_module_vars);
+  return float4(0.0f);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %22:void = call %textureSampleBaseClampToEdge_9ca02c
-    ret vec4<f32>(0.0f)
-  }
+fragment void fragment_main(texture2d<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  textureSampleBaseClampToEdge_9ca02c(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %24:void = call %textureSampleBaseClampToEdge_9ca02c
-    ret
-  }
+kernel void compute_main(texture2d<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  textureSampleBaseClampToEdge_9ca02c(tint_module_vars);
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %26:void = call %textureSampleBaseClampToEdge_9ca02c
-    ret
-  }
+vertex vertex_main_outputs vertex_main(texture2d<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

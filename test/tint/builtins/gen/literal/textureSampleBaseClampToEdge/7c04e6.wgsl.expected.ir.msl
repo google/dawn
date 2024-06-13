@@ -1,31 +1,90 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_GammaTransferParams {
+  float G;
+  float A;
+  float B;
+  float C;
+  float D;
+  float E;
+  float F;
+  uint padding;
+};
+struct tint_ExternalTextureParams {
+  uint numPlanes;
+  uint doYuvToRgbConversionOnly;
+  float3x4 yuvToRgbConversionMatrix;
+  tint_GammaTransferParams gammaDecodeParams;
+  tint_GammaTransferParams gammaEncodeParams;
+  float3x3 gamutConversionMatrix;
+  float3x2 sampleTransform;
+  float3x2 loadTransform;
+  float2 samplePlane0RectMin;
+  float2 samplePlane0RectMax;
+  float2 samplePlane1RectMin;
+  float2 samplePlane1RectMax;
+  uint2 visibleSize;
+  float2 plane1CoordFactor;
+};
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> arg_0_plane0;
+  texture2d<float, access::sample> arg_0_plane1;
+  const constant tint_ExternalTextureParams* arg_0_params;
+  sampler arg_1;
+  device float4* prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
 
-
-@group(1) @binding(0) var arg_0 : texture_external;
-
-@group(1) @binding(1) var arg_1 : sampler;
-
-fn textureSampleBaseClampToEdge_7c04e6() {
-  var res : vec4<f32> = textureSampleBaseClampToEdge(arg_0, arg_1, vec2<f32>(1.0f));
-  prevent_dce = res;
+float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
+  float3 const v_1 = float3(params.G);
+  float3 const v_2 = float3(params.D);
+  float3 const v_3 = abs(v);
+  float3 const v_4 = sign(v);
+  return select((v_4 * (pow(((params.A * v_3) + params.B), v_1) + params.E)), (v_4 * ((params.C * v_3) + params.F)), (v_3 < v_2));
 }
-
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureSampleBaseClampToEdge_7c04e6();
-  return vec4<f32>();
+float4 tint_TextureSampleExternal(texture2d<float, access::sample> plane_0, texture2d<float, access::sample> plane_1, tint_ExternalTextureParams params, sampler sampler, float2 coords) {
+  float2 const v_5 = (params.sampleTransform * float3(coords, 1.0f));
+  float2 const v_6 = clamp(v_5, params.samplePlane0RectMin, params.samplePlane0RectMax);
+  float3 v_7 = 0.0f;
+  float v_8 = 0.0f;
+  if ((params.numPlanes == 1u)) {
+    float4 const v_9 = plane_0.sample(sampler, v_6, level(0.0f));
+    v_7 = v_9.xyz;
+    v_8 = v_9[3u];
+  } else {
+    float const v_10 = plane_0.sample(sampler, v_6, level(0.0f))[0u];
+    float2 const v_11 = clamp(v_5, params.samplePlane1RectMin, params.samplePlane1RectMax);
+    v_7 = (float4(v_10, plane_1.sample(sampler, v_11, level(0.0f)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
+    v_8 = 1.0f;
+  }
+  float3 const v_12 = v_7;
+  float3 v_13 = 0.0f;
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    v_13 = tint_GammaCorrection((params.gamutConversionMatrix * tint_GammaCorrection(v_12, params.gammaDecodeParams)), params.gammaEncodeParams);
+  } else {
+    v_13 = v_12;
+  }
+  return float4(v_13, v_8);
 }
-
-@fragment
-fn fragment_main() {
-  textureSampleBaseClampToEdge_7c04e6();
+void textureSampleBaseClampToEdge_7c04e6(tint_module_vars_struct tint_module_vars) {
+  float4 res = tint_TextureSampleExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, (*tint_module_vars.arg_0_params), tint_module_vars.arg_1, float2(1.0f));
+  (*tint_module_vars.prevent_dce) = res;
 }
-
-@compute @workgroup_size(1)
-fn compute_main() {
-  textureSampleBaseClampToEdge_7c04e6();
+float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  textureSampleBaseClampToEdge_7c04e6(tint_module_vars);
+  return float4(0.0f);
 }
-
-Failed to generate: error: ExternalTextureOptions missing binding entry for [group: 1, binding: 0]
+fragment void fragment_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams* arg_0_params [[buffer(2)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  textureSampleBaseClampToEdge_7c04e6(tint_module_vars);
+}
+kernel void compute_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams* arg_0_params [[buffer(2)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  textureSampleBaseClampToEdge_7c04e6(tint_module_vars);
+}
+vertex vertex_main_outputs vertex_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams* arg_0_params [[buffer(2)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
+}

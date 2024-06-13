@@ -91,6 +91,7 @@
 #include "src/tint/lang/msl/ir/builtin_call.h"
 #include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
+#include "src/tint/lang/msl/type/level.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
@@ -1128,6 +1129,10 @@ class Printer : public tint::TextGenerator {
                 TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
                 EmitStructType(str);
             },  //
+
+            // MSL builtin types.
+            [&](const msl::type::Level*) { out << "level"; },  //
+
             TINT_ICE_ON_NO_MATCH);
     }
 

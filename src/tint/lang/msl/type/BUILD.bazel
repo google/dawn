@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2024 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,33 +37,16 @@
 load("//src/tint:flags.bzl", "COPTS")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
-  name = "raise",
+  name = "type",
   srcs = [
-    "builtin_polyfill.cc",
-    "module_scope_vars.cc",
-    "raise.cc",
-    "shader_io.cc",
+    "level.cc",
   ],
   hdrs = [
-    "builtin_polyfill.h",
-    "module_scope_vars.h",
-    "raise.h",
-    "shader_io.h",
+    "level.h",
   ],
   deps = [
-    "//src/tint/api/common",
     "//src/tint/lang/core",
-    "//src/tint/lang/core/common",
-    "//src/tint/lang/core/constant",
-    "//src/tint/lang/core/intrinsic",
-    "//src/tint/lang/core/ir",
-    "//src/tint/lang/core/ir/transform",
-    "//src/tint/lang/core/ir/transform/common",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/msl",
-    "//src/tint/lang/msl/intrinsic",
-    "//src/tint/lang/msl/ir",
-    "//src/tint/lang/msl/type",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
@@ -77,12 +60,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
-  ] + select({
-    ":tint_build_msl_writer": [
-      "//src/tint/lang/msl/writer/common",
-    ],
-    "//conditions:default": [],
-  }),
+  ],
   copts = COPTS,
   visibility = ["//visibility:public"],
 )
@@ -90,44 +68,21 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
-    "builtin_polyfill_test.cc",
-    "module_scope_vars_test.cc",
-    "shader_io_test.cc",
+    "level_test.cc",
   ],
   deps = [
-    "//src/tint/api/common",
-    "//src/tint/lang/core",
-    "//src/tint/lang/core/constant",
-    "//src/tint/lang/core/intrinsic",
-    "//src/tint/lang/core/ir",
-    "//src/tint/lang/core/ir/transform:test",
     "//src/tint/lang/core/type",
+    "//src/tint/lang/msl/type",
     "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
-    "//src/tint/utils/id",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
-    "//src/tint/utils/reflection",
-    "//src/tint/utils/result",
     "//src/tint/utils/rtti",
-    "//src/tint/utils/symbol",
-    "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
-  ] + select({
-    ":tint_build_msl_writer": [
-      "//src/tint/lang/msl/writer/raise",
-    ],
-    "//conditions:default": [],
-  }),
+  ],
   copts = COPTS,
   visibility = ["//visibility:public"],
-)
-
-alias(
-  name = "tint_build_msl_writer",
-  actual = "//src/tint:tint_build_msl_writer_true",
 )
 

@@ -55,6 +55,7 @@ tint_target_add_dependencies(tint_lang_msl_writer_printer lib
   tint_lang_msl
   tint_lang_msl_intrinsic
   tint_lang_msl_ir
+  tint_lang_msl_type
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_generator

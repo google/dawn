@@ -54,6 +54,7 @@ cc_library(
     "//src/tint/lang/msl",
     "//src/tint/lang/msl/intrinsic",
     "//src/tint/lang/msl/ir",
+    "//src/tint/lang/msl/type",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/generator",

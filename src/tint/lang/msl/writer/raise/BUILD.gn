@@ -66,6 +66,7 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/lang/msl",
       "${tint_src_dir}/lang/msl/intrinsic",
       "${tint_src_dir}/lang/msl/ir",
+      "${tint_src_dir}/lang/msl/type",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",

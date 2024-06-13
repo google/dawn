@@ -36,6 +36,7 @@
 
 include(lang/msl/intrinsic/BUILD.cmake)
 include(lang/msl/ir/BUILD.cmake)
+include(lang/msl/type/BUILD.cmake)
 include(lang/msl/validate/BUILD.cmake)
 include(lang/msl/writer/BUILD.cmake)
 
