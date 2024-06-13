@@ -220,7 +220,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@6701f8731529350c6c8ad7ba8003a8d215d4f90f',
+    'url': '{chromium_git}/chromium/src/testing@1bd0da6657e330cf26ed0702b3f456393587ad7c',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
