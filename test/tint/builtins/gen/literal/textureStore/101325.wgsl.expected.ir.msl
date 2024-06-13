@@ -3,17 +3,10 @@ using namespace metal;
 struct tint_module_vars_struct {
   texture3d<uint, access::read_write> arg_0;
 };
-struct vertex_main_outputs {
-  float4 tint_symbol [[position]];
-};
 
 void textureStore_101325(tint_module_vars_struct tint_module_vars) {
   tint_module_vars.arg_0.write(uint4(1u), uint3(1u));
   tint_module_vars.arg_0.fence();
-}
-float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
-  textureStore_101325(tint_module_vars);
-  return float4(0.0f);
 }
 fragment void fragment_main(texture3d<uint, access::read_write> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
@@ -22,8 +15,4 @@ fragment void fragment_main(texture3d<uint, access::read_write> arg_0 [[texture(
 kernel void compute_main(texture3d<uint, access::read_write> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
   textureStore_101325(tint_module_vars);
-}
-vertex vertex_main_outputs vertex_main(texture3d<uint, access::read_write> arg_0 [[texture(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
-  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }

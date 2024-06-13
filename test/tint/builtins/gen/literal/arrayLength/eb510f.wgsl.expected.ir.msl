@@ -20,27 +20,35 @@ struct tint_module_vars_struct {
   device uint* prevent_dce;
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
+struct VertexOutput {
+  float4 pos;
+  uint prevent_dce;
+};
 struct vertex_main_outputs {
-  float4 tint_symbol [[position]];
+  float4 VertexOutput_pos [[position]];
+  uint VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
 
-void arrayLength_eb510f(tint_module_vars_struct tint_module_vars) {
+uint arrayLength_eb510f(tint_module_vars_struct tint_module_vars) {
   uint res = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u);
-  (*tint_module_vars.prevent_dce) = res;
+  return res;
 }
-float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
-  arrayLength_eb510f(tint_module_vars);
-  return float4(0.0f);
-}
-fragment void fragment_main(device SB_RW* sb_rw [[buffer(0)]], device uint* prevent_dce [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
+fragment void fragment_main(device SB_RW* sb_rw [[buffer(1)]], device uint* prevent_dce [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  arrayLength_eb510f(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = arrayLength_eb510f(tint_module_vars);
 }
-kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]], device uint* prevent_dce [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
+kernel void compute_main(device SB_RW* sb_rw [[buffer(1)]], device uint* prevent_dce [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  arrayLength_eb510f(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = arrayLength_eb510f(tint_module_vars);
 }
-vertex vertex_main_outputs vertex_main(device SB_RW* sb_rw [[buffer(0)]], device uint* prevent_dce [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
+VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = arrayLength_eb510f(tint_module_vars);
+  return out;
+}
+vertex vertex_main_outputs vertex_main(device SB_RW* sb_rw [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  VertexOutput const v = vertex_main_inner(tint_module_vars);
+  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
 }

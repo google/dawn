@@ -3,9 +3,6 @@ using namespace metal;
 struct tint_module_vars_struct {
   texture2d_array<uint, access::write> arg_0;
 };
-struct vertex_main_outputs {
-  float4 tint_symbol [[position]];
-};
 
 void textureStore_00ca64(tint_module_vars_struct tint_module_vars) {
   int2 arg_1 = int2(1);
@@ -15,10 +12,6 @@ void textureStore_00ca64(tint_module_vars_struct tint_module_vars) {
   uint4 const v_1 = arg_3;
   tint_module_vars.arg_0.write(v_1, uint2(arg_1), v);
 }
-float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
-  textureStore_00ca64(tint_module_vars);
-  return float4(0.0f);
-}
 fragment void fragment_main(texture2d_array<uint, access::write> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
   textureStore_00ca64(tint_module_vars);
@@ -26,8 +19,4 @@ fragment void fragment_main(texture2d_array<uint, access::write> arg_0 [[texture
 kernel void compute_main(texture2d_array<uint, access::write> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
   textureStore_00ca64(tint_module_vars);
-}
-vertex vertex_main_outputs vertex_main(texture2d_array<uint, access::write> arg_0 [[texture(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
-  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
 }

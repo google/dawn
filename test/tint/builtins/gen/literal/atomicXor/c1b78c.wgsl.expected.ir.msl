@@ -8,15 +8,15 @@ struct tint_module_vars_struct {
   device int* prevent_dce;
 };
 
-void atomicXor_c1b78c(tint_module_vars_struct tint_module_vars) {
+int atomicXor_c1b78c(tint_module_vars_struct tint_module_vars) {
   int res = atomic_fetch_xor_explicit((&(*tint_module_vars.sb_rw).arg_0), 1, memory_order_relaxed);
-  (*tint_module_vars.prevent_dce) = res;
+  return res;
 }
-fragment void fragment_main(device SB_RW* sb_rw [[buffer(0)]], device int* prevent_dce [[buffer(1)]]) {
+fragment void fragment_main(device SB_RW* sb_rw [[buffer(1)]], device int* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce};
-  atomicXor_c1b78c(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = atomicXor_c1b78c(tint_module_vars);
 }
-kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]], device int* prevent_dce [[buffer(1)]]) {
+kernel void compute_main(device SB_RW* sb_rw [[buffer(1)]], device int* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce};
-  atomicXor_c1b78c(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = atomicXor_c1b78c(tint_module_vars);
 }

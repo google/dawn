@@ -1,15 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
+struct VertexOutput {
+  float4 pos;
+};
 struct vertex_main_outputs {
-  float4 tint_symbol [[position]];
+  float4 VertexOutput_pos [[position]];
 };
 
 void log_f60cc7() {
   float2 res = float2(0.0f);
-}
-float4 vertex_main_inner() {
-  log_f60cc7();
-  return float4(0.0f);
 }
 fragment void fragment_main() {
   log_f60cc7();
@@ -17,6 +16,12 @@ fragment void fragment_main() {
 kernel void compute_main() {
   log_f60cc7();
 }
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  log_f60cc7();
+  return out;
+}
 vertex vertex_main_outputs vertex_main() {
-  return vertex_main_outputs{.tint_symbol=vertex_main_inner()};
+  return vertex_main_outputs{.VertexOutput_pos=vertex_main_inner().pos};
 }

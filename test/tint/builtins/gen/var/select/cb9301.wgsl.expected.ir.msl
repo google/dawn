@@ -3,30 +3,37 @@ using namespace metal;
 struct tint_module_vars_struct {
   device int* prevent_dce;
 };
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
 struct vertex_main_outputs {
-  float4 tint_symbol [[position]];
+  float4 VertexOutput_pos [[position]];
+  int VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
 
-void select_cb9301(tint_module_vars_struct tint_module_vars) {
+int select_cb9301() {
   bool2 arg_0 = bool2(true);
   bool2 arg_1 = bool2(true);
   bool2 arg_2 = bool2(true);
   bool2 res = select(arg_0, arg_1, arg_2);
-  (*tint_module_vars.prevent_dce) = select(0, 1, all((res == bool2(false))));
-}
-float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
-  select_cb9301(tint_module_vars);
-  return float4(0.0f);
+  return select(0, 1, all((res == bool2(false))));
 }
 fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  select_cb9301(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = select_cb9301();
 }
 kernel void compute_main(device int* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  select_cb9301(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = select_cb9301();
 }
-vertex vertex_main_outputs vertex_main(device int* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = select_cb9301();
+  return out;
+}
+vertex vertex_main_outputs vertex_main() {
+  VertexOutput const v = vertex_main_inner();
+  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
 }

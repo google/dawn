@@ -1,15 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
+struct VertexOutput {
+  float4 pos;
+};
 struct vertex_main_outputs {
-  float4 tint_symbol [[position]];
+  float4 VertexOutput_pos [[position]];
 };
 
 void max_19070a() {
   int4 res = int4(1);
-}
-float4 vertex_main_inner() {
-  max_19070a();
-  return float4(0.0f);
 }
 fragment void fragment_main() {
   max_19070a();
@@ -17,6 +16,12 @@ fragment void fragment_main() {
 kernel void compute_main() {
   max_19070a();
 }
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  max_19070a();
+  return out;
+}
 vertex vertex_main_outputs vertex_main() {
-  return vertex_main_outputs{.tint_symbol=vertex_main_inner()};
+  return vertex_main_outputs{.VertexOutput_pos=vertex_main_inner().pos};
 }

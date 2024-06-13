@@ -8,19 +8,19 @@ struct tint_symbol_1 {
   int tint_symbol;
 };
 
-void workgroupUniformLoad_9d33de(tint_module_vars_struct tint_module_vars) {
+int workgroupUniformLoad_9d33de(tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
   int const v = (*tint_module_vars.arg_0);
   threadgroup_barrier(mem_flags::mem_threadgroup);
   int res = v;
-  (*tint_module_vars.prevent_dce) = res;
+  return res;
 }
 void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index == 0u)) {
     (*tint_module_vars.arg_0) = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  workgroupUniformLoad_9d33de(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = workgroupUniformLoad_9d33de(tint_module_vars);
 }
 kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]], device int* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=(&(*v_1).tint_symbol), .prevent_dce=prevent_dce};

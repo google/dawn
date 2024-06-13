@@ -3,11 +3,16 @@ using namespace metal;
 struct tint_module_vars_struct {
   device int2* prevent_dce;
 };
+struct VertexOutput {
+  float4 pos;
+  int2 prevent_dce;
+};
 struct vertex_main_outputs {
-  float4 tint_symbol [[position]];
+  float4 VertexOutput_pos [[position]];
+  int2 VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
 
-void insertBits_fe6ba6(tint_module_vars_struct tint_module_vars) {
+int2 insertBits_fe6ba6() {
   int2 arg_0 = int2(1);
   int2 arg_1 = int2(1);
   uint arg_2 = 1u;
@@ -17,21 +22,23 @@ void insertBits_fe6ba6(tint_module_vars_struct tint_module_vars) {
   uint const v_2 = arg_3;
   uint const v_3 = min(arg_2, 32u);
   int2 res = insert_bits(v, v_1, v_3, min(v_2, (32u - v_3)));
-  (*tint_module_vars.prevent_dce) = res;
-}
-float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
-  insertBits_fe6ba6(tint_module_vars);
-  return float4(0.0f);
+  return res;
 }
 fragment void fragment_main(device int2* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  insertBits_fe6ba6(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = insertBits_fe6ba6();
 }
 kernel void compute_main(device int2* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  insertBits_fe6ba6(tint_module_vars);
+  (*tint_module_vars.prevent_dce) = insertBits_fe6ba6();
 }
-vertex vertex_main_outputs vertex_main(device int2* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  return vertex_main_outputs{.tint_symbol=vertex_main_inner(tint_module_vars)};
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = insertBits_fe6ba6();
+  return out;
+}
+vertex vertex_main_outputs vertex_main() {
+  VertexOutput const v_4 = vertex_main_inner();
+  return vertex_main_outputs{.VertexOutput_pos=v_4.pos, .VertexOutput_prevent_dce=v_4.prevent_dce};
 }

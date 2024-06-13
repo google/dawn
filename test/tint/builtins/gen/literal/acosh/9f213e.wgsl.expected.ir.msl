@@ -1,15 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
+struct VertexOutput {
+  float4 pos;
+};
 struct vertex_main_outputs {
-  float4 tint_symbol [[position]];
+  float4 VertexOutput_pos [[position]];
 };
 
 void acosh_9f213e() {
   float3 res = float3(1.0f);
-}
-float4 vertex_main_inner() {
-  acosh_9f213e();
-  return float4(0.0f);
 }
 fragment void fragment_main() {
   acosh_9f213e();
@@ -17,6 +16,12 @@ fragment void fragment_main() {
 kernel void compute_main() {
   acosh_9f213e();
 }
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  acosh_9f213e();
+  return out;
+}
 vertex vertex_main_outputs vertex_main() {
-  return vertex_main_outputs{.tint_symbol=vertex_main_inner()};
+  return vertex_main_outputs{.VertexOutput_pos=vertex_main_inner().pos};
 }
