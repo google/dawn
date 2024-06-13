@@ -490,6 +490,16 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::MetalUseMockBlitEncoderForWriteTimestamp, true);
     }
 
+    // On macOS 15.0+, we can use sampleTimestamps:gpuTimestamp: from MTLDevice to capture CPU and
+    // GPU timestamps to estimate GPU timestamp period at device creation, but this API call will
+    // cause GPU overheating on Intel Iris Plus Graphics 655 due to driver bug. Skip the
+    // timestamp sampling on the specific device as workaround. See https://crbug.com/342701242 for
+    // more details.
+    if (@available(macos 15.0, iOS 14.0, *)) {
+        deviceToggles->Default(Toggle::MetalDisableTimestampPeriodEstimation,
+                               gpu_info::IsIrisPlus655(deviceId));
+    }
+
 #if DAWN_PLATFORM_IS(MACOS)
     if (gpu_info::IsIntel(vendorId)) {
         deviceToggles->Default(

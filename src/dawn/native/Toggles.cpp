@@ -340,6 +340,13 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "This toggle is enabled by default on Metal backend where GPU counters cannot be stored to"
       "sampleBufferAttachments on empty blit encoder.",
       "https://crbug.com/dawn/1473", ToggleStage::Device}},
+    {Toggle::MetalDisableTimestampPeriodEstimation,
+     {"metal_disable_timestamp_period_estimation",
+      "Calling sampleTimestamps:gpuTimestamp: from MTLDevice to estimate timestamp period leads to "
+      "GPU overheating on some specific Intel GPUs due to driver issue, such as Intel Iris "
+      "Plus Graphics 655. Enable this workaround to skip timestamp period estimation and use a "
+      "default value instead on the specific GPUs.",
+      "https://crbug.com/342701242", ToggleStage::Device}},
     {Toggle::VulkanSplitCommandBufferOnComputePassAfterRenderPass,
      {"vulkan_split_command_buffer_on_compute_pass_after_render_pass",
       "Splits any command buffer where a compute pass is recorded after a render pass. This "

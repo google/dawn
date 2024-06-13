@@ -73,6 +73,7 @@ int CompareIntelMesaDriverVersion(const DriverVersion& version1, const DriverVer
 
 // Intel architectures
 bool IsSkylake(PCIDeviceID deviceId);
+bool IsIrisPlus655(PCIDeviceID deviceId);
 
 }  // namespace dawn::gpu_info
 #endif  // SRC_DAWN_COMMON_GPUINFO_H_

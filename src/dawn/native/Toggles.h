@@ -95,6 +95,7 @@ enum class Toggle {
     D3D12UseTempBufferInTextureToTextureCopyBetweenDifferentDimensions,
     ApplyClearBigIntegerColorValueWithDraw,
     MetalUseMockBlitEncoderForWriteTimestamp,
+    MetalDisableTimestampPeriodEstimation,
     VulkanSplitCommandBufferOnComputePassAfterRenderPass,
     DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment,
     MetalUseCombinedDepthStencilFormatForStencil8,
