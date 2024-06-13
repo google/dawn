@@ -91,6 +91,7 @@ if (tint_build_unittests) {
   if (tint_build_hlsl_writer) {
     tint_unittests_source_set("unittests") {
       sources = [
+        "constant_test.cc",
         "function_test.cc",
         "helper_test.h",
       ]
