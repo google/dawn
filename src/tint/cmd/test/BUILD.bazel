@@ -100,6 +100,7 @@ cc_binary(
   }) + select({
     ":tint_build_hlsl_writer": [
       "//src/tint/lang/hlsl/writer/ast_printer:test",
+      "//src/tint/lang/hlsl/writer:test",
     ],
     "//conditions:default": [],
   }) + select({

@@ -1282,6 +1282,19 @@ class Builder {
         return Var(name, ir.Types().ptr<SPACE, T, ACCESS>());
     }
 
+    /// Creates a new `var` declaration with a name
+    /// @param name the var name
+    /// @param space the var's address space
+    /// @param subtype the storage pointer's element type
+    /// @param access the var's access mode
+    /// @returns the instruction
+    ir::Var* Var(std::string_view name,
+                 core::AddressSpace space,
+                 core::type::Type* subtype,
+                 core::Access access = core::Access::kUndefined) {
+        return Var(name, ir.Types().ptr(space, subtype, access));
+    }
+
     /// Creates a new `let` declaration
     /// @param name the let name
     /// @param value the let value

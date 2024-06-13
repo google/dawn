@@ -108,6 +108,7 @@ endif(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRIT
 if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_hlsl_writer_ast_printer_test
+    tint_lang_hlsl_writer_test
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
