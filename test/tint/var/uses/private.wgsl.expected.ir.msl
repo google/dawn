@@ -32,7 +32,7 @@ kernel void main1() {
 }
 kernel void main2() {
   thread int b = 0;
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&b)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=(&b)};
   (*tint_module_vars.b) = 7;
   uses_b(tint_module_vars);
 }

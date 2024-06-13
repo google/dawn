@@ -68,13 +68,9 @@ kernel void tint_symbol(texture2d<float, access::sample> t_plane0 [[texture(1)]]
   tint_ExternalTextureParams const v_13 = (*tint_module_vars.t_params);
   float4 red = tint_TextureLoadExternal(tint_module_vars.t_plane0, tint_module_vars.t_plane1, v_13, min(uint2(int2(10)), ((v_13.visibleSize + uint2(1u)) - uint2(1u))));
   float4 const v_14 = red;
-  uint const v_15 = tint_module_vars.outImage.get_width(0u);
-  uint2 const v_16 = (uint2(v_15, tint_module_vars.outImage.get_height(0u)) - uint2(1u));
-  tint_module_vars.outImage.write(v_14, min(uint2(int2(0)), v_16));
-  tint_ExternalTextureParams const v_17 = (*tint_module_vars.t_params);
-  float4 green = tint_TextureLoadExternal(tint_module_vars.t_plane0, tint_module_vars.t_plane1, v_17, min(uint2(int2(70, 118)), ((v_17.visibleSize + uint2(1u)) - uint2(1u))));
-  float4 const v_18 = green;
-  uint const v_19 = tint_module_vars.outImage.get_width(0u);
-  uint2 const v_20 = (uint2(v_19, tint_module_vars.outImage.get_height(0u)) - uint2(1u));
-  tint_module_vars.outImage.write(v_18, min(uint2(int2(1, 0)), v_20));
+  tint_module_vars.outImage.write(v_14, uint2(int2(0)));
+  tint_ExternalTextureParams const v_15 = (*tint_module_vars.t_params);
+  float4 green = tint_TextureLoadExternal(tint_module_vars.t_plane0, tint_module_vars.t_plane1, v_15, min(uint2(int2(70, 118)), ((v_15.visibleSize + uint2(1u)) - uint2(1u))));
+  float4 const v_16 = green;
+  tint_module_vars.outImage.write(v_16, uint2(int2(1, 0)));
 }

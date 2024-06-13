@@ -1045,12 +1045,14 @@ class Printer : public tint::TextGenerator {
                 out << StructName(struct_ty);
                 out << "{";
                 size_t i = 0;
+                bool needs_comma = false;
                 for (auto* arg : c->Args()) {
                     if (arg == nullptr) {
                         // Skip `undef` values.
+                        i++;
                         continue;
                     }
-                    if (i > 0) {
+                    if (needs_comma) {
                         out << ", ";
                     }
                     // Emit field designators for structures so that we can skip padding members and
@@ -1058,6 +1060,7 @@ class Printer : public tint::TextGenerator {
                     auto name = struct_ty->Members()[i]->Name().Name();
                     out << "." << name << "=";
                     EmitAndTakeAddressIfNeeded(out, arg);
+                    needs_comma = true;
                     i++;
                 }
                 out << "}";

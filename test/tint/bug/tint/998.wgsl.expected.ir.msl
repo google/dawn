@@ -1,37 +1,34 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Constants {
+  uint zero;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Constants = struct @align(4) {
-  zero:u32 @offset(0)
+struct S {
+  tint_array<uint, 3> data;
+};
+struct Result {
+  uint value;
+};
+struct tint_module_vars_struct {
+  const constant Constants* constants;
+  device Result* result;
+  thread S* s;
+};
+
+kernel void tint_symbol(const constant Constants* constants [[buffer(0)]]) {
+  thread S s = {};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.constants=constants, .s=(&s)};
+  (*tint_module_vars.s).data[(*tint_module_vars.constants).zero] = 0u;
 }
-
-Result = struct @align(4) {
-  value:u32 @offset(0)
-}
-
-S = struct @align(4) {
-  data:array<u32, 3> @offset(0)
-}
-
-$B1: {  # root
-  %constants:ptr<uniform, Constants, read> = var @binding_point(1, 0)
-  %result:ptr<storage, Result, read_write> = var @binding_point(0, 1)
-  %s:ptr<private, S, read_write> = var
-}
-
-%tint_symbol = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %5:ptr<uniform, u32, read> = access %constants, 0u
-    %6:u32 = load %5
-    %7:ptr<private, u32, read_write> = access %s, 0u, %6
-    store %7, 0u
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

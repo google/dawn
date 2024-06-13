@@ -67,7 +67,7 @@ kernel void main1(uint tint_local_index [[thread_index_in_threadgroup]], threadg
   main1_inner(tint_local_index, tint_module_vars);
 }
 kernel void main2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_4* v_1 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v_1).tint_symbol_3)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=(&(*v_1).tint_symbol_3)};
   main2_inner(tint_local_index, tint_module_vars);
 }
 kernel void main3(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_2 [[threadgroup(0)]]) {
