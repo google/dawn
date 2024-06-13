@@ -77,18 +77,18 @@ class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedR
     // Returns true if access was acquired. If it returns true, then APIEndAccess must
     // be called to release access. Other errors may occur even if `true` is returned.
     // Use an error scope to catch them.
-    bool APIBeginAccess(TextureBase* texture,
-                        const SharedTextureMemoryBeginAccessDescriptor* descriptor);
+    wgpu::Status APIBeginAccess(TextureBase* texture,
+                                const SharedTextureMemoryBeginAccessDescriptor* descriptor);
     // Returns true if access was released.
-    bool APIEndAccess(TextureBase* texture, SharedTextureMemoryEndAccessState* state);
+    wgpu::Status APIEndAccess(TextureBase* texture, SharedTextureMemoryEndAccessState* state);
 
     // Returns true if access was acquired. If it returns true, then APIEndAccess must
     // be called to release access. Other errors may occur even if `true` is returned.
     // Use an error scope to catch them.
-    bool APIBeginAccess(BufferBase* buffer,
-                        const SharedBufferMemoryBeginAccessDescriptor* descriptor);
+    wgpu::Status APIBeginAccess(BufferBase* buffer,
+                                const SharedBufferMemoryBeginAccessDescriptor* descriptor);
     // Returns true if access was released.
-    bool APIEndAccess(BufferBase* buffer, SharedBufferMemoryEndAccessState* state);
+    wgpu::Status APIEndAccess(BufferBase* buffer, SharedBufferMemoryEndAccessState* state);
 
     // Returns true iff the device passed to this object on creation is now lost.
     // TODO(crbug.com/1506468): Eliminate this API once Chromium has been
@@ -111,7 +111,7 @@ class SharedResourceMemory : public ApiObjectBase, public WeakRefSupport<SharedR
     MaybeError BeginAccess(Resource* resource, const BeginAccessDescriptor* rawDescriptor);
 
     template <typename Resource, typename EndAccessState>
-    MaybeError EndAccess(Resource* resource, EndAccessState* state, bool* didEnd);
+    MaybeError EndAccess(Resource* resource, EndAccessState* state);
 
     template <typename Resource, typename EndAccessState>
     ResultOrError<FenceAndSignalValue> EndAccessInternal(ExecutionSerial lastUsageSerial,

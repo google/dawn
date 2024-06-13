@@ -1974,7 +1974,7 @@
             },
             {
                 "name": "begin access",
-                "returns": "bool",
+                "returns": "status",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
                     {"name": "descriptor", "type": "shared buffer memory begin access descriptor", "annotation": "const*"}
@@ -1982,7 +1982,7 @@
             },
             {
                 "name": "end access",
-                "returns": "bool",
+                "returns": "status",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
                     {"name": "descriptor", "type": "shared buffer memory end access state", "annotation": "*"}
@@ -2039,7 +2039,7 @@
             },
             {
                 "name": "begin access",
-                "returns": "bool",
+                "returns": "status",
                 "args": [
                     {"name": "texture", "type": "texture"},
                     {"name": "descriptor", "type": "shared texture memory begin access descriptor", "annotation": "const*"}
@@ -2047,7 +2047,7 @@
             },
             {
                 "name": "end access",
-                "returns": "bool",
+                "returns": "status",
                 "args": [
                     {"name": "texture", "type": "texture"},
                     {"name": "descriptor", "type": "shared texture memory end access state", "annotation": "*"}
