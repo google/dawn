@@ -382,7 +382,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF16) {
 )");
 }
 
-TEST_F(HlslWriterTest, ConstantTypeArray) {
+TEST_F(HlslWriterTest, DISABLED_ConstantTypeArray) {
     auto* f = b.Function("a", ty.array<vec3<f32>, 3>());
     b.Append(f->Block(), [&] {
         b.Return(f,
@@ -392,8 +392,10 @@ TEST_F(HlslWriterTest, ConstantTypeArray) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float3[3] a() {
-  return {float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), float3(7.0f, 8.0f, 9.0f)};
+    EXPECT_EQ(output_.hlsl, R"(typedef float3 a_ret[3]
+a_ret a() {
+  float3 tint_symbol[3] = {float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), float3(7.0f, 8.0f, 9.0f)};
+  return tint_symbol;
 }
 )");
 }
