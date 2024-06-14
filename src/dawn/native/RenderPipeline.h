@@ -49,7 +49,6 @@ enum class VertexFormatBaseType {
 };
 
 struct VertexFormatInfo {
-    wgpu::VertexFormat format;
     uint32_t byteSize;
     uint32_t componentCount;
     VertexFormatBaseType baseType;
