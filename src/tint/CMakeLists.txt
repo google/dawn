@@ -680,7 +680,7 @@ if (DAWN_BUILD_PROTOBUF)
       PROTOC_OUT_DIR "${DAWN_BUILD_GEN_DIR}")
     target_include_directories(${PROTO_TARGET} PRIVATE "${DAWN_BUILD_GEN_DIR}/src/tint/")
     target_include_directories(${PROTO_TARGET} PUBLIC "${DAWN_BUILD_GEN_DIR}")
-    target_link_libraries(${PROTO_TARGET} libprotobuf)
+    target_link_libraries(${PROTO_TARGET} PUBLIC libprotobuf)
   endforeach()
 endif()
 
