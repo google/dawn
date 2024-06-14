@@ -37,7 +37,8 @@
 import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
-if (tint_build_ir_binary && tint_build_ir_fuzzer) {
+if (tint_build_ir_binary && tint_build_ir_fuzzer &&
+    (!is_asan || build_with_chromium)) {
   tint_proto_library("proto") {
     sources = [ "fuzz.proto" ]
     deps = []
@@ -90,7 +91,8 @@ tint_fuzz_source_set("fuzz") {
     ]
   }
 }
-if (tint_build_ir_binary && tint_build_ir_fuzzer) {
+if (tint_build_ir_binary && tint_build_ir_fuzzer &&
+    (!is_asan || build_with_chromium)) {
   tint_fuzzer_test("ir") {
     output_name = "tint_ir_fuzzer"
     sources = [ "main_fuzz.cc" ]
@@ -139,7 +141,8 @@ if (tint_build_ir_binary && tint_build_ir_fuzzer) {
       ]
     }
 
-    if (tint_build_ir_binary && tint_build_ir_fuzzer) {
+    if (tint_build_ir_binary && tint_build_ir_fuzzer &&
+        (!is_asan || build_with_chromium)) {
       deps += [ "${tint_src_dir}/cmd/fuzz/ir:proto" ]
     }
 

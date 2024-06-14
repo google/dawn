@@ -360,6 +360,7 @@ message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 message(STATUS "Tint external benchmark corpus dir: ${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}")
 
+set(IS_ASAN ${DAWN_ENABLE_ASAN})
 
 if (NOT ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS} STREQUAL "")
   message(STATUS "Using provided LIB_FUZZING_ENGINE options: ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}")

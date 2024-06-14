@@ -34,11 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_proto
 # Kind:      proto
-# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER
+# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM)
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_proto proto
   cmd/fuzz/ir/fuzz.proto
@@ -50,12 +50,12 @@ if(TINT_BUILD_IR_BINARY)
   )
 endif(TINT_BUILD_IR_BINARY)
 
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz_cmd
 # Kind:      fuzz_cmd
-# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER
+# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM)
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
   cmd/fuzz/ir/main_fuzz.cc
@@ -113,11 +113,11 @@ if(TINT_BUILD_IR_BINARY)
   )
 endif(TINT_BUILD_IR_BINARY)
 
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
   tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
     tint_cmd_fuzz_ir_proto
   )
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
 
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
@@ -146,7 +146,7 @@ endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd "tint_ir_fuzzer")
 
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz
 # Kind:      fuzz

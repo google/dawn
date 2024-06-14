@@ -343,7 +343,7 @@ group("fuzzers") {
     deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
   }
 
-  if (tint_build_ir_fuzzer) {
+  if (tint_build_ir_fuzzer && (!is_asan || build_with_chromium)) {
     deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
   }
 }
