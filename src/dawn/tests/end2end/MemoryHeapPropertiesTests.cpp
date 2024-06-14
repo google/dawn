@@ -32,7 +32,27 @@
 namespace dawn {
 namespace {
 
-class MemoryHeapPropertiesTest : public DawnTest {};
+class MemoryHeapPropertiesTest : public DawnTest {
+  protected:
+    void CheckMemoryHeapProperties(const wgpu::AdapterPropertiesMemoryHeaps& memoryHeapProperties) {
+        EXPECT_GT(memoryHeapProperties.heapCount, 0u);
+        for (size_t i = 0; i < memoryHeapProperties.heapCount; ++i) {
+            // Check the heap is non-zero in size.
+            EXPECT_GT(memoryHeapProperties.heapInfo[i].size, 0ull);
+
+            constexpr wgpu::HeapProperty kValidProps =
+                wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
+                wgpu::HeapProperty::HostCoherent | wgpu::HeapProperty::HostUncached |
+                wgpu::HeapProperty::HostCached;
+
+            // Check the heap properties only contain the set of valid enums.
+            EXPECT_EQ(memoryHeapProperties.heapInfo[i].properties & ~kValidProps, 0u);
+
+            // Check the heap properties have at least one bit.
+            EXPECT_NE(uint32_t(memoryHeapProperties.heapInfo[i].properties), 0u);
+        }
+    }
+};
 
 // TODO(dawn:2257) test that is is invalid to request AdapterPropertiesMemoryHeaps if the
 // feature is not available.
@@ -40,28 +60,21 @@ class MemoryHeapPropertiesTest : public DawnTest {};
 // Test that it is possible to query the memory, and it is populated with valid enums.
 TEST_P(MemoryHeapPropertiesTest, GetMemoryHeapProperties) {
     DAWN_TEST_UNSUPPORTED_IF(!adapter.HasFeature(wgpu::FeatureName::AdapterPropertiesMemoryHeaps));
+    {
+        wgpu::AdapterProperties properties;
+        wgpu::AdapterPropertiesMemoryHeaps memoryHeapProperties;
+        properties.nextInChain = &memoryHeapProperties;
 
-    wgpu::AdapterProperties properties;
-    wgpu::AdapterPropertiesMemoryHeaps memoryHeapProperties;
-    properties.nextInChain = &memoryHeapProperties;
+        adapter.GetProperties(&properties);
+        CheckMemoryHeapProperties(memoryHeapProperties);
+    }
+    {
+        wgpu::AdapterInfo info;
+        wgpu::AdapterPropertiesMemoryHeaps memoryHeapProperties;
+        info.nextInChain = &memoryHeapProperties;
 
-    adapter.GetProperties(&properties);
-
-    EXPECT_GT(memoryHeapProperties.heapCount, 0u);
-    for (size_t i = 0; i < memoryHeapProperties.heapCount; ++i) {
-        // Check the heap is non-zero in size.
-        EXPECT_GT(memoryHeapProperties.heapInfo[i].size, 0ull);
-
-        constexpr wgpu::HeapProperty kValidProps =
-            wgpu::HeapProperty::DeviceLocal | wgpu::HeapProperty::HostVisible |
-            wgpu::HeapProperty::HostCoherent | wgpu::HeapProperty::HostUncached |
-            wgpu::HeapProperty::HostCached;
-
-        // Check the heap properties only contain the set of valid enums.
-        EXPECT_EQ(memoryHeapProperties.heapInfo[i].properties & ~kValidProps, 0u);
-
-        // Check the heap properies have at least one bit.
-        EXPECT_NE(uint32_t(memoryHeapProperties.heapInfo[i].properties), 0u);
+        adapter.GetInfo(&info);
+        CheckMemoryHeapProperties(memoryHeapProperties);
     }
 }
 

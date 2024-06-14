@@ -277,6 +277,10 @@ TEST_P(AdapterCreationTest, Compatibility) {
     wgpu::AdapterProperties properties;
     adapter.GetProperties(&properties);
     EXPECT_TRUE(properties.compatibilityMode);
+
+    wgpu::AdapterInfo info;
+    adapter.GetInfo(&info);
+    EXPECT_TRUE(info.compatibilityMode);
 }
 
 // Test that requesting a Non-Compatibility adapter is supported and is default.
@@ -296,6 +300,10 @@ TEST_P(AdapterCreationTest, NonCompatibility) {
     wgpu::AdapterProperties properties;
     adapter.GetProperties(&properties);
     EXPECT_FALSE(properties.compatibilityMode);
+
+    wgpu::AdapterInfo info;
+    adapter.GetInfo(&info);
+    EXPECT_FALSE(info.compatibilityMode);
 }
 
 // Test that GetInstance() returns the correct Instance.
@@ -561,6 +569,7 @@ TEST_P(AdapterCreationTest, InfoMoveAssign) {
     wgpu::AdapterType adapterType = info1.adapterType;
     uint32_t vendorID = info1.vendorID;
     uint32_t deviceID = info1.deviceID;
+    bool compatibilityMode = info1.compatibilityMode;
 
     info2 = std::move(info1);
 
@@ -573,6 +582,7 @@ TEST_P(AdapterCreationTest, InfoMoveAssign) {
     EXPECT_EQ(info2.adapterType, adapterType);
     EXPECT_EQ(info2.vendorID, vendorID);
     EXPECT_EQ(info2.deviceID, deviceID);
+    EXPECT_EQ(info2.compatibilityMode, compatibilityMode);
 
     // Expect info1 to be empty.
     EXPECT_EQ(info1.vendor, nullptr);
@@ -583,6 +593,7 @@ TEST_P(AdapterCreationTest, InfoMoveAssign) {
     EXPECT_EQ(info1.adapterType, static_cast<wgpu::AdapterType>(0));
     EXPECT_EQ(info1.vendorID, 0u);
     EXPECT_EQ(info1.deviceID, 0u);
+    EXPECT_EQ(info1.compatibilityMode, false);
 }
 
 // Test move construction of the adapter info.
@@ -613,6 +624,7 @@ TEST_P(AdapterCreationTest, InfoMoveConstruct) {
     wgpu::AdapterType adapterType = info1.adapterType;
     uint32_t vendorID = info1.vendorID;
     uint32_t deviceID = info1.deviceID;
+    bool compatibilityMode = info1.compatibilityMode;
 
     wgpu::AdapterInfo info2(std::move(info1));
 
@@ -625,6 +637,7 @@ TEST_P(AdapterCreationTest, InfoMoveConstruct) {
     EXPECT_EQ(info2.adapterType, adapterType);
     EXPECT_EQ(info2.vendorID, vendorID);
     EXPECT_EQ(info2.deviceID, deviceID);
+    EXPECT_EQ(info2.compatibilityMode, compatibilityMode);
 
     // Expect info1 to be empty.
     EXPECT_EQ(info1.vendor, nullptr);
@@ -635,6 +648,7 @@ TEST_P(AdapterCreationTest, InfoMoveConstruct) {
     EXPECT_EQ(info1.adapterType, static_cast<wgpu::AdapterType>(0));
     EXPECT_EQ(info1.vendorID, 0u);
     EXPECT_EQ(info1.deviceID, 0u);
+    EXPECT_EQ(info1.compatibilityMode, false);
 }
 
 // Test that the adapter info can outlive the adapter.

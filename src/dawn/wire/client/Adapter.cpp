@@ -159,6 +159,37 @@ void Adapter::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCoun
 
 void Adapter::SetInfo(const WGPUAdapterInfo* info) {
     mInfo = *info;
+    mInfo.nextInChain = nullptr;
+
+    // Loop through the chained struct.
+    WGPUChainedStructOut* chain = info->nextInChain;
+    while (chain != nullptr) {
+        switch (chain->sType) {
+            case WGPUSType_AdapterPropertiesMemoryHeaps: {
+                // Make a copy of the heap info in `mMemoryHeapInfo`.
+                const auto* memoryHeapProperties =
+                    reinterpret_cast<const WGPUAdapterPropertiesMemoryHeaps*>(chain);
+                mMemoryHeapInfo = {
+                    memoryHeapProperties->heapInfo,
+                    memoryHeapProperties->heapInfo + memoryHeapProperties->heapCount};
+                break;
+            }
+            case WGPUSType_AdapterPropertiesD3D: {
+                auto* d3dProperties = reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain);
+                mD3DProperties.shaderModel = d3dProperties->shaderModel;
+                break;
+            }
+            case WGPUSType_AdapterPropertiesVk: {
+                auto* vkProperties = reinterpret_cast<WGPUAdapterPropertiesVk*>(chain);
+                mVkProperties.driverVersion = vkProperties->driverVersion;
+                break;
+            }
+            default:
+                DAWN_UNREACHABLE();
+                break;
+        }
+        chain = chain->next;
+    }
 }
 
 void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
@@ -197,6 +228,38 @@ void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
 }
 
 WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
+    // Loop through the chained struct.
+    WGPUChainedStructOut* chain = info->nextInChain;
+    while (chain != nullptr) {
+        switch (chain->sType) {
+            case WGPUSType_AdapterPropertiesMemoryHeaps: {
+                // Copy `mMemoryHeapInfo` into a new allocation.
+                auto* memoryHeapProperties =
+                    reinterpret_cast<WGPUAdapterPropertiesMemoryHeaps*>(chain);
+                size_t heapCount = mMemoryHeapInfo.size();
+                auto* heapInfo = new WGPUMemoryHeapInfo[heapCount];
+                memcpy(heapInfo, mMemoryHeapInfo.data(), sizeof(WGPUMemoryHeapInfo) * heapCount);
+                // Write out the pointer and count to the heap properties out-struct.
+                memoryHeapProperties->heapCount = heapCount;
+                memoryHeapProperties->heapInfo = heapInfo;
+                break;
+            }
+            case WGPUSType_AdapterPropertiesD3D: {
+                auto* d3dProperties = reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain);
+                d3dProperties->shaderModel = mD3DProperties.shaderModel;
+                break;
+            }
+            case WGPUSType_AdapterPropertiesVk: {
+                auto* vkProperties = reinterpret_cast<WGPUAdapterPropertiesVk*>(chain);
+                vkProperties->driverVersion = mVkProperties.driverVersion;
+                break;
+            }
+            default:
+                break;
+        }
+        chain = chain->next;
+    }
+
     *info = mInfo;
 
     // Get lengths, with null terminators.

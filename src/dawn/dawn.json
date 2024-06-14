@@ -217,7 +217,8 @@
             {"name": "backend type", "type": "backend type"},
             {"name": "adapter type", "type": "adapter type"},
             {"name": "vendor ID", "type": "uint32_t"},
-            {"name": "device ID", "type": "uint32_t"}
+            {"name": "device ID", "type": "uint32_t"},
+            {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
         ]
     },
     "adapter properties": {
@@ -4477,7 +4478,7 @@
     "dawn adapter properties power preference": {
         "category": "structure",
         "chained": "out",
-        "chain roots": ["adapter properties"],
+        "chain roots": ["adapter info", "adapter properties"],
         "tags": ["dawn"],
         "members": [
             {"name": "power preference", "type": "power preference", "default": "undefined"}
@@ -4506,7 +4507,7 @@
     "adapter properties memory heaps": {
         "category": "structure",
         "chained": "out",
-        "chain roots": ["adapter properties"],
+        "chain roots": ["adapter info", "adapter properties"],
         "tags": ["dawn"],
         "members": [
             {"name": "heap count", "type": "size_t"},
@@ -4516,7 +4517,7 @@
     "adapter properties D3D": {
         "category": "structure",
         "chained": "out",
-        "chain roots": ["adapter properties"],
+        "chain roots": ["adapter info", "adapter properties"],
         "tags": ["dawn"],
         "members": [
             {"name": "shader model", "type": "uint32_t"}
@@ -4525,7 +4526,7 @@
     "adapter properties vk": {
       "category": "structure",
       "chained": "out",
-      "chain roots": ["adapter properties"],
+      "chain roots": ["adapter info", "adapter properties"],
       "tags": ["dawn"],
       "members": [
           {"name": "driver version", "type": "uint32_t"}
