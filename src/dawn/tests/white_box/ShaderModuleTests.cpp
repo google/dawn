@@ -83,11 +83,6 @@ class ShaderModuleTests : public DawnTest {
     }
 
     bool SupportsCreatePipelineAsync() const {
-        // OpenGL and OpenGLES don't support it.
-        if (IsOpenGL() || IsOpenGLES()) {
-            return false;
-        }
-
         // Async pipeline creation is disabled with Metal AMD and Validation.
         // See crbug.com/dawn/1200.
         if (IsAMD() && IsMetal() && IsBackendValidationEnabled()) {

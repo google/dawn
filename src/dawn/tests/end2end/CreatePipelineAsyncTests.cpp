@@ -204,7 +204,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStress) {
 // Stress test that asynchronously creates many compute pipelines in different threads.
 TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStressManyThreads) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    // eglMakeCurrent: Context can only be current on one thread
+    // TODO(crbug.com/42240635): eglMakeCurrent: Context can only be current on one thread
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
 
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
@@ -369,7 +369,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStress) {
 // Stress test that asynchronously creates many render pipelines in different threads.
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStressManyThreads) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    // eglMakeCurrent: Context can only be current on one thread
+    // TODO(crbug.com/42240635): eglMakeCurrent: Context can only be current on one thread
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
 
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.

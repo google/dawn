@@ -676,10 +676,10 @@ class CopyTests_T2T_Srgb : public CopyTests_T2TBase<DawnTestWithParams<CopyTextu
         DawnTestWithParams<CopyTextureFormatParams>::SetUp();
 
         const auto format = GetParam().mTextureFormat;
-        // TODO(dawn:596): Remove when bgra8unorm-srgb is supported on OpenGL.
-        DAWN_SUPPRESS_TEST_IF((format == wgpu::TextureFormat::BGRA8Unorm ||
-                               format == wgpu::TextureFormat::BGRA8UnormSrgb) &&
-                              (IsOpenGL() || IsOpenGLES()));
+        // BGRA8UnormSrgb is unsupported in Compatibility mode.
+        DAWN_SUPPRESS_TEST_IF((format == wgpu::TextureFormat::BGRA8UnormSrgb ||
+                               format == wgpu::TextureFormat::BGRA8Unorm) &&
+                              IsCompatibilityMode());
     }
 
     // Texture format is compatible and could be copied to each other if the only diff is srgb-ness.

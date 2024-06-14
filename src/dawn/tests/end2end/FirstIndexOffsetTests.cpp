@@ -78,9 +78,6 @@ class FirstIndexOffsetTests : public DawnTest {
         // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
         // the offsets that Tint/GLSL produces.
         DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
-
-        // TODO(tint:451): Remove once "flat" is supported under OpenGL(ES).
-        DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
     }
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -307,6 +304,9 @@ TEST_P(FirstIndexOffsetTests, IndexedBothOffset) {
 
 // Test that vertex_index starts at 7 when drawn using DrawIndirect()
 TEST_P(FirstIndexOffsetTests, NonIndexedIndirectVertexOffset) {
+    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
+
     // TODO(crbug.com/dawn/1429): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
     TestVertexIndex(DrawMode::NonIndexedIndirect, 7);
@@ -314,17 +314,26 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectVertexOffset) {
 
 // Test that instance_index starts at 11 when drawn using DrawIndirect()
 TEST_P(FirstIndexOffsetTests, NonIndexedIndirectInstanceOffset) {
+    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
+
     TestInstanceIndex(DrawMode::NonIndexedIndirect, 11);
 }
 
 // Test that vertex_index and instance_index start at 7 and 11 respectively when drawn using
 // DrawIndirect()
 TEST_P(FirstIndexOffsetTests, NonIndexedIndirectBothOffset) {
+    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
+
     TestBothIndices(DrawMode::NonIndexedIndirect, 7, 11);
 }
 
 // Test that vertex_index starts at 7 when drawn using DrawIndexedIndirect()
 TEST_P(FirstIndexOffsetTests, IndexedIndirectVertex) {
+    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
+
     // TODO(crbug.com/dawn/1429): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
     TestVertexIndex(DrawMode::IndexedIndirect, 7);
@@ -332,12 +341,18 @@ TEST_P(FirstIndexOffsetTests, IndexedIndirectVertex) {
 
 // Test that instance_index starts at 11 when drawn using DrawIndexed()
 TEST_P(FirstIndexOffsetTests, IndexedIndirectInstance) {
+    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
+
     TestInstanceIndex(DrawMode::IndexedIndirect, 11);
 }
 
 // Test that vertex_index and instance_index start at 7 and 11 respectively when drawn using
 // DrawIndexed()
 TEST_P(FirstIndexOffsetTests, IndexedIndirectBothOffset) {
+    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
+
     TestBothIndices(DrawMode::IndexedIndirect, 7, 11);
 }
 

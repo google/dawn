@@ -80,10 +80,6 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
 
         DAWN_TEST_UNSUPPORTED_IF(!mIsFormatSupported);
 
-        // Readback of Depth/Stencil textures not fully supported on GL right now.
-        // Also depends on glTextureView which is not supported on ES.
-        DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
         // Skip formats other than Depth24PlusStencil8 if we're specifically testing with the packed
         // depth24_unorm_stencil8 toggle.
         DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_packed_depth24_unorm_stencil8_format") &&
