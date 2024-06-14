@@ -514,8 +514,10 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
             properties.usage |= wgpu::TextureUsage::RenderAttachment;
         }
         if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE) {
-            properties.usage |=
-                wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding;
+            properties.usage |= wgpu::TextureUsage::TextureBinding;
+        }
+        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_DATA_BUFFER) {
+            properties.usage |= wgpu::TextureUsage::StorageBinding;
         }
     }
 

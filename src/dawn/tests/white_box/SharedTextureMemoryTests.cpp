@@ -993,11 +993,12 @@ TEST_P(SharedTextureMemoryTests, TextureUsages) {
         // texture (the relevant flag is currently always passed in the test
         // context). Add tests where the D3D/Vulkan texture is not created with the
         // relevant flag.
+#if !DAWN_PLATFORM_IS(ANDROID)
         if (isSinglePlanar && utils::TextureFormatSupportsStorageTexture(properties.format, device,
                                                                          IsCompatibilityMode())) {
             expectedUsage |= wgpu::TextureUsage::StorageBinding;
         }
-
+#endif
         EXPECT_EQ(properties.usage, expectedUsage) << properties.format;
     }
 }
