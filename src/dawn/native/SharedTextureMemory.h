@@ -40,6 +40,7 @@
 
 namespace dawn::native {
 
+class SharedTextureMemoryContents;
 class SharedResourceMemoryContents;
 struct SharedTextureMemoryDescriptor;
 struct SharedTextureMemoryBeginAccessDescriptor;
@@ -60,6 +61,8 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
 
     ObjectType GetType() const override;
 
+    SharedTextureMemoryContents* GetContents() const;
+
   protected:
     SharedTextureMemoryBase(DeviceBase* device,
                             const char* label,
@@ -72,6 +75,8 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
     ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
     MaybeError GetProperties(SharedTextureMemoryProperties* properties) const;
 
+    Ref<SharedResourceMemoryContents> CreateContents() override;
+
     virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const UnpackedPtr<TextureDescriptor>& descriptor) = 0;
 
@@ -81,6 +86,19 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
     }
 
     SharedTextureMemoryProperties mProperties;
+};
+
+class SharedTextureMemoryContents : public SharedResourceMemoryContents {
+  public:
+    explicit SharedTextureMemoryContents(WeakRef<SharedTextureMemoryBase> sharedTextureMemory);
+
+    SampleTypeBit GetExternalFormatSupportedSampleTypes() const;
+    void SetExternalFormatSupportedSampleTypes(SampleTypeBit supportedSampleType);
+
+  private:
+    friend class SharedTextureMemoryBase;
+
+    SampleTypeBit mSupportedExternalSampleTypes;
 };
 
 }  // namespace dawn::native

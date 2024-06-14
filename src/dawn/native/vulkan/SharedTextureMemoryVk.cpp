@@ -523,6 +523,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 
     VkFormat vkFormat;
     YCbCrVkDescriptor yCbCrAHBInfo;
+    SampleTypeBit externalSampleType;
     VkAndroidHardwareBufferPropertiesANDROID bufferProperties = {
         .sType = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_PROPERTIES_ANDROID,
     };
@@ -574,10 +575,13 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         yCbCrAHBInfo.vkYChromaOffset = bufferFormatProperties.suggestedYChromaOffset;
 
         uint32_t formatFeatures = bufferFormatProperties.formatFeatures;
-        yCbCrAHBInfo.vkChromaFilter =
-            (formatFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT)
-                ? wgpu::FilterMode::Linear
-                : wgpu::FilterMode::Nearest;
+        if (formatFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_LINEAR_FILTER_BIT) {
+            yCbCrAHBInfo.vkChromaFilter = wgpu::FilterMode::Linear;
+            externalSampleType = SampleTypeBit::UnfilterableFloat | SampleTypeBit::Float;
+        } else {
+            yCbCrAHBInfo.vkChromaFilter = wgpu::FilterMode::Nearest;
+            externalSampleType = SampleTypeBit::UnfilterableFloat;
+        }
         yCbCrAHBInfo.forceExplicitReconstruction =
             formatFeatures &
             VK_FORMAT_FEATURE_SAMPLED_IMAGE_YCBCR_CONVERSION_CHROMA_RECONSTRUCTION_EXPLICIT_BIT;
@@ -594,6 +598,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         SharedTextureMemory::Create(device, label, properties, VK_QUEUE_FAMILY_FOREIGN_EXT);
 
     sharedTextureMemory->mYCbCrAHBInfo = yCbCrAHBInfo;
+    sharedTextureMemory->GetContents()->SetExternalFormatSupportedSampleTypes(externalSampleType);
 
     // Reflect properties to reify them.
     sharedTextureMemory->APIGetProperties(&properties);
