@@ -608,8 +608,8 @@ wgpu::Status Surface::APIGetCapabilities(AdapterBase* adapter,
                                          SurfaceCapabilities* capabilities) const {
     MaybeError maybeError = GetCapabilities(adapter, capabilities);
     if (!GetCurrentDevice()) {
-        [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
-        return wgpu::Status::Error;
+        return mInstance->ConsumedError(std::move(maybeError)) ? wgpu::Status::Error
+                                                               : wgpu::Status::Success;
     } else {
         return GetCurrentDevice()->ConsumedError(std::move(maybeError), "calling %s.Configure().",
                                                  this)
