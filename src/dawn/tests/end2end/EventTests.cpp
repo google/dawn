@@ -506,10 +506,9 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
     }
 
     for (uint64_t timeout : {uint64_t(1), uint64_t(0), UINT64_MAX}) {
-        wgpu::WaitStatus status = instance2.WaitAny(
-            device2.GetQueue().OnSubmittedWorkDone(wgpu::CallbackMode::WaitAnyOnly,
-                                                   [](wgpu::QueueWorkDoneStatus) {}),
-            timeout);
+        wgpu::FutureWaitInfo info{device2.GetQueue().OnSubmittedWorkDone(
+            wgpu::CallbackMode::WaitAnyOnly, [](wgpu::QueueWorkDoneStatus) {})};
+        wgpu::WaitStatus status = instance2.WaitAny(1, &info, timeout);
         if (timeout == 0) {
             ASSERT_TRUE(status == wgpu::WaitStatus::Success ||
                         status == wgpu::WaitStatus::TimedOut);

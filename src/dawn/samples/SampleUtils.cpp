@@ -164,20 +164,20 @@ wgpu::Device CreateCppDawnDevice() {
     }
 
     wgpu::Adapter adapter;
-    instance.WaitAny(
-        instance.RequestAdapter(&options, {nullptr, wgpu::CallbackMode::WaitAnyOnly,
-                                           [](WGPURequestAdapterStatus status, WGPUAdapter adapter,
-                                              const char* message, void* userdata) {
-                                               if (status != WGPURequestAdapterStatus_Success) {
-                                                   dawn::ErrorLog()
-                                                       << "Failed to get an adapter:" << message;
-                                                   return;
-                                               }
-                                               *static_cast<wgpu::Adapter*>(userdata) =
-                                                   wgpu::Adapter::Acquire(adapter);
-                                           },
-                                           &adapter}),
-        UINT64_MAX);
+    wgpu::FutureWaitInfo adapterFuture = {};
+    adapterFuture.future = instance.RequestAdapter(
+        &options, {nullptr, wgpu::CallbackMode::WaitAnyOnly,
+                   [](WGPURequestAdapterStatus status, WGPUAdapter adapter, const char* message,
+                      void* userdata) {
+                       if (status != WGPURequestAdapterStatus_Success) {
+                           dawn::ErrorLog() << "Failed to get an adapter:" << message;
+                           return;
+                       }
+                       *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(adapter);
+                   },
+                   &adapter});
+    instance.WaitAny(1, &adapterFuture, UINT64_MAX);
+    DAWN_ASSERT(adapterFuture.completed);
 
     if (adapter == nullptr) {
         return wgpu::Device();
@@ -194,20 +194,20 @@ wgpu::Device CreateCppDawnDevice() {
                                          PrintDeviceLoss, nullptr};
 
     wgpu::Device device;
-    instance.WaitAny(
-        adapter.RequestDevice(&deviceDesc, {nullptr, wgpu::CallbackMode::WaitAnyOnly,
-                                            [](WGPURequestDeviceStatus status, WGPUDevice device,
-                                               const char* message, void* userdata) {
-                                                if (status != WGPURequestDeviceStatus_Success) {
-                                                    dawn::ErrorLog()
-                                                        << "Failed to get an device:" << message;
-                                                    return;
-                                                }
-                                                *static_cast<wgpu::Device*>(userdata) =
-                                                    wgpu::Device::Acquire(device);
-                                            },
-                                            &device}),
-        UINT64_MAX);
+    wgpu::FutureWaitInfo deviceFuture = {};
+    deviceFuture.future = adapter.RequestDevice(
+        &deviceDesc, {nullptr, wgpu::CallbackMode::WaitAnyOnly,
+                      [](WGPURequestDeviceStatus status, WGPUDevice device, const char* message,
+                         void* userdata) {
+                          if (status != WGPURequestDeviceStatus_Success) {
+                              dawn::ErrorLog() << "Failed to get an device:" << message;
+                              return;
+                          }
+                          *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(device);
+                      },
+                      &device});
+    instance.WaitAny(1, &deviceFuture, UINT64_MAX);
+    DAWN_ASSERT(deviceFuture.completed);
 
     if (device == nullptr) {
         return wgpu::Device();

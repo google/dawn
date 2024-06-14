@@ -1650,11 +1650,9 @@ void DawnTestBase::MapAsyncAndWait(const wgpu::Buffer& buffer,
         MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)> mockCb;
         EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
 
-        ASSERT_EQ(
-            instance.WaitAny(buffer.MapAsync(mapMode, offset, size, wgpu::CallbackMode::WaitAnyOnly,
-                                             mockCb.Callback()),
-                             UINT64_MAX),
-            wgpu::WaitStatus::Success);
+        wgpu::FutureWaitInfo waitInfo = {buffer.MapAsync(
+            mapMode, offset, size, wgpu::CallbackMode::WaitAnyOnly, mockCb.Callback())};
+        ASSERT_EQ(instance.WaitAny(1, &waitInfo, UINT64_MAX), wgpu::WaitStatus::Success);
     } else {
         bool done = false;
         buffer.MapAsync(mapMode, offset, size, wgpu::CallbackMode::AllowProcessEvents,

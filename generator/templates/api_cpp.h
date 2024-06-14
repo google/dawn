@@ -481,10 +481,6 @@ class ObjectBase {
             {% endif %}
         {% endfor %}
 
-        {% if CppType == "Instance" %}
-            inline wgpu::WaitStatus WaitAny(wgpu::Future f, uint64_t timeout);
-        {% endif %}
-
       private:
         friend ObjectBase<{{CppType}}, {{CType}}>;
         static inline void {{c_prefix}}AddRef({{CType}} handle);
@@ -661,14 +657,6 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
             {{render_cpp_method_impl(type, method)}}
         {% endif %}
     {% endfor %}
-
-    {% if CppType == "Instance" %}
-        wgpu::WaitStatus Instance::WaitAny(wgpu::Future f, uint64_t timeout) {
-            wgpu::FutureWaitInfo waitInfo { f };
-            return WaitAny(1, &waitInfo, timeout);
-        }
-    {% endif %}
-
     void {{CppType}}::{{c_prefix}}AddRef({{CType}} handle) {
         if (handle != nullptr) {
             {{as_cMethodNamespaced(type.name, Name("add ref"), c_namespace)}}(handle);
