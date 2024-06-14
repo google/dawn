@@ -140,7 +140,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     Converter conv(env);
     std::vector<wgpu::FeatureName> requiredFeatures;
     for (auto required : descriptor.requiredFeatures) {
-        wgpu::FeatureName feature = wgpu::FeatureName::Undefined;
+        wgpu::FeatureName feature;
 
         // requiredFeatures is a "sequence<GPUFeatureName>" so a Javascript exception should be
         // thrown if one of the strings isn't one of the known features.

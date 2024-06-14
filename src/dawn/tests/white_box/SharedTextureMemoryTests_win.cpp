@@ -204,7 +204,7 @@ class Backend : public SharedTextureMemoryTestBackend {
 
         struct D3DFormat {
             DXGI_FORMAT format;
-            wgpu::FeatureName requiredFeature = wgpu::FeatureName::Undefined;
+            wgpu::FeatureName requiredFeature = wgpu::FeatureName(0u);
         };
         std::vector<D3DFormat> formats = {{
             {DXGI_FORMAT_R16G16B16A16_FLOAT},
@@ -255,7 +255,7 @@ class Backend : public SharedTextureMemoryTestBackend {
                         desc.nextInChain = &texture2DDesc;
 
                         for (auto& device : devices) {
-                            if (f.requiredFeature != wgpu::FeatureName::Undefined &&
+                            if (f.requiredFeature != wgpu::FeatureName(0u) &&
                                 !device.HasFeature(f.requiredFeature)) {
                                 continue;
                             }
@@ -286,7 +286,7 @@ class Backend : public SharedTextureMemoryTestBackend {
                         desc.label = label.c_str();
 
                         for (auto& device : devices) {
-                            if (f.requiredFeature != wgpu::FeatureName::Undefined &&
+                            if (f.requiredFeature != wgpu::FeatureName(0u) &&
                                 !device.HasFeature(f.requiredFeature)) {
                                 continue;
                             }

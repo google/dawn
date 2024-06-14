@@ -72,9 +72,9 @@ void SharedFenceBase::APIExportInfo(SharedFenceExportInfo* info) const {
 void SharedFenceBase::DestroyImpl() {}
 
 MaybeError SharedFenceBase::ExportInfo(SharedFenceExportInfo* info) const {
-    // Set the type to undefined. It will be overwritten to the actual type
+    // Set the type to 0. It will be overwritten to the actual type
     // as long as no error occurs.
-    info->type = wgpu::SharedFenceType::Undefined;
+    info->type = wgpu::SharedFenceType(0);
 
     DAWN_TRY(GetDevice()->ValidateObject(this));
 

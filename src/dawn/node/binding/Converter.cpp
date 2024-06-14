@@ -191,7 +191,7 @@ bool Converter::Convert(wgpu::TextureDataLayout& out, const interop::GPUImageDat
 
 bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureFormat& in) {
     out = wgpu::TextureFormat::Undefined;
-    wgpu::FeatureName requiredFeature = wgpu::FeatureName::Undefined;
+    wgpu::FeatureName requiredFeature = wgpu::FeatureName(0u);
     switch (in) {
         case interop::GPUTextureFormat::kR8Unorm:
             out = wgpu::TextureFormat::R8Unorm;
@@ -539,7 +539,7 @@ bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureForma
             return Throw(err.str());
     }
 
-    assert(requiredFeature != wgpu::FeatureName::Undefined);
+    assert(requiredFeature != wgpu::FeatureName(0u));
     if (!HasFeature(requiredFeature)) {
         std::stringstream err;
         err << "" << out << " requires feature '" << requiredFeature << "'";
@@ -1116,7 +1116,6 @@ bool Converter::Convert(wgpu::VertexAttribute& out, const interop::GPUVertexAttr
 }
 
 bool Converter::Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat& in) {
-    out = wgpu::VertexFormat::Undefined;
     switch (in) {
         case interop::GPUVertexFormat::kUint8X2:
             out = wgpu::VertexFormat::Uint8x2;
@@ -1547,7 +1546,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::StaticSamplers:
         case wgpu::FeatureName::SurfaceCapabilities:
         case wgpu::FeatureName::TransientAttachments:
-        case wgpu::FeatureName::Undefined:
         case wgpu::FeatureName::YCbCrVulkanSamplers:
         case wgpu::FeatureName::DawnLoadResolveTexture:
             return false;
@@ -1588,7 +1586,6 @@ bool Converter::Convert(interop::WGSLFeatureName& out, wgpu::WGSLFeatureName in)
             out = interop::WGSLFeatureName::kPointerCompositeAccess;
             return true;
 
-        case wgpu::WGSLFeatureName::Undefined:
         case wgpu::WGSLFeatureName::ChromiumTestingUnimplemented:
         case wgpu::WGSLFeatureName::ChromiumTestingUnsafeExperimental:
         case wgpu::WGSLFeatureName::ChromiumTestingExperimental:

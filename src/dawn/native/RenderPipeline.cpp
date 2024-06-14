@@ -46,7 +46,7 @@ namespace dawn::native {
 
 static constexpr std::array<VertexFormatInfo, 32> sVertexFormatTable = {{
     //
-    {wgpu::VertexFormat::Undefined, 0, 0, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat(0u), 0, 0, VertexFormatBaseType::Float},
 
     {wgpu::VertexFormat::Uint8x2, 2, 2, VertexFormatBaseType::Uint},
     {wgpu::VertexFormat::Uint8x4, 4, 4, VertexFormatBaseType::Uint},
@@ -85,8 +85,8 @@ static constexpr std::array<VertexFormatInfo, 32> sVertexFormatTable = {{
 }};
 
 const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format) {
-    DAWN_ASSERT(format != wgpu::VertexFormat::Undefined);
     DAWN_ASSERT(static_cast<uint32_t>(format) < sVertexFormatTable.size());
+    DAWN_ASSERT(static_cast<uint32_t>(format) != 0u);
     DAWN_ASSERT(sVertexFormatTable[static_cast<uint32_t>(format)].format == format);
     return sVertexFormatTable[static_cast<uint32_t>(format)];
 }

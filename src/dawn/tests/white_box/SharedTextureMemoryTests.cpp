@@ -835,7 +835,7 @@ TEST_P(SharedTextureMemoryTests, ImportSharedFenceNoChain) {
 
     // Expect that exporting the fence info writes Undefined, and generates an error.
     ASSERT_DEVICE_ERROR(fence.ExportInfo(&exportInfo));
-    EXPECT_EQ(exportInfo.type, wgpu::SharedFenceType::Undefined);
+    EXPECT_EQ(exportInfo.type, wgpu::SharedFenceType(0));
 }
 
 // Test importing a shared texture memory when the device is destroyed

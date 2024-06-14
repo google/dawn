@@ -201,8 +201,6 @@ uint32_t VertexFormatSize(wgpu::VertexFormat format) {
         case wgpu::VertexFormat::Uint32x4:
         case wgpu::VertexFormat::Sint32x4:
             return 16;
-        case wgpu::VertexFormat::Undefined:
-            break;
     }
     DAWN_UNREACHABLE();
 }

@@ -119,9 +119,6 @@ tint::ast::transform::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format)
             return tint::ast::transform::VertexFormat::kSint32x4;
         case wgpu::VertexFormat::Unorm10_10_10_2:
             return tint::ast::transform::VertexFormat::kUnorm10_10_10_2;
-
-        case wgpu::VertexFormat::Undefined:
-            break;
     }
     DAWN_UNREACHABLE();
 }

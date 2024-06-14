@@ -33,7 +33,6 @@ namespace dawn::wire {
 // of limit structs on Adapter/Device initialization.
 bool IsFeatureSupported(WGPUFeatureName feature) {
     switch (feature) {
-        case WGPUFeatureName_Undefined:
         case WGPUFeatureName_Force32:
         case WGPUFeatureName_DawnNative:
         case WGPUFeatureName_ImplicitDeviceSynchronization:

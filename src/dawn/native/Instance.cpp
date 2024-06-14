@@ -109,6 +109,8 @@ wgpu::WGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
         return wgpu::WGSLFeatureName::WgpuName;
         DAWN_FOREACH_WGSL_FEATURE(CASE)
 #undef CASE
+        case tint::wgsl::LanguageFeature::kUndefined:
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -651,7 +653,7 @@ void InstanceBase::GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist) {
                 break;
         }
 
-        if (enable) {
+        if (enable && wgslFeature != tint::wgsl::LanguageFeature::kUndefined) {
             mWGSLFeatures.emplace(ToWGPUFeature(wgslFeature));
             mTintLanguageFeatures.emplace(wgslFeature);
         }
@@ -662,15 +664,12 @@ void InstanceBase::GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist) {
         for (size_t i = 0; i < wgslBlocklist->blocklistedFeatureCount; i++) {
             const char* name = wgslBlocklist->blocklistedFeatures[i];
             tint::wgsl::LanguageFeature tintFeature = tint::wgsl::ParseLanguageFeature(name);
-            wgpu::WGSLFeatureName feature = ToWGPUFeature(tintFeature);
-
-            // Ignore unknown features in the blocklist.
-            if (feature == wgpu::WGSLFeatureName::Undefined) {
+            if (tintFeature == tint::wgsl::LanguageFeature::kUndefined) {
+                // Ignore unknown features in the blocklist.
                 continue;
             }
-
             mTintLanguageFeatures.erase(tintFeature);
-            mWGSLFeatures.erase(feature);
+            mWGSLFeatures.erase(ToWGPUFeature(tintFeature));
         }
     }
 }
