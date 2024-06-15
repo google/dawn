@@ -41,7 +41,9 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 add_subdirectory(../../../../../.. dawn)
 
-add_library(native_dawn methods.cpp structures.cpp Util.cpp ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
+set(C_BINDINGS_PATH ../../../../../../out/Debug/gen/cpp)
+
+add_library(native_dawn ${C_BINDINGS_PATH}/methods.cpp ${C_BINDINGS_PATH}/structures.cpp Util.cpp ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
 
 target_link_libraries(native_dawn webgpu_dawn)
 

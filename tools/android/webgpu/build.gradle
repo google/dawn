@@ -65,6 +65,11 @@ android {
     compileOptions {
         targetCompatibility JavaVersion.VERSION_17
     }
+    sourceSets {
+        main {
+            java.srcDirs += "$project.projectDir/../../../out/Debug/gen/java"
+        }
+    }
 }
 
 dependencies {
@@ -83,4 +88,18 @@ project.afterEvaluate {
             }
         }
     }
+}
+
+tasks.register('generateBindings', Exec) {
+    workingDir('../../..')
+    commandLine 'python3', 'generator/dawn_json_generator.py',
+    '--template-dir', 'generator/templates',
+    '--output-dir', "$project.projectDir/../../../out/Debug/gen",
+    '--dawn-json', 'src/dawn/dawn.json',
+    '--targets', 'kotlin',
+    '--kotlin-json', 'src/dawn/dawn_kotlin.json'
+}
+
+preBuild {
+    dependsOn generateBindings
 }
