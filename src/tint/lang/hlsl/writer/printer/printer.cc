@@ -131,6 +131,14 @@ class Printer : public tint::TextGenerator {
         TINT_SCOPED_ASSIGNMENT(current_function_, func);
 
         {
+            if (func->Stage() == core::ir::Function::PipelineStage::kCompute) {
+                auto wg_opt = func->WorkgroupSize();
+                TINT_ASSERT(wg_opt.has_value());
+
+                auto& wg = wg_opt.value();
+                Line() << "[numthreads(" << wg[0] << ", " << wg[1] << ", " << wg[2] << ")]";
+            }
+
             auto out = Line();
             auto func_name = NameOf(func);
 

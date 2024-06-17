@@ -2,5 +2,6 @@
     let non_uniform_cond = non_uniform_value == 0;
     ^^^^^^^^^^^^^^^^^^^^
 
+[numthreads(1, 1, 1)]
 void main() {
 }
