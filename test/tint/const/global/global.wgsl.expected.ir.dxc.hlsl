@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 float4 main() {
   int v1 = 1;
   uint v2 = 1u;
@@ -9,3 +11,10 @@ float4 main() {
   float[10] v9 = (float[10])0;
   return (0.0f).xxxx;
 }
+
+DXC validation failure:
+hlsl.hlsl:9:15: error: brackets are not allowed here; to declare an array, place the brackets after the name
+  float[10] v9 = (float[10])0;
+       ~~~~   ^
+              [10]
+

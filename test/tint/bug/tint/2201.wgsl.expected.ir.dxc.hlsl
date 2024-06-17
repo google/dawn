@@ -4,7 +4,7 @@ SKIP: FAILED
         let _e16_ = vec2(false, false);
         ^^^^^^^^^
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:163 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
+<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:180 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

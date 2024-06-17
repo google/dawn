@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:222 internal compiler error: Switch() passed nullptr
+<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:205 internal compiler error: TINT_UNREACHABLE unimplemented `var` zero initialization
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -1,9 +1,14 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:163 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBinary
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+[numthreads(1, 1, 1)]
+void f0() {
+  int a = 2147483647;
+  int b = 1;
+  int c = (a + 1);
+}
+
+void f1() {
+  int a = 1;
+  int b = (-2147483648 - a);
+}
+

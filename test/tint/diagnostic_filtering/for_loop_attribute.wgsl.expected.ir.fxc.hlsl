@@ -12,7 +12,7 @@ SKIP: FAILED
   for (; x > v.x && dpdx(1.0) > 0.0; ) {
                     ^^^^^^^^^
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:163 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
+<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:180 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -45,6 +45,7 @@
 #include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
+#include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -170,10 +171,12 @@ class Printer : public tint::TextGenerator {
             Switch(
                 inst,                                                //
                 [&](const core::ir::Call* i) { EmitCallStmt(i); },   //
-                [&](const core::ir::CoreBinary*) { /* inlined */ },  //
                 [&](const core::ir::Let* i) { EmitLet(i); },         //
                 [&](const core::ir::Return* i) { EmitReturn(i); },   //
                 [&](const core::ir::Var* v) { EmitVar(v); },         //
+                                                                     //
+                [&](const core::ir::CoreBinary*) { /* inlined */ },  //
+                [&](const core::ir::Load*) { /* inlined */ },        //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -199,7 +202,7 @@ class Printer : public tint::TextGenerator {
         if (var->Initializer()) {
             EmitValue(out, var->Initializer());
         } else {
-            TINT_UNREACHABLE();
+            TINT_UNREACHABLE() << "unimplemented `var` zero initialization";
             // TODO(dsinclair): Add zero value emission
         }
         out << ";";
@@ -244,11 +247,17 @@ class Printer : public tint::TextGenerator {
                     r->Instruction(),
                     [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },    //
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },  //
+                    [&](const core::ir::Load* l) { EmitLoad(out, l); },            //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },    //
                     TINT_ICE_ON_NO_MATCH);
             },
             TINT_ICE_ON_NO_MATCH);
     }
+
+    /// Emit Load
+    /// @param out the output stream to write to
+    /// @param load the load
+    void EmitLoad(StringStream& out, const core::ir::Load* load) { EmitValue(out, load->From()); }
 
     /// Emit a binary instruction
     /// @param b the binary instruction
@@ -294,7 +303,7 @@ class Printer : public tint::TextGenerator {
                 case core::BinaryOp::kLogicalOr:
                     // These should have been replaced by if statments as HLSL is not
                     // short-circuting.
-                    TINT_UNREACHABLE();
+                    TINT_UNREACHABLE() << "logical and/or should not be present";
             }
             return "<error>";
         };

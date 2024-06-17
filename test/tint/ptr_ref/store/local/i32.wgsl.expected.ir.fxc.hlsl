@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:220 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Var
+<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Var
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

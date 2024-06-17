@@ -1,9 +1,10 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:163 internal compiler error: Switch() matched no cases. Type: tint::core::ir::UserCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void main_1() {
+  float2x2 x_10 = float2x2(float2(6000.0f, 6100.0f), float2(6100.0f, 6000.0f));
+}
+
+void main() {
+  main_1();
+}
+
