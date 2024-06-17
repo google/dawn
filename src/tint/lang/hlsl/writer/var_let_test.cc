@@ -47,6 +47,7 @@ TEST_F(HlslWriterTest, Var) {
     EXPECT_EQ(output_.hlsl, R"(void main() {
   uint a = 1u;
 }
+
 )");
 }
 
@@ -75,6 +76,7 @@ TEST_F(HlslWriterTest, Let) {
     EXPECT_EQ(output_.hlsl, R"(void main() {
   float a = 2.0f;
 }
+
 )");
 }
 

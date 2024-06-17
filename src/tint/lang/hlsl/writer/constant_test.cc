@@ -41,6 +41,7 @@ TEST_F(HlslWriterTest, ConstantBoolFalse) {
     EXPECT_EQ(output_.hlsl, R"(bool a() {
   return false;
 }
+
 )");
 }
 
@@ -52,6 +53,7 @@ TEST_F(HlslWriterTest, ConstantBoolTrue) {
     EXPECT_EQ(output_.hlsl, R"(bool a() {
   return true;
 }
+
 )");
 }
 
@@ -63,6 +65,7 @@ TEST_F(HlslWriterTest, ConstantInt) {
     EXPECT_EQ(output_.hlsl, R"(int a() {
   return -12345;
 }
+
 )");
 }
 
@@ -74,6 +77,7 @@ TEST_F(HlslWriterTest, ConstantUInt) {
     EXPECT_EQ(output_.hlsl, R"(uint a() {
   return 56779u;
 }
+
 )");
 }
 
@@ -86,6 +90,7 @@ TEST_F(HlslWriterTest, ConstantFloat) {
     EXPECT_EQ(output_.hlsl, R"(float a() {
   return 1073741824.0f;
 }
+
 )");
 }
 
@@ -98,6 +103,7 @@ TEST_F(HlslWriterTest, ConstantF16) {
     EXPECT_EQ(output_.hlsl, R"(float16_t a() {
   return float16_t(32752.0h);
 }
+
 )");
 }
 
@@ -109,6 +115,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecF32) {
     EXPECT_EQ(output_.hlsl, R"(float3 a() {
   return float3(1.0f, 2.0f, 3.0f);
 }
+
 )");
 }
 
@@ -120,6 +127,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecF16) {
     EXPECT_EQ(output_.hlsl, R"(vector<float16_t, 3> a() {
   return vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h));
 }
+
 )");
 }
 
@@ -131,6 +139,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecEmptyF32) {
     EXPECT_EQ(output_.hlsl, R"(float3 a() {
   return (0.0f).xxx;
 }
+
 )");
 }
 
@@ -142,6 +151,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecEmptyF16) {
     EXPECT_EQ(output_.hlsl, R"(vector<float16_t, 3> a() {
   return (float16_t(0.0h)).xxx;
 }
+
 )");
 }
 
@@ -153,6 +163,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarF32Literal) {
     EXPECT_EQ(output_.hlsl, R"(float3 a() {
   return (2.0f).xxx;
 }
+
 )");
 }
 
@@ -164,6 +175,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarF16Literal) {
     EXPECT_EQ(output_.hlsl, R"(vector<float16_t, 3> a() {
   return (float16_t(2.0h)).xxx;
 }
+
 )");
 }
 
@@ -180,6 +192,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeVecSingleScalarF32Var) {
   float v = 2.0f;
   return float3((v).xxx);
 }
+
 )");
 }
 
@@ -196,6 +209,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeVecSingleScalarF16Var) {
   float16_t v = float16_t(2.0h);
   return vector<float16_t, 3> tint_symbol = vector<float16_t, 3>((v).xxx);
 }
+
 )");
 }
 
@@ -207,6 +221,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarBoolLiteral) {
     EXPECT_EQ(output_.hlsl, R"(bool3 a() {
   return (true).xxx;
 }
+
 )");
 }
 
@@ -223,6 +238,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeVecSingleScalarBoolVar) {
   bool v = true;
   return bool3((v).xxx);
 }
+
 )");
 }
 
@@ -234,6 +250,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarInt) {
     EXPECT_EQ(output_.hlsl, R"(int3 a() {
   return (2).xxx;
 }
+
 )");
 }
 
@@ -245,6 +262,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarUInt) {
     EXPECT_EQ(output_.hlsl, R"(uint3 a() {
   return (2u).xxx;
 }
+
 )");
 }
 
@@ -259,6 +277,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatF32) {
     EXPECT_EQ(output_.hlsl, R"(float2x3 a() {
   return float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f));
 }
+
 )");
 }
 
@@ -273,6 +292,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatF16) {
     EXPECT_EQ(output_.hlsl, R"(matrix<float16_t, 2, 3> a() {
   return matrix<float16_t, 2, 3>(vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h)), vector<float16_t, 3>(float16_t(3.0h), float16_t(4.0h), float16_t(5.0h)));
 }
+
 )");
 }
 
@@ -294,6 +314,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatComplexF32) {
     EXPECT_EQ(output_.hlsl, R"(float4x4 a() {
   return float4x4(float4(2.0f, 3.0f, 4.0f, 8.0f), (0.0f).xxxx, (7.0f).xxxx, float4(42.0f, 21.0f, 6.0f, -5.0f));
 }
+
 )");
 }
 
@@ -315,6 +336,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatComplexF16) {
     EXPECT_EQ(output_.hlsl, R"(matrix<float16_t, 4, 4> a() {
   return matrix<float16_t, 4, 4>(vector<float16_t, 4>(float16_t(2.0h), float16_t(3.0h), float16_t(4.0h), float16_t(8.0h)), (float16_t(0.0h)).xxxx, (float16_t(7.0h)).xxxx, vector<float16_t, 4>(float16_t(42.0h), float16_t(21.0h), float16_t(6.0h), float16_t(-5.0h)));
 }
+
 )");
 }
 
@@ -326,6 +348,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatEmptyF32) {
     EXPECT_EQ(output_.hlsl, R"(float2x3 a() {
   return float2x3((0.0f).xxx, (0.0f).xxx);
 }
+
 )");
 }
 
@@ -337,6 +360,7 @@ TEST_F(HlslWriterTest, ConstantTypeMatEmptyF16) {
     EXPECT_EQ(output_.hlsl, R"(matrix<float16_t, 2, 3> a() {
   return matrix<float16_t, 2, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
 }
+
 )");
 }
 
@@ -358,6 +382,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF32) {
     EXPECT_EQ(output_.hlsl, R"(void a() {
   float4x4 m_2 = float4x4(m_1);
 }
+
 )");
 }
 
@@ -379,6 +404,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF16) {
     EXPECT_EQ(output_.hlsl, R"(void a() {
   matrix<float16_t, 4, 4> m_2 = matrix<float16_t, 4, 4>(m_1);
 }
+
 )");
 }
 
@@ -397,6 +423,7 @@ a_ret a() {
   float3 tint_symbol[3] = {float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), float3(7.0f, 8.0f, 9.0f)};
   return tint_symbol;
 }
+
 )");
 }
 
@@ -408,6 +435,7 @@ TEST_F(HlslWriterTest, ConstantType_Array_Empty) {
     EXPECT_EQ(output_.hlsl, R"(float3[3] a() {
   return (float3[3])0;
 }
+
 )");
 }
 
@@ -438,6 +466,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeStruct) {
 S a() {
   return {1, 2.0f, int3(3, 4, 5)};
 }
+
 )");
 }
 
@@ -466,6 +495,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeStructEmpty) {
 S a() {
   return (S)0;
 }
+
 )");
 }
 
@@ -485,6 +515,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeStructStatic) {
 }
 
 static S p = {1_i]};
+
 )");
 }
 

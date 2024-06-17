@@ -40,11 +40,13 @@
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -157,6 +159,7 @@ class Printer : public tint::TextGenerator {
         }
 
         Line() << "}";
+        Line();
     }
 
     void EmitBlock(const core::ir::Block* block) {
@@ -165,10 +168,19 @@ class Printer : public tint::TextGenerator {
         for (auto* inst : *block) {
             Switch(
                 inst,                                               //
+                [&](const core::ir::Call* i) { EmitCallStmt(i); },  //
                 [&](const core::ir::Var* v) { EmitVar(v); },        //
                 [&](const core::ir::Let* i) { EmitLet(i); },        //
                 [&](const core::ir::Return* i) { EmitReturn(i); },  //
                 TINT_ICE_ON_NO_MATCH);
+        }
+    }
+
+    void EmitCallStmt(const core::ir::Call* c) {
+        if (!c->Result(0)->IsUsed()) {
+            auto out = Line();
+            EmitValue(out, c->Result(0));
+            out << ";";
         }
     }
 
@@ -229,9 +241,25 @@ class Printer : public tint::TextGenerator {
                 Switch(
                     r->Instruction(),
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },  //
+                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },    //
                     TINT_ICE_ON_NO_MATCH);
             },
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Emits a user call instruction
+    void EmitUserCall(StringStream& out, const core::ir::UserCall* c) {
+        out << NameOf(c->Target()) << "(";
+        size_t i = 0;
+        for (const auto* arg : c->Args()) {
+            if (i > 0) {
+                out << ", ";
+            }
+            ++i;
+
+            EmitValue(out, arg);
+        }
+        out << ")";
     }
 
     void EmitConstant(StringStream& out, const core::ir::Constant* c) {

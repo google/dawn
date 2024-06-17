@@ -1,9 +1,20 @@
-SKIP: FAILED
+void A() {
+}
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:163 internal compiler error: Switch() matched no cases. Type: tint::core::ir::UserCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void _A() {
+}
+
+void B() {
+  A();
+}
+
+void _B() {
+  _A();
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  B();
+  _B();
+}
+

@@ -49,6 +49,7 @@ TEST_F(HlslWriterTest, FunctionEmpty) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(void foo() {
 }
+
 )");
 }
 

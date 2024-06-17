@@ -9,3 +9,4 @@ float4 main() {
   float[10] v9 = (float[10])0;
   return (0.0f).xxxx;
 }
+

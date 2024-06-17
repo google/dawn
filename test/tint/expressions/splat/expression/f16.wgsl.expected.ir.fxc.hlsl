@@ -3,3 +3,4 @@ void f() {
   vector<float16_t, 3> v3 = (float16_t(3.0h)).xxx;
   vector<float16_t, 4> v4 = (float16_t(3.0h)).xxxx;
 }
+
