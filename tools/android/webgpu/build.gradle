@@ -35,7 +35,8 @@ android {
     namespace 'net.android.webgpu'
     defaultConfig {
         minSdkVersion 26
-        compileSdk 31
+        compileSdk 34
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_STL=c++_shared'
@@ -73,8 +74,11 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
-    testImplementation 'junit:junit:4.12'
+    implementation 'androidx.core:core-ktx:1.13.1'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.5'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.0'
 }
 
 project.afterEvaluate {
