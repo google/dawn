@@ -39,15 +39,22 @@
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/ir/access.h"
+#include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/core_binary.h"
+#include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
+#include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/value.h"
@@ -169,14 +176,22 @@ class Printer : public tint::TextGenerator {
 
         for (auto* inst : *block) {
             Switch(
-                inst,                                                //
-                [&](const core::ir::Call* i) { EmitCallStmt(i); },   //
-                [&](const core::ir::Let* i) { EmitLet(i); },         //
-                [&](const core::ir::Return* i) { EmitReturn(i); },   //
-                [&](const core::ir::Var* v) { EmitVar(v); },         //
-                                                                     //
-                [&](const core::ir::CoreBinary*) { /* inlined */ },  //
-                [&](const core::ir::Load*) { /* inlined */ },        //
+                inst,                                                       //
+                [&](const core::ir::Call* i) { EmitCallStmt(i); },          //
+                [&](const core::ir::Let* i) { EmitLet(i); },                //
+                [&](const core::ir::Return* i) { EmitReturn(i); },          //
+                [&](const core::ir::Var* v) { EmitVar(v); },                //
+                                                                            //
+                [&](const core::ir::NextIteration*) { /* do nothing */ },   //
+                                                                            //
+                [&](const core::ir::Access*) { /* inlined */ },             //
+                [&](const core::ir::Bitcast*) { /* inlined */ },            //
+                [&](const core::ir::Construct*) { /* inlined */ },          //
+                [&](const core::ir::CoreBinary*) { /* inlined */ },         //
+                [&](const core::ir::CoreUnary*) { /* inlined */ },          //
+                [&](const core::ir::Load*) { /* inlined */ },               //
+                [&](const core::ir::LoadVectorElement*) { /* inlined */ },  //
+                [&](const core::ir::Swizzle*) { /* inlined */ },            //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
