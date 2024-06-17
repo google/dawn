@@ -53,7 +53,7 @@ function(bundle_libraries output_target)
   foreach(dependency IN LISTS all_dependencies)
     get_target_property(type ${dependency} TYPE)
     if(${type} STREQUAL "STATIC_LIBRARY")
-      list(APPEND all_objects $<FILTER:$<TARGET_OBJECTS:${dependency}>,EXCLUDE,Placeholder\.cpp\.o$>)
+      list(APPEND all_objects $<TARGET_OBJECTS:${dependency}>)
     endif()
   endforeach()
 
