@@ -1,9 +1,7 @@
-SKIP: FAILED
+[numthreads(1, 1, 1)]
+void f() {
+  uint3 a = uint3(1u, 2u, 3u);
+  uint b = 4u;
+  uint3 r = (a / b);
+}
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:163 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBinary
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

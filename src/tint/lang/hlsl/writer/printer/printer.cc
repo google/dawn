@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -167,11 +168,12 @@ class Printer : public tint::TextGenerator {
 
         for (auto* inst : *block) {
             Switch(
-                inst,                                               //
-                [&](const core::ir::Call* i) { EmitCallStmt(i); },  //
-                [&](const core::ir::Var* v) { EmitVar(v); },        //
-                [&](const core::ir::Let* i) { EmitLet(i); },        //
-                [&](const core::ir::Return* i) { EmitReturn(i); },  //
+                inst,                                                //
+                [&](const core::ir::Call* i) { EmitCallStmt(i); },   //
+                [&](const core::ir::CoreBinary*) { /* inlined */ },  //
+                [&](const core::ir::Let* i) { EmitLet(i); },         //
+                [&](const core::ir::Return* i) { EmitReturn(i); },   //
+                [&](const core::ir::Var* v) { EmitVar(v); },         //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -240,11 +242,67 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::InstructionResult* r) {
                 Switch(
                     r->Instruction(),
+                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },    //
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },  //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },    //
                     TINT_ICE_ON_NO_MATCH);
             },
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Emit a binary instruction
+    /// @param b the binary instruction
+    void EmitBinary(StringStream& out, const core::ir::CoreBinary* b) {
+        // TODO(dsinclair): Short circuring transform
+        // TODO(dsinclair): Transform matrix multiplication into a `mul` instruction
+
+        auto kind = [&] {
+            switch (b->Op()) {
+                case core::BinaryOp::kAdd:
+                    return "+";
+                case core::BinaryOp::kSubtract:
+                    return "-";
+                case core::BinaryOp::kMultiply:
+                    return "*";
+                case core::BinaryOp::kDivide:
+                    return "/";
+                case core::BinaryOp::kModulo:
+                    return "%";
+                case core::BinaryOp::kAnd:
+                    return "&";
+                case core::BinaryOp::kOr:
+                    return "|";
+                case core::BinaryOp::kXor:
+                    return "^";
+                case core::BinaryOp::kEqual:
+                    return "==";
+                case core::BinaryOp::kNotEqual:
+                    return "!=";
+                case core::BinaryOp::kLessThan:
+                    return "<";
+                case core::BinaryOp::kGreaterThan:
+                    return ">";
+                case core::BinaryOp::kLessThanEqual:
+                    return "<=";
+                case core::BinaryOp::kGreaterThanEqual:
+                    return ">=";
+                case core::BinaryOp::kShiftLeft:
+                    return "<<";
+                case core::BinaryOp::kShiftRight:
+                    return ">>";
+                case core::BinaryOp::kLogicalAnd:
+                case core::BinaryOp::kLogicalOr:
+                    // These should have been replaced by if statments as HLSL is not
+                    // short-circuting.
+                    TINT_UNREACHABLE();
+            }
+            return "<error>";
+        };
+
+        ScopedParen sp(out);
+        EmitValue(out, b->LHS());
+        out << " " << kind() << " ";
+        EmitValue(out, b->RHS());
     }
 
     /// Emits a user call instruction
