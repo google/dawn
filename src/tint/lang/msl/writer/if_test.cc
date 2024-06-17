@@ -116,8 +116,7 @@ void foo() {
 )");
 }
 
-// Requires a transform to turn PHIs into lets
-TEST_F(MslWriterTest, DISABLED_IfWithSinglePhi) {
+TEST_F(MslWriterTest, IfWithSinglePhi) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -134,18 +133,17 @@ TEST_F(MslWriterTest, DISABLED_IfWithSinglePhi) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  int tint_symbol;
+  int v = 0;
   if (true) {
-    tint_symbol = 10;
+    v = 10;
   } else {
-    tint_symbol = 20;
+    v = 20;
   }
 }
 )");
 }
 
-// Requires a transform to turn PHIs into lets
-TEST_F(MslWriterTest, DISABLED_IfWithMultiPhi) {
+TEST_F(MslWriterTest, IfWithMultiPhi) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -162,21 +160,20 @@ TEST_F(MslWriterTest, DISABLED_IfWithMultiPhi) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  int tint_symbol;
-  bool tint_symbol_1;
+  int v = 0;
+  bool v_1 = false;
   if (true) {
-    tint_symbol = 10;
-    tint_symbol_1 = true;
+    v = 10;
+    v_1 = true;
   } else {
-    tint_symbol = 20;
-    tint_symbol_1 = false;
+    v = 20;
+    v_1 = false;
   }
 }
 )");
 }
 
-// Requires a transform to turn PHIs into lets
-TEST_F(MslWriterTest, DISABLED_IfWithMultiPhiReturn1) {
+TEST_F(MslWriterTest, IfWithMultiPhiReturn1) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -193,22 +190,21 @@ TEST_F(MslWriterTest, DISABLED_IfWithMultiPhiReturn1) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 int foo() {
-  int tint_symbol;
-  bool tint_symbol_1;
+  int v = 0;
+  bool v_1 = false;
   if (true) {
-    tint_symbol = 10;
-    tint_symbol_1 = true;
+    v = 10;
+    v_1 = true;
   } else {
-    tint_symbol = 20;
-    tint_symbol_1 = false;
+    v = 20;
+    v_1 = false;
   }
-  return tint_symbol;
+  return v;
 }
 )");
 }
 
-// Requires a transform to turn PHIs into lets
-TEST_F(MslWriterTest, DISABLED_IfWithMultiPhiReturn2) {
+TEST_F(MslWriterTest, IfWithMultiPhiReturn2) {
     auto* func = b.Function("foo", ty.bool_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
@@ -225,16 +221,16 @@ TEST_F(MslWriterTest, DISABLED_IfWithMultiPhiReturn2) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 bool foo() {
-  int tint_symbol;
-  bool tint_symbol_1;
+  int v = 0;
+  bool v_1 = false;
   if (true) {
-    tint_symbol = 10;
-    tint_symbol_1 = true;
+    v = 10;
+    v_1 = true;
   } else {
-    tint_symbol = 20;
-    tint_symbol_1 = false;
+    v = 20;
+    v_1 = false;
   }
-  return tint_symbol_1;
+  return v_1;
 }
 )");
 }
