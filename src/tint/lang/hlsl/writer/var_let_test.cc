@@ -37,14 +37,16 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, Var) {
-    auto* func = b.Function("main", ty.void_());
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
         b.Var("a", 1_u);
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void main() {
+    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+void main() {
   uint a = 1u;
 }
 
@@ -52,28 +54,33 @@ TEST_F(HlslWriterTest, Var) {
 }
 
 TEST_F(HlslWriterTest, DISABLED_VarZeroInit) {
-    auto* func = b.Function("main", ty.void_());
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
         b.Var("a", function, ty.f32());
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void main() {
+    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+void main() {
   float a = 0.0f;
 }
+
 )");
 }
 
 TEST_F(HlslWriterTest, Let) {
-    auto* func = b.Function("main", ty.void_());
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
         b.Let("a", 2_f);
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void main() {
+    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+void main() {
   float a = 2.0f;
 }
 

@@ -50,6 +50,10 @@ TEST_F(HlslWriterTest, FunctionEmpty) {
     EXPECT_EQ(output_.hlsl, R"(void foo() {
 }
 
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
 )");
 }
 
@@ -62,17 +66,24 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithParams) {
     EXPECT_EQ(output_.hlsl, R"(void my_func(float a, int b) {
   return;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPoint) {
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+TEST_F(HlslWriterTest, FunctionEntryPoint) {
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void main() {
-  return;
+    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+void main() {
 }
+
 )");
 }
 
@@ -90,6 +101,11 @@ TEST_F(HlslWriterTest, DISABLED_FunctionPtrParameter) {
     EXPECT_EQ(output_.hlsl, R"(float f(inout float foo) {
   return foo;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
 )");
 }
 
@@ -123,6 +139,7 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
 )");
 }
 
@@ -160,6 +177,7 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
+
 )");
 }
 
@@ -260,6 +278,7 @@ void frag_main(tint_symbol_2 tint_symbol_1) {
   frag_main_inner(tint_symbol_4);
   return;
 }
+
 )");
 }
 
@@ -346,6 +365,7 @@ tint_symbol_1 vert_main2() {
   wrapper_result_1.pos = inner_result_1.pos;
   return wrapper_result_1;
 }
+
 )");
 }
 
@@ -400,6 +420,7 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
+
 )");
 }
 
@@ -439,6 +460,7 @@ void frag_main() {
   float v = asfloat(ubo[0].x);
   return;
 }
+
 )");
 }
 
@@ -479,6 +501,7 @@ void frag_main() {
   float v = asfloat(coord.Load(4u));
   return;
 }
+
 )");
 }
 
@@ -518,6 +541,7 @@ void frag_main() {
   float v = asfloat(coord.Load(4u));
   return;
 }
+
 )");
 }
 
@@ -555,6 +579,7 @@ void frag_main() {
   coord.Store(4u, asuint(2.0f));
   return;
 }
+
 )");
 }
 
@@ -592,6 +617,7 @@ void frag_main() {
   coord.Store(4u, asuint(2.0f));
   return;
 }
+
 )");
 }
 
@@ -641,6 +667,7 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
+
 )");
 }
 
@@ -689,10 +716,11 @@ void frag_main() {
   float v = sub_func(1.0f);
   return;
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointCompute) {
+TEST_F(HlslWriterTest, FunctionEntryPointCompute) {
     // @compute @workgroup_size(1) fn main() {}
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
@@ -702,12 +730,12 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointCompute) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
 void main() {
-  return;
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointComputeWithWorkgroupLiteral) {
+TEST_F(HlslWriterTest, FunctionEntryPointComputeWithWorkgroupLiteral) {
     // @compute @workgroup_size(2, 4, 6) fn main() {}
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
@@ -717,8 +745,8 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointComputeWithWorkgroupLiteral) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"([numthreads(2, 4, 6)]
 void main() {
-  return;
 }
+
 )");
 }
 
@@ -734,6 +762,11 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithArrayParams) {
     EXPECT_EQ(output_.hlsl, R"(void my_func(float a[5]) {
   return;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
 )");
 }
 
@@ -750,6 +783,11 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithArrayReturn) {
 my_func_ret my_func() {
   return (float[5])0;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
 )");
 }
 
@@ -777,6 +815,11 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithDiscardAndVoidReturn) {
   }
   return;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
 )");
 }
 
@@ -809,6 +852,11 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithDiscardAndNonVoidReturn) {
   int unused;
   return unused;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
 )");
 }
 

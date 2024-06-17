@@ -4,3 +4,7 @@ void f() {
   bool4 v4 = (true).xxxx;
 }
 
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

@@ -8,3 +8,7 @@ void more_tests_that_would_fail() {
   float b = 2.5f;
 }
 
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

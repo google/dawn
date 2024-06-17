@@ -46,6 +46,7 @@ tint_add_target(tint_lang_hlsl_writer_raise lib
 tint_target_add_dependencies(tint_lang_hlsl_writer_raise lib
   tint_api_common
   tint_lang_core
+  tint_lang_core_ir_transform
   tint_lang_hlsl_writer_common
   tint_utils_containers
   tint_utils_diagnostic
