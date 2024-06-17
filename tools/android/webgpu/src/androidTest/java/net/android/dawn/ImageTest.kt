@@ -3,8 +3,8 @@ package net.android.dawn
 import android.dawn.*
 import android.dawn.helper.DawnException
 import android.dawn.helper.Util
-import android.dawn.helper.createImageFromGpuTexture
-import android.dawn.helper.streamToString
+import android.dawn.helper.asString
+import android.dawn.helper.createBitmap
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
@@ -66,7 +66,7 @@ class ImageTest {
             val shaderModule = device.createShaderModule(
                 ShaderModuleDescriptor(
                     shaderModuleWGSLDescriptor = ShaderModuleWGSLDescriptor(
-                        code = streamToString(appContext.assets.open("triangle/shader.wgsl"))
+                        code = appContext.assets.open("triangle/shader.wgsl").asString()
                     )
                 )
             )
@@ -121,7 +121,7 @@ class ImageTest {
                 })
             }
 
-            val bitmap = createImageFromGpuTexture(device, testTexture)
+            val bitmap = testTexture.createBitmap(device)
 
             if (false) {
                 writeReferenceImage(bitmap)
