@@ -30,11 +30,32 @@
 #include <memory>
 #include <utility>
 
+#include "src/tint/lang/core/ir/function.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/hlsl/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
+#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace tint::hlsl::writer {
+namespace {
+
+ast::PipelineStage ir_to_ast_stage(core::ir::Function::PipelineStage stage) {
+    switch (stage) {
+        case core::ir::Function::PipelineStage::kCompute:
+            return ast::PipelineStage::kCompute;
+        case core::ir::Function::PipelineStage::kFragment:
+            return ast::PipelineStage::kFragment;
+        case core::ir::Function::PipelineStage::kVertex:
+            return ast::PipelineStage::kVertex;
+        default:
+            break;
+    }
+    TINT_UNREACHABLE();
+}
+
+}  // namespace
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     Output output;
@@ -50,6 +71,14 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
         return result.Failure();
     }
     output.hlsl = result->hlsl;
+
+    // Collect the list of entry points in the sanitized program.
+    for (auto func : ir.functions) {
+        if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+            auto name = ir.NameOf(func).Name();
+            output.entry_points.push_back({name, ir_to_ast_stage(func->Stage())});
+        }
+    }
 
     return output;
 }
