@@ -89,5 +89,93 @@ kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgro
     EXPECT_THAT(output_.workgroup_allocations.at("bar"), testing::ElementsAre());
 }
 
+TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {
+    auto* var = b.Var("a", ty.ptr<storage, array<u32>>());
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* foo = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                           std::array<uint32_t, 3>{1u, 1u, 1u});
+    b.Append(foo->Block(), [&] {
+        b.Store(b.Access<ptr<storage, u32>>(var, 0_u), 42_u);
+        b.Return(foo);
+    });
+
+    Options options;
+    options.array_length_from_uniform.bindpoint_to_size_index[{0u, 0u}] = 0u;
+    options.array_length_from_uniform.ubo_binding = 30u;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  device tint_array<uint, 1>* a;
+};
+
+kernel void foo(device tint_array<uint, 1>* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+  (*tint_module_vars.a)[0u] = 42u;
+}
+)");
+    EXPECT_FALSE(output_.needs_storage_buffer_sizes);
+}
+
+TEST_F(MslWriterTest, NeedsStorageBufferSizes_True) {
+    auto* var = b.Var("a", ty.ptr<storage, array<u32>>());
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* foo = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                           std::array<uint32_t, 3>{1u, 1u, 1u});
+    b.Append(foo->Block(), [&] {
+        auto* length = b.Call<u32>(core::BuiltinFn::kArrayLength, var);
+        b.Store(b.Access<ptr<storage, u32>>(var, 0_u), length);
+        b.Return(foo);
+    });
+
+    Options options;
+    options.array_length_from_uniform.bindpoint_to_size_index[{0u, 0u}] = 0u;
+    options.array_length_from_uniform.ubo_binding = 30u;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  device tint_array<uint, 1>* a;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+};
+
+kernel void foo(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  (*tint_module_vars.a)[0u] = ((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 4u);
+}
+)");
+    EXPECT_TRUE(output_.needs_storage_buffer_sizes);
+}
+
 }  // namespace
 }  // namespace tint::msl::writer

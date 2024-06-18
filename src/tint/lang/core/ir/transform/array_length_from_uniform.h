@@ -40,6 +40,12 @@ class Module;
 
 namespace tint::core::ir::transform {
 
+/// The result of running the ArrayLengthFromUniform transform.
+struct ArrayLengthFromUniformResult {
+    /// `true` if the transformed module needs the storage buffer sizes UBO.
+    bool needs_storage_buffer_sizes = false;
+};
+
 /// ArrayLengthFromUniform is a transform that replaces calls to the arrayLength() builtin by
 /// calculating the array length from the total size of the storage buffer, which is received via a
 /// uniform buffer.
@@ -56,8 +62,8 @@ namespace tint::core::ir::transform {
 /// @param module the module to transform
 /// @param ubo_binding the binding point to use for the uniform buffer
 /// @param bindpoint_to_size_index the map from binding point to an index which holds the size
-/// @returns success or failure
-Result<SuccessType> ArrayLengthFromUniform(
+/// @returns the transform result or failure
+Result<ArrayLengthFromUniformResult> ArrayLengthFromUniform(
     Module& module,
     BindingPoint ubo_binding,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index);

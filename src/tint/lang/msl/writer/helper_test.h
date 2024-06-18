@@ -78,9 +78,9 @@ class MslWriterTestHelperBase : public BASE {
     Output output_;
 
     /// Run the writer on the IR module and validate the result.
+    /// @param options the writer options
     /// @returns true if generation and validation succeeded
-    bool Generate() {
-        Options options;
+    bool Generate(Options options = {}) {
         auto result = writer::Generate(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason.Str();

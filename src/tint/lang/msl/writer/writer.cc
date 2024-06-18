@@ -48,8 +48,9 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     Output output;
 
     // Raise from core-dialect to MSL-dialect.
-    if (auto res = Raise(ir, options); res != Success) {
-        return res.Failure();
+    auto raise_result = Raise(ir, options);
+    if (raise_result != Success) {
+        return raise_result.Failure();
     }
 
     // Generate the MSL code.
@@ -59,8 +60,8 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     }
     output.msl = result->msl;
     output.workgroup_allocations = std::move(result->workgroup_allocations);
+    output.needs_storage_buffer_sizes = raise_result->needs_storage_buffer_sizes;
     // TODO(crbug.com/42251016): Set has_invariant.
-    // TODO(crbug.com/42251016): Set needs_storage_buffer_sizes.
     // TODO(crbug.com/42251016): Set used_array_length_from_uniform_indices.
     return output;
 }

@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
@@ -50,14 +51,16 @@
 
 namespace tint::msl::writer {
 
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
+Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)                   \
     do {                                           \
         auto result = name(module, ##__VA_ARGS__); \
         if (result != Success) {                   \
-            return result;                         \
+            return result.Failure();               \
         }                                          \
     } while (false)
+
+    RaiseResult raise_result;
 
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
@@ -97,9 +100,15 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, multiplanar_map);
-    RUN_TRANSFORM(core::ir::transform::ArrayLengthFromUniform,
-                  BindingPoint{0u, array_length_from_uniform_options.ubo_binding},
-                  array_length_from_uniform_options.bindpoint_to_size_index);
+
+    auto array_length_from_uniform_result = core::ir::transform::ArrayLengthFromUniform(
+        module, BindingPoint{0u, array_length_from_uniform_options.ubo_binding},
+        array_length_from_uniform_options.bindpoint_to_size_index);
+    if (array_length_from_uniform_result != Success) {
+        return array_length_from_uniform_result.Failure();
+    }
+    raise_result.needs_storage_buffer_sizes =
+        array_length_from_uniform_result->needs_storage_buffer_sizes;
 
     if (!options.disable_workgroup_init) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory);
@@ -121,7 +130,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::RenameConflicts);
     RUN_TRANSFORM(core::ir::transform::ValueToLet);
 
-    return Success;
+    return raise_result;
 }
 
 }  // namespace tint::msl::writer
