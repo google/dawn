@@ -89,6 +89,7 @@
 #include "src/tint/lang/msl/barrier_type.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/component.h"
 #include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
 #include "src/tint/lang/msl/type/bias.h"
@@ -1430,7 +1431,26 @@ class Printer : public tint::TextGenerator {
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
     void EmitConstant(StringStream& out, const core::ir::Constant* c) {
-        // Special case for memory_order enum values.
+        // Special cases for enum values.
+        if (auto* order = c->As<msl::ir::Component>()) {
+            switch (order->Value()->ValueAs<uint32_t>()) {
+                case 0:
+                    out << "component::x";
+                    break;
+                case 1:
+                    out << "component::y";
+                    break;
+                case 2:
+                    out << "component::z";
+                    break;
+                case 3:
+                    out << "component::w";
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+            return;
+        }
         if (auto* order = c->As<msl::ir::MemoryOrder>()) {
             TINT_ASSERT(order->Value()->ValueAs<u32>() ==
                         static_cast<u32>(std::memory_order_relaxed));

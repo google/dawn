@@ -66,6 +66,8 @@ const char* str(BuiltinFn i) {
             return "atomic_store_explicit";
         case BuiltinFn::kFence:
             return "fence";
+        case BuiltinFn::kGather:
+            return "gather";
         case BuiltinFn::kGetWidth:
             return "get_width";
         case BuiltinFn::kGetHeight:

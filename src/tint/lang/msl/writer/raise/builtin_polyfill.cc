@@ -46,6 +46,7 @@
 #include "src/tint/lang/msl/barrier_type.h"
 #include "src/tint/lang/msl/builtin_fn.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
+#include "src/tint/lang/msl/ir/component.h"
 #include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
 #include "src/tint/lang/msl/type/bias.h"
@@ -92,6 +93,7 @@ struct State {
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kTextureDimensions:
+                    case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kTextureNumLevels:
@@ -156,6 +158,9 @@ struct State {
                 // Texture builtins.
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(builtin);
+                    break;
+                case core::BuiltinFn::kTextureGather:
+                    TextureGather(builtin);
                     break;
                 case core::BuiltinFn::kTextureLoad:
                     TextureLoad(builtin);
@@ -309,6 +314,46 @@ struct State {
             // Reconstruct the original result type from the individual dimensions.
             b.ConstructWithResult(builtin->DetachResult(), std::move(values));
         });
+        builtin->Destroy();
+    }
+
+    /// Replace a textureGather call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureGather(core::ir::CoreBuiltinCall* builtin) {
+        // If there is a component argument it will always be first followed by the texture object.
+        // Otherwise, the texture object will be first.
+        core::ir::Value* tex = nullptr;
+        Vector<core::ir::Value*, 4> args;
+        auto* component = builtin->Args()[0]->As<core::ir::Constant>();
+        if (component) {
+            tex = builtin->Args()[1];
+            args = builtin->Args().Offset(2);
+        } else {
+            tex = builtin->Args()[0];
+            args = builtin->Args().Offset(1);
+        }
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+
+        // Add an offset argument if it was not provided.
+        const bool has_offset = args.Back()->Type()->is_signed_integer_vector();
+        const bool needs_offset = tex_type->dim() == core::type::TextureDimension::k2d ||
+                                  tex_type->dim() == core::type::TextureDimension::k2dArray;
+        if (needs_offset && !has_offset) {
+            args.Push(b.Zero<vec2<i32>>());
+        }
+
+        // Add the component argument if needed, converting it to u32 if necessary.
+        if (component) {
+            if (component->Type()->Is<core::type::I32>()) {
+                component = b.Constant(component->Value()->ValueAs<u32>());
+            }
+            args.Push(ir.allocators.values.Create<msl::ir::Component>(component->Value()));
+        }
+
+        // Call the `gather()` member function.
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kGather, tex, std::move(args));
+        call->InsertBefore(builtin);
         builtin->Destroy();
     }
 

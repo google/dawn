@@ -1,49 +1,41 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  texture2d_array<uint, access::sample> arg_1;
+  sampler arg_2;
+  device uint4* prevent_dce;
+};
+struct VertexOutput {
+  float4 pos;
+  uint4 prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  uint4 VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_1:ptr<handle, texture_2d_array<u32>, read> = var @binding_point(1, 1)
-  %arg_2:ptr<handle, sampler, read> = var @binding_point(1, 2)
-  %prevent_dce:ptr<storage, vec4<u32>, read_write> = var @binding_point(2, 0)
+uint4 textureGather_6b7b74(tint_module_vars_struct tint_module_vars) {
+  float2 arg_3 = float2(1.0f);
+  uint arg_4 = 1u;
+  uint4 res = tint_module_vars.arg_1.gather(tint_module_vars.arg_2, arg_3, arg_4, int2(1), component::y);
+  return res;
 }
-
-%textureGather_6b7b74 = func():void {
-  $B2: {
-    %arg_3:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(1.0f)
-    %arg_4:ptr<function, u32, read_write> = var, 1u
-    %7:texture_2d_array<u32> = load %arg_1
-    %8:sampler = load %arg_2
-    %9:vec2<f32> = load %arg_3
-    %10:u32 = load %arg_4
-    %11:vec4<u32> = textureGather 1u, %7, %8, %9, %10, vec2<i32>(1i)
-    %res:ptr<function, vec4<u32>, read_write> = var, %11
-    %13:vec4<u32> = load %res
-    store %prevent_dce, %13
-    ret
-  }
+fragment void fragment_main(texture2d_array<uint, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]], device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_1=arg_1, .arg_2=arg_2, .prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = textureGather_6b7b74(tint_module_vars);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %15:void = call %textureGather_6b7b74
-    ret vec4<f32>(0.0f)
-  }
+kernel void compute_main(texture2d_array<uint, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]], device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_1=arg_1, .arg_2=arg_2, .prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = textureGather_6b7b74(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %17:void = call %textureGather_6b7b74
-    ret
-  }
+VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = textureGather_6b7b74(tint_module_vars);
+  return out;
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %19:void = call %textureGather_6b7b74
-    ret
-  }
+vertex vertex_main_outputs vertex_main(texture2d_array<uint, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_1=arg_1, .arg_2=arg_2};
+  VertexOutput const v = vertex_main_inner(tint_module_vars);
+  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
