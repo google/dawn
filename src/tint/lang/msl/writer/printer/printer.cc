@@ -580,9 +580,9 @@ class Printer : public tint::TextGenerator {
 
     void EmitBreakIf(const core::ir::BreakIf* b) {
         auto out = Line();
-        out << "if ";
+        out << "if (";
         EmitValue(out, b->Condition());
-        out << " { break; }";
+        out << ") { break; }";
     }
 
     void EmitContinue() {

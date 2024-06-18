@@ -10,7 +10,7 @@ int f() {
       }
       {
         i = (i + 1);
-        if (i == 4) { break; }
+        if ((i == 4)) { break; }
       }
       continue;
     }

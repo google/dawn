@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
@@ -10,12 +8,10 @@ fragment void tint_symbol() {
       } else {
         break;
       }
-      if false { break; }
+      {
+        if (false) { break; }
+      }
       continue;
     }
   }
 }
-program_source:11:10: error: expected '(' after 'if'
-      if false { break; }
-         ^
-

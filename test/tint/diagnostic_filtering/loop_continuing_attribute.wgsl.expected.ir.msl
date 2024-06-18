@@ -21,7 +21,7 @@ void tint_symbol_inner(float x) {
     while(true) {
       {
         dfdx(1.0f);
-        if (x > 0.0f) { break; }
+        if ((x > 0.0f)) { break; }
       }
       continue;
     }

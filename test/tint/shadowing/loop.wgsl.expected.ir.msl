@@ -25,7 +25,7 @@ kernel void foo(device tint_array<int, 10>* output [[buffer(0)]]) {
       {
         int x = (*tint_module_vars.output)[x];
         i = (i + x);
-        if (i > 10) { break; }
+        if ((i > 10)) { break; }
       }
       continue;
     }
