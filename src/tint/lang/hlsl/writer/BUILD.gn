@@ -93,6 +93,7 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [
         "access_test.cc",
+        "binary_test.cc",
         "constant_test.cc",
         "function_test.cc",
         "helper_test.h",

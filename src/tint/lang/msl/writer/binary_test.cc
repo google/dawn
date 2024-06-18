@@ -199,8 +199,6 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"(left <= right)", core::BinaryOp::kLessThanEqual},
                     BinaryData{"(left >= right)", core::BinaryOp::kGreaterThanEqual}));
 
-// TODO(dsinclair): Needs transform
-// TODO(dsinclair): Requires `bitcast` support
 using MslWriterBinaryTest_SignedOverflowDefinedBehaviour = MslWriterTestWithParam<BinaryData>;
 TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, DISABLED_Emit) {
     auto params = GetParam();
@@ -218,11 +216,11 @@ TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, DISABLED_Emit) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  int const left = 1i;
-  int const right = 3i;
+  int const left = 1;
+  int const right = 3;
   int const val = )" + params.result +
                                R"(;
-      }
+}
 )");
 }
 
@@ -234,8 +232,6 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_SignedOverflowDefinedBehaviour,
                          testing::ValuesIn(signed_overflow_defined_behaviour_cases));
 
-// TODO(dsinclair): Needs transform
-// TODO(dsinclair): Requires `bitcast` support
 using MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour = MslWriterTestWithParam<BinaryData>;
 TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour, DISABLED_Emit) {
     auto params = GetParam();
@@ -252,11 +248,11 @@ TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour, DISABLED_Emit) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  int const left = 1i;
+  int const left = 1;
   uint const right = 2u;
   int const val = )" + params.result +
                                R"(;
-      }
+}
 )");
 }
 
@@ -267,8 +263,6 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour,
                          testing::ValuesIn(shift_signed_overflow_defined_behaviour_cases));
 
-// TODO(dsinclair): Needs transform
-// TODO(dsinclair): Requires `bitcast`
 using MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained =
     MslWriterTestWithParam<BinaryData>;
 TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained, DISABLED_Emit) {
@@ -279,17 +273,21 @@ TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained, DISABLED_Emit
         auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, i32>());
         auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, i32>());
 
-        auto* expr1 = b.Binary(params.op, ty.i32(), left, right);
-        auto* expr2 = b.Binary(params.op, ty.i32(), expr1, right);
+        auto* l = b.Load(left);
+        auto* r = b.Load(right);
+        auto* expr1 = b.Binary(params.op, ty.i32(), l, r);
+        auto* expr2 = b.Binary(params.op, ty.i32(), expr1, r);
 
         b.Let("val", expr2);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  int left;
-  int right;
+  int const left = 0;
+  int const right = 0;
+  int const v = right;
   int const val = )" + params.result +
                                R"(;
 )");
@@ -308,8 +306,6 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained,
                          testing::ValuesIn(signed_overflow_defined_behaviour_chained_cases));
 
-// TODO(dsinclair): Needs transform
-// TODO(dsinclair): Requires `bitcast`
 using MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained =
     MslWriterTestWithParam<BinaryData>;
 TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained, DISABLED_Emit) {
@@ -320,17 +316,21 @@ TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained, DISABLED
         auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, i32>());
         auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, u32>());
 
-        auto* expr1 = b.Binary(params.op, ty.i32(), left, right);
-        auto* expr2 = b.Binary(params.op, ty.i32(), expr1, right);
+        auto* l = b.Load(left);
+        auto* r = b.Load(right);
+        auto* expr1 = b.Binary(params.op, ty.i32(), l, r);
+        auto* expr2 = b.Binary(params.op, ty.i32(), expr1, r);
 
         b.Let("val", expr2);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  int left;
-  uint right;
+  int left = 0;
+  uint right = 0u;
+  uint const v = right;
   int const val = )" + params.result +
                                R"(;
 )");
@@ -344,133 +344,95 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained,
                          testing::ValuesIn(shift_signed_overflow_defined_behaviour_chained_cases));
 
-// TODO(dsinclair): Needs transform
 TEST_F(MslWriterTest, DISABLED_BinaryModF32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, f32>());
         auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, f32>());
 
-        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.f32(), left, right);
+        auto* l = b.Load(left);
+        auto* r = b.Load(right);
+        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.f32(), l, r);
 
         b.Let("val", expr1);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  float left;
-  float right;
+  float left = 0.0f;
+  float right = 0.0f;
   float const val = fmod(left, right);
 )");
 }
 
-// TODO(dsinclair): Needs transform
 TEST_F(MslWriterTest, DISABLED_BinaryModF16) {
-    // Enable f16?
-
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, f16>());
         auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, f16>());
 
-        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.f16(), left, right);
+        auto* l = b.Load(left);
+        auto* r = b.Load(right);
+        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.f16(), l, r);
 
         b.Let("val", expr1);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  half left;
-  half right;
+  half left = 0.0h;
+  half right = 0.0h;
   half const val = fmod(left, right);
 )");
 }
 
-// TODO(dsinclair): Needs transform
 TEST_F(MslWriterTest, DISABLED_BinaryModVec3F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
         auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
 
-        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3<f32>(), left, right);
+        auto* l = b.Load(left);
+        auto* r = b.Load(right);
+        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3<f32>(), l, r);
 
         b.Let("val", expr1);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  float3 left;
-  float3 right;
+  float3 left = 0.0f;
+  float3 right = 0.0f;
   float3 const val = fmod(left, right);
 )");
 }
 
-// TODO(dsinclair): Needs transform
 TEST_F(MslWriterTest, DISABLED_BinaryModVec3F16) {
-    // Enable f16?
-
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
         auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
 
-        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3<f16>(), left, right);
+        auto* l = b.Load(left);
+        auto* r = b.Load(right);
+        auto* expr1 = b.Binary(core::BinaryOp::kModulo, ty.vec3<f16>(), l, r);
 
         b.Let("val", expr1);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  half3 left;
-  half3 right;
+  half3 left = 0.0h;
+  half3 right = 0.0h;
   half3 const val = fmod(left, right);
-)");
-}
-
-// TODO(dsinclair): Needs transform
-TEST_F(MslWriterTest, DISABLED_BinaryBoolAnd) {
-    auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
-        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
-
-        auto* expr1 = b.Binary(core::BinaryOp::kAdd, ty.bool_(), left, right);
-
-        b.Let("val", expr1);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
-  float left;
-  float right;
-  float const val = bool(left & right);
-)");
-}
-
-// TODO(dsinclair): Needs transform
-TEST_F(MslWriterTest, DISABLED_BinaryBoolOr) {
-    auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
-        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
-
-        auto* expr1 = b.Binary(core::BinaryOp::kOr, ty.bool_(), left, right);
-
-        b.Let("val", expr1);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
-  float left;
-  float right;
-  float const val = bool(left | right);
 )");
 }
 

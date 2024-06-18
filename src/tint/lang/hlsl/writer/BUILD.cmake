@@ -101,6 +101,7 @@ if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_test test
   lang/hlsl/writer/access_test.cc
+  lang/hlsl/writer/binary_test.cc
   lang/hlsl/writer/constant_test.cc
   lang/hlsl/writer/function_test.cc
   lang/hlsl/writer/helper_test.h
