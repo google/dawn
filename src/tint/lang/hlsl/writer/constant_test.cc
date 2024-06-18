@@ -38,7 +38,8 @@ TEST_F(HlslWriterTest, ConstantBoolFalse) {
     f->Block()->Append(b.Return(f, false));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(bool a() {
+    EXPECT_EQ(output_.hlsl, R"(
+bool a() {
   return false;
 }
 
@@ -54,7 +55,8 @@ TEST_F(HlslWriterTest, ConstantBoolTrue) {
     f->Block()->Append(b.Return(f, true));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(bool a() {
+    EXPECT_EQ(output_.hlsl, R"(
+bool a() {
   return true;
 }
 
@@ -70,7 +72,8 @@ TEST_F(HlslWriterTest, ConstantInt) {
     f->Block()->Append(b.Return(f, -12345_i));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(int a() {
+    EXPECT_EQ(output_.hlsl, R"(
+int a() {
   return -12345;
 }
 
@@ -86,7 +89,8 @@ TEST_F(HlslWriterTest, ConstantUInt) {
     f->Block()->Append(b.Return(f, 56779_u));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(uint a() {
+    EXPECT_EQ(output_.hlsl, R"(
+uint a() {
   return 56779u;
 }
 
@@ -103,7 +107,8 @@ TEST_F(HlslWriterTest, ConstantFloat) {
     f->Block()->Append(b.Return(f, f32((1 << 30) - 4)));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float a() {
   return 1073741824.0f;
 }
 
@@ -120,7 +125,8 @@ TEST_F(HlslWriterTest, ConstantF16) {
     f->Block()->Append(b.Return(f, f16((1 << 15) - 8)));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float16_t a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float16_t a() {
   return float16_t(32752.0h);
 }
 
@@ -136,7 +142,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecF32) {
     b.Append(f->Block(), [&] { b.Return(f, b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float3 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float3 a() {
   return float3(1.0f, 2.0f, 3.0f);
 }
 
@@ -152,7 +159,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecF16) {
     b.Append(f->Block(), [&] { b.Return(f, b.Composite(ty.vec3<f16>(), 1_h, 2_h, 3_h)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(vector<float16_t, 3> a() {
+    EXPECT_EQ(output_.hlsl, R"(
+vector<float16_t, 3> a() {
   return vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h));
 }
 
@@ -168,7 +176,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecEmptyF32) {
     b.Append(f->Block(), [&] { b.Return(f, b.Zero<vec3<f32>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float3 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float3 a() {
   return (0.0f).xxx;
 }
 
@@ -184,7 +193,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecEmptyF16) {
     b.Append(f->Block(), [&] { b.Return(f, b.Zero<vec3<f16>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(vector<float16_t, 3> a() {
+    EXPECT_EQ(output_.hlsl, R"(
+vector<float16_t, 3> a() {
   return (float16_t(0.0h)).xxx;
 }
 
@@ -200,7 +210,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarF32Literal) {
     b.Append(f->Block(), [&] { b.Return(f, b.Splat(ty.vec3<f32>(), 2_f)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float3 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float3 a() {
   return (2.0f).xxx;
 }
 
@@ -216,7 +227,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarF16Literal) {
     b.Append(f->Block(), [&] { b.Return(f, b.Splat(ty.vec3<f16>(), 2_h)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(vector<float16_t, 3> a() {
+    EXPECT_EQ(output_.hlsl, R"(
+vector<float16_t, 3> a() {
   return (float16_t(2.0h)).xxx;
 }
 
@@ -274,7 +286,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarBoolLiteral) {
     b.Append(f->Block(), [&] { b.Return(f, b.Splat(ty.vec3<bool>(), true)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(bool3 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+bool3 a() {
   return (true).xxx;
 }
 
@@ -311,7 +324,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarInt) {
     b.Append(f->Block(), [&] { b.Return(f, b.Splat(ty.vec3<i32>(), 2_i)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(int3 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+int3 a() {
   return (2).xxx;
 }
 
@@ -327,7 +341,8 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarUInt) {
     b.Append(f->Block(), [&] { b.Return(f, b.Splat(ty.vec3<u32>(), 2_u)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(uint3 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+uint3 a() {
   return (2u).xxx;
 }
 
@@ -346,7 +361,8 @@ TEST_F(HlslWriterTest, ConstantTypeMatF32) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float2x3 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float2x3 a() {
   return float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f));
 }
 
@@ -365,7 +381,8 @@ TEST_F(HlslWriterTest, ConstantTypeMatF16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(matrix<float16_t, 2, 3> a() {
+    EXPECT_EQ(output_.hlsl, R"(
+matrix<float16_t, 2, 3> a() {
   return matrix<float16_t, 2, 3>(vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h)), vector<float16_t, 3>(float16_t(3.0h), float16_t(4.0h), float16_t(5.0h)));
 }
 
@@ -391,7 +408,8 @@ TEST_F(HlslWriterTest, ConstantTypeMatComplexF32) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float4x4 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float4x4 a() {
   return float4x4(float4(2.0f, 3.0f, 4.0f, 8.0f), (0.0f).xxxx, (7.0f).xxxx, float4(42.0f, 21.0f, 6.0f, -5.0f));
 }
 
@@ -417,7 +435,8 @@ TEST_F(HlslWriterTest, ConstantTypeMatComplexF16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(matrix<float16_t, 4, 4> a() {
+    EXPECT_EQ(output_.hlsl, R"(
+matrix<float16_t, 4, 4> a() {
   return matrix<float16_t, 4, 4>(vector<float16_t, 4>(float16_t(2.0h), float16_t(3.0h), float16_t(4.0h), float16_t(8.0h)), (float16_t(0.0h)).xxxx, (float16_t(7.0h)).xxxx, vector<float16_t, 4>(float16_t(42.0h), float16_t(21.0h), float16_t(6.0h), float16_t(-5.0h)));
 }
 
@@ -433,7 +452,8 @@ TEST_F(HlslWriterTest, ConstantTypeMatEmptyF32) {
     b.Append(f->Block(), [&] { b.Return(f, b.Zero<mat2x3<f32>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float2x3 a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float2x3 a() {
   return float2x3((0.0f).xxx, (0.0f).xxx);
 }
 
@@ -449,7 +469,8 @@ TEST_F(HlslWriterTest, ConstantTypeMatEmptyF16) {
     b.Append(f->Block(), [&] { b.Return(f, b.Zero<mat2x3<f16>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(matrix<float16_t, 2, 3> a() {
+    EXPECT_EQ(output_.hlsl, R"(
+matrix<float16_t, 2, 3> a() {
   return matrix<float16_t, 2, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
 }
 
@@ -540,7 +561,8 @@ TEST_F(HlslWriterTest, ConstantType_Array_Empty) {
     b.Append(f->Block(), [&] { b.Return(f, b.Zero<array<vec3<f32>, 3>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float3[3] a() {
+    EXPECT_EQ(output_.hlsl, R"(
+float3[3] a() {
   return (float3[3])0;
 }
 
@@ -586,8 +608,7 @@ void unused_entry_point() {
 )");
 }
 
-// TODO(dsinclair): Needs `struct` constant emission
-TEST_F(HlslWriterTest, DISABLED_ConstantTypeStructEmpty) {
+TEST_F(HlslWriterTest, ConstantTypeStructEmpty) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
                                          core::type::StructMemberAttributes{}),
@@ -602,11 +623,11 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeStructEmpty) {
     b.Append(f->Block(), [&] { b.Return(f, b.Zero(strct)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(struct S
+    EXPECT_EQ(output_.hlsl, R"(struct S {
   int a;
   float b;
   int3 c;
-}
+};
 
 S a() {
   return (S)0;
@@ -619,7 +640,7 @@ void unused_entry_point() {
 )");
 }
 
-// TODO(dsinclair): Needs `struct` constant emission
+// TODO(dsinclair): Needs `construct` emission
 TEST_F(HlslWriterTest, DISABLED_ConstantTypeStructStatic) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,

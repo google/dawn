@@ -45,7 +45,8 @@ TEST_F(HlslWriterTest, Var) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
 void main() {
   uint a = 1u;
 }
@@ -62,7 +63,8 @@ TEST_F(HlslWriterTest, VarZeroInit) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
 void main() {
   float a = 0.0f;
 }
@@ -79,7 +81,8 @@ TEST_F(HlslWriterTest, Let) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
 void main() {
   float a = 2.0f;
 }

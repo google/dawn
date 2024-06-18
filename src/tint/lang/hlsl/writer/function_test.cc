@@ -47,7 +47,8 @@ TEST_F(HlslWriterTest, FunctionEmpty) {
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void foo() {
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
 }
 
 [numthreads(1, 1, 1)]
@@ -80,7 +81,8 @@ TEST_F(HlslWriterTest, FunctionEntryPoint) {
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
 void main() {
 }
 
@@ -728,7 +730,8 @@ TEST_F(HlslWriterTest, FunctionEntryPointCompute) {
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"([numthreads(1, 1, 1)]
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
 void main() {
 }
 
@@ -743,7 +746,8 @@ TEST_F(HlslWriterTest, FunctionEntryPointComputeWithWorkgroupLiteral) {
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"([numthreads(2, 4, 6)]
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(2, 4, 6)]
 void main() {
 }
 

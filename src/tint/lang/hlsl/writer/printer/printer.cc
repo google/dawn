@@ -30,15 +30,20 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/interpolation_sampling.h"
+#include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
@@ -93,6 +98,7 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/strconv/float_to_string.h"
 #include "src/tint/utils/text/string.h"
+#include "src/tint/utils/text/string_stream.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
@@ -120,7 +126,10 @@ class Printer : public tint::TextGenerator {
             EmitFunction(func);
         }
 
-        result_.hlsl = main_buffer_.String();
+        StringStream ss;
+        ss << preamble_buffer_.String() << "\n" << main_buffer_.String();
+        result_.hlsl = ss.str();
+
         return std::move(result_);
     }
 
@@ -130,10 +139,15 @@ class Printer : public tint::TextGenerator {
 
     core::ir::Module& ir_;
 
+    /// The buffer holding preamble text
+    TextBuffer preamble_buffer_;
+
     /// A hashmap of value to name
     Hashmap<const core::ir::Value*, std::string, 32> names_;
     /// Map of builtin structure to unique generated name
     std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
+    /// Set of structs which have been emitted already
+    std::unordered_set<const core::type::Struct*> emitted_structs_;
 
     /// The current function being emitted
     const core::ir::Function* current_function_ = nullptr;
@@ -208,19 +222,14 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitVar(const core::ir::Var* var) {
-        auto out = Line();
-
-        // TODO(dsinclair): This isn't right, as some types contain their names
-        EmitType(out, var->Result(0)->Type());
-        out << " ";
-        out << NameOf(var->Result(0));
-
-        out << " = ";
-
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         TINT_ASSERT(ptr);
 
         auto space = ptr->AddressSpace();
+
+        auto out = Line();
+        EmitTypeAndName(out, var->Result(0)->Type(), space, ptr->Access(), NameOf(var->Result(0)));
+        out << " = ";
 
         if (var->Initializer()) {
             EmitValue(out, var->Initializer());
@@ -242,12 +251,10 @@ class Printer : public tint::TextGenerator {
     void EmitLet(const core::ir::Let* l) {
         auto out = Line();
 
-        // TODO(dsinclair): This isn't right, as some types contain their names.
         // TODO(dsinclair): Investigate using `const` here as well, the AST printer doesn't emit
         //                  const with a let, but we should be able to.
-        EmitType(out, l->Result(0)->Type());
-        out << " ";
-        out << NameOf(l->Result(0));
+        EmitTypeAndName(out, l->Result(0)->Type(), core::AddressSpace::kUndefined,
+                        core::Access::kUndefined, NameOf(l->Result(0)));
         out << " = ";
         EmitValue(out, l->Value());
         out << ";";
@@ -497,7 +504,8 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::U32*) { out << c->ValueAs<AInt>() << "u"; },
             [&](const core::type::Array* a) { EmitConstantArray(out, c, a); },
             [&](const core::type::Vector* v) { EmitConstantVector(out, c, v); },
-            [&](const core::type::Matrix* m) { EmitConstantMatrix(out, c, m); },  //
+            [&](const core::type::Matrix* m) { EmitConstantMatrix(out, c, m); },
+            [&](const core::type::Struct* s) { EmitConstantStruct(out, c, s); },  //
             TINT_ICE_ON_NO_MATCH);
     }
 
@@ -573,6 +581,17 @@ class Printer : public tint::TextGenerator {
         }
     }
 
+    void EmitConstantStruct(StringStream& out,
+                            const core::constant::Value* c,
+                            const core::type::Struct* s) {
+        EmitStructType(&preamble_buffer_, s);
+
+        if (c->AllZero()) {
+            out << "(" << StructName(s) << ")0";
+            return;
+        }
+    }
+
     void EmitType(StringStream& out,
                   const core::type::Type* ty,
                   core::AddressSpace address_space = core::AddressSpace::kUndefined,
@@ -625,6 +644,19 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Sampler* sampler) { EmitSamplerType(out, sampler); },
             [&](const core::type::Texture* tex) { EmitTextureType(out, tex); },
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitTypeAndName(StringStream& out,
+                         const core::type::Type* type,
+                         core::AddressSpace address_space,
+                         core::Access access,
+                         const std::string& name) {
+        bool name_printed = false;
+        EmitType(out, type, address_space, access, name, &name_printed);
+
+        if (!name.empty() && !name_printed) {
+            out << " " << name;
+        }
     }
 
     void EmitArrayType(StringStream& out,
@@ -766,6 +798,140 @@ class Printer : public tint::TextGenerator {
             out << "Comparison";
         }
         out << "State";
+    }
+
+    void EmitStructType(TextBuffer* b, const core::type::Struct* str) {
+        auto it = emitted_structs_.emplace(str);
+        if (!it.second) {
+            return;
+        }
+
+        Line(b) << "struct " << StructName(str) << " {";
+        {
+            const ScopedIndent si(b);
+            for (auto* mem : str->Members()) {
+                auto mem_name = mem->Name().Name();
+                auto* ty = mem->Type();
+                auto out = Line(b);
+                std::string pre, post;
+
+                auto& attributes = mem->Attributes();
+
+                if (auto location = attributes.location) {
+                    auto& pipeline_stage_uses = str->PipelineStageUses();
+                    if (TINT_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
+                        TINT_ICE() << "invalid entry point IO struct uses";
+                    }
+                    if (pipeline_stage_uses.Contains(
+                            core::type::PipelineStageUsage::kVertexInput)) {
+                        post += " : TEXCOORD" + std::to_string(location.value());
+                    } else if (pipeline_stage_uses.Contains(
+                                   core::type::PipelineStageUsage::kVertexOutput)) {
+                        post += " : TEXCOORD" + std::to_string(location.value());
+                    } else if (pipeline_stage_uses.Contains(
+                                   core::type::PipelineStageUsage::kFragmentInput)) {
+                        post += " : TEXCOORD" + std::to_string(location.value());
+                    } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
+                                   core::type::PipelineStageUsage::kFragmentOutput))) {
+                        if (auto blend_src = attributes.blend_src) {
+                            post += " : SV_Target" +
+                                    std::to_string(location.value() + blend_src.value());
+                        } else {
+                            post += " : SV_Target" + std::to_string(location.value());
+                        }
+
+                    } else {
+                        TINT_ICE() << "invalid use of location attribute";
+                    }
+                }
+                if (auto builtin = attributes.builtin) {
+                    auto name = builtin_to_attribute(builtin.value());
+                    TINT_ASSERT(!name.empty());
+
+                    post += " : " + name;
+                }
+                if (auto interpolation = attributes.interpolation) {
+                    auto mod =
+                        interpolation_to_modifiers(interpolation->type, interpolation->sampling);
+                    TINT_ASSERT(!mod.empty());
+
+                    pre += mod;
+                }
+                if (attributes.invariant) {
+                    // Note: `precise` is not exactly the same as `invariant`, but is
+                    // stricter and therefore provides the necessary guarantees.
+                    // See discussion here: https://github.com/gpuweb/gpuweb/issues/893
+                    pre += "precise ";
+                }
+
+                out << pre;
+                EmitTypeAndName(out, ty, core::AddressSpace::kUndefined, core::Access::kReadWrite,
+                                mem_name);
+                out << post << ";";
+            }
+        }
+
+        Line(b) << "};";
+    }
+
+    std::string builtin_to_attribute(core::BuiltinValue builtin) const {
+        switch (builtin) {
+            case core::BuiltinValue::kPosition:
+                return "SV_Position";
+            case core::BuiltinValue::kVertexIndex:
+                return "SV_VertexID";
+            case core::BuiltinValue::kInstanceIndex:
+                return "SV_InstanceID";
+            case core::BuiltinValue::kFrontFacing:
+                return "SV_IsFrontFace";
+            case core::BuiltinValue::kFragDepth:
+                return "SV_Depth";
+            case core::BuiltinValue::kLocalInvocationId:
+                return "SV_GroupThreadID";
+            case core::BuiltinValue::kLocalInvocationIndex:
+                return "SV_GroupIndex";
+            case core::BuiltinValue::kGlobalInvocationId:
+                return "SV_DispatchThreadID";
+            case core::BuiltinValue::kWorkgroupId:
+                return "SV_GroupID";
+            case core::BuiltinValue::kSampleIndex:
+                return "SV_SampleIndex";
+            case core::BuiltinValue::kSampleMask:
+                return "SV_Coverage";
+            default:
+                break;
+        }
+        return "";
+    }
+
+    std::string interpolation_to_modifiers(core::InterpolationType type,
+                                           core::InterpolationSampling sampling) const {
+        std::string modifiers;
+        switch (type) {
+            case core::InterpolationType::kPerspective:
+                modifiers += "linear ";
+                break;
+            case core::InterpolationType::kLinear:
+                modifiers += "noperspective ";
+                break;
+            case core::InterpolationType::kFlat:
+                modifiers += "nointerpolation ";
+                break;
+            case core::InterpolationType::kUndefined:
+                break;
+        }
+        switch (sampling) {
+            case core::InterpolationSampling::kCentroid:
+                modifiers += "centroid ";
+                break;
+            case core::InterpolationSampling::kSample:
+                modifiers += "sample ";
+                break;
+            case core::InterpolationSampling::kCenter:
+            case core::InterpolationSampling::kUndefined:
+                break;
+        }
+        return modifiers;
     }
 
     /// @returns the name of the given value, creating a new unique name if the value is unnamed in
