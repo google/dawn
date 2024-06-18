@@ -79,16 +79,8 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             _{{ method.name.camelCase() }}(JNIEnv *env
                     {{ ', jobject obj' if object else ', jclass clazz' -}}
 
-    {% set input_args = [] %}
-    //* Filter the list of method arguments. We ignore userdata and length arguments which are not
-    //* present in the Kotlin host method.
-    {% for arg in method.arguments if arg.name.get() != 'userdata'
-            and not method.arguments | selectattr('length', 'equalto', arg) | first %}
-        {% do input_args.append(arg) %}
-    {% endfor %}
-
     //* Make the signature for each argument in turn.
-    {% for arg in input_args %},
+    {% for arg in filter_arguments(method.arguments) %},
         {%- if arg.length == 'strlen' -%}
             jstring
         {%- elif arg.length and arg.constant_length != 1 %}
@@ -122,7 +114,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 
     //* Each parameter is converted from the JNI parameter to the expected form of the native
     //* parameter.
-    {% for arg in input_args %}
+    {% for arg in filter_arguments(method.arguments) %}
         {% if arg.length == 'strlen' %}
             if (_{{ as_varName(arg.name) }}) {  //* Don't convert null strings.
                 {{ as_varName(arg.name) }} = env->GetStringUTFChars(_{{ as_varName(arg.name) }}, 0);
@@ -223,8 +215,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                 //* Get the client (Kotlin) callback so we can call it.
                 jmethodID callbackMethod = env->GetMethodID(
                         env->FindClass("{{ jni_name(arg.type) }}"), "callback", "(
-                    {%- for callbackArg in arg.type.arguments if
-                            callbackArg.name.get() != 'userdata'-%}
+                    {%- for callbackArg in filter_arguments(arg.type.arguments) -%}
                         {%- if callbackArg.type.category in ['bitmask', 'enum'] -%}
                             I
                         {%- elif callbackArg.type.category in ['object', 'structure'] -%}
@@ -238,7 +229,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 
                 //* Call the callback with all converted parameters.
                 env->CallVoidMethod(userData1->callback, callbackMethod
-                {%- for callbackArg in arg.type.arguments if callbackArg.name.get() != 'userdata' %}
+                {%- for callbackArg in filter_arguments(arg.type.arguments) %}
                     ,
                     {%- if callbackArg.type.category == 'object' %}
                         env->NewObject(env->FindClass("{{ jni_name(callbackArg.type) }}"),

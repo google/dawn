@@ -32,11 +32,8 @@ import java.nio.ByteBuffer
 class {{ obj.name.CamelCase() }}(val handle: Long): AutoCloseable {
     {% for method in obj.methods if include_method(method) %}
         @JvmName("{{ method.name.camelCase() }}") external fun {{ method.name.camelCase() }}(
-        //* userdata parameter omitted because Kotlin clients can achieve the same with closures.
-        //* length parameters are omitted because Kotlin containers have 'length'.
         //* TODO(b/341923892): rework async methods to use futures.
-        {%- for arg in method.arguments if arg.name.get() != 'userdata' and
-                not method.arguments | selectattr('length', 'equalto', arg) | first %}
+        {%- for arg in filter_arguments(method.arguments) %}
             {{- as_varName(arg.name) }}: {{ kotlin_definition(arg) }},
         {%- endfor -%}):
         {{- kotlin_type_declaration(method.return_type) -}}

@@ -812,6 +812,18 @@ def compute_kotlin_params(loaded_json, kotlin_json):
                 return False
         return True
 
+    def filter_arguments(arguments):
+        for argument in arguments:
+            # length parameters are omitted because Kotlin containers have 'length'.
+            if argument in [arg.length for arg in arguments]:
+                continue
+
+            # userdata parameter omitted because Kotlin clients can achieve the same with closures.
+            if argument.name.get() == 'userdata':
+                continue
+
+            yield argument
+
     def include_method(method):
         if method.return_type.category == 'function pointer':
             # Kotlin doesn't support returning functions.
@@ -852,6 +864,7 @@ def compute_kotlin_params(loaded_json, kotlin_json):
         for chain_root in structure.chain_roots:
             chain_children[chain_root.name.get()].append(structure)
     params_kotlin['chain_children'] = chain_children
+    params_kotlin['filter_arguments'] = filter_arguments
     params_kotlin['include_structure_member'] = include_structure_member
     params_kotlin['include_method'] = include_method
     params_kotlin['jni_name'] = jni_name

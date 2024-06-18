@@ -31,8 +31,7 @@ fun interface {{ function_pointer.name.CamelCase() }} {
 @Suppress("INAPPLICABLE_JVM_NAME")  //* Required for @JvmName on global function.
 @JvmName("callback")  //* Required to access Inline Value Class parameters via JNI.
 fun callback(
-    //* userdata parameter is omitted because Kotlin callbacks can achieve the same with closures.
-    {%- for arg in function_pointer.arguments if arg.name.get() != 'userdata' %}
+    {%- for arg in filter_arguments(function_pointer.arguments) %}
         {{ as_varName(arg.name) }}:{{ kotlin_declaration(arg) }},
     {%- endfor -%});
 }
