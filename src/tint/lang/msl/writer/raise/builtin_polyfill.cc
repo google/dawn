@@ -93,6 +93,7 @@ struct State {
                     case core::BuiltinFn::kAtomicStore:
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicXor:
+                    case core::BuiltinFn::kDistance:
                     case core::BuiltinFn::kLength:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
@@ -159,6 +160,9 @@ struct State {
                     break;
 
                 // Geometric builtins.
+                case core::BuiltinFn::kDistance:
+                    Distance(builtin);
+                    break;
                 case core::BuiltinFn::kLength:
                     Length(builtin);
                     break;
@@ -279,6 +283,24 @@ struct State {
         auto args = Vector<core::ir::Value*, 4>{builtin->Args()};
         auto* call = b.CallWithResult(builtin->DetachResult(), polyfill, std::move(args));
         call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Polyfill a distance call if necessary.
+    /// @param builtin the builtin call instruction
+    void Distance(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* arg0 = builtin->Args()[0];
+            auto* arg1 = builtin->Args()[1];
+            if (arg0->Type()->Is<core::type::Scalar>()) {
+                // Calls to `distance` with a scalar argument are replaced with `abs(a - b)`.
+                auto* sub = b.Subtract(builtin->Result(0)->Type(), arg0, arg1);
+                b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kAbs, sub);
+            } else {
+                b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
+                                                       msl::BuiltinFn::kDistance, arg0, arg1);
+            }
+        });
         builtin->Destroy();
     }
 

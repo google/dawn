@@ -321,6 +321,7 @@ match f32_f16: f32 | f16
 @member_function fn write[A: iu32](texture: texture_storage_2d_array<u32_texel_format, writable>, value: vec4<u32>, coords: vec2<u32>, array_index: A)
 @member_function fn write(texture: texture_storage_3d<u32_texel_format, writable>, value: vec4<u32>, coords: vec3<u32>)
 
+fn distance[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
 fn length[N: num, T: f32_f16](vec<N, T>) -> T
 @stage("compute") fn threadgroup_barrier(u32)
 

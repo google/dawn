@@ -1,309 +1,147 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct SimParams {
+  float deltaT;
+  float rule1Distance;
+  float rule2Distance;
+  float rule3Distance;
+  float rule1Scale;
+  float rule2Scale;
+  float rule3Scale;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: SimParams = struct @align(4) {
-  deltaT:f32 @offset(0)
-  rule1Distance:f32 @offset(4)
-  rule2Distance:f32 @offset(8)
-  rule3Distance:f32 @offset(12)
-  rule1Scale:f32 @offset(16)
-  rule2Scale:f32 @offset(20)
-  rule3Scale:f32 @offset(24)
+struct Particle {
+  float2 pos;
+  float2 vel;
+};
+struct Particles {
+  tint_array<Particle, 5> particles;
+};
+struct tint_module_vars_struct {
+  const constant SimParams* params;
+  device Particles* particlesA;
+  device Particles* particlesB;
+};
+struct vert_main_outputs {
+  float4 tint_symbol [[position]];
+};
+struct vert_main_inputs {
+  float2 a_particlePos [[attribute(0)]];
+  float2 a_particleVel [[attribute(1)]];
+  float2 a_pos [[attribute(2)]];
+};
+struct frag_main_outputs {
+  float4 tint_symbol_1 [[color(0)]];
+};
+
+float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
+  float angle = -(atan2(a_particleVel[0u], a_particleVel[1u]));
+  float const v = (a_pos[0u] * cos(angle));
+  float const v_1 = (v - (a_pos[1u] * sin(angle)));
+  float const v_2 = (a_pos[0u] * sin(angle));
+  float2 pos = float2(v_1, (v_2 + (a_pos[1u] * cos(angle))));
+  return float4((pos + a_particlePos), 0.0f, 1.0f);
 }
-
-Particle = struct @align(8) {
-  pos:vec2<f32> @offset(0)
-  vel:vec2<f32> @offset(8)
+float4 frag_main_inner() {
+  return float4(1.0f);
 }
-
-Particles = struct @align(8) {
-  particles:array<Particle, 5> @offset(0)
-}
-
-$B1: {  # root
-  %params:ptr<uniform, SimParams, read> = var @binding_point(0, 0)
-  %particlesA:ptr<storage, Particles, read_write> = var @binding_point(0, 1)
-  %particlesB:ptr<storage, Particles, read_write> = var @binding_point(0, 2)
-}
-
-%vert_main = @vertex func(%a_particlePos:vec2<f32> [@location(0)], %a_particleVel:vec2<f32> [@location(1)], %a_pos:vec2<f32> [@location(2)]):vec4<f32> [@position] {
-  $B2: {
-    %8:f32 = access %a_particleVel, 0u
-    %9:f32 = access %a_particleVel, 1u
-    %10:f32 = atan2 %8, %9
-    %11:f32 = negation %10
-    %angle:ptr<function, f32, read_write> = var, %11
-    %13:f32 = access %a_pos, 0u
-    %14:f32 = load %angle
-    %15:f32 = cos %14
-    %16:f32 = mul %13, %15
-    %17:f32 = let %16
-    %18:f32 = access %a_pos, 1u
-    %19:f32 = load %angle
-    %20:f32 = sin %19
-    %21:f32 = mul %18, %20
-    %22:f32 = sub %17, %21
-    %23:f32 = let %22
-    %24:f32 = access %a_pos, 0u
-    %25:f32 = load %angle
-    %26:f32 = sin %25
-    %27:f32 = mul %24, %26
-    %28:f32 = let %27
-    %29:f32 = access %a_pos, 1u
-    %30:f32 = load %angle
-    %31:f32 = cos %30
-    %32:f32 = mul %29, %31
-    %33:f32 = add %28, %32
-    %34:vec2<f32> = construct %23, %33
-    %pos:ptr<function, vec2<f32>, read_write> = var, %34
-    %36:vec2<f32> = load %pos
-    %37:vec2<f32> = add %36, %a_particlePos
-    %38:vec4<f32> = construct %37, 0.0f, 1.0f
-    ret %38
+void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+  uint index = gl_GlobalInvocationID[0u];
+  if ((index >= 5u)) {
+    return;
   }
-}
-%frag_main = @fragment func():vec4<f32> [@location(0)] {
-  $B3: {
-    ret vec4<f32>(1.0f)
+  float2 vPos = (*tint_module_vars.particlesA).particles[index].pos;
+  float2 vVel = (*tint_module_vars.particlesA).particles[index].vel;
+  float2 cMass = float2(0.0f);
+  float2 cVel = float2(0.0f);
+  float2 colVel = float2(0.0f);
+  int cMassCount = 0;
+  int cVelCount = 0;
+  float2 pos = 0.0f;
+  float2 vel = 0.0f;
+  {
+    uint i = 0u;
+    while(true) {
+      if ((i < 5u)) {
+      } else {
+        break;
+      }
+      if ((i == index)) {
+        {
+          i = (i + 1u);
+        }
+        continue;
+      }
+      pos = (*tint_module_vars.particlesA).particles[i].pos.xy;
+      vel = (*tint_module_vars.particlesA).particles[i].vel.xy;
+      float const v_3 = distance(pos, vPos);
+      if ((v_3 < (*tint_module_vars.params).rule1Distance)) {
+        cMass = (cMass + pos);
+        cMassCount = (cMassCount + 1);
+      }
+      float const v_4 = distance(pos, vPos);
+      if ((v_4 < (*tint_module_vars.params).rule2Distance)) {
+        colVel = (colVel - (pos - vPos));
+      }
+      float const v_5 = distance(pos, vPos);
+      if ((v_5 < (*tint_module_vars.params).rule3Distance)) {
+        cVel = (cVel + vel);
+        cVelCount = (cVelCount + 1);
+      }
+      {
+        i = (i + 1u);
+      }
+      continue;
+    }
   }
-}
-%comp_main = @compute @workgroup_size(1, 1, 1) func(%gl_GlobalInvocationID:vec3<u32> [@global_invocation_id]):void {
-  $B4: {
-    %42:u32 = access %gl_GlobalInvocationID, 0u
-    %index:ptr<function, u32, read_write> = var, %42
-    %44:u32 = load %index
-    %45:bool = gte %44, 5u
-    if %45 [t: $B5] {  # if_1
-      $B5: {  # true
-        ret
-      }
-    }
-    %46:u32 = load %index
-    %47:ptr<storage, vec2<f32>, read_write> = access %particlesA, 0u, %46, 0u
-    %48:vec2<f32> = load %47
-    %vPos:ptr<function, vec2<f32>, read_write> = var, %48
-    %50:u32 = load %index
-    %51:ptr<storage, vec2<f32>, read_write> = access %particlesA, 0u, %50, 1u
-    %52:vec2<f32> = load %51
-    %vVel:ptr<function, vec2<f32>, read_write> = var, %52
-    %cMass:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
-    %cVel:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
-    %colVel:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
-    %cMassCount:ptr<function, i32, read_write> = var, 0i
-    %cVelCount:ptr<function, i32, read_write> = var, 0i
-    %pos_1:ptr<function, vec2<f32>, read_write> = var  # %pos_1: 'pos'
-    %vel:ptr<function, vec2<f32>, read_write> = var
-    loop [i: $B6, b: $B7, c: $B8] {  # loop_1
-      $B6: {  # initializer
-        %i:ptr<function, u32, read_write> = var, 0u
-        next_iteration  # -> $B7
-      }
-      $B7: {  # body
-        %62:u32 = load %i
-        %63:bool = lt %62, 5u
-        if %63 [t: $B9, f: $B10] {  # if_2
-          $B9: {  # true
-            exit_if  # if_2
-          }
-          $B10: {  # false
-            exit_loop  # loop_1
-          }
-        }
-        %64:u32 = load %i
-        %65:u32 = load %index
-        %66:bool = eq %64, %65
-        if %66 [t: $B11] {  # if_3
-          $B11: {  # true
-            continue  # -> $B8
-          }
-        }
-        %67:u32 = load %i
-        %68:ptr<storage, vec2<f32>, read_write> = access %particlesA, 0u, %67, 0u
-        %69:vec2<f32> = load %68
-        %70:vec2<f32> = swizzle %69, xy
-        store %pos_1, %70
-        %71:u32 = load %i
-        %72:ptr<storage, vec2<f32>, read_write> = access %particlesA, 0u, %71, 1u
-        %73:vec2<f32> = load %72
-        %74:vec2<f32> = swizzle %73, xy
-        store %vel, %74
-        %75:vec2<f32> = load %pos_1
-        %76:vec2<f32> = load %vPos
-        %77:f32 = distance %75, %76
-        %78:ptr<uniform, f32, read> = access %params, 1u
-        %79:f32 = load %78
-        %80:bool = lt %77, %79
-        if %80 [t: $B12] {  # if_4
-          $B12: {  # true
-            %81:vec2<f32> = load %cMass
-            %82:vec2<f32> = load %pos_1
-            %83:vec2<f32> = add %81, %82
-            store %cMass, %83
-            %84:i32 = load %cMassCount
-            %85:i32 = add %84, 1i
-            store %cMassCount, %85
-            exit_if  # if_4
-          }
-        }
-        %86:vec2<f32> = load %pos_1
-        %87:vec2<f32> = load %vPos
-        %88:f32 = distance %86, %87
-        %89:ptr<uniform, f32, read> = access %params, 2u
-        %90:f32 = load %89
-        %91:bool = lt %88, %90
-        if %91 [t: $B13] {  # if_5
-          $B13: {  # true
-            %92:vec2<f32> = load %colVel
-            %93:vec2<f32> = load %pos_1
-            %94:vec2<f32> = load %vPos
-            %95:vec2<f32> = sub %93, %94
-            %96:vec2<f32> = sub %92, %95
-            store %colVel, %96
-            exit_if  # if_5
-          }
-        }
-        %97:vec2<f32> = load %pos_1
-        %98:vec2<f32> = load %vPos
-        %99:f32 = distance %97, %98
-        %100:ptr<uniform, f32, read> = access %params, 3u
-        %101:f32 = load %100
-        %102:bool = lt %99, %101
-        if %102 [t: $B14] {  # if_6
-          $B14: {  # true
-            %103:vec2<f32> = load %cVel
-            %104:vec2<f32> = load %vel
-            %105:vec2<f32> = add %103, %104
-            store %cVel, %105
-            %106:i32 = load %cVelCount
-            %107:i32 = add %106, 1i
-            store %cVelCount, %107
-            exit_if  # if_6
-          }
-        }
-        continue  # -> $B8
-      }
-      $B8: {  # continuing
-        %108:u32 = load %i
-        %109:u32 = add %108, 1u
-        store %i, %109
-        next_iteration  # -> $B7
-      }
-    }
-    %110:i32 = load %cMassCount
-    %111:bool = gt %110, 0i
-    if %111 [t: $B15] {  # if_7
-      $B15: {  # true
-        %112:vec2<f32> = load %cMass
-        %113:vec2<f32> = let %112
-        %114:i32 = load %cMassCount
-        %115:f32 = convert %114
-        %116:f32 = let %115
-        %117:i32 = load %cMassCount
-        %118:f32 = convert %117
-        %119:vec2<f32> = construct %116, %118
-        %120:vec2<f32> = div %113, %119
-        %121:vec2<f32> = load %vPos
-        %122:vec2<f32> = sub %120, %121
-        store %cMass, %122
-        exit_if  # if_7
-      }
-    }
-    %123:i32 = load %cVelCount
-    %124:bool = gt %123, 0i
-    if %124 [t: $B16] {  # if_8
-      $B16: {  # true
-        %125:vec2<f32> = load %cVel
-        %126:vec2<f32> = let %125
-        %127:i32 = load %cVelCount
-        %128:f32 = convert %127
-        %129:f32 = let %128
-        %130:i32 = load %cVelCount
-        %131:f32 = convert %130
-        %132:vec2<f32> = construct %129, %131
-        %133:vec2<f32> = div %126, %132
-        store %cVel, %133
-        exit_if  # if_8
-      }
-    }
-    %134:vec2<f32> = load %vVel
-    %135:vec2<f32> = load %cMass
-    %136:ptr<uniform, f32, read> = access %params, 4u
-    %137:f32 = load %136
-    %138:vec2<f32> = mul %135, %137
-    %139:vec2<f32> = add %134, %138
-    %140:vec2<f32> = load %colVel
-    %141:ptr<uniform, f32, read> = access %params, 5u
-    %142:f32 = load %141
-    %143:vec2<f32> = mul %140, %142
-    %144:vec2<f32> = add %139, %143
-    %145:vec2<f32> = load %cVel
-    %146:ptr<uniform, f32, read> = access %params, 6u
-    %147:f32 = load %146
-    %148:vec2<f32> = mul %145, %147
-    %149:vec2<f32> = add %144, %148
-    store %vVel, %149
-    %150:vec2<f32> = load %vVel
-    %151:vec2<f32> = normalize %150
-    %152:vec2<f32> = let %151
-    %153:vec2<f32> = load %vVel
-    %154:f32 = length %153
-    %155:f32 = clamp %154, 0.0f, 0.10000000149011611938f
-    %156:vec2<f32> = mul %152, %155
-    store %vVel, %156
-    %157:vec2<f32> = load %vPos
-    %158:vec2<f32> = load %vVel
-    %159:ptr<uniform, f32, read> = access %params, 0u
-    %160:f32 = load %159
-    %161:vec2<f32> = mul %158, %160
-    %162:vec2<f32> = add %157, %161
-    store %vPos, %162
-    %163:f32 = load_vector_element %vPos, 0u
-    %164:bool = lt %163, -1.0f
-    if %164 [t: $B17] {  # if_9
-      $B17: {  # true
-        store_vector_element %vPos, 0u, 1.0f
-        exit_if  # if_9
-      }
-    }
-    %165:f32 = load_vector_element %vPos, 0u
-    %166:bool = gt %165, 1.0f
-    if %166 [t: $B18] {  # if_10
-      $B18: {  # true
-        store_vector_element %vPos, 0u, -1.0f
-        exit_if  # if_10
-      }
-    }
-    %167:f32 = load_vector_element %vPos, 1u
-    %168:bool = lt %167, -1.0f
-    if %168 [t: $B19] {  # if_11
-      $B19: {  # true
-        store_vector_element %vPos, 1u, 1.0f
-        exit_if  # if_11
-      }
-    }
-    %169:f32 = load_vector_element %vPos, 1u
-    %170:bool = gt %169, 1.0f
-    if %170 [t: $B20] {  # if_12
-      $B20: {  # true
-        store_vector_element %vPos, 1u, -1.0f
-        exit_if  # if_12
-      }
-    }
-    %171:u32 = load %index
-    %172:ptr<storage, vec2<f32>, read_write> = access %particlesB, 0u, %171, 0u
-    %173:vec2<f32> = load %vPos
-    store %172, %173
-    %174:u32 = load %index
-    %175:ptr<storage, vec2<f32>, read_write> = access %particlesB, 0u, %174, 1u
-    %176:vec2<f32> = load %vVel
-    store %175, %176
-    ret
+  if ((cMassCount > 0)) {
+    float2 const v_6 = cMass;
+    float const v_7 = float(cMassCount);
+    float2 const v_8 = (v_6 / float2(v_7, float(cMassCount)));
+    cMass = (v_8 - vPos);
   }
+  if ((cVelCount > 0)) {
+    float2 const v_9 = cVel;
+    float const v_10 = float(cVelCount);
+    cVel = (v_9 / float2(v_10, float(cVelCount)));
+  }
+  vVel = (((vVel + (cMass * (*tint_module_vars.params).rule1Scale)) + (colVel * (*tint_module_vars.params).rule2Scale)) + (cVel * (*tint_module_vars.params).rule3Scale));
+  float2 const v_11 = normalize(vVel);
+  vVel = (v_11 * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
+  vPos = (vPos + (vVel * (*tint_module_vars.params).deltaT));
+  if ((vPos[0u] < -1.0f)) {
+    vPos[0u] = 1.0f;
+  }
+  if ((vPos[0u] > 1.0f)) {
+    vPos[0u] = -1.0f;
+  }
+  if ((vPos[1u] < -1.0f)) {
+    vPos[1u] = 1.0f;
+  }
+  if ((vPos[1u] > 1.0f)) {
+    vPos[1u] = -1.0f;
+  }
+  (*tint_module_vars.particlesB).particles[index].pos = vPos;
+  (*tint_module_vars.particlesB).particles[index].vel = vVel;
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+vertex vert_main_outputs vert_main(vert_main_inputs inputs [[stage_in]]) {
+  return vert_main_outputs{.tint_symbol=vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos)};
+}
+fragment frag_main_outputs frag_main() {
+  return frag_main_outputs{.tint_symbol_1=frag_main_inner()};
+}
+kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], const constant SimParams* params [[buffer(0)]], device Particles* particlesA [[buffer(1)]], device Particles* particlesB [[buffer(2)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.params=params, .particlesA=particlesA, .particlesB=particlesB};
+  comp_main_inner(gl_GlobalInvocationID, tint_module_vars);
+}

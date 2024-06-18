@@ -758,6 +758,75 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, Distance_Scalar) {
+    auto* value0 = b.FunctionParam<f32>("value0");
+    auto* value1 = b.FunctionParam<f32>("value1");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value0, value1});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<f32>(core::BuiltinFn::kDistance, value0, value1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value0:f32, %value1:f32):f32 {
+  $B1: {
+    %4:f32 = distance %value0, %value1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value0:f32, %value1:f32):f32 {
+  $B1: {
+    %4:f32 = sub %value0, %value1
+    %5:f32 = abs %4
+    ret %5
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Distance_Vector) {
+    auto* value0 = b.FunctionParam<vec4<f32>>("value0");
+    auto* value1 = b.FunctionParam<vec4<f32>>("value1");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value0, value1});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<f32>(core::BuiltinFn::kDistance, value0, value1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value0:vec4<f32>, %value1:vec4<f32>):f32 {
+  $B1: {
+    %4:f32 = distance %value0, %value1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value0:vec4<f32>, %value1:vec4<f32>):f32 {
+  $B1: {
+    %4:f32 = msl.distance %value0, %value1
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, Length_Scalar) {
     auto* value = b.FunctionParam<f32>("value");
     auto* func = b.Function("foo", ty.f32());

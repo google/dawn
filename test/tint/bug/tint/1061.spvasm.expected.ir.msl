@@ -1,67 +1,39 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct buf0 {
+  float4 r;
+};
+struct tint_module_vars_struct {
+  const constant buf0* x_7;
+  thread float4* x_GLF_color;
+};
+struct main_out {
+  float4 x_GLF_color_1;
+};
+struct tint_symbol_outputs {
+  float4 main_out_x_GLF_color_1 [[color(0)]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: buf0 = struct @align(16) {
-  r:vec4<f32> @offset(0)
-}
-
-main_out = struct @align(16) {
-  x_GLF_color_1:vec4<f32> @offset(0), @location(0)
-}
-
-$B1: {  # root
-  %x_7:ptr<uniform, buf0, read> = var @binding_point(0, 0)
-  %x_GLF_color:ptr<private, vec4<f32>, read_write> = var
-}
-
-%main_1 = func():void {
-  $B2: {
-    %f:ptr<function, f32, read_write> = var
-    %v:ptr<function, vec4<f32>, read_write> = var
-    store %f, 1.0f
-    %6:f32 = load %f
-    %7:f32 = sin %6
-    %8:f32 = let %7
-    %9:f32 = load %f
-    %10:f32 = cos %9
-    %11:f32 = let %10
-    %12:f32 = load %f
-    %13:f32 = exp2 %12
-    %14:f32 = let %13
-    %15:f32 = load %f
-    %16:f32 = log %15
-    %17:vec4<f32> = construct %8, %11, %14, %16
-    store %v, %17
-    %18:vec4<f32> = load %v
-    %19:ptr<uniform, vec4<f32>, read> = access %x_7, 0u
-    %20:vec4<f32> = load %19
-    %21:f32 = distance %18, %20
-    %22:bool = lt %21, 0.10000000149011611938f
-    if %22 [t: $B3, f: $B4] {  # if_1
-      $B3: {  # true
-        store %x_GLF_color, vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f)
-        exit_if  # if_1
-      }
-      $B4: {  # false
-        store %x_GLF_color, vec4<f32>(0.0f)
-        exit_if  # if_1
-      }
-    }
-    ret
+void main_1(tint_module_vars_struct tint_module_vars) {
+  float f = 0.0f;
+  float4 v = 0.0f;
+  f = 1.0f;
+  float const v_1 = sin(f);
+  float const v_2 = cos(f);
+  float const v_3 = exp2(f);
+  v = float4(v_1, v_2, v_3, log(f));
+  if ((distance(v, (*tint_module_vars.x_7).r) < 0.10000000149011611938f)) {
+    (*tint_module_vars.x_GLF_color) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    (*tint_module_vars.x_GLF_color) = float4(0.0f);
   }
 }
-%tint_symbol = @fragment func():main_out {
-  $B5: {
-    %24:void = call %main_1
-    %25:vec4<f32> = load %x_GLF_color
-    %26:main_out = construct %25
-    ret %26
-  }
+main_out tint_symbol_inner(tint_module_vars_struct tint_module_vars) {
+  main_1(tint_module_vars);
+  return main_out{.x_GLF_color_1=(*tint_module_vars.x_GLF_color)};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+fragment tint_symbol_outputs tint_symbol(const constant buf0* x_7 [[buffer(0)]]) {
+  thread float4 x_GLF_color = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_7=x_7, .x_GLF_color=(&x_GLF_color)};
+  return tint_symbol_outputs{.main_out_x_GLF_color_1=tint_symbol_inner(tint_module_vars).x_GLF_color_1};
+}

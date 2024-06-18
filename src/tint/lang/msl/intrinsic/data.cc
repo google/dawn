@@ -2600,13 +2600,18 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [300] */
-    /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(9),
+    /* usage */ core::ParameterUsage::kNone,
+    /* matcher_indices */ MatcherIndicesIndex(93),
   },
   {
     /* [301] */
     /* usage */ core::ParameterUsage::kNone,
     /* matcher_indices */ MatcherIndicesIndex(93),
+  },
+  {
+    /* [302] */
+    /* usage */ core::ParameterUsage::kTexture,
+    /* matcher_indices */ MatcherIndicesIndex(9),
   },
 };
 
@@ -3552,7 +3557,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_explicit_templates */ 0,
     /* num_templates   */ 2,
     /* templates */ TemplateIndex(5),
-    /* parameters */ ParameterIndex(300),
+    /* parameters */ ParameterIndex(302),
     /* return_matcher_indices */ MatcherIndicesIndex(59),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
@@ -4333,7 +4338,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_explicit_templates */ 0,
     /* num_templates   */ 2,
     /* templates */ TemplateIndex(5),
-    /* parameters */ ParameterIndex(300),
+    /* parameters */ ParameterIndex(302),
     /* return_matcher_indices */ MatcherIndicesIndex(/* invalid */),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
@@ -4461,16 +4466,27 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [160] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* num_parameters */ 1,
+    /* num_parameters */ 2,
     /* num_explicit_templates */ 0,
     /* num_templates   */ 2,
     /* templates */ TemplateIndex(11),
-    /* parameters */ ParameterIndex(301),
+    /* parameters */ ParameterIndex(300),
     /* return_matcher_indices */ MatcherIndicesIndex(1),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
     /* [161] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 1,
+    /* num_explicit_templates */ 0,
+    /* num_templates   */ 2,
+    /* templates */ TemplateIndex(11),
+    /* parameters */ ParameterIndex(300),
+    /* return_matcher_indices */ MatcherIndicesIndex(1),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [162] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
     /* num_parameters */ 1,
     /* num_explicit_templates */ 0,
@@ -4775,15 +4791,21 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [24] */
-    /* fn length[N : num, T : f32_f16](vec<N, T>) -> T */
+    /* fn distance[N : num, T : f32_f16](vec<N, T>, vec<N, T>) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(160),
   },
   {
     /* [25] */
-    /* fn threadgroup_barrier(u32) */
+    /* fn length[N : num, T : f32_f16](vec<N, T>) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(161),
+  },
+  {
+    /* [26] */
+    /* fn threadgroup_barrier(u32) */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(162),
   },
 };
 
