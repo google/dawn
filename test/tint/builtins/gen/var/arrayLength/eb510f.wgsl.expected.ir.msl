@@ -33,11 +33,11 @@ uint arrayLength_eb510f(tint_module_vars_struct tint_module_vars) {
   uint res = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u);
   return res;
 }
-fragment void fragment_main(device SB_RW* sb_rw [[buffer(1)]], device uint* prevent_dce [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
+fragment void fragment_main(device SB_RW* sb_rw [[buffer(1)]], device uint* prevent_dce [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   (*tint_module_vars.prevent_dce) = arrayLength_eb510f(tint_module_vars);
 }
-kernel void compute_main(device SB_RW* sb_rw [[buffer(1)]], device uint* prevent_dce [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
+kernel void compute_main(device SB_RW* sb_rw [[buffer(1)]], device uint* prevent_dce [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .prevent_dce=prevent_dce, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   (*tint_module_vars.prevent_dce) = arrayLength_eb510f(tint_module_vars);
 }
@@ -47,7 +47,7 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
   out.prevent_dce = arrayLength_eb510f(tint_module_vars);
   return out;
 }
-vertex vertex_main_outputs vertex_main(device SB_RW* sb_rw [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
+vertex vertex_main_outputs vertex_main(device SB_RW* sb_rw [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   VertexOutput const v = vertex_main_inner(tint_module_vars);
   return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};

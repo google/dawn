@@ -26,7 +26,7 @@ uint f1(device tint_array<uint, 1>* const p, uint tint_array_length) {
 uint f0(device tint_array<uint, 1>* const p, uint tint_array_length) {
   return f1(p, tint_array_length);
 }
-kernel void tint_symbol(device tint_array<uint, 1>* arr [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes) {
+kernel void tint_symbol(device tint_array<uint, 1>* arr [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arr=arr, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   (*tint_module_vars.arr)[0] = f0(tint_module_vars.arr, ((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 4u));
 }

@@ -119,7 +119,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():u32 {
@@ -170,7 +170,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 2>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 2>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():u32 {
@@ -270,7 +270,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():u32 {
@@ -335,7 +335,7 @@ MyStruct = struct @align(4) {
 
 $B1: {  # root
   %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():u32 {
@@ -416,7 +416,7 @@ MyStruct = struct @align(4) {
 
 $B1: {  # root
   %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():u32 {
@@ -470,7 +470,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():u32 {
@@ -536,7 +536,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -621,7 +621,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %foo = func(%param_zoo:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -705,7 +705,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -786,7 +786,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %bar = func(%param_a:ptr<storage, array<i32>, read_write>, %param_b:ptr<storage, array<i32>, read_write>, %param_c:ptr<storage, array<i32>, read_write>, %tint_array_length:u32, %tint_array_length_1:u32, %tint_array_length_2:u32):u32 {  # %tint_array_length_1: 'tint_array_length', %tint_array_length_2: 'tint_array_length'
@@ -888,7 +888,7 @@ MyStruct = struct @align(4) {
 
 $B1: {  # root
   %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
@@ -950,7 +950,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %buffer:ptr<storage, array<vec3<i32>>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():u32 {
@@ -1029,7 +1029,7 @@ $B1: {  # root
   %buffer_c:ptr<storage, array<i32>, read_write> = var @binding_point(1, 0)
   %buffer_d:ptr<storage, array<i32>, read_write> = var @binding_point(1, 1)
   %buffer_e:ptr<storage, array<i32>, read_write> = var @binding_point(2, 3)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 2>, read> = var
+  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 2>, read> = var @binding_point(1, 2)
 }
 
 %foo = func():void {
