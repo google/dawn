@@ -481,8 +481,7 @@ void unused_entry_point() {
 )");
 }
 
-// TODO(dsinclair): Need `load`
-TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF32) {
+TEST_F(HlslWriterTest, ConstantTypeMatIdentityF32) {
     // fn f() {
     //  var m_1: mat4x4<f32> = mat4x4<f32>();
     //  var m_2: mat4x4<f32> = mat4x4<f32>(m_1);
@@ -496,8 +495,10 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF32) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void a() {
-  float4x4 m_2 = float4x4(m_1);
+    EXPECT_EQ(output_.hlsl, R"(
+void a() {
+  float4x4 m_1 = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
+  float4x4 m_2 = m_1;
 }
 
 [numthreads(1, 1, 1)]
@@ -507,8 +508,7 @@ void unused_entry_point() {
 )");
 }
 
-// TODO(dsinclair): Need `load`
-TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF16) {
+TEST_F(HlslWriterTest, ConstantTypeMatIdentityF16) {
     // fn f() {
     //   var m_1: mat4x4<f16> = mat4x4<f16>();
     //   var m_2: mat4x4<f16> = mat4x4<f16>(m_1);
@@ -522,8 +522,10 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeMatIdentityF16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void a() {
-  matrix<float16_t, 4, 4> m_2 = matrix<float16_t, 4, 4>(m_1);
+    EXPECT_EQ(output_.hlsl, R"(
+void a() {
+  matrix<float16_t, 4, 4> m_1 = matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx);
+  matrix<float16_t, 4, 4> m_2 = m_1;
 }
 
 [numthreads(1, 1, 1)]
@@ -533,7 +535,7 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_ConstantTypeArray) {
+TEST_F(HlslWriterTest, DISABLED_ConstantTypeArrayFunctionReturn) {
     auto* f = b.Function("a", ty.array<vec3<f32>, 3>());
     b.Append(f->Block(), [&] {
         b.Return(f,
@@ -545,8 +547,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeArray) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(typedef float3 a_ret[3]
 a_ret a() {
-  float3 tint_symbol[3] = {float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), float3(7.0f, 8.0f, 9.0f)};
-  return tint_symbol;
+  return {float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), float3(7.0f, 8.0f, 9.0f)};
 }
 
 [numthreads(1, 1, 1)]
@@ -556,18 +557,59 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, ConstantType_Array_Empty) {
+TEST_F(HlslWriterTest, DISABLED_ConstantTypeArrayEmptyFunctionReturn) {
     auto* f = b.Function("a", ty.array<vec3<f32>, 3>());
     b.Append(f->Block(), [&] { b.Return(f, b.Zero<array<vec3<f32>, 3>>()); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-float3[3] a() {
+typedef float3 a_ret[3];
+a_ret a() {
   return (float3[3])0;
 }
 
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, ConstantTypeArray) {
+    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        b.Var("v", b.Composite(ty.array<vec3<f32>, 3>(), b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f),
+                               b.Composite(ty.vec3<f32>(), 4_f, 5_f, 6_f),
+                               b.Composite(ty.vec3<f32>(), 7_f, 8_f, 9_f)));
+        b.Return(f);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void a() {
+  float3 v[3] = {float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), float3(7.0f, 8.0f, 9.0f)};
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, ConstantTypeArrayEmpty) {
+    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        b.Var("v", b.Zero<array<vec3<f32>, 3>>());
+        b.Return(f);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void a() {
+  float3 v[3] = (float3[3])0;
 }
 
 )");
@@ -608,6 +650,52 @@ void unused_entry_point() {
 )");
 }
 
+TEST_F(HlslWriterTest, ConstantTypeStructNested) {
+    Vector members_a{
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.i32(), 0u, 0u, 4u, 4u,
+                                         core::type::StructMemberAttributes{}),
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("e"), ty.f32(), 1u, 4u, 4u, 4u,
+                                         core::type::StructMemberAttributes{}),
+    };
+    auto* a_strct = ty.Struct(b.ir.symbols.New("A"), std::move(members_a));
+
+    Vector members_s{
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
+                                         core::type::StructMemberAttributes{}),
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
+                                         core::type::StructMemberAttributes{}),
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), a_strct, 2u, 8u, 8u, 8u,
+                                         core::type::StructMemberAttributes{}),
+    };
+    auto* s_strct = ty.Struct(b.ir.symbols.New("S"), std::move(members_s));
+
+    auto* f = b.Function("a", s_strct);
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero(s_strct)); });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(struct A {
+  int d;
+  float e;
+};
+
+struct S {
+  int a;
+  float b;
+  A c;
+};
+
+
+S a() {
+  return (S)0;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, ConstantTypeStructEmpty) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
@@ -616,6 +704,8 @@ TEST_F(HlslWriterTest, ConstantTypeStructEmpty) {
                                          core::type::StructMemberAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.vec3<i32>(), 2u, 8u, 16u, 16u,
                                          core::type::StructMemberAttributes{}),
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.array<f32, 3>(), 2u, 8u, 16u,
+                                         16u, core::type::StructMemberAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
@@ -627,7 +717,9 @@ TEST_F(HlslWriterTest, ConstantTypeStructEmpty) {
   int a;
   float b;
   int3 c;
+  float d[3];
 };
+
 
 S a() {
   return (S)0;

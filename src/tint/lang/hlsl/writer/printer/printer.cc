@@ -584,11 +584,24 @@ class Printer : public tint::TextGenerator {
     void EmitConstantStruct(StringStream& out,
                             const core::constant::Value* c,
                             const core::type::Struct* s) {
-        EmitStructType(&preamble_buffer_, s);
+        EmitStructType(s);
 
         if (c->AllZero()) {
             out << "(" << StructName(s) << ")0";
             return;
+        }
+    }
+
+    void EmitTypeAndName(StringStream& out,
+                         const core::type::Type* type,
+                         core::AddressSpace address_space,
+                         core::Access access,
+                         const std::string& name) {
+        bool name_printed = false;
+        EmitType(out, type, address_space, access, name, &name_printed);
+
+        if (!name.empty() && !name_printed) {
+            out << " " << name;
         }
     }
 
@@ -633,36 +646,30 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Atomic* atomic) {
                 EmitType(out, atomic->Type(), address_space, access, name);
             },
-            [&](const core::type::Array* ary) { EmitArrayType(out, ary, address_space, access); },
+            [&](const core::type::Array* ary) {
+                EmitArrayType(out, ary, address_space, access, name, name_printed);
+            },
             [&](const core::type::Vector* vec) { EmitVectorType(out, vec, address_space, access); },
             [&](const core::type::Matrix* mat) { EmitMatrixType(out, mat, address_space, access); },
-            [&](const core::type::Struct* str) { out << StructName(str); },
+            [&](const core::type::Struct* str) {
+                out << StructName(str);
+                EmitStructType(str);
+            },
 
             [&](const core::type::Pointer* p) {
-                EmitType(out, p->StoreType(), p->AddressSpace(), p->Access());
+                EmitType(out, p->StoreType(), p->AddressSpace(), p->Access(), name, name_printed);
             },
             [&](const core::type::Sampler* sampler) { EmitSamplerType(out, sampler); },
             [&](const core::type::Texture* tex) { EmitTextureType(out, tex); },
             TINT_ICE_ON_NO_MATCH);
     }
 
-    void EmitTypeAndName(StringStream& out,
-                         const core::type::Type* type,
-                         core::AddressSpace address_space,
-                         core::Access access,
-                         const std::string& name) {
-        bool name_printed = false;
-        EmitType(out, type, address_space, access, name, &name_printed);
-
-        if (!name.empty() && !name_printed) {
-            out << " " << name;
-        }
-    }
-
     void EmitArrayType(StringStream& out,
                        const core::type::Array* ary,
                        core::AddressSpace address_space,
-                       core::Access access) {
+                       core::Access access,
+                       const std::string& name,
+                       bool* name_printed) {
         const core::type::Type* base_type = ary;
         std::vector<uint32_t> sizes;
         while (auto* arr = base_type->As<core::type::Array>()) {
@@ -678,6 +685,13 @@ class Printer : public tint::TextGenerator {
             base_type = arr->ElemType();
         }
         EmitType(out, base_type, address_space, access);
+
+        if (!name.empty()) {
+            out << " " << name;
+            if (name_printed) {
+                *name_printed = true;
+            }
+        }
 
         for (const uint32_t size : sizes) {
             out << "[" << size << "]";
@@ -800,23 +814,25 @@ class Printer : public tint::TextGenerator {
         out << "State";
     }
 
-    void EmitStructType(TextBuffer* b, const core::type::Struct* str) {
+    void EmitStructType(const core::type::Struct* str) {
         auto it = emitted_structs_.emplace(str);
         if (!it.second) {
             return;
         }
 
-        Line(b) << "struct " << StructName(str) << " {";
+        TextBuffer str_buf;
+        Line(&str_buf) << "struct " << StructName(str) << " {";
         {
-            const ScopedIndent si(b);
+            const ScopedIndent si(&str_buf);
             for (auto* mem : str->Members()) {
                 auto mem_name = mem->Name().Name();
                 auto* ty = mem->Type();
-                auto out = Line(b);
-                std::string pre, post;
+                auto out = Line(&str_buf);
 
                 auto& attributes = mem->Attributes();
 
+                std::string pre;
+                std::string post;
                 if (auto location = attributes.location) {
                     auto& pipeline_stage_uses = str->PipelineStageUses();
                     if (TINT_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
@@ -871,7 +887,10 @@ class Printer : public tint::TextGenerator {
             }
         }
 
-        Line(b) << "};";
+        Line(&str_buf) << "};";
+        Line(&str_buf) << "";
+
+        preamble_buffer_.Append(str_buf);
     }
 
     std::string builtin_to_attribute(core::BuiltinValue builtin) const {
