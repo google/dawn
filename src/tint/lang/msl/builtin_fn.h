@@ -60,6 +60,7 @@ enum class BuiltinFn : uint8_t {
     kAtomicStoreExplicit,
     kFence,
     kGather,
+    kGatherCompare,
     kGetWidth,
     kGetHeight,
     kGetDepth,

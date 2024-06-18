@@ -153,6 +153,13 @@ match fiu32: f32 | i32 | u32
 @member_function fn gather(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
 @member_function fn gather[A: iu32](texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<f32>
 
+@member_function fn gather_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> vec4<f32>
+@member_function fn gather_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> vec4<f32>
+@member_function fn gather_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
+@member_function fn gather_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> vec4<f32>
+@member_function fn gather_compare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> vec4<f32>
+@member_function fn gather_compare[A: iu32](texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
+
 @member_function fn get_width[T: fiu32](texture: texture_1d<T>) -> u32
 @member_function fn get_width[T: fiu32](texture: texture_2d<T>, u32) -> u32
 @member_function fn get_width[T: fiu32](texture: texture_2d_array<T>, u32) -> u32

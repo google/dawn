@@ -1,51 +1,42 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  depth2d_array<float, access::sample> arg_0;
+  sampler arg_1;
+  device float4* prevent_dce;
+};
+struct VertexOutput {
+  float4 pos;
+  float4 prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  float4 VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<handle, texture_depth_2d_array, read> = var @binding_point(1, 0)
-  %arg_1:ptr<handle, sampler_comparison, read> = var @binding_point(1, 1)
-  %prevent_dce:ptr<storage, vec4<f32>, read_write> = var @binding_point(2, 0)
+float4 textureGatherCompare_f585cc(tint_module_vars_struct tint_module_vars) {
+  float2 arg_2 = float2(1.0f);
+  int arg_3 = 1;
+  float arg_4 = 1.0f;
+  float4 res = tint_module_vars.arg_0.gather_compare(tint_module_vars.arg_1, arg_2, arg_3, arg_4, int2(1));
+  return res;
 }
-
-%textureGatherCompare_f585cc = func():void {
-  $B2: {
-    %arg_2:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(1.0f)
-    %arg_3:ptr<function, i32, read_write> = var, 1i
-    %arg_4:ptr<function, f32, read_write> = var, 1.0f
-    %8:texture_depth_2d_array = load %arg_0
-    %9:sampler_comparison = load %arg_1
-    %10:vec2<f32> = load %arg_2
-    %11:i32 = load %arg_3
-    %12:f32 = load %arg_4
-    %13:vec4<f32> = textureGatherCompare %8, %9, %10, %11, %12, vec2<i32>(1i)
-    %res:ptr<function, vec4<f32>, read_write> = var, %13
-    %15:vec4<f32> = load %res
-    store %prevent_dce, %15
-    ret
-  }
+fragment void fragment_main(depth2d_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = textureGatherCompare_f585cc(tint_module_vars);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %17:void = call %textureGatherCompare_f585cc
-    ret vec4<f32>(0.0f)
-  }
+kernel void compute_main(depth2d_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = textureGatherCompare_f585cc(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %19:void = call %textureGatherCompare_f585cc
-    ret
-  }
+VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = textureGatherCompare_f585cc(tint_module_vars);
+  return out;
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %21:void = call %textureGatherCompare_f585cc
-    ret
-  }
+vertex vertex_main_outputs vertex_main(depth2d_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1};
+  VertexOutput const v = vertex_main_inner(tint_module_vars);
+  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

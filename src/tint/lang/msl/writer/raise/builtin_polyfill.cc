@@ -94,6 +94,7 @@ struct State {
                     case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
+                    case core::BuiltinFn::kTextureGatherCompare:
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kTextureNumLevels:
@@ -161,6 +162,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureGather:
                     TextureGather(builtin);
+                    break;
+                case core::BuiltinFn::kTextureGatherCompare:
+                    TextureGatherCompare(builtin);
                     break;
                 case core::BuiltinFn::kTextureLoad:
                     TextureLoad(builtin);
@@ -353,6 +357,18 @@ struct State {
         // Call the `gather()` member function.
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kGather, tex, std::move(args));
+        call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Replace a textureGatherCompare call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureGatherCompare(core::ir::CoreBuiltinCall* builtin) {
+        // The MSL intrinsic is a member function, so we split the first argument off as the object.
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kGatherCompare, builtin->Args()[0],
+            std::move(args));
         call->InsertBefore(builtin);
         builtin->Destroy();
     }

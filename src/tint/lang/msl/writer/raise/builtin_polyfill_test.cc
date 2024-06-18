@@ -1049,6 +1049,44 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureGather_Depth2d) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureGatherCompare) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, depth});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<vec4<f32>>(core::BuiltinFn::kTextureGatherCompare, t, s, coords, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):vec4<f32> {
+  $B1: {
+    %6:vec4<f32> = textureGatherCompare %t, %s, %coords, %depth
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):vec4<f32> {
+  $B1: {
+    %6:vec4<f32> = %t.gather_compare %s, %coords, %depth
+    ret %6
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_1d_U32Coord) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* texture_ty = ty.Get<core::type::StorageTexture>(

@@ -68,6 +68,8 @@ const char* str(BuiltinFn i) {
             return "fence";
         case BuiltinFn::kGather:
             return "gather";
+        case BuiltinFn::kGatherCompare:
+            return "gather_compare";
         case BuiltinFn::kGetWidth:
             return "get_width";
         case BuiltinFn::kGetHeight:
