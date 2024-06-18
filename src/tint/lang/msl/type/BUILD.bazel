@@ -40,10 +40,12 @@ cc_library(
   name = "type",
   srcs = [
     "bias.cc",
+    "gradient.cc",
     "level.cc",
   ],
   hdrs = [
     "bias.h",
+    "gradient.h",
     "level.h",
   ],
   deps = [
@@ -71,6 +73,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "bias_test.cc",
+    "gradient_test.cc",
     "level_test.cc",
   ],
   deps = [

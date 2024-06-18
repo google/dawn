@@ -46,6 +46,8 @@ libtint_source_set("type") {
   sources = [
     "bias.cc",
     "bias.h",
+    "gradient.cc",
+    "gradient.h",
     "level.cc",
     "level.h",
   ]
@@ -71,6 +73,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
       "bias_test.cc",
+      "gradient_test.cc",
       "level_test.cc",
     ]
     deps = [

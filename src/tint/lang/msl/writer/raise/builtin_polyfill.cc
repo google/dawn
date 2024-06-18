@@ -49,8 +49,10 @@
 #include "src/tint/lang/msl/ir/member_builtin_call.h"
 #include "src/tint/lang/msl/ir/memory_order.h"
 #include "src/tint/lang/msl/type/bias.h"
+#include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
 #include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace tint::msl::writer::raise {
 namespace {
@@ -98,6 +100,7 @@ struct State {
                     case core::BuiltinFn::kTextureSampleBias:
                     case core::BuiltinFn::kTextureSampleCompare:
                     case core::BuiltinFn::kTextureSampleCompareLevel:
+                    case core::BuiltinFn::kTextureSampleGrad:
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kStorageBarrier:
@@ -177,6 +180,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureSampleCompareLevel:
                     TextureSampleCompareLevel(builtin);
+                    break;
+                case core::BuiltinFn::kTextureSampleGrad:
+                    TextureSampleGrad(builtin);
                     break;
                 case core::BuiltinFn::kTextureSampleLevel:
                     TextureSampleLevel(builtin);
@@ -449,6 +455,59 @@ struct State {
             // Call the `sample_compare()` member function.
             b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
                 builtin->DetachResult(), msl::BuiltinFn::kSampleCompare, tex, std::move(args));
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a textureSampleGrad call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureSampleGrad(core::ir::CoreBuiltinCall* builtin) {
+        // The MSL intrinsic is a member function, so we split the first argument off as the object.
+        auto* tex = builtin->Args()[0];
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+
+        b.InsertBefore(builtin, [&] {
+            // Find the ddx and ddy arguments.
+            uint32_t grad_idx = 2;
+            if (tex_type->dim() == core::type::TextureDimension::k2dArray ||
+                tex_type->dim() == core::type::TextureDimension::kCubeArray) {
+                grad_idx = 3;
+            }
+            auto* ddx = args[grad_idx];
+            auto* ddy = args[grad_idx + 1];
+
+            // Wrap the ddx and ddy arguments in a constructor for the MSL `gradient` builtin type.
+            enum type::Gradient::Dim dim;
+            switch (tex_type->dim()) {
+                case core::type::TextureDimension::k2d:
+                case core::type::TextureDimension::k2dArray:
+                    dim = type::Gradient::Dim::k2d;
+                    break;
+                case core::type::TextureDimension::k3d:
+                    dim = type::Gradient::Dim::k3d;
+                    break;
+                case core::type::TextureDimension::kCube:
+                case core::type::TextureDimension::kCubeArray:
+                    dim = type::Gradient::Dim::kCube;
+                    break;
+                case core::type::TextureDimension::k1d:
+                case core::type::TextureDimension::kNone:
+                    TINT_UNREACHABLE();
+            }
+            args[grad_idx] = b.Construct(ty.Get<msl::type::Gradient>(dim), ddx, ddy)->Result(0);
+
+            // Resize the argument list as the gradient argument only takes up one argument.
+            // Move the offset argument back one place if present.
+            const bool has_offset = args.Back()->Type()->is_signed_integer_vector();
+            if (has_offset) {
+                args[args.Length() - 2] = args.Back();
+            }
+            args.Resize(args.Length() - 1);
+
+            // Call the `sample()` member function.
+            b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+                builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
         });
         builtin->Destroy();
     }

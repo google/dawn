@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/msl/type/bias.h"
+#include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
 
 namespace tint::msl::intrinsic {
@@ -45,6 +46,42 @@ inline bool MatchBias(core::intrinsic::MatchState&, const core::type::Type* ty) 
 inline const core::type::Type* BuildBias(core::intrinsic::MatchState& state,
                                          const core::type::Type*) {
     return state.types.Get<type::Bias>();
+}
+
+inline bool MatchGradient2D(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    if (auto g = ty->As<msl::type::Gradient>()) {
+        return g->Dim() == type::Gradient::Dim::k2d;
+    }
+    return false;
+}
+
+inline const core::type::Type* BuildGradient2D(core::intrinsic::MatchState& state,
+                                               const core::type::Type*) {
+    return state.types.Get<type::Gradient>(type::Gradient::Dim::k2d);
+}
+
+inline bool MatchGradient3D(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    if (auto g = ty->As<msl::type::Gradient>()) {
+        return g->Dim() == type::Gradient::Dim::k3d;
+    }
+    return false;
+}
+
+inline const core::type::Type* BuildGradient3D(core::intrinsic::MatchState& state,
+                                               const core::type::Type*) {
+    return state.types.Get<type::Gradient>(type::Gradient::Dim::k3d);
+}
+
+inline bool MatchGradientcube(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    if (auto g = ty->As<msl::type::Gradient>()) {
+        return g->Dim() == type::Gradient::Dim::kCube;
+    }
+    return false;
+}
+
+inline const core::type::Type* BuildGradientcube(core::intrinsic::MatchState& state,
+                                                 const core::type::Type*) {
+    return state.types.Get<type::Gradient>(type::Gradient::Dim::kCube);
 }
 
 inline bool MatchLevel(core::intrinsic::MatchState&, const core::type::Type* ty) {

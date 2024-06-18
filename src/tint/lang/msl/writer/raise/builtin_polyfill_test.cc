@@ -1585,6 +1585,208 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_WithOffset) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* ddx = b.FunctionParam("ddx", ty.vec2<f32>());
+    auto* ddy = b.FunctionParam("ddy", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, ddx, ddy});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> {
+  $B1: {
+    %7:vec4<f32> = textureSampleGrad %t, %s, %coords, %ddx, %ddy
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> {
+  $B1: {
+    %7:msl.gradient2d = construct %ddx, %ddy
+    %8:vec4<f32> = %t.sample %s, %coords, %7
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_2dArray) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* index = b.FunctionParam("index", ty.i32());
+    auto* ddx = b.FunctionParam("ddx", ty.vec2<f32>());
+    auto* ddy = b.FunctionParam("ddy", ty.vec2<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, index, ddx, ddy});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, index, ddx, ddy);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d_array<f32>, %s:sampler, %coords:vec2<f32>, %index:i32, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> {
+  $B1: {
+    %8:vec4<f32> = textureSampleGrad %t, %s, %coords, %index, %ddx, %ddy
+    ret %8
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d_array<f32>, %s:sampler, %coords:vec2<f32>, %index:i32, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> {
+  $B1: {
+    %8:msl.gradient2d = construct %ddx, %ddy
+    %9:vec4<f32> = %t.sample %s, %coords, %index, %8
+    ret %9
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_3d) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k3d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec3<f32>());
+    auto* ddx = b.FunctionParam("ddx", ty.vec3<f32>());
+    auto* ddy = b.FunctionParam("ddy", ty.vec3<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, ddx, ddy});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_3d<f32>, %s:sampler, %coords:vec3<f32>, %ddx:vec3<f32>, %ddy:vec3<f32>):vec4<f32> {
+  $B1: {
+    %7:vec4<f32> = textureSampleGrad %t, %s, %coords, %ddx, %ddy
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_3d<f32>, %s:sampler, %coords:vec3<f32>, %ddx:vec3<f32>, %ddy:vec3<f32>):vec4<f32> {
+  $B1: {
+    %7:msl.gradient3d = construct %ddx, %ddy
+    %8:vec4<f32> = %t.sample %s, %coords, %7
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_Cube) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::kCube, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec3<f32>());
+    auto* ddx = b.FunctionParam("ddx", ty.vec3<f32>());
+    auto* ddy = b.FunctionParam("ddy", ty.vec3<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, ddx, ddy});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_cube<f32>, %s:sampler, %coords:vec3<f32>, %ddx:vec3<f32>, %ddy:vec3<f32>):vec4<f32> {
+  $B1: {
+    %7:vec4<f32> = textureSampleGrad %t, %s, %coords, %ddx, %ddy
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_cube<f32>, %s:sampler, %coords:vec3<f32>, %ddx:vec3<f32>, %ddy:vec3<f32>):vec4<f32> {
+  $B1: {
+    %7:msl.gradientcube = construct %ddx, %ddy
+    %8:vec4<f32> = %t.sample %s, %coords, %7
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_WithOffset) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* ddx = b.FunctionParam("ddx", ty.vec2<f32>());
+    auto* ddy = b.FunctionParam("ddy", ty.vec2<f32>());
+    auto* offset = b.FunctionParam("offset", ty.vec2<i32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t, s, coords, ddx, ddy, offset});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy, offset);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>, %offset:vec2<i32>):vec4<f32> {
+  $B1: {
+    %8:vec4<f32> = textureSampleGrad %t, %s, %coords, %ddx, %ddy, %offset
+    ret %8
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>, %offset:vec2<i32>):vec4<f32> {
+  $B1: {
+    %8:msl.gradient2d = construct %ddx, %ddy
+    %9:vec4<f32> = %t.sample %s, %coords, %8, %offset
+    ret %9
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
