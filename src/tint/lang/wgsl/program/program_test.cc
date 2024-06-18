@@ -32,6 +32,7 @@ namespace tint {
 namespace {
 
 using ProgramTest = ast::TestHelper;
+using ProgramDeathTest = ProgramTest;
 
 TEST_F(ProgramTest, Unbuilt) {
     Program program;
@@ -64,7 +65,7 @@ TEST_F(ProgramTest, Assert_GlobalVariable) {
     EXPECT_TRUE(program.IsValid());
 }
 
-TEST_F(ProgramTest, Assert_NullGlobalVariable) {
+TEST_F(ProgramDeathTest, Assert_NullGlobalVariable) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -73,7 +74,7 @@ TEST_F(ProgramTest, Assert_NullGlobalVariable) {
         "internal compiler error");
 }
 
-TEST_F(ProgramTest, Assert_NullTypeDecl) {
+TEST_F(ProgramDeathTest, Assert_NullTypeDecl) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -82,7 +83,7 @@ TEST_F(ProgramTest, Assert_NullTypeDecl) {
         "internal compiler error");
 }
 
-TEST_F(ProgramTest, Assert_Null_Function) {
+TEST_F(ProgramDeathTest, Assert_Null_Function) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;

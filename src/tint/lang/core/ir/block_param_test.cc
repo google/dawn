@@ -35,15 +35,16 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using IR_BlockParamTest = IRTestHelper;
+using IR_BlockParamDeathTest = IR_BlockParamTest;
 
-TEST_F(IR_BlockParamTest, Fail_NullType) {
+TEST_F(IR_BlockParamDeathTest, Fail_NullType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.BlockParam(nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_BlockParamTest, Clone) {

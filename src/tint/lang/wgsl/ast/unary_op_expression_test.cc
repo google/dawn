@@ -33,6 +33,7 @@ namespace tint::ast {
 namespace {
 
 using UnaryOpExpressionTest = TestHelper;
+using UnaryOpExpressionDeathTest = UnaryOpExpressionTest;
 
 TEST_F(UnaryOpExpressionTest, Creation) {
     auto* ident = Expr("ident");
@@ -57,7 +58,7 @@ TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
     EXPECT_TRUE(u->Is<UnaryOpExpression>());
 }
 
-TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
+TEST_F(UnaryOpExpressionDeathTest, Assert_Null_Expression) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -66,7 +67,7 @@ TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
         "internal compiler error");
 }
 
-TEST_F(UnaryOpExpressionTest, Assert_DifferentGenerationID_Expression) {
+TEST_F(UnaryOpExpressionDeathTest, Assert_DifferentGenerationID_Expression) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

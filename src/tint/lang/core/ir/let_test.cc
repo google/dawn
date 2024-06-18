@@ -39,8 +39,9 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using IR_LetTest = IRTestHelper;
+using IR_LetDeathTest = IR_LetTest;
 
-TEST_F(IR_LetTest, Fail_NullValue) {
+TEST_F(IR_LetDeathTest, Fail_NullValue) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -48,7 +49,7 @@ TEST_F(IR_LetTest, Fail_NullValue) {
             ir::Value* value = nullptr;
             b.Let("l", value);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_LetTest, Results) {

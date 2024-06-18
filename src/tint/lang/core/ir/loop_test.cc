@@ -33,6 +33,7 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using IR_LoopTest = IRTestHelper;
+using IR_LoopDeathTest = IR_LoopTest;
 
 TEST_F(IR_LoopTest, Parent) {
     auto* loop = b.Loop();
@@ -46,34 +47,34 @@ TEST_F(IR_LoopTest, Result) {
     EXPECT_TRUE(loop->Results().IsEmpty());
 }
 
-TEST_F(IR_LoopTest, Fail_NullInitializerBlock) {
+TEST_F(IR_LoopDeathTest, Fail_NullInitializerBlock) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             Loop loop(nullptr, b.MultiInBlock(), b.MultiInBlock());
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_LoopTest, Fail_NullBodyBlock) {
+TEST_F(IR_LoopDeathTest, Fail_NullBodyBlock) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             Loop loop(b.Block(), nullptr, b.MultiInBlock());
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_LoopTest, Fail_NullContinuingBlock) {
+TEST_F(IR_LoopDeathTest, Fail_NullContinuingBlock) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             Loop loop(b.Block(), b.MultiInBlock(), nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_LoopTest, Clone) {

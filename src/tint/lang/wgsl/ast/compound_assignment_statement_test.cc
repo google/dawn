@@ -35,6 +35,7 @@ namespace tint::ast {
 namespace {
 
 using CompoundAssignmentStatementTest = TestHelper;
+using CompoundAssignmentStatementDeathTest = CompoundAssignmentStatementTest;
 
 TEST_F(CompoundAssignmentStatementTest, Creation) {
     auto* lhs = Expr("lhs");
@@ -67,7 +68,7 @@ TEST_F(CompoundAssignmentStatementTest, IsCompoundAssign) {
     EXPECT_TRUE(stmt->Is<CompoundAssignmentStatement>());
 }
 
-TEST_F(CompoundAssignmentStatementTest, Assert_Null_LHS) {
+TEST_F(CompoundAssignmentStatementDeathTest, Assert_Null_LHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -76,7 +77,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_LHS) {
         "internal compiler error");
 }
 
-TEST_F(CompoundAssignmentStatementTest, Assert_Null_RHS) {
+TEST_F(CompoundAssignmentStatementDeathTest, Assert_Null_RHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -85,7 +86,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_RHS) {
         "internal compiler error");
 }
 
-TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
+TEST_F(CompoundAssignmentStatementDeathTest, Assert_DifferentGenerationID_LHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -96,7 +97,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
         "internal compiler error");
 }
 
-TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_RHS) {
+TEST_F(CompoundAssignmentStatementDeathTest, Assert_DifferentGenerationID_RHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

@@ -104,6 +104,7 @@ struct IDNode : public Castable<IDNode, ast::Node> {
 };
 
 using ProgramCloneContextNodeTest = ::testing::Test;
+using ProgramCloneContextNodeDeathTest = ProgramCloneContextNodeTest;
 
 TEST_F(ProgramCloneContextNodeTest, Clone) {
     Allocator alloc;
@@ -1048,7 +1049,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBeforeAndAfterRemoved_Functio
     EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
 }
 
-TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceAll_SameTypeTwice) {
+TEST_F(ProgramCloneContextNodeDeathTest, CloneWithReplaceAll_SameTypeTwice) {
     std::string node_name = TypeInfo::Of<Node>().name;
 
     EXPECT_DEATH_IF_SUPPORTED(
@@ -1064,7 +1065,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceAll_SameTypeTwice) {
                            node_name));
 }
 
-TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceAll_BaseThenDerived) {
+TEST_F(ProgramCloneContextNodeDeathTest, CloneWithReplaceAll_BaseThenDerived) {
     std::string node_name = TypeInfo::Of<Node>().name;
     std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
 
@@ -1081,7 +1082,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceAll_BaseThenDerived) {
                            node_name));
 }
 
-TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceAll_DerivedThenBase) {
+TEST_F(ProgramCloneContextNodeDeathTest, CloneWithReplaceAll_DerivedThenBase) {
     std::string node_name = TypeInfo::Of<Node>().name;
     std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
 
@@ -1099,8 +1100,9 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceAll_DerivedThenBase) {
 }
 
 using ProgramCloneContextTest = ::testing::Test;
+using ProgramCloneContextDeathTest = ProgramCloneContextTest;
 
-TEST_F(ProgramCloneContextTest, CloneWithReplaceAll_SymbolsTwice) {
+TEST_F(ProgramCloneContextDeathTest, CloneWithReplaceAll_SymbolsTwice) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder cloned;
@@ -1206,7 +1208,7 @@ TEST_F(ProgramCloneContextTest, GenerationIDs) {
     EXPECT_EQ(cloned->generation_id, dst.ID());
 }
 
-TEST_F(ProgramCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
+TEST_F(ProgramCloneContextDeathTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder dst;
@@ -1216,10 +1218,10 @@ TEST_F(ProgramCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
             ctx.Clone(allocator.Create<IDNode>(GenerationID::New(), dst.ID()));
         },
         testing::HasSubstr(
-            R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, object))"));
+            "internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, object)"));
 }
 
-TEST_F(ProgramCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
+TEST_F(ProgramCloneContextDeathTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder dst;
@@ -1229,7 +1231,7 @@ TEST_F(ProgramCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
             ctx.Clone(allocator.Create<IDNode>(src.ID(), GenerationID::New()));
         },
         testing::HasSubstr(
-            R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(dst, out))"));
+            "internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(dst, out)"));
 }
 
 }  // namespace

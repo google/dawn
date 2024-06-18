@@ -32,6 +32,7 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using StructMemberTest = TestHelper;
+using StructMemberDeathTest = StructMemberTest;
 
 TEST_F(StructMemberTest, Creation) {
     auto* st = Member("a", ty.i32(), tint::Vector{MemberSize(4_a)});
@@ -57,7 +58,7 @@ TEST_F(StructMemberTest, CreationWithSource) {
     EXPECT_EQ(st->source.range.end.column, 8u);
 }
 
-TEST_F(StructMemberTest, Assert_Null_Name) {
+TEST_F(StructMemberDeathTest, Assert_Null_Name) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -66,7 +67,7 @@ TEST_F(StructMemberTest, Assert_Null_Name) {
         "internal compiler error");
 }
 
-TEST_F(StructMemberTest, Assert_Null_Type) {
+TEST_F(StructMemberDeathTest, Assert_Null_Type) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -75,7 +76,7 @@ TEST_F(StructMemberTest, Assert_Null_Type) {
         "internal compiler error");
 }
 
-TEST_F(StructMemberTest, Assert_Null_Attribute) {
+TEST_F(StructMemberDeathTest, Assert_Null_Attribute) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -84,7 +85,7 @@ TEST_F(StructMemberTest, Assert_Null_Attribute) {
         "internal compiler error");
 }
 
-TEST_F(StructMemberTest, Assert_DifferentGenerationID_Symbol) {
+TEST_F(StructMemberDeathTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -94,7 +95,7 @@ TEST_F(StructMemberTest, Assert_DifferentGenerationID_Symbol) {
         "internal compiler error");
 }
 
-TEST_F(StructMemberTest, Assert_DifferentGenerationID_Attribute) {
+TEST_F(StructMemberDeathTest, Assert_DifferentGenerationID_Attribute) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

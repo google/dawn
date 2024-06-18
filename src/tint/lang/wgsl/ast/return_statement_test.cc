@@ -33,6 +33,7 @@ namespace tint::ast {
 namespace {
 
 using ReturnStatementTest = TestHelper;
+using ReturnStatementDeathTest = ReturnStatementTest;
 
 TEST_F(ReturnStatementTest, Creation) {
     auto* expr = Expr("expr");
@@ -64,7 +65,7 @@ TEST_F(ReturnStatementTest, WithValue) {
     EXPECT_NE(r->value, nullptr);
 }
 
-TEST_F(ReturnStatementTest, Assert_DifferentGenerationID_Expr) {
+TEST_F(ReturnStatementDeathTest, Assert_DifferentGenerationID_Expr) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

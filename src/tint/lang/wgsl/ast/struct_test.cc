@@ -34,6 +34,7 @@ namespace tint::ast {
 namespace {
 
 using AstStructTest = TestHelper;
+using AstStructDeathTest = AstStructTest;
 using BlockAttribute = transform::AddBlockAttribute::BlockAttribute;
 
 TEST_F(AstStructTest, Creation) {
@@ -80,7 +81,7 @@ TEST_F(AstStructTest, CreationWithSourceAndAttributes) {
     EXPECT_EQ(s->source.range.end.column, 8u);
 }
 
-TEST_F(AstStructTest, Assert_Null_StructMember) {
+TEST_F(AstStructDeathTest, Assert_Null_StructMember) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -89,7 +90,7 @@ TEST_F(AstStructTest, Assert_Null_StructMember) {
         "internal compiler error");
 }
 
-TEST_F(AstStructTest, Assert_Null_Attribute) {
+TEST_F(AstStructDeathTest, Assert_Null_Attribute) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -99,7 +100,7 @@ TEST_F(AstStructTest, Assert_Null_Attribute) {
         "internal compiler error");
 }
 
-TEST_F(AstStructTest, Assert_DifferentGenerationID_StructMember) {
+TEST_F(AstStructDeathTest, Assert_DifferentGenerationID_StructMember) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -109,7 +110,7 @@ TEST_F(AstStructTest, Assert_DifferentGenerationID_StructMember) {
         "internal compiler error");
 }
 
-TEST_F(AstStructTest, Assert_DifferentGenerationID_Attribute) {
+TEST_F(AstStructDeathTest, Assert_DifferentGenerationID_Attribute) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

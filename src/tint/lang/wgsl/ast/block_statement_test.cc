@@ -34,6 +34,7 @@ namespace tint::ast {
 namespace {
 
 using BlockStatementTest = TestHelper;
+using BlockStatementDeathTest = BlockStatementTest;
 
 TEST_F(BlockStatementTest, Creation) {
     auto* d = create<DiscardStatement>();
@@ -71,7 +72,7 @@ TEST_F(BlockStatementTest, IsBlock) {
     EXPECT_TRUE(b->Is<BlockStatement>());
 }
 
-TEST_F(BlockStatementTest, Assert_Null_Statement) {
+TEST_F(BlockStatementDeathTest, Assert_Null_Statement) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -80,7 +81,7 @@ TEST_F(BlockStatementTest, Assert_Null_Statement) {
         "internal compiler error");
 }
 
-TEST_F(BlockStatementTest, Assert_DifferentGenerationID_Statement) {
+TEST_F(BlockStatementDeathTest, Assert_DifferentGenerationID_Statement) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

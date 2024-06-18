@@ -35,6 +35,7 @@ namespace tint::ast {
 namespace {
 
 using VariableTest = TestHelper;
+using VariableDeathTest = VariableTest;
 
 TEST_F(VariableTest, Creation) {
     auto* v = Var("my_var", ty.i32(), core::AddressSpace::kFunction);
@@ -75,7 +76,7 @@ TEST_F(VariableTest, CreationEmpty) {
     EXPECT_EQ(v->source.range.end.column, 7u);
 }
 
-TEST_F(VariableTest, Assert_Null_Name) {
+TEST_F(VariableDeathTest, Assert_Null_Name) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -84,7 +85,7 @@ TEST_F(VariableTest, Assert_Null_Name) {
         "internal compiler error");
 }
 
-TEST_F(VariableTest, Assert_DifferentGenerationID_Symbol) {
+TEST_F(VariableDeathTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -94,7 +95,7 @@ TEST_F(VariableTest, Assert_DifferentGenerationID_Symbol) {
         "internal compiler error");
 }
 
-TEST_F(VariableTest, Assert_DifferentGenerationID_Initializer) {
+TEST_F(VariableDeathTest, Assert_DifferentGenerationID_Initializer) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

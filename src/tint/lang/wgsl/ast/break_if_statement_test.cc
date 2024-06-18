@@ -33,6 +33,7 @@ namespace tint::ast {
 namespace {
 
 using BreakIfStatementTest = TestHelper;
+using BreakIfStatementDeathTest = BreakIfStatementTest;
 
 TEST_F(BreakIfStatementTest, Creation) {
     auto* cond = Expr("cond");
@@ -47,7 +48,7 @@ TEST_F(BreakIfStatementTest, IsBreakIf) {
     EXPECT_TRUE(stmt->Is<BreakIfStatement>());
 }
 
-TEST_F(BreakIfStatementTest, Assert_Null_Condition) {
+TEST_F(BreakIfStatementDeathTest, Assert_Null_Condition) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -56,7 +57,7 @@ TEST_F(BreakIfStatementTest, Assert_Null_Condition) {
         "internal compiler error");
 }
 
-TEST_F(BreakIfStatementTest, Assert_DifferentGenerationID_Cond) {
+TEST_F(BreakIfStatementDeathTest, Assert_DifferentGenerationID_Cond) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

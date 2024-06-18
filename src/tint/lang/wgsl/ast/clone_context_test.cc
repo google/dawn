@@ -103,6 +103,7 @@ struct IDTestNode : public Castable<IDTestNode, ast::Node> {
 };
 
 using ASTCloneContextTestNodeTest = ::testing::Test;
+using ASTCloneContextTestNodeDeathTest = ASTCloneContextTestNodeTest;
 
 TEST_F(ASTCloneContextTestNodeTest, Clone) {
     Allocator alloc;
@@ -1050,7 +1051,7 @@ TEST_F(ASTCloneContextTestNodeTest, CloneWithInsertBeforeAndAfterRemoved_Functio
     EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
 }
 
-TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_SameTypeTwice) {
+TEST_F(ASTCloneContextTestNodeDeathTest, CloneWithReplaceAll_SameTypeTwice) {
     std::string Testnode_name = TypeInfo::Of<TestNode>().name;
 
     EXPECT_DEATH_IF_SUPPORTED(
@@ -1066,7 +1067,7 @@ TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_SameTypeTwice) {
                            Testnode_name));
 }
 
-TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_BaseThenDerived) {
+TEST_F(ASTCloneContextTestNodeDeathTest, CloneWithReplaceAll_BaseThenDerived) {
     std::string Testnode_name = TypeInfo::Of<TestNode>().name;
     std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
 
@@ -1083,7 +1084,7 @@ TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_BaseThenDerived) {
                            Testnode_name));
 }
 
-TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_DerivedThenBase) {
+TEST_F(ASTCloneContextTestNodeDeathTest, CloneWithReplaceAll_DerivedThenBase) {
     std::string Testnode_name = TypeInfo::Of<TestNode>().name;
     std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
 
@@ -1101,8 +1102,9 @@ TEST_F(ASTCloneContextTestNodeTest, CloneWithReplaceAll_DerivedThenBase) {
 }
 
 using ASTCloneContextTest = ::testing::Test;
+using ASTCloneContextDeathTest = ASTCloneContextTest;
 
-TEST_F(ASTCloneContextTest, CloneWithReplaceAll_SymbolsTwice) {
+TEST_F(ASTCloneContextDeathTest, CloneWithReplaceAll_SymbolsTwice) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder cloned;
@@ -1180,7 +1182,7 @@ TEST_F(ASTCloneContextTest, GenerationIDs) {
     EXPECT_EQ(cloned->generation_id, dst.ID());
 }
 
-TEST_F(ASTCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
+TEST_F(ASTCloneContextDeathTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder dst;
@@ -1193,7 +1195,7 @@ TEST_F(ASTCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
             R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, object))"));
 }
 
-TEST_F(ASTCloneContextTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
+TEST_F(ASTCloneContextDeathTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder dst;

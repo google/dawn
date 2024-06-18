@@ -2109,7 +2109,7 @@ TEST(TintVectorTest, ostream) {
     EXPECT_EQ(ss.str(), "[1, 2, 3]");
 }
 
-TEST(TintVectorTest, AssertOOBs) {
+TEST(TintVectorDeathTest, AssertOOBs) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Vector vec{1};
@@ -2119,7 +2119,7 @@ TEST(TintVectorTest, AssertOOBs) {
 }
 
 #if TINT_VECTOR_MUTATION_CHECKS_ENABLED
-TEST(TintVectorTest, AssertPushWhileIterating) {
+TEST(TintVectorDeathTest, AssertPushWhileIterating) {
     using V = Vector<int, 4>;
     EXPECT_DEATH_IF_SUPPORTED(
         {
@@ -2134,7 +2134,7 @@ TEST(TintVectorTest, AssertPushWhileIterating) {
         "internal compiler error");
 }
 
-TEST(TintVectorTest, AssertPopWhileIterating) {
+TEST(TintVectorDeathTest, AssertPopWhileIterating) {
     using V = Vector<int, 4>;
     EXPECT_DEATH_IF_SUPPORTED(
         {
@@ -2149,7 +2149,7 @@ TEST(TintVectorTest, AssertPopWhileIterating) {
         "internal compiler error");
 }
 
-TEST(TintVectorTest, AssertClearWhileIterating) {
+TEST(TintVectorDeathTest, AssertClearWhileIterating) {
     using V = Vector<int, 4>;
     EXPECT_DEATH_IF_SUPPORTED(
         {
@@ -2445,7 +2445,7 @@ TEST(TintVectorRefTest, ostream) {
     EXPECT_EQ(ss.str(), "[1, 2, 3]");
 }
 
-TEST(TintVectorRefTest, AssertOOBs) {
+TEST(TintVectorRefDeathTest, AssertOOBs) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Vector vec{1};

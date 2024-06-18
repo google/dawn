@@ -137,6 +137,7 @@ class TestHelper : public ProgramBuilder {
 };
 
 class ResolverTest : public TestHelper, public testing::Test {};
+using ResolverDeathTest = ResolverTest;
 
 template <typename T>
 class ResolverTestWithParam : public TestHelper, public testing::TestWithParam<T> {};

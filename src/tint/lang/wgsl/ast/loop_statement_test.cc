@@ -36,6 +36,7 @@ namespace tint::ast {
 namespace {
 
 using LoopStatementTest = TestHelper;
+using LoopStatementDeathTest = LoopStatementTest;
 
 TEST_F(LoopStatementTest, Creation) {
     auto* body = Block(create<DiscardStatement>());
@@ -92,7 +93,7 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
     EXPECT_TRUE(l->continuing);
 }
 
-TEST_F(LoopStatementTest, Assert_Null_Body) {
+TEST_F(LoopStatementDeathTest, Assert_Null_Body) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -101,7 +102,7 @@ TEST_F(LoopStatementTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Body) {
+TEST_F(LoopStatementDeathTest, Assert_DifferentGenerationID_Body) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -111,7 +112,7 @@ TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Body) {
         "internal compiler error");
 }
 
-TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Continuing) {
+TEST_F(LoopStatementDeathTest, Assert_DifferentGenerationID_Continuing) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

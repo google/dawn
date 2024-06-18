@@ -35,8 +35,9 @@ namespace tint::ast {
 namespace {
 
 using DiagnosticControlTest = TestHelper;
+using DiagnosticControlDeathTest = DiagnosticControlTest;
 
-TEST_F(DiagnosticControlTest, Assert_RuleNotNull) {
+TEST_F(DiagnosticControlDeathTest, Assert_RuleNotNull) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;

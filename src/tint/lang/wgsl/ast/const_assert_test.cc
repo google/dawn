@@ -36,6 +36,7 @@ namespace tint::ast {
 namespace {
 
 using ConstAssertTest = TestHelper;
+using ConstAssertDeathTest = ConstAssertTest;
 
 TEST_F(ConstAssertTest, Creation) {
     auto* cond = Expr(true);
@@ -58,7 +59,7 @@ TEST_F(ConstAssertTest, IsConstAssert) {
     EXPECT_TRUE(stmt->Is<ast::ConstAssert>());
 }
 
-TEST_F(ConstAssertTest, Assert_Null_Condition) {
+TEST_F(ConstAssertDeathTest, Assert_Null_Condition) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -67,7 +68,7 @@ TEST_F(ConstAssertTest, Assert_Null_Condition) {
         "internal compiler error");
 }
 
-TEST_F(ConstAssertTest, Assert_DifferentGenerationID_Condition) {
+TEST_F(ConstAssertDeathTest, Assert_DifferentGenerationID_Condition) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

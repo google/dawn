@@ -31,6 +31,7 @@ namespace tint::ast {
 namespace {
 
 using IdentifierTest = TestHelper;
+using IdentifierDeathTest = IdentifierTest;
 
 TEST_F(IdentifierTest, Creation) {
     auto* i = Ident("ident");
@@ -51,7 +52,7 @@ TEST_F(IdentifierTest, IsIdentifier) {
     EXPECT_TRUE(i->Is<Identifier>());
 }
 
-TEST_F(IdentifierTest, Assert_InvalidSymbol) {
+TEST_F(IdentifierDeathTest, Assert_InvalidSymbol) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -60,7 +61,7 @@ TEST_F(IdentifierTest, Assert_InvalidSymbol) {
         "internal compiler error");
 }
 
-TEST_F(IdentifierTest, Assert_DifferentGenerationID_Symbol) {
+TEST_F(IdentifierDeathTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

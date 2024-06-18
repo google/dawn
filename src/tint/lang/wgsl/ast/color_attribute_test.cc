@@ -34,6 +34,7 @@ namespace tint::ast {
 namespace {
 
 using ColorAttributeTest = TestHelper;
+using ColorAttributeDeathTest = ColorAttributeTest;
 
 TEST_F(ColorAttributeTest, Creation) {
     auto* expr = Expr(1_u);
@@ -41,7 +42,7 @@ TEST_F(ColorAttributeTest, Creation) {
     EXPECT_EQ(c->expr, expr);
 }
 
-TEST_F(ColorAttributeTest, Assert_Null_Builtin) {
+TEST_F(ColorAttributeDeathTest, Assert_Null_Builtin) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -50,7 +51,7 @@ TEST_F(ColorAttributeTest, Assert_Null_Builtin) {
         "internal compiler error");
 }
 
-TEST_F(ColorAttributeTest, Assert_DifferentGenerationID_Color) {
+TEST_F(ColorAttributeDeathTest, Assert_DifferentGenerationID_Color) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

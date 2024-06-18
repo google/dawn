@@ -35,6 +35,7 @@ namespace tint::spirv::writer {
 namespace {
 
 using SpirvASTPrinterTest = TestHelper;
+using SpirvASTPrinterDeathTest = SpirvASTPrinterTest;
 
 TEST_F(SpirvASTPrinterTest, If_Empty) {
     // if (true) {
@@ -59,7 +60,7 @@ OpBranch %3
 )");
 }
 
-TEST_F(SpirvASTPrinterTest, If_Empty_OutsideFunction_IsError) {
+TEST_F(SpirvASTPrinterDeathTest, If_Empty_OutsideFunction_IsError) {
     // Outside a function.
     // if (true) {
     // }

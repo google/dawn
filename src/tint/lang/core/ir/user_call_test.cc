@@ -35,6 +35,7 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using IR_UserCallTest = IRTestHelper;
+using IR_UserCallDeathTest = IR_UserCallTest;
 
 TEST_F(IR_UserCallTest, Usage) {
     auto* func = b.Function("myfunc", mod.Types().void_());
@@ -57,14 +58,14 @@ TEST_F(IR_UserCallTest, Results) {
     EXPECT_EQ(e->Result(0)->Instruction(), e);
 }
 
-TEST_F(IR_UserCallTest, Fail_NullType) {
+TEST_F(IR_UserCallDeathTest, Fail_NullType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Call(static_cast<type::Type*>(nullptr), b.Function("myfunc", mod.Types().void_()));
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_UserCallTest, Clone) {

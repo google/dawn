@@ -33,6 +33,7 @@ namespace tint::ast {
 namespace {
 
 using IncrementDecrementStatementTest = TestHelper;
+using IncrementDecrementStatementDeathTest = IncrementDecrementStatementTest;
 
 TEST_F(IncrementDecrementStatementTest, Creation) {
     auto* expr = Expr("expr");
@@ -65,7 +66,7 @@ TEST_F(IncrementDecrementStatementTest, Decrement) {
     EXPECT_FALSE(i->increment);
 }
 
-TEST_F(IncrementDecrementStatementTest, Assert_DifferentGenerationID_Expr) {
+TEST_F(IncrementDecrementStatementDeathTest, Assert_DifferentGenerationID_Expr) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

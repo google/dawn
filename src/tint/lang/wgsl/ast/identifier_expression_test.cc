@@ -33,6 +33,7 @@ namespace {
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using IdentifierExpressionTest = TestHelper;
+using IdentifierExpressionDeathTest = IdentifierExpressionTest;
 
 TEST_F(IdentifierExpressionTest, Creation) {
     auto* i = Expr("ident");
@@ -56,7 +57,7 @@ TEST_F(IdentifierExpressionTest, Creation_WithSource) {
     EXPECT_EQ(i->identifier->source.range, (Source::Range{{20, 2}}));
 }
 
-TEST_F(IdentifierExpressionTest, Assert_InvalidSymbol) {
+TEST_F(IdentifierExpressionDeathTest, Assert_InvalidSymbol) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -65,7 +66,7 @@ TEST_F(IdentifierExpressionTest, Assert_InvalidSymbol) {
         "internal compiler error");
 }
 
-TEST_F(IdentifierExpressionTest, Assert_DifferentGenerationID_Symbol) {
+TEST_F(IdentifierExpressionDeathTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

@@ -35,6 +35,7 @@ namespace tint::ast {
 namespace {
 
 using WhileStatementTest = TestHelper;
+using WhileStatementDeathTest = WhileStatementTest;
 
 TEST_F(WhileStatementTest, Creation) {
     auto* cond = create<BinaryExpression>(core::BinaryOp::kLessThan, Expr("i"), Expr(5_u));
@@ -64,7 +65,7 @@ TEST_F(WhileStatementTest, Creation_WithAttributes) {
     EXPECT_THAT(l->attributes, testing::ElementsAre(attr1, attr2));
 }
 
-TEST_F(WhileStatementTest, Assert_Null_Cond) {
+TEST_F(WhileStatementDeathTest, Assert_Null_Cond) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -74,7 +75,7 @@ TEST_F(WhileStatementTest, Assert_Null_Cond) {
         "internal compiler error");
 }
 
-TEST_F(WhileStatementTest, Assert_Null_Body) {
+TEST_F(WhileStatementDeathTest, Assert_Null_Body) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -85,7 +86,7 @@ TEST_F(WhileStatementTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(WhileStatementTest, Assert_DifferentGenerationID_Condition) {
+TEST_F(WhileStatementDeathTest, Assert_DifferentGenerationID_Condition) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -95,7 +96,7 @@ TEST_F(WhileStatementTest, Assert_DifferentGenerationID_Condition) {
         "internal compiler error");
 }
 
-TEST_F(WhileStatementTest, Assert_DifferentGenerationID_Body) {
+TEST_F(WhileStatementDeathTest, Assert_DifferentGenerationID_Body) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

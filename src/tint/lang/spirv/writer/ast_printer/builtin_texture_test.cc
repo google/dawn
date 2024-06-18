@@ -3718,9 +3718,13 @@ OpImageWrite %10 %16 %22
 }  // NOLINT - Ignore the length of this function
 
 using BuiltinTextureTest = TestParamHelper<ast::test::TextureOverloadCase>;
+using BuiltinTextureDeathTest = BuiltinTextureTest;
 
 INSTANTIATE_TEST_SUITE_P(BuiltinTextureTest,
                          BuiltinTextureTest,
+                         testing::ValuesIn(ast::test::TextureOverloadCase::ValidCases()));
+INSTANTIATE_TEST_SUITE_P(BuiltinTextureTest,
+                         BuiltinTextureDeathTest,
                          testing::ValuesIn(ast::test::TextureOverloadCase::ValidCases()));
 
 TEST_P(BuiltinTextureTest, Call) {
@@ -3774,7 +3778,7 @@ TEST_P(BuiltinTextureTest, ValidateSPIRV) {
     Validate(b);
 }
 
-TEST_P(BuiltinTextureTest, OutsideFunction_IsError) {
+TEST_P(BuiltinTextureDeathTest, OutsideFunction_IsError) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             auto param = GetParam();

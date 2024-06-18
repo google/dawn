@@ -37,6 +37,7 @@ namespace tint::core::ir {
 namespace {
 
 using IR_ConstantTest = IRTestHelper;
+using IR_ConstantDeathTest = IR_ConstantTest;
 
 TEST_F(IR_ConstantTest, f32) {
     StringStream str;
@@ -111,18 +112,18 @@ TEST_F(IR_ConstantTest, bool) {
     }
 }
 
-TEST_F(IR_ConstantTest, Fail_NullValue) {
-    EXPECT_DEATH_IF_SUPPORTED({ Constant c(nullptr); }, "");
+TEST_F(IR_ConstantDeathTest, Fail_NullValue) {
+    EXPECT_DEATH_IF_SUPPORTED({ Constant c(nullptr); }, "internal compiler error");
 }
 
-TEST_F(IR_ConstantTest, Fail_Builder_NullValue) {
+TEST_F(IR_ConstantDeathTest, Fail_Builder_NullValue) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Constant(nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_ConstantTest, Clone) {

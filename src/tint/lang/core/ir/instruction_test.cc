@@ -36,6 +36,7 @@ namespace tint::core::ir {
 namespace {
 
 using IR_InstructionTest = IRTestHelper;
+using IR_InstructionDeathTest = IR_InstructionTest;
 
 TEST_F(IR_InstructionTest, InsertBefore) {
     auto* inst1 = b.Loop();
@@ -47,7 +48,7 @@ TEST_F(IR_InstructionTest, InsertBefore) {
     EXPECT_EQ(inst1->Block(), blk);
 }
 
-TEST_F(IR_InstructionTest, Fail_InsertBeforeNullptr) {
+TEST_F(IR_InstructionDeathTest, Fail_InsertBeforeNullptr) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -56,10 +57,10 @@ TEST_F(IR_InstructionTest, Fail_InsertBeforeNullptr) {
             auto* inst1 = b.Loop();
             inst1->InsertBefore(nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_InstructionTest, Fail_InsertBeforeNotInserted) {
+TEST_F(IR_InstructionDeathTest, Fail_InsertBeforeNotInserted) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -69,7 +70,7 @@ TEST_F(IR_InstructionTest, Fail_InsertBeforeNotInserted) {
             auto* inst2 = b.Loop();
             inst1->InsertBefore(inst2);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_InstructionTest, InsertAfter) {
@@ -82,7 +83,7 @@ TEST_F(IR_InstructionTest, InsertAfter) {
     EXPECT_EQ(inst1->Block(), blk);
 }
 
-TEST_F(IR_InstructionTest, Fail_InsertAfterNullptr) {
+TEST_F(IR_InstructionDeathTest, Fail_InsertAfterNullptr) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -91,10 +92,10 @@ TEST_F(IR_InstructionTest, Fail_InsertAfterNullptr) {
             auto* inst1 = b.Loop();
             inst1->InsertAfter(nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_InstructionTest, Fail_InsertAfterNotInserted) {
+TEST_F(IR_InstructionDeathTest, Fail_InsertAfterNotInserted) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -104,7 +105,7 @@ TEST_F(IR_InstructionTest, Fail_InsertAfterNotInserted) {
             auto* inst2 = b.Loop();
             inst1->InsertAfter(inst2);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_InstructionTest, ReplaceWith) {
@@ -118,7 +119,7 @@ TEST_F(IR_InstructionTest, ReplaceWith) {
     EXPECT_EQ(inst2->Block(), nullptr);
 }
 
-TEST_F(IR_InstructionTest, Fail_ReplaceWithNullptr) {
+TEST_F(IR_InstructionDeathTest, Fail_ReplaceWithNullptr) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -129,10 +130,10 @@ TEST_F(IR_InstructionTest, Fail_ReplaceWithNullptr) {
             blk->Append(inst1);
             inst1->ReplaceWith(nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_InstructionTest, Fail_ReplaceWithNotInserted) {
+TEST_F(IR_InstructionDeathTest, Fail_ReplaceWithNotInserted) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -142,7 +143,7 @@ TEST_F(IR_InstructionTest, Fail_ReplaceWithNotInserted) {
             auto* inst2 = b.Loop();
             inst1->ReplaceWith(inst2);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_InstructionTest, Remove) {
@@ -156,7 +157,7 @@ TEST_F(IR_InstructionTest, Remove) {
     EXPECT_EQ(inst1->Block(), nullptr);
 }
 
-TEST_F(IR_InstructionTest, Fail_RemoveNotInserted) {
+TEST_F(IR_InstructionDeathTest, Fail_RemoveNotInserted) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -165,7 +166,7 @@ TEST_F(IR_InstructionTest, Fail_RemoveNotInserted) {
             auto* inst1 = b.Loop();
             inst1->Remove();
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_InstructionTest, DetachResult) {

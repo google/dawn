@@ -34,13 +34,14 @@ namespace tint::ast {
 namespace {
 
 using DiagnosticRuleNameTest = TestHelper;
+using DiagnosticRuleNameDeathTest = DiagnosticRuleNameTest;
 
 TEST_F(DiagnosticRuleNameTest, String) {
     EXPECT_EQ(DiagnosticRuleName("name")->String(), "name");
     EXPECT_EQ(DiagnosticRuleName("category", "name")->String(), "category.name");
 }
 
-TEST_F(DiagnosticRuleNameTest, Assert_NameNotTemplated) {
+TEST_F(DiagnosticRuleNameDeathTest, Assert_NameNotTemplated) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -49,7 +50,7 @@ TEST_F(DiagnosticRuleNameTest, Assert_NameNotTemplated) {
         "internal compiler error");
 }
 
-TEST_F(DiagnosticRuleNameTest, Assert_CategoryNotTemplated) {
+TEST_F(DiagnosticRuleNameDeathTest, Assert_CategoryNotTemplated) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;

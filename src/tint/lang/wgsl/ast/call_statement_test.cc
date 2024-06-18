@@ -33,6 +33,7 @@ namespace tint::ast {
 namespace {
 
 using CallStatementTest = TestHelper;
+using CallStatementDeathTest = CallStatementTest;
 
 TEST_F(CallStatementTest, Creation) {
     auto* expr = Call("func");
@@ -46,7 +47,7 @@ TEST_F(CallStatementTest, IsCall) {
     EXPECT_TRUE(c->Is<CallStatement>());
 }
 
-TEST_F(CallStatementTest, Assert_Null_Call) {
+TEST_F(CallStatementDeathTest, Assert_Null_Call) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -55,7 +56,7 @@ TEST_F(CallStatementTest, Assert_Null_Call) {
         "internal compiler error");
 }
 
-TEST_F(CallStatementTest, Assert_DifferentGenerationID_Call) {
+TEST_F(CallStatementDeathTest, Assert_DifferentGenerationID_Call) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

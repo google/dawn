@@ -2086,7 +2086,7 @@ TEST_F(ResolverTest, ASTNodesAreReached) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTest, ASTNodeNotReached) {
+TEST_F(ResolverDeathTest, ASTNodeNotReached) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -2097,7 +2097,7 @@ TEST_F(ResolverTest, ASTNodeNotReached) {
         "resolver");
 }
 
-TEST_F(ResolverTest, ASTNodeReachedTwice) {
+TEST_F(ResolverDeathTest, ASTNodeReachedTwice) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;

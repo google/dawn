@@ -34,8 +34,9 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using IR_MultiInBlockTest = IRTestHelper;
+using IR_MultiInBlockDeathTest = IR_MultiInBlockTest;
 
-TEST_F(IR_MultiInBlockTest, Fail_NullInboundBranch) {
+TEST_F(IR_MultiInBlockDeathTest, Fail_NullInboundBranch) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -44,7 +45,7 @@ TEST_F(IR_MultiInBlockTest, Fail_NullInboundBranch) {
             auto* blk = b.MultiInBlock();
             blk->AddInboundSiblingBranch(nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_MultiInBlockTest, CloneInto) {

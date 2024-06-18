@@ -87,6 +87,7 @@ class SpirvParserTestHelperBase : public BASE {
 };
 
 using SpirvParserTest = SpirvParserTestHelperBase<testing::Test>;
+using SpirvParserDeathTest = SpirvParserTest;
 
 template <typename T>
 using SpirvParserTestWithParam = SpirvParserTestHelperBase<testing::TestWithParam<T>>;

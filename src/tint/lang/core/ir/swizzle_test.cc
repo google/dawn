@@ -36,6 +36,7 @@ namespace tint::core::ir {
 namespace {
 
 using IR_SwizzleTest = IRTestHelper;
+using IR_SwizzleDeathTest = IR_SwizzleTest;
 
 TEST_F(IR_SwizzleTest, SetsUsage) {
     auto* var = b.Var(ty.ptr<function, i32>());
@@ -53,7 +54,7 @@ TEST_F(IR_SwizzleTest, Results) {
     EXPECT_EQ(a->Result(0)->Instruction(), a);
 }
 
-TEST_F(IR_SwizzleTest, Fail_NullType) {
+TEST_F(IR_SwizzleDeathTest, Fail_NullType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -61,10 +62,10 @@ TEST_F(IR_SwizzleTest, Fail_NullType) {
             auto* var = b.Var(mod.Types().ptr<function, i32>());
             b.Swizzle(nullptr, var, {1u});
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
+TEST_F(IR_SwizzleDeathTest, Fail_EmptyIndices) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -72,10 +73,10 @@ TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
             auto* var = b.Var(mod.Types().ptr<function, i32>());
             b.Swizzle(mod.Types().i32(), var, tint::Empty);
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_SwizzleTest, Fail_TooManyIndices) {
+TEST_F(IR_SwizzleDeathTest, Fail_TooManyIndices) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -83,10 +84,10 @@ TEST_F(IR_SwizzleTest, Fail_TooManyIndices) {
             auto* var = b.Var(mod.Types().ptr<function, i32>());
             b.Swizzle(mod.Types().i32(), var, {1u, 1u, 1u, 1u, 1u});
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_SwizzleTest, Fail_IndexOutOfRange) {
+TEST_F(IR_SwizzleDeathTest, Fail_IndexOutOfRange) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -94,7 +95,7 @@ TEST_F(IR_SwizzleTest, Fail_IndexOutOfRange) {
             auto* var = b.Var(mod.Types().ptr<function, i32>());
             b.Swizzle(mod.Types().i32(), var, {4u});
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_SwizzleTest, Clone) {

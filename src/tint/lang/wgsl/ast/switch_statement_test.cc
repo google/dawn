@@ -36,6 +36,7 @@ namespace tint::ast {
 namespace {
 
 using SwitchStatementTest = TestHelper;
+using SwitchStatementDeathTest = SwitchStatementTest;
 
 TEST_F(SwitchStatementTest, Creation) {
     auto* case_stmt = create<CaseStatement>(tint::Vector{CaseSelector(1_u)}, Block());
@@ -86,7 +87,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
     EXPECT_TRUE(stmt->Is<SwitchStatement>());
 }
 
-TEST_F(SwitchStatementTest, Assert_Null_Condition) {
+TEST_F(SwitchStatementDeathTest, Assert_Null_Condition) {
     using CaseStatementList = tint::Vector<const CaseStatement*, 2>;
     EXPECT_DEATH_IF_SUPPORTED(
         {
@@ -99,7 +100,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
         "internal compiler error");
 }
 
-TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
+TEST_F(SwitchStatementDeathTest, Assert_Null_CaseStatement) {
     using CaseStatementList = tint::Vector<const CaseStatement*, 2>;
     EXPECT_DEATH_IF_SUPPORTED(
         {
@@ -110,7 +111,7 @@ TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
         "internal compiler error");
 }
 
-TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_Condition) {
+TEST_F(SwitchStatementDeathTest, Assert_DifferentGenerationID_Condition) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -128,7 +129,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_Condition) {
         "internal compiler error");
 }
 
-TEST_F(SwitchStatementTest, Assert_DifferentGenerationID_CaseStatement) {
+TEST_F(SwitchStatementDeathTest, Assert_DifferentGenerationID_CaseStatement) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

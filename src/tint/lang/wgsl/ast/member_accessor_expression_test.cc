@@ -31,6 +31,7 @@ namespace tint::ast {
 namespace {
 
 using MemberAccessorExpressionTest = TestHelper;
+using MemberAccessorExpressionDeathTest = MemberAccessorExpressionTest;
 
 TEST_F(MemberAccessorExpressionTest, Creation) {
     auto* str = Expr("structure");
@@ -54,7 +55,7 @@ TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {
     EXPECT_TRUE(stmt->Is<MemberAccessorExpression>());
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_Null_Struct) {
+TEST_F(MemberAccessorExpressionDeathTest, Assert_Null_Struct) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -63,7 +64,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_Null_Struct) {
         "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_Null_Member) {
+TEST_F(MemberAccessorExpressionDeathTest, Assert_Null_Member) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -72,7 +73,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_Null_Member) {
         "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Struct) {
+TEST_F(MemberAccessorExpressionDeathTest, Assert_DifferentGenerationID_Struct) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -82,7 +83,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Struct) {
         "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Member) {
+TEST_F(MemberAccessorExpressionDeathTest, Assert_DifferentGenerationID_Member) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -92,7 +93,7 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentGenerationID_Member) {
         "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_MemberNotTemplated) {
+TEST_F(MemberAccessorExpressionDeathTest, Assert_MemberNotTemplated) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;

@@ -33,6 +33,7 @@ namespace {
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using TemplatedIdentifierTest = TestHelper;
+using TemplatedIdentifierDeathTest = TemplatedIdentifierTest;
 
 TEST_F(TemplatedIdentifierTest, Creation) {
     auto* i = Ident("ident", 1_a, Add("x", "y"), false, "x");
@@ -62,7 +63,7 @@ TEST_F(TemplatedIdentifierTest, Creation_WithSource) {
     EXPECT_EQ(src.range.begin.column, 2u);
 }
 
-TEST_F(TemplatedIdentifierTest, Assert_InvalidSymbol) {
+TEST_F(TemplatedIdentifierDeathTest, Assert_InvalidSymbol) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -71,7 +72,7 @@ TEST_F(TemplatedIdentifierTest, Assert_InvalidSymbol) {
         "internal compiler error");
 }
 
-TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_Symbol) {
+TEST_F(TemplatedIdentifierDeathTest, Assert_DifferentGenerationID_Symbol) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -81,7 +82,7 @@ TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_Symbol) {
         "internal compiler error");
 }
 
-TEST_F(TemplatedIdentifierTest, Assert_DifferentGenerationID_TemplateArg) {
+TEST_F(TemplatedIdentifierDeathTest, Assert_DifferentGenerationID_TemplateArg) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

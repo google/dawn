@@ -33,15 +33,16 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using IR_ConvertTest = IRTestHelper;
+using IR_ConvertDeathTest = IR_ConvertTest;
 
-TEST_F(IR_ConvertTest, Fail_NullToType) {
+TEST_F(IR_ConvertDeathTest, Fail_NullToType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Convert(nullptr, 1_u);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_ConvertTest, Results) {

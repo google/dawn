@@ -35,6 +35,7 @@ namespace tint::core::ir {
 namespace {
 
 using IR_ValueTest = IRTestHelper;
+using IR_ValueDeathTest = IR_ValueTest;
 
 TEST_F(IR_ValueTest, ReplaceAllUsesWith_Value) {
     auto* val_old = b.InstructionResult(ty.i32());
@@ -65,7 +66,7 @@ TEST_F(IR_ValueTest, Destroy) {
     EXPECT_FALSE(val->Alive());
 }
 
-TEST_F(IR_ValueTest, Destroy_HasSource) {
+TEST_F(IR_ValueDeathTest, Destroy_HasSource) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -73,7 +74,7 @@ TEST_F(IR_ValueTest, Destroy_HasSource) {
             auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result(0);
             val->Destroy();
         },
-        "");
+        "internal compiler error");
 }
 
 }  // namespace

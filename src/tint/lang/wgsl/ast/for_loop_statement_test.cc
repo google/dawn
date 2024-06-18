@@ -35,6 +35,7 @@ namespace tint::ast {
 namespace {
 
 using ForLoopStatementTest = TestHelper;
+using ForLoopStatementDeathTest = ForLoopStatementTest;
 
 TEST_F(ForLoopStatementTest, Creation) {
     auto* init = Decl(Var("i", ty.u32()));
@@ -72,7 +73,7 @@ TEST_F(ForLoopStatementTest, Creation_WithAttributes) {
     EXPECT_THAT(l->attributes, testing::ElementsAre(attr1, attr2));
 }
 
-TEST_F(ForLoopStatementTest, Assert_Null_Body) {
+TEST_F(ForLoopStatementDeathTest, Assert_Null_Body) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -81,7 +82,7 @@ TEST_F(ForLoopStatementTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Initializer) {
+TEST_F(ForLoopStatementDeathTest, Assert_DifferentGenerationID_Initializer) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -91,7 +92,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Initializer) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Condition) {
+TEST_F(ForLoopStatementDeathTest, Assert_DifferentGenerationID_Condition) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -101,7 +102,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Condition) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Continuing) {
+TEST_F(ForLoopStatementDeathTest, Assert_DifferentGenerationID_Continuing) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -111,7 +112,7 @@ TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Continuing) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementTest, Assert_DifferentGenerationID_Body) {
+TEST_F(ForLoopStatementDeathTest, Assert_DifferentGenerationID_Body) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

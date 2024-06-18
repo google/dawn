@@ -35,6 +35,7 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using IR_BreakIfTest = IRTestHelper;
+using IR_BreakIfDeathTest = IR_BreakIfTest;
 
 TEST_F(IR_BreakIfTest, Usage) {
     auto* loop = b.Loop();
@@ -59,14 +60,14 @@ TEST_F(IR_BreakIfTest, Results) {
     EXPECT_TRUE(brk->Results().IsEmpty());
 }
 
-TEST_F(IR_BreakIfTest, Fail_NullLoop) {
+TEST_F(IR_BreakIfDeathTest, Fail_NullLoop) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.BreakIf(nullptr, true);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_BreakIfTest, Clone) {

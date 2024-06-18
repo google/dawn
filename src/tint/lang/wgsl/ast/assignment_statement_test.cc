@@ -35,6 +35,7 @@ namespace tint::ast {
 namespace {
 
 using AssignmentStatementTest = TestHelper;
+using AssignmentStatementDeathTest = AssignmentStatementTest;
 
 TEST_F(AssignmentStatementTest, Creation) {
     auto* lhs = Expr("lhs");
@@ -63,7 +64,7 @@ TEST_F(AssignmentStatementTest, IsAssign) {
     EXPECT_TRUE(stmt->Is<AssignmentStatement>());
 }
 
-TEST_F(AssignmentStatementTest, Assert_Null_LHS) {
+TEST_F(AssignmentStatementDeathTest, Assert_Null_LHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -72,7 +73,7 @@ TEST_F(AssignmentStatementTest, Assert_Null_LHS) {
         "internal compiler error");
 }
 
-TEST_F(AssignmentStatementTest, Assert_Null_RHS) {
+TEST_F(AssignmentStatementDeathTest, Assert_Null_RHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -81,7 +82,7 @@ TEST_F(AssignmentStatementTest, Assert_Null_RHS) {
         "internal compiler error");
 }
 
-TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
+TEST_F(AssignmentStatementDeathTest, Assert_DifferentGenerationID_LHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -91,7 +92,7 @@ TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
         "internal compiler error");
 }
 
-TEST_F(AssignmentStatementTest, Assert_DifferentGenerationID_RHS) {
+TEST_F(AssignmentStatementDeathTest, Assert_DifferentGenerationID_RHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

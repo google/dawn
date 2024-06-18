@@ -29,7 +29,7 @@
 
 namespace tint::spirv::reader {
 
-TEST_F(SpirvParserTest, Struct_Empty) {
+TEST_F(SpirvParserDeathTest, Struct_Empty) {
     EXPECT_DEATH_IF_SUPPORTED(  //
         {
             auto assembly = Assemble(R"(

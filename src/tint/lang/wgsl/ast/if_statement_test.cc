@@ -35,6 +35,7 @@ namespace tint::ast {
 namespace {
 
 using IfStatementTest = TestHelper;
+using IfStatementDeathTest = IfStatementTest;
 
 TEST_F(IfStatementTest, Creation) {
     auto* cond = Expr("cond");
@@ -58,7 +59,7 @@ TEST_F(IfStatementTest, IsIf) {
     EXPECT_TRUE(stmt->Is<IfStatement>());
 }
 
-TEST_F(IfStatementTest, Assert_Null_Condition) {
+TEST_F(IfStatementDeathTest, Assert_Null_Condition) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -67,7 +68,7 @@ TEST_F(IfStatementTest, Assert_Null_Condition) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_Null_Body) {
+TEST_F(IfStatementDeathTest, Assert_Null_Body) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -76,7 +77,7 @@ TEST_F(IfStatementTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_InvalidElse) {
+TEST_F(IfStatementDeathTest, Assert_InvalidElse) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -85,7 +86,7 @@ TEST_F(IfStatementTest, Assert_InvalidElse) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_DifferentGenerationID_Cond) {
+TEST_F(IfStatementDeathTest, Assert_DifferentGenerationID_Cond) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -95,7 +96,7 @@ TEST_F(IfStatementTest, Assert_DifferentGenerationID_Cond) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_DifferentGenerationID_Body) {
+TEST_F(IfStatementDeathTest, Assert_DifferentGenerationID_Body) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -105,7 +106,7 @@ TEST_F(IfStatementTest, Assert_DifferentGenerationID_Body) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_DifferentGenerationID_ElseStatement) {
+TEST_F(IfStatementDeathTest, Assert_DifferentGenerationID_ElseStatement) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

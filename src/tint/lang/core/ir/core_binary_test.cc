@@ -38,15 +38,16 @@ namespace tint::core::ir {
 namespace {
 
 using IR_BinaryTest = IRTestHelper;
+using IR_BinaryDeathTest = IR_BinaryTest;
 
-TEST_F(IR_BinaryTest, Fail_NullType) {
+TEST_F(IR_BinaryDeathTest, Fail_NullType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Add(nullptr, u32(1), u32(2));
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_BinaryTest, Result) {

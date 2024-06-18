@@ -35,8 +35,9 @@ namespace tint::core::ir {
 namespace {
 
 using IR_InstructionResultTest = IRTestHelper;
+using IR_InstructionResultDeathTest = IR_InstructionResultTest;
 
-TEST_F(IR_InstructionResultTest, Destroy_HasInstruction) {
+TEST_F(IR_InstructionResultDeathTest, Destroy_HasInstruction) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
@@ -44,7 +45,7 @@ TEST_F(IR_InstructionResultTest, Destroy_HasInstruction) {
             auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result(0);
             val->Destroy();
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_InstructionResultTest, Clone) {

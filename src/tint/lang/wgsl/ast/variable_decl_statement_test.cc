@@ -33,6 +33,7 @@ namespace tint::ast {
 namespace {
 
 using VariableDeclStatementTest = TestHelper;
+using VariableDeclStatementDeathTest = VariableDeclStatementTest;
 
 TEST_F(VariableDeclStatementTest, Creation) {
     auto* var = Var("a", ty.f32());
@@ -57,7 +58,7 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
     EXPECT_TRUE(stmt->Is<VariableDeclStatement>());
 }
 
-TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
+TEST_F(VariableDeclStatementDeathTest, Assert_Null_Variable) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -66,7 +67,7 @@ TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
         "internal compiler error");
 }
 
-TEST_F(VariableDeclStatementTest, Assert_DifferentGenerationID_Variable) {
+TEST_F(VariableDeclStatementDeathTest, Assert_DifferentGenerationID_Variable) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

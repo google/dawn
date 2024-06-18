@@ -39,6 +39,7 @@ namespace tint::core::ir {
 namespace {
 
 using IR_BitcastTest = IRTestHelper;
+using IR_BitcastDeathTest = IR_BitcastTest;
 
 TEST_F(IR_BitcastTest, Bitcast) {
     auto* inst = b.Bitcast(mod.Types().i32(), 4_i);
@@ -71,14 +72,14 @@ TEST_F(IR_BitcastTest, Bitcast_Usage) {
     EXPECT_THAT(args[0]->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
-TEST_F(IR_BitcastTest, Fail_NullType) {
+TEST_F(IR_BitcastDeathTest, Fail_NullType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Bitcast(nullptr, 1_i);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_BitcastTest, Clone) {

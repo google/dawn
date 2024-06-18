@@ -34,6 +34,7 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using IR_CoreBuiltinCallTest = IRTestHelper;
+using IR_CoreBuiltinCallDeathTest = IR_CoreBuiltinCallTest;
 
 TEST_F(IR_CoreBuiltinCallTest, Usage) {
     auto* arg1 = b.Constant(1_u);
@@ -54,24 +55,24 @@ TEST_F(IR_CoreBuiltinCallTest, Result) {
     EXPECT_EQ(builtin->Result(0)->Instruction(), builtin);
 }
 
-TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
+TEST_F(IR_CoreBuiltinCallDeathTest, Fail_NullType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Call(static_cast<type::Type*>(nullptr), core::BuiltinFn::kAbs);
         },
-        "");
+        "internal compiler error");
 }
 
-TEST_F(IR_CoreBuiltinCallTest, Fail_NoneFunction) {
+TEST_F(IR_CoreBuiltinCallDeathTest, Fail_NoneFunction) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Call(mod.Types().f32(), core::BuiltinFn::kNone);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Clone) {

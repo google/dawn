@@ -39,15 +39,16 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using IR_VarTest = IRTestHelper;
+using IR_VarDeathTest = IR_VarTest;
 
-TEST_F(IR_VarTest, Fail_NullType) {
+TEST_F(IR_VarDeathTest, Fail_NullType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Var(nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_VarTest, Results) {

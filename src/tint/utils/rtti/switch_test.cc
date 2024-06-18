@@ -229,7 +229,7 @@ TEST(Castable, SwitchMustMatch_MatchedWithReturnValue) {
     }
 }
 
-TEST(Castable, SwitchMustMatch_NoMatchWithoutReturnValue) {
+TEST(CastableDeathTest, SwitchMustMatch_NoMatchWithoutReturnValue) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             std::unique_ptr<Animal> frog = std::make_unique<Frog>();
@@ -242,7 +242,7 @@ TEST(Castable, SwitchMustMatch_NoMatchWithoutReturnValue) {
         testing::HasSubstr("internal compiler error: Switch() matched no cases. Type: Frog"));
 }
 
-TEST(Castable, SwitchMustMatch_NoMatchWithReturnValue) {
+TEST(CastableDeathTest, SwitchMustMatch_NoMatchWithReturnValue) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             std::unique_ptr<Animal> frog = std::make_unique<Frog>();
@@ -256,7 +256,7 @@ TEST(Castable, SwitchMustMatch_NoMatchWithReturnValue) {
         testing::HasSubstr("internal compiler error: Switch() matched no cases. Type: Frog"));
 }
 
-TEST(Castable, SwitchMustMatch_NullptrWithoutReturnValue) {
+TEST(CastableDeathTest, SwitchMustMatch_NullptrWithoutReturnValue) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Switch(
@@ -268,7 +268,7 @@ TEST(Castable, SwitchMustMatch_NullptrWithoutReturnValue) {
         testing::HasSubstr("internal compiler error: Switch() passed nullptr"));
 }
 
-TEST(Castable, SwitchMustMatch_NullptrWithReturnValue) {
+TEST(CastableDeathTest, SwitchMustMatch_NullptrWithReturnValue) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             int res = Switch(

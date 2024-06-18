@@ -38,6 +38,7 @@ namespace tint::core::ir {
 namespace {
 
 using IR_UnaryTest = IRTestHelper;
+using IR_UnaryDeathTest = IR_UnaryTest;
 
 TEST_F(IR_UnaryTest, CreateComplement) {
     auto* inst = b.Complement(mod.Types().i32(), 4_i);
@@ -91,14 +92,14 @@ TEST_F(IR_UnaryTest, Result) {
     EXPECT_EQ(inst->Result(0)->Instruction(), inst);
 }
 
-TEST_F(IR_UnaryTest, Fail_NullType) {
+TEST_F(IR_UnaryDeathTest, Fail_NullType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.Negation(nullptr, 1_i);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_UnaryTest, Clone) {

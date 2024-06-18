@@ -33,15 +33,16 @@ namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using IR_NextIterationTest = IRTestHelper;
+using IR_NextIterationDeathTest = IR_NextIterationTest;
 
-TEST_F(IR_NextIterationTest, Fail_NullLoop) {
+TEST_F(IR_NextIterationDeathTest, Fail_NullLoop) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             Module mod;
             Builder b{mod};
             b.NextIteration(nullptr);
         },
-        "");
+        "internal compiler error");
 }
 
 TEST_F(IR_NextIterationTest, Result) {

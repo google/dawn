@@ -61,6 +61,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using ResolverValidationTest = ResolverTest;
+using ResolverValidationDeathTest = ResolverValidationTest;
 
 class FakeStmt final : public Castable<FakeStmt, ast::Statement> {
   public:
@@ -132,7 +133,7 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
 9:10 note: called by entry point 'f0')");
 }
 
-TEST_F(ResolverValidationTest, UnhandledStmt) {
+TEST_F(ResolverValidationDeathTest, UnhandledStmt) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -163,7 +164,7 @@ TEST_F(ResolverValidationTest, Stmt_ElseIf_NonBool) {
     EXPECT_EQ(r()->error(), R"(12:34 error: if statement condition must be bool, got f32)");
 }
 
-TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
+TEST_F(ResolverValidationDeathTest, Expr_ErrUnknownExprType) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;

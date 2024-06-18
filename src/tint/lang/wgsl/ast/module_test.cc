@@ -34,6 +34,7 @@ namespace tint::ast {
 namespace {
 
 using ModuleTest = TestHelper;
+using ModuleDeathTest = ModuleTest;
 
 TEST_F(ModuleTest, Creation) {
     EXPECT_EQ(resolver::Resolve(*this).AST().Functions().Length(), 0u);
@@ -51,7 +52,7 @@ TEST_F(ModuleTest, LookupFunctionMissing) {
     EXPECT_EQ(nullptr, program.AST().Functions().Find(program.Symbols().Get("Missing")));
 }
 
-TEST_F(ModuleTest, Assert_Null_GlobalVariable) {
+TEST_F(ModuleDeathTest, Assert_Null_GlobalVariable) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder builder;
@@ -60,7 +61,7 @@ TEST_F(ModuleTest, Assert_Null_GlobalVariable) {
         "internal compiler error");
 }
 
-TEST_F(ModuleTest, Assert_Null_TypeDecl) {
+TEST_F(ModuleDeathTest, Assert_Null_TypeDecl) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder builder;
@@ -69,7 +70,7 @@ TEST_F(ModuleTest, Assert_Null_TypeDecl) {
         "internal compiler error");
 }
 
-TEST_F(ModuleTest, Assert_DifferentGenerationID_Function) {
+TEST_F(ModuleDeathTest, Assert_DifferentGenerationID_Function) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -80,7 +81,7 @@ TEST_F(ModuleTest, Assert_DifferentGenerationID_Function) {
         "internal compiler error");
 }
 
-TEST_F(ModuleTest, Assert_DifferentGenerationID_GlobalVariable) {
+TEST_F(ModuleDeathTest, Assert_DifferentGenerationID_GlobalVariable) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -90,7 +91,7 @@ TEST_F(ModuleTest, Assert_DifferentGenerationID_GlobalVariable) {
         "internal compiler error");
 }
 
-TEST_F(ModuleTest, Assert_Null_Function) {
+TEST_F(ModuleDeathTest, Assert_Null_Function) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder builder;

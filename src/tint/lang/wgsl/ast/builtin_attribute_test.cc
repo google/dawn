@@ -32,13 +32,14 @@ namespace tint::ast {
 namespace {
 
 using BuiltinAttributeTest = TestHelper;
+using BuiltinAttributeDeathTest = BuiltinAttributeTest;
 
 TEST_F(BuiltinAttributeTest, Creation) {
     auto* d = Builtin(core::BuiltinValue::kFragDepth);
     CheckIdentifier(d->builtin, "frag_depth");
 }
 
-TEST_F(BuiltinAttributeTest, Assert_Null_Builtin) {
+TEST_F(BuiltinAttributeDeathTest, Assert_Null_Builtin) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -47,7 +48,7 @@ TEST_F(BuiltinAttributeTest, Assert_Null_Builtin) {
         "internal compiler error");
 }
 
-TEST_F(BuiltinAttributeTest, Assert_DifferentGenerationID_Builtin) {
+TEST_F(BuiltinAttributeDeathTest, Assert_DifferentGenerationID_Builtin) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;

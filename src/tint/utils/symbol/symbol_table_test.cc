@@ -33,6 +33,7 @@ namespace tint {
 namespace {
 
 using SymbolTableTest = testing::Test;
+using SymbolTableDeathTest = SymbolTableTest;
 
 TEST_F(SymbolTableTest, GeneratesSymbolForName) {
     auto generation_id = GenerationID::New();
@@ -49,7 +50,7 @@ TEST_F(SymbolTableTest, DeduplicatesNames) {
     EXPECT_EQ(Symbol(1, generation_id, "name"), s.Register("name"));
 }
 
-TEST_F(SymbolTableTest, AssertsForBlankString) {
+TEST_F(SymbolTableDeathTest, AssertsForBlankString) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             auto generation_id = GenerationID::New();

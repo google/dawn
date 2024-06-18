@@ -31,6 +31,7 @@ namespace tint::ast {
 namespace {
 
 using BinaryExpressionTest = TestHelper;
+using BinaryExpressionDeathTest = BinaryExpressionTest;
 
 TEST_F(BinaryExpressionTest, Creation) {
     auto* lhs = Expr("lhs");
@@ -61,7 +62,7 @@ TEST_F(BinaryExpressionTest, IsBinary) {
     EXPECT_TRUE(r->Is<BinaryExpression>());
 }
 
-TEST_F(BinaryExpressionTest, Assert_Null_LHS) {
+TEST_F(BinaryExpressionDeathTest, Assert_Null_LHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -70,7 +71,7 @@ TEST_F(BinaryExpressionTest, Assert_Null_LHS) {
         "internal compiler error");
 }
 
-TEST_F(BinaryExpressionTest, Assert_Null_RHS) {
+TEST_F(BinaryExpressionDeathTest, Assert_Null_RHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
@@ -79,7 +80,7 @@ TEST_F(BinaryExpressionTest, Assert_Null_RHS) {
         "internal compiler error");
 }
 
-TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_LHS) {
+TEST_F(BinaryExpressionDeathTest, Assert_DifferentGenerationID_LHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
@@ -89,7 +90,7 @@ TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_LHS) {
         "internal compiler error");
 }
 
-TEST_F(BinaryExpressionTest, Assert_DifferentGenerationID_RHS) {
+TEST_F(BinaryExpressionDeathTest, Assert_DifferentGenerationID_RHS) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
