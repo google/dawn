@@ -54,6 +54,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -180,6 +181,7 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::Call* i) { EmitCallStmt(i); },          //
                 [&](const core::ir::Let* i) { EmitLet(i); },                //
                 [&](const core::ir::Return* i) { EmitReturn(i); },          //
+                [&](const core::ir::Store* i) { EmitStore(i); },            //
                 [&](const core::ir::Var* v) { EmitVar(v); },                //
                                                                             //
                 [&](const core::ir::NextIteration*) { /* do nothing */ },   //
@@ -274,6 +276,16 @@ class Printer : public tint::TextGenerator {
     /// @param out the output stream to write to
     /// @param load the load
     void EmitLoad(StringStream& out, const core::ir::Load* load) { EmitValue(out, load->From()); }
+
+    /// Emit a store
+    void EmitStore(const core::ir::Store* s) {
+        auto out = Line();
+
+        EmitValue(out, s->To());
+        out << " = ";
+        EmitValue(out, s->From());
+        out << ";";
+    }
 
     /// Emit a binary instruction
     /// @param b the binary instruction
