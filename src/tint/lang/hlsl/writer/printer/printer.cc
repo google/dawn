@@ -282,7 +282,8 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::Constant* c) { EmitConstant(out, c); },  //
             [&](const core::ir::InstructionResult* r) {
                 Switch(
-                    r->Instruction(),
+                    r->Instruction(),                                                          //
+                    [&](const core::ir::Access* a) { EmitAccess(out, a); },                    //
                     [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },                //
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },  //
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },              //
@@ -292,6 +293,32 @@ class Printer : public tint::TextGenerator {
                     TINT_ICE_ON_NO_MATCH);
             },
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Emit an access instruction
+    void EmitAccess(StringStream& out, const core::ir::Access* a) {
+        EmitValue(out, a->Object());
+
+        auto* current_type = a->Object()->Type();
+        for (auto* index : a->Indices()) {
+            TINT_ASSERT(current_type);
+
+            current_type = current_type->UnwrapPtr();
+            Switch(
+                current_type,  //
+                [&](const core::type::Struct* s) {
+                    auto* c = index->As<core::ir::Constant>();
+                    auto* member = s->Members()[c->Value()->ValueAs<uint32_t>()];
+                    out << "." << member->Name().Name();
+                    current_type = member->Type();
+                },
+                [&](Default) {
+                    out << "[";
+                    EmitValue(out, index);
+                    out << "]";
+                    current_type = current_type->Element(0);
+                });
+        }
     }
 
     void EmitCoreBuiltinCall(StringStream& out, const core::ir::CoreBuiltinCall* c) {
