@@ -227,8 +227,6 @@ option(TINT_BUILD_SYNTAX_TREE_WRITER "Build the syntax tree writer" OFF)
 option(TINT_BUILD_IR_BINARY "Build IR binary format support" ON)
 
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
-option(TINT_BUILD_AST_FUZZER "Build AST fuzzer" OFF)
-option(TINT_BUILD_REGEX_FUZZER "Build regex fuzzer" OFF)
 option(TINT_BUILD_IR_FUZZER "Build IR fuzzer" OFF)
 option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
 option(TINT_BUILD_TESTS "Build tests" ON)
@@ -278,42 +276,6 @@ if(DAWN_ENABLE_PIC)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-if (${TINT_BUILD_AST_FUZZER})
-  message(STATUS "TINT_BUILD_AST_FUZZER is ON - setting
-      TINT_BUILD_FUZZERS
-      TINT_BUILD_WGSL_READER
-      TINT_BUILD_WGSL_WRITER
-      TINT_BUILD_SPV_WRITER
-      TINT_BUILD_MSL_WRITER
-      TINT_BUILD_GLSL_WRITER
-      TINT_BUILD_HLSL_WRITER to ON")
-  set(TINT_BUILD_FUZZERS ON CACHE BOOL "Build tint fuzzers" FORCE)
-  set(TINT_BUILD_WGSL_READER ON CACHE BOOL "Build WGSL reader" FORCE)
-  set(TINT_BUILD_WGSL_WRITER ON CACHE BOOL "Build WGSL writer" FORCE)
-  set(TINT_BUILD_SPV_WRITER ON CACHE BOOL "Build SPIR-V writer" FORCE)
-  set(TINT_BUILD_MSL_WRITER ON CACHE BOOL "Build MSL writer" FORCE)
-  set(TINT_BUILD_GLSL_WRITER ON CACHE BOOL "Build GLSL writer" FORCE)
-  set(TINT_BUILD_HLSL_WRITER ON CACHE BOOL "Build HLSL writer" FORCE)
-endif()
-
-if (${TINT_BUILD_REGEX_FUZZER})
-  message(STATUS "TINT_BUILD_REGEX_FUZZER is ON - setting
-      TINT_BUILD_FUZZERS
-      TINT_BUILD_WGSL_READER
-      TINT_BUILD_WGSL_WRITER
-      TINT_BUILD_SPV_WRITER
-      TINT_BUILD_MSL_WRITER
-      TINT_BUILD_GLSL_WRITER
-      TINT_BUILD_HLSL_WRITER to ON")
-      set(TINT_BUILD_FUZZERS ON CACHE BOOL "Build tint fuzzers" FORCE)
-      set(TINT_BUILD_WGSL_READER ON CACHE BOOL "Build WGSL reader" FORCE)
-      set(TINT_BUILD_WGSL_WRITER ON CACHE BOOL "Build WGSL writer" FORCE)
-      set(TINT_BUILD_SPV_WRITER ON CACHE BOOL "Build SPIR-V writer" FORCE)
-      set(TINT_BUILD_MSL_WRITER ON CACHE BOOL "Build MSL writer" FORCE)
-      set(TINT_BUILD_GLSL_WRITER ON CACHE BOOL "Build GLSL writer" FORCE)
-      set(TINT_BUILD_HLSL_WRITER ON CACHE BOOL "Build HLSL writer" FORCE)
-endif()
-
 message(STATUS "Dawn build D3D11 backend: ${DAWN_ENABLE_D3D11}")
 message(STATUS "Dawn build D3D12 backend: ${DAWN_ENABLE_D3D12}")
 message(STATUS "Dawn build Metal backend: ${DAWN_ENABLE_METAL}")
@@ -353,8 +315,7 @@ message(STATUS "Tint build SPIR-V writer: ${TINT_BUILD_SPV_WRITER}")
 message(STATUS "Tint build WGSL writer: ${TINT_BUILD_WGSL_WRITER}")
 message(STATUS "Tint build Syntax Tree writer: ${TINT_BUILD_SYNTAX_TREE_WRITER}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
-message(STATUS "Tint build AST fuzzer: ${TINT_BUILD_AST_FUZZER}")
-message(STATUS "Tint build regex fuzzer: ${TINT_BUILD_REGEX_FUZZER}")
+message(STATUS "Tint build IR fuzzer: ${TINT_BUILD_IR_FUZZER}")
 message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
