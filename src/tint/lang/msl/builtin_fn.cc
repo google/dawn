@@ -90,6 +90,8 @@ const char* str(BuiltinFn i) {
             return "sample_compare";
         case BuiltinFn::kWrite:
             return "write";
+        case BuiltinFn::kLength:
+            return "length";
         case BuiltinFn::kThreadgroupBarrier:
             return "threadgroup_barrier";
     }

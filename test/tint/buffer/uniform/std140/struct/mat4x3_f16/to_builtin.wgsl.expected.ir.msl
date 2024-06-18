@@ -1,40 +1,29 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: S = struct @align(64) {
-  before:i32 @offset(0)
-  m:mat4x3<f16> @offset(8)
-  after:i32 @offset(64)
+struct S {
+  int before;
+  half4x3 m;
+  int after;
+};
+struct tint_module_vars_struct {
+  const constant tint_array<S, 4>* u;
+};
+
+kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
+  half3x4 const t = transpose((*tint_module_vars.u)[2].m);
+  half const l = length((*tint_module_vars.u)[0].m[1].zxy);
+  half const a = abs((*tint_module_vars.u)[0].m[1].zxy[0u]);
 }
-
-$B1: {  # root
-  %u:ptr<uniform, array<S, 4>, read> = var @binding_point(0, 0)
-}
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %3:ptr<uniform, mat4x3<f16>, read> = access %u, 2i, 1u
-    %4:mat4x3<f16> = load %3
-    %5:mat3x4<f16> = transpose %4
-    %t:mat3x4<f16> = let %5
-    %7:ptr<uniform, vec3<f16>, read> = access %u, 0i, 1u, 1i
-    %8:vec3<f16> = load %7
-    %9:vec3<f16> = swizzle %8, zxy
-    %10:f16 = length %9
-    %l:f16 = let %10
-    %12:ptr<uniform, vec3<f16>, read> = access %u, 0i, 1u, 1i
-    %13:vec3<f16> = load %12
-    %14:vec3<f16> = swizzle %13, zxy
-    %15:f16 = access %14, 0u
-    %16:f16 = abs %15
-    %a:f16 = let %16
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

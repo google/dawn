@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/scalar.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -92,6 +93,7 @@ struct State {
                     case core::BuiltinFn::kAtomicStore:
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicXor:
+                    case core::BuiltinFn::kLength:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -154,6 +156,11 @@ struct State {
                     break;
                 case core::BuiltinFn::kAtomicXor:
                     AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchXorExplicit);
+                    break;
+
+                // Geometric builtins.
+                case core::BuiltinFn::kLength:
+                    Length(builtin);
                     break;
 
                 // Texture builtins.
@@ -272,6 +279,22 @@ struct State {
         auto args = Vector<core::ir::Value*, 4>{builtin->Args()};
         auto* call = b.CallWithResult(builtin->DetachResult(), polyfill, std::move(args));
         call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Polyfill a length call if necessary.
+    /// @param builtin the builtin call instruction
+    void Length(core::ir::CoreBuiltinCall* builtin) {
+        auto* arg = builtin->Args()[0];
+        if (arg->Type()->Is<core::type::Scalar>()) {
+            // Calls to `length` with a scalar argument are replaced with `abs`.
+            auto* call = b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kAbs, arg);
+            call->InsertBefore(builtin);
+        } else {
+            auto* call = b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
+                                                                msl::BuiltinFn::kLength, arg);
+            call->InsertBefore(builtin);
+        }
         builtin->Destroy();
     }
 

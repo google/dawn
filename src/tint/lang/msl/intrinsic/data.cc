@@ -131,6 +131,20 @@ constexpr TypeMatcher kF32Matcher {
 };
 
 
+/// TypeMatcher for 'type f16'
+constexpr TypeMatcher kF16Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+    if (!MatchF16(state, ty)) {
+      return nullptr;
+    }
+    return BuildF16(state, ty);
+  },
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type("f16");
+  }
+};
+
+
 /// TypeMatcher for 'type vec2'
 constexpr TypeMatcher kVec2Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
@@ -187,6 +201,32 @@ constexpr TypeMatcher kVec4Matcher {
 /* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
   state->PrintType(T);
     out << style::Type("vec4", "<", T, ">");
+  }
+};
+
+
+/// TypeMatcher for 'type vec'
+constexpr TypeMatcher kVecMatcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  Number N = Number::invalid;
+  const Type* T = nullptr;
+    if (!MatchVec(state, ty, N, T)) {
+      return nullptr;
+    }
+    N = state.Num(N);
+    if (!N.IsValid()) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildVec(state, ty, N, T);
+  },
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText N;
+  state->PrintNum(N);StyledText T;
+  state->PrintType(T);
+    out << style::Type("vec", N, "<", T, ">");
   }
 };
 
@@ -692,6 +732,23 @@ constexpr TypeMatcher kFiu32Matcher {
  kF32Matcher.print(nullptr, out); out << style::Plain(", "); kI32Matcher.print(nullptr, out); out << style::Plain(" or "); kU32Matcher.print(nullptr, out);}
 };
 
+/// TypeMatcher for 'match f32_f16'
+constexpr TypeMatcher kF32F16Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+    if (MatchF32(state, ty)) {
+      return BuildF32(state, ty);
+    }
+    if (MatchF16(state, ty)) {
+      return BuildF16(state, ty);
+    }
+    return nullptr;
+  },
+/* print */ [](MatchState*, StyledText& out) {
+    // Note: We pass nullptr to the Matcher.print() functions, as matchers do not support
+    // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+ kF32Matcher.print(nullptr, out); out << style::Plain(" or "); kF16Matcher.print(nullptr, out);}
+};
+
 /// EnumMatcher for 'match read_write'
 constexpr NumberMatcher kReadWriteMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
@@ -837,36 +894,39 @@ constexpr TypeMatcher kTypeMatchers[] = {
   /* [4] */ kI32Matcher,
   /* [5] */ kU32Matcher,
   /* [6] */ kF32Matcher,
-  /* [7] */ kVec2Matcher,
-  /* [8] */ kVec3Matcher,
-  /* [9] */ kVec4Matcher,
-  /* [10] */ kAtomicMatcher,
-  /* [11] */ kPtrMatcher,
-  /* [12] */ kSamplerMatcher,
-  /* [13] */ kSamplerComparisonMatcher,
-  /* [14] */ kTexture1DMatcher,
-  /* [15] */ kTexture2DMatcher,
-  /* [16] */ kTexture2DArrayMatcher,
-  /* [17] */ kTexture3DMatcher,
-  /* [18] */ kTextureCubeMatcher,
-  /* [19] */ kTextureCubeArrayMatcher,
-  /* [20] */ kTextureDepth2DMatcher,
-  /* [21] */ kTextureDepth2DArrayMatcher,
-  /* [22] */ kTextureDepthCubeMatcher,
-  /* [23] */ kTextureDepthCubeArrayMatcher,
-  /* [24] */ kTextureDepthMultisampled2DMatcher,
-  /* [25] */ kTextureMultisampled2DMatcher,
-  /* [26] */ kTextureStorage1DMatcher,
-  /* [27] */ kTextureStorage2DMatcher,
-  /* [28] */ kTextureStorage2DArrayMatcher,
-  /* [29] */ kTextureStorage3DMatcher,
-  /* [30] */ kBiasMatcher,
-  /* [31] */ kGradient2DMatcher,
-  /* [32] */ kGradient3DMatcher,
-  /* [33] */ kGradientcubeMatcher,
-  /* [34] */ kLevelMatcher,
-  /* [35] */ kIu32Matcher,
-  /* [36] */ kFiu32Matcher,
+  /* [7] */ kF16Matcher,
+  /* [8] */ kVec2Matcher,
+  /* [9] */ kVec3Matcher,
+  /* [10] */ kVec4Matcher,
+  /* [11] */ kVecMatcher,
+  /* [12] */ kAtomicMatcher,
+  /* [13] */ kPtrMatcher,
+  /* [14] */ kSamplerMatcher,
+  /* [15] */ kSamplerComparisonMatcher,
+  /* [16] */ kTexture1DMatcher,
+  /* [17] */ kTexture2DMatcher,
+  /* [18] */ kTexture2DArrayMatcher,
+  /* [19] */ kTexture3DMatcher,
+  /* [20] */ kTextureCubeMatcher,
+  /* [21] */ kTextureCubeArrayMatcher,
+  /* [22] */ kTextureDepth2DMatcher,
+  /* [23] */ kTextureDepth2DArrayMatcher,
+  /* [24] */ kTextureDepthCubeMatcher,
+  /* [25] */ kTextureDepthCubeArrayMatcher,
+  /* [26] */ kTextureDepthMultisampled2DMatcher,
+  /* [27] */ kTextureMultisampled2DMatcher,
+  /* [28] */ kTextureStorage1DMatcher,
+  /* [29] */ kTextureStorage2DMatcher,
+  /* [30] */ kTextureStorage2DArrayMatcher,
+  /* [31] */ kTextureStorage3DMatcher,
+  /* [32] */ kBiasMatcher,
+  /* [33] */ kGradient2DMatcher,
+  /* [34] */ kGradient3DMatcher,
+  /* [35] */ kGradientcubeMatcher,
+  /* [36] */ kLevelMatcher,
+  /* [37] */ kIu32Matcher,
+  /* [38] */ kFiu32Matcher,
+  /* [39] */ kF32F16Matcher,
 };
 
 /// The template numbers, and number matchers
@@ -885,152 +945,153 @@ constexpr NumberMatcher kNumberMatchers[] = {
 };
 
 constexpr MatcherIndex kMatcherIndices[] = {
-  /* [0] */ MatcherIndex(11),
+  /* [0] */ MatcherIndex(13),
   /* [1] */ MatcherIndex(1),
-  /* [2] */ MatcherIndex(10),
+  /* [2] */ MatcherIndex(12),
   /* [3] */ MatcherIndex(0),
   /* [4] */ MatcherIndex(3),
-  /* [5] */ MatcherIndex(11),
+  /* [5] */ MatcherIndex(13),
   /* [6] */ MatcherIndex(6),
   /* [7] */ MatcherIndex(0),
   /* [8] */ MatcherIndex(3),
-  /* [9] */ MatcherIndex(26),
+  /* [9] */ MatcherIndex(28),
   /* [10] */ MatcherIndex(0),
   /* [11] */ MatcherIndex(1),
-  /* [12] */ MatcherIndex(27),
+  /* [12] */ MatcherIndex(29),
   /* [13] */ MatcherIndex(0),
   /* [14] */ MatcherIndex(1),
-  /* [15] */ MatcherIndex(28),
+  /* [15] */ MatcherIndex(30),
   /* [16] */ MatcherIndex(0),
   /* [17] */ MatcherIndex(1),
-  /* [18] */ MatcherIndex(29),
+  /* [18] */ MatcherIndex(31),
   /* [19] */ MatcherIndex(0),
   /* [20] */ MatcherIndex(1),
-  /* [21] */ MatcherIndex(26),
+  /* [21] */ MatcherIndex(28),
   /* [22] */ MatcherIndex(8),
   /* [23] */ MatcherIndex(4),
-  /* [24] */ MatcherIndex(27),
+  /* [24] */ MatcherIndex(29),
   /* [25] */ MatcherIndex(8),
   /* [26] */ MatcherIndex(4),
-  /* [27] */ MatcherIndex(28),
+  /* [27] */ MatcherIndex(30),
   /* [28] */ MatcherIndex(8),
   /* [29] */ MatcherIndex(4),
-  /* [30] */ MatcherIndex(29),
+  /* [30] */ MatcherIndex(31),
   /* [31] */ MatcherIndex(8),
   /* [32] */ MatcherIndex(4),
-  /* [33] */ MatcherIndex(26),
+  /* [33] */ MatcherIndex(28),
   /* [34] */ MatcherIndex(9),
   /* [35] */ MatcherIndex(4),
-  /* [36] */ MatcherIndex(27),
+  /* [36] */ MatcherIndex(29),
   /* [37] */ MatcherIndex(9),
   /* [38] */ MatcherIndex(4),
-  /* [39] */ MatcherIndex(28),
+  /* [39] */ MatcherIndex(30),
   /* [40] */ MatcherIndex(9),
   /* [41] */ MatcherIndex(4),
-  /* [42] */ MatcherIndex(29),
+  /* [42] */ MatcherIndex(31),
   /* [43] */ MatcherIndex(9),
   /* [44] */ MatcherIndex(4),
-  /* [45] */ MatcherIndex(26),
+  /* [45] */ MatcherIndex(28),
   /* [46] */ MatcherIndex(10),
   /* [47] */ MatcherIndex(4),
-  /* [48] */ MatcherIndex(27),
+  /* [48] */ MatcherIndex(29),
   /* [49] */ MatcherIndex(10),
   /* [50] */ MatcherIndex(4),
-  /* [51] */ MatcherIndex(28),
+  /* [51] */ MatcherIndex(30),
   /* [52] */ MatcherIndex(10),
   /* [53] */ MatcherIndex(4),
-  /* [54] */ MatcherIndex(29),
+  /* [54] */ MatcherIndex(31),
   /* [55] */ MatcherIndex(10),
   /* [56] */ MatcherIndex(4),
-  /* [57] */ MatcherIndex(26),
+  /* [57] */ MatcherIndex(28),
   /* [58] */ MatcherIndex(8),
   /* [59] */ MatcherIndex(5),
-  /* [60] */ MatcherIndex(27),
+  /* [60] */ MatcherIndex(29),
   /* [61] */ MatcherIndex(8),
   /* [62] */ MatcherIndex(5),
-  /* [63] */ MatcherIndex(28),
+  /* [63] */ MatcherIndex(30),
   /* [64] */ MatcherIndex(8),
   /* [65] */ MatcherIndex(5),
-  /* [66] */ MatcherIndex(29),
+  /* [66] */ MatcherIndex(31),
   /* [67] */ MatcherIndex(8),
   /* [68] */ MatcherIndex(5),
-  /* [69] */ MatcherIndex(26),
+  /* [69] */ MatcherIndex(28),
   /* [70] */ MatcherIndex(9),
   /* [71] */ MatcherIndex(5),
-  /* [72] */ MatcherIndex(27),
+  /* [72] */ MatcherIndex(29),
   /* [73] */ MatcherIndex(9),
   /* [74] */ MatcherIndex(5),
-  /* [75] */ MatcherIndex(28),
+  /* [75] */ MatcherIndex(30),
   /* [76] */ MatcherIndex(9),
   /* [77] */ MatcherIndex(5),
-  /* [78] */ MatcherIndex(29),
+  /* [78] */ MatcherIndex(31),
   /* [79] */ MatcherIndex(9),
   /* [80] */ MatcherIndex(5),
-  /* [81] */ MatcherIndex(26),
+  /* [81] */ MatcherIndex(28),
   /* [82] */ MatcherIndex(10),
   /* [83] */ MatcherIndex(5),
-  /* [84] */ MatcherIndex(27),
+  /* [84] */ MatcherIndex(29),
   /* [85] */ MatcherIndex(10),
   /* [86] */ MatcherIndex(5),
-  /* [87] */ MatcherIndex(28),
+  /* [87] */ MatcherIndex(30),
   /* [88] */ MatcherIndex(10),
   /* [89] */ MatcherIndex(5),
-  /* [90] */ MatcherIndex(29),
+  /* [90] */ MatcherIndex(31),
   /* [91] */ MatcherIndex(10),
   /* [92] */ MatcherIndex(5),
-  /* [93] */ MatcherIndex(9),
+  /* [93] */ MatcherIndex(11),
   /* [94] */ MatcherIndex(0),
-  /* [95] */ MatcherIndex(15),
-  /* [96] */ MatcherIndex(0),
-  /* [97] */ MatcherIndex(7),
-  /* [98] */ MatcherIndex(6),
-  /* [99] */ MatcherIndex(7),
-  /* [100] */ MatcherIndex(4),
-  /* [101] */ MatcherIndex(16),
-  /* [102] */ MatcherIndex(0),
-  /* [103] */ MatcherIndex(18),
-  /* [104] */ MatcherIndex(0),
-  /* [105] */ MatcherIndex(8),
-  /* [106] */ MatcherIndex(6),
-  /* [107] */ MatcherIndex(19),
-  /* [108] */ MatcherIndex(0),
-  /* [109] */ MatcherIndex(9),
-  /* [110] */ MatcherIndex(6),
-  /* [111] */ MatcherIndex(14),
-  /* [112] */ MatcherIndex(0),
-  /* [113] */ MatcherIndex(17),
-  /* [114] */ MatcherIndex(0),
-  /* [115] */ MatcherIndex(25),
-  /* [116] */ MatcherIndex(0),
-  /* [117] */ MatcherIndex(7),
-  /* [118] */ MatcherIndex(5),
-  /* [119] */ MatcherIndex(14),
-  /* [120] */ MatcherIndex(6),
-  /* [121] */ MatcherIndex(15),
-  /* [122] */ MatcherIndex(6),
-  /* [123] */ MatcherIndex(16),
-  /* [124] */ MatcherIndex(6),
-  /* [125] */ MatcherIndex(17),
-  /* [126] */ MatcherIndex(6),
-  /* [127] */ MatcherIndex(18),
-  /* [128] */ MatcherIndex(6),
-  /* [129] */ MatcherIndex(19),
-  /* [130] */ MatcherIndex(6),
-  /* [131] */ MatcherIndex(35),
-  /* [132] */ MatcherIndex(36),
-  /* [133] */ MatcherIndex(12),
-  /* [134] */ MatcherIndex(20),
-  /* [135] */ MatcherIndex(21),
-  /* [136] */ MatcherIndex(22),
-  /* [137] */ MatcherIndex(23),
-  /* [138] */ MatcherIndex(13),
-  /* [139] */ MatcherIndex(24),
+  /* [95] */ MatcherIndex(1),
+  /* [96] */ MatcherIndex(10),
+  /* [97] */ MatcherIndex(0),
+  /* [98] */ MatcherIndex(17),
+  /* [99] */ MatcherIndex(0),
+  /* [100] */ MatcherIndex(8),
+  /* [101] */ MatcherIndex(6),
+  /* [102] */ MatcherIndex(18),
+  /* [103] */ MatcherIndex(0),
+  /* [104] */ MatcherIndex(20),
+  /* [105] */ MatcherIndex(0),
+  /* [106] */ MatcherIndex(9),
+  /* [107] */ MatcherIndex(6),
+  /* [108] */ MatcherIndex(21),
+  /* [109] */ MatcherIndex(0),
+  /* [110] */ MatcherIndex(10),
+  /* [111] */ MatcherIndex(6),
+  /* [112] */ MatcherIndex(16),
+  /* [113] */ MatcherIndex(0),
+  /* [114] */ MatcherIndex(19),
+  /* [115] */ MatcherIndex(0),
+  /* [116] */ MatcherIndex(27),
+  /* [117] */ MatcherIndex(0),
+  /* [118] */ MatcherIndex(16),
+  /* [119] */ MatcherIndex(6),
+  /* [120] */ MatcherIndex(17),
+  /* [121] */ MatcherIndex(6),
+  /* [122] */ MatcherIndex(18),
+  /* [123] */ MatcherIndex(6),
+  /* [124] */ MatcherIndex(19),
+  /* [125] */ MatcherIndex(6),
+  /* [126] */ MatcherIndex(20),
+  /* [127] */ MatcherIndex(6),
+  /* [128] */ MatcherIndex(21),
+  /* [129] */ MatcherIndex(6),
+  /* [130] */ MatcherIndex(37),
+  /* [131] */ MatcherIndex(7),
+  /* [132] */ MatcherIndex(38),
+  /* [133] */ MatcherIndex(14),
+  /* [134] */ MatcherIndex(22),
+  /* [135] */ MatcherIndex(23),
+  /* [136] */ MatcherIndex(24),
+  /* [137] */ MatcherIndex(25),
+  /* [138] */ MatcherIndex(15),
+  /* [139] */ MatcherIndex(26),
   /* [140] */ MatcherIndex(2),
-  /* [141] */ MatcherIndex(34),
-  /* [142] */ MatcherIndex(30),
-  /* [143] */ MatcherIndex(31),
-  /* [144] */ MatcherIndex(32),
-  /* [145] */ MatcherIndex(33),
+  /* [141] */ MatcherIndex(36),
+  /* [142] */ MatcherIndex(32),
+  /* [143] */ MatcherIndex(33),
+  /* [144] */ MatcherIndex(34),
+  /* [145] */ MatcherIndex(35),
+  /* [146] */ MatcherIndex(39),
 };
 
 static_assert(MatcherIndicesIndex::CanIndex(kMatcherIndices),
@@ -1050,7 +1111,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [2] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [3] */
@@ -1070,12 +1131,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [6] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [7] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(101),
+    /* matcher_indices */ MatcherIndicesIndex(102),
   },
   {
     /* [8] */
@@ -1085,7 +1146,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [9] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [10] */
@@ -1095,7 +1156,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [11] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [12] */
@@ -1115,7 +1176,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [15] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [16] */
@@ -1130,12 +1191,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [18] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [19] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(123),
+    /* matcher_indices */ MatcherIndicesIndex(122),
   },
   {
     /* [20] */
@@ -1145,7 +1206,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [21] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [22] */
@@ -1160,7 +1221,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [24] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [25] */
@@ -1175,7 +1236,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [27] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [28] */
@@ -1190,12 +1251,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [30] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [31] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(123),
+    /* matcher_indices */ MatcherIndicesIndex(122),
   },
   {
     /* [32] */
@@ -1205,7 +1266,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [33] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [34] */
@@ -1220,12 +1281,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [36] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [37] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(123),
+    /* matcher_indices */ MatcherIndicesIndex(122),
   },
   {
     /* [38] */
@@ -1235,7 +1296,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [39] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [40] */
@@ -1250,7 +1311,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [42] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [43] */
@@ -1265,7 +1326,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [45] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [46] */
@@ -1280,7 +1341,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [48] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [49] */
@@ -1295,7 +1356,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [51] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [52] */
@@ -1340,7 +1401,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [60] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(95),
+    /* matcher_indices */ MatcherIndicesIndex(98),
   },
   {
     /* [61] */
@@ -1350,12 +1411,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [62] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [63] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [64] */
@@ -1365,7 +1426,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [65] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(107),
+    /* matcher_indices */ MatcherIndicesIndex(108),
   },
   {
     /* [66] */
@@ -1375,7 +1436,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [67] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [68] */
@@ -1400,7 +1461,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [72] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [73] */
@@ -1410,7 +1471,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [74] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [75] */
@@ -1425,7 +1486,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [77] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [78] */
@@ -1435,12 +1496,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [79] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [80] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(123),
+    /* matcher_indices */ MatcherIndicesIndex(122),
   },
   {
     /* [81] */
@@ -1450,7 +1511,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [82] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [83] */
@@ -1460,12 +1521,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [84] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [85] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(121),
+    /* matcher_indices */ MatcherIndicesIndex(120),
   },
   {
     /* [86] */
@@ -1475,7 +1536,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [87] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [88] */
@@ -1485,12 +1546,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [89] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [90] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(125),
+    /* matcher_indices */ MatcherIndicesIndex(124),
   },
   {
     /* [91] */
@@ -1500,7 +1561,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [92] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [93] */
@@ -1510,12 +1571,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [94] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(22),
+    /* matcher_indices */ MatcherIndicesIndex(34),
   },
   {
     /* [95] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(129),
+    /* matcher_indices */ MatcherIndicesIndex(128),
   },
   {
     /* [96] */
@@ -1525,7 +1586,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [97] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [98] */
@@ -1550,7 +1611,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [102] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [103] */
@@ -1560,7 +1621,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [104] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [105] */
@@ -1575,7 +1636,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [107] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [108] */
@@ -1590,7 +1651,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [110] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(121),
+    /* matcher_indices */ MatcherIndicesIndex(120),
   },
   {
     /* [111] */
@@ -1600,7 +1661,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [112] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [113] */
@@ -1610,12 +1671,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [114] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [115] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(125),
+    /* matcher_indices */ MatcherIndicesIndex(124),
   },
   {
     /* [116] */
@@ -1625,7 +1686,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [117] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [118] */
@@ -1635,12 +1696,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [119] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(22),
+    /* matcher_indices */ MatcherIndicesIndex(34),
   },
   {
     /* [120] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(129),
+    /* matcher_indices */ MatcherIndicesIndex(128),
   },
   {
     /* [121] */
@@ -1650,7 +1711,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [122] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [123] */
@@ -1665,7 +1726,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [125] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(121),
+    /* matcher_indices */ MatcherIndicesIndex(120),
   },
   {
     /* [126] */
@@ -1675,7 +1736,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [127] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [128] */
@@ -1685,12 +1746,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [129] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [130] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(125),
+    /* matcher_indices */ MatcherIndicesIndex(124),
   },
   {
     /* [131] */
@@ -1700,7 +1761,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [132] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [133] */
@@ -1710,12 +1771,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [134] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(22),
+    /* matcher_indices */ MatcherIndicesIndex(34),
   },
   {
     /* [135] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(129),
+    /* matcher_indices */ MatcherIndicesIndex(128),
   },
   {
     /* [136] */
@@ -1725,7 +1786,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [137] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [138] */
@@ -1750,7 +1811,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [142] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [143] */
@@ -1765,7 +1826,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [145] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(103),
+    /* matcher_indices */ MatcherIndicesIndex(104),
   },
   {
     /* [146] */
@@ -1775,7 +1836,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [147] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [148] */
@@ -1795,22 +1856,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [151] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [152] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [153] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(101),
+    /* matcher_indices */ MatcherIndicesIndex(102),
   },
   {
     /* [154] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [155] */
@@ -1830,7 +1891,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [158] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [159] */
@@ -1845,7 +1906,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [161] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(121),
+    /* matcher_indices */ MatcherIndicesIndex(120),
   },
   {
     /* [162] */
@@ -1855,17 +1916,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [163] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(100),
   },
   {
     /* [164] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(99),
+    /* matcher_indices */ MatcherIndicesIndex(22),
   },
   {
     /* [165] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(125),
+    /* matcher_indices */ MatcherIndicesIndex(124),
   },
   {
     /* [166] */
@@ -1875,17 +1936,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [167] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [168] */
     /* usage */ core::ParameterUsage::kOffset,
-    /* matcher_indices */ MatcherIndicesIndex(22),
+    /* matcher_indices */ MatcherIndicesIndex(34),
   },
   {
     /* [169] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(127),
+    /* matcher_indices */ MatcherIndicesIndex(126),
   },
   {
     /* [170] */
@@ -1895,7 +1956,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [171] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [172] */
@@ -1915,7 +1976,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [175] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [176] */
@@ -1925,7 +1986,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [177] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(127),
+    /* matcher_indices */ MatcherIndicesIndex(126),
   },
   {
     /* [178] */
@@ -1935,7 +1996,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [179] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [180] */
@@ -1945,7 +2006,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [181] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(127),
+    /* matcher_indices */ MatcherIndicesIndex(126),
   },
   {
     /* [182] */
@@ -1955,7 +2016,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [183] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(105),
+    /* matcher_indices */ MatcherIndicesIndex(106),
   },
   {
     /* [184] */
@@ -1970,12 +2031,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [186] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(109),
+    /* matcher_indices */ MatcherIndicesIndex(110),
   },
   {
     /* [187] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [188] */
@@ -1990,12 +2051,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [190] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(34),
+    /* matcher_indices */ MatcherIndicesIndex(46),
   },
   {
     /* [191] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [192] */
@@ -2010,12 +2071,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [194] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(70),
+    /* matcher_indices */ MatcherIndicesIndex(82),
   },
   {
     /* [195] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [196] */
@@ -2040,12 +2101,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [200] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(95),
+    /* matcher_indices */ MatcherIndicesIndex(98),
   },
   {
     /* [201] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [202] */
@@ -2055,12 +2116,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [203] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(113),
+    /* matcher_indices */ MatcherIndicesIndex(114),
   },
   {
     /* [204] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(58),
+    /* matcher_indices */ MatcherIndicesIndex(70),
   },
   {
     /* [205] */
@@ -2070,12 +2131,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [206] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(115),
+    /* matcher_indices */ MatcherIndicesIndex(116),
   },
   {
     /* [207] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [208] */
@@ -2090,7 +2151,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [210] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [211] */
@@ -2105,7 +2166,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [213] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [214] */
@@ -2120,7 +2181,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [216] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [217] */
@@ -2135,7 +2196,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [219] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [220] */
@@ -2150,7 +2211,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [222] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [223] */
@@ -2160,7 +2221,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [224] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(119),
+    /* matcher_indices */ MatcherIndicesIndex(118),
   },
   {
     /* [225] */
@@ -2180,7 +2241,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [228] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(109),
+    /* matcher_indices */ MatcherIndicesIndex(110),
   },
   {
     /* [229] */
@@ -2195,12 +2256,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [231] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(109),
+    /* matcher_indices */ MatcherIndicesIndex(110),
   },
   {
     /* [232] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [233] */
@@ -2210,12 +2271,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [234] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(109),
+    /* matcher_indices */ MatcherIndicesIndex(110),
   },
   {
     /* [235] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(58),
+    /* matcher_indices */ MatcherIndicesIndex(70),
   },
   {
     /* [236] */
@@ -2225,7 +2286,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [237] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(34),
+    /* matcher_indices */ MatcherIndicesIndex(46),
   },
   {
     /* [238] */
@@ -2240,12 +2301,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [240] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(34),
+    /* matcher_indices */ MatcherIndicesIndex(46),
   },
   {
     /* [241] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [242] */
@@ -2255,12 +2316,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [243] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(34),
+    /* matcher_indices */ MatcherIndicesIndex(46),
   },
   {
     /* [244] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(58),
+    /* matcher_indices */ MatcherIndicesIndex(70),
   },
   {
     /* [245] */
@@ -2270,7 +2331,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [246] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(70),
+    /* matcher_indices */ MatcherIndicesIndex(82),
   },
   {
     /* [247] */
@@ -2285,12 +2346,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [249] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(70),
+    /* matcher_indices */ MatcherIndicesIndex(82),
   },
   {
     /* [250] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [251] */
@@ -2300,12 +2361,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [252] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(70),
+    /* matcher_indices */ MatcherIndicesIndex(82),
   },
   {
     /* [253] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(58),
+    /* matcher_indices */ MatcherIndicesIndex(70),
   },
   {
     /* [254] */
@@ -2320,7 +2381,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [256] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(95),
+    /* matcher_indices */ MatcherIndicesIndex(98),
   },
   {
     /* [257] */
@@ -2330,7 +2391,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [258] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(101),
+    /* matcher_indices */ MatcherIndicesIndex(102),
   },
   {
     /* [259] */
@@ -2340,7 +2401,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [260] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(113),
+    /* matcher_indices */ MatcherIndicesIndex(114),
   },
   {
     /* [261] */
@@ -2350,7 +2411,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [262] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(103),
+    /* matcher_indices */ MatcherIndicesIndex(104),
   },
   {
     /* [263] */
@@ -2360,7 +2421,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [264] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(107),
+    /* matcher_indices */ MatcherIndicesIndex(108),
   },
   {
     /* [265] */
@@ -2440,7 +2501,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [280] */
     /* usage */ core::ParameterUsage::kTexture,
-    /* matcher_indices */ MatcherIndicesIndex(111),
+    /* matcher_indices */ MatcherIndicesIndex(112),
   },
   {
     /* [281] */
@@ -2465,7 +2526,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [285] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [286] */
@@ -2475,7 +2536,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [287] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(58),
+    /* matcher_indices */ MatcherIndicesIndex(70),
   },
   {
     /* [288] */
@@ -2495,7 +2556,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [291] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [292] */
@@ -2505,7 +2566,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [293] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(58),
+    /* matcher_indices */ MatcherIndicesIndex(70),
   },
   {
     /* [294] */
@@ -2525,7 +2586,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [297] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(117),
+    /* matcher_indices */ MatcherIndicesIndex(58),
   },
   {
     /* [298] */
@@ -2535,12 +2596,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [299] */
     /* usage */ core::ParameterUsage::kCoords,
-    /* matcher_indices */ MatcherIndicesIndex(58),
+    /* matcher_indices */ MatcherIndicesIndex(70),
   },
   {
     /* [300] */
     /* usage */ core::ParameterUsage::kTexture,
     /* matcher_indices */ MatcherIndicesIndex(9),
+  },
+  {
+    /* [301] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* matcher_indices */ MatcherIndicesIndex(93),
   },
 };
 
@@ -2557,25 +2623,25 @@ constexpr TemplateInfo kTemplates[] = {
   {
     /* [1] */
     /* name */ "A",
-    /* matcher_indices */ MatcherIndicesIndex(131),
+    /* matcher_indices */ MatcherIndicesIndex(130),
     /* kind */ TemplateInfo::Kind::kType,
   },
   {
     /* [2] */
     /* name */ "L",
-    /* matcher_indices */ MatcherIndicesIndex(131),
+    /* matcher_indices */ MatcherIndicesIndex(130),
     /* kind */ TemplateInfo::Kind::kType,
   },
   {
     /* [3] */
     /* name */ "T",
-    /* matcher_indices */ MatcherIndicesIndex(131),
+    /* matcher_indices */ MatcherIndicesIndex(130),
     /* kind */ TemplateInfo::Kind::kType,
   },
   {
     /* [4] */
     /* name */ "S",
-    /* matcher_indices */ MatcherIndicesIndex(97),
+    /* matcher_indices */ MatcherIndicesIndex(131),
     /* kind */ TemplateInfo::Kind::kNumber,
   },
   {
@@ -2599,7 +2665,7 @@ constexpr TemplateInfo kTemplates[] = {
   {
     /* [8] */
     /* name */ "L",
-    /* matcher_indices */ MatcherIndicesIndex(131),
+    /* matcher_indices */ MatcherIndicesIndex(130),
     /* kind */ TemplateInfo::Kind::kType,
   },
   {
@@ -2611,7 +2677,19 @@ constexpr TemplateInfo kTemplates[] = {
   {
     /* [10] */
     /* name */ "S",
-    /* matcher_indices */ MatcherIndicesIndex(131),
+    /* matcher_indices */ MatcherIndicesIndex(130),
+    /* kind */ TemplateInfo::Kind::kType,
+  },
+  {
+    /* [11] */
+    /* name */ "N",
+    /* matcher_indices */ MatcherIndicesIndex(/* invalid */),
+    /* kind */ TemplateInfo::Kind::kNumber,
+  },
+  {
+    /* [12] */
+    /* name */ "T",
+    /* matcher_indices */ MatcherIndicesIndex(146),
     /* kind */ TemplateInfo::Kind::kType,
   },
 };
@@ -2628,7 +2706,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(224),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2639,7 +2717,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(85),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2650,7 +2728,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(161),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2661,7 +2739,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(19),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2672,7 +2750,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(80),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2683,7 +2761,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(90),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2694,7 +2772,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(165),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2705,7 +2783,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(169),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2716,7 +2794,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(95),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2793,7 +2871,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(85),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2804,7 +2882,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(85),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2815,7 +2893,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(19),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2826,7 +2904,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(19),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2837,7 +2915,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(90),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2848,7 +2926,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(90),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2859,7 +2937,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(169),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2870,7 +2948,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(95),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2947,7 +3025,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(110),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2958,7 +3036,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(110),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2969,7 +3047,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(31),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2980,7 +3058,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(31),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -2991,7 +3069,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(115),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3002,7 +3080,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(115),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3013,7 +3091,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(177),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3024,7 +3102,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(120),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3035,7 +3113,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(125),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3046,7 +3124,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(125),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3057,7 +3135,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(37),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3068,7 +3146,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(37),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3079,7 +3157,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(130),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3090,7 +3168,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(130),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3101,7 +3179,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(181),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3112,7 +3190,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(135),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3123,7 +3201,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(0),
     /* parameters */ ParameterIndex(280),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3134,7 +3212,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 2,
     /* templates */ TemplateIndex(7),
     /* parameters */ ParameterIndex(200),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3145,7 +3223,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 3,
     /* templates */ TemplateIndex(0),
     /* parameters */ ParameterIndex(153),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3156,7 +3234,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 2,
     /* templates */ TemplateIndex(7),
     /* parameters */ ParameterIndex(203),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3167,7 +3245,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 2,
     /* templates */ TemplateIndex(9),
     /* parameters */ ParameterIndex(206),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3211,7 +3289,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(282),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3222,7 +3300,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(284),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3233,7 +3311,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(215),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3244,7 +3322,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(286),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3255,7 +3333,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(288),
-    /* return_matcher_indices */ MatcherIndicesIndex(34),
+    /* return_matcher_indices */ MatcherIndicesIndex(46),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3266,7 +3344,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(290),
-    /* return_matcher_indices */ MatcherIndicesIndex(34),
+    /* return_matcher_indices */ MatcherIndicesIndex(46),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3277,7 +3355,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(218),
-    /* return_matcher_indices */ MatcherIndicesIndex(34),
+    /* return_matcher_indices */ MatcherIndicesIndex(46),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3288,7 +3366,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(292),
-    /* return_matcher_indices */ MatcherIndicesIndex(34),
+    /* return_matcher_indices */ MatcherIndicesIndex(46),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3299,7 +3377,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(294),
-    /* return_matcher_indices */ MatcherIndicesIndex(70),
+    /* return_matcher_indices */ MatcherIndicesIndex(82),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3310,7 +3388,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(296),
-    /* return_matcher_indices */ MatcherIndicesIndex(70),
+    /* return_matcher_indices */ MatcherIndicesIndex(82),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3321,7 +3399,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(221),
-    /* return_matcher_indices */ MatcherIndicesIndex(70),
+    /* return_matcher_indices */ MatcherIndicesIndex(82),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -3332,7 +3410,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(298),
-    /* return_matcher_indices */ MatcherIndicesIndex(70),
+    /* return_matcher_indices */ MatcherIndicesIndex(82),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4047,7 +4125,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(0),
     /* parameters */ ParameterIndex(60),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4058,7 +4136,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 2,
     /* templates */ TemplateIndex(0),
     /* parameters */ ParameterIndex(7),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4069,7 +4147,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(0),
     /* parameters */ ParameterIndex(145),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4080,7 +4158,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 2,
     /* templates */ TemplateIndex(0),
     /* parameters */ ParameterIndex(65),
-    /* return_matcher_indices */ MatcherIndicesIndex(93),
+    /* return_matcher_indices */ MatcherIndicesIndex(96),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4091,7 +4169,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(149),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4102,7 +4180,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(70),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4113,7 +4191,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(173),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4124,7 +4202,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(105),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4135,7 +4213,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(43),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4146,7 +4224,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(75),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4157,7 +4235,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(0),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4168,7 +4246,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(13),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4179,7 +4257,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(140),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4190,7 +4268,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 1,
     /* templates */ TemplateIndex(1),
     /* parameters */ ParameterIndex(49),
-    /* return_matcher_indices */ MatcherIndicesIndex(109),
+    /* return_matcher_indices */ MatcherIndicesIndex(110),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -4382,6 +4460,17 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [160] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 1,
+    /* num_explicit_templates */ 0,
+    /* num_templates   */ 2,
+    /* templates */ TemplateIndex(11),
+    /* parameters */ ParameterIndex(301),
+    /* return_matcher_indices */ MatcherIndicesIndex(1),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [161] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
     /* num_parameters */ 1,
     /* num_explicit_templates */ 0,
@@ -4686,9 +4775,15 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [24] */
-    /* fn threadgroup_barrier(u32) */
+    /* fn length[N : num, T : f32_f16](vec<N, T>) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(160),
+  },
+  {
+    /* [25] */
+    /* fn threadgroup_barrier(u32) */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(161),
   },
 };
 

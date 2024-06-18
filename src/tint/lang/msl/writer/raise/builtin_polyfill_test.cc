@@ -758,6 +758,72 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, Length_Scalar) {
+    auto* value = b.FunctionParam<f32>("value");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<f32>(core::BuiltinFn::kLength, value);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:f32 = length %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:f32 = abs %value
+    ret %3
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Length_Vector) {
+    auto* value = b.FunctionParam<vec4<f32>>("value");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<f32>(core::BuiltinFn::kLength, value);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value:vec4<f32>):f32 {
+  $B1: {
+    %3:f32 = length %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value:vec4<f32>):f32 {
+  $B1: {
+    %3:f32 = msl.length %value
+    ret %3
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_1d) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));

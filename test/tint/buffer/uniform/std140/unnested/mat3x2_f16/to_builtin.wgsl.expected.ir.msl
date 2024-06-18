@@ -1,32 +1,12 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  const constant half3x2* u;
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %u:ptr<uniform, mat3x2<f16>, read> = var @binding_point(0, 0)
+kernel void f(const constant half3x2* u [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
+  half2x3 const t = transpose((*tint_module_vars.u));
+  half const l = length((*tint_module_vars.u)[1]);
+  half const a = abs((*tint_module_vars.u)[0].yx[0u]);
 }
-
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %3:mat3x2<f16> = load %u
-    %4:mat2x3<f16> = transpose %3
-    %t:mat2x3<f16> = let %4
-    %6:ptr<uniform, vec2<f16>, read> = access %u, 1i
-    %7:vec2<f16> = load %6
-    %8:f16 = length %7
-    %l:f16 = let %8
-    %10:ptr<uniform, vec2<f16>, read> = access %u, 0i
-    %11:vec2<f16> = load %10
-    %12:vec2<f16> = swizzle %11, yx
-    %13:f16 = access %12, 0u
-    %14:f16 = abs %13
-    %a:f16 = let %14
-    ret
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

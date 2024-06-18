@@ -86,9 +86,11 @@ type bool
 type i32
 type u32
 type f32
+type f16
 type vec2<T>
 type vec3<T>
 type vec4<T>
+@display("vec{N}<{T}>")     type vec<N: num, T>
 type atomic<T>
 type ptr<S: address_space, T, A: access>
 type sampler
@@ -123,6 +125,7 @@ type level
 
 match iu32: i32 | u32
 match fiu32: f32 | i32 | u32
+match f32_f16: f32 | f16
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
@@ -318,5 +321,6 @@ match fiu32: f32 | i32 | u32
 @member_function fn write[A: iu32](texture: texture_storage_2d_array<u32_texel_format, writable>, value: vec4<u32>, coords: vec2<u32>, array_index: A)
 @member_function fn write(texture: texture_storage_3d<u32_texel_format, writable>, value: vec4<u32>, coords: vec3<u32>)
 
+fn length[N: num, T: f32_f16](vec<N, T>) -> T
 @stage("compute") fn threadgroup_barrier(u32)
 

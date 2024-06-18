@@ -71,6 +71,7 @@ enum class BuiltinFn : uint8_t {
     kSample,
     kSampleCompare,
     kWrite,
+    kLength,
     kThreadgroupBarrier,
     kNone,
 };
