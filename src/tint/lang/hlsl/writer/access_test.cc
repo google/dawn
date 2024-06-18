@@ -183,5 +183,47 @@ void a() {
 )");
 }
 
+TEST_F(HlslWriterTest, AccessSwizzle) {
+    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var("v", b.Zero<vec3<f32>>());
+        b.Let("b", b.Swizzle(ty.f32(), v, {1u}));
+        b.Return(f);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void a() {
+  float3 v = (0.0f).xxx;
+  float b = v.y;
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessSwizzleMulti) {
+    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var("v", b.Zero<vec4<f32>>());
+        b.Let("b", b.Swizzle(ty.vec4<f32>(), v, {3u, 2u, 1u, 0u}));
+        b.Return(f);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void a() {
+  float4 v = (0.0f).xxxx;
+  float4 b = v.wzyx;
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

@@ -387,10 +387,34 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },              //
                     [&](const core::ir::Load* l) { EmitLoad(out, l); },                        //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },                //
+                    [&](const core::ir::Swizzle* s) { EmitSwizzle(out, s); },                  //
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },          //
                     TINT_ICE_ON_NO_MATCH);
             },
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitSwizzle(StringStream& out, const core::ir::Swizzle* swizzle) {
+        EmitValue(out, swizzle->Object());
+        out << ".";
+        for (const auto i : swizzle->Indices()) {
+            switch (i) {
+                case 0:
+                    out << "x";
+                    break;
+                case 1:
+                    out << "y";
+                    break;
+                case 2:
+                    out << "z";
+                    break;
+                case 3:
+                    out << "w";
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+        }
     }
 
     /// Emit an access instruction
