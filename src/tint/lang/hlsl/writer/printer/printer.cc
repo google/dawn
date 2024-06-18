@@ -47,21 +47,27 @@
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/construct.h"
+#include "src/tint/lang/core/ir/continue.h"
 #include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
+#include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
+#include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/swizzle.h"
+#include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/value.h"
@@ -154,6 +160,9 @@ class Printer : public tint::TextGenerator {
     /// The current block being emitted
     const core::ir::Block* current_block_ = nullptr;
 
+    /// Block to emit for a continuing
+    std::function<void()> emit_continuing_;
+
     void EmitFunction(const core::ir::Function* func) {
         TINT_SCOPED_ASSIGNMENT(current_function_, func);
 
@@ -193,10 +202,15 @@ class Printer : public tint::TextGenerator {
         for (auto* inst : *block) {
             Switch(
                 inst,                                                       //
+                [&](const core::ir::BreakIf* i) { EmitBreakIf(i); },        //
                 [&](const core::ir::Call* i) { EmitCallStmt(i); },          //
+                [&](const core::ir::Continue*) { EmitContinue(); },         //
+                [&](const core::ir::ExitLoop*) { EmitExitLoop(); },         //
                 [&](const core::ir::Let* i) { EmitLet(i); },                //
+                [&](const core::ir::Loop* l) { EmitLoop(l); },              //
                 [&](const core::ir::Return* i) { EmitReturn(i); },          //
                 [&](const core::ir::Store* i) { EmitStore(i); },            //
+                [&](const core::ir::Unreachable*) { EmitUnreachable(); },   //
                 [&](const core::ir::Var* v) { EmitVar(v); },                //
                                                                             //
                 [&](const core::ir::NextIteration*) { /* do nothing */ },   //
@@ -211,6 +225,61 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::Swizzle*) { /* inlined */ },            //
                 TINT_ICE_ON_NO_MATCH);
         }
+    }
+
+    /// Emit an unreachable instruction
+    void EmitUnreachable() { Line() << "/* unreachable */"; }
+
+    void EmitContinue() {
+        if (emit_continuing_) {
+            emit_continuing_();
+        }
+        Line() << "continue;";
+    }
+
+    void EmitExitLoop() { Line() << "break;"; }
+
+    void EmitBreakIf(const core::ir::BreakIf* b) {
+        auto out = Line();
+        out << "if (";
+        EmitValue(out, b->Condition());
+        out << ") { break; }";
+    }
+
+    void EmitLoop(const core::ir::Loop* l) {
+        // Note, we can't just emit the continuing inside a conditional at the top of the loop
+        // because any variable declared in the block must be visible to the continuing.
+        //
+        // loop {
+        //   var a = 3;
+        //   continue {
+        //     let y = a;
+        //   }
+        // }
+
+        auto emit_continuing = [&] {
+            Line() << "{";
+            {
+                const ScopedIndent si(current_buffer_);
+                EmitBlock(l->Continuing());
+            }
+            Line() << "}";
+        };
+        TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
+
+        Line() << "{";
+        {
+            const ScopedIndent init(current_buffer_);
+            EmitBlock(l->Initializer());
+
+            Line() << "while(true) {";
+            {
+                const ScopedIndent si(current_buffer_);
+                EmitBlock(l->Body());
+            }
+            Line() << "}";
+        }
+        Line() << "}";
     }
 
     void EmitCallStmt(const core::ir::Call* c) {

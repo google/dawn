@@ -93,6 +93,7 @@ cc_library(
     "constant_test.cc",
     "function_test.cc",
     "helper_test.h",
+    "loop_test.cc",
     "var_let_test.cc",
   ],
   deps = [
