@@ -139,7 +139,7 @@ $B1: {  # root
       }
     }
     %6:bool = load %continue_execution
-    %7:bool = eq %6, false
+    %7:bool = not %6
     if %7 [t: $B5] {  # if_3
       $B5: {  # true
         terminate_invocation
@@ -236,7 +236,7 @@ $B1: {  # root
     }
     %7:void = call %foo
     %8:bool = load %continue_execution
-    %9:bool = eq %8, false
+    %9:bool = not %8
     if %9 [t: $B6] {  # if_3
       $B6: {  # true
         terminate_invocation
@@ -335,7 +335,7 @@ $B1: {  # root
       }
     }
     %9:bool = load %continue_execution
-    %10:bool = eq %9, false
+    %10:bool = not %9
     if %10 [t: $B6] {  # if_3
       $B6: {  # true
         terminate_invocation
@@ -434,7 +434,7 @@ $B1: {  # root
   $B5: {
     %8:void = call %foo, %front_facing
     %9:bool = load %continue_execution
-    %10:bool = eq %9, false
+    %10:bool = not %9
     if %10 [t: $B6] {  # if_3
       $B6: {  # true
         terminate_invocation
@@ -510,7 +510,7 @@ $B1: {  # root
     store %priv, 42i
     store %func, 42i
     %6:bool = load %continue_execution
-    %7:bool = eq %6, false
+    %7:bool = not %6
     if %7 [t: $B4] {  # if_2
       $B4: {  # true
         terminate_invocation
@@ -598,7 +598,7 @@ $B1: {  # root
       }
     }
     %9:bool = load %continue_execution
-    %10:bool = eq %9, false
+    %10:bool = not %9
     if %10 [t: $B5] {  # if_3
       $B5: {  # true
         terminate_invocation
@@ -677,7 +677,7 @@ $B1: {  # root
       }
     }
     %7:bool = load %continue_execution
-    %8:bool = eq %7, false
+    %8:bool = not %7
     if %8 [t: $B5] {  # if_3
       $B5: {  # true
         terminate_invocation
@@ -760,7 +760,7 @@ $B1: {  # root
     }
     %8:i32 = add %6, 1i
     %9:bool = load %continue_execution
-    %10:bool = eq %9, false
+    %10:bool = not %9
     if %10 [t: $B5] {  # if_3
       $B5: {  # true
         terminate_invocation
@@ -857,7 +857,7 @@ $B1: {  # root
     %8:i32 = access %6, 0i
     %9:i32 = add %8, 1i
     %10:bool = load %continue_execution
-    %11:bool = eq %10, false
+    %11:bool = not %10
     if %11 [t: $B5] {  # if_3
       $B5: {  # true
         terminate_invocation

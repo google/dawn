@@ -1983,6 +1983,9 @@ class Printer {
                     op = spv::Op::OpSNegate;
                 }
                 break;
+            case core::UnaryOp::kNot:
+                op = spv::Op::OpLogicalNot;
+                break;
             default:
                 TINT_UNIMPLEMENTED() << unary->Op();
         }

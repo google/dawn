@@ -211,23 +211,6 @@ TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
     EXPECT_EQ(2_i, rhs->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
-TEST_F(IR_BinaryTest, CreateNot) {
-    auto* inst = b.Not(mod.Types().bool_(), true);
-
-    ASSERT_TRUE(inst->Is<Binary>());
-    EXPECT_EQ(inst->Op(), BinaryOp::kEqual);
-
-    ASSERT_TRUE(inst->LHS()->Is<Constant>());
-    auto lhs = inst->LHS()->As<Constant>()->Value();
-    ASSERT_TRUE(lhs->Is<core::constant::Scalar<bool>>());
-    EXPECT_TRUE(lhs->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
-
-    ASSERT_TRUE(inst->RHS()->Is<Constant>());
-    auto rhs = inst->RHS()->As<Constant>()->Value();
-    ASSERT_TRUE(rhs->Is<core::constant::Scalar<bool>>());
-    EXPECT_FALSE(rhs->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
-}
-
 TEST_F(IR_BinaryTest, CreateShiftLeft) {
     auto* inst = b.ShiftLeft(mod.Types().i32(), 4_i, 2_i);
 

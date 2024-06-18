@@ -51,7 +51,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B2: {
     %3:bool = call %my_func
-    %4:bool = eq %3, false
+    %4:bool = not %3
     %tint_symbol:bool = let %4
     ret
   }
@@ -75,7 +75,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not_Vector) {
 %test_function = @compute @workgroup_size(1, 1, 1) func():void {
   $B2: {
     %3:vec4<bool> = call %my_func
-    %4:vec4<bool> = eq %3, vec4<bool>(false)
+    %4:vec4<bool> = not %3
     %tint_symbol:vec4<bool> = let %4
     ret
   }

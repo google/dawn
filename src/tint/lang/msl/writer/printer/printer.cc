@@ -447,6 +447,9 @@ class Printer : public tint::TextGenerator {
             case core::UnaryOp::kComplement:
                 out << "~";
                 break;
+            case core::UnaryOp::kNot:
+                out << "!";
+                break;
             default:
                 TINT_UNIMPLEMENTED() << u->Op();
         }
@@ -458,18 +461,6 @@ class Printer : public tint::TextGenerator {
     /// Emit a binary instruction
     /// @param b the binary instruction
     void EmitBinary(StringStream& out, const core::ir::CoreBinary* b) {
-        if (b->Op() == core::BinaryOp::kEqual) {
-            auto* rhs = b->RHS()->As<core::ir::Constant>();
-            if (rhs && rhs->Type()->Is<core::type::Bool>() &&
-                rhs->Value()->ValueAs<bool>() == false) {
-                // expr == false
-                out << "!(";
-                EmitValue(out, b->LHS());
-                out << ")";
-                return;
-            }
-        }
-
         auto kind = [&] {
             switch (b->Op()) {
                 case core::BinaryOp::kAdd:

@@ -680,14 +680,15 @@ class State {
             case core::UnaryOp::kNegation:
                 expr = b.Negation(Expr(u->Val()));
                 break;
+            case core::UnaryOp::kNot:
+                expr = b.Not(Expr(u->Val()));
+                break;
             case core::UnaryOp::kAddressOf:
                 expr = b.AddressOf(Expr(u->Val()));
                 break;
             case core::UnaryOp::kIndirection:
                 expr = b.Deref(Expr(u->Val()));
                 break;
-            default:
-                TINT_UNIMPLEMENTED() << u->Op();
         }
         Bind(u->Result(0), expr);
     }

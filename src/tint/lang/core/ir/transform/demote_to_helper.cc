@@ -194,7 +194,7 @@ struct State {
                     if (ret->Func()->Stage() == Function::PipelineStage::kFragment) {
                         b.InsertBefore(ret, [&] {
                             auto* cond = b.Load(continue_execution);
-                            auto* ifelse = b.If(b.Equal(ty.bool_(), cond, false));
+                            auto* ifelse = b.If(b.Not<bool>(cond));
                             b.Append(ifelse->True(), [&] {  //
                                 b.TerminateInvocation();
                             });

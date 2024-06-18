@@ -927,12 +927,8 @@ class Builder {
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::CoreBinary* Not(const core::type::Type* type, VAL&& val) {
-        if (auto* vec = type->As<core::type::Vector>()) {
-            return Equal(type, std::forward<VAL>(val), Splat(vec, false));
-        } else {
-            return Equal(type, std::forward<VAL>(val), Constant(false));
-        }
+    ir::CoreUnary* Not(const core::type::Type* type, VAL&& val) {
+        return Unary(UnaryOp::kNot, type, std::forward<VAL>(val));
     }
 
     /// Creates a Not operation
@@ -940,7 +936,7 @@ class Builder {
     /// @param val the value
     /// @returns the operation
     template <typename TYPE, typename VAL>
-    ir::CoreBinary* Not(VAL&& val) {
+    ir::CoreUnary* Not(VAL&& val) {
         auto* type = ir.Types().Get<TYPE>();
         return Not(type, std::forward<VAL>(val));
     }

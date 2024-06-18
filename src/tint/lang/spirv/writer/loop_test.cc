@@ -432,7 +432,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
          %13 = OpPhi %int %18 %6
          %19 = OpPhi %bool %15 %6
          %20 = OpSGreaterThan %bool %13 %int_5
-         %17 = OpLogicalEqual %bool %19 %false
+         %17 = OpLogicalNot %bool %19
                OpBranchConditional %20 %9 %8
           %9 = OpLabel
                OpReturn
