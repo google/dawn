@@ -28,6 +28,7 @@
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
 
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
+#include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/utils/result/result.h"
 
@@ -43,6 +44,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options&) {
     } while (false)
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint);
+
+    // These transforms need to be run last as various transforms introduce terminator arguments,
+    // naming conflicts, and expressions that need to be explicitly not inlined.
+    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
 
     return Success;
 }

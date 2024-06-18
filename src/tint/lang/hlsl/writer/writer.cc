@@ -72,7 +72,7 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     }
     output.hlsl = result->hlsl;
 
-    // Collect the list of entry points in the sanitized program.
+    // Collect the list of entry points in the generated program.
     for (auto func : ir.functions) {
         if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
             auto name = ir.NameOf(func).Name();

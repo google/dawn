@@ -55,7 +55,9 @@
 #include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
+#include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
+#include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
@@ -201,30 +203,57 @@ class Printer : public tint::TextGenerator {
 
         for (auto* inst : *block) {
             Switch(
-                inst,                                                       //
-                [&](const core::ir::BreakIf* i) { EmitBreakIf(i); },        //
-                [&](const core::ir::Call* i) { EmitCallStmt(i); },          //
-                [&](const core::ir::Continue*) { EmitContinue(); },         //
-                [&](const core::ir::ExitLoop*) { EmitExitLoop(); },         //
-                [&](const core::ir::Let* i) { EmitLet(i); },                //
-                [&](const core::ir::Loop* l) { EmitLoop(l); },              //
-                [&](const core::ir::Return* i) { EmitReturn(i); },          //
-                [&](const core::ir::Store* i) { EmitStore(i); },            //
-                [&](const core::ir::Unreachable*) { EmitUnreachable(); },   //
-                [&](const core::ir::Var* v) { EmitVar(v); },                //
-                                                                            //
-                [&](const core::ir::NextIteration*) { /* do nothing */ },   //
-                                                                            //
-                [&](const core::ir::Access*) { /* inlined */ },             //
-                [&](const core::ir::Bitcast*) { /* inlined */ },            //
-                [&](const core::ir::Construct*) { /* inlined */ },          //
-                [&](const core::ir::CoreBinary*) { /* inlined */ },         //
-                [&](const core::ir::CoreUnary*) { /* inlined */ },          //
-                [&](const core::ir::Load*) { /* inlined */ },               //
-                [&](const core::ir::LoadVectorElement*) { /* inlined */ },  //
-                [&](const core::ir::Swizzle*) { /* inlined */ },            //
+                inst,                                                                    //
+                [&](const core::ir::BreakIf* i) { EmitBreakIf(i); },                     //
+                [&](const core::ir::Call* i) { EmitCallStmt(i); },                       //
+                [&](const core::ir::Continue*) { EmitContinue(); },                      //
+                [&](const core::ir::ExitLoop*) { EmitExitLoop(); },                      //
+                [&](const core::ir::If* i) { EmitIf(i); },                               //
+                [&](const core::ir::Let* i) { EmitLet(i); },                             //
+                [&](const core::ir::Loop* l) { EmitLoop(l); },                           //
+                [&](const core::ir::Return* i) { EmitReturn(i); },                       //
+                [&](const core::ir::Store* i) { EmitStore(i); },                         //
+                [&](const core::ir::Unreachable*) { EmitUnreachable(); },                //
+                [&](const core::ir::Var* v) { EmitVar(v); },                             //
+                                                                                         //
+                [&](const core::ir::NextIteration*) { /* do nothing */ },                //
+                [&](const core::ir::ExitIf*) { /* do nothing handled by transform */ },  //
+                                                                                         //
+                [&](const core::ir::Access*) { /* inlined */ },                          //
+                [&](const core::ir::Bitcast*) { /* inlined */ },                         //
+                [&](const core::ir::Construct*) { /* inlined */ },                       //
+                [&](const core::ir::CoreBinary*) { /* inlined */ },                      //
+                [&](const core::ir::CoreUnary*) { /* inlined */ },                       //
+                [&](const core::ir::Load*) { /* inlined */ },                            //
+                [&](const core::ir::LoadVectorElement*) { /* inlined */ },               //
+                [&](const core::ir::Swizzle*) { /* inlined */ },                         //
                 TINT_ICE_ON_NO_MATCH);
         }
+    }
+
+    /// Emit an if instruction
+    /// @param if_ the if instruction
+    void EmitIf(const core::ir::If* if_) {
+        {
+            auto out = Line();
+            out << "if (";
+            EmitValue(out, if_->Condition());
+            out << ") {";
+        }
+
+        {
+            const ScopedIndent si(current_buffer_);
+            EmitBlock(if_->True());
+        }
+
+        if (if_->False() && !if_->False()->IsEmpty()) {
+            Line() << "} else {";
+
+            const ScopedIndent si(current_buffer_);
+            EmitBlock(if_->False());
+        }
+
+        Line() << "}";
     }
 
     /// Emit an unreachable instruction

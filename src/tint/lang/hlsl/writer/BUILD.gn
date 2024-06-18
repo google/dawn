@@ -96,6 +96,7 @@ if (tint_build_unittests) {
         "constant_test.cc",
         "function_test.cc",
         "helper_test.h",
+        "if_test.cc",
         "loop_test.cc",
         "var_let_test.cc",
       ]

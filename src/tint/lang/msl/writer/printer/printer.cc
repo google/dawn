@@ -375,23 +375,23 @@ class Printer : public tint::TextGenerator {
 
         for (auto* inst : *block) {
             Switch(
-                inst,                                                      //
-                [&](const core::ir::BreakIf* i) { EmitBreakIf(i); },       //
-                [&](const core::ir::Continue*) { EmitContinue(); },        //
-                [&](const core::ir::Discard*) { EmitDiscard(); },          //
-                [&](const core::ir::ExitIf* i) { EmitExitIf(i); },         //
-                [&](const core::ir::ExitLoop*) { EmitExitLoop(); },        //
-                [&](const core::ir::ExitSwitch*) { EmitExitSwitch(); },    //
-                [&](const core::ir::If* i) { EmitIf(i); },                 //
-                [&](const core::ir::Let* i) { EmitLet(i); },               //
-                [&](const core::ir::Loop* i) { EmitLoop(i); },             //
-                [&](const core::ir::NextIteration*) { /* do nothing */ },  //
-                [&](const core::ir::Return* i) { EmitReturn(i); },         //
-                [&](const core::ir::Store* i) { EmitStore(i); },           //
-                [&](const core::ir::Switch* i) { EmitSwitch(i); },         //
-                [&](const core::ir::Unreachable*) { EmitUnreachable(); },  //
-                [&](const core::ir::Call* i) { EmitCallStmt(i); },         //
-                [&](const core::ir::Var* i) { EmitVar(i); },               //
+                inst,                                                                    //
+                [&](const core::ir::BreakIf* i) { EmitBreakIf(i); },                     //
+                [&](const core::ir::Continue*) { EmitContinue(); },                      //
+                [&](const core::ir::Discard*) { EmitDiscard(); },                        //
+                [&](const core::ir::ExitIf*) { /* do nothing handled by transform */ },  //
+                [&](const core::ir::ExitLoop*) { EmitExitLoop(); },                      //
+                [&](const core::ir::ExitSwitch*) { EmitExitSwitch(); },                  //
+                [&](const core::ir::If* i) { EmitIf(i); },                               //
+                [&](const core::ir::Let* i) { EmitLet(i); },                             //
+                [&](const core::ir::Loop* i) { EmitLoop(i); },                           //
+                [&](const core::ir::NextIteration*) { /* do nothing */ },                //
+                [&](const core::ir::Return* i) { EmitReturn(i); },                       //
+                [&](const core::ir::Store* i) { EmitStore(i); },                         //
+                [&](const core::ir::Switch* i) { EmitSwitch(i); },                       //
+                [&](const core::ir::Unreachable*) { EmitUnreachable(); },                //
+                [&](const core::ir::Call* i) { EmitCallStmt(i); },                       //
+                [&](const core::ir::Var* i) { EmitVar(i); },                             //
                 [&](const core::ir::StoreVectorElement* e) { EmitStoreVectorElement(e); },
                 [&](const core::ir::TerminateInvocation*) { EmitDiscard(); },  //
 
@@ -716,22 +716,6 @@ class Printer : public tint::TextGenerator {
         }
 
         Line() << "}";
-    }
-
-    /// Emit an exit-if instruction
-    /// @param e the exit-if instruction
-    void EmitExitIf(const core::ir::ExitIf* e) {
-        auto results = e->If()->Results();
-        auto args = e->Args();
-        for (size_t i = 0; i < e->Args().Length(); ++i) {
-            auto* phi = results[i];
-            auto* val = args[i];
-
-            auto out = Line();
-            out << NameOf(phi) << " = ";
-            EmitValue(out, val);
-            out << ";";
-        }
     }
 
     /// Emit a return instruction
