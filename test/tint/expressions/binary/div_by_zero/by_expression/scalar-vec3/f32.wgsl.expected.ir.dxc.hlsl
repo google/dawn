@@ -1,9 +1,7 @@
-SKIP: FAILED
+[numthreads(1, 1, 1)]
+void f() {
+  float a = 4.0f;
+  float3 b = float3(0.0f, 2.0f, 0.0f);
+  float3 r = (a / (b + b));
+}
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Var
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

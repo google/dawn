@@ -260,10 +260,11 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::InstructionResult* r) {
                 Switch(
                     r->Instruction(),
-                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },    //
-                    [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },  //
-                    [&](const core::ir::Load* l) { EmitLoad(out, l); },            //
-                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },    //
+                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },        //
+                    [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },      //
+                    [&](const core::ir::Load* l) { EmitLoad(out, l); },                //
+                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },        //
+                    [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },  //
                     TINT_ICE_ON_NO_MATCH);
             },
             TINT_ICE_ON_NO_MATCH);
