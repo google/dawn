@@ -1,9 +1,19 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Var
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void f() {
+  float[2][2] v = arr;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+DXC validation failure:
+hlsl.hlsl:2:16: error: brackets are not allowed here; to declare an array, place the brackets after the name
+  float[2][2] v = arr;
+       ~~~~~~  ^
+               [2][2]
+hlsl.hlsl:2:19: error: use of undeclared identifier 'arr'
+  float[2][2] v = arr;
+                  ^
+

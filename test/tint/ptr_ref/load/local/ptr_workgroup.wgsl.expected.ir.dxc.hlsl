@@ -1,9 +1,17 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:180 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+[numthreads(1, 1, 1)]
+void main() {
+  i = 123;
+  int p = i;
+  int u = (p + 1);
+}
+
+DXC validation failure:
+hlsl.hlsl:3:3: error: use of undeclared identifier 'i'
+  i = 123;
+  ^
+hlsl.hlsl:4:11: error: use of undeclared identifier 'i'
+  int p = i;
+          ^
+

@@ -1,9 +1,12 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:205 internal compiler error: TINT_UNREACHABLE unimplemented `var` zero initialization
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void main_1() {
+  uint x_1 = 0u;
+  x_1 = 42u;
+  x_1 = 0u;
+}
+
+void main() {
+  main_1();
+}
+

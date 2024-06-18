@@ -1,9 +1,20 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:205 internal compiler error: TINT_UNREACHABLE unimplemented `var` zero initialization
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void main_1() {
+  uint x_1 = 0u;
+  x_2 = x_1;
+}
+
+void main() {
+  main_1();
+}
+
+DXC validation failure:
+hlsl.hlsl:3:3: error: use of undeclared identifier 'x_2'; did you mean 'x_1'?
+  x_2 = x_1;
+  ^~~
+  x_1
+hlsl.hlsl:2:8: note: 'x_1' declared here
+  uint x_1 = 0u;
+       ^
+

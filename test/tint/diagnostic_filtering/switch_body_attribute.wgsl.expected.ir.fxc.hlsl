@@ -12,7 +12,7 @@ SKIP: FAILED
   switch (i32(x)) @diagnostic(warning, derivative_uniformity) {
               ^
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:180 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Switch
+<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:197 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Switch
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

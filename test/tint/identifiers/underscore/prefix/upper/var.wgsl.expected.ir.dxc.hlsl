@@ -1,9 +1,20 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Var
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+[numthreads(1, 1, 1)]
+void f() {
+  int B = A;
+  int _B = _A;
+  s = (B + _B);
+}
+
+DXC validation failure:
+hlsl.hlsl:3:11: error: use of undeclared identifier 'A'
+  int B = A;
+          ^
+hlsl.hlsl:4:12: error: use of undeclared identifier '_A'
+  int _B = _A;
+           ^
+hlsl.hlsl:5:3: error: use of undeclared identifier 's'
+  s = (B + _B);
+  ^
+

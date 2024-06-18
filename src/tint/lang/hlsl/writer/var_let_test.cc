@@ -53,7 +53,7 @@ void main() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_VarZeroInit) {
+TEST_F(HlslWriterTest, VarZeroInit) {
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {

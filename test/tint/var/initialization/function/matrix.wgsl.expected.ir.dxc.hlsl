@@ -1,9 +1,5 @@
-SKIP: FAILED
+[numthreads(1, 1, 1)]
+void main() {
+  float2x3 v = float2x3((0.0f).xxx, (0.0f).xxx);
+}
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:205 internal compiler error: TINT_UNREACHABLE unimplemented `var` zero initialization
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -216,13 +216,26 @@ class Printer : public tint::TextGenerator {
 
         out << " = ";
 
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(ptr);
+
+        auto space = ptr->AddressSpace();
+
         if (var->Initializer()) {
             EmitValue(out, var->Initializer());
-        } else {
-            TINT_UNREACHABLE() << "unimplemented `var` zero initialization";
-            // TODO(dsinclair): Add zero value emission
+        } else if (space == core::AddressSpace::kPrivate ||
+                   space == core::AddressSpace::kFunction ||
+                   space == core::AddressSpace::kUndefined) {
+            EmitZeroValue(out, ptr->UnwrapPtr());
         }
         out << ";";
+    }
+
+    /// Emits the zero value for the given type
+    /// @param out the stream to emit too
+    /// @param ty the type
+    void EmitZeroValue(StringStream& out, const core::type::Type* ty) {
+        EmitConstant(out, ir_.constant_values.Zero(ty));
     }
 
     void EmitLet(const core::ir::Let* l) {
