@@ -903,6 +903,10 @@ def _create_dawn_cq_group(name, refs, refs_exclude = None):
             transient_failure_weight = 1,
             timeout_weight = 2,
         ),
+        user_limit_default = cq.user_limit(
+            name = "default-limit",
+            run = cq.run_limits(max_active = 4),
+        ),
     )
 
 def _create_branch_groups():
