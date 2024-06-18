@@ -180,12 +180,38 @@ class Printer : public tint::TextGenerator {
             auto out = Line();
             auto func_name = NameOf(func);
 
-            // TODO(dsinclair): Pipeline stage and workgroup information
-
             EmitType(out, func->ReturnType());
             out << " " << func_name << "(";
 
-            // TODO(dsinclair): Parameters
+            bool is_ep = func->Stage() != core::ir::Function::PipelineStage::kUndefined;
+            size_t i = 0;
+            for (auto* param : func->Params()) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                ++i;
+
+                auto ptr = param->Type()->As<core::type::Pointer>();
+                auto address_space = core::AddressSpace::kUndefined;
+                auto access = core::Access::kUndefined;
+
+                if (is_ep && !param->Type()->Is<core::type::Struct>()) {
+                    // ICE likely indicates that the ShaderIO transform was not run, or a builtin
+                    // parameter was added after it was run.
+                    TINT_ICE() << "Unsupported non-struct entry point parameter";
+                } else if (!is_ep && ptr) {
+                    switch (ptr->AddressSpace()) {
+                        case core::AddressSpace::kStorage:
+                        case core::AddressSpace::kUniform: {
+                            TINT_UNREACHABLE();
+                        }
+                        default:
+                            // Transform regular pointer parameters in to `inout` parameters.
+                            out << "inout ";
+                    }
+                }
+                EmitTypeAndName(out, param->Type(), address_space, access, NameOf(param));
+            }
 
             out << ") {";
         }
@@ -391,6 +417,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },          //
                     TINT_ICE_ON_NO_MATCH);
             },
+            [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
             TINT_ICE_ON_NO_MATCH);
     }
 

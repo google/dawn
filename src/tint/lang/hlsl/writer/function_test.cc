@@ -58,14 +58,14 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionWithParams) {
+TEST_F(HlslWriterTest, FunctionWithParams) {
     auto* func = b.Function("my_func", ty.void_());
     func->SetParams({b.FunctionParam("a", ty.f32()), b.FunctionParam("b", ty.i32())});
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void my_func(float a, int b) {
-  return;
+    EXPECT_EQ(output_.hlsl, R"(
+void my_func(float a, int b) {
 }
 
 [numthreads(1, 1, 1)]
@@ -89,7 +89,32 @@ void main() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionPtrParameter) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithParams) {
+    Vector members{
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("pos"), ty.vec4<f32>(), 0u, 0u, 16u, 16u,
+                                         core::type::StructMemberAttributes{}),
+    };
+    auto* strct = ty.Struct(b.ir.symbols.New("Interface"), std::move(members));
+
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* p = b.FunctionParam("p", strct);
+    func->SetParams({p});
+
+    func->Block()->Append(b.Return(func));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(struct Interface {
+  float4 pos;
+};
+
+
+void main(Interface p) {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, FunctionPtrParameter) {
     // fn f(foo : ptr<function, f32>) -> f32 {
     //   return *foo;
     // }
@@ -100,7 +125,8 @@ TEST_F(HlslWriterTest, DISABLED_FunctionPtrParameter) {
     b.Append(func->Block(), [&] { b.Return(func, b.Load(foo)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(float f(inout float foo) {
+    EXPECT_EQ(output_.hlsl, R"(
+float f(inout float foo) {
   return foo;
 }
 
