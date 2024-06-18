@@ -179,5 +179,96 @@ TEST_F(ResolverCompatibilityModeTest, SampleIndex_StructMember) {
         R"(12:34 error: use of '@builtin(sample_index)' is not allowed in compatibility mode)");
 }
 
+TEST_F(ResolverCompatibilityModeTest, LinearInterpolation_Parameter) {
+    // @fragment
+    // fn main(@location(1) @interpolate(linear) value : f32) {
+    // }
+
+    Func("main",
+         Vector{Param("value", ty.f32(),
+                      Vector{
+                          Location(1_i),
+                          Interpolate(Source{{12, 34}}, core::InterpolationType::kLinear,
+                                      core::InterpolationSampling::kCenter),
+                      })},
+         ty.void_(), Empty,
+         Vector{
+             Stage(ast::PipelineStage::kFragment),
+         },
+         Vector{
+             Builtin(core::BuiltinValue::kPosition),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: use of '@interpolate(linear)' is not allowed in compatibility mode)");
+}
+
+TEST_F(ResolverCompatibilityModeTest, LinearInterpolation_StructMember) {
+    // struct S {
+    //   @location(1) @interpolate(linear) value : f32,
+    // }
+
+    Structure("S", Vector{
+                       Member("value", ty.f32(),
+                              Vector{
+                                  Location(1_i),
+                                  Interpolate(Source{{12, 34}}, core::InterpolationType::kLinear,
+                                              core::InterpolationSampling::kCenter),
+                              }),
+                   });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: use of '@interpolate(linear)' is not allowed in compatibility mode)");
+}
+
+TEST_F(ResolverCompatibilityModeTest, SampleInterpolation_Parameter) {
+    // @fragment
+    // fn main(@location(1) @interpolate(perspective, sample) value : f32) {
+    // }
+
+    Func("main",
+         Vector{Param("value", ty.f32(),
+                      Vector{
+                          Location(1_i),
+                          Interpolate(Source{{12, 34}}, core::InterpolationType::kPerspective,
+                                      core::InterpolationSampling::kSample),
+                      })},
+         ty.void_(), Empty,
+         Vector{
+             Stage(ast::PipelineStage::kFragment),
+         },
+         Vector{
+             Builtin(core::BuiltinValue::kPosition),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: use of '@interpolate(..., sample)' is not allowed in compatibility mode)");
+}
+
+TEST_F(ResolverCompatibilityModeTest, SampleInterpolation_StructMember) {
+    // struct S {
+    //   @location(1) @interpolate(perspective, sample) value : f32,
+    // }
+
+    Structure("S",
+              Vector{
+                  Member("value", ty.f32(),
+                         Vector{
+                             Location(1_i),
+                             Interpolate(Source{{12, 34}}, core::InterpolationType::kPerspective,
+                                         core::InterpolationSampling::kSample),
+                         }),
+              });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: use of '@interpolate(..., sample)' is not allowed in compatibility mode)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

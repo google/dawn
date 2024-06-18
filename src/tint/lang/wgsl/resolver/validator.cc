@@ -1120,6 +1120,22 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
         return false;
     }
 
+    if (mode_ == wgsl::ValidationMode::kCompat) {
+        if (i_type->Value() == core::InterpolationType::kLinear) {
+            AddError(attr->source)
+                << "use of '@interpolate(linear)' is not allowed in compatibility mode";
+            return false;
+        }
+
+        if (attr->sampling) {
+            auto s_type = sem_.AsInterpolationSampling(sem_.Get(attr->sampling));
+            if (s_type->Value() == core::InterpolationSampling::kSample) {
+                AddError(attr->source)
+                    << "use of '@interpolate(..., sample)' is not allowed in compatibility mode";
+                return false;
+            }
+        }
+    }
     return true;
 }
 

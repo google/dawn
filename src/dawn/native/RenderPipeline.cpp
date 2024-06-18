@@ -797,18 +797,6 @@ MaybeError ValidateInterStageMatching(DeviceBase* device,
             "different from the interpolation sampling (%s) of the fragment input at "
             "location %u.",
             vertexOutputInfo.interpolationSampling, i, fragmentInputInfo.interpolationSampling, i);
-
-        DAWN_INVALID_IF(device->IsCompatibilityMode() &&
-                            vertexOutputInfo.interpolationType == InterpolationType::Linear,
-                        "The interpolation type (%s) of the vertex output at location %u is not "
-                        "supported in compatibility mode",
-                        vertexOutputInfo.interpolationType, i);
-
-        DAWN_INVALID_IF(device->IsCompatibilityMode() &&
-                            vertexOutputInfo.interpolationSampling == InterpolationSampling::Sample,
-                        "The interpolation sampling (%s) of the vertex output at location %u is "
-                        "not supported in compatibility mode",
-                        vertexOutputInfo.interpolationSampling, i);
     }
 
     return {};
