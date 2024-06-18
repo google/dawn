@@ -282,6 +282,12 @@ source_set("dxc-include") {
   public_configs = [ ":dxc-include-config" ]
 }
 
+source_set("dxcompiler-for-fuzzer") {
+  if (use_libfuzzer && target_cpu != "x86") {
+    public_deps = [ "${dawn_dxc_dir}/../gn/dxc:dxcompiler" ]
+  }
+}
+
 ###############################################################################
 # Fuzzers
 ###############################################################################

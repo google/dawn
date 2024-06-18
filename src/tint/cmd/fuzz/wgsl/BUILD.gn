@@ -101,6 +101,7 @@ if (tint_build_wgsl_reader) {
       "${tint_src_dir}/lang/wgsl/writer/raise:fuzz",
       "${tint_src_dir}/utils/bytes",
       "${tint_src_dir}/utils/cli",
+      "${tint_src_dir}/utils/command",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
@@ -122,7 +123,11 @@ if (tint_build_wgsl_reader) {
     }
 
     if (tint_build_hlsl_writer) {
-      deps += [ "${tint_src_dir}/lang/hlsl/writer:fuzz" ]
+      deps += [
+        "${tint_src_dir}:dxcompiler-for-fuzzer",
+        "${tint_src_dir}/lang/hlsl/validate",
+        "${tint_src_dir}/lang/hlsl/writer:fuzz",
+      ]
     }
 
     if (tint_build_ir_binary) {
