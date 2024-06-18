@@ -1,45 +1,39 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct tint_module_vars_struct {
+  depthcube_array<float, access::sample> arg_0;
+  sampler arg_1;
+  device float* prevent_dce;
+};
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  float VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %arg_0:ptr<handle, texture_depth_cube_array, read> = var @binding_point(1, 0)
-  %arg_1:ptr<handle, sampler_comparison, read> = var @binding_point(1, 1)
-  %prevent_dce:ptr<storage, f32, read_write> = var @binding_point(2, 0)
+float textureSampleCompareLevel_4cf3a2(tint_module_vars_struct tint_module_vars) {
+  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float3(1.0f), 1, 1.0f, level(0u));
+  return res;
 }
-
-%textureSampleCompareLevel_4cf3a2 = func():void {
-  $B2: {
-    %5:texture_depth_cube_array = load %arg_0
-    %6:sampler_comparison = load %arg_1
-    %7:f32 = textureSampleCompareLevel %5, %6, vec3<f32>(1.0f), 1i, 1.0f
-    %res:ptr<function, f32, read_write> = var, %7
-    %9:f32 = load %res
-    store %prevent_dce, %9
-    ret
-  }
+fragment void fragment_main(depthcube_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = textureSampleCompareLevel_4cf3a2(tint_module_vars);
 }
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %11:void = call %textureSampleCompareLevel_4cf3a2
-    ret vec4<f32>(0.0f)
-  }
+kernel void compute_main(depthcube_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]], device float* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1, .prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = textureSampleCompareLevel_4cf3a2(tint_module_vars);
 }
-%fragment_main = @fragment func():void {
-  $B4: {
-    %13:void = call %textureSampleCompareLevel_4cf3a2
-    ret
-  }
+VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = textureSampleCompareLevel_4cf3a2(tint_module_vars);
+  return out;
 }
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %15:void = call %textureSampleCompareLevel_4cf3a2
-    ret
-  }
+vertex vertex_main_outputs vertex_main(depthcube_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1};
+  VertexOutput const v = vertex_main_inner(tint_module_vars);
+  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

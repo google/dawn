@@ -97,6 +97,7 @@ struct State {
                     case core::BuiltinFn::kTextureSample:
                     case core::BuiltinFn::kTextureSampleBias:
                     case core::BuiltinFn::kTextureSampleCompare:
+                    case core::BuiltinFn::kTextureSampleCompareLevel:
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kStorageBarrier:
@@ -173,6 +174,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureSampleCompare:
                     TextureSampleCompare(builtin);
+                    break;
+                case core::BuiltinFn::kTextureSampleCompareLevel:
+                    TextureSampleCompareLevel(builtin);
                     break;
                 case core::BuiltinFn::kTextureSampleLevel:
                     TextureSampleLevel(builtin);
@@ -419,6 +423,33 @@ struct State {
             builtin->DetachResult(), msl::BuiltinFn::kSampleCompare, builtin->Args()[0],
             std::move(args));
         call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Replace a textureSampleCompareLevel call with the equivalent MSL intrinsic.
+    /// @param builtin the builtin call instruction
+    void TextureSampleCompareLevel(core::ir::CoreBuiltinCall* builtin) {
+        // The MSL intrinsic is a member function, so we split the first argument off as the object.
+        auto* tex = builtin->Args()[0];
+        auto args = Vector<core::ir::Value*, 4>(builtin->Args().Offset(1));
+
+        // The overloads that don't use an offset all have the depth_ref as their final argument.
+        const bool has_offset = !args.Back()->Type()->Is<core::type::F32>();
+
+        b.InsertBefore(builtin, [&] {
+            // Insert a constant zero LOD argument.
+            // The LOD goes before the offset if there is one, otherwise at the end.
+            auto* lod = b.Construct(ty.Get<msl::type::Level>(), u32(0))->Result(0);
+            if (has_offset) {
+                args.Insert(args.Length() - 1, lod);
+            } else {
+                args.Push(lod);
+            }
+
+            // Call the `sample_compare()` member function.
+            b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+                builtin->DetachResult(), msl::BuiltinFn::kSampleCompare, tex, std::move(args));
+        });
         builtin->Destroy();
     }
 

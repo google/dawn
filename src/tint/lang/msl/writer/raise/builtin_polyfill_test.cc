@@ -1506,6 +1506,85 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleCompare) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t, s, coords, depth});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<f32>(core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords, depth);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):f32 {
+  $B1: {
+    %6:f32 = textureSampleCompareLevel %t, %s, %coords, %depth
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):f32 {
+  $B1: {
+    %6:msl.level = construct 0u
+    %7:f32 = %t.sample_compare %s, %coords, %depth, %6
+    ret %7
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_WithOffset) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
+    auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
+    auto* depth = b.FunctionParam("depth", ty.f32());
+    auto* offset = b.FunctionParam("offset", ty.vec2<i32>());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t, s, coords, depth, offset});
+    b.Append(func->Block(), [&] {
+        auto* result =
+            b.Call<f32>(core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords, depth, offset);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32, %offset:vec2<i32>):f32 {
+  $B1: {
+    %7:f32 = textureSampleCompareLevel %t, %s, %coords, %depth, %offset
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32, %offset:vec2<i32>):f32 {
+  $B1: {
+    %7:msl.level = construct 0u
+    %8:f32 = %t.sample_compare %s, %coords, %depth, %7, %offset
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
