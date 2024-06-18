@@ -4,7 +4,7 @@ SKIP: FAILED
         let _e9 = (vec3<i32>().y >= vec3<i32>().y);
         ^^^^^^^
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:197 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
+<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

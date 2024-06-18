@@ -1,9 +1,13 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:283 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBuiltinCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+int2 subgroupBroadcast_3e6879() {
+  int2 arg_0 = (1).xx;
+  int2 res = WaveReadLaneAt(arg_0, 1u);
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce = subgroupBroadcast_3e6879();
+}
+

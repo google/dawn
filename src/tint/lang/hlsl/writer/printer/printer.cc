@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/core_binary.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
@@ -275,14 +276,126 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::InstructionResult* r) {
                 Switch(
                     r->Instruction(),
-                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },        //
-                    [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },      //
-                    [&](const core::ir::Load* l) { EmitLoad(out, l); },                //
-                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },        //
-                    [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },  //
+                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },                //
+                    [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },  //
+                    [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },              //
+                    [&](const core::ir::Load* l) { EmitLoad(out, l); },                        //
+                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },                //
+                    [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },          //
                     TINT_ICE_ON_NO_MATCH);
             },
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitCoreBuiltinCall(StringStream& out, const core::ir::CoreBuiltinCall* c) {
+        EmitCoreBuiltinName(out, c->Func());
+
+        ScopedParen sp(out);
+        size_t i = 0;
+        for (const auto* arg : c->Args()) {
+            if (i > 0) {
+                out << ", ";
+            }
+            ++i;
+
+            EmitValue(out, arg);
+        }
+    }
+
+    void EmitCoreBuiltinName(StringStream& out, core::BuiltinFn func) {
+        switch (func) {
+            case core::BuiltinFn::kAbs:
+            case core::BuiltinFn::kAcos:
+            case core::BuiltinFn::kAll:
+            case core::BuiltinFn::kAny:
+            case core::BuiltinFn::kAsin:
+            case core::BuiltinFn::kAtan:
+            case core::BuiltinFn::kAtan2:
+            case core::BuiltinFn::kCeil:
+            case core::BuiltinFn::kClamp:
+            case core::BuiltinFn::kCos:
+            case core::BuiltinFn::kCosh:
+            case core::BuiltinFn::kCross:
+            case core::BuiltinFn::kDeterminant:
+            case core::BuiltinFn::kDistance:
+            case core::BuiltinFn::kDot:
+            case core::BuiltinFn::kExp:
+            case core::BuiltinFn::kExp2:
+            case core::BuiltinFn::kFloor:
+            case core::BuiltinFn::kFrexp:
+            case core::BuiltinFn::kLdexp:
+            case core::BuiltinFn::kLength:
+            case core::BuiltinFn::kLog:
+            case core::BuiltinFn::kLog2:
+            case core::BuiltinFn::kMax:
+            case core::BuiltinFn::kMin:
+            case core::BuiltinFn::kModf:
+            case core::BuiltinFn::kNormalize:
+            case core::BuiltinFn::kPow:
+            case core::BuiltinFn::kReflect:
+            case core::BuiltinFn::kRefract:
+            case core::BuiltinFn::kRound:
+            case core::BuiltinFn::kSaturate:
+            case core::BuiltinFn::kSin:
+            case core::BuiltinFn::kSinh:
+            case core::BuiltinFn::kSqrt:
+            case core::BuiltinFn::kStep:
+            case core::BuiltinFn::kTan:
+            case core::BuiltinFn::kTanh:
+            case core::BuiltinFn::kTranspose:
+                out << func;
+                break;
+            case core::BuiltinFn::kCountOneBits:  // uint
+                out << "countbits";
+                break;
+            case core::BuiltinFn::kDpdx:
+                out << "ddx";
+                break;
+            case core::BuiltinFn::kDpdxCoarse:
+                out << "ddx_coarse";
+                break;
+            case core::BuiltinFn::kDpdxFine:
+                out << "ddx_fine";
+                break;
+            case core::BuiltinFn::kDpdy:
+                out << "ddy";
+                break;
+            case core::BuiltinFn::kDpdyCoarse:
+                out << "ddy_coarse";
+                break;
+            case core::BuiltinFn::kDpdyFine:
+                out << "ddy_fine";
+                break;
+            case core::BuiltinFn::kFaceForward:
+                out << "faceforward";
+                break;
+            case core::BuiltinFn::kFract:
+                out << "frac";
+                break;
+            case core::BuiltinFn::kFma:
+                out << "mad";
+                break;
+            case core::BuiltinFn::kFwidth:
+            case core::BuiltinFn::kFwidthCoarse:
+            case core::BuiltinFn::kFwidthFine:
+                out << "fwidth";
+                break;
+            case core::BuiltinFn::kInverseSqrt:
+                out << "rsqrt";
+                break;
+            case core::BuiltinFn::kMix:
+                out << "lerp";
+                break;
+            case core::BuiltinFn::kReverseBits:  // uint
+                out << "reversebits";
+                break;
+            case core::BuiltinFn::kSubgroupBroadcast:
+                out << "WaveReadLaneAt";
+                break;
+
+            default:
+                TINT_UNREACHABLE() << "unhandled: " << func;
+        }
     }
 
     /// Emit Load

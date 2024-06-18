@@ -12,7 +12,7 @@ SKIP: FAILED
   if (x > 0) {
       ^
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:197 internal compiler error: Switch() matched no cases. Type: tint::core::ir::If
+<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::If
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

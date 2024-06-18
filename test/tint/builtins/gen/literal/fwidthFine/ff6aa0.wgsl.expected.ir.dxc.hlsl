@@ -1,9 +1,16 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:283 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBuiltinCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+float2 fwidthFine_ff6aa0() {
+  float2 res = fwidth((1.0f).xx);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce = fwidthFine_ff6aa0();
+}
+
+DXC validation failure:
+hlsl.hlsl:7:3: error: use of undeclared identifier 'prevent_dce'
+  prevent_dce = fwidthFine_ff6aa0();
+  ^
+
