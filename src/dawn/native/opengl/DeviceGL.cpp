@@ -40,6 +40,8 @@
 #include "dawn/native/opengl/CommandBufferGL.h"
 #include "dawn/native/opengl/ComputePipelineGL.h"
 #include "dawn/native/opengl/ContextEGL.h"
+#include "dawn/native/opengl/DisplayEGL.h"
+#include "dawn/native/opengl/PhysicalDeviceGL.h"
 #include "dawn/native/opengl/PipelineLayoutGL.h"
 #include "dawn/native/opengl/QuerySetGL.h"
 #include "dawn/native/opengl/QueueGL.h"
@@ -314,6 +316,10 @@ Ref<TextureBase> Device::CreateTextureWrappingEGLImage(const ExternalImageDescri
     if (ConsumedError(ValidateTextureCanBeWrapped(textureDescriptor))) {
         return nullptr;
     }
+    // The EGLImage was created from outside of Dawn so it must be on the same display that was
+    // provided to create the device. The best check we can do is that we indeed have
+    // EGL_KHR_image_base.
+    DAWN_ASSERT(GetEGL(false).HasExt(EGLExt::ImageBase));
 
     GLuint tex;
     gl.GenTextures(1, &tex);
@@ -443,11 +449,11 @@ const EGLFunctions& Device::GetEGL(bool makeCurrent) const {
         mContext->MakeCurrent();
         ToBackend(GetQueue())->OnGLUsed();
     }
-    return mContext->GetEGL();
+    return ToBackend(GetPhysicalDevice())->GetDisplay()->egl;
 }
 
 EGLDisplay Device::GetEGLDisplay() const {
-    return mContext->GetEGLDisplay();
+    return ToBackend(GetPhysicalDevice())->GetDisplay()->GetDisplay();
 }
 
 ContextEGL* Device::GetContext() const {

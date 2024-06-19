@@ -29,8 +29,10 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "dawn/native/opengl/DisplayEGL.h"
 #include "dawn/native/opengl/UtilsEGL.h"
 
 #ifndef EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE
@@ -39,92 +41,92 @@
 
 namespace dawn::native::opengl {
 
-ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions& egl,
-                                                              EGLenum api,
-                                                              EGLDisplay display,
+// static
+ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const DisplayEGL* display,
+                                                              wgpu::BackendType backend,
+                                                              bool useRobustness,
                                                               bool useANGLETextureSharing) {
-    EGLint renderableType = api == EGL_OPENGL_ES_API ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT;
+    auto context = std::make_unique<ContextEGL>(display);
+    DAWN_TRY(context->Initialize(backend, useRobustness, useANGLETextureSharing));
+    return std::move(context);
+}
 
-    // We require at least EGL 1.4.
-    DAWN_INVALID_IF(
-        egl.GetMajorVersion() < 1 || (egl.GetMajorVersion() == 1 && egl.GetMinorVersion() < 4),
-        "EGL version (%u.%u) must be at least 1.4", egl.GetMajorVersion(), egl.GetMinorVersion());
+ContextEGL::ContextEGL(const DisplayEGL* display) : mDisplay(display) {}
+
+ContextEGL::~ContextEGL() {
+    if (mContext != EGL_NO_CONTEXT) {
+        mDisplay->egl.DestroyContext(mDisplay->GetDisplay(), mContext);
+        mContext = EGL_NO_CONTEXT;
+    }
+}
+
+MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
+                                  bool useRobustness,
+                                  bool useANGLETextureSharing) {
+    const EGLFunctions& egl = mDisplay->egl;
 
     // Since we're creating a surfaceless context, the only thing we really care
     // about is the RENDERABLE_TYPE.
-    EGLint config_attribs[] = {EGL_RENDERABLE_TYPE, renderableType, EGL_NONE};
+    EGLint configAttribs[] = {EGL_RENDERABLE_TYPE, mDisplay->GetAPIBit(), EGL_NONE};
 
-    EGLint num_config;
+    EGLint numConfig;
     EGLConfig config;
-    DAWN_TRY(CheckEGL(egl, egl.ChooseConfig(display, config_attribs, &config, 1, &num_config),
-                      "eglChooseConfig"));
+    DAWN_TRY(CheckEGL(
+        egl, egl.ChooseConfig(mDisplay->GetDisplay(), configAttribs, &config, 1, &numConfig),
+        "eglChooseConfig"));
 
-    DAWN_INVALID_IF(num_config == 0, "eglChooseConfig returned zero configs");
+    DAWN_INVALID_IF(numConfig == 0, "eglChooseConfig returned zero configs");
 
-    DAWN_TRY(CheckEGL(egl, egl.BindAPI(api), "eglBindAPI"));
-
-    if (!egl.HasExt(EGLExt::ImageBase)) {
-        return DAWN_INTERNAL_ERROR("EGL_KHR_image_base is required.");
-    }
-    if (!egl.HasExt(EGLExt::CreateContextRobustness)) {
-        return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness is required.");
-    }
-
-    if (!egl.HasExt(EGLExt::FenceSync) && !egl.HasExt(EGLExt::ReusableSync)) {
-        return DAWN_INTERNAL_ERROR("EGL_KHR_fence_sync or EGL_KHR_reusable_sync must be supported");
-    }
+    DAWN_TRY(CheckEGL(egl, egl.BindAPI(mDisplay->GetAPIEnum()), "eglBindAPI"));
 
     int major, minor;
-    if (api == EGL_OPENGL_ES_API) {
-        major = 3;
-        minor = 1;
-    } else {
-        major = 4;
-        minor = 4;
+    switch (backend) {
+        case wgpu::BackendType::OpenGLES:
+            major = 3;
+            minor = 1;
+            break;
+        case wgpu::BackendType::OpenGL:
+            major = 4;
+            minor = 4;
+            break;
+        default:
+            DAWN_UNREACHABLE();
     }
-    std::vector<EGLint> attrib_list{
+
+    std::vector<EGLint> attribs{
         EGL_CONTEXT_MAJOR_VERSION,
         major,
         EGL_CONTEXT_MINOR_VERSION,
         minor,
-        EGL_CONTEXT_OPENGL_ROBUST_ACCESS,  // Core in EGL 1.5
-        EGL_TRUE,
     };
-    if (useANGLETextureSharing) {
-        if (!egl.HasExt(EGLExt::DisplayTextureShareGroup)) {
-            return DAWN_INTERNAL_ERROR(
-                "EGL_GL_ANGLE_display_texture_share_group must be supported to use GL texture "
-                "sharing");
+
+    if (useRobustness) {
+        DAWN_ASSERT(egl.HasExt(EGLExt::CreateContextRobustness));
+        // EGL_EXT_create_context_robustness is promoted to 1.5 but with a different enum value.
+        if (egl.GetMinorVersion() >= 5) {
+            attribs.push_back(EGL_CONTEXT_OPENGL_ROBUST_ACCESS);
+        } else {
+            attribs.push_back(EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT);
         }
-        attrib_list.push_back(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE);
-        attrib_list.push_back(EGL_TRUE);
+        attribs.push_back(EGL_TRUE);
     }
-    attrib_list.push_back(EGL_NONE);
 
-    EGLContext context = egl.CreateContext(display, config, EGL_NO_CONTEXT, attrib_list.data());
-    DAWN_TRY(CheckEGL(egl, context != EGL_NO_CONTEXT, "eglCreateContext"));
+    if (useANGLETextureSharing) {
+        DAWN_ASSERT(egl.HasExt(EGLExt::DisplayTextureShareGroup));
+        attribs.push_back(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE);
+        attribs.push_back(EGL_TRUE);
+    }
 
-    return std::unique_ptr<ContextEGL>(new ContextEGL(egl, display, context));
+    attribs.push_back(EGL_NONE);
+
+    mContext = egl.CreateContext(mDisplay->GetDisplay(), config, EGL_NO_CONTEXT, attribs.data());
+    return CheckEGL(egl, mContext != EGL_NO_CONTEXT, "eglCreateContext");
 }
-
-ContextEGL::ContextEGL(const EGLFunctions& functions, EGLDisplay display, EGLContext context)
-    : mEgl(functions), mDisplay(display), mContext(context) {}
 
 void ContextEGL::MakeCurrent() {
-    EGLBoolean success = mEgl.MakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, mContext);
-    DAWN_ASSERT(success == EGL_TRUE);
-}
-
-EGLDisplay ContextEGL::GetEGLDisplay() const {
-    return mDisplay;
-}
-
-const EGLFunctions& ContextEGL::GetEGL() const {
-    return mEgl;
-}
-
-ContextEGL::~ContextEGL() {
-    mEgl.DestroyContext(mDisplay, mContext);
+    EGLBoolean success =
+        mDisplay->egl.MakeCurrent(mDisplay->GetDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE, mContext);
+    IgnoreErrors(CheckEGL(mDisplay->egl, success == EGL_TRUE, "eglMakeCurrent"));
 }
 
 }  // namespace dawn::native::opengl
