@@ -39,13 +39,27 @@ BUILD_FUZZER=""
 BUILD_SYSTEM=""
 BUILD_TYPE=""
 BUILD_ARCH=""
+FORCE=""
+VERBOSE=""
 
 function show_usage() {
-  echo "setup-build $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz|fuzzer]"
+  echo "setup-build [-f] $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz|fuzzer]"
   echo
-  echo "creates a build directory in <dawn>/out using either GN or CMake, then"
-  echo "updates the '<dawn>/out/active' symlink to point to the build directory"
-  echo "Specifying 'fuzz' or 'fuzzer' forces Clang to be used"
+  echo "Creates a build directory in <dawn>/out using either GN or CMake, then"
+  echo "updates the '<dawn>/out/active' symlink to point to the build directory."
+  echo
+  echo "Options:"
+  echo "  -h, --help    Print this help, then exit"
+  echo "  -v, --verbose Print the generate command"
+  echo "  -f, --force   Force rewrite of args.gn with specified options,"
+  echo "                even if args.gn exists"
+  echo "  gn            Create GN build configuration"
+  echo "  cmake         Create CMake build configuration"
+  echo "  release       Make a release build"
+  echo "  debug         Make a debug build"
+  echo "  fuzz, fuzzer  Build fuzzers. Forces Clang to be used"
+  echo "  native        Target the machine you're running on"
+  echo "  x86           Target a 32-bit x86 (adds -m32 to compiler flags)"
   if [[ ! -z "$1" ]]; then
     echo
     echo "$1"
@@ -100,6 +114,12 @@ for arg in "$@"; do
     "fuzz" | "fuzzer")
       BUILD_FUZZER=1
     ;;
+    "--force" | "-f")
+      FORCE=1
+    ;;
+    "--verbose" | "-v")
+      VERBOSE=1
+    ;;
     "--help" | "-help" | "-h")
       show_usage
     ;;
@@ -127,9 +147,11 @@ fi
 
 function generate() {
   pushd "$ROOT_DIR" > /dev/null
+    test -n "$VERBOSE" && echo mkdir -p "out/$BUILD_DIR"
     mkdir -p "out/$BUILD_DIR"
     rm -fr "out/active" || true
     ln -s "$BUILD_DIR" "out/active"
+    test -n "$VERBOSE" && echo "$@"
     "$@"
   popd > /dev/null
 }
@@ -160,8 +182,10 @@ case $BUILD_SYSTEM in
     esac
     if [[ -n "$BUILD_FUZZER" ]]; then
         GN_ARGS+=" use_libfuzzer=true"
+        GN_ARGS+=" tint_build_ir_binary=true"
+        GN_ARGS+=" tint_build_ir_fuzzer=true"
     fi
-    if [ -f "$ROOT_DIR/out/$BUILD_DIR/args.gn" ]; then
+    if [[ -z "$FORCE" && -f "$ROOT_DIR/out/$BUILD_DIR/args.gn" ]]; then
       generate "gn" "gen" "out/active" # keep existing args
     else
       generate "gn" "gen" "out/active" "--args=$GN_ARGS"
@@ -180,6 +204,10 @@ case $BUILD_SYSTEM in
         CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER=clang++")
         CMAKE_FLAGS+=("-DCMAKE_C_COMPILER=clang")
         CMAKE_FLAGS+=("-DTINT_BUILD_FUZZERS=ON")
+        CMAKE_FLAGS+=("-DDAWN_BUILD_PROTOBUF=ON")
+        CMAKE_FLAGS+=("-DTINT_BUILD_IR_FUZZER=ON")
+        CMAKE_FLAGS+=("-DTINT_BUILD_IR_BINARY=ON")
+        CMAKE_FLAGS+=("-DDAWN_USE_BUILT_DXC=ON")  # TODO(b/348200364)
     fi
     if [[ -x $(command -v ccache) ]]; then
       CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER_LAUNCHER=ccache")
