@@ -41,10 +41,16 @@ if(NOT TINT_BUILD_AS_OTHER_OS)
   endif()
 endif()
 
-if (DAWN_BUILD_PROTOBUF AND TARGET libprotobuf)
-  set(TINT_BUILD_IR_BINARY 1)
-else()
-  set(TINT_BUILD_IR_BINARY 0)
+################################################################################
+# Dependent flag checks
+################################################################################
+
+if (TINT_BUILD_IR_BINARY AND NOT (DAWN_BUILD_PROTOBUF AND TARGET libprotobuf))
+  message(FATAL_ERROR "Build IR binary format support is enabled, but libprotobuf is not available")
+endif()
+
+if (TINT_BUILD_IR_FUZZER AND NOT TINT_BUILD_IR_BINARY)
+  message(FATAL_ERROR "Build IR fuzzer is enabled, but build IR binary format support is not")
 endif()
 
 ################################################################################
@@ -57,6 +63,7 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_GLSL_WRITER=$<BOOL:${TINT_BUILD_GLSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_HLSL_WRITER=$<BOOL:${TINT_BUILD_HLSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IR_BINARY=$<BOOL:${TINT_BUILD_IR_BINARY}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IR_FUZZER=$<BOOL:${TINT_BUILD_IR_FUZZER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IS_LINUX=$<BOOL:${TINT_BUILD_IS_LINUX}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IS_MAC=$<BOOL:${TINT_BUILD_IS_MAC}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IS_WIN=$<BOOL:${TINT_BUILD_IS_WIN}>)

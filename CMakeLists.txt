@@ -224,8 +224,13 @@ option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 
 option(TINT_BUILD_SYNTAX_TREE_WRITER "Build the syntax tree writer" OFF)
 
-option(TINT_BUILD_IR_BINARY "Build IR binary format support" ON)
+if (DAWN_BUILD_PROTOBUF AND TARGET libprotobuf)
+  set(TINT_DEFAULT_BUILD_IR_BINARY ON)
+else()
+  set(TINT_DEFAULT_BUILD_IR_BINARY OFF)
+endif()
 
+option(TINT_BUILD_IR_BINARY "Build IR binary format support" ${TINT_DEFAULT_BUILD_IR_BINARY})
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
 option(TINT_BUILD_IR_FUZZER "Build IR fuzzer" OFF)
 option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
