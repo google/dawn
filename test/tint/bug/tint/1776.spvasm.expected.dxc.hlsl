@@ -3,7 +3,7 @@ struct S {
   int b;
 };
 
-RWByteAddressBuffer sb : register(u0);
+ByteAddressBuffer sb : register(t0);
 
 S sb_load(uint offset) {
   S tint_symbol = {asfloat(sb.Load4((offset + 0u))), asint(sb.Load((offset + 16u)))};

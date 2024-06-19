@@ -20,6 +20,7 @@
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 1 Offset 16
                OpDecorate %_runtimearr_S ArrayStride 32
+               OpDecorate %sb NonWritable
                OpDecorate %sb DescriptorSet 0
                OpDecorate %sb Binding 0
       %float = OpTypeFloat 32

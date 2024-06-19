@@ -267,6 +267,7 @@ class ASTParser {
     /// then the `type` parameter is updated.  Returns false on failure (with
     /// a diagnostic), or when the variable should not be emitted, e.g. for a
     /// PointSize builtin.
+    /// This method is idempotent.
     /// @param id the ID of the SPIR-V variable
     /// @param store_type the WGSL store type for the variable, which should be prepopulated
     /// @param attributes the attribute list to populate
@@ -434,17 +435,20 @@ class ASTParser {
     /// @returns a list of SPIR-V decorations.
     DecorationList GetMemberPipelineDecorations(const Struct& struct_type, int member_index);
 
+    /// @param var_id the SPIR-V ID of the OpVariable
     /// @param storage_type the 'var' storage type
     /// @param address_space the 'var' address space
-    /// @returns the access mode for a 'var' declaration with the given storage type and address
-    /// space.
-    core::Access VarAccess(const Type* storage_type, core::AddressSpace address_space);
+    /// @returns the access mode for a 'var' declaration with the given variable id, storage type
+    /// and address space. Must only be called after decorations for the variable have been
+    /// converted.
+    core::Access VarAccess(uint32_t var_id,
+                           const Type* storage_type,
+                           core::AddressSpace address_space);
 
     /// Creates an AST 'var' node for a SPIR-V ID, including any attached decorations, unless it's
     /// an ignorable builtin variable.
     /// @param id the SPIR-V result ID
     /// @param address_space the address space, which cannot be core::AddressSpace::kUndefined
-    /// @param access the access
     /// @param storage_type the storage type of the variable
     /// @param initializer the variable initializer
     /// @param attributes the variable attributes
@@ -452,7 +456,6 @@ class ASTParser {
     /// in the error case
     const ast::Var* MakeVar(uint32_t id,
                             core::AddressSpace address_space,
-                            core::Access access,
                             const Type* storage_type,
                             const ast::Expression* initializer,
                             Attributes attributes);
@@ -905,6 +908,9 @@ class ASTParser {
 
     // The ast::Struct type names with only read-only members.
     std::unordered_set<Symbol> read_only_struct_types_;
+
+    // The IDs of variables marked as NonWritable.
+    std::unordered_set<uint32_t> read_only_vars_;
 
     // Maps from OpConstantComposite IDs to identifiers of module-scope const declarations.
     std::unordered_map<uint32_t, Symbol> declared_constant_composites_;

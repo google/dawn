@@ -1394,6 +1394,37 @@ TEST_F(SpvModuleScopeVarParserTest, RowMajorDecoration_IsError) {
         << p->error();
 }
 
+TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_Var) {
+    // Variable should have access(read)
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+     OpDecorate %s Block
+     OpDecorate %1 DescriptorSet 0
+     OpDecorate %1 Binding 0
+     OpDecorate %1 NonWritable
+     OpMemberDecorate %s 0 Offset 0
+     OpMemberDecorate %s 1 Offset 4
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %float = OpTypeFloat 32
+
+     %s = OpTypeStruct %float %float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %1 = OpVariable %ptr_sb_s StorageBuffer
+  )" + MainBody()));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
+  field0 : f32,
+  /* @offset(4) */
+  field1 : f32,
+}
+
+@group(0) @binding(0) var<storage, read> x_1 : S;
+)")) << module_str;
+}
+
 TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
     // Variable should have access(read)
     auto p = parser(test::Assemble(Preamble() + FragMain() + R"(

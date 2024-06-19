@@ -2522,8 +2522,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
             }
         }
         auto* var = parser_impl_.MakeVar(inst.result_id(), core::AddressSpace::kUndefined,
-                                         core::Access::kUndefined, var_store_type, initializer,
-                                         Attributes{});
+                                         var_store_type, initializer, Attributes{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
         auto* var_type = ty_.Reference(core::AddressSpace::kUndefined, var_store_type);
@@ -3369,9 +3368,8 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         // no need to remap pointer properties.
         auto* store_type = parser_impl_.ConvertType(def_inst->type_id());
         AddStatement(create<ast::VariableDeclStatement>(
-            Source{},
-            parser_impl_.MakeVar(id, core::AddressSpace::kUndefined, core::Access::kUndefined,
-                                 store_type, nullptr, Attributes{})));
+            Source{}, parser_impl_.MakeVar(id, core::AddressSpace::kUndefined, store_type, nullptr,
+                                           Attributes{})));
         auto* type = ty_.Reference(core::AddressSpace::kUndefined, store_type);
         identifier_types_.emplace(id, type);
     }
