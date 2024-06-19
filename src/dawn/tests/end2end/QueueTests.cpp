@@ -216,6 +216,54 @@ TEST_P(QueueWriteBufferTests, UnalignedDynamicUploader) {
     EXPECT_BUFFER_U32_EQ(value, buffer, 0);
 }
 
+// Test using various offset and size alignments to write a uniform buffer.
+TEST_P(QueueWriteBufferTests, WriteUniformBufferWithVariousOffsetAndSizeAlignments) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 128;
+    descriptor.usage =
+        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    constexpr size_t kElementCount = 16;
+    uint32_t data[kElementCount] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    constexpr size_t kElementBytes = sizeof(data[0]);
+    queue.WriteBuffer(buffer, 0, data, sizeof(data));
+    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+
+    // Alignments: offset -- 4, size -- 4
+    size_t offset = 1;
+    data[offset] = 100;
+    size_t size = kElementBytes;
+    queue.WriteBuffer(buffer, offset * kElementBytes, &data[offset], size);
+    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+
+    // Alignments: offset -- 16, size -- 16
+    offset = 4;
+    data[offset] = 101;
+    data[offset + 1] = 102;
+    data[offset + 2] = 103;
+    data[offset + 3] = 104;
+    size = 4 * kElementBytes;
+    queue.WriteBuffer(buffer, offset * kElementBytes, &data[offset], size);
+    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+
+    // Alignments: offset -- 4, size -- 16
+    offset = 10;
+    data[offset] = 105;
+    data[offset + 1] = 106;
+    data[offset + 2] = 107;
+    data[offset + 3] = 108;
+    queue.WriteBuffer(buffer, offset * kElementBytes, &data[offset], size);
+    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+
+    // Alignments: offset -- 16, size -- 4
+    offset = 12;
+    data[offset] = 109;
+    size = kElementBytes;
+    queue.WriteBuffer(buffer, offset * kElementBytes, &data[offset], size);
+    EXPECT_BUFFER_U32_RANGE_EQ(data, buffer, 0, kElementCount);
+}
+
 DAWN_INSTANTIATE_TEST(QueueWriteBufferTests,
                       D3D11Backend(),
                       D3D12Backend(),

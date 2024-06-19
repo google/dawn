@@ -144,11 +144,14 @@ class Buffer : public BufferBase {
                                      uint64_t offset,
                                      uint64_t size);
 
+    virtual MaybeError ClearPaddingInternal(const ScopedCommandRecordingContext* commandContext);
+
     raw_ptr<uint8_t, AllowPtrArithmetic> mMappedData = nullptr;
 
   private:
     MaybeError Initialize(bool mappedAtCreation,
                           const ScopedCommandRecordingContext* commandContext);
+    MaybeError ClearInitialResource(const ScopedCommandRecordingContext* commandContext);
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     void UnmapImpl() override;
     bool IsCPUWritableAtCreation() const override;
@@ -208,6 +211,8 @@ class GPUOnlyBuffer final : public Buffer {
                              uint64_t bufferOffset,
                              const void* data,
                              size_t size) override;
+
+    MaybeError ClearPaddingInternal(const ScopedCommandRecordingContext* commandContext) override;
 
     bool mConstantBufferIsUpdated = true;
 };
