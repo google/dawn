@@ -58,19 +58,34 @@ std::ostream& operator<<(std::ostream& ostream, const DataType& v) {
     return ostream;
 }
 
+enum class KernelImplementation {
+    Naive,
+    Subgroup,
+    WorkgroupShared,
+};
+
+std::ostream& operator<<(std::ostream& ostream, const KernelImplementation& v) {
+    switch (v) {
+        case KernelImplementation::Naive:
+            ostream << "Naive";
+            break;
+        case KernelImplementation::Subgroup:
+            ostream << "Subgroup";
+            break;
+        case KernelImplementation::WorkgroupShared:
+            ostream << "WorkgroupShared";
+            break;
+    }
+    return ostream;
+}
+
 using Rows = uint32_t;
 using Cols = uint32_t;
 using StoreType = DataType;
 using AccType = DataType;
-using Subgroups = bool;
+using Impl = KernelImplementation;
 using Swizzle = bool;
-DAWN_TEST_PARAM_STRUCT(MatrixVectorMultiplyParams,
-                       Rows,
-                       Cols,
-                       StoreType,
-                       AccType,
-                       Subgroups,
-                       Swizzle);
+DAWN_TEST_PARAM_STRUCT(MatrixVectorMultiplyParams, Rows, Cols, StoreType, AccType, Impl, Swizzle);
 
 class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMultiplyParams> {
   public:
@@ -87,7 +102,7 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
             SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
             requirements.push_back(wgpu::FeatureName::ShaderF16);
         }
-        if (GetParam().mSubgroups &&
+        if (GetParam().mImpl == KernelImplementation::Subgroup &&
             SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroups})) {
             requirements.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroups);
         }
@@ -142,13 +157,12 @@ void MatrixVectorMultiplyPerf::SetUp() {
         (GetParam().mStoreType == StoreType::F16 || GetParam().mAccType == AccType::F16) &&
         !SupportsFeatures({wgpu::FeatureName::ShaderF16}));
 
-    DAWN_TEST_UNSUPPORTED_IF(GetParam().mSubgroups &&
+    DAWN_TEST_UNSUPPORTED_IF(GetParam().mImpl == KernelImplementation::Subgroup &&
                              !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroups}));
 
-    // TODO(crbug.com/dawn/2462): Fails compilation with
-    //      error X3004: undeclared identifier 'WaveReadLaneAt'
-    // on D3D12 when using subgroups. Suppress while we figure out why FXC is used.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && GetParam().mSubgroups);
+    // D3D12 device must be using DXC to support subgroups feature.
+    DAWN_ASSERT(!SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroups}) ||
+                !IsD3D12() || IsDXC());
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.usage = wgpu::BufferUsage::Storage;
@@ -186,7 +200,7 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
     if (GetParam().mStoreType == StoreType::F16 || GetParam().mAccType == AccType::F16) {
         code << "enable f16;\n";
     }
-    if (GetParam().mSubgroups) {
+    if (GetParam().mImpl == KernelImplementation::Subgroup) {
         code << "enable chromium_experimental_subgroups;\n";
     }
     switch (GetParam().mStoreType) {
@@ -232,16 +246,18 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
     std::function<std::string(std::string)> loopBody;
     std::string writeResult;
 
-    // The global compute grid is 1-dimensional.
-    // When not swizzling:
-    //  - invocation gid.x performs the work of 4 rows in the matrix starting at 4*gid.x, and
+    // Parameter mSwizzle indicates whether the physical layout of the matrix has 4x4 subblocks
+    // transposed from what they are in the logical matrix.
+    // The global compute grid is 1-dimensional for input matrix MxK and vector Kx1 to output vector
+    // Mx1. When the kernel implementation is Workgroup:
+    //  - each workgroup output 4 rows of the output column vector.
+    //  - each invocation within the workgroup compute a slice of input matrix 4x⌈K/workgroup_size⌉
+    //    multiples a slice of input column vector ⌈K/workgroup_size⌉x1, and at the end each
+    //    invocation's result get added up to get the final output sum.
+    // Otherwise:
+    //  - invocation gid.x performs the work of 4 output rows in the matrix starting at 4*gid.x, and
     //    nothing else.
     //  - the whole workgroup computes * workgroup_size rows
-    // When swizzling:
-    //  - invocation gid.x performs 4 adjacent StoreType values at a time within a column.
-    //  - the whole workgroup computes * workgroup_size rows
-    //  - The physical layout of the matrix has 4x4 subblocks transposed from what they are in the
-    //    logical matrix.
     if (GetParam().mStoreType == StoreType::U8 && GetParam().mAccType == AccType::U8) {
         // Data is already 8-bit. Compute 8-bit dot products.
         valueLoad = [](std::string i) { return "vector.values[" + i + "]"; };
@@ -249,22 +265,22 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
         loopBody = [](std::string offset) {
             if (GetParam().mSwizzle) {
                 return "sum += vec4<AccType>(\n"
-                    "dot4U8Packed(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 0u], v),\n"
-                    "dot4U8Packed(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 1u], v),\n"
-                    "dot4U8Packed(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 2u], v),\n"
-                    "dot4U8Packed(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 3u], v),\n"
+                    "dot4U8Packed(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 0u], v),\n"
+                    "dot4U8Packed(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 1u], v),\n"
+                    "dot4U8Packed(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 2u], v),\n"
+                    "dot4U8Packed(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 3u], v),\n"
                 ");";
             } else {
                 return "sum += vec4<AccType>(\n"
-                    "dot4U8Packed(matrix.values[(4u * global_id.x + 0u) * uniforms.packedCols + col" + offset + "], v),\n"
-                    "dot4U8Packed(matrix.values[(4u * global_id.x + 1u) * uniforms.packedCols + col" + offset + "], v),\n"
-                    "dot4U8Packed(matrix.values[(4u * global_id.x + 2u) * uniforms.packedCols + col" + offset + "], v),\n"
-                    "dot4U8Packed(matrix.values[(4u * global_id.x + 3u) * uniforms.packedCols + col" + offset + "], v),\n"
+                    "dot4U8Packed(matrix.values[(4u * row_by_4 + 0u) * uniforms.packedCols + col" + offset + "], v),\n"
+                    "dot4U8Packed(matrix.values[(4u * row_by_4 + 1u) * uniforms.packedCols + col" + offset + "], v),\n"
+                    "dot4U8Packed(matrix.values[(4u * row_by_4 + 2u) * uniforms.packedCols + col" + offset + "], v),\n"
+                    "dot4U8Packed(matrix.values[(4u * row_by_4 + 3u) * uniforms.packedCols + col" + offset + "], v),\n"
                 ");";
             }
         };
         // clang-format on
-        writeResult = "result.values[global_id.x] = pack4xU8(sum);\n";
+        writeResult = "result.values[row_by_4] = pack4xU8(sum);\n";
     } else if (GetParam().mStoreType == StoreType::U8) {
         // Data is 8-bit. Expand out to float, compute dot product, and then pack again.
         valueLoad = [](std::string i) {
@@ -274,22 +290,22 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
         loopBody = [](std::string offset) {
             if (GetParam().mSwizzle) {
                 return "sum += vec4<AccType>(\n"
-                    "dot(vec4<AccType>(unpack4xU8(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 0u])), v),\n"
-                    "dot(vec4<AccType>(unpack4xU8(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 1u])), v),\n"
-                    "dot(vec4<AccType>(unpack4xU8(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 2u])), v),\n"
-                    "dot(vec4<AccType>(unpack4xU8(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 3u])), v),\n"
+                    "dot(vec4<AccType>(unpack4xU8(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 0u])), v),\n"
+                    "dot(vec4<AccType>(unpack4xU8(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 1u])), v),\n"
+                    "dot(vec4<AccType>(unpack4xU8(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 2u])), v),\n"
+                    "dot(vec4<AccType>(unpack4xU8(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 3u])), v),\n"
                 ");";
             } else {
                 return "sum += vec4<AccType>(\n"
-                    "dot(vec4<AccType>(unpack4xU8(matrix.values[(4u * global_id.x + 0u) * uniforms.packedCols + col" + offset + "])), v),\n"
-                    "dot(vec4<AccType>(unpack4xU8(matrix.values[(4u * global_id.x + 1u) * uniforms.packedCols + col" + offset + "])), v),\n"
-                    "dot(vec4<AccType>(unpack4xU8(matrix.values[(4u * global_id.x + 2u) * uniforms.packedCols + col" + offset + "])), v),\n"
-                    "dot(vec4<AccType>(unpack4xU8(matrix.values[(4u * global_id.x + 3u) * uniforms.packedCols + col" + offset + "])), v),\n"
+                    "dot(vec4<AccType>(unpack4xU8(matrix.values[(4u * row_by_4 + 0u) * uniforms.packedCols + col" + offset + "])), v),\n"
+                    "dot(vec4<AccType>(unpack4xU8(matrix.values[(4u * row_by_4 + 1u) * uniforms.packedCols + col" + offset + "])), v),\n"
+                    "dot(vec4<AccType>(unpack4xU8(matrix.values[(4u * row_by_4 + 2u) * uniforms.packedCols + col" + offset + "])), v),\n"
+                    "dot(vec4<AccType>(unpack4xU8(matrix.values[(4u * row_by_4 + 3u) * uniforms.packedCols + col" + offset + "])), v),\n"
                 ");";
             }
         };
         // clang-format on
-        writeResult = "result.values[global_id.x] = pack4x8unorm(vec4<f32>(sum));\n";
+        writeResult = "result.values[row_by_4] = pack4x8unorm(vec4<f32>(sum));\n";
     } else {
         // Data is in float. Compute dot product in float.
         valueLoad = [](std::string i) { return "vector.values[" + i + "]"; };
@@ -297,70 +313,139 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
         loopBody = [](std::string offset) {
             if (GetParam().mSwizzle) {
                 return "sum += vec4<AccType>(\n"
-                    "dot(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 0u], v),\n"
-                    "dot(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 1u], v),\n"
-                    "dot(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 2u], v),\n"
-                    "dot(matrix.values[4u * (global_id.x * uniforms.packedCols + col" + offset + ") + 3u], v),\n"
+                    "dot(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 0u], v),\n"
+                    "dot(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 1u], v),\n"
+                    "dot(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 2u], v),\n"
+                    "dot(matrix.values[4u * (row_by_4 * uniforms.packedCols + col" + offset + ") + 3u], v),\n"
                 ");";
             } else {
                 return "sum += vec4<AccType>(\n"
-                    "dot(matrix.values[(4u * global_id.x + 0u) * uniforms.packedCols + col" + offset + "], v),\n"
-                    "dot(matrix.values[(4u * global_id.x + 1u) * uniforms.packedCols + col" + offset + "], v),\n"
-                    "dot(matrix.values[(4u * global_id.x + 2u) * uniforms.packedCols + col" + offset + "], v),\n"
-                    "dot(matrix.values[(4u * global_id.x + 3u) * uniforms.packedCols + col" + offset + "], v),\n"
+                    "dot(matrix.values[(4u * row_by_4 + 0u) * uniforms.packedCols + col" + offset + "], v),\n"
+                    "dot(matrix.values[(4u * row_by_4 + 1u) * uniforms.packedCols + col" + offset + "], v),\n"
+                    "dot(matrix.values[(4u * row_by_4 + 2u) * uniforms.packedCols + col" + offset + "], v),\n"
+                    "dot(matrix.values[(4u * row_by_4 + 3u) * uniforms.packedCols + col" + offset + "], v),\n"
                 ");";
             }
         };
         // clang-format on
-        writeResult = "result.values[global_id.x] = sum;\n";
+        writeResult = "result.values[row_by_4] = sum;\n";
     }
 
-    if (GetParam().mSubgroups) {
-        // Helper function to generate a subgroup case since:
-        // - we don't know the subgroup size until runtime
-        // - subgroupBroadcast requires a constant lane.
-        auto GenerateSubgroupCase = [&valueLoad, &loopBody](uint32_t size) {
-            std::stringstream c;
-            c << "  if (sg_size == " << size << "u){\n";
-            c << "    for (var col = 0u; col < uniforms.packedCols; col = col + " << size << "u) {"
-              << "\n";
-            c << "      let shared_v = " << valueLoad("col + sg_id") << ";\n";
-            if (GetParam().mAccType == AccType::U8) {
-                c << "      var v : AccType;\n";
-            } else {
-                c << "      var v : vec4<AccType>;\n";
-            }
-            for (uint32_t i = 0; i < size; ++i) {
-                c << "      v = subgroupBroadcast(shared_v, " << i << "u);\n";
-                c << "        " << loopBody(" + " + std::to_string(i) + "u") << "\n";
-            }
-            c << "    }\n";
-            c << "  }";
-            return c.str();
-        };
+    switch (GetParam().mImpl) {
+        case (KernelImplementation::Naive): {
+            // clang-format off
+            code << R"(
+@compute @workgroup_size(64)
+fn main(@builtin(global_invocation_id) global_id : vec3u) {
+  let row_by_4 = global_id.x;
+  var sum : vec4<AccType>;
+  for (var col = 0u; col < uniforms.packedCols; col++) {
+    let v = )" << valueLoad("col") << R"(;
+    )" << loopBody("") << R"(
+  }
+  )" << writeResult << R"(
+}
+)";
+            // clang-format on
+            break;
+        }
+        case (KernelImplementation::Subgroup): {
+            // Helper function to generate a subgroup case since:
+            // - we don't know the subgroup size until runtime
+            // - subgroupBroadcast requires a constant lane.
+            auto GenerateSubgroupCase = [&valueLoad, &loopBody](uint32_t size) {
+                std::stringstream c;
+                c << "  if (sg_size == " << size << "u){\n";
+                c << "    for (var col = 0u; col < uniforms.packedCols; col = col + " << size
+                  << "u) {" << "\n";
+                c << "      let shared_v = " << valueLoad("col + sg_id") << ";\n";
+                if (GetParam().mAccType == AccType::U8) {
+                    c << "      var v : AccType;\n";
+                } else {
+                    c << "      var v : vec4<AccType>;\n";
+                }
+                for (uint32_t i = 0; i < size; ++i) {
+                    c << "      v = subgroupBroadcast(shared_v, " << i << "u);\n";
+                    c << "        " << loopBody(" + " + std::to_string(i) + "u") << "\n";
+                }
+                c << "    }\n";
+                c << "  }";
+                return c.str();
+            };
 
-        code << "@compute @workgroup_size(64) fn main("
-                "@builtin(global_invocation_id) global_id  : vec3u, "
-                "@builtin(subgroup_size) sg_size : u32, "
-                "@builtin(subgroup_invocation_id) sg_id : u32"
-                ") {\n";
-        code << "  var sum : vec4<AccType>" << ";\n";
-        code << GenerateSubgroupCase(4) << " else " << GenerateSubgroupCase(8) << " else "
-             << GenerateSubgroupCase(16) << " else " << GenerateSubgroupCase(32) << " else "
-             << GenerateSubgroupCase(64);
-        code << "  " << writeResult;
-        code << "}";
-    } else {
-        code << "@compute @workgroup_size(64) fn main(@builtin(global_invocation_id) global_id  : "
-                "vec3u) {\n";
-        code << "  var sum : vec4<AccType>" << ";\n";
-        code << "  for (var col = 0u; col < uniforms.packedCols; col++) {" << ";\n";
-        code << "    let v = " << valueLoad("col") << ";\n";
-        code << "    " << loopBody("") << "\n";
-        code << "  }\n";
-        code << "  " << writeResult;
-        code << "}";
+            // clang-format off
+            code << R"(
+@compute @workgroup_size(64)
+fn main(
+  @builtin(global_invocation_id) global_id : vec3u,
+  @builtin(subgroup_size) sg_size : u32,
+  @builtin(subgroup_invocation_id) sg_id : u32
+) {
+  let row_by_4 = global_id.x;
+  var sum : vec4<AccType>;
+)" << GenerateSubgroupCase(4)
+    << " else " << GenerateSubgroupCase(8)
+    << " else " << GenerateSubgroupCase(16)
+    << " else " << GenerateSubgroupCase(32)
+    << " else " << GenerateSubgroupCase(64)
+    << "\n  " << writeResult << R"(
+}
+)";
+            // clang-format on
+            break;
+        }
+        case (KernelImplementation::WorkgroupShared): {
+            const uint32_t workgroupSize = 64;
+            // workgroupSize should be power of 2.
+            DAWN_ASSERT((workgroupSize & (workgroupSize - 1)) == 0);
+
+            std::stringstream workgroupSumStream;
+            for (uint32_t i = workgroupSize / 2; i >= 1; i /= 2) {
+                // clang-format off
+                workgroupSumStream << R"(
+  workgroupBarrier();
+  if (local_id.x < )" << i << R"(u) {
+    sum = sum + workgroup_sum[local_id.x + )" << i << R"(u];
+    workgroup_sum[local_id.x] = sum;
+  })";
+                // clang-format on
+            }
+
+            // clang-format off
+            code << R"(
+const wg_size = )" << workgroupSize << R"(u;
+var<workgroup> workgroup_sum: array<vec4<AccType>, wg_size>;
+
+@compute @workgroup_size(wg_size)
+fn main(
+  @builtin(workgroup_id) wg_id : vec3u,
+  @builtin(local_invocation_id) local_id : vec3u
+) {
+  let row_by_4 = wg_id.x;
+  let compute_packed_cols_per_invocation = (uniforms.packedCols + wg_size - 1) / wg_size;
+  let packed_cols_base = compute_packed_cols_per_invocation * local_id.x;
+  var sum : vec4<AccType>;
+  for (var col = packed_cols_base; col < packed_cols_base + compute_packed_cols_per_invocation; col++) {
+    let v = )" << valueLoad("col") << R"(;
+    )" << loopBody("") << R"(
+  }
+
+  // Store sum result into workgroup memory.
+  workgroup_sum[local_id.x] = sum;
+
+  // Add up results from all invocations and output.
+)" << workgroupSumStream.str() << R"(
+  // Write the final output
+  if (local_id.x == 0) {
+    )" << writeResult << R"(
+  }
+}
+)";
+            // clang-format on
+            break;
+        }
     }
+
     return code.str();
 }
 
@@ -379,13 +464,21 @@ void MatrixVectorMultiplyPerf::Step() {
         pass.SetPipeline(mPipeline);
         pass.SetBindGroup(0, mBindGroup);
         for (unsigned int i = 0; i < kNumDisptaches; ++i) {
-            // 64 is the linear workgroup size.
-            // 4 is because each unit of data loaded is 4 packed values;
-            // either a 4-element vector, or 4 u8's packed as a u32.
-            // Each thread will write on 4-element output in the output
-            // column vector. There are 64 threads. We need `mRows/ (64 * 4)`
-            // workgroups total.
-            pass.DispatchWorkgroups(GetParam().mRows / (64u * 4u));
+            if (GetParam().mImpl == KernelImplementation::WorkgroupShared) {
+                // 4 is because each unit of data loaded is 4 packed values;
+                // either a 4-element vector, or 4 u8's packed as a u32.
+                // Each workgroup will write on 4-element output in the output
+                // column vector. We need `mRows/ 4` workgroups total.
+                pass.DispatchWorkgroups(GetParam().mRows / 4u);
+            } else {
+                // 64 is the linear workgroup size.
+                // 4 is because each unit of data loaded is 4 packed values;
+                // either a 4-element vector, or 4 u8's packed as a u32.
+                // Each thread will write on 4-element output in the output
+                // column vector. There are 64 threads. We need `mRows/ (64 * 4)`
+                // workgroups total.
+                pass.DispatchWorkgroups(GetParam().mRows / (64u * 4u));
+            }
         }
         pass.End();
         if (useTimestamps) {
@@ -419,7 +512,8 @@ DAWN_INSTANTIATE_TEST_P(
     {2048u},  /* cols */
     {StoreType::F32, StoreType::F16, StoreType::U8},
     {AccType::F32, AccType::F16, AccType::U8},
-    {false, true}, /* subgroups */
+    {KernelImplementation::Naive, KernelImplementation::Subgroup,
+     KernelImplementation::WorkgroupShared}, /* Impl */
     {false, true} /* swizzle */);
 
 }  // anonymous namespace
