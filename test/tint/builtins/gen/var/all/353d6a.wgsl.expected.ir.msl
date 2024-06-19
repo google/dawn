@@ -15,7 +15,7 @@ struct vertex_main_outputs {
 int all_353d6a() {
   bool arg_0 = true;
   bool res = all(arg_0);
-  return select(0, 1, all(!(res)));
+  return select(0, 1, all((res == false)));
 }
 fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};

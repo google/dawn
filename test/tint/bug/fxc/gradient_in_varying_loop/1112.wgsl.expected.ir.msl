@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 #include <metal_stdlib>
 using namespace metal;
 struct tint_module_vars_struct {
@@ -59,3 +61,16 @@ fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]],
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.Sampler=Sampler, .randomTexture=randomTexture};
   return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner(inputs.vUV, tint_module_vars)};
 }
+program_source:49:19: warning: unused variable 'sampleDepth' [-Wunused-variable]
+      float const sampleDepth = 0.0f;
+                  ^
+program_source:59:122: error: call to deleted constructor of 'texture2d<float, access::sample>'
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.Sampler=Sampler, .randomTexture=randomTexture};
+                                                                                                                         ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_texture:6083:3: note: 'texture2d' has been explicitly marked deleted here
+  texture2d() thread = delete;
+  ^
+program_source:6:36: note: in implicit initialization of field 'depthTexture' with omitted initializer
+  texture2d<float, access::sample> depthTexture;
+                                   ^
+

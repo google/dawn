@@ -15,7 +15,7 @@ struct vertex_main_outputs {
 float3 pow_4a46c9() {
   float3 arg_0 = float3(1.0f);
   float3 arg_1 = float3(1.0f);
-  float3 res = pow(arg_0, arg_1);
+  float3 res = powr(arg_0, arg_1);
   return res;
 }
 fragment void fragment_main(device float3* prevent_dce [[buffer(0)]]) {

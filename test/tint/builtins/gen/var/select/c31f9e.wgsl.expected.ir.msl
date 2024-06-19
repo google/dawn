@@ -17,7 +17,7 @@ int select_c31f9e() {
   bool arg_1 = true;
   bool arg_2 = true;
   bool res = select(arg_0, arg_1, arg_2);
-  return select(0, 1, all(!(res)));
+  return select(0, 1, all((res == false)));
 }
 fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
