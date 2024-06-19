@@ -203,7 +203,7 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(thread float
   specComp = fmax(0.0f, dot(x_233, x_234));
   float const x_237 = specComp;
   float const x_238 = *(glossiness);
-  specComp = pow(x_237, fmax(1.0f, x_238));
+  specComp = powr(x_237, fmax(1.0f, x_238));
   float const x_241 = specComp;
   float3 const x_242 = *(specularColor);
   result.specular = (x_242 * x_241);

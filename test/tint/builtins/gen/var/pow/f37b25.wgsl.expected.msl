@@ -4,7 +4,7 @@ using namespace metal;
 half2 pow_f37b25() {
   half2 arg_0 = half2(1.0h);
   half2 arg_1 = half2(1.0h);
-  half2 res = pow(arg_0, arg_1);
+  half2 res = powr(arg_0, arg_1);
   return res;
 }
 

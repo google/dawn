@@ -43,9 +43,9 @@ float binaryOperation_f1_f1_(thread float* const a, thread float* const b) {
   }
   float const x_21 = *(b);
   if (!((rint((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
-    x_26 = pow(fabs(*(a)), *(b));
+    x_26 = powr(fabs(*(a)), *(b));
   } else {
-    x_26 = (sign(*(a)) * pow(fabs(*(a)), *(b)));
+    x_26 = (sign(*(a)) * powr(fabs(*(a)), *(b)));
   }
   float const x_41 = x_26;
   return x_41;

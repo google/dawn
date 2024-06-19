@@ -100,7 +100,7 @@ int2 tint_clamp(int2 e, int2 low, int2 high) {
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
   bool3 const cond = (fabs(v) < float3(params.D));
   float3 const t = (sign(v) * ((params.C * fabs(v)) + params.F));
-  float3 const f = (sign(v) * (pow(((params.A * fabs(v)) + params.B), float3(params.G)) + params.E));
+  float3 const f = (sign(v) * (powr(((params.A * fabs(v)) + params.B), float3(params.G)) + params.E));
   return select(f, t, cond);
 }
 
