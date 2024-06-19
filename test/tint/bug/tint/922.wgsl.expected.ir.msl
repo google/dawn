@@ -1,509 +1,309 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+struct Mat4x3_ {
+  float4 mx;
+  float4 my;
+  float4 mz;
+};
+struct Mat4x4_ {
+  float4 mx;
+  float4 my;
+  float4 mz;
+  float4 mw;
+};
+struct Mat4x2_ {
+  float4 mx;
+  float4 my;
+};
+struct ub_SceneParams {
+  Mat4x4_ u_Projection;
+};
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: Mat4x4_ = struct @align(16) {
-  mx:vec4<f32> @offset(0)
-  my:vec4<f32> @offset(16)
-  mz:vec4<f32> @offset(32)
-  mw:vec4<f32> @offset(48)
-}
+struct ub_MaterialParams {
+  tint_array<Mat4x2_, 1> u_TexMtx;
+  float4 u_Misc0_;
+};
+struct ub_PacketParams {
+  tint_array<Mat4x3_, 32> u_PosMtx;
+};
+struct tint_module_vars_struct {
+  const constant ub_SceneParams* global;
+  const constant ub_MaterialParams* global1;
+  const constant ub_PacketParams* global2;
+  thread float3* a_Position1;
+  thread float2* a_UV1;
+  thread float4* a_Color1;
+  thread float3* a_Normal1;
+  thread float* a_PosMtxIdx1;
+  thread float4* v_Color;
+  thread float2* v_TexCoord;
+  thread float4* gl_Position;
+};
+struct VertexOutput {
+  float4 v_Color;
+  float2 v_TexCoord;
+  float4 member;
+};
+struct tint_symbol_outputs {
+  float4 VertexOutput_v_Color [[user(locn0)]];
+  float2 VertexOutput_v_TexCoord [[user(locn1)]];
+  float4 VertexOutput_member [[position]];
+};
+struct tint_symbol_inputs {
+  float3 a_Position [[attribute(0)]];
+  float2 a_UV [[attribute(1)]];
+  float4 a_Color [[attribute(2)]];
+  float3 a_Normal [[attribute(3)]];
+  float a_PosMtxIdx [[attribute(4)]];
+};
 
-ub_SceneParams = struct @align(16) {
-  u_Projection:Mat4x4_ @offset(0)
+float3 Mat4x3GetCol0_(Mat4x3_ m) {
+  Mat4x3_ m1 = {};
+  m1 = m;
+  Mat4x3_ const x_e2 = m1;
+  Mat4x3_ const x_e5 = m1;
+  Mat4x3_ const x_e8 = m1;
+  return float3(x_e2.mx[0u], x_e5.my[0u], x_e8.mz[0u]);
 }
-
-Mat4x2_ = struct @align(16) {
-  mx:vec4<f32> @offset(0)
-  my:vec4<f32> @offset(16)
+float3 Mat4x3GetCol1_(Mat4x3_ m2) {
+  Mat4x3_ m3 = {};
+  m3 = m2;
+  Mat4x3_ const x_e2 = m3;
+  Mat4x3_ const x_e5 = m3;
+  Mat4x3_ const x_e8 = m3;
+  return float3(x_e2.mx[1u], x_e5.my[1u], x_e8.mz[1u]);
 }
-
-ub_MaterialParams = struct @align(16) {
-  u_TexMtx:array<Mat4x2_, 1> @offset(0)
-  u_Misc0_:vec4<f32> @offset(32)
+float3 Mat4x3GetCol2_(Mat4x3_ m4) {
+  Mat4x3_ m5 = {};
+  m5 = m4;
+  Mat4x3_ const x_e2 = m5;
+  Mat4x3_ const x_e5 = m5;
+  Mat4x3_ const x_e8 = m5;
+  return float3(x_e2.mx[2u], x_e5.my[2u], x_e8.mz[2u]);
 }
-
-Mat4x3_ = struct @align(16) {
-  mx:vec4<f32> @offset(0)
-  my:vec4<f32> @offset(16)
-  mz:vec4<f32> @offset(32)
+float3 Mat4x3GetCol3_(Mat4x3_ m6) {
+  Mat4x3_ m7 = {};
+  m7 = m6;
+  Mat4x3_ const x_e2 = m7;
+  Mat4x3_ const x_e5 = m7;
+  Mat4x3_ const x_e8 = m7;
+  return float3(x_e2.mx[3u], x_e5.my[3u], x_e8.mz[3u]);
 }
-
-ub_PacketParams = struct @align(16) {
-  u_PosMtx:array<Mat4x3_, 32> @offset(0)
+float4 Mul(Mat4x4_ m8, float4 v) {
+  Mat4x4_ m9 = {};
+  float4 v1 = 0.0f;
+  m9 = m8;
+  v1 = v;
+  Mat4x4_ const x_e4 = m9;
+  float4 const x_e6 = v1;
+  Mat4x4_ const x_e8 = m9;
+  float4 const x_e10 = v1;
+  Mat4x4_ const x_e12 = m9;
+  float4 const x_e14 = v1;
+  Mat4x4_ const x_e16 = m9;
+  float4 const x_e18 = v1;
+  float const v_1 = dot(x_e4.mx, x_e6);
+  float const v_2 = dot(x_e8.my, x_e10);
+  float const v_3 = dot(x_e12.mz, x_e14);
+  return float4(v_1, v_2, v_3, dot(x_e16.mw, x_e18));
 }
-
-VertexOutput = struct @align(16) {
-  v_Color:vec4<f32> @offset(0), @location(0)
-  v_TexCoord:vec2<f32> @offset(16), @location(1)
-  member:vec4<f32> @offset(32), @builtin(position)
+float3 Mul1(Mat4x3_ m10, float4 v2) {
+  Mat4x3_ m11 = {};
+  float4 v3 = 0.0f;
+  m11 = m10;
+  v3 = v2;
+  Mat4x3_ const x_e4 = m11;
+  float4 const x_e6 = v3;
+  Mat4x3_ const x_e8 = m11;
+  float4 const x_e10 = v3;
+  Mat4x3_ const x_e12 = m11;
+  float4 const x_e14 = v3;
+  float const v_4 = dot(x_e4.mx, x_e6);
+  float const v_5 = dot(x_e8.my, x_e10);
+  return float3(v_4, v_5, dot(x_e12.mz, x_e14));
 }
-
-$B1: {  # root
-  %global:ptr<uniform, ub_SceneParams, read> = var @binding_point(0, 0)
-  %global1:ptr<uniform, ub_MaterialParams, read> = var @binding_point(0, 1)
-  %global2:ptr<uniform, ub_PacketParams, read> = var @binding_point(0, 2)
-  %a_Position1:ptr<private, vec3<f32>, read_write> = var
-  %a_UV1:ptr<private, vec2<f32>, read_write> = var
-  %a_Color1:ptr<private, vec4<f32>, read_write> = var
-  %a_Normal1:ptr<private, vec3<f32>, read_write> = var
-  %a_PosMtxIdx1:ptr<private, f32, read_write> = var
-  %v_Color:ptr<private, vec4<f32>, read_write> = var
-  %v_TexCoord:ptr<private, vec2<f32>, read_write> = var
-  %gl_Position:ptr<private, vec4<f32>, read_write> = var
+float2 Mul2(Mat4x2_ m12, float4 v4) {
+  Mat4x2_ m13 = {};
+  float4 v5 = 0.0f;
+  m13 = m12;
+  v5 = v4;
+  Mat4x2_ const x_e4 = m13;
+  float4 const x_e6 = v5;
+  Mat4x2_ const x_e8 = m13;
+  float4 const x_e10 = v5;
+  float const v_6 = dot(x_e4.mx, x_e6);
+  return float2(v_6, dot(x_e8.my, x_e10));
 }
-
-%Mat4x3GetCol0_ = func(%m:Mat4x3_):vec3<f32> {
-  $B2: {
-    %m1:ptr<function, Mat4x3_, read_write> = var
-    store %m1, %m
-    %15:Mat4x3_ = load %m1
-    %x_e2:Mat4x3_ = let %15
-    %17:Mat4x3_ = load %m1
-    %x_e5:Mat4x3_ = let %17
-    %19:Mat4x3_ = load %m1
-    %x_e8:Mat4x3_ = let %19
-    %21:f32 = access %x_e2, 0u, 0u
-    %22:f32 = access %x_e5, 1u, 0u
-    %23:f32 = access %x_e8, 2u, 0u
-    %24:vec3<f32> = construct %21, %22, %23
-    ret %24
+float4 Mul3(float3 v6, Mat4x3_ m14) {
+  float3 v7 = 0.0f;
+  Mat4x3_ m15 = {};
+  v7 = v6;
+  m15 = m14;
+  Mat4x3_ const x_e5 = m15;
+  float3 const x_e6 = Mat4x3GetCol0_(x_e5);
+  float3 const x_e7 = v7;
+  Mat4x3_ const x_e10 = m15;
+  float3 const x_e11 = Mat4x3GetCol1_(x_e10);
+  float3 const x_e12 = v7;
+  Mat4x3_ const x_e15 = m15;
+  float3 const x_e16 = Mat4x3GetCol2_(x_e15);
+  float3 const x_e17 = v7;
+  Mat4x3_ const x_e20 = m15;
+  float3 const x_e21 = Mat4x3GetCol3_(x_e20);
+  float3 const x_e22 = v7;
+  float const v_7 = dot(x_e6, x_e7);
+  float const v_8 = dot(x_e11, x_e12);
+  float const v_9 = dot(x_e16, x_e17);
+  return float4(v_7, v_8, v_9, dot(x_e21, x_e22));
+}
+Mat4x4_ x_Mat4x4_(float n) {
+  float n1 = 0.0f;
+  Mat4x4_ o = {};
+  n1 = n;
+  float const x_e4 = n1;
+  o.mx = float4(x_e4, 0.0f, 0.0f, 0.0f);
+  float const x_e11 = n1;
+  o.my = float4(0.0f, x_e11, 0.0f, 0.0f);
+  float const x_e18 = n1;
+  o.mz = float4(0.0f, 0.0f, x_e18, 0.0f);
+  float const x_e25 = n1;
+  o.mw = float4(0.0f, 0.0f, 0.0f, x_e25);
+  Mat4x4_ const x_e27 = o;
+  return x_e27;
+}
+Mat4x4_ x_Mat4x4_1(Mat4x3_ m16) {
+  Mat4x3_ m17 = {};
+  Mat4x4_ o1 = {};
+  m17 = m16;
+  Mat4x4_ const x_e4 = x_Mat4x4_(1.0f);
+  o1 = x_e4;
+  Mat4x3_ const x_e7 = m17;
+  o1.mx = x_e7.mx;
+  Mat4x3_ const x_e10 = m17;
+  o1.my = x_e10.my;
+  Mat4x3_ const x_e13 = m17;
+  o1.mz = x_e13.mz;
+  Mat4x4_ const x_e15 = o1;
+  return x_e15;
+}
+Mat4x4_ x_Mat4x4_2(Mat4x2_ m18) {
+  Mat4x2_ m19 = {};
+  Mat4x4_ o2 = {};
+  m19 = m18;
+  Mat4x4_ const x_e4 = x_Mat4x4_(1.0f);
+  o2 = x_e4;
+  Mat4x2_ const x_e7 = m19;
+  o2.mx = x_e7.mx;
+  Mat4x2_ const x_e10 = m19;
+  o2.my = x_e10.my;
+  Mat4x4_ const x_e12 = o2;
+  return x_e12;
+}
+Mat4x3_ x_Mat4x3_(float n2) {
+  float n3 = 0.0f;
+  Mat4x3_ o3 = {};
+  n3 = n2;
+  float const x_e4 = n3;
+  o3.mx = float4(x_e4, 0.0f, 0.0f, 0.0f);
+  float const x_e11 = n3;
+  o3.my = float4(0.0f, x_e11, 0.0f, 0.0f);
+  float const x_e18 = n3;
+  o3.mz = float4(0.0f, 0.0f, x_e18, 0.0f);
+  Mat4x3_ const x_e21 = o3;
+  return x_e21;
+}
+Mat4x3_ x_Mat4x3_1(Mat4x4_ m20) {
+  Mat4x4_ m21 = {};
+  Mat4x3_ o4 = {};
+  m21 = m20;
+  Mat4x4_ const x_e4 = m21;
+  o4.mx = x_e4.mx;
+  Mat4x4_ const x_e7 = m21;
+  o4.my = x_e7.my;
+  Mat4x4_ const x_e10 = m21;
+  o4.mz = x_e10.mz;
+  Mat4x3_ const x_e12 = o4;
+  return x_e12;
+}
+int tint_f32_to_i32(float value) {
+  return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+}
+void main1(tint_module_vars_struct tint_module_vars) {
+  Mat4x3_ t_PosMtx = {};
+  float2 t_TexSpaceCoord = 0.0f;
+  float const x_e15 = (*tint_module_vars.a_PosMtxIdx1);
+  Mat4x3_ const x_e18 = (*tint_module_vars.global2).u_PosMtx[tint_f32_to_i32(x_e15)];
+  t_PosMtx = x_e18;
+  Mat4x3_ const x_e23 = t_PosMtx;
+  Mat4x4_ const x_e24 = x_Mat4x4_1(x_e23);
+  float3 const x_e25 = (*tint_module_vars.a_Position1);
+  Mat4x3_ const x_e29 = t_PosMtx;
+  Mat4x4_ const x_e30 = x_Mat4x4_1(x_e29);
+  float3 const x_e31 = (*tint_module_vars.a_Position1);
+  float4 const x_e34 = Mul(x_e30, float4(x_e31, 1.0f));
+  Mat4x4_ const x_e35 = (*tint_module_vars.global).u_Projection;
+  Mat4x3_ const x_e37 = t_PosMtx;
+  Mat4x4_ const x_e38 = x_Mat4x4_1(x_e37);
+  float3 const x_e39 = (*tint_module_vars.a_Position1);
+  Mat4x3_ const x_e43 = t_PosMtx;
+  Mat4x4_ const x_e44 = x_Mat4x4_1(x_e43);
+  float3 const x_e45 = (*tint_module_vars.a_Position1);
+  float4 const x_e48 = Mul(x_e44, float4(x_e45, 1.0f));
+  float4 const x_e49 = Mul(x_e35, x_e48);
+  (*tint_module_vars.gl_Position) = x_e49;
+  float4 const x_e50 = (*tint_module_vars.a_Color1);
+  (*tint_module_vars.v_Color) = x_e50;
+  float4 const x_e52 = (*tint_module_vars.global1).u_Misc0_;
+  if ((x_e52[0u] == 2.0f)) {
+    float3 const x_e59 = (*tint_module_vars.a_Normal1);
+    Mat4x2_ const x_e64 = (*tint_module_vars.global1).u_TexMtx[0];
+    float3 const x_e65 = (*tint_module_vars.a_Normal1);
+    float2 const x_e68 = Mul2(x_e64, float4(x_e65, 1.0f));
+    (*tint_module_vars.v_TexCoord) = x_e68.xy;
+    return;
+  } else {
+    float2 const x_e73 = (*tint_module_vars.a_UV1);
+    Mat4x2_ const x_e79 = (*tint_module_vars.global1).u_TexMtx[0];
+    float2 const x_e80 = (*tint_module_vars.a_UV1);
+    float2 const x_e84 = Mul2(x_e79, float4(x_e80, 1.0f, 1.0f));
+    (*tint_module_vars.v_TexCoord) = x_e84.xy;
+    return;
   }
+  /* unreachable */
 }
-%Mat4x3GetCol1_ = func(%m2:Mat4x3_):vec3<f32> {
-  $B3: {
-    %m3:ptr<function, Mat4x3_, read_write> = var
-    store %m3, %m2
-    %28:Mat4x3_ = load %m3
-    %x_e2_1:Mat4x3_ = let %28  # %x_e2_1: 'x_e2'
-    %30:Mat4x3_ = load %m3
-    %x_e5_1:Mat4x3_ = let %30  # %x_e5_1: 'x_e5'
-    %32:Mat4x3_ = load %m3
-    %x_e8_1:Mat4x3_ = let %32  # %x_e8_1: 'x_e8'
-    %34:f32 = access %x_e2_1, 0u, 1u
-    %35:f32 = access %x_e5_1, 1u, 1u
-    %36:f32 = access %x_e8_1, 2u, 1u
-    %37:vec3<f32> = construct %34, %35, %36
-    ret %37
-  }
+VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a_Normal, float a_PosMtxIdx, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.a_Position1) = a_Position;
+  (*tint_module_vars.a_UV1) = a_UV;
+  (*tint_module_vars.a_Color1) = a_Color;
+  (*tint_module_vars.a_Normal1) = a_Normal;
+  (*tint_module_vars.a_PosMtxIdx1) = a_PosMtxIdx;
+  main1(tint_module_vars);
+  float4 const x_e11 = (*tint_module_vars.v_Color);
+  float2 const x_e13 = (*tint_module_vars.v_TexCoord);
+  float4 const x_e15 = (*tint_module_vars.gl_Position);
+  return VertexOutput{.v_Color=x_e11, .v_TexCoord=x_e13, .member=x_e15};
 }
-%Mat4x3GetCol2_ = func(%m4:Mat4x3_):vec3<f32> {
-  $B4: {
-    %m5:ptr<function, Mat4x3_, read_write> = var
-    store %m5, %m4
-    %41:Mat4x3_ = load %m5
-    %x_e2_2:Mat4x3_ = let %41  # %x_e2_2: 'x_e2'
-    %43:Mat4x3_ = load %m5
-    %x_e5_2:Mat4x3_ = let %43  # %x_e5_2: 'x_e5'
-    %45:Mat4x3_ = load %m5
-    %x_e8_2:Mat4x3_ = let %45  # %x_e8_2: 'x_e8'
-    %47:f32 = access %x_e2_2, 0u, 2u
-    %48:f32 = access %x_e5_2, 1u, 2u
-    %49:f32 = access %x_e8_2, 2u, 2u
-    %50:vec3<f32> = construct %47, %48, %49
-    ret %50
-  }
+vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant ub_SceneParams* global [[buffer(1)]], const constant ub_MaterialParams* global1 [[buffer(2)]], const constant ub_PacketParams* global2 [[buffer(0)]]) {
+  thread float3 a_Position1 = 0.0f;
+  thread float2 a_UV1 = 0.0f;
+  thread float4 a_Color1 = 0.0f;
+  thread float3 a_Normal1 = 0.0f;
+  thread float a_PosMtxIdx1 = 0.0f;
+  thread float4 v_Color = 0.0f;
+  thread float2 v_TexCoord = 0.0f;
+  thread float4 gl_Position = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.global=global, .global1=global1, .global2=global2, .a_Position1=(&a_Position1), .a_UV1=(&a_UV1), .a_Color1=(&a_Color1), .a_Normal1=(&a_Normal1), .a_PosMtxIdx1=(&a_PosMtxIdx1), .v_Color=(&v_Color), .v_TexCoord=(&v_TexCoord), .gl_Position=(&gl_Position)};
+  VertexOutput const v_10 = tint_symbol_inner(inputs.a_Position, inputs.a_UV, inputs.a_Color, inputs.a_Normal, inputs.a_PosMtxIdx, tint_module_vars);
+  return tint_symbol_outputs{.VertexOutput_v_Color=v_10.v_Color, .VertexOutput_v_TexCoord=v_10.v_TexCoord, .VertexOutput_member=v_10.member};
 }
-%Mat4x3GetCol3_ = func(%m6:Mat4x3_):vec3<f32> {
-  $B5: {
-    %m7:ptr<function, Mat4x3_, read_write> = var
-    store %m7, %m6
-    %54:Mat4x3_ = load %m7
-    %x_e2_3:Mat4x3_ = let %54  # %x_e2_3: 'x_e2'
-    %56:Mat4x3_ = load %m7
-    %x_e5_3:Mat4x3_ = let %56  # %x_e5_3: 'x_e5'
-    %58:Mat4x3_ = load %m7
-    %x_e8_3:Mat4x3_ = let %58  # %x_e8_3: 'x_e8'
-    %60:f32 = access %x_e2_3, 0u, 3u
-    %61:f32 = access %x_e5_3, 1u, 3u
-    %62:f32 = access %x_e8_3, 2u, 3u
-    %63:vec3<f32> = construct %60, %61, %62
-    ret %63
-  }
-}
-%Mul = func(%m8:Mat4x4_, %v:vec4<f32>):vec4<f32> {
-  $B6: {
-    %m9:ptr<function, Mat4x4_, read_write> = var
-    %v1:ptr<function, vec4<f32>, read_write> = var
-    store %m9, %m8
-    store %v1, %v
-    %69:Mat4x4_ = load %m9
-    %x_e4:Mat4x4_ = let %69
-    %71:vec4<f32> = load %v1
-    %x_e6:vec4<f32> = let %71
-    %73:Mat4x4_ = load %m9
-    %x_e8_4:Mat4x4_ = let %73  # %x_e8_4: 'x_e8'
-    %75:vec4<f32> = load %v1
-    %x_e10:vec4<f32> = let %75
-    %77:Mat4x4_ = load %m9
-    %x_e12:Mat4x4_ = let %77
-    %79:vec4<f32> = load %v1
-    %x_e14:vec4<f32> = let %79
-    %81:Mat4x4_ = load %m9
-    %x_e16:Mat4x4_ = let %81
-    %83:vec4<f32> = load %v1
-    %x_e18:vec4<f32> = let %83
-    %85:vec4<f32> = access %x_e4, 0u
-    %86:f32 = dot %85, %x_e6
-    %87:f32 = let %86
-    %88:vec4<f32> = access %x_e8_4, 1u
-    %89:f32 = dot %88, %x_e10
-    %90:f32 = let %89
-    %91:vec4<f32> = access %x_e12, 2u
-    %92:f32 = dot %91, %x_e14
-    %93:f32 = let %92
-    %94:vec4<f32> = access %x_e16, 3u
-    %95:f32 = dot %94, %x_e18
-    %96:vec4<f32> = construct %87, %90, %93, %95
-    ret %96
-  }
-}
-%Mul1 = func(%m10:Mat4x3_, %v2:vec4<f32>):vec3<f32> {
-  $B7: {
-    %m11:ptr<function, Mat4x3_, read_write> = var
-    %v3:ptr<function, vec4<f32>, read_write> = var
-    store %m11, %m10
-    store %v3, %v2
-    %102:Mat4x3_ = load %m11
-    %x_e4_1:Mat4x3_ = let %102  # %x_e4_1: 'x_e4'
-    %104:vec4<f32> = load %v3
-    %x_e6_1:vec4<f32> = let %104  # %x_e6_1: 'x_e6'
-    %106:Mat4x3_ = load %m11
-    %x_e8_5:Mat4x3_ = let %106  # %x_e8_5: 'x_e8'
-    %108:vec4<f32> = load %v3
-    %x_e10_1:vec4<f32> = let %108  # %x_e10_1: 'x_e10'
-    %110:Mat4x3_ = load %m11
-    %x_e12_1:Mat4x3_ = let %110  # %x_e12_1: 'x_e12'
-    %112:vec4<f32> = load %v3
-    %x_e14_1:vec4<f32> = let %112  # %x_e14_1: 'x_e14'
-    %114:vec4<f32> = access %x_e4_1, 0u
-    %115:f32 = dot %114, %x_e6_1
-    %116:f32 = let %115
-    %117:vec4<f32> = access %x_e8_5, 1u
-    %118:f32 = dot %117, %x_e10_1
-    %119:f32 = let %118
-    %120:vec4<f32> = access %x_e12_1, 2u
-    %121:f32 = dot %120, %x_e14_1
-    %122:vec3<f32> = construct %116, %119, %121
-    ret %122
-  }
-}
-%Mul2 = func(%m12:Mat4x2_, %v4:vec4<f32>):vec2<f32> {
-  $B8: {
-    %m13:ptr<function, Mat4x2_, read_write> = var
-    %v5:ptr<function, vec4<f32>, read_write> = var
-    store %m13, %m12
-    store %v5, %v4
-    %128:Mat4x2_ = load %m13
-    %x_e4_2:Mat4x2_ = let %128  # %x_e4_2: 'x_e4'
-    %130:vec4<f32> = load %v5
-    %x_e6_2:vec4<f32> = let %130  # %x_e6_2: 'x_e6'
-    %132:Mat4x2_ = load %m13
-    %x_e8_6:Mat4x2_ = let %132  # %x_e8_6: 'x_e8'
-    %134:vec4<f32> = load %v5
-    %x_e10_2:vec4<f32> = let %134  # %x_e10_2: 'x_e10'
-    %136:vec4<f32> = access %x_e4_2, 0u
-    %137:f32 = dot %136, %x_e6_2
-    %138:f32 = let %137
-    %139:vec4<f32> = access %x_e8_6, 1u
-    %140:f32 = dot %139, %x_e10_2
-    %141:vec2<f32> = construct %138, %140
-    ret %141
-  }
-}
-%Mul3 = func(%v6:vec3<f32>, %m14:Mat4x3_):vec4<f32> {
-  $B9: {
-    %v7:ptr<function, vec3<f32>, read_write> = var
-    %m15:ptr<function, Mat4x3_, read_write> = var
-    store %v7, %v6
-    store %m15, %m14
-    %147:Mat4x3_ = load %m15
-    %x_e5_4:Mat4x3_ = let %147  # %x_e5_4: 'x_e5'
-    %149:vec3<f32> = call %Mat4x3GetCol0_, %x_e5_4
-    %x_e6_3:vec3<f32> = let %149  # %x_e6_3: 'x_e6'
-    %151:vec3<f32> = load %v7
-    %x_e7:vec3<f32> = let %151
-    %153:Mat4x3_ = load %m15
-    %x_e10_3:Mat4x3_ = let %153  # %x_e10_3: 'x_e10'
-    %155:vec3<f32> = call %Mat4x3GetCol1_, %x_e10_3
-    %x_e11:vec3<f32> = let %155
-    %157:vec3<f32> = load %v7
-    %x_e12_2:vec3<f32> = let %157  # %x_e12_2: 'x_e12'
-    %159:Mat4x3_ = load %m15
-    %x_e15:Mat4x3_ = let %159
-    %161:vec3<f32> = call %Mat4x3GetCol2_, %x_e15
-    %x_e16_1:vec3<f32> = let %161  # %x_e16_1: 'x_e16'
-    %163:vec3<f32> = load %v7
-    %x_e17:vec3<f32> = let %163
-    %165:Mat4x3_ = load %m15
-    %x_e20:Mat4x3_ = let %165
-    %167:vec3<f32> = call %Mat4x3GetCol3_, %x_e20
-    %x_e21:vec3<f32> = let %167
-    %169:vec3<f32> = load %v7
-    %x_e22:vec3<f32> = let %169
-    %171:f32 = dot %x_e6_3, %x_e7
-    %172:f32 = let %171
-    %173:f32 = dot %x_e11, %x_e12_2
-    %174:f32 = let %173
-    %175:f32 = dot %x_e16_1, %x_e17
-    %176:f32 = let %175
-    %177:f32 = dot %x_e21, %x_e22
-    %178:vec4<f32> = construct %172, %174, %176, %177
-    ret %178
-  }
-}
-%x_Mat4x4_ = func(%n:f32):Mat4x4_ {
-  $B10: {
-    %n1:ptr<function, f32, read_write> = var
-    %o:ptr<function, Mat4x4_, read_write> = var
-    store %n1, %n
-    %183:f32 = load %n1
-    %x_e4_3:f32 = let %183  # %x_e4_3: 'x_e4'
-    %185:ptr<function, vec4<f32>, read_write> = access %o, 0u
-    %186:vec4<f32> = construct %x_e4_3, 0.0f, 0.0f, 0.0f
-    store %185, %186
-    %187:f32 = load %n1
-    %x_e11_1:f32 = let %187  # %x_e11_1: 'x_e11'
-    %189:ptr<function, vec4<f32>, read_write> = access %o, 1u
-    %190:vec4<f32> = construct 0.0f, %x_e11_1, 0.0f, 0.0f
-    store %189, %190
-    %191:f32 = load %n1
-    %x_e18_1:f32 = let %191  # %x_e18_1: 'x_e18'
-    %193:ptr<function, vec4<f32>, read_write> = access %o, 2u
-    %194:vec4<f32> = construct 0.0f, 0.0f, %x_e18_1, 0.0f
-    store %193, %194
-    %195:f32 = load %n1
-    %x_e25:f32 = let %195
-    %197:ptr<function, vec4<f32>, read_write> = access %o, 3u
-    %198:vec4<f32> = construct 0.0f, 0.0f, 0.0f, %x_e25
-    store %197, %198
-    %199:Mat4x4_ = load %o
-    %x_e27:Mat4x4_ = let %199
-    ret %x_e27
-  }
-}
-%x_Mat4x4_1 = func(%m16:Mat4x3_):Mat4x4_ {
-  $B11: {
-    %m17:ptr<function, Mat4x3_, read_write> = var
-    %o1:ptr<function, Mat4x4_, read_write> = var
-    store %m17, %m16
-    %205:Mat4x4_ = call %x_Mat4x4_, 1.0f
-    %x_e4_4:Mat4x4_ = let %205  # %x_e4_4: 'x_e4'
-    store %o1, %x_e4_4
-    %207:Mat4x3_ = load %m17
-    %x_e7_1:Mat4x3_ = let %207  # %x_e7_1: 'x_e7'
-    %209:ptr<function, vec4<f32>, read_write> = access %o1, 0u
-    %210:vec4<f32> = access %x_e7_1, 0u
-    store %209, %210
-    %211:Mat4x3_ = load %m17
-    %x_e10_4:Mat4x3_ = let %211  # %x_e10_4: 'x_e10'
-    %213:ptr<function, vec4<f32>, read_write> = access %o1, 1u
-    %214:vec4<f32> = access %x_e10_4, 1u
-    store %213, %214
-    %215:Mat4x3_ = load %m17
-    %x_e13:Mat4x3_ = let %215
-    %217:ptr<function, vec4<f32>, read_write> = access %o1, 2u
-    %218:vec4<f32> = access %x_e13, 2u
-    store %217, %218
-    %219:Mat4x4_ = load %o1
-    %x_e15_1:Mat4x4_ = let %219  # %x_e15_1: 'x_e15'
-    ret %x_e15_1
-  }
-}
-%x_Mat4x4_2 = func(%m18:Mat4x2_):Mat4x4_ {
-  $B12: {
-    %m19:ptr<function, Mat4x2_, read_write> = var
-    %o2:ptr<function, Mat4x4_, read_write> = var
-    store %m19, %m18
-    %225:Mat4x4_ = call %x_Mat4x4_, 1.0f
-    %x_e4_5:Mat4x4_ = let %225  # %x_e4_5: 'x_e4'
-    store %o2, %x_e4_5
-    %227:Mat4x2_ = load %m19
-    %x_e7_2:Mat4x2_ = let %227  # %x_e7_2: 'x_e7'
-    %229:ptr<function, vec4<f32>, read_write> = access %o2, 0u
-    %230:vec4<f32> = access %x_e7_2, 0u
-    store %229, %230
-    %231:Mat4x2_ = load %m19
-    %x_e10_5:Mat4x2_ = let %231  # %x_e10_5: 'x_e10'
-    %233:ptr<function, vec4<f32>, read_write> = access %o2, 1u
-    %234:vec4<f32> = access %x_e10_5, 1u
-    store %233, %234
-    %235:Mat4x4_ = load %o2
-    %x_e12_3:Mat4x4_ = let %235  # %x_e12_3: 'x_e12'
-    ret %x_e12_3
-  }
-}
-%x_Mat4x3_ = func(%n2:f32):Mat4x3_ {
-  $B13: {
-    %n3:ptr<function, f32, read_write> = var
-    %o3:ptr<function, Mat4x3_, read_write> = var
-    store %n3, %n2
-    %241:f32 = load %n3
-    %x_e4_6:f32 = let %241  # %x_e4_6: 'x_e4'
-    %243:ptr<function, vec4<f32>, read_write> = access %o3, 0u
-    %244:vec4<f32> = construct %x_e4_6, 0.0f, 0.0f, 0.0f
-    store %243, %244
-    %245:f32 = load %n3
-    %x_e11_2:f32 = let %245  # %x_e11_2: 'x_e11'
-    %247:ptr<function, vec4<f32>, read_write> = access %o3, 1u
-    %248:vec4<f32> = construct 0.0f, %x_e11_2, 0.0f, 0.0f
-    store %247, %248
-    %249:f32 = load %n3
-    %x_e18_2:f32 = let %249  # %x_e18_2: 'x_e18'
-    %251:ptr<function, vec4<f32>, read_write> = access %o3, 2u
-    %252:vec4<f32> = construct 0.0f, 0.0f, %x_e18_2, 0.0f
-    store %251, %252
-    %253:Mat4x3_ = load %o3
-    %x_e21_1:Mat4x3_ = let %253  # %x_e21_1: 'x_e21'
-    ret %x_e21_1
-  }
-}
-%x_Mat4x3_1 = func(%m20:Mat4x4_):Mat4x3_ {
-  $B14: {
-    %m21:ptr<function, Mat4x4_, read_write> = var
-    %o4:ptr<function, Mat4x3_, read_write> = var
-    store %m21, %m20
-    %259:Mat4x4_ = load %m21
-    %x_e4_7:Mat4x4_ = let %259  # %x_e4_7: 'x_e4'
-    %261:ptr<function, vec4<f32>, read_write> = access %o4, 0u
-    %262:vec4<f32> = access %x_e4_7, 0u
-    store %261, %262
-    %263:Mat4x4_ = load %m21
-    %x_e7_3:Mat4x4_ = let %263  # %x_e7_3: 'x_e7'
-    %265:ptr<function, vec4<f32>, read_write> = access %o4, 1u
-    %266:vec4<f32> = access %x_e7_3, 1u
-    store %265, %266
-    %267:Mat4x4_ = load %m21
-    %x_e10_6:Mat4x4_ = let %267  # %x_e10_6: 'x_e10'
-    %269:ptr<function, vec4<f32>, read_write> = access %o4, 2u
-    %270:vec4<f32> = access %x_e10_6, 2u
-    store %269, %270
-    %271:Mat4x3_ = load %o4
-    %x_e12_4:Mat4x3_ = let %271  # %x_e12_4: 'x_e12'
-    ret %x_e12_4
-  }
-}
-%main1 = func():void {
-  $B15: {
-    %t_PosMtx:ptr<function, Mat4x3_, read_write> = var
-    %t_TexSpaceCoord:ptr<function, vec2<f32>, read_write> = var
-    %276:f32 = load %a_PosMtxIdx1
-    %x_e15_2:f32 = let %276  # %x_e15_2: 'x_e15'
-    %278:i32 = call %tint_f32_to_i32, %x_e15_2
-    %280:ptr<uniform, Mat4x3_, read> = access %global2, 0u, %278
-    %281:Mat4x3_ = load %280
-    %x_e18_3:Mat4x3_ = let %281  # %x_e18_3: 'x_e18'
-    store %t_PosMtx, %x_e18_3
-    %283:Mat4x3_ = load %t_PosMtx
-    %x_e23:Mat4x3_ = let %283
-    %285:Mat4x4_ = call %x_Mat4x4_1, %x_e23
-    %x_e24:Mat4x4_ = let %285
-    %287:vec3<f32> = load %a_Position1
-    %x_e25_1:vec3<f32> = let %287  # %x_e25_1: 'x_e25'
-    %289:Mat4x3_ = load %t_PosMtx
-    %x_e29:Mat4x3_ = let %289
-    %291:Mat4x4_ = call %x_Mat4x4_1, %x_e29
-    %x_e30:Mat4x4_ = let %291
-    %293:vec3<f32> = load %a_Position1
-    %x_e31:vec3<f32> = let %293
-    %295:vec4<f32> = construct %x_e31, 1.0f
-    %296:vec4<f32> = call %Mul, %x_e30, %295
-    %x_e34:vec4<f32> = let %296
-    %298:ptr<uniform, Mat4x4_, read> = access %global, 0u
-    %299:Mat4x4_ = load %298
-    %x_e35:Mat4x4_ = let %299
-    %301:Mat4x3_ = load %t_PosMtx
-    %x_e37:Mat4x3_ = let %301
-    %303:Mat4x4_ = call %x_Mat4x4_1, %x_e37
-    %x_e38:Mat4x4_ = let %303
-    %305:vec3<f32> = load %a_Position1
-    %x_e39:vec3<f32> = let %305
-    %307:Mat4x3_ = load %t_PosMtx
-    %x_e43:Mat4x3_ = let %307
-    %309:Mat4x4_ = call %x_Mat4x4_1, %x_e43
-    %x_e44:Mat4x4_ = let %309
-    %311:vec3<f32> = load %a_Position1
-    %x_e45:vec3<f32> = let %311
-    %313:vec4<f32> = construct %x_e45, 1.0f
-    %314:vec4<f32> = call %Mul, %x_e44, %313
-    %x_e48:vec4<f32> = let %314
-    %316:vec4<f32> = call %Mul, %x_e35, %x_e48
-    %x_e49:vec4<f32> = let %316
-    store %gl_Position, %x_e49
-    %318:vec4<f32> = load %a_Color1
-    %x_e50:vec4<f32> = let %318
-    store %v_Color, %x_e50
-    %320:ptr<uniform, vec4<f32>, read> = access %global1, 1u
-    %321:vec4<f32> = load %320
-    %x_e52:vec4<f32> = let %321
-    %323:f32 = access %x_e52, 0u
-    %324:bool = eq %323, 2.0f
-    if %324 [t: $B16, f: $B17] {  # if_1
-      $B16: {  # true
-        %325:vec3<f32> = load %a_Normal1
-        %x_e59:vec3<f32> = let %325
-        %327:ptr<uniform, Mat4x2_, read> = access %global1, 0u, 0i
-        %328:Mat4x2_ = load %327
-        %x_e64:Mat4x2_ = let %328
-        %330:vec3<f32> = load %a_Normal1
-        %x_e65:vec3<f32> = let %330
-        %332:vec4<f32> = construct %x_e65, 1.0f
-        %333:vec2<f32> = call %Mul2, %x_e64, %332
-        %x_e68:vec2<f32> = let %333
-        %335:vec2<f32> = swizzle %x_e68, xy
-        store %v_TexCoord, %335
-        ret
-      }
-      $B17: {  # false
-        %336:vec2<f32> = load %a_UV1
-        %x_e73:vec2<f32> = let %336
-        %338:ptr<uniform, Mat4x2_, read> = access %global1, 0u, 0i
-        %339:Mat4x2_ = load %338
-        %x_e79:Mat4x2_ = let %339
-        %341:vec2<f32> = load %a_UV1
-        %x_e80:vec2<f32> = let %341
-        %343:vec4<f32> = construct %x_e80, 1.0f, 1.0f
-        %344:vec2<f32> = call %Mul2, %x_e79, %343
-        %x_e84:vec2<f32> = let %344
-        %346:vec2<f32> = swizzle %x_e84, xy
-        store %v_TexCoord, %346
-        ret
-      }
-    }
-    unreachable
-  }
-}
-%tint_symbol = @vertex func(%a_Position:vec3<f32> [@location(0)], %a_UV:vec2<f32> [@location(1)], %a_Color:vec4<f32> [@location(2)], %a_Normal:vec3<f32> [@location(3)], %a_PosMtxIdx:f32 [@location(4)]):VertexOutput {
-  $B18: {
-    store %a_Position1, %a_Position
-    store %a_UV1, %a_UV
-    store %a_Color1, %a_Color
-    store %a_Normal1, %a_Normal
-    store %a_PosMtxIdx1, %a_PosMtxIdx
-    %353:void = call %main1
-    %354:vec4<f32> = load %v_Color
-    %x_e11_3:vec4<f32> = let %354  # %x_e11_3: 'x_e11'
-    %356:vec2<f32> = load %v_TexCoord
-    %x_e13_1:vec2<f32> = let %356  # %x_e13_1: 'x_e13'
-    %358:vec4<f32> = load %gl_Position
-    %x_e15_3:vec4<f32> = let %358  # %x_e15_3: 'x_e15'
-    %360:VertexOutput = construct %x_e11_3, %x_e13_1, %x_e15_3
-    ret %360
-  }
-}
-%tint_f32_to_i32 = func(%value:f32):i32 {
-  $B19: {
-    %362:i32 = convert %value
-    %363:bool = gte %value, -2147483648.0f
-    %364:i32 = select -2147483648i, %362, %363
-    %365:bool = lte %value, 2147483520.0f
-    %366:i32 = select 2147483647i, %364, %365
-    ret %366
-  }
-}
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

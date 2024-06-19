@@ -827,6 +827,201 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Distance_Vector) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, Dot_I32) {
+    auto* value0 = b.FunctionParam<vec4<i32>>("value0");
+    auto* value1 = b.FunctionParam<vec4<i32>>("value1");
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({value0, value1});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<i32>(core::BuiltinFn::kDot, value0, value1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value0:vec4<i32>, %value1:vec4<i32>):i32 {
+  $B1: {
+    %4:i32 = dot %value0, %value1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value0:vec4<i32>, %value1:vec4<i32>):i32 {
+  $B1: {
+    %4:i32 = call %tint_dot, %value0, %value1
+    ret %4
+  }
+}
+%tint_dot = func(%lhs:vec4<i32>, %rhs:vec4<i32>):i32 {
+  $B2: {
+    %8:vec4<i32> = mul %lhs, %rhs
+    %9:i32 = access %8, 0u
+    %10:i32 = access %8, 1u
+    %11:i32 = add %9, %10
+    %12:i32 = access %8, 2u
+    %13:i32 = add %11, %12
+    %14:i32 = access %8, 3u
+    %15:i32 = add %13, %14
+    ret %15
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Dot_U32) {
+    auto* value0 = b.FunctionParam<vec3<u32>>("value0");
+    auto* value1 = b.FunctionParam<vec3<u32>>("value1");
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({value0, value1});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kDot, value0, value1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value0:vec3<u32>, %value1:vec3<u32>):u32 {
+  $B1: {
+    %4:u32 = dot %value0, %value1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value0:vec3<u32>, %value1:vec3<u32>):u32 {
+  $B1: {
+    %4:u32 = call %tint_dot, %value0, %value1
+    ret %4
+  }
+}
+%tint_dot = func(%lhs:vec3<u32>, %rhs:vec3<u32>):u32 {
+  $B2: {
+    %8:vec3<u32> = mul %lhs, %rhs
+    %9:u32 = access %8, 0u
+    %10:u32 = access %8, 1u
+    %11:u32 = add %9, %10
+    %12:u32 = access %8, 2u
+    %13:u32 = add %11, %12
+    ret %13
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Dot_F32) {
+    auto* value0 = b.FunctionParam<vec2<f32>>("value0");
+    auto* value1 = b.FunctionParam<vec2<f32>>("value1");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value0, value1});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<f32>(core::BuiltinFn::kDot, value0, value1);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value0:vec2<f32>, %value1:vec2<f32>):f32 {
+  $B1: {
+    %4:f32 = dot %value0, %value1
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value0:vec2<f32>, %value1:vec2<f32>):f32 {
+  $B1: {
+    %4:f32 = msl.dot %value0, %value1
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Dot_MultipleCalls) {
+    auto* v4i = b.FunctionParam<vec4<i32>>("v4i");
+    auto* v4u = b.FunctionParam<vec4<u32>>("v4u");
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({v4i, v4u});
+    b.Append(func->Block(), [&] {
+        b.Call<i32>(core::BuiltinFn::kDot, v4i, v4i);
+        b.Call<i32>(core::BuiltinFn::kDot, v4i, v4i);
+        b.Call<u32>(core::BuiltinFn::kDot, v4u, v4u);
+        b.Call<u32>(core::BuiltinFn::kDot, v4u, v4u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%v4i:vec4<i32>, %v4u:vec4<u32>):void {
+  $B1: {
+    %4:i32 = dot %v4i, %v4i
+    %5:i32 = dot %v4i, %v4i
+    %6:u32 = dot %v4u, %v4u
+    %7:u32 = dot %v4u, %v4u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%v4i:vec4<i32>, %v4u:vec4<u32>):void {
+  $B1: {
+    %4:i32 = call %tint_dot, %v4i, %v4i
+    %6:i32 = call %tint_dot, %v4i, %v4i
+    %7:u32 = call %tint_dot_1, %v4u, %v4u
+    %9:u32 = call %tint_dot_1, %v4u, %v4u
+    ret
+  }
+}
+%tint_dot = func(%lhs:vec4<i32>, %rhs:vec4<i32>):i32 {
+  $B2: {
+    %12:vec4<i32> = mul %lhs, %rhs
+    %13:i32 = access %12, 0u
+    %14:i32 = access %12, 1u
+    %15:i32 = add %13, %14
+    %16:i32 = access %12, 2u
+    %17:i32 = add %15, %16
+    %18:i32 = access %12, 3u
+    %19:i32 = add %17, %18
+    ret %19
+  }
+}
+%tint_dot_1 = func(%lhs_1:vec4<u32>, %rhs_1:vec4<u32>):u32 {  # %tint_dot_1: 'tint_dot', %lhs_1: 'lhs', %rhs_1: 'rhs'
+  $B3: {
+    %22:vec4<u32> = mul %lhs_1, %rhs_1
+    %23:u32 = access %22, 0u
+    %24:u32 = access %22, 1u
+    %25:u32 = add %23, %24
+    %26:u32 = access %22, 2u
+    %27:u32 = add %25, %26
+    %28:u32 = access %22, 3u
+    %29:u32 = add %27, %28
+    ret %29
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, Length_Scalar) {
     auto* value = b.FunctionParam<f32>("value");
     auto* func = b.Function("foo", ty.f32());

@@ -75,6 +75,9 @@ struct State {
     /// A map from an atomic pointer type to an atomicCompareExchangeWeak polyfill.
     Hashmap<const core::type::Type*, core::ir::Function*, 2> atomic_compare_exchange_polyfills{};
 
+    /// A map from an integer vector type to a dot polyfill.
+    Hashmap<const core::type::Vector*, core::ir::Function*, 4> integer_dot_polyfills{};
+
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
@@ -94,6 +97,7 @@ struct State {
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kDistance:
+                    case core::BuiltinFn::kDot:
                     case core::BuiltinFn::kLength:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
@@ -159,9 +163,12 @@ struct State {
                     AtomicCall(builtin, msl::BuiltinFn::kAtomicFetchXorExplicit);
                     break;
 
-                // Geometric builtins.
+                // Arithmetic builtins.
                 case core::BuiltinFn::kDistance:
                     Distance(builtin);
+                    break;
+                case core::BuiltinFn::kDot:
+                    Dot(builtin);
                     break;
                 case core::BuiltinFn::kLength:
                     Length(builtin);
@@ -299,6 +306,46 @@ struct State {
             } else {
                 b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
                                                        msl::BuiltinFn::kDistance, arg0, arg1);
+            }
+        });
+        builtin->Destroy();
+    }
+
+    /// Polyfill a dot call if necessary.
+    /// @param builtin the builtin call instruction
+    void Dot(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* arg0 = builtin->Args()[0];
+            auto* arg1 = builtin->Args()[1];
+            auto* vec = arg0->Type()->As<core::type::Vector>();
+            if (vec->type()->is_integer_scalar()) {
+                // Calls to `dot` with a integer arguments are replaced with helper functions, as
+                // MSL's `dot` builtin only supports floating point arguments.
+                auto* polyfill = integer_dot_polyfills.GetOrAdd(vec, [&] {
+                    // Generate a helper function that performs the following:
+                    //     fn tint_integer_dot(lhs: vec4i, rhs: vec4i) {
+                    //         let mul = lhs * rhs;
+                    //         return mul[0] + mul[1] + mul[2] + mul[3];
+                    //     }
+                    auto* el_ty = vec->type();
+                    auto* lhs = b.FunctionParam("lhs", vec);
+                    auto* rhs = b.FunctionParam("rhs", vec);
+                    auto* func = b.Function("tint_dot", el_ty);
+                    func->SetParams({lhs, rhs});
+                    b.Append(func->Block(), [&] {
+                        auto* mul = b.Multiply(vec, lhs, rhs);
+                        auto* sum = b.Access(el_ty, mul, u32(0))->Result(0);
+                        for (uint32_t i = 1; i < vec->Width(); i++) {
+                            sum = b.Add(el_ty, sum, b.Access(el_ty, mul, u32(i)))->Result(0);
+                        }
+                        b.Return(func, sum);
+                    });
+                    return func;
+                });
+                b.CallWithResult(builtin->DetachResult(), polyfill, arg0, arg1);
+            } else {
+                b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
+                                                       msl::BuiltinFn::kDot, arg0, arg1);
             }
         });
         builtin->Destroy();

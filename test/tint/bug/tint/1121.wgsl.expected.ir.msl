@@ -1,459 +1,179 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: LightData = struct @align(16) {
-  position:vec4<f32> @offset(0)
-  color:vec3<f32> @offset(16)
-  radius:f32 @offset(28)
-}
+struct LightData {
+  float4 position;
+  float3 color;
+  float radius;
+};
+struct LightsBuffer {
+  tint_array<LightData, 1> lights;
+};
+struct TileLightIdData {
+  atomic_uint count;
+  tint_array<uint, 64> lightId;
+};
+struct Tiles {
+  tint_array<TileLightIdData, 4> data;
+};
+struct Config {
+  uint numLights;
+  uint numTiles;
+  uint tileCountX;
+  uint tileCountY;
+  uint numTileLightSlot;
+  uint tileSize;
+};
+struct Uniforms {
+  float4 min;
+  float4 max;
+  float4x4 viewMatrix;
+  float4x4 projectionMatrix;
+  float4 fullScreenSize;
+};
+struct tint_module_vars_struct {
+  device LightsBuffer* lightsBuffer;
+  device Tiles* tileLightId;
+  const constant Config* config;
+  const constant Uniforms* uniforms;
+};
 
-LightsBuffer = struct @align(16) {
-  lights:array<LightData> @offset(0)
-}
-
-TileLightIdData = struct @align(4) {
-  count:atomic<u32> @offset(0)
-  lightId:array<u32, 64> @offset(4)
-}
-
-Tiles = struct @align(4) {
-  data:array<TileLightIdData, 4> @offset(0)
-}
-
-Config = struct @align(4) {
-  numLights:u32 @offset(0)
-  numTiles:u32 @offset(4)
-  tileCountX:u32 @offset(8)
-  tileCountY:u32 @offset(12)
-  numTileLightSlot:u32 @offset(16)
-  tileSize:u32 @offset(20)
-}
-
-Uniforms = struct @align(16) {
-  min:vec4<f32> @offset(0)
-  max:vec4<f32> @offset(16)
-  viewMatrix:mat4x4<f32> @offset(32)
-  projectionMatrix:mat4x4<f32> @offset(96)
-  fullScreenSize:vec4<f32> @offset(160)
-}
-
-$B1: {  # root
-  %lightsBuffer:ptr<storage, LightsBuffer, read_write> = var @binding_point(0, 0)
-  %tileLightId:ptr<storage, Tiles, read_write> = var @binding_point(1, 0)
-  %config:ptr<uniform, Config, read> = var @binding_point(2, 0)
-  %uniforms:ptr<uniform, Uniforms, read> = var @binding_point(3, 0)
-}
-
-%tint_symbol = @compute @workgroup_size(64, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void {
-  $B2: {
-    %7:u32 = access %GlobalInvocationID, 0u
-    %index:ptr<function, u32, read_write> = var, %7
-    %9:u32 = load %index
-    %10:ptr<uniform, u32, read> = access %config, 0u
-    %11:u32 = load %10
-    %12:bool = gte %9, %11
-    if %12 [t: $B3] {  # if_1
-      $B3: {  # true
-        ret
+void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+  uint index = GlobalInvocationID[0u];
+  if ((index >= (*tint_module_vars.config).numLights)) {
+    return;
+  }
+  device float4* const v = (&(*tint_module_vars.lightsBuffer).lights[index].position);
+  float const v_1 = ((*tint_module_vars.lightsBuffer).lights[index].position[1u] - 0.10000000149011611938f);
+  float const v_2 = float(index);
+  (*v)[1u] = (v_1 + (0.00100000004749745131f * (v_2 - (64.0f * floor((float(index) / 64.0f))))));
+  if (((*tint_module_vars.lightsBuffer).lights[index].position[1u] < (*tint_module_vars.uniforms).min[1u])) {
+    (*tint_module_vars.lightsBuffer).lights[index].position[1u] = (*tint_module_vars.uniforms).max[1u];
+  }
+  float4x4 M = (*tint_module_vars.uniforms).projectionMatrix;
+  float viewNear = (-(M[3][2]) / (-1.0f + M[2][2]));
+  float viewFar = (-(M[3][2]) / (1.0f + M[2][2]));
+  float4 lightPos = (*tint_module_vars.lightsBuffer).lights[index].position;
+  lightPos = ((*tint_module_vars.uniforms).viewMatrix * lightPos);
+  lightPos = (lightPos / lightPos[3u]);
+  float lightRadius = (*tint_module_vars.lightsBuffer).lights[index].radius;
+  float4 const v_3 = lightPos;
+  float4 boxMin = (v_3 - float4(float3(lightRadius), 0.0f));
+  float4 const v_4 = lightPos;
+  float4 boxMax = (v_4 + float4(float3(lightRadius), 0.0f));
+  tint_array<float4, 6> frustumPlanes = {};
+  frustumPlanes[4] = float4(0.0f, 0.0f, -1.0f, viewNear);
+  frustumPlanes[5] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
+  int const TILE_SIZE = 16;
+  int const TILE_COUNT_X = 2;
+  int const TILE_COUNT_Y = 2;
+  {
+    int y = 0;
+    while(true) {
+      if ((y < TILE_COUNT_Y)) {
+      } else {
+        break;
       }
-    }
-    %13:u32 = load %index
-    %14:ptr<storage, vec4<f32>, read_write> = access %lightsBuffer, 0u, %13, 0u
-    %15:ptr<storage, vec4<f32>, read_write> = let %14
-    %16:u32 = load %index
-    %17:ptr<storage, vec4<f32>, read_write> = access %lightsBuffer, 0u, %16, 0u
-    %18:f32 = load_vector_element %17, 1u
-    %19:f32 = sub %18, 0.10000000149011611938f
-    %20:f32 = let %19
-    %21:u32 = load %index
-    %22:f32 = convert %21
-    %23:f32 = let %22
-    %24:u32 = load %index
-    %25:f32 = convert %24
-    %26:f32 = div %25, 64.0f
-    %27:f32 = floor %26
-    %28:f32 = mul 64.0f, %27
-    %29:f32 = sub %23, %28
-    %30:f32 = mul 0.00100000004749745131f, %29
-    %31:f32 = add %20, %30
-    store_vector_element %15, 1u, %31
-    %32:u32 = load %index
-    %33:ptr<storage, vec4<f32>, read_write> = access %lightsBuffer, 0u, %32, 0u
-    %34:f32 = load_vector_element %33, 1u
-    %35:ptr<uniform, vec4<f32>, read> = access %uniforms, 0u
-    %36:f32 = load_vector_element %35, 1u
-    %37:bool = lt %34, %36
-    if %37 [t: $B4] {  # if_2
-      $B4: {  # true
-        %38:u32 = load %index
-        %39:ptr<storage, vec4<f32>, read_write> = access %lightsBuffer, 0u, %38, 0u
-        %40:ptr<uniform, vec4<f32>, read> = access %uniforms, 1u
-        %41:f32 = load_vector_element %40, 1u
-        store_vector_element %39, 1u, %41
-        exit_if  # if_2
-      }
-    }
-    %42:ptr<uniform, mat4x4<f32>, read> = access %uniforms, 3u
-    %43:mat4x4<f32> = load %42
-    %M:ptr<function, mat4x4<f32>, read_write> = var, %43
-    %45:ptr<function, vec4<f32>, read_write> = access %M, 3i
-    %46:f32 = load_vector_element %45, 2i
-    %47:f32 = negation %46
-    %48:ptr<function, vec4<f32>, read_write> = access %M, 2i
-    %49:f32 = load_vector_element %48, 2i
-    %50:f32 = add -1.0f, %49
-    %51:f32 = div %47, %50
-    %viewNear:ptr<function, f32, read_write> = var, %51
-    %53:ptr<function, vec4<f32>, read_write> = access %M, 3i
-    %54:f32 = load_vector_element %53, 2i
-    %55:f32 = negation %54
-    %56:ptr<function, vec4<f32>, read_write> = access %M, 2i
-    %57:f32 = load_vector_element %56, 2i
-    %58:f32 = add 1.0f, %57
-    %59:f32 = div %55, %58
-    %viewFar:ptr<function, f32, read_write> = var, %59
-    %61:u32 = load %index
-    %62:ptr<storage, vec4<f32>, read_write> = access %lightsBuffer, 0u, %61, 0u
-    %63:vec4<f32> = load %62
-    %lightPos:ptr<function, vec4<f32>, read_write> = var, %63
-    %65:ptr<uniform, mat4x4<f32>, read> = access %uniforms, 2u
-    %66:mat4x4<f32> = load %65
-    %67:vec4<f32> = load %lightPos
-    %68:vec4<f32> = mul %66, %67
-    store %lightPos, %68
-    %69:vec4<f32> = load %lightPos
-    %70:f32 = load_vector_element %lightPos, 3u
-    %71:vec4<f32> = div %69, %70
-    store %lightPos, %71
-    %72:u32 = load %index
-    %73:ptr<storage, f32, read_write> = access %lightsBuffer, 0u, %72, 2u
-    %74:f32 = load %73
-    %lightRadius:ptr<function, f32, read_write> = var, %74
-    %76:vec4<f32> = load %lightPos
-    %77:vec4<f32> = let %76
-    %78:f32 = load %lightRadius
-    %79:vec3<f32> = construct %78
-    %80:vec4<f32> = construct %79, 0.0f
-    %81:vec4<f32> = sub %77, %80
-    %boxMin:ptr<function, vec4<f32>, read_write> = var, %81
-    %83:vec4<f32> = load %lightPos
-    %84:vec4<f32> = let %83
-    %85:f32 = load %lightRadius
-    %86:vec3<f32> = construct %85
-    %87:vec4<f32> = construct %86, 0.0f
-    %88:vec4<f32> = add %84, %87
-    %boxMax:ptr<function, vec4<f32>, read_write> = var, %88
-    %frustumPlanes:ptr<function, array<vec4<f32>, 6>, read_write> = var
-    %91:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, 4i
-    %92:f32 = load %viewNear
-    %93:vec4<f32> = construct 0.0f, 0.0f, -1.0f, %92
-    store %91, %93
-    %94:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, 5i
-    %95:f32 = load %viewFar
-    %96:f32 = negation %95
-    %97:vec4<f32> = construct 0.0f, 0.0f, 1.0f, %96
-    store %94, %97
-    %TILE_SIZE:i32 = let 16i
-    %TILE_COUNT_X:i32 = let 2i
-    %TILE_COUNT_Y:i32 = let 2i
-    loop [i: $B5, b: $B6, c: $B7] {  # loop_1
-      $B5: {  # initializer
-        %y:ptr<function, i32, read_write> = var, 0i
-        next_iteration  # -> $B6
-      }
-      $B6: {  # body
-        %102:i32 = load %y
-        %103:bool = lt %102, %TILE_COUNT_Y
-        if %103 [t: $B8, f: $B9] {  # if_3
-          $B8: {  # true
-            exit_if  # if_3
+      {
+        int x = 0;
+        while(true) {
+          if ((x < TILE_COUNT_X)) {
+          } else {
+            break;
           }
-          $B9: {  # false
-            exit_loop  # loop_1
+          int2 tilePixel0Idx = int2((x * TILE_SIZE), (y * TILE_SIZE));
+          float2 const v_5 = (2.0f * float2(tilePixel0Idx));
+          float2 floorCoord = ((v_5 / (*tint_module_vars.uniforms).fullScreenSize.xy) - float2(1.0f));
+          int2 const v_6 = tilePixel0Idx;
+          float2 const v_7 = (2.0f * float2((v_6 + int2(TILE_SIZE))));
+          float2 ceilCoord = ((v_7 / (*tint_module_vars.uniforms).fullScreenSize.xy) - float2(1.0f));
+          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord[0u]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord[1u]) - (M[2][1] * viewNear)) / M[1][1]));
+          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord[0u]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * ceilCoord[1u]) - (M[2][1] * viewNear)) / M[1][1]));
+          frustumPlanes[0] = float4(1.0f, 0.0f, (-(viewFloorCoord[0u]) / viewNear), 0.0f);
+          frustumPlanes[1] = float4(-1.0f, 0.0f, (viewCeilCoord[0u] / viewNear), 0.0f);
+          frustumPlanes[2] = float4(0.0f, 1.0f, (-(viewFloorCoord[1u]) / viewNear), 0.0f);
+          frustumPlanes[3] = float4(0.0f, -1.0f, (viewCeilCoord[1u] / viewNear), 0.0f);
+          float dp = 0.0f;
+          {
+            uint i = 0u;
+            while(true) {
+              if ((i < 6u)) {
+              } else {
+                break;
+              }
+              float4 p = 0.0f;
+              if ((frustumPlanes[i][0u] > 0.0f)) {
+                p[0u] = boxMax[0u];
+              } else {
+                p[0u] = boxMin[0u];
+              }
+              if ((frustumPlanes[i][1u] > 0.0f)) {
+                p[1u] = boxMax[1u];
+              } else {
+                p[1u] = boxMin[1u];
+              }
+              if ((frustumPlanes[i][2u] > 0.0f)) {
+                p[2u] = boxMax[2u];
+              } else {
+                p[2u] = boxMin[2u];
+              }
+              p[3u] = 1.0f;
+              float const v_8 = dp;
+              dp = (v_8 + min(0.0f, dot(p, frustumPlanes[i])));
+              {
+                i = (i + 1u);
+              }
+              continue;
+            }
           }
+          if ((dp >= 0.0f)) {
+            uint tileId = uint((x + (y * TILE_COUNT_X)));
+            bool v_9 = false;
+            if ((tileId < 0u)) {
+              v_9 = true;
+            } else {
+              v_9 = (tileId >= (*tint_module_vars.config).numTiles);
+            }
+            if (v_9) {
+              {
+                x = (x + 1);
+              }
+              continue;
+            }
+            uint offset = atomic_fetch_add_explicit((&(*tint_module_vars.tileLightId).data[tileId].count), 1u, memory_order_relaxed);
+            if ((offset >= (*tint_module_vars.config).numTileLightSlot)) {
+              {
+                x = (x + 1);
+              }
+              continue;
+            }
+            (*tint_module_vars.tileLightId).data[tileId].lightId[offset] = GlobalInvocationID[0u];
+          }
+          {
+            x = (x + 1);
+          }
+          continue;
         }
-        loop [i: $B10, b: $B11, c: $B12] {  # loop_2
-          $B10: {  # initializer
-            %x:ptr<function, i32, read_write> = var, 0i
-            next_iteration  # -> $B11
-          }
-          $B11: {  # body
-            %105:i32 = load %x
-            %106:bool = lt %105, %TILE_COUNT_X
-            if %106 [t: $B13, f: $B14] {  # if_4
-              $B13: {  # true
-                exit_if  # if_4
-              }
-              $B14: {  # false
-                exit_loop  # loop_2
-              }
-            }
-            %107:i32 = load %x
-            %108:i32 = mul %107, %TILE_SIZE
-            %109:i32 = load %y
-            %110:i32 = mul %109, %TILE_SIZE
-            %111:vec2<i32> = construct %108, %110
-            %tilePixel0Idx:ptr<function, vec2<i32>, read_write> = var, %111
-            %113:vec2<i32> = load %tilePixel0Idx
-            %114:vec2<f32> = convert %113
-            %115:vec2<f32> = mul 2.0f, %114
-            %116:ptr<uniform, vec4<f32>, read> = access %uniforms, 4u
-            %117:vec4<f32> = load %116
-            %118:vec2<f32> = swizzle %117, xy
-            %119:vec2<f32> = div %115, %118
-            %120:vec2<f32> = sub %119, vec2<f32>(1.0f)
-            %floorCoord:ptr<function, vec2<f32>, read_write> = var, %120
-            %122:vec2<i32> = load %tilePixel0Idx
-            %123:vec2<i32> = let %122
-            %124:vec2<i32> = construct %TILE_SIZE
-            %125:vec2<i32> = add %123, %124
-            %126:vec2<f32> = convert %125
-            %127:vec2<f32> = mul 2.0f, %126
-            %128:ptr<uniform, vec4<f32>, read> = access %uniforms, 4u
-            %129:vec4<f32> = load %128
-            %130:vec2<f32> = swizzle %129, xy
-            %131:vec2<f32> = div %127, %130
-            %132:vec2<f32> = sub %131, vec2<f32>(1.0f)
-            %ceilCoord:ptr<function, vec2<f32>, read_write> = var, %132
-            %134:f32 = load %viewNear
-            %135:f32 = negation %134
-            %136:f32 = load_vector_element %floorCoord, 0u
-            %137:f32 = mul %135, %136
-            %138:ptr<function, vec4<f32>, read_write> = access %M, 2i
-            %139:f32 = load_vector_element %138, 0i
-            %140:f32 = load %viewNear
-            %141:f32 = mul %139, %140
-            %142:f32 = sub %137, %141
-            %143:ptr<function, vec4<f32>, read_write> = access %M, 0i
-            %144:f32 = load_vector_element %143, 0i
-            %145:f32 = div %142, %144
-            %146:f32 = load %viewNear
-            %147:f32 = negation %146
-            %148:f32 = load_vector_element %floorCoord, 1u
-            %149:f32 = mul %147, %148
-            %150:ptr<function, vec4<f32>, read_write> = access %M, 2i
-            %151:f32 = load_vector_element %150, 1i
-            %152:f32 = load %viewNear
-            %153:f32 = mul %151, %152
-            %154:f32 = sub %149, %153
-            %155:ptr<function, vec4<f32>, read_write> = access %M, 1i
-            %156:f32 = load_vector_element %155, 1i
-            %157:f32 = div %154, %156
-            %158:vec2<f32> = construct %145, %157
-            %viewFloorCoord:ptr<function, vec2<f32>, read_write> = var, %158
-            %160:f32 = load %viewNear
-            %161:f32 = negation %160
-            %162:f32 = load_vector_element %ceilCoord, 0u
-            %163:f32 = mul %161, %162
-            %164:ptr<function, vec4<f32>, read_write> = access %M, 2i
-            %165:f32 = load_vector_element %164, 0i
-            %166:f32 = load %viewNear
-            %167:f32 = mul %165, %166
-            %168:f32 = sub %163, %167
-            %169:ptr<function, vec4<f32>, read_write> = access %M, 0i
-            %170:f32 = load_vector_element %169, 0i
-            %171:f32 = div %168, %170
-            %172:f32 = load %viewNear
-            %173:f32 = negation %172
-            %174:f32 = load_vector_element %ceilCoord, 1u
-            %175:f32 = mul %173, %174
-            %176:ptr<function, vec4<f32>, read_write> = access %M, 2i
-            %177:f32 = load_vector_element %176, 1i
-            %178:f32 = load %viewNear
-            %179:f32 = mul %177, %178
-            %180:f32 = sub %175, %179
-            %181:ptr<function, vec4<f32>, read_write> = access %M, 1i
-            %182:f32 = load_vector_element %181, 1i
-            %183:f32 = div %180, %182
-            %184:vec2<f32> = construct %171, %183
-            %viewCeilCoord:ptr<function, vec2<f32>, read_write> = var, %184
-            %186:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, 0i
-            %187:f32 = load_vector_element %viewFloorCoord, 0u
-            %188:f32 = negation %187
-            %189:f32 = load %viewNear
-            %190:f32 = div %188, %189
-            %191:vec4<f32> = construct 1.0f, 0.0f, %190, 0.0f
-            store %186, %191
-            %192:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, 1i
-            %193:f32 = load_vector_element %viewCeilCoord, 0u
-            %194:f32 = load %viewNear
-            %195:f32 = div %193, %194
-            %196:vec4<f32> = construct -1.0f, 0.0f, %195, 0.0f
-            store %192, %196
-            %197:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, 2i
-            %198:f32 = load_vector_element %viewFloorCoord, 1u
-            %199:f32 = negation %198
-            %200:f32 = load %viewNear
-            %201:f32 = div %199, %200
-            %202:vec4<f32> = construct 0.0f, 1.0f, %201, 0.0f
-            store %197, %202
-            %203:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, 3i
-            %204:f32 = load_vector_element %viewCeilCoord, 1u
-            %205:f32 = load %viewNear
-            %206:f32 = div %204, %205
-            %207:vec4<f32> = construct 0.0f, -1.0f, %206, 0.0f
-            store %203, %207
-            %dp:ptr<function, f32, read_write> = var, 0.0f
-            loop [i: $B15, b: $B16, c: $B17] {  # loop_3
-              $B15: {  # initializer
-                %i:ptr<function, u32, read_write> = var, 0u
-                next_iteration  # -> $B16
-              }
-              $B16: {  # body
-                %210:u32 = load %i
-                %211:bool = lt %210, 6u
-                if %211 [t: $B18, f: $B19] {  # if_5
-                  $B18: {  # true
-                    exit_if  # if_5
-                  }
-                  $B19: {  # false
-                    exit_loop  # loop_3
-                  }
-                }
-                %p:ptr<function, vec4<f32>, read_write> = var
-                %213:u32 = load %i
-                %214:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, %213
-                %215:f32 = load_vector_element %214, 0u
-                %216:bool = gt %215, 0.0f
-                if %216 [t: $B20, f: $B21] {  # if_6
-                  $B20: {  # true
-                    %217:f32 = load_vector_element %boxMax, 0u
-                    store_vector_element %p, 0u, %217
-                    exit_if  # if_6
-                  }
-                  $B21: {  # false
-                    %218:f32 = load_vector_element %boxMin, 0u
-                    store_vector_element %p, 0u, %218
-                    exit_if  # if_6
-                  }
-                }
-                %219:u32 = load %i
-                %220:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, %219
-                %221:f32 = load_vector_element %220, 1u
-                %222:bool = gt %221, 0.0f
-                if %222 [t: $B22, f: $B23] {  # if_7
-                  $B22: {  # true
-                    %223:f32 = load_vector_element %boxMax, 1u
-                    store_vector_element %p, 1u, %223
-                    exit_if  # if_7
-                  }
-                  $B23: {  # false
-                    %224:f32 = load_vector_element %boxMin, 1u
-                    store_vector_element %p, 1u, %224
-                    exit_if  # if_7
-                  }
-                }
-                %225:u32 = load %i
-                %226:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, %225
-                %227:f32 = load_vector_element %226, 2u
-                %228:bool = gt %227, 0.0f
-                if %228 [t: $B24, f: $B25] {  # if_8
-                  $B24: {  # true
-                    %229:f32 = load_vector_element %boxMax, 2u
-                    store_vector_element %p, 2u, %229
-                    exit_if  # if_8
-                  }
-                  $B25: {  # false
-                    %230:f32 = load_vector_element %boxMin, 2u
-                    store_vector_element %p, 2u, %230
-                    exit_if  # if_8
-                  }
-                }
-                store_vector_element %p, 3u, 1.0f
-                %231:f32 = load %dp
-                %232:f32 = let %231
-                %233:vec4<f32> = load %p
-                %234:u32 = load %i
-                %235:ptr<function, vec4<f32>, read_write> = access %frustumPlanes, %234
-                %236:vec4<f32> = load %235
-                %237:f32 = dot %233, %236
-                %238:f32 = min 0.0f, %237
-                %239:f32 = add %232, %238
-                store %dp, %239
-                continue  # -> $B17
-              }
-              $B17: {  # continuing
-                %240:u32 = load %i
-                %241:u32 = add %240, 1u
-                store %i, %241
-                next_iteration  # -> $B16
-              }
-            }
-            %242:f32 = load %dp
-            %243:bool = gte %242, 0.0f
-            if %243 [t: $B26] {  # if_9
-              $B26: {  # true
-                %244:i32 = load %x
-                %245:i32 = load %y
-                %246:i32 = mul %245, %TILE_COUNT_X
-                %247:i32 = add %244, %246
-                %248:u32 = convert %247
-                %tileId:ptr<function, u32, read_write> = var, %248
-                %250:u32 = load %tileId
-                %251:bool = lt %250, 0u
-                %252:bool = if %251 [t: $B27, f: $B28] {  # if_10
-                  $B27: {  # true
-                    exit_if true  # if_10
-                  }
-                  $B28: {  # false
-                    %253:u32 = load %tileId
-                    %254:ptr<uniform, u32, read> = access %config, 1u
-                    %255:u32 = load %254
-                    %256:bool = gte %253, %255
-                    exit_if %256  # if_10
-                  }
-                }
-                if %252 [t: $B29] {  # if_11
-                  $B29: {  # true
-                    continue  # -> $B12
-                  }
-                }
-                %257:u32 = load %tileId
-                %258:ptr<storage, atomic<u32>, read_write> = access %tileLightId, 0u, %257, 0u
-                %259:u32 = atomicAdd %258, 1u
-                %offset:ptr<function, u32, read_write> = var, %259
-                %261:u32 = load %offset
-                %262:ptr<uniform, u32, read> = access %config, 4u
-                %263:u32 = load %262
-                %264:bool = gte %261, %263
-                if %264 [t: $B30] {  # if_12
-                  $B30: {  # true
-                    continue  # -> $B12
-                  }
-                }
-                %265:u32 = load %tileId
-                %266:u32 = load %offset
-                %267:ptr<storage, u32, read_write> = access %tileLightId, 0u, %265, 1u, %266
-                %268:u32 = access %GlobalInvocationID, 0u
-                store %267, %268
-                exit_if  # if_9
-              }
-            }
-            continue  # -> $B12
-          }
-          $B12: {  # continuing
-            %269:i32 = load %x
-            %270:i32 = add %269, 1i
-            store %x, %270
-            next_iteration  # -> $B11
-          }
-        }
-        continue  # -> $B7
       }
-      $B7: {  # continuing
-        %271:i32 = load %y
-        %272:i32 = add %271, 1i
-        store %y, %272
-        next_iteration  # -> $B6
+      {
+        y = (y + 1);
       }
+      continue;
     }
-    ret
   }
 }
-
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], device LightsBuffer* lightsBuffer [[buffer(2)]], device Tiles* tileLightId [[buffer(3)]], const constant Config* config [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.lightsBuffer=lightsBuffer, .tileLightId=tileLightId, .config=config, .uniforms=uniforms};
+  tint_symbol_inner(GlobalInvocationID, tint_module_vars);
+}

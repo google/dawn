@@ -4797,12 +4797,18 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [25] */
+    /* fn dot[N : num, T : f32_f16](vec<N, T>, vec<N, T>) -> T */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(160),
+  },
+  {
+    /* [26] */
     /* fn length[N : num, T : f32_f16](vec<N, T>) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(161),
   },
   {
-    /* [26] */
+    /* [27] */
     /* fn threadgroup_barrier(u32) */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(162),
