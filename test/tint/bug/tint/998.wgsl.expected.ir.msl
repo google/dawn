@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Constants {
   uint zero;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -18,9 +20,11 @@ struct tint_array {
 struct S {
   tint_array<uint, 3> data;
 };
+
 struct Result {
   uint value;
 };
+
 struct tint_module_vars_struct {
   const constant Constants* constants;
   device Result* result;

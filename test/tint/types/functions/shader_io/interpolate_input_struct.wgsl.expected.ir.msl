@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct In {
   float none;
   float flat;
@@ -12,6 +13,7 @@ struct In {
   float perspective_default;
   float linear_default;
 };
+
 struct tint_symbol_inputs {
   float In_none [[user(locn0)]];
   float In_flat [[user(locn1)]] [[flat]];
@@ -27,6 +29,7 @@ struct tint_symbol_inputs {
 
 void tint_symbol_inner(In in) {
 }
+
 fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
   tint_symbol_inner(In{.none=inputs.In_none, .flat=inputs.In_flat, .perspective_center=inputs.In_perspective_center, .perspective_centroid=inputs.In_perspective_centroid, .perspective_sample=inputs.In_perspective_sample, .linear_center=inputs.In_linear_center, .linear_centroid=inputs.In_linear_centroid, .linear_sample=inputs.In_linear_sample, .perspective_default=inputs.In_perspective_default, .linear_default=inputs.In_linear_default});
 }

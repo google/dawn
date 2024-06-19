@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   const constant half4x2* u;
   thread half4x2* p;

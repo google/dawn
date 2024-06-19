@@ -12,6 +12,7 @@
 
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_symbol_inputs {
   float x [[user(locn0)]];
 };
@@ -19,6 +20,7 @@ struct tint_symbol_inputs {
 int tint_f32_to_i32(float value) {
   return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
+
 void tint_symbol_inner(float x) {
   switch(tint_f32_to_i32(x)) {
     default:
@@ -28,6 +30,7 @@ void tint_symbol_inner(float x) {
     }
   }
 }
+
 fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
   tint_symbol_inner(inputs.x);
 }

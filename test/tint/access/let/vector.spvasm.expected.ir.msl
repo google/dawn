@@ -6,6 +6,7 @@ void main_1() {
   float2 const x_13 = float2(1.0f, 3.0f);
   float3 const x_14 = float3(1.0f, 3.0f, 2.0f);
 }
+
 kernel void tint_symbol() {
   main_1();
 }

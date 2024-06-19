@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -16,6 +17,7 @@ struct Inner {
   int scalar_i32;
   float scalar_f32;
 };
+
 struct S {
   float scalar_f32;
   int scalar_i32;
@@ -42,6 +44,7 @@ struct S {
   Inner struct_inner;
   tint_array<Inner, 4> array_struct_inner;
 };
+
 struct tint_module_vars_struct {
   device S* sb;
 };
@@ -63,21 +66,25 @@ void tint_store_and_preserve_padding_3(device tint_array<float3, 2>* const targe
     }
   }
 }
+
 void tint_store_and_preserve_padding_2(device float4x3* const target, float4x3 value_param) {
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
   (*target)[2u] = value_param[2u];
   (*target)[3u] = value_param[3u];
 }
+
 void tint_store_and_preserve_padding_1(device float3x3* const target, float3x3 value_param) {
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
   (*target)[2u] = value_param[2u];
 }
+
 void tint_store_and_preserve_padding(device float2x3* const target, float2x3 value_param) {
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
 }
+
 kernel void tint_symbol(device S* sb [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
   (*tint_module_vars.sb).scalar_f32 = 0.0f;

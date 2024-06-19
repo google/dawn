@@ -94,6 +94,7 @@ TEST_F(MslWriterTest, BinaryDivU32) {
 uint tint_div_u32(uint lhs, uint rhs) {
   return (lhs / select(rhs, 1u, (rhs == 0u)));
 }
+
 void foo() {
   uint const left = 1u;
   uint const right = 2u;
@@ -118,6 +119,7 @@ uint tint_mod_u32(uint lhs, uint rhs) {
   uint const v = select(rhs, 1u, (rhs == 0u));
   return (lhs - ((lhs / v) * v));
 }
+
 void foo() {
   uint const left = 1u;
   uint const right = 2u;

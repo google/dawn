@@ -6,6 +6,7 @@ int c() {
   a = (a + 2);
   return a;
 }
+
 void b() {
   int b_1 = c();
   int const v = c();

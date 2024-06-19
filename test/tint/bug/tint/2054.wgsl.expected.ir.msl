@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   device float* out;
 };
@@ -16,6 +17,7 @@ void bar(thread float* const p) {
   bool const cond = v;
   (*p) = select(a, b, cond);
 }
+
 kernel void foo(device float* out [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out=out};
   float param = 0.0f;

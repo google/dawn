@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   texture2d_ms<float, access::read> t_f;
   texture2d_ms<int, access::read> t_i;

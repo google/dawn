@@ -12,6 +12,7 @@
 
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_symbol_inputs {
   float x [[user(locn0)]];
 };
@@ -27,6 +28,7 @@ void tint_symbol_inner(float x) {
     }
   }
 }
+
 fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
   tint_symbol_inner(inputs.x);
 }

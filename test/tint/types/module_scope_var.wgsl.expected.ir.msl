@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,6 +16,7 @@ struct tint_array {
 struct S {
   float a;
 };
+
 struct tint_module_vars_struct {
   thread bool* bool_var;
   thread int* i32_var;
@@ -28,6 +30,7 @@ struct tint_module_vars_struct {
   thread S* struct_var;
   threadgroup float* wg_var;
 };
+
 struct tint_symbol_2 {
   float tint_symbol_1;
 };
@@ -49,6 +52,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   (*tint_module_vars.struct_var) = S{};
   (*tint_module_vars.wg_var) = 42.0f;
 }
+
 kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   thread bool bool_var = false;
   thread int i32_var = 0;

@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct FragmentInput {
   float4 position;
   float4 view_position;
@@ -7,6 +8,7 @@ struct FragmentInput {
   float2 uv;
   float4 color;
 };
+
 struct Uniforms {
   float4x4 worldView;
   float4x4 proj;
@@ -14,6 +16,7 @@ struct Uniforms {
   uint color_source;
   float4 color;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -29,21 +32,26 @@ struct tint_array {
 struct PointLight {
   float4 position;
 };
+
 struct PointLights {
   tint_array<PointLight, 1> values;
 };
+
 struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
   const device PointLights* pointLights;
   sampler mySampler;
   texture2d<float, access::sample> myTexture;
 };
+
 struct FragmentOutput {
   float4 color;
 };
+
 struct tint_symbol_1_outputs {
   float4 FragmentOutput_color [[color(0)]];
 };
+
 struct tint_symbol_1_inputs {
   float4 FragmentInput_view_position [[user(locn0)]];
   float4 FragmentInput_normal [[user(locn1)]];
@@ -71,11 +79,13 @@ float4 getColor(FragmentInput tint_symbol, tint_module_vars_struct tint_module_v
   }
   return color;
 }
+
 FragmentOutput tint_symbol_1_inner(FragmentInput tint_symbol, tint_module_vars_struct tint_module_vars) {
   FragmentOutput output = {};
   output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   return output;
 }
+
 fragment tint_symbol_1_outputs tint_symbol_1(float4 FragmentInput_position [[position]], tint_symbol_1_inputs inputs [[stage_in]], const constant Uniforms* uniforms [[buffer(0)]], sampler mySampler [[sampler(0)]], texture2d<float, access::sample> myTexture [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .mySampler=mySampler, .myTexture=myTexture};
   return tint_symbol_1_outputs{.FragmentOutput_color=tint_symbol_1_inner(FragmentInput{.position=FragmentInput_position, .view_position=inputs.FragmentInput_view_position, .normal=inputs.FragmentInput_normal, .uv=inputs.FragmentInput_uv, .color=inputs.FragmentInput_color}, tint_module_vars).color};

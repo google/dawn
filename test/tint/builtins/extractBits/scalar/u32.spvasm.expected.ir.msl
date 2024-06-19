@@ -10,6 +10,7 @@ void f_1() {
   uint const v_3 = min(offset_1, 32u);
   uint const x_11 = extract_bits(v_1, v_3, min(v_2, (32u - v_3)));
 }
+
 kernel void f() {
   f_1();
 }

@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct MyStruct {
   float f1;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }

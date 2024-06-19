@@ -3,6 +3,7 @@ using namespace metal;
 
 void some_loop_body() {
 }
+
 void f() {
   int j = 0;
   {

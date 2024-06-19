@@ -1,23 +1,28 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Mat4x3_ {
   float4 mx;
   float4 my;
   float4 mz;
 };
+
 struct Mat4x4_ {
   float4 mx;
   float4 my;
   float4 mz;
   float4 mw;
 };
+
 struct Mat4x2_ {
   float4 mx;
   float4 my;
 };
+
 struct ub_SceneParams {
   Mat4x4_ u_Projection;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -34,9 +39,11 @@ struct ub_MaterialParams {
   tint_array<Mat4x2_, 1> u_TexMtx;
   float4 u_Misc0_;
 };
+
 struct ub_PacketParams {
   tint_array<Mat4x3_, 32> u_PosMtx;
 };
+
 struct tint_module_vars_struct {
   const constant ub_SceneParams* global;
   const constant ub_MaterialParams* global1;
@@ -50,16 +57,19 @@ struct tint_module_vars_struct {
   thread float2* v_TexCoord;
   thread float4* gl_Position;
 };
+
 struct VertexOutput {
   float4 v_Color;
   float2 v_TexCoord;
   float4 member;
 };
+
 struct tint_symbol_outputs {
   float4 VertexOutput_v_Color [[user(locn0)]];
   float2 VertexOutput_v_TexCoord [[user(locn1)]];
   float4 VertexOutput_member [[position]];
 };
+
 struct tint_symbol_inputs {
   float3 a_Position [[attribute(0)]];
   float2 a_UV [[attribute(1)]];
@@ -76,6 +86,7 @@ float3 Mat4x3GetCol0_(Mat4x3_ m) {
   Mat4x3_ const x_e8 = m1;
   return float3(x_e2.mx[0u], x_e5.my[0u], x_e8.mz[0u]);
 }
+
 float3 Mat4x3GetCol1_(Mat4x3_ m2) {
   Mat4x3_ m3 = {};
   m3 = m2;
@@ -84,6 +95,7 @@ float3 Mat4x3GetCol1_(Mat4x3_ m2) {
   Mat4x3_ const x_e8 = m3;
   return float3(x_e2.mx[1u], x_e5.my[1u], x_e8.mz[1u]);
 }
+
 float3 Mat4x3GetCol2_(Mat4x3_ m4) {
   Mat4x3_ m5 = {};
   m5 = m4;
@@ -92,6 +104,7 @@ float3 Mat4x3GetCol2_(Mat4x3_ m4) {
   Mat4x3_ const x_e8 = m5;
   return float3(x_e2.mx[2u], x_e5.my[2u], x_e8.mz[2u]);
 }
+
 float3 Mat4x3GetCol3_(Mat4x3_ m6) {
   Mat4x3_ m7 = {};
   m7 = m6;
@@ -100,6 +113,7 @@ float3 Mat4x3GetCol3_(Mat4x3_ m6) {
   Mat4x3_ const x_e8 = m7;
   return float3(x_e2.mx[3u], x_e5.my[3u], x_e8.mz[3u]);
 }
+
 float4 Mul(Mat4x4_ m8, float4 v) {
   Mat4x4_ m9 = {};
   float4 v1 = 0.0f;
@@ -118,6 +132,7 @@ float4 Mul(Mat4x4_ m8, float4 v) {
   float const v_3 = dot(x_e12.mz, x_e14);
   return float4(v_1, v_2, v_3, dot(x_e16.mw, x_e18));
 }
+
 float3 Mul1(Mat4x3_ m10, float4 v2) {
   Mat4x3_ m11 = {};
   float4 v3 = 0.0f;
@@ -133,6 +148,7 @@ float3 Mul1(Mat4x3_ m10, float4 v2) {
   float const v_5 = dot(x_e8.my, x_e10);
   return float3(v_4, v_5, dot(x_e12.mz, x_e14));
 }
+
 float2 Mul2(Mat4x2_ m12, float4 v4) {
   Mat4x2_ m13 = {};
   float4 v5 = 0.0f;
@@ -145,6 +161,7 @@ float2 Mul2(Mat4x2_ m12, float4 v4) {
   float const v_6 = dot(x_e4.mx, x_e6);
   return float2(v_6, dot(x_e8.my, x_e10));
 }
+
 float4 Mul3(float3 v6, Mat4x3_ m14) {
   float3 v7 = 0.0f;
   Mat4x3_ m15 = {};
@@ -167,6 +184,7 @@ float4 Mul3(float3 v6, Mat4x3_ m14) {
   float const v_9 = dot(x_e16, x_e17);
   return float4(v_7, v_8, v_9, dot(x_e21, x_e22));
 }
+
 Mat4x4_ x_Mat4x4_(float n) {
   float n1 = 0.0f;
   Mat4x4_ o = {};
@@ -182,6 +200,7 @@ Mat4x4_ x_Mat4x4_(float n) {
   Mat4x4_ const x_e27 = o;
   return x_e27;
 }
+
 Mat4x4_ x_Mat4x4_1(Mat4x3_ m16) {
   Mat4x3_ m17 = {};
   Mat4x4_ o1 = {};
@@ -197,6 +216,7 @@ Mat4x4_ x_Mat4x4_1(Mat4x3_ m16) {
   Mat4x4_ const x_e15 = o1;
   return x_e15;
 }
+
 Mat4x4_ x_Mat4x4_2(Mat4x2_ m18) {
   Mat4x2_ m19 = {};
   Mat4x4_ o2 = {};
@@ -210,6 +230,7 @@ Mat4x4_ x_Mat4x4_2(Mat4x2_ m18) {
   Mat4x4_ const x_e12 = o2;
   return x_e12;
 }
+
 Mat4x3_ x_Mat4x3_(float n2) {
   float n3 = 0.0f;
   Mat4x3_ o3 = {};
@@ -223,6 +244,7 @@ Mat4x3_ x_Mat4x3_(float n2) {
   Mat4x3_ const x_e21 = o3;
   return x_e21;
 }
+
 Mat4x3_ x_Mat4x3_1(Mat4x4_ m20) {
   Mat4x4_ m21 = {};
   Mat4x3_ o4 = {};
@@ -236,9 +258,11 @@ Mat4x3_ x_Mat4x3_1(Mat4x4_ m20) {
   Mat4x3_ const x_e12 = o4;
   return x_e12;
 }
+
 int tint_f32_to_i32(float value) {
   return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
+
 void main1(tint_module_vars_struct tint_module_vars) {
   Mat4x3_ t_PosMtx = {};
   float2 t_TexSpaceCoord = 0.0f;
@@ -282,6 +306,7 @@ void main1(tint_module_vars_struct tint_module_vars) {
   }
   /* unreachable */
 }
+
 VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a_Normal, float a_PosMtxIdx, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.a_Position1) = a_Position;
   (*tint_module_vars.a_UV1) = a_UV;
@@ -294,6 +319,7 @@ VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, f
   float4 const x_e15 = (*tint_module_vars.gl_Position);
   return VertexOutput{.v_Color=x_e11, .v_TexCoord=x_e13, .member=x_e15};
 }
+
 vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant ub_SceneParams* global [[buffer(1)]], const constant ub_MaterialParams* global1 [[buffer(2)]], const constant ub_PacketParams* global2 [[buffer(0)]]) {
   thread float3 a_Position1 = 0.0f;
   thread float2 a_UV1 = 0.0f;

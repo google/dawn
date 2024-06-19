@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,6 +16,7 @@ struct tint_array {
 struct tint_module_vars_struct {
   threadgroup tint_array<int, 3>* zero;
 };
+
 struct tint_symbol_2 {
   tint_array<int, 3> tint_symbol_1;
 };
@@ -38,6 +40,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_array<int, 3> v = (*tint_module_vars.zero);
 }
+
 kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_3 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.zero=(&(*v_3).tint_symbol_1)};
   tint_symbol_inner(tint_local_index, tint_module_vars);

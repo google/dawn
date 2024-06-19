@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -12,10 +13,10 @@ struct tint_array {
   T elements[N];
 };
 
-
 int foo() {
   return 1;
 }
+
 fragment void tint_symbol() {
   tint_array<float, 4> arr = tint_array<float, 4>{};
   {

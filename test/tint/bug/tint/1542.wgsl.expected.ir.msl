@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct UniformBuffer {
   int3 d;
 };
+
 struct tint_module_vars_struct {
   const constant UniformBuffer* u_input;
 };

@@ -1,10 +1,12 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S {
   int before;
   float3x4 m;
   int after;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -27,6 +29,7 @@ void tint_store_and_preserve_padding_1(device S* const target, S value_param) {
   (*target).m = value_param.m;
   (*target).after = value_param.after;
 }
+
 void tint_store_and_preserve_padding(device tint_array<S, 4>* const target, tint_array<S, 4> value_param) {
   {
     uint v = 0u;
@@ -44,6 +47,7 @@ void tint_store_and_preserve_padding(device tint_array<S, 4>* const target, tint
     }
   }
 }
+
 kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]], device tint_array<S, 4>* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   tint_store_and_preserve_padding(tint_module_vars.s, (*tint_module_vars.u));

@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_symbol_outputs {
   float4 tint_symbol_1 [[position]];
 };
+
 struct tint_symbol_inputs {
   int loc0 [[attribute(0)]];
   uint loc1 [[attribute(1)]];
@@ -21,6 +23,7 @@ float4 tint_symbol_inner(int loc0, uint loc1, float loc2, float4 loc3, half loc4
   half3 const y = loc5;
   return float4(0.0f);
 }
+
 vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
   return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner(inputs.loc0, inputs.loc1, inputs.loc2, inputs.loc3, inputs.loc4, inputs.loc5)};
 }

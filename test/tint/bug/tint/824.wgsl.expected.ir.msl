@@ -1,9 +1,11 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Output {
   float4 Position;
   float4 color;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -30,6 +32,7 @@ Output tint_symbol_inner(uint VertexIndex, uint InstanceIndex) {
   output.color = colors[InstanceIndex];
   return output;
 }
+
 vertex tint_symbol_outputs tint_symbol(uint VertexIndex [[vertex_id]], uint InstanceIndex [[instance_id]]) {
   Output const v = tint_symbol_inner(VertexIndex, InstanceIndex);
   return tint_symbol_outputs{.Output_Position=v.Position, .Output_color=v.color};

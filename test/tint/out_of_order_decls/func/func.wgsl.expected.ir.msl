@@ -3,6 +3,7 @@ using namespace metal;
 
 void f2() {
 }
+
 fragment void f1() {
   f2();
 }

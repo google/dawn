@@ -4,6 +4,7 @@ using namespace metal;
 void main_1() {
   float const x_24 = 5.0f;
 }
+
 kernel void tint_symbol() {
   main_1();
 }

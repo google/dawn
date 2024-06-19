@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,12 +16,14 @@ struct tint_array {
 struct S {
   tint_array<int4, 4> arr;
 };
+
 struct tint_module_vars_struct {
   thread tint_array<int4, 4>* src_private;
   threadgroup tint_array<int4, 4>* src_workgroup;
   const constant S* src_uniform;
   device S* src_storage;
 };
+
 struct tint_symbol_2 {
   tint_array<int4, 4> tint_symbol_1;
 };
@@ -28,9 +31,11 @@ struct tint_symbol_2 {
 tint_array<int4, 4> ret_arr() {
   return tint_array<int4, 4>{};
 }
+
 S ret_struct_arr() {
   return S{};
 }
+
 void foo(tint_array<int4, 4> src_param, tint_module_vars_struct tint_module_vars) {
   tint_array<int4, 4> src_function = {};
   tint_array<int4, 4> dst = {};
@@ -49,6 +54,7 @@ void foo(tint_array<int4, 4> src_param, tint_module_vars_struct tint_module_vars
   tint_array<tint_array<tint_array<int, 2>, 3>, 4> src_nested = {};
   dst_nested = src_nested;
 }
+
 void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
     uint v = 0u;
@@ -69,6 +75,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   tint_array<int4, 4> const val = tint_array<int4, 4>{};
   foo(val, tint_module_vars);
 }
+
 kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_2 [[threadgroup(0)]], const constant S* src_uniform [[buffer(0)]], device S* src_storage [[buffer(1)]]) {
   thread tint_array<int4, 4> src_private = {};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src_private=(&src_private), .src_workgroup=(&(*v_2).tint_symbol_1), .src_uniform=src_uniform, .src_storage=src_storage};

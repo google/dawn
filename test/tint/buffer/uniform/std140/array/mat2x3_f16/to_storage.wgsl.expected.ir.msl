@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -21,6 +22,7 @@ void tint_store_and_preserve_padding_1(device half2x3* const target, half2x3 val
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
 }
+
 void tint_store_and_preserve_padding(device tint_array<half2x3, 4>* const target, tint_array<half2x3, 4> value_param) {
   {
     uint v = 0u;
@@ -38,6 +40,7 @@ void tint_store_and_preserve_padding(device tint_array<half2x3, 4>* const target
     }
   }
 }
+
 kernel void f(const constant tint_array<half2x3, 4>* u [[buffer(0)]], device tint_array<half2x3, 4>* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   tint_store_and_preserve_padding(tint_module_vars.s, (*tint_module_vars.u));

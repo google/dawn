@@ -1,9 +1,11 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Uniforms {
   uint i;
   uint j;
 };
+
 struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
   thread float2x4* m1;

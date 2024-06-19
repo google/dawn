@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,6 +16,7 @@ struct tint_array {
 struct OutputBuf {
   tint_array<uint, 1> result;
 };
+
 struct Uniforms {
   uint dstTextureFlipY;
   uint channelCount;
@@ -22,6 +24,7 @@ struct Uniforms {
   uint2 dstCopyOrigin;
   uint2 copySize;
 };
+
 struct tint_module_vars_struct {
   texture2d<float, access::sample> src;
   texture2d<float, access::sample> dst;
@@ -32,6 +35,7 @@ struct tint_module_vars_struct {
 bool aboutEqual(float value, float expect) {
   return (abs((value - expect)) < 0.00100000004749745131f);
 }
+
 void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
   uint const v = tint_module_vars.src.get_width(0u);
   uint2 const srcSize = uint2(v, tint_module_vars.src.get_height(0u));
@@ -122,6 +126,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
     (*tint_module_vars.output).result[outputIndex] = 0u;
   }
 }
+
 kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms};
   tint_symbol_inner(GlobalInvocationID, tint_module_vars);

@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Scene {
   float4 vEyePosition;
 };
+
 struct Material {
   float4 vDiffuseColor;
   float3 vAmbientColor;
@@ -10,9 +12,11 @@ struct Material {
   float3 vEmissiveColor;
   float placeholder2;
 };
+
 struct Mesh {
   float visibility;
 };
+
 struct tint_module_vars_struct {
   thread float* fClipDistance3;
   thread float* fClipDistance4;
@@ -22,12 +26,15 @@ struct tint_module_vars_struct {
   thread float4* glFragColor;
   thread bool* continue_execution;
 };
+
 struct main_out {
   float4 glFragColor_1;
 };
+
 struct tint_symbol_outputs {
   float4 main_out_glFragColor_1 [[color(0)]];
 };
+
 struct tint_symbol_inputs {
   float fClipDistance3_param [[user(locn2)]];
   float fClipDistance4_param [[user(locn3)]];
@@ -110,6 +117,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   float4 const x_147 = color;
   (*tint_module_vars.glFragColor) = x_147;
 }
+
 main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_param, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.fClipDistance3) = fClipDistance3_param;
   (*tint_module_vars.fClipDistance4) = fClipDistance4_param;
@@ -120,6 +128,7 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   }
   return v_3;
 }
+
 fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant Scene* x_29 [[buffer(0)]], const constant Material* x_49 [[buffer(1)]], const constant Mesh* x_137 [[buffer(2)]]) {
   thread float fClipDistance3 = 0.0f;
   thread float fClipDistance4 = 0.0f;

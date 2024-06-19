@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   threadgroup atomic_int* arg_0;
 };
+
 struct tint_symbol_1 {
   atomic_int tint_symbol;
 };
@@ -14,6 +16,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
   threadgroup_barrier(mem_flags::mem_threadgroup);
   int res = atomic_fetch_sub_explicit(tint_module_vars.arg_0, -1, memory_order_relaxed);
 }
+
 kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=(&(*v).tint_symbol)};
   compute_main_inner(tint_local_index, tint_module_vars);

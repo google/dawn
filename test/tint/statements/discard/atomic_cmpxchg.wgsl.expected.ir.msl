@@ -1,13 +1,16 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
+
 struct tint_module_vars_struct {
   device atomic_int* a;
   thread bool* continue_execution;
 };
+
 struct foo_outputs {
   int tint_symbol [[color(0)]];
 };
@@ -17,6 +20,7 @@ atomic_compare_exchange_result_i32 v(device atomic_int* const atomic_ptr, int cm
   bool const v_1 = atomic_compare_exchange_weak_explicit(atomic_ptr, (&old_value), val, memory_order_relaxed, memory_order_relaxed);
   return atomic_compare_exchange_result_i32{.old_value=old_value, .exchanged=v_1};
 }
+
 int foo_inner(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.continue_execution) = false;
   int x = 0;
@@ -33,6 +37,7 @@ int foo_inner(tint_module_vars_struct tint_module_vars) {
   }
   return x;
 }
+
 fragment foo_outputs foo(device atomic_int* a [[buffer(0)]]) {
   thread bool continue_execution = true;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .continue_execution=(&continue_execution)};

@@ -1,14 +1,18 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S1 {
   int i;
 };
+
 struct S2 {
   S1 s1;
 };
+
 struct S3 {
   S2 s2;
 };
+
 struct tint_module_vars_struct {
   thread S3* P;
   device int* out;

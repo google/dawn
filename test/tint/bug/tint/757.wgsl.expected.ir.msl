@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Constants {
   int level;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -18,6 +20,7 @@ struct tint_array {
 struct Result {
   tint_array<float, 1> values;
 };
+
 struct tint_module_vars_struct {
   const constant Constants* constants;
   texture2d_array<float, access::sample> myTexture;
@@ -43,6 +46,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
     }
   }
 }
+
 kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d_array<float, access::sample> myTexture [[texture(0)]], device Result* result [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.myTexture=myTexture, .result=result};
   tint_symbol_inner(GlobalInvocationID, tint_module_vars);

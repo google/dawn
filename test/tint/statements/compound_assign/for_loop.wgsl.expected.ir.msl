@@ -1,14 +1,17 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S {
   int a;
   float4 b;
   float2x2 c;
 };
+
 struct tint_module_vars_struct {
   device S* v;
   thread uint* i;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -21,19 +24,21 @@ struct tint_array {
   T elements[N];
 };
 
-
 int idx1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.i) = ((*tint_module_vars.i) + 1u);
   return 1;
 }
+
 int idx2(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.i) = ((*tint_module_vars.i) + 2u);
   return 1;
 }
+
 int idx3(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.i) = ((*tint_module_vars.i) + 3u);
   return 1;
 }
+
 void foo(tint_module_vars_struct tint_module_vars) {
   tint_array<float, 4> a = tint_array<float, 4>{};
   {

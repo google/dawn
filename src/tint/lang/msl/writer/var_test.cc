@@ -106,7 +106,8 @@ TEST_F(MslWriterTest, VarStruct) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct MyStruct {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct MyStruct {
   float a;
   int4 b;
 };
@@ -267,13 +268,15 @@ TEST_F(MslWriterTest, VarGlobalPrivate) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct tint_module_vars_struct {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct tint_module_vars_struct {
   thread float* v;
 };
 
 void foo(tint_module_vars_struct tint_module_vars) {
   float const a = (*tint_module_vars.v);
 }
+
 fragment void frag() {
   thread float v = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&v)};
@@ -296,7 +299,8 @@ TEST_F(MslWriterTest, VarGlobalWorkgroup) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct tint_module_vars_struct {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct tint_module_vars_struct {
   threadgroup float* v;
 };
 

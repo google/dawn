@@ -1,13 +1,16 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct FragmentInputs0 {
   float4 position;
   int loc0;
 };
+
 struct FragmentInputs1 {
   float4 loc3;
   uint sample_mask;
 };
+
 struct tint_symbol_inputs {
   int FragmentInputs0_loc0 [[user(locn0)]] [[flat]];
   uint loc1 [[user(locn1)]] [[flat]];
@@ -25,6 +28,7 @@ void tint_symbol_inner(FragmentInputs0 inputs0, bool front_facing, uint loc1, ui
     float4 const v = inputs1.loc3;
   }
 }
+
 fragment void tint_symbol(float4 FragmentInputs0_position [[position]], tint_symbol_inputs inputs [[stage_in]], bool front_facing [[front_facing]], uint sample_index [[sample_id]], uint FragmentInputs1_sample_mask [[sample_mask]]) {
   FragmentInputs0 const v_1 = FragmentInputs0{.position=FragmentInputs0_position, .loc0=inputs.FragmentInputs0_loc0};
   tint_symbol_inner(v_1, front_facing, inputs.loc1, sample_index, FragmentInputs1{.loc3=inputs.FragmentInputs1_loc3, .sample_mask=FragmentInputs1_sample_mask}, inputs.loc2);

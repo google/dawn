@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -19,6 +20,7 @@ struct str {
 void func(thread tint_array<int, 4>* const pointer) {
   (*pointer) = tint_array<int, 4>{};
 }
+
 kernel void tint_symbol() {
   str F = {};
   func((&F.arr));

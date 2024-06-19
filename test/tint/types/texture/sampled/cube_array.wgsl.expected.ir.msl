@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   texturecube_array<float, access::sample> t_f;
   texturecube_array<int, access::sample> t_i;

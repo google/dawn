@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   threadgroup int* i;
 };
+
 struct tint_symbol_2 {
   int tint_symbol_1;
 };
@@ -16,6 +18,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   threadgroup int* const p = tint_module_vars.i;
   int const u = ((*p) + 1);
 }
+
 kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.i=(&(*v).tint_symbol_1)};
   tint_symbol_inner(tint_local_index, tint_module_vars);

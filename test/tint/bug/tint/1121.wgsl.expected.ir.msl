@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -17,16 +18,20 @@ struct LightData {
   float3 color;
   float radius;
 };
+
 struct LightsBuffer {
   tint_array<LightData, 1> lights;
 };
+
 struct TileLightIdData {
   atomic_uint count;
   tint_array<uint, 64> lightId;
 };
+
 struct Tiles {
   tint_array<TileLightIdData, 4> data;
 };
+
 struct Config {
   uint numLights;
   uint numTiles;
@@ -35,6 +40,7 @@ struct Config {
   uint numTileLightSlot;
   uint tileSize;
 };
+
 struct Uniforms {
   float4 min;
   float4 max;
@@ -42,6 +48,7 @@ struct Uniforms {
   float4x4 projectionMatrix;
   float4 fullScreenSize;
 };
+
 struct tint_module_vars_struct {
   device LightsBuffer* lightsBuffer;
   device Tiles* tileLightId;
@@ -173,6 +180,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
     }
   }
 }
+
 kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], device LightsBuffer* lightsBuffer [[buffer(2)]], device Tiles* tileLightId [[buffer(3)]], const constant Config* config [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.lightsBuffer=lightsBuffer, .tileLightId=tileLightId, .config=config, .uniforms=uniforms};
   tint_symbol_inner(GlobalInvocationID, tint_module_vars);

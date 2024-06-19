@@ -4,6 +4,7 @@ using namespace metal;
 float4 func(thread float4* const pointer) {
   return (*pointer);
 }
+
 kernel void tint_symbol() {
   float4 F = 0.0f;
   float4 const r = func((&F));

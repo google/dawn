@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,11 +16,13 @@ struct tint_array {
 struct Matrix {
   tint_array<float, 1> numbers;
 };
+
 struct Uniforms {
   uint dimAOuter;
   uint dimInner;
   uint dimBOuter;
 };
+
 struct tint_module_vars_struct {
   const device Matrix* firstMatrix;
   const device Matrix* secondMatrix;
@@ -28,6 +31,7 @@ struct tint_module_vars_struct {
   threadgroup tint_array<tint_array<float, 64>, 64>* mm_Asub;
   threadgroup tint_array<tint_array<float, 64>, 64>* mm_Bsub;
 };
+
 struct tint_symbol_3 {
   tint_array<tint_array<float, 64>, 64> tint_symbol_1;
   tint_array<tint_array<float, 64>, 64> tint_symbol_2;
@@ -46,6 +50,7 @@ float mm_readA(uint row, uint col, tint_module_vars_struct tint_module_vars) {
   }
   return 0.0f;
 }
+
 float mm_readB(uint row, uint col, tint_module_vars_struct tint_module_vars) {
   bool v_1 = false;
   if ((row < (*tint_module_vars.uniforms).dimInner)) {
@@ -59,6 +64,7 @@ float mm_readB(uint row, uint col, tint_module_vars_struct tint_module_vars) {
   }
   return 0.0f;
 }
+
 void mm_write(uint row, uint col, float value, tint_module_vars_struct tint_module_vars) {
   bool v_2 = false;
   if ((row < (*tint_module_vars.uniforms).dimAOuter)) {
@@ -71,9 +77,11 @@ void mm_write(uint row, uint col, float value, tint_module_vars_struct tint_modu
     (*tint_module_vars.resultMatrix).numbers[index] = value;
   }
 }
+
 uint tint_div_u32(uint lhs, uint rhs) {
   return (lhs / select(rhs, 1u, (rhs == 0u)));
 }
+
 void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
     uint v_3 = 0u;
@@ -277,6 +285,7 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
     }
   }
 }
+
 kernel void tint_symbol(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint tint_local_index [[thread_index_in_threadgroup]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], threadgroup tint_symbol_3* v_6 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .mm_Asub=(&(*v_6).tint_symbol_1), .mm_Bsub=(&(*v_6).tint_symbol_2)};
   tint_symbol_inner(local_id, global_id, tint_local_index, tint_module_vars);

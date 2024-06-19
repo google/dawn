@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct strided_arr {
   float el;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -18,9 +20,11 @@ struct tint_array {
 struct strided_arr_1 {
   tint_array<tint_array<strided_arr, 2>, 3> el;
 };
+
 struct S {
   tint_array<strided_arr_1, 4> a;
 };
+
 struct tint_module_vars_struct {
   device S* s;
 };
@@ -28,6 +32,7 @@ struct tint_module_vars_struct {
 void tint_store_and_preserve_padding_4(device strided_arr* const target, strided_arr value_param) {
   (*target).el = value_param.el;
 }
+
 void tint_store_and_preserve_padding_3(device tint_array<strided_arr, 2>* const target, tint_array<strided_arr, 2> value_param) {
   {
     uint v = 0u;
@@ -45,6 +50,7 @@ void tint_store_and_preserve_padding_3(device tint_array<strided_arr, 2>* const 
     }
   }
 }
+
 void tint_store_and_preserve_padding_2(device tint_array<tint_array<strided_arr, 2>, 3>* const target, tint_array<tint_array<strided_arr, 2>, 3> value_param) {
   {
     uint v_2 = 0u;
@@ -62,9 +68,11 @@ void tint_store_and_preserve_padding_2(device tint_array<tint_array<strided_arr,
     }
   }
 }
+
 void tint_store_and_preserve_padding_1(device strided_arr_1* const target, strided_arr_1 value_param) {
   tint_store_and_preserve_padding_2((&(*target).el), value_param.el);
 }
+
 void tint_store_and_preserve_padding(device tint_array<strided_arr_1, 4>* const target, tint_array<strided_arr_1, 4> value_param) {
   {
     uint v_4 = 0u;
@@ -82,6 +90,7 @@ void tint_store_and_preserve_padding(device tint_array<strided_arr_1, 4>* const 
     }
   }
 }
+
 void f_1(tint_module_vars_struct tint_module_vars) {
   tint_array<strided_arr_1, 4> const x_19 = (*tint_module_vars.s).a;
   tint_array<tint_array<strided_arr, 2>, 3> const x_24 = (*tint_module_vars.s).a[3].el;
@@ -90,6 +99,7 @@ void f_1(tint_module_vars_struct tint_module_vars) {
   tint_store_and_preserve_padding((&(*tint_module_vars.s).a), tint_array<strided_arr_1, 4>{});
   (*tint_module_vars.s).a[3].el[2][1].el = 5.0f;
 }
+
 kernel void f(device S* s [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
   f_1(tint_module_vars);

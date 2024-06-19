@@ -58,10 +58,12 @@ TEST_F(MslWriterTest, WorkgroupAllocations) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   threadgroup int* a;
   threadgroup int* b;
 };
+
 struct tint_symbol_2 {
   int tint_symbol;
   int tint_symbol_1;
@@ -75,8 +77,10 @@ void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) 
   threadgroup_barrier(mem_flags::mem_threadgroup);
   (*tint_module_vars.a) = ((*tint_module_vars.a) + (*tint_module_vars.b));
 }
+
 kernel void bar() {
 }
+
 kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol), .b=(&(*v).tint_symbol_1)};
   foo_inner(tint_local_index, tint_module_vars);
@@ -108,6 +112,7 @@ TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {
     ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -152,6 +157,7 @@ TEST_F(MslWriterTest, NeedsStorageBufferSizes_True) {
     ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }

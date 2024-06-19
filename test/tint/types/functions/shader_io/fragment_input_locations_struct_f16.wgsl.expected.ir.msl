@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct FragmentInputs {
   int loc0;
   uint loc1;
@@ -8,6 +9,7 @@ struct FragmentInputs {
   half loc4;
   half3 loc5;
 };
+
 struct tint_symbol_inputs {
   int FragmentInputs_loc0 [[user(locn0)]] [[flat]];
   uint FragmentInputs_loc1 [[user(locn1)]] [[flat]];
@@ -25,6 +27,7 @@ void tint_symbol_inner(FragmentInputs inputs) {
   half const x = inputs.loc4;
   half3 const y = inputs.loc5;
 }
+
 fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
   tint_symbol_inner(FragmentInputs{.loc0=inputs.FragmentInputs_loc0, .loc1=inputs.FragmentInputs_loc1, .loc2=inputs.FragmentInputs_loc2, .loc3=inputs.FragmentInputs_loc3, .loc4=inputs.FragmentInputs_loc4, .loc5=inputs.FragmentInputs_loc5});
 }

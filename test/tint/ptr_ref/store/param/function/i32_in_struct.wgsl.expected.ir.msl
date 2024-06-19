@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct str {
   int i;
 };
@@ -7,6 +8,7 @@ struct str {
 void func(thread int* const pointer) {
   (*pointer) = 42;
 }
+
 kernel void tint_symbol() {
   str F = {};
   func((&F.i));

@@ -60,7 +60,8 @@ TEST_F(MslWriterTest, EntryPointParameterBufferBindingPoint) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct tint_module_vars_struct {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct tint_module_vars_struct {
   device int* storage_var;
   const constant int* uniform_var;
 };
@@ -90,6 +91,7 @@ TEST_F(MslWriterTest, EntryPointParameterHandleBindingPoint) {
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   texture2d<float, access::sample> texture;
   sampler sampler;

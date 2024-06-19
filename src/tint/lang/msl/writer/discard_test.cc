@@ -50,7 +50,8 @@ TEST_F(MslWriterTest, Discard) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct tint_module_vars_struct {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct tint_module_vars_struct {
   thread bool* continue_execution;
 };
 
@@ -59,6 +60,7 @@ void foo(tint_module_vars_struct tint_module_vars) {
     (*tint_module_vars.continue_execution) = false;
   }
 }
+
 fragment void frag_main() {
   thread bool continue_execution = true;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};

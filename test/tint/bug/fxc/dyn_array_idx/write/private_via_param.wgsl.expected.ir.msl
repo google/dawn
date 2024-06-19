@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,12 +16,15 @@ struct tint_array {
 struct S {
   tint_array<int, 64> data;
 };
+
 struct UBO {
   int dynamic_idx;
 };
+
 struct Result {
   int out;
 };
+
 struct tint_module_vars_struct {
   const constant UBO* ubo;
   device Result* result;
@@ -30,6 +34,7 @@ struct tint_module_vars_struct {
 void x(thread S* const p, tint_module_vars_struct tint_module_vars) {
   (*p).data[(*tint_module_vars.ubo).dynamic_idx] = 1;
 }
+
 kernel void f(const constant UBO* ubo [[buffer(0)]], device Result* result [[buffer(1)]]) {
   thread S s = {};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .result=result, .s=(&s)};

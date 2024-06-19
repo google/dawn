@@ -346,7 +346,8 @@ TEST_F(MslWriterTest, Constant_Struct_Splat) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct S {
   float a;
   float b;
 };
@@ -370,7 +371,8 @@ TEST_F(MslWriterTest, Constant_Struct_Composite) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct S {
   float a;
   float b;
 };
@@ -394,7 +396,8 @@ TEST_F(MslWriterTest, Constant_Struct_Composite_AnyZero) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct S {
   float a;
   float b;
 };
@@ -418,7 +421,8 @@ TEST_F(MslWriterTest, Constant_Struct_Composite_AllZero) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct S {
   float a;
   float b;
 };

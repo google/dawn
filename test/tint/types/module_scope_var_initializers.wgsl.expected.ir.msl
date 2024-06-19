@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,6 +16,7 @@ struct tint_array {
 struct S {
   float a;
 };
+
 struct tint_module_vars_struct {
   thread bool* bool_var;
   thread int* i32_var;

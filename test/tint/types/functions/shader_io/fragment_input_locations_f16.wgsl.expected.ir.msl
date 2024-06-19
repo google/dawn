@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_symbol_inputs {
   int loc0 [[user(locn0)]] [[flat]];
   uint loc1 [[user(locn1)]] [[flat]];
@@ -17,6 +18,7 @@ void tint_symbol_inner(int loc0, uint loc1, float loc2, float4 loc3, half loc4, 
   half const x = loc4;
   half3 const y = loc5;
 }
+
 fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
   tint_symbol_inner(inputs.loc0, inputs.loc1, inputs.loc2, inputs.loc3, inputs.loc4, inputs.loc5);
 }

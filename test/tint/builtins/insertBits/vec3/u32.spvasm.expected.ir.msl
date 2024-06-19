@@ -12,6 +12,7 @@ void f_1() {
   uint const v_4 = min(offset_1, 32u);
   uint3 const x_15 = insert_bits(v_1, v_2, v_4, min(v_3, (32u - v_4)));
 }
+
 kernel void f() {
   f_1();
 }

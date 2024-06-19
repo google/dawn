@@ -4,6 +4,7 @@ using namespace metal;
 uint get_u32() {
   return 1u;
 }
+
 void f() {
   uint2 v2 = uint2(get_u32());
   uint3 v3 = uint3(get_u32());

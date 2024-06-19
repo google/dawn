@@ -327,7 +327,8 @@ TEST_F(MslWriterTest, EmitType_Struct) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct S {
   int a;
   float b;
 };
@@ -351,7 +352,8 @@ TEST_F(MslWriterTest, EmitType_Struct_Dedup) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, MetalHeader() + R"(struct S {
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct S {
   int a;
   float b;
 };
@@ -524,7 +526,7 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_NonComposites) {
 
     // Check that the generated string is as expected.
     StringStream expect;
-    expect << MetalHeader() << MetalArray() << "struct S {\n";
+    expect << MetalHeader() << MetalArray() << "\nstruct S {\n";
 #define FIELD(ADDR, TYPE, ARRAY_COUNT, NAME) \
     FormatMSLField(expect, #ADDR, #TYPE, ARRAY_COUNT, #NAME);
     ALL_FIELDS()
@@ -600,14 +602,17 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_Structures) {
 
     // Check that the generated string is as expected.
     StringStream expect;
-    expect << MetalHeader() << MetalArray() << R"(struct inner_x {
+    expect << MetalHeader() << MetalArray() << R"(
+struct inner_x {
   int a;
   float b;
 };
+
 struct inner_y {
   int a;
   float b;
 };
+
 )";
 
     expect << "struct S {\n";
@@ -706,10 +711,12 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     // Check that the generated string is as expected.
     StringStream expect;
 
-    expect << MetalHeader() << MetalArray() << R"(struct inner {
+    expect << MetalHeader() << MetalArray() << R"(
+struct inner {
   int a;
   float b;
 };
+
 )";
 
     expect << "struct S {\n";
@@ -798,7 +805,7 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     // Check that the generated string is as expected.
     StringStream expect;
 
-    expect << MetalHeader() << MetalArray() << "struct S {\n";
+    expect << MetalHeader() << MetalArray() << "\nstruct S {\n";
 #define FIELD(ADDR, TYPE, ARRAY_COUNT, NAME) \
     FormatMSLField(expect, #ADDR, #TYPE, ARRAY_COUNT, #NAME);
     ALL_FIELDS()
@@ -852,7 +859,8 @@ TEST_F(MslWriterTest, AttemptTintPadSymbolCollision) {
     auto* s = MkStruct(mod, ty, "S", data);
     s->AddUsage(core::AddressSpace::kStorage);
 
-    auto expect = MetalHeader() + MetalArray() + R"(struct S {
+    auto expect = MetalHeader() + MetalArray() + R"(
+struct S {
   /* 0x0000 */ int tint_pad_2;
   /* 0x0004 */ tint_array<int8_t, 124> tint_pad_10;
   /* 0x0080 */ float tint_pad_20;

@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   thread int* P;
 };
@@ -7,6 +8,7 @@ struct tint_module_vars_struct {
 void func(thread int* const pointer) {
   (*pointer) = 42;
 }
+
 kernel void tint_symbol() {
   thread int P = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.P=(&P)};

@@ -4,6 +4,7 @@ using namespace metal;
 int get_i32() {
   return 1;
 }
+
 void f() {
   int2 v2 = int2(get_i32());
   int3 v3 = int3(get_i32());

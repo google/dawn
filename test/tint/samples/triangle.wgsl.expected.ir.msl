@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,6 +16,7 @@ struct tint_array {
 struct vtx_main_outputs {
   float4 tint_symbol [[position]];
 };
+
 struct frag_main_outputs {
   float4 tint_symbol_1 [[color(0)]];
 };
@@ -22,12 +24,15 @@ struct frag_main_outputs {
 float4 vtx_main_inner(uint VertexIndex) {
   return float4(tint_array<float2, 3>{float2(0.0f, 0.5f), float2(-0.5f), float2(0.5f, -0.5f)}[VertexIndex], 0.0f, 1.0f);
 }
+
 float4 frag_main_inner() {
   return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
+
 vertex vtx_main_outputs vtx_main(uint VertexIndex [[vertex_id]]) {
   return vtx_main_outputs{.tint_symbol=vtx_main_inner(VertexIndex)};
 }
+
 fragment frag_main_outputs frag_main() {
   return frag_main_outputs{.tint_symbol_1=frag_main_inner()};
 }

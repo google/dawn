@@ -136,7 +136,7 @@ class Printer : public tint::TextGenerator {
         }
 
         StringStream ss;
-        ss << preamble_buffer_.String() << "\n" << main_buffer_.String();
+        ss << preamble_buffer_.String() << main_buffer_.String();
         result_.msl = ss.str();
 
         return std::move(result_);
@@ -184,6 +184,7 @@ class Printer : public tint::TextGenerator {
         array_template_name_ = UniqueIdentifier("tint_array");
 
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+        Line();
         Line() << "template<typename T, size_t N>";
         Line() << "struct " << array_template_name_ << " {";
 
@@ -200,7 +201,6 @@ class Printer : public tint::TextGenerator {
             Line() << "T elements[N];";
         }
         Line() << "};";
-        Line();
 
         return array_template_name_;
     }
@@ -264,6 +264,7 @@ class Printer : public tint::TextGenerator {
     void EmitFunction(const core::ir::Function* func) {
         TINT_SCOPED_ASSIGNMENT(current_function_, func);
 
+        Line();
         {
             auto out = Line();
 
@@ -1283,7 +1284,7 @@ class Printer : public tint::TextGenerator {
         // temporary text buffer, then anything it depends on will emit to the preamble first,
         // and then it copies the text buffer into the preamble.
         TextBuffer str_buf;
-        Line(&str_buf) << "struct " << StructName(str) << " {";
+        Line(&str_buf) << "\n" << "struct " << StructName(str) << " {";
 
         bool is_host_shareable = str->IsHostShareable();
 

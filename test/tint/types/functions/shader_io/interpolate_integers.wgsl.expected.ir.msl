@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Interface {
   int i;
   uint u;
@@ -7,6 +8,7 @@ struct Interface {
   uint4 vu;
   float4 pos;
 };
+
 struct vert_main_outputs {
   int Interface_i [[user(locn0)]] [[flat]];
   uint Interface_u [[user(locn1)]] [[flat]];
@@ -14,9 +16,11 @@ struct vert_main_outputs {
   uint4 Interface_vu [[user(locn3)]] [[flat]];
   float4 Interface_pos [[position]];
 };
+
 struct frag_main_outputs {
   int tint_symbol [[color(0)]];
 };
+
 struct frag_main_inputs {
   int Interface_i [[user(locn0)]] [[flat]];
   uint Interface_u [[user(locn1)]] [[flat]];
@@ -27,13 +31,16 @@ struct frag_main_inputs {
 Interface vert_main_inner() {
   return Interface{};
 }
+
 int frag_main_inner(Interface inputs) {
   return inputs.i;
 }
+
 vertex vert_main_outputs vert_main() {
   Interface const v = vert_main_inner();
   return vert_main_outputs{.Interface_i=v.i, .Interface_u=v.u, .Interface_vi=v.vi, .Interface_vu=v.vu, .Interface_pos=v.pos};
 }
+
 fragment frag_main_outputs frag_main(frag_main_inputs inputs [[stage_in]], float4 Interface_pos [[position]]) {
   return frag_main_outputs{.tint_symbol=frag_main_inner(Interface{.i=inputs.Interface_i, .u=inputs.Interface_u, .vi=inputs.Interface_vi, .vu=inputs.Interface_vu, .pos=Interface_pos})};
 }

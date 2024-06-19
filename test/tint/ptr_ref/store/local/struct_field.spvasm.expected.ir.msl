@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S {
   int i;
 };
@@ -8,6 +9,7 @@ void main_1() {
   S V = {};
   V.i = 5;
 }
+
 kernel void tint_symbol() {
   main_1();
 }

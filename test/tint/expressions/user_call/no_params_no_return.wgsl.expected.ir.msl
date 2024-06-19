@@ -5,6 +5,7 @@ void c() {
   int a = 1;
   a = (a + 2);
 }
+
 void b() {
   c();
   c();

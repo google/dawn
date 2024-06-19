@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -22,6 +23,7 @@ int foo(threadgroup int* const p) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
   return v_1;
 }
+
 int bar(tint_module_vars_struct tint_module_vars) {
   return foo((&(*tint_module_vars.v)[0]));
 }

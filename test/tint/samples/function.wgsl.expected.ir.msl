@@ -4,5 +4,6 @@ using namespace metal;
 float tint_symbol() {
   return 0.40000000596046447754f;
 }
+
 kernel void ep() {
 }

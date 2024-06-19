@@ -1,15 +1,19 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct vertexUniformBuffer1 {
   float2x2 transform1;
 };
+
 struct vertexUniformBuffer2 {
   float2x2 transform2;
 };
+
 struct tint_module_vars_struct {
   const constant vertexUniformBuffer1* x_20;
   const constant vertexUniformBuffer2* x_26;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -36,6 +40,7 @@ float4 tint_symbol_inner(uint gl_VertexIndex, tint_module_vars_struct tint_modul
   float2 const x_52 = (float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);
   return float4(x_52[0u], x_52[1u], 0.0f, 1.0f);
 }
+
 vertex tint_symbol_outputs tint_symbol(uint gl_VertexIndex [[vertex_id]], const constant vertexUniformBuffer1* x_20 [[buffer(0)]], const constant vertexUniformBuffer2* x_26 [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_20=x_20, .x_26=x_26};
   return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner(gl_VertexIndex, tint_module_vars)};

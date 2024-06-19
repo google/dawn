@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -18,9 +19,11 @@ struct sspp962805860buildInformationS {
   int essence;
   tint_array<int, 6> orientation;
 };
+
 struct x_B4_BuildInformation {
   sspp962805860buildInformationS passthru;
 };
+
 struct tint_module_vars_struct {
   const device x_B4_BuildInformation* sspp962805860buildInformation;
 };
@@ -35,6 +38,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   orientation[4] = x_23[4u];
   orientation[5] = x_23[5u];
 }
+
 fragment void tint_symbol(const device x_B4_BuildInformation* sspp962805860buildInformation [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sspp962805860buildInformation=sspp962805860buildInformation};
   main_1(tint_module_vars);

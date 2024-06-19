@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Buffer {
   uint data;
 };
+
 struct tint_module_vars_struct {
   device Buffer* tint_symbol;
 };

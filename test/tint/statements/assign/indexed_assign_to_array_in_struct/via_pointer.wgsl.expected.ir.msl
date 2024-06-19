@@ -1,14 +1,18 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Uniforms {
   uint i;
 };
+
 struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
 };
+
 struct InnerS {
   int v;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }

@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S {
   int a;
   float b;

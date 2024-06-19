@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -18,12 +19,15 @@ struct Particle {
   float4 color;
   float3 velocity;
 };
+
 struct Particles {
   tint_array<Particle, 1> p;
 };
+
 struct Simulation {
   uint i;
 };
+
 struct tint_module_vars_struct {
   const device Particles* particles;
   const constant Simulation* sim;

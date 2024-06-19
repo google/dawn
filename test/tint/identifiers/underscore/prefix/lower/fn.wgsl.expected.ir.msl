@@ -3,14 +3,18 @@ using namespace metal;
 
 void a() {
 }
+
 void _a() {
 }
+
 void b() {
   a();
 }
+
 void _b() {
   _a();
 }
+
 kernel void tint_symbol() {
   b();
   _b();

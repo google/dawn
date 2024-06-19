@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   thread float2* v2f;
   thread int3* v3i;
@@ -26,6 +27,7 @@ void foo(tint_module_vars_struct tint_module_vars) {
     }
   }
 }
+
 kernel void tint_symbol() {
   thread float2 v2f = 0.0f;
   thread int3 v3i = 0;

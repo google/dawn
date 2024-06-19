@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -16,6 +17,7 @@ struct Buf {
   uint count;
   tint_array<uint, 50> data;
 };
+
 struct tint_module_vars_struct {
   device Buf* b;
 };
@@ -24,6 +26,7 @@ uint tint_mod_u32(uint lhs, uint rhs) {
   uint const v = select(rhs, 1u, (rhs == 0u));
   return (lhs - ((lhs / v) * v));
 }
+
 kernel void tint_symbol(device Buf* b [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=b};
   uint i = 0u;

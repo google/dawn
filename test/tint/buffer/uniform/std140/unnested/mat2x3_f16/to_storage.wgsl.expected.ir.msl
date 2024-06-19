@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   const constant half2x3* u;
   device half2x3* s;
@@ -9,6 +10,7 @@ void tint_store_and_preserve_padding(device half2x3* const target, half2x3 value
   (*target)[0u] = value_param[0u];
   (*target)[1u] = value_param[1u];
 }
+
 kernel void f(const constant half2x3* u [[buffer(0)]], device half2x3* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   tint_store_and_preserve_padding(tint_module_vars.s, (*tint_module_vars.u));

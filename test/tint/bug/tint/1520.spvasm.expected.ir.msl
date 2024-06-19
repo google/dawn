@@ -1,23 +1,28 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct UniformBuffer {
   float unknownInput_S1_c0;
   float4 ucolorRed_S1_c0;
   float4 ucolorGreen_S1_c0;
   float3x3 umatrix_S1;
 };
+
 struct tint_module_vars_struct {
   const constant UniformBuffer* x_4;
   thread float4* sk_FragColor;
   thread bool* sk_Clockwise;
   thread float4* vcolor_S0;
 };
+
 struct main_out {
   float4 sk_FragColor_1;
 };
+
 struct tint_symbol_outputs {
   float4 main_out_sk_FragColor_1 [[color(0)]];
 };
+
 struct tint_symbol_inputs {
   float4 vcolor_S0_param [[user(locn0)]];
 };
@@ -25,9 +30,11 @@ struct tint_symbol_inputs {
 int4 tint_div_v4i32(int4 lhs, int4 rhs) {
   return (lhs / select(rhs, int4(1), ((rhs == int4(0)) | ((lhs == int4((-2147483647 - 1))) & (rhs == int4(-1))))));
 }
+
 int tint_f32_to_i32(float value) {
   return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
+
 bool test_int_S1_c0_b(tint_module_vars_struct tint_module_vars) {
   int unknown = 0;
   bool ok = false;
@@ -79,6 +86,7 @@ bool test_int_S1_c0_b(tint_module_vars_struct tint_module_vars) {
   ok = x_66;
   return x_66;
 }
+
 void main_1(tint_module_vars_struct tint_module_vars) {
   float4 outputColor_S0 = 0.0f;
   float4 output_S1 = 0.0f;
@@ -148,12 +156,14 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   output_S1 = x_116;
   (*tint_module_vars.sk_FragColor) = x_125;
 }
+
 main_out tint_symbol_inner(bool sk_Clockwise_param, float4 vcolor_S0_param, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.sk_Clockwise) = sk_Clockwise_param;
   (*tint_module_vars.vcolor_S0) = vcolor_S0_param;
   main_1(tint_module_vars);
   return main_out{.sk_FragColor_1=(*tint_module_vars.sk_FragColor)};
 }
+
 fragment tint_symbol_outputs tint_symbol(bool sk_Clockwise_param [[front_facing]], tint_symbol_inputs inputs [[stage_in]], const constant UniformBuffer* x_4 [[buffer(0)]]) {
   thread float4 sk_FragColor = 0.0f;
   thread bool sk_Clockwise = false;

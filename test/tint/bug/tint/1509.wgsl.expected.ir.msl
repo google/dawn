@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   thread uint* v0;
   thread uint* v1;
@@ -1002,6 +1003,7 @@ struct tint_module_vars_struct {
   thread uint* v998;
   thread uint* v999;
 };
+
 struct tint_symbol_outputs {
   uint tint_symbol_1 [[color(0)]];
 };
@@ -2010,9 +2012,11 @@ uint foo(tint_module_vars_struct tint_module_vars) {
   x = (x + (*tint_module_vars.v999));
   return x;
 }
+
 uint tint_symbol_inner(tint_module_vars_struct tint_module_vars) {
   return foo(tint_module_vars);
 }
+
 fragment tint_symbol_outputs tint_symbol() {
   thread uint v0 = 0u;
   thread uint v1 = 0u;

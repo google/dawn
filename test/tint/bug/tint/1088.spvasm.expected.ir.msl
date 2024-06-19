@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,12 +16,14 @@ struct tint_array {
 struct strided_arr {
   float el;
 };
+
 struct LeftOver {
   float4x4 worldViewProjection;
   float time;
   tint_array<float4x4, 2> test2;
   tint_array<strided_arr, 4> test;
 };
+
 struct tint_module_vars_struct {
   thread float3* position_1;
   const constant LeftOver* x_14;
@@ -29,14 +32,17 @@ struct tint_module_vars_struct {
   thread float3* normal;
   thread float4* gl_Position;
 };
+
 struct main_out {
   float4 gl_Position;
   float2 vUV_1;
 };
+
 struct tint_symbol_outputs {
   float4 main_out_gl_Position [[position]];
   float2 main_out_vUV_1 [[user(locn0)]];
 };
+
 struct tint_symbol_inputs {
   float3 position_1_param [[attribute(0)]];
   float2 uv_param [[attribute(2)]];
@@ -57,6 +63,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.vUV) = (*tint_module_vars.uv);
   (*tint_module_vars.gl_Position)[1u] = ((*tint_module_vars.gl_Position)[1u] * -1.0f);
 }
+
 main_out tint_symbol_inner(float3 position_1_param, float2 uv_param, float3 normal_param, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.position_1) = position_1_param;
   (*tint_module_vars.uv) = uv_param;
@@ -64,6 +71,7 @@ main_out tint_symbol_inner(float3 position_1_param, float2 uv_param, float3 norm
   main_1(tint_module_vars);
   return main_out{.gl_Position=(*tint_module_vars.gl_Position), .vUV_1=(*tint_module_vars.vUV)};
 }
+
 vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant LeftOver* x_14 [[buffer(0)]]) {
   thread float3 position_1 = 0.0f;
   thread float2 vUV = 0.0f;

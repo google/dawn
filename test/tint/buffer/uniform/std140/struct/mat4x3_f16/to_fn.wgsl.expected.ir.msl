@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -17,20 +18,26 @@ struct S {
   half4x3 m;
   int after;
 };
+
 struct tint_module_vars_struct {
   const constant tint_array<S, 4>* u;
 };
 
 void a(tint_array<S, 4> a_1) {
 }
+
 void b(S s) {
 }
+
 void c(half4x3 m) {
 }
+
 void d(half3 v) {
 }
+
 void e(half f) {
 }
+
 kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   a((*tint_module_vars.u));

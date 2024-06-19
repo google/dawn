@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   thread int* global;
 };
@@ -7,6 +8,7 @@ struct tint_module_vars_struct {
 int tint_f32_to_i32(float value) {
   return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
+
 void foo(float x) {
   switch(tint_f32_to_i32(x)) {
     default:
@@ -15,10 +17,12 @@ void foo(float x) {
     }
   }
 }
+
 int baz(int x, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.global) = 42;
   return x;
 }
+
 void bar(float x, tint_module_vars_struct tint_module_vars) {
   switch(baz(tint_f32_to_i32(x), tint_module_vars)) {
     default:
@@ -27,5 +31,6 @@ void bar(float x, tint_module_vars_struct tint_module_vars) {
     }
   }
 }
+
 void tint_symbol() {
 }

@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -11,7 +12,6 @@ struct tint_array {
   const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
   T elements[N];
 };
-
 
 int f() {
   tint_array<int, 8> const a = tint_array<int, 8>{1, 2, 3, 4, 5, 6, 7, 8};

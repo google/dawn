@@ -1,11 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct Constants {
   uint zero;
 };
+
 struct Result {
   uint value;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -21,6 +24,7 @@ struct tint_array {
 struct TestData {
   tint_array<atomic_int, 3> data;
 };
+
 struct tint_module_vars_struct {
   const constant Constants* constants;
   device Result* result;
@@ -30,6 +34,7 @@ struct tint_module_vars_struct {
 int runTest(tint_module_vars_struct tint_module_vars) {
   return atomic_load_explicit((&(*tint_module_vars.s).data[(0u + uint((*tint_module_vars.constants).zero))]), memory_order_relaxed);
 }
+
 kernel void tint_symbol(const constant Constants* constants [[buffer(0)]], device Result* result [[buffer(1)]], device TestData* s [[buffer(2)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.constants=constants, .result=result, .s=s};
   (*tint_module_vars.result).value = uint(runTest(tint_module_vars));

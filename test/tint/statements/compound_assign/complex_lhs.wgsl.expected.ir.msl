@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   thread int* counter;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -23,10 +25,12 @@ int foo(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.counter) = ((*tint_module_vars.counter) + 1);
   return (*tint_module_vars.counter);
 }
+
 int bar(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.counter) = ((*tint_module_vars.counter) + 2);
   return (*tint_module_vars.counter);
 }
+
 void tint_symbol(tint_module_vars_struct tint_module_vars) {
   S x = S{};
   thread S* const p = (&x);

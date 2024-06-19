@@ -4,6 +4,7 @@ using namespace metal;
 void main_1() {
   uint x_10 = 0u;
 }
+
 kernel void tint_symbol() {
   main_1();
 }

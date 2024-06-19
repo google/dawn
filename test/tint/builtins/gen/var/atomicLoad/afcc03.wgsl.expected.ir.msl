@@ -1,9 +1,11 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct tint_module_vars_struct {
   threadgroup atomic_int* arg_0;
   device int* prevent_dce;
 };
+
 struct tint_symbol_1 {
   atomic_int tint_symbol;
 };
@@ -12,6 +14,7 @@ int atomicLoad_afcc03(tint_module_vars_struct tint_module_vars) {
   int res = atomic_load_explicit(tint_module_vars.arg_0, memory_order_relaxed);
   return res;
 }
+
 void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index == 0u)) {
     atomic_store_explicit(tint_module_vars.arg_0, 0, memory_order_relaxed);
@@ -19,6 +22,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
   threadgroup_barrier(mem_flags::mem_threadgroup);
   (*tint_module_vars.prevent_dce) = atomicLoad_afcc03(tint_module_vars);
 }
+
 kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]], device int* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=(&(*v).tint_symbol), .prevent_dce=prevent_dce};
   compute_main_inner(tint_local_index, tint_module_vars);

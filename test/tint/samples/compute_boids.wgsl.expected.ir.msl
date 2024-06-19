@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct SimParams {
   float deltaT;
   float rule1Distance;
@@ -9,6 +10,7 @@ struct SimParams {
   float rule2Scale;
   float rule3Scale;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -25,22 +27,27 @@ struct Particle {
   float2 pos;
   float2 vel;
 };
+
 struct Particles {
   tint_array<Particle, 5> particles;
 };
+
 struct tint_module_vars_struct {
   const constant SimParams* params;
   device Particles* particlesA;
   device Particles* particlesB;
 };
+
 struct vert_main_outputs {
   float4 tint_symbol [[position]];
 };
+
 struct vert_main_inputs {
   float2 a_particlePos [[attribute(0)]];
   float2 a_particleVel [[attribute(1)]];
   float2 a_pos [[attribute(2)]];
 };
+
 struct frag_main_outputs {
   float4 tint_symbol_1 [[color(0)]];
 };
@@ -53,9 +60,11 @@ float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos)
   float2 pos = float2(v_1, (v_2 + (a_pos[1u] * cos(angle))));
   return float4((pos + a_particlePos), 0.0f, 1.0f);
 }
+
 float4 frag_main_inner() {
   return float4(1.0f);
 }
+
 void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
   uint index = gl_GlobalInvocationID[0u];
   if ((index >= 5u)) {
@@ -135,12 +144,15 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
   (*tint_module_vars.particlesB).particles[index].pos = vPos;
   (*tint_module_vars.particlesB).particles[index].vel = vVel;
 }
+
 vertex vert_main_outputs vert_main(vert_main_inputs inputs [[stage_in]]) {
   return vert_main_outputs{.tint_symbol=vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos)};
 }
+
 fragment frag_main_outputs frag_main() {
   return frag_main_outputs{.tint_symbol_1=frag_main_inner()};
 }
+
 kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], const constant SimParams* params [[buffer(0)]], device Particles* particlesA [[buffer(1)]], device Particles* particlesB [[buffer(2)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.params=params, .particlesA=particlesA, .particlesB=particlesB};
   comp_main_inner(gl_GlobalInvocationID, tint_module_vars);

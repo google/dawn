@@ -4,6 +4,7 @@ using namespace metal;
 void main_1() {
   uint const x_88 = 58u;
 }
+
 fragment void tint_symbol() {
   main_1();
 }

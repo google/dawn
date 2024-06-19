@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct str {
   int i;
 };
+
 struct tint_module_vars_struct {
   device str* S;
 };
@@ -10,6 +12,7 @@ struct tint_module_vars_struct {
 void func(device int* const pointer) {
   (*pointer) = 42;
 }
+
 kernel void tint_symbol(device str* S [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=S};
   func((&(*tint_module_vars.S).i));

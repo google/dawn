@@ -1,5 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -15,6 +16,7 @@ struct tint_array {
 struct S {
   tint_array<int4, 4> a;
 };
+
 struct tint_module_vars_struct {
   device tint_array<S, 1>* tint_symbol;
   thread uint* v;
@@ -24,26 +26,32 @@ int idx1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
   return 1;
 }
+
 int idx2(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
   return 2;
 }
+
 int idx3(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
   return 3;
 }
+
 int idx4(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
   return 4;
 }
+
 int idx5(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
   return 0;
 }
+
 int idx6(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.v) = ((*tint_module_vars.v) - 1u);
   return 2;
 }
+
 void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
   {
     int const v_1 = idx1(tint_module_vars);

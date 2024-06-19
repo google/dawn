@@ -1,20 +1,24 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S1 {
   int a;
   int b;
   int c;
   int d;
 };
+
 struct S2 {
   int e;
   S1 f;
 };
+
 struct S3 {
   int g;
   S1 h;
   S2 i;
 };
+
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }

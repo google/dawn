@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S {
   int i;
 };
+
 struct tint_module_vars_struct {
   thread S* V;
 };
@@ -10,6 +12,7 @@ struct tint_module_vars_struct {
 void main_1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.V).i = 5;
 }
+
 kernel void tint_symbol() {
   thread S V = {};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.V=(&V)};

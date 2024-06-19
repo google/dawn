@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S {
   int3 v;
 };
+
 struct tint_module_vars_struct {
   thread S* P;
 };

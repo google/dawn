@@ -4,6 +4,7 @@ using namespace metal;
 bool get_bool() {
   return true;
 }
+
 void f() {
   bool2 v2 = bool2(get_bool());
   bool3 v3 = bool3(get_bool());

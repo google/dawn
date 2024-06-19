@@ -1,8 +1,10 @@
 #include <metal_stdlib>
 using namespace metal;
+
 struct S {
   float f;
 };
+
 struct tint_module_vars_struct {
   const device S* in;
   device S* out;
