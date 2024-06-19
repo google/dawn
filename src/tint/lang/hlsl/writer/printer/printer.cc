@@ -57,6 +57,7 @@
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
+#include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/let.h"
@@ -68,6 +69,7 @@
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
+#include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -234,11 +236,13 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::Call* i) { EmitCallStmt(i); },                       //
                 [&](const core::ir::Continue*) { EmitContinue(); },                      //
                 [&](const core::ir::ExitLoop*) { EmitExitLoop(); },                      //
+                [&](const core::ir::ExitSwitch*) { EmitExitSwitch(); },                  //
                 [&](const core::ir::If* i) { EmitIf(i); },                               //
                 [&](const core::ir::Let* i) { EmitLet(i); },                             //
                 [&](const core::ir::Loop* l) { EmitLoop(l); },                           //
                 [&](const core::ir::Return* i) { EmitReturn(i); },                       //
                 [&](const core::ir::Store* i) { EmitStore(i); },                         //
+                [&](const core::ir::Switch* i) { EmitSwitch(i); },                       //
                 [&](const core::ir::Unreachable*) { EmitUnreachable(); },                //
                 [&](const core::ir::Var* v) { EmitVar(v); },                             //
                                                                                          //
@@ -255,6 +259,44 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::Swizzle*) { /* inlined */ },                         //
                 TINT_ICE_ON_NO_MATCH);
         }
+    }
+
+    void EmitExitSwitch() { Line() << "break;"; }
+
+    void EmitSwitch(const core::ir::Switch* s) {
+        // TODO(dsinclair): Create transform to replace default only switch
+        // BUG(crbug.com/tint/1188): work around default-only switches
+        TINT_ASSERT(!(s->Cases().Length() == 1 && s->Cases()[0].selectors.Length() == 1 &&
+                      s->Cases()[0].selectors[0].IsDefault()));
+
+        {
+            auto out = Line();
+            out << "switch(";
+            EmitValue(out, s->Condition());
+            out << ") {";
+        }
+        {
+            const ScopedIndent blk(current_buffer_);
+            for (auto& case_ : s->Cases()) {
+                for (auto& sel : case_.selectors) {
+                    if (sel.IsDefault()) {
+                        Line() << "default:";
+                    } else {
+                        auto out = Line();
+                        out << "case ";
+                        EmitValue(out, sel.val);
+                        out << ":";
+                    }
+                }
+                Line() << "{";
+                {
+                    const ScopedIndent ci(current_buffer_);
+                    EmitBlock(case_.block);
+                }
+                Line() << "}";
+            }
+        }
+        Line() << "}";
     }
 
     /// Emit an if instruction

@@ -1,0 +1,200 @@
+// Copyright 2024 The Dawn & Tint Authors
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+#include "src/tint/lang/hlsl/writer/helper_test.h"
+
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+
+namespace tint::hlsl::writer {
+namespace {
+
+TEST_F(HlslWriterTest, Switch) {
+    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        auto* a = b.Var("a", b.Zero<i32>());
+        auto* s = b.Switch(a);
+        b.Append(b.Case(s, {b.Constant(5_i)}), [&] { b.ExitSwitch(s); });
+        b.Append(b.DefaultCase(s), [&] { b.ExitSwitch(s); });
+        b.Return(f);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  int a = 0;
+  switch(a) {
+    case 5:
+    {
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, SwitchMixedDefault) {
+    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        auto* a = b.Var("a", b.Zero<i32>());
+        auto* s = b.Switch(a);
+        auto* c = b.Case(s, {b.Constant(5_i), nullptr});
+        b.Append(c, [&] { b.ExitSwitch(s); });
+        b.Return(f);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  int a = 0;
+  switch(a) {
+    case 5:
+    default:
+    {
+      break;
+    }
+  }
+}
+
+)");
+}
+
+// TODO(dsinclair): Needs transfrom to convert single default switch to while loop
+TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseNoSideEffectsCondition) {
+    // var<private> cond : i32;
+    // var<private> a : i32;
+    // fn test() {
+    //   switch(cond) {
+    //     default: {
+    //       a = 42;
+    //     }
+    //   }
+    // }
+
+    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        auto* cond = b.Var("cond", b.Zero<i32>());
+        auto* a = b.Var("a", b.Zero<i32>());
+        auto* s = b.Switch(cond);
+        b.Append(b.DefaultCase(s), [&] {
+            b.Store(a, 42_i);
+            b.ExitSwitch(s);
+        });
+        b.Return(f);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  while(true) {
+    a = 42;
+    break;
+  }
+}
+
+)");
+}
+
+// TODO(dsinclair): Needs transfrom to convert single default switch to while loop
+TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseSideEffectsCondition) {
+    // var<private> global : i32;
+    // fn bar() -> i32 {
+    //   global = 84;
+    //   return global;
+    // }
+    //
+    // var<private> a : i32;
+    // fn test() {
+    //   switch(bar()) {
+    //     default: {
+    //       a = 42;
+    //     }
+    //   }
+    // }
+
+    auto* global = b.Var("global", b.Zero<i32>());
+    auto* a = b.Var("a", b.Zero<i32>());
+    b.ir.root_block->Append(global);
+    b.ir.root_block->Append(a);
+
+    auto* bar = b.Function("bar", ty.i32());
+    b.Append(bar->Block(), [&] {
+        b.Store(global, 84_i);
+        b.Return(bar, b.Load(global));
+    });
+
+    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        auto* cond = b.Call(bar);
+        auto* s = b.Switch(cond);
+        b.Append(b.DefaultCase(s), [&] {
+            b.Store(a, 42_i);
+            b.ExitSwitch(s);
+        });
+        b.Return(f);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+static int global = 0;
+static int a = 0;
+
+int bar() {
+  global = 84;
+  return global;
+}
+
+[numthreads(1, 1, 1)]
+void foo() {
+  bar();
+  while(true) {
+    a = 42;
+    break;
+  }
+}
+
+)");
+}
+
+}  // namespace
+}  // namespace tint::hlsl::writer
