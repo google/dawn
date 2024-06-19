@@ -32,6 +32,18 @@
 
 #define TINT_REQUIRE_SEMICOLON static_assert(true)
 
+#if defined(__has_attribute)
+#define TINT_HAS_ATTRIBUTE(x) __has_attribute(x)
+#else
+#define TINT_HAS_ATTRIBUTE(x) 0
+#endif
+
+#if TINT_HAS_ATTRIBUTE(no_sanitize)
+#define TINT_NO_SANITIZE(instrumentation) __attribute__((no_sanitize(instrumentation)))
+#else
+#define TINT_NO_SANITIZE(instrumentation)
+#endif
+
 #if defined(_MSC_VER) && !defined(__clang__)
 ////////////////////////////////////////////////////////////////////////////////
 // MSVC

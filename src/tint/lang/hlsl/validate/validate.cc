@@ -57,6 +57,21 @@ TINT_END_DISABLE_ALL_WARNINGS();
 // the SUCCEEDED and FAILED macros that C-style cast to HRESULT.
 TINT_DISABLE_WARNING_OLD_STYLE_CAST
 
+namespace {
+using PFN_DXC_CREATE_INSTANCE = HRESULT(__stdcall*)(REFCLSID rclsid,
+                                                    REFIID riid,
+                                                    LPVOID* ppCompiler);
+
+// Wrap the call to DxcCreateInstance via the dlsym-loaded function pointer
+// to disable UBSAN on it. This is to workaround a known UBSAN false
+// positive: https://github.com/google/sanitizers/issues/911
+TINT_NO_SANITIZE("undefined")
+HRESULT CallDxcCreateInstance(PFN_DXC_CREATE_INSTANCE dxc_create_instance,
+                              CComPtr<IDxcCompiler3>& dxc_compiler) {
+    return dxc_create_instance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxc_compiler));
+}
+}  // namespace
+
 namespace tint::hlsl::validate {
 
 Result ValidateUsingDXC(const std::string& dxc_path,
@@ -97,8 +112,6 @@ Result ValidateUsingDXC(const std::string& dxc_path,
     HRESULT hr;
 
     // Load the dll and get the DxcCreateInstance function
-    using PFN_DXC_CREATE_INSTANCE =
-        HRESULT(__stdcall*)(REFCLSID rclsid, REFIID riid, LPVOID * ppCompiler);
     PFN_DXC_CREATE_INSTANCE dxc_create_instance = nullptr;
 #ifdef _WIN32
     HMODULE dxcLib = LoadLibraryA(dxc_path.c_str());
@@ -136,7 +149,7 @@ Result ValidateUsingDXC(const std::string& dxc_path,
     }
 
     CComPtr<IDxcCompiler3> dxc_compiler;
-    hr = dxc_create_instance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxc_compiler));
+    hr = CallDxcCreateInstance(dxc_create_instance, dxc_compiler);
     CHECK_HR(hr, "DxcCreateInstance failed");
 
     for (auto ep : entry_points) {
