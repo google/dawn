@@ -410,6 +410,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Access* a) { EmitAccess(out, a); },                    //
                     [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },                //
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },  //
+                    [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },                  //
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },              //
                     [&](const core::ir::Load* l) { EmitLoad(out, l); },                        //
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },                //
@@ -419,6 +420,25 @@ class Printer : public tint::TextGenerator {
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitUnary(StringStream& out, const core::ir::CoreUnary* u) {
+        switch (u->Op()) {
+            case core::UnaryOp::kNegation:
+                out << "-";
+                break;
+            case core::UnaryOp::kComplement:
+                out << "~";
+                break;
+            case core::UnaryOp::kNot:
+                out << "!";
+                break;
+            default:
+                TINT_UNIMPLEMENTED() << u->Op();
+        }
+        out << "(";
+        EmitValue(out, u->Val());
+        out << ")";
     }
 
     void EmitSwizzle(StringStream& out, const core::ir::Swizzle* swizzle) {
