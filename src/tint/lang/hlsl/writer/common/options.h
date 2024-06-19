@@ -173,6 +173,12 @@ struct PixelLocalOptions {
 
 /// Configuration options used for generating HLSL.
 struct Options {
+    /// The downstream compiler to be used
+    enum class Compiler : uint8_t {
+        kFXC,
+        kDXC,
+    };
+
     /// Constructor
     Options();
     /// Destructor
@@ -205,6 +211,9 @@ struct Options {
     /// `unpack4xI8` and `unpack4xU8` builtins
     bool polyfill_pack_unpack_4x8 = false;
 
+    /// The downstream compiler which will be used
+    Compiler compiler = Compiler::kDXC;
+
     /// Options used to specify a mapping of binding points to indices into a UBO
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
@@ -231,6 +240,7 @@ struct Options {
                  polyfill_dot_4x8_packed,
                  disable_polyfill_integer_div_mod,
                  polyfill_pack_unpack_4x8,
+                 compiler,
                  array_length_from_uniform,
                  interstage_locations,
                  root_constant_binding_point,
@@ -244,6 +254,7 @@ namespace tint {
 
 /// Reflect valid value ranges for the PixelLocalOptions::TexelFormat enum.
 TINT_REFLECT_ENUM_RANGE(hlsl::writer::PixelLocalOptions::TexelFormat, kR32Sint, kR32Float);
+TINT_REFLECT_ENUM_RANGE(hlsl::writer::Options::Compiler, kFXC, kDXC);
 
 }  // namespace tint
 

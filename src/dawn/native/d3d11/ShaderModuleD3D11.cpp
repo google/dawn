@@ -240,6 +240,9 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
+    // D3D11 only supports FXC
+    req.hlsl.tintOptions.compiler = tint::hlsl::writer::Options::Compiler::kFXC;
+
     // TODO(dawn:1705): do we need to support it?
     req.hlsl.tintOptions.polyfill_reflect_vec2_f32 = false;
 
