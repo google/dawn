@@ -43,6 +43,13 @@ function(bundle_libraries output_target)
       endif()
     endforeach()
 
+    get_target_property(link_libraries ${input_target} INTERFACE_LINK_LIBRARIES)
+    foreach(dependency IN LISTS link_libraries)
+      if(TARGET ${dependency})
+        get_dependencies(${dependency})
+      endif()
+    endforeach()
+
     set(all_dependencies ${all_dependencies} PARENT_SCOPE)
   endfunction()
 
