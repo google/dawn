@@ -95,6 +95,7 @@ if (tint_build_unittests) {
         "access_test.cc",
         "binary_test.cc",
         "constant_test.cc",
+        "construct_test.cc",
         "function_test.cc",
         "helper_test.h",
         "if_test.cc",
