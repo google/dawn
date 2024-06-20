@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/resolver/validator.h"
 
 #include <algorithm>
+#include <bitset>
 #include <limits>
 #include <string_view>
 #include <tuple>
@@ -1235,10 +1236,6 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // sem::Function since it would be useful there too.
     Hashset<core::BuiltinValue, 4> builtins;
     Hashset<std::pair<uint32_t, uint32_t>, 8> locations_and_blend_srcs;
-    const ast::LocationAttribute* first_nonzero_location = nullptr;
-    const ast::BlendSrcAttribute* first_blend_src = nullptr;
-    const core::type::Type* first_blend_src_type = nullptr;
-    const ast::LocationAttribute* first_location_without_blend_src = nullptr;
     Hashset<uint32_t, 4> colors;
     enum class ParamOrRetType {
         kParameter,
@@ -1390,54 +1387,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 }
             }
 
-            if (blend_src_attribute) {
-                if (location.value_or(1) != 0) {
-                    AddError(blend_src_attribute->source)
-                        << style::Attribute("@blend_src") << " can only be used with "
-                        << style::Attribute("@location")
-                        << style::Code("(", style::Literal("0"), ")");
-                    return false;
-                }
-                if (first_blend_src_type == nullptr) {
-                    first_blend_src_type = ty;
-                } else if (!first_blend_src_type->Equals(*ty)) {
-                    AddError(blend_src_attribute->source)
-                        << "Use of " << style::Attribute("@blend_src")
-                        << " requires all outputs have same type";
-                    return false;
-                }
-            }
-
-            if (blend_src_attribute) {
-                first_blend_src = blend_src_attribute;
-            } else if (location_attribute) {
-                first_location_without_blend_src = location_attribute;
-            }
-
-            if (first_blend_src && first_location_without_blend_src) {
-                AddError(first_location_without_blend_src->source)
-                    << "use of " << style::Attribute("@blend_src") << " requires all the output "
-                    << style::Attribute("@location")
-                    << " attributes of the entry point to be paired with a "
-                    << style::Attribute("@blend_src") << " attribute";
-                AddNote(first_blend_src->source)
-                    << "use of " << style::Attribute("@blend_src") << " here";
-                return false;
-            }
-
             if (location_attribute) {
-                if (!first_nonzero_location && location > 0u) {
-                    first_nonzero_location = location_attribute;
-                }
-                if (first_nonzero_location && first_blend_src) {
-                    AddError(first_blend_src->source)
-                        << "pipeline cannot use both a " << style::Attribute("@blend_src")
-                        << " and non-zero " << style::Attribute("@location");
-                    AddNote(first_nonzero_location->source)
-                        << "non-zero " << style::Attribute("@location") << " declared here";
-                    return false;
-                }
-
                 std::pair<uint32_t, uint32_t> location_and_blend_src(location.value(),
                                                                      blend_src.value_or(0));
                 if (!locations_and_blend_srcs.Add(location_and_blend_src)) {
@@ -1533,10 +1483,6 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // should be validated independently from those used in parameters.
     builtins.Clear();
     locations_and_blend_srcs.Clear();
-    first_nonzero_location = nullptr;
-    first_blend_src = nullptr;
-    first_blend_src_type = nullptr;
-    first_location_without_blend_src = nullptr;
 
     if (!func->ReturnType()->Is<core::type::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
@@ -2323,6 +2269,10 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         return false;
     }
 
+    std::bitset<2> blend_src_appearance_mask;
+    const ast::BlendSrcAttribute* first_blend_src = nullptr;
+    const core::type::Type* first_blend_src_type = nullptr;
+    const ast::LocationAttribute* first_location_without_blend_src = nullptr;
     Hashset<std::pair<uint32_t, std::optional<uint32_t>>, 8> locations_and_blend_srcs;
     Hashset<uint32_t, 4> colors;
     for (auto* member : str->Members()) {
@@ -2411,15 +2361,38 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         }
 
         if (blend_src_attribute) {
-            // Because HLSL specifies dual source blending targets with SV_Target0 and 1, we should
-            // restrict targets with index attributes to location 0 for easy translation in the
-            // backend writers.
             if (member->Attributes().location.value_or(1) != 0) {
                 AddError(blend_src_attribute->source)
                     << style::Attribute("@blend_src") << " can only be used with "
                     << style::Attribute("@location") << style::Code("(", style::Literal("0"), ")");
                 return false;
             }
+
+            if (first_blend_src == nullptr) {
+                first_blend_src = blend_src_attribute;
+                first_blend_src_type = member->Type();
+            } else if (!first_blend_src_type->Equals(*member->Type())) {
+                AddError(blend_src_attribute->source)
+                    << "All the outputs with " << style::Attribute("@blend_src")
+                    << " must have same type";
+                return false;
+            }
+
+            TINT_ASSERT(member->Attributes().blend_src.has_value() &&
+                        *member->Attributes().blend_src <= 1u);
+            uint32_t blend_src = *member->Attributes().blend_src;
+            blend_src_appearance_mask.set(blend_src);
+        } else if (location_attribute) {
+            first_location_without_blend_src = location_attribute;
+        }
+
+        if (first_blend_src && first_location_without_blend_src) {
+            AddError(member->Declaration()->source)
+                << style::Attribute("@blend_src") << " and " << style::Attribute("@location")
+                << " are used on one member while another member with "
+                << style::Attribute("@location") << " doesn't use "
+                << style::Attribute("@blend_src");
+            return false;
         }
 
         if (interpolate_attribute && !location_attribute) {
@@ -2456,6 +2429,17 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 return false;
             }
         }
+    }
+
+    if (first_blend_src != nullptr && !blend_src_appearance_mask.all()) {
+        for (uint32_t i = 0; i < blend_src_appearance_mask.size(); ++i) {
+            if (!blend_src_appearance_mask.test(i)) {
+                AddError(first_blend_src->source)
+                    << style::Attribute("@blend_src") << style::Code("(", style::Literal(i), ")")
+                    << " is missing when " << style::Attribute("@blend_src") << " is used";
+            }
+        }
+        return false;
     }
 
     return true;
