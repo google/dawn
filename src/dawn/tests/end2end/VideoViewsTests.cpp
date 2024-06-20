@@ -1479,8 +1479,9 @@ TEST_P(VideoViewsValidationTests, SamplingMultiPlanarTexture) {
 // Tests creating a texture with a multi-plane format.
 TEST_P(VideoViewsValidationTests, RenderAttachmentInvalid) {
     // "Invalid Texture" error is expected if failed to create the video texture.
-    EXPECT_CALL(mDeviceErrorCallback, Call(testing::Ne(WGPUErrorType_NoError),
-                                           testing::HasSubstr("Invalid Texture"), device.Get()))
+    EXPECT_CALL(mDeviceErrorCallback,
+                Call(CHandleIs(device.Get()), testing::Ne(wgpu::ErrorType::NoError),
+                     testing::HasSubstr("Invalid Texture")))
         .Times(testing::AnyNumber());
 
     // multi-planar formats are NOT allowed to be renderable by default and require

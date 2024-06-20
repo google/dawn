@@ -1027,6 +1027,13 @@ def get_c_methods_sorted_by_name(api_params):
     return [(typ, method) for (_, typ, method) in sorted(unsorted)]
 
 
+def find_by_name(members, name):
+    for member in members:
+        if member.name.get() == name:
+            return member
+    assert False
+
+
 def has_callback_arguments(method):
     return any(arg.type.category == 'function pointer' for arg in method.arguments)
 
@@ -1047,6 +1054,7 @@ def is_wire_serializable(type):
     # Function pointers, callback functions, and "void *" types (i.e. userdata) cannot
     # be serialized.
     return (type.category != 'function pointer'
+            and type.category != 'callback info'
             and type.category != 'callback function'
             and type.name.get() != 'void *')
 
@@ -1108,6 +1116,7 @@ def make_base_render_params(metadata):
             'decorate': decorate,
             'as_ktName': as_ktName,
             'has_callbackInfoStruct': has_callbackInfoStruct,
+            'find_by_name': find_by_name,
             'unreachable_code': unreachable_code
         }
 

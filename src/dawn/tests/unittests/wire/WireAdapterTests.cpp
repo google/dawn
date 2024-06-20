@@ -114,18 +114,15 @@ TEST_P(WireAdapterTests, RequestDeviceNullDescriptor) {
     });
 }
 
-static void DeviceLostCallback(WGPUDevice const* device,
-                               WGPUDeviceLostReason reason,
-                               const char* message,
-                               void* userdata) {}
+static void DeviceLostCallback(const wgpu::Device&,
+                               wgpu::DeviceLostReason reason,
+                               const char* message) {}
 
 // Test that the DeviceDescriptor is not allowed to pass a device lost callback from the client to
 // the server.
 TEST_P(WireAdapterTests, RequestDeviceAssertsOnLostCallbackPointer) {
-    int userdata = 1337;
     wgpu::DeviceDescriptor desc = {};
-    desc.deviceLostCallbackInfo.callback = DeviceLostCallback;
-    desc.deviceLostCallbackInfo.userdata = &userdata;
+    desc.SetDeviceLostCallback(wgpu::CallbackMode::AllowSpontaneous, DeviceLostCallback);
 
     AdapterRequestDevice(adapter, &desc);
 
@@ -134,10 +131,12 @@ TEST_P(WireAdapterTests, RequestDeviceAssertsOnLostCallbackPointer) {
             EXPECT_STREQ(apiDesc->label, desc.label);
 
             // The callback should not be passed through to the server, and it should be overridden.
-            ASSERT_NE(apiDesc->deviceLostCallbackInfo.callback, nullptr);
-            ASSERT_NE(apiDesc->deviceLostCallbackInfo.callback, &DeviceLostCallback);
-            ASSERT_NE(apiDesc->deviceLostCallbackInfo.userdata, nullptr);
-            ASSERT_NE(apiDesc->deviceLostCallbackInfo.userdata, &userdata);
+            WGPUDeviceDescriptor& inputDesc = *reinterpret_cast<WGPUDeviceDescriptor*>(&desc);
+            ASSERT_NE(apiDesc->deviceLostCallbackInfo2.callback,
+                      inputDesc.deviceLostCallbackInfo2.callback);
+            ASSERT_NE(apiDesc->deviceLostCallbackInfo2.callback, nullptr);
+            ASSERT_NE(apiDesc->deviceLostCallbackInfo2.userdata1, nullptr);
+            ASSERT_EQ(apiDesc->deviceLostCallbackInfo2.userdata2, nullptr);
 
             // Call the callback so the test doesn't wait indefinitely.
             api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Error, nullptr,
@@ -174,8 +173,6 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
     EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(InvokeWithoutArgs([&] {
             // Set on device creation to forward callbacks to the client.
-            EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
-                .Times(1);
             EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, NotNull(), NotNull())).Times(1);
 
             EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
@@ -233,19 +230,8 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
         FlushCallbacks();
     });
 
-    // Test that callbacks can propagate from server to client.
-    MockCallback<WGPUErrorCallback> errorCb;
-    device.SetUncapturedErrorCallback(errorCb.Callback(), errorCb.MakeUserdata(this));
-    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_Validation,
-                                                     "Some error message");
-
-    EXPECT_CALL(errorCb, Call(WGPUErrorType_Validation, StrEq("Some error message"), this))
-        .Times(1);
-    FlushCallbacks();
-
     device = nullptr;
     // Cleared when the device is destroyed.
-    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, DeviceRelease(apiDevice));
 
@@ -348,8 +334,6 @@ TEST_P(WireAdapterTests, RequestDeviceAdapterDestroyedBeforeCallback) {
     EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(InvokeWithoutArgs([&] {
             // Set on device creation to forward callbacks to the client.
-            EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
-                .Times(1);
             EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, NotNull(), NotNull())).Times(1);
 
             EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
@@ -387,7 +371,6 @@ TEST_P(WireAdapterTests, RequestDeviceAdapterDestroyedBeforeCallback) {
 
     device = nullptr;
     // Cleared when the device is destroyed.
-    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, DeviceRelease(apiDevice));
     FlushClient();

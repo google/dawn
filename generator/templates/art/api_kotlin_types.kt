@@ -47,7 +47,7 @@
     {%- elif type.category in ['function pointer', 'object'] %}
         {{- type.name.CamelCase() }}
         {%- if optional or default_value %}?{{ ' = null' if emit_defaults }}{% endif %}
-    {%- elif type.category == 'structure' %}
+    {%- elif type.category == 'structure' or type.category == 'callback info' %}
         {{- type.name.CamelCase() }}{{ '?' if optional }}
         {%- if emit_defaults -%}
             {%- if type.has_basic_constructor -%}

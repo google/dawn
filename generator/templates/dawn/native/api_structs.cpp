@@ -108,12 +108,12 @@ namespace {{native_namespace}} {
             return {% if type.extensible or type.chained -%}
                 (nextInChain == rhs.nextInChain) &&
             {%- endif %} std::tie(
-                {% for member in type.members %}
+                {% for member in type.members if member.type.category != 'callback info' %}
                     {{member.name.camelCase()-}}
                     {{ "," if not loop.last else "" }}
                 {% endfor %}
             ) == std::tie(
-                {% for member in type.members %}
+                {% for member in type.members if member.type.category != 'callback info' %}
                     rhs.{{member.name.camelCase()-}}
                     {{ "," if not loop.last else "" }}
                 {% endfor %}

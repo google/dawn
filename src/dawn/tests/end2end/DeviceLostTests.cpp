@@ -52,13 +52,15 @@ static const int fakeUserData = 0;
 class DeviceLostTest : public DawnTest {
   protected:
     void SetUp() override {
-        DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+        DawnTest::SetUp();
     }
 
     void TearDown() override {
-        instance.ProcessEvents();  // Flush all callbacks.
-        DawnTest::TearDown();
+        if (!UsesWire()) {
+            instance.ProcessEvents();  // Flush all callbacks.
+            DawnTest::TearDown();
+        }
     }
 
     static void MapFailCallback(WGPUBufferMapAsyncStatus status, void* userdata) {
@@ -75,7 +77,7 @@ class DeviceLostTest : public DawnTest {
     MockMapAsyncCallback mMapAsyncCb;
 };
 
-// Test that DeviceLostCallback is invoked when LostForTestimg is called
+// Test that DeviceLostCallback is invoked when LostForTesting is called
 TEST_P(DeviceLostTest, DeviceLostCallbackIsCalled) {
     LoseDeviceForTesting();
 }

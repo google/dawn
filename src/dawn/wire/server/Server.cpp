@@ -170,15 +170,8 @@ void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
     // Also, the device is special-cased in Server::DoDestroyObject to call
     // ClearDeviceCallbacks. This ensures that callbacks will not fire after |deviceObject|
     // is freed.
-    mProcs.deviceSetUncapturedErrorCallback(
-        device->handle,
-        [](WGPUErrorType type, const char* message, void* userdata) {
-            DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
-            info->server->OnUncapturedError(info->self, type, message);
-        },
-        device->info.get());
-    // Set callback to post warning and other infomation to client.
-    // Almost the same with UncapturedError.
+
+    // Set callback to post warning and other information to client.
     mProcs.deviceSetLoggingCallback(
         device->handle,
         [](WGPULoggingType type, const char* message, void* userdata) {
@@ -189,9 +182,7 @@ void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
 }
 
 void Server::ClearDeviceCallbacks(WGPUDevice device) {
-    // Un-set the error and logging callbacks since we cannot forward them
-    // after the server has been destroyed.
-    mProcs.deviceSetUncapturedErrorCallback(device, nullptr, nullptr);
+    // Un-set the logging callback since we cannot forward them after the server has been destroyed.
     mProcs.deviceSetLoggingCallback(device, nullptr, nullptr);
 }
 

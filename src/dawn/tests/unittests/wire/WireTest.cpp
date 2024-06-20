@@ -143,12 +143,13 @@ void WireTest::SetUp() {
     // Create the device for testing.
     apiDevice = api.GetNewDevice();
     WGPUDeviceDescriptor deviceDesc = {};
-    deviceDesc.deviceLostCallbackInfo.mode = WGPUCallbackMode_WaitAnyOnly;
-    deviceDesc.deviceLostCallbackInfo.callback = deviceLostCallback.Callback();
-    deviceDesc.deviceLostCallbackInfo.userdata = deviceLostCallback.MakeUserdata(this);
+    deviceDesc.deviceLostCallbackInfo2 = {nullptr, WGPUCallbackMode_AllowSpontaneous,
+                                          deviceLostCallback.Callback(), nullptr,
+                                          deviceLostCallback.MakeUserdata(this)};
+    deviceDesc.uncapturedErrorCallbackInfo2 = {nullptr, uncapturedErrorCallback.Callback(), nullptr,
+                                               uncapturedErrorCallback.MakeUserdata(this)};
     EXPECT_CALL(deviceLostCallback, Call).Times(AtMost(1));
-    deviceDesc.uncapturedErrorCallbackInfo.callback = uncapturedErrorCallback.Callback();
-    deviceDesc.uncapturedErrorCallbackInfo.userdata = uncapturedErrorCallback.MakeUserdata(this);
+
     MockCallback<WGPURequestDeviceCallback2> deviceCb;
     wgpuAdapterRequestDevice2(adapter.Get(), &deviceDesc,
                               {nullptr, WGPUCallbackMode_AllowSpontaneous, deviceCb.Callback(),
@@ -156,16 +157,18 @@ void WireTest::SetUp() {
     EXPECT_CALL(api, OnAdapterRequestDevice2(apiAdapter, NotNull(), _))
         .WillOnce(WithArg<1>([&](const WGPUDeviceDescriptor* desc) {
             // Set on device creation to forward callbacks to the client.
-            EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, NotNull(), NotNull()))
-                .Times(1);
             EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, NotNull(), NotNull())).Times(1);
 
             // The mock objects currently require us to manually set the callbacks because we
-            // are no longer explicitly calling SetDeviceLostCallback anymore.
+            // are no longer explicitly calling the setters anymore.
             ProcTableAsClass::Object* object =
                 reinterpret_cast<ProcTableAsClass::Object*>(apiDevice);
-            object->mDeviceLostCallback = desc->deviceLostCallbackInfo.callback;
-            object->mDeviceLostUserdata = desc->deviceLostCallbackInfo.userdata;
+            object->mDeviceLostCallback = desc->deviceLostCallbackInfo2.callback;
+            object->mDeviceLostUserdata1 = desc->deviceLostCallbackInfo2.userdata1;
+            object->mDeviceLostUserdata2 = desc->deviceLostCallbackInfo2.userdata2;
+            object->mUncapturedErrorCallback = desc->uncapturedErrorCallbackInfo2.callback;
+            object->mUncapturedErrorUserdata1 = desc->uncapturedErrorCallbackInfo2.userdata1;
+            object->mUncapturedErrorUserdata2 = desc->uncapturedErrorCallbackInfo2.userdata2;
 
             EXPECT_CALL(api, DeviceGetLimits(apiDevice, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
@@ -215,8 +218,6 @@ void WireTest::TearDown() {
     if (mWireServer && apiDevice) {
         // These are called on server destruction to clear the callbacks. They must not be
         // called after the server is destroyed.
-        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
-            .Times(Exactly(1));
         EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(Exactly(1));
     }
     mC2sBuf->SetHandler(nullptr);
@@ -263,8 +264,6 @@ void WireTest::DeleteServer() {
     if (mWireServer) {
         // These are called on server destruction to clear the callbacks. They must not be
         // called after the server is destroyed.
-        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
-            .Times(Exactly(1));
         EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(Exactly(1));
     }
     mC2sBuf->SetHandler(nullptr);

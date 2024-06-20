@@ -60,13 +60,11 @@ class ProcTableAsClass {
 
         //* Generate the older Call*Callback if there is no Future call equivalent.
         //* Includes:
-        //*   - setDeviceLostCallback
-        //*   - setUncapturedErrorCallback
         //*   - setLoggingCallback
-        {%- set LegacyCallbackFunctions = ['set uncaptured error callback', 'set logging callback'] %}
+        {%- set LegacyCallbackFunctions = ['set logging callback'] %}
 
         //* Manually implemented mock functions due to incompatibility.
-        {% set ManuallyMockedFunctions = ['set device lost callback'] %}
+        {% set ManuallyMockedFunctions = ['set device lost callback', 'set uncaptured error callback'] %}
 
         {%- for type in by_category["object"] %}
 
@@ -103,7 +101,7 @@ class ProcTableAsClass {
                     {%- endfor -%}
                 ) = 0;
                 {% set CallbackInfoType = (method.arguments|last).type %}
-                {% set CallbackType = (CallbackInfoType.members|first).type %}
+                {% set CallbackType = find_by_name(CallbackInfoType.members, "callback").type %}
                 void Call{{Suffix}}Callback(
                     {{-as_cType(type.name)}} {{as_varName(type.name)}}
                     {%- for arg in CallbackType.arguments -%}
@@ -145,7 +143,7 @@ class ProcTableAsClass {
             {% endfor %}
         {% endfor %}
 
-        // Manually implement device lost related callback helpers for testing.
+        // Manually implement some callback helpers for testing.
         void DeviceSetDeviceLostCallback(WGPUDevice device,
                                          WGPUDeviceLostCallback callback,
                                          void* userdata);
@@ -155,6 +153,15 @@ class ProcTableAsClass {
         void CallDeviceSetDeviceLostCallbackCallback(WGPUDevice device,
                                                      WGPUDeviceLostReason reason,
                                                      char const* message);
+        void DeviceSetUncapturedErrorCallback(WGPUDevice device,
+                                              WGPUErrorCallback callback,
+                                              void* userdata);
+        virtual void OnDeviceSetUncapturedErrorCallback(WGPUDevice device,
+                                                        WGPUErrorCallback callback,
+                                                        void* userdata) = 0;
+        void CallDeviceSetUncapturedErrorCallbackCallback(WGPUDevice device,
+                                                          WGPUErrorType type,
+                                                          char const* message);
 
         struct Object {
             ProcTableAsClass* procs = nullptr;
@@ -173,16 +180,19 @@ class ProcTableAsClass {
                 {% endfor %}
                 {% for method in type.methods if has_callbackInfoStruct(method) %}
                     {% set CallbackInfoType = (method.arguments|last).type %}
-                    {% set CallbackType = (CallbackInfoType.members|first).type %}
+                    {% set CallbackType = find_by_name(CallbackInfoType.members, "callback").type %}
                     void* m{{as_CppMethodSuffix(type.name, method.name)}}Userdata1 = 0;
                     void* m{{as_CppMethodSuffix(type.name, method.name)}}Userdata2 = 0;
                     {{as_cType(CallbackType.name)}} m{{as_CppMethodSuffix(type.name, method.name)}}Callback = nullptr;
                 {% endfor %}
             {% endfor %}
-            // Manually implement device lost related callback helpers for testing.
-            WGPUDeviceLostCallback mDeviceLostOldCallback = nullptr;
-            WGPUDeviceLostCallbackNew mDeviceLostCallback = nullptr;
-            void* mDeviceLostUserdata = 0;
+            // Manually implement some callback helpers for testing.
+            WGPUDeviceLostCallback2 mDeviceLostCallback = nullptr;
+            void* mDeviceLostUserdata1 = 0;
+            void* mDeviceLostUserdata2 = 0;
+            WGPUUncapturedErrorCallback mUncapturedErrorCallback = nullptr;
+            void* mUncapturedErrorUserdata1 = 0;
+            void* mUncapturedErrorUserdata2 = 0;
         };
 
     private:
@@ -233,10 +243,14 @@ class MockProcTable : public ProcTableAsClass {
             {% endfor %}
         {% endfor %}
 
-        // Manually implement device lost related callback helpers for testing.
+        // Manually implement some callback helpers for testing.
         MOCK_METHOD(void,
                     OnDeviceSetDeviceLostCallback,
                     (WGPUDevice device, WGPUDeviceLostCallback callback, void* userdata),
+                    (override));
+        MOCK_METHOD(void,
+                    OnDeviceSetUncapturedErrorCallback,
+                    (WGPUDevice device, WGPUErrorCallback callback, void* userdata),
                     (override));
 };
 

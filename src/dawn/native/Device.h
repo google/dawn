@@ -96,17 +96,14 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
         wgpu::DeviceLostReason mReason;
         std::string mMessage;
 
-        wgpu::DeviceLostCallbackNew mCallback = nullptr;
-        // TODO(https://crbug.com/dawn/2465): Remove old callback when setters are deprecated, and
-        // move userdata into private.
-        wgpu::DeviceLostCallback mOldCallback = nullptr;
-        raw_ptr<void> mUserdata;
+        WGPUDeviceLostCallback2 mCallback = nullptr;
+        raw_ptr<void> mUserdata1;
+        raw_ptr<void> mUserdata2;
         // Note that the device is set when the event is passed to construct a device.
         Ref<DeviceBase> mDevice = nullptr;
 
       private:
-        explicit DeviceLostEvent(const DeviceLostCallbackInfo& callbackInfo);
-        DeviceLostEvent(wgpu::DeviceLostCallback oldCallback, void* userdata);
+        explicit DeviceLostEvent(const WGPUDeviceLostCallbackInfo2& callbackInfo);
         ~DeviceLostEvent() override;
 
         void Complete(EventCompletionType completionType) override;
@@ -550,7 +547,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
                                                     const TextureCopy& dst,
                                                     const Extent3D& copySizePixels) = 0;
 
-    UncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo;
+    WGPUUncapturedErrorCallbackInfo2 mUncapturedErrorCallbackInfo;
 
     std::shared_mutex mLoggingMutex;
     wgpu::LoggingCallback mLoggingCallback = nullptr;

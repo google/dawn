@@ -81,7 +81,6 @@ void DawnNativeTest::SetUp() {
 
     adapter = instance->EnumerateAdapters(&options)[0];
     device = wgpu::Device::Acquire(CreateTestDevice());
-    device.SetUncapturedErrorCallback(DawnNativeTest::OnDeviceError, nullptr);
 }
 
 std::unique_ptr<dawn::platform::Platform> DawnNativeTest::CreateTestPlatform() {
@@ -89,11 +88,12 @@ std::unique_ptr<dawn::platform::Platform> DawnNativeTest::CreateTestPlatform() {
 }
 
 WGPUDevice DawnNativeTest::CreateTestDevice() {
-    return adapter.CreateDevice();
-}
+    wgpu::DeviceDescriptor desc = {};
+    desc.SetUncapturedErrorCallback(
+        [](const wgpu::Device&, wgpu::ErrorType type, const char* message) {
+            DAWN_ASSERT(type != wgpu::ErrorType::NoError);
+            FAIL() << "Unexpected error: " << message;
+        });
 
-// static
-void DawnNativeTest::OnDeviceError(WGPUErrorType type, const char* message, void* userdata) {
-    DAWN_ASSERT(type != WGPUErrorType_NoError);
-    FAIL() << "Unexpected error: " << message;
+    return adapter.CreateDevice(&desc);
 }

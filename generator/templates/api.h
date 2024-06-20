@@ -167,6 +167,26 @@ typedef struct {{API}}ChainedStructOut {
 
 #define {{API}}_COMMA ,
 
+{% for type in by_category["callback info"] %}
+    typedef struct {{as_cType(type.name)}} {
+        {{API}}ChainedStruct const* nextInChain;
+        {% for member in type.members %}
+            {{as_annotated_cType(member)}};
+        {% endfor %}
+        void* userdata1;
+        void* userdata2;
+    } {{as_cType(type.name)}} {{API}}_STRUCTURE_ATTRIBUTE;
+
+    #define {{API}}_{{type.name.SNAKE_CASE()}}_INIT {{API}}_MAKE_INIT_STRUCT({{as_cType(type.name)}}, { \
+        /*.nextInChain=*/nullptr {{API}}_COMMA \
+        {% for member in type.members %}
+            /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} {{API}}_COMMA \
+        {% endfor %}
+        /*.userdata1=*/nullptr {{API}}_COMMA \
+        /*.userdata2=*/nullptr {{API}}_COMMA \
+    })
+
+{% endfor %}
 {% for type in by_category["structure"] %}
     {% for root in type.chain_roots %}
         // Can be chained in {{as_cType(root.name)}}
@@ -199,28 +219,6 @@ typedef struct {{API}}ChainedStructOut {
         {% for member in type.members %}
             /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} {{API}}_COMMA \
         {% endfor %}
-    })
-
-{% endfor %}
-{% for type in by_category["callback info"] %}
-    typedef struct {{as_cType(type.name)}} {
-        {{API}}ChainedStruct const* nextInChain;
-        {{as_cType(types["callback mode"].name)}} mode;
-        {% for member in type.members %}
-            //* Only callback function types are allowed in callback info structs.
-            {{assert(member.type.category == "callback function")}}{{as_annotated_cType(member)}};
-        {% endfor %}
-        void* userdata1;
-        void* userdata2;
-    } {{as_cType(type.name)}} {{API}}_STRUCTURE_ATTRIBUTE;
-
-    #define {{API}}_{{type.name.SNAKE_CASE()}}_INIT {{API}}_MAKE_INIT_STRUCT({{as_cType(type.name)}}, { \
-        /*.mode=*/{{as_cEnum(types["callback mode"].name, Name("undefined"))}} {{API}}_COMMA \
-        {% for member in type.members %}
-            /*.{{as_varName(member.name)}}=*/{{render_c_default_value(member)}} {{API}}_COMMA \
-        {% endfor %}
-        /*.userdata1=*/nullptr {{API}}_COMMA \
-        /*.userdata2=*/nullptr {{API}}_COMMA \
     })
 
 {% endfor %}

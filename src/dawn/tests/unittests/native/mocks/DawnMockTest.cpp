@@ -42,8 +42,21 @@ DawnMockTest::DawnMockTest() {
 }
 
 void DawnMockTest::DropDevice() {
+    if (device == nullptr) {
+        return;
+    }
+
+    // Since the device owns the instance in these tests, we need to explicitly verify that the
+    // instance has completed all work. To do this, we take an additional ref to the instance here
+    // and use it to process events until completion after dropping the device.
+    Ref<InstanceBase> instance = mDeviceMock->GetInstance();
+
     mDeviceMock = nullptr;
     device = nullptr;
+
+    do {
+    } while (instance->ProcessEvents());
+    instance = nullptr;
 }
 
 DawnMockTest::~DawnMockTest() {

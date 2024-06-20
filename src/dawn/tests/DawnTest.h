@@ -122,15 +122,20 @@
 #define EXPECT_TEXTURE_FLOAT16_EQ(...) \
     AddTextureExpectation<float, uint16_t>(__FILE__, __LINE__, __VA_ARGS__)
 
-#define ASSERT_DEVICE_ERROR_MSG_ON(device, statement, matcher)                    \
-    FlushWire();                                                                  \
-    EXPECT_CALL(mDeviceErrorCallback,                                             \
-                Call(testing::Ne(WGPUErrorType_NoError), matcher, device.Get())); \
-    statement;                                                                    \
-    instance.ProcessEvents();                                                     \
-    FlushWire();                                                                  \
-    testing::Mock::VerifyAndClearExpectations(&mDeviceErrorCallback);             \
-    do {                                                                          \
+// Matcher for C++ types to verify that their internal C-handles are identical.
+MATCHER_P(CHandleIs, cType, "") {
+    return arg.Get() == cType;
+}
+
+#define ASSERT_DEVICE_ERROR_MSG_ON(device, statement, matcher)                                  \
+    FlushWire();                                                                                \
+    EXPECT_CALL(mDeviceErrorCallback,                                                           \
+                Call(CHandleIs(device.Get()), testing::Ne(wgpu::ErrorType::NoError), matcher)); \
+    statement;                                                                                  \
+    instance.ProcessEvents();                                                                   \
+    FlushWire();                                                                                \
+    testing::Mock::VerifyAndClearExpectations(&mDeviceErrorCallback);                           \
+    do {                                                                                        \
     } while (0)
 
 #define ASSERT_DEVICE_ERROR_MSG(statement, matcher) \
@@ -337,8 +342,12 @@ class DawnTestBase {
     // Mock callbacks tracking errors and destruction. These are strict mocks because any errors or
     // device loss that aren't expected should result in test failures and not just some warnings
     // printed to stdout.
-    testing::StrictMock<testing::MockCallback<WGPUErrorCallback>> mDeviceErrorCallback;
-    testing::StrictMock<testing::MockCallback<WGPUDeviceLostCallbackNew>> mDeviceLostCallback;
+    testing::StrictMock<
+        testing::MockCppCallback<void (*)(const wgpu::Device&, wgpu::ErrorType, const char*)>>
+        mDeviceErrorCallback;
+    testing::StrictMock<testing::MockCppCallback<
+        void (*)(const wgpu::Device&, wgpu::DeviceLostReason, const char*)>>
+        mDeviceLostCallback;
 
     // Helper methods to implement the EXPECT_ macros
     std::ostringstream& AddBufferExpectation(const char* file,

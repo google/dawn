@@ -60,21 +60,19 @@ void NullDeviceBenchmarkFixture::SetUp(const benchmark::State& state) {
 
             // Create the device.
             wgpu::DeviceDescriptor desc = GetDeviceDescriptor();
-            desc.deviceLostCallbackInfo = {
-                nullptr, wgpu::CallbackMode::AllowSpontaneous,
-                [](WGPUDevice const*, WGPUDeviceLostReason reason, char const* message, void*) {
-                    if (reason == WGPUDeviceLostReason_Unknown) {
+            desc.SetDeviceLostCallback(
+                wgpu::CallbackMode::AllowSpontaneous,
+                [](const wgpu::Device&, wgpu::DeviceLostReason reason, char const* message) {
+                    if (reason == wgpu::DeviceLostReason::Unknown) {
                         dawn::ErrorLog() << message;
                         DAWN_UNREACHABLE();
                     }
-                },
-                this};
-            desc.uncapturedErrorCallbackInfo = {nullptr,
-                                                [](WGPUErrorType, char const* message, void*) {
-                                                    dawn::ErrorLog() << message;
-                                                    DAWN_UNREACHABLE();
-                                                },
-                                                this};
+                });
+            desc.SetUncapturedErrorCallback(
+                [](const wgpu::Device&, wgpu::ErrorType, const char* message) {
+                    dawn::ErrorLog() << message;
+                    DAWN_UNREACHABLE();
+                });
 
             adapter.RequestDevice(
                 &desc, wgpu::CallbackMode::AllowSpontaneous,

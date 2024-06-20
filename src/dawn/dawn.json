@@ -101,7 +101,8 @@
     "request adapter callback info 2": {
         "category": "callback info",
         "members": [
-           {"name": "callback", "type": "request adapter callback 2"}
+            {"name": "mode", "type": "callback mode"},
+            {"name": "callback", "type": "request adapter callback 2"}
         ]
    },
     "request adapter status": {
@@ -258,7 +259,9 @@
             {"name": "device lost callback", "type": "device lost callback", "default": "nullptr", "tags": ["deprecated"]},
             {"name": "device lost userdata", "type": "void *", "default": "nullptr", "tags": ["deprecated"]},
             {"name": "device lost callback info", "type": "device lost callback info"},
-            {"name": "uncaptured error callback info", "type": "uncaptured error callback info"}
+            {"name": "uncaptured error callback info", "type": "uncaptured error callback info"},
+            {"name": "device lost callback info 2", "type": "device lost callback info 2"},
+            {"name": "uncaptured error callback info 2", "type": "uncaptured error callback info 2"}
         ]
     },
     "dawn toggles descriptor": {
@@ -728,6 +731,7 @@
     "buffer map callback info 2": {
         "category": "callback info",
         "members": [
+            {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "buffer map callback 2"}
         ]
     },
@@ -1014,6 +1018,7 @@
     "compilation info callback info 2": {
         "category": "callback info",
         "members": [
+            {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "compilation info callback 2"}
         ]
     },
@@ -1240,6 +1245,7 @@
     "create compute pipeline async callback info 2": {
         "category": "callback info",
         "members": [
+            {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "create compute pipeline async callback 2"}
         ]
     },
@@ -1285,6 +1291,7 @@
     "create render pipeline async callback info 2": {
         "category": "callback info",
         "members": [
+            {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "create render pipeline async callback 2"}
         ]
     },
@@ -1686,6 +1693,14 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "device lost callback 2": {
+        "category": "callback function",
+        "args": [
+            {"name": "device", "type": "device", "annotation": "const*", "length": 1},
+            {"name": "reason", "type": "device lost reason"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
+        ]
+    },
     "device lost callback info": {
         "category": "structure",
         "extensible": "in",
@@ -1693,6 +1708,13 @@
             {"name": "mode", "type": "callback mode", "default": "wait any only", "_comment": "TODO(crbug.com/dawn/2458) Default should be removed."},
             {"name": "callback", "type": "device lost callback new", "default": "nullptr"},
             {"name": "userdata", "type": "void *", "default": "nullptr"}
+        ]
+    },
+    "device lost callback info 2": {
+        "category": "callback info",
+        "members": [
+            {"name": "mode", "type": "callback mode"},
+            {"name": "callback", "type": "device lost callback 2", "default": "nullptr"}
         ]
     },
     "device lost reason": {
@@ -1716,12 +1738,26 @@
             {"name": "userdata", "type": "void *"}
         ]
     },
+    "uncaptured error callback": {
+        "category": "callback function",
+        "args": [
+            {"name": "device", "type": "device", "annotation": "const*", "length": 1},
+            {"name": "type", "type": "error type"},
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
+        ]
+    },
     "uncaptured error callback info": {
         "category": "structure",
         "extensible": "in",
         "members": [
             {"name": "callback", "type": "error callback", "default": "nullptr"},
             {"name": "userdata", "type": "void *", "default": "nullptr"}
+        ]
+    },
+    "uncaptured error callback info 2": {
+        "category": "callback info",
+        "members": [
+            {"name": "callback", "type": "uncaptured error callback", "default": "nullptr"}
         ]
     },
     "pop error scope status": {
@@ -1762,6 +1798,7 @@
     "pop error scope callback info 2": {
         "category": "callback info",
         "members": [
+            {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "pop error scope callback 2"}
         ]
     },
@@ -2999,6 +3036,7 @@
     "queue work done callback info 2": {
         "category": "callback info",
         "members": [
+            {"name": "mode", "type": "callback mode"},
             {"name": "callback", "type": "queue work done callback 2"}
         ]
     },
@@ -3449,7 +3487,8 @@
     "request device callback info 2": {
         "category": "callback info",
         "members": [
-           {"name": "callback", "type": "request device callback 2"}
+            {"name": "mode", "type": "callback mode"},
+            {"name": "callback", "type": "request device callback 2"}
         ]
    },
 

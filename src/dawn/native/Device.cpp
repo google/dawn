@@ -165,21 +165,53 @@ struct LoggingCallbackTask : CallbackTask {
     raw_ptr<void> mUserdata;
 };
 
-static constexpr UncapturedErrorCallbackInfo kEmptyUncapturedErrorCallbackInfo = {nullptr, nullptr,
-                                                                                  nullptr};
+void LegacyDeviceLostCallback(WGPUDevice const* device,
+                              WGPUDeviceLostReason reason,
+                              char const* message,
+                              void* callback,
+                              void* userdata) {
+    if (callback == nullptr) {
+        return;
+    }
+    auto cb = reinterpret_cast<WGPUDeviceLostCallback>(callback);
+    cb(reason, message, userdata);
+}
+
+void LegacyDeviceLostCallback2(WGPUDevice const* device,
+                               WGPUDeviceLostReason reason,
+                               char const* message,
+                               void* callback,
+                               void* userdata) {
+    if (callback == nullptr) {
+        return;
+    }
+    auto cb = reinterpret_cast<WGPUDeviceLostCallbackNew>(callback);
+    cb(device, reason, message, userdata);
+}
+
+void LegacyUncapturedErrorCallback(WGPUDevice const* device,
+                                   WGPUErrorType type,
+                                   const char* message,
+                                   void* callback,
+                                   void* userdata) {
+    if (callback == nullptr) {
+        return;
+    }
+    auto cb = reinterpret_cast<WGPUErrorCallback>(callback);
+    cb(type, message, userdata);
+}
+
+static constexpr WGPUUncapturedErrorCallbackInfo2 kEmptyUncapturedErrorCallbackInfo = {
+    nullptr, nullptr, nullptr, nullptr};
 
 }  // anonymous namespace
 
-DeviceBase::DeviceLostEvent::DeviceLostEvent(const DeviceLostCallbackInfo& callbackInfo)
-    : TrackedEvent(callbackInfo.mode, SystemEvent::CreateNonProgressingEvent()),
-      mCallback(callbackInfo.callback),
-      mUserdata(callbackInfo.userdata) {}
-
-DeviceBase::DeviceLostEvent::DeviceLostEvent(wgpu::DeviceLostCallback oldCallback, void* userdata)
-    : TrackedEvent(wgpu::CallbackMode::AllowProcessEvents,
+DeviceBase::DeviceLostEvent::DeviceLostEvent(const WGPUDeviceLostCallbackInfo2& callbackInfo)
+    : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
                    SystemEvent::CreateNonProgressingEvent()),
-      mOldCallback(oldCallback),
-      mUserdata(userdata) {}
+      mCallback(callbackInfo.callback),
+      mUserdata1(callbackInfo.userdata1),
+      mUserdata2(callbackInfo.userdata2) {}
 
 DeviceBase::DeviceLostEvent::~DeviceLostEvent() {
     EnsureComplete(EventCompletionType::Shutdown);
@@ -192,9 +224,9 @@ Ref<DeviceBase::DeviceLostEvent> DeviceBase::DeviceLostEvent::Create(
 
 #if defined(DAWN_ENABLE_ASSERTS)
     // TODO(crbug.com/dawn/2465) Make default AllowSpontaneous once SetDeviceLostCallback is gone.
-    static constexpr DeviceLostCallbackInfo kDefaultDeviceLostCallbackInfo = {
-        nullptr, wgpu::CallbackMode::AllowProcessEvents,
-        [](WGPUDevice const*, WGPUDeviceLostReason, char const*, void*) {
+    static constexpr WGPUDeviceLostCallbackInfo2 kDefaultDeviceLostCallbackInfo = {
+        nullptr, WGPUCallbackMode_AllowProcessEvents,
+        [](WGPUDevice const*, WGPUDeviceLostReason, char const*, void*, void*) {
             static bool calledOnce = false;
             if (!calledOnce) {
                 calledOnce = true;
@@ -203,35 +235,31 @@ Ref<DeviceBase::DeviceLostEvent> DeviceBase::DeviceLostEvent::Create(
                                       "suppress this message, set the callback explicitly.";
             }
         },
-        nullptr};
+        nullptr, nullptr};
 #else
-    static constexpr DeviceLostCallbackInfo kDefaultDeviceLostCallbackInfo = {
-        nullptr, wgpu::CallbackMode::AllowProcessEvents, nullptr, nullptr};
+    static constexpr WGPUDeviceLostCallbackInfo2 kDefaultDeviceLostCallbackInfo = {
+        nullptr, WGPUCallbackMode_AllowProcessEvents, nullptr, nullptr, nullptr};
 #endif  // DAWN_ENABLE_ASSERTS
 
-    Ref<DeviceBase::DeviceLostEvent> lostEvent;
-    if (descriptor->deviceLostCallback != nullptr) {
+    WGPUDeviceLostCallbackInfo2 deviceLostCallbackInfo = kDefaultDeviceLostCallbackInfo;
+    if (descriptor->deviceLostCallbackInfo2.callback != nullptr) {
+        deviceLostCallbackInfo = descriptor->deviceLostCallbackInfo2;
+    } else if (descriptor->deviceLostCallbackInfo.callback != nullptr) {
+        auto& callbackInfo = descriptor->deviceLostCallbackInfo;
+        deviceLostCallbackInfo = {
+            ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode), &LegacyDeviceLostCallback2,
+            reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata};
+    } else if (descriptor->deviceLostCallback != nullptr) {
         dawn::WarningLog()
             << "DeviceDescriptor.deviceLostCallback and DeviceDescriptor.deviceLostUserdata are "
                "deprecated. Use DeviceDescriptor.deviceLostCallbackInfo instead.";
-        lostEvent = AcquireRef(new DeviceBase::DeviceLostEvent(descriptor->deviceLostCallback,
-                                                               descriptor->deviceLostUserdata));
-    } else {
-        DeviceLostCallbackInfo deviceLostCallbackInfo = kDefaultDeviceLostCallbackInfo;
-        if (descriptor->deviceLostCallbackInfo.callback != nullptr ||
-            descriptor->deviceLostCallbackInfo.mode != wgpu::CallbackMode::WaitAnyOnly) {
-            deviceLostCallbackInfo = descriptor->deviceLostCallbackInfo;
-            if (deviceLostCallbackInfo.mode != wgpu::CallbackMode::AllowSpontaneous) {
-                // TODO(dawn:2458) Currently we default the callback mode to ProcessEvents if not
-                // passed for backwards compatibility. We should add warning logging for it though
-                // when available.
-                deviceLostCallbackInfo.mode = wgpu::CallbackMode::AllowProcessEvents;
-            }
-        }
-        lostEvent = AcquireRef(new DeviceBase::DeviceLostEvent(deviceLostCallbackInfo));
+        deviceLostCallbackInfo = {nullptr, WGPUCallbackMode_AllowProcessEvents,
+                                  &LegacyDeviceLostCallback,
+                                  reinterpret_cast<void*>(descriptor->deviceLostCallback),
+                                  descriptor->deviceLostUserdata};
     }
 
-    return lostEvent;
+    return AcquireRef(new DeviceBase::DeviceLostEvent(deviceLostCallbackInfo));
 }
 
 void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
@@ -239,17 +267,25 @@ void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
         mReason = wgpu::DeviceLostReason::InstanceDropped;
         mMessage = "A valid external Instance reference no longer exists.";
     }
+
+    auto device = ToAPI(mDevice.Get());
+    void* userdata1 = mUserdata1.ExtractAsDangling();
+    void* userdata2 = mUserdata2.ExtractAsDangling();
+
     if (mReason == wgpu::DeviceLostReason::InstanceDropped ||
         mReason == wgpu::DeviceLostReason::FailedCreation) {
-        mDevice = nullptr;
+        device = nullptr;
+    }
+    if (mCallback) {
+        mCallback(&device, ToAPI(mReason), mMessage.c_str(), userdata1, userdata2);
     }
 
-    if (mOldCallback) {
-        mOldCallback(ToAPI(mReason), mMessage.c_str(), mUserdata.ExtractAsDangling());
-    } else if (mCallback) {
-        auto device = ToAPI(mDevice.Get());
-        mCallback(&device, ToAPI(mReason), mMessage.c_str(), mUserdata.ExtractAsDangling());
+    // After the device lost callback fires, the uncaptured error callback is no longer valid so we
+    // unset it here.
+    if (mDevice != nullptr) {
+        mDevice->mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
     }
+
     mDevice = nullptr;
 }
 
@@ -313,9 +349,9 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mLostEvent->mDevice = this;
 
 #if defined(DAWN_ENABLE_ASSERTS)
-    static constexpr UncapturedErrorCallbackInfo kDefaultUncapturedErrorCallbackInfo = {
+    static constexpr WGPUUncapturedErrorCallbackInfo2 kDefaultUncapturedErrorCallbackInfo = {
         nullptr,
-        [](WGPUErrorType, char const*, void*) {
+        [](WGPUDevice const*, WGPUErrorType, char const*, void*, void*) {
             static bool calledOnce = false;
             if (!calledOnce) {
                 calledOnce = true;
@@ -324,14 +360,19 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
                                       "and suppress this message, set the callback explicitly.";
             }
         },
-        nullptr};
+        nullptr, nullptr};
 #else
-    static constexpr UncapturedErrorCallbackInfo kDefaultUncapturedErrorCallbackInfo =
+    static constexpr WGPUUncapturedErrorCallbackInfo2 kDefaultUncapturedErrorCallbackInfo =
         kEmptyUncapturedErrorCallbackInfo;
 #endif  // DAWN_ENABLE_ASSERTS
     mUncapturedErrorCallbackInfo = kDefaultUncapturedErrorCallbackInfo;
-    if (descriptor->uncapturedErrorCallbackInfo.callback != nullptr) {
-        mUncapturedErrorCallbackInfo = descriptor->uncapturedErrorCallbackInfo;
+    if (descriptor->uncapturedErrorCallbackInfo2.callback != nullptr) {
+        mUncapturedErrorCallbackInfo = descriptor->uncapturedErrorCallbackInfo2;
+    } else if (descriptor->uncapturedErrorCallbackInfo.callback != nullptr) {
+        auto& callbackInfo = descriptor->uncapturedErrorCallbackInfo;
+        mUncapturedErrorCallbackInfo = {
+            ToAPI(callbackInfo.nextInChain), &LegacyUncapturedErrorCallback,
+            reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata};
     }
 
     AdapterProperties adapterProperties;
@@ -406,7 +447,8 @@ DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
     mFormatTable = BuildFormatTable(this);
 
     DeviceDescriptor desc = {};
-    desc.deviceLostCallbackInfo = {nullptr, wgpu::CallbackMode::AllowSpontaneous};
+    desc.deviceLostCallbackInfo2 = {nullptr, WGPUCallbackMode_AllowSpontaneous, nullptr, nullptr,
+                                    nullptr};
     mLostEvent = DeviceLostEvent::Create(&desc);
     mLostEvent->mDevice = this;
 }
@@ -751,9 +793,10 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
             // Only call the uncaptured error callback if the device is alive. After the
             // device is lost, the uncaptured error callback should cease firing.
             if (mUncapturedErrorCallbackInfo.callback != nullptr && mState == State::Alive) {
+                auto device = ToAPI(this);
                 mUncapturedErrorCallbackInfo.callback(
-                    static_cast<WGPUErrorType>(ToWGPUErrorType(type)), messageStr.c_str(),
-                    mUncapturedErrorCallbackInfo.userdata);
+                    &device, ToAPI(ToWGPUErrorType(type)), messageStr.c_str(),
+                    mUncapturedErrorCallbackInfo.userdata1, mUncapturedErrorCallbackInfo.userdata2);
             }
         }
     }
@@ -772,6 +815,10 @@ void DeviceBase::APISetLoggingCallback(wgpu::LoggingCallback callback, void* use
 }
 
 void DeviceBase::APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {
+    GetInstance()->EmitDeprecationWarning(
+        "SetUncapturedErrorCallback is deprecated. Pass the callback in the device descriptor "
+        "instead.");
+
     // The registered callback function and userdata pointer are stored and used by deferred
     // callback tasks, and after setting a different callback (especially in the case of
     // resetting) the resources pointed by such pointer may be freed. Flush all deferred
@@ -788,7 +835,8 @@ void DeviceBase::APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, voi
     if (IsLost()) {
         return;
     }
-    mUncapturedErrorCallbackInfo = {nullptr, callback, userdata};
+    mUncapturedErrorCallbackInfo = {nullptr, &LegacyUncapturedErrorCallback,
+                                    reinterpret_cast<void*>(callback), userdata};
 }
 
 void DeviceBase::APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata) {
@@ -806,15 +854,16 @@ void DeviceBase::APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, voi
     // after Dawn device is destroyed and before Dawn wire server is destroyed.
     if (callback == nullptr) {
         mLostEvent->mCallback = nullptr;
-        mLostEvent->mOldCallback = nullptr;
-        mLostEvent->mUserdata = nullptr;
+        mLostEvent->mUserdata1 = nullptr;
+        mLostEvent->mUserdata2 = nullptr;
         return;
     }
     if (IsLost()) {
         return;
     }
-    mLostEvent->mOldCallback = callback;
-    mLostEvent->mUserdata = userdata;
+    mLostEvent->mCallback = &LegacyDeviceLostCallback;
+    mLostEvent->mUserdata1 = reinterpret_cast<void*>(callback);
+    mLostEvent->mUserdata2 = userdata;
 }
 
 void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {

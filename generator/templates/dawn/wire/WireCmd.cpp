@@ -107,6 +107,8 @@
                 {%- endif -%}
             ));
         {%- endif -%}
+    {%- elif member.type.category == 'callback info' %}
+        {{out}} = WGPU_{{member.type.name.SNAKE_CASE()}}_INIT;
     {%- elif not is_wire_serializable(member.type) %}
         {{out}} = nullptr;
     {%- elif member.type.name.get() == "size_t" -%}
@@ -267,8 +269,8 @@
         //* "length", but order is not always given.
         {% for member in members | sort(reverse=true, attribute="annotation") %}
             {% set memberName = as_varName(member.name) %}
-            //* Skip serialization for custom serialized members.
-            {% if member.skip_serialize %}
+            //* Skip serialization for custom serialized members and callback infos.
+            {% if member.skip_serialize or member.type.category == 'callback info' %}
                 {% continue %}
             {% endif %}
             //* Value types are directly in the transfer record, objects being replaced with their IDs.

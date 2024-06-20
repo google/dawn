@@ -113,13 +113,13 @@ class Device final : public ObjectWithEventsBase {
     struct DeviceLostInfo {
         FutureID futureID = kNullFutureID;
         std::unique_ptr<TrackedEvent> event = nullptr;
-        WGPUDeviceLostCallbackNew callback = nullptr;
-        WGPUDeviceLostCallback oldCallback = nullptr;
-        raw_ptr<void> userdata = nullptr;
+        WGPUDeviceLostCallback2 callback = nullptr;
+        raw_ptr<void> userdata1 = nullptr;
+        raw_ptr<void> userdata2 = nullptr;
     };
     DeviceLostInfo mDeviceLostInfo;
 
-    WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo;
+    WGPUUncapturedErrorCallbackInfo2 mUncapturedErrorCallbackInfo;
     WGPULoggingCallback mLoggingCallback = nullptr;
     raw_ptr<void> mLoggingUserdata = nullptr;
 

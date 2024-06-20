@@ -348,9 +348,33 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
 
     // Initialize the device.
     wgpu::DeviceDescriptor deviceDescriptor = {};
-    deviceDescriptor.deviceLostCallbackInfo = {nullptr, wgpu::CallbackMode::AllowSpontaneous,
-                                               ValidationTest::OnDeviceLost, this};
-    deviceDescriptor.uncapturedErrorCallbackInfo = {nullptr, ValidationTest::OnDeviceError, this};
+    deviceDescriptor.SetDeviceLostCallback(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [this](const wgpu::Device&, wgpu::DeviceLostReason reason, const char* message) {
+            if (mExpectDestruction) {
+                EXPECT_EQ(reason, wgpu::DeviceLostReason::Destroyed);
+                return;
+            }
+            ADD_FAILURE() << "Device lost during test: " << message;
+            DAWN_ASSERT(false);
+        });
+    deviceDescriptor.SetUncapturedErrorCallback(
+        [](const wgpu::Device&, wgpu::ErrorType type, const char* message, ValidationTest* self) {
+            DAWN_ASSERT(type != wgpu::ErrorType::NoError);
+
+            ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
+            ASSERT_FALSE(self->mError) << "Got two errors in expect block, first one is:\n"  //
+                                       << self->mDeviceErrorMessage                          //
+                                       << "\nsecond one is:\n"                               //
+                                       << message;
+
+            self->mDeviceErrorMessage = message;
+            if (self->mExpectError) {
+                ASSERT_THAT(message, self->mErrorMatcher);
+            }
+            self->mError = true;
+        },
+        this);
 
     // Set the required features for the device.
     auto requiredFeatures = GetRequiredFeatures();
@@ -366,37 +390,6 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
 
 bool ValidationTest::UseCompatibilityMode() const {
     return false;
-}
-
-// static
-void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void* userdata) {
-    DAWN_ASSERT(type != WGPUErrorType_NoError);
-    auto* self = static_cast<ValidationTest*>(userdata);
-
-    ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
-    ASSERT_FALSE(self->mError) << "Got two errors in expect block, first one is:\n"  //
-                               << self->mDeviceErrorMessage                          //
-                               << "\nsecond one is:\n"                               //
-                               << message;
-
-    self->mDeviceErrorMessage = message;
-    if (self->mExpectError) {
-        ASSERT_THAT(message, self->mErrorMatcher);
-    }
-    self->mError = true;
-}
-
-void ValidationTest::OnDeviceLost(WGPUDevice const* device,
-                                  WGPUDeviceLostReason reason,
-                                  const char* message,
-                                  void* userdata) {
-    auto* self = static_cast<ValidationTest*>(userdata);
-    if (self->mExpectDestruction) {
-        EXPECT_EQ(reason, WGPUDeviceLostReason_Destroyed);
-        return;
-    }
-    ADD_FAILURE() << "Device lost during test: " << message;
-    DAWN_ASSERT(false);
 }
 
 ValidationTest::PlaceholderRenderPass::PlaceholderRenderPass(const wgpu::Device& device)

@@ -136,7 +136,7 @@ namespace dawn::kotlin_api {
                                     env->CallLongMethod(mObj, getHandle));
                 }
             }
-            {% elif member.type.category == 'structure' %}
+            {% elif member.type.category == 'structure' or member.type.category == 'callback info' %}
                 //* Mandatory structure.
                 Convert(env, env->CallObjectMethod(obj,
                         env->GetMethodID(clz, "get{{ member.name.CamelCase() }}",

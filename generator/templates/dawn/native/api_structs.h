@@ -32,6 +32,7 @@
 #define {{DIR}}_{{namespace.upper()}}_STRUCTS_H_
 
 {% set api = metadata.api.lower() %}
+{% set CAPI = metadata.c_prefix %}
 #include "dawn/{{api}}_cpp.h"
 {% set impl_dir = metadata.impl_dir + "/" if metadata.impl_dir else "" %}
 {% set native_namespace = namespace_name.namespace_case() %}
@@ -46,6 +47,8 @@ namespace {{native_namespace}} {
         {{" "}}= nullptr
     {%- elif member.type.category == "object" and member.optional -%}
         {{" "}}= nullptr
+    {%- elif member.type.category == "callback info" -%}
+        {{" "}}= {{CAPI}}_{{member.name.SNAKE_CASE()}}_INIT
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
         {{" "}}= {{namespace}}::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
     {%- elif member.type.category == "native" and member.default_value != None -%}
