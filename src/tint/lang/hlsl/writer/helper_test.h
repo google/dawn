@@ -57,8 +57,7 @@ class HlslWriterTestHelperBase : public BASE {
 
     /// Run the writer on the IR module and validate the result.
     /// @returns true if generation and validation succeeded
-    bool Generate() {
-        const Options options;
+    bool Generate(Options options = {}) {
         auto result = writer::Generate(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason.Str();

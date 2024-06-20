@@ -311,11 +311,6 @@ class Printer : public tint::TextGenerator {
     void EmitExitSwitch() { Line() << "break;"; }
 
     void EmitSwitch(const core::ir::Switch* s) {
-        // TODO(dsinclair): Create transform to replace default only switch
-        // BUG(crbug.com/tint/1188): work around default-only switches
-        TINT_ASSERT(!(s->Cases().Length() == 1 && s->Cases()[0].selectors.Length() == 1 &&
-                      s->Cases()[0].selectors[0].IsDefault()));
-
         {
             auto out = Line();
             out << "switch(";

@@ -94,8 +94,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Needs transfrom to convert single default switch to while loop
-TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseNoSideEffectsCondition) {
+TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionDXC) {
     // var<private> cond : i32;
     // var<private> a : i32;
     // fn test() {
@@ -124,17 +123,21 @@ TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseNoSideEffectsCondition) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  while(true) {
-    a = 42;
-    break;
+  int cond = 0;
+  int a = 0;
+  switch(cond) {
+    default:
+    {
+      a = 42;
+      break;
+    }
   }
 }
 
 )");
 }
 
-// TODO(dsinclair): Needs transfrom to convert single default switch to while loop
-TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseSideEffectsCondition) {
+TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionDXC) {
     // var<private> global : i32;
     // fn bar() -> i32 {
     //   global = 84;
@@ -150,8 +153,8 @@ TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseSideEffectsCondition) {
     //   }
     // }
 
-    auto* global = b.Var("global", b.Zero<i32>());
-    auto* a = b.Var("a", b.Zero<i32>());
+    auto* global = b.Var<private_>("global", b.Zero<i32>());
+    auto* a = b.Var<private_>("a", b.Zero<i32>());
     b.ir.root_block->Append(global);
     b.ir.root_block->Append(a);
 
@@ -175,6 +178,117 @@ TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseSideEffectsCondition) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+static
+int global = 0;
+static
+int a = 0;
+int bar() {
+  global = 84;
+  return global;
+}
+
+[numthreads(1, 1, 1)]
+void foo() {
+  switch(bar()) {
+    default:
+    {
+      a = 42;
+      break;
+    }
+  }
+}
+
+)");
+}
+
+// TODO(dsinclair): Needs transfrom to convert single default switch to while loop
+TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) {
+    // var<private> cond : i32;
+    // var<private> a : i32;
+    // fn test() {
+    //   switch(cond) {
+    //     default: {
+    //       a = 42;
+    //     }
+    //   }
+    // }
+
+    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        auto* cond = b.Var("cond", b.Zero<i32>());
+        auto* a = b.Var("a", b.Zero<i32>());
+        auto* s = b.Switch(cond);
+        b.Append(b.DefaultCase(s), [&] {
+            b.Store(a, 42_i);
+            b.ExitSwitch(s);
+        });
+        b.Return(f);
+    });
+
+    Options options;
+    options.compiler = Options::Compiler::kFXC;
+
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  while(true) {
+    a = 42;
+    break;
+  }
+}
+
+)");
+}
+
+// TODO(dsinclair): Needs transfrom to convert single default switch to while loop
+TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
+    // var<private> global : i32;
+    // fn bar() -> i32 {
+    //   global = 84;
+    //   return global;
+    // }
+    //
+    // var<private> a : i32;
+    // fn test() {
+    //   switch(bar()) {
+    //     default: {
+    //       a = 42;
+    //     }
+    //   }
+    // }
+
+    auto* global = b.Var<private_>("global", b.Zero<i32>());
+    auto* a = b.Var<private_>("a", b.Zero<i32>());
+    b.ir.root_block->Append(global);
+    b.ir.root_block->Append(a);
+
+    auto* bar = b.Function("bar", ty.i32());
+    b.Append(bar->Block(), [&] {
+        b.Store(global, 84_i);
+        b.Return(bar, b.Load(global));
+    });
+
+    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(f->Block(), [&] {
+        auto* cond = b.Call(bar);
+        auto* s = b.Switch(cond);
+        b.Append(b.DefaultCase(s), [&] {
+            b.Store(a, 42_i);
+            b.ExitSwitch(s);
+        });
+        b.Return(f);
+    });
+
+    Options options;
+    options.compiler = Options::Compiler::kFXC;
+
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 static int global = 0;
 static int a = 0;
