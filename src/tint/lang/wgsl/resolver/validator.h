@@ -364,7 +364,7 @@ class Validator {
                         const Source& source,
                         const std::optional<bool> is_input = std::nullopt) const;
 
-    /// Validates a index attribute
+    /// Validates a blend_src attribute
     /// @param blend_src_attr the blend_src attribute to validate
     /// @param stage the current pipeline stage
     /// @param is_input true if is an input variable, false if output variable, std::nullopt is

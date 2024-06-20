@@ -1445,10 +1445,10 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     auto validate_entry_point_attributes =
         [&](VectorRef<const ast::Attribute*> attrs, const core::type::Type* ty, Source source,
             ParamOrRetType param_or_ret, std::optional<uint32_t> location,
-            std::optional<uint32_t> index, std::optional<uint32_t> color) {
+            std::optional<uint32_t> blend_src, std::optional<uint32_t> color) {
             if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
-                                                       /*is_struct_member*/ false, location, index,
-                                                       color)) {
+                                                       /*is_struct_member*/ false, location,
+                                                       blend_src, color)) {
                 return false;
             }
 
@@ -1474,7 +1474,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         auto& attrs = param->Attributes();
         if (!validate_entry_point_attributes(param_decl->attributes, param->Type(),
                                              param_decl->source, ParamOrRetType::kParameter,
-                                             attrs.location, attrs.index, attrs.color)) {
+                                             attrs.location, attrs.blend_src, attrs.color)) {
             return false;
         }
     }

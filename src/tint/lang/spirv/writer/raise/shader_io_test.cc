@@ -154,7 +154,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      ty.bool_(),
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kFrontFacing,
                                          /* interpolation */ std::nullopt,
@@ -166,7 +166,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      ty.vec4<f32>(),
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
@@ -178,7 +178,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
@@ -190,7 +190,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ 1u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */
@@ -306,7 +306,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
                                      ty.vec4<f32>(),
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
@@ -318,7 +318,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
@@ -520,7 +520,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
                                      ty.vec4<f32>(),
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
@@ -532,7 +532,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
@@ -544,7 +544,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ 1u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */
@@ -630,7 +630,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
                                                      ty.f32(),
                                                      core::type::StructMemberAttributes{
                                                          /* location */ 0u,
-                                                         /* index */ 0u,
+                                                         /* blend_src */ 0u,
                                                          /* color */ std::nullopt,
                                                          /* builtin */ std::nullopt,
                                                          /* interpolation */ std::nullopt,
@@ -642,7 +642,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
                                                      ty.f32(),
                                                      core::type::StructMemberAttributes{
                                                          /* location */ 0u,
-                                                         /* index */ 1u,
+                                                         /* blend_src */ 1u,
                                                          /* color */ std::nullopt,
                                                          /* builtin */ std::nullopt,
                                                          /* interpolation */ std::nullopt,
@@ -718,7 +718,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
                                      vec4f,
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
@@ -730,7 +730,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
                                      vec4f,
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
@@ -859,7 +859,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
                                      vec4f,
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kPosition,
                                          /* interpolation */ std::nullopt,
@@ -871,7 +871,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
                                      vec4f,
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
@@ -954,7 +954,7 @@ TEST_F(SpirvWriter_ShaderIOTest, SampleMask) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
@@ -966,7 +966,7 @@ TEST_F(SpirvWriter_ShaderIOTest, SampleMask) {
                                      ty.u32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kSampleMask,
                                          /* interpolation */ std::nullopt,
@@ -1050,7 +1050,7 @@ TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInputOrFragmentOutput) {
                                                        ty.f32(),
                                                        core::type::StructMemberAttributes{
                                                            /* location */ 1u,
-                                                           /* index */ std::nullopt,
+                                                           /* blend_src */ std::nullopt,
                                                            /* color */ std::nullopt,
                                                            /* builtin */ std::nullopt,
                                                            /* interpolation */
@@ -1198,7 +1198,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
@@ -1210,7 +1210,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kFragDepth,
                                          /* interpolation */ std::nullopt,
@@ -1295,7 +1295,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth_MultipleFragmentShaders) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ 0u,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ std::nullopt,
                                          /* interpolation */ std::nullopt,
@@ -1307,7 +1307,7 @@ TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth_MultipleFragmentShaders) {
                                      ty.f32(),
                                      core::type::StructMemberAttributes{
                                          /* location */ std::nullopt,
-                                         /* index */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
                                          /* builtin */ core::BuiltinValue::kFragDepth,
                                          /* interpolation */ std::nullopt,
@@ -1500,7 +1500,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithoutPolyfill) {
                                                       ty.f16(),
                                                       core::type::StructMemberAttributes{
                                                           /* location */ 1u,
-                                                          /* index */ std::nullopt,
+                                                          /* blend_src */ std::nullopt,
                                                           /* color */ std::nullopt,
                                                           /* builtin */ std::nullopt,
                                                           /* interpolation */ std::nullopt,
@@ -1512,7 +1512,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithoutPolyfill) {
                                                       ty.vec4<f16>(),
                                                       core::type::StructMemberAttributes{
                                                           /* location */ 2u,
-                                                          /* index */ std::nullopt,
+                                                          /* blend_src */ std::nullopt,
                                                           /* color */ std::nullopt,
                                                           /* builtin */ std::nullopt,
                                                           /* interpolation */ std::nullopt,
@@ -1594,7 +1594,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithPolyfill) {
                                                       ty.f16(),
                                                       core::type::StructMemberAttributes{
                                                           /* location */ 1u,
-                                                          /* index */ std::nullopt,
+                                                          /* blend_src */ std::nullopt,
                                                           /* color */ std::nullopt,
                                                           /* builtin */ std::nullopt,
                                                           /* interpolation */ std::nullopt,
@@ -1606,7 +1606,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithPolyfill) {
                                                       ty.vec4<f16>(),
                                                       core::type::StructMemberAttributes{
                                                           /* location */ 2u,
-                                                          /* index */ std::nullopt,
+                                                          /* blend_src */ std::nullopt,
                                                           /* color */ std::nullopt,
                                                           /* builtin */ std::nullopt,
                                                           /* interpolation */ std::nullopt,

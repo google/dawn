@@ -78,7 +78,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcFloatValueError) {
     EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' value must be 'i32' or 'u32'");
 }
 
-// Using a number less than zero as an index value should fail.
+// Using a number less than zero as a @blend_src value should fail.
 TEST_F(DualSourceBlendingExtensionTests, BlendSrcNegativeValue) {
     Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
@@ -89,7 +89,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcNegativeValue) {
     EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' value must be zero or one");
 }
 
-// Using a number greater than one as an index value should fail.
+// Using a number greater than one as a @blend_src value should fail.
 TEST_F(DualSourceBlendingExtensionTests, BlendSrcValueAboveOne) {
     Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
@@ -100,7 +100,7 @@ TEST_F(DualSourceBlendingExtensionTests, BlendSrcValueAboveOne) {
     EXPECT_EQ(r()->error(), "12:34 error: '@blend_src' value must be zero or one");
 }
 
-// Using an index value at the same location multiple times should fail.
+// Using a @blend_src value at the same location multiple times should fail.
 TEST_F(DualSourceBlendingExtensionTests, DuplicateBlendSrces) {
     Structure("Output", Vector{
                             Member("a", ty.vec4<f32>(), Vector{Location(0_a), BlendSrc(0_a)}),
@@ -112,7 +112,7 @@ TEST_F(DualSourceBlendingExtensionTests, DuplicateBlendSrces) {
     EXPECT_EQ(r()->error(), "12:34 error: '@location(0) @blend_src(0)' appears multiple times");
 }
 
-// Using the index attribute without a location attribute should fail.
+// Using the @blend_src attribute without a location attribute should fail.
 TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithMissingLocationAttribute_Struct) {
     Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
@@ -160,7 +160,7 @@ TEST_F(DualSourceBlendingExtensionTests, GlobalVariableBlendSrcAttributeAfterInt
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// Using the index attribute with a non-zero location should fail.
+// Using the a @blend_src attribute with a non-zero location should fail.
 TEST_F(DualSourceBlendingExtensionTests, BlendSrcWithNonZeroLocation_Struct) {
     Structure("Output", Vector{
                             Member("a", ty.vec4<f32>(),

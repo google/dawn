@@ -213,8 +213,8 @@ struct ParameterAttributes {
     std::optional<tint::BindingPoint> binding_point;
     /// The `location` attribute value for the variable, if set
     std::optional<uint32_t> location;
-    /// The `index` attribute value for the variable, if set
-    std::optional<uint32_t> index;
+    /// The `blend_src` attribute value for the variable, if set
+    std::optional<uint32_t> blend_src;
     /// The `color` attribute value for the variable, if set
     std::optional<uint32_t> color;
 };

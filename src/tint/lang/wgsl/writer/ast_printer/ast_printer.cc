@@ -501,9 +501,9 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
                 EmitExpression(out, color->expr);
                 out << ")";
             },
-            [&](const ast::BlendSrcAttribute* index) {
+            [&](const ast::BlendSrcAttribute* blend_src) {
                 out << "blend_src(";
-                EmitExpression(out, index->expr);
+                EmitExpression(out, blend_src->expr);
                 out << ")";
             },
             [&](const ast::BuiltinAttribute* builtin) {
