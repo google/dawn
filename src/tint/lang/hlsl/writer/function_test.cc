@@ -800,17 +800,18 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionWithArrayReturn) {
+TEST_F(HlslWriterTest, FunctionWithArrayReturn) {
     // fn my_func() -> array<f32, 5> {
     //   return array<f32, 5>();
     // }
 
     auto* func = b.Function("my_func", ty.array<f32, 5>());
-    func->Block()->Append(b.Return(func, b.Construct(ty.array<f32, 5>())));
+    func->Block()->Append(b.Return(func, b.Zero(ty.array<f32, 5>())));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(typedef float my_func_ret[5];
-my_func_ret my_func() {
+    EXPECT_EQ(output_.hlsl, R"(
+typedef float ary_ret[5];
+ary_ret my_func() {
   return (float[5])0;
 }
 

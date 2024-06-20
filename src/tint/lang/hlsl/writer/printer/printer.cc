@@ -181,8 +181,12 @@ class Printer : public tint::TextGenerator {
 
             auto out = Line();
             auto func_name = NameOf(func);
+            if (func->ReturnType()->Is<core::type::Array>()) {
+                EmitTypedefedType(out, func->ReturnType());
+            } else {
+                EmitType(out, func->ReturnType());
+            }
 
-            EmitType(out, func->ReturnType());
             out << " " << func_name << "(";
 
             bool is_ep = func->Stage() != core::ir::Function::PipelineStage::kUndefined;
@@ -224,6 +228,14 @@ class Printer : public tint::TextGenerator {
 
         Line() << "}";
         Line();
+    }
+
+    void EmitTypedefedType(StringStream& out, const core::type::Type* ty) {
+        auto name = UniqueIdentifier("ary_ret");
+
+        out << "typedef ";
+        EmitTypeAndName(out, ty, core::AddressSpace::kUndefined, core::Access::kReadWrite, name);
+        out << ";\n" << name;
     }
 
     void EmitBlock(const core::ir::Block* block) {
