@@ -116,6 +116,28 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::hlsl::writer {
 namespace {
 
+// Helper for writing " : register(RX, spaceY)", where R is the register, X is
+// the binding point binding value, and Y is the binding point group value.
+struct RegisterAndSpace {
+    RegisterAndSpace(char r, BindingPoint bp) : reg(r), binding_point(bp) {}
+
+    const char reg;
+    BindingPoint const binding_point;
+};
+
+StringStream& operator<<(StringStream& s, const RegisterAndSpace& rs) {
+    s << " : register(" << rs.reg << rs.binding_point.binding;
+    // Omit the space if it's 0, as it's the default.
+    // SM 5.0 doesn't support spaces, so we don't emit them if group is 0 for better
+    // compatibility.
+    if (rs.binding_point.group == 0) {
+        s << ")";
+    } else {
+        s << ", space" << rs.binding_point.group << ")";
+    }
+    return s;
+}
+
 /// PIMPL class for the HLSL generator
 class Printer : public tint::TextGenerator {
   public:
@@ -130,7 +152,8 @@ class Printer : public tint::TextGenerator {
             return std::move(valid.Failure());
         }
 
-        // TOOD(dsinclair): EmitRootBlock
+        // Emit module-scope declarations.
+        EmitRootBlock(ir_.root_block);
 
         // Emit functions.
         for (auto* func : ir_.DependencyOrderedFunctions()) {
@@ -167,6 +190,17 @@ class Printer : public tint::TextGenerator {
 
     /// Block to emit for a continuing
     std::function<void()> emit_continuing_;
+
+    /// Emit the root block.
+    /// @param root_block the root block to emit
+    void EmitRootBlock(core::ir::Block* root_block) {
+        for (auto* inst : *root_block) {
+            Switch(
+                inst,                                                //
+                [&](core::ir::Var* v) { return EmitGlobalVar(v); },  //
+                TINT_ICE_ON_NO_MATCH);
+        }
+    }
 
     void EmitFunction(const core::ir::Function* func) {
         TINT_SCOPED_ASSIGNMENT(current_function_, func);
@@ -400,6 +434,101 @@ class Printer : public tint::TextGenerator {
         }
     }
 
+    void EmitGlobalVar(const core::ir::Var* var) {
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(ptr);
+
+        auto space = ptr->AddressSpace();
+
+        switch (space) {
+            case core::AddressSpace::kUniform:
+                EmitUniformVariable(var);
+                break;
+            case core::AddressSpace::kStorage:
+                EmitStorageVariable(var);
+                break;
+            case core::AddressSpace::kHandle:
+                EmitHandleVariable(var);
+                break;
+            case core::AddressSpace::kPrivate: {
+                Line() << "static";
+                EmitVar(var);
+                break;
+            }
+            case core::AddressSpace::kWorkgroup:
+                Line() << "groupshared";
+                EmitVar(var);
+                break;
+            case core::AddressSpace::kPushConstant:
+            default: {
+                TINT_ICE() << "unhandled address space " << space;
+            }
+        }
+    }
+
+    void EmitUniformVariable(const core::ir::Var* var) {
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(ptr);
+
+        auto bp = var->BindingPoint();
+        TINT_ASSERT(bp.has_value());
+
+        Line() << "cbuffer cbuffer_" << NameOf(var->Result(0)) << RegisterAndSpace('b', bp.value())
+               << " {";
+        {
+            const ScopedIndent si(this);
+
+            auto out = Line();
+            EmitTypeAndName(out, ptr->StoreType(), core::AddressSpace::kUniform, ptr->Access(),
+                            NameOf(var->Result(0)));
+
+            out << ";";
+        }
+        Line() << "};";
+    }
+
+    void EmitStorageVariable(const core::ir::Var* var) {
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(ptr);
+
+        auto out = Line();
+        EmitTypeAndName(out, var->Result(0)->Type(), core::AddressSpace::kStorage, ptr->Access(),
+                        NameOf(var->Result(0)));
+
+        auto bp = var->BindingPoint();
+        TINT_ASSERT(bp.has_value());
+
+        out << RegisterAndSpace(ptr->Access() == core::Access::kRead ? 't' : 'u', bp.value())
+            << ";";
+    }
+
+    void EmitHandleVariable(const core::ir::Var* var) {
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(ptr);
+
+        char register_space = ' ';
+        if (ptr->StoreType()->Is<core::type::Texture>()) {
+            register_space = 't';
+
+            auto* st = ptr->StoreType()->As<core::type::StorageTexture>();
+            if (st && st->access() != core::Access::kRead) {
+                register_space = 'u';
+            }
+        } else if (ptr->StoreType()->Is<core::type::Sampler>()) {
+            register_space = 's';
+        }
+        TINT_ASSERT(register_space != ' ');
+
+        auto bp = var->BindingPoint();
+        TINT_ASSERT(bp.has_value());
+
+        // TODO(dsinclair): Handle PixelLocal::RasterizerOrderedView attribute
+        auto out = Line();
+        EmitTypeAndName(out, var->Result(0)->Type(), ptr->AddressSpace(), ptr->Access(),
+                        NameOf(var->Result(0)));
+        out << RegisterAndSpace(register_space, bp.value()) << ";";
+    }
+
     void EmitVar(const core::ir::Var* var) {
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         TINT_ASSERT(ptr);
@@ -408,13 +537,14 @@ class Printer : public tint::TextGenerator {
 
         auto out = Line();
         EmitTypeAndName(out, var->Result(0)->Type(), space, ptr->Access(), NameOf(var->Result(0)));
-        out << " = ";
 
         if (var->Initializer()) {
+            out << " = ";
             EmitValue(out, var->Initializer());
         } else if (space == core::AddressSpace::kPrivate ||
                    space == core::AddressSpace::kFunction ||
                    space == core::AddressSpace::kUndefined) {
+            out << " = ";
             EmitZeroValue(out, ptr->UnwrapPtr());
         }
         out << ";";
