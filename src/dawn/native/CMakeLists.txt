@@ -595,8 +595,6 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/ContextEGL.h"
         "opengl/DeviceGL.cpp"
         "opengl/DeviceGL.h"
-        "opengl/DisplayEGL.cpp"
-        "opengl/DisplayEGL.h"
         "opengl/EGLFunctions.cpp"
         "opengl/EGLFunctions.h"
         "opengl/Forward.h"

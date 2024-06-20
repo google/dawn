@@ -38,7 +38,6 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/opengl/ContextEGL.h"
 #include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/DisplayEGL.h"
 
 namespace dawn::native::opengl {
 
@@ -92,16 +91,23 @@ uint32_t GetDeviceIdFromRender(std::string_view render) {
 
 // static
 ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
-                                                          std::unique_ptr<DisplayEGL> display) {
-    const EGLFunctions& egl = display->egl;
-    EGLDisplay eglDisplay = display->GetDisplay();
+                                                          EGLGetProcProc getProc,
+                                                          EGLDisplay display) {
+    EGLFunctions egl;
+    DAWN_TRY(egl.LoadClientProcs(getProc));
 
-    // Create a temporary context and make it current during the creation of the PhysicalDevice so
-    // that we can query the limits and other properties. Assumes that the limit are the same
-    // irrespective of the context creation options.
+    if (display == EGL_NO_DISPLAY) {
+        display = egl.GetCurrentDisplay();
+    }
+    if (display == EGL_NO_DISPLAY) {
+        display = egl.GetDisplay(EGL_DEFAULT_DISPLAY);
+    }
+
+    DAWN_TRY(egl.LoadDisplayProcs(display));
+
+    EGLenum api = backendType == wgpu::BackendType::OpenGLES ? EGL_OPENGL_ES_API : EGL_OPENGL_API;
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context, ContextEGL::Create(display.get(), backendType, /*useRobustness*/ false,
-                                                /*useANGLETextureSharing*/ false));
+    DAWN_TRY_ASSIGN(context, ContextEGL::Create(egl, api, display, false));
 
     EGLContext prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
     EGLContext prevReadSurface = egl.GetCurrentSurface(EGL_READ);
@@ -109,22 +115,22 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
 
     context->MakeCurrent();
 
-    Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(backendType, std::move(display)));
-    DAWN_TRY_WITH_CLEANUP(physicalDevice->Initialize(), {
-        egl.MakeCurrent(eglDisplay, prevDrawSurface, prevReadSurface, prevContext);
-    });
+    Ref<PhysicalDevice> physicalDevice = AcquireRef(new PhysicalDevice(backendType, display));
+    DAWN_TRY(physicalDevice->InitializeGLFunctions(getProc));
+    DAWN_TRY(physicalDevice->Initialize());
 
-    egl.MakeCurrent(eglDisplay, prevDrawSurface, prevReadSurface, prevContext);
-
+    egl.MakeCurrent(display, prevDrawSurface, prevReadSurface, prevContext);
     return physicalDevice;
 }
 
-PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType, std::unique_ptr<DisplayEGL> display)
-    : PhysicalDeviceBase(backendType), mDisplay(std::move(display)) {}
+PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType, EGLDisplay display)
+    : PhysicalDeviceBase(backendType), mDisplay(display) {}
 
-DisplayEGL* PhysicalDevice::GetDisplay() const {
-    return mDisplay.get();
+MaybeError PhysicalDevice::InitializeGLFunctions(EGLGetProcProc getProc) {
+    // Use getProc to populate the dispatch table
+    DAWN_TRY(mEGLFunctions.LoadClientProcs(getProc));
+    DAWN_TRY(mEGLFunctions.LoadDisplayProcs(mDisplay));
+    return mFunctions.Initialize(getProc);
 }
 
 bool PhysicalDevice::SupportsExternalImages() const {
@@ -133,8 +139,6 @@ bool PhysicalDevice::SupportsExternalImages() const {
 }
 
 MaybeError PhysicalDevice::InitializeImpl() {
-    DAWN_TRY(mFunctions.Initialize(mDisplay->egl.GetProcAddress));
-
     if (mFunctions.GetVersion().IsES()) {
         DAWN_ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);
 
@@ -213,8 +217,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
             EnableFeature(dawn::native::Feature::TextureCompressionBC);
         }
     }
-
-    if (mDisplay->egl.HasExt(EGLExt::DisplayTextureShareGroup)) {
+    if (mName.find("ANGLE") != std::string::npos) {
         EnableFeature(dawn::native::Feature::ANGLETextureSharing);
     }
 
@@ -403,6 +406,8 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     const UnpackedPtr<DeviceDescriptor>& descriptor,
     const TogglesState& deviceToggles,
     Ref<DeviceBase::DeviceLostEvent>&& lostEvent) {
+    EGLenum api =
+        GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
     bool useANGLETextureSharing = false;
     for (size_t i = 0; i < descriptor->requiredFeatureCount; ++i) {
         if (descriptor->requiredFeatures[i] == wgpu::FeatureName::ANGLETextureSharing) {
@@ -410,11 +415,9 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
         }
     }
 
-    bool useRobustness = !deviceToggles.IsEnabled(Toggle::DisableRobustness);
-
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay.get(), GetBackendType(), useRobustness,
-                                                useANGLETextureSharing));
+    DAWN_TRY_ASSIGN(context,
+                    ContextEGL::Create(mEGLFunctions, api, mDisplay, useANGLETextureSharing));
 
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
                           std::move(lostEvent));
