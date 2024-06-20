@@ -705,6 +705,8 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
 TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
     // TODO(dawn:1692) Currently does not work on GL and GLES.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    // TODO(http://crbug.com/348199037): VUID-RuntimeSpirv-Location-06428
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
 
     // Compute the number of each resource type (storage buffers and storage textures) such that
     // there is at least one color attachment, and as many of the buffer/textures as possible,
