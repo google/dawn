@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-06-17 08:56:55AM
+# Last rolled: 2024-06-20 07:38:56AM
 
 # Flaky on all platforms
 # KEEP
@@ -495,7 +495,11 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 # New failures. Please triage:
 ################################################################################
 crbug.com/dawn/0000 webgpu:api,operation,uncapturederror:iff_uncaptured:errorType="out-of-memory" [ Failure ]
-crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,* [ Failure ]
+crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,shader_module:interpolate:success=false;interpolate="%40interpolate(flat)" [ Failure ]
+crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,shader_module:interpolate:success=true;interpolate="%40interpolate(flat,%20either)" [ Failure ]
+crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,shader_module:interpolate:success=true;interpolate="%40interpolate(linear)" [ Failure ]
+crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,shader_module:textureLoad_with_depth_textures:* [ Failure ]
+crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,shader_module:unsupportedStorageTextureFormats:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:f32:inputSource="const";dim=2 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
@@ -519,9 +523,7 @@ crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:parti
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="override";typeA="vec4%3Cf32%3E";typeB="vec4%3Ci32%3E" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,smoothstep:early_eval_errors:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,shader_io,interpolate:type_and_sampling:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,validation,gpu_external_texture_expiration:import_and_use_in_different_task:sourceType="VideoFrame" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:* [ Failure ]
