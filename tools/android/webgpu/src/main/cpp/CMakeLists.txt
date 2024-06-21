@@ -30,8 +30,6 @@ project(webgpu VERSION 1.1.0 LANGUAGES CXX)
 
 cmake_minimum_required(VERSION 3.22.1)
 
-include(${CMAKE_CURRENT_LIST_DIR}/BundleLibraries.cmake)
-
 set(DAWN_BUILD_ANDROID_SAMPLES OFF)
 set(DAWN_BUILD_SAMPLES OFF)
 set(TINT_BUILD_TESTS OFF)
@@ -47,6 +45,8 @@ add_library(native_dawn ${C_BINDINGS_PATH}/methods.cpp ${C_BINDINGS_PATH}/struct
 
 target_link_libraries(native_dawn webgpu_dawn)
 
+list(INSERT CMAKE_MODULE_PATH 0 ../../../../../../src/cmake)
+include(BundleLibraries)
 bundle_libraries(webgpu_c_bundled native_dawn)
 
 find_library(log-lib log)
