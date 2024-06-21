@@ -89,32 +89,24 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
         }
     };
 
-    using Promise = interop::Promise<interop::Interface<interop::GPUCompilationInfo>>;
-
-    struct Context {
-        Napi::Env env;
-        Promise promise;
-        AsyncTask task;
-    };
-    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(env, async_)};
+    auto ctx = std::make_unique<AsyncContext<interop::Interface<interop::GPUCompilationInfo>>>(
+        env, PROMISE_INFO, async_);
     auto promise = ctx->promise;
 
     shader_.GetCompilationInfo(
-        [](WGPUCompilationInfoRequestStatus status, WGPUCompilationInfo const* compilationInfo,
-           void* userdata) {
-            auto c = std::unique_ptr<Context>(static_cast<Context*>(userdata));
-
+        wgpu::CallbackMode::AllowProcessEvents,
+        [ctx = std::move(ctx)](wgpu::CompilationInfoRequestStatus status,
+                               wgpu::CompilationInfo const* compilationInfo) {
             Messages messages(compilationInfo->messageCount);
             for (uint32_t i = 0; i < compilationInfo->messageCount; i++) {
                 auto& msg = compilationInfo->messages[i];
                 messages[i] =
-                    interop::GPUCompilationMessage::Create<GPUCompilationMessage>(c->env, msg);
+                    interop::GPUCompilationMessage::Create<GPUCompilationMessage>(ctx->env, msg);
             }
 
-            c->promise.Resolve(interop::GPUCompilationInfo::Create<GPUCompilationInfo>(
-                c->env, c->env, std::move(messages)));
-        },
-        ctx);
+            ctx->promise.Resolve(interop::GPUCompilationInfo::Create<GPUCompilationInfo>(
+                ctx->env, ctx->env, std::move(messages)));
+        });
 
     return promise;
 }

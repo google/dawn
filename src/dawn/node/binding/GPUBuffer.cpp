@@ -69,56 +69,42 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
         return promise;
     }
 
-    pending_map_.emplace(env, PROMISE_INFO);
     uint64_t rangeSize = size.has_value() ? size.value().value : (desc_.size - offset);
 
-    struct Context {
-        Napi::Env env;
-        GPUBuffer* self;
-        AsyncTask task;
-        interop::Promise<void> promise;
-    };
-    auto ctx = new Context{env, this, AsyncTask(env, async_), *pending_map_};
+    auto ctx = std::make_unique<AsyncContext<void>>(env, PROMISE_INFO, async_);
+    pending_map_.emplace(ctx->promise);
 
     buffer_.MapAsync(
-        mode, offset, rangeSize,
-        [](WGPUBufferMapAsyncStatus status, void* userdata) {
-            auto c = std::unique_ptr<Context>(static_cast<Context*>(userdata));
-
+        mode, offset, rangeSize, wgpu::CallbackMode::AllowProcessEvents,
+        [ctx = std::move(ctx), this](wgpu::MapAsyncStatus status, char const*) {
             // The promise may already have been resolved with an AbortError if there was an early
             // destroy() or early unmap().
-            if (c->promise.GetState() != interop::PromiseState::Pending) {
-                assert(c->promise.GetState() == interop::PromiseState::Rejected);
+            if (ctx->promise.GetState() != interop::PromiseState::Pending) {
+                assert(ctx->promise.GetState() == interop::PromiseState::Rejected);
                 return;
             }
 
             switch (status) {
-                case WGPUBufferMapAsyncStatus_Force32:
-                    UNREACHABLE("WGPUBufferMapAsyncStatus_Force32");
+                case wgpu::MapAsyncStatus::Success:
+                    ctx->promise.Resolve();
+                    mapped_ = true;
                     break;
-                case WGPUBufferMapAsyncStatus_Success:
-                    c->promise.Resolve();
-                    c->self->mapped_ = true;
+                case wgpu::MapAsyncStatus::InstanceDropped:
+                case wgpu::MapAsyncStatus::Aborted:
+                    async_->Reject(ctx->env, ctx->promise, Errors::AbortError(ctx->env));
                     break;
-                case WGPUBufferMapAsyncStatus_DestroyedBeforeCallback:
-                case WGPUBufferMapAsyncStatus_DeviceLost:
-                case WGPUBufferMapAsyncStatus_InstanceDropped:
-                case WGPUBufferMapAsyncStatus_MappingAlreadyPending:
-                case WGPUBufferMapAsyncStatus_OffsetOutOfRange:
-                case WGPUBufferMapAsyncStatus_SizeOutOfRange:
-                case WGPUBufferMapAsyncStatus_Unknown:
-                case WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
-                case WGPUBufferMapAsyncStatus_ValidationError:
-                    c->self->async_->Reject(c->env, c->promise, Errors::OperationError(c->env));
+                case wgpu::MapAsyncStatus::Error:
+                case wgpu::MapAsyncStatus::Unknown:
+                default:
+                    async_->Reject(ctx->env, ctx->promise, Errors::OperationError(ctx->env));
                     break;
             }
 
             // This captured promise is the currently pending mapping, reset it so we can start new
             // mappings.
-            assert(*c->self->pending_map_ == c->promise);
-            c->self->pending_map_.reset();
-        },
-        ctx);
+            assert(*pending_map_ == ctx->promise);
+            pending_map_.reset();
+        });
 
     return pending_map_.value();
 }

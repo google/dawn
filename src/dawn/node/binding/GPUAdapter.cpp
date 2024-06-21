@@ -132,6 +132,40 @@ bool GPUAdapter::getIsCompatibilityMode(Napi::Env) {
     return adapterProperties.compatibilityMode;
 }
 
+namespace {
+// Returns a string representation of the wgpu::ErrorType
+const char* str(wgpu::ErrorType ty) {
+    switch (ty) {
+        case wgpu::ErrorType::NoError:
+            return "no error";
+        case wgpu::ErrorType::Validation:
+            return "validation";
+        case wgpu::ErrorType::OutOfMemory:
+            return "out of memory";
+        case wgpu::ErrorType::Internal:
+            return "internal";
+        case wgpu::ErrorType::DeviceLost:
+            return "device lost";
+        case wgpu::ErrorType::Unknown:
+        default:
+            return "unknown";
+    }
+}
+
+// There's something broken with Node when attempting to write more than 65536 bytes to cout.
+// Split the string up into writes of 4k chunks.
+// Likely related: https://github.com/nodejs/node/issues/12921
+void chunkedWrite(const char* msg) {
+    while (true) {
+        auto n = printf("%.4096s", msg);
+        if (n <= 0) {
+            break;
+        }
+        msg += n;
+    }
+}
+}  // namespace
+
 interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevice(
     Napi::Env env,
     interop::GPUDeviceDescriptor descriptor) {
@@ -182,6 +216,37 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     desc.requiredFeatures = requiredFeatures.data();
     desc.requiredLimits = &limits;
 
+    // Set the device callbacks.
+    using DeviceLostContext = AsyncContext<interop::Interface<interop::GPUDeviceLostInfo>>;
+    auto device_lost_ctx = new DeviceLostContext(env, PROMISE_INFO, async_);
+    auto device_lost_promise = device_lost_ctx->promise;
+    desc.SetDeviceLostCallback(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [](const wgpu::Device&, wgpu::DeviceLostReason reason, const char* message,
+           DeviceLostContext* device_lost_ctx) {
+            std::unique_ptr<DeviceLostContext> ctx(device_lost_ctx);
+            auto r = interop::GPUDeviceLostReason::kDestroyed;
+            switch (reason) {
+                case wgpu::DeviceLostReason::Destroyed:
+                case wgpu::DeviceLostReason::InstanceDropped:
+                    r = interop::GPUDeviceLostReason::kDestroyed;
+                    break;
+                case wgpu::DeviceLostReason::FailedCreation:
+                case wgpu::DeviceLostReason::Unknown:
+                    r = interop::GPUDeviceLostReason::kUnknown;
+                    break;
+            }
+            if (ctx->promise.GetState() == interop::PromiseState::Pending) {
+                ctx->promise.Resolve(
+                    interop::GPUDeviceLostInfo::Create<GPUDeviceLostInfo>(ctx->env, r, message));
+            }
+        },
+        device_lost_ctx);
+    desc.SetUncapturedErrorCallback([](const wgpu::Device&, ErrorType type, const char* message) {
+        printf("%s:\n", str(type));
+        chunkedWrite(message);
+    });
+
     // Propagate enabled/disabled dawn features
     TogglesLoader togglesLoader(flags_);
     DawnTogglesDescriptor deviceTogglesDesc = togglesLoader.GetDescriptor();
@@ -193,9 +258,10 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         return promise;
     }
 
-    auto gpu_device = std::make_unique<GPUDevice>(env, desc, wgpu_device, async_);
+    auto gpu_device =
+        std::make_unique<GPUDevice>(env, desc, wgpu_device, device_lost_promise, async_);
     if (!valid_) {
-        gpu_device->ForceLoss(wgpu::DeviceLostReason::FailedCreation,
+        gpu_device->ForceLoss(wgpu::DeviceLostReason::Unknown,
                               "Device was marked as lost due to a stale adapter.");
     }
     valid_ = false;

@@ -71,25 +71,33 @@ class AsyncRunner {
 };
 
 // AsyncTask is a RAII helper for calling AsyncRunner::Begin() on construction, and
-// AsyncRunner::End() on destruction.
-class AsyncTask {
+// AsyncRunner::End() on destruction, that also encapsulates the promise generally
+// associated with any async task.
+template <typename T>
+class AsyncContext {
   public:
-    inline AsyncTask(AsyncTask&&) = default;
-
     // Constructor.
     // Calls AsyncRunner::Begin()
-    explicit inline AsyncTask(Napi::Env env, std::shared_ptr<AsyncRunner> runner)
-        : runner_(std::move(runner)) {
+    inline AsyncContext(Napi::Env env,
+                        const interop::PromiseInfo& info,
+                        std::shared_ptr<AsyncRunner> runner)
+        : env(env), promise(env, info), runner_(runner) {
         runner_->Begin(env);
     }
 
     // Destructor.
     // Calls AsyncRunner::End()
-    inline ~AsyncTask() { runner_->End(); }
+    inline ~AsyncContext() { runner_->End(); }
+
+    // Note these are public to allow for access for the callbacks that take ownership of this
+    // context.
+    Napi::Env env;
+    interop::Promise<T> promise;
 
   private:
-    AsyncTask(const AsyncTask&) = delete;
-    AsyncTask& operator=(const AsyncTask&) = delete;
+    AsyncContext(const AsyncContext&) = delete;
+    AsyncContext& operator=(const AsyncContext&) = delete;
+
     std::shared_ptr<AsyncRunner> runner_;
 };
 
