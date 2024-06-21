@@ -209,7 +209,7 @@ endif()
 option(TINT_ENABLE_INSTALL "Enable install step for Tint libraries" OFF)
 option(TINT_BUILD_CMD_TOOLS "Build the Tint command line tools" ON)
 
-if (NOT DAWN_USE_GLFW AND (TINT_BUILD_CMD_TOOLS OR DAWN_BUILD_SAMPLES))
+if (NOT DAWN_USE_GLFW AND DAWN_BUILD_SAMPLES)
   message(SEND_ERROR "Dawn samples require GLFW")
 endif()
 
@@ -261,6 +261,7 @@ set_if_not_defined(DAWN_LPM_DIR "${DAWN_THIRD_PARTY_DIR}/libprotobuf-mutator/src
 
 set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-tools/src" "Directory in which to find SPIRV-Tools")
 set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-headers/src" "Directory in which to find SPIRV-Headers")
+set_if_not_defined(DAWN_GLSLANG_DIR "${DAWN_THIRD_PARTY_DIR}/glslang/src" "Directory in which to find GLSLang")
 set_if_not_defined(DAWN_VULKAN_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-headers/src" "Directory in which to find Vulkan-Headers")
 set_if_not_defined(DAWN_VULKAN_UTILITY_LIBRARIES_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-utility-libraries/src" "Directory in which to find Vulkan-Utility-Libraries")
 
@@ -320,6 +321,7 @@ message(STATUS "Tint build SPIR-V writer: ${TINT_BUILD_SPV_WRITER}")
 message(STATUS "Tint build WGSL writer: ${TINT_BUILD_WGSL_WRITER}")
 message(STATUS "Tint build Syntax Tree writer: ${TINT_BUILD_SYNTAX_TREE_WRITER}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
+message(STATUS "Tint build IR binary: ${TINT_BUILD_IR_BINARY}")
 message(STATUS "Tint build IR fuzzer: ${TINT_BUILD_IR_FUZZER}")
 message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
@@ -528,8 +530,11 @@ set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS 0)
 add_subdirectory(src/tint)
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
-add_subdirectory(generator)
-add_subdirectory(src/dawn)
+
+if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12 OR DAWN_ENABLE_METAL OR DAWN_ENABLE_NULL OR DAWN_ENABLE_DESKTOP_GL OR DAWN_ENABLE_OPENGLES OR DAWN_ENABLE_VULKAN)
+    add_subdirectory(generator)
+    add_subdirectory(src/dawn)
+endif()
 
 ################################################################################
 # Samples
