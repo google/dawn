@@ -2346,7 +2346,7 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
         b.ExitIf(if_outer);
     });
 
-    auto* c = b.Case(switch_inner, {b.Constant(1_i)});
+    auto* c = b.Case(switch_inner, {b.Constant(1_i), nullptr});
     b.Append(c, [&] { b.ExitIf(if_outer); });
 
     b.Append(f->Block(), [&] {
@@ -2366,15 +2366,15 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
           ^^^
 
 :5:9 note: first control instruction jumped
-        switch 1i [c: (1i, $B3)] {  # switch_1
-        ^^^^^^^^^^^^^^^^^^^^^^^^
+        switch 1i [c: (1i default, $B3)] {  # switch_1
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
     if true [t: $B2] {  # if_1
       $B2: {  # true
-        switch 1i [c: (1i, $B3)] {  # switch_1
+        switch 1i [c: (1i default, $B3)] {  # switch_1
           $B3: {  # case
             exit_if  # if_1
           }
@@ -2441,7 +2441,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
 
     auto* def = b.DefaultCase(switch_);
     def->Append(b.ExitSwitch(switch_));
@@ -2455,7 +2455,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch) {
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_NullSwitch) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
 
     auto* def = b.DefaultCase(switch_);
     def->Append(mod.allocators.instructions.Create<ExitSwitch>(nullptr));
@@ -2479,7 +2479,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NullSwitch) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    switch true [c: (default, $B2)] {  # switch_1
+    switch 1i [c: (default, $B2)] {  # switch_1
       $B2: {  # case
         exit_switch  # undef
       }
@@ -2491,7 +2491,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
 
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
@@ -2517,13 +2517,13 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
       ^^^
 
 :3:5 note: 'switch' declared here
-    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
+    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
       $B2: {  # case
         exit_switch 1i  # switch_1
       }
@@ -2535,7 +2535,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
     switch_->SetResults(Vector{r1, r2});
@@ -2560,13 +2560,13 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
       ^^^
 
 :3:5 note: 'switch' declared here
-    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
+    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
       $B2: {  # case
         exit_switch 1i, 2.0f, 3i  # switch_1
       }
@@ -2578,7 +2578,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_WithResult) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
     switch_->SetResults(Vector{r1, r2});
@@ -2596,7 +2596,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_WithResult) {
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
     switch_->SetResults(Vector{r1, r2});
@@ -2622,13 +2622,13 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
       ^^^
 
 :3:13 note: %3 declared here
-    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
+    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
             ^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    %2:i32, %3:f32 = switch true [c: (default, $B2)] {  # switch_1
+    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
       $B2: {  # case
         exit_switch 1i, 2i  # switch_1
       }
@@ -2640,7 +2640,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
 
     auto* f = b.Function("my_func", ty.void_());
 
@@ -2668,7 +2668,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    switch true [c: (default, $B2)] {  # switch_1
+    switch 1i [c: (default, $B2)] {  # switch_1
       $B2: {  # case
         ret
       }
@@ -2694,7 +2694,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_JumpsOverIfs) {
     //     }
     //     break;
     //  }
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
 
     auto* f = b.Function("my_func", ty.void_());
 
@@ -2717,11 +2717,11 @@ TEST_F(IR_ValidatorTest, ExitSwitch_JumpsOverIfs) {
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
 
     auto* def = b.DefaultCase(switch_);
     b.Append(def, [&] {
-        auto* inner = b.Switch(false);
+        auto* inner = b.Switch(0_i);
         b.ExitSwitch(switch_);
 
         auto* inner_def = b.DefaultCase(inner);
@@ -2747,15 +2747,15 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
           ^^^
 
 :5:9 note: first control instruction jumped
-        switch false [c: (default, $B3)] {  # switch_2
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        switch 0i [c: (default, $B3)] {  # switch_2
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    switch true [c: (default, $B2)] {  # switch_1
+    switch 1i [c: (default, $B2)] {  # switch_1
       $B2: {  # case
-        switch false [c: (default, $B3)] {  # switch_2
+        switch 0i [c: (default, $B3)] {  # switch_2
           $B3: {  # case
             exit_switch  # switch_1
           }
@@ -2770,7 +2770,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
-    auto* switch_ = b.Switch(true);
+    auto* switch_ = b.Switch(1_i);
 
     auto* def = b.DefaultCase(switch_);
     b.Append(def, [&] {
@@ -2804,7 +2804,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    switch true [c: (default, $B2)] {  # switch_1
+    switch 1i [c: (default, $B2)] {  # switch_1
       $B2: {  # case
         loop [b: $B3] {  # loop_1
           $B3: {  # body
@@ -4068,7 +4068,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverSwitch) {
     loop->Continuing()->Append(b.NextIteration(loop));
 
     b.Append(loop->Body(), [&] {
-        auto* inner = b.Switch(false);
+        auto* inner = b.Switch(1_i);
         b.ExitLoop(loop);
 
         auto* inner_def = b.DefaultCase(inner);
@@ -4094,15 +4094,15 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverSwitch) {
           ^^^
 
 :5:9 note: first control instruction jumped
-        switch false [c: (default, $B4)] {  # switch_1
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        switch 1i [c: (default, $B4)] {  # switch_1
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func():void {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
-        switch false [c: (default, $B4)] {  # switch_1
+        switch 1i [c: (default, $B4)] {  # switch_1
           $B4: {  # case
             exit_loop  # loop_1
           }
@@ -5042,5 +5042,131 @@ INSTANTIATE_TEST_SUITE_P(RefTypes,
                                           testing::Values(RefTypeBuilder<i32>,
                                                           RefTypeBuilder<bool>,
                                                           RefTypeBuilder<vec4<f32>>)));
+
+TEST_F(IR_ValidatorTest, Switch_NoCondition) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* s = b.ir.allocators.instructions.Create<ir::Switch>();
+    f->Block()->Append(s);
+    b.Append(b.DefaultCase(s), [&] { b.ExitSwitch(s); });
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(error: switch: operand is undefined
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    switch undef [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
+        exit_switch  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Switch_ConditionPointer) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* s = b.Switch(b.Var("a", b.Zero<i32>()));
+        b.Append(b.DefaultCase(s), [&] { b.ExitSwitch(s); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(error: switch: condition type must be an integer scalar
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %a:ptr<function, i32, read_write> = var, 0i
+    switch %a [c: (default, $B2)] {  # switch_1
+      $B2: {  # case
+        exit_switch  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Switch_NoCases) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Switch(1_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: switch: missing default case for switch
+    switch 1i [] {  # switch_1
+    ^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    switch 1i [] {  # switch_1
+    }
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Switch_NoDefaultCase) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* s = b.Switch(1_i);
+        b.Append(b.Case(s, {b.Constant(0_i)}), [&] { b.ExitSwitch(s); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: switch: missing default case for switch
+    switch 1i [c: (0i, $B2)] {  # switch_1
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    switch 1i [c: (0i, $B2)] {  # switch_1
+      $B2: {  # case
+        exit_switch  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::core::ir

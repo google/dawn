@@ -1336,10 +1336,27 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
 }
 
 void Validator::CheckSwitch(const Switch* s) {
+    CheckOperandNotNull(s, s->Condition(), If::kConditionOperandOffset);
+
+    if (s->Condition() && !s->Condition()->Type()->is_integer_scalar()) {
+        AddError(s, Switch::kConditionOperandOffset) << "condition type must be an integer scalar";
+    }
+
     tasks_.Push([this] { control_stack_.Pop(); });
 
+    bool found_default = false;
     for (auto& cse : s->Cases()) {
         QueueBlock(cse.block);
+
+        for (const auto& sel : cse.selectors) {
+            if (sel.IsDefault()) {
+                found_default = true;
+            }
+        }
+    }
+
+    if (!found_default) {
+        AddError(s) << "missing default case for switch";
     }
 
     tasks_.Push([this, s] { control_stack_.Push(s); });
