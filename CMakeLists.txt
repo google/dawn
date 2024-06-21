@@ -42,6 +42,8 @@ project(
 )
 enable_testing()
 
+list(INSERT CMAKE_MODULE_PATH 0 "${Dawn_SOURCE_DIR}/src/cmake")
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -55,28 +57,13 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
+include(DawnSetIfNotDefined)
+
 set(DAWN_BUILD_GEN_DIR "${Dawn_BINARY_DIR}/gen")
 set(DAWN_GENERATOR_DIR "${Dawn_SOURCE_DIR}/generator")
 set(DAWN_SRC_DIR "${Dawn_SOURCE_DIR}/src")
 set(DAWN_INCLUDE_DIR "${Dawn_SOURCE_DIR}/include")
 set(DAWN_TEMPLATE_DIR "${DAWN_GENERATOR_DIR}/templates")
-
-################################################################################
-# Configuration options
-################################################################################
-# set_if_not_defined(name value description)
-# Behaves like:
-#   set(${name} ${value} CACHE STRING ${description})
-# If a variable is not already defined with the given name, otherwise the
-# function does nothing.
-# Simplifies customization by projects that use Dawn as a dependency.
-# Usages of set_if_not_defined can be safely replaced with `set` after
-# the minimum cmake version is bumped to >= 3.20
-function (set_if_not_defined name value description)
-    if(NOT DEFINED ${name})
-        set(${name} ${value} CACHE STRING ${description})
-    endif()
-endfunction()
 
 function (install_if_enabled target)
     if(NOT DAWN_ENABLE_INSTALL)
@@ -116,7 +103,9 @@ function (install_if_enabled target)
     endforeach()
 endfunction()
 
-
+################################################################################
+# Configuration options
+################################################################################
 # Default values for the backend-enabling options
 set(ENABLE_D3D11 OFF)
 set(ENABLE_D3D12 OFF)
