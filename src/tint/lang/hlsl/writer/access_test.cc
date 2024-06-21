@@ -88,8 +88,7 @@ void a() {
 )");
 }
 
-// TODO(dsinclair): Needs `LoadVectorElement`
-TEST_F(HlslWriterTest, DISABLED_AccessVector) {
+TEST_F(HlslWriterTest, AccessVector) {
     auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
 
@@ -103,15 +102,14 @@ TEST_F(HlslWriterTest, DISABLED_AccessVector) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void a() {
-  float3 v = (float3)0;
+  float3 v = (0.0f).xxx;
   float x = v[1u];
 }
 
 )");
 }
 
-// TODO(dsinclair): Needs `LoadVectorElement`
-TEST_F(HlslWriterTest, DISABLED_AccessMatrix) {
+TEST_F(HlslWriterTest, AccessMatrix) {
     auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
 
@@ -126,8 +124,54 @@ TEST_F(HlslWriterTest, DISABLED_AccessMatrix) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void a() {
-  float3 v = (float3)0;
+  float4x4 v = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
   float x = v[1u][2u];
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessStoreVectorElementConstantIndex) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
+        b.StoreVectorElement(vec_var, 1_u, b.Constant(42_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  int4 vec = (0).xxxx;
+  vec[1u] = 42;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessStoreVectorElementDynamicIndex) {
+    auto* idx = b.FunctionParam("idx", ty.i32());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({idx});
+    b.Append(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
+        b.StoreVectorElement(vec_var, idx, b.Constant(42_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo(int idx) {
+  int4 vec = (0).xxxx;
+  vec[idx] = 42;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
 }
 
 )");
