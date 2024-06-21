@@ -89,6 +89,8 @@ if (NOT TARGET glfw AND DAWN_USE_GLFW)
 endif()
 
 if (NOT TARGET libabsl)
+    # Recommended setting for compability with future abseil releases.
+    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
     message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
     if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
         ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
