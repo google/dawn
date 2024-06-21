@@ -121,6 +121,11 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         DAWN_TEST_UNSUPPORTED_IF(utils::IsCompressedTextureFormat(GetParam().mFormat) &&
                                  IsCompatibilityMode());
 
+        // TODO(crbug.com/dawn/667): Workaround the fact that you can't use textureLoad with
+        // texture_depth_xxx in compat mode.
+        DAWN_TEST_UNSUPPORTED_IF(utils::IsDepthOrStencilFormat(GetParam().mFormat) &&
+                                 IsCompatibilityMode());
+
         // TODO(crbug.com/dawn/1637): Failures with ANGLE only with some format/aspect
         DAWN_SUPPRESS_TEST_IF(IsWindows() && IsANGLE() &&
                               GetParam().mAspect == wgpu::TextureAspect::All &&

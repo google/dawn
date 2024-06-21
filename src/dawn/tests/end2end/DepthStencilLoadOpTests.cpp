@@ -131,6 +131,8 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
         switch (GetParam().mCheck) {
             case Check::SampleDepth: {
                 DAWN_TEST_UNSUPPORTED_IF(utils::IsStencilOnlyFormat(GetParam().mFormat));
+                // textureLoad with texture_depth_xxx is not supported in compat mode.
+                DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
                 std::vector<float> expectedDepth(mipSize * mipSize, kDepthValues[mipLevel]);
                 ExpectSampledDepthData(

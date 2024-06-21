@@ -25,9 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
+#include "src/tint/lang/core/number.h"
+#include "src/tint/lang/wgsl/ast/expression.h"
+#include "src/tint/lang/wgsl/ast/type.h"
 #include "src/tint/lang/wgsl/common/validation_mode.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/utils/text/string.h"
 
 #include "gmock/gmock.h"
 
@@ -36,6 +41,8 @@ namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
+
+using ExpressionList = Vector<const ast::Expression*, 8>;
 
 class ResolverCompatibilityModeTest : public ResolverTest {
   protected:
@@ -268,6 +275,80 @@ TEST_F(ResolverCompatibilityModeTest, SampleInterpolation_StructMember) {
     EXPECT_EQ(
         r()->error(),
         R"(12:34 error: use of '@interpolate(..., sample)' is not allowed in compatibility mode)");
+}
+
+class ResolverCompatibilityModeTest_TextureLoad : public ResolverCompatibilityModeTest {
+  protected:
+    void add_call_param(std::string name, ast::Type type, ExpressionList* call_params) {
+        const std::string type_name = type->identifier->symbol.Name();
+        if (tint::HasPrefix(type_name, "texture")) {
+            GlobalVar(name, type, Binding(0_a), Group(0_a));
+        } else {
+            GlobalVar(name, type, core::AddressSpace::kPrivate);
+        }
+        call_params->Push(Expr(Source{{12, 34}}, name));
+    }
+};
+
+TEST_F(ResolverCompatibilityModeTest_TextureLoad, TextureDepth2D) {
+    // textureLoad(someDepthTexture2D, coords, level)
+    const ast::Type coords_type = ty.vec2(ty.i32());
+    auto texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
+
+    ExpressionList call_params;
+
+    add_call_param("texture", texture_type, &call_params);
+    add_call_param("coords", coords_type, &call_params);
+    add_call_param("level", ty.i32(), &call_params);
+
+    auto* expr = Call("textureLoad", call_params);
+    WrapInFunction(expr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: use of texture_depth_2d with textureLoad is not allowed in compatibility mode)");
+}
+
+TEST_F(ResolverCompatibilityModeTest_TextureLoad, TextureDepth2DArray) {
+    // textureLoad(someDepthTexture2DArray, coords, layer, level)
+    const ast::Type coords_type = ty.vec2(ty.i32());
+    auto texture_type = ty.depth_texture(core::type::TextureDimension::k2dArray);
+
+    ExpressionList call_params;
+
+    add_call_param("texture", texture_type, &call_params);
+    add_call_param("coords", coords_type, &call_params);
+    add_call_param("array_index", ty.i32(), &call_params);
+    add_call_param("level", ty.i32(), &call_params);
+
+    auto* expr = Call("textureLoad", call_params);
+    WrapInFunction(expr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: use of texture_depth_2d_array with textureLoad is not allowed in compatibility mode)");
+}
+
+TEST_F(ResolverCompatibilityModeTest_TextureLoad, TextureDepthMultisampled2D) {
+    // textureLoad(someDepthTextureMultisampled2D, coords, sample_index)
+    const ast::Type coords_type = ty.vec2(ty.i32());
+    auto texture_type = ty.depth_multisampled_texture(core::type::TextureDimension::k2d);
+
+    ExpressionList call_params;
+
+    add_call_param("texture", texture_type, &call_params);
+    add_call_param("coords", coords_type, &call_params);
+    add_call_param("sample_index", ty.i32(), &call_params);
+
+    auto* expr = Call("textureLoad", call_params);
+    WrapInFunction(expr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: use of texture_depth_multisampled_2d with textureLoad is not allowed in compatibility mode)");
 }
 
 }  // namespace

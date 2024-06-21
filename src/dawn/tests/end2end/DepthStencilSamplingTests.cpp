@@ -896,6 +896,9 @@ class DepthSamplingTest : public DepthStencilSamplingTest {};
 
 // Test that sampling a depth texture with a render/compute pipeline works
 TEST_P(DepthSamplingTest, SampleDepthOnly) {
+    // textureLoad with texture_depth_xxx is not supported in compat mode.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     // TODO(crbug.com/dawn/2552): diagnose this flake on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
 
