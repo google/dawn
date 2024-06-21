@@ -283,7 +283,8 @@ source_set("dxc-include") {
 }
 
 source_set("dxcompiler-for-fuzzer") {
-  if (use_libfuzzer && (is_win || is_linux || is_mac) && target_cpu != "x86") {
+  if (defined(use_libfuzzer) && use_libfuzzer &&
+      (is_win || is_linux || is_mac) && target_cpu != "x86") {
     public_deps = [ "${dawn_dxc_dir}/../gn/dxc:dxcompiler" ]
   }
 }
