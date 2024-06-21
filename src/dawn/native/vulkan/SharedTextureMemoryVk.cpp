@@ -298,17 +298,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
             vkFormat, descriptor->drmFormat, descriptor->drmModifier, memoryPlaneCount,
             descriptor->planeCount);
         DAWN_INVALID_IF(memoryPlaneCount == 0, "Memory plane count must not be 0");
-        DAWN_INVALID_IF(
-            memoryPlaneCount > 1 && !(drmModifierProps.drmFormatModifierTilingFeatures &
-                                      VK_FORMAT_FEATURE_DISJOINT_BIT),
-            "VK_FORMAT_FEATURE_DISJOINT_BIT tiling is not supported for multi-planar DRM "
-            "format (%u) with drm modifier (%u).",
-            descriptor->drmFormat, descriptor->drmModifier);
         DAWN_INVALID_IF(memoryPlaneCount > kMaxPlanesPerFormat,
                         "Memory plane count (%u) must not exceed %u.", memoryPlaneCount,
                         kMaxPlanesPerFormat);
-        DAWN_INVALID_IF(memoryPlaneCount > 1,
-                        "TODO(crbug.com/dawn/1548): Disjoint planar import not supported yet.");
 
         // Verify that the format modifier of the external memory and the requested Vulkan format
         // are actually supported together in a dma-buf import.
@@ -318,10 +310,6 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         imageFormatInfo.tiling = VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT;
         imageFormatInfo.usage = vkUsageFlags;
         imageFormatInfo.flags = 0;
-
-        if (memoryPlaneCount > 1) {
-            imageFormatInfo.flags |= VK_IMAGE_CREATE_DISJOINT_BIT;
-        }
 
         VkPhysicalDeviceImageDrmFormatModifierInfoEXT drmModifierInfo = {};
         drmModifierInfo.sType =
@@ -383,6 +371,18 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         }
     }
 
+    // Validate that there is a single FD. If there is more than one FD, Dawn will need to validate
+    // the format has VK_FORMAT_FEATURE_DISJOINT_BIT, create the VkImage with
+    // VK_IMAGE_CREATE_DISJOINT_BIT, and separately bind the image planes to memory. Dawn doesn't
+    // support use of VK_IMAGE_CREATE_DISJOINT_BIT currently. See crbug.com/42240514.
+    int fd = descriptor->planes[0].fd;
+    for (uint32_t i = 1; i < descriptor->planeCount; ++i) {
+        DAWN_INVALID_IF(descriptor->planes[i].fd != fd,
+                        "descriptor->planes[%u].fd (%i) does not match other plane fd (%i). All "
+                        "fds must be the same.",
+                        i, descriptor->planes[i].fd, fd);
+    }
+
     // Don't add the view format if backend validation is enabled, otherwise most image creations
     // will fail with VVL. This view format is only needed for sRGB reinterpretation.
     // TODO(crbug.com/dawn/2304): Investigate if this is a bug in VVL.
@@ -420,60 +420,54 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     }
 
     // Import the memory plane(s) as VkDeviceMemory and bind to the VkImage.
-    if (memoryPlaneCount > 1u) {
-        // TODO(crbug.com/dawn/1548): Disjoint planar import not supported yet.
-        DAWN_UNREACHABLE();
-    } else {
-        VkMemoryFdPropertiesKHR fdProperties;
-        fdProperties.sType = VK_STRUCTURE_TYPE_MEMORY_FD_PROPERTIES_KHR;
-        fdProperties.pNext = nullptr;
+    VkMemoryFdPropertiesKHR fdProperties;
+    fdProperties.sType = VK_STRUCTURE_TYPE_MEMORY_FD_PROPERTIES_KHR;
+    fdProperties.pNext = nullptr;
 
-        // Get the valid memory types that the external memory can be imported as.
-        DAWN_TRY(CheckVkSuccess(device->fn.GetMemoryFdPropertiesKHR(
-                                    vkDevice, handleType, descriptor->planes[0].fd, &fdProperties),
-                                "vkGetMemoryFdPropertiesKHR"));
+    // Get the valid memory types that the external memory can be imported as.
+    DAWN_TRY(CheckVkSuccess(device->fn.GetMemoryFdPropertiesKHR(
+                                vkDevice, handleType, descriptor->planes[0].fd, &fdProperties),
+                            "vkGetMemoryFdPropertiesKHR"));
 
-        // Get the valid memory types for the VkImage.
-        VkMemoryRequirements memoryRequirements;
-        device->fn.GetImageMemoryRequirements(vkDevice, sharedTextureMemory->mVkImage->Get(),
-                                              &memoryRequirements);
+    // Get the valid memory types for the VkImage.
+    VkMemoryRequirements memoryRequirements;
+    device->fn.GetImageMemoryRequirements(vkDevice, sharedTextureMemory->mVkImage->Get(),
+                                          &memoryRequirements);
 
-        // Choose the best memory type that satisfies both the image's constraint and the
-        // import's constraint.
-        memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
-        int memoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
-            memoryRequirements, MemoryKind::Opaque);
-        DAWN_INVALID_IF(memoryTypeIndex == -1,
-                        "Unable to find an appropriate memory type for import.");
+    // Choose the best memory type that satisfies both the image's constraint and the
+    // import's constraint.
+    memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
+    int memoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
+        memoryRequirements, MemoryKind::Opaque);
+    DAWN_INVALID_IF(memoryTypeIndex == -1, "Unable to find an appropriate memory type for import.");
 
-        SystemHandle memoryFD;
-        DAWN_TRY_ASSIGN(memoryFD, SystemHandle::Duplicate(descriptor->planes[0].fd));
+    SystemHandle memoryFD;
+    DAWN_TRY_ASSIGN(memoryFD, SystemHandle::Duplicate(fd));
 
-        VkMemoryAllocateInfo memoryAllocateInfo = {};
-        memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        memoryAllocateInfo.allocationSize = memoryRequirements.size;
-        memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
+    VkMemoryAllocateInfo memoryAllocateInfo = {};
+    memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    memoryAllocateInfo.allocationSize = memoryRequirements.size;
+    memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
 
-        VkImportMemoryFdInfoKHR importMemoryFdInfo;
-        importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
-        importMemoryFdInfo.handleType = handleType;
-        importMemoryFdInfo.fd = memoryFD.Get();
+    VkImportMemoryFdInfoKHR importMemoryFdInfo;
+    importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
+    importMemoryFdInfo.handleType = handleType;
+    importMemoryFdInfo.fd = memoryFD.Get();
 
-        // Import the fd as VkDeviceMemory
-        VkDeviceMemory vkDeviceMemory;
-        DAWN_TRY_ASSIGN(vkDeviceMemory,
-                        AllocateDeviceMemory(device, &memoryAllocateInfo, &importMemoryFdInfo));
+    // Import the fd as VkDeviceMemory
+    VkDeviceMemory vkDeviceMemory;
+    DAWN_TRY_ASSIGN(vkDeviceMemory,
+                    AllocateDeviceMemory(device, &memoryAllocateInfo, &importMemoryFdInfo));
 
-        memoryFD.Detach();  // Ownership transfered to the VkDeviceMemory.
-        sharedTextureMemory->mVkDeviceMemory =
-            AcquireRef(new RefCountedVkHandle<VkDeviceMemory>(device, vkDeviceMemory));
+    memoryFD.Detach();  // Ownership transfered to the VkDeviceMemory.
+    sharedTextureMemory->mVkDeviceMemory =
+        AcquireRef(new RefCountedVkHandle<VkDeviceMemory>(device, vkDeviceMemory));
 
-        // Bind the VkImage to the memory.
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.BindImageMemory(vkDevice, sharedTextureMemory->mVkImage->Get(),
-                                       sharedTextureMemory->mVkDeviceMemory->Get(), 0),
-            "vkBindImageMemory"));
-    }
+    // Bind the VkImage to the memory.
+    DAWN_TRY(
+        CheckVkSuccess(device->fn.BindImageMemory(vkDevice, sharedTextureMemory->mVkImage->Get(),
+                                                  sharedTextureMemory->mVkDeviceMemory->Get(), 0),
+                       "vkBindImageMemory"));
     return sharedTextureMemory;
 #else
     DAWN_UNREACHABLE();
