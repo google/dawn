@@ -39,6 +39,8 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise lib
+  lang/hlsl/writer/raise/fxc_polyfill.cc
+  lang/hlsl/writer/raise/fxc_polyfill.h
   lang/hlsl/writer/raise/raise.cc
   lang/hlsl/writer/raise/raise.h
 )
@@ -46,17 +48,59 @@ tint_add_target(tint_lang_hlsl_writer_raise lib
 tint_target_add_dependencies(tint_lang_hlsl_writer_raise lib
   tint_api_common
   tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_ir
   tint_lang_core_ir_transform
+  tint_lang_core_type
   tint_lang_hlsl_writer_common
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
+  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
   tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
+  tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+################################################################################
+# Target:    tint_lang_hlsl_writer_raise_test
+# Kind:      test
+################################################################################
+tint_add_target(tint_lang_hlsl_writer_raise_test test
+  lang/hlsl/writer/raise/fxc_polyfill_test.cc
+)
+
+tint_target_add_dependencies(tint_lang_hlsl_writer_raise_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_ir
+  tint_lang_core_ir_transform_test
+  tint_lang_core_type
+  tint_lang_hlsl_writer_raise
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise_test test
+  "gtest"
 )

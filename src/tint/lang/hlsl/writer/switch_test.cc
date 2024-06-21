@@ -39,7 +39,7 @@ TEST_F(HlslWriterTest, Switch) {
 
     b.Append(f->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
-        auto* s = b.Switch(a);
+        auto* s = b.Switch(b.Load(a));
         b.Append(b.Case(s, {b.Constant(5_i)}), [&] { b.ExitSwitch(s); });
         b.Append(b.DefaultCase(s), [&] { b.ExitSwitch(s); });
         b.Return(f);
@@ -71,7 +71,7 @@ TEST_F(HlslWriterTest, SwitchMixedDefault) {
 
     b.Append(f->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
-        auto* s = b.Switch(a);
+        auto* s = b.Switch(b.Load(a));
         auto* c = b.Case(s, {b.Constant(5_i), nullptr});
         b.Append(c, [&] { b.ExitSwitch(s); });
         b.Return(f);
@@ -111,7 +111,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionDXC) {
     b.Append(f->Block(), [&] {
         auto* cond = b.Var("cond", b.Zero<i32>());
         auto* a = b.Var("a", b.Zero<i32>());
-        auto* s = b.Switch(cond);
+        auto* s = b.Switch(b.Load(cond));
         b.Append(b.DefaultCase(s), [&] {
             b.Store(a, 42_i);
             b.ExitSwitch(s);
@@ -202,8 +202,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Needs transfrom to convert single default switch to while loop
-TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) {
+TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) {
     // var<private> cond : i32;
     // var<private> a : i32;
     // fn test() {
@@ -220,7 +219,7 @@ TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) 
     b.Append(f->Block(), [&] {
         auto* cond = b.Var("cond", b.Zero<i32>());
         auto* a = b.Var("a", b.Zero<i32>());
-        auto* s = b.Switch(cond);
+        auto* s = b.Switch(b.Load(cond));
         b.Append(b.DefaultCase(s), [&] {
             b.Store(a, 42_i);
             b.ExitSwitch(s);
@@ -235,17 +234,22 @@ TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) 
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  while(true) {
-    a = 42;
-    break;
+  int cond = 0;
+  int a = 0;
+  switch(cond) {
+    default:
+    case 0:
+    {
+      a = 42;
+      break;
+    }
   }
 }
 
 )");
 }
 
-// TODO(dsinclair): Needs transfrom to convert single default switch to while loop
-TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
+TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
     // var<private> global : i32;
     // fn bar() -> i32 {
     //   global = 84;
@@ -290,9 +294,10 @@ TEST_F(HlslWriterTest, DISABLED_SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
 
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-static int global = 0;
-static int a = 0;
-
+static
+int global = 0;
+static
+int a = 0;
 int bar() {
   global = 84;
   return global;
@@ -300,10 +305,13 @@ int bar() {
 
 [numthreads(1, 1, 1)]
 void foo() {
-  bar();
-  while(true) {
-    a = 42;
-    break;
+  switch(bar()) {
+    default:
+    case 0:
+    {
+      a = 42;
+      break;
+    }
   }
 }
 

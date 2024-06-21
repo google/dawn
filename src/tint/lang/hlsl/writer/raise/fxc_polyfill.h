@@ -25,36 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/raise.h"
+#ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_FXC_POLYFILL_H_
+#define SRC_TINT_LANG_HLSL_WRITER_RAISE_FXC_POLYFILL_H_
 
-#include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
-#include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
-#include "src/tint/lang/hlsl/writer/common/options.h"
-#include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
+#include <string>
+
 #include "src/tint/utils/result/result.h"
 
-namespace tint::hlsl::writer {
+// Forward declarations.
+namespace tint::core::ir {
+class Module;
+}  // namespace tint::core::ir
 
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)                   \
-    do {                                           \
-        auto result = name(module, ##__VA_ARGS__); \
-        if (result != Success) {                   \
-            return result;                         \
-        }                                          \
-    } while (false)
+namespace tint::hlsl::writer::raise {
 
-    RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint);
+/// FxcPollyfill is a transform that replaces code constructs which cause FXC mis-compiles with
+/// safer constructs.
+/// @param module the module to transform
+/// @returns success or failure
+Result<SuccessType> FxcPolyfill(core::ir::Module& module);
 
-    if (options.compiler == Options::Compiler::kFXC) {
-        RUN_TRANSFORM(raise::FxcPolyfill);
-    }
+}  // namespace tint::hlsl::writer::raise
 
-    // These transforms need to be run last as various transforms introduce terminator arguments,
-    // naming conflicts, and expressions that need to be explicitly not inlined.
-    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
-
-    return Success;
-}
-
-}  // namespace tint::hlsl::writer
+#endif  // SRC_TINT_LANG_HLSL_WRITER_RAISE_FXC_POLYFILL_H_
