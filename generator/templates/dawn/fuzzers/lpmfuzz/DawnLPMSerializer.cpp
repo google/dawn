@@ -58,7 +58,7 @@ namespace dawn::wire {
 
 //* Outputs the conversion code to put `in` in `out`
 {% macro convert_member(member, in, out, in_access="") %}
-    {% if member.type in by_category["structure"] %}
+    {% if member.type.category == "structure" or member.type.category == "callback info" %}
         {{ convert_structure(member, in, out, in_access) }}
     {% elif member.type in by_category["bitmask"] %}
         {{ convert_bitmask(member, in, out, in_access) }}
@@ -68,8 +68,6 @@ namespace dawn::wire {
         {{ convert_object(member, in, out, in_access) }}
     {% elif member.type.name.get() == "ObjectId" %}
         {{ convert_objectid(member, in, out, access) }}
-    {% elif member.type.category == "callback info" %}
-        //* Skip handling callback info structs for now.
     {% elif member.type.name.get() == "ObjectHandle" %}
         //* Only convert the handle if it maps to an object. Otherwise don't serialize it at all.
         {% if member.handle_type %}
@@ -162,6 +160,7 @@ namespace dawn::wire {
                     mutable_record->{{ memberName }} =
                         {{- overrides[overrides_key][member.name.canonical_case()] }};
                 {%- elif member.type.category == "function pointer" or
+                    member.type.category == "callback function" or
                     member.type.name.get() == "void *" -%}
                     mutable_record->{{ memberName }} = nullptr;
                 {% else %}
@@ -250,7 +249,7 @@ namespace dawn::wire {
 {% endmacro %}
 
 //* Output structure conversion first because it is used by commands.
-{% for type in by_category["structure"] %}
+{% for type in by_category["callback info"] + by_category["structure"] %}
     {% set name = as_cType(type.name) %}
     {% if type.name.CamelCase() not in client_side_structures %}
         {{ write_record_conversion_helpers(type, name, type.members, False) }}
