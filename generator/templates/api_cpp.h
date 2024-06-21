@@ -427,7 +427,7 @@ class ObjectBase {
             callbackInfo);
             return {{convert_cType_to_cppType(method.return_type, 'value', 'result') | indent(8)}};
         } else {
-            auto* lambda = new L(callback);
+            auto* lambda = new L(std::move(callback));
             callbackInfo.callback = [](
                 {%- for arg in CallbackType.arguments -%}
                     {{as_annotated_cType(arg)}}{{", "}}
