@@ -758,7 +758,7 @@ void {{CppType}}::SetDeviceLostCallback(CallbackMode callbackMode, L callback) {
 
     deviceLostCallbackInfo2.mode = static_cast<WGPUCallbackMode>(callbackMode);
     if constexpr (std::is_convertible_v<L, F*>) {
-        deviceLostCallbackInfo2.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, char const * message, void* callback, void* userdata) {
+        deviceLostCallbackInfo2.callback = [](WGPUDevice const * device, WGPUDeviceLostReason reason, char const * message, void* callback, void*) {
             auto cb = reinterpret_cast<F*>(callback);
             // We manually acquire and release the device to avoid changing any ref counts.
             auto apiDevice = Device::Acquire(*device);
@@ -799,7 +799,7 @@ void {{CppType}}::SetUncapturedErrorCallback(L callback) {
     using F = void (const Device& device, ErrorType type, const char * message);
     static_assert(std::is_convertible_v<L, F*>, "Uncaptured error callback cannot be a binding lambda");
 
-    uncapturedErrorCallbackInfo2.callback = [](WGPUDevice const * device, WGPUErrorType type, char const * message, void* callback, void* userdata) {
+    uncapturedErrorCallbackInfo2.callback = [](WGPUDevice const * device, WGPUErrorType type, char const * message, void* callback, void*) {
         auto cb = reinterpret_cast<F*>(callback);
         // We manually acquire and release the device to avoid changing any ref counts.
         auto apiDevice = Device::Acquire(*device);
