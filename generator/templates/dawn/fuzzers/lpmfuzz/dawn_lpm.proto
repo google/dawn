@@ -164,6 +164,8 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
     {% for member in members %}
         {% if member.skip_serialize == True %}
             //  {{ member.name.camelCase()}}.skip_serialize
+        {% elif member.type.category == 'callback info' %}
+            //  {{ member.name.camelCase()}} skipping serialize
         {% elif member.annotation == 'value' %}
             {{ lift_dawn_member_pass_by_value(record, name, member, count) }}
         {% elif member.annotation == 'const*' %}
@@ -171,7 +173,6 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
         {% endif %}
     {% endfor %}
 {% endmacro %}
-
 
 {% for structure in by_category["structure"] %}
     message {{structure.name.CamelCase()}} {

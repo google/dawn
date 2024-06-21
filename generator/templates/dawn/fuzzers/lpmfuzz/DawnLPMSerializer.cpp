@@ -68,6 +68,8 @@ namespace dawn::wire {
         {{ convert_object(member, in, out, in_access) }}
     {% elif member.type.name.get() == "ObjectId" %}
         {{ convert_objectid(member, in, out, access) }}
+    {% elif member.type.category == "callback info" %}
+        //* Skip handling callback info structs for now.
     {% elif member.type.name.get() == "ObjectHandle" %}
         //* Only convert the handle if it maps to an object. Otherwise don't serialize it at all.
         {% if member.handle_type %}
