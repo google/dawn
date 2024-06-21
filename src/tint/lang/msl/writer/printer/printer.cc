@@ -1353,16 +1353,19 @@ class Printer : public tint::TextGenerator {
                 }
 
                 if (pipeline_stage_uses.Contains(core::type::PipelineStageUsage::kVertexInput)) {
-                    out << " [[attribute(" + std::to_string(location.value()) + ")]]";
+                    out << " [[attribute(" << location.value() << ")]]";
                 } else if (pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kVertexOutput)) {
-                    out << " [[user(locn" + std::to_string(location.value()) + ")]]";
+                    out << " [[user(locn" << location.value() << ")]]";
                 } else if (pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentInput)) {
-                    out << " [[user(locn" + std::to_string(location.value()) + ")]]";
+                    out << " [[user(locn" << location.value() << ")]]";
                 } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentOutput))) {
-                    out << " [[color(" + std::to_string(location.value()) + ")]]";
+                    out << " [[color(" << location.value() << ")]]";
+                    if (auto blend_src = attributes.blend_src) {
+                        out << " [[index(" << blend_src.value() << ")]]";
+                    }
                 } else {
                     TINT_IR_ICE(ir_) << "invalid use of location decoration";
                 }

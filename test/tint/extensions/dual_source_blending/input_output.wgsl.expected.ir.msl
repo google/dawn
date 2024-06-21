@@ -1,33 +1,34 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: FragOutput = struct @align(16) {
-  color:vec4<f32> @offset(0), @location(0)
-  blend:vec4<f32> @offset(16), @location(0)
+struct FragOutput {
+  float4 color;
+  float4 blend;
+};
+
+struct FragInput {
+  float4 a;
+  float4 b;
+};
+
+struct frag_main_outputs {
+  float4 FragOutput_color [[color(0)]] [[index(0)]];
+  float4 FragOutput_blend [[color(0)]] [[index(1)]];
+};
+
+struct frag_main_inputs {
+  float4 FragInput_a [[user(locn0)]];
+  float4 FragInput_b [[user(locn1)]];
+};
+
+FragOutput frag_main_inner(FragInput in) {
+  FragOutput output = {};
+  output.color = in.a;
+  output.blend = in.b;
+  return output;
 }
 
-FragInput = struct @align(16) {
-  a:vec4<f32> @offset(0), @location(0)
-  b:vec4<f32> @offset(16), @location(1)
+fragment frag_main_outputs frag_main(frag_main_inputs inputs [[stage_in]]) {
+  FragOutput const v = frag_main_inner(FragInput{.a=inputs.FragInput_a, .b=inputs.FragInput_b});
+  return frag_main_outputs{.FragOutput_color=v.color, .FragOutput_blend=v.blend};
 }
-
-%frag_main = @fragment func(%in:FragInput):FragOutput {
-  $B1: {
-    %output:ptr<function, FragOutput, read_write> = var
-    %4:ptr<function, vec4<f32>, read_write> = access %output, 0u
-    %5:vec4<f32> = access %in, 0u
-    store %4, %5
-    %6:ptr<function, vec4<f32>, read_write> = access %output, 1u
-    %7:vec4<f32> = access %in, 1u
-    store %6, %7
-    %8:FragOutput = load %output
-    ret %8
-  }
-}
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

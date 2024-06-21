@@ -1,26 +1,24 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: FragOutput = struct @align(16) {
-  color:vec4<f32> @offset(0), @location(0)
-  blend:vec4<f32> @offset(16), @location(0)
+struct FragOutput {
+  float4 color;
+  float4 blend;
+};
+
+struct frag_main_outputs {
+  float4 FragOutput_color [[color(0)]] [[index(0)]];
+  float4 FragOutput_blend [[color(0)]] [[index(1)]];
+};
+
+FragOutput frag_main_inner() {
+  FragOutput output = {};
+  output.color = float4(0.5f, 0.5f, 0.5f, 1.0f);
+  output.blend = float4(0.5f, 0.5f, 0.5f, 1.0f);
+  return output;
 }
 
-%frag_main = @fragment func():FragOutput {
-  $B1: {
-    %output:ptr<function, FragOutput, read_write> = var
-    %3:ptr<function, vec4<f32>, read_write> = access %output, 0u
-    store %3, vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f)
-    %4:ptr<function, vec4<f32>, read_write> = access %output, 1u
-    store %4, vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f)
-    %5:FragOutput = load %output
-    ret %5
-  }
+fragment frag_main_outputs frag_main() {
+  FragOutput const v = frag_main_inner();
+  return frag_main_outputs{.FragOutput_color=v.color, .FragOutput_blend=v.blend};
 }
-
-invalid entry point IO struct uses
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************

@@ -23,14 +23,14 @@ struct sb_block {
 };
 
 struct tint_module_vars_struct {
-  device sb_block* sb;
+  const device sb_block* sb;
 };
 
 void main_1(tint_module_vars_struct tint_module_vars) {
   S const x_18 = (*tint_module_vars.sb).inner[1];
 }
 
-kernel void tint_symbol(device sb_block* sb [[buffer(0)]]) {
+kernel void tint_symbol(const device sb_block* sb [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
   main_1(tint_module_vars);
 }
