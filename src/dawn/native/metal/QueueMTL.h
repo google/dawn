@@ -50,6 +50,7 @@ class Queue final : public QueueBase {
     CommandRecordingContext* GetPendingCommandContext(SubmitMode submitMode = SubmitMode::Normal);
     MaybeError SubmitPendingCommandBuffer();
     void WaitForCommandsToBeScheduled();
+    id<MTLSharedEvent> GetMTLSharedEvent() const API_AVAILABLE(macos(10.14), ios(12.0));
     ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence();
 
     Ref<SystemEvent> CreateWorkDoneSystemEvent(ExecutionSerial serial);
@@ -71,7 +72,7 @@ class Queue final : public QueueBase {
     void DestroyImpl() override;
 
     NSPRef<id<MTLCommandQueue>> mCommandQueue;
-    CommandRecordingContext mCommandContext;
+    CommandRecordingContext mCommandContext{this};
 
     // mLastSubmittedCommands will be accessed in a Metal schedule handler that can be fired on
     // a different thread so we guard access to it with a mutex.

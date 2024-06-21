@@ -28,10 +28,11 @@
 #include "dawn/native/metal/CommandRecordingContext.h"
 
 #include "dawn/common/Assert.h"
+#include "dawn/native/metal/QueueMTL.h"
 
 namespace dawn::native::metal {
 
-CommandRecordingContext::CommandRecordingContext() = default;
+CommandRecordingContext::CommandRecordingContext(const Queue* queue) : mQueue(queue) {}
 
 CommandRecordingContext::~CommandRecordingContext() {
     // Commands must be acquired.
@@ -83,8 +84,7 @@ NSPRef<id<MTLCommandBuffer>> CommandRecordingContext::AcquireCommands() {
     return std::move(mCommands);
 }
 
-id<MTLBlitCommandEncoder> CommandRecordingContext::BeginBlit(MTLBlitPassDescriptor* descriptor)
-    API_AVAILABLE(macos(11.0), ios(14.0)) {
+id<MTLBlitCommandEncoder> CommandRecordingContext::BeginBlit(MTLBlitPassDescriptor* descriptor) {
     @autoreleasepool {
         DAWN_ASSERT(descriptor);
         DAWN_ASSERT(mCommands != nullptr);
@@ -133,7 +133,7 @@ id<MTLComputeCommandEncoder> CommandRecordingContext::BeginCompute() {
 }
 
 id<MTLComputeCommandEncoder> CommandRecordingContext::BeginCompute(
-    MTLComputePassDescriptor* descriptor) API_AVAILABLE(macos(11.0), ios(14.0)) {
+    MTLComputePassDescriptor* descriptor) {
     @autoreleasepool {
         DAWN_ASSERT(descriptor);
         DAWN_ASSERT(mCommands != nullptr);
@@ -175,6 +175,22 @@ void CommandRecordingContext::EndRender() {
     [*mRender endEncoding];
     mRender = nullptr;
     mInEncoder = false;
+}
+
+void CommandRecordingContext::WaitForSharedEvent(id<MTLSharedEvent> sharedEvent,
+                                                 uint64_t signaledValue) {
+    // Skip the wait if it's for the same shared event as the queue i.e. a self wait. These can
+    // happen if the client passes us the same shared event that we gave it back to us. If these
+    // events are waited on, they seem to cause waitUntilScheduled to block for previous command
+    // buffers to complete due to dependencies between consecutive command buffers.
+    if (sharedEvent != mQueue->GetMTLSharedEvent()) {
+        // There may be an open blit encoder from a copy command or writeBuffer.
+        // Wait events are only allowed if there is no encoder open.
+        EndBlit();
+        [*mCommands encodeWaitForEvent:sharedEvent value:signaledValue];
+    } else {
+        DAWN_ASSERT(ExecutionSerial(signaledValue) <= mQueue->GetLastSubmittedCommandSerial());
+    }
 }
 
 }  // namespace dawn::native::metal

@@ -419,23 +419,14 @@ void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContex
         if (contents != nullptr) {
             contents->AcquirePendingFences(&fences);
         }
-
-        if (!mWaitEvents.empty() || !fences.empty()) {
-            // There may be an open blit encoder from a copy command or writeBuffer.
-            // Wait events are only allowed if there is no encoder open.
-            commandContext->EndBlit();
-        }
-        auto commandBuffer = commandContext->GetCommands();
         // Consume the wait events on the texture. They will be empty after this loop.
         for (auto waitEvent : std::move(mWaitEvents)) {
-            id rawEvent = *waitEvent.sharedEvent;
-            id<MTLSharedEvent> sharedEvent = static_cast<id<MTLSharedEvent>>(rawEvent);
-            [commandBuffer encodeWaitForEvent:sharedEvent value:waitEvent.signaledValue];
+            commandContext->WaitForSharedEvent(
+                static_cast<id<MTLSharedEvent>>(*waitEvent.sharedEvent), waitEvent.signaledValue);
         }
-
         for (const auto& fence : fences) {
-            [commandBuffer encodeWaitForEvent:ToBackend(fence.object)->GetMTLSharedEvent()
-                                        value:fence.signaledValue];
+            commandContext->WaitForSharedEvent(ToBackend(fence.object)->GetMTLSharedEvent(),
+                                               fence.signaledValue);
         }
     }
     mLastSharedTextureMemoryUsageSerial = GetDevice()->GetQueue()->GetPendingCommandSerial();

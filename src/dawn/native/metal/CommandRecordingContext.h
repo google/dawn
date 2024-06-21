@@ -35,6 +35,8 @@
 
 namespace dawn::native::metal {
 
+class Queue;
+
 struct MTLSharedEventAndSignalValue {
     NSPRef<id> sharedEvent;
     uint64_t signaledValue;
@@ -44,7 +46,7 @@ struct MTLSharedEventAndSignalValue {
 // Only one encoder may be open at a time.
 class CommandRecordingContext : NonMovable {
   public:
-    CommandRecordingContext();
+    explicit CommandRecordingContext(const Queue* queue);
     ~CommandRecordingContext();
 
     id<MTLCommandBuffer> GetCommands();
@@ -73,7 +75,11 @@ class CommandRecordingContext : NonMovable {
     id<MTLRenderCommandEncoder> BeginRender(MTLRenderPassDescriptor* descriptor);
     void EndRender();
 
+    void WaitForSharedEvent(id<MTLSharedEvent> sharedEvent, uint64_t signaledValue)
+        API_AVAILABLE(macos(10.14), ios(12.0));
+
   private:
+    const raw_ptr<const Queue> mQueue;
     NSPRef<id<MTLCommandBuffer>> mCommands;
     NSPRef<id<MTLBlitCommandEncoder>> mBlit;
     NSPRef<id<MTLComputeCommandEncoder>> mCompute;
