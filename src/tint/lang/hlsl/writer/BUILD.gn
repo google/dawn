@@ -94,6 +94,7 @@ if (tint_build_unittests) {
       sources = [
         "access_test.cc",
         "binary_test.cc",
+        "bitcast_test.cc",
         "constant_test.cc",
         "construct_test.cc",
         "convert_test.cc",
