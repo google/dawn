@@ -1088,6 +1088,74 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Length_Vector) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, QuantizeToF16_Scalar) {
+    auto* value = b.FunctionParam<f32>("value");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<f32>(core::BuiltinFn::kQuantizeToF16, value);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:f32 = quantizeToF16 %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:f16 = convert %value
+    %4:f32 = convert %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, QuantizeToF16_Vector) {
+    auto* value = b.FunctionParam<vec4<f32>>("value");
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kQuantizeToF16, value);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value:vec4<f32>):vec4<f32> {
+  $B1: {
+    %3:vec4<f32> = quantizeToF16 %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value:vec4<f32>):vec4<f32> {
+  $B1: {
+    %3:vec4<f16> = convert %value
+    %4:vec4<f32> = convert %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_1d) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));

@@ -99,6 +99,7 @@ struct State {
                     case core::BuiltinFn::kDistance:
                     case core::BuiltinFn::kDot:
                     case core::BuiltinFn::kLength:
+                    case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -172,6 +173,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kLength:
                     Length(builtin);
+                    break;
+                case core::BuiltinFn::kQuantizeToF16:
+                    QuantizeToF16(builtin);
                     break;
 
                 // Texture builtins.
@@ -364,6 +368,23 @@ struct State {
                                                                 msl::BuiltinFn::kLength, arg);
             call->InsertBefore(builtin);
         }
+        builtin->Destroy();
+    }
+
+    /// Polyfill a quantizeToF16 call.
+    /// @param builtin the builtin call instruction
+    void QuantizeToF16(core::ir::CoreBuiltinCall* builtin) {
+        auto* arg = builtin->Args()[0];
+        auto* type_f32 = arg->Type();
+        const core::type::Type* type_f16 = ty.f16();
+        if (auto* vec = type_f32->As<core::type::Vector>()) {
+            type_f16 = ty.vec(ty.f16(), vec->Width());
+        }
+
+        // Convert the argument to f16 and then back again.
+        b.InsertBefore(builtin, [&] {
+            b.ConvertWithResult(builtin->DetachResult(), b.Convert(type_f16, arg));
+        });
         builtin->Destroy();
     }
 
