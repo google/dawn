@@ -396,8 +396,6 @@ if (WIN32)
     target_compile_definitions(dawn_internal_config INTERFACE "NOMINMAX" "WIN32_LEAN_AND_MEAN")
 endif()
 
-set(CMAKE_CXX_STANDARD "17")
-
 ################################################################################
 # Tint
 ################################################################################
