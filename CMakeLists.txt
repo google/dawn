@@ -268,6 +268,11 @@ if(DAWN_ENABLE_PIC)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+################################################################################
+# Include utility CMake modules
+################################################################################
+include(DawnCompilerExtraFlags)
+
 message(STATUS "Dawn build D3D11 backend: ${DAWN_ENABLE_D3D11}")
 message(STATUS "Dawn build D3D12 backend: ${DAWN_ENABLE_D3D12}")
 message(STATUS "Dawn build Metal backend: ${DAWN_ENABLE_METAL}")
@@ -322,70 +327,6 @@ endif()
 
 find_package(Python3 REQUIRED)
 message(STATUS "Dawn: using python at ${Python3_EXECUTABLE}")
-
-################################################################################
-# common_compile_options - sets compiler and linker options common for dawn and
-# tint on the given target
-################################################################################
-function(common_compile_options TARGET)
-  if (COMPILER_IS_LIKE_GNU)
-    target_compile_options(${TARGET} PRIVATE
-      -fno-exceptions
-      -fno-rtti
-
-      -Wno-deprecated-builtins
-      -Wno-unknown-warning-option
-      -Wno-switch-default
-    )
-    if (${DAWN_WERROR})
-        target_compile_options(${TARGET} PRIVATE -Werror)
-    endif()
-
-    set(SANITIZER_OPTIONS "")
-    if (${DAWN_ENABLE_MSAN})
-      list(APPEND SANITIZER_OPTIONS "-fsanitize=memory")
-    endif()
-    if (${DAWN_ENABLE_ASAN})
-      list(APPEND SANITIZER_OPTIONS "-fsanitize=address")
-    endif()
-    if (${DAWN_ENABLE_TSAN})
-      list(APPEND SANITIZER_OPTIONS "-fsanitize=thread")
-    endif()
-    if (${DAWN_ENABLE_UBSAN})
-      list(APPEND SANITIZER_OPTIONS "-fsanitize=undefined" "-fsanitize=float-divide-by-zero")
-    endif()
-    if (SANITIZER_OPTIONS)
-      target_compile_options(${TARGET} PUBLIC ${SANITIZER_OPTIONS})
-      target_link_options(${TARGET} PUBLIC ${SANITIZER_OPTIONS})
-    endif()
-  endif(COMPILER_IS_LIKE_GNU)
-
-  if(MSVC)
-      target_compile_options(${TARGET} PUBLIC /utf-8)
-  endif()
-
-  if (DAWN_EMIT_COVERAGE)
-    target_compile_definitions(${TARGET} PRIVATE "DAWN_EMIT_COVERAGE")
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-        target_compile_options(${TARGET} PRIVATE "--coverage")
-        target_link_options(${TARGET} PRIVATE "gcov")
-    elseif(COMPILER_IS_CLANG OR COMPILER_IS_CLANG_CL)
-        target_compile_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
-        target_link_options(${TARGET} PRIVATE "-fprofile-instr-generate" "-fcoverage-mapping")
-    else()
-        message(FATAL_ERROR "Coverage generation not supported for the ${CMAKE_CXX_COMPILER_ID} toolchain")
-    endif()
-  endif(DAWN_EMIT_COVERAGE)
-endfunction()
-
-if (${DAWN_ENABLE_TSAN})
-  add_compile_options(-stdlib=libc++)
-  add_link_options(-stdlib=libc++)
-endif()
-
-################################################################################
-# Dawn's public and internal "configs"
-################################################################################
 
 set(IS_DEBUG_BUILD 0)
 string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type)
