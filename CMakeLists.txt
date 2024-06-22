@@ -52,11 +52,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_DEBUG_POSTFIX "")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
-  message(STATUS "No build type selected, default to Debug")
-  set(CMAKE_BUILD_TYPE "Debug")
-endif()
-
 include(DawnSetIfNotDefined)
 
 set(DAWN_BUILD_GEN_DIR "${Dawn_BINARY_DIR}/gen")
@@ -273,6 +268,7 @@ endif()
 ################################################################################
 include(DawnCompilerExtraFlags)
 include(DawnCompilerPlatformFlags)
+include(DawnInitializeBuildType)
 
 message(STATUS "Dawn build D3D11 backend: ${DAWN_ENABLE_D3D11}")
 message(STATUS "Dawn build D3D12 backend: ${DAWN_ENABLE_D3D12}")
