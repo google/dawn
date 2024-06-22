@@ -272,6 +272,7 @@ endif()
 # Include utility CMake modules
 ################################################################################
 include(DawnCompilerExtraFlags)
+include(DawnCompilerPlatformFlags)
 
 message(STATUS "Dawn build D3D11 backend: ${DAWN_ENABLE_D3D11}")
 message(STATUS "Dawn build D3D12 backend: ${DAWN_ENABLE_D3D12}")
@@ -402,40 +403,6 @@ set(TINT_ROOT_SOURCE_DIR   ${PROJECT_SOURCE_DIR})
 set(TINT_SPIRV_HEADERS_DIR ${DAWN_SPIRV_HEADERS_DIR})
 set(TINT_SPIRV_TOOLS_DIR   ${DAWN_SPIRV_TOOLS_DIR})
 
-# CMake < 3.15 sets /W3 in CMAKE_CXX_FLAGS. Remove it if it's there.
-# See https://gitlab.kitware.com/cmake/cmake/-/issues/18317
-if (MSVC)
-  if (CMAKE_CXX_FLAGS MATCHES "/W3")
-    string(REPLACE "/W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-  endif()
-endif()
-
-if (${TINT_CHECK_CHROMIUM_STYLE})
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -add-plugin -Xclang find-bad-constructs")
-endif()
-
-if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
-  set(COMPILER_IS_CLANG_CL TRUE)
-endif()
-
-if((CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") OR
-    ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND
-     (NOT COMPILER_IS_CLANG_CL)))
-  set(COMPILER_IS_CLANG TRUE)
-endif()
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(COMPILER_IS_GNU TRUE)
-endif()
-
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR COMPILER_IS_CLANG)
-  set(COMPILER_IS_LIKE_GNU TRUE)
-endif()
-
-# Enable msbuild multiprocessor builds
-if (MSVC AND NOT COMPILER_IS_CLANG_CL)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-endif()
 
 ################################################################################
 # Run on all subdirectories
