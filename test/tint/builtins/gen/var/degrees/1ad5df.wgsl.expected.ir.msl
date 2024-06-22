@@ -1,43 +1,44 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, vec2<f32>, read_write> = var @binding_point(2, 0)
-}
+struct tint_module_vars_struct {
+  device float2* prevent_dce;
+};
 
-%degrees_1ad5df = func():void {
-  $B2: {
-    %arg_0:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(1.0f)
-    %4:vec2<f32> = load %arg_0
-    %5:vec2<f32> = degrees %4
-    %res:ptr<function, vec2<f32>, read_write> = var, %5
-    %7:vec2<f32> = load %res
-    store %prevent_dce, %7
-    ret
-  }
-}
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %9:void = call %degrees_1ad5df
-    ret vec4<f32>(0.0f)
-  }
-}
-%fragment_main = @fragment func():void {
-  $B4: {
-    %11:void = call %degrees_1ad5df
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %13:void = call %degrees_1ad5df
-    ret
-  }
+struct VertexOutput {
+  float4 pos;
+  float2 prevent_dce;
+};
+
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  float2 VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
+};
+
+float2 degrees_1ad5df() {
+  float2 arg_0 = float2(1.0f);
+  float2 res = (arg_0 * 57.295780181884765625f);
+  return res;
 }
 
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+fragment void fragment_main(device float2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = degrees_1ad5df();
+}
+
+kernel void compute_main(device float2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = degrees_1ad5df();
+}
+
+VertexOutput vertex_main_inner() {
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  out.prevent_dce = degrees_1ad5df();
+  return out;
+}
+
+vertex vertex_main_outputs vertex_main() {
+  VertexOutput const v = vertex_main_inner();
+  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
+}

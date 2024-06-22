@@ -609,6 +609,133 @@ TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_Vec4I32) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, Degrees_NoPolyfill) {
+    Build(core::BuiltinFn::kDegrees, ty.f32(), Vector{ty.f32()});
+    auto* src = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %result:f32 = degrees %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.degrees = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Degrees_F32) {
+    Build(core::BuiltinFn::kDegrees, ty.f32(), Vector{ty.f32()});
+    auto* src = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %result:f32 = degrees %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %result:f32 = mul %arg, 57.295780181884765625f
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.degrees = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Degrees_F16) {
+    Build(core::BuiltinFn::kDegrees, ty.f16(), Vector{ty.f16()});
+    auto* src = R"(
+%foo = func(%arg:f16):f16 {
+  $B1: {
+    %result:f16 = degrees %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:f16):f16 {
+  $B1: {
+    %result:f16 = mul %arg, 57.28125h
+    ret %result
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.degrees = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Degrees_Vec2F32) {
+    Build(core::BuiltinFn::kDegrees, ty.vec2<f32>(), Vector{ty.vec2<f32>()});
+    auto* src = R"(
+%foo = func(%arg:vec2<f32>):vec2<f32> {
+  $B1: {
+    %result:vec2<f32> = degrees %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec2<f32>):vec2<f32> {
+  $B1: {
+    %result:vec2<f32> = mul %arg, 57.295780181884765625f
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.degrees = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Degrees_Vec4F16) {
+    Build(core::BuiltinFn::kDegrees, ty.vec4<f16>(), Vector{ty.vec4<f16>()});
+    auto* src = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %result:vec4<f16> = degrees %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %result:vec4<f16> = mul %arg, 57.28125h
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.degrees = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_BuiltinPolyfillTest, ExtractBits_NoPolyfill) {
     Build(core::BuiltinFn::kExtractBits, ty.u32(), Vector{ty.u32(), ty.u32(), ty.u32()});
     auto* src = R"(
@@ -1374,6 +1501,133 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32_NoPolyfill) {
 
     BuiltinPolyfillConfig config;
     config.texture_sample_base_clamp_to_edge_2d_f32 = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Radians_NoPolyfill) {
+    Build(core::BuiltinFn::kRadians, ty.f32(), Vector{ty.f32()});
+    auto* src = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %result:f32 = radians %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.radians = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Radians_F32) {
+    Build(core::BuiltinFn::kRadians, ty.f32(), Vector{ty.f32()});
+    auto* src = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %result:f32 = radians %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %result:f32 = mul %arg, 0.01745329238474369049f
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.radians = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Radians_F16) {
+    Build(core::BuiltinFn::kRadians, ty.f16(), Vector{ty.f16()});
+    auto* src = R"(
+%foo = func(%arg:f16):f16 {
+  $B1: {
+    %result:f16 = radians %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:f16):f16 {
+  $B1: {
+    %result:f16 = mul %arg, 0.0174407958984375h
+    ret %result
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.radians = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Radians_Vec2F32) {
+    Build(core::BuiltinFn::kRadians, ty.vec2<f32>(), Vector{ty.vec2<f32>()});
+    auto* src = R"(
+%foo = func(%arg:vec2<f32>):vec2<f32> {
+  $B1: {
+    %result:vec2<f32> = radians %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec2<f32>):vec2<f32> {
+  $B1: {
+    %result:vec2<f32> = mul %arg, 0.01745329238474369049f
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.radians = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Radians_Vec4F16) {
+    Build(core::BuiltinFn::kRadians, ty.vec4<f16>(), Vector{ty.vec4<f16>()});
+    auto* src = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %result:vec4<f16> = radians %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %result:vec4<f16> = mul %arg, 0.0174407958984375h
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.radians = true;
     Run(BuiltinPolyfill, config);
     EXPECT_EQ(expect, str());
 }

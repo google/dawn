@@ -41,6 +41,12 @@ namespace tint::core::ir::transform {
 
 namespace {
 
+/// Constant value used to polyfill the radians() builtin.
+static constexpr double kDegToRad = 0.017453292519943295474;
+
+/// Constant value used to polyfill the degrees() builtin.
+static constexpr double kRadToDeg = 57.295779513082322865;
+
 /// PIMPL state for the transform.
 struct State {
     /// The polyfill config.
@@ -81,6 +87,11 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kDegrees:
+                        if (config.degrees) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     case core::BuiltinFn::kExtractBits:
                         if (config.extract_bits != BuiltinPolyfillLevel::kNone) {
                             worklist.Push(builtin);
@@ -98,6 +109,11 @@ struct State {
                         break;
                     case core::BuiltinFn::kInsertBits:
                         if (config.insert_bits != BuiltinPolyfillLevel::kNone) {
+                            worklist.Push(builtin);
+                        }
+                        break;
+                    case core::BuiltinFn::kRadians:
+                        if (config.radians) {
                             worklist.Push(builtin);
                         }
                         break;
@@ -157,6 +173,9 @@ struct State {
                 case core::BuiltinFn::kCountTrailingZeros:
                     CountTrailingZeros(builtin);
                     break;
+                case core::BuiltinFn::kDegrees:
+                    Degrees(builtin);
+                    break;
                 case core::BuiltinFn::kExtractBits:
                     ExtractBits(builtin);
                     break;
@@ -168,6 +187,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kInsertBits:
                     InsertBits(builtin);
+                    break;
+                case core::BuiltinFn::kRadians:
+                    Radians(builtin);
                     break;
                 case core::BuiltinFn::kSaturate:
                     Saturate(builtin);
@@ -367,6 +389,24 @@ struct State {
         call->Destroy();
     }
 
+    /// Polyfill an `degrees()` builtin call.
+    /// @param call the builtin call instruction
+    void Degrees(ir::CoreBuiltinCall* call) {
+        auto* arg = call->Args()[0];
+        auto* type = arg->Type()->DeepestElement();
+        ir::Value* value = nullptr;
+        if (type->Is<core::type::F16>()) {
+            value = b.Constant(f16(kRadToDeg));
+        } else if (type->Is<core::type::F32>()) {
+            value = b.Constant(f32(kRadToDeg));
+        }
+        b.InsertBefore(call, [&] {
+            auto* mul = b.Multiply(arg->Type(), arg, value);
+            mul->SetResults(Vector{call->DetachResult()});
+        });
+        call->Destroy();
+    }
+
     /// Polyfill an `extractBits()` builtin call.
     /// @param call the builtin call instruction
     void ExtractBits(ir::CoreBuiltinCall* call) {
@@ -541,6 +581,24 @@ struct State {
             default:
                 TINT_UNIMPLEMENTED() << "insertBits polyfill level";
         }
+    }
+
+    /// Polyfill an `radians()` builtin call.
+    /// @param call the builtin call instruction
+    void Radians(ir::CoreBuiltinCall* call) {
+        auto* arg = call->Args()[0];
+        auto* type = arg->Type()->DeepestElement();
+        ir::Value* value = nullptr;
+        if (type->Is<core::type::F16>()) {
+            value = b.Constant(f16(kDegToRad));
+        } else if (type->Is<core::type::F32>()) {
+            value = b.Constant(f32(kDegToRad));
+        }
+        b.InsertBefore(call, [&] {
+            auto* mul = b.Multiply(arg->Type(), arg, value);
+            mul->SetResults(Vector{call->DetachResult()});
+        });
+        call->Destroy();
     }
 
     /// Polyfill a `saturate()` builtin call.

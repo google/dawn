@@ -58,6 +58,8 @@ struct BuiltinPolyfillConfig {
     bool count_leading_zeros = false;
     /// Should `countTrailingZeros()` be polyfilled?
     bool count_trailing_zeros = false;
+    /// Should `degrees()` be polyfilled?
+    bool degrees = false;
     /// How should `extractBits()` be polyfilled?
     BuiltinPolyfillLevel extract_bits = BuiltinPolyfillLevel::kNone;
     /// Should `firstLeadingBit()` be polyfilled?
@@ -66,6 +68,8 @@ struct BuiltinPolyfillConfig {
     bool first_trailing_bit = false;
     /// How should `insertBits()` be polyfilled?
     BuiltinPolyfillLevel insert_bits = BuiltinPolyfillLevel::kNone;
+    /// Should `radians()` be polyfilled?
+    bool radians = false;
     /// Should `saturate()` be polyfilled?
     bool saturate = false;
     /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?
