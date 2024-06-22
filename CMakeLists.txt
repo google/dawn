@@ -48,7 +48,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_DEBUG_POSTFIX "")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -273,6 +272,7 @@ endif()
 ################################################################################
 # Include utility CMake modules
 ################################################################################
+include(DawnCompilerChecks)
 include(DawnCompilerExtraFlags)
 include(DawnCompilerPlatformFlags)
 include(DawnInitializeBuildType)
