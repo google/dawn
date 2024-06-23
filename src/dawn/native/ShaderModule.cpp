@@ -459,12 +459,8 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
     if (std::holds_alternative<ExternalTextureBindingInfo>(shaderInfo.bindingInfo)) {
         // If an external texture binding used to exist in the bgl, it will be found as a
         // key in the ExternalTextureBindingExpansions map.
-        ExternalTextureBindingExpansionMap expansions =
-            layout->GetExternalTextureBindingExpansionMap();
-        std::map<BindingNumber, dawn::native::ExternalTextureBindingExpansion>::iterator it =
-            expansions.find(bindingNumber);
         // TODO(dawn:563): Provide info about the binding types.
-        DAWN_INVALID_IF(it == expansions.end(),
+        DAWN_INVALID_IF(!layout->GetExternalTextureBindingExpansionMap().contains(bindingNumber),
                         "Binding type in the shader (texture_external) doesn't match the "
                         "type in the layout.");
 

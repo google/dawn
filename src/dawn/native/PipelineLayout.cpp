@@ -163,7 +163,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     DeviceBase* device,
     std::vector<StageAndDescriptor> stages,
     bool allowInternalBinding) {
-    using EntryMap = std::map<BindingNumber, BindGroupLayoutEntry>;
+    using EntryMap = absl::flat_hash_map<BindingNumber, BindGroupLayoutEntry>;
 
     // Merges two entries at the same location, if they are allowed to be merged.
     auto MergeEntries = [](BindGroupLayoutEntry* modifiedEntry,
@@ -297,7 +297,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         device->GetNextPipelineCompatibilityToken();
 
     // Data which BindGroupLayoutDescriptor will point to for creation
-    PerBindGroup<std::map<BindingNumber, BindGroupLayoutEntry>> entryData = {};
+    PerBindGroup<EntryMap> entryData = {};
 
     // External texture binding layouts are chained structs that are set as a pointer within
     // the bind group layout entry. We declare an entry here so that it can be used when needed

@@ -51,7 +51,7 @@ SyncScopeUsageTracker& SyncScopeUsageTracker::operator=(SyncScopeUsageTracker&&)
 void SyncScopeUsageTracker::BufferUsedAs(BufferBase* buffer,
                                          wgpu::BufferUsage usage,
                                          wgpu::ShaderStage shaderStages) {
-    // std::map's operator[] will create a new element using the default constructor
+    // absl::flat_hash_map's operator[] will create a new element using the default constructor
     // if the key didn't exist before.
     BufferSyncInfo& bufferSyncInfo = mBufferSyncInfos[buffer];
 

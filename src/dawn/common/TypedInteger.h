@@ -30,6 +30,7 @@
 
 #include <limits>
 #include <type_traits>
+#include <utility>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/UnderlyingType.h"
@@ -219,6 +220,12 @@ class alignas(T) TypedIntegerImpl {
         auto result = SubImpl(*this, rhs);
         static_assert(std::is_same<T, decltype(result)>::value, "Use ityp::Sub instead.");
         return TypedIntegerImpl(result);
+    }
+
+    template <typename H>
+    friend H AbslHashValue(H state, const TypedIntegerImpl& value) {
+        H::combine(std::move(state), value.mValue);
+        return std::move(state);
     }
 };
 

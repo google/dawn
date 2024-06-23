@@ -33,6 +33,7 @@
 #include <map>
 #include <string>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/SlabAllocator.h"
@@ -54,7 +55,8 @@ struct ExternalTextureBindingExpansion {
     BindingNumber params;
 };
 
-using ExternalTextureBindingExpansionMap = std::map<BindingNumber, ExternalTextureBindingExpansion>;
+using ExternalTextureBindingExpansionMap =
+    absl::flat_hash_map<BindingNumber, ExternalTextureBindingExpansion>;
 
 MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
                                              const BindGroupLayoutDescriptor* descriptor,
