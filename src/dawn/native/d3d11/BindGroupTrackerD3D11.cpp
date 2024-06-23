@@ -190,10 +190,9 @@ MaybeError BindGroupTracker::Apply() {
                                     bindingInfo.visibility,
                                     wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
                                 ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
-                                DAWN_TRY_ASSIGN(d3d11UAV, ToGPUOnlyBuffer(binding.buffer)
-                                                              ->CreateD3D11UnorderedAccessView1(
-                                                                  offset, binding.size));
-                                ToGPUOnlyBuffer(binding.buffer)->MarkMutated();
+                                DAWN_TRY_ASSIGN(d3d11UAV, ToGPUUsableBuffer(binding.buffer)
+                                                              ->UseAsUAV(mCommandContext, offset,
+                                                                         binding.size));
                                 uavsInBindGroup.insert(uavsInBindGroup.begin(),
                                                        std::move(d3d11UAV));
                                 break;
@@ -309,10 +308,9 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
 
                 switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform: {
-                        ToGPUOnlyBuffer(binding.buffer)
-                            ->EnsureConstantBufferIsUpdated(mCommandContext);
-                        ID3D11Buffer* d3d11Buffer =
-                            ToGPUOnlyBuffer(binding.buffer)->GetD3D11ConstantBuffer();
+                        ID3D11Buffer* d3d11Buffer;
+                        DAWN_TRY_ASSIGN(d3d11Buffer, ToGPUUsableBuffer(binding.buffer)
+                                                         ->GetD3D11ConstantBuffer(mCommandContext));
                         // https://learn.microsoft.com/en-us/windows/win32/api/d3d11_1/nf-d3d11_1-id3d11devicecontext1-vssetconstantbuffers1
                         // Offset and size are measured in shader constants, which are 16 bytes
                         // (4*32-bit components). And the offsets and counts must be multiples
@@ -346,10 +344,9 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                                      wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
                         if (bindingVisibility & wgpu::ShaderStage::Compute) {
                             ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
-                            DAWN_TRY_ASSIGN(d3d11UAV, ToGPUOnlyBuffer(binding.buffer)
-                                                          ->CreateD3D11UnorderedAccessView1(
-                                                              offset, binding.size));
-                            ToGPUOnlyBuffer(binding.buffer)->MarkMutated();
+                            DAWN_TRY_ASSIGN(d3d11UAV,
+                                            ToGPUUsableBuffer(binding.buffer)
+                                                ->UseAsUAV(mCommandContext, offset, binding.size));
                             deviceContext->CSSetUnorderedAccessViews(
                                 bindingSlot, 1, d3d11UAV.GetAddressOf(), nullptr);
                         }
@@ -358,8 +355,8 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                     case wgpu::BufferBindingType::ReadOnlyStorage: {
                         ComPtr<ID3D11ShaderResourceView> d3d11SRV;
                         DAWN_TRY_ASSIGN(d3d11SRV,
-                                        ToGPUOnlyBuffer(binding.buffer)
-                                            ->CreateD3D11ShaderResourceView(offset, binding.size));
+                                        ToGPUUsableBuffer(binding.buffer)
+                                            ->UseAsSRV(mCommandContext, offset, binding.size));
                         if (bindingVisibility & wgpu::ShaderStage::Vertex) {
                             deviceContext->VSSetShaderResources(bindingSlot, 1,
                                                                 d3d11SRV.GetAddressOf());

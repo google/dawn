@@ -40,7 +40,7 @@ namespace dawn::native::d3d11 {
 
 class CommandAllocatorManager;
 class Buffer;
-class GPUOnlyBuffer;
+class GPUUsableBuffer;
 class Device;
 
 class CommandRecordingContext;
@@ -84,7 +84,7 @@ class CommandRecordingContext {
     void Destroy();
 
     static ResultOrError<Ref<BufferBase>> CreateInternalUniformBuffer(DeviceBase* device);
-    void SetInternalUniformBuffer(Ref<BufferBase> uniformBuffer);
+    MaybeError SetInternalUniformBuffer(Ref<BufferBase> uniformBuffer);
 
     void ReleaseKeyedMutexes();
 
@@ -107,7 +107,7 @@ class CommandRecordingContext {
     // The maximum number of builtin elements is 4 (vec4). It must be multiple of 4.
     static constexpr size_t kMaxNumBuiltinElements = 4;
     // The uniform buffer for built-in variables.
-    Ref<GPUOnlyBuffer> mUniformBuffer;
+    Ref<GPUUsableBuffer> mUniformBuffer;
     std::array<uint32_t, kMaxNumBuiltinElements> mUniformBufferData;
     bool mUniformBufferDirty = true;
 

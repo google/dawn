@@ -93,15 +93,12 @@ MaybeError QuerySet::Resolve(const ScopedSwapStateCommandRecordingContext* comma
                              uint64_t offset) {
     DAWN_TRY(destination->Clear(commandContext, 0, offset, queryCount * sizeof(uint64_t)));
     const auto& queryAvailability = GetQueryAvailability();
-    ID3D11DeviceContext* d3d11DeviceContext = commandContext->GetD3D11DeviceContext4();
     for (uint32_t i = 0; i < queryCount; ++i) {
         uint32_t queryIndex = i + firstQuery;
         if (queryAvailability[queryIndex]) {
             auto& predicate = mPredicates[queryIndex];
-            d3d11DeviceContext->SetPredication(predicate.Get(), false);
-            DAWN_TRY(destination->Clear(commandContext, 1, offset + i * sizeof(uint64_t),
-                                        sizeof(uint64_t)));
-            d3d11DeviceContext->SetPredication(nullptr, false);
+            DAWN_TRY(destination->PredicatedClear(commandContext, predicate.Get(), 1,
+                                                  offset + i * sizeof(uint64_t), sizeof(uint64_t)));
         }
     }
     return {};

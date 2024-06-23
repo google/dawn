@@ -109,66 +109,66 @@ TEST_P(D3D11BufferTests, CreateUniformBuffer) {
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
     }
     {
         wgpu::BufferUsage usage =
             wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
     }
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Vertex;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
     }
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Index;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
     }
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Indirect;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
     }
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
     }
     {
         wgpu::BufferUsage usage = wgpu::BufferUsage::Storage;
         wgpu::Buffer buffer = CreateBuffer(4, usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_EQ(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_EQ(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
     }
 }
 
@@ -179,34 +179,34 @@ TEST_P(D3D11BufferTests, WriteUniformBuffer) {
         wgpu::BufferUsage usage =
             wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buffer = CreateBuffer(data.size(), usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_EQ(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
 
         queue.WriteBuffer(buffer, 0, data.data(), data.size());
         EXPECT_BUFFER_U8_RANGE_EQ(data.data(), buffer, 0, data.size());
 
-        CheckBuffer(d3d11Buffer->GetD3D11ConstantBuffer(), data);
+        CheckBuffer(d3d11Buffer->GetD3D11ConstantBufferForTesting(), data);
     }
     {
         std::vector<uint8_t> data = {0x12, 0x34, 0x56, 0x78};
         wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Vertex |
                                   wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
         wgpu::Buffer buffer = CreateBuffer(data.size(), usage);
-        native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-            native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+        native::d3d11::GPUUsableBuffer* d3d11Buffer =
+            native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+        EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
 
         queue.WriteBuffer(buffer, 0, data.data(), data.size());
         EXPECT_BUFFER_U8_RANGE_EQ(data.data(), buffer, 0, data.size());
 
         // both buffers should be updated.
-        CheckBuffer(d3d11Buffer->GetD3D11NonConstantBuffer(), data);
-        CheckBuffer(d3d11Buffer->GetD3D11ConstantBuffer(), data);
+        CheckBuffer(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), data);
+        CheckBuffer(d3d11Buffer->GetD3D11ConstantBufferForTesting(), data);
     }
 }
 
@@ -218,17 +218,17 @@ TEST_P(D3D11BufferTests, WriteUniformBufferWithComputeShader) {
     wgpu::BufferUsage usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage |
                               wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer buffer = CreateBuffer(bufferSize, usage);
-    native::d3d11::GPUOnlyBuffer* d3d11Buffer =
-        native::d3d11::ToGPUOnlyBuffer(native::FromAPI(buffer.Get()));
+    native::d3d11::GPUUsableBuffer* d3d11Buffer =
+        native::d3d11::ToGPUUsableBuffer(native::FromAPI(buffer.Get()));
 
-    EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBuffer(), nullptr);
-    EXPECT_NE(d3d11Buffer->GetD3D11ConstantBuffer(), nullptr);
+    EXPECT_NE(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), nullptr);
+    EXPECT_NE(d3d11Buffer->GetD3D11ConstantBufferForTesting(), nullptr);
 
     queue.WriteBuffer(buffer, 0, data.data(), bufferSize);
     EXPECT_BUFFER_U32_RANGE_EQ(data.data(), buffer, 0, data.size());
 
-    CheckBuffer(d3d11Buffer->GetD3D11NonConstantBuffer(), data);
-    CheckBuffer(d3d11Buffer->GetD3D11ConstantBuffer(), data);
+    CheckBuffer(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), data);
+    CheckBuffer(d3d11Buffer->GetD3D11ConstantBufferForTesting(), data);
 
     // Fill the buffer with 0x11223344 with a compute shader
     {
@@ -268,9 +268,9 @@ TEST_P(D3D11BufferTests, WriteUniformBufferWithComputeShader) {
         std::vector<uint32_t> expectedData(kNumValues, 0x11223344);
         EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), buffer, 0, expectedData.size());
         // The non-constant buffer should be updated.
-        CheckBuffer(d3d11Buffer->GetD3D11NonConstantBuffer(), expectedData);
-        // The constant buffer should not be updated, until the constant buffer is used a pipeline
-        CheckBuffer(d3d11Buffer->GetD3D11ConstantBuffer(), data);
+        CheckBuffer(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), expectedData);
+        // The constant buffer should be updated too.
+        CheckBuffer(d3d11Buffer->GetD3D11ConstantBufferForTesting(), expectedData);
     }
 
     // Copy the uniform buffer content to a new buffer with Compute shader
@@ -316,9 +316,9 @@ TEST_P(D3D11BufferTests, WriteUniformBufferWithComputeShader) {
         EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), newBuffer, 0, expectedData.size());
 
         // The non-constant buffer should be updated.
-        CheckBuffer(d3d11Buffer->GetD3D11NonConstantBuffer(), expectedData);
+        CheckBuffer(d3d11Buffer->GetD3D11NonConstantBufferForTesting(), expectedData);
         // The constant buffer should be updated too.
-        CheckBuffer(d3d11Buffer->GetD3D11ConstantBuffer(), expectedData);
+        CheckBuffer(d3d11Buffer->GetD3D11ConstantBufferForTesting(), expectedData);
     }
 }
 
