@@ -102,13 +102,13 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/hlsl/ir/builtin_call.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
-#include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/strconv/float_to_string.h"
 #include "src/tint/utils/text/string.h"
@@ -193,13 +193,6 @@ class Printer : public tint::TextGenerator {
 
     /// Block to emit for a continuing
     std::function<void()> emit_continuing_;
-
-    using BinaryType =
-        tint::UnorderedKeyWrapper<std::tuple<const core::type::Type*, const core::type::Type*>>;
-
-    // Polyfill functions for bitcast expression, BinaryType indicates the source type and the
-    // destination type.
-    std::unordered_map<BinaryType, std::string> bitcast_funcs_;
 
     /// Emit the root block.
     /// @param root_block the root block to emit
@@ -617,7 +610,6 @@ class Printer : public tint::TextGenerator {
                 Switch(
                     r->Instruction(),                                                          //
                     [&](const core::ir::Access* a) { EmitAccess(out, a); },                    //
-                    [&](const core::ir::Bitcast* b) { EmitBitcast(out, b); },                  //
                     [&](const core::ir::Construct* c) { EmitConstruct(out, c); },              //
                     [&](const core::ir::Convert* c) { EmitConvert(out, c); },                  //
                     [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },                //
@@ -631,162 +623,26 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },        //
                     [&](const core::ir::Swizzle* s) { EmitSwizzle(out, s); },          //
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },  //
+
+                    [&](const hlsl::ir::BuiltinCall* c) { EmitHlslBuiltinCall(out, c); },  //
+
                     TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
             TINT_ICE_ON_NO_MATCH);
     }
 
-    /// Emit a bitcast instruction
-    void EmitBitcast(StringStream& out, const core::ir::Bitcast* b) {
-        auto* src_type = b->Val()->Type();
-        auto* dst_type = b->Result(0)->Type();
-
-        // Identity transform
-        if (src_type == dst_type) {
-            EmitValue(out, b->Val());
-            return;
+    void EmitHlslBuiltinCall(StringStream& out, const hlsl::ir::BuiltinCall* c) {
+        out << c->Func() << "(";
+        bool needs_comma = false;
+        for (const auto* arg : c->Args()) {
+            if (needs_comma) {
+                out << ", ";
+            }
+            EmitValue(out, arg);
+            needs_comma = true;
         }
-
-        if (src_type->DeepestElement()->As<core::type::F16>()) {
-            out << EmitBitcastFromF16(src_type, dst_type);
-        } else if (dst_type->DeepestElement()->As<core::type::F16>()) {
-            out << EmitBitcastToF16(src_type, dst_type);
-        } else {
-            out << "as";
-            EmitType(out, dst_type);
-        }
-        out << "(";
-        EmitValue(out, b->Val());
         out << ")";
-    }
-
-    // Bitcast f16 types to others by converting the given f16 value to f32 and call
-    // f32tof16 to get the bits. This should be safe, because the conversion is precise
-    // for finite and infinite f16 value as they are exactly representable by f32.
-    std::string EmitBitcastFromF16(const core::type::Type* src_type,
-                                   const core::type::Type* dst_type) {
-        return tint::GetOrAdd(
-            bitcast_funcs_, BinaryType{{src_type, dst_type}}, [&]() -> std::string {
-                TextBuffer b;
-                auto fn_name = UniqueIdentifier(std::string("tint_bitcast_from_f16"));
-                {
-                    auto decl = Line(&b);
-                    EmitTypeAndName(decl, dst_type, core::AddressSpace::kUndefined,
-                                    core::Access::kUndefined, fn_name);
-                    {
-                        const ScopedParen sp(decl);
-                        EmitTypeAndName(decl, src_type, core::AddressSpace::kUndefined,
-                                        core::Access::kUndefined, "src");
-                    }
-                    decl << " {";
-                }
-                {
-                    auto* src_vec = src_type->As<core::type::Vector>();
-
-                    const ScopedIndent si(&b);
-                    {
-                        Line(&b) << "uint" << src_vec->Width() << " r = f32tof16(float"
-                                 << src_vec->Width() << "(src));";
-
-                        {
-                            auto* dst_el_type = dst_type->DeepestElement();
-
-                            auto s = Line(&b);
-                            s << "return as";
-                            EmitType(s, dst_el_type, core::AddressSpace::kUndefined,
-                                     core::Access::kReadWrite, "");
-                            s << "(";
-                            switch (src_vec->Width()) {
-                                case 2: {
-                                    s << "uint((r.x & 0xffff) | ((r.y & 0xffff) << 16))";
-                                    break;
-                                }
-                                case 4: {
-                                    s << "uint2((r.x & 0xffff) | ((r.y & 0xffff) << 16), "
-                                         "(r.z & 0xffff) | ((r.w & 0xffff) << 16))";
-                                    break;
-                                }
-                                default: {
-                                    TINT_UNREACHABLE();
-                                }
-                            }
-                            s << ");";
-                        }
-                    }
-                }
-                Line(&b) << "}";
-                Line(&b);
-
-                preamble_buffer_.Append(b);
-                return fn_name;
-            });
-    }
-
-    // Bitcast other types to f16 types by reinterpreting their bits as f16 using
-    // f16tof32, and convert the result f32 to f16. This should be safe, because the
-    // conversion is precise for finite and infinite f16 result value as they are
-    // exactly representable by f32.
-    std::string EmitBitcastToF16(const core::type::Type* src_type,
-                                 const core::type::Type* dst_type) {
-        return tint::GetOrAdd(
-            bitcast_funcs_, BinaryType{{src_type, dst_type}}, [&]() -> std::string {
-                TextBuffer b;
-                auto fn_name = UniqueIdentifier(std::string("tint_bitcast_to_f16"));
-                {
-                    auto decl = Line(&b);
-                    EmitTypeAndName(decl, dst_type, core::AddressSpace::kUndefined,
-                                    core::Access::kUndefined, fn_name);
-                    {
-                        const ScopedParen sp(decl);
-                        EmitTypeAndName(decl, src_type, core::AddressSpace::kUndefined,
-                                        core::Access::kUndefined, "src");
-                    }
-                    decl << " {";
-                }
-                {
-                    const ScopedIndent si(&b);
-                    {
-                        auto* dst_vec = dst_type->As<core::type::Vector>();
-                        auto* src_vec = src_type->As<core::type::Vector>();
-                        const std::string src_type_suffix = (src_vec ? "2" : "");
-
-                        // Convert the source to uint for f16tof32.
-                        Line(&b) << "uint" << src_type_suffix << " v = asuint(src);";
-                        // Reinterpret the low 16 bits and high 16 bits
-                        Line(&b) << "float" << src_type_suffix << " t_low = f16tof32(v & 0xffff);";
-                        Line(&b) << "float" << src_type_suffix
-                                 << " t_high = f16tof32((v >> 16) & 0xffff);";
-                        // Construct the result f16 vector
-                        {
-                            auto s = Line(&b);
-                            s << "return ";
-                            EmitType(s, dst_type, core::AddressSpace::kUndefined,
-                                     core::Access::kReadWrite, "");
-                            s << "(";
-                            switch (dst_vec->Width()) {
-                                case 2: {
-                                    s << "t_low.x, t_high.x";
-                                    break;
-                                }
-                                case 4: {
-                                    s << "t_low.x, t_high.x, t_low.y, t_high.y";
-                                    break;
-                                }
-                                default: {
-                                    TINT_UNREACHABLE();
-                                }
-                            }
-                            s << ");";
-                        }
-                    }
-                }
-                Line(&b) << "}";
-                Line(&b);
-
-                preamble_buffer_.Append(b);
-                return fn_name;
-            });
     }
 
     /// Emit a convert instruction

@@ -25,39 +25,27 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/raise.h"
+#ifndef SRC_TINT_LANG_HLSL_INTRINSIC_DIALECT_H_
+#define SRC_TINT_LANG_HLSL_INTRINSIC_DIALECT_H_
 
-#include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
-#include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
-#include "src/tint/lang/hlsl/writer/common/options.h"
-#include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
-#include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/lang/core/intrinsic/table_data.h"
+#include "src/tint/lang/hlsl/builtin_fn.h"
 
-namespace tint::hlsl::writer {
+namespace tint::hlsl::intrinsic {
 
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)                   \
-    do {                                           \
-        auto result = name(module, ##__VA_ARGS__); \
-        if (result != Success) {                   \
-            return result;                         \
-        }                                          \
-    } while (false)
+/// Dialect holds the intrinsic table data and types for the HLSL dialect
+struct Dialect {
+    /// The dialect's intrinsic table data
+    static const core::intrinsic::TableData kData;
 
-    RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint);
+    /// The dialect's builtin function enumerator
+    using BuiltinFn = hlsl::BuiltinFn;
 
-    if (options.compiler == Options::Compiler::kFXC) {
-        RUN_TRANSFORM(raise::FxcPolyfill);
-    }
+    /// @returns the name of the builtin function @p fn
+    /// @param fn the builtin function
+    static std::string_view ToString(BuiltinFn fn) { return str(fn); }
+};
 
-    RUN_TRANSFORM(raise::BuiltinPolyfill);
+}  // namespace tint::hlsl::intrinsic
 
-    // These transforms need to be run last as various transforms introduce terminator arguments,
-    // naming conflicts, and expressions that need to be explicitly not inlined.
-    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
-
-    return Success;
-}
-
-}  // namespace tint::hlsl::writer
+#endif  // SRC_TINT_LANG_HLSL_INTRINSIC_DIALECT_H_

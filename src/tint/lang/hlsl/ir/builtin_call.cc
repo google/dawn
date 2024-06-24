@@ -25,39 +25,32 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/raise.h"
+#include "src/tint/lang/hlsl/ir/builtin_call.h"
 
-#include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
-#include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
-#include "src/tint/lang/hlsl/writer/common/options.h"
-#include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
-#include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
-#include "src/tint/utils/result/result.h"
+#include <utility>
 
-namespace tint::hlsl::writer {
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/utils/ice/ice.h"
 
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)                   \
-    do {                                           \
-        auto result = name(module, ##__VA_ARGS__); \
-        if (result != Success) {                   \
-            return result;                         \
-        }                                          \
-    } while (false)
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::ir::BuiltinCall);
 
-    RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint);
+namespace tint::hlsl::ir {
 
-    if (options.compiler == Options::Compiler::kFXC) {
-        RUN_TRANSFORM(raise::FxcPolyfill);
-    }
-
-    RUN_TRANSFORM(raise::BuiltinPolyfill);
-
-    // These transforms need to be run last as various transforms introduce terminator arguments,
-    // naming conflicts, and expressions that need to be explicitly not inlined.
-    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
-
-    return Success;
+BuiltinCall::BuiltinCall(core::ir::InstructionResult* result,
+                         BuiltinFn func,
+                         VectorRef<core::ir::Value*> arguments)
+    : Base(result, arguments), func_(func) {
+    flags_.Add(Flag::kSequenced);
+    TINT_ASSERT(func != BuiltinFn::kNone);
 }
 
-}  // namespace tint::hlsl::writer
+BuiltinCall::~BuiltinCall() = default;
+
+BuiltinCall* BuiltinCall::Clone(core::ir::CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result(0));
+    auto new_args = ctx.Clone<BuiltinCall::kDefaultNumOperands>(Args());
+    return ctx.ir.allocators.instructions.Create<BuiltinCall>(new_result, func_, new_args);
+}
+
+}  // namespace tint::hlsl::ir

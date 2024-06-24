@@ -25,39 +25,38 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/raise.h"
+#include "src/tint/lang/hlsl/ir/builtin_call.h"
 
-#include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
-#include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
-#include "src/tint/lang/hlsl/writer/common/options.h"
-#include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
-#include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
-#include "src/tint/utils/result/result.h"
+#include "gtest/gtest.h"
+#include "src/tint/lang/core/ir/ir_helper_test.h"
+#include "src/tint/lang/core/ir/validator.h"
 
-namespace tint::hlsl::writer {
+using namespace tint::core::fluent_types;  // NOLINT
 
-Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)                   \
-    do {                                           \
-        auto result = name(module, ##__VA_ARGS__); \
-        if (result != Success) {                   \
-            return result;                         \
-        }                                          \
-    } while (false)
+namespace tint::hlsl::ir {
+namespace {
 
-    RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint);
+using namespace tint::core::number_suffixes;  // NOLINT
+                                              //
+using IR_HlslBuiltinCallTest = core::ir::IRTestHelper;
 
-    if (options.compiler == Options::Compiler::kFXC) {
-        RUN_TRANSFORM(raise::FxcPolyfill);
-    }
+TEST_F(IR_HlslBuiltinCallTest, Clone) {
+    auto* builtin = b.Call<BuiltinCall>(mod.Types().u32(), BuiltinFn::kF32Tof16, 0_f);
 
-    RUN_TRANSFORM(raise::BuiltinPolyfill);
+    auto* new_b = clone_ctx.Clone(builtin);
 
-    // These transforms need to be run last as various transforms introduce terminator arguments,
-    // naming conflicts, and expressions that need to be explicitly not inlined.
-    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
+    EXPECT_NE(builtin, new_b);
+    EXPECT_NE(builtin->Result(0), new_b->Result(0));
+    EXPECT_EQ(mod.Types().u32(), new_b->Result(0)->Type());
 
-    return Success;
+    EXPECT_EQ(BuiltinFn::kF32Tof16, new_b->Func());
+
+    auto args = new_b->Args();
+    EXPECT_EQ(1u, args.Length());
+
+    auto* val0 = args[0]->As<core::ir::Constant>()->Value();
+    EXPECT_EQ(0_f, val0->As<core::constant::Scalar<core::f32>>()->ValueAs<core::f32>());
 }
 
-}  // namespace tint::hlsl::writer
+}  // namespace
+}  // namespace tint::hlsl::ir

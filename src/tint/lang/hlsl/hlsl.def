@@ -1,0 +1,73 @@
+// Copyright 2024 The Dawn & Tint Authors
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+////////////////////////////////////////////////////////////////////////////////
+// HLSL builtin definition file                                               //
+//                                                                            //
+// After modifying this file, run:                                            //
+//    tools/run gen                                                           //
+// from the Dawn source directory.                                            //
+//                                                                            //
+// See docs/tint/intrinsic_definition_files.md for syntax                     //
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// Types                                                                      //
+////////////////////////////////////////////////////////////////////////////////
+
+type i32
+type u32
+type f32
+type f16
+type vec2<T>
+@display("vec{N}<{T}>")     type vec<N: num, T>
+
+////////////////////////////////////////////////////////////////////////////////
+// Type matchers                                                              //
+////////////////////////////////////////////////////////////////////////////////
+
+match iu32: i32 | u32
+match f32_u32: f32 | u32
+match f32_i32: f32 | i32
+
+////////////////////////////////////////////////////////////////////////////////
+// Builtin Functions                                                          //
+////////////////////////////////////////////////////////////////////////////////
+fn asint[T: f32_u32](T) -> i32
+fn asint[T: f32_u32, N: num](vec<N, T>) -> vec<N, i32>
+
+fn asuint[T: f32_i32](T) -> u32
+fn asuint[T: f32_i32, N: num](vec<N, T>) -> vec<N, u32>
+
+fn asfloat[T: iu32](T) -> f32
+fn asfloat[T: iu32, N: num](vec<N, T>) -> vec<N, f32>
+
+fn f32tof16(f32) -> u32
+fn f32tof16[N: num](vec<N, f32>) -> vec<N, u32>
+
+fn f16tof32(u32) -> f32
+fn f16tof32[N: num](vec<N, u32>) -> vec<N, f32>

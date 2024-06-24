@@ -44,6 +44,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("raise") {
   sources = [
+    "builtin_polyfill.cc",
+    "builtin_polyfill.h",
     "fxc_polyfill.cc",
     "fxc_polyfill.h",
     "raise.cc",
@@ -57,6 +59,9 @@ libtint_source_set("raise") {
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/ir/transform",
     "${tint_src_dir}/lang/core/type",
+    "${tint_src_dir}/lang/hlsl",
+    "${tint_src_dir}/lang/hlsl/intrinsic",
+    "${tint_src_dir}/lang/hlsl/ir",
     "${tint_src_dir}/lang/hlsl/writer/common",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
@@ -75,7 +80,10 @@ libtint_source_set("raise") {
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
-    sources = [ "fxc_polyfill_test.cc" ]
+    sources = [
+      "builtin_polyfill_test.cc",
+      "fxc_polyfill_test.cc",
+    ]
     deps = [
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api/common",

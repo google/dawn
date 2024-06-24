@@ -39,10 +39,12 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "raise",
   srcs = [
+    "builtin_polyfill.cc",
     "fxc_polyfill.cc",
     "raise.cc",
   ],
   hdrs = [
+    "builtin_polyfill.h",
     "fxc_polyfill.h",
     "raise.h",
   ],
@@ -54,6 +56,9 @@ cc_library(
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/ir/transform",
     "//src/tint/lang/core/type",
+    "//src/tint/lang/hlsl",
+    "//src/tint/lang/hlsl/intrinsic",
+    "//src/tint/lang/hlsl/ir",
     "//src/tint/lang/hlsl/writer/common",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -76,6 +81,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "builtin_polyfill_test.cc",
     "fxc_polyfill_test.cc",
   ],
   deps = [

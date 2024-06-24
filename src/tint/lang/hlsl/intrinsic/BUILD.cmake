@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2024 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,20 +34,32 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/hlsl/intrinsic/BUILD.cmake)
-include(lang/hlsl/ir/BUILD.cmake)
-include(lang/hlsl/validate/BUILD.cmake)
-include(lang/hlsl/writer/BUILD.cmake)
-
 ################################################################################
-# Target:    tint_lang_hlsl
+# Target:    tint_lang_hlsl_intrinsic
 # Kind:      lib
 ################################################################################
-tint_add_target(tint_lang_hlsl lib
-  lang/hlsl/builtin_fn.cc
-  lang/hlsl/builtin_fn.h
+tint_add_target(tint_lang_hlsl_intrinsic lib
+  lang/hlsl/intrinsic/data.cc
+  lang/hlsl/intrinsic/dialect.h
 )
 
-tint_target_add_dependencies(tint_lang_hlsl lib
+tint_target_add_dependencies(tint_lang_hlsl_intrinsic lib
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_type
+  tint_lang_hlsl
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
   tint_utils_traits
 )
