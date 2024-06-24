@@ -81,8 +81,7 @@ INSTANTIATE_TEST_SUITE_P(HlslWriterTest,
                                          BinaryData{"(left | right)", core::BinaryOp::kOr},
                                          BinaryData{"(left ^ right)", core::BinaryOp::kXor}));
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryU32Div) {
+TEST_F(HlslWriterTest, BinaryU32Div) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -95,15 +94,15 @@ TEST_F(HlslWriterTest, DISABLED_BinaryU32Div) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / (((rhs == 0u)) ? (1u) : (rhs)));
 }
 
 [numthreads(1, 1, 1)]
 void foo() {
   uint left = 1u;
   uint right = 2u;
-  uint val = tint_div(left, right);
+  uint val = tint_div_u32(left, right);
 }
 
 )");
@@ -136,8 +135,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryU32ShiftLeft) {
+TEST_F(HlslWriterTest, BinaryU32ShiftLeft) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -160,8 +158,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryU32ShiftRight) {
+TEST_F(HlslWriterTest, BinaryU32ShiftRight) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {

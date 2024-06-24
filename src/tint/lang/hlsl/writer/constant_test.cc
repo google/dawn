@@ -635,7 +635,7 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_ConstantTypeStructStatic) {
+TEST_F(HlslWriterTest, ConstantTypeStructStatic) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
                                          core::type::StructMemberAttributes{}),
