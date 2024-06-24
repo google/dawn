@@ -24,6 +24,7 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+{% from 'art/api_jni_types.kt' import arg_to_jni_type, to_jni_type with context %}
 #include <jni.h>
 #include "dawn/webgpu.h"
 #include "structures.h"
@@ -64,47 +65,14 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 {% macro render_method(method, object) %}
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
     DEFAULT extern "C"
-    {% if method.return_type.category == 'structure' %}
-        {{ unreachable_code() }}   //*  Currently returning structures is not supported.
-    {% elif method.return_type.category in ['bitmask', 'enum'] -%}
-        jint
-    {%- elif method.return_type.category == 'object' -%}
-        jobject
-    {%- else -%}
-        {{ to_jni_type[method.return_type.name.get()] }}
-    {%- endif %}
-    {{ ' ' }}
-    Java_{{ kotlin_package.replace('.', '_') }}_
+    {{ to_jni_type(method.return_type) }} Java_{{ kotlin_package.replace('.', '_') }}_
             {{- object.name.CamelCase() if object else 'FunctionsKt' -}}
             _{{ method.name.camelCase() }}(JNIEnv *env
                     {{ ', jobject obj' if object else ', jclass clazz' -}}
 
     //* Make the signature for each argument in turn.
     {% for arg in filter_arguments(method.arguments) %},
-        {%- if arg.length == 'strlen' -%}
-            jstring
-        {%- elif arg.length and arg.constant_length != 1 %}
-            {%- if arg.type.category in [
-                    'bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
-                jobjectArray
-            {%- elif arg.type.name.get() == 'void' -%}
-                jobject
-            {%- elif arg.type.name.get() == 'uint32_t' -%}
-                jintArray
-            {%- else %}
-                //* Currently returning structures in callbacks is not supported.
-                {{ unreachable_code() }}
-            {% endif %}
-        {%- elif arg.type.category in ['function pointer', 'object', 'structure'] -%}
-            jobject
-        {%- elif arg.type.category in ['bitmask', 'enum'] -%}
-            jint
-        {%- elif arg.type.name.get() in ['float',  'int32_t', 'uint32_t', 'uint64_t', 'size_t'] -%}
-            {{ to_jni_type[arg.type.name.get()] }}
-        {%- else %}
-            {{ unreachable_code() }}
-        {% endif %}
-        {{ ' ' }}_{{ as_varName(arg.name) }}
+        {{ arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
     {% endfor %}) {
 
     //*  A variable is declared for each parameter of the native method.

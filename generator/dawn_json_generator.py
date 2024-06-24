@@ -795,7 +795,7 @@ def unreachable_code():
 def compute_kotlin_params(loaded_json, kotlin_json):
     params_kotlin = parse_json(loaded_json, enabled_tags=['art'])
     params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
-    params_kotlin['to_jni_type'] = kotlin_json['to_jni_type']
+    params_kotlin['jni_primitives'] = kotlin_json['jni_primitives']
     kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
 
     # The 'length' members are removed as Kotlin can infer that from the container.

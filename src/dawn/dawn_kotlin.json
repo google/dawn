@@ -32,7 +32,7 @@
 
     "kotlin_package": "android.dawn",
 
-    "to_jni_type" : {
+    "jni_primitives" : {
         "bool": "jboolean",
         "float": "jfloat",
         "int32_t": "jint",
