@@ -29,7 +29,7 @@ syntax = "proto3";
 
 package tint.cmd.fuzz.ir.pb;
 
-import "src/tint/lang/core/ir/binary/ir.proto";
+import "src/tint/utils/protos/ir/ir.proto";
 
 message Root {
     tint.core.ir.binary.pb.Module module = 1;

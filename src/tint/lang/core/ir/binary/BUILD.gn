@@ -72,14 +72,8 @@ if (tint_build_ir_binary) {
     ]
 
     if (tint_build_ir_binary) {
-      deps += [ "${tint_src_dir}/lang/core/ir/binary:proto" ]
+      deps += [ "${tint_src_dir}/utils/protos/ir:proto" ]
     }
-  }
-}
-if (tint_build_ir_binary) {
-  tint_proto_library("proto") {
-    sources = [ "ir.proto" ]
-    deps = []
   }
 }
 if (tint_build_unittests) {

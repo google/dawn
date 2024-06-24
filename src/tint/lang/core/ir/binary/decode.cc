@@ -53,7 +53,7 @@
 #include "src/tint/utils/text/text_style.h"
 
 TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS();
-#include "src/tint/lang/core/ir/binary/ir.pb.h"
+#include "src/tint/utils/protos/ir/ir.pb.h"
 TINT_END_DISABLE_PROTOBUF_WARNINGS();
 
 using namespace tint::core::fluent_types;  // NOLINT

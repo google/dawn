@@ -36,23 +36,6 @@
 
 if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
 ################################################################################
-# Target:    tint_cmd_fuzz_ir_proto
-# Kind:      proto
-# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM)
-################################################################################
-tint_add_target(tint_cmd_fuzz_ir_proto proto
-  cmd/fuzz/ir/fuzz.proto
-)
-
-if(TINT_BUILD_IR_BINARY)
-  tint_target_add_dependencies(tint_cmd_fuzz_ir_proto proto
-    tint_lang_core_ir_binary_proto
-  )
-endif(TINT_BUILD_IR_BINARY)
-
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
-################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz_cmd
 # Kind:      fuzz_cmd
 # Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM)
@@ -113,11 +96,11 @@ if(TINT_BUILD_IR_BINARY)
   )
 endif(TINT_BUILD_IR_BINARY)
 
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd
-    tint_cmd_fuzz_ir_proto
+    tint_utils_protos_ir_fuzz_proto
   )
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
 
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_fuzz_cmd fuzz_cmd

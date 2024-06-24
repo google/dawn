@@ -87,7 +87,7 @@
 #include "src/tint/utils/rtti/switch.h"
 
 TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS();
-#include "src/tint/lang/core/ir/binary/ir.pb.h"
+#include "src/tint/utils/protos/ir/ir.pb.h"
 TINT_END_DISABLE_PROTOBUF_WARNINGS();
 
 namespace tint::core::ir::binary {

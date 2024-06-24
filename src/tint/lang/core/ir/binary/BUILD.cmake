@@ -71,20 +71,9 @@ tint_target_add_dependencies(tint_lang_core_ir_binary lib
 
 if(TINT_BUILD_IR_BINARY)
   tint_target_add_dependencies(tint_lang_core_ir_binary lib
-    tint_lang_core_ir_binary_proto
+    tint_utils_protos_ir_proto
   )
 endif(TINT_BUILD_IR_BINARY)
-
-endif(TINT_BUILD_IR_BINARY)
-if(TINT_BUILD_IR_BINARY)
-################################################################################
-# Target:    tint_lang_core_ir_binary_proto
-# Kind:      proto
-# Condition: TINT_BUILD_IR_BINARY
-################################################################################
-tint_add_target(tint_lang_core_ir_binary_proto proto
-  lang/core/ir/binary/ir.proto
-)
 
 endif(TINT_BUILD_IR_BINARY)
 if(TINT_BUILD_IR_BINARY)

@@ -39,7 +39,7 @@
 
 TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS();
 #include "src/libfuzzer/libfuzzer_macro.h"
-#include "src/tint/cmd/fuzz/ir/fuzz.pb.h"
+#include "src/tint/utils/protos/ir_fuzz/ir_fuzz.pb.h"
 #include "testing/libfuzzer/proto/lpm_interface.h"
 TINT_END_DISABLE_PROTOBUF_WARNINGS();
 
