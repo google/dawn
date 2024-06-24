@@ -109,8 +109,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryU32Mod) {
+TEST_F(HlslWriterTest, BinaryU32Mod) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -123,15 +122,15 @@ TEST_F(HlslWriterTest, DISABLED_BinaryU32Mod) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
+uint tint_mod_u32(uint lhs, uint rhs) {
+  return (lhs - ((lhs / (((rhs == 0u)) ? (1u) : (rhs))) * (((rhs == 0u)) ? (1u) : (rhs))));
 }
 
 [numthreads(1, 1, 1)]
 void foo() {
   uint left = 1u;
   uint right = 2u;
-  uint val = tint_mod(left, right);
+  uint val = tint_mod_u32(left, right);
 }
 
 )");

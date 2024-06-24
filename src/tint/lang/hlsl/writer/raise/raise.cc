@@ -28,6 +28,7 @@
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
 
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
+#include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
@@ -44,6 +45,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             return result;                         \
         }                                          \
     } while (false)
+
+    {
+        core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
+        binary_polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
+        binary_polyfills.bitshift_modulo = true;
+        RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, binary_polyfills);
+    }
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint);
 
