@@ -258,7 +258,6 @@ target_link_libraries(dawn_native
             dawn_platform
             dawn_internal_config
             libtint
-            SPIRV-Tools-opt
             absl::strings
             absl::str_format_internal
             absl::flat_hash_map
@@ -559,6 +558,9 @@ if (DAWN_ENABLE_OPENGL OR DAWN_ENABLE_VULKAN)
     target_sources(dawn_native PRIVATE
         "SpirvValidation.cpp"
         "SpirvValidation.h"
+    )
+    target_link_libraries(dawn_native PRIVATE
+        SPIRV-Tools-opt
     )
 endif()
 
