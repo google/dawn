@@ -822,7 +822,7 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionWithDiscardAndVoidReturn) {
+TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturn) {
     // fn my_func(a: i32) {
     //   if (a == 0) {
     //     discard;
@@ -835,16 +835,19 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithDiscardAndVoidReturn) {
 
     b.Append(func->Block(), [&] {
         auto* i = b.If(b.Equal(ty.bool_(), p, 0_i));
-        b.Append(i->True(), [&] { b.Discard(); });
+        b.Append(i->True(), [&] {
+            b.Discard();
+            b.ExitIf(i);
+        });
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void my_func(int a) {
+    EXPECT_EQ(output_.hlsl, R"(
+void my_func(int a) {
   if ((a == 0)) {
     discard;
   }
-  return;
 }
 
 [numthreads(1, 1, 1)]
@@ -854,6 +857,7 @@ void unused_entry_point() {
 )");
 }
 
+// TODO(dsinclair): Needs transform to handle discard properly
 TEST_F(HlslWriterTest, DISABLED_FunctionWithDiscardAndNonVoidReturn) {
     // fn my_func(a: i32) -> i32 {
     //   if (a == 0) {
@@ -863,17 +867,21 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithDiscardAndNonVoidReturn) {
     // }
 
     auto* func = b.Function("my_func", ty.i32());
-    auto* p = b.FunctionParam("a", ty.i32());
-    func->SetParams({p});
+    auto* a = b.FunctionParam("a", ty.i32());
+    func->SetParams({a});
 
     b.Append(func->Block(), [&] {
-        auto* i = b.If(b.Equal(ty.bool_(), p, 0_i));
-        b.Append(i->True(), [&] { b.Discard(); });
+        auto* i = b.If(b.Equal(ty.bool_(), a, 0_i));
+        b.Append(i->True(), [&] {
+            b.Discard();
+            b.ExitIf(i);
+        });
         b.Return(func, 42_i);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(int my_func(int a) {
+    EXPECT_EQ(output_.hlsl, R"(
+int my_func(int a) {
   if (true) {
     if ((a == 0)) {
       discard;
@@ -939,7 +947,8 @@ TEST_F(HlslWriterTest, DISABLED_FunctionMultipleEntryPointWithSameModuleVar) {
     }
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(RWByteAddressBuffer data : register(u0);
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer data : register(u0);
 
 [numthreads(1, 1, 1)]
 void a() {

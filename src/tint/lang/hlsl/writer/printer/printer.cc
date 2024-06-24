@@ -57,6 +57,7 @@
 #include "src/tint/lang/core/ir/core_binary.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
+#include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
@@ -74,6 +75,7 @@
 #include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
+#include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -282,7 +284,11 @@ class Printer : public tint::TextGenerator {
 
         for (auto* inst : *block) {
             Switch(
-                inst,                                                                       //
+                inst,
+                // Discard and TerminateInvocation must come before Call.
+                [&](const core::ir::Discard*) { EmitDiscard(); },              //
+                [&](const core::ir::TerminateInvocation*) { EmitDiscard(); },  //
+
                 [&](const core::ir::BreakIf* i) { EmitBreakIf(i); },                        //
                 [&](const core::ir::Call* i) { EmitCallStmt(i); },                          //
                 [&](const core::ir::Continue*) { EmitContinue(); },                         //
@@ -312,6 +318,8 @@ class Printer : public tint::TextGenerator {
                 TINT_ICE_ON_NO_MATCH);
         }
     }
+
+    void EmitDiscard() { Line() << "discard;"; }
 
     void EmitStoreVectorElement(const core::ir::StoreVectorElement* l) {
         auto out = Line();
