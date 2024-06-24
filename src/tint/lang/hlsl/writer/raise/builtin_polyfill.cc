@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/hlsl/builtin_fn.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
+#include "src/tint/lang/hlsl/ir/ternary.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/math/hash.h"
 
@@ -68,9 +69,21 @@ struct State {
     void Process() {
         // Find the bitcasts that need replacing.
         Vector<core::ir::Bitcast*, 4> bitcast_worklist;
+        Vector<core::ir::CoreBuiltinCall*, 4> call_worklist;
         for (auto* inst : ir.Instructions()) {
             if (auto* bitcast = inst->As<core::ir::Bitcast>()) {
                 bitcast_worklist.Push(bitcast);
+                continue;
+            }
+            if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
+                switch (call->Func()) {
+                    case core::BuiltinFn::kSelect:
+                        call_worklist.Push(call);
+                        break;
+                    default:
+                        break;
+                }
+                continue;
             }
         }
 
@@ -90,6 +103,25 @@ struct State {
                 ReplaceBitcastWithAs(bitcast);
             }
         }
+
+        // Replace the builtin calls that we found
+        for (auto* call : call_worklist) {
+            switch (call->Func()) {
+                case core::BuiltinFn::kSelect:
+                    Select(call);
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+        }
+    }
+
+    void Select(core::ir::CoreBuiltinCall* call) {
+        Vector<core::ir::Value*, 4> args = call->Args();
+        auto* ternary =
+            b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(call->DetachResult(), args);
+        ternary->InsertBefore(call);
+        call->Destroy();
     }
 
     /// Replaces an identity bitcast result with the value.

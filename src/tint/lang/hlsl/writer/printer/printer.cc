@@ -103,6 +103,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
+#include "src/tint/lang/hlsl/ir/ternary.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
@@ -625,11 +626,22 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },  //
 
                     [&](const hlsl::ir::BuiltinCall* c) { EmitHlslBuiltinCall(out, c); },  //
-
+                    [&](const hlsl::ir::Ternary* t) { EmitTernary(out, t); },              //
                     TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitTernary(StringStream& out, const hlsl::ir::Ternary* t) {
+        out << "((";
+        EmitValue(out, t->Cmp());
+        out << ") ? (";
+        EmitValue(out, t->True());
+        out << ") : (";
+        EmitValue(out, t->False());
+        out << "))";
+        return;
     }
 
     void EmitHlslBuiltinCall(StringStream& out, const hlsl::ir::BuiltinCall* c) {

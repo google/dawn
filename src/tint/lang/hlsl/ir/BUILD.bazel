@@ -40,9 +40,11 @@ cc_library(
   name = "ir",
   srcs = [
     "builtin_call.cc",
+    "ternary.cc",
   ],
   hdrs = [
     "builtin_call.h",
+    "ternary.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -75,6 +77,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "builtin_call_test.cc",
+    "ternary_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

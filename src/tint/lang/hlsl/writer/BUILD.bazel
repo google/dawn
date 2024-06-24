@@ -92,6 +92,7 @@ cc_library(
     "access_test.cc",
     "binary_test.cc",
     "bitcast_test.cc",
+    "builtin_test.cc",
     "constant_test.cc",
     "construct_test.cc",
     "convert_test.cc",
