@@ -523,12 +523,12 @@ MaybeError Surface::GetCapabilities(AdapterBase* adapter, SurfaceCapabilities* c
         [&capabilities](const PhysicalDeviceSurfaceCapabilities& caps) -> MaybeError {
             capabilities->nextInChain = nullptr;
             capabilities->usages = caps.usages;
-            DAWN_TRY(utils::AllocateApiSeqFromStdVector(capabilities->formats,
-                                                        capabilities->formatCount, caps.formats));
-            DAWN_TRY(utils::AllocateApiSeqFromStdVector(
-                capabilities->presentModes, capabilities->presentModeCount, caps.presentModes));
-            DAWN_TRY(utils::AllocateApiSeqFromStdVector(
-                capabilities->alphaModes, capabilities->alphaModeCount, caps.alphaModes));
+            utils::AllocateApiSeqFromStdVector(&capabilities->formats, &capabilities->formatCount,
+                                               caps.formats);
+            utils::AllocateApiSeqFromStdVector(&capabilities->presentModes,
+                                               &capabilities->presentModeCount, caps.presentModes);
+            utils::AllocateApiSeqFromStdVector(&capabilities->alphaModes,
+                                               &capabilities->alphaModeCount, caps.alphaModes);
             return {};
         }));
 
@@ -536,9 +536,9 @@ MaybeError Surface::GetCapabilities(AdapterBase* adapter, SurfaceCapabilities* c
 }
 
 void APISurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
-    utils::FreeApiSeq(capabilities.formats, capabilities.formatCount);
-    utils::FreeApiSeq(capabilities.presentModes, capabilities.presentModeCount);
-    utils::FreeApiSeq(capabilities.alphaModes, capabilities.alphaModeCount);
+    utils::FreeApiSeq(&capabilities.formats, &capabilities.formatCount);
+    utils::FreeApiSeq(&capabilities.presentModes, &capabilities.presentModeCount);
+    utils::FreeApiSeq(&capabilities.alphaModes, &capabilities.alphaModeCount);
 }
 
 MaybeError Surface::GetCurrentTexture(SurfaceTexture* surfaceTexture) const {

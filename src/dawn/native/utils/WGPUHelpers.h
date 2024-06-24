@@ -146,26 +146,25 @@ const char* GetLabelForTrace(const char* label);
 // Given a std vector, allocate an equivalent array that can be returned in an API's foos/fooCount
 // pair of fields. The apiData must eventually be freed using FreeApiSeq.
 template <typename T>
-inline MaybeError AllocateApiSeqFromStdVector(const T*& apiData,
-                                              size_t& apiSize,
-                                              const std::vector<T>& vector) {
-    apiSize = vector.size();
-    if (apiSize > 0) {
-        T* mutableData = new T[apiSize];
-        memcpy(mutableData, vector.data(), apiSize * sizeof(T));
-        apiData = mutableData;
+void AllocateApiSeqFromStdVector(const T** apiData, size_t* apiSize, const std::vector<T>& vector) {
+    size_t size = vector.size();
+    *apiSize = size;
+
+    if (size > 0) {
+        T* mutableData = new T[size];
+        memcpy(mutableData, vector.data(), size * sizeof(T));
+        *apiData = mutableData;
     } else {
-        apiData = nullptr;
+        *apiData = nullptr;
     }
-    return {};
 }
 
 // Free an API sequence that was allocated by AllocateApiSeqFromStdVector
 template <typename T>
-inline void FreeApiSeq(T*& apiData, size_t& apiSize) {
-    delete[] apiData;
-    apiData = nullptr;
-    apiSize = 0;
+void FreeApiSeq(T** apiData, size_t* apiSize) {
+    delete[] *apiData;
+    *apiData = nullptr;
+    *apiSize = 0;
 }
 
 }  // namespace dawn::native::utils
