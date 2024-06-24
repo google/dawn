@@ -803,7 +803,7 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     # length parameter. Void pointer members refer to binary structures that cannot be used by
     # clients without conversion to ART types in handwritten code, so we don't convert those.
     def include_structure_member(structure, member):
-        if member.type.category == 'function pointer':
+        if member.type.category in ['callback info', 'function pointer']:
             return False
         if member.type.name.get() in ['void *', 'void const *']:
             return False
@@ -832,6 +832,9 @@ def compute_kotlin_params(loaded_json, kotlin_json):
             if argument.annotation == '*':
                 # Dawn uses 'annotation = *' for output parameters, for example to return arrays.
                 # Kotlin doesn't support that at the moment
+                return False
+            if argument.type.category == 'callback info':
+                # We don't handle this yet.
                 return False
             if argument.annotation == 'value' and argument.type.category == 'structure':
                 # Passing structures by value is not supported at the moment.
