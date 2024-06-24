@@ -197,7 +197,9 @@ class OptionSet {
 
     /// Prints to @p out the description of all the command line options.
     /// @param out the output stream
-    void ShowHelp(std::ostream& out);
+    /// @param show_equals_form if true, show the '--option=value' syntax
+    /// instead of '--option value'
+    void ShowHelp(std::ostream& out, bool show_equals_form = false);
 
     /// Parses all the options in @p options.
     /// @param arguments the command line arguments, excluding the initial executable name

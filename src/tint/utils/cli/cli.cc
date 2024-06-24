@@ -40,7 +40,7 @@ namespace tint::cli {
 Option::Option() = default;
 Option::~Option() = default;
 
-void OptionSet::ShowHelp(std::ostream& s_out) {
+void OptionSet::ShowHelp(std::ostream& s_out, bool show_equal_form) {
     Vector<const Option*, 32> sorted_options;
     for (auto* opt : options.Objects()) {
         sorted_options.Push(opt);
@@ -58,7 +58,7 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
             std::stringstream left, right;
             left << "--" << opt->Name();
             if (auto param = opt->Parameter(); !param.empty()) {
-                left << " <" << param << ">";
+                left << (show_equal_form ? '=' : ' ') << "<" << param << ">";
             }
             right << opt->Description();
             if (auto def = opt->DefaultValue(); !def.empty()) {

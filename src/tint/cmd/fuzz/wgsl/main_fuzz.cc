@@ -97,7 +97,7 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
 
     auto show_help = [&] {
         std::cerr << "Custom fuzzer options:\n";
-        opts.ShowHelp(std::cerr);
+        opts.ShowHelp(std::cerr, true);
         std::cerr << "\n";
 
         // Change args to show libfuzzer help

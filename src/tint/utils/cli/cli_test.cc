@@ -58,6 +58,30 @@ TEST_F(CLITest, ShowHelp_ValueWithParameter) {
 )");
 }
 
+TEST_F(CLITest, ShowHelp_ValueWithParameter_ExplicitEqualsFormFalse) {
+    OptionSet opts;
+    opts.Add<ValueOption<int>>("my_option", "sets the awesome value");
+
+    std::stringstream out;
+    out << "\n";
+    opts.ShowHelp(out, false);
+    EXPECT_EQ(out.str(), R"(
+--my_option <value>  sets the awesome value
+)");
+}
+
+TEST_F(CLITest, ShowHelp_ValueWithParameter_ExplicitEqualsFormTrue) {
+    OptionSet opts;
+    opts.Add<ValueOption<int>>("my_option", "sets the awesome value");
+
+    std::stringstream out;
+    out << "\n";
+    opts.ShowHelp(out, true);
+    EXPECT_EQ(out.str(), R"(
+--my_option=<value>  sets the awesome value
+)");
+}
+
 TEST_F(CLITest, ShowHelp_ValueWithAlias) {
     OptionSet opts;
     opts.Add<ValueOption<int>>("my_option", "sets the awesome value", Alias{"alias"});
