@@ -142,7 +142,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                 {{ as_varName(arg.name) }} =
                         reinterpret_cast<{{ as_cType(arg.type.name) }}*>(
                                env->GetIntArrayElements(_{{ as_varName(arg.name) }}, 0));
-               {{ arg.length.name.camelCase() }} =
+                {{ arg.length.name.camelCase() }} =
                        env->GetArrayLength(_{{ as_varName(arg.name) }});
             {% elif arg.type.name.get() == 'void' %}
                 {{ as_varName(arg.name) }} =
@@ -162,8 +162,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                         out[idx] = static_cast<{{ as_cType(arg.type.name) }}>(
                                 env->CallIntMethod(element, getValue));
                     }
-                }
-                {% elif arg.type.category == 'object' %} {
+                } {% elif arg.type.category == 'object' %} {
                     jclass memberClass = env->FindClass("{{ jni_name(arg.type) }}");
                     jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
                     for (int idx = 0; idx != length; idx++) {
@@ -172,14 +171,12 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                         out[idx] = reinterpret_cast<{{ as_cType(arg.type.name) }}>(
                                 env->CallLongMethod(element, getHandle));
                     }
-                }
-                {% else %}
+                } {% else %}
                     {{ unreachable_code() }}
                 {% endif %}
                 {{ as_varName(arg.name) }} = out;
                 {{ arg.length.name.camelCase() }} = length;
-            }
-            {% endif %}
+            } {% endif %}
 
         //*  Single value types.
         {% elif arg.type.category == 'object' %}
@@ -192,8 +189,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             } else {
                 {{ as_varName(arg.name) }} = nullptr;
             }
-        {% elif arg.type.name.get() in ['int32_t', 'size_t', 'uint32_t', 'uint64_t']
-                or arg.type.category in ['bitmask', 'enum'] %}
+        {% elif arg.type.name.get() in ['int32_t', 'size_t', 'uint32_t', 'uint64_t'] or arg.type.category in ['bitmask', 'enum'] %}
             {{ as_varName(arg.name) }} =
                     static_cast<{{ as_cType(arg.type.name) }}>(_{{ as_varName(arg.name) }});
         {% elif arg.type.name.get() in ['float', 'int'] %}
@@ -250,8 +246,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             //* TODO(b/330293719): free associated resources.
             userdata = new UserData(
                     {.env = env, .callback = env->NewGlobalRef(_{{ as_varName(arg.name) }})});
-        }
-        {% else %}
+        } {% else %}
             {{ unreachable_code() }}
         {% endif %}
     {% endfor %}
@@ -288,8 +283,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% elif method.return_type.name.get() != 'void' %}
         return result;  //* Primitives are implicitly converted by JNI.
     {% endif %}
-}
-{% endmacro %}
+} {% endmacro %}
 
 {% for obj in by_category['object'] %}
     {% for method in obj.methods if include_method(method) %}
