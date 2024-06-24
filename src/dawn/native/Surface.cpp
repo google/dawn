@@ -218,13 +218,13 @@ MaybeError ValidateSurfaceConfiguration(DeviceBase* device,
                                    capabilities.presentModes.end(), config->presentMode);
     DAWN_INVALID_IF(presentModeIt == capabilities.presentModes.end(),
                     "Present mode (%s) is not supported by the adapter (%s) for this surface.",
-                    config->format, config->device->GetAdapter());
+                    config->presentMode, config->device->GetAdapter());
 
     auto alphaModeIt = std::find(capabilities.alphaModes.begin(), capabilities.alphaModes.end(),
                                  config->alphaMode);
     DAWN_INVALID_IF(alphaModeIt == capabilities.alphaModes.end(),
                     "Alpha mode (%s) is not supported by the adapter (%s) for this surface.",
-                    config->format, config->device->GetAdapter());
+                    config->alphaMode, config->device->GetAdapter());
 
     // Validate the surface would produce valid textures.
     TextureDescriptor textureDesc;
