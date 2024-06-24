@@ -419,66 +419,6 @@ void foo() {
 }
 
 // TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryLogicalAnd) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
-    b.Append(func->Block(), [&] {
-        auto* x = b.Var("x", true);
-        auto* y = b.Var("y", false);
-
-        auto* l = b.Load(x);
-        auto* r = b.Load(y);
-        b.Var("c", b.Binary(core::BinaryOp::kLogicalAnd, ty.bool_(), l, r));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-[numthreads(1, 1, 1)]
-void foo() {
-  bool x = true;
-  bool y = false;
-  bool tint_tmp = x;
-  if (tint_tmp) {
-    tint_tmp = y;
-  }
-  bool c = (tint_tmp);
-}
-
-)");
-}
-
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryLogicalOr) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
-    b.Append(func->Block(), [&] {
-        auto* x = b.Var("x", true);
-        auto* y = b.Var("y", false);
-
-        auto* l = b.Load(x);
-        auto* r = b.Load(y);
-        b.Var("c", b.Binary(core::BinaryOp::kLogicalOr, ty.bool_(), l, r));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-[numthreads(1, 1, 1)]
-void foo() {
-  bool a = true;
-  bool b = false;
-  bool tint_tmp = x;
-  if (!tint_tmp) {
-    tint_tmp = y;
-  }
-  bool c = (tint_tmp);
-}
-
-)");
-}
-
-// TODO(dsinclair): Needs binary polyfill
 TEST_F(HlslWriterTest, DISABLED_BinaryMulMatVec) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
