@@ -31,7 +31,18 @@
 namespace tint::ast::transform {
 namespace {
 
-void FoldConstantsFuzzer(const Program& program) {
+bool CanRun(const Program& program, const fuzz::wgsl::Context& context) {
+    if (context.program_properties.Contains(fuzz::wgsl::ProgramProperties::kBuiltinTypesShadowed)) {
+        return false;  // FoldConstants assumes the Renamer transform has been run
+    }
+    return true;
+}
+
+void FoldConstantsFuzzer(const Program& program, const fuzz::wgsl::Context& context) {
+    if (!CanRun(program, context)) {
+        return;
+    }
+
     DataMap outputs;
     if (auto result = FoldConstants{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
