@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,51 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_OPENGL_BACKENDGL_H_
-#define SRC_DAWN_NATIVE_OPENGL_BACKENDGL_H_
+#ifndef SRC_DAWN_NATIVE_OPENGL_DISPLAYEGL_H_
+#define SRC_DAWN_NATIVE_OPENGL_DISPLAYEGL_H_
 
-#include <vector>
+#include <memory>
 
-#include "dawn/native/BackendConnection.h"
+#include "dawn/common/DynamicLib.h"
+#include "dawn/common/NonMovable.h"
+#include "dawn/common/egl_platform.h"
+#include "dawn/native/opengl/EGLFunctions.h"
 
 namespace dawn::native::opengl {
 
-class Backend : public BackendConnection {
+// Represents a connection to an EGL driver, with its EGLDisplay, its functions and other metadata
+// global to EGL.
+class DisplayEGL : NonMovable {
   public:
-    Backend(InstanceBase* instance, wgpu::BackendType backendType);
+    static ResultOrError<std::unique_ptr<DisplayEGL>> CreateFromDynamicLoading(
+        wgpu::BackendType backend,
+        const char* libName);
 
-    std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevices(
-        const UnpackedPtr<RequestAdapterOptions>& options) override;
+    static ResultOrError<std::unique_ptr<DisplayEGL>>
+    CreateFromProcAndDisplay(wgpu::BackendType backend, EGLGetProcProc getProc, EGLDisplay display);
+
+    explicit DisplayEGL(wgpu::BackendType backend);
+    ~DisplayEGL();
+
+    // A convenience ref to avoid having to call an accessor function every time we need to use EGL
+    const EGLFunctions& egl;
+    EGLDisplay GetDisplay() const;
+    EGLint GetAPIEnum() const;
+    EGLint GetAPIBit() const;
+
+  private:
+    MaybeError InitializeWithDynamicLoading(const char* libName);
+    MaybeError InitializeWithProcAndDisplay(EGLGetProcProc getProc, EGLDisplay display);
+
+    DynamicLib mLib;
+
+    EGLFunctions mFunctions;
+    EGLDisplay mDisplay = EGL_NO_DISPLAY;
+
+    EGLint mApiEnum;
+    EGLint mApiBit;
 };
 
 }  // namespace dawn::native::opengl
 
-#endif  // SRC_DAWN_NATIVE_OPENGL_BACKENDGL_H_
+#endif  // SRC_DAWN_NATIVE_OPENGL_DISPLAYEGL_H_
