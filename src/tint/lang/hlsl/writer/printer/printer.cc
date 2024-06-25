@@ -1088,6 +1088,15 @@ class Printer : public tint::TextGenerator {
             out << "(" << StructName(s) << ")0";
             return;
         }
+
+        out << "{";
+        for (size_t i = 0; i < s->Members().Length(); i++) {
+            if (i > 0) {
+                out << ", ";
+            }
+            EmitConstant(out, c->Index(i));
+        }
+        out << "}";
     }
 
     void EmitTypeAndName(StringStream& out,
