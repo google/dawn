@@ -67,14 +67,35 @@ namespace {
 
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 
-void AppendDebugLayerMessagesToError(ID3D11InfoQueue* infoQueue,
-                                     uint64_t totalErrors,
-                                     ErrorData* error) {
+bool SkipDebugMessage(const D3D11_MESSAGE& message) {
+    // Filter out messages that are not warnings or errors.
+    switch (message.Severity) {
+        case D3D11_MESSAGE_SEVERITY_INFO:
+        case D3D11_MESSAGE_SEVERITY_MESSAGE:
+            return true;
+        default:
+            break;
+    }
+
+    switch (message.ID) {
+        // D3D11 Debug layer warns no RTV set, however it is allowed.
+        case D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET:
+        // D3D11 Debug layer warns SetPrivateData() with same name more than once.
+        case D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS:
+            return true;
+        default:
+            return false;
+    }
+}
+
+uint64_t AppendDebugLayerMessagesToError(ID3D11InfoQueue* infoQueue,
+                                         uint64_t totalErrors,
+                                         ErrorData* error) {
     DAWN_ASSERT(totalErrors > 0);
     DAWN_ASSERT(error != nullptr);
 
-    uint64_t errorsToPrint = std::min(kMaxDebugMessagesToPrint, totalErrors);
-    for (uint64_t i = 0; i < errorsToPrint; ++i) {
+    uint64_t errorsEmitted = 0;
+    for (uint64_t i = 0; i < totalErrors; ++i) {
         std::ostringstream messageStream;
         SIZE_T messageLength = 0;
         HRESULT hr = infoQueue->GetMessage(i, nullptr, &messageLength);
@@ -93,17 +114,29 @@ void AppendDebugLayerMessagesToError(ID3D11InfoQueue* infoQueue,
             continue;
         }
 
+        if (SkipDebugMessage(*message)) {
+            continue;
+        }
+
         messageStream << "(" << message->ID << ") " << message->pDescription;
         error->AppendBackendMessage(messageStream.str());
+
+        errorsEmitted++;
+        if (errorsEmitted >= kMaxDebugMessagesToPrint) {
+            break;
+        }
     }
-    if (errorsToPrint < totalErrors) {
+
+    if (errorsEmitted < totalErrors) {
         std::ostringstream messages;
-        messages << (totalErrors - errorsToPrint) << " messages silenced";
+        messages << (totalErrors - errorsEmitted) << " messages silenced";
         error->AppendBackendMessage(messages.str());
     }
 
     // We only print up to the first kMaxDebugMessagesToPrint errors
     infoQueue->ClearStoredMessages();
+
+    return errorsEmitted;
 }
 
 }  // namespace
@@ -326,18 +359,21 @@ MaybeError Device::CheckDebugLayerAndGenerateErrors() {
     ComPtr<ID3D11InfoQueue> infoQueue;
     DAWN_TRY(CheckHRESULT(mD3d11Device.As(&infoQueue),
                           "D3D11 QueryInterface ID3D11Device to ID3D11InfoQueue"));
-    uint64_t totalErrors = infoQueue->GetNumStoredMessagesAllowedByRetrievalFilter();
 
-    // Check if any errors have occurred otherwise we would be creating an empty error. Note
-    // that we use GetNumStoredMessagesAllowedByRetrievalFilter instead of GetNumStoredMessages
-    // because we only convert WARNINGS or higher messages to dawn errors.
+    // We use GetNumStoredMessages instead of applying a retrieval filter because dxcpl.exe
+    // and d3dconfig.exe override any filter settings we apply.
+    const uint64_t totalErrors = infoQueue->GetNumStoredMessages();
     if (totalErrors == 0) {
         return {};
     }
 
     auto error = DAWN_INTERNAL_ERROR("The D3D11 debug layer reported uncaught errors.");
 
-    AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error.get());
+    const uint64_t emittedErrors =
+        AppendDebugLayerMessagesToError(infoQueue.Get(), totalErrors, error.get());
+    if (emittedErrors == 0) {
+        return {};
+    }
 
     return error;
 }
@@ -351,8 +387,8 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
     if (FAILED(mD3d11Device.As(&infoQueue))) {
         return;
     }
-    uint64_t totalErrors = infoQueue->GetNumStoredMessagesAllowedByRetrievalFilter();
 
+    const uint64_t totalErrors = infoQueue->GetNumStoredMessages();
     if (totalErrors == 0) {
         return;
     }

@@ -41,43 +41,6 @@
 #include "dawn/native/d3d11/UtilsD3D11.h"
 
 namespace dawn::native::d3d11 {
-namespace {
-
-MaybeError InitializeDebugLayerFilters(ComPtr<ID3D11Device> d3d11Device) {
-    ComPtr<ID3D11InfoQueue> infoQueue;
-    DAWN_TRY(CheckHRESULT(d3d11Device.As(&infoQueue),
-                          "D3D11 querying device for ID3D11InfoQueue interface"));
-
-    static D3D11_MESSAGE_ID kDenyIds[] = {
-        // D3D11 Debug layer warns no RTV set, however it is allowed.
-        D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET,
-        // D3D11 Debug layer warns SetPrivateData() with same name more than once.
-        D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
-    };
-
-    // Filter out info/message and only create errors from warnings or worse.
-    static D3D11_MESSAGE_SEVERITY kDenySeverities[] = {
-        D3D11_MESSAGE_SEVERITY_INFO,
-        D3D11_MESSAGE_SEVERITY_MESSAGE,
-    };
-
-    static D3D11_INFO_QUEUE_FILTER filter = {
-        {},  // AllowList
-        {
-            0,                           // NumCategories
-            nullptr,                     // pCategoryList
-            std::size(kDenySeverities),  // NumSeverities
-            kDenySeverities,             // pSeverityList
-            std::size(kDenyIds),         // NumIDs
-            kDenyIds,                    // pIDList
-        },                               // DenyList
-    };
-
-    return CheckHRESULT(infoQueue->PushStorageFilter(&filter),
-                        "D3D11 InfoQueue pushing storage filter");
-}
-
-}  // namespace
 
 PhysicalDevice::PhysicalDevice(Backend* backend,
                                ComPtr<IDXGIAdapter4> hardwareAdapter,
@@ -111,11 +74,6 @@ const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {
 ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device(bool enableDebugLayer) {
     if (mIsSharedD3D11Device) {
         DAWN_ASSERT(mD3D11Device);
-        // If the shared d3d11 device was created with debug layer, we have to initialize debug
-        // layer filters to avoid some unwanted warnings.
-        if (IsDebugLayerEnabled(mD3D11Device)) {
-            DAWN_TRY(InitializeDebugLayerFilters(mD3D11Device));
-        }
         return ComPtr<ID3D11Device>(mD3D11Device);
     }
 
@@ -143,7 +101,6 @@ ResultOrError<ComPtr<ID3D11Device>> PhysicalDevice::CreateD3D11Device(bool enabl
 
         if (SUCCEEDED(hr)) {
             DAWN_ASSERT(IsDebugLayerEnabled(d3d11Device));
-            DAWN_TRY(InitializeDebugLayerFilters(d3d11Device));
             return d3d11Device;
         }
     }
