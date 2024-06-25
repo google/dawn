@@ -40,6 +40,9 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn ldexp(f16, i32) -> f16
 fn ldexp_624e0c() -> f16{
   var arg_0 = 1.h;
@@ -47,8 +50,6 @@ fn ldexp_624e0c() -> f16{
   var res: f16 = ldexp(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = ldexp_624e0c();

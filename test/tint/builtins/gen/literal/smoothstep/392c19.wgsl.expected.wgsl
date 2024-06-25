@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
+
 fn smoothstep_392c19() -> vec2<f32> {
   var res : vec2<f32> = smoothstep(vec2<f32>(2.0f), vec2<f32>(4.0f), vec2<f32>(3.0f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
 
 @fragment
 fn fragment_main() {

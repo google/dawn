@@ -1,10 +1,10 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 fn all_353d6a() -> i32 {
   var arg_0 = true;
   var res : bool = all(arg_0);
   return select(0, 1, all((res == bool())));
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

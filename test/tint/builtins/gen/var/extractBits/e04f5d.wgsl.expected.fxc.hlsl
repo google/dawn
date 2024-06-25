@@ -7,6 +7,8 @@ int3 tint_extract_bits(int3 v, uint offset, uint count) {
   return ((shr < 32u) ? (shl_result >> uint3((shr).xxx)) : ((shl_result >> (31u).xxx) >> (1u).xxx));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int3 extractBits_e04f5d() {
   int3 arg_0 = (1).xxx;
   uint arg_1 = 1u;
@@ -14,8 +16,6 @@ int3 extractBits_e04f5d() {
   int3 res = tint_extract_bits(arg_0, arg_1, arg_2);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(extractBits_e04f5d()));

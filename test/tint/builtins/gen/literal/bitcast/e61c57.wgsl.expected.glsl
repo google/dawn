@@ -2,14 +2,14 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int bitcast_e61c57() {
   int res = 1;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -26,14 +26,14 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int bitcast_e61c57() {
   int res = 1;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

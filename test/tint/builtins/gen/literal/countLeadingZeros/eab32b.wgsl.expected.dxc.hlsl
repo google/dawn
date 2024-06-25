@@ -1,9 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int4 countLeadingZeros_eab32b() {
   int4 res = (31).xxxx;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(countLeadingZeros_eab32b()));

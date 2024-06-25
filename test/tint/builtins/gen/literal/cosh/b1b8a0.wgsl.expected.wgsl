@@ -1,11 +1,11 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
 fn cosh_b1b8a0() -> vec3<f16> {
   var res : vec3<f16> = cosh(vec3<f16>(0.0h));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
 
 @fragment
 fn fragment_main() {

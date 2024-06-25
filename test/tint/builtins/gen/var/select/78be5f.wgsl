@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
+
 // fn select(vec<3, f32>, vec<3, f32>, bool) -> vec<3, f32>
 fn select_78be5f() -> vec3<f32>{
   var arg_0 = vec3<f32>(1.f);
@@ -43,8 +46,6 @@ fn select_78be5f() -> vec3<f32>{
   var res: vec3<f32> = select(arg_0, arg_1, arg_2);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = select_78be5f();

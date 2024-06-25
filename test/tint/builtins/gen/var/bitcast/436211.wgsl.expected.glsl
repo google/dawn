@@ -3,15 +3,15 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t bitcast_436211() {
   float16_t arg_0 = 1.0hf;
   float16_t res = arg_0;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -29,15 +29,15 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t bitcast_436211() {
   float16_t arg_0 = 1.0hf;
   float16_t res = arg_0;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

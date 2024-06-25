@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int select_ed8a15() {
   int arg_0 = 1;
   int arg_1 = 1;
@@ -5,8 +7,6 @@ int select_ed8a15() {
   int res = (arg_2 ? arg_1 : arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(select_ed8a15()));

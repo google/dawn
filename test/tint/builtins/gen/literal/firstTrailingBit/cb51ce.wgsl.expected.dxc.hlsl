@@ -1,9 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint3 firstTrailingBit_cb51ce() {
   uint3 res = (0u).xxx;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(firstTrailingBit_cb51ce()));

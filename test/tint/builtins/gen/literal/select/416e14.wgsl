@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn select(f32, f32, bool) -> f32
 fn select_416e14() -> f32{
   var res: f32 = select(1.f, 1.f, true);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = select_416e14();

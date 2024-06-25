@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 2> acos_004aff() {
   vector<float16_t, 2> arg_0 = (float16_t(0.96875h)).xx;
   vector<float16_t, 2> res = acos(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, acos_004aff());

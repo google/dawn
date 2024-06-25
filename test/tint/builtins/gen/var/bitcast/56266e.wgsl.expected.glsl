@@ -2,16 +2,16 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uvec3 bitcast_56266e() {
   vec3 arg_0 = vec3(1.0f);
   uvec3 res = floatBitsToUint(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -28,16 +28,16 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uvec3 bitcast_56266e() {
   vec3 arg_0 = vec3(1.0f);
   uvec3 res = floatBitsToUint(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

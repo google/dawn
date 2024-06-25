@@ -2,13 +2,13 @@ vector<float16_t, 3> tint_sinh(vector<float16_t, 3> x) {
   return log((x + sqrt(((x * x) + float16_t(1.0h)))));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 3> asinh_fb5e8c() {
   vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = tint_sinh(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, asinh_fb5e8c());

@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
+
 // fn pack4x8unorm(vec4<f32>) -> u32
 fn pack4x8unorm_95c456() -> u32{
   var res: u32 = pack4x8unorm(vec4<f32>(1.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = pack4x8unorm_95c456();

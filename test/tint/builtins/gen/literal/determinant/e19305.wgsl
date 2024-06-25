@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn determinant(mat<2, 2, f32>) -> f32
 fn determinant_e19305() -> f32{
   var res: f32 = determinant(mat2x2<f32>(1.f, 1.f, 1.f, 1.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = determinant_e19305();

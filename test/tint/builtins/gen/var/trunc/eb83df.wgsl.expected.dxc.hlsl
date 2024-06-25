@@ -2,13 +2,13 @@ float tint_trunc(float param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float trunc_eb83df() {
   float arg_0 = 1.5f;
   float res = tint_trunc(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(trunc_eb83df()));

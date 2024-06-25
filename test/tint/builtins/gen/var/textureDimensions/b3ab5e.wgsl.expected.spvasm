@@ -15,10 +15,10 @@
                OpName %pos_1 "pos_1"
                OpName %prevent_dce_1 "prevent_dce_1"
                OpName %vertex_point_size "vertex_point_size"
-               OpName %arg_0 "arg_0"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_0 "arg_0"
                OpName %textureDimensions_b3ab5e "textureDimensions_b3ab5e"
                OpName %arg_1 "arg_1"
                OpName %res "res"
@@ -34,12 +34,12 @@
                OpDecorate %prevent_dce_1 Location 0
                OpDecorate %prevent_dce_1 Flat
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpDecorate %arg_0 DescriptorSet 1
-               OpDecorate %arg_0 Binding 0
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
                OpMemberDecorate %VertexOutput 0 Offset 0
                OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
@@ -55,12 +55,12 @@
 %_ptr_Output_float = OpTypePointer Output %float
          %13 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %13
-         %16 = OpTypeImage %float Cube 0 1 0 1 Unknown
-%_ptr_UniformConstant_16 = OpTypePointer UniformConstant %16
-      %arg_0 = OpVariable %_ptr_UniformConstant_16 UniformConstant
 %prevent_dce_block = OpTypeStruct %v2uint
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+         %19 = OpTypeImage %float Cube 0 1 0 1 Unknown
+%_ptr_UniformConstant_19 = OpTypePointer UniformConstant %19
+      %arg_0 = OpVariable %_ptr_UniformConstant_19 UniformConstant
          %20 = OpTypeFunction %v2uint
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
@@ -84,7 +84,7 @@
       %arg_1 = OpVariable %_ptr_Function_int Function %27
         %res = OpVariable %_ptr_Function_v2uint Function %10
                OpStore %arg_1 %int_1
-         %31 = OpLoad %16 %arg_0
+         %31 = OpLoad %19 %arg_0
          %32 = OpLoad %int %arg_1
          %29 = OpImageQuerySizeLod %v3uint %31 %32
          %28 = OpVectorShuffle %v2uint %29 %29 0 1

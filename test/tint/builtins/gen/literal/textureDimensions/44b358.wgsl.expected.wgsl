@@ -1,11 +1,11 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
+
 @group(1) @binding(0) var arg_0 : texture_storage_3d<rgba32uint, write>;
 
 fn textureDimensions_44b358() -> vec3<u32> {
   var res : vec3<u32> = textureDimensions(arg_0);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
 
 @fragment
 fn fragment_main() {

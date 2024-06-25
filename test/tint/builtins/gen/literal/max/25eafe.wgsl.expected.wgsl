@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
+
 fn max_25eafe() -> vec3<i32> {
   var res : vec3<i32> = max(vec3<i32>(1i), vec3<i32>(1i));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
 
 @fragment
 fn fragment_main() {

@@ -1,11 +1,11 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 fn dot4U8Packed_fbed7b() -> u32 {
   var arg_0 = 1u;
   var arg_1 = 1u;
   var res : u32 = dot4U8Packed(arg_0, arg_1);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

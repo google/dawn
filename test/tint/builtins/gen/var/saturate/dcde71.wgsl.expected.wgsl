@@ -1,12 +1,12 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
+
 fn saturate_dcde71() -> vec4<f16> {
   var arg_0 = vec4<f16>(2.0h);
   var res : vec4<f16> = saturate(arg_0);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
 
 @fragment
 fn fragment_main() {

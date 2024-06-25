@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int4 unpack4xI8_830900() {
   uint arg_0 = 1u;
   int4 res = unpack_s8s32(int8_t4_packed(arg_0));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(unpack4xI8_830900()));

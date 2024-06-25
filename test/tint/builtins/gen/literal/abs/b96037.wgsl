@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn abs(f32) -> f32
 fn abs_b96037() -> f32{
   var res: f32 = abs(1.f);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = abs_b96037();

@@ -1,11 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float distance_aa4055() {
   float2 arg_0 = (1.0f).xx;
   float2 arg_1 = (1.0f).xx;
   float res = distance(arg_0, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(distance_aa4055()));

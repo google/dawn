@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D arg_0 : register(t0, space1);
 
 uint textureNumLevels_d63126() {
@@ -6,8 +7,6 @@ uint textureNumLevels_d63126() {
   uint res = tint_tmp.z;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(textureNumLevels_d63126()));

@@ -8,15 +8,15 @@ f16vec2 tint_bitcast_to_f16(float src) {
   return unpackFloat2x16(r);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec2 inner;
+} prevent_dce;
+
 f16vec2 bitcast_9ca42c() {
   float arg_0 = 1.0f;
   f16vec2 res = tint_bitcast_to_f16(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  f16vec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -39,15 +39,15 @@ f16vec2 tint_bitcast_to_f16(float src) {
   return unpackFloat2x16(r);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec2 inner;
+} prevent_dce;
+
 f16vec2 bitcast_9ca42c() {
   float arg_0 = 1.0f;
   f16vec2 res = tint_bitcast_to_f16(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  f16vec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

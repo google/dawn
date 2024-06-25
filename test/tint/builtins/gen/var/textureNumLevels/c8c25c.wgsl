@@ -34,6 +34,9 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 @group(1) @binding(0) var arg_0: texture_depth_cube;
 
 // fn textureNumLevels(texture: texture_depth_cube) -> u32
@@ -41,8 +44,6 @@ fn textureNumLevels_c8c25c() -> u32{
   var res: u32 = textureNumLevels(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = textureNumLevels_c8c25c();

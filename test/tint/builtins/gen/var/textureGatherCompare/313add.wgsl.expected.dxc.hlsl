@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 
@@ -7,8 +8,6 @@ float4 textureGatherCompare_313add() {
   float4 res = arg_0.GatherCmp(arg_1, arg_2, arg_3, int2((1).xx));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureGatherCompare_313add()));

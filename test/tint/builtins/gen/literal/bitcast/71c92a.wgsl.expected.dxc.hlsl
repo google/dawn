@@ -1,9 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 4> bitcast_71c92a() {
   vector<float16_t, 4> res = vector<float16_t, 4>(float16_t(0.00000005960464477539h), float16_t(0.0h), float16_t(0.00000005960464477539h), float16_t(0.0h));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, bitcast_71c92a());

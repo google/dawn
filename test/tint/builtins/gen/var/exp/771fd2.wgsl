@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn exp(f32) -> f32
 fn exp_771fd2() -> f32{
   var arg_0 = 1.f;
   var res: f32 = exp(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = exp_771fd2();

@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
+
+
 // fn smoothstep(vec<2, f16>, vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn smoothstep_12c031() -> vec2<f16>{
   var res: vec2<f16> = smoothstep(vec2<f16>(2.h), vec2<f16>(4.h), vec2<f16>(3.h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = smoothstep_12c031();

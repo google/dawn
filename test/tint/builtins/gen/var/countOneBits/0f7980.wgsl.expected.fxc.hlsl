@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int4 countOneBits_0f7980() {
   int4 arg_0 = (1).xxxx;
   int4 res = asint(countbits(asuint(arg_0)));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(countOneBits_0f7980()));

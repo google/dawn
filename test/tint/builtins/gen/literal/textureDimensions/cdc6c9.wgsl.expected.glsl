@@ -59,14 +59,14 @@ layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
   ExternalTextureParams_std140 inner;
 } ext_tex_params;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 uvec2 textureDimensions_cdc6c9() {
   uvec2 res = (ext_tex_params.inner.visibleSize + uvec2(1u));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -140,14 +140,14 @@ layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
   ExternalTextureParams_std140 inner;
 } ext_tex_params;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 uvec2 textureDimensions_cdc6c9() {
   uvec2 res = (ext_tex_params.inner.visibleSize + uvec2(1u));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

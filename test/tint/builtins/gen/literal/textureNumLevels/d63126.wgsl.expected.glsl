@@ -13,14 +13,14 @@ layout(binding = 0, std140) uniform tint_symbol_2_block_ubo {
   tint_symbol_1 inner;
 } tint_symbol_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint textureNumLevels_d63126() {
   uint res = tint_symbol_2.inner.texture_builtin_value_0;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -48,14 +48,14 @@ layout(binding = 0, std140) uniform tint_symbol_2_block_ubo {
   tint_symbol_1 inner;
 } tint_symbol_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint textureNumLevels_d63126() {
   uint res = tint_symbol_2.inner.texture_builtin_value_0;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

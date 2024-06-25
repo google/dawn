@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
+
+
 // fn saturate(vec<2, f32>) -> vec<2, f32>
 fn saturate_51567f() -> vec2<f32>{
   var res: vec2<f32> = saturate(vec2<f32>(2.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = saturate_51567f();

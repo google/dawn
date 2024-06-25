@@ -14,10 +14,10 @@
                OpName %pos_1 "pos_1"
                OpName %prevent_dce_1 "prevent_dce_1"
                OpName %vertex_point_size "vertex_point_size"
-               OpName %arg_0 "arg_0"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_0 "arg_0"
                OpName %textureLoad_454347 "textureLoad_454347"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
@@ -32,13 +32,13 @@
                OpDecorate %prevent_dce_1 Location 0
                OpDecorate %prevent_dce_1 Flat
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpDecorate %arg_0 NonWritable
-               OpDecorate %arg_0 DescriptorSet 1
-               OpDecorate %arg_0 Binding 0
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
+               OpDecorate %arg_0 NonWritable
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
                OpMemberDecorate %VertexOutput 0 Offset 0
                OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
@@ -54,12 +54,12 @@
 %_ptr_Output_float = OpTypePointer Output %float
          %13 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %13
-         %16 = OpTypeImage %uint 1D 0 0 0 2 Rgba32ui
-%_ptr_UniformConstant_16 = OpTypePointer UniformConstant %16
-      %arg_0 = OpVariable %_ptr_UniformConstant_16 UniformConstant
 %prevent_dce_block = OpTypeStruct %v4uint
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+         %19 = OpTypeImage %uint 1D 0 0 0 2 Rgba32ui
+%_ptr_UniformConstant_19 = OpTypePointer UniformConstant %19
+      %arg_0 = OpVariable %_ptr_UniformConstant_19 UniformConstant
          %20 = OpTypeFunction %v4uint
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
@@ -76,7 +76,7 @@
 %textureLoad_454347 = OpFunction %v4uint None %20
          %22 = OpLabel
         %res = OpVariable %_ptr_Function_v4uint Function %10
-         %24 = OpLoad %16 %arg_0
+         %24 = OpLoad %19 %arg_0
          %23 = OpImageRead %v4uint %24 %uint_1
                OpStore %res %23
          %28 = OpLoad %v4uint %res

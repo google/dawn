@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 4> round_f665b5() {
   vector<float16_t, 4> arg_0 = (float16_t(3.5h)).xxxx;
   vector<float16_t, 4> res = round(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, round_f665b5());

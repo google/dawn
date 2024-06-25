@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 RWByteAddressBuffer sb_rw : register(u1);
 
 int sb_rwatomicMin(uint offset, int value) {
@@ -12,8 +14,6 @@ int atomicMin_8e38dc() {
   int res = sb_rwatomicMin(0u, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(atomicMin_8e38dc()));

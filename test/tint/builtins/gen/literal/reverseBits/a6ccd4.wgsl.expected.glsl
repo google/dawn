@@ -2,15 +2,15 @@
 precision highp float;
 precision highp int;
 
-uvec3 reverseBits_a6ccd4() {
-  uvec3 res = uvec3(2147483648u);
-  return res;
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
   uint pad;
 } prevent_dce;
+
+uvec3 reverseBits_a6ccd4() {
+  uvec3 res = uvec3(2147483648u);
+  return res;
+}
 
 struct VertexOutput {
   vec4 pos;
@@ -27,15 +27,15 @@ void main() {
 }
 #version 310 es
 
-uvec3 reverseBits_a6ccd4() {
-  uvec3 res = uvec3(2147483648u);
-  return res;
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
   uint pad;
 } prevent_dce;
+
+uvec3 reverseBits_a6ccd4() {
+  uvec3 res = uvec3(2147483648u);
+  return res;
+}
 
 struct VertexOutput {
   vec4 pos;

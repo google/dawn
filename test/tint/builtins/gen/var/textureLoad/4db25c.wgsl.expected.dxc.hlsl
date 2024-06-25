@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DMS<float4> arg_0 : register(t0, space1);
 
 float textureLoad_4db25c() {
@@ -6,8 +7,6 @@ float textureLoad_4db25c() {
   float res = arg_0.Load(uint3(arg_1, uint(0)), arg_2).x;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(textureLoad_4db25c()));

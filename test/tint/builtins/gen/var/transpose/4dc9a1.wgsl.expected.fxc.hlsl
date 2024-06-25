@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int transpose_4dc9a1() {
   float2x3 arg_0 = float2x3((1.0f).xxx, (1.0f).xxx);
   float3x2 res = transpose(arg_0);
   return ((res[0][0] == 0.0f) ? 1 : 0);
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(transpose_4dc9a1()));

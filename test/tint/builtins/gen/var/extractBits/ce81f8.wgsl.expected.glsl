@@ -8,6 +8,10 @@ uint tint_extract_bits(uint v, uint offset, uint count) {
   return bitfieldExtract(v, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint extractBits_ce81f8() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
@@ -15,10 +19,6 @@ uint extractBits_ce81f8() {
   uint res = tint_extract_bits(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -41,6 +41,10 @@ uint tint_extract_bits(uint v, uint offset, uint count) {
   return bitfieldExtract(v, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint extractBits_ce81f8() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
@@ -48,10 +52,6 @@ uint extractBits_ce81f8() {
   uint res = tint_extract_bits(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

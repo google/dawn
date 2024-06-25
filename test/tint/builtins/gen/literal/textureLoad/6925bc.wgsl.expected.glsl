@@ -2,15 +2,15 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 uniform highp sampler2DMS arg_0_1;
 float textureLoad_6925bc() {
   float res = texelFetch(arg_0_1, ivec2(1), int(1u)).x;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -27,15 +27,15 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 uniform highp sampler2DMS arg_0_1;
 float textureLoad_6925bc() {
   float res = texelFetch(arg_0_1, ivec2(1), int(1u)).x;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

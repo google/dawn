@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
+
 // fn floor(vec<4, f32>) -> vec<4, f32>
 fn floor_3bccc4() -> vec4<f32>{
   var res: vec4<f32> = floor(vec4<f32>(1.5f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = floor_3bccc4();

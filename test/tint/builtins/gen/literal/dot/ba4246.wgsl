@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn dot(vec<3, f32>, vec<3, f32>) -> f32
 fn dot_ba4246() -> f32{
   var res: f32 = dot(vec3<f32>(1.f), vec3<f32>(1.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = dot_ba4246();

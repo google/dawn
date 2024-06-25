@@ -1,9 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 2> radians_fbacf0() {
   vector<float16_t, 2> res = (float16_t(0.0174407958984375h)).xx;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, radians_fbacf0());

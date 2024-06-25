@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float3 cosh_377652() {
   float3 arg_0 = (0.0f).xxx;
   float3 res = cosh(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(cosh_377652()));

@@ -11,15 +11,15 @@ vec2 tint_acosh(vec2 x) {
   return tint_select(acosh(x), vec2(0.0f), lessThan(x, vec2(1.0f)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 vec2 acosh_640883() {
   vec2 arg_0 = vec2(1.54308068752288818359f);
   vec2 res = tint_acosh(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -45,15 +45,15 @@ vec2 tint_acosh(vec2 x) {
   return tint_select(acosh(x), vec2(0.0f), lessThan(x, vec2(1.0f)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 vec2 acosh_640883() {
   vec2 arg_0 = vec2(1.54308068752288818359f);
   vec2 res = tint_acosh(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

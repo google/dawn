@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
+
+
 // fn abs(vec<2, u32>) -> vec<2, u32>
 fn abs_7f28e6() -> vec2<u32>{
   var res: vec2<u32> = abs(vec2<u32>(1u));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = abs_7f28e6();

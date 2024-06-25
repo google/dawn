@@ -2,15 +2,15 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 ivec2 abs_7faa9e() {
   ivec2 arg_0 = ivec2(1);
   ivec2 res = abs(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -27,15 +27,15 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 ivec2 abs_7faa9e() {
   ivec2 arg_0 = ivec2(1);
   ivec2 res = abs(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

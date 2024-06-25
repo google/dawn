@@ -1,12 +1,12 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
 fn asin_2d8e29() -> vec3<f16> {
   var arg_0 = vec3<f16>(0.479248046875h);
   var res : vec3<f16> = asin(arg_0);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
 
 @fragment
 fn fragment_main() {

@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
+
+
 // fn insertBits(vec<4, i32>, vec<4, i32>, u32, u32) -> vec<4, i32>
 fn insertBits_d86978() -> vec4<i32>{
   var res: vec4<i32> = insertBits(vec4<i32>(1i), vec4<i32>(1i), 1u, 1u);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = insertBits_d86978();

@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn fract(f16) -> f16
 fn fract_eb38ce() -> f16{
   var arg_0 = 1.25h;
   var res: f16 = fract(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = fract_eb38ce();

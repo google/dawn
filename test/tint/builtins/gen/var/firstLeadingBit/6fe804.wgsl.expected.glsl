@@ -22,15 +22,15 @@ uvec2 tint_first_leading_bit(uvec2 v) {
   return uvec2((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 uvec2 firstLeadingBit_6fe804() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 res = tint_first_leading_bit(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -67,15 +67,15 @@ uvec2 tint_first_leading_bit(uvec2 v) {
   return uvec2((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 uvec2 firstLeadingBit_6fe804() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 res = tint_first_leading_bit(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

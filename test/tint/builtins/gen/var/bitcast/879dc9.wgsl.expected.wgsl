@@ -1,10 +1,10 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 fn bitcast_879dc9() -> u32 {
   const arg_0 = 1;
   var res : u32 = bitcast<u32>(arg_0);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 fn max_ce7c30() -> i32 {
   var res : i32 = max(1i, 1i);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

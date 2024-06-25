@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float16_t saturate_e8df56() {
   float16_t arg_0 = float16_t(2.0h);
   float16_t res = saturate(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<float16_t>(0u, saturate_e8df56());

@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
 // fn select(i32, i32, bool) -> i32
 fn select_ed8a15() -> i32{
   var arg_0 = 1i;
@@ -43,8 +46,6 @@ fn select_ed8a15() -> i32{
   var res: i32 = select(arg_0, arg_1, arg_2);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = select_ed8a15();

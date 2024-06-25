@@ -2,6 +2,8 @@ int4 tint_clamp(int4 e, int4 low, int4 high) {
   return min(max(e, low), high);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int4 clamp_1a32e3() {
   int4 arg_0 = (1).xxxx;
   int4 arg_1 = (1).xxxx;
@@ -9,8 +11,6 @@ int4 clamp_1a32e3() {
   int4 res = tint_clamp(arg_0, arg_1, arg_2);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(clamp_1a32e3()));

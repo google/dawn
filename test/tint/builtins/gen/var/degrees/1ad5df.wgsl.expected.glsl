@@ -7,15 +7,15 @@ vec2 tint_degrees(vec2 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 vec2 degrees_1ad5df() {
   vec2 arg_0 = vec2(1.0f);
   vec2 res = tint_degrees(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -37,15 +37,15 @@ vec2 tint_degrees(vec2 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec2 inner;
+} prevent_dce;
+
 vec2 degrees_1ad5df() {
   vec2 arg_0 = vec2(1.0f);
   vec2 res = tint_degrees(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

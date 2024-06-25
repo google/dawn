@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
 fn sign_dd790e() -> f32 {
   var res : f32 = sign(1.0f);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {

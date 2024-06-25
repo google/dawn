@@ -1,9 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int transpose_d6faec() {
   matrix<float16_t, 3, 2> res = matrix<float16_t, 3, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
   return ((res[0][0] == float16_t(0.0h)) ? 1 : 0);
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(transpose_d6faec()));

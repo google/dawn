@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 RWByteAddressBuffer sb_rw : register(u1);
 
 int sb_rwatomicXor(uint offset, int value) {
@@ -11,8 +13,6 @@ int atomicXor_c1b78c() {
   int res = sb_rwatomicXor(0u, 1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(atomicXor_c1b78c()));

@@ -7,15 +7,15 @@ vec4 tint_radians(vec4 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 vec4 radians_09b7fc() {
   vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_radians(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -37,15 +37,15 @@ vec4 tint_radians(vec4 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 vec4 radians_09b7fc() {
   vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_radians(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

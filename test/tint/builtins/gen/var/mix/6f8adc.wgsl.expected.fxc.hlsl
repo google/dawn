@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float2 mix_6f8adc() {
   float2 arg_0 = (1.0f).xx;
   float2 arg_1 = (1.0f).xx;
@@ -5,8 +7,6 @@ float2 mix_6f8adc() {
   float2 res = lerp(arg_0, arg_1, arg_2);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(mix_6f8adc()));

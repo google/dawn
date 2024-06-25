@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn distance(vec<2, f16>, vec<2, f16>) -> f16
 fn distance_892a5d() -> f16{
   var res: f16 = distance(vec2<f16>(1.h), vec2<f16>(1.h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = distance_892a5d();

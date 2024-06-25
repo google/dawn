@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 fn any_e755c1() -> i32 {
   var res : bool = any(vec3<bool>(true));
   return select(0, 1, all((res == bool())));
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

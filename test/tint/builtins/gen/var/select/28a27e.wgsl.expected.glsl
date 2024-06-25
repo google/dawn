@@ -7,6 +7,11 @@ uvec3 tint_select(uvec3 param_0, uvec3 param_1, bvec3 param_2) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uvec3 select_28a27e() {
   uvec3 arg_0 = uvec3(1u);
   uvec3 arg_1 = uvec3(1u);
@@ -14,11 +19,6 @@ uvec3 select_28a27e() {
   uvec3 res = tint_select(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -40,6 +40,11 @@ uvec3 tint_select(uvec3 param_0, uvec3 param_1, bvec3 param_2) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uvec3 select_28a27e() {
   uvec3 arg_0 = uvec3(1u);
   uvec3 arg_1 = uvec3(1u);
@@ -47,11 +52,6 @@ uvec3 select_28a27e() {
   uvec3 res = tint_select(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

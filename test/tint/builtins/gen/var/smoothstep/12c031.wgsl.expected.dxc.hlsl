@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 2> smoothstep_12c031() {
   vector<float16_t, 2> arg_0 = (float16_t(2.0h)).xx;
   vector<float16_t, 2> arg_1 = (float16_t(4.0h)).xx;
@@ -5,8 +7,6 @@ vector<float16_t, 2> smoothstep_12c031() {
   vector<float16_t, 2> res = smoothstep(arg_0, arg_1, arg_2);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, smoothstep_12c031());

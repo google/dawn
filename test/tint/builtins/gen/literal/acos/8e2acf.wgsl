@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
+
 // fn acos(vec<4, f32>) -> vec<4, f32>
 fn acos_8e2acf() -> vec4<f32>{
   var res: vec4<f32> = acos(vec4<f32>(0.96891242171f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = acos_8e2acf();

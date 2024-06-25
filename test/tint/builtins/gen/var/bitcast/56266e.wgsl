@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
+
+
 // fn bitcast<T: vec<3, u32>>(vec<3, f32>) -> vec<3, u32>
 fn bitcast_56266e() -> vec3<u32>{
   var arg_0 = vec3<f32>(1.f);
   var res: vec3<u32> = bitcast<vec3<u32>>(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = bitcast_56266e();

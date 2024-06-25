@@ -36,14 +36,15 @@
 
 
 // [hlsl-dxc] flags: --hlsl_shader_model 66
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
+
 // fn pack4xI8(vec4<i32>) -> u32
 fn pack4xI8_bfce01() -> u32{
   var arg_0 = vec4<i32>(1i);
   var res: u32 = pack4xI8(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = pack4xI8_bfce01();

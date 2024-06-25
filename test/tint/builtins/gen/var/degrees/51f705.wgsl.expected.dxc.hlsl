@@ -2,13 +2,13 @@ float tint_degrees(float param_0) {
   return param_0 * 57.29577951308232286465;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float degrees_51f705() {
   float arg_0 = 1.0f;
   float res = tint_degrees(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(degrees_51f705()));

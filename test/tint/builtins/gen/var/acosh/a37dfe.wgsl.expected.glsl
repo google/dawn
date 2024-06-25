@@ -7,15 +7,15 @@ float16_t tint_acosh(float16_t x) {
   return ((x < 1.0hf) ? 0.0hf : acosh(x));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t acosh_a37dfe() {
   float16_t arg_0 = 1.54296875hf;
   float16_t res = tint_acosh(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -37,15 +37,15 @@ float16_t tint_acosh(float16_t x) {
   return ((x < 1.0hf) ? 0.0hf : acosh(x));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t acosh_a37dfe() {
   float16_t arg_0 = 1.54296875hf;
   float16_t res = tint_acosh(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

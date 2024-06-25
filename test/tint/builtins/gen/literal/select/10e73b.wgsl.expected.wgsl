@@ -1,11 +1,11 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
 fn select_10e73b() -> f16 {
   var res : f16 = select(1.0h, 1.0h, true);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {

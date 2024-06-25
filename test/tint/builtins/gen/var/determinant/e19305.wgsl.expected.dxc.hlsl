@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float determinant_e19305() {
   float2x2 arg_0 = float2x2((1.0f).xx, (1.0f).xx);
   float res = determinant(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(determinant_e19305()));

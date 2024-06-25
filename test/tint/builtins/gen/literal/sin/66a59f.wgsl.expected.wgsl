@@ -1,11 +1,11 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
 fn sin_66a59f() -> f16 {
   var res : f16 = sin(1.5703125h);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {

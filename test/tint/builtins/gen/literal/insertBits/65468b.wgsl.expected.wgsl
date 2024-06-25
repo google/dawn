@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 fn insertBits_65468b() -> i32 {
   var res : i32 = insertBits(1i, 1i, 1u, 1u);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

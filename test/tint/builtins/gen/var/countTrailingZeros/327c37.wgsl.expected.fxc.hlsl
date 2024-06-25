@@ -13,13 +13,13 @@ int2 tint_count_trailing_zeros(int2 v) {
   return int2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int2 countTrailingZeros_327c37() {
   int2 arg_0 = (1).xx;
   int2 res = tint_count_trailing_zeros(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(countTrailingZeros_327c37()));

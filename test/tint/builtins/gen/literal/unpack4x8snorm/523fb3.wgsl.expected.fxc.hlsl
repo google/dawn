@@ -1,9 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float4 unpack4x8snorm_523fb3() {
   float4 res = float4(0.00787401571869850159f, 0.0f, 0.0f, 0.0f);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(unpack4x8snorm_523fb3()));

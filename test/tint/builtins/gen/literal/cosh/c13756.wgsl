@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
+
+
 // fn cosh(vec<2, f32>) -> vec<2, f32>
 fn cosh_c13756() -> vec2<f32>{
   var res: vec2<f32> = cosh(vec2<f32>(0.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = cosh_c13756();

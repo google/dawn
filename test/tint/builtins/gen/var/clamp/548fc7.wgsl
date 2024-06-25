@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
+
+
 // fn clamp(vec<3, u32>, vec<3, u32>, vec<3, u32>) -> vec<3, u32>
 fn clamp_548fc7() -> vec3<u32>{
   var arg_0 = vec3<u32>(1u);
@@ -43,8 +46,6 @@ fn clamp_548fc7() -> vec3<u32>{
   var res: vec3<u32> = clamp(arg_0, arg_1, arg_2);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = clamp_548fc7();

@@ -4,14 +4,14 @@ uint tint_dot4_u8_packed(uint a, uint b) {
   return dot(a_u8, b_u8);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint dot4U8Packed_fbed7b() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   uint res = tint_dot4_u8_packed(arg_0, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(dot4U8Packed_fbed7b()));

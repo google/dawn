@@ -72,6 +72,10 @@ layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
   ExternalTextureParams_std140 inner;
 } ext_tex_params;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));
@@ -108,10 +112,6 @@ vec4 textureLoad_8acf41() {
   vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, arg_1, conv_ExternalTextureParams(ext_tex_params.inner));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -198,6 +198,10 @@ layout(binding = 2, std140) uniform ext_tex_params_block_std140_ubo {
   ExternalTextureParams_std140 inner;
 } ext_tex_params;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));
@@ -234,10 +238,6 @@ vec4 textureLoad_8acf41() {
   vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, arg_1, conv_ExternalTextureParams(ext_tex_params.inner));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

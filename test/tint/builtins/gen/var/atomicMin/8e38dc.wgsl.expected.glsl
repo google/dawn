@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 struct SB_RW {
   int arg_0;
 };
@@ -15,10 +19,6 @@ int atomicMin_8e38dc() {
   int res = atomicMin(sb_rw.inner.arg_0, arg_1);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 void fragment_main() {
   prevent_dce.inner = atomicMin_8e38dc();
@@ -30,6 +30,10 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 struct SB_RW {
   int arg_0;
 };
@@ -43,10 +47,6 @@ int atomicMin_8e38dc() {
   int res = atomicMin(sb_rw.inner.arg_0, arg_1);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 void compute_main() {
   prevent_dce.inner = atomicMin_8e38dc();

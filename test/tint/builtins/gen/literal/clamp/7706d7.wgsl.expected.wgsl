@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
+
 fn clamp_7706d7() -> vec2<u32> {
   var res : vec2<u32> = clamp(vec2<u32>(1u), vec2<u32>(1u), vec2<u32>(1u));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
 
 @fragment
 fn fragment_main() {

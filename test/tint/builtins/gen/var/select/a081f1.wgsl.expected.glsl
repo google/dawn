@@ -8,6 +8,10 @@ f16vec4 tint_select(f16vec4 param_0, f16vec4 param_1, bvec4 param_2) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec4 inner;
+} prevent_dce;
+
 f16vec4 select_a081f1() {
   f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 arg_1 = f16vec4(1.0hf);
@@ -15,10 +19,6 @@ f16vec4 select_a081f1() {
   f16vec4 res = tint_select(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  f16vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -41,6 +41,10 @@ f16vec4 tint_select(f16vec4 param_0, f16vec4 param_1, bvec4 param_2) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec4 inner;
+} prevent_dce;
+
 f16vec4 select_a081f1() {
   f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 arg_1 = f16vec4(1.0hf);
@@ -48,10 +52,6 @@ f16vec4 select_a081f1() {
   f16vec4 res = tint_select(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  f16vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

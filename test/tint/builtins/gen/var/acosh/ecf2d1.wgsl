@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn acosh(f32) -> f32
 fn acosh_ecf2d1() -> f32{
   var arg_0 = 1.5430806348f;
   var res: f32 = acosh(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = acosh_ecf2d1();

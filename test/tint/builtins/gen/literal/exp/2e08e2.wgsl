@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
+
+
 // fn exp(vec<2, f16>) -> vec<2, f16>
 fn exp_2e08e2() -> vec2<f16>{
   var res: vec2<f16> = exp(vec2<f16>(1.h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = exp_2e08e2();

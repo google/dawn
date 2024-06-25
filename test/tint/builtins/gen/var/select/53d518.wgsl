@@ -40,6 +40,9 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn select(vec<3, f16>, vec<3, f16>, vec<3, bool>) -> vec<3, f16>
 fn select_53d518() -> vec3<f16>{
   var arg_0 = vec3<f16>(1.h);
@@ -48,8 +51,6 @@ fn select_53d518() -> vec3<f16>{
   var res: vec3<f16> = select(arg_0, arg_1, arg_2);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = select_53d518();

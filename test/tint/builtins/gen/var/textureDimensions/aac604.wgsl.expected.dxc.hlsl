@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<float4> arg_0 : register(t0, space1);
 
 uint textureDimensions_aac604() {
@@ -7,8 +8,6 @@ uint textureDimensions_aac604() {
   uint res = tint_tmp.x;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(textureDimensions_aac604()));

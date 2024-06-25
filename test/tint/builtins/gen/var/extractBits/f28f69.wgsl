@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
+
+
 // fn extractBits(vec<2, u32>, u32, u32) -> vec<2, u32>
 fn extractBits_f28f69() -> vec2<u32>{
   var arg_0 = vec2<u32>(1u);
@@ -43,8 +46,6 @@ fn extractBits_f28f69() -> vec2<u32>{
   var res: vec2<u32> = extractBits(arg_0, arg_1, arg_2);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = extractBits_f28f69();

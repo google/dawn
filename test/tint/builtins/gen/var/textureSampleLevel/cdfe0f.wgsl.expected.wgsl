@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
 @group(1) @binding(0) var arg_0 : texture_depth_2d_array;
 
 @group(1) @binding(1) var arg_1 : sampler;
@@ -10,8 +12,6 @@ fn textureSampleLevel_cdfe0f() -> f32 {
   var res : f32 = textureSampleLevel(arg_0, arg_1, arg_2, arg_3, arg_4, arg_5);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {

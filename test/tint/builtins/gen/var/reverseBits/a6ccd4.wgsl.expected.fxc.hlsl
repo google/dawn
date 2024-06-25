@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint3 reverseBits_a6ccd4() {
   uint3 arg_0 = (1u).xxx;
   uint3 res = reversebits(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(reverseBits_a6ccd4()));

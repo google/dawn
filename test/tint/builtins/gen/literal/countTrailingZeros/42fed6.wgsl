@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
 // fn countTrailingZeros(i32) -> i32
 fn countTrailingZeros_42fed6() -> i32{
   var res: i32 = countTrailingZeros(1i);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = countTrailingZeros_42fed6();

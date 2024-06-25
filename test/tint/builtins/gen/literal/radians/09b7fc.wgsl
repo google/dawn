@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
+
 // fn radians(vec<4, f32>) -> vec<4, f32>
 fn radians_09b7fc() -> vec4<f32>{
   var res: vec4<f32> = radians(vec4<f32>(1.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = radians_09b7fc();

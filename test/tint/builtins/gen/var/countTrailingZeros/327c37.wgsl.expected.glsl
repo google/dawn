@@ -22,15 +22,15 @@ ivec2 tint_count_trailing_zeros(ivec2 v) {
   return ivec2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 ivec2 countTrailingZeros_327c37() {
   ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_count_trailing_zeros(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -67,15 +67,15 @@ ivec2 tint_count_trailing_zeros(ivec2 v) {
   return ivec2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 ivec2 countTrailingZeros_327c37() {
   ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_count_trailing_zeros(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

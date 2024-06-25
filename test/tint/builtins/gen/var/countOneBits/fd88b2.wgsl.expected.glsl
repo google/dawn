@@ -2,15 +2,15 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int countOneBits_fd88b2() {
   int arg_0 = 1;
   int res = int(bitCount(arg_0));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -27,15 +27,15 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int countOneBits_fd88b2() {
   int arg_0 = 1;
   int res = int(bitCount(arg_0));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

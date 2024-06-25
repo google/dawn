@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
 fn fma_e17c5c() -> vec3<f32> {
   var res : vec3<f32> = fma(vec3<f32>(1.0f), vec3<f32>(1.0f), vec3<f32>(1.0f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @fragment
 fn fragment_main() {

@@ -1,11 +1,11 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
 fn sqrt_ec33e9() -> f16 {
   var res : f16 = sqrt(1.0h);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {

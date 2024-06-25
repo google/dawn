@@ -22,16 +22,16 @@ ivec3 tint_first_trailing_bit(ivec3 v) {
   return ivec3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec3 inner;
+  uint pad;
+} prevent_dce;
+
 ivec3 firstTrailingBit_7496d6() {
   ivec3 arg_0 = ivec3(1);
   ivec3 res = tint_first_trailing_bit(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -68,16 +68,16 @@ ivec3 tint_first_trailing_bit(ivec3 v) {
   return ivec3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec3 inner;
+  uint pad;
+} prevent_dce;
+
 ivec3 firstTrailingBit_7496d6() {
   ivec3 arg_0 = ivec3(1);
   ivec3 res = tint_first_trailing_bit(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

@@ -2,13 +2,13 @@ vector<float16_t, 4> tint_trunc(vector<float16_t, 4> param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 4> trunc_ce7c17() {
   vector<float16_t, 4> arg_0 = (float16_t(1.5h)).xxxx;
   vector<float16_t, 4> res = tint_trunc(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, trunc_ce7c17());

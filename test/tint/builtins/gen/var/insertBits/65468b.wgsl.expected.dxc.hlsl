@@ -4,6 +4,8 @@ int tint_insert_bits(int v, int n, uint offset, uint count) {
   return ((((offset < 32u) ? (n << offset) : 0) & int(mask)) | (v & int(~(mask))));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int insertBits_65468b() {
   int arg_0 = 1;
   int arg_1 = 1;
@@ -12,8 +14,6 @@ int insertBits_65468b() {
   int res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(insertBits_65468b()));

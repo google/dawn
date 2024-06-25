@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int3 select_01e2cd() {
   int3 arg_0 = (1).xxx;
   int3 arg_1 = (1).xxx;
@@ -5,8 +7,6 @@ int3 select_01e2cd() {
   int3 res = (arg_2 ? arg_1 : arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(select_01e2cd()));

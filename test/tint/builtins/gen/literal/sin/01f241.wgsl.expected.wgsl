@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
 fn sin_01f241() -> vec3<f32> {
   var res : vec3<f32> = sin(vec3<f32>(1.57079637050628662109f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @fragment
 fn fragment_main() {

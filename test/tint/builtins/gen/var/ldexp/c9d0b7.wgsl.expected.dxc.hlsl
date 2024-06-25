@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float ldexp_c9d0b7() {
   float arg_0 = 1.0f;
   float res = ldexp(arg_0, 1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(ldexp_c9d0b7()));

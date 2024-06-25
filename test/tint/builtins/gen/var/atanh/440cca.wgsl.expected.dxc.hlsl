@@ -2,13 +2,13 @@ float3 tint_atanh(float3 x) {
   return (log(((1.0f + x) / (1.0f - x))) * 0.5f);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float3 atanh_440cca() {
   float3 arg_0 = (0.5f).xxx;
   float3 res = tint_atanh(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(atanh_440cca()));

@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
+
+
 // fn trunc(vec<2, f16>) -> vec<2, f16>
 fn trunc_a56109() -> vec2<f16>{
   var arg_0 = vec2<f16>(1.5h);
   var res: vec2<f16> = trunc(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = trunc_a56109();

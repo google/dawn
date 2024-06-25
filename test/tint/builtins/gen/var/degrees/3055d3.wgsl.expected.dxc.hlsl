@@ -2,13 +2,13 @@ vector<float16_t, 4> tint_degrees(vector<float16_t, 4> param_0) {
   return param_0 * 57.29577951308232286465;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 4> degrees_3055d3() {
   vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = tint_degrees(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, degrees_3055d3());

@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float4 atan_a8b696() {
   float4 arg_0 = (1.0f).xxxx;
   float4 res = atan(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(atan_a8b696()));

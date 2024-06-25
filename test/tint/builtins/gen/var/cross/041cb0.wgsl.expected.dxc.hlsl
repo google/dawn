@@ -1,11 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float3 cross_041cb0() {
   float3 arg_0 = (1.0f).xxx;
   float3 arg_1 = (1.0f).xxx;
   float3 res = cross(arg_0, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(cross_041cb0()));

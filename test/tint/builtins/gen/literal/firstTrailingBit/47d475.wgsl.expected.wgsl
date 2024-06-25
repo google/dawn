@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 fn firstTrailingBit_47d475() -> u32 {
   var res : u32 = firstTrailingBit(1u);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

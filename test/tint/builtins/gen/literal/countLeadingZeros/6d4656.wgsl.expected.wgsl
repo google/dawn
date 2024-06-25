@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 fn countLeadingZeros_6d4656() -> i32 {
   var res : i32 = countLeadingZeros(1i);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

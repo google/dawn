@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn acosh(vec<3, f16>) -> vec<3, f16>
 fn acosh_f56574() -> vec3<f16>{
   var res: vec3<f16> = acosh(vec3<f16>(1.5430806348h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = acosh_f56574();

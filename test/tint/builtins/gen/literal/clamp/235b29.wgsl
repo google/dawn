@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
+
+
 // fn clamp(vec<2, f16>, vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn clamp_235b29() -> vec2<f16>{
   var res: vec2<f16> = clamp(vec2<f16>(1.h), vec2<f16>(1.h), vec2<f16>(1.h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = clamp_235b29();

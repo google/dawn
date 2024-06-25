@@ -8,14 +8,14 @@ void tint_zero_workgroup_memory(uint local_idx) {
   GroupMemoryBarrierWithGroupSync();
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int atomicExchange_e114ba() {
   int atomic_result_1 = 0;
   InterlockedExchange(arg_0, 1, atomic_result_1);
   int res = atomic_result_1;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;

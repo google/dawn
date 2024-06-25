@@ -1,9 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int select_80a9a9() {
   bool3 res = (true).xxx;
   return (all((res == (false).xxx)) ? 1 : 0);
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(select_80a9a9()));

@@ -3,13 +3,13 @@ float tint_bitcast_from_f16(vector<float16_t, 2> src) {
   return asfloat(uint((r.x & 0xffff) | ((r.y & 0xffff) << 16)));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float bitcast_23c8bd() {
   vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   float res = tint_bitcast_from_f16(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(bitcast_23c8bd()));

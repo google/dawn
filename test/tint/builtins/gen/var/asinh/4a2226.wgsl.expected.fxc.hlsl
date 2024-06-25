@@ -2,13 +2,13 @@ float2 tint_sinh(float2 x) {
   return log((x + sqrt(((x * x) + 1.0f))));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float2 asinh_4a2226() {
   float2 arg_0 = (1.0f).xx;
   float2 res = tint_sinh(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(asinh_4a2226()));

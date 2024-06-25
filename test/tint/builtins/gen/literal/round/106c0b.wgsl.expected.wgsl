@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 fn round_106c0b() -> vec4<f32> {
   var res : vec4<f32> = round(vec4<f32>(3.5f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {

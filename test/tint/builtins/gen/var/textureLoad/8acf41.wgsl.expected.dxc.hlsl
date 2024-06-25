@@ -33,6 +33,7 @@ Texture2D<float4> ext_tex_plane_1 : register(t1, space1);
 cbuffer cbuffer_ext_tex_params : register(b2, space1) {
   uint4 ext_tex_params[17];
 };
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D<float4> arg_0 : register(t0, space1);
 
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
@@ -121,8 +122,6 @@ float4 textureLoad_8acf41() {
   float4 res = textureLoadExternal(arg_0, ext_tex_plane_1, arg_1, ext_tex_params_load(0u));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureLoad_8acf41()));

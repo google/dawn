@@ -8,6 +8,8 @@ void tint_zero_workgroup_memory(uint local_idx) {
   GroupMemoryBarrierWithGroupSync();
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint atomicOr_5e3d61() {
   uint arg_1 = 1u;
   uint atomic_result_1 = 0u;
@@ -15,8 +17,6 @@ uint atomicOr_5e3d61() {
   uint res = atomic_result_1;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;

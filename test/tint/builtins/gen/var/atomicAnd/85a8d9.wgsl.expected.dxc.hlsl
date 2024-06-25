@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 RWByteAddressBuffer sb_rw : register(u1);
 
 uint sb_rwatomicAnd(uint offset, uint value) {
@@ -12,8 +14,6 @@ uint atomicAnd_85a8d9() {
   uint res = sb_rwatomicAnd(0u, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(atomicAnd_85a8d9()));

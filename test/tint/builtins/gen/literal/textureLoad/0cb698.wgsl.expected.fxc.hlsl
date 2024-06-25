@@ -1,11 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<int4> arg_0 : register(t0, space1);
 
 int4 textureLoad_0cb698() {
   int4 res = arg_0.Load(uint2(1u, 1u));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureLoad_0cb698()));

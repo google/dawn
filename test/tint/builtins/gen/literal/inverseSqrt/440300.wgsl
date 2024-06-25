@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn inverseSqrt(f16) -> f16
 fn inverseSqrt_440300() -> f16{
   var res: f16 = inverseSqrt(1.h);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = inverseSqrt_440300();

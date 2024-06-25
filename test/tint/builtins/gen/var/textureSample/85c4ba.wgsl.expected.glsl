@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 uniform highp sampler2D arg_0_arg_1;
 
 vec4 textureSample_85c4ba() {
@@ -9,10 +13,6 @@ vec4 textureSample_85c4ba() {
   vec4 res = textureOffset(arg_0_arg_1, arg_2, ivec2(1));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 void fragment_main() {
   prevent_dce.inner = textureSample_85c4ba();

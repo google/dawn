@@ -36,13 +36,14 @@
 
 
 // [hlsl-dxc] flags: --hlsl_shader_model 64
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
+
 // fn dot4U8Packed(u32, u32) -> u32
 fn dot4U8Packed_fbed7b() -> u32{
   var res: u32 = dot4U8Packed(1u, 1u);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = dot4U8Packed_fbed7b();

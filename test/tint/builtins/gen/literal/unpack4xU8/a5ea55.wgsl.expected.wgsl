@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
+
 fn unpack4xU8_a5ea55() -> vec4<u32> {
   var res : vec4<u32> = unpack4xU8(1u);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
 
 @fragment
 fn fragment_main() {

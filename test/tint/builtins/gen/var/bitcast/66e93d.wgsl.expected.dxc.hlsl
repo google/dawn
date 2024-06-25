@@ -5,13 +5,13 @@ vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
   return vector<float16_t, 2>(t_low.x, t_high.x);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 2> bitcast_66e93d() {
   uint arg_0 = 1u;
   vector<float16_t, 2> res = tint_bitcast_to_f16(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, bitcast_66e93d());

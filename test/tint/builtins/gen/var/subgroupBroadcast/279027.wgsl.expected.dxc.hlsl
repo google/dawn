@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint4 subgroupBroadcast_279027() {
   uint4 arg_0 = (1u).xxxx;
   uint4 res = WaveReadLaneAt(arg_0, 1u);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 [numthreads(1, 1, 1)]
 void compute_main() {

@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
+
+
 // fn atanh(vec<4, f16>) -> vec<4, f16>
 fn atanh_e3b450() -> vec4<f16>{
   var res: vec4<f16> = atanh(vec4<f16>(0.5h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = atanh_e3b450();

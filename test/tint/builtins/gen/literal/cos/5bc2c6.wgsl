@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
+
+
 // fn cos(vec<2, f16>) -> vec<2, f16>
 fn cos_5bc2c6() -> vec2<f16>{
   var res: vec2<f16> = cos(vec2<f16>(0.h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = cos_5bc2c6();

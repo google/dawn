@@ -13,13 +13,13 @@ uint4 tint_first_leading_bit(uint4 v) {
   return uint4((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint4 firstLeadingBit_000ff3() {
   uint4 arg_0 = (1u).xxxx;
   uint4 res = tint_first_leading_bit(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(firstLeadingBit_000ff3()));

@@ -8,6 +8,11 @@ uvec3 tint_extract_bits(uvec3 v, uint offset, uint count) {
   return bitfieldExtract(v, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uvec3 extractBits_12b197() {
   uvec3 arg_0 = uvec3(1u);
   uint arg_1 = 1u;
@@ -15,11 +20,6 @@ uvec3 extractBits_12b197() {
   uvec3 res = tint_extract_bits(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -42,6 +42,11 @@ uvec3 tint_extract_bits(uvec3 v, uint offset, uint count) {
   return bitfieldExtract(v, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uvec3 extractBits_12b197() {
   uvec3 arg_0 = uvec3(1u);
   uint arg_1 = 1u;
@@ -49,11 +54,6 @@ uvec3 extractBits_12b197() {
   uvec3 res = tint_extract_bits(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

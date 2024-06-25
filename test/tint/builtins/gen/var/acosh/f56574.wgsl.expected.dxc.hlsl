@@ -2,13 +2,13 @@ vector<float16_t, 3> tint_acosh(vector<float16_t, 3> x) {
   return log((x + sqrt(((x * x) - float16_t(1.0h)))));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 3> acosh_f56574() {
   vector<float16_t, 3> arg_0 = (float16_t(1.54296875h)).xxx;
   vector<float16_t, 3> res = tint_acosh(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, acosh_f56574());

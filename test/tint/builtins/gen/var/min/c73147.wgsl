@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
 // fn min(i32, i32) -> i32
 fn min_c73147() -> i32{
   var arg_0 = 1i;
@@ -42,8 +45,6 @@ fn min_c73147() -> i32{
   var res: i32 = min(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = min_c73147();

@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
+
 // fn refract(vec<3, f32>, vec<3, f32>, f32) -> vec<3, f32>
 fn refract_cbc1d2() -> vec3<f32>{
   var res: vec3<f32> = refract(vec3<f32>(1.f), vec3<f32>(1.f), 1.f);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = refract_cbc1d2();

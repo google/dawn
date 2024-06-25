@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
+
+
 // fn pow(vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn pow_f37b25() -> vec2<f16>{
   var res: vec2<f16> = pow(vec2<f16>(1.h), vec2<f16>(1.h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = pow_f37b25();

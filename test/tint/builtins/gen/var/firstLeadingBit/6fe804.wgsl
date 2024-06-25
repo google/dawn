@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
+
+
 // fn firstLeadingBit(vec<2, u32>) -> vec<2, u32>
 fn firstLeadingBit_6fe804() -> vec2<u32>{
   var arg_0 = vec2<u32>(1u);
   var res: vec2<u32> = firstLeadingBit(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = firstLeadingBit_6fe804();

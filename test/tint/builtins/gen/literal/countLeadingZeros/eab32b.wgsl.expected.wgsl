@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
+
 fn countLeadingZeros_eab32b() -> vec4<i32> {
   var res : vec4<i32> = countLeadingZeros(vec4<i32>(1i));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
 
 @fragment
 fn fragment_main() {

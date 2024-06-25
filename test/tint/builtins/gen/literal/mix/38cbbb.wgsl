@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn mix(f16, f16, f16) -> f16
 fn mix_38cbbb() -> f16{
   var res: f16 = mix(1.h, 1.h, 1.h);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = mix_38cbbb();

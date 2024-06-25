@@ -34,6 +34,9 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 @group(1) @binding(1) var arg_1: texture_2d_array<f32>;
 @group(1) @binding(2) var arg_2: sampler;
 
@@ -42,8 +45,6 @@ fn textureGather_17baac() -> vec4<f32>{
   var res: vec4<f32> = textureGather(1i, arg_1, arg_2, vec2<f32>(1.f), 1u);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = textureGather_17baac();

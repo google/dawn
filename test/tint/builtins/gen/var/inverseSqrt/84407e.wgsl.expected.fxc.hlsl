@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float inverseSqrt_84407e() {
   float arg_0 = 1.0f;
   float res = rsqrt(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(inverseSqrt_84407e()));

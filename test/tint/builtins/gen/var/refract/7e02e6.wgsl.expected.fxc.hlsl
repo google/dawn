@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float4 refract_7e02e6() {
   float4 arg_0 = (1.0f).xxxx;
   float4 arg_1 = (1.0f).xxxx;
@@ -5,8 +7,6 @@ float4 refract_7e02e6() {
   float4 res = refract(arg_0, arg_1, arg_2);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(refract_7e02e6()));

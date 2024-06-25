@@ -15,11 +15,11 @@
                OpName %pos_1 "pos_1"
                OpName %prevent_dce_1 "prevent_dce_1"
                OpName %vertex_point_size "vertex_point_size"
-               OpName %arg_0 "arg_0"
-               OpName %arg_1 "arg_1"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
                OpName %tint_textureSampleBaseClampToEdge "tint_textureSampleBaseClampToEdge"
                OpName %t "t"
                OpName %s "s"
@@ -39,14 +39,14 @@
                OpDecorate %prevent_dce_1 Location 0
                OpDecorate %prevent_dce_1 Flat
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpDecorate %arg_0 DescriptorSet 1
-               OpDecorate %arg_0 Binding 0
-               OpDecorate %arg_1 DescriptorSet 1
-               OpDecorate %arg_1 Binding 1
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_1 DescriptorSet 1
+               OpDecorate %arg_1 Binding 1
                OpMemberDecorate %VertexOutput 0 Offset 0
                OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
@@ -58,17 +58,17 @@
 %_ptr_Output_float = OpTypePointer Output %float
           %9 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %9
-         %12 = OpTypeImage %float 2D 0 0 0 1 Unknown
-%_ptr_UniformConstant_12 = OpTypePointer UniformConstant %12
-      %arg_0 = OpVariable %_ptr_UniformConstant_12 UniformConstant
-         %15 = OpTypeSampler
-%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
-      %arg_1 = OpVariable %_ptr_UniformConstant_15 UniformConstant
 %prevent_dce_block = OpTypeStruct %v4float
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+         %15 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
+      %arg_0 = OpVariable %_ptr_UniformConstant_15 UniformConstant
+         %18 = OpTypeSampler
+%_ptr_UniformConstant_18 = OpTypePointer UniformConstant %18
+      %arg_1 = OpVariable %_ptr_UniformConstant_18 UniformConstant
     %v2float = OpTypeVector %float 2
-         %19 = OpTypeFunction %v4float %12 %15 %v2float
+         %19 = OpTypeFunction %v4float %15 %18 %v2float
        %uint = OpTypeInt 32 0
      %v2uint = OpTypeVector %uint 2
         %int = OpTypeInt 32 1
@@ -78,7 +78,7 @@
     %float_1 = OpConstant %float 1
 %_ptr_Function_v2float = OpTypePointer Function %v2float
          %41 = OpConstantNull %v2float
-         %44 = OpTypeSampledImage %12
+         %44 = OpTypeSampledImage %15
          %46 = OpTypeFunction %v4float
          %49 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
@@ -92,8 +92,8 @@
          %76 = OpConstantNull %VertexOutput
      %uint_1 = OpConstant %uint 1
 %tint_textureSampleBaseClampToEdge = OpFunction %v4float None %19
-          %t = OpFunctionParameter %12
-          %s = OpFunctionParameter %15
+          %t = OpFunctionParameter %15
+          %s = OpFunctionParameter %18
       %coord = OpFunctionParameter %v2float
          %25 = OpLabel
          %39 = OpVariable %_ptr_Function_v2float Function %41
@@ -112,8 +112,8 @@
       %arg_2 = OpVariable %_ptr_Function_v2float Function %41
         %res = OpVariable %_ptr_Function_v4float Function %5
                OpStore %arg_2 %49
-         %52 = OpLoad %12 %arg_0
-         %53 = OpLoad %15 %arg_1
+         %52 = OpLoad %15 %arg_0
+         %53 = OpLoad %18 %arg_1
          %54 = OpLoad %v2float %arg_2
          %51 = OpFunctionCall %v4float %tint_textureSampleBaseClampToEdge %52 %53 %54
                OpStore %res %51

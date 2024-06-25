@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 2> saturate_cd2028() {
   vector<float16_t, 2> arg_0 = (float16_t(2.0h)).xx;
   vector<float16_t, 2> res = saturate(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, saturate_cd2028());

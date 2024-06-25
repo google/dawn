@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 fn pack2x16float_0e97b3() -> u32 {
   var res : u32 = pack2x16float(vec2<f32>(1.0f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

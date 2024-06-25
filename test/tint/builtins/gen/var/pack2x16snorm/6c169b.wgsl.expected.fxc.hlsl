@@ -3,13 +3,13 @@ uint tint_pack2x16snorm(float2 param_0) {
   return asuint(i.x | i.y << 16);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint pack2x16snorm_6c169b() {
   float2 arg_0 = (1.0f).xx;
   uint res = tint_pack2x16snorm(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(pack2x16snorm_6c169b()));

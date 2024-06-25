@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
+
 fn fract_943cb1() -> vec2<f32> {
   var res : vec2<f32> = fract(vec2<f32>(1.25f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
 
 @fragment
 fn fragment_main() {

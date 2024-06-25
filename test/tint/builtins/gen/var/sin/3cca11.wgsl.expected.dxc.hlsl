@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 2> sin_3cca11() {
   vector<float16_t, 2> arg_0 = (float16_t(1.5703125h)).xx;
   vector<float16_t, 2> res = sin(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, sin_3cca11());

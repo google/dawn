@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float2 saturate_51567f() {
   float2 arg_0 = (2.0f).xx;
   float2 res = saturate(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(saturate_51567f()));

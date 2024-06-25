@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
 // fn clamp(i32, i32, i32) -> i32
 fn clamp_b07c65() -> i32{
   var res: i32 = clamp(1i, 1i, 1i);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = clamp_b07c65();

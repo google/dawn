@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int select_c31f9e() {
   bool arg_0 = true;
   bool arg_1 = true;
@@ -9,10 +13,6 @@ int select_c31f9e() {
   bool res = (arg_2 ? arg_1 : arg_0);
   return ((res == false) ? 1 : 0);
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -29,6 +29,10 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int select_c31f9e() {
   bool arg_0 = true;
   bool arg_1 = true;
@@ -36,10 +40,6 @@ int select_c31f9e() {
   bool res = (arg_2 ? arg_1 : arg_0);
   return ((res == false) ? 1 : 0);
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

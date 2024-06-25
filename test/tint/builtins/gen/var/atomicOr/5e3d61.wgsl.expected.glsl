@@ -8,15 +8,15 @@ void tint_zero_workgroup_memory(uint local_idx) {
   barrier();
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint atomicOr_5e3d61() {
   uint arg_1 = 1u;
   uint res = atomicOr(arg_0, arg_1);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 void compute_main(uint local_invocation_index) {
   tint_zero_workgroup_memory(local_invocation_index);

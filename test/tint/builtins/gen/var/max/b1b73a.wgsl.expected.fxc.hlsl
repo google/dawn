@@ -1,11 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint3 max_b1b73a() {
   uint3 arg_0 = (1u).xxx;
   uint3 arg_1 = (1u).xxx;
   uint3 res = max(arg_0, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(max_b1b73a()));

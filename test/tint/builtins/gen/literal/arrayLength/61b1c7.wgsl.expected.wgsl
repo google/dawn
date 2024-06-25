@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 struct SB_RW {
   arg_0 : array<i32>,
 }
@@ -8,8 +10,6 @@ fn arrayLength_61b1c7() -> u32 {
   var res : u32 = arrayLength(&(sb_rw.arg_0));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

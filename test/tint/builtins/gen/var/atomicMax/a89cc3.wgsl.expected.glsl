@@ -8,15 +8,15 @@ void tint_zero_workgroup_memory(uint local_idx) {
   barrier();
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int atomicMax_a89cc3() {
   int arg_1 = 1;
   int res = atomicMax(arg_0, arg_1);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 void compute_main(uint local_invocation_index) {
   tint_zero_workgroup_memory(local_invocation_index);

@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn atanh(f32) -> f32
 fn atanh_7997d8() -> f32{
   var arg_0 = 0.5f;
   var res: f32 = atanh(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = atanh_7997d8();

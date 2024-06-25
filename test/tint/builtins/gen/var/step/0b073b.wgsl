@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn step(f32, f32) -> f32
 fn step_0b073b() -> f32{
   var arg_0 = 1.f;
@@ -42,8 +45,6 @@ fn step_0b073b() -> f32{
   var res: f32 = step(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = step_0b073b();

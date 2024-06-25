@@ -2,14 +2,14 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 uvec2 clamp_7706d7() {
   uvec2 res = uvec2(1u);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -26,14 +26,14 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 uvec2 clamp_7706d7() {
   uvec2 res = uvec2(1u);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

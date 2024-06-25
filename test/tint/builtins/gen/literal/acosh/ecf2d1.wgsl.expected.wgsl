@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
 fn acosh_ecf2d1() -> f32 {
   var res : f32 = acosh(1.54308068752288818359f);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {

@@ -2,17 +2,17 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uniform highp sampler3D arg_0_1;
 uvec3 textureDimensions_0890c6() {
   uint arg_1 = 1u;
   uvec3 res = uvec3(textureSize(arg_0_1, int(arg_1)));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -29,17 +29,17 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uniform highp sampler3D arg_0_1;
 uvec3 textureDimensions_0890c6() {
   uint arg_1 = 1u;
   uvec3 res = uvec3(textureSize(arg_0_1, int(arg_1)));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

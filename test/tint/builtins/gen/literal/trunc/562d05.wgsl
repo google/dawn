@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
+
 // fn trunc(vec<3, f32>) -> vec<3, f32>
 fn trunc_562d05() -> vec3<f32>{
   var res: vec3<f32> = trunc(vec3<f32>(1.5f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = trunc_562d05();

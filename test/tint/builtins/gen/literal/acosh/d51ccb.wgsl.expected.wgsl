@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 fn acosh_d51ccb() -> vec4<f32> {
   var res : vec4<f32> = acosh(vec4<f32>(1.54308068752288818359f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {

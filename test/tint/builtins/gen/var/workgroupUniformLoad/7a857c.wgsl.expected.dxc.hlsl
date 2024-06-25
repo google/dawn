@@ -14,12 +14,12 @@ float tint_workgroupUniformLoad_arg_0() {
   return result;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float workgroupUniformLoad_7a857c() {
   float res = tint_workgroupUniformLoad_arg_0();
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 struct tint_symbol_1 {
   uint local_invocation_index : SV_GroupIndex;

@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<i32>;
+
 fn extractBits_a99a8d() -> vec2<i32> {
   var res : vec2<i32> = extractBits(vec2<i32>(1i), 1u, 1u);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<i32>;
 
 @fragment
 fn fragment_main() {

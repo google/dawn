@@ -16,14 +16,14 @@ void tint_zero_workgroup_memory(uint local_idx) {
   barrier();
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t workgroupUniformLoad_e07d08() {
   float16_t res = tint_workgroupUniformLoad_arg_0();
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 void compute_main(uint local_invocation_index) {
   tint_zero_workgroup_memory(local_invocation_index);

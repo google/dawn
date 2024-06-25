@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
+
 fn select_a2860e() -> vec4<i32> {
   var res : vec4<i32> = select(vec4<i32>(1i), vec4<i32>(1i), vec4<bool>(true));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
 
 @fragment
 fn fragment_main() {

@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
+
 fn acos_dfc915() -> vec2<f32> {
   var res : vec2<f32> = acos(vec2<f32>(0.96891242265701293945f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
 
 @fragment
 fn fragment_main() {

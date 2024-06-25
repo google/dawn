@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn ldexp(f32, i32) -> f32
 fn ldexp_db8b49() -> f32{
   var res: f32 = ldexp(1.f, 1i);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = ldexp_db8b49();

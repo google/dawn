@@ -4,13 +4,13 @@ uint tint_pack_4xi8(int4 a) {
   return dot(a_u8, (1u).xxxx);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint pack4xI8_bfce01() {
   int4 arg_0 = (1).xxxx;
   uint res = tint_pack_4xi8(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(pack4xI8_bfce01()));

@@ -17,15 +17,15 @@ uint tint_first_trailing_bit(uint v) {
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint firstTrailingBit_47d475() {
   uint arg_0 = 1u;
   uint res = tint_first_trailing_bit(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -57,15 +57,15 @@ uint tint_first_trailing_bit(uint v) {
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint firstTrailingBit_47d475() {
   uint arg_0 = 1u;
   uint res = tint_first_trailing_bit(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

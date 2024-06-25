@@ -2,13 +2,13 @@ float tint_radians(float param_0) {
   return param_0 * 0.01745329251994329547;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float radians_6b0ff2() {
   float arg_0 = 1.0f;
   float res = tint_radians(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(radians_6b0ff2()));

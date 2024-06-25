@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
+
 // fn all(bool) -> bool
 fn all_353d6a() -> i32{
   var res: bool = all(true);
   return select(0, 1, all(res == bool()));
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-
 @fragment
 fn fragment_main() {
   prevent_dce = all_353d6a();

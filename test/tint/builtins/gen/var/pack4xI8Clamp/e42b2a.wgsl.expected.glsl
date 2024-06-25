@@ -13,15 +13,15 @@ uint tint_pack_4xi8_clamp(ivec4 a) {
   return tint_int_dot(a_u8, uvec4(1u));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint pack4xI8Clamp_e42b2a() {
   ivec4 arg_0 = ivec4(1);
   uint res = tint_pack_4xi8_clamp(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -49,15 +49,15 @@ uint tint_pack_4xi8_clamp(ivec4 a) {
   return tint_int_dot(a_u8, uvec4(1u));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint pack4xI8Clamp_e42b2a() {
   ivec4 arg_0 = ivec4(1);
   uint res = tint_pack_4xi8_clamp(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

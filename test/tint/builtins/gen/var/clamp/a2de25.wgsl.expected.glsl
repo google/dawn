@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint clamp_a2de25() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
@@ -9,10 +13,6 @@ uint clamp_a2de25() {
   uint res = clamp(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -29,6 +29,10 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint clamp_a2de25() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
@@ -36,10 +40,6 @@ uint clamp_a2de25() {
   uint res = clamp(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

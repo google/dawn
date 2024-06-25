@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
+
+
 // fn countLeadingZeros(vec<3, i32>) -> vec<3, i32>
 fn countLeadingZeros_7c38a6() -> vec3<i32>{
   var res: vec3<i32> = countLeadingZeros(vec3<i32>(1i));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = countLeadingZeros_7c38a6();

@@ -46,11 +46,11 @@
                OpMemberName %ExternalTextureParams_std140 16 "visibleSize"
                OpMemberName %ExternalTextureParams_std140 17 "plane1CoordFactor"
                OpName %ext_tex_params "ext_tex_params"
-               OpName %arg_0 "arg_0"
-               OpName %arg_1 "arg_1"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
                OpName %gammaCorrection "gammaCorrection"
                OpName %v "v"
                OpName %params "params"
@@ -130,14 +130,14 @@
                OpDecorate %ext_tex_params NonWritable
                OpDecorate %ext_tex_params DescriptorSet 1
                OpDecorate %ext_tex_params Binding 3
-               OpDecorate %arg_0 DescriptorSet 1
-               OpDecorate %arg_0 Binding 0
-               OpDecorate %arg_1 DescriptorSet 1
-               OpDecorate %arg_1 Binding 1
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_1 DescriptorSet 1
+               OpDecorate %arg_1 Binding 1
                OpMemberDecorate %ExternalTextureParams 0 Offset 0
                OpMemberDecorate %ExternalTextureParams 1 Offset 4
                OpMemberDecorate %ExternalTextureParams 2 Offset 16
@@ -185,13 +185,13 @@
 %ext_tex_params_block_std140 = OpTypeStruct %ExternalTextureParams_std140
 %_ptr_Uniform_ext_tex_params_block_std140 = OpTypePointer Uniform %ext_tex_params_block_std140
 %ext_tex_params = OpVariable %_ptr_Uniform_ext_tex_params_block_std140 Uniform
-      %arg_0 = OpVariable %_ptr_UniformConstant_12 UniformConstant
-         %27 = OpTypeSampler
-%_ptr_UniformConstant_27 = OpTypePointer UniformConstant %27
-      %arg_1 = OpVariable %_ptr_UniformConstant_27 UniformConstant
 %prevent_dce_block = OpTypeStruct %v4float
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+      %arg_0 = OpVariable %_ptr_UniformConstant_12 UniformConstant
+         %30 = OpTypeSampler
+%_ptr_UniformConstant_30 = OpTypePointer UniformConstant %30
+      %arg_1 = OpVariable %_ptr_UniformConstant_30 UniformConstant
          %31 = OpTypeFunction %v3float %v3float %GammaTransferParams
        %bool = OpTypeBool
      %v3bool = OpTypeVector %bool 3
@@ -199,7 +199,7 @@
          %51 = OpConstantNull %v3float
 %mat3v2float = OpTypeMatrix %v2float 3
 %ExternalTextureParams = OpTypeStruct %uint %uint %mat3v4float %GammaTransferParams %GammaTransferParams %mat3v3float %mat3v2float %mat3v2float %v2float %v2float %v2float %v2float %v2uint %v2float
-         %71 = OpTypeFunction %v4float %12 %12 %27 %v2float %ExternalTextureParams
+         %71 = OpTypeFunction %v4float %12 %12 %30 %v2float %ExternalTextureParams
     %float_1 = OpConstant %float 1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
      %uint_1 = OpConstant %uint 1
@@ -260,7 +260,7 @@
 %textureSampleExternal = OpFunction %v4float None %71
      %plane0 = OpFunctionParameter %12
      %plane1 = OpFunctionParameter %12
-        %smp = OpFunctionParameter %27
+        %smp = OpFunctionParameter %30
       %coord = OpFunctionParameter %v2float
    %params_0 = OpFunctionParameter %ExternalTextureParams
          %80 = OpLabel
@@ -381,7 +381,7 @@
                OpStore %arg_2 %186
         %191 = OpLoad %12 %arg_0
         %192 = OpLoad %12 %ext_tex_plane_1
-        %193 = OpLoad %27 %arg_1
+        %193 = OpLoad %30 %arg_1
         %194 = OpLoad %v2float %arg_2
         %198 = OpAccessChain %_ptr_Uniform_ExternalTextureParams_std140 %ext_tex_params %uint_0
         %199 = OpLoad %ExternalTextureParams_std140 %198

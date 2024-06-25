@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
+
 fn select_01e2cd() -> vec3<i32> {
   var arg_0 = vec3<i32>(1i);
   var arg_1 = vec3<i32>(1i);
@@ -5,8 +7,6 @@ fn select_01e2cd() -> vec3<i32> {
   var res : vec3<i32> = select(arg_0, arg_1, arg_2);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
 
 @fragment
 fn fragment_main() {

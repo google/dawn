@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float4 asin_064953() {
   float4 arg_0 = (0.47942554950714111328f).xxxx;
   float4 res = asin(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(asin_064953()));

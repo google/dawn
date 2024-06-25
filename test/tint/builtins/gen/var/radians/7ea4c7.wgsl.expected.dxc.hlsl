@@ -2,13 +2,13 @@ vector<float16_t, 3> tint_radians(vector<float16_t, 3> param_0) {
   return param_0 * 0.01745329251994329547;
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 3> radians_7ea4c7() {
   vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = tint_radians(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, radians_7ea4c7());

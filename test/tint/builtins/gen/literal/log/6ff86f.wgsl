@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn log(vec<3, f16>) -> vec<3, f16>
 fn log_6ff86f() -> vec3<f16>{
   var res: vec3<f16> = log(vec3<f16>(1.h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = log_6ff86f();

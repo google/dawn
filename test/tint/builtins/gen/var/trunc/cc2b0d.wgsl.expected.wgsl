@@ -1,12 +1,12 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
 fn trunc_cc2b0d() -> f16 {
   var arg_0 = 1.5h;
   var res : f16 = trunc(arg_0);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {

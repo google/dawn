@@ -8,10 +8,10 @@
                OpEntryPoint GLCompute %compute_main "compute_main" %local_invocation_index_1
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %local_invocation_index_1 "local_invocation_index_1"
-               OpName %arg_0 "arg_0"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_0 "arg_0"
                OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
                OpName %local_idx "local_idx"
                OpName %atomicXor_c8e6be "atomicXor_c8e6be"
@@ -28,11 +28,11 @@
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
-%_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
-      %arg_0 = OpVariable %_ptr_Workgroup_uint Workgroup
 %prevent_dce_block = OpTypeStruct %uint
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+%_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
+      %arg_0 = OpVariable %_ptr_Workgroup_uint Workgroup
        %void = OpTypeVoid
           %9 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1

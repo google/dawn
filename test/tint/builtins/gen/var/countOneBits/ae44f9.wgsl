@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
+
 // fn countOneBits(u32) -> u32
 fn countOneBits_ae44f9() -> u32{
   var arg_0 = 1u;
   var res: u32 = countOneBits(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = countOneBits_ae44f9();

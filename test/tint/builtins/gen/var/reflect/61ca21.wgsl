@@ -40,6 +40,9 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn reflect(vec<3, f16>, vec<3, f16>) -> vec<3, f16>
 fn reflect_61ca21() -> vec3<f16>{
   var arg_0 = vec3<f16>(1.h);
@@ -47,8 +50,6 @@ fn reflect_61ca21() -> vec3<f16>{
   var res: vec3<f16> = reflect(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = reflect_61ca21();

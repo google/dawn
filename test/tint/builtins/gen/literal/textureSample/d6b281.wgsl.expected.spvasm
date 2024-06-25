@@ -7,35 +7,35 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
-               OpName %arg_0 "arg_0"
-               OpName %arg_1 "arg_1"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
                OpName %textureSample_d6b281 "textureSample_d6b281"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
-               OpDecorate %arg_0 DescriptorSet 1
-               OpDecorate %arg_0 Binding 0
-               OpDecorate %arg_1 DescriptorSet 1
-               OpDecorate %arg_1 Binding 1
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_1 DescriptorSet 1
+               OpDecorate %arg_1 Binding 1
       %float = OpTypeFloat 32
-          %3 = OpTypeImage %float 2D 0 1 0 1 Unknown
-%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-      %arg_0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
-          %7 = OpTypeSampler
-%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
-      %arg_1 = OpVariable %_ptr_UniformConstant_7 UniformConstant
     %v4float = OpTypeVector %float 4
 %prevent_dce_block = OpTypeStruct %v4float
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+          %8 = OpTypeImage %float 2D 0 1 0 1 Unknown
+%_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+      %arg_0 = OpVariable %_ptr_UniformConstant_8 UniformConstant
+         %11 = OpTypeSampler
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+      %arg_1 = OpVariable %_ptr_UniformConstant_11 UniformConstant
          %12 = OpTypeFunction %v4float
-         %18 = OpTypeSampledImage %3
+         %18 = OpTypeSampledImage %8
     %v3float = OpTypeVector %float 3
     %v2float = OpTypeVector %float 2
     %float_1 = OpConstant %float 1
@@ -51,8 +51,8 @@
 %textureSample_d6b281 = OpFunction %v4float None %12
          %14 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function %32
-         %16 = OpLoad %7 %arg_1
-         %17 = OpLoad %3 %arg_0
+         %16 = OpLoad %11 %arg_1
+         %17 = OpLoad %8 %arg_0
          %19 = OpSampledImage %18 %17 %16
          %24 = OpCompositeExtract %float %23 0
          %25 = OpCompositeExtract %float %23 1

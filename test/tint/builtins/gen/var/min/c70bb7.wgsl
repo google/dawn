@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
+
+
 // fn min(vec<3, u32>, vec<3, u32>) -> vec<3, u32>
 fn min_c70bb7() -> vec3<u32>{
   var arg_0 = vec3<u32>(1u);
@@ -42,8 +45,6 @@ fn min_c70bb7() -> vec3<u32>{
   var res: vec3<u32> = min(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = min_c70bb7();

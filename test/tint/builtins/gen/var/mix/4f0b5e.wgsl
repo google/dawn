@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn mix(f32, f32, f32) -> f32
 fn mix_4f0b5e() -> f32{
   var arg_0 = 1.f;
@@ -43,8 +46,6 @@ fn mix_4f0b5e() -> f32{
   var res: f32 = mix(arg_0, arg_1, arg_2);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = mix_4f0b5e();

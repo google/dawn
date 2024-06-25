@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
 fn floor_60d7ea() -> vec3<f32> {
   var res : vec3<f32> = floor(vec3<f32>(1.5f));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
 
 @fragment
 fn fragment_main() {

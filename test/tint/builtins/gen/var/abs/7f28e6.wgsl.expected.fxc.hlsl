@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint2 abs_7f28e6() {
   uint2 arg_0 = (1u).xx;
   uint2 res = abs(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(abs_7f28e6()));

@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
+
 // fn fract(vec<3, f32>) -> vec<3, f32>
 fn fract_a49758() -> vec3<f32>{
   var res: vec3<f32> = fract(vec3<f32>(1.25f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = fract_a49758();

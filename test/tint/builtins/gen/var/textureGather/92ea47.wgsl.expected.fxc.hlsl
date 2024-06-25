@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<uint4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
 
@@ -7,8 +8,6 @@ uint4 textureGather_92ea47() {
   uint4 res = arg_1.GatherGreen(arg_2, float3(arg_3, float(arg_4)));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureGather_92ea47()));

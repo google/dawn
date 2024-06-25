@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
+
+
 // fn max(vec<2, f32>, vec<2, f32>) -> vec<2, f32>
 fn max_462050() -> vec2<f32>{
   var res: vec2<f32> = max(vec2<f32>(1.f), vec2<f32>(1.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = max_462050();

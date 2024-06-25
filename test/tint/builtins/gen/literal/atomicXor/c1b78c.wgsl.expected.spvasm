@@ -9,35 +9,35 @@
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %fragment_main OriginUpperLeft
                OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
                OpName %sb_rw_block "sb_rw_block"
                OpMemberName %sb_rw_block 0 "inner"
                OpName %SB_RW "SB_RW"
                OpMemberName %SB_RW 0 "arg_0"
                OpName %sb_rw "sb_rw"
-               OpName %prevent_dce_block "prevent_dce_block"
-               OpMemberName %prevent_dce_block 0 "inner"
-               OpName %prevent_dce "prevent_dce"
                OpName %atomicXor_c1b78c "atomicXor_c1b78c"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
                OpName %compute_main "compute_main"
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 0
+               OpDecorate %prevent_dce Binding 0
                OpDecorate %sb_rw_block Block
                OpMemberDecorate %sb_rw_block 0 Offset 0
                OpMemberDecorate %SB_RW 0 Offset 0
                OpDecorate %sb_rw DescriptorSet 0
                OpDecorate %sb_rw Binding 1
-               OpDecorate %prevent_dce_block Block
-               OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce DescriptorSet 0
-               OpDecorate %prevent_dce Binding 0
         %int = OpTypeInt 32 1
+%prevent_dce_block = OpTypeStruct %int
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
       %SB_RW = OpTypeStruct %int
 %sb_rw_block = OpTypeStruct %SB_RW
 %_ptr_StorageBuffer_sb_rw_block = OpTypePointer StorageBuffer %sb_rw_block
       %sb_rw = OpVariable %_ptr_StorageBuffer_sb_rw_block StorageBuffer
-%prevent_dce_block = OpTypeStruct %int
-%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
-%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
           %9 = OpTypeFunction %int
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1

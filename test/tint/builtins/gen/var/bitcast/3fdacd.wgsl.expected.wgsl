@@ -1,10 +1,10 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 fn bitcast_3fdacd() -> vec4<f32> {
   var arg_0 = vec4<i32>(1i);
   var res : vec4<f32> = bitcast<vec4<f32>>(arg_0);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {

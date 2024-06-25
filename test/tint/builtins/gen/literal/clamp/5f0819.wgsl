@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
+
+
 // fn clamp(vec<3, i32>, vec<3, i32>, vec<3, i32>) -> vec<3, i32>
 fn clamp_5f0819() -> vec3<i32>{
   var res: vec3<i32> = clamp(vec3<i32>(1i), vec3<i32>(1i), vec3<i32>(1i));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = clamp_5f0819();

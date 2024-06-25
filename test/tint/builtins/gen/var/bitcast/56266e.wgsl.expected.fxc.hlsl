@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint3 bitcast_56266e() {
   float3 arg_0 = (1.0f).xxx;
   uint3 res = asuint(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(bitcast_56266e()));

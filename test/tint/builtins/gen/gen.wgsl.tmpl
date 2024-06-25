@@ -47,6 +47,17 @@ See:
 {{- /* Generate enable directives */ -}}
 {{- template "EnableDirectives" $overload -}}
 
+{{- /* Keep track of binding numbers to satisfy limitations of the MSL backend with the Tint executable interface: https://crbug.com/42250109 */ -}}
+{{- $b := 0 -}}
+{{- if and (or $overload.CanBeUsedInStage.Fragment $overload.CanBeUsedInStage.Compute) (and $overload.ReturnType (IsDeclarable $overload.ReturnType))}}
+{{-   if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : {{template "Type" $overload.ReturnType -}};
+{{-   else}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : i32;
+{{    end}}
+{{    $b = 1}}
+{{  end}}
+
 {{- /* Generate RW storage buffer parameters */ -}}
 {{-   $sb_rw_fields := Eval "EmitBufferFields" "overload"          $overload
                                                "var_name"          "sb_rw"
@@ -57,7 +68,7 @@ See:
 struct SB_RW {
 {{- $sb_rw_fields -}}
 };
-@group(0) @binding(1) var<storage, read_write> sb_rw : SB_RW;
+@group(0) @binding({{$b}}) var<storage, read_write> sb_rw : SB_RW;
 {{    end -}}
 
 {{- /* Generate RO storage buffer parameters */ -}}
@@ -70,7 +81,7 @@ struct SB_RW {
 struct SB_RO {
 {{- $sb_ro_fields -}}
 };
-@group(0) @binding(1) var<storage, read> sb_ro : SB_RO;
+@group(0) @binding({{$b}}) var<storage, read> sb_ro : SB_RO;
 {{    end -}}
 
 {{- /* Generate uniform buffer parameters */ -}}
@@ -83,7 +94,7 @@ struct SB_RO {
 struct UB {
 {{- $ub_fields -}}
 };
-@group(0) @binding(1) var<uniform> ub : UB;
+@group(0) @binding({{$b}}) var<uniform> ub : UB;
 {{    end -}}
 
 {{- /* Generate module-scoped handle variables */ -}}
@@ -175,14 +186,6 @@ fn {{$permutation}}() {{/* preserve space after () */ -}}
 {{-     end}}
 {{-   end}}
 }
-
-{{-   if and (or $overload.CanBeUsedInStage.Fragment $overload.CanBeUsedInStage.Compute) (and $overload.ReturnType (IsDeclarable $overload.ReturnType))}}
-{{-     if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
-@group(0) @binding(0) var<storage, read_write> prevent_dce : {{template "Type" $overload.ReturnType -}};
-{{-     else}}
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-{{      end}}
-{{    end}}
 
 {{- if $overload.CanBeUsedInStage.Fragment }}
 @fragment

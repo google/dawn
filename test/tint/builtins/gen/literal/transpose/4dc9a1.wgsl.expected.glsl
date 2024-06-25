@@ -2,14 +2,14 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int transpose_4dc9a1() {
   mat3x2 res = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
   return ((res[0][0] == 0.0f) ? 1 : 0);
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -26,14 +26,14 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int transpose_4dc9a1() {
   mat3x2 res = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
   return ((res[0][0] == 0.0f) ? 1 : 0);
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

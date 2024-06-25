@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
+
+
 // fn extractBits(vec<3, u32>, u32, u32) -> vec<3, u32>
 fn extractBits_12b197() -> vec3<u32>{
   var res: vec3<u32> = extractBits(vec3<u32>(1u), 1u, 1u);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = extractBits_12b197();

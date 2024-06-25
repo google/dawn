@@ -2,15 +2,15 @@
 precision highp float;
 precision highp int;
 
-ivec3 insertBits_428b0b() {
-  ivec3 res = ivec3(3);
-  return res;
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
   uint pad;
 } prevent_dce;
+
+ivec3 insertBits_428b0b() {
+  ivec3 res = ivec3(3);
+  return res;
+}
 
 struct VertexOutput {
   vec4 pos;
@@ -27,15 +27,15 @@ void main() {
 }
 #version 310 es
 
-ivec3 insertBits_428b0b() {
-  ivec3 res = ivec3(3);
-  return res;
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
   uint pad;
 } prevent_dce;
+
+ivec3 insertBits_428b0b() {
+  ivec3 res = ivec3(3);
+  return res;
+}
 
 struct VertexOutput {
   vec4 pos;

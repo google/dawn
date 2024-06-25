@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 TextureCube arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 
@@ -7,8 +8,6 @@ float textureSampleCompareLevel_1568e3() {
   float res = arg_0.SampleCmpLevelZero(arg_1, arg_2, arg_3);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(textureSampleCompareLevel_1568e3()));

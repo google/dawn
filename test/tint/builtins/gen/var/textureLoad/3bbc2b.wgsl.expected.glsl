@@ -2,16 +2,16 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 layout(r32f) uniform highp image2D arg_0;
 vec4 textureLoad_3bbc2b() {
   int arg_1 = 1;
   vec4 res = imageLoad(arg_0, ivec2(arg_1, 0));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -28,16 +28,16 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 layout(r32f) uniform highp image2D arg_0;
 vec4 textureLoad_3bbc2b() {
   int arg_1 = 1;
   vec4 res = imageLoad(arg_0, ivec2(arg_1, 0));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

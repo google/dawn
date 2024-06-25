@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
+
 // fn max(u32, u32) -> u32
 fn max_0c0aae() -> u32{
   var res: u32 = max(1u, 1u);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = max_0c0aae();

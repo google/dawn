@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
+
 @group(1) @binding(0) var arg_0 : texture_multisampled_2d<u32>;
 
 fn textureLoad_c378ee() -> vec4<u32> {
@@ -6,8 +8,6 @@ fn textureLoad_c378ee() -> vec4<u32> {
   var res : vec4<u32> = textureLoad(arg_0, arg_1, arg_2);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
 
 @fragment
 fn fragment_main() {

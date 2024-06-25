@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
 // fn reverseBits(i32) -> i32
 fn reverseBits_7c4269() -> i32{
   var arg_0 = 1i;
   var res: i32 = reverseBits(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = reverseBits_7c4269();

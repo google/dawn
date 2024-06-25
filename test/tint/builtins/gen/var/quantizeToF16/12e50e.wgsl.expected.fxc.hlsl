@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float quantizeToF16_12e50e() {
   float arg_0 = 1.0f;
   float res = f16tof32(f32tof16(arg_0));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(quantizeToF16_12e50e()));

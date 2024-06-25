@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
+
+
 // fn round(vec<2, f32>) -> vec<2, f32>
 fn round_52c84d() -> vec2<f32>{
   var res: vec2<f32> = round(vec2<f32>(3.5f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = round_52c84d();

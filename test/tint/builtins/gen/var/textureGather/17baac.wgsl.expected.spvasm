@@ -13,11 +13,11 @@
                OpName %pos_1 "pos_1"
                OpName %prevent_dce_1 "prevent_dce_1"
                OpName %vertex_point_size "vertex_point_size"
-               OpName %arg_1 "arg_1"
-               OpName %arg_2 "arg_2"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_1 "arg_1"
+               OpName %arg_2 "arg_2"
                OpName %textureGather_17baac "textureGather_17baac"
                OpName %arg_3 "arg_3"
                OpName %arg_4 "arg_4"
@@ -34,14 +34,14 @@
                OpDecorate %prevent_dce_1 Location 0
                OpDecorate %prevent_dce_1 Flat
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpDecorate %arg_1 DescriptorSet 1
-               OpDecorate %arg_1 Binding 1
-               OpDecorate %arg_2 DescriptorSet 1
-               OpDecorate %arg_2 Binding 2
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
+               OpDecorate %arg_1 DescriptorSet 1
+               OpDecorate %arg_1 Binding 1
+               OpDecorate %arg_2 DescriptorSet 1
+               OpDecorate %arg_2 Binding 2
                OpMemberDecorate %VertexOutput 0 Offset 0
                OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
@@ -53,15 +53,15 @@
 %_ptr_Output_float = OpTypePointer Output %float
           %9 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %9
-         %12 = OpTypeImage %float 2D 0 1 0 1 Unknown
-%_ptr_UniformConstant_12 = OpTypePointer UniformConstant %12
-      %arg_1 = OpVariable %_ptr_UniformConstant_12 UniformConstant
-         %15 = OpTypeSampler
-%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
-      %arg_2 = OpVariable %_ptr_UniformConstant_15 UniformConstant
 %prevent_dce_block = OpTypeStruct %v4float
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+         %15 = OpTypeImage %float 2D 0 1 0 1 Unknown
+%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
+      %arg_1 = OpVariable %_ptr_UniformConstant_15 UniformConstant
+         %18 = OpTypeSampler
+%_ptr_UniformConstant_18 = OpTypePointer UniformConstant %18
+      %arg_2 = OpVariable %_ptr_UniformConstant_18 UniformConstant
          %19 = OpTypeFunction %v4float
     %v2float = OpTypeVector %float 2
     %float_1 = OpConstant %float 1
@@ -72,7 +72,7 @@
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_uint = OpTypePointer Function %uint
          %32 = OpConstantNull %uint
-         %36 = OpTypeSampledImage %12
+         %36 = OpTypeSampledImage %15
     %v3float = OpTypeVector %float 3
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
@@ -92,8 +92,8 @@
         %res = OpVariable %_ptr_Function_v4float Function %5
                OpStore %arg_3 %24
                OpStore %arg_4 %uint_1
-         %34 = OpLoad %15 %arg_2
-         %35 = OpLoad %12 %arg_1
+         %34 = OpLoad %18 %arg_2
+         %35 = OpLoad %15 %arg_1
          %37 = OpSampledImage %36 %35 %34
          %39 = OpLoad %v2float %arg_3
          %40 = OpCompositeExtract %float %39 0

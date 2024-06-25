@@ -4,13 +4,13 @@ float2 tint_unpack2x16snorm(uint param_0) {
   return clamp(float2(i) / 32767.0, -1.0, 1.0);
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float2 unpack2x16snorm_b4aea6() {
   uint arg_0 = 1u;
   float2 res = tint_unpack2x16snorm(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(unpack2x16snorm_b4aea6()));

@@ -1,13 +1,13 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
 fn dot_d0d179() -> f16 {
   var arg_0 = vec4<f16>(1.0h);
   var arg_1 = vec4<f16>(1.0h);
   var res : f16 = dot(arg_0, arg_1);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {

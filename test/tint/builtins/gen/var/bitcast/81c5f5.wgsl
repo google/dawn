@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
+
+
 // fn bitcast<T: vec2<u32>>(vec4<f16>) -> vec2<u32>
 fn bitcast_81c5f5() -> vec2<u32>{
   var arg_0 = vec4<f16>(1.h);
   var res: vec2<u32> = bitcast<vec2<u32>>(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = bitcast_81c5f5();

@@ -11,16 +11,16 @@ vec3 tint_atanh(vec3 x) {
   return tint_select(atanh(x), vec3(0.0f), greaterThanEqual(x, vec3(1.0f)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec3 inner;
+  uint pad;
+} prevent_dce;
+
 vec3 atanh_440cca() {
   vec3 arg_0 = vec3(0.5f);
   vec3 res = tint_atanh(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -46,16 +46,16 @@ vec3 tint_atanh(vec3 x) {
   return tint_select(atanh(x), vec3(0.0f), greaterThanEqual(x, vec3(1.0f)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec3 inner;
+  uint pad;
+} prevent_dce;
+
 vec3 atanh_440cca() {
   vec3 arg_0 = vec3(0.5f);
   vec3 res = tint_atanh(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

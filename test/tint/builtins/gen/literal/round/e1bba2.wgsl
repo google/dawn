@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn round(vec<3, f16>) -> vec<3, f16>
 fn round_e1bba2() -> vec3<f16>{
   var res: vec3<f16> = round(vec3<f16>(3.5h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = round_e1bba2();

@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float2 faceForward_e6908b() {
   float2 arg_0 = (1.0f).xx;
   float2 arg_1 = (1.0f).xx;
@@ -5,8 +7,6 @@ float2 faceForward_e6908b() {
   float2 res = faceforward(arg_0, arg_1, arg_2);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(faceForward_e6908b()));

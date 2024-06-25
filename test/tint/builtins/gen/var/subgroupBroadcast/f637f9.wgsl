@@ -37,6 +37,9 @@
 
 enable chromium_experimental_subgroups;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
+
+
 // fn subgroupBroadcast(value: vec<4, i32>, @const sourceLaneIndex: u32) -> vec<4, i32>
 fn subgroupBroadcast_f637f9() -> vec4<i32>{
   var arg_0 = vec4<i32>(1i);
@@ -44,8 +47,6 @@ fn subgroupBroadcast_f637f9() -> vec4<i32>{
   var res: vec4<i32> = subgroupBroadcast(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
-
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupBroadcast_f637f9();

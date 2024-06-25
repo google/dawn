@@ -40,6 +40,9 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn min(vec<3, f16>, vec<3, f16>) -> vec<3, f16>
 fn min_ab0acd() -> vec3<f16>{
   var arg_0 = vec3<f16>(1.h);
@@ -47,8 +50,6 @@ fn min_ab0acd() -> vec3<f16>{
   var res: vec3<f16> = min(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = min_ab0acd();

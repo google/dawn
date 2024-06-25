@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 struct SB_RW {
   arg_0 : atomic<i32>,
 }
@@ -8,8 +10,6 @@ fn atomicAdd_d32fe4() -> i32 {
   var res : i32 = atomicAdd(&(sb_rw.arg_0), 1i);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

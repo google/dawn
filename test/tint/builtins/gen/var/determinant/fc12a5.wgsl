@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn determinant(mat<2, 2, f16>) -> f16
 fn determinant_fc12a5() -> f16{
   var arg_0 = mat2x2<f16>(1.h, 1.h, 1.h, 1.h);
   var res: f16 = determinant(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = determinant_fc12a5();

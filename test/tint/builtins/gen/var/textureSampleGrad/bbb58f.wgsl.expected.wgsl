@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 @group(1) @binding(0) var arg_0 : texture_cube_array<f32>;
 
 @group(1) @binding(1) var arg_1 : sampler;
@@ -10,8 +12,6 @@ fn textureSampleGrad_bbb58f() -> vec4<f32> {
   var res : vec4<f32> = textureSampleGrad(arg_0, arg_1, arg_2, arg_3, arg_4, arg_5);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {

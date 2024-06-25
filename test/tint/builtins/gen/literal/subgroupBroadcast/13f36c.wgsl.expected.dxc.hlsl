@@ -1,9 +1,9 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 2> subgroupBroadcast_13f36c() {
   vector<float16_t, 2> res = WaveReadLaneAt((float16_t(1.0h)).xx, 1u);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 [numthreads(1, 1, 1)]
 void compute_main() {

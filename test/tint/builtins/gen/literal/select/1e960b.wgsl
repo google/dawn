@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
+
+
 // fn select(vec<2, u32>, vec<2, u32>, vec<2, bool>) -> vec<2, u32>
 fn select_1e960b() -> vec2<u32>{
   var res: vec2<u32> = select(vec2<u32>(1u), vec2<u32>(1u), vec2<bool>(true));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = select_1e960b();

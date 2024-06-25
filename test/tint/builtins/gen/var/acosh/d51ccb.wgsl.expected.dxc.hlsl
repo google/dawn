@@ -2,13 +2,13 @@ float4 tint_acosh(float4 x) {
   return log((x + sqrt(((x * x) - 1.0f))));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float4 acosh_d51ccb() {
   float4 arg_0 = (1.54308068752288818359f).xxxx;
   float4 res = tint_acosh(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(acosh_d51ccb()));

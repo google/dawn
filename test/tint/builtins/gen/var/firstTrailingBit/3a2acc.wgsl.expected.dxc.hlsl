@@ -13,13 +13,13 @@ int tint_first_trailing_bit(int v) {
   return int((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 int firstTrailingBit_3a2acc() {
   int arg_0 = 1;
   int res = tint_first_trailing_bit(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(firstTrailingBit_3a2acc()));

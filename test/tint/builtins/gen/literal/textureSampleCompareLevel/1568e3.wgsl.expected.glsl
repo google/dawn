@@ -2,16 +2,16 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 uniform highp samplerCubeShadow arg_0_arg_1;
 
 float textureSampleCompareLevel_1568e3() {
   float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -28,16 +28,16 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 uniform highp samplerCubeShadow arg_0_arg_1;
 
 float textureSampleCompareLevel_1568e3() {
   float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

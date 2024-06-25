@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
+
 fn insertBits_d86978() -> vec4<i32> {
   var arg_0 = vec4<i32>(1i);
   var arg_1 = vec4<i32>(1i);
@@ -6,8 +8,6 @@ fn insertBits_d86978() -> vec4<i32> {
   var res : vec4<i32> = insertBits(arg_0, arg_1, arg_2, arg_3);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
 
 @fragment
 fn fragment_main() {

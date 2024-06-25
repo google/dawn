@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn acos(vec<3, f16>) -> vec<3, f16>
 fn acos_f47057() -> vec3<f16>{
   var arg_0 = vec3<f16>(0.96891242171h);
   var res: vec3<f16> = acos(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = acos_f47057();

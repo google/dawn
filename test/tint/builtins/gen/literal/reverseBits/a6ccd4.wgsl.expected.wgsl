@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
+
 fn reverseBits_a6ccd4() -> vec3<u32> {
   var res : vec3<u32> = reverseBits(vec3<u32>(1u));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
 
 @fragment
 fn fragment_main() {

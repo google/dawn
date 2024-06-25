@@ -14,10 +14,10 @@
                OpName %pos_1 "pos_1"
                OpName %prevent_dce_1 "prevent_dce_1"
                OpName %vertex_point_size "vertex_point_size"
-               OpName %arg_0 "arg_0"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_0 "arg_0"
                OpName %textureLoad_99d8fa "textureLoad_99d8fa"
                OpName %arg_1 "arg_1"
                OpName %res "res"
@@ -33,12 +33,12 @@
                OpDecorate %prevent_dce_1 Location 0
                OpDecorate %prevent_dce_1 Flat
                OpDecorate %vertex_point_size BuiltIn PointSize
-               OpDecorate %arg_0 DescriptorSet 1
-               OpDecorate %arg_0 Binding 0
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
                OpMemberDecorate %VertexOutput 0 Offset 0
                OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
@@ -50,12 +50,12 @@
 %_ptr_Output_float = OpTypePointer Output %float
           %9 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %9
-         %12 = OpTypeImage %float 3D 0 0 0 2 R8
-%_ptr_UniformConstant_12 = OpTypePointer UniformConstant %12
-      %arg_0 = OpVariable %_ptr_UniformConstant_12 UniformConstant
 %prevent_dce_block = OpTypeStruct %v4float
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+         %15 = OpTypeImage %float 3D 0 0 0 2 R8
+%_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
+      %arg_0 = OpVariable %_ptr_UniformConstant_15 UniformConstant
          %16 = OpTypeFunction %v4float
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
@@ -80,7 +80,7 @@
       %arg_1 = OpVariable %_ptr_Function_v3int Function %25
         %res = OpVariable %_ptr_Function_v4float Function %5
                OpStore %arg_1 %22
-         %27 = OpLoad %12 %arg_0
+         %27 = OpLoad %15 %arg_0
          %28 = OpLoad %v3int %arg_1
          %26 = OpImageRead %v4float %27 %28
                OpStore %res %26

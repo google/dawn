@@ -40,6 +40,9 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
+
+
 // fn max(vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn max_34956e() -> vec2<f16>{
   var arg_0 = vec2<f16>(1.h);
@@ -47,8 +50,6 @@ fn max_34956e() -> vec2<f16>{
   var res: vec2<f16> = max(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = max_34956e();

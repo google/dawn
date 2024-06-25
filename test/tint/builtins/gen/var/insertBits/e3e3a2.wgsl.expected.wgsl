@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 fn insertBits_e3e3a2() -> u32 {
   var arg_0 = 1u;
   var arg_1 = 1u;
@@ -6,8 +8,6 @@ fn insertBits_e3e3a2() -> u32 {
   var res : u32 = insertBits(arg_0, arg_1, arg_2, arg_3);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

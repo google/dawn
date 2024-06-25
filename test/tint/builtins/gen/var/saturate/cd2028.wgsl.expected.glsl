@@ -7,15 +7,15 @@ f16vec2 tint_saturate(f16vec2 v) {
   return clamp(v, f16vec2(0.0hf), f16vec2(1.0hf));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec2 inner;
+} prevent_dce;
+
 f16vec2 saturate_cd2028() {
   f16vec2 arg_0 = f16vec2(2.0hf);
   f16vec2 res = tint_saturate(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  f16vec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -37,15 +37,15 @@ f16vec2 tint_saturate(f16vec2 v) {
   return clamp(v, f16vec2(0.0hf), f16vec2(1.0hf));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  f16vec2 inner;
+} prevent_dce;
+
 f16vec2 saturate_cd2028() {
   f16vec2 arg_0 = f16vec2(2.0hf);
   f16vec2 res = tint_saturate(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  f16vec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

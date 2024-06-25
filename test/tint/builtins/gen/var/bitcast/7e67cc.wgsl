@@ -35,14 +35,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
 // fn bitcast<T: i32>(i32) -> i32
 fn bitcast_7e67cc() -> i32{
   var arg_0 = 1i;
   var res: i32 = bitcast<i32>(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = bitcast_7e67cc();

@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 3> clamp_b195eb() {
   vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> arg_1 = (float16_t(1.0h)).xxx;
@@ -5,8 +7,6 @@ vector<float16_t, 3> clamp_b195eb() {
   vector<float16_t, 3> res = clamp(arg_0, arg_1, arg_2);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, clamp_b195eb());

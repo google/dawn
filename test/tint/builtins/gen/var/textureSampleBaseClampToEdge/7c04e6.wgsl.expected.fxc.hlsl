@@ -29,6 +29,7 @@ Texture2D<float4> ext_tex_plane_1 : register(t2, space1);
 cbuffer cbuffer_ext_tex_params : register(b3, space1) {
   uint4 ext_tex_params[17];
 };
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
@@ -118,8 +119,6 @@ float4 textureSampleBaseClampToEdge_7c04e6() {
   float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, arg_2, ext_tex_params_load(0u));
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureSampleBaseClampToEdge_7c04e6()));

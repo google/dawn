@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DMS<int4> arg_0 : register(t0, space1);
 
 uint textureNumSamples_c1a777() {
@@ -6,8 +7,6 @@ uint textureNumSamples_c1a777() {
   uint res = tint_tmp.z;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(textureNumSamples_c1a777()));

@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float select_416e14() {
   float arg_0 = 1.0f;
   float arg_1 = 1.0f;
@@ -5,8 +7,6 @@ float select_416e14() {
   float res = (arg_2 ? arg_1 : arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(select_416e14()));

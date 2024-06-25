@@ -8,15 +8,15 @@ ivec4 tint_unpack_4xi8(uint a) {
   return (a_vec4i >> uvec4(24u));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 ivec4 unpack4xI8_830900() {
   uint arg_0 = 1u;
   ivec4 res = tint_unpack_4xi8(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -39,15 +39,15 @@ ivec4 tint_unpack_4xi8(uint a) {
   return (a_vec4i >> uvec4(24u));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 ivec4 unpack4xI8_830900() {
   uint arg_0 = 1u;
   ivec4 res = tint_unpack_4xi8(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

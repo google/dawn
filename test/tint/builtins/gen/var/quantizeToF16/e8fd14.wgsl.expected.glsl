@@ -9,16 +9,16 @@ vec3 tint_quantizeToF16(vec3 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec3 inner;
+  uint pad;
+} prevent_dce;
+
 vec3 quantizeToF16_e8fd14() {
   vec3 arg_0 = vec3(1.0f);
   vec3 res = tint_quantizeToF16(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -42,16 +42,16 @@ vec3 tint_quantizeToF16(vec3 param_0) {
 }
 
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec3 inner;
+  uint pad;
+} prevent_dce;
+
 vec3 quantizeToF16_e8fd14() {
   vec3 arg_0 = vec3(1.0f);
   vec3 res = tint_quantizeToF16(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

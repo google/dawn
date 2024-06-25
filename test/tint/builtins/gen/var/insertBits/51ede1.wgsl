@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
+
+
 // fn insertBits(vec<4, u32>, vec<4, u32>, u32, u32) -> vec<4, u32>
 fn insertBits_51ede1() -> vec4<u32>{
   var arg_0 = vec4<u32>(1u);
@@ -44,8 +47,6 @@ fn insertBits_51ede1() -> vec4<u32>{
   var res: vec4<u32> = insertBits(arg_0, arg_1, arg_2, arg_3);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = insertBits_51ede1();

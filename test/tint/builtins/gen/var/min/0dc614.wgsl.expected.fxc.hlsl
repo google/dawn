@@ -1,11 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 uint4 min_0dc614() {
   uint4 arg_0 = (1u).xxxx;
   uint4 arg_1 = (1u).xxxx;
   uint4 res = min(arg_0, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(min_0dc614()));

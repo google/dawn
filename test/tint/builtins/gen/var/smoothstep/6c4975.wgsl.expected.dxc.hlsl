@@ -1,3 +1,5 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float smoothstep_6c4975() {
   float arg_0 = 2.0f;
   float arg_1 = 4.0f;
@@ -5,8 +7,6 @@ float smoothstep_6c4975() {
   float res = smoothstep(arg_0, arg_1, arg_2);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(smoothstep_6c4975()));

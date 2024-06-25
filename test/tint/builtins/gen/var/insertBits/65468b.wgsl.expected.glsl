@@ -8,6 +8,10 @@ int tint_insert_bits(int v, int n, uint offset, uint count) {
   return bitfieldInsert(v, n, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int insertBits_65468b() {
   int arg_0 = 1;
   int arg_1 = 1;
@@ -16,10 +20,6 @@ int insertBits_65468b() {
   int res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -42,6 +42,10 @@ int tint_insert_bits(int v, int n, uint offset, uint count) {
   return bitfieldInsert(v, n, int(s), int((e - s)));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int insertBits_65468b() {
   int arg_0 = 1;
   int arg_1 = 1;
@@ -50,10 +54,6 @@ int insertBits_65468b() {
   int res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

@@ -34,6 +34,9 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 @group(1) @binding(0) var arg_0: texture_external;
 @group(1) @binding(1) var arg_1: sampler;
 
@@ -43,8 +46,6 @@ fn textureSampleBaseClampToEdge_7c04e6() -> vec4<f32>{
   var res: vec4<f32> = textureSampleBaseClampToEdge(arg_0, arg_1, arg_2);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = textureSampleBaseClampToEdge_7c04e6();

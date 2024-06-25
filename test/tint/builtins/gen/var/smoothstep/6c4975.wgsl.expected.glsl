@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 float smoothstep_6c4975() {
   float arg_0 = 2.0f;
   float arg_1 = 4.0f;
@@ -9,10 +13,6 @@ float smoothstep_6c4975() {
   float res = smoothstep(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -29,6 +29,10 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 float smoothstep_6c4975() {
   float arg_0 = 2.0f;
   float arg_1 = 4.0f;
@@ -36,10 +40,6 @@ float smoothstep_6c4975() {
   float res = smoothstep(arg_0, arg_1, arg_2);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

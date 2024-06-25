@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
+
 // fn distance(vec<2, f32>, vec<2, f32>) -> f32
 fn distance_aa4055() -> f32{
   var res: f32 = distance(vec2<f32>(1.f), vec2<f32>(1.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = distance_aa4055();

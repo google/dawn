@@ -40,15 +40,16 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
+
 // fn transpose(mat<2, 3, f16>) -> mat<3, 2, f16>
 fn transpose_d6faec() -> i32{
   var arg_0 = mat2x3<f16>(1.h, 1.h, 1.h, 1.h, 1.h, 1.h);
   var res: mat3x2<f16> = transpose(arg_0);
   return select(0, 1, res[0][0] == 0);
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-
 @fragment
 fn fragment_main() {
   prevent_dce = transpose_d6faec();

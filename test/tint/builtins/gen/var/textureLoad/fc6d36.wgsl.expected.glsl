@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 layout(rgba16i) uniform highp readonly iimage2DArray arg_0;
 ivec4 textureLoad_fc6d36() {
   ivec2 arg_1 = ivec2(1);
@@ -9,10 +13,6 @@ ivec4 textureLoad_fc6d36() {
   ivec4 res = imageLoad(arg_0, ivec3(arg_1, arg_2));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -29,6 +29,10 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 layout(rgba16i) uniform highp readonly iimage2DArray arg_0;
 ivec4 textureLoad_fc6d36() {
   ivec2 arg_1 = ivec2(1);
@@ -36,10 +40,6 @@ ivec4 textureLoad_fc6d36() {
   ivec4 res = imageLoad(arg_0, ivec3(arg_1, arg_2));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

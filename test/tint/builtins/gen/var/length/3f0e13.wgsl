@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn length(vec<2, f16>) -> f16
 fn length_3f0e13() -> f16{
   var arg_0 = vec2<f16>(0.h);
   var res: f16 = length(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = length_3f0e13();

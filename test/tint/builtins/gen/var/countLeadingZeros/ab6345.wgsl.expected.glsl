@@ -22,16 +22,16 @@ uvec3 tint_count_leading_zeros(uvec3 v) {
   return uvec3((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uvec3 countLeadingZeros_ab6345() {
   uvec3 arg_0 = uvec3(1u);
   uvec3 res = tint_count_leading_zeros(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -68,16 +68,16 @@ uvec3 tint_count_leading_zeros(uvec3 v) {
   return uvec3((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec3 inner;
+  uint pad;
+} prevent_dce;
+
 uvec3 countLeadingZeros_ab6345() {
   uvec3 arg_0 = uvec3(1u);
   uvec3 res = tint_count_leading_zeros(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uvec3 inner;
-  uint pad;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

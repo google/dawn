@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn acosh(f16) -> f16
 fn acosh_a37dfe() -> f16{
   var res: f16 = acosh(1.5430806348h);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = acosh_a37dfe();

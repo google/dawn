@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
+
 // fn sqrt(vec<3, f32>) -> vec<3, f32>
 fn sqrt_f8c59a() -> vec3<f32>{
   var res: vec3<f32> = sqrt(vec3<f32>(1.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = sqrt_f8c59a();

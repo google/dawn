@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 struct SB_RW {
   uint arg_0;
 };
@@ -14,10 +18,6 @@ uint atomicLoad_fe6cc3() {
   uint res = atomicOr(sb_rw.inner.arg_0, 0u);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 void fragment_main() {
   prevent_dce.inner = atomicLoad_fe6cc3();
@@ -29,6 +29,10 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 struct SB_RW {
   uint arg_0;
 };
@@ -41,10 +45,6 @@ uint atomicLoad_fe6cc3() {
   uint res = atomicOr(sb_rw.inner.arg_0, 0u);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 void compute_main() {
   prevent_dce.inner = atomicLoad_fe6cc3();

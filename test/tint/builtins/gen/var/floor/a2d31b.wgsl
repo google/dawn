@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
+
+
 // fn floor(vec<4, f16>) -> vec<4, f16>
 fn floor_a2d31b() -> vec4<f16>{
   var arg_0 = vec4<f16>(1.5h);
   var res: vec4<f16> = floor(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = floor_a2d31b();

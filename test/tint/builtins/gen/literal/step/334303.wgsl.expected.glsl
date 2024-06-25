@@ -2,15 +2,15 @@
 precision highp float;
 precision highp int;
 
-vec3 step_334303() {
-  vec3 res = vec3(1.0f);
-  return res;
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
   uint pad;
 } prevent_dce;
+
+vec3 step_334303() {
+  vec3 res = vec3(1.0f);
+  return res;
+}
 
 struct VertexOutput {
   vec4 pos;
@@ -27,15 +27,15 @@ void main() {
 }
 #version 310 es
 
-vec3 step_334303() {
-  vec3 res = vec3(1.0f);
-  return res;
-}
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
   uint pad;
 } prevent_dce;
+
+vec3 step_334303() {
+  vec3 res = vec3(1.0f);
+  return res;
+}
 
 struct VertexOutput {
   vec4 pos;

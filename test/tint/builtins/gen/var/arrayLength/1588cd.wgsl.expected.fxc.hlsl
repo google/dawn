@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 ByteAddressBuffer sb_ro : register(t1);
 
 uint arrayLength_1588cd() {
@@ -7,8 +8,6 @@ uint arrayLength_1588cd() {
   uint res = tint_symbol_4;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store(0u, asuint(arrayLength_1588cd()));

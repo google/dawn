@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn floor(f16) -> f16
 fn floor_b6e09c() -> f16{
   var arg_0 = 1.5h;
   var res: f16 = floor(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = floor_b6e09c();

@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 RWTexture2DArray<int4> arg_0 : register(u0, space1);
 
 uint2 textureDimensions_674058() {
@@ -6,8 +7,6 @@ uint2 textureDimensions_674058() {
   uint2 res = tint_tmp.xy;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(textureDimensions_674058()));

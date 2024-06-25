@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
 // fn extractBits(i32, u32, u32) -> i32
 fn extractBits_249874() -> i32{
   var res: i32 = extractBits(1i, 1u, 1u);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = extractBits_249874();

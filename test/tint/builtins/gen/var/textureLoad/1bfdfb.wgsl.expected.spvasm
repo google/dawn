@@ -46,10 +46,10 @@
                OpMemberName %ExternalTextureParams_std140 16 "visibleSize"
                OpMemberName %ExternalTextureParams_std140 17 "plane1CoordFactor"
                OpName %ext_tex_params "ext_tex_params"
-               OpName %arg_0 "arg_0"
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
+               OpName %arg_0 "arg_0"
                OpName %tint_ftou "tint_ftou"
                OpName %v "v"
                OpName %gammaCorrection "gammaCorrection"
@@ -130,12 +130,12 @@
                OpDecorate %ext_tex_params NonWritable
                OpDecorate %ext_tex_params DescriptorSet 1
                OpDecorate %ext_tex_params Binding 2
-               OpDecorate %arg_0 DescriptorSet 1
-               OpDecorate %arg_0 Binding 0
                OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
                OpDecorate %prevent_dce DescriptorSet 0
                OpDecorate %prevent_dce Binding 0
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
                OpMemberDecorate %ExternalTextureParams 0 Offset 0
                OpMemberDecorate %ExternalTextureParams 1 Offset 4
                OpMemberDecorate %ExternalTextureParams 2 Offset 16
@@ -183,10 +183,10 @@
 %ext_tex_params_block_std140 = OpTypeStruct %ExternalTextureParams_std140
 %_ptr_Uniform_ext_tex_params_block_std140 = OpTypePointer Uniform %ext_tex_params_block_std140
 %ext_tex_params = OpVariable %_ptr_Uniform_ext_tex_params_block_std140 Uniform
-      %arg_0 = OpVariable %_ptr_UniformConstant_12 UniformConstant
 %prevent_dce_block = OpTypeStruct %v4float
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+      %arg_0 = OpVariable %_ptr_UniformConstant_12 UniformConstant
          %28 = OpTypeFunction %v2uint %v2float
 %float_4_29496704e_09 = OpConstant %float 4.29496704e+09
          %34 = OpConstantComposite %v2float %float_4_29496704e_09 %float_4_29496704e_09

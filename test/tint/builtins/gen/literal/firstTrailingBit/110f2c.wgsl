@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
+
+
 // fn firstTrailingBit(vec<4, u32>) -> vec<4, u32>
 fn firstTrailingBit_110f2c() -> vec4<u32>{
   var res: vec4<u32> = firstTrailingBit(vec4<u32>(1u));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = firstTrailingBit_110f2c();

@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 layout(binding = 1, std430) buffer SB_RW_ssbo {
   float arg_0[];
 } sb_rw;
@@ -10,10 +14,6 @@ uint arrayLength_cdd123() {
   uint res = uint(sb_rw.arg_0.length());
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -30,6 +30,10 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 layout(binding = 1, std430) buffer SB_RW_ssbo {
   float arg_0[];
 } sb_rw;
@@ -38,10 +42,6 @@ uint arrayLength_cdd123() {
   uint res = uint(sb_rw.arg_0.length());
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

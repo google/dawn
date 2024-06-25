@@ -40,6 +40,9 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn atan2(f16, f16) -> f16
 fn atan2_ca698e() -> f16{
   var arg_0 = 1.h;
@@ -47,8 +50,6 @@ fn atan2_ca698e() -> f16{
   var res: f16 = atan2(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = atan2_ca698e();

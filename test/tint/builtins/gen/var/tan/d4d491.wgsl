@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn tan(f16) -> f16
 fn tan_d4d491() -> f16{
   var arg_0 = 1.h;
   var res: f16 = tan(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = tan_d4d491();

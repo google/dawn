@@ -1,10 +1,10 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 fn asin_064953() -> vec4<f32> {
   var arg_0 = vec4<f32>(0.47942554950714111328f);
   var res : vec4<f32> = asin(arg_0);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {

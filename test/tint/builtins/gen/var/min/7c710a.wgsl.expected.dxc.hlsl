@@ -1,11 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 4> min_7c710a() {
   vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> arg_1 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = min(arg_0, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, min_7c710a());

@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 fn transpose_4dc9a1() -> i32 {
   var res : mat3x2<f32> = transpose(mat2x3<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f));
   return select(0, 1, (res[0][0] == 0));
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

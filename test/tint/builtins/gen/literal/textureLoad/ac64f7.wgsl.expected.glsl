@@ -2,15 +2,15 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 layout(rgba8) uniform highp readonly image2DArray arg_0;
 vec4 textureLoad_ac64f7() {
   vec4 res = imageLoad(arg_0, ivec3(uvec3(uvec2(1u), 1u))).bgra;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -27,15 +27,15 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  vec4 inner;
+} prevent_dce;
+
 layout(rgba8) uniform highp readonly image2DArray arg_0;
 vec4 textureLoad_ac64f7() {
   vec4 res = imageLoad(arg_0, ivec3(uvec3(uvec2(1u), 1u))).bgra;
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  vec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

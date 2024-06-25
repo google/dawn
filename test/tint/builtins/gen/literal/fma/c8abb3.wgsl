@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
+
 // fn fma(f16, f16, f16) -> f16
 fn fma_c8abb3() -> f16{
   var res: f16 = fma(1.h, 1.h, 1.h);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
-
 @fragment
 fn fragment_main() {
   prevent_dce = fma_c8abb3();

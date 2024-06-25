@@ -7,15 +7,15 @@ float16_t tint_saturate(float16_t v) {
   return clamp(v, 0.0hf, 1.0hf);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t saturate_e8df56() {
   float16_t arg_0 = 2.0hf;
   float16_t res = tint_saturate(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -37,15 +37,15 @@ float16_t tint_saturate(float16_t v) {
   return clamp(v, 0.0hf, 1.0hf);
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t saturate_e8df56() {
   float16_t arg_0 = 2.0hf;
   float16_t res = tint_saturate(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

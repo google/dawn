@@ -1,11 +1,11 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 3> ldexp_7485ce() {
   vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   int3 arg_1 = (1).xxx;
   vector<float16_t, 3> res = ldexp(arg_0, arg_1);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, ldexp_7485ce());

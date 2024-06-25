@@ -34,6 +34,9 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 @group(1) @binding(0) var arg_0: texture_storage_2d_array<rgba8snorm, read>;
 
 // fn textureLoad(texture: texture_storage_2d_array<rgba8snorm, read>, coords: vec2<u32>, array_index: i32) -> vec4<f32>
@@ -41,8 +44,6 @@ fn textureLoad_72bb3c() -> vec4<f32>{
   var res: vec4<f32> = textureLoad(arg_0, vec2<u32>(1u), 1i);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = textureLoad_72bb3c();

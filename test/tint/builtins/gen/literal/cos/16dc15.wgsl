@@ -35,13 +35,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
+
+
 // fn cos(vec<3, f32>) -> vec<3, f32>
 fn cos_16dc15() -> vec3<f32>{
   var res: vec3<f32> = cos(vec3<f32>(0.f));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = cos_16dc15();

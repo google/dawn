@@ -7,15 +7,15 @@ float16_t tint_atanh(float16_t x) {
   return ((x >= 1.0hf) ? 0.0hf : atanh(x));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t atanh_d2d8cd() {
   float16_t arg_0 = 0.5hf;
   float16_t res = tint_atanh(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -37,15 +37,15 @@ float16_t tint_atanh(float16_t x) {
   return ((x >= 1.0hf) ? 0.0hf : atanh(x));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float16_t inner;
+} prevent_dce;
+
 float16_t atanh_d2d8cd() {
   float16_t arg_0 = 0.5hf;
   float16_t res = tint_atanh(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float16_t inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

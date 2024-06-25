@@ -1,11 +1,11 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
+
 fn bitcast_23c8bd() -> f32 {
   var res : f32 = bitcast<f32>(vec2<f16>(1.0h));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
 
 @fragment
 fn fragment_main() {

@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
+
 // fn smoothstep(vec<4, f32>, vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn smoothstep_40864c() -> vec4<f32>{
   var arg_0 = vec4<f32>(2.f);
@@ -43,8 +46,6 @@ fn smoothstep_40864c() -> vec4<f32>{
   var res: vec4<f32> = smoothstep(arg_0, arg_1, arg_2);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = smoothstep_40864c();

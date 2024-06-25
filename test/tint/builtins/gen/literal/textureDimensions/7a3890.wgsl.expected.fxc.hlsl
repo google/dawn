@@ -1,3 +1,4 @@
+RWByteAddressBuffer prevent_dce : register(u0);
 Texture3D<uint4> arg_0 : register(t0, space1);
 
 uint3 textureDimensions_7a3890() {
@@ -6,8 +7,6 @@ uint3 textureDimensions_7a3890() {
   uint3 res = tint_tmp;
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(textureDimensions_7a3890()));

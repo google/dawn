@@ -2,13 +2,13 @@ vector<float16_t, 3> tint_atanh(vector<float16_t, 3> x) {
   return (log(((float16_t(1.0h) + x) / (float16_t(1.0h) - x))) * float16_t(0.5h));
 }
 
+RWByteAddressBuffer prevent_dce : register(u0);
+
 vector<float16_t, 3> atanh_ec4b06() {
   vector<float16_t, 3> arg_0 = (float16_t(0.5h)).xxx;
   vector<float16_t, 3> res = tint_atanh(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, atanh_ec4b06());

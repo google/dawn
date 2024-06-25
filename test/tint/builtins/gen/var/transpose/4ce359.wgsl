@@ -35,15 +35,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
+
+
 // fn transpose(mat<2, 4, f32>) -> mat<4, 2, f32>
 fn transpose_4ce359() -> i32{
   var arg_0 = mat2x4<f32>(1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f);
   var res: mat4x2<f32> = transpose(arg_0);
   return select(0, 1, res[0][0] == 0);
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-
 @fragment
 fn fragment_main() {
   prevent_dce = transpose_4ce359();

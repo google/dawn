@@ -40,14 +40,15 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn normalize(vec<3, f16>) -> vec<3, f16>
 fn normalize_39d5ec() -> vec3<f16>{
   var arg_0 = vec3<f16>(1.h);
   var res: vec3<f16> = normalize(arg_0);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = normalize_39d5ec();

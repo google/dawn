@@ -1,11 +1,11 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+
 fn ldexp_65a7bd() -> vec4<f32> {
   var arg_0 = vec4<f32>(1.0f);
   const arg_1 = vec4(1);
   var res : vec4<f32> = ldexp(arg_0, arg_1);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 
 @fragment
 fn fragment_main() {

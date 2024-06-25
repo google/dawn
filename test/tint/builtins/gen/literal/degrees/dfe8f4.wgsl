@@ -40,13 +40,14 @@
 
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
+
+
 // fn degrees(vec<3, f16>) -> vec<3, f16>
 fn degrees_dfe8f4() -> vec3<f16>{
   var res: vec3<f16> = degrees(vec3<f16>(1.h));
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f16>;
-
 @fragment
 fn fragment_main() {
   prevent_dce = degrees_dfe8f4();

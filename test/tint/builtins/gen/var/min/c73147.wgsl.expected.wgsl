@@ -1,11 +1,11 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 fn min_c73147() -> i32 {
   var arg_0 = 1i;
   var arg_1 = 1i;
   var res : i32 = min(arg_0, arg_1);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
 
 @fragment
 fn fragment_main() {

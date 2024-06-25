@@ -1,3 +1,5 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 struct SB_RW {
   arg_0 : atomic<u32>,
 }
@@ -8,8 +10,6 @@ fn atomicOr_5e95d4() -> u32 {
   var res : u32 = atomicOr(&(sb_rw.arg_0), 1u);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
 
 @fragment
 fn fragment_main() {

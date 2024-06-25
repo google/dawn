@@ -1,11 +1,11 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
+
 fn ldexp_217a31() -> vec2<f16> {
   var res : vec2<f16> = ldexp(vec2<f16>(1.0h), vec2(1));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
 
 @fragment
 fn fragment_main() {

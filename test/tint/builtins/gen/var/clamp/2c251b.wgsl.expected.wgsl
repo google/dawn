@@ -1,5 +1,7 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
+
 fn clamp_2c251b() -> vec4<f16> {
   var arg_0 = vec4<f16>(1.0h);
   var arg_1 = vec4<f16>(1.0h);
@@ -7,8 +9,6 @@ fn clamp_2c251b() -> vec4<f16> {
   var res : vec4<f16> = clamp(arg_0, arg_1, arg_2);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f16>;
 
 @fragment
 fn fragment_main() {

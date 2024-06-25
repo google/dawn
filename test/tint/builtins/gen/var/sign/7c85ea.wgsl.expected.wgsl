@@ -1,12 +1,12 @@
 enable f16;
 
+@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
+
 fn sign_7c85ea() -> f16 {
   var arg_0 = 1.0h;
   var res : f16 = sign(arg_0);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f16;
 
 @fragment
 fn fragment_main() {

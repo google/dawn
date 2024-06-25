@@ -2,6 +2,10 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 uniform highp isampler2DArray arg_0_1;
 ivec4 textureLoad_2363be() {
   uvec2 arg_1 = uvec2(1u);
@@ -10,10 +14,6 @@ ivec4 textureLoad_2363be() {
   ivec4 res = texelFetch(arg_0_1, ivec3(uvec3(arg_1, uint(arg_2))), int(arg_3));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -30,6 +30,10 @@ void main() {
 }
 #version 310 es
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 uniform highp isampler2DArray arg_0_1;
 ivec4 textureLoad_2363be() {
   uvec2 arg_1 = uvec2(1u);
@@ -38,10 +42,6 @@ ivec4 textureLoad_2363be() {
   ivec4 res = texelFetch(arg_0_1, ivec3(uvec3(arg_1, uint(arg_2))), int(arg_3));
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec4 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

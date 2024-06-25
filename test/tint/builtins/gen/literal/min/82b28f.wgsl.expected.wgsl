@@ -1,9 +1,9 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
+
 fn min_82b28f() -> vec2<u32> {
   var res : vec2<u32> = min(vec2<u32>(1u), vec2<u32>(1u));
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
 
 @fragment
 fn fragment_main() {

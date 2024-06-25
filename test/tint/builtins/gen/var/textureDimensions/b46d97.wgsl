@@ -34,6 +34,9 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 @group(1) @binding(0) var arg_0: texture_1d<i32>;
 
 // fn textureDimensions(texture: texture_1d<i32>, level: i32) -> u32
@@ -42,8 +45,6 @@ fn textureDimensions_b46d97() -> u32{
   var res: u32 = textureDimensions(arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = textureDimensions_b46d97();

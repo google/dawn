@@ -1,10 +1,10 @@
+RWByteAddressBuffer prevent_dce : register(u0);
+
 float4 floor_3bccc4() {
   float4 arg_0 = (1.5f).xxxx;
   float4 res = floor(arg_0);
   return res;
 }
-
-RWByteAddressBuffer prevent_dce : register(u0);
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(floor_3bccc4()));

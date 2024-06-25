@@ -3,14 +3,14 @@
 precision highp float;
 precision highp int;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 ivec2 bitcast_214f23() {
   ivec2 res = ivec2(1006648320);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -28,14 +28,14 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec2 inner;
+} prevent_dce;
+
 ivec2 bitcast_214f23() {
   ivec2 res = ivec2(1006648320);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  ivec2 inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

@@ -1,11 +1,11 @@
+@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
+
 @group(1) @binding(0) var arg_0 : texture_2d_array<u32>;
 
 fn textureLoad_1b051f() -> vec4<u32> {
   var res : vec4<u32> = textureLoad(arg_0, vec2<i32>(1i), 1u, 1u);
   return res;
 }
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
 
 @fragment
 fn fragment_main() {

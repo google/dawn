@@ -6,16 +6,16 @@ int tint_int_dot(ivec4 a, ivec4 b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int dot_ef6b1d() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
   int res = tint_int_dot(arg_0, arg_1);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -36,16 +36,16 @@ int tint_int_dot(ivec4 a, ivec4 b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  int inner;
+} prevent_dce;
+
 int dot_ef6b1d() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
   int res = tint_int_dot(arg_0, arg_1);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  int inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

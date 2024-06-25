@@ -34,6 +34,9 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
+
 struct SB_RW {
   arg_0: atomic<u32>,
 };
@@ -45,8 +48,6 @@ fn atomicMin_c67a74() -> u32{
   var res: u32 = atomicMin(&sb_rw.arg_0, arg_1);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : u32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = atomicMin_c67a74();

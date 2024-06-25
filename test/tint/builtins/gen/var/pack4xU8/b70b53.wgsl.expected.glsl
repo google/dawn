@@ -11,15 +11,15 @@ uint tint_pack_4xu8(uvec4 a) {
   return tint_int_dot(a_u8, uvec4(1u));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint pack4xU8_b70b53() {
   uvec4 arg_0 = uvec4(1u);
   uint res = tint_pack_4xu8(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;
@@ -45,15 +45,15 @@ uint tint_pack_4xu8(uvec4 a) {
   return tint_int_dot(a_u8, uvec4(1u));
 }
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 uint pack4xU8_b70b53() {
   uvec4 arg_0 = uvec4(1u);
   uint res = tint_pack_4xu8(arg_0);
   return res;
 }
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct VertexOutput {
   vec4 pos;

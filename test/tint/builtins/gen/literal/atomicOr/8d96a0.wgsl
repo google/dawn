@@ -34,6 +34,9 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
+
 struct SB_RW {
   arg_0: atomic<i32>,
 };
@@ -44,8 +47,6 @@ fn atomicOr_8d96a0() -> i32{
   var res: i32 = atomicOr(&sb_rw.arg_0, 1i);
   return res;
 }
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
 @fragment
 fn fragment_main() {
   prevent_dce = atomicOr_8d96a0();
