@@ -377,6 +377,14 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
         adapters.push_back(
             CreateAdapter(physicalDevice, featureLevel, togglesDesc, unpacked->powerPreference));
     }
+
+    if (options->backendType == wgpu::BackendType::D3D11 ||
+        options->backendType == wgpu::BackendType::D3D12) {
+        // If a D3D backend was requested, the order of the adapters returned by DXGI should be
+        // preserved instead of sorting by whether they are integrated vs. discrete. DXGI
+        // returns the correct order based on system settings and configuration.
+        return adapters;
+    }
     return SortAdapters(std::move(adapters), options);
 }
 

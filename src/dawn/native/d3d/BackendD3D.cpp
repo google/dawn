@@ -61,6 +61,17 @@ ResultOrError<ComPtr<IDXGIFactory4>> CreateFactory(const PlatformFunctions* func
     return std::move(factory);
 }
 
+DXGI_GPU_PREFERENCE ToDXGIPowerPreference(wgpu::PowerPreference powerPreference) {
+    switch (powerPreference) {
+        case wgpu::PowerPreference::Undefined:
+            return DXGI_GPU_PREFERENCE_UNSPECIFIED;
+        case wgpu::PowerPreference::LowPower:
+            return DXGI_GPU_PREFERENCE_MINIMUM_POWER;
+        case wgpu::PowerPreference::HighPerformance:
+            return DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE;
+    }
+}
+
 }  // anonymous namespace
 
 Backend::Backend(InstanceBase* instance, wgpu::BackendType type)
@@ -261,7 +272,7 @@ ResultOrError<Ref<PhysicalDeviceBase>> Backend::GetOrCreatePhysicalDeviceFromLUI
         return it->second;
     }
 
-    ComPtr<IDXGIAdapter1> dxgiAdapter = nullptr;
+    ComPtr<IDXGIAdapter1> dxgiAdapter;
     DAWN_TRY(CheckHRESULT(GetFactory()->EnumAdapterByLuid(luid, IID_PPV_ARGS(&dxgiAdapter)),
                           "EnumAdapterByLuid"));
 
@@ -308,11 +319,29 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return {std::move(physicalDevice)};
     }
 
+    std::function<HRESULT(uint32_t, ComPtr<IDXGIAdapter1>&)> enumAdapters;
+    DXGI_GPU_PREFERENCE gpuPreference = ToDXGIPowerPreference(options->powerPreference);
+
+    ComPtr<IDXGIFactory6> factory6;
+    HRESULT hr = GetFactory()->QueryInterface(IID_PPV_ARGS(&factory6));
+    if (SUCCEEDED(hr)) {
+        // IDXGIFactory6 is not available on all versions of Windows 10. If it is available, use it
+        // to enumerate the adapters based on the desired power preference.
+        enumAdapters = [&](uint32_t adapterIndex, ComPtr<IDXGIAdapter1>& dxgiAdapter) -> HRESULT {
+            return factory6->EnumAdapterByGpuPreference(adapterIndex, gpuPreference,
+                                                        IID_PPV_ARGS(&dxgiAdapter));
+        };
+    } else {
+        enumAdapters = [&](uint32_t adapterIndex, ComPtr<IDXGIAdapter1>& dxgiAdapter) -> HRESULT {
+            return GetFactory()->EnumAdapters1(adapterIndex, &dxgiAdapter);
+        };
+    }
+
     // Enumerate and discover all available physicalDevices.
     std::vector<Ref<PhysicalDeviceBase>> physicalDevices;
     for (uint32_t adapterIndex = 0;; ++adapterIndex) {
-        ComPtr<IDXGIAdapter1> dxgiAdapter = nullptr;
-        if (GetFactory()->EnumAdapters1(adapterIndex, &dxgiAdapter) == DXGI_ERROR_NOT_FOUND) {
+        ComPtr<IDXGIAdapter1> dxgiAdapter;
+        if (enumAdapters(adapterIndex, dxgiAdapter) == DXGI_ERROR_NOT_FOUND) {
             break;  // No more physicalDevices to enumerate.
         }
 
