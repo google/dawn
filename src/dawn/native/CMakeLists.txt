@@ -28,7 +28,8 @@
 DawnJSONGenerator(
     TARGET "native_utils"
     PRINT_NAME "Dawn native utilities"
-    RESULT_VARIABLE "DAWN_NATIVE_UTILS_GEN_SOURCES"
+    OUTPUT_HEADERS DAWN_NATIVE_UTILS_GEN_HEADERS
+    OUTPUT_SOURCES DAWN_NATIVE_UTILS_GEN_SOURCES
 )
 
 add_library(dawn_native)
@@ -44,6 +45,7 @@ target_sources(dawn_native
     "${DAWN_INCLUDE_DIR}/dawn/native/DawnNative.h"
     "${DAWN_INCLUDE_DIR}/dawn/native/dawn_native_export.h"
   PRIVATE
+    ${DAWN_NATIVE_UTILS_GEN_HEADERS}
     ${DAWN_NATIVE_UTILS_GEN_SOURCES}
     "Adapter.h"
     "Adapter.cpp"
@@ -568,17 +570,19 @@ if (DAWN_ENABLE_OPENGL)
     DawnGenerator(
         SCRIPT "${Dawn_SOURCE_DIR}/generator/opengl_loader_generator.py"
         PRINT_NAME "OpenGL function loader"
-        ARGS "--gl-xml"
+        EXTRA_PARAMETERS "--gl-xml"
              "${Dawn_SOURCE_DIR}/third_party/khronos/OpenGL-Registry/xml/gl.xml"
              "--supported-extensions"
              "${Dawn_SOURCE_DIR}/src/dawn/native/opengl/supported_extensions.json"
-        RESULT_VARIABLE "DAWN_NATIVE_OPENGL_AUTOGEN_SOURCES"
+        OUTPUT_HEADERS DAWN_NATIVE_OPENGL_AUTOGEN_HEADERS
+        OUTPUT_SOURCES DAWN_NATIVE_OPENGL_AUTOGEN_SOURCES
     )
 
     target_sources(dawn_native
       INTERFACE
         "${DAWN_INCLUDE_DIR}/dawn/native/OpenGLBackend.h"
       PRIVATE
+        ${DAWN_NATIVE_OPENGL_AUTOGEN_HEADERS}
         ${DAWN_NATIVE_OPENGL_AUTOGEN_SOURCES}
         "opengl/BackendGL.cpp"
         "opengl/BackendGL.h"
@@ -772,7 +776,7 @@ endif()
 DawnJSONGenerator(
     TARGET "webgpu_dawn_native_proc"
     PRINT_NAME "Dawn native WebGPU procs"
-    RESULT_VARIABLE "WEBGPU_DAWN_NATIVE_PROC_GEN"
+    OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES
 )
 
 # A convenience target that bundles dawn_native and procs calling it directly so that
@@ -789,7 +793,10 @@ target_compile_definitions(webgpu_dawn PRIVATE "WGPU_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(webgpu_dawn PRIVATE "WGPU_SHARED_LIBRARY")
 endif()
-target_sources(webgpu_dawn PRIVATE ${WEBGPU_DAWN_NATIVE_PROC_GEN})
+target_sources(webgpu_dawn
+    PRIVATE
+        ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
+)
 
 install_if_enabled(dawn_native)
 install_if_enabled(webgpu_dawn)

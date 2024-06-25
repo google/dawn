@@ -28,23 +28,25 @@
 DawnGenerator(
     SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_version_generator.py"
     PRINT_NAME "Dawn version based utilities"
-    ARGS "--dawn-dir"
+    OUTPUT_HEADERS DAWN_VERSION_AUTOGEN_HEADERS
+    EXTRA_PARAMETERS "--dawn-dir"
          "${Dawn_SOURCE_DIR}"
-    RESULT_VARIABLE "DAWN_VERSION_AUTOGEN_SOURCES"
 )
 
 DawnGenerator(
     SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_gpu_info_generator.py"
     PRINT_NAME "Dawn GPU info utilities"
-    ARGS "--gpu-info-json"
+    OUTPUT_HEADERS DAWN_GPU_INFO_AUTOGEN_HEADERS
+    OUTPUT_SOURCES DAWN_GPU_INFO_AUTOGEN_SOURCES
+    EXTRA_PARAMETERS "--gpu-info-json"
          "${Dawn_SOURCE_DIR}/src/dawn/gpu_info.json"
-    RESULT_VARIABLE "DAWN_GPU_INFO_AUTOGEN_SOURCES"
 )
 
 add_library(dawn_common STATIC)
 common_compile_options(dawn_common)
 target_sources(dawn_common PRIVATE
-    ${DAWN_VERSION_AUTOGEN_SOURCES}
+    ${DAWN_VERSION_AUTOGEN_HEADERS}
+    ${DAWN_GPU_INFO_AUTOGEN_HEADERS}
     ${DAWN_GPU_INFO_AUTOGEN_SOURCES}
     "AlignedAlloc.cpp"
     "AlignedAlloc.h"
