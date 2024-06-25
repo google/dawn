@@ -40,7 +40,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
     tint::Hashmap<tint::BindingPoint, binding::BindingInfo, 8> seen_wgsl_bindings{};
     tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8> seen_glsl_bindings{};
 
-    // Both wgsl_seen and spirv_seen check to see if the pair of [src, dst] are unique. If
+    // Both wgsl_seen and glsl_seen check to see if the pair of [src, dst] are unique. If
     // we have multiple entries that map the same [src, dst] pair, that's fine. We treat it as valid
     // as it's possible for multiple entry points to use the remapper at the same time. If the pair
     // doesn't match, then we report an error about a duplicate binding point.

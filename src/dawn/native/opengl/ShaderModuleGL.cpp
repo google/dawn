@@ -211,13 +211,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
                                                static_cast<uint32_t>(binding)};
 
-            // For buffer bindings that can be sharable across stages, we need to rename them to
-            // avoid GL program link failures due to block naming issues.
-            if (std::holds_alternative<BufferBindingInfo>(shaderBindingInfo.bindingInfo) &&
-                stage != SingleShaderStage::Compute) {
-                req.bufferBindingVariables.emplace_back(shaderBindingInfo.name);
-            }
-
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
             auto& bindingIndexInfo = layout->GetBindingIndexInfo()[group];
             uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
@@ -227,6 +220,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
 
             if (bufferBindingInfo) {
+                // For buffer bindings that can be shareable across stages, we need to rename them
+                // to avoid GL program link failures due to block naming issues.
+                if (stage != SingleShaderStage::Compute) {
+                    req.bufferBindingVariables.emplace_back(shaderBindingInfo.name);
+                }
+
                 switch (bufferBindingInfo->type) {
                     case wgpu::BufferBindingType::Uniform:
                         bindings.uniform.emplace(
@@ -261,12 +260,14 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 const auto& expansion = etBindingMap.find(binding);
                 DAWN_ASSERT(expansion != etBindingMap.end());
 
+                using BindingInfo = tint::glsl::writer::binding::BindingInfo;
+
                 const auto& bindingExpansion = expansion->second;
-                tint::glsl::writer::binding::BindingInfo plane0{
+                const BindingInfo plane0{
                     bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)]};
-                tint::glsl::writer::binding::BindingInfo plane1{
+                const BindingInfo plane1{
                     bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
-                tint::glsl::writer::binding::BindingInfo metadata{
+                const BindingInfo metadata{
                     bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
 
                 tint::BindingPoint plane1WGSLBindingPoint{
@@ -310,7 +311,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
         // Note, the rest of Dawn is expecting to use the un-modified WGSL binding points when
         // looking up information on the combined samplers. Tint is expecting Dawn to provide
-        // the final expected values for those entry points. So, we end up using the origina
+        // the final expected values for those entry points. So, we end up using the original
         // values for the AppendCombinedSampler calls and the remapped binding points when we
         // put things in the tint bindings structure.
 
@@ -321,7 +322,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 texBindPoint.binding = texIt->second.binding;
             } else {
                 // The plane0 texture will be in external_textures, not textures, so we have to set
-                // the `sampler_texture_name` based on the external_texture value.
+                // the `sampler_texture_to_name` based on the external_texture value.
                 auto exIt = bindings.external_texture.find(texBindPoint);
                 if (exIt != bindings.external_texture.end()) {
                     texBindPoint.group = 0;
