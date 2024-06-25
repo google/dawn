@@ -269,12 +269,28 @@ if(DAWN_ENABLE_PIC)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+# The public config contains only the include paths for the Dawn headers.
+add_library(dawn_public_config INTERFACE)
+target_include_directories(dawn_public_config INTERFACE
+    "${DAWN_INCLUDE_DIR}"
+    "${DAWN_BUILD_GEN_DIR}/include"
+)
+
+# The internal config contains additional path but includes the dawn_public_config include paths
+add_library(dawn_internal_config INTERFACE)
+target_include_directories(dawn_internal_config INTERFACE
+    "${DAWN_SRC_DIR}"
+    "${DAWN_BUILD_GEN_DIR}/src"
+)
+target_link_libraries(dawn_internal_config INTERFACE dawn_public_config)
+
 ################################################################################
 # Include utility CMake modules
 ################################################################################
 include(DawnCompilerChecks)
 include(DawnCompilerExtraFlags)
 include(DawnCompilerPlatformFlags)
+include(DawnCompilerWarningFlags)
 include(DawnInitializeBuildType)
 
 message(STATUS "Dawn build D3D11 backend: ${DAWN_ENABLE_D3D11}")
@@ -339,21 +355,6 @@ string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type)
 if ((NOT ${build_type} STREQUAL "RELEASE") AND (NOT ${build_type} STREQUAL "RELWITHDEBINFO"))
   set(IS_DEBUG_BUILD 1)
 endif()
-
-# The public config contains only the include paths for the Dawn headers.
-add_library(dawn_public_config INTERFACE)
-target_include_directories(dawn_public_config INTERFACE
-    "${DAWN_INCLUDE_DIR}"
-    "${DAWN_BUILD_GEN_DIR}/include"
-)
-
-# The internal config conatins additional path but includes the dawn_public_config include paths
-add_library(dawn_internal_config INTERFACE)
-target_include_directories(dawn_internal_config INTERFACE
-    "${DAWN_SRC_DIR}"
-    "${DAWN_BUILD_GEN_DIR}/src"
-)
-target_link_libraries(dawn_internal_config INTERFACE dawn_public_config)
 
 # Compile definitions for the internal config
 if (DAWN_ALWAYS_ASSERT OR IS_DEBUG_BUILD)
