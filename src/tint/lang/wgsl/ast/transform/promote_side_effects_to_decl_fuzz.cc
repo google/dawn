@@ -34,7 +34,10 @@
 namespace tint::ast::transform {
 namespace {
 
-bool CanRun(const Program& program) {
+bool CanRun(const Program& program, const fuzz::wgsl::Context& context) {
+    if (context.program_properties.Contains(fuzz::wgsl::ProgramProperties::kBuiltinTypesShadowed)) {
+        return false;  // PromoteSideEffectsToDecl assumes the Renamer transform has been run
+    }
     if (!program.Sem().Module()->Extensions().Contains(
             wgsl::Extension::kChromiumDisableUniformityAnalysis)) {
         return false;  // Requires 'chromium_disable_uniformity_analysis'
@@ -45,8 +48,8 @@ bool CanRun(const Program& program) {
     return true;
 }
 
-void PromoteSideEffectsToDeclFuzzer(const Program& program) {
-    if (!CanRun(program)) {
+void PromoteSideEffectsToDeclFuzzer(const Program& program, const fuzz::wgsl::Context& context) {
+    if (!CanRun(program, context)) {
         return;
     }
 
