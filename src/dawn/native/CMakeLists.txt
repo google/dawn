@@ -339,6 +339,7 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/UtilsD3D.h"
         "d3d/d3d_platform.h"
     )
+    target_link_libraries(dawn_native PRIVATE dxguid.lib)
 endif()
 
 if (DAWN_ENABLE_D3D11)
@@ -478,7 +479,6 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/UtilsD3D12.h"
         "d3d12/d3d12_platform.h"
     )
-    target_link_libraries(dawn_native PRIVATE dxguid.lib)
     if (DAWN_USE_BUILT_DXC)
         target_compile_definitions(dawn_native PRIVATE "DAWN_USE_BUILT_DXC")
         target_link_libraries(dawn_native PRIVATE dxcompiler)
