@@ -88,7 +88,7 @@ if (NOT TARGET glfw AND DAWN_USE_GLFW)
     add_subdirectory(${DAWN_GLFW_DIR} "${CMAKE_CURRENT_BINARY_DIR}/glfw")
 endif()
 
-if (NOT TARGET libabsl)
+if (NOT TARGET absl::strings)
     # Recommended setting for compability with future abseil releases.
     set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
     message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
