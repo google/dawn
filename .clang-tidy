@@ -84,6 +84,8 @@ Checks: "-*,\
           -google-runtime-int,\
           -google-upgrade-googletest-case,\
           misc-*,\
+          -misc-const-correctness,\
+          -misc-include-cleaner,\
           -misc-misplaced-const,\
           -misc-new-delete-overloads,\
           -misc-non-private-member-variables-in-classes,\
