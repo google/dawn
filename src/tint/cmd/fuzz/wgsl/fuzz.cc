@@ -32,6 +32,7 @@
 #include <string_view>
 #include <thread>
 
+#include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/builtin_type.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/function.h"
@@ -72,6 +73,10 @@ thread_local std::string_view currently_running;
     __builtin_trap();
 }
 
+bool IsAddressSpace(std::string_view name) {
+    return tint::core::ParseAddressSpace(name) != tint::core::AddressSpace::kUndefined;
+}
+
 bool IsBuiltinFn(std::string_view name) {
     return tint::wgsl::ParseBuiltinFn(name) != tint::wgsl::BuiltinFn::kNone;
 }
@@ -84,6 +89,9 @@ bool IsBuiltinType(std::string_view name) {
 EnumSet<ProgramProperties> ScanProgramProperties(const Program& program) {
     EnumSet<ProgramProperties> out;
     auto check = [&](std::string_view name) {
+        if (IsAddressSpace(name)) {
+            out.Add(ProgramProperties::kAddressSpacesShadowed);
+        }
         if (IsBuiltinFn(name)) {
             out.Add(ProgramProperties::kBuiltinFnsShadowed);
         }

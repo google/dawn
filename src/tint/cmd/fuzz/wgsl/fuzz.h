@@ -57,6 +57,8 @@ struct Options {
 /// ProgramProperties is an enumerator of flags used to describe characteristics of the input
 /// program.
 enum class ProgramProperties {
+    /// The program has address spaces which have been shadowed
+    kAddressSpacesShadowed,
     /// The program has builtin functions which have been shadowed
     kBuiltinFnsShadowed,
     /// The program has builtin types which have been shadowed

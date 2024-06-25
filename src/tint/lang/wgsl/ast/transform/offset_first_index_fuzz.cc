@@ -31,7 +31,15 @@
 namespace tint::ast::transform {
 namespace {
 
-bool CanRun(const Program& program, const OffsetFirstIndex::Config& config) {
+bool CanRun(const Program& program,
+            const fuzz::wgsl::Context& context,
+            const OffsetFirstIndex::Config& config) {
+    if (context.program_properties.Contains(
+            fuzz::wgsl::ProgramProperties::kAddressSpacesShadowed) ||
+        context.program_properties.Contains(fuzz::wgsl::ProgramProperties::kBuiltinTypesShadowed)) {
+        return false;  // OffsetFirstIndex assumes the Renamer transform has been run
+    }
+
     if ((config.first_instance_offset.value_or(0) & 3) != 0 ||
         (config.first_vertex_offset.value_or(0) & 3) != 0) {
         return false;  // Misaligned
@@ -44,8 +52,10 @@ bool CanRun(const Program& program, const OffsetFirstIndex::Config& config) {
     return true;
 }
 
-void OffsetFirstIndexFuzzer(const Program& program, const OffsetFirstIndex::Config& config) {
-    if (!CanRun(program, config)) {
+void OffsetFirstIndexFuzzer(const Program& program,
+                            const fuzz::wgsl::Context& context,
+                            const OffsetFirstIndex::Config& config) {
+    if (!CanRun(program, context, config)) {
         return;
     }
 
