@@ -168,41 +168,17 @@ MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
     return {};
 }
 
-ResultOrError<GLuint> ShaderModule::CompileShader(
-    const OpenGLFunctions& gl,
-    const ProgrammableStage& programmableStage,
+std::pair<tint::glsl::writer::Bindings, BindingMap> generateBindingInfo(
     SingleShaderStage stage,
-    bool usesVertexIndex,
-    bool usesInstanceIndex,
-    bool usesFragDepth,
-    CombinedSamplerInfo* combinedSamplers,
     const PipelineLayout* layout,
-    bool* needsPlaceholderSampler,
-    bool* needsTextureBuiltinUniformBuffer,
-    BindingPointToFunctionAndOffset* bindingPointToData) const {
-    TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
-
-    const OpenGLVersion& version = ToBackend(GetDevice())->GetGL().GetVersion();
-
-    GLSLCompilationRequest req = {};
-
-    auto tintProgram = GetTintProgram();
-    req.inputProgram = &(tintProgram->program);
-
-    tint::inspector::Inspector inspector(*req.inputProgram);
-    tint::glsl::writer::Bindings bindings;
-
-    // Since (non-Vulkan) GLSL does not support descriptor sets, generate a
-    // mapping from the original group/binding pair to a binding-only
-    // value. This mapping will be used by Tint to remap all global
-    // variables to the 1D space.
-    const EntryPointMetadata& entryPointMetaData = GetEntryPoint(programmableStage.entryPoint);
-    const BindingInfoArray& moduleBindingInfo = entryPointMetaData.bindings;
-
+    const BindingInfoArray& moduleBindingInfo,
+    GLSLCompilationRequest& req) {
     // Because of the way the rest of the backend uses the binding information, we need to pass
     // through the original WGSL values in the combined shader map. That means, we need to store
     // that data for the external texture, otherwise it ends up getting lost.
     BindingMap externalTextureExpansionMap;
+
+    tint::glsl::writer::Bindings bindings;
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
@@ -280,6 +256,41 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             }
         }
     }
+    return {bindings, externalTextureExpansionMap};
+}
+
+ResultOrError<GLuint> ShaderModule::CompileShader(
+    const OpenGLFunctions& gl,
+    const ProgrammableStage& programmableStage,
+    SingleShaderStage stage,
+    bool usesVertexIndex,
+    bool usesInstanceIndex,
+    bool usesFragDepth,
+    CombinedSamplerInfo* combinedSamplers,
+    const PipelineLayout* layout,
+    bool* needsPlaceholderSampler,
+    bool* needsTextureBuiltinUniformBuffer,
+    BindingPointToFunctionAndOffset* bindingPointToData) const {
+    TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
+
+    const OpenGLVersion& version = ToBackend(GetDevice())->GetGL().GetVersion();
+
+    GLSLCompilationRequest req = {};
+
+    auto tintProgram = GetTintProgram();
+    req.inputProgram = &(tintProgram->program);
+
+    tint::inspector::Inspector inspector(*req.inputProgram);
+
+    // Since (non-Vulkan) GLSL does not support descriptor sets, generate a
+    // mapping from the original group/binding pair to a binding-only
+    // value. This mapping will be used by Tint to remap all global
+    // variables to the 1D space.
+    const EntryPointMetadata& entryPointMetaData = GetEntryPoint(programmableStage.entryPoint);
+    const BindingInfoArray& moduleBindingInfo = entryPointMetaData.bindings;
+
+    auto [bindings, externalTextureExpansionMap] =
+        generateBindingInfo(stage, layout, moduleBindingInfo, req);
 
     // When textures are accessed without a sampler (e.g., textureLoad()),
     // GetSamplerTextureUses() will return this sentinel value.
