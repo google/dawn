@@ -45,10 +45,32 @@ TEST_F(BuiltinPolyfillTest, ShouldRunEmptyModule) {
     EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
 }
 
-TEST_F(BuiltinPolyfillTest, EmptyModule) {
-    auto* src = R"()";
+TEST_F(BuiltinPolyfillTest, ShouldRun_OverrideCall) {
+    auto* src = R"(
+override x = 42.123;
+override y = saturate(x);
+)";
 
-    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    DataMap data;
+    BuiltinPolyfill::Builtins builtins;
+    builtins.saturate = true;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, data));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRun_OverrideBinary) {
+    auto* src = R"(
+override v = 10i;
+override x = 20i / v;
+)";
+
+    DataMap data;
+    BuiltinPolyfill::Builtins builtins;
+    builtins.int_div_mod = true;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, data));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

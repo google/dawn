@@ -71,10 +71,9 @@ struct BuiltinPolyfill::State {
                 node,  //
                 [&](const CallExpression* expr) { Call(expr); },
                 [&](const BinaryExpression* bin_op) {
-                    if (auto* s = src.Sem().Get(bin_op);
-                        !s || s->Stage() == core::EvaluationStage::kConstant ||
-                        s->Stage() == core::EvaluationStage::kNotEvaluated) {
-                        return;  // Don't polyfill @const expressions
+                    auto* s = src.Sem().Get(bin_op);
+                    if (!s || s->Stage() != core::EvaluationStage::kRuntime) {
+                        return;  // Only polyfill runtime expressions
                     }
                     switch (bin_op->op) {
                         case core::BinaryOp::kShiftLeft:
@@ -1301,9 +1300,8 @@ struct BuiltinPolyfill::State {
     /// Examines the call expression @p expr, applying any necessary polyfill transforms
     void Call(const CallExpression* expr) {
         auto* call = src.Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
-        if (!call || call->Stage() == core::EvaluationStage::kConstant ||
-            call->Stage() == core::EvaluationStage::kNotEvaluated) {
-            return;  // Don't polyfill @const expressions
+        if (!call || call->Stage() != core::EvaluationStage::kRuntime) {
+            return;  // Only polyfill runtime expressions
         }
         Symbol fn = Switch(
             call->Target(),  //
