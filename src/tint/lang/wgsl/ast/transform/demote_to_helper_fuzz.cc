@@ -31,7 +31,19 @@
 namespace tint::ast::transform {
 namespace {
 
-void DemoteToHelperFuzzer(const Program& program) {
+bool CanRun(const Program& program, const fuzz::wgsl::Context& context) {
+    if (context.program_properties.Contains(
+            fuzz::wgsl::ProgramProperties::kAddressSpacesShadowed)) {
+        return false;  // DemoteToHelper assumes the Renamer transform has been run
+    }
+    return true;
+}
+
+void DemoteToHelperFuzzer(const Program& program, const fuzz::wgsl::Context& context) {
+    if (!CanRun(program, context)) {
+        return;
+    }
+
     DataMap outputs;
     if (auto result = DemoteToHelper{}.Apply(program, DataMap{}, outputs)) {
         if (!result->IsValid()) {
