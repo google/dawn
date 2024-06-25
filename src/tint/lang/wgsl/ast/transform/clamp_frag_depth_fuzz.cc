@@ -26,13 +26,17 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/clamp_frag_depth.h"
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::ast::transform {
 namespace {
 
-bool CanRun(const ClampFragDepth::Config& config) {
+bool CanRun(const Program& program, const ClampFragDepth::Config& config) {
     if (config.offsets) {
         if (config.offsets->min >= config.offsets->max) {
             return false;  // member offset collision / non-ascending
@@ -41,11 +45,24 @@ bool CanRun(const ClampFragDepth::Config& config) {
             return false;  // Offsets need 4-byte alignment.
         }
     }
+
+    // ClampFragDepth assumes that AddBlockAttribute has run, which makes sure that all push
+    // constant variables are structures.
+    for (auto& global : program.AST().GlobalVariables()) {
+        if (auto* sem = program.Sem().Get<sem::GlobalVariable>(global)) {
+            if (sem->AddressSpace() == core::AddressSpace::kPushConstant) {
+                if (!sem->Type()->UnwrapRef()->Is<core::type::Struct>()) {
+                    return false;
+                }
+            }
+        }
+    }
+
     return true;
 }
 
 void ClampFragDepthFuzzer(const Program& program, const ClampFragDepth::Config& config) {
-    if (!CanRun(config)) {
+    if (!CanRun(program, config)) {
         return;
     }
 
