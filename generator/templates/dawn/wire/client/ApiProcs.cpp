@@ -40,14 +40,14 @@ namespace dawn::wire::client {
     template <typename Parent, typename Child, typename... Args>
     Child* Create(Parent p, Args... args) {
         if constexpr (std::is_constructible_v<Child, const ObjectBaseParams&, decltype(args)...>) {
-            return p->GetClient()->template Make<Child>(args...);
+            return p->GetClient()->template Make<Child>(args...).Detach();
         } else if constexpr (std::is_constructible_v<Child, const ObjectBaseParams&, const ObjectHandle&, decltype(args)...>) {
-            return p->GetClient()->template Make<Child>(p->GetEventManagerHandle(), args...);
+            return p->GetClient()->template Make<Child>(p->GetEventManagerHandle(), args...).Detach();
         } else {
             if constexpr (std::is_base_of_v<ObjectWithEventsBase, Child>) {
-                return p->GetClient()->template Make<Child>(p->GetEventManagerHandle());
+                return p->GetClient()->template Make<Child>(p->GetEventManagerHandle()).Detach();
             } else {
-                return p->GetClient()->template Make<Child>();
+                return p->GetClient()->template Make<Child>().Detach();
             }
         }
     }

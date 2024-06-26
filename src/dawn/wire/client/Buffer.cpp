@@ -58,16 +58,13 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::MapAsync;
 
-    MapAsyncEvent(const WGPUBufferMapCallbackInfo& callbackInfo, Buffer* buffer)
+    MapAsyncEvent(const WGPUBufferMapCallbackInfo& callbackInfo, Ref<Buffer> buffer)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
           mUserdata(callbackInfo.userdata),
-          mBuffer(buffer) {
-        DAWN_ASSERT(buffer != nullptr);
-        mBuffer->AddRef();
+          mBuffer(std::move(buffer)) {
+        DAWN_ASSERT(mBuffer != nullptr);
     }
-
-    ~MapAsyncEvent() override { mBuffer.ExtractAsDangling()->Release(); }
 
     EventType GetType() override { return kType; }
 
@@ -207,24 +204,21 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
     std::optional<WGPUBufferMapAsyncStatus> mStatus;
 
     // Strong reference to the buffer so that when we call the callback we can pass the buffer.
-    raw_ptr<Buffer> mBuffer;
+    Ref<Buffer> mBuffer;
 };
 
 class Buffer::MapAsyncEvent2 : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::MapAsync;
 
-    MapAsyncEvent2(const WGPUBufferMapCallbackInfo2& callbackInfo, Buffer* buffer)
+    MapAsyncEvent2(const WGPUBufferMapCallbackInfo2& callbackInfo, Ref<Buffer> buffer)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2),
           mBuffer(buffer) {
-        DAWN_ASSERT(buffer != nullptr);
-        mBuffer->AddRef();
+        DAWN_ASSERT(mBuffer != nullptr);
     }
-
-    ~MapAsyncEvent2() override { mBuffer.ExtractAsDangling()->Release(); }
 
     EventType GetType() override { return kType; }
 
@@ -339,7 +333,7 @@ class Buffer::MapAsyncEvent2 : public TrackedEvent {
     std::optional<std::string> mMessage;
 
     // Strong reference to the buffer so that when we call the callback we can pass the buffer.
-    raw_ptr<Buffer> mBuffer;
+    Ref<Buffer> mBuffer;
 };
 
 // static
@@ -393,7 +387,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     // Create the buffer and send the creation command.
     // This must happen after any potential error buffer creation
     // as server expects allocating ids to be monotonically increasing
-    Buffer* buffer = wireClient->Make<Buffer>(device->GetEventManagerHandle(), descriptor);
+    Ref<Buffer> buffer = wireClient->Make<Buffer>(device->GetEventManagerHandle(), descriptor);
     buffer->mIsDeviceAlive = device->GetAliveWeakPtr();
 
     if (descriptor->mappedAtCreation) {
@@ -431,7 +425,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
                              }
                          }});
     // clang-format on
-    return ToAPI(buffer);
+    return ReturnToAPI(std::move(buffer));
 }
 
 Buffer::Buffer(const ObjectBaseParams& params,

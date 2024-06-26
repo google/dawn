@@ -29,6 +29,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "dawn/common/Log.h"
 #include "dawn/wire/client/Client.h"
@@ -42,18 +43,18 @@ class RequestDeviceEvent : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::RequestDevice;
 
-    RequestDeviceEvent(const WGPURequestDeviceCallbackInfo& callbackInfo, Device* device)
+    RequestDeviceEvent(const WGPURequestDeviceCallbackInfo& callbackInfo, Ref<Device> device)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata),
-          mDevice(device) {}
+          mDevice(std::move(device)) {}
 
-    RequestDeviceEvent(const WGPURequestDeviceCallbackInfo2& callbackInfo, Device* device)
+    RequestDeviceEvent(const WGPURequestDeviceCallbackInfo2& callbackInfo, Ref<Device> device)
         : TrackedEvent(callbackInfo.mode),
           mCallback2(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2),
-          mDevice(device) {}
+          mDevice(std::move(device)) {}
 
     EventType GetType() override { return kType; }
 
@@ -82,14 +83,14 @@ class RequestDeviceEvent : public TrackedEvent {
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
-        Device* device = mDevice.ExtractAsDangling();
         // Callback needs to happen before device lost handling to ensure resolution order.
         if (mCallback) {
-            mCallback(mStatus, ToAPI(mStatus == WGPURequestDeviceStatus_Success ? device : nullptr),
+            mCallback(mStatus,
+                      mStatus == WGPURequestDeviceStatus_Success ? ReturnToAPI(mDevice) : nullptr,
                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling());
         } else if (mCallback2) {
             mCallback2(mStatus,
-                       ToAPI(mStatus == WGPURequestDeviceStatus_Success ? device : nullptr),
+                       mStatus == WGPURequestDeviceStatus_Success ? ReturnToAPI(mDevice) : nullptr,
                        mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
                        mUserdata2.ExtractAsDangling());
         }
@@ -98,17 +99,16 @@ class RequestDeviceEvent : public TrackedEvent {
             // If there was an error and we didn't return a device, we need to call the device lost
             // callback and reclaim the device allocation.
             if (mStatus == WGPURequestDeviceStatus_InstanceDropped) {
-                device->HandleDeviceLost(WGPUDeviceLostReason_InstanceDropped,
-                                         "A valid external Instance reference no longer exists.");
+                mDevice->HandleDeviceLost(WGPUDeviceLostReason_InstanceDropped,
+                                          "A valid external Instance reference no longer exists.");
             } else {
-                device->HandleDeviceLost(WGPUDeviceLostReason_FailedCreation,
-                                         "Device failed at creation.");
+                mDevice->HandleDeviceLost(WGPUDeviceLostReason_FailedCreation,
+                                          "Device failed at creation.");
             }
         }
 
         if (mCallback == nullptr && mCallback2 == nullptr) {
             // If there's no callback, clean up the resources.
-            device->Release();
             mUserdata1.ExtractAsDangling();
             mUserdata2.ExtractAsDangling();
         }
@@ -128,7 +128,7 @@ class RequestDeviceEvent : public TrackedEvent {
     // throughout the duration of a RequestDeviceEvent because the Event essentially takes
     // ownership of it until either an error occurs at which point the Event cleans it up, or it
     // returns the device to the user who then takes ownership as the Event goes away.
-    raw_ptr<Device> mDevice = nullptr;
+    Ref<Device> mDevice;
 };
 
 }  // anonymous namespace
@@ -366,7 +366,7 @@ void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
 WGPUFuture Adapter::RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
                                    const WGPURequestDeviceCallbackInfo& callbackInfo) {
     Client* client = GetClient();
-    Device* device = client->Make<Device>(GetEventManagerHandle(), descriptor);
+    Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), descriptor);
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(callbackInfo, device));
     if (!tracked) {
@@ -402,7 +402,7 @@ WGPUFuture Adapter::RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
 WGPUFuture Adapter::RequestDevice2(const WGPUDeviceDescriptor* descriptor,
                                    const WGPURequestDeviceCallbackInfo2& callbackInfo) {
     Client* client = GetClient();
-    Device* device = client->Make<Device>(GetEventManagerHandle(), descriptor);
+    Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), descriptor);
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(callbackInfo, device));
     if (!tracked) {

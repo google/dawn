@@ -100,41 +100,40 @@ void Client::DestroyAllObjects() {
 }
 
 ReservedBuffer Client::ReserveBuffer(WGPUDevice device, const WGPUBufferDescriptor* descriptor) {
-    Buffer* buffer = Make<Buffer>(FromAPI(device)->GetEventManagerHandle(), descriptor);
+    Ref<Buffer> buffer = Make<Buffer>(FromAPI(device)->GetEventManagerHandle(), descriptor);
 
     ReservedBuffer result;
-    result.buffer = ToAPI(buffer);
     result.handle = buffer->GetWireHandle();
     result.deviceHandle = FromAPI(device)->GetWireHandle();
+    result.buffer = ReturnToAPI(buffer);
     return result;
 }
 
 ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor) {
-    Texture* texture = Make<Texture>(descriptor);
+    Ref<Texture> texture = Make<Texture>(descriptor);
 
     ReservedTexture result;
-    result.texture = ToAPI(texture);
     result.handle = texture->GetWireHandle();
     result.deviceHandle = FromAPI(device)->GetWireHandle();
+    result.texture = ReturnToAPI(texture);
     return result;
 }
 
 ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device,
                                            const WGPUSwapChainDescriptor* descriptor) {
-    SwapChain* swapChain = Make<SwapChain>(nullptr, descriptor);
+    Ref<SwapChain> swapChain = Make<SwapChain>(nullptr, descriptor);
 
     ReservedSwapChain result;
-    result.swapchain = ToAPI(swapChain);
     result.handle = swapChain->GetWireHandle();
     result.deviceHandle = FromAPI(device)->GetWireHandle();
+    result.swapchain = ReturnToAPI(swapChain);
     return result;
 }
 
 ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descriptor) {
-    Instance* instance = Make<Instance>();
+    Ref<Instance> instance = Make<Instance>();
 
     if (instance->Initialize(descriptor) != WireResult::Success) {
-        Free(instance);
         return {nullptr, {0, 0}};
     }
 
@@ -142,8 +141,8 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
     mEventManagers.emplace(instance->GetWireHandle(), std::make_unique<EventManager>());
 
     ReservedInstance result;
-    result.instance = ToAPI(instance);
     result.handle = instance->GetWireHandle();
+    result.instance = ReturnToAPI(instance);
     return result;
 }
 

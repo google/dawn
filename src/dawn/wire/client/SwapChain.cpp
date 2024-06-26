@@ -54,7 +54,7 @@ ObjectType SwapChain::GetObjectType() const {
 
 WGPUTexture SwapChain::GetCurrentTexture() {
     Client* wireClient = GetClient();
-    Texture* texture = wireClient->Make<Texture>(&mTextureDescriptor);
+    Ref<Texture> texture = wireClient->Make<Texture>(&mTextureDescriptor);
 
     SwapChainGetCurrentTextureCmd cmd;
     cmd.self = ToAPI(this);
@@ -62,7 +62,7 @@ WGPUTexture SwapChain::GetCurrentTexture() {
     cmd.result = texture->GetWireHandle();
     wireClient->SerializeCommand(cmd);
 
-    return ToAPI(texture);
+    return ReturnToAPI(texture);
 }
 
 }  // namespace dawn::wire::client

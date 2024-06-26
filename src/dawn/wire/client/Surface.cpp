@@ -77,14 +77,15 @@ void Surface::GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
     dawn::ErrorLog() << "surface.GetCurrentTexture not supported yet with dawn_wire.";
 
     Client* wireClient = GetClient();
-    Texture* texture = wireClient->Make<Texture>(&mTextureDescriptor);
-    surfaceTexture->texture = ToAPI(texture);
+    Ref<Texture> texture = wireClient->Make<Texture>(&mTextureDescriptor);
 
     SurfaceGetCurrentTextureCmd cmd;
     cmd.self = ToAPI(this);
     cmd.selfId = GetWireId();
     // cmd.result = texture->GetWireHandle(); // TODO(dawn:2320): Feed surfaceTexture to cmd
     wireClient->SerializeCommand(cmd);
+
+    surfaceTexture->texture = ReturnToAPI(texture);
 }
 
 }  // namespace dawn::wire::client

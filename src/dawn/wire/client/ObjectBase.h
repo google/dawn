@@ -32,6 +32,7 @@
 #include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/common/LinkedList.h"
+#include "dawn/common/RefBase.h"
 #include "dawn/wire/ObjectHandle.h"
 #include "dawn/wire/ObjectType_autogen.h"
 #include "dawn/wire/client/EventManager.h"
@@ -91,6 +92,29 @@ class ObjectWithEventsBase : public ObjectBase {
     // objects are also freed.
     ObjectHandle mEventManagerHandle;
 };
+
+// Ref<T> for a T that's an ObjectBase*
+namespace detail {
+
+template <typename T>
+struct ObjectBaseTraits {
+    static constexpr T* kNullValue = nullptr;
+    static void AddRef(T* value) { value->AddRef(); }
+    static void Release(T* value) { value->Release(); }
+};
+
+}  // namespace detail
+
+template <typename T>
+class Ref : public RefBase<T*, detail::ObjectBaseTraits<T>> {
+  public:
+    using RefBase<T*, detail::ObjectBaseTraits<T>>::RefBase;
+};
+
+template <typename T>
+auto ReturnToAPI(Ref<T> r) {
+    return ToAPI(r.Detach());
+}
 
 }  // namespace dawn::wire::client
 

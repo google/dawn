@@ -60,7 +60,7 @@ class Client : public ClientBase {
     //
     //   T::T(ObjectBaseParams, arg1, arg2, arg3)
     template <typename T, typename... Args>
-    T* Make(Args&&... args) {
+    Ref<T> Make(Args&&... args) {
         constexpr ObjectType type = ObjectTypeToTypeEnum<T>;
 
         ObjectBaseParams params = {this, mObjectStores[type].ReserveHandle()};
@@ -68,7 +68,10 @@ class Client : public ClientBase {
 
         mObjects[type].Append(object);
         mObjectStores[type].Insert(std::unique_ptr<T>(object));
-        return object;
+
+        Ref<T> ref;
+        ref.Acquire(object);
+        return ref;
     }
 
     void Free(ObjectBase* obj, ObjectType type);

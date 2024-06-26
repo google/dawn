@@ -48,7 +48,6 @@ class Device final : public ObjectWithEventsBase {
     explicit Device(const ObjectBaseParams& params,
                     const ObjectHandle& eventManagerHandle,
                     const WGPUDeviceDescriptor* descriptor);
-    ~Device() override;
 
     ObjectType GetObjectType() const override;
 
@@ -123,7 +122,7 @@ class Device final : public ObjectWithEventsBase {
     WGPULoggingCallback mLoggingCallback = nullptr;
     raw_ptr<void> mLoggingUserdata = nullptr;
 
-    raw_ptr<Queue> mQueue = nullptr;
+    Ref<Queue> mQueue;
 
     std::shared_ptr<bool> mIsAlive;
 };

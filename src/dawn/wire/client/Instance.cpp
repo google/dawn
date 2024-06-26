@@ -48,18 +48,18 @@ class RequestAdapterEvent : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::RequestAdapter;
 
-    RequestAdapterEvent(const WGPURequestAdapterCallbackInfo& callbackInfo, Adapter* adapter)
+    RequestAdapterEvent(const WGPURequestAdapterCallbackInfo& callbackInfo, Ref<Adapter> adapter)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata),
-          mAdapter(adapter) {}
+          mAdapter(std::move(adapter)) {}
 
-    RequestAdapterEvent(const WGPURequestAdapterCallbackInfo2& callbackInfo, Adapter* adapter)
+    RequestAdapterEvent(const WGPURequestAdapterCallbackInfo2& callbackInfo, Ref<Adapter> adapter)
         : TrackedEvent(callbackInfo.mode),
           mCallback2(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2),
-          mAdapter(adapter) {}
+          mAdapter(std::move(adapter)) {}
 
     EventType GetType() override { return kType; }
 
@@ -89,7 +89,6 @@ class RequestAdapterEvent : public TrackedEvent {
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         if (mCallback == nullptr && mCallback2 == nullptr) {
             // If there's no callback, just clean up the resources.
-            mAdapter.ExtractAsDangling()->Release();
             mUserdata1.ExtractAsDangling();
             mUserdata2.ExtractAsDangling();
             return;
@@ -100,16 +99,16 @@ class RequestAdapterEvent : public TrackedEvent {
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
-        Adapter* adapter = mAdapter.ExtractAsDangling();
         if (mCallback) {
             mCallback(mStatus,
-                      ToAPI(mStatus == WGPURequestAdapterStatus_Success ? adapter : nullptr),
+                      mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(mAdapter) : nullptr,
                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling());
         } else {
-            mCallback2(mStatus,
-                       ToAPI(mStatus == WGPURequestAdapterStatus_Success ? adapter : nullptr),
-                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
-                       mUserdata2.ExtractAsDangling());
+            mCallback2(
+                mStatus,
+                mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(mAdapter) : nullptr,
+                mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
+                mUserdata2.ExtractAsDangling());
         }
     }
 
@@ -127,7 +126,7 @@ class RequestAdapterEvent : public TrackedEvent {
     // throughout the duration of a RequestAdapterEvent because the Event essentially takes
     // ownership of it until either an error occurs at which point the Event cleans it up, or it
     // returns the adapter to the user who then takes ownership as the Event goes away.
-    raw_ptr<Adapter> mAdapter = nullptr;
+    Ref<Adapter> mAdapter;
 };
 
 WGPUWGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
@@ -207,7 +206,7 @@ void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
 WGPUFuture Instance::RequestAdapterF(const WGPURequestAdapterOptions* options,
                                      const WGPURequestAdapterCallbackInfo& callbackInfo) {
     Client* client = GetClient();
-    Adapter* adapter = client->Make<Adapter>(GetEventManagerHandle());
+    Ref<Adapter> adapter = client->Make<Adapter>(GetEventManagerHandle());
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(callbackInfo, adapter));
     if (!tracked) {
@@ -229,7 +228,7 @@ WGPUFuture Instance::RequestAdapterF(const WGPURequestAdapterOptions* options,
 WGPUFuture Instance::RequestAdapter2(const WGPURequestAdapterOptions* options,
                                      const WGPURequestAdapterCallbackInfo2& callbackInfo) {
     Client* client = GetClient();
-    Adapter* adapter = client->Make<Adapter>(GetEventManagerHandle());
+    Ref<Adapter> adapter = client->Make<Adapter>(GetEventManagerHandle());
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(callbackInfo, adapter));
     if (!tracked) {
