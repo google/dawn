@@ -117,10 +117,6 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     /// one of its inputs)
     bool HasSideEffects() const;
 
-    /// @returns the required extension of this builtin function. Returns
-    /// wgsl::Extension::kUndefined if no extension is required.
-    wgsl::Extension RequiredExtension() const;
-
     /// @returns the required language feature of this builtin function. Returns
     /// wgsl::LanguageFeature::kUndefined if no language feature is required.
     wgsl::LanguageFeature RequiredLanguageFeature() const;

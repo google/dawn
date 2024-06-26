@@ -112,13 +112,6 @@ bool BuiltinFn::HasSideEffects() const {
     return wgsl::HasSideEffects(fn_);
 }
 
-wgsl::Extension BuiltinFn::RequiredExtension() const {
-    if (IsSubgroup()) {
-        return wgsl::Extension::kChromiumExperimentalSubgroups;
-    }
-    return wgsl::Extension::kUndefined;
-}
-
 wgsl::LanguageFeature BuiltinFn::RequiredLanguageFeature() const {
     if (fn_ == wgsl::BuiltinFn::kTextureBarrier) {
         return wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures;

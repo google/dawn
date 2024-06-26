@@ -844,10 +844,23 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithoutExtension) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: cannot call built-in function 'subgroupBallot' without extension chromium_experimental_subgroups)");
+        R"(12:34 error: cannot call built-in function 'subgroupBallot' without extension 'subgroups')");
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithExtension) {
+    // enable subgroups;
+    // fn func -> vec4<u32> { return subgroupBallot(); }
+    Enable(wgsl::Extension::kSubgroups);
+
+    Func("func", tint::Empty, ty.vec4<u32>(),
+         Vector{
+             Return(Call("subgroupBallot")),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithExperimentalExtension) {
     // enable chromium_experimental_subgroups;
     // fn func -> vec4<u32> { return subgroupBallot(); }
     Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
@@ -870,10 +883,23 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutExtension) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: cannot call built-in function 'subgroupBroadcast' without extension chromium_experimental_subgroups)");
+        R"(12:34 error: cannot call built-in function 'subgroupBroadcast' without extension 'subgroups')");
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtension) {
+    // enable subgroups;
+    // fn func -> i32 { return subgroupBroadcast(1,0); }
+    Enable(wgsl::Extension::kSubgroups);
+
+    Func("func", tint::Empty, ty.i32(),
+         Vector{
+             Return(Call("subgroupBroadcast", 1_i, 0_u)),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExperimentalExtension) {
     // enable chromium_experimental_subgroups;
     // fn func -> i32 { return subgroupBroadcast(1,0); }
     Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
@@ -886,10 +912,108 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtension) {
     EXPECT_TRUE(r()->Resolve());
 }
 
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutExtension_F16) {
+    // enable f16;
+    // enable subgroups;
+    // fn func -> f16 { return subgroupBroadcast(1.h,0); }
+    Enable(wgsl::Extension::kF16);
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.f16(),
+         Vector{
+             Return(Call(Source{{12, 34}}, "subgroupBroadcast", 1_h, 0_u)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot call built-in function 'subgroupBroadcast' without extension 'subgroups_f16')");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtensions_F16) {
+    // enable f16;
+    // enable subgroups;
+    // enable subgroups_f16;
+    // fn func -> f16 { return subgroupBroadcast(1.h,0); }
+    Enable(wgsl::Extension::kF16);
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kSubgroupsF16);
+
+    Func("func", tint::Empty, ty.f16(),
+         Vector{
+             Return(Call("subgroupBroadcast", 1_h, 0_u)),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExperimentalExtension_F16) {
+    // enable f16;
+    // enable chromium_experimental_subgroups;
+    // fn func -> f16 { return subgroupBroadcast(1.h,0); }
+    Enable(wgsl::Extension::kF16);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+
+    Func("func", tint::Empty, ty.f16(),
+         Vector{
+             Return(Call("subgroupBroadcast", 1_h, 0_u)),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutExtension_VecF16) {
+    // enable f16;
+    // enable subgroups;
+    // fn func -> vec4<f16> { return subgroupBroadcast(vec4(1.h),0); }
+    Enable(wgsl::Extension::kF16);
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.vec4<f16>(),
+         Vector{
+             Return(Call(Source{{12, 34}}, "subgroupBroadcast", Call(ty.vec4<f16>(), 1_h), 0_u)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot call built-in function 'subgroupBroadcast' without extension 'subgroups_f16')");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtensions_VecF16) {
+    // enable f16;
+    // enable subgroups;
+    // enable subgroups_f16;
+    // fn func -> vec4<f16> { return subgroupBroadcast(vec4(1.h),0); }
+    Enable(wgsl::Extension::kF16);
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kSubgroupsF16);
+
+    Func("func", tint::Empty, ty.vec4<f16>(),
+         Vector{
+             Return(Call("subgroupBroadcast", Call(ty.vec4<f16>(), 1_h), 0_u)),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExperimentalExtension_VecF16) {
+    // enable f16;
+    // enable chromium_experimental_subgroups;
+    // fn func -> vec4<f16> { return subgroupBroadcast(vec4(1.h),0); }
+    Enable(wgsl::Extension::kF16);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+
+    Func("func", tint::Empty, ty.vec4<f16>(),
+         Vector{
+             Return(Call("subgroupBroadcast", Call(ty.vec4<f16>(), 1_h), 0_u)),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
 TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInComputeStage) {
     // @vertex fn func { dpdx(1.0); }
 
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kSubgroups);
 
     auto* call = Call("subgroupBroadcast", 1_f, 0_u);
     Func(Source{{1, 2}}, "func", tint::Empty, ty.void_(), Vector{Ignore(call)},
@@ -904,7 +1028,7 @@ TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInComputeStage) {
 TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInVertexStageIsError) {
     // @vertex fn func { dpdx(1.0); }
 
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kSubgroups);
 
     auto* call = Call(Source{{3, 4}}, "subgroupBroadcast", 1_f, 0_u);
     Func("func", tint::Empty, ty.vec4<f32>(), Vector{Ignore(call), Return(Call(ty.vec4<f32>()))},
@@ -920,7 +1044,7 @@ TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInVertexStageIsError) {
 TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInFragmentStageIsError) {
     // @vertex fn func { dpdx(1.0); }
 
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kSubgroups);
 
     auto* call = Call(Source{{3, 4}}, "subgroupBroadcast", 1_f, 0_u);
     Func("func",
@@ -935,7 +1059,7 @@ TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInFragmentStageIsError) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastValueF32) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kSubgroups);
     Func("func", tint::Empty, ty.f32(),
          Vector{
              Return(Call("subgroupBroadcast", 1_f, 0_u)),
@@ -944,7 +1068,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastValueF32) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastValueI32) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kSubgroups);
     Func("func", tint::Empty, ty.i32(),
          Vector{
              Return(Call("subgroupBroadcast", 1_i, 0_u)),
@@ -953,7 +1077,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastValueI32) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastValueU32) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kSubgroups);
     Func("func", tint::Empty, ty.u32(),
          Vector{
              Return(Call("subgroupBroadcast", 1_u, 0_u)),
@@ -962,7 +1086,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastValueU32) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastLaneArgMustBeConst) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kSubgroups);
     Func("func", tint::Empty, ty.void_(),
          Vector{
              Decl(Let("lane", Expr(1_u))),
