@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2024 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,78 +34,56 @@
 #                       Do not modify this file directly
 ################################################################################
 
-import("../../../../scripts/tint_overrides_with_defaults.gni")
+import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
-
-if (tint_build_unittests || tint_build_benchmarks) {
-  import("//testing/test.gni")
-}
-
-libtint_source_set("text") {
-  sources = [
-    "base64.cc",
-    "base64.h",
-    "color_mode.cc",
-    "color_mode.h",
-    "string.cc",
-    "string.h",
-    "string_stream.cc",
-    "string_stream.h",
-    "styled_text.cc",
-    "styled_text.h",
-    "styled_text_printer.cc",
-    "styled_text_printer.h",
-    "styled_text_printer_ansi.cc",
-    "styled_text_theme.cc",
-    "styled_text_theme.h",
-    "text_style.h",
-    "unicode.cc",
-    "unicode.h",
-  ]
-  deps = [
-    "${tint_src_dir}/utils/containers",
-    "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/macros",
-    "${tint_src_dir}/utils/math",
-    "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/rtti",
-    "${tint_src_dir}/utils/system",
-    "${tint_src_dir}/utils/traits",
-  ]
-
-  if (!tint_build_is_linux && !tint_build_is_mac && !tint_build_is_win) {
-    sources += [ "styled_text_printer_other.cc" ]
-  }
-
-  if (tint_build_is_linux || tint_build_is_mac) {
-    sources += [ "styled_text_printer_posix.cc" ]
-  }
-
-  if (tint_build_is_win) {
-    sources += [ "styled_text_printer_windows.cc" ]
-  }
-}
-if (tint_build_unittests) {
-  tint_unittests_source_set("unittests") {
-    sources = [
-      "base64_test.cc",
-      "string_stream_test.cc",
-      "string_test.cc",
-      "styled_text_printer_test.cc",
-      "text_style_test.cc",
-      "unicode_test.cc",
-    ]
+if (tint_build_ir_binary && tint_build_wgsl_reader) {
+  tint_executable("as") {
+    output_name = "ir_fuzz_as"
+    sources = [ "main.cc" ]
     deps = [
-      "${tint_src_dir}:gmock_and_gtest",
+      "${tint_src_dir}/api",
+      "${tint_src_dir}/api/common",
+      "${tint_src_dir}/cmd/common",
+      "${tint_src_dir}/lang/core",
+      "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/ir",
+      "${tint_src_dir}/lang/core/type",
+      "${tint_src_dir}/lang/wgsl",
+      "${tint_src_dir}/lang/wgsl/ast",
+      "${tint_src_dir}/lang/wgsl/common",
+      "${tint_src_dir}/lang/wgsl/features",
+      "${tint_src_dir}/lang/wgsl/helpers",
+      "${tint_src_dir}/lang/wgsl/inspector",
+      "${tint_src_dir}/lang/wgsl/program",
+      "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/utils/cli",
       "${tint_src_dir}/utils/containers",
+      "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
+      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
+      "${tint_src_dir}/utils/reflection",
+      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/strconv",
+      "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
+
+    if (tint_build_ir_binary) {
+      deps += [ "${tint_src_dir}/lang/core/ir/binary" ]
+    }
+
+    if (tint_build_spv_reader) {
+      deps += [ "${tint_src_dir}/lang/spirv/reader/common" ]
+    }
+
+    if (tint_build_wgsl_reader) {
+      deps += [ "${tint_src_dir}/lang/wgsl/reader" ]
+    }
   }
 }

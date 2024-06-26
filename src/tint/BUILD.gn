@@ -309,10 +309,10 @@ if (tint_has_fuzzers) {
       action("tint_generate_ir_corpus") {
         script = "${tint_src_dir}/cmd/fuzz/wgsl/generate_ir_corpus.py"
         sources = [ "${script}" ]
-        deps = [ "${tint_src_dir}/cmd/tint" ]
+        deps = [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
         args = [
           "--stamp=" + rebase_path(fuzzer_corpus_ir_stamp, root_build_dir),
-          rebase_path("${root_build_dir}/tint", root_build_dir),
+          rebase_path("${root_build_dir}/ir_fuzz_as", root_build_dir),
           rebase_path("${tint_root_dir}/test", root_build_dir),
           rebase_path(fuzzer_corpus_ir_dir, root_build_dir),
         ]

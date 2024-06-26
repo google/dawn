@@ -40,6 +40,7 @@ cc_library(
   name = "text",
   srcs = [
     "base64.cc",
+    "color_mode.cc",
     "string.cc",
     "string_stream.cc",
     "styled_text.cc",
@@ -65,6 +66,7 @@ cc_library(
   }),
   hdrs = [
     "base64.h",
+    "color_mode.h",
     "string.h",
     "string_stream.h",
     "styled_text.h",

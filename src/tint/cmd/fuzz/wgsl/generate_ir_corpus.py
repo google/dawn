@@ -39,7 +39,7 @@
 # Based off of generate_wgsl_corpus.py
 #
 # Usage:
-#    generate_ir_corpus.py <path to tint cmd> <input_dir> <corpus_dir>
+#    generate_ir_corpus.py <path to ir_fuzz_as cmd> <input_dir> <corpus_dir>
 
 import optparse
 import subprocess
@@ -59,17 +59,17 @@ def list_wgsl_files(root_search_dir):
 
 def main():
     parser = optparse.OptionParser(
-        usage="usage: %prog [option] tint-cmd input-dir output-dir")
+        usage="usage: %prog [option] <ir_fuzz_as cmd> input-dir output-dir")
     parser.add_option('--stamp', dest='stamp', help='stamp file')
     options, args = parser.parse_args(sys.argv[1:])
 
     if len(args) != 3:
         parser.error("incorrect number of arguments")
 
-    tint_cmd: str = os.path.abspath(args[0])
-    if not os.path.isfile(tint_cmd) or not os.access(tint_cmd, os.X_OK):
-        parser.error("Unable to run tint-cmd '" + os.path.abspath(args[0]) +
-                     "' (" + tint_cmd + ")")
+    ir_fuzz_as: str = os.path.abspath(args[0])
+    if not os.path.isfile(ir_fuzz_as) or not os.access(ir_fuzz_as, os.X_OK):
+        parser.error("Unable to run ir_fuzz_as cmd '" +
+                     os.path.abspath(args[0]) + "' (" + ir_fuzz_as + ")")
 
     input_dir: str = os.path.abspath(args[1].rstrip(os.sep))
     corpus_dir: str = os.path.abspath(args[2])
@@ -85,8 +85,8 @@ def main():
         out_file = os.path.splitext(in_file[len(input_dir) + 1:].replace(
             os.sep, '_'))[0] + '.tirb'
         subprocess.run([
-            tint_cmd, '--format=ir_bin',
-            '--output-name=' + corpus_dir + os.sep + out_file, in_file
+            ir_fuzz_as, '--output-name=' + corpus_dir + os.sep + out_file,
+            in_file
         ],
                        stderr=subprocess.STDOUT)
 

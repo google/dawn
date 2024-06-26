@@ -34,6 +34,7 @@
 #include <unordered_map>
 #include <vector>
 #include "src/tint/lang/wgsl/sem/variable.h"
+#include "src/tint/utils/text/color_mode.h"
 
 #if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
@@ -112,8 +113,6 @@
 #define WGSL_READER_ONLY(x)
 #endif
 
-#define WGSL_READER_AND_IR_BINARY (TINT_BUILD_WGSL_READER && TINT_BUILD_IR_BINARY)
-
 #if TINT_BUILD_SPV_WRITER
 #define SPV_WRITER_ONLY(x) x
 #else
@@ -144,12 +143,6 @@
 #define GLSL_WRITER_ONLY(x)
 #endif
 
-#if WGSL_READER_AND_IR_BINARY
-#define WGSL_READER_AND_IR_BINARY_ONLY(x) x
-#else
-#define WGSL_READER_AND_IR_BINARY_ONLY(x)
-#endif
-
 namespace {
 
 /// Prints the given hash value in a format string that the end-to-end test runner can parse.
@@ -167,7 +160,6 @@ enum class Format : uint8_t {
     kHlsl,
     kGlsl,
     kIr,
-    kIrBin
 };
 
 #if TINT_BUILD_HLSL_WRITER
@@ -176,9 +168,6 @@ constexpr uint32_t kMaxSupportedShaderModelForDXC = 66u;
 constexpr uint32_t kMinShaderModelForDP4aInHLSL = 64u;
 constexpr uint32_t kMinShaderModelForPackUnpack4x8InHLSL = 66u;
 #endif  // TINT_BUILD_HLSL_WRITER
-
-/// An enumerator of color-output modes
-enum class ColorMode : uint8_t { kPlain, kDark, kLight };
 
 struct Options {
     std::unique_ptr<tint::StyledTextPrinter> printer;
@@ -207,7 +196,6 @@ struct Options {
     bool rename_all = false;
 
     bool dump_ir = false;
-    bool dump_ir_bin = false;
     bool use_ir = false;
     bool use_ir_reader = false;
 
@@ -242,35 +230,6 @@ struct Options {
 #endif  // TINT_BULD_MSL_WRITER
 };
 
-/// @returns the default ColorMode when no `--color` flag is specified.
-ColorMode ColorModeDefault() {
-    if (!tint::TerminalSupportsColors(stdout)) {
-        return ColorMode::kPlain;
-    }
-    if (auto res = tint::TerminalIsDark(stdout)) {
-        return *res ? ColorMode::kDark : ColorMode::kLight;
-    }
-    if (auto env = tint::GetEnvVar("DARK_BACKGROUND_COLOR"); !env.empty()) {
-        return env != "0" ? ColorMode::kDark : ColorMode::kLight;
-    }
-    if (auto env = tint::GetEnvVar("LIGHT_BACKGROUND_COLOR"); !env.empty()) {
-        return env != "0" ? ColorMode::kLight : ColorMode::kDark;
-    }
-    return ColorMode::kDark;
-}
-
-std::unique_ptr<tint::StyledTextPrinter> CreatePrinter(ColorMode mode) {
-    switch (mode) {
-        case ColorMode::kLight:
-            return tint::StyledTextPrinter::Create(stderr, tint::StyledTextTheme::kDefaultLight);
-        case ColorMode::kDark:
-            return tint::StyledTextPrinter::Create(stderr, tint::StyledTextTheme::kDefaultDark);
-        case ColorMode::kPlain:
-            break;
-    }
-    return tint::StyledTextPrinter::CreatePlain(stderr);
-}
-
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
 Format InferFormat(const std::string& filename) {
@@ -303,12 +262,6 @@ Format InferFormat(const std::string& filename) {
     }
 #endif  // TINT_BUILD_HLSL_WRITER
 
-#if WGSL_READER_AND_IR_BINARY
-    if (tint::HasSuffix(filename, ".tirb")) {
-        return Format::kIrBin;
-    }
-#endif  // WGSL_READER_AND_IR_BINARY
-
     return Format::kUnknown;
 }
 
@@ -328,7 +281,6 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments,
     HLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kHlsl, "hlsl"));
     GLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kGlsl, "glsl"));
     WGSL_READER_ONLY(format_enum_names.Emplace(Format::kIr, "ir"));
-    WGSL_READER_AND_IR_BINARY_ONLY(format_enum_names.Emplace(Format::kIrBin, "ir_bin"));
 
     OptionSet options;
     auto& fmt = options.Add<EnumOption<Format>>("format",
@@ -338,18 +290,18 @@ If not provided, will be inferred from output filename extension:
   .spv    -> spirv
   .wgsl   -> wgsl
   .metal  -> msl
-  .hlsl   -> hlsl)" WGSL_READER_AND_IR_BINARY_ONLY(R"(
-  .tirb  -> ir binary protobuf)"),
+  .hlsl   -> hlsl)",
                                                 format_enum_names, ShortName{"f"});
     TINT_DEFER(opts->format = fmt.value.value_or(Format::kUnknown));
 
-    auto& col = options.Add<EnumOption<ColorMode>>("color", "Use colored output",
-                                                   tint::Vector{
-                                                       EnumName{ColorMode::kPlain, "off"},
-                                                       EnumName{ColorMode::kDark, "dark"},
-                                                       EnumName{ColorMode::kLight, "light"},
-                                                   },
-                                                   ShortName{"col"}, Default{ColorModeDefault()});
+    auto& col = options.Add<EnumOption<tint::ColorMode>>(
+        "color", "Use colored output",
+        tint::Vector{
+            EnumName{tint::ColorMode::kPlain, "off"},
+            EnumName{tint::ColorMode::kDark, "dark"},
+            EnumName{tint::ColorMode::kLight, "light"},
+        },
+        ShortName{"col"}, Default{tint::ColorModeDefault()});
     TINT_DEFER(opts->printer = CreatePrinter(*col.value));
 
     auto& ep = options.Add<StringOption>("entry-point", "Output single entry point",
@@ -395,11 +347,6 @@ When specified, automatically enables MSL validation)",
     auto& dump_ir = options.Add<BoolOption>("dump-ir", "Writes the IR to stdout", Alias{"emit-ir"},
                                             Default{false});
     TINT_DEFER(opts->dump_ir = *dump_ir.value);
-
-    auto& dump_ir_bin = options.Add<BoolOption>(
-        "dump-ir-bin", "Writes the IR as a human readable protobuf to stdout", Alias{"emit-ir-bin"},
-        Default{false});
-    TINT_DEFER(opts->dump_ir_bin = *dump_ir_bin.value);
 
     auto& use_ir = options.Add<BoolOption>(
         "use-ir", "Use the IR for writers and transforms when possible", Default{false});
@@ -702,49 +649,6 @@ Options:
     return true;
 }
 
-/// Writes the given `buffer` into the file named as `output_file` using the
-/// given `mode`.  If `output_file` is empty or "-", writes to standard
-/// output. If any error occurs, returns false and outputs error message to
-/// standard error. The ContainerT type must have data() and size() methods,
-/// like `std::string` and `std::vector` do.
-/// @returns true on success
-template <typename ContainerT>
-[[maybe_unused]] bool WriteFile(const std::string& output_file,
-                                const std::string mode,
-                                const ContainerT& buffer) {
-    const bool use_stdout = output_file.empty() || output_file == "-";
-    FILE* file = stdout;
-
-    if (!use_stdout) {
-#if defined(_MSC_VER)
-        fopen_s(&file, output_file.c_str(), mode.c_str());
-#else
-        file = fopen(output_file.c_str(), mode.c_str());
-#endif
-        if (!file) {
-            std::cerr << "Could not open file " << output_file << " for writing\n";
-            return false;
-        }
-    }
-
-    size_t written =
-        fwrite(buffer.data(), sizeof(typename ContainerT::value_type), buffer.size(), file);
-    if (buffer.size() != written) {
-        if (use_stdout) {
-            std::cerr << "Could not write all output to standard output\n";
-        } else {
-            std::cerr << "Could not write to file " << output_file << "\n";
-            fclose(file);
-        }
-        return false;
-    }
-    if (!use_stdout) {
-        fclose(file);
-    }
-
-    return true;
-}
-
 #if TINT_BUILD_SPV_WRITER
 std::string Disassemble(const std::vector<uint32_t>& data) {
     std::string spv_errors;
@@ -818,11 +722,11 @@ bool GenerateSpirv(const tint::Program& program, const Options& options) {
     }
 
     if (options.format == Format::kSpvAsm) {
-        if (!WriteFile(options.output_file, "w", Disassemble(result.Get().spirv))) {
+        if (!tint::cmd::WriteFile(options.output_file, "w", Disassemble(result.Get().spirv))) {
             return false;
         }
     } else {
-        if (!WriteFile(options.output_file, "wb", result.Get().spirv)) {
+        if (!tint::cmd::WriteFile(options.output_file, "wb", result.Get().spirv)) {
             return false;
         }
     }
@@ -869,7 +773,7 @@ bool GenerateWgsl([[maybe_unused]] const tint::Program& program,
         return false;
     }
 
-    if (!WriteFile(options.output_file, "w", result->wgsl)) {
+    if (!tint::cmd::WriteFile(options.output_file, "w", result->wgsl)) {
         return false;
     }
 
@@ -958,7 +862,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
         return false;
     }
 
-    if (!WriteFile(options.output_file, "w", result->msl)) {
+    if (!tint::cmd::WriteFile(options.output_file, "w", result->msl)) {
         return false;
     }
 
@@ -1050,7 +954,7 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
         return false;
     }
 
-    if (!WriteFile(options.output_file, "w", result->hlsl)) {
+    if (!tint::cmd::WriteFile(options.output_file, "w", result->hlsl)) {
         return false;
     }
 
@@ -1202,7 +1106,7 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
             return false;
         }
 
-        if (!WriteFile(options.output_file, "w", result->glsl)) {
+        if (!tint::cmd::WriteFile(options.output_file, "w", result->glsl)) {
             return false;
         }
 
@@ -1259,8 +1163,8 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 /// @param program the program to generate
 /// @param options the options that Tint was invoked with
 /// @returns true on success
-bool GenerateIr([[maybe_unused]] const tint::Program& program,
-                [[maybe_unused]] const Options& options) {
+bool DumpIR([[maybe_unused]] const tint::Program& program,
+            [[maybe_unused]] const Options& options) {
 #if !TINT_BUILD_WGSL_READER
     std::cerr << "WGSL reader not enabled in tint build\n";
     return false;
@@ -1277,99 +1181,6 @@ bool GenerateIr([[maybe_unused]] const tint::Program& program,
     return true;
 #endif
 }
-
-/// Generate an IR module for a program, performs checking for unsupported
-/// enables, needed transforms, and validation.
-/// @param program the program to generate
-/// @param options the options that Tint was invoked with
-/// @returns generated module on success, tint::failure on failure
-#if WGSL_READER_AND_IR_BINARY
-tint::Result<tint::core::ir::Module> GenerateIrModule([[maybe_unused]] const tint::Program& program,
-                                                      [[maybe_unused]] const Options& options) {
-    if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
-        return tint::Failure{"Unsupported enable used in shader"};
-    }
-
-    auto transformed = tint::wgsl::ApplySubstituteOverrides(program);
-    auto& src = transformed ? transformed.value() : program;
-    if (!src.IsValid()) {
-        return tint::Failure{src.Diagnostics()};
-    }
-
-    auto ir = tint::wgsl::reader::ProgramToLoweredIR(src);
-    if (ir != tint::Success) {
-        return ir.Failure();
-    }
-
-    if (auto val = tint::core::ir::Validate(ir.Get()); val != tint::Success) {
-        return val.Failure();
-    }
-
-    return ir;
-}
-#endif  // WGSL_READER_AND_IR_BINARY
-
-/// Generate IR binary protobuf for a program.
-/// @param program the program to generate
-/// @param options the options that Tint was invoked with
-/// @returns true on success
-bool GenerateIrProtoBinary([[maybe_unused]] const tint::Program& program,
-                           [[maybe_unused]] const Options& options) {
-#if !TINT_BUILD_WGSL_READER
-    std::cerr << "WGSL reader not enabled in tint build\n";
-    return false;
-#elif !TINT_BUILD_IR_BINARY
-    std::cerr << "IR binary not enabled in tint build\n";
-    return false;
-#else
-    auto module = GenerateIrModule(program, options);
-    if (module != tint::Success) {
-        std::cerr << "Failed to generate lowered IR from program: " << module.Failure() << "\n";
-        return false;
-    }
-
-    auto pb = tint::core::ir::binary::Encode(module.Get());
-    if (pb != tint::Success) {
-        std::cerr << "Failed to encode IR module to protobuf: " << pb.Failure() << "\n";
-        return false;
-    }
-
-    if (!WriteFile(options.output_file, "wb", ToStdVector(pb.Get()))) {
-        std::cerr << "Failed to write protobuf binary out to file\n";
-        return false;
-    }
-
-    return true;
-#endif
-}
-
-/// Generate IR human readable protobuf for a program.
-/// @param program the program to generate
-/// @param options the options that Tint was invoked with
-/// @returns true on success
-#if WGSL_READER_AND_IR_BINARY
-bool GenerateIrProtoDebug([[maybe_unused]] const tint::Program& program,
-                          [[maybe_unused]] const Options& options) {
-    auto module = GenerateIrModule(program, options);
-    if (module != tint::Success) {
-        std::cerr << "Failed to generate lowered IR from program: " << module.Failure() << "\n";
-        return false;
-    }
-
-    auto pb = tint::core::ir::binary::EncodeDebug(module.Get());
-    if (pb != tint::Success) {
-        std::cerr << "Failed to encode IR module to protobuf: " << pb.Failure() << "\n";
-        return false;
-    }
-
-    if (!WriteFile(options.output_file, "w", pb.Get())) {
-        std::cerr << "Failed to write protobuf debug text out to file\n";
-        return false;
-    }
-
-    return true;
-}
-#endif  // WGSL_READER_AND_IR_BINARY
 
 }  // namespace
 
@@ -1510,15 +1321,9 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_WGSL_READER
     if (options.dump_ir) {
-        GenerateIr(info.program, options);
+        DumpIR(info.program, options);
     }
 #endif  // TINT_BUILD_WGSL_READER
-
-#if WGSL_READER_AND_IR_BINARY
-    if (options.dump_ir_bin) {
-        GenerateIrProtoDebug(info.program, options);
-    }
-#endif  // WGSL_READER_AND_IR_BINARY
 
     tint::inspector::Inspector inspector(info.program);
     if (options.dump_inspector_bindings) {
@@ -1628,10 +1433,7 @@ int main(int argc, const char** argv) {
             success = GenerateGlsl(program, options);
             break;
         case Format::kIr:
-            success = GenerateIr(program, options);
-            break;
-        case Format::kIrBin:
-            success = GenerateIrProtoBinary(program, options);
+            success = DumpIR(program, options);
             break;
         case Format::kNone:
             break;

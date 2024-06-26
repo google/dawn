@@ -34,6 +34,8 @@
 #                       Do not modify this file directly
 ################################################################################
 
+include(cmd/fuzz/ir/as/BUILD.cmake)
+
 if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_fuzz_cmd

@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2024 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,84 +34,67 @@
 #                       Do not modify this file directly
 ################################################################################
 
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
 ################################################################################
-# Target:    tint_utils_text
-# Kind:      lib
+# Target:    tint_cmd_fuzz_ir_as_cmd
+# Kind:      cmd
+# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER
 ################################################################################
-tint_add_target(tint_utils_text lib
-  utils/text/base64.cc
-  utils/text/base64.h
-  utils/text/color_mode.cc
-  utils/text/color_mode.h
-  utils/text/string.cc
-  utils/text/string.h
-  utils/text/string_stream.cc
-  utils/text/string_stream.h
-  utils/text/styled_text.cc
-  utils/text/styled_text.h
-  utils/text/styled_text_printer.cc
-  utils/text/styled_text_printer.h
-  utils/text/styled_text_printer_ansi.cc
-  utils/text/styled_text_theme.cc
-  utils/text/styled_text_theme.h
-  utils/text/text_style.h
-  utils/text/unicode.cc
-  utils/text/unicode.h
+tint_add_target(tint_cmd_fuzz_ir_as_cmd cmd
+  cmd/fuzz/ir/as/main.cc
 )
 
-tint_target_add_dependencies(tint_utils_text lib
+tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
+  tint_api
+  tint_api_common
+  tint_cmd_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_ir
+  tint_lang_core_type
+  tint_lang_wgsl
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_common
+  tint_lang_wgsl_features
+  tint_lang_wgsl_helpers
+  tint_lang_wgsl_inspector
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_cli
   tint_utils_containers
+  tint_utils_diagnostic
   tint_utils_ice
+  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
   tint_utils_rtti
-  tint_utils_system
-  tint_utils_traits
-)
-
-if((NOT TINT_BUILD_IS_LINUX) AND (NOT TINT_BUILD_IS_MAC) AND (NOT TINT_BUILD_IS_WIN))
-  tint_target_add_sources(tint_utils_text lib
-    "utils/text/styled_text_printer_other.cc"
-  )
-endif((NOT TINT_BUILD_IS_LINUX) AND (NOT TINT_BUILD_IS_MAC) AND (NOT TINT_BUILD_IS_WIN))
-
-if(TINT_BUILD_IS_LINUX OR TINT_BUILD_IS_MAC)
-  tint_target_add_sources(tint_utils_text lib
-    "utils/text/styled_text_printer_posix.cc"
-  )
-endif(TINT_BUILD_IS_LINUX OR TINT_BUILD_IS_MAC)
-
-if(TINT_BUILD_IS_WIN)
-  tint_target_add_sources(tint_utils_text lib
-    "utils/text/styled_text_printer_windows.cc"
-  )
-endif(TINT_BUILD_IS_WIN)
-
-################################################################################
-# Target:    tint_utils_text_test
-# Kind:      test
-################################################################################
-tint_add_target(tint_utils_text_test test
-  utils/text/base64_test.cc
-  utils/text/string_stream_test.cc
-  utils/text/string_test.cc
-  utils/text/styled_text_printer_test.cc
-  utils/text/text_style_test.cc
-  utils/text/unicode_test.cc
-)
-
-tint_target_add_dependencies(tint_utils_text_test test
-  tint_utils_containers
-  tint_utils_ice
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_rtti
+  tint_utils_strconv
+  tint_utils_symbol
   tint_utils_text
   tint_utils_traits
 )
 
-tint_target_add_external_dependencies(tint_utils_text_test test
-  "gtest"
-)
+if(TINT_BUILD_IR_BINARY)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
+    tint_lang_core_ir_binary
+  )
+endif(TINT_BUILD_IR_BINARY)
+
+if(TINT_BUILD_SPV_READER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
+    tint_lang_spirv_reader_common
+  )
+endif(TINT_BUILD_SPV_READER)
+
+if(TINT_BUILD_WGSL_READER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
+    tint_lang_wgsl_reader
+  )
+endif(TINT_BUILD_WGSL_READER)
+
+tint_target_set_output_name(tint_cmd_fuzz_ir_as_cmd cmd "ir_fuzz_as")
+
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
