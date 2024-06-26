@@ -232,15 +232,21 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
     }
 }
 
-// Validate read-only, write-only and read-write storage textures are supported in shader modules.
+// Validate read-only, write-only and read-write storage textures are supported in shader modules,
+// excepting that only read-only storage textures are supported in vertex shaders.
 TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
-    constexpr std::array<wgpu::StorageTextureAccess, 2> kStorageTextureAccesses = {
-        {wgpu::StorageTextureAccess::ReadOnly, wgpu::StorageTextureAccess::ReadWrite}};
+    constexpr std::array<wgpu::StorageTextureAccess, 3> kStorageTextureAccesses = {
+        {wgpu::StorageTextureAccess::ReadOnly, wgpu::StorageTextureAccess::WriteOnly,
+         wgpu::StorageTextureAccess::ReadWrite}};
     constexpr std::array<wgpu::ShaderStage, 3> kShaderStages = {
         {wgpu::ShaderStage::Vertex, wgpu::ShaderStage::Fragment, wgpu::ShaderStage::Compute}};
 
     for (wgpu::StorageTextureAccess access : kStorageTextureAccesses) {
         for (wgpu::ShaderStage shaderStage : kShaderStages) {
+            if (shaderStage == wgpu::ShaderStage::Vertex &&
+                access != wgpu::StorageTextureAccess::ReadOnly) {
+                continue;
+            }
             std::string shader = CreateShaderWithStorageTexture(
                 access, wgpu::TextureFormat::R32Float, "texture_storage_2d", shaderStage);
             utils::CreateShaderModule(device, shader.c_str());

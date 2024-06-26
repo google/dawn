@@ -55,16 +55,3 @@ fn fragment_main() {
 fn compute_main() {
   prevent_dce = textureLoad_0b515a();
 }
-
-struct VertexOutput {
-    @builtin(position) pos: vec4<f32>,
-    @location(0) @interpolate(flat) prevent_dce : vec4<i32>
-};
-
-@vertex
-fn vertex_main() -> VertexOutput {
-  var out : VertexOutput;
-  out.pos = vec4<f32>();
-  out.prevent_dce = textureLoad_0b515a();
-  return out;
-}

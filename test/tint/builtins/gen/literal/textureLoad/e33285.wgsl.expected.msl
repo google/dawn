@@ -1,43 +1,18 @@
 #include <metal_stdlib>
 
 using namespace metal;
-int4 textureLoad_e33285(texture2d<int, access::read_write> tint_symbol_1) {
-  int4 res = tint_symbol_1.read(uint2(int2(1)));
+int4 textureLoad_e33285(texture2d<int, access::read_write> tint_symbol) {
+  int4 res = tint_symbol.read(uint2(int2(1)));
   return res;
 }
 
-fragment void fragment_main(device int4* tint_symbol_2 [[buffer(0)]], texture2d<int, access::read_write> tint_symbol_3 [[texture(0)]]) {
-  *(tint_symbol_2) = textureLoad_e33285(tint_symbol_3);
+fragment void fragment_main(device int4* tint_symbol_1 [[buffer(0)]], texture2d<int, access::read_write> tint_symbol_2 [[texture(0)]]) {
+  *(tint_symbol_1) = textureLoad_e33285(tint_symbol_2);
   return;
 }
 
-kernel void compute_main(device int4* tint_symbol_4 [[buffer(0)]], texture2d<int, access::read_write> tint_symbol_5 [[texture(0)]]) {
-  *(tint_symbol_4) = textureLoad_e33285(tint_symbol_5);
+kernel void compute_main(device int4* tint_symbol_3 [[buffer(0)]], texture2d<int, access::read_write> tint_symbol_4 [[texture(0)]]) {
+  *(tint_symbol_3) = textureLoad_e33285(tint_symbol_4);
   return;
-}
-
-struct VertexOutput {
-  float4 pos;
-  int4 prevent_dce;
-};
-
-struct tint_symbol {
-  int4 prevent_dce [[user(locn0)]] [[flat]];
-  float4 pos [[position]];
-};
-
-VertexOutput vertex_main_inner(texture2d<int, access::read_write> tint_symbol_6) {
-  VertexOutput out = {};
-  out.pos = float4(0.0f);
-  out.prevent_dce = textureLoad_e33285(tint_symbol_6);
-  return out;
-}
-
-vertex tint_symbol vertex_main(texture2d<int, access::read_write> tint_symbol_7 [[texture(0)]]) {
-  VertexOutput const inner_result = vertex_main_inner(tint_symbol_7);
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
 }
 

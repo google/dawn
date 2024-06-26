@@ -16,18 +16,3 @@ fn fragment_main() {
 fn compute_main() {
   prevent_dce = textureNumLayers_17ccad();
 }
-
-struct VertexOutput {
-  @builtin(position)
-  pos : vec4<f32>,
-  @location(0) @interpolate(flat)
-  prevent_dce : u32,
-}
-
-@vertex
-fn vertex_main() -> VertexOutput {
-  var out : VertexOutput;
-  out.pos = vec4<f32>();
-  out.prevent_dce = textureNumLayers_17ccad();
-  return out;
-}

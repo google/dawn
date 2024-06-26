@@ -22,43 +22,18 @@ struct SB_RW {
   tint_array<uint, 1> arg_0;
 };
 
-uint arrayLength_eb510f(const constant TintArrayLengths* const tint_symbol_1) {
-  uint res = (((*(tint_symbol_1)).array_lengths[0u][0u] - 0u) / 4u);
+uint arrayLength_eb510f(const constant TintArrayLengths* const tint_symbol) {
+  uint res = (((*(tint_symbol)).array_lengths[0u][0u] - 0u) / 4u);
   return res;
 }
 
-fragment void fragment_main(device uint* tint_symbol_2 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_3 [[buffer(30)]]) {
-  *(tint_symbol_2) = arrayLength_eb510f(tint_symbol_3);
+fragment void fragment_main(device uint* tint_symbol_1 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_2 [[buffer(30)]]) {
+  *(tint_symbol_1) = arrayLength_eb510f(tint_symbol_2);
   return;
 }
 
-kernel void compute_main(device uint* tint_symbol_4 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_5 [[buffer(30)]]) {
-  *(tint_symbol_4) = arrayLength_eb510f(tint_symbol_5);
+kernel void compute_main(device uint* tint_symbol_3 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_4 [[buffer(30)]]) {
+  *(tint_symbol_3) = arrayLength_eb510f(tint_symbol_4);
   return;
-}
-
-struct VertexOutput {
-  float4 pos;
-  uint prevent_dce;
-};
-
-struct tint_symbol {
-  uint prevent_dce [[user(locn0)]] [[flat]];
-  float4 pos [[position]];
-};
-
-VertexOutput vertex_main_inner(const constant TintArrayLengths* const tint_symbol_6) {
-  VertexOutput out = {};
-  out.pos = float4(0.0f);
-  out.prevent_dce = arrayLength_eb510f(tint_symbol_6);
-  return out;
-}
-
-vertex tint_symbol vertex_main(const constant TintArrayLengths* tint_symbol_7 [[buffer(30)]]) {
-  VertexOutput const inner_result = vertex_main_inner(tint_symbol_7);
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
 }
 
