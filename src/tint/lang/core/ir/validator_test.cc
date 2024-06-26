@@ -587,7 +587,7 @@ TEST_F(IR_ValidatorTest, Construct_Struct_WrongArgType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:8:33 error: construct: sructure member 1 is of type 'u32', but argument is of type 'i32'
+        R"(:8:33 error: construct: structure member 1 is of type 'u32', but argument is of type 'i32'
     %2:MyStruct = construct 1i, 2i
                                 ^^
 

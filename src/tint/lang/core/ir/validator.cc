@@ -1052,7 +1052,7 @@ void Validator::CheckConstruct(const Construct* construct) {
         for (size_t i = 0; i < args.Length(); i++) {
             if (args[i] && args[i]->Type() != members[i]->Type()) {
                 AddError(construct, Construct::kArgsOperandOffset + i)
-                    << "sructure member " << i << " is of type "
+                    << "structure member " << i << " is of type "
                     << style::Type(members[i]->Type()->FriendlyName())
                     << ", but argument is of type " << style::Type(args[i]->Type()->FriendlyName());
             }
