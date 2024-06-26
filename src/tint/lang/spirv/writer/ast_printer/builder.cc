@@ -284,6 +284,8 @@ bool Builder::Build() {
                 wgsl::Extension::kChromiumInternalInputAttachments,
                 wgsl::Extension::kF16,
                 wgsl::Extension::kDualSourceBlending,
+                wgsl::Extension::kSubgroups,
+                wgsl::Extension::kSubgroupsF16,
             })) {
         return false;
     }

@@ -399,6 +399,8 @@ bool ASTPrinter::Generate() {
                 wgsl::Extension::kChromiumInternalGraphite,
                 wgsl::Extension::kF16,
                 wgsl::Extension::kDualSourceBlending,
+                wgsl::Extension::kSubgroups,
+                wgsl::Extension::kSubgroupsF16,
             })) {
         return false;
     }
