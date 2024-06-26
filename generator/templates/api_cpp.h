@@ -483,6 +483,10 @@ class ObjectBase {
             {% endif %}
         {% endfor %}
 
+        {% if CppType == "Instance" %}
+            inline WaitStatus WaitAny(Future f, uint64_t timeout);
+        {% endif %}
+
       private:
         friend ObjectBase<{{CppType}}, {{CType}}>;
         static inline void {{c_prefix}}AddRef({{CType}} handle);
@@ -827,6 +831,14 @@ void {{CppType}}::SetUncapturedErrorCallback(L callback) {
             {{render_cpp_method_impl(type, method)}}
         {% endif %}
     {% endfor %}
+
+    {% if CppType == "Instance" %}
+        WaitStatus Instance::WaitAny(Future f, uint64_t timeout) {
+            FutureWaitInfo waitInfo { f };
+            return WaitAny(1, &waitInfo, timeout);
+        }
+    {% endif %}
+
     void {{CppType}}::{{c_prefix}}AddRef({{CType}} handle) {
         if (handle != nullptr) {
             {{as_cMethodNamespaced(type.name, Name("add ref"), c_namespace)}}(handle);

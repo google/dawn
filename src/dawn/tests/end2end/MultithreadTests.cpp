@@ -206,14 +206,15 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
         wgpu::Buffer buffer =
             CreateBuffer(kSize, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
 
-        wgpu::FutureWaitInfo waitInfo = {
-            buffer.MapAsync(wgpu::MapMode::Write, 0, kSize, wgpu::CallbackMode::AllowProcessEvents,
-                            [](wgpu::MapAsyncStatus status, const char*) {
-                                ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
-                            })};
-
         // Wait for the mapping to complete
-        ASSERT_EQ(instance.WaitAny(1, &waitInfo, UINT64_MAX), wgpu::WaitStatus::Success);
+        ASSERT_EQ(instance.WaitAny(buffer.MapAsync(wgpu::MapMode::Write, 0, kSize,
+                                                   wgpu::CallbackMode::AllowProcessEvents,
+                                                   [](wgpu::MapAsyncStatus status, const char*) {
+                                                       ASSERT_EQ(status,
+                                                                 wgpu::MapAsyncStatus::Success);
+                                                   }),
+                                   UINT64_MAX),
+                  wgpu::WaitStatus::Success);
 
         // Buffer is mapped, write into it and unmap .
         memcpy(buffer.GetMappedRange(0, kSize), myData.data(), kSize);
