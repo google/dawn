@@ -176,6 +176,12 @@ crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,i
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 
+################################################################################
+# crbug.com/bug/349420827: smoothstep execution
+################################################################################
+crbug.com/dawn/349420827 [ intel-0x9bc5 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
+crbug.com/dawn/349420827 [ nvidia-0x2184 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
+
 # stencil-only tests failing after the removal of the texture copy workaround
 crbug.com/343735745 webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
 crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
@@ -537,12 +543,10 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,binary,b
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,validation,expression,call,builtin,clamp:low_high:* [ Failure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,validation,expression,call,builtin,clamp:low_high:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:* [ Failure ]
