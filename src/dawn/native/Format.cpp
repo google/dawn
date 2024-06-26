@@ -173,11 +173,29 @@ typename std::bitset<kKnownFormatCount>::reference FormatSet::operator[](const F
 
 // For the enum for formats are packed but this might change when we have a broader feature
 // mechanism for webgpu.h. Formats start at 1 because 0 is the undefined format.
+// Dawn internal formats start with a prefix. We strip the prefix and then pack
+// them after the last WebGPU format.
 FormatIndex ComputeFormatIndex(wgpu::TextureFormat format) {
-    // This takes advantage of overflows to make the index of TextureFormat::Undefined outside
-    // of the range of the FormatTable.
-    static_assert(static_cast<uint32_t>(wgpu::TextureFormat::Undefined) - 1 > kKnownFormatCount);
-    return static_cast<FormatIndex>(static_cast<uint32_t>(format) - 1);
+    uint32_t formatValue = static_cast<uint32_t>(format);
+    switch (formatValue & kEnumPrefixMask) {
+        case 0:
+            // This takes advantage of overflows to make the index of TextureFormat::Undefined
+            // outside of the range of the FormatTable.
+            static_assert(static_cast<uint32_t>(wgpu::TextureFormat::Undefined) - 1 >
+                          kKnownFormatCount);
+            return static_cast<FormatIndex>(formatValue - 1);
+        case kDawnEnumPrefix: {
+            uint32_t dawnIndex = formatValue & ~kEnumPrefixMask;
+            if (dawnIndex < kDawnFormatCount) {
+                return static_cast<FormatIndex>(dawnIndex + kWebGPUFormatCount);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    // Invalid format. Return an index outside the format table.
+    return FormatIndex(~0);
 }
 
 FormatTable BuildFormatTable(const DeviceBase* device) {

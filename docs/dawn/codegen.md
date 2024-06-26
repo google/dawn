@@ -37,6 +37,8 @@ The basic schema is that every entry is a thing with a `"category"` key what det
 
 Most items and sub-items can include a list of `"tags"`, which, if specified, conditionally includes the item if any of its tags appears in the `enabled_tags` configuration passed to `parse_json`. This is used to include and exclude various items for Dawn, Emscripten, or upstream header variants. Tags are applied in the "parse_json" step ([rather than later](https://docs.google.com/document/d/1fBniVOxx3-hQbxHMugEPcQsaXaKBZYVO8yG9iXJp-fU/edit?usp=sharing)): this has the benefit of automatically catching when, for a particular tag configuration, an included item references an excluded item.
 
+When used on enum values, `"tags"` may add an additional prefix to the enum value. This is to implement [implementation-specific ranges of enums](https://github.com/webgpu-native/webgpu-headers/issues/214). All compat enums are to start at `0x0002_0000`, Emscripten enums are to start at `0x0004_0000`, and all Dawn enums are to start at `0x0005_0000`. Use of `"compat"`, `"emscripten"`, or `"dawn"` tags will add these values, respectively. So, an enum with value `"3"` but tag `"emscripten"` will actually use value `0x0002_0003`. Multi-implementation native enums start at `0x0001_0000`, so this value is added if the `"native"` tag is present and no other value-impacting tag is applied.
+
 A **record** is a list of **record members**, each of which is a dictionary with the following schema:
  - `"name"` a string
  - `"type"` a string, the name of the base type for this member
