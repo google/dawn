@@ -106,27 +106,23 @@ DawnJSONGenerator(
     OUTPUT_SOURCES DAWNPROC_GEN_SOURCES
 )
 
-add_library(dawn_proc)
-common_compile_options(dawn_proc)
-target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
-if(BUILD_SHARED_LIBS)
-    target_compile_definitions(dawn_proc PRIVATE "WGPU_SHARED_LIBRARY")
-endif()
-target_sources(dawn_proc
-  INTERFACE
+dawn_add_library(
+  dawn_proc
+  UTILITY_TARGET dawn_internal_config
+  HEADERS
     "${DAWN_INCLUDE_DIR}/dawn/dawn_thread_dispatch_proc.h"
     "${DAWN_INCLUDE_DIR}/dawn/dawn_proc.h"
-  PRIVATE
-    ${DAWNPROC_GEN_SOURCES}
+  SOURCES
+    "${DAWNPROC_GEN_SOURCES}"
+  DEPENDS
+    dawn::dawn_headers
+  PRIVATE_DEPENDS
+    dawn::dawn_common
 )
-target_link_libraries(dawn_proc
-  PUBLIC
-  dawn_headers
-  PRIVATE
-  dawn_common
-  dawn_internal_config
-)
-
+target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
+if(BUILD_SHARED_LIBS)
+  target_compile_definitions(dawn_proc PUBLIC "WGPU_SHARED_LIBRARY")
+endif()
 install_if_enabled(dawn_proc)
 
 ###############################################################################
