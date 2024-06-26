@@ -115,6 +115,20 @@ void ExtensionParser(::benchmark::State& state) {
         "c16",
         "fO6",
         "_KKttvv",
+        "xubgro5p8",
+        "suFq__ups",
+        "sqqgroups",
+        "subgroups",
+        "subgr6u33O",
+        "s96grQttupoo",
+        "sugro66ps",
+        "ubgrxupszzO166",
+        "suyygroups_f16",
+        "sHHbgroups_Z",
+        "subgroups_f16",
+        "ubgWWou44q_f16",
+        "sOObgroup_f16",
+        "suboruph_Y16",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {

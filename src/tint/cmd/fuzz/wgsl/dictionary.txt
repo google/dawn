@@ -361,6 +361,8 @@
 "subgroupBroadcast"
 "subgroup_invocation_id"
 "subgroup_size"
+"subgroups"
+"subgroups_f16"
 "switch"
 "tan"
 "tanh"
