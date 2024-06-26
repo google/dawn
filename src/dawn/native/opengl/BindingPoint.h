@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_BINDPOINT_H_
 #define SRC_DAWN_NATIVE_OPENGL_BINDPOINT_H_
 
-#include <unordered_map>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "src/tint/api/common/binding_point.h"
 
 namespace dawn::native::opengl {
@@ -46,7 +46,7 @@ enum class BindPointFunction : uint8_t {
 /// Records the field and the byte offset of the data to push in the internal uniform buffer.
 using FunctionAndOffset = std::pair<BindPointFunction, uint32_t>;
 /// Maps from binding point to data entry with the information to populate the data.
-using BindingPointToFunctionAndOffset = std::unordered_map<tint::BindingPoint, FunctionAndOffset>;
+using BindingPointToFunctionAndOffset = absl::flat_hash_map<tint::BindingPoint, FunctionAndOffset>;
 
 }  // namespace dawn::native::opengl
 

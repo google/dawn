@@ -30,9 +30,7 @@
 
 #include <d3dcompiler.h>
 
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <string_view>
 
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Serializable.h"
@@ -56,8 +54,6 @@ inline void Stream<pD3DCompile>::Write(Sink*, pD3DCompile const&) {}
 namespace dawn::native::d3d {
 
 enum class Compiler { FXC, DXC };
-
-using AccessControl = std::unordered_map<tint::BindingPoint, tint::core::Access>;
 
 using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterStageLocations>;
 

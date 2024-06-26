@@ -28,9 +28,9 @@
 #include "dawn/native/opengl/ShaderModuleGL.h"
 
 #include <sstream>
-#include <unordered_map>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Pipeline.h"
@@ -42,7 +42,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
-#include "tint/tint.h"
+#include "src/tint/api/common/binding_point.h"
 
 namespace dawn::native {
 namespace {
@@ -69,7 +69,7 @@ tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
     DAWN_UNREACHABLE();
 }
 
-using BindingMap = std::unordered_map<tint::BindingPoint, tint::BindingPoint>;
+using BindingMap = absl::flat_hash_map<tint::BindingPoint, tint::BindingPoint>;
 
 opengl::CombinedSampler* AppendCombinedSampler(opengl::CombinedSamplerInfo* info,
                                                tint::BindingPoint texture,
