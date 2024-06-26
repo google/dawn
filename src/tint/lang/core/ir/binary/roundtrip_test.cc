@@ -49,7 +49,7 @@ class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
   public:
     std::pair<std::string, std::string> Roundtrip() {
         auto pre = Disassembler(this->mod).Plain();
-        auto encoded = Encode(this->mod);
+        auto encoded = EncodeToBinary(this->mod);
         if (encoded != Success) {
             return {pre, encoded.Failure().reason.Str()};
         }

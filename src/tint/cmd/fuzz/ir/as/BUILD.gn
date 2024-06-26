@@ -37,7 +37,7 @@
 import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
-if (tint_build_ir_binary && tint_build_wgsl_reader) {
+if (tint_build_ir_binary && tint_build_wgsl_reader && tint_build_ir_fuzzer) {
   tint_executable("as") {
     output_name = "ir_fuzz_as"
     sources = [ "main.cc" ]
@@ -76,6 +76,10 @@ if (tint_build_ir_binary && tint_build_wgsl_reader) {
 
     if (tint_build_ir_binary) {
       deps += [ "${tint_src_dir}/lang/core/ir/binary" ]
+    }
+
+    if (tint_build_ir_binary && tint_build_ir_fuzzer) {
+      deps += [ "${tint_src_dir}/utils/protos/ir_fuzz:proto" ]
     }
 
     if (tint_build_spv_reader) {

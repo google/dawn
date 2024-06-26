@@ -34,7 +34,7 @@ namespace tint::core::ir::binary {
 namespace {
 
 void IRBinaryRoundtripFuzzer(core::ir::Module& module) {
-    auto encoded = Encode(module);
+    auto encoded = EncodeToBinary(module);
     if (encoded != Success) {
         TINT_ICE() << "Encode() failed\n" << encoded.Failure();
     }

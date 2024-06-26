@@ -34,11 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER AND TINT_BUILD_IR_FUZZER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_as_cmd
 # Kind:      cmd
-# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER
+# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER AND TINT_BUILD_IR_FUZZER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_as_cmd cmd
   cmd/fuzz/ir/as/main.cc
@@ -83,6 +83,12 @@ if(TINT_BUILD_IR_BINARY)
   )
 endif(TINT_BUILD_IR_BINARY)
 
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
+  tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
+    tint_utils_protos_ir_fuzz_proto
+  )
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
+
 if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
     tint_lang_spirv_reader_common
@@ -97,4 +103,4 @@ endif(TINT_BUILD_WGSL_READER)
 
 tint_target_set_output_name(tint_cmd_fuzz_ir_as_cmd cmd "ir_fuzz_as")
 
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER)
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_READER AND TINT_BUILD_IR_FUZZER)

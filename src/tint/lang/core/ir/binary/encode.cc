@@ -1145,30 +1145,27 @@ struct Encoder {
 
 }  // namespace
 
-Result<Vector<std::byte, 0>> Encode(const Module& mod_in) {
+std::unique_ptr<pb::Module> EncodeToProto(const Module& mod_in) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     pb::Module mod_out;
     Encoder{mod_in, mod_out}.Encode();
 
+    return std::make_unique<pb::Module>(mod_out);
+}
+
+Result<Vector<std::byte, 0>> EncodeToBinary(const Module& mod_in) {
+    auto mod_out = EncodeToProto(mod_in);
+
     Vector<std::byte, 0> buffer;
-    size_t len = mod_out.ByteSizeLong();
+    size_t len = mod_out->ByteSizeLong();
     buffer.Resize(len);
     if (len > 0) {
-        if (!mod_out.SerializeToArray(&buffer[0], static_cast<int>(len))) {
+        if (!mod_out->SerializeToArray(&buffer[0], static_cast<int>(len))) {
             return Failure{"failed to serialize protobuf"};
         }
     }
     return buffer;
-}
-
-Result<std::string> EncodeDebug(const Module& mod_in) {
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-    pb::Module mod_out;
-    Encoder{mod_in, mod_out}.Encode();
-
-    return mod_out.DebugString();
 }
 
 }  // namespace tint::core::ir::binary
