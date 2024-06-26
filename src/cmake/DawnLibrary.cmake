@@ -37,6 +37,7 @@
     [HEADER_ONLY]
     [UTILITY_TARGET           <target>]
     [HEADERS                  <header>...]
+    [PRIVATE_HEADERS          <header>...]
     [SOURCES                  <source>...]
     [DEPENDS                  <library>...]
     [PRIVATE_DEPENDS          <library>...])
@@ -50,6 +51,7 @@
     Dawn library API will privately link to this target. This may be used to
     provide things such as project-wide compilation flags or similar.
   * ``HEADERS``: A list of header files.
+  * ``PRIVATE_HEADERS``: A list of private header files.
   * ``SOURCES``: A list of source files which require compilation.
   * ``DEPENDS``: A list of libraries that this library must link against,
     equivalent to PUBLIC deps in target_link_libraries.
@@ -61,7 +63,7 @@ function(dawn_add_library name)
   cmake_parse_arguments(PARSE_ARGV 1 arg
     "FORCE_STATIC;FORCE_SHARED;FORCE_OBJECT;HEADER_ONLY"
     "UTILITY_TARGET"
-    "HEADERS;SOURCES;DEPENDS;PRIVATE_DEPENDS")
+    "HEADERS;PRIVATE_HEADERS;SOURCES;DEPENDS;PRIVATE_DEPENDS")
 
   if (arg_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR
@@ -115,13 +117,18 @@ function(dawn_add_library name)
       INTERFACE
         ${arg_DEPENDS})
     target_sources("${name}"
-      PRIVATE
+      PUBLIC
         ${arg_HEADERS})
   else ()
     add_library("${name}" ${library_type})
+    if (arg_HEADERS)
+      target_sources("${name}"
+        PUBLIC
+          ${arg_HEADERS})
+    endif ()
     target_sources("${name}"
       PRIVATE
-        ${arg_HEADERS}
+        ${arg_PRIVATE_HEADERS}
         ${arg_SOURCES})
     target_link_libraries("${name}"
       PUBLIC
