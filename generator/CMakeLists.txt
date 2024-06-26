@@ -168,6 +168,7 @@ function(DawnJSONGenerator)
     )
     DawnGenerator(
         SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_json_generator.py"
+        PRINT_NAME "${arg_PRINT_NAME}"
         OUTPUT_HEADERS HEADERS
         OUTPUT_SOURCES SOURCES
         EXTRA_PARAMETERS
