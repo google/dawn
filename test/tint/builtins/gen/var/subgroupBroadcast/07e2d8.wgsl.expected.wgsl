@@ -1,4 +1,5 @@
-enable chromium_experimental_subgroups;
+enable subgroups;
+enable subgroups_f16;
 enable f16;
 
 @group(0) @binding(0) var<storage, read_write> prevent_dce : f16;

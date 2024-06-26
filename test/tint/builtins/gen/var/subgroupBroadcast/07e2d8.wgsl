@@ -38,7 +38,8 @@
 // flags: --hlsl_shader_model 62
 
 
-enable chromium_experimental_subgroups;
+enable subgroups;
+enable subgroups_f16;
 
 enable f16;
 

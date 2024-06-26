@@ -267,9 +267,12 @@ fn vertex_main() -> VertexOutput {
 {{-   $overload := $permutation.Overload -}}
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
-{{- /* Emit 'enable chromium_experimental_subgroups' if required */ -}}
+{{- /* Emit 'enable subgroups' and 'enable subgroups_f16' if required */ -}}
 {{-   if or (eq "subgroupBallot" $builtin_name) (eq "subgroupBroadcast" $builtin_name)}}
-enable chromium_experimental_subgroups;
+enable subgroups;
+{{-     if OverloadUsesType $overload "f16"}}
+enable subgroups_f16;
+{{      end -}}
 {{    end -}}
 
 
