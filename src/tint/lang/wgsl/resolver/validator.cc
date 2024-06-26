@@ -2164,6 +2164,15 @@ bool Validator::Matrix(const core::type::Type* el_ty, const Source& source) cons
 }
 
 bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
+    auto var_source = [&](const sem::Function* func, const sem::GlobalVariable* var) {
+        for (auto* user : var->Users()) {
+            if (user->Stmt() && func == user->Stmt()->Function()) {
+                return user->Declaration()->source;
+            }
+        }
+        return Source();
+    };
+
     auto backtrace = [&](const sem::Function* func, const sem::Function* entry_point) {
         if (func != entry_point) {
             TraverseCallChain(entry_point, func, [&](const sem::Function* f) {
@@ -2178,30 +2187,40 @@ bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
     };
 
     auto check_var_uses = [&](const sem::Function* func, const sem::Function* entry_point) {
-        auto err = [&](ast::PipelineStage stage, const sem::GlobalVariable* var) {
-            Source source;
-            for (auto* user : var->Users()) {
-                if (func == user->Stmt()->Function()) {
-                    source = user->Declaration()->source;
-                    break;
-                }
-            }
-            AddError(source) << "var with " << style::Enum(var->AddressSpace())
-                             << " address space cannot be used by " << stage << " pipeline stage";
+        auto var_decl_note = [&](const sem::GlobalVariable* var) {
             AddNote(var->Declaration()->source) << "variable is declared here";
             backtrace(func, entry_point);
-            return false;
         };
 
         auto stage = entry_point->Declaration()->PipelineStage();
         for (auto* var : func->DirectlyReferencedGlobals()) {
-            if (stage != ast::PipelineStage::kCompute &&
-                var->AddressSpace() == core::AddressSpace::kWorkgroup) {
-                return err(stage, var);
+            Source source = var_source(func, var);
+            if ((stage != ast::PipelineStage::kCompute &&
+                 var->AddressSpace() == core::AddressSpace::kWorkgroup) ||
+                (stage != ast::PipelineStage::kFragment &&
+                 var->AddressSpace() == core::AddressSpace::kPixelLocal)) {
+                AddError(source) << "var with " << style::Enum(var->AddressSpace())
+                                 << " address space cannot be used by " << stage
+                                 << " pipeline stage";
+                var_decl_note(var);
+                return false;
             }
-            if (stage != ast::PipelineStage::kFragment &&
-                var->AddressSpace() == core::AddressSpace::kPixelLocal) {
-                return err(stage, var);
+            if (stage == ast::PipelineStage::kVertex &&
+                var->AddressSpace() == core::AddressSpace::kStorage &&
+                var->Access() != core::Access::kRead) {
+                AddError(source) << "var with " << style::Enum(var->AddressSpace())
+                                 << " address space and " << style::Enum(var->Access())
+                                 << " access mode cannot be used by " << stage << " pipeline stage";
+                var_decl_note(var);
+                return false;
+            }
+            auto* storage = var->Type()->UnwrapRef()->As<core::type::StorageTexture>();
+            if (stage == ast::PipelineStage::kVertex && storage &&
+                storage->access() != core::Access::kRead) {
+                AddError(source) << "storage texture with " << style::Enum(storage->access())
+                                 << " access mode cannot be used by " << stage << " pipeline stage";
+                var_decl_note(var);
+                return false;
             }
         }
         return true;

@@ -1203,9 +1203,9 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
         struct Dst {
             data : array<u32, 100>
         }
-        @group(0) @binding(0) var<storage, read_write> dst : Dst;
+        @group(0) @binding(0) var<storage, read> dst : Dst;
         @vertex fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
-            dst.data[VertexIndex] = 0x1234u;
+            var val = dst.data[VertexIndex];
             return vec4f();
         })");
 
@@ -1213,7 +1213,7 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModuleWithStorageBuffer;
     descriptor.cFragment.module = fsModule;
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    device.CreateRenderPipeline(&descriptor);
 }
 
 // Tests that only strip primitive topologies allow an index format

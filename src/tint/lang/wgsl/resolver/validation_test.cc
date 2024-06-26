@@ -133,6 +133,57 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
 9:10 note: called by entry point 'f0')");
 }
 
+TEST_F(ResolverValidationTest, RWStorageBufferUsedInVertexStage) {
+    // @group(0) @binding(0) var<storage, read_write> v : vec4<f32>;
+    // @vertex
+    // fn main() -> @builtin(position) vec4f {
+    //   return v;
+    // }
+
+    GlobalVar(Source{{1, 2}}, "v", ty.vec4<f32>(), core::AddressSpace::kStorage,
+              core::Access::kReadWrite, Binding(0_a), Group(0_a));
+    Func("main", tint::Empty, ty.vec4<f32>(),
+         Vector{
+             Return(Expr(Source{{3, 4}}, "v")),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kVertex),
+         },
+         Vector{
+             Builtin(core::BuiltinValue::kPosition),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(3:4 error: var with 'storage' address space and 'read_write' access mode cannot be used by vertex pipeline stage
+1:2 note: variable is declared here)");
+}
+
+TEST_F(ResolverValidationTest, RWStorageTextureUsedInVertexStage) {
+    auto type = ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+                                   core::Access::kReadWrite);
+    GlobalVar(Source{{1, 2}}, "v", type, Binding(0_a), Group(0_a));
+    GlobalVar("res", ty.vec4<f32>(), core::AddressSpace::kPrivate);
+    Func("main", tint::Empty, ty.vec4<f32>(),
+         Vector{
+             Assign(Phony(), Expr(Source{{3, 4}}, "v")),
+             Return(Expr(Source{{3, 4}}, "res")),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kVertex),
+         },
+         Vector{
+             Builtin(core::BuiltinValue::kPosition),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(3:4 error: storage texture with 'read_write' access mode cannot be used by vertex pipeline stage
+1:2 note: variable is declared here)");
+}
+
 TEST_F(ResolverValidationDeathTest, UnhandledStmt) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
