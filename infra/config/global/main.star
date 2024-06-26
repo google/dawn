@@ -797,6 +797,12 @@ tricium_dawn_tryjob()
 
 luci.cq_tryjob_verifier(
     cq_group = "Dawn-CQ",
+    builder = "chromium:try/dawn-try-linux-x64-intel-uhd770-rel",
+    includable_only = True,
+)
+
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
     builder = "chromium:try/dawn-try-win10-x86-rel",
     includable_only = True,
 )

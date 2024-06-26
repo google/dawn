@@ -78,6 +78,11 @@
       "Project": "chromium",
       "Bucket": "try",
       "Builder": "linux-dawn-rel"
+    },
+    "Linux-Intel-UHD770" : {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "dawn-try-linux-x64-intel-uhd770-rel"
     }
   },
   "Tag": {
