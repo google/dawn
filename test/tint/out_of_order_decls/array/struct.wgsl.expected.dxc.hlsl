@@ -1,3 +1,5 @@
+SKIP: hlsl-dxc validation fails on debug builds due to https://github.com/microsoft/DirectXShaderCompiler/issues/5294
+
 struct S {
   int m;
 };
