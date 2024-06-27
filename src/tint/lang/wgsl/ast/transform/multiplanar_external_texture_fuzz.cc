@@ -69,7 +69,7 @@ bool CanRun(const Program& program,
         }
         Hashset<BindingPoint, 8> new_binding_points;
         for (auto& remapping : remappings.bindings_map) {
-            if (all_binding_points.Remove(remapping.first)) {
+            if (all_binding_points.Contains(remapping.first)) {
                 if (!new_binding_points.Add(remapping.second.params)) {
                     return false;  // Binding collision
                 }
