@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
+kernel void e(texture2d<float, access::sample> tint_symbol_1 [[texture(0)]]) {
+  {
+    TINT_ISOLATE_UB(tint_volatile_true) for(uint level = tint_symbol_1.get_num_mip_levels(); (level > 0u); ) {
+    }
+  }
+  return;
+}
+

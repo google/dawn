@@ -28,9 +28,11 @@
 // GEN_BUILD:CONDITION(tint_build_wgsl_reader)
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
+#include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::glsl::writer {
 namespace {
@@ -54,6 +56,27 @@ bool CanRun(const tint::Program& program, const Options& options) {
     if (options.depth_range_offsets) {
         if (options.depth_range_offsets->max > kMaxOffset ||
             options.depth_range_offsets->min > kMaxOffset) {
+            return false;
+        }
+    }
+
+    // Make sure that every texture variable is in the texture_builtins_from_uniform binding list,
+    // otherwise TextureBuiltinsFromUniform will fail.
+    for (auto* global : program.AST().GlobalVariables()) {
+        auto* sem = program.Sem().Get<sem::GlobalVariable>(global);
+        if (!sem || !sem->Type()->UnwrapRef()->Is<core::type::Texture>()) {
+            continue;
+        }
+
+        bool found = false;
+        auto binding_point = sem->Attributes().binding_point;
+        for (auto& bp : options.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering) {
+            if (bp == binding_point) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
             return false;
         }
     }
