@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -58,10 +59,12 @@ struct Options {
     std::unique_ptr<tint::StyledTextPrinter> printer;
 
     std::string input_filename;
-    std::string output_file;
+    std::string output_filename;
+    std::string io_dirname;
 
     bool dump_ir = false;
     bool dump_proto = false;
+    bool verbose = false;
 };
 
 bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
@@ -78,9 +81,10 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
         ShortName{"col"}, Default{tint::ColorModeDefault()});
     TINT_DEFER(opts->printer = CreatePrinter(*col.value));
 
-    auto& output = options.Add<StringOption>("output-name", "Output file name", ShortName{"o"},
-                                             Parameter{"name"});
-    TINT_DEFER(opts->output_file = output.value.value_or(""));
+    auto& output = options.Add<StringOption>(
+        "output-filename", "Output file name, only usable if single input file provided",
+        ShortName{"o"}, Parameter{"name"});
+    TINT_DEFER(opts->output_filename = output.value.value_or(""));
 
     auto& dump_ir = options.Add<BoolOption>("dump-ir", "Writes the IR form of input to stdout",
                                             Alias{"emit-ir"}, Default{false});
@@ -91,10 +95,22 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
         Alias{"emit-proto"}, Default{false});
     TINT_DEFER(opts->dump_proto = *dump_proto.value);
 
+    auto& verbose =
+        options.Add<BoolOption>("verbose", "Enable additional internal logging", Default{false});
+    TINT_DEFER(opts->verbose = *verbose.value);
+
     auto& help = options.Add<BoolOption>("help", "Show usage", ShortName{"h"});
 
     auto show_usage = [&] {
-        std::cout << R"(Usage: tint [options] <input-file>
+        std::cout
+            << R"(Usage: tint [options] [-o|--output-filename] <output-file> <input-file> or tint [options] <io-dir>
+If a single WGSL file is provided, the suffix of the input file is not checked, and
+'-o|--output-filename' must be provided.
+
+If a directory is provided, the files it contains will be scanned and any .wgsl files will have a
+corresponding .tirb file generated.
+
+Passing in '-o|--output-filename' when providing a directory will cause a failure.
 
 Options:
 )";
@@ -112,14 +128,18 @@ Options:
         return false;
     }
 
-    auto files = result.Get();
-    if (files.Length() > 1) {
-        std::cerr << "More than one input file specified: "
-                  << tint::Join(Transform(files, tint::Quote), ", ") << "\n";
+    auto args = result.Get();
+    if (args.Length() > 1) {
+        std::cerr << "More than one input arg specified: "
+                  << tint::Join(Transform(args, tint::Quote), ", ") << "\n";
         return false;
     }
-    if (files.Length() == 1) {
-        opts->input_filename = files[0];
+    if (args.Length() == 1) {
+        if (is_directory(std::filesystem::path{args[0]})) {
+            opts->io_dirname = args[0];
+        } else {
+            opts->input_filename = args[0];
+        }
     }
 
     return true;
@@ -202,8 +222,9 @@ bool WriteTestCaseProto(const tint::cmd::fuzz::ir::pb::Root& proto, const Option
         }
     }
 
-    if (!tint::cmd::WriteFile(options.output_file, "wb", ToStdVector(buffer))) {
-        std::cerr << "Failed to write protobuf binary out to file\n";
+    if (!tint::cmd::WriteFile(options.output_filename, "wb", ToStdVector(buffer))) {
+        std::cerr << "Failed to write protobuf binary out to file '" << options.output_filename
+                  << "'\n";
         return false;
     }
 
@@ -216,6 +237,40 @@ bool WriteTestCaseProto(const tint::cmd::fuzz::ir::pb::Root& proto, const Option
 void DumpTestCaseProtoDebug(const tint::cmd::fuzz::ir::pb::Root& proto, const Options& options) {
     options.printer->Print(tint::StyledText{} << proto.module().DebugString());
     options.printer->Print(tint::StyledText{} << "\n");
+}
+
+bool ProcessFile(const Options& options) {
+    if (options.verbose) {
+        options.printer->Print(tint::StyledText{} << "Processing '" << options.input_filename
+                                                  << "'\n");
+    }
+
+    tint::cmd::LoadProgramOptions opts;
+    opts.filename = options.input_filename;
+    opts.printer = options.printer.get();
+
+    auto info = tint::cmd::LoadProgramInfo(opts);
+
+    if (options.dump_ir) {
+        DumpIR(info.program, options);
+    }
+
+    auto proto = GenerateFuzzCaseProto(info.program);
+    if (proto != tint::Success) {
+        return false;
+    }
+
+    if (options.dump_proto) {
+        DumpTestCaseProtoDebug(proto.Get(), options);
+    }
+
+    if (!options.output_filename.empty()) {
+        if (!WriteTestCaseProto(proto.Get(), options)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 }  // namespace
@@ -238,36 +293,45 @@ int main(int argc, const char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (options.output_file.empty() && !options.dump_ir && !options.dump_proto) {
-        std::cerr << "No output file (--output-name) and no diagnostic flags set (--dump_ir or "
-                     "--dump_proto), so nothing would be generated...\n";
+    if (!options.input_filename.empty() && !options.io_dirname.empty()) {
+        std::cerr << "Somehow both input_filename '" << options.input_filename
+                  << ", and io_dirname '" << options.io_dirname
+                  << "' were set after parsing arguments\n";
         return EXIT_FAILURE;
     }
 
-    tint::cmd::LoadProgramOptions opts;
-    opts.filename = options.input_filename;
-    opts.printer = options.printer.get();
-
-    auto info = tint::cmd::LoadProgramInfo(opts);
-
-    if (options.dump_ir) {
-        DumpIR(info.program, options);
-    }
-
-    auto proto = GenerateFuzzCaseProto(info.program);
-    if (proto != tint::Success) {
+    if (options.output_filename.empty() && !options.dump_ir && !options.dump_proto &&
+        options.io_dirname.empty()) {
+        std::cerr << "None of --output-name, --dump-ir, --dump-proto, or <io-dir> were provided, "
+                     "so no output would be generated...\n";
         return EXIT_FAILURE;
     }
 
-    if (options.dump_proto) {
-        DumpTestCaseProtoDebug(proto.Get(), options);
-    }
-
-    if (options.output_file.empty()) {
-        // Does not write out to stdout by default like other commands, since
-        // that would just be binary data
-        if (!WriteTestCaseProto(proto.Get(), options)) {
+    if (!options.input_filename.empty()) {
+        if (!ProcessFile(options)) {
             return EXIT_FAILURE;
+        }
+    } else {
+        tint::Vector<std::string, 8> wgsl_filenames;
+
+        // Need to collect the WGSL filenames and then process them in a second phase, so that the
+        // contents of the directory isn't changing during the iteration.
+        for (auto const& io_entry :
+             std::filesystem::directory_iterator{std::filesystem::path{options.io_dirname}}) {
+            const std::string entry_filename = io_entry.path().string();
+            if (entry_filename.substr(entry_filename.size() - 5) == ".wgsl") {
+                wgsl_filenames.Push(std::move(entry_filename));
+            }
+        }
+
+        for (auto const& input_filename : wgsl_filenames) {
+            const auto output_filename =
+                std::string(input_filename.substr(0, input_filename.size() - 5)) + ".tirb";
+            options.input_filename = input_filename;
+            options.output_filename = output_filename;
+
+            ProcessFile(options);  // Ignoring the return value, so that one bad file doesn't cause
+                                   // the processing batch to stop.
         }
     }
 

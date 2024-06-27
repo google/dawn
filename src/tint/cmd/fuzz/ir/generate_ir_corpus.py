@@ -72,23 +72,24 @@ def main():
                      os.path.abspath(args[0]) + "' (" + ir_fuzz_as + ")")
 
     input_dir: str = os.path.abspath(args[1].rstrip(os.sep))
-    corpus_dir: str = os.path.abspath(args[2])
+    output_dir: str = os.path.abspath(args[2])
 
-    if os.path.exists(corpus_dir):
-        shutil.rmtree(corpus_dir)
-    os.makedirs(corpus_dir)
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    os.makedirs(output_dir)
 
     for in_file in list_wgsl_files(input_dir):
         if in_file.endswith(".expected.wgsl"):
             continue
 
-        out_file = os.path.splitext(in_file[len(input_dir) + 1:].replace(
-            os.sep, '_'))[0] + '.tirb'
-        subprocess.run([
-            ir_fuzz_as, '--output-name=' + corpus_dir + os.sep + out_file,
-            in_file
-        ],
-                       stderr=subprocess.STDOUT)
+        out_file = in_file[len(input_dir) + 1:].replace(os.sep, '_')
+        shutil.copy(in_file, os.path.join(output_dir, out_file))
+
+    subprocess.run([ir_fuzz_as, output_dir], stderr=subprocess.STDOUT)
+
+    for f in os.listdir(output_dir):
+        if f.endswith(".wgsl"):
+            os.remove(os.path.join(output_dir, f))
 
     if options.stamp:
         pathlib.Path(options.stamp).touch(mode=0o644, exist_ok=True)
