@@ -1628,6 +1628,7 @@ crbug.com/tint/2225 webgpu:shader,execution,expression,unary,u32_conversion:abst
 
 ################################################################################
 # Triaged but uncategorized expectations
+# KEEP
 ################################################################################
 crbug.com/dawn/2497 [ android-t ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Failure ]
 
