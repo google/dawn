@@ -177,10 +177,10 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     entry_point.push_constant_size = ComputePushConstantSize(func);
 
     for (auto* param : sem->Parameters()) {
-        AddEntryPointInOutVariables(param->Declaration()->name->symbol.Name(),
-                                    param->Declaration()->name->symbol.Name(), param->Type(),
-                                    param->Declaration()->attributes, param->Attributes().location,
-                                    param->Attributes().color, entry_point.input_variables);
+        AddEntryPointInOutVariables(
+            param->Declaration()->name->symbol.Name(), param->Declaration()->name->symbol.Name(),
+            param->Type(), param->Declaration()->attributes, param->Attributes().location,
+            param->Attributes().color, /* @blend_src */ std::nullopt, entry_point.input_variables);
 
         entry_point.input_position_used |= ContainsBuiltin(
             core::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
@@ -201,7 +201,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     if (!sem->ReturnType()->Is<core::type::Void>()) {
         AddEntryPointInOutVariables("<retval>", "", sem->ReturnType(), func->return_type_attributes,
                                     sem->ReturnLocation(), /* @color */ std::nullopt,
-                                    entry_point.output_variables);
+                                    /* @blend_src */ std::nullopt, entry_point.output_variables);
 
         entry_point.output_sample_mask_used = ContainsBuiltin(
             core::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
@@ -629,6 +629,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
                                             VectorRef<const ast::Attribute*> attributes,
                                             std::optional<uint32_t> location,
                                             std::optional<uint32_t> color,
+                                            std::optional<uint32_t> blend_src,
                                             std::vector<StageVariable>& variables) const {
     // Skip builtins.
     if (ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
@@ -643,7 +644,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
             AddEntryPointInOutVariables(name + "." + member->Name().Name(), member->Name().Name(),
                                         member->Type(), member->Declaration()->attributes,
                                         member->Attributes().location, member->Attributes().color,
-                                        variables);
+                                        member->Attributes().blend_src, variables);
         }
         return;
     }
@@ -656,12 +657,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     std::tie(stage_variable.component_type, stage_variable.composition_type) =
         CalculateComponentAndComposition(type);
 
-    if (auto* blend_src_attribute = ast::GetAttribute<ast::BlendSrcAttribute>(attributes)) {
-        TINT_ASSERT(blend_src_attribute->expr->Is<ast::IntLiteralExpression>());
-        stage_variable.attributes.blend_src = static_cast<uint32_t>(
-            blend_src_attribute->expr->As<ast::IntLiteralExpression>()->value);
-    }
-
+    stage_variable.attributes.blend_src = blend_src;
     stage_variable.attributes.location = location;
     stage_variable.attributes.color = color;
 

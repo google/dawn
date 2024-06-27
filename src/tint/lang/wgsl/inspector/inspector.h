@@ -208,6 +208,7 @@ class Inspector {
     /// @param attributes the variable attributes
     /// @param location the location attribute value if provided
     /// @param color the color attribute value if provided
+    /// @param blend_src the blend_src attribute value if provided
     /// @param variables the list to add the variables to
     void AddEntryPointInOutVariables(std::string name,
                                      std::string variable_name,
@@ -215,6 +216,7 @@ class Inspector {
                                      VectorRef<const ast::Attribute*> attributes,
                                      std::optional<uint32_t> location,
                                      std::optional<uint32_t> color,
+                                     std::optional<uint32_t> blend_src,
                                      std::vector<StageVariable>& variables) const;
 
     /// Recursively determine if the type contains builtin.
