@@ -236,8 +236,9 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
                                                       SwapChainBase* previousSwapChain,
                                                       const SurfaceConfiguration* config);
     ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
-    ResultOrError<Ref<TextureViewBase>> CreateTextureView(TextureBase* texture,
-                                                          const TextureViewDescriptor* descriptor);
+    ResultOrError<Ref<TextureViewBase>> CreateTextureView(
+        TextureBase* texture,
+        const TextureViewDescriptor* descriptor = nullptr);
 
     ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsage(const Surface* surface) const;
 

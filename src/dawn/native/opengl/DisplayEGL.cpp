@@ -56,10 +56,12 @@ DisplayEGL::DisplayEGL(wgpu::BackendType backend) : egl(mFunctions) {
         case wgpu::BackendType::OpenGL:
             mApiEnum = EGL_OPENGL_API;
             mApiBit = EGL_OPENGL_BIT;
+            mRenderableBit = EGL_OPENGL_BIT;
             break;
         case wgpu::BackendType::OpenGLES:
             mApiEnum = EGL_OPENGL_ES_API;
             mApiBit = EGL_OPENGL_ES3_BIT;
+            mRenderableBit = EGL_OPENGL_ES2_BIT;
             break;
         default:
             DAWN_UNREACHABLE();
@@ -122,6 +124,63 @@ EGLint DisplayEGL::GetAPIEnum() const {
 
 EGLint DisplayEGL::GetAPIBit() const {
     return mApiBit;
+}
+
+EGLConfig DisplayEGL::ChooseConfig(EGLint surfaceType,
+                                   wgpu::TextureFormat color,
+                                   wgpu::TextureFormat depthStencil) const {
+    absl::InlinedVector<EGLint, 20> attribs;
+    auto AddAttrib = [&](EGLint attrib, EGLint value) {
+        attribs.push_back(attrib);
+        attribs.push_back(value);
+    };
+
+    AddAttrib(EGL_SURFACE_TYPE, surfaceType);
+    AddAttrib(EGL_RENDERABLE_TYPE, mRenderableBit);
+    AddAttrib(EGL_CONFORMANT, mRenderableBit);
+
+    switch (color) {
+        case wgpu::TextureFormat::RGBA8Unorm:
+            AddAttrib(EGL_RED_SIZE, 8);
+            AddAttrib(EGL_BLUE_SIZE, 8);
+            AddAttrib(EGL_GREEN_SIZE, 8);
+            AddAttrib(EGL_ALPHA_SIZE, 8);
+            break;
+
+            // TODO(344814083): Support RGBA16Float, RGB565Unorm and RGB10A2Unorm, it could be
+            // supported with EGL_KHR_no_config_context.
+            // TODO(344814083): Support RGBA8UnormSrgb with EGL_KHR_gl_colorspace.
+
+        default:
+            return kNoConfig;
+    }
+
+    switch (depthStencil) {
+        case wgpu::TextureFormat::Depth24PlusStencil8:
+            AddAttrib(EGL_DEPTH_SIZE, 24);
+            AddAttrib(EGL_STENCIL_SIZE, 8);
+            break;
+        case wgpu::TextureFormat::Depth16Unorm:
+            AddAttrib(EGL_DEPTH_SIZE, 16);
+            break;
+        case wgpu::TextureFormat::Undefined:
+            break;
+
+        default:
+            return kNoConfig;
+    }
+
+    // The attrib list is finished with an EGL_NONE tag.
+    attribs.push_back(EGL_NONE);
+
+    EGLConfig config = EGL_NO_CONFIG_KHR;
+    EGLint numConfigs = 0;
+    if (egl.ChooseConfig(mDisplay, attribs.data(), &config, 1, &numConfigs) == EGL_FALSE ||
+        numConfigs == 0) {
+        return kNoConfig;
+    }
+
+    return config;
 }
 
 }  // namespace dawn::native::opengl

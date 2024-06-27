@@ -37,6 +37,8 @@
 
 namespace dawn::native::opengl {
 
+static constexpr EGLConfig kNoConfig = 0;
+
 // Represents a connection to an EGL driver, with its EGLDisplay, its functions and other metadata
 // global to EGL.
 class DisplayEGL : NonMovable {
@@ -57,6 +59,11 @@ class DisplayEGL : NonMovable {
     EGLint GetAPIEnum() const;
     EGLint GetAPIBit() const;
 
+    // Chooses an EGLConfig that works for that surface type and color format.
+    EGLConfig ChooseConfig(EGLint surfaceType,
+                           wgpu::TextureFormat color,
+                           wgpu::TextureFormat depthStencil = wgpu::TextureFormat::Undefined) const;
+
   private:
     MaybeError InitializeWithDynamicLoading(const char* libName);
     MaybeError InitializeWithProcAndDisplay(EGLGetProcProc getProc, EGLDisplay display);
@@ -68,6 +75,8 @@ class DisplayEGL : NonMovable {
 
     EGLint mApiEnum;
     EGLint mApiBit;
+    // Different from mApiBit because renderables don't make a difference between GLES 2 and 3
+    EGLint mRenderableBit;
 };
 
 }  // namespace dawn::native::opengl

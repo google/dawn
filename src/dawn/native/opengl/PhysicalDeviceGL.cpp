@@ -39,6 +39,7 @@
 #include "dawn/native/opengl/ContextEGL.h"
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/native/opengl/DisplayEGL.h"
+#include "dawn/native/opengl/SwapChainEGL.h"
 
 namespace dawn::native::opengl {
 
@@ -430,15 +431,12 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     PhysicalDeviceSurfaceCapabilities capabilities;
 
     capabilities.usages = wgpu::TextureUsage::RenderAttachment |
-                          wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
-                          wgpu::TextureUsage::CopyDst;
+                          wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding |
+                          wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
 
-    // This is the only supported format in native mode (see crbug.com/dawn/160).
-#if DAWN_PLATFORM_IS(ANDROID)
-    capabilities.formats.push_back(wgpu::TextureFormat::RGBA8Unorm);
-#else
-    capabilities.formats.push_back(wgpu::TextureFormat::BGRA8Unorm);
-#endif  // !DAWN_PLATFORM_IS(ANDROID)
+    if (mDisplay->ChooseConfig(EGL_WINDOW_BIT, wgpu::TextureFormat::RGBA8Unorm) != kNoConfig) {
+        capabilities.formats.push_back(wgpu::TextureFormat::RGBA8Unorm);
+    }
 
     capabilities.presentModes = {
         wgpu::PresentMode::Fifo,

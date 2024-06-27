@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,55 +25,46 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_OPENGL_CONTEXTEGL_H_
-#define SRC_DAWN_NATIVE_OPENGL_CONTEXTEGL_H_
+#ifndef SRC_DAWN_NATIVE_OPENGL_SWAPCHAINEGL_H_
+#define SRC_DAWN_NATIVE_OPENGL_SWAPCHAINEGL_H_
 
-#include <memory>
-#include <utility>
-
-#include "dawn/common/NonMovable.h"
 #include "dawn/common/egl_platform.h"
-#include "dawn/native/opengl/DeviceGL.h"
-#include "dawn/native/opengl/EGLFunctions.h"
-#include "partition_alloc/pointers/raw_ptr.h"
+#include "dawn/native/SwapChain.h"
 
 namespace dawn::native::opengl {
 
+class Device;
 class DisplayEGL;
+class Texture;
+class TextureView;
 
-class ContextEGL : NonMovable {
+class SwapChainEGL final : public SwapChainBase {
   public:
-    static ResultOrError<std::unique_ptr<ContextEGL>> Create(const DisplayEGL* display,
-                                                             wgpu::BackendType backend,
-                                                             bool useRobustness,
-                                                             bool useANGLETextureSharing);
+    static ResultOrError<Ref<SwapChainEGL>> Create(Device* device,
+                                                   Surface* surface,
+                                                   SwapChainBase* previousSwapChain,
+                                                   const SurfaceConfiguration* config);
 
-    explicit ContextEGL(const DisplayEGL* display);
-    ~ContextEGL();
-
-    MaybeError Initialize(wgpu::BackendType backend,
-                          bool useRobustness,
-                          bool useANGLETextureSharing);
-
-    // Make the surface used by all MakeCurrent until the scoper gets out of scope.
-    class ScopedMakeSurfaceCurrent : NonMovable {
-      public:
-        ScopedMakeSurfaceCurrent(ContextEGL* context, EGLSurface surface);
-        ~ScopedMakeSurfaceCurrent();
-
-      private:
-        raw_ptr<ContextEGL> mContext;
-    };
-    [[nodiscard]] ScopedMakeSurfaceCurrent MakeSurfaceCurrentScope(EGLSurface surface);
-
-    void MakeCurrent();
+    SwapChainEGL(DeviceBase* device, Surface* surface, const SurfaceConfiguration* config);
+    ~SwapChainEGL() override;
 
   private:
-    raw_ptr<const DisplayEGL> mDisplay;
-    EGLContext mContext = EGL_NO_CONTEXT;
-    EGLSurface mSurface = EGL_NO_SURFACE;
+    void DestroyImpl() override;
+
+    using SwapChainBase::SwapChainBase;
+    MaybeError Initialize(SwapChainBase* previousSwapChain);
+
+    MaybeError CreateEGLSurface(const DisplayEGL* display);
+
+    EGLSurface mEGLSurface = EGL_NO_SURFACE;
+    Ref<Texture> mTexture;
+    Ref<TextureView> mTextureView;
+
+    MaybeError PresentImpl() override;
+    ResultOrError<SwapChainTextureInfo> GetCurrentTextureImpl() override;
+    void DetachFromSurfaceImpl() override;
 };
 
 }  // namespace dawn::native::opengl
 
-#endif  // SRC_DAWN_NATIVE_OPENGL_CONTEXTEGL_H_
+#endif  // SRC_DAWN_NATIVE_OPENGL_SWAPCHAINEGL_H_
