@@ -25,31 +25,35 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(dawn_glfw)
-common_compile_options(dawn_glfw)
-target_sources(dawn_glfw
-  INTERFACE
+set(headers
     "${DAWN_INCLUDE_DIR}/webgpu/webgpu_glfw.h"
-  PRIVATE
+)
+set(sources
     "utils.cpp"
 )
-target_link_libraries(dawn_glfw
-  PUBLIC
-    dawncpp_headers
-  PRIVATE
-    glfw
-    dawn_common
-    dawn_internal_config
-)
+set(conditional_private_depends)
+if (DAWN_ENABLE_METAL)
+    list(APPEND sources "utils_metal.mm")
+    list(APPEND conditional_private_depends"-framework Metal")
+endif ()
 
+dawn_add_library(
+  dawn_glfw
+  UTILITY_TARGET dawn_internal_config
+  HEADERS
+    "${headers}"
+  SOURCES
+    "${sources}"
+  DEPENDS
+    dawn::dawn_common
+    dawn::dawncpp_headers
+  PRIVATE_DEPENDS
+    glfw
+    ${conditional_private_depends}
+)
 target_compile_definitions(dawn_glfw PRIVATE "WGPU_GLFW_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(dawn_glfw PRIVATE "WGPU_GLFW_SHARED_LIBRARY")
-endif()
-
-if (DAWN_ENABLE_METAL)
-    target_link_libraries(dawn_glfw PRIVATE "-framework Metal")
-    target_sources(dawn_glfw PRIVATE "utils_metal.mm")
+    target_compile_definitions(dawn_glfw PUBLIC "WGPU_GLFW_SHARED_LIBRARY")
 endif()
 
 add_library(webgpu_glfw ALIAS dawn_glfw)
