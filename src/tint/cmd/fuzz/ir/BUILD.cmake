@@ -35,6 +35,7 @@
 ################################################################################
 
 include(cmd/fuzz/ir/as/BUILD.cmake)
+include(cmd/fuzz/ir/dis/BUILD.cmake)
 
 if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND ((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM))
 ################################################################################

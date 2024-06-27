@@ -103,7 +103,7 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
 
     auto show_usage = [&] {
         std::cout
-            << R"(Usage: tint [options] [-o|--output-filename] <output-file> <input-file> or tint [options] <io-dir>
+            << R"(Usage: ir_fuzz_as [options] [-o|--output-filename] <output-file> <input-file> or tint [options] <io-dir>
 If a single WGSL file is provided, the suffix of the input file is not checked, and
 '-o|--output-filename' must be provided.
 
