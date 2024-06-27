@@ -118,6 +118,9 @@ std::vector<std::string_view> CopyRelativeStringViews(const std::vector<std::str
                                                       const std::string_view& dst_view) {
     std::vector<std::string_view> out(src_list.size());
     for (size_t i = 0; i < src_list.size(); i++) {
+        if (src_list[i].empty()) {
+            continue;
+        }
         auto offset = static_cast<size_t>(&src_list[i].front() - &src_view.front());
         auto count = src_list[i].length();
         out[i] = dst_view.substr(offset, count);
