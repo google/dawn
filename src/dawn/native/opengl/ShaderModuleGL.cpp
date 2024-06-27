@@ -199,6 +199,50 @@ CombinedSamplerInfo generateCombinedSamplerInfo(tint::inspector::Inspector& insp
     return combinedSamplerInfo;
 }
 
+bool generateTextureBuiltinFromUniformData(tint::inspector::Inspector& inspector,
+                                           const std::string& entryPoint,
+                                           const PipelineLayout* layout,
+                                           BindingPointToFunctionAndOffset* bindingPointToData,
+                                           tint::glsl::writer::Bindings& bindings) {
+    auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(entryPoint);
+
+    if (textureBuiltinsFromUniformData.empty()) {
+        return false;
+    }
+
+    for (size_t i = 0; i < textureBuiltinsFromUniformData.size(); ++i) {
+        const auto& info = textureBuiltinsFromUniformData[i];
+
+        // This is the unmodified binding point from the WGSL shader.
+        tint::BindingPoint srcBindingPoint{info.group, info.binding};
+        bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering.emplace_back(
+            srcBindingPoint);
+
+        // The remapped binding point is inserted into the Dawn data structure.
+        const BindGroupLayoutInternalBase* bgl =
+            layout->GetBindGroupLayout(BindGroupIndex{info.group});
+        tint::BindingPoint dstBindingPoint = tint::BindingPoint{
+            info.group, static_cast<uint32_t>(bgl->GetBindingIndex(BindingNumber{info.binding}))};
+
+        BindPointFunction type = BindPointFunction::kTextureNumLevels;
+        switch (info.type) {
+            case tint::inspector::Inspector::TextureQueryType::kTextureNumLevels:
+                type = BindPointFunction::kTextureNumLevels;
+                break;
+            case tint::inspector::Inspector::TextureQueryType::kTextureNumSamples:
+                type = BindPointFunction::kTextureNumSamples;
+                break;
+        }
+
+        // Note, the `sizeof(uint32_t)` has to match up with the data type created by the
+        // `TextureBuiltinsFromUniform` when it creates the UBO structure.
+        bindingPointToData->emplace(dstBindingPoint,
+                                    std::pair{type, static_cast<uint32_t>(i * sizeof(uint32_t))});
+    }
+
+    return true;
+}
+
 }  // namespace
 
 std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber) {
@@ -399,41 +443,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         generateCombinedSamplerInfo(inspector, programmableStage.entryPoint, bindings,
                                     externalTextureExpansionMap, needsPlaceholderSampler);
 
-    auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(programmableStage.entryPoint);
-    bool needsInternalUBO = false;
-    if (!textureBuiltinsFromUniformData.empty()) {
-        needsInternalUBO = true;
-        for (size_t i = 0; i < textureBuiltinsFromUniformData.size(); ++i) {
-            const auto& info = textureBuiltinsFromUniformData[i];
-
-            // This is the unmodified binding point from the WGSL shader.
-            tint::BindingPoint srcBindingPoint{info.group, info.binding};
-            bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering.emplace_back(
-                srcBindingPoint);
-
-            // The remapped binding point is inserted into the Dawn data structure.
-            const BindGroupLayoutInternalBase* bgl =
-                layout->GetBindGroupLayout(BindGroupIndex{info.group});
-            tint::BindingPoint dstBindingPoint = tint::BindingPoint{
-                info.group,
-                static_cast<uint32_t>(bgl->GetBindingIndex(BindingNumber{info.binding}))};
-
-            BindPointFunction type = BindPointFunction::kTextureNumLevels;
-            switch (info.type) {
-                case tint::inspector::Inspector::TextureQueryType::kTextureNumLevels:
-                    type = BindPointFunction::kTextureNumLevels;
-                    break;
-                case tint::inspector::Inspector::TextureQueryType::kTextureNumSamples:
-                    type = BindPointFunction::kTextureNumSamples;
-                    break;
-            }
-
-            // Note, the `sizeof(uint32_t)` has to match up with the data type created by the
-            // `TextureBuiltinsFromUniform` when it creates the UBO structure.
-            bindingPointToData->emplace(
-                dstBindingPoint, std::pair{type, static_cast<uint32_t>(i * sizeof(uint32_t))});
-        }
-    }
+    bool needsInternalUBO = generateTextureBuiltinFromUniformData(
+        inspector, programmableStage.entryPoint, layout, bindingPointToData, bindings);
 
     std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
     if (!programmableStage.metadata->overrides.empty()) {
