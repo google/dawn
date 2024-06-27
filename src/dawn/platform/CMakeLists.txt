@@ -25,36 +25,36 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(dawn_platform)
-common_compile_options(dawn_platform)
+dawn_add_library(
+  dawn_platform
+  UTILITY_TARGET dawn_internal_config
+  HEADERS
+    "${DAWN_INCLUDE_DIR}/dawn/platform/DawnPlatform.h"
+    "${DAWN_INCLUDE_DIR}/dawn/platform/dawn_platform_export.h"
+  PRIVATE_HEADERS
+    "WorkerThread.h"
+    "metrics/HistogramMacros.h"
+    "tracing/EventTracer.h"
+    "tracing/TraceEvent.h"
+  SOURCES
+    "DawnPlatform.cpp"
+    "WorkerThread.cpp"
+    "metrics/HistogramMacros.cpp"
+    "tracing/EventTracer.cpp"
+  DEPENDS
+    dawn::dawn_headers
+    dawn::partition_alloc
+  PRIVATE_DEPENDS
+    dawn::dawn_common
+)
 
 target_compile_definitions(dawn_platform PRIVATE "DAWN_PLATFORM_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(dawn_platform PRIVATE "DAWN_PLATFORM_SHARED_LIBRARY")
+  target_compile_definitions(dawn_platform PUBLIC "DAWN_PLATFORM_SHARED_LIBRARY")
 endif()
 
 if (DAWN_USE_BUILT_DXC)
   target_compile_definitions(dawn_platform PRIVATE "DAWN_USE_BUILT_DXC")
 endif()
-
-target_sources(dawn_platform PRIVATE
-  PUBLIC
-    "${DAWN_INCLUDE_DIR}/dawn/platform/DawnPlatform.h"
-    "${DAWN_INCLUDE_DIR}/dawn/platform/dawn_platform_export.h"
-  PRIVATE
-    "DawnPlatform.cpp"
-    "WorkerThread.cpp"
-    "WorkerThread.h"
-    "metrics/HistogramMacros.cpp"
-    "metrics/HistogramMacros.h"
-    "tracing/EventTracer.cpp"
-    "tracing/EventTracer.h"
-    "tracing/TraceEvent.h"
-)
-target_link_libraries(dawn_platform
-  PUBLIC dawn_headers
-         partition_alloc
-  PRIVATE dawn_internal_config
-          dawn_common)
 
 install_if_enabled(dawn_platform)
