@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
+#include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
@@ -66,6 +67,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.
     RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
+    RUN_TRANSFORM(core::ir::transform::ValueToLet);
 
     return Success;
 }

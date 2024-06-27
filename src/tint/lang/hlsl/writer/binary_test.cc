@@ -122,7 +122,8 @@ TEST_F(HlslWriterTest, BinaryU32Mod) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 uint tint_mod_u32(uint lhs, uint rhs) {
-  return (lhs - ((lhs / (((rhs == 0u)) ? (1u) : (rhs))) * (((rhs == 0u)) ? (1u) : (rhs))));
+  uint v = (((rhs == 0u)) ? (1u) : (rhs));
+  return (lhs - ((lhs / v) * v));
 }
 
 [numthreads(1, 1, 1)]

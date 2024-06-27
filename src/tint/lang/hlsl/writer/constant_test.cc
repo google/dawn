@@ -878,7 +878,7 @@ TEST_F(HlslWriterTest, DISABLED_ConstantTypeStructStatic) {
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
-    b.Append(b.ir.root_block, [&] { b.Var<private_>("p", b.Construct(strct, 3_i)); });
+    b.Append(b.ir.root_block, [&] { b.Var<private_>("p", b.Composite(strct, 3_i)); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(struct S {

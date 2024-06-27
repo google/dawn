@@ -192,31 +192,32 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithInOutBuiltins) {
     auto* coord = b.FunctionParam("coord", ty.vec4<f32>());
     coord->SetBuiltin(core::BuiltinValue::kPosition);
 
-    auto* func = b.Function("frag_main", ty.f32());
+    auto* func = b.Function("frag_main", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     func->SetReturnBuiltin(core::BuiltinValue::kFragDepth);
     func->SetParams({coord});
-    b.Append(func->Block(), [&] {  //
-        auto* a = b.Access(ty.ptr(function, ty.f32()), coord, 0_u);
-        b.Return(func, b.Load(a));
+    b.Append(func->Block(), [&] {
+        auto* a = b.Swizzle(ty.f32(), coord, {0});
+        b.Return(func, a);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(struct tint_symbol_1 {
+    EXPECT_EQ(output_.hlsl, R"(struct frag_main_outputs {
+  float tint_symbol : SV_Depth;
+};
+
+struct frag_main_inputs {
   float4 coord : SV_Position;
 };
-struct tint_symbol_2 {
-  float value : SV_Depth;
-};
+
 
 float frag_main_inner(float4 coord) {
   return coord.x;
 }
 
-tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  float inner_result = frag_main_inner(float4(tint_symbol.coord.xyz, (1.0f / tint_symbol.coord.w)));
-  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+frag_main_outputs frag_main(frag_main_inputs inputs) {
+  float inner_result = frag_main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord.w)));
+  frag_main_outputs v = {inner_result};
+  return v;
 }
 
 )");
@@ -266,13 +267,13 @@ TEST_F(HlslWriterTest, DISABLED_FunctiontEntryPointSharedStructDifferentStages) 
         b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     frag_func->SetParams({frag_param});
     b.Append(frag_func->Block(), [&] {
-        auto* r = b.Access(ty.ptr(function, ty.f32()), frag_param, 1_u);
-        auto* g = b.Access(ty.ptr(function, ty.f32()), frag_param, 2_u);
-        auto* p = b.Access(ty.ptr(function, ty.vec4<f32>()), frag_param, 0_u);
+        auto* r = b.Access(ty.f32(), frag_param, 1_u);
+        auto* g = b.Access(ty.f32(), frag_param, 2_u);
+        auto* p = b.Access(ty.vec4<f32>(), frag_param, 0_u);
 
-        b.Let("r", b.Load(r));
-        b.Let("g", b.Load(g));
-        b.Let("p", b.Load(p));
+        b.Let("r", r);
+        b.Let("g", g);
+        b.Let("p", p);
         b.Return(frag_func);
     });
 
@@ -282,31 +283,24 @@ TEST_F(HlslWriterTest, DISABLED_FunctiontEntryPointSharedStructDifferentStages) 
   float col1;
   float col2;
 };
-struct tint_symbol {
-  float col1 : TEXCOORD1;
-  float col2 : TEXCOORD2;
-  float4 pos : SV_Position;
+
+struct vert_main_outputs {
+  float Interface_col1 : TEXCOORD1;
+  float Interface_col2 : TEXCOORD2;
+  float4 Interface_pos : SV_Position;
 };
+
+struct frag_main_inputs {
+  float Interface_col1 : TEXCOORD1;
+  float Interface_col2 : TEXCOORD2;
+  float4 Interface_pos : SV_Position;
+};
+
 
 Interface vert_main_inner() {
   Interface tint_symbol_3 = {(0.0f).xxxx, 0.5f, 0.25f};
   return tint_symbol_3;
 }
-
-tint_symbol vert_main() {
-  Interface inner_result = vert_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.col1 = inner_result.col1;
-  wrapper_result.col2 = inner_result.col2;
-  return wrapper_result;
-}
-
-struct tint_symbol_2 {
-  float col1 : TEXCOORD1;
-  float col2 : TEXCOORD2;
-  float4 pos : SV_Position;
-};
 
 void frag_main_inner(Interface inputs) {
   float r = inputs.col1;
@@ -314,10 +308,15 @@ void frag_main_inner(Interface inputs) {
   float4 p = inputs.pos;
 }
 
-void frag_main(tint_symbol_2 tint_symbol_1) {
-  Interface tint_symbol_4 = {float4(tint_symbol_1.pos.xyz, (1.0f / tint_symbol_1.pos.w)), tint_symbol_1.col1, tint_symbol_1.col2};
-  frag_main_inner(tint_symbol_4);
-  return;
+vert_main_outputs vert_main() {
+  Interface v = vert_main_inner();
+  vert_main_outputs wrapper_result = {v.col1, v.col2, v.pos};
+  return wrapper_result;
+}
+
+void frag_main(frag_main_inputs inputs) {
+  Interface v = {float4(inputs.pos.xyz, (1.0f / inputs.pos.w)), inputs.col1, inputs.col2};
+  frag_main_inner(v);
 }
 
 )");
@@ -372,39 +371,37 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointSharedStructHelperFunction) {
   float4 pos;
 };
 
-VertexOutput foo(float x) {
-  VertexOutput tint_symbol_2 = {float4(x, x, x, 1.0f)};
-  return tint_symbol_2;
-}
-
-struct tint_symbol {
-  float4 pos : SV_Position;
+struct vert1_main1_outputs {
+  float4 VertexOutput_pos : SV_Position;
 };
 
-VertexOutput vert_main1_inner() {
+struct vert2_main1_outputs {
+  float4 VertexOutput_pos : SV_Position;
+};
+
+
+VertexOutput foo(float x) {
+  return {float4(x, x, x, 1.0f)};
+}
+
+VertexOutput vert1_main1_inner() {
   return foo(0.5f);
 }
 
-tint_symbol vert_main1() {
-  VertexOutput inner_result = vert_main1_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.pos = inner_result.pos;
-  return wrapper_result;
-}
-
-struct tint_symbol_1 {
-  float4 pos : SV_Position;
-};
-
-VertexOutput vert_main2_inner() {
+VertexOutput vert2_main1_inner() {
   return foo(0.25f);
 }
 
-tint_symbol_1 vert_main2() {
+vert1_main1_outputs vert1_main1() {
+  VertexOutput inner_result = vert_main1_inner();
+  vert1_main1_outputs v = {inner_result.pos};
+  return v;
+}
+
+vert2_main1_outputs vert2_main1() {
   VertexOutput inner_result_1 = vert_main2_inner();
-  tint_symbol_1 wrapper_result_1 = (tint_symbol_1)0;
-  wrapper_result_1.pos = inner_result_1.pos;
-  return wrapper_result_1;
+  vert2_main1_outputs v = {inner_result_1.pos};
+  return v;
 }
 
 )");
@@ -423,8 +420,12 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniform) {
     //   var v = sub_func(1f);
     // }
 
-    Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("coord"), ty.vec4<f32>(), 0u,
-                                                    0u, 16u, 16u,
+    Vector inner_members{ty.Get<core::type::StructMember>(
+        b.ir.symbols.New("coord"), ty.f32(), 0u, 0u, 4u, 4u, core::type::StructMemberAttributes{})};
+    auto* inner_strct = ty.Struct(b.ir.symbols.New("Inner"), std::move(inner_members));
+
+    Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("coord"), inner_strct, 0u, 0u,
+                                                    16u, 16u,
                                                     core::type::StructMemberAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Uniforms"), std::move(members));
 
@@ -449,7 +450,8 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniform) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(cbuffer cbuffer_uniforms : register(b0, space1) {
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_ubo : register(b0, space1) {
   uint4 ubo[1];
 };
 
@@ -459,7 +461,6 @@ float sub_func(float param) {
 
 void frag_main() {
   float v = sub_func(1.0f);
-  return;
 }
 
 )");
@@ -476,8 +477,12 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniformStruct) {
     //   var v = ubo.coord.x;
     // }
 
-    Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("coord"), ty.vec4<f32>(), 0u,
-                                                    0u, 16u, 16u,
+    Vector inner_members{ty.Get<core::type::StructMember>(
+        b.ir.symbols.New("coord"), ty.f32(), 0u, 0u, 4u, 4u, core::type::StructMemberAttributes{})};
+    auto* inner_strct = ty.Struct(b.ir.symbols.New("Inner"), std::move(inner_members));
+
+    Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("coord"), inner_strct, 0u, 0u,
+                                                    16u, 16u,
                                                     core::type::StructMemberAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Uniforms"), std::move(members));
 
@@ -493,10 +498,10 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniformStruct) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(cbuffer cbuffer_uniforms : register(b0, space1) {
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_ubo : register(b0, space1) {
   uint4 ubo[1];
 };
-
 void frag_main() {
   float v = asfloat(ubo[0].x);
   return;
@@ -528,7 +533,7 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithRWStorageBufferRead) {
 
     auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
-        auto* a = b.Access(ty.ptr(storage, ty.f32()), coord, 0_u);
+        auto* a = b.Access(ty.ptr(storage, ty.i32()), coord, 0_u);
         b.Var("v", b.Load(a));
 
         b.Return(func);
@@ -536,10 +541,10 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithRWStorageBufferRead) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl,
-              R"(RWByteAddressBuffer coord : register(u0, space1);
-
+              R"(
+RWByteAddressBuffer coord : register(u0, space1);
 void frag_main() {
-  float v = asfloat(coord.Load(4u));
+  int v = asint(coord.Load(4u));
   return;
 }
 
@@ -569,7 +574,7 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithROStorageBufferRead) {
 
     auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
-        auto* a = b.Access(ty.ptr<storage, f32>(), coord, 0_u);
+        auto* a = b.Access(ty.ptr<storage, i32, core::Access::kRead>(), coord, 0_u);
         b.Var("v", b.Load(a));
         b.Return(func);
     });
@@ -579,7 +584,7 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithROStorageBufferRead) {
               R"(ByteAddressBuffer coord : register(t0, space1);
 
 void frag_main() {
-  float v = asfloat(coord.Load(4u));
+  int v = asint(coord.Load(4u));
   return;
 }
 
@@ -603,13 +608,14 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithWOStorageBufferStore) {
                                                     core::type::StructMemberAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Data"), std::move(members));
 
-    auto* coord = b.Var("coord", storage, strct, core::Access::kWrite);
+    auto* coord = b.Var("coord", storage, strct, core::Access::kReadWrite);
     coord->SetBindingPoint(1, 0);
     b.ir.root_block->Append(coord);
 
     auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         b.Store(b.Access(ty.ptr(storage, ty.f32()), coord, 1_u), 2_f);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
@@ -648,12 +654,13 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithStorageBufferStore) {
     auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         b.Store(b.Access(ty.ptr(storage, ty.f32()), coord, 1_u), 2_f);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl,
-              R"(RWByteAddressBuffer coord : register(u0, space1);
-
+              R"(
+RWByteAddressBuffer coord : register(u0, space1);
 void frag_main() {
   coord.Store(4u, asuint(2.0f));
   return;
@@ -685,7 +692,7 @@ TEST_F(HlslWriterTest, DISABLED_FunctionCalledByEntryPointWithUniform) {
 
     auto* sub_func = b.Function("sub_func", ty.f32());
     b.Append(sub_func->Block(), [&] {
-        auto* a = b.Access(ty.ptr<storage, f32>(), coord, 0_u);
+        auto* a = b.Access(ty.ptr<uniform, f32, core::Access::kRead>(), coord, 0_u);
         b.Return(sub_func, b.Load(a));
     });
 
@@ -722,7 +729,7 @@ TEST_F(HlslWriterTest, DISABLED_FunctionCalledByEntryPointWithStorageBuffer) {
     //   return coord.x;
     // }
     // @fragment fn frag_main() {
-    //   var v = sub_func(1f);
+    //   var v = sub_func();
     // }
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("x"), ty.f32(), 0u, 0u, 4u, 4u,
@@ -741,21 +748,20 @@ TEST_F(HlslWriterTest, DISABLED_FunctionCalledByEntryPointWithStorageBuffer) {
 
     auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
-        b.Var("v", b.Call(sub_func, 1_f));
+        b.Var("v", b.Call(sub_func));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl,
-              R"(RWByteAddressBuffer coord : register(u0, space1);
-
-float sub_func(float param) {
+              R"(
+RWByteAddressBuffer coord : register(u0, space1);
+float sub_func() {
   return asfloat(coord.Load(0u));
 }
 
 void frag_main() {
-  float v = sub_func(1.0f);
-  return;
+  float v = sub_func();
 }
 
 )");
@@ -793,7 +799,7 @@ void main() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionWithArrayParams) {
+TEST_F(HlslWriterTest, FunctionWithArrayParams) {
     // fn my_func(a: array<f32, 5>) {}
 
     auto* func = b.Function("my_func", ty.void_());
@@ -802,8 +808,8 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithArrayParams) {
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(void my_func(float a[5]) {
-  return;
+    EXPECT_EQ(output_.hlsl, R"(
+void my_func(float a[5]) {
 }
 
 [numthreads(1, 1, 1)]
@@ -962,7 +968,6 @@ TEST_F(HlslWriterTest, DISABLED_FunctionMultipleEntryPointWithSameModuleVar) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer data : register(u0);
-
 [numthreads(1, 1, 1)]
 void a() {
   float v = asfloat(data.Load(0u));

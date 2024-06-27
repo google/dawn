@@ -158,9 +158,10 @@ int tint_bitcast_from_f16(vector<float16_t, 2> src) {
 
 void foo() {
   vector<float16_t, 2> a = vector<float16_t, 2>(float16_t(1.0h), float16_t(2.0h));
-  int b = tint_bitcast_from_f16(a);
-  float c = tint_bitcast_from_f16_1(a);
-  uint d = tint_bitcast_from_f16_2(a);
+  vector<float16_t, 2> v = a;
+  int b = tint_bitcast_from_f16(v);
+  float c = tint_bitcast_from_f16_1(v);
+  uint d = tint_bitcast_from_f16_2(v);
 }
 
 )");
@@ -245,9 +246,10 @@ int2 tint_bitcast_from_f16(vector<float16_t, 4> src) {
 
 void foo() {
   vector<float16_t, 4> a = vector<float16_t, 4>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h), float16_t(4.0h));
-  int2 b = tint_bitcast_from_f16(a);
-  float2 c = tint_bitcast_from_f16_1(a);
-  uint2 d = tint_bitcast_from_f16_2(a);
+  vector<float16_t, 4> v = a;
+  int2 b = tint_bitcast_from_f16(v);
+  float2 c = tint_bitcast_from_f16_1(v);
+  uint2 d = tint_bitcast_from_f16_2(v);
 }
 
 )");
