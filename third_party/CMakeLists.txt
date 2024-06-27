@@ -123,6 +123,11 @@ if (NOT TARGET Vulkan-Headers AND DAWN_ENABLE_VULKAN)
     add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers")
 endif()
 
+if (NOT TARGET VulkanUtilityHeaders AND DAWN_ENABLE_VULKAN)
+    message(STATUS "Dawn: using VulkanUtilityLibraries at ${DAWN_VULKAN_UTILITY_LIBRARIES_DIR}")
+    add_subdirectory(${DAWN_VULKAN_UTILITY_LIBRARIES_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-utility-libraries")
+endif()
+
 if (DAWN_ENABLE_SWIFTSHADER AND NOT TARGET vk_swiftshader)
     set(SWIFTSHADER_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(SWIFTSHADER_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
@@ -150,6 +155,11 @@ function(AddSubdirectoryDXC)
     set(HLSL_ENABLE_FIXED_VER OFF)
     set(HLSL_BUILD_DXILCONV OFF)
     set(HLSL_INCLUDE_TESTS OFF)
+    # When bundling up dawn, the object files of dxc must be binary compatible with rest of dawn.
+    # The default value of `OFF` adds a macro `_ITERATOR_DEBUG_LEVEL=0`.
+    # This is a problem in `Debug` builds of dawn because all of dawn's objects get compiled
+    # with `_ITERATOR_DEBUG_LEVEL=2`
+    set(HLSL_ENABLE_DEBUG_ITERATORS ON)
 
     set(ENABLE_SPIRV_CODEGEN OFF)
     set(SPIRV_BUILD_TESTS OFF)
