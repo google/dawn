@@ -43,8 +43,33 @@
 namespace tint::hlsl::writer {
 namespace {
 
-void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context, Options options) {
+bool CanRun(const Program& program) {
     if (program.AST().HasOverrides()) {
+        return false;
+    }
+
+    // The PixelLocal transform assumes only a single entry point, so check for multiple entry
+    // points if chromium_experimental_pixel_local is enabled.
+    uint32_t num_entry_points = 0;
+    for (auto* fn : program.AST().Functions()) {
+        if (fn->PipelineStage() != ast::PipelineStage::kNone) {
+            num_entry_points++;
+        }
+    }
+    for (auto* enable : program.AST().Enables()) {
+        if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalPixelLocal)) {
+            if (num_entry_points > 1) {
+                return false;
+            }
+            break;
+        }
+    }
+
+    return true;
+}
+
+void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context, Options options) {
+    if (!CanRun(program)) {
         return;
     }
 
