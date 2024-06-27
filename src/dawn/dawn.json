@@ -2921,15 +2921,6 @@
             },
             {
                 "name": "on submitted work done",
-                "tags": ["emscripten"],
-                "args": [
-                    {"name": "signal value", "type": "uint64_t"},
-                    {"name": "callback", "type": "queue work done callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "on submitted work done",
                 "tags": ["dawn", "upstream"],
                 "args": [
                     {"name": "callback", "type": "queue work done callback"},
@@ -3851,6 +3842,7 @@
         "category": "structure",
         "chained": "in",
         "chain roots": ["surface descriptor"],
+        "tags": ["emscripten"],
         "members": [
             {"name": "selector", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
@@ -3878,7 +3870,7 @@
         "category": "structure",
         "chained": "in",
         "chain roots": ["surface descriptor"],
-        "tags": ["upstream"],
+        "tags": ["native"],
         "members": [
             {"name": "connection", "type": "void", "annotation": "*"},
             {"name": "window", "type": "uint32_t"}
@@ -3956,19 +3948,21 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 1, "name": "surface descriptor from metal layer", "tags": ["native"]},
-            {"value": 2, "name": "surface descriptor from windows HWND", "tags": ["native"]},
-            {"value": 3, "name": "surface descriptor from xlib window", "tags": ["native"]},
-            {"value": 4, "name": "surface descriptor from canvas HTML selector"},
-            {"value": 5, "name": "shader module SPIRV descriptor"},
-            {"value": 6, "name": "shader module WGSL descriptor"},
-            {"value": 7, "name": "primitive depth clip control"},
-            {"value": 8, "name": "surface descriptor from wayland surface", "tags": ["native"]},
-            {"value": 9, "name": "surface descriptor from android native window", "tags": ["native"]},
-            {"value": 10, "name": "surface descriptor from xcb window", "tags": ["upstream"]},
-            {"value": 11, "name": "render pass descriptor max draw count"},
+            {"value": 1, "name": "shader module SPIRV descriptor"},
+            {"value": 2, "name": "shader module WGSL descriptor"},
+            {"value": 3, "name": "primitive depth clip control"},
+            {"value": 4, "name": "render pass descriptor max draw count"},
 
             {"value": 0, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
+
+            {"value": 0, "name": "surface descriptor from canvas HTML selector", "tags": ["emscripten"]},
+
+            {"value": 0, "name": "surface descriptor from metal layer", "tags": ["native"]},
+            {"value": 1, "name": "surface descriptor from windows HWND", "tags": ["native"]},
+            {"value": 2, "name": "surface descriptor from xlib window", "tags": ["native"]},
+            {"value": 3, "name": "surface descriptor from wayland surface", "tags": ["native"]},
+            {"value": 4, "name": "surface descriptor from android native window", "tags": ["native"]},
+            {"value": 5, "name": "surface descriptor from xcb window", "tags": ["native"]},
 
             {"value": 0, "name": "surface descriptor from windows core window", "tags": ["dawn"]},
             {"value": 1, "name": "external texture binding entry", "tags": ["dawn"]},

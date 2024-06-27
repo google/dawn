@@ -94,7 +94,6 @@ class Name:
             result += chunk.lower()
         return result
 
-
 def concat_names(*names):
     return ' '.join([name.canonical_case() for name in names])
 
@@ -1204,6 +1203,13 @@ class MultiGeneratorFromDawnJSON(Generator):
         params_dawn = parse_json(
             loaded_json,
             enabled_tags=['compat', 'dawn', 'native', 'deprecated'])
+
+        params_all = parse_json(loaded_json,
+                                enabled_tags=[
+                                    'compat', 'dawn', 'emscripten', 'native',
+                                    'deprecated'
+                                ])
+
         metadata = params_dawn['metadata']
         RENDER_PARAMS_BASE = make_base_render_params(metadata)
 
@@ -1212,7 +1218,7 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'headers' in targets:
             renders.append(
                 FileRender('api.h', 'include/dawn/' + api + '.h',
-                           [RENDER_PARAMS_BASE, params_dawn]))
+                           [RENDER_PARAMS_BASE, params_all]))
             renders.append(
                 FileRender('dawn/wire/client/api.h',
                            'include/dawn/wire/client/' + api + '.h',
@@ -1225,7 +1231,7 @@ class MultiGeneratorFromDawnJSON(Generator):
         if 'cpp_headers' in targets:
             renders.append(
                 FileRender('api_cpp.h', 'include/dawn/' + api + '_cpp.h', [
-                    RENDER_PARAMS_BASE, params_dawn, {
+                    RENDER_PARAMS_BASE, params_all, {
                         'c_header': api + '/' + api + '.h',
                         'c_namespace': None,
                     }

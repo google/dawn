@@ -89,12 +89,13 @@ namespace {{namespace}} {
             {% for value in type.values %}
                 case {{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}:
                     s->Append("{{as_cppEnum(value.name)}}");
-                    break;
+                    return {true};
             {% endfor %}
+            default:
+                break;
             }
-        } else {
-            s->Append(absl::StrFormat("%u", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
         }
+        s->Append(absl::StrFormat("%u", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
         return {true};
     }
     {% endfor %}
