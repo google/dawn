@@ -2381,8 +2381,8 @@ fn a(i : i32) -> i32 {
 }
 
 fn b(p_indices : array<u32, 1u>) -> i32 {
-  let v = &(S[p_indices[0u]]);
-  return (*(v))[a((*(v))[0i][1i][2i])][a((*(v))[a(3i)][4i][5i])][a((*(v))[6i][a(7i)][8i])];
+  let v_1 = &(S[p_indices[0u]]);
+  return (*(v_1))[a((*(v_1))[0i][1i][2i])][a((*(v_1))[a(3i)][4i][5i])][a((*(v_1))[6i][a(7i)][8i])];
 }
 
 fn c() {
@@ -2422,10 +2422,10 @@ fn a(pre : i32, i_indices : array<u32, 4u>, post : i32) -> i32 {
 }
 
 fn b(p_indices : array<u32, 1u>) -> i32 {
-  let v = p_indices[0u];
-  let v_1 = a(20i, array<u32, 4u>(v, u32(0i), u32(1i), u32(2i)), 30i);
-  let v_2 = a(40i, array<u32, 4u>(v, u32(3i), u32(4i), u32(5i)), 50i);
-  return a(10i, array<u32, 4u>(v, u32(v_1), u32(v_2), u32(a(60i, array<u32, 4u>(v, u32(6i), u32(7i), u32(8i)), 70i))), 80i);
+  let v_1 = p_indices[0u];
+  let v_2 = a(20i, array<u32, 4u>(v_1, u32(0i), u32(1i), u32(2i)), 30i);
+  let v_3 = a(40i, array<u32, 4u>(v_1, u32(3i), u32(4i), u32(5i)), 50i);
+  return a(10i, array<u32, 4u>(v_1, u32(v_2), u32(v_3), u32(a(60i, array<u32, 4u>(v_1, u32(6i), u32(7i), u32(8i)), 70i))), 80i);
 }
 
 fn c() {
@@ -2466,8 +2466,8 @@ fn a(i : i32) -> i32 {
 }
 
 fn b(s_indices : array<u32, 1u>, u_indices : array<u32, 1u>) -> i32 {
-  let v = &(U[u_indices[0u]]);
-  return S[s_indices[0u]][a((*(v))[0i][1i].x)][a((*(v))[a(3i)][4i].y)];
+  let v_1 = &(U[u_indices[0u]]);
+  return S[s_indices[0u]][a((*(v_1))[0i][1i].x)][a((*(v_1))[a(3i)][4i].y)];
 }
 
 fn c() {

@@ -117,6 +117,13 @@ class State {
             return Program{resolver::Resolve(b)};
         }
 
+        // Clone all symbols before we start.
+        // This ensures that we preserve the names of named values and prevents unnamed values
+        // receiving names that would conflict with named values that are emitted later than them.
+        mod.symbols.Foreach([&](Symbol s) {  //
+            b.Symbols().New(s.Name());
+        });
+
         RootBlock(mod.root_block);
 
         // TODO(crbug.com/tint/1902): Emit user-declared types

@@ -32,13 +32,17 @@
 #include <string_view>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/program_options.h"
 #include "src/tint/lang/wgsl/writer/raise/raise.h"
 #include "src/tint/utils/result/result.h"
 #include "src/tint/utils/text/string.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::wgsl::writer {
 namespace {
@@ -142,6 +146,64 @@ std::ostream& operator<<(std::ostream& o, const WgslIRWriterTest::Result& res) {
             FAIL() << res;                               \
         }                                                \
     } while (false)
+
+TEST_F(WgslIRWriterTest, NameConflict_NamedBeforeUnnamed_ModuleScope) {
+    b.Append(mod.root_block, [&] {
+        b.Var<private_, u32>("v");
+        b.Var<private_, u32>();
+    });
+
+    RUN_TEST(R"(
+var<private> v : u32;
+
+var<private> v_1 : u32;
+)");
+}
+
+TEST_F(WgslIRWriterTest, NameConflict_NamedBeforeUnnamed_FunctionScope) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var<function, u32>("v");
+        b.Var<function, u32>();
+        b.Return(fn);
+    });
+
+    RUN_TEST(R"(
+fn f() {
+  var v : u32;
+  var v_1 : u32;
+}
+)");
+}
+
+TEST_F(WgslIRWriterTest, NameConflict_UnnamedBeforeNamed_ModuleScope) {
+    b.Append(mod.root_block, [&] {
+        b.Var<private_, u32>();
+        b.Var<private_, u32>("v");
+    });
+
+    RUN_TEST(R"(
+var<private> v_1 : u32;
+
+var<private> v : u32;
+)");
+}
+
+TEST_F(WgslIRWriterTest, NameConflict_UnnamedBeforeNamed_FunctionScope) {
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var<function, u32>();
+        b.Var<function, u32>("v");
+        b.Return(fn);
+    });
+
+    RUN_TEST(R"(
+fn f() {
+  var v_1 : u32;
+  var v : u32;
+}
+)");
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Short-circuiting binary ops
