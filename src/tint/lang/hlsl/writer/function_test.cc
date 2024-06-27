@@ -89,8 +89,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Need to pull the struct initializer up to a let.
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithParams) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithParams) {
     core::type::StructMemberAttributes pos_attrs{};
     pos_attrs.builtin = core::BuiltinValue::kPosition;
 
@@ -120,7 +119,7 @@ void main_inner(Interface p) {
 }
 
 void main(main_inputs inputs) {
-  Interface v = {float4(inputs.Interface_pos.xyz, 1.0f / inputs.Interface_pos.w)};
+  Interface v = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u]))};
   main_inner(v);
 }
 
@@ -178,13 +177,14 @@ float frag_main_inner(float foo) {
 }
 
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  return {frag_main_inner(inputs.foo)};
+  frag_main_outputs v = {frag_main_inner(inputs.foo)};
+  return v;
 }
 
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithInOutBuiltins) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithInOutBuiltins) {
     // fn frag_main(@position(0) coord : vec4<f32>) -> @frag_depth f32 {
     //   return coord.x;
     // }
@@ -215,15 +215,14 @@ float frag_main_inner(float4 coord) {
 }
 
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  float inner_result = frag_main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord.w)));
-  frag_main_outputs v = {inner_result};
+  frag_main_outputs v = {frag_main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord[3u])))};
   return v;
 }
 
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctiontEntryPointSharedStructDifferentStages) {
+TEST_F(HlslWriterTest, FunctionEntryPointSharedStructDifferentStages) {
     // struct Interface {
     //   @builtin(position) pos : vec4<f32>;
     //   @location(1) col1 : f32;
@@ -259,7 +258,7 @@ TEST_F(HlslWriterTest, DISABLED_FunctiontEntryPointSharedStructDifferentStages) 
 
     auto* vert_func = b.Function("vert_main", strct, core::ir::Function::PipelineStage::kVertex);
     b.Append(vert_func->Block(), [&] {  //
-        b.Return(vert_func, b.Construct(strct, b.Construct(ty.vec4<f32>()), 0.5_f, 0.25_f));
+        b.Return(vert_func, b.Construct(strct, b.Zero(ty.vec4<f32>()), 0.5_f, 0.25_f));
     });
 
     auto* frag_param = b.FunctionParam("inputs", strct);
@@ -298,8 +297,8 @@ struct frag_main_inputs {
 
 
 Interface vert_main_inner() {
-  Interface tint_symbol_3 = {(0.0f).xxxx, 0.5f, 0.25f};
-  return tint_symbol_3;
+  Interface v = {(0.0f).xxxx, 0.5f, 0.25f};
+  return v;
 }
 
 void frag_main_inner(Interface inputs) {
@@ -309,20 +308,20 @@ void frag_main_inner(Interface inputs) {
 }
 
 vert_main_outputs vert_main() {
-  Interface v = vert_main_inner();
-  vert_main_outputs wrapper_result = {v.col1, v.col2, v.pos};
-  return wrapper_result;
+  Interface v_1 = vert_main_inner();
+  vert_main_outputs v_2 = {v_1.col1, v_1.col2, v_1.pos};
+  return v_2;
 }
 
 void frag_main(frag_main_inputs inputs) {
-  Interface v = {float4(inputs.pos.xyz, (1.0f / inputs.pos.w)), inputs.col1, inputs.col2};
-  frag_main_inner(v);
+  Interface v_3 = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u])), inputs.Interface_col1, inputs.Interface_col2};
+  frag_main_inner(v_3);
 }
 
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointSharedStructHelperFunction) {
+TEST_F(HlslWriterTest, FunctionEntryPointSharedStructHelperFunction) {
     // struct VertexOutput {
     //   @builtin(position) pos : vec4<f32>;
     // };
@@ -381,27 +380,30 @@ struct vert2_main1_outputs {
 
 
 VertexOutput foo(float x) {
-  return {float4(x, x, x, 1.0f)};
+  VertexOutput v = {float4(x, x, x, 1.0f)};
+  return v;
 }
 
 VertexOutput vert1_main1_inner() {
-  return foo(0.5f);
+  VertexOutput v_1 = foo(0.5f);
+  return v_1;
 }
 
 VertexOutput vert2_main1_inner() {
-  return foo(0.25f);
+  VertexOutput v_2 = foo(0.25f);
+  return v_2;
 }
 
 vert1_main1_outputs vert1_main1() {
-  VertexOutput inner_result = vert_main1_inner();
-  vert1_main1_outputs v = {inner_result.pos};
-  return v;
+  VertexOutput v_3 = vert1_main1_inner();
+  vert1_main1_outputs v_4 = {v_3.pos};
+  return v_4;
 }
 
 vert2_main1_outputs vert2_main1() {
-  VertexOutput inner_result_1 = vert_main2_inner();
-  vert2_main1_outputs v = {inner_result_1.pos};
-  return v;
+  VertexOutput v_5 = vert2_main1_inner();
+  vert2_main1_outputs v_6 = {v_5.pos};
+  return v_6;
 }
 
 )");
@@ -831,7 +833,8 @@ TEST_F(HlslWriterTest, FunctionWithArrayReturn) {
     EXPECT_EQ(output_.hlsl, R"(
 typedef float ary_ret[5];
 ary_ret my_func() {
-  return (float[5])0;
+  float v[5] = (float[5])0;
+  return v;
 }
 
 [numthreads(1, 1, 1)]

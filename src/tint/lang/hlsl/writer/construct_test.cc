@@ -268,7 +268,8 @@ TEST_F(HlslWriterTest, ConstructStruct) {
 
 
 S a() {
-  return {1, 2.0f, int3(3, 4, 5)};
+  S v = {1, 2.0f, int3(3, 4, 5)};
+  return v;
 }
 
 [numthreads(1, 1, 1)]

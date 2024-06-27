@@ -41,12 +41,14 @@ cc_library(
   srcs = [
     "builtin_polyfill.cc",
     "fxc_polyfill.cc",
+    "promote_initializers.cc",
     "raise.cc",
     "shader_io.cc",
   ],
   hdrs = [
     "builtin_polyfill.h",
     "fxc_polyfill.h",
+    "promote_initializers.h",
     "raise.h",
     "shader_io.h",
   ],
@@ -85,6 +87,7 @@ cc_library(
   srcs = [
     "builtin_polyfill_test.cc",
     "fxc_polyfill_test.cc",
+    "promote_initializers_test.cc",
     "shader_io_test.cc",
   ],
   deps = [

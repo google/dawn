@@ -48,6 +48,8 @@ libtint_source_set("raise") {
     "builtin_polyfill.h",
     "fxc_polyfill.cc",
     "fxc_polyfill.h",
+    "promote_initializers.cc",
+    "promote_initializers.h",
     "raise.cc",
     "raise.h",
     "shader_io.cc",
@@ -85,6 +87,7 @@ if (tint_build_unittests) {
     sources = [
       "builtin_polyfill_test.cc",
       "fxc_polyfill_test.cc",
+      "promote_initializers_test.cc",
       "shader_io_test.cc",
     ]
     deps = [

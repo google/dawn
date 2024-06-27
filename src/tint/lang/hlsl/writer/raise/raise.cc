@@ -34,6 +34,7 @@
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
+#include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
 #include "src/tint/lang/hlsl/writer/raise/shader_io.h"
 #include "src/tint/utils/result/result.h"
 
@@ -67,6 +68,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.
     RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
+    RUN_TRANSFORM(raise::PromoteInitializers);
     RUN_TRANSFORM(core::ir::transform::ValueToLet);
 
     return Success;
