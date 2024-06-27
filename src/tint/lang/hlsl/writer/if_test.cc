@@ -192,8 +192,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfWithMultiPhiReturn1) {
-    auto* func = b.Function("foo", ty.i32(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
@@ -208,7 +207,6 @@ TEST_F(HlslWriterTest, IfWithMultiPhiReturn1) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-[numthreads(1, 1, 1)]
 int foo() {
   int v = 0;
   bool v_1 = false;
@@ -222,12 +220,15 @@ int foo() {
   return v;
 }
 
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
 )");
 }
 
 TEST_F(HlslWriterTest, IfWithMultiPhiReturn2) {
-    auto* func = b.Function("foo", ty.bool_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.Function("foo", ty.bool_());
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
@@ -242,7 +243,6 @@ TEST_F(HlslWriterTest, IfWithMultiPhiReturn2) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-[numthreads(1, 1, 1)]
 bool foo() {
   int v = 0;
   bool v_1 = false;
@@ -254,6 +254,10 @@ bool foo() {
     v_1 = false;
   }
   return v_1;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
 }
 
 )");

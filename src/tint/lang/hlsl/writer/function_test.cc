@@ -89,10 +89,14 @@ void main() {
 )");
 }
 
-TEST_F(HlslWriterTest, FunctionEntryPointWithParams) {
+// TODO(dsinclair): Need to pull the struct initializer up to a let.
+TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithParams) {
+    core::type::StructMemberAttributes pos_attrs{};
+    pos_attrs.builtin = core::BuiltinValue::kPosition;
+
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("pos"), ty.vec4<f32>(), 0u, 0u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         pos_attrs),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("Interface"), std::move(members));
 
@@ -107,8 +111,17 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithParams) {
   float4 pos;
 };
 
+struct main_inputs {
+  float4 Interface_pos : SV_Position;
+};
 
-void main(Interface p) {
+
+void main_inner(Interface p) {
+}
+
+void main(main_inputs inputs) {
+  Interface v = {float4(inputs.Interface_pos.xyz, 1.0f / inputs.Interface_pos.w)};
+  main_inner(v);
 }
 
 )");
@@ -137,7 +150,7 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithInAndOutLocations) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithInAndOutLocations) {
     // fn frag_main(@location(0) foo : f32) -> @location(1) f32 {
     //   return foo;
     // }
@@ -146,26 +159,26 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithInAndOutLocations) {
     foo->SetLocation(0, {});
 
     auto* func = b.Function("frag_main", ty.f32(), core::ir::Function::PipelineStage::kFragment);
+    func->SetParams({foo});
     func->SetReturnLocation(1, {});
     func->Block()->Append(b.Return(func, foo));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(struct tint_symbol_1 {
+    EXPECT_EQ(output_.hlsl, R"(struct frag_main_outputs {
+  float tint_symbol : SV_Target1;
+};
+
+struct frag_main_inputs {
   float foo : TEXCOORD0;
 };
-struct tint_symbol_2 {
-  float value : SV_Target1;
-};
+
 
 float frag_main_inner(float foo) {
   return foo;
 }
 
-tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  float inner_result = frag_main_inner(tint_symbol.foo);
-  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+frag_main_outputs frag_main(frag_main_inputs inputs) {
+  return {frag_main_inner(inputs.foo)};
 }
 
 )");

@@ -33,6 +33,7 @@
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
+#include "src/tint/lang/hlsl/writer/raise/shader_io.h"
 #include "src/tint/utils/result/result.h"
 
 namespace tint::hlsl::writer {
@@ -59,6 +60,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(raise::FxcPolyfill);
     }
 
+    RUN_TRANSFORM(raise::ShaderIO);
     RUN_TRANSFORM(raise::BuiltinPolyfill);
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
