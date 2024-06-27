@@ -111,6 +111,95 @@ DAWN_SERIALIZABLE(struct, GLSLCompilation, GLSL_COMPILATION_MEMBERS){};
 }  // namespace dawn::native
 
 namespace dawn::native::opengl {
+namespace {
+
+// Find all the sampler/texture pairs for this entry point, and create CombinedSamplers for them.
+// CombinedSampler records the binding points of the original texture and sampler, and generates a
+// unique name. The corresponding uniforms will be retrieved by these generated names in PipelineGL.
+// Any texture-only references will have "usePlaceholderSampler" set to true, and only the texture
+// binding point will be used in naming them. In addition, Dawn will bind a non-filtering sampler
+// for them (see PipelineGL).
+CombinedSamplerInfo generateCombinedSamplerInfo(tint::inspector::Inspector& inspector,
+                                                const std::string& entryPoint,
+                                                tint::glsl::writer::Bindings& bindings,
+                                                BindingMap externalTextureExpansionMap,
+                                                bool* needsPlaceholderSampler
+
+) {
+    auto uses =
+        inspector.GetSamplerTextureUses(entryPoint, bindings.placeholder_sampler_bind_point);
+    CombinedSamplerInfo combinedSamplerInfo;
+    for (const auto& use : uses) {
+        tint::BindingPoint samplerBindPoint = use.sampler_binding_point;
+        tint::BindingPoint texBindPoint = use.texture_binding_point;
+
+        CombinedSampler* info = AppendCombinedSampler(
+            &combinedSamplerInfo, use.texture_binding_point, use.sampler_binding_point,
+            bindings.placeholder_sampler_bind_point);
+
+        if (info->usePlaceholderSampler) {
+            *needsPlaceholderSampler = true;
+        }
+
+        // Note, the rest of Dawn is expecting to use the un-modified WGSL binding points when
+        // looking up information on the combined samplers. Tint is expecting Dawn to provide
+        // the final expected values for those entry points. So, we end up using the original
+        // values for the AppendCombinedSampler calls and the remapped binding points when we
+        // put things in the tint bindings structure.
+
+        {
+            auto texIt = bindings.texture.find(texBindPoint);
+            if (texIt != bindings.texture.end()) {
+                texBindPoint.group = 0;
+                texBindPoint.binding = texIt->second.binding;
+            } else {
+                // The plane0 texture will be in external_textures, not textures, so we have to set
+                // the `sampler_texture_to_name` based on the external_texture value.
+                auto exIt = bindings.external_texture.find(texBindPoint);
+                if (exIt != bindings.external_texture.end()) {
+                    texBindPoint.group = 0;
+                    texBindPoint.binding = exIt->second.plane0.binding;
+                }
+            }
+        }
+        {
+            auto it = bindings.sampler.find(samplerBindPoint);
+            if (it != bindings.sampler.end()) {
+                samplerBindPoint.group = 0;
+                samplerBindPoint.binding = it->second.binding;
+            }
+        }
+
+        bindings.sampler_texture_to_name.emplace(
+            tint::glsl::writer::binding::CombinedTextureSamplerPair{texBindPoint, samplerBindPoint,
+                                                                    false},
+            info->GetName());
+
+        // If the texture has an associated plane1 texture (ie., it's an external texture),
+        // append a new combined sampler with the same sampler and the plane1 texture.
+        auto it = externalTextureExpansionMap.find(use.texture_binding_point);
+        if (it != externalTextureExpansionMap.end()) {
+            CombinedSampler* plane1Info =
+                AppendCombinedSampler(&combinedSamplerInfo, it->second, use.sampler_binding_point,
+                                      bindings.placeholder_sampler_bind_point);
+
+            tint::BindingPoint plane1TexBindPoint = it->second;
+            auto dstIt = bindings.external_texture.find(use.texture_binding_point);
+            if (dstIt != bindings.external_texture.end()) {
+                plane1TexBindPoint.group = 0;
+                plane1TexBindPoint.binding = dstIt->second.plane1.binding;
+            }
+
+            bindings.sampler_texture_to_name.emplace(
+                tint::glsl::writer::binding::CombinedTextureSamplerPair{plane1TexBindPoint,
+                                                                        samplerBindPoint, true},
+                plane1Info->GetName());
+        }
+    }
+    return combinedSamplerInfo;
+}
+
+}  // namespace
 
 std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber) {
     std::ostringstream o;
@@ -296,86 +385,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     // GetSamplerTextureUses() will return this sentinel value.
     bindings.placeholder_sampler_bind_point = {static_cast<uint32_t>(kMaxBindGroupsTyped), 0};
 
-    *needsPlaceholderSampler = false;
-    // Find all the sampler/texture pairs for this entry point, and create
-    // CombinedSamplers for them. CombinedSampler records the binding points
-    // of the original texture and sampler, and generates a unique name. The
-    // corresponding uniforms will be retrieved by these generated names
-    // in PipelineGL. Any texture-only references will have
-    // "usePlaceholderSampler" set to true, and only the texture binding point
-    // will be used in naming them. In addition, Dawn will bind a
-    // non-filtering sampler for them (see PipelineGL).
-    auto uses = inspector.GetSamplerTextureUses(programmableStage.entryPoint,
-                                                bindings.placeholder_sampler_bind_point);
-    CombinedSamplerInfo combinedSamplerInfo;
-    for (const auto& use : uses) {
-        tint::BindingPoint samplerBindPoint = use.sampler_binding_point;
-        tint::BindingPoint texBindPoint = use.texture_binding_point;
-
-        CombinedSampler* info = AppendCombinedSampler(
-            &combinedSamplerInfo, use.texture_binding_point, use.sampler_binding_point,
-            bindings.placeholder_sampler_bind_point);
-
-        if (info->usePlaceholderSampler) {
-            *needsPlaceholderSampler = true;
-        }
-
-        // Note, the rest of Dawn is expecting to use the un-modified WGSL binding points when
-        // looking up information on the combined samplers. Tint is expecting Dawn to provide
-        // the final expected values for those entry points. So, we end up using the original
-        // values for the AppendCombinedSampler calls and the remapped binding points when we
-        // put things in the tint bindings structure.
-
-        {
-            auto texIt = bindings.texture.find(texBindPoint);
-            if (texIt != bindings.texture.end()) {
-                texBindPoint.group = 0;
-                texBindPoint.binding = texIt->second.binding;
-            } else {
-                // The plane0 texture will be in external_textures, not textures, so we have to set
-                // the `sampler_texture_to_name` based on the external_texture value.
-                auto exIt = bindings.external_texture.find(texBindPoint);
-                if (exIt != bindings.external_texture.end()) {
-                    texBindPoint.group = 0;
-                    texBindPoint.binding = exIt->second.plane0.binding;
-                }
-            }
-        }
-        {
-            auto it = bindings.sampler.find(samplerBindPoint);
-            if (it != bindings.sampler.end()) {
-                samplerBindPoint.group = 0;
-                samplerBindPoint.binding = it->second.binding;
-            }
-        }
-
-        bindings.sampler_texture_to_name.emplace(
-            tint::glsl::writer::binding::CombinedTextureSamplerPair{texBindPoint, samplerBindPoint,
-                                                                    false},
-            info->GetName());
-
-        // If the texture has an associated plane1 texture (ie., it's an external texture),
-        // append a new combined sampler with the same sampler and the plane1 texture.
-        auto it = externalTextureExpansionMap.find(use.texture_binding_point);
-        if (it != externalTextureExpansionMap.end()) {
-            CombinedSampler* plane1Info =
-                AppendCombinedSampler(&combinedSamplerInfo, it->second, use.sampler_binding_point,
-                                      bindings.placeholder_sampler_bind_point);
-
-            tint::BindingPoint plane1TexBindPoint = it->second;
-            auto dstIt = bindings.external_texture.find(use.texture_binding_point);
-            if (dstIt != bindings.external_texture.end()) {
-                plane1TexBindPoint.group = 0;
-                plane1TexBindPoint.binding = dstIt->second.plane1.binding;
-            }
-
-            bindings.sampler_texture_to_name.emplace(
-                tint::glsl::writer::binding::CombinedTextureSamplerPair{plane1TexBindPoint,
-                                                                        samplerBindPoint, true},
-                plane1Info->GetName());
-        }
-    }
-
     // Some texture builtin functions are unsupported on GLSL ES. These are emulated with internal
     // uniforms.
     bindings.texture_builtins_from_uniform.ubo_binding = {kMaxBindGroups + 1, 0};
@@ -384,6 +393,11 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     bindings.uniform.emplace(
         bindings.texture_builtins_from_uniform.ubo_binding,
         tint::glsl::writer::binding::Uniform{layout->GetInternalUniformBinding()});
+
+    *needsPlaceholderSampler = false;
+    CombinedSamplerInfo combinedSamplerInfo =
+        generateCombinedSamplerInfo(inspector, programmableStage.entryPoint, bindings,
+                                    externalTextureExpansionMap, needsPlaceholderSampler);
 
     auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(programmableStage.entryPoint);
     bool needsInternalUBO = false;
