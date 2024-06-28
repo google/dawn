@@ -181,45 +181,44 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
                                           GetSurface());
     }
 
-    const EGLFunctions& egl = display->egl;
-    EGLDisplay eglDisplay = display->GetDisplay();
+    // [[maybe_unused]] to prevent unused variable warnings when platform code is disabled.
+    [[maybe_unused]] const EGLFunctions& egl = display->egl;
+    [[maybe_unused]] EGLDisplay eglDisplay = display->GetDisplay();
     Surface* surface = GetSurface();
 
-    switch (surface->GetType()) {
+    auto TryCreateSurface = [&]() -> ResultOrError<EGLSurface> {
+        switch (surface->GetType()) {
 #if DAWN_PLATFORM_IS(ANDROID)
-        case Surface::Type::AndroidWindow:
-            mEGLSurface = egl.CreateWindowSurface(
-                eglDisplay, config, static_cast<ANativeWindow*>(surface->GetAndroidNativeWindow()),
-                nullptr);
-            break;
+            case Surface::Type::AndroidWindow:
+                return egl.CreateWindowSurface(
+                    eglDisplay, config,
+                    static_cast<ANativeWindow*>(surface->GetAndroidNativeWindow()), nullptr);
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-        case Surface::Type::MetalLayer:
-            mEGLSurface =
-                egl.CreateWindowSurface(eglDisplay, config, surface->GetMetalLayer(), nullptr);
-            break;
+            case Surface::Type::MetalLayer:
+                return egl.CreateWindowSurface(eglDisplay, config, surface->GetMetalLayer(),
+                                               nullptr);
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 #if DAWN_PLATFORM_IS(WIN32)
-        case Surface::Type::WindowsHWND:
-            mEGLSurface = egl.CreateWindowSurface(eglDisplay, config,
-                                                  static_cast<HWND>(surface->GetHWND()), nullptr);
-            break;
+            case Surface::Type::WindowsHWND:
+                return egl.CreateWindowSurface(eglDisplay, config,
+                                               static_cast<HWND>(surface->GetHWND()), nullptr);
 #endif  // DAWN_PLATFORM_IS(WIN32)
 #if defined(DAWN_USE_X11)
-        case Surface::Type::XlibWindow:
-            mEGLSurface =
-                egl.CreateWindowSurface(eglDisplay, config, surface->GetXWindow(), nullptr);
-            break;
+            case Surface::Type::XlibWindow:
+                return egl.CreateWindowSurface(eglDisplay, config, surface->GetXWindow(), nullptr);
 #endif  // defined(DAWN_USE_X11)
 
-        // TODO(344814083): Add support for creating surfaces using EGL_KHR_platform_base and
-        // friends.
-        case Surface::Type::WaylandSurface:
+            // TODO(344814083): Add support for creating surfaces using EGL_KHR_platform_base and
+            // friends.
+            case Surface::Type::WaylandSurface:
 
-        default:
-            return DAWN_FORMAT_INTERNAL_ERROR("%s cannot be supported on EGL.", surface);
-    }
+            default:
+                return DAWN_FORMAT_INTERNAL_ERROR("%s cannot be supported on EGL.", surface);
+        }
+    };
 
+    DAWN_TRY_ASSIGN(mEGLSurface, TryCreateSurface());
     if (mEGLSurface == EGL_NO_SURFACE) {
         return DAWN_FORMAT_INTERNAL_ERROR("Couldn't create an EGLSurface for %s.", surface);
     }
