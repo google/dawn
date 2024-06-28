@@ -41,6 +41,8 @@
 tint_add_target(tint_lang_hlsl_writer_raise lib
   lang/hlsl/writer/raise/builtin_polyfill.cc
   lang/hlsl/writer/raise/builtin_polyfill.h
+  lang/hlsl/writer/raise/decompose_memory_access.cc
+  lang/hlsl/writer/raise/decompose_memory_access.h
   lang/hlsl/writer/raise/fxc_polyfill.cc
   lang/hlsl/writer/raise/fxc_polyfill.h
   lang/hlsl/writer/raise/promote_initializers.cc
@@ -84,6 +86,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise lib
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise_test test
   lang/hlsl/writer/raise/builtin_polyfill_test.cc
+  lang/hlsl/writer/raise/decompose_memory_access_test.cc
   lang/hlsl/writer/raise/fxc_polyfill_test.cc
   lang/hlsl/writer/raise/promote_initializers_test.cc
   lang/hlsl/writer/raise/shader_io_test.cc

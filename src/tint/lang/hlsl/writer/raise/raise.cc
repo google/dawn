@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/hlsl/writer/raise/decompose_memory_access.h"
 #include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
 #include "src/tint/lang/hlsl/writer/raise/shader_io.h"
@@ -57,6 +58,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint);
+
+    RUN_TRANSFORM(raise::DecomposeMemoryAccess);
 
     if (options.compiler == Options::Compiler::kFXC) {
         RUN_TRANSFORM(raise::FxcPolyfill);
