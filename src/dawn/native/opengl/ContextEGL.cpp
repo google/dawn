@@ -65,17 +65,19 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
                                   bool useANGLETextureSharing) {
     const EGLFunctions& egl = mDisplay->egl;
 
-    // Since we're creating a surfaceless context, the only thing we really care
-    // about is the RENDERABLE_TYPE.
-    EGLint configAttribs[] = {EGL_RENDERABLE_TYPE, mDisplay->GetAPIBit(), EGL_NONE};
+    // Unless EGL_KHR_no_config is present, we need to choose an EGLConfig on context creation that
+    // will lock the EGLContext to be use with a single kind of color buffer. In that case the
+    // display should only list one kind of color buffer as potentially supported.
+    EGLConfig config = kNoConfig;
+    if (!egl.HasExt(EGLExt::NoConfigContext)) {
+        DAWN_ASSERT(mDisplay->GetPotentialSurfaceFormats().size() == 1);
+        wgpu::TextureFormat format = mDisplay->GetPotentialSurfaceFormats()[0];
 
-    EGLint numConfig;
-    EGLConfig config;
-    DAWN_TRY(CheckEGL(
-        egl, egl.ChooseConfig(mDisplay->GetDisplay(), configAttribs, &config, 1, &numConfig),
-        "eglChooseConfig"));
-
-    DAWN_INVALID_IF(numConfig == 0, "eglChooseConfig returned zero configs");
+        config = mDisplay->ChooseConfig(EGL_WINDOW_BIT, format);
+        if (config == kNoConfig) {
+            return DAWN_FORMAT_INTERNAL_ERROR("Couldn't find an EGLConfig for %s.", format);
+        }
+    }
 
     DAWN_TRY(CheckEGL(egl, egl.BindAPI(mDisplay->GetAPIEnum()), "eglBindAPI"));
 

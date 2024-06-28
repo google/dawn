@@ -57,6 +57,7 @@ enum class EGLExt {
     // Other extensions,
     DisplayTextureShareGroup,
     ReusableSync,
+    NoConfigContext,
 
     EnumCount,
 };

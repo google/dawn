@@ -434,8 +434,10 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
                           wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding |
                           wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
 
-    if (mDisplay->ChooseConfig(EGL_WINDOW_BIT, wgpu::TextureFormat::RGBA8Unorm) != kNoConfig) {
-        capabilities.formats.push_back(wgpu::TextureFormat::RGBA8Unorm);
+    for (wgpu::TextureFormat format : mDisplay->GetPotentialSurfaceFormats()) {
+        if (mDisplay->ChooseConfig(EGL_WINDOW_BIT, format) != kNoConfig) {
+            capabilities.formats.push_back(format);
+        }
     }
 
     capabilities.presentModes = {

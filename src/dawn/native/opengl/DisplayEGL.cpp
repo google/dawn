@@ -126,6 +126,18 @@ EGLint DisplayEGL::GetAPIBit() const {
     return mApiBit;
 }
 
+absl::Span<const wgpu::TextureFormat> DisplayEGL::GetPotentialSurfaceFormats() const {
+    static constexpr wgpu::TextureFormat kFormatWhenConfigRequired[] = {
+        wgpu::TextureFormat::RGBA8Unorm};
+    static constexpr wgpu::TextureFormat kFormatsWithNoConfigContext[] = {
+        wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGB10A2Unorm};
+
+    if (egl.HasExt(EGLExt::NoConfigContext)) {
+        return {kFormatsWithNoConfigContext};
+    }
+    return {kFormatWhenConfigRequired};
+}
+
 EGLConfig DisplayEGL::ChooseConfig(EGLint surfaceType,
                                    wgpu::TextureFormat color,
                                    wgpu::TextureFormat depthStencil) const {
@@ -147,8 +159,14 @@ EGLConfig DisplayEGL::ChooseConfig(EGLint surfaceType,
             AddAttrib(EGL_ALPHA_SIZE, 8);
             break;
 
-            // TODO(344814083): Support RGBA16Float, RGB565Unorm and RGB10A2Unorm, it could be
-            // supported with EGL_KHR_no_config_context.
+        case wgpu::TextureFormat::RGB10A2Unorm:
+            AddAttrib(EGL_RED_SIZE, 10);
+            AddAttrib(EGL_BLUE_SIZE, 10);
+            AddAttrib(EGL_GREEN_SIZE, 10);
+            AddAttrib(EGL_ALPHA_SIZE, 2);
+            break;
+
+            // TODO(344814083): Support RGBA16Float with EGL_EXT_pixel_format_float.
             // TODO(344814083): Support RGBA8UnormSrgb with EGL_KHR_gl_colorspace.
 
         default:

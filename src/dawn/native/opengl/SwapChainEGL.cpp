@@ -78,9 +78,12 @@ MaybeError SwapChainEGL::Initialize(SwapChainBase* previousSwapChain) {
             "OpenGL SwapChain cannot switch between contexts for %s and %s.",
             previousSwapChain->GetDevice(), device);
 
-        SwapChainEGL* previousGLSwapChain =
-            reinterpret_cast<SwapChainEGL*>(ToBackend(previousSwapChain));
-        std::swap(previousGLSwapChain->mEGLSurface, mEGLSurface);
+        // The EGLSurface created depends on the format; only reuse it if we have the same one.
+        if (previousSwapChain->GetFormat() == GetFormat()) {
+            SwapChainEGL* previousEGLSwapChain =
+                reinterpret_cast<SwapChainEGL*>(ToBackend(previousSwapChain));
+            std::swap(previousEGLSwapChain->mEGLSurface, mEGLSurface);
+        }
 
         previousSwapChain->DetachFromSurface();
     }

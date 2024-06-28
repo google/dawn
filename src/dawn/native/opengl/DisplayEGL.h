@@ -30,6 +30,7 @@
 
 #include <memory>
 
+#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/DynamicLib.h"
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/egl_platform.h"
@@ -58,6 +59,8 @@ class DisplayEGL : NonMovable {
     EGLDisplay GetDisplay() const;
     EGLint GetAPIEnum() const;
     EGLint GetAPIBit() const;
+
+    absl::Span<const wgpu::TextureFormat> GetPotentialSurfaceFormats() const;
 
     // Chooses an EGLConfig that works for that surface type and color format.
     EGLConfig ChooseConfig(EGLint surfaceType,
