@@ -128,7 +128,7 @@ struct MapUserdata : CallbackUserdata {
     WGPUFuture future;
     uint64_t offset;
     uint64_t size;
-    WGPUMapModeFlags mode;
+    WGPUMapMode mode;
     uint8_t userdataCount;
 };
 

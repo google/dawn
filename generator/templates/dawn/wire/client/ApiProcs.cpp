@@ -62,7 +62,7 @@ namespace dawn::wire::client {
     {% for method in type.methods %}
         {% set Suffix = as_MethodSuffix(type.name, method.name) %}
 
-        DAWN_WIRE_EXPORT {{as_cReturnType(method.return_type)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
+        DAWN_WIRE_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
             {{-cType}} cSelf
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}

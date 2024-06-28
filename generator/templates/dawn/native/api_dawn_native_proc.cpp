@@ -40,7 +40,7 @@ namespace dawn::native {
 {% endfor %}
 {% for type in by_category["object"] %}
     {% for method in c_methods(type) %}
-        extern {{as_cReturnType(method.return_type)}} Native{{as_MethodSuffix(type.name, method.name)}}(
+        extern {{as_cType(method.return_type.name)}} Native{{as_MethodSuffix(type.name, method.name)}}(
             {{-as_cType(type.name)}} cSelf
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}
@@ -70,7 +70,7 @@ extern "C" {
 
     {% for type in by_category["object"] %}
         {% for method in c_methods(type) %}
-            {{as_cReturnType(method.return_type)}} {{metadata.namespace}}{{as_MethodSuffix(type.name, method.name)}}(
+            {{as_cType(method.return_type.name)}} {{metadata.namespace}}{{as_MethodSuffix(type.name, method.name)}}(
                 {{-as_cType(type.name)}} cSelf
                 {%- for arg in method.arguments -%}
                     , {{as_annotated_cType(arg)}}

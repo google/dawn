@@ -70,7 +70,7 @@ struct ObjectData<WGPUBuffer> : public ObjectDataBase<WGPUBuffer> {
     std::unique_ptr<MemoryTransferService::ReadHandle> readHandle;
     std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle;
     BufferMapWriteState mapWriteState = BufferMapWriteState::Unmapped;
-    WGPUBufferUsageFlags usage = WGPUBufferUsage_None;
+    WGPUBufferUsage usage = WGPUBufferUsage_None;
     // Indicate if writeHandle needs to be destroyed on unmap
     bool mappedAtCreation = false;
 };

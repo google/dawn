@@ -63,7 +63,7 @@ TEST_F(ErrorScopeValidationTest, CatchesError) {
     device.PushErrorScope(wgpu::ErrorFilter::Validation);
 
     wgpu::BufferDescriptor desc = {};
-    desc.usage = static_cast<wgpu::BufferUsage>(WGPUBufferUsage_Force32);
+    desc.usage = static_cast<wgpu::BufferUsage>(UINT64_MAX);
     device.CreateBuffer(&desc);
 
     EXPECT_CALL(mPopErrorScopeCb,
@@ -79,7 +79,7 @@ TEST_F(ErrorScopeValidationTest, ErrorBubbles) {
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
     wgpu::BufferDescriptor desc = {};
-    desc.usage = static_cast<wgpu::BufferUsage>(WGPUBufferUsage_Force32);
+    desc.usage = static_cast<wgpu::BufferUsage>(UINT64_MAX);
     device.CreateBuffer(&desc);
 
     // OutOfMemory does not match Validation error.
@@ -103,7 +103,7 @@ TEST_F(ErrorScopeValidationTest, HandledErrorsStopBubbling) {
     device.PushErrorScope(wgpu::ErrorFilter::Validation);
 
     wgpu::BufferDescriptor desc = {};
-    desc.usage = static_cast<wgpu::BufferUsage>(WGPUBufferUsage_Force32);
+    desc.usage = static_cast<wgpu::BufferUsage>(UINT64_MAX);
     device.CreateBuffer(&desc);
 
     // Inner scope catches the error.
@@ -126,7 +126,7 @@ TEST_F(ErrorScopeValidationTest, UnhandledErrorsMatchUncapturedErrorCallback) {
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
     wgpu::BufferDescriptor desc = {};
-    desc.usage = static_cast<wgpu::BufferUsage>(WGPUBufferUsage_Force32);
+    desc.usage = static_cast<wgpu::BufferUsage>(UINT64_MAX);
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&desc));
 
     EXPECT_CALL(mPopErrorScopeCb,

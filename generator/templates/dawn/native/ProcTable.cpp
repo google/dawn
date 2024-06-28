@@ -49,7 +49,7 @@ namespace {{native_namespace}} {
         {% for method in c_methods(type) %}
             {% set suffix = as_MethodSuffix(type.name, method.name) %}
 
-            {{as_cReturnType(method.return_type)}} Native{{suffix}}(
+            {{as_cType(method.return_type.name)}} Native{{suffix}}(
                 {{-as_cType(type.name)}} cSelf
                 {%- for arg in method.arguments -%}
                     , {{as_annotated_cType(arg)}}

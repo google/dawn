@@ -54,16 +54,16 @@ class Buffer final : public ObjectWithEventsBase {
 
     ObjectType GetObjectType() const override;
 
-    void MapAsync(WGPUMapModeFlags mode,
+    void MapAsync(WGPUMapMode mode,
                   size_t offset,
                   size_t size,
                   WGPUBufferMapCallback callback,
                   void* userdata);
-    WGPUFuture MapAsyncF(WGPUMapModeFlags mode,
+    WGPUFuture MapAsyncF(WGPUMapMode mode,
                          size_t offset,
                          size_t size,
                          const WGPUBufferMapCallbackInfo& callbackInfo);
-    WGPUFuture MapAsync2(WGPUMapModeFlags mode,
+    WGPUFuture MapAsync2(WGPUMapMode mode,
                          size_t offset,
                          size_t size,
                          const WGPUBufferMapCallbackInfo2& callbackInfo);

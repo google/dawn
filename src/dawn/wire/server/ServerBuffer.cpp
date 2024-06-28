@@ -40,7 +40,7 @@ WireResult Server::PreHandleBufferUnmap(const BufferUnmapCmd& cmd) {
     Known<WGPUBuffer> buffer;
     WIRE_TRY(Objects<WGPUBuffer>().Get(cmd.selfId, &buffer));
 
-    if (buffer->mappedAtCreation && !(buffer->usage & WGPUMapMode_Write)) {
+    if (buffer->mappedAtCreation && !(buffer->usage & WGPUBufferUsage_MapWrite)) {
         // This indicates the writeHandle is for mappedAtCreation only. Destroy on unmap
         // writeHandle could have possibly been deleted if buffer is already destroyed so we
         // don't assert it's non-null
@@ -68,7 +68,7 @@ WireResult Server::PreHandleBufferDestroy(const BufferDestroyCmd& cmd) {
 WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
                                     ObjectHandle eventManager,
                                     WGPUFuture future,
-                                    WGPUMapModeFlags mode,
+                                    WGPUMapMode mode,
                                     uint64_t offset64,
                                     uint64_t size64,
                                     uint8_t userdataCount) {
@@ -131,9 +131,9 @@ WireResult Server::DoDeviceCreateBuffer(Known<WGPUDevice> device,
     buffer->mappedAtCreation = descriptor->mappedAtCreation;
 
     // isReadMode and isWriteMode could be true at the same time if usage contains
-    // WGPUMapMode_Read and buffer is mappedAtCreation
-    bool isReadMode = descriptor->usage & WGPUMapMode_Read;
-    bool isWriteMode = descriptor->usage & WGPUMapMode_Write || descriptor->mappedAtCreation;
+    // WGPUBufferUsage_MapRead and buffer is mappedAtCreation
+    bool isReadMode = descriptor->usage & WGPUBufferUsage_MapRead;
+    bool isWriteMode = descriptor->usage & WGPUBufferUsage_MapWrite || descriptor->mappedAtCreation;
 
     // This is the size of data deserialized from the command stream to create the read/write
     // handle, which must be CPU-addressable.

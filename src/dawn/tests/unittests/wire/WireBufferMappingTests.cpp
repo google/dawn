@@ -93,7 +93,7 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
     }
 
     void SetupBuffer(WGPUMapMode mapMode) {
-        WGPUBufferUsageFlags usage = WGPUBufferUsage_MapRead;
+        WGPUBufferUsage usage = WGPUBufferUsage_MapRead;
         if (mapMode == WGPUMapMode_Read) {
             usage = WGPUBufferUsage_MapRead;
         } else if (mapMode == WGPUMapMode_Write) {

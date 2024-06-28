@@ -51,7 +51,7 @@ extern "C" {
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Methods of {{type.name.CamelCase()}}
     {% for method in c_methods(type) %}
-        DAWN_WIRE_EXPORT {{as_cReturnType(method.return_type)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
+        DAWN_WIRE_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethodNamespaced(type.name, method.name, Name('dawn wire client'))}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 ,{{" "}}

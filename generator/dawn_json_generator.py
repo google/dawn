@@ -911,14 +911,6 @@ def as_cType(c_prefix, name):
     else:
         return c_prefix + name.CamelCase()
 
-
-def as_cReturnType(c_prefix, typ):
-    if typ.category != 'bitmask':
-        return as_cType(c_prefix, typ.name)
-    else:
-        return as_cType(c_prefix, typ.name) + 'Flags'
-
-
 def as_cppType(name):
     # Special case for 'bool' because it has a typedef for compatibility.
     if name.native and name.get() != 'bool':
@@ -1085,8 +1077,6 @@ def make_base_render_params(metadata):
     c_prefix = metadata.c_prefix
 
     def as_cTypeEnumSpecialCase(typ):
-        if typ.category == 'bitmask':
-            return as_cType(c_prefix, typ.name) + 'Flags'
         return as_cType(c_prefix, typ.name)
 
     def as_cEnum(type_name, value_name):
@@ -1130,7 +1120,6 @@ def make_base_render_params(metadata):
             'as_CppMethodSuffix': as_CppMethodSuffix,
             'as_cProc': as_cProc,
             'as_cType': lambda name: as_cType(c_prefix, name),
-            'as_cReturnType': lambda typ: as_cReturnType(c_prefix, typ),
             'as_cppType': as_cppType,
             'as_jsEnumValue': as_jsEnumValue,
             'convert_cType_to_cppType': convert_cType_to_cppType,

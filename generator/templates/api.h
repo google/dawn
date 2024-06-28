@@ -89,7 +89,7 @@
     #define {{API}}_{{constant.name.SNAKE_CASE()}} {{constant.value}}
 {% endfor %}
 
-typedef uint32_t {{API}}Flags;
+typedef uint64_t {{API}}Flags;
 typedef uint32_t {{API}}Bool;
 
 {% for type in by_category["object"] %}
@@ -101,18 +101,27 @@ typedef uint32_t {{API}}Bool;
     struct {{as_cType(type.name)}};
 {% endfor %}
 
-{% for type in by_category["enum"] + by_category["bitmask"] %}
+{% for type in by_category["enum"] %}
     typedef enum {{as_cType(type.name)}} {
         {% for value in type.values %}
             {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "08X")}},
         {% endfor %}
         {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF
     } {{as_cType(type.name)}} {{API}}_ENUM_ATTRIBUTE;
-    {% if type.category == "bitmask" %}
-        typedef {{API}}Flags {{as_cType(type.name)}}Flags {{API}}_ENUM_ATTRIBUTE;
-    {% endif %}
+{% endfor %}
 
+{% for type in by_category["bitmask"] %}
+    //* TODO(crbug.com/42241186): Remove one of these, based on resolution of what the name is:
+    //* https://github.com/webgpu-native/webgpu-headers/issues/273#issuecomment-2195951806
+    typedef {{API}}Flags {{as_cType(type.name)}};
+    typedef {{API}}Flags {{as_cType(type.name)}}Flags;
+    {% for value in type.values %}
+        static const {{as_cType(type.name)}} {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "016X")}};
+    {% endfor %}
+    //* TODO(crbug.com/42241186): Remove Force32 values
+    static const {{as_cType(type.name)}} {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF;
 {% endfor -%}
+
 {% for type in by_category["function pointer"] %}
     typedef {{as_cType(type.return_type.name)}} (*{{as_cType(type.name)}})(
         {%- if type.arguments == [] -%}
@@ -245,7 +254,7 @@ extern "C" {
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Procs of {{type.name.CamelCase()}}
     {% for method in c_methods(type) %}
-        typedef {{as_cReturnType(method.return_type)}} (*{{as_cProc(type.name, method.name)}})(
+        typedef {{as_cType(method.return_type.name)}} (*{{as_cProc(type.name, method.name)}})(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 ,{{" "}}
@@ -274,7 +283,7 @@ extern "C" {
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Methods of {{type.name.CamelCase()}}
     {% for method in c_methods(type) %}
-        {{API}}_EXPORT {{as_cReturnType(method.return_type)}} {{as_cMethod(type.name, method.name)}}(
+        {{API}}_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 ,{{" "}}

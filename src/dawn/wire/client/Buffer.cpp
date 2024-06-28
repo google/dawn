@@ -479,7 +479,7 @@ void Buffer::SetFutureStatus(WGPUBufferMapAsyncStatus status) {
     }
 }
 
-void Buffer::MapAsync(WGPUMapModeFlags mode,
+void Buffer::MapAsync(WGPUMapMode mode,
                       size_t offset,
                       size_t size,
                       WGPUBufferMapCallback callback,
@@ -491,7 +491,7 @@ void Buffer::MapAsync(WGPUMapModeFlags mode,
     MapAsyncF(mode, offset, size, callbackInfo);
 }
 
-WGPUFuture Buffer::MapAsyncF(WGPUMapModeFlags mode,
+WGPUFuture Buffer::MapAsyncF(WGPUMapMode mode,
                              size_t offset,
                              size_t size,
                              const WGPUBufferMapCallbackInfo& callbackInfo) {
@@ -539,7 +539,7 @@ WGPUFuture Buffer::MapAsyncF(WGPUMapModeFlags mode,
     return {futureIDInternal};
 }
 
-WGPUFuture Buffer::MapAsync2(WGPUMapModeFlags mode,
+WGPUFuture Buffer::MapAsync2(WGPUMapMode mode,
                              size_t offset,
                              size_t size,
                              const WGPUBufferMapCallbackInfo2& callbackInfo) {
