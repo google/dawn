@@ -105,6 +105,7 @@ def main(args):
         'third_party/protobuf',
         'third_party/markupsafe',
         'third_party/glslang/src',
+        'third_party/google_benchmark/src',
         'third_party/spirv-headers/src',
         'third_party/spirv-tools/src',
         'third_party/vulkan-headers/src',
