@@ -74,7 +74,12 @@ if(NOT TARGET glslang AND (TINT_BUILD_GLSL_WRITER OR TINT_BUILD_GLSL_VALIDATOR) 
     set(SKIP_GLSLANG_INSTALL ON CACHE BOOL "" FORCE)
     set(ENABLE_OPT OFF CACHE BOOL "" FORCE)
     message(STATUS "Dawn: using GLSLang at ${DAWN_GLSLANG_DIR}")
+    # https://github.com/KhronosGroup/glslang/issues/2283
+    # glslang does not export symbols properly when BUILD_SHARED_LIBS=1, so always build it as static for now.
+    set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
+    set(BUILD_SHARED_LIBS 0)
     add_subdirectory("${DAWN_GLSLANG_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/glslang" EXCLUDE_FROM_ALL)
+    set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
 endif()
 
 if (NOT TARGET glfw AND DAWN_USE_GLFW)
