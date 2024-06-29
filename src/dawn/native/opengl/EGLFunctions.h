@@ -58,6 +58,7 @@ enum class EGLExt {
     DisplayTextureShareGroup,
     ReusableSync,
     NoConfigContext,
+    PixelFormatFloat,
 
     EnumCount,
 };

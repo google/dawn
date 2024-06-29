@@ -130,7 +130,8 @@ absl::Span<const wgpu::TextureFormat> DisplayEGL::GetPotentialSurfaceFormats() c
     static constexpr wgpu::TextureFormat kFormatWhenConfigRequired[] = {
         wgpu::TextureFormat::RGBA8Unorm};
     static constexpr wgpu::TextureFormat kFormatsWithNoConfigContext[] = {
-        wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGB10A2Unorm};
+        wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGB10A2Unorm,
+        wgpu::TextureFormat::RGBA16Float};
 
     if (egl.HasExt(EGLExt::NoConfigContext)) {
         return {kFormatsWithNoConfigContext};
@@ -166,7 +167,17 @@ EGLConfig DisplayEGL::ChooseConfig(EGLint surfaceType,
             AddAttrib(EGL_ALPHA_SIZE, 2);
             break;
 
-            // TODO(344814083): Support RGBA16Float with EGL_EXT_pixel_format_float.
+        case wgpu::TextureFormat::RGBA16Float:
+            if (!egl.HasExt(EGLExt::PixelFormatFloat)) {
+                return kNoConfig;
+            }
+            AddAttrib(EGL_RED_SIZE, 16);
+            AddAttrib(EGL_BLUE_SIZE, 16);
+            AddAttrib(EGL_GREEN_SIZE, 16);
+            AddAttrib(EGL_ALPHA_SIZE, 16);
+            AddAttrib(EGL_COLOR_COMPONENT_TYPE_EXT, EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT);
+            break;
+
             // TODO(344814083): Support RGBA8UnormSrgb with EGL_KHR_gl_colorspace.
 
         default:

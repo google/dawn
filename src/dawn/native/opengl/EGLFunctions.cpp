@@ -84,6 +84,7 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
      ExtType::Display},
     {EGLExt::ReusableSync, "EGL_KHR_reusable_sync", NeverPromoted, ExtType::Display},
     {EGLExt::NoConfigContext, "EGL_KHR_no_config_context", NeverPromoted, ExtType::Display},
+    {EGLExt::PixelFormatFloat, "EGL_EXT_pixel_format_float", NeverPromoted, ExtType::Display},
     //
 }};
 
