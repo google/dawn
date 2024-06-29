@@ -225,10 +225,6 @@ async function runCtsTest(queryString) {
 
   const name = testcase.query.toString();
 
-  // Logs look like: " - EXPECTATION FAILED: subcase: foobar=2;foo=a;bar=2\n...."
-  // or "EXCEPTION: Name!: Message!\nsubcase: fail = true\n..."
-  const subcaseLogPrefixRegex = /\s?subcase: .*$/m;
-
   const wpt_fn = async () => {
     sendMessageTestStarted();
     const [rec, res] = log.record(name);
@@ -246,21 +242,7 @@ async function runCtsTest(queryString) {
       // Send an "OK" log. Passing tests don't report logs to Telemetry.
       sendMessageTestLogOK();
     } else {
-      // Log all the logs to the console so they are visible.
-      if (res.logs) {
-        // Log the query string first as logs from multiple browsers may be interleaved and prefixed
-        // with their process id. Logging the test name lets us see what process a test ran in.
-        console.log(`Logs from ${queryString}`);
-        for (const l of res.logs) {
-          console.log(l);
-        }
-      }
-      // Report non-INFO logs to the harness so they don't show up in the LUCI failure reason.
-      // Strip out subcase information for better clustering.
-      sendMessageTestLog((res.logs || [])
-        .filter(l => l.name !== 'INFO')
-        .map(prettyPrintLog)
-        .map(l => l.replace(subcaseLogPrefixRegex, '')));
+      sendMessageTestLog(res.logs ?? []);
     }
     sendMessageTestFinished();
   };
@@ -311,8 +293,31 @@ function sendMessageTestLogOK() {
   socket.send('{"type":"TEST_LOG","log":"OK"}');
 }
 
+// Logs look like: " - EXPECTATION FAILED: subcase: foobar=2;foo=a;bar=2\n...."
+// or "EXCEPTION: Name!: Message!\nsubcase: fail = true\n..."
+const kSubcaseLogPrefixRegex = /\bsubcase: .*$\n/m;
+
+/** Send logs with the most important log line on the first line as a "summary". */
 function sendMessageTestLog(logs) {
-  splitLogsForPayload(logs.join('\n\n'))
+  // Find the first log that is max-severity (doesn't have its stack hidden)
+  let summary = '';
+  let details = [];
+  for (const log of logs) {
+    let detail = prettyPrintLog(log);
+    if (summary === '' && log.stackHiddenMessage === undefined) {
+      // First top-severity message (because its stack is not hidden).
+      // Clean up this message and pick it as the summary:
+      summary = '  ' + log.toJSON()
+        .replace(kSubcaseLogPrefixRegex, '')
+        .split('\n')[0] + '\n';
+      // Replace '  - ' with '--> ':
+      detail = '--> ' + detail.slice(4);
+    }
+    details.push(detail);
+  }
+
+  const outLogsString = summary + details.join('\n');
+  splitLogsForPayload(outLogsString)
     .forEach((piece) => {
       socket.send(JSON.stringify({
         'type': 'TEST_LOG',
