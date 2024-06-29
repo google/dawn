@@ -179,10 +179,8 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionDXC) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-static
-int global = 0;
-static
-int a = 0;
+static int global = 0;
+static int a = 0;
 int bar() {
   global = 84;
   return global;
@@ -294,10 +292,8 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
 
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-static
-int global = 0;
-static
-int a = 0;
+static int global = 0;
+static int a = 0;
 int bar() {
   global = 84;
   return global;

@@ -38,7 +38,37 @@ class Module;
 namespace tint::hlsl::writer::raise {
 
 /// PromoteInitializers is a transform that moves inline struct and array initializers to a `let`
-/// unless the initializer is already in a `let ` or `var`.
+/// unless the initializer is already in a `let ` or `var`. For any `var` at the module scope it
+/// will recursively break any array or struct initializers out of the constant into their own
+/// `let`.
+///
+/// After this transform the `Capability::kAllowModuleScopeLets` must be enabled and any downstream
+/// transform/printer must under stand `let` and `construct` instructions at the module scope.
+/// (`construct` can just be skipped as they will be inlined, but the instruction still has to be
+/// handled.)
+///
+/// For example:
+///
+/// ```wgsl
+/// struct A {
+///   b: f32,
+/// }
+/// struct S {
+///   a: A
+/// }
+/// var<private> p = S(A(1.f));
+/// ```
+///
+/// Essentially creates:
+///
+/// ```wgsl
+/// struct S {
+///   a: i32,
+/// }
+/// let v: A = A(1.f);
+/// let v_1: S = S(v);
+/// var p = v_1;
+/// ```
 ///
 /// @param module the module to transform
 /// @returns error diagnostics on failure

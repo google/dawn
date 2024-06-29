@@ -754,12 +754,27 @@ void Validator::CheckRootBlock(const Block* blk) {
             AddError(inst) << "instruction in root block does not have root block as parent";
             continue;
         }
-        auto* var = inst->As<ir::Var>();
-        if (!var) {
-            AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
-            continue;
-        }
-        CheckInstruction(var);
+
+        tint::Switch(
+            inst,  //
+            [&](const core::ir::Var* var) { CheckInstruction(var); },
+            [&](const core::ir::Let* let) {
+                if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
+                    CheckInstruction(let);
+                } else {
+                    AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
+                }
+            },
+            [&](const core::ir::Construct* c) {
+                if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
+                    CheckInstruction(c);
+                } else {
+                    AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
+                }
+            },
+            [&](Default) {
+                AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
+            });
     }
 }
 

@@ -153,7 +153,8 @@ class Printer : public tint::TextGenerator {
 
     /// @returns the generated HLSL shader
     tint::Result<PrintResult> Generate() {
-        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "HLSL writer");
+        core::ir::Capabilities capabilities{core::ir::Capability::kAllowModuleScopeLets};
+        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "HLSL writer", capabilities);
         if (valid != Success) {
             return std::move(valid.Failure());
         }
@@ -197,13 +198,20 @@ class Printer : public tint::TextGenerator {
     /// Block to emit for a continuing
     std::function<void()> emit_continuing_;
 
+    enum LetType : uint8_t {
+        kFunction,
+        kModuleScope,
+    };
+
     /// Emit the root block.
     /// @param root_block the root block to emit
     void EmitRootBlock(core::ir::Block* root_block) {
         for (auto* inst : *root_block) {
             Switch(
-                inst,                                                //
-                [&](core::ir::Var* v) { return EmitGlobalVar(v); },  //
+                inst,                                                          //
+                [&](core::ir::Var* v) { EmitGlobalVar(v); },                   //
+                [&](core::ir::Let* l) { EmitLet(l, LetType::kModuleScope); },  //
+                [&](core::ir::Construct*) { /* inlined  */ },                  //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -295,14 +303,14 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::ExitLoop*) { EmitExitLoop(); },                         //
                 [&](const core::ir::ExitSwitch*) { EmitExitSwitch(); },                     //
                 [&](const core::ir::If* i) { EmitIf(i); },                                  //
-                [&](const core::ir::Let* i) { EmitLet(i); },                                //
+                [&](const core::ir::Let* i) { EmitLet(i, LetType::kFunction); },            //
                 [&](const core::ir::StoreVectorElement* s) { EmitStoreVectorElement(s); },  //
                 [&](const core::ir::Loop* l) { EmitLoop(l); },                              //
                 [&](const core::ir::Return* i) { EmitReturn(i); },                          //
                 [&](const core::ir::Store* i) { EmitStore(i); },                            //
                 [&](const core::ir::Switch* i) { EmitSwitch(i); },                          //
                 [&](const core::ir::Unreachable*) { EmitUnreachable(); },                   //
-                [&](const core::ir::Var* v) { EmitVar(v); },                                //
+                [&](const core::ir::Var* v) { EmitVar(Line(), v); },                        //
                                                                                             //
                 [&](const core::ir::NextIteration*) { /* do nothing */ },                   //
                 [&](const core::ir::ExitIf*) { /* do nothing handled by transform */ },     //
@@ -477,14 +485,17 @@ class Printer : public tint::TextGenerator {
                 EmitHandleVariable(var);
                 break;
             case core::AddressSpace::kPrivate: {
-                Line() << "static";
-                EmitVar(var);
+                auto out = Line();
+                out << "static ";
+                EmitVar(out, var);
                 break;
             }
-            case core::AddressSpace::kWorkgroup:
-                Line() << "groupshared";
-                EmitVar(var);
+            case core::AddressSpace::kWorkgroup: {
+                auto out = Line();
+                out << "groupshared ";
+                EmitVar(out, var);
                 break;
+            }
             case core::AddressSpace::kPushConstant:
             default: {
                 TINT_ICE() << "unhandled address space " << space;
@@ -555,13 +566,12 @@ class Printer : public tint::TextGenerator {
         out << RegisterAndSpace(register_space, bp.value()) << ";";
     }
 
-    void EmitVar(const core::ir::Var* var) {
+    void EmitVar(StringStream& out, const core::ir::Var* var) {
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         TINT_ASSERT(ptr);
 
         auto space = ptr->AddressSpace();
 
-        auto out = Line();
         EmitTypeAndName(out, var->Result(0)->Type(), space, ptr->Access(), NameOf(var->Result(0)));
 
         if (var->Initializer()) {
@@ -583,8 +593,12 @@ class Printer : public tint::TextGenerator {
         EmitConstant(out, ir_.constant_values.Zero(ty));
     }
 
-    void EmitLet(const core::ir::Let* l) {
+    void EmitLet(const core::ir::Let* l, LetType type) {
         auto out = Line();
+
+        if (type == LetType::kModuleScope) {
+            out << "static const ";
+        }
 
         // TODO(dsinclair): Investigate using `const` here as well, the AST printer doesn't emit
         //                  const with a let, but we should be able to.
@@ -689,9 +703,18 @@ class Printer : public tint::TextGenerator {
         Switch(
             c->Result(0)->Type(),
             [&](const core::type::Array*) {
-                out << "{";
-                emit_args();
-                out << "}";
+                // The PromoteInitializers transform will inject splat arrays as composites of one
+                // element. These need to convert to `(type)0` in HLSL otherwise DXC will complain
+                // about missing values.
+                if (c->Args().Length() == 1) {
+                    out << "(";
+                    EmitType(out, c->Result(0)->Type());
+                    out << ")0";
+                } else {
+                    out << "{";
+                    emit_args();
+                    out << "}";
+                }
             },
             [&](const core::type::Struct*) {
                 out << "{";

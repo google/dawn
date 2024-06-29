@@ -309,13 +309,16 @@ void frag_main_inner(Interface inputs) {
 
 vert_main_outputs vert_main() {
   Interface v_1 = vert_main_inner();
-  vert_main_outputs v_2 = {v_1.col1, v_1.col2, v_1.pos};
-  return v_2;
+  Interface v_2 = v_1;
+  Interface v_3 = v_1;
+  Interface v_4 = v_1;
+  vert_main_outputs v_5 = {v_3.col1, v_4.col2, v_2.pos};
+  return v_5;
 }
 
 void frag_main(frag_main_inputs inputs) {
-  Interface v_3 = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u])), inputs.Interface_col1, inputs.Interface_col2};
-  frag_main_inner(v_3);
+  Interface v_6 = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u])), inputs.Interface_col1, inputs.Interface_col2};
+  frag_main_inner(v_6);
 }
 
 )");
@@ -982,6 +985,31 @@ void b() {
   float v = asfloat(data.Load(0u));
   return;
 }
+)");
+}
+
+TEST_F(HlslWriterTest, DuplicateConstant) {
+    auto* ret_arr = b.Function("ret_arr", ty.array<vec4<i32>, 4>());
+    b.Append(ret_arr->Block(), [&] { b.Return(ret_arr, b.Zero<array<vec4<i32>, 4>>()); });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("src_let", b.Zero<array<vec4<i32>, 4>>());
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+typedef int4 ary_ret[4];
+ary_ret ret_arr() {
+  int4 v[4] = (int4[4])0;
+  return v;
+}
+
+void foo() {
+  int4 src_let[4] = (int4[4])0;
+}
+
 )");
 }
 

@@ -513,8 +513,7 @@ TEST_F(HlslWriterTest, VarPrivate) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-static
-float4 u = (0.0f).xxxx;
+static float4 u = (0.0f).xxxx;
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
 }
@@ -530,8 +529,7 @@ TEST_F(HlslWriterTest, VarWorkgroup) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-groupshared
-float4 u;
+groupshared float4 u;
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
 }

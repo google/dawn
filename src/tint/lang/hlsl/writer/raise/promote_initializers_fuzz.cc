@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -19,49 +19,33 @@
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 // DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
 // FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT\ OF SUBSTITUTE GOODS OR
 // SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_CALL_H_
-#define SRC_TINT_LANG_CORE_IR_CALL_H_
+#include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
 
-#include "src/tint/lang/core/ir/operand_instruction.h"
-#include "src/tint/utils/rtti/castable.h"
+#include "src/tint/cmd/fuzz/ir/fuzz.h"
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 
-namespace tint::core::ir {
+namespace tint::hlsl::writer::raise {
+namespace {
 
-/// A Call instruction in the IR.
-class Call : public Castable<Call, OperandInstruction<4, 1>> {
-  public:
-    ~Call() override;
-
-    /// @returns the offset of the arguments in Operands()
-    virtual size_t ArgsOperandOffset() const { return 0; }
-
-    /// @returns the call arguments
-    tint::Slice<Value* const> Args() { return operands_.Slice().Offset(ArgsOperandOffset()); }
-
-    /// @returns the call arguments
-    tint::Slice<const Value* const> Args() const {
-        return operands_.Slice().Offset(ArgsOperandOffset());
+void PromoteInitializersFuzzer(core::ir::Module& module) {
+    if (auto res = PromoteInitializers(module); res != Success) {
+        return;
     }
 
-    /// Sets the argument at `idx` of `arg`. `idx` must be within bounds of the current argument
-    /// set.
-    void SetArg(size_t idx, ir::Value* arg) { SetOperand(ArgsOperandOffset() + idx, arg); }
+    core::ir::Capabilities capabilities{core::ir::Capability::kAllowModuleScopeLets};
+    if (auto res = Validate(module, capabilities); res != Success) {
+        TINT_ICE() << "result of PromoteInitializers failed IR validation\n" << res.Failure();
+    }
+}
 
-    /// Append a new argument to the argument list for this call instruction.
-    /// @param arg the argument value to append
-    void AppendArg(ir::Value* arg) { AddOperand(operands_.Length(), arg); }
+}  // namespace
+}  // namespace tint::hlsl::writer::raise
 
-  protected:
-    /// Constructor
-    Call();
-};
-
-}  // namespace tint::core::ir
-
-#endif  // SRC_TINT_LANG_CORE_IR_CALL_H_
+TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer);

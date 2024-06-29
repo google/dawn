@@ -71,8 +71,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.
     RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
-    RUN_TRANSFORM(raise::PromoteInitializers);
     RUN_TRANSFORM(core::ir::transform::ValueToLet);
+
+    // Anything which runs after this needs to handle `Capabilities::kAllowModuleScopedLets`
+    RUN_TRANSFORM(raise::PromoteInitializers);
 
     return Success;
 }

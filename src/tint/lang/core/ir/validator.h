@@ -46,6 +46,8 @@ enum class Capability {
     kAllowVectorElementPointer,
     /// Allows ref types
     kAllowRefTypes,
+    /// Allows module scoped lets
+    kAllowModuleScopeLets,
 };
 
 /// Capabilities is a set of Capability

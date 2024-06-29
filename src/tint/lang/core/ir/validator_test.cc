@@ -88,6 +88,64 @@ $B1: {  # root
 )");
 }
 
+TEST_F(IR_ValidatorTest, RootBlock_Let) {
+    mod.root_block->Append(b.Let("a", 1_f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:12 error: let: root block: invalid instruction: tint::core::ir::Let
+  %a:f32 = let 1.0f
+           ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %a:f32 = let 1.0f
+}
+
+)");
+}
+
+TEST_F(IR_ValidatorTest, RootBlock_LetWithAllowModuleScopeLets) {
+    mod.root_block->Append(b.Let("a", 1_f));
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowModuleScopeLets});
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, RootBlock_Construct) {
+    mod.root_block->Append(b.Construct(ty.vec2<f32>(), 1_f, 2_f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:18 error: construct: root block: invalid instruction: tint::core::ir::Construct
+  %1:vec2<f32> = construct 1.0f, 2.0f
+                 ^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:vec2<f32> = construct 1.0f, 2.0f
+}
+
+)");
+}
+
+TEST_F(IR_ValidatorTest, RootBlock_ConstructWithAllowModuleScopeLets) {
+    mod.root_block->Append(b.Construct(ty.vec2<f32>(), 1_f, 2_f));
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowModuleScopeLets});
+    ASSERT_EQ(res, Success);
+}
+
 TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
     auto* var = b.Var(ty.ptr<private_, i32>());
     mod.root_block->Append(var);
