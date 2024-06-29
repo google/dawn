@@ -1,56 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %a:ptr<push_constant, i32, read_write> = var
-  %b:ptr<push_constant, i32, read_write> = var
-  %c:ptr<push_constant, i32, read_write> = var
-}
-
-%uses_a = func():void {
-  $B2: {
-    %5:i32 = load %a
-    %foo:i32 = let %5
-    ret
-  }
-}
-%uses_uses_a = func():void {
-  $B3: {
-    %8:void = call %uses_a
-    ret
-  }
-}
-%uses_b = func():void {
-  $B4: {
-    %10:i32 = load %b
-    %foo_1:i32 = let %10  # %foo_1: 'foo'
-    ret
-  }
-}
-%main1 = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %13:void = call %uses_a
-    ret
-  }
-}
-%main2 = @compute @workgroup_size(1, 1, 1) func():void {
-  $B6: {
-    %15:void = call %uses_uses_a
-    ret
-  }
-}
-%main3 = @compute @workgroup_size(1, 1, 1) func():void {
-  $B7: {
-    %17:void = call %uses_b
-    ret
-  }
-}
-%main4 = @compute @workgroup_size(1, 1, 1) func():void {
-  $B8: {
-    ret
-  }
-}
-
-unhandled variable address space
+../../src/tint/lang/msl/writer/raise/module_scope_vars.cc:239 internal compiler error: TINT_UNREACHABLE unhandled address space: push_constant
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

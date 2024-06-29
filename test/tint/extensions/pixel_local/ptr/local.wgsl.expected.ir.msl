@@ -1,23 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: PixelLocal = struct @align(4) {
-  a:u32 @offset(0)
-}
-
-$B1: {  # root
-  %V:ptr<pixel_local, PixelLocal, read_write> = var
-}
-
-%f = @fragment func():void {
-  $B2: {
-    %p:ptr<pixel_local, PixelLocal, read_write> = let %V
-    %4:ptr<pixel_local, u32, read_write> = access %p, 0u
-    store %4, 42u
-    ret
-  }
-}
-
-unhandled variable address space
+../../src/tint/lang/msl/writer/raise/module_scope_vars.cc:239 internal compiler error: TINT_UNREACHABLE unhandled address space: pixel_local
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

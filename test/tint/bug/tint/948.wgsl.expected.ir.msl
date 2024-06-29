@@ -1,462 +1,272 @@
 SKIP: FAILED
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: LeftOver = struct @align(16) {
-  time:f32 @offset(0)
-  padding:u32 @offset(4)
-  worldViewProjection:mat4x4<f32> @offset(16)
-  outputSize:vec2<f32> @offset(80)
-  stageSize:vec2<f32> @offset(88)
-  spriteMapSize:vec2<f32> @offset(96)
-  stageScale:f32 @offset(104)
-  spriteCount:f32 @offset(108)
-  colorMul:vec3<f32> @offset(112)
+#include <metal_stdlib>
+using namespace metal;
+
+struct LeftOver {
+  float time;
+  uint padding;
+  float4x4 worldViewProjection;
+  float2 outputSize;
+  float2 stageSize;
+  float2 spriteMapSize;
+  float stageScale;
+  float spriteCount;
+  float3 colorMul;
+};
+
+struct tint_module_vars_struct {
+  const constant LeftOver* x_20;
+  texture2d<float, access::sample> frameMapTexture;
+  sampler frameMapSampler;
+  thread float2* tUV;
+  texture2d<float, access::sample> tileMapsTexture0;
+  sampler tileMapsSampler;
+  texture2d<float, access::sample> tileMapsTexture1;
+  texture2d<float, access::sample> animationMapTexture;
+  sampler animationMapSampler;
+  thread float* mt;
+  texture2d<float, access::sample> spriteSheetTexture;
+  sampler spriteSheetSampler;
+  thread float4* glFragColor;
+  thread float2* tileID_1;
+  thread float2* levelUnits;
+  thread float2* stageUnits_1;
+  thread float3* vPosition;
+  thread float2* vUV;
+};
+
+struct main_out {
+  float4 glFragColor_1;
+};
+
+struct tint_symbol_outputs {
+  float4 main_out_glFragColor_1 [[color(0)]];
+};
+
+struct tint_symbol_inputs {
+  float2 tUV_param [[user(locn2)]];
+  float2 tileID_1_param [[user(locn5)]];
+  float2 levelUnits_param [[user(locn4)]];
+  float2 stageUnits_1_param [[user(locn3)]];
+  float3 vPosition_param [[user(locn0)]];
+  float2 vUV_param [[user(locn1)]];
+};
+
+float4x4 getFrameData_f1_(thread float* const frameID, tint_module_vars_struct tint_module_vars) {
+  float fX = 0.0f;
+  float const x_15 = (*frameID);
+  float const x_25 = (*tint_module_vars.x_20).spriteCount;
+  fX = (x_15 / x_25);
+  float const x_37 = fX;
+  float2 const v = float2(x_37, 0.0f);
+  float4 const x_40 = tint_module_vars.frameMapTexture.sample(tint_module_vars.frameMapSampler, v, bias(0.0f));
+  float const x_44 = fX;
+  float2 const v_1 = float2(x_44, 0.25f);
+  float4 const x_47 = tint_module_vars.frameMapTexture.sample(tint_module_vars.frameMapSampler, v_1, bias(0.0f));
+  float const x_51 = fX;
+  float2 const v_2 = float2(x_51, 0.5f);
+  float4 const x_54 = tint_module_vars.frameMapTexture.sample(tint_module_vars.frameMapSampler, v_2, bias(0.0f));
+  float4 const v_3 = float4(x_40[0u], x_40[1u], x_40[2u], x_40[3u]);
+  float4 const v_4 = float4(x_47[0u], x_47[1u], x_47[2u], x_47[3u]);
+  return float4x4(v_3, v_4, float4(x_54[0u], x_54[1u], x_54[2u], x_54[3u]), float4(0.0f));
 }
 
-main_out = struct @align(16) {
-  glFragColor_1:vec4<f32> @offset(0), @location(0)
-}
-
-$B1: {  # root
-  %x_20:ptr<uniform, LeftOver, read> = var @binding_point(2, 9)
-  %frameMapTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 3)
-  %frameMapSampler:ptr<handle, sampler, read> = var @binding_point(2, 2)
-  %tUV:ptr<private, vec2<f32>, read_write> = var
-  %tileMapsTexture0:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 5)
-  %tileMapsSampler:ptr<handle, sampler, read> = var @binding_point(2, 4)
-  %tileMapsTexture1:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 6)
-  %animationMapTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 8)
-  %animationMapSampler:ptr<handle, sampler, read> = var @binding_point(2, 7)
-  %mt:ptr<private, f32, read_write> = var
-  %spriteSheetTexture:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 1)
-  %spriteSheetSampler:ptr<handle, sampler, read> = var @binding_point(2, 0)
-  %glFragColor:ptr<private, vec4<f32>, read_write> = var
-  %tileID_1:ptr<private, vec2<f32>, read_write> = var
-  %levelUnits:ptr<private, vec2<f32>, read_write> = var
-  %stageUnits_1:ptr<private, vec2<f32>, read_write> = var
-  %vPosition:ptr<private, vec3<f32>, read_write> = var
-  %vUV:ptr<private, vec2<f32>, read_write> = var
-}
-
-%getFrameData_f1_ = func(%frameID:ptr<function, f32, read_write>):mat4x4<f32> {
-  $B2: {
-    %fX:ptr<function, f32, read_write> = var
-    %22:f32 = load %frameID
-    %x_15:f32 = let %22
-    %24:ptr<uniform, f32, read> = access %x_20, 7u
-    %25:f32 = load %24
-    %x_25:f32 = let %25
-    %27:f32 = div %x_15, %x_25
-    store %fX, %27
-    %28:f32 = load %fX
-    %x_37:f32 = let %28
-    %30:texture_2d<f32> = load %frameMapTexture
-    %31:texture_2d<f32> = let %30
-    %32:sampler = load %frameMapSampler
-    %33:sampler = let %32
-    %34:vec2<f32> = construct %x_37, 0.0f
-    %35:vec4<f32> = textureSampleBias %31, %33, %34, 0.0f
-    %x_40:vec4<f32> = let %35
-    %37:f32 = load %fX
-    %x_44:f32 = let %37
-    %39:texture_2d<f32> = load %frameMapTexture
-    %40:texture_2d<f32> = let %39
-    %41:sampler = load %frameMapSampler
-    %42:sampler = let %41
-    %43:vec2<f32> = construct %x_44, 0.25f
-    %44:vec4<f32> = textureSampleBias %40, %42, %43, 0.0f
-    %x_47:vec4<f32> = let %44
-    %46:f32 = load %fX
-    %x_51:f32 = let %46
-    %48:texture_2d<f32> = load %frameMapTexture
-    %49:texture_2d<f32> = let %48
-    %50:sampler = load %frameMapSampler
-    %51:sampler = let %50
-    %52:vec2<f32> = construct %x_51, 0.5f
-    %53:vec4<f32> = textureSampleBias %49, %51, %52, 0.0f
-    %x_54:vec4<f32> = let %53
-    %55:f32 = access %x_40, 0u
-    %56:f32 = access %x_40, 1u
-    %57:f32 = access %x_40, 2u
-    %58:f32 = access %x_40, 3u
-    %59:vec4<f32> = construct %55, %56, %57, %58
-    %60:vec4<f32> = let %59
-    %61:f32 = access %x_47, 0u
-    %62:f32 = access %x_47, 1u
-    %63:f32 = access %x_47, 2u
-    %64:f32 = access %x_47, 3u
-    %65:vec4<f32> = construct %61, %62, %63, %64
-    %66:vec4<f32> = let %65
-    %67:f32 = access %x_54, 0u
-    %68:f32 = access %x_54, 1u
-    %69:f32 = access %x_54, 2u
-    %70:f32 = access %x_54, 3u
-    %71:vec4<f32> = construct %67, %68, %69, %70
-    %72:mat4x4<f32> = construct %60, %66, %71, vec4<f32>(0.0f)
-    ret %72
-  }
-}
-%main_1 = func():void {
-  $B3: {
-    %color:ptr<function, vec4<f32>, read_write> = var
-    %tileUV:ptr<function, vec2<f32>, read_write> = var
-    %tileID:ptr<function, vec2<f32>, read_write> = var
-    %sheetUnits:ptr<function, vec2<f32>, read_write> = var
-    %spriteUnits:ptr<function, f32, read_write> = var
-    %stageUnits:ptr<function, vec2<f32>, read_write> = var
-    %i:ptr<function, i32, read_write> = var
-    %frameID_1:ptr<function, f32, read_write> = var
-    %animationData:ptr<function, vec4<f32>, read_write> = var
-    %f:ptr<function, f32, read_write> = var
-    %frameData:ptr<function, mat4x4<f32>, read_write> = var
-    %param:ptr<function, f32, read_write> = var
-    %frameSize:ptr<function, vec2<f32>, read_write> = var
-    %offset_1:ptr<function, vec2<f32>, read_write> = var
-    %ratio:ptr<function, vec2<f32>, read_write> = var
-    %nc:ptr<function, vec4<f32>, read_write> = var
-    %alpha:ptr<function, f32, read_write> = var
-    %mixed:ptr<function, vec3<f32>, read_write> = var
-    store %color, vec4<f32>(0.0f)
-    %92:vec2<f32> = load %tUV
-    %x_86:vec2<f32> = let %92
-    %94:vec2<f32> = fract %x_86
-    store %tileUV, %94
-    %95:f32 = load_vector_element %tileUV, 1u
-    %x_91:f32 = let %95
-    %97:f32 = sub 1.0f, %x_91
-    store_vector_element %tileUV, 1u, %97
-    %98:vec2<f32> = load %tUV
-    %x_95:vec2<f32> = let %98
-    %100:vec2<f32> = floor %x_95
-    store %tileID, %100
-    %101:ptr<uniform, vec2<f32>, read> = access %x_20, 5u
-    %102:vec2<f32> = load %101
-    %x_101:vec2<f32> = let %102
-    %104:vec2<f32> = div vec2<f32>(1.0f), %x_101
-    store %sheetUnits, %104
-    %105:ptr<uniform, f32, read> = access %x_20, 7u
-    %106:f32 = load %105
-    %x_106:f32 = let %106
-    %108:f32 = div 1.0f, %x_106
-    store %spriteUnits, %108
-    %109:ptr<uniform, vec2<f32>, read> = access %x_20, 4u
-    %110:vec2<f32> = load %109
-    %x_111:vec2<f32> = let %110
-    %112:vec2<f32> = div vec2<f32>(1.0f), %x_111
-    store %stageUnits, %112
-    store %i, 0i
-    loop [b: $B4, c: $B5] {  # loop_1
-      $B4: {  # body
-        %113:i32 = load %i
-        %x_122:i32 = let %113
-        %115:bool = lt %x_122, 2i
-        if %115 [t: $B6, f: $B7] {  # if_1
-          $B6: {  # true
-            exit_if  # if_1
-          }
-          $B7: {  # false
-            exit_loop  # loop_1
-          }
+void main_1(tint_module_vars_struct tint_module_vars) {
+  float4 color = 0.0f;
+  float2 tileUV = 0.0f;
+  float2 tileID = 0.0f;
+  float2 sheetUnits = 0.0f;
+  float spriteUnits = 0.0f;
+  float2 stageUnits = 0.0f;
+  int i = 0;
+  float frameID_1 = 0.0f;
+  float4 animationData = 0.0f;
+  float f = 0.0f;
+  float4x4 frameData = float4x4(0.0f);
+  float param = 0.0f;
+  float2 frameSize = 0.0f;
+  float2 offset_1 = 0.0f;
+  float2 ratio = 0.0f;
+  float4 nc = 0.0f;
+  float alpha = 0.0f;
+  float3 mixed = 0.0f;
+  color = float4(0.0f);
+  float2 const x_86 = (*tint_module_vars.tUV);
+  tileUV = fract(x_86);
+  float const x_91 = tileUV[1u];
+  tileUV[1u] = (1.0f - x_91);
+  float2 const x_95 = (*tint_module_vars.tUV);
+  tileID = floor(x_95);
+  float2 const x_101 = (*tint_module_vars.x_20).spriteMapSize;
+  sheetUnits = (float2(1.0f) / x_101);
+  float const x_106 = (*tint_module_vars.x_20).spriteCount;
+  spriteUnits = (1.0f / x_106);
+  float2 const x_111 = (*tint_module_vars.x_20).stageSize;
+  stageUnits = (float2(1.0f) / x_111);
+  i = 0;
+  {
+    while(true) {
+      int const x_122 = i;
+      if ((x_122 < 2)) {
+      } else {
+        break;
+      }
+      int const x_126 = i;
+      switch(x_126) {
+        case 1:
+        {
+          float2 const x_150 = tileID;
+          float2 const x_154 = (*tint_module_vars.x_20).stageSize;
+          float4 const x_156 = tint_module_vars.tileMapsTexture1.sample(tint_module_vars.tileMapsSampler, ((x_150 + float2(0.5f)) / x_154), bias(0.0f));
+          frameID_1 = x_156[0u];
+          break;
         }
-        %116:i32 = load %i
-        %x_126:i32 = let %116
-        switch %x_126 [c: (1i, $B8), c: (0i, $B9), c: (default, $B10)] {  # switch_1
-          $B8: {  # case
-            %118:vec2<f32> = load %tileID
-            %x_150:vec2<f32> = let %118
-            %120:ptr<uniform, vec2<f32>, read> = access %x_20, 4u
-            %121:vec2<f32> = load %120
-            %x_154:vec2<f32> = let %121
-            %123:texture_2d<f32> = load %tileMapsTexture1
-            %124:sampler = load %tileMapsSampler
-            %125:vec2<f32> = add %x_150, vec2<f32>(0.5f)
-            %126:vec2<f32> = div %125, %x_154
-            %127:vec4<f32> = textureSampleBias %123, %124, %126, 0.0f
-            %x_156:vec4<f32> = let %127
-            %129:f32 = access %x_156, 0u
-            store %frameID_1, %129
-            exit_switch  # switch_1
-          }
-          $B9: {  # case
-            %130:vec2<f32> = load %tileID
-            %x_136:vec2<f32> = let %130
-            %132:ptr<uniform, vec2<f32>, read> = access %x_20, 4u
-            %133:vec2<f32> = load %132
-            %x_140:vec2<f32> = let %133
-            %135:texture_2d<f32> = load %tileMapsTexture0
-            %136:sampler = load %tileMapsSampler
-            %137:vec2<f32> = add %x_136, vec2<f32>(0.5f)
-            %138:vec2<f32> = div %137, %x_140
-            %139:vec4<f32> = textureSampleBias %135, %136, %138, 0.0f
-            %x_142:vec4<f32> = let %139
-            %141:f32 = access %x_142, 0u
-            store %frameID_1, %141
-            exit_switch  # switch_1
-          }
-          $B10: {  # case
-            exit_switch  # switch_1
-          }
+        case 0:
+        {
+          float2 const x_136 = tileID;
+          float2 const x_140 = (*tint_module_vars.x_20).stageSize;
+          float4 const x_142 = tint_module_vars.tileMapsTexture0.sample(tint_module_vars.tileMapsSampler, ((x_136 + float2(0.5f)) / x_140), bias(0.0f));
+          frameID_1 = x_142[0u];
+          break;
         }
-        %142:f32 = load %frameID_1
-        %x_166:f32 = let %142
-        %144:ptr<uniform, f32, read> = access %x_20, 7u
-        %145:f32 = load %144
-        %x_169:f32 = let %145
-        %147:texture_2d<f32> = load %animationMapTexture
-        %148:texture_2d<f32> = let %147
-        %149:sampler = load %animationMapSampler
-        %150:sampler = let %149
-        %151:f32 = add %x_166, 0.5f
-        %152:f32 = div %151, %x_169
-        %153:vec2<f32> = construct %152, 0.0f
-        %154:vec4<f32> = textureSampleBias %148, %150, %153, 0.0f
-        %x_172:vec4<f32> = let %154
-        store %animationData, %x_172
-        %156:f32 = load_vector_element %animationData, 1u
-        %x_174:f32 = let %156
-        %158:bool = gt %x_174, 0.0f
-        if %158 [t: $B11] {  # if_2
-          $B11: {  # true
-            %159:ptr<uniform, f32, read> = access %x_20, 0u
-            %160:f32 = load %159
-            %x_181:f32 = let %160
-            %162:f32 = load_vector_element %animationData, 2u
-            %x_184:f32 = let %162
-            %164:f32 = mul %x_181, %x_184
-            %165:f32 = mod %164, 1.0f
-            store %mt, %165
-            store %f, 0.0f
-            loop [b: $B12, c: $B13] {  # loop_2
-              $B12: {  # body
-                %166:f32 = load %f
-                %x_193:f32 = let %166
-                %168:bool = lt %x_193, 8.0f
-                if %168 [t: $B14, f: $B15] {  # if_3
-                  $B14: {  # true
-                    exit_if  # if_3
-                  }
-                  $B15: {  # false
-                    exit_loop  # loop_2
-                  }
-                }
-                %169:f32 = load_vector_element %animationData, 1u
-                %x_197:f32 = let %169
-                %171:f32 = load %mt
-                %x_198:f32 = let %171
-                %173:bool = gt %x_197, %x_198
-                if %173 [t: $B16] {  # if_4
-                  $B16: {  # true
-                    %174:f32 = load_vector_element %animationData, 0u
-                    %x_203:f32 = let %174
-                    store %frameID_1, %x_203
-                    exit_loop  # loop_2
-                  }
-                }
-                %176:f32 = load %frameID_1
-                %x_208:f32 = let %176
-                %178:ptr<uniform, f32, read> = access %x_20, 7u
-                %179:f32 = load %178
-                %x_211:f32 = let %179
-                %181:f32 = load %f
-                %x_214:f32 = let %181
-                %x_217:vec4<f32> = let vec4<f32>(0.0f)
-                store %animationData, %x_217
-                continue  # -> $B13
-              }
-              $B13: {  # continuing
-                %184:f32 = load %f
-                %x_218:f32 = let %184
-                %186:f32 = add %x_218, 1.0f
-                store %f, %186
-                next_iteration  # -> $B12
-              }
+        default:
+        {
+          break;
+        }
+      }
+      float const x_166 = frameID_1;
+      float const x_169 = (*tint_module_vars.x_20).spriteCount;
+      float2 const v_5 = float2(((x_166 + 0.5f) / x_169), 0.0f);
+      float4 const x_172 = tint_module_vars.animationMapTexture.sample(tint_module_vars.animationMapSampler, v_5, bias(0.0f));
+      animationData = x_172;
+      float const x_174 = animationData[1u];
+      if ((x_174 > 0.0f)) {
+        float const x_181 = (*tint_module_vars.x_20).time;
+        float const x_184 = animationData[2u];
+        (*tint_module_vars.mt) = ((x_181 * x_184) % 1.0f);
+        f = 0.0f;
+        {
+          while(true) {
+            float const x_193 = f;
+            if ((x_193 < 8.0f)) {
+            } else {
+              break;
             }
-            exit_if  # if_2
+            float const x_197 = animationData[1u];
+            float const x_198 = (*tint_module_vars.mt);
+            if ((x_197 > x_198)) {
+              float const x_203 = animationData[0u];
+              frameID_1 = x_203;
+              break;
+            }
+            float const x_208 = frameID_1;
+            float const x_211 = (*tint_module_vars.x_20).spriteCount;
+            float const x_214 = f;
+            float4 const x_217 = float4(0.0f);
+            animationData = x_217;
+            {
+              float const x_218 = f;
+              f = (x_218 + 1.0f);
+            }
+            continue;
           }
         }
-        %187:f32 = load %frameID_1
-        %x_222:f32 = let %187
-        %189:f32 = add %x_222, 0.5f
-        store %param, %189
-        %190:mat4x4<f32> = call %getFrameData_f1_, %param
-        %x_225:mat4x4<f32> = let %190
-        store %frameData, %x_225
-        %192:ptr<function, vec4<f32>, read_write> = access %frameData, 0i
-        %193:vec4<f32> = load %192
-        %x_228:vec4<f32> = let %193
-        %195:ptr<uniform, vec2<f32>, read> = access %x_20, 5u
-        %196:vec2<f32> = load %195
-        %x_231:vec2<f32> = let %196
-        %198:f32 = access %x_228, 3u
-        %199:f32 = access %x_228, 2u
-        %200:vec2<f32> = construct %198, %199
-        %201:vec2<f32> = div %200, %x_231
-        store %frameSize, %201
-        %202:ptr<function, vec4<f32>, read_write> = access %frameData, 0i
-        %203:vec4<f32> = load %202
-        %x_235:vec4<f32> = let %203
-        %205:vec2<f32> = load %sheetUnits
-        %x_237:vec2<f32> = let %205
-        %207:f32 = access %x_235, 0u
-        %208:f32 = access %x_235, 1u
-        %209:vec2<f32> = construct %207, %208
-        %210:vec2<f32> = mul %209, %x_237
-        store %offset_1, %210
-        %211:ptr<function, vec4<f32>, read_write> = access %frameData, 2i
-        %212:vec4<f32> = load %211
-        %x_241:vec4<f32> = let %212
-        %214:ptr<function, vec4<f32>, read_write> = access %frameData, 0i
-        %215:vec4<f32> = load %214
-        %x_244:vec4<f32> = let %215
-        %217:f32 = access %x_241, 0u
-        %218:f32 = access %x_241, 1u
-        %219:vec2<f32> = construct %217, %218
-        %220:vec2<f32> = let %219
-        %221:f32 = access %x_244, 3u
-        %222:f32 = access %x_244, 2u
-        %223:vec2<f32> = construct %221, %222
-        %224:vec2<f32> = div %220, %223
-        store %ratio, %224
-        %225:ptr<function, vec4<f32>, read_write> = access %frameData, 2i
-        %226:f32 = load_vector_element %225, 2u
-        %x_248:f32 = let %226
-        %228:bool = eq %x_248, 1.0f
-        if %228 [t: $B17] {  # if_5
-          $B17: {  # true
-            %229:vec2<f32> = load %tileUV
-            %x_252:vec2<f32> = let %229
-            %231:f32 = access %x_252, 1u
-            %232:f32 = access %x_252, 0u
-            %233:vec2<f32> = construct %231, %232
-            store %tileUV, %233
-            exit_if  # if_5
-          }
-        }
-        %234:i32 = load %i
-        %x_254:i32 = let %234
-        %236:bool = eq %x_254, 0i
-        if %236 [t: $B18, f: $B19] {  # if_6
-          $B18: {  # true
-            %237:vec2<f32> = load %tileUV
-            %x_263:vec2<f32> = let %237
-            %239:vec2<f32> = load %frameSize
-            %x_264:vec2<f32> = let %239
-            %241:vec2<f32> = load %offset_1
-            %x_266:vec2<f32> = let %241
-            %243:texture_2d<f32> = load %spriteSheetTexture
-            %244:sampler = load %spriteSheetSampler
-            %245:vec2<f32> = mul %x_263, %x_264
-            %246:vec2<f32> = add %245, %x_266
-            %247:vec4<f32> = textureSample %243, %244, %246
-            %x_268:vec4<f32> = let %247
-            store %color, %x_268
-            exit_if  # if_6
-          }
-          $B19: {  # false
-            %249:vec2<f32> = load %tileUV
-            %x_274:vec2<f32> = let %249
-            %251:vec2<f32> = load %frameSize
-            %x_275:vec2<f32> = let %251
-            %253:vec2<f32> = load %offset_1
-            %x_277:vec2<f32> = let %253
-            %255:texture_2d<f32> = load %spriteSheetTexture
-            %256:sampler = load %spriteSheetSampler
-            %257:vec2<f32> = mul %x_274, %x_275
-            %258:vec2<f32> = add %257, %x_277
-            %259:vec4<f32> = textureSample %255, %256, %258
-            %x_279:vec4<f32> = let %259
-            store %nc, %x_279
-            %261:f32 = load_vector_element %color, 3u
-            %x_283:f32 = let %261
-            %263:f32 = load_vector_element %nc, 3u
-            %x_285:f32 = let %263
-            %265:f32 = add %x_283, %x_285
-            %266:f32 = min %265, 1.0f
-            store %alpha, %266
-            %267:vec4<f32> = load %color
-            %x_290:vec4<f32> = let %267
-            %269:vec4<f32> = load %nc
-            %x_292:vec4<f32> = let %269
-            %271:f32 = load_vector_element %nc, 3u
-            %x_295:f32 = let %271
-            %273:f32 = access %x_290, 0u
-            %274:f32 = access %x_290, 1u
-            %275:f32 = access %x_290, 2u
-            %276:vec3<f32> = construct %273, %274, %275
-            %277:vec3<f32> = let %276
-            %278:f32 = access %x_292, 0u
-            %279:f32 = access %x_292, 1u
-            %280:f32 = access %x_292, 2u
-            %281:vec3<f32> = construct %278, %279, %280
-            %282:vec3<f32> = let %281
-            %283:vec3<f32> = construct %x_295, %x_295, %x_295
-            %284:vec3<f32> = mix %277, %282, %283
-            store %mixed, %284
-            %285:vec3<f32> = load %mixed
-            %x_298:vec3<f32> = let %285
-            %287:f32 = load %alpha
-            %x_299:f32 = let %287
-            %289:f32 = access %x_298, 0u
-            %290:f32 = access %x_298, 1u
-            %291:f32 = access %x_298, 2u
-            %292:vec4<f32> = construct %289, %290, %291, %x_299
-            store %color, %292
-            exit_if  # if_6
-          }
-        }
-        continue  # -> $B5
       }
-      $B5: {  # continuing
-        %293:i32 = load %i
-        %x_304:i32 = let %293
-        %295:i32 = add %x_304, 1i
-        store %i, %295
-        next_iteration  # -> $B4
+      float const x_222 = frameID_1;
+      param = (x_222 + 0.5f);
+      float4x4 const x_225 = getFrameData_f1_((&param), tint_module_vars);
+      frameData = x_225;
+      float4 const x_228 = frameData[0];
+      float2 const x_231 = (*tint_module_vars.x_20).spriteMapSize;
+      frameSize = (float2(x_228[3u], x_228[2u]) / x_231);
+      float4 const x_235 = frameData[0];
+      float2 const x_237 = sheetUnits;
+      offset_1 = (float2(x_235[0u], x_235[1u]) * x_237);
+      float4 const x_241 = frameData[2];
+      float4 const x_244 = frameData[0];
+      float2 const v_6 = float2(x_241[0u], x_241[1u]);
+      ratio = (v_6 / float2(x_244[3u], x_244[2u]));
+      float const x_248 = frameData[2][2u];
+      if ((x_248 == 1.0f)) {
+        float2 const x_252 = tileUV;
+        tileUV = float2(x_252[1u], x_252[0u]);
       }
+      int const x_254 = i;
+      if ((x_254 == 0)) {
+        float2 const x_263 = tileUV;
+        float2 const x_264 = frameSize;
+        float2 const x_266 = offset_1;
+        float4 const x_268 = tint_module_vars.spriteSheetTexture.sample(tint_module_vars.spriteSheetSampler, ((x_263 * x_264) + x_266));
+        color = x_268;
+      } else {
+        float2 const x_274 = tileUV;
+        float2 const x_275 = frameSize;
+        float2 const x_277 = offset_1;
+        float4 const x_279 = tint_module_vars.spriteSheetTexture.sample(tint_module_vars.spriteSheetSampler, ((x_274 * x_275) + x_277));
+        nc = x_279;
+        float const x_283 = color[3u];
+        float const x_285 = nc[3u];
+        alpha = min((x_283 + x_285), 1.0f);
+        float4 const x_290 = color;
+        float4 const x_292 = nc;
+        float const x_295 = nc[3u];
+        float3 const v_7 = float3(x_290[0u], x_290[1u], x_290[2u]);
+        float3 const v_8 = float3(x_292[0u], x_292[1u], x_292[2u]);
+        mixed = mix(v_7, v_8, float3(x_295, x_295, x_295));
+        float3 const x_298 = mixed;
+        float const x_299 = alpha;
+        color = float4(x_298[0u], x_298[1u], x_298[2u], x_299);
+      }
+      {
+        int const x_304 = i;
+        i = (x_304 + 1);
+      }
+      continue;
     }
-    %296:ptr<uniform, vec3<f32>, read> = access %x_20, 8u
-    %297:vec3<f32> = load %296
-    %x_310:vec3<f32> = let %297
-    %299:vec4<f32> = load %color
-    %x_311:vec4<f32> = let %299
-    %301:f32 = access %x_311, 0u
-    %302:f32 = access %x_311, 1u
-    %303:f32 = access %x_311, 2u
-    %304:vec3<f32> = construct %301, %302, %303
-    %305:vec3<f32> = mul %304, %x_310
-    %x_313:vec3<f32> = let %305
-    %307:vec4<f32> = load %color
-    %x_314:vec4<f32> = let %307
-    %309:f32 = access %x_313, 0u
-    %310:f32 = access %x_313, 1u
-    %311:f32 = access %x_313, 2u
-    %312:f32 = access %x_314, 3u
-    %313:vec4<f32> = construct %309, %310, %311, %312
-    store %color, %313
-    %314:vec4<f32> = load %color
-    %x_318:vec4<f32> = let %314
-    store %glFragColor, %x_318
-    ret
   }
-}
-%tint_symbol = @fragment func(%tUV_param:vec2<f32> [@location(2)], %tileID_1_param:vec2<f32> [@location(5)], %levelUnits_param:vec2<f32> [@location(4)], %stageUnits_1_param:vec2<f32> [@location(3)], %vPosition_param:vec3<f32> [@location(0)], %vUV_param:vec2<f32> [@location(1)]):main_out {
-  $B20: {
-    store %tUV, %tUV_param
-    store %tileID_1, %tileID_1_param
-    store %levelUnits, %levelUnits_param
-    store %stageUnits_1, %stageUnits_1_param
-    store %vPosition, %vPosition_param
-    store %vUV, %vUV_param
-    %323:void = call %main_1
-    %324:vec4<f32> = load %glFragColor
-    %325:main_out = construct %324
-    ret %325
-  }
+  float3 const x_310 = (*tint_module_vars.x_20).colorMul;
+  float4 const x_311 = color;
+  float3 const x_313 = (float3(x_311[0u], x_311[1u], x_311[2u]) * x_310);
+  float4 const x_314 = color;
+  color = float4(x_313[0u], x_313[1u], x_313[2u], x_314[3u]);
+  float4 const x_318 = color;
+  (*tint_module_vars.glFragColor) = x_318;
 }
 
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+main_out tint_symbol_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_param, float2 stageUnits_1_param, float3 vPosition_param, float2 vUV_param, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.tUV) = tUV_param;
+  (*tint_module_vars.tileID_1) = tileID_1_param;
+  (*tint_module_vars.levelUnits) = levelUnits_param;
+  (*tint_module_vars.stageUnits_1) = stageUnits_1_param;
+  (*tint_module_vars.vPosition) = vPosition_param;
+  (*tint_module_vars.vUV) = vUV_param;
+  main_1(tint_module_vars);
+  return main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
+}
+
+fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant LeftOver* x_20 [[buffer(0)]], texture2d<float, access::sample> frameMapTexture [[texture(3)]], sampler frameMapSampler [[sampler(2)]], texture2d<float, access::sample> tileMapsTexture0 [[texture(1)]], sampler tileMapsSampler [[sampler(0)]], texture2d<float, access::sample> tileMapsTexture1 [[texture(0)]], texture2d<float, access::sample> animationMapTexture [[texture(2)]], sampler animationMapSampler [[sampler(1)]], texture2d<float, access::sample> spriteSheetTexture [[texture(4)]], sampler spriteSheetSampler [[sampler(3)]]) {
+  thread float2 tUV = 0.0f;
+  thread float mt = 0.0f;
+  thread float4 glFragColor = 0.0f;
+  thread float2 tileID_1 = 0.0f;
+  thread float2 levelUnits = 0.0f;
+  thread float2 stageUnits_1 = 0.0f;
+  thread float3 vPosition = 0.0f;
+  thread float2 vUV = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_20=x_20, .frameMapTexture=frameMapTexture, .frameMapSampler=frameMapSampler, .tUV=(&tUV), .tileMapsTexture0=tileMapsTexture0, .tileMapsSampler=tileMapsSampler, .tileMapsTexture1=tileMapsTexture1, .animationMapTexture=animationMapTexture, .animationMapSampler=animationMapSampler, .mt=(&mt), .spriteSheetTexture=spriteSheetTexture, .spriteSheetSampler=spriteSheetSampler, .glFragColor=(&glFragColor), .tileID_1=(&tileID_1), .levelUnits=(&levelUnits), .stageUnits_1=(&stageUnits_1), .vPosition=(&vPosition), .vUV=(&vUV)};
+  return tint_symbol_outputs{.main_out_glFragColor_1=tint_symbol_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param, tint_module_vars).glFragColor_1};
+}
+program_source:145:51: error: invalid operands to binary expression ('float' and 'float')
+        (*tint_module_vars.mt) = ((x_181 * x_184) % 1.0f);
+                                  ~~~~~~~~~~~~~~~ ^ ~~~~
+program_source:161:25: warning: unused variable 'x_208' [-Wunused-variable]
+            float const x_208 = frameID_1;
+                        ^
+program_source:162:25: warning: unused variable 'x_211' [-Wunused-variable]
+            float const x_211 = (*tint_module_vars.x_20).spriteCount;
+                        ^
+program_source:163:25: warning: unused variable 'x_214' [-Wunused-variable]
+            float const x_214 = f;
+                        ^
+

@@ -2,6 +2,7 @@ SKIP: FAILED
 
 #include <metal_stdlib>
 using namespace metal;
+
 struct a {
   int a;
 };
@@ -9,14 +10,14 @@ struct a {
 void f(a a) {
   a const b = a;
 }
-program_source:8:4: error: expected ';' after expression
+program_source:9:4: error: expected ';' after expression
   a const b = a;
    ^
    ;
-program_source:8:11: error: C++ requires a type specifier for all declarations
+program_source:9:11: error: C++ requires a type specifier for all declarations
   a const b = a;
     ~~~~~ ^
-program_source:8:3: warning: expression result unused [-Wunused-value]
+program_source:9:3: warning: expression result unused [-Wunused-value]
   a const b = a;
   ^
 

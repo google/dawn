@@ -2,8 +2,8 @@
 using namespace metal;
 
 struct tint_module_vars_struct {
-  depth2d_ms<float, access::read> arg_0;
   device uint2* prevent_dce;
+  depth2d_ms<float, access::read> arg_0;
 };
 
 struct VertexOutput {
@@ -22,13 +22,13 @@ uint2 textureDimensions_c2cdd3(tint_module_vars_struct tint_module_vars) {
   return res;
 }
 
-fragment void fragment_main(depth2d_ms<float, access::read> arg_0 [[texture(0)]], device uint2* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .prevent_dce=prevent_dce};
+fragment void fragment_main(device uint2* prevent_dce [[buffer(0)]], depth2d_ms<float, access::read> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
   (*tint_module_vars.prevent_dce) = textureDimensions_c2cdd3(tint_module_vars);
 }
 
-kernel void compute_main(depth2d_ms<float, access::read> arg_0 [[texture(0)]], device uint2* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .prevent_dce=prevent_dce};
+kernel void compute_main(device uint2* prevent_dce [[buffer(0)]], depth2d_ms<float, access::read> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
   (*tint_module_vars.prevent_dce) = textureDimensions_c2cdd3(tint_module_vars);
 }
 

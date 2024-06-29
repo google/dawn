@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/msl/writer/printer/printer.cc:924 internal compiler error: TINT_UNREACHABLE unhandled: frexp
+../../src/tint/lang/msl/writer/printer/printer.cc:989 internal compiler error: TINT_UNREACHABLE unhandled: frexp
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

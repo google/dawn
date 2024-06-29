@@ -1,244 +1,204 @@
 SKIP: FAILED
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: RenderParams = struct @align(16) {
-  modelViewProjectionMatrix:mat4x4<f32> @offset(0)
-  right:vec3<f32> @offset(64)
-  up:vec3<f32> @offset(80)
+#include <metal_stdlib>
+using namespace metal;
+
+struct VertexOutput {
+  float4 position;
+  float4 color;
+  float2 quad_pos;
+};
+
+struct VertexInput {
+  float3 position;
+  float4 color;
+  float2 quad_pos;
+};
+
+struct RenderParams {
+  float4x4 modelViewProjectionMatrix;
+  float3 right;
+  float3 up;
+};
+
+struct SimulationParams {
+  float deltaTime;
+  float4 seed;
+};
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct Particle {
+  float3 position;
+  float lifetime;
+  float4 color;
+  float2 velocity;
+};
+
+struct Particles {
+  tint_array<Particle, 1> particles;
+};
+
+struct UBO {
+  uint width;
+};
+
+struct Buffer {
+  tint_array<float, 1> weights;
+};
+
+struct tint_module_vars_struct {
+  thread float2* rand_seed;
+  const constant RenderParams* render_params;
+  const constant SimulationParams* sim_params;
+  device Particles* data;
+  texture1d<float, access::sample> tint_symbol;
+  const constant UBO* ubo;
+  const device Buffer* buf_in;
+  device Buffer* buf_out;
+  texture2d<float, access::sample> tex_in;
+  texture2d<float, access::write> tex_out;
+};
+
+struct vertex_main_outputs {
+  float4 tint_symbol_1 [[position]];
+};
+
+struct vs_main_outputs {
+  float4 VertexOutput_position [[position]];
+  float4 VertexOutput_color [[user(locn0)]];
+  float2 VertexOutput_quad_pos [[user(locn1)]];
+};
+
+struct vs_main_inputs {
+  float3 VertexInput_position [[attribute(0)]];
+  float4 VertexInput_color [[attribute(1)]];
+  float2 VertexInput_quad_pos [[attribute(2)]];
+};
+
+void asinh_468a48() {
+  half arg_0 = 0.0h;
+  half res = asinh(arg_0);
 }
 
-VertexOutput = struct @align(16) {
-  position:vec4<f32> @offset(0), @builtin(position)
-  color:vec4<f32> @offset(16), @location(0)
-  quad_pos:vec2<f32> @offset(32), @location(1)
+float4 vertex_main_inner() {
+  asinh_468a48();
+  return float4(0.0f);
 }
 
-VertexInput = struct @align(16) {
-  position:vec3<f32> @offset(0), @location(0)
-  color:vec4<f32> @offset(16), @location(1)
-  quad_pos:vec2<f32> @offset(32), @location(2)
+fragment void fragment_main() {
+  asinh_468a48();
 }
 
-SimulationParams = struct @align(16) {
-  deltaTime:f32 @offset(0)
-  seed:vec4<f32> @offset(16)
+kernel void rgba32uintin() {
+  asinh_468a48();
 }
 
-Particle = struct @align(16) {
-  position:vec3<f32> @offset(0)
-  lifetime:f32 @offset(12)
-  color:vec4<f32> @offset(16)
-  velocity:vec2<f32> @offset(32)
+VertexOutput vs_main_inner(VertexInput in, tint_module_vars_struct tint_module_vars) {
+  float3 quad_pos = (float2x3((*tint_module_vars.render_params).right, (*tint_module_vars.render_params).up) * in.quad_pos);
+  float3 position = (in.position - (quad_pos + 0.00999999977648258209f));
+  VertexOutput out = {};
+  float4x4 const v = (*tint_module_vars.render_params).modelViewProjectionMatrix;
+  out.position = (v * float4(position, 1.0f));
+  out.color = in.color;
+  out.quad_pos = in.quad_pos;
+  return out;
 }
 
-Particles = struct @align(16) {
-  particles:array<Particle> @offset(0)
+void tint_store_and_preserve_padding(device Particle* const target, Particle value_param) {
+  (*target).position = value_param.position;
+  (*target).lifetime = value_param.lifetime;
+  (*target).color = value_param.color;
+  (*target).velocity = value_param.velocity;
 }
 
-UBO = struct @align(4) {
-  width:u32 @offset(0)
+void simulate_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+  float2 const v_1 = (*tint_module_vars.sim_params).seed.xy;
+  float2 const v_2 = (v_1 * float2(GlobalInvocationID.xy));
+  (*tint_module_vars.rand_seed) = (v_2 * (*tint_module_vars.sim_params).seed.zw);
+  uint const idx = GlobalInvocationID[0u];
+  Particle particle = (*tint_module_vars.data).particles[idx];
+  tint_store_and_preserve_padding((&(*tint_module_vars.data).particles[idx]), particle);
 }
 
-Buffer = struct @align(4) {
-  weights:array<f32> @offset(0)
-}
-
-$B1: {  # root
-  %rand_seed:ptr<private, vec2<f32>, read_write> = var
-  %render_params:ptr<uniform, RenderParams, read> = var @binding_point(0, 5)
-  %sim_params:ptr<uniform, SimulationParams, read> = var @binding_point(0, 0)
-  %data:ptr<storage, Particles, read_write> = var @binding_point(0, 1)
-  %tint_symbol:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 2)
-  %ubo:ptr<uniform, UBO, read> = var @binding_point(0, 3)
-  %buf_in:ptr<storage, Buffer, read> = var @binding_point(0, 4)
-  %buf_out:ptr<storage, Buffer, read_write> = var @binding_point(0, 5)
-  %tex_in:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 6)
-  %tex_out:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(0, 7)
-}
-
-%asinh_468a48 = func():void {
-  $B2: {
-    %arg_0:ptr<function, f16, read_write> = var, 0.0h
-    %13:f16 = load %arg_0
-    %14:f16 = asinh %13
-    %res:ptr<function, f16, read_write> = var, %14
-    ret
-  }
-}
-%vertex_main = @vertex func():vec4<f32> [@position] {
-  $B3: {
-    %17:void = call %asinh_468a48
-    ret vec4<f32>(0.0f)
-  }
-}
-%fragment_main = @fragment func():void {
-  $B4: {
-    %19:void = call %asinh_468a48
-    ret
-  }
-}
-%rgba32uintin = @compute @workgroup_size(1, 1, 1) func():void {
-  $B5: {
-    %21:void = call %asinh_468a48
-    ret
-  }
-}
-%vs_main = @vertex func(%in:VertexInput):VertexOutput {
-  $B6: {
-    %24:ptr<uniform, vec3<f32>, read> = access %render_params, 1u
-    %25:vec3<f32> = load %24
-    %26:ptr<uniform, vec3<f32>, read> = access %render_params, 2u
-    %27:vec3<f32> = load %26
-    %28:mat2x3<f32> = construct %25, %27
-    %29:vec2<f32> = access %in, 2u
-    %30:vec3<f32> = mul %28, %29
-    %quad_pos:ptr<function, vec3<f32>, read_write> = var, %30
-    %32:vec3<f32> = access %in, 0u
-    %33:vec3<f32> = load %quad_pos
-    %34:vec3<f32> = add %33, 0.00999999977648258209f
-    %35:vec3<f32> = sub %32, %34
-    %position:ptr<function, vec3<f32>, read_write> = var, %35
-    %out:ptr<function, VertexOutput, read_write> = var
-    %38:ptr<function, vec4<f32>, read_write> = access %out, 0u
-    %39:ptr<uniform, mat4x4<f32>, read> = access %render_params, 0u
-    %40:mat4x4<f32> = load %39
-    %41:mat4x4<f32> = let %40
-    %42:vec3<f32> = load %position
-    %43:vec4<f32> = construct %42, 1.0f
-    %44:vec4<f32> = mul %41, %43
-    store %38, %44
-    %45:ptr<function, vec4<f32>, read_write> = access %out, 1u
-    %46:vec4<f32> = access %in, 1u
-    store %45, %46
-    %47:ptr<function, vec2<f32>, read_write> = access %out, 2u
-    %48:vec2<f32> = access %in, 2u
-    store %47, %48
-    %49:VertexOutput = load %out
-    ret %49
-  }
-}
-%simulate = @compute @workgroup_size(64, 1, 1) func(%GlobalInvocationID:vec3<u32> [@global_invocation_id]):void {
-  $B7: {
-    %52:ptr<uniform, vec4<f32>, read> = access %sim_params, 1u
-    %53:vec4<f32> = load %52
-    %54:vec2<f32> = swizzle %53, xy
-    %55:vec2<f32> = let %54
-    %56:vec2<u32> = swizzle %GlobalInvocationID, xy
-    %57:vec2<f32> = convert %56
-    %58:vec2<f32> = mul %55, %57
-    %59:ptr<uniform, vec4<f32>, read> = access %sim_params, 1u
-    %60:vec4<f32> = load %59
-    %61:vec2<f32> = swizzle %60, zw
-    %62:vec2<f32> = mul %58, %61
-    store %rand_seed, %62
-    %63:u32 = access %GlobalInvocationID, 0u
-    %idx:u32 = let %63
-    %65:ptr<storage, Particle, read_write> = access %data, 0u, %idx
-    %66:Particle = load %65
-    %particle:ptr<function, Particle, read_write> = var, %66
-    %68:ptr<storage, Particle, read_write> = access %data, 0u, %idx
-    %69:Particle = load %particle
-    %70:void = call %tint_store_and_preserve_padding, %68, %69
-    ret
-  }
-}
-%export_level = @compute @workgroup_size(64, 1, 1) func(%coord:vec3<u32> [@global_invocation_id]):void {
-  $B8: {
-    %74:vec2<u32> = swizzle %coord, xy
-    %75:texture_storage_2d<rgba8unorm, write> = load %tex_out
-    %76:vec2<u32> = textureDimensions %75
-    %77:vec2<u32> = construct %76
-    %78:vec2<bool> = lt %74, %77
-    %79:bool = all %78
-    if %79 [t: $B9] {  # if_1
-      $B9: {  # true
-        %80:u32 = access %coord, 0u
-        %81:u32 = access %coord, 1u
-        %82:ptr<uniform, u32, read> = access %ubo, 0u
-        %83:u32 = load %82
-        %84:u32 = mul %81, %83
-        %85:u32 = and %84, 31u
-        %86:u32 = shl %80, %85
-        %dst_offset:u32 = let %86
-        %88:u32 = access %coord, 0u
-        %89:u32 = sub %88, 2u
-        %90:u32 = access %coord, 1u
-        %91:u32 = and 2u, 31u
-        %92:u32 = shr %90, %91
-        %93:ptr<uniform, u32, read> = access %ubo, 0u
-        %94:u32 = load %93
-        %95:u32 = mul %92, %94
-        %96:u32 = add %89, %95
-        %src_offset:u32 = let %96
-        %98:u32 = and 0u, 31u
-        %99:u32 = shl %src_offset, %98
-        %100:ptr<storage, f32, read> = access %buf_in, 0u, %99
-        %101:f32 = load %100
-        %a:f32 = let %101
-        %103:u32 = add %src_offset, 1u
-        %104:ptr<storage, f32, read> = access %buf_in, 0u, %103
-        %105:f32 = load %104
-        %b:f32 = let %105
-        %107:u32 = add %src_offset, 1u
-        %108:ptr<uniform, u32, read> = access %ubo, 0u
-        %109:u32 = load %108
-        %110:u32 = add %107, %109
-        %111:ptr<storage, f32, read> = access %buf_in, 0u, %110
-        %112:f32 = load %111
-        %c:f32 = let %112
-        %114:u32 = add %src_offset, 1u
-        %115:ptr<uniform, u32, read> = access %ubo, 0u
-        %116:u32 = load %115
-        %117:u32 = add %114, %116
-        %118:ptr<storage, f32, read> = access %buf_in, 0u, %117
-        %119:f32 = load %118
-        %d:f32 = let %119
-        %121:vec4<f32> = construct %a, %b, %c, %d
-        %122:f32 = dot %121, vec4<f32>(1.0f)
-        %sum:f32 = let %122
-        %124:ptr<storage, f32, read_write> = access %buf_out, 0u, %dst_offset
-        %125:f32 = mod %sum, 4.0f
-        store %124, %125
-        %126:f32 = mul %a, %b
-        %127:f32 = div %a, %b
-        %128:f32 = add %127, %c
-        %129:vec4<f32> = construct %a, %126, %128, %sum
-        %130:vec4<f32> = let %129
-        %131:f32 = max %sum, 0.0f
-        %132:vec4<f32> = add %130, %131
-        %probabilities:vec4<f32> = let %132
-        %134:texture_storage_2d<rgba8unorm, write> = load %tex_out
-        %135:texture_storage_2d<rgba8unorm, write> = let %134
-        %136:vec2<u32> = swizzle %coord, xy
-        %137:vec2<i32> = convert %136
-        %138:void = textureStore %135, %137, %probabilities
-        exit_if  # if_1
-      }
-    }
-    ret
-  }
-}
-%tint_store_and_preserve_padding = func(%target:ptr<storage, Particle, read_write>, %value_param:Particle):void {
-  $B10: {
-    %141:ptr<storage, vec3<f32>, read_write> = access %target, 0u
-    %142:vec3<f32> = access %value_param, 0u
-    store %141, %142
-    %143:ptr<storage, f32, read_write> = access %target, 1u
-    %144:f32 = access %value_param, 1u
-    store %143, %144
-    %145:ptr<storage, vec4<f32>, read_write> = access %target, 2u
-    %146:vec4<f32> = access %value_param, 2u
-    store %145, %146
-    %147:ptr<storage, vec2<f32>, read_write> = access %target, 3u
-    %148:vec2<f32> = access %value_param, 3u
-    store %147, %148
-    ret
+void export_level_inner(uint3 coord, tint_module_vars_struct tint_module_vars) {
+  uint const v_3 = tint_module_vars.tex_out.get_width(0u);
+  if (all((coord.xy < uint2(uint2(v_3, tint_module_vars.tex_out.get_height(0u)))))) {
+    uint const dst_offset = (coord[0u] << ((coord[1u] * (*tint_module_vars.ubo).width) & 31u));
+    uint const src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * (*tint_module_vars.ubo).width));
+    float const a = (*tint_module_vars.buf_in).weights[(src_offset << (0u & 31u))];
+    float const b = (*tint_module_vars.buf_in).weights[(src_offset + 1u)];
+    float const c = (*tint_module_vars.buf_in).weights[((src_offset + 1u) + (*tint_module_vars.ubo).width)];
+    float const d = (*tint_module_vars.buf_in).weights[((src_offset + 1u) + (*tint_module_vars.ubo).width)];
+    float const sum = dot(float4(a, b, c, d), float4(1.0f));
+    (*tint_module_vars.buf_out).weights[dst_offset] = (sum % 4.0f);
+    float4 const v_4 = float4(a, (a * b), ((a / b) + c), sum);
+    float4 const probabilities = (v_4 + max(sum, 0.0f));
+    tint_module_vars.tex_out.write(probabilities, uint2(int2(coord.xy)));
   }
 }
 
-unhandled variable address space
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+vertex vertex_main_outputs vertex_main() {
+  return vertex_main_outputs{.tint_symbol_1=vertex_main_inner()};
+}
+
+vertex vs_main_outputs vs_main(vs_main_inputs inputs [[stage_in]], const constant RenderParams* render_params [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.render_params=render_params};
+  VertexOutput const v_5 = vs_main_inner(VertexInput{.position=inputs.VertexInput_position, .color=inputs.VertexInput_color, .quad_pos=inputs.VertexInput_quad_pos}, tint_module_vars);
+  return vs_main_outputs{.VertexOutput_position=v_5.position, .VertexOutput_color=v_5.color, .VertexOutput_quad_pos=v_5.quad_pos};
+}
+
+kernel void simulate(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant SimulationParams* sim_params [[buffer(1)]], device Particles* data [[buffer(2)]]) {
+  thread float2 rand_seed = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rand_seed=(&rand_seed), .sim_params=sim_params, .data=data};
+  simulate_inner(GlobalInvocationID, tint_module_vars);
+}
+
+kernel void export_level(uint3 coord [[thread_position_in_grid]], const constant UBO* ubo [[buffer(3)]], const device Buffer* buf_in [[buffer(4)]], device Buffer* buf_out [[buffer(0)]], texture2d<float, access::write> tex_out [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .buf_in=buf_in, .buf_out=buf_out, .tex_out=tex_out};
+  export_level_inner(coord, tint_module_vars);
+}
+program_source:89:8: warning: unused variable 'res' [-Wunused-variable]
+  half res = asinh(arg_0);
+       ^
+program_source:142:60: error: invalid operands to binary expression ('const float' and 'float')
+    (*tint_module_vars.buf_out).weights[dst_offset] = (sum % 4.0f);
+                                                       ~~~ ^ ~~~~
+program_source:154:104: error: call to deleted constructor of 'texture1d<float, access::sample>'
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.render_params=render_params};
+                                                                                                       ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_texture:2308:3: note: 'texture1d' has been explicitly marked deleted here
+  texture1d() thread = delete;
+  ^
+program_source:63:36: note: in implicit initialization of field 'tint_symbol' with omitted initializer
+  texture1d<float, access::sample> tint_symbol;
+                                   ^
+program_source:161:135: error: call to deleted constructor of 'texture1d<float, access::sample>'
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rand_seed=(&rand_seed), .sim_params=sim_params, .data=data};
+                                                                                                                                      ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_texture:2308:3: note: 'texture1d' has been explicitly marked deleted here
+  texture1d() thread = delete;
+  ^
+program_source:63:36: note: in implicit initialization of field 'tint_symbol' with omitted initializer
+  texture1d<float, access::sample> tint_symbol;
+                                   ^
+program_source:166:136: error: call to deleted constructor of 'texture1d<float, access::sample>'
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .buf_in=buf_in, .buf_out=buf_out, .tex_out=tex_out};
+                                                                                                                                       ^
+/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_texture:2308:3: note: 'texture1d' has been explicitly marked deleted here
+  texture1d() thread = delete;
+  ^
+program_source:63:36: note: in implicit initialization of field 'tint_symbol' with omitted initializer
+  texture1d<float, access::sample> tint_symbol;
+                                   ^
+

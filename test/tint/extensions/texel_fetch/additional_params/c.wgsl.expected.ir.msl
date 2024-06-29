@@ -1,27 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/msl/writer/printer/printer.cc:1257 internal compiler error: In = struct @align(16) {
-  pos:vec4<f32> @offset(0), @builtin(position)
-  uv:vec4<f32> @offset(16), @location(0)
-  fbf:vec4<f32> @offset(32)
-}
-
-%g = func(%a:f32, %b:f32, %c:f32):void {
-  $B1: {
-    ret
-  }
-}
-%f = @fragment func(%in:In):void {
-  $B2: {
-    %7:f32 = access %in, 0u, 0u
-    %8:f32 = access %in, 1u, 0u
-    %9:f32 = access %in, 2u, 1u
-    %10:void = call %g, %7, %8, %9
-    ret
-  }
-}
-
-invalid entry point IO struct uses
+../../src/tint/utils/containers/slice.h:216 internal compiler error: TINT_ASSERT(i < Length())
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

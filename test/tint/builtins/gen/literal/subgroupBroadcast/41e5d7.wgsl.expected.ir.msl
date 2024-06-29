@@ -1,26 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/msl/writer/printer/printer.cc:500 internal compiler error: $B1: {  # root
-  %prevent_dce:ptr<storage, vec3<f16>, read_write> = var @binding_point(2, 0)
-}
-
-%subgroupBroadcast_41e5d7 = func():void {
-  $B2: {
-    %3:vec3<f16> = subgroupBroadcast vec3<f16>(1.0h), 1u
-    %res:ptr<function, vec3<f16>, read_write> = var, %3
-    %5:vec3<f16> = load %res
-    store %prevent_dce, %5
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %7:void = call %subgroupBroadcast_41e5d7
-    ret
-  }
-}
-
-unhandled variable address space
+../../src/tint/lang/msl/writer/printer/printer.cc:989 internal compiler error: TINT_UNREACHABLE unhandled: subgroupBroadcast
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

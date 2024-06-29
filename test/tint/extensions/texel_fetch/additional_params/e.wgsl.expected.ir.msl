@@ -1,21 +1,9 @@
 SKIP: FAILED
 
-#include <metal_stdlib>
-using namespace metal;
-struct In {
-  int4 fbf;
-  float4 pos [[position]];
-};
-
-void g(int a, float b) {
-}
-fragment void f(In in) {
-  g(in.fbf[3u], in.pos[0u]);
-}
-program_source:10:17: error: invalid type 'In' for input declaration in a fragment function
-fragment void f(In in) {
-                ^~~~~
-program_source:5:3: note: type 'float4' (vector of 4 'float' values) cannot be used in struct of resources/colors
-  float4 pos [[position]];
-  ^
-
+../../src/tint/utils/containers/slice.h:216 internal compiler error: TINT_ASSERT(i < Length())
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

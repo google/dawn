@@ -1,24 +1,9 @@
 SKIP: FAILED
 
-#include <metal_stdlib>
-using namespace metal;
-struct FBF {
-  float4 c1;
-  int4 c3;
-};
-
-void g(float a, float b, int c) {
-}
-fragment void f(float4 pos [[position]], FBF fbf) {
-  g(fbf.c1[0u], pos[1u], fbf.c3[2u]);
-}
-program_source:10:42: error: invalid type 'FBF' for input declaration in a fragment function
-fragment void f(float4 pos [[position]], FBF fbf) {
-                                         ^~~~~~~
-program_source:4:10: note: 'color' attribute must be made explicit
-  float4 c1;
-         ^
-program_source:5:8: note: 'color' attribute must be made explicit
-  int4 c3;
-       ^
-
+../../src/tint/utils/containers/slice.h:216 internal compiler error: TINT_ASSERT(i < Length())
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

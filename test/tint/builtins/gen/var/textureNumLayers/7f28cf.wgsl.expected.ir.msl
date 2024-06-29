@@ -2,18 +2,8 @@
 using namespace metal;
 
 struct tint_module_vars_struct {
-  texture2d_array<float, access::write> arg_0;
   device uint* prevent_dce;
-};
-
-struct VertexOutput {
-  float4 pos;
-  uint prevent_dce;
-};
-
-struct vertex_main_outputs {
-  float4 VertexOutput_pos [[position]];
-  uint VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
+  texture2d_array<float, access::write> arg_0;
 };
 
 uint textureNumLayers_7f28cf(tint_module_vars_struct tint_module_vars) {
@@ -21,25 +11,12 @@ uint textureNumLayers_7f28cf(tint_module_vars_struct tint_module_vars) {
   return res;
 }
 
-fragment void fragment_main(texture2d_array<float, access::write> arg_0 [[texture(0)]], device uint* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .prevent_dce=prevent_dce};
+fragment void fragment_main(device uint* prevent_dce [[buffer(0)]], texture2d_array<float, access::write> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
   (*tint_module_vars.prevent_dce) = textureNumLayers_7f28cf(tint_module_vars);
 }
 
-kernel void compute_main(texture2d_array<float, access::write> arg_0 [[texture(0)]], device uint* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .prevent_dce=prevent_dce};
+kernel void compute_main(device uint* prevent_dce [[buffer(0)]], texture2d_array<float, access::write> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
   (*tint_module_vars.prevent_dce) = textureNumLayers_7f28cf(tint_module_vars);
-}
-
-VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
-  VertexOutput out = {};
-  out.pos = float4(0.0f);
-  out.prevent_dce = textureNumLayers_7f28cf(tint_module_vars);
-  return out;
-}
-
-vertex vertex_main_outputs vertex_main(texture2d_array<float, access::write> arg_0 [[texture(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
-  VertexOutput const v = vertex_main_inner(tint_module_vars);
-  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
 }
