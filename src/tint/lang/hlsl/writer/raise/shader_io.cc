@@ -194,6 +194,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                     input_struct->AddUsage(core::type::PipelineStageUsage::kVertexInput);
                     break;
                 case core::ir::Function::PipelineStage::kCompute:
+                    input_struct->AddUsage(core::type::PipelineStageUsage::kComputeInput);
+                    break;
                 case core::ir::Function::PipelineStage::kUndefined:
                     TINT_UNREACHABLE();
             }

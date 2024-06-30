@@ -1013,5 +1013,53 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterTransformTest, ShaderIOCompute) {
+    auto* invoc = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invoc->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* ep = b.Function("cmp", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetParams({invoc});
+    ep->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(ep->Block(), [&] {
+        b.Let("a", invoc);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%cmp = @compute @workgroup_size(1, 1, 1) func(%invoc_id:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %a:vec3<u32> = let %invoc_id
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+cmp_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+}
+
+%cmp_inner = func(%invoc_id:vec3<u32>):void {
+  $B1: {
+    %a:vec3<u32> = let %invoc_id
+    ret
+  }
+}
+%cmp = @compute @workgroup_size(1, 1, 1) func(%inputs:cmp_inputs):void {
+  $B2: {
+    %6:vec3<u32> = access %inputs, 0u
+    %7:void = call %cmp_inner, %6
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
