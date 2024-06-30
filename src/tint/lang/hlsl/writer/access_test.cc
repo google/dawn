@@ -167,7 +167,7 @@ TEST_F(HlslWriterTest, AccessStoreVectorElementDynamicIndex) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(int idx) {
   int4 vec = (0).xxxx;
-  vec[idx] = 42;
+  vec[min(uint(idx), 3u)] = 42;
 }
 
 [numthreads(1, 1, 1)]
@@ -221,7 +221,7 @@ struct S {
 [numthreads(1, 1, 1)]
 void a() {
   S v = (S)0;
-  float x = v.c.e[1];
+  float x = v.c.e[1u];
 }
 
 )");

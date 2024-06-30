@@ -869,9 +869,10 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturn) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
+static bool continue_execution = true;
 void my_func(int a) {
   if ((a == 0)) {
-    discard;
+    continue_execution = false;
   }
 }
 
