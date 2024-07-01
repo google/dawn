@@ -86,7 +86,13 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
             }
         },
         [](const SamplerBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
-        [](const StaticSamplerBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
+        [](const StaticSamplerBindingInfo& layout) {
+            // By the Vulkan spec, YCbCr samplers must have descriptor type
+            // COMBINED_IMAGE_SAMPLER:
+            // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSamplerYcbcrConversionInfo.html
+            return (layout.sampler->IsYCbCr()) ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+                                               : VK_DESCRIPTOR_TYPE_SAMPLER;
+        },
         [](const TextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; },
         [](const StorageTextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; },
         [](const InputAttachmentBindingInfo&) { return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; });
