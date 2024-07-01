@@ -38,6 +38,15 @@ ResultOrError<DeviceInfo> GatherDeviceInfo(const ComPtr<IDXGIAdapter4>& adapter,
                                            const ComPtr<ID3D11Device>& device) {
     DeviceInfo info = {};
 
+    D3D11_FEATURE_DATA_D3D11_OPTIONS options;
+    DAWN_TRY(CheckHRESULT(
+        device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &options, sizeof(options)),
+        "D3D11_FEATURE_D3D11_OPTIONS"));
+    info.supportsMapNoOverwriteDynamicBuffers =
+        options.MapNoOverwriteOnDynamicBufferSRV && options.MapNoOverwriteOnDynamicConstantBuffer;
+
+    info.supportsPartialConstantBufferUpdate = options.ConstantBufferPartialUpdate;
+
     D3D11_FEATURE_DATA_D3D11_OPTIONS2 options2;
     DAWN_TRY(CheckHRESULT(
         device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &options2, sizeof(options2)),

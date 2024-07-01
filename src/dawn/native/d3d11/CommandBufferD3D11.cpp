@@ -227,6 +227,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
         for (BufferBase* buffer : scope.buffers) {
             DAWN_TRY(ToBackend(buffer)->EnsureDataInitialized(commandContext));
+            buffer->MarkUsedInPendingCommands();
         }
 
         return {};
@@ -240,6 +241,10 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
         switch (type) {
             case Command::BeginComputePass: {
                 mCommands.NextCommand<BeginComputePassCmd>();
+                for (BufferBase* buffer :
+                     GetResourceUsages().computePasses[nextComputePassNumber].referencedBuffers) {
+                    buffer->MarkUsedInPendingCommands();
+                }
                 for (TextureBase* texture :
                      GetResourceUsages().computePasses[nextComputePassNumber].referencedTextures) {
                     DAWN_TRY(ToBackend(texture)->SynchronizeTextureBeforeUse(commandContext));

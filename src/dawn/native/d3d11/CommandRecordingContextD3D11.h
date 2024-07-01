@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_D3D11_COMMANDRECORDINGCONTEXT_D3D11_H_
 
 #include "absl/container/flat_hash_set.h"
+#include "absl/container/inlined_vector.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Ref.h"
@@ -115,6 +116,10 @@ class CommandRecordingContext {
 
     bool mNeedsFence = false;
 
+    // List of buffers to sync their CPU accessible storages.
+    // Use inlined vector to avoid heap allocation when the vector is empty.
+    absl::InlinedVector<GPUUsableBuffer*, 1> mBuffersToSyncWithCPU;
+
     Ref<Device> mDevice;
 };
 
@@ -165,6 +170,11 @@ class ScopedCommandRecordingContext : public CommandRecordingContext::Guard {
     MaybeError AcquireKeyedMutex(Ref<d3d::KeyedMutex> keyedMutex) const;
 
     void SetNeedsFence() const;
+
+    // Add a buffer to a pending list for syncing CPU storages. The list is typically processed at
+    // the end of a command buffer when it is about to be submitted.
+    void AddBufferForSyncingWithCPU(GPUUsableBuffer* buffer) const;
+    MaybeError FlushBuffersForSyncingWithCPU() const;
 };
 
 // For using ID3D11DeviceContext directly. It swaps and resets ID3DDeviceContextState of

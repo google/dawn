@@ -69,6 +69,8 @@ enum class UploadMethod {
     SingleStagingBuffer,
     // Map and copy to a specific staging buffer first for each uniform buffer to then copy from.
     MultipleStagingBuffer,
+    // Map uniform buffer directly
+    MapWithExtendedUsages,
 };
 
 enum class UploadSize {
@@ -109,6 +111,9 @@ std::ostream& operator<<(std::ostream& ostream, const UniformBufferUpdateParams&
         case UploadMethod::MultipleStagingBuffer:
             ostream << "_MultipleStagingBuffer";
             break;
+        case UploadMethod::MapWithExtendedUsages:
+            ostream << "_MapWithExtendedUsages";
+            break;
     }
 
     switch (param.uploadSize) {
@@ -147,6 +152,7 @@ class UniformBufferUpdatePerf : public DawnPerfTestWithParams<UniformBufferUpdat
         wgpu::Buffer buffer;
     };
     void Step() override;
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
 
     size_t GetBufferSize();
     wgpu::Buffer FindOrCreateUniformBuffer();
@@ -169,6 +175,15 @@ class UniformBufferUpdatePerf : public DawnPerfTestWithParams<UniformBufferUpdat
     MutexProtected<std::queue<wgpu::Buffer>> mMultipleStagingBuffers;
 };
 
+std::vector<wgpu::FeatureName> UniformBufferUpdatePerf::GetRequiredFeatures() {
+    std::vector<wgpu::FeatureName> requiredFeatures = DawnPerfTestWithParams::GetRequiredFeatures();
+    if (!UsesWire() && GetParam().uploadMethod == UploadMethod::MapWithExtendedUsages &&
+        SupportsFeatures({wgpu::FeatureName::BufferMapExtendedUsages})) {
+        requiredFeatures.push_back(wgpu::FeatureName::BufferMapExtendedUsages);
+    }
+    return requiredFeatures;
+}
+
 size_t UniformBufferUpdatePerf::GetBufferSize() {
     // The actual data size, and buffer create size should be same for full upload size.
     return GetParam().uploadSize == UploadSize::Full ? kUniformDataSize : kUniformBufferSize;
@@ -182,7 +197,15 @@ wgpu::Buffer UniformBufferUpdatePerf::FindOrCreateUniformBuffer() {
         return buffer;
     }
     wgpu::BufferDescriptor descriptor;
-    descriptor.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+    descriptor.usage = wgpu::BufferUsage::Uniform;
+
+    if (GetParam().uploadMethod == UploadMethod::MapWithExtendedUsages) {
+        descriptor.usage |= wgpu::BufferUsage::MapWrite;
+        descriptor.mappedAtCreation = true;
+    } else {
+        descriptor.usage |= wgpu::BufferUsage::CopyDst;
+    }
+
     descriptor.size = GetBufferSize();
     return device.CreateBuffer(&descriptor);
 }
@@ -213,6 +236,10 @@ void UniformBufferUpdatePerf::ReturnStagingBuffer(wgpu::Buffer buffer) {
 
 void UniformBufferUpdatePerf::SetUp() {
     DawnPerfTestWithParams<UniformBufferUpdateParams>::SetUp();
+
+    // Skip all tests if the BufferMapExtendedUsages feature is not supported.
+    DAWN_TEST_UNSUPPORTED_IF(GetParam().uploadMethod == UploadMethod::MapWithExtendedUsages &&
+                             !device.HasFeature(wgpu::FeatureName::BufferMapExtendedUsages));
 
     // Create the color / depth stencil attachments.
     wgpu::TextureDescriptor descriptor = {};
@@ -273,6 +300,14 @@ void UniformBufferUpdatePerf::SetUp() {
     mSingleStagingBuffer = FindOrCreateStagingBuffer();
     memcpy(mSingleStagingBuffer.GetMappedRange(0, data.size()), data.data(), data.size());
     mSingleStagingBuffer.Unmap();
+
+    if (GetParam().uploadMethod == UploadMethod::MapWithExtendedUsages &&
+        GetParam().uniformBuffer == UniformBuffer::Single) {
+        auto buffer = FindOrCreateUniformBuffer();
+        memcpy(buffer.GetMappedRange(0, data.size()), data.data(), data.size());
+        buffer.Unmap();
+        ReturnUniformBuffer(buffer);
+    }
 }
 
 void UniformBufferUpdatePerf::Step() {
@@ -293,6 +328,12 @@ void UniformBufferUpdatePerf::Step() {
                 memcpy(stagingBuffer.GetMappedRange(0, data.size()), data.data(), data.size());
                 stagingBuffer.Unmap();
                 commands.CopyBufferToBuffer(stagingBuffer, 0, uniformBuffer, 0, data.size());
+                break;
+            case UploadMethod::MapWithExtendedUsages:
+                if (GetParam().uniformBuffer == UniformBuffer::Multiple) {
+                    memcpy(uniformBuffer.GetMappedRange(0, data.size()), data.data(), data.size());
+                    uniformBuffer.Unmap();
+                }
                 break;
         }
         utils::ComboRenderPassDescriptor renderPass({mColorAttachmentTextureView},
@@ -326,12 +367,24 @@ void UniformBufferUpdatePerf::Step() {
                 break;
             case UniformBuffer::Multiple:
                 // Return the uniform buffer once it's done with the last submit.
-                queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
-                                          [this, uniformBuffer](wgpu::QueueWorkDoneStatus status) {
-                                              if (status == wgpu::QueueWorkDoneStatus::Success) {
-                                                  this->ReturnUniformBuffer(uniformBuffer);
-                                              }
-                                          });
+                if (GetParam().uploadMethod == UploadMethod::MapWithExtendedUsages) {
+                    uniformBuffer.MapAsync(
+                        wgpu::MapMode::Write, 0, GetBufferSize(),
+                        wgpu::CallbackMode::AllowProcessEvents,
+                        [this, uniformBuffer](wgpu::MapAsyncStatus status, const char*) {
+                            if (status == wgpu::MapAsyncStatus::Success) {
+                                this->ReturnUniformBuffer(uniformBuffer);
+                            }
+                        });
+                } else {
+                    queue.OnSubmittedWorkDone(
+                        wgpu::CallbackMode::AllowProcessEvents,
+                        [this, uniformBuffer](wgpu::QueueWorkDoneStatus status) {
+                            if (status == wgpu::QueueWorkDoneStatus::Success) {
+                                this->ReturnUniformBuffer(uniformBuffer);
+                            }
+                        });
+                }
                 break;
         }
 
@@ -357,7 +410,7 @@ DAWN_INSTANTIATE_TEST_P(UniformBufferUpdatePerf,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
                          OpenGLESBackend(), VulkanBackend()},
                         {UploadMethod::WriteBuffer, UploadMethod::SingleStagingBuffer,
-                         UploadMethod::MultipleStagingBuffer},
+                         UploadMethod::MultipleStagingBuffer, UploadMethod::MapWithExtendedUsages},
                         {UploadSize::Partial, UploadSize::Full},
                         {UniformBuffer::Single, UniformBuffer::Multiple});
 
