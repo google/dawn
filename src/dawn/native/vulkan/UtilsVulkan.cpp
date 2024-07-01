@@ -87,6 +87,18 @@ VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op) {
     DAWN_UNREACHABLE();
 }
 
+VkFilter ToVulkanSamplerFilter(wgpu::FilterMode filter) {
+    switch (filter) {
+        case wgpu::FilterMode::Linear:
+            return VK_FILTER_LINEAR;
+        case wgpu::FilterMode::Nearest:
+            return VK_FILTER_NEAREST;
+        case wgpu::FilterMode::Undefined:
+            break;
+    }
+    DAWN_UNREACHABLE();
+}
+
 // Convert Dawn texture aspects to  Vulkan texture aspect flags
 VkImageAspectFlags VulkanAspectMask(const Aspect& aspects) {
     VkImageAspectFlags flags = 0;
@@ -354,7 +366,7 @@ ResultOrError<VkSamplerYcbcrConversion> CreateSamplerYCbCrConversionCreateInfo(
         static_cast<VkChromaLocation>(yCbCrDescriptor.vkXChromaOffset);
     vulkanYCbCrCreateInfo.yChromaOffset =
         static_cast<VkChromaLocation>(yCbCrDescriptor.vkYChromaOffset);
-    vulkanYCbCrCreateInfo.chromaFilter = static_cast<VkFilter>(yCbCrDescriptor.vkChromaFilter);
+    vulkanYCbCrCreateInfo.chromaFilter = ToVulkanSamplerFilter(yCbCrDescriptor.vkChromaFilter);
     vulkanYCbCrCreateInfo.forceExplicitReconstruction =
         static_cast<VkBool32>(yCbCrDescriptor.forceExplicitReconstruction);
 

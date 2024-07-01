@@ -52,18 +52,6 @@ VkSamplerAddressMode VulkanSamplerAddressMode(wgpu::AddressMode mode) {
     DAWN_UNREACHABLE();
 }
 
-VkFilter VulkanSamplerFilter(wgpu::FilterMode filter) {
-    switch (filter) {
-        case wgpu::FilterMode::Linear:
-            return VK_FILTER_LINEAR;
-        case wgpu::FilterMode::Nearest:
-            return VK_FILTER_NEAREST;
-        case wgpu::FilterMode::Undefined:
-            break;
-    }
-    DAWN_UNREACHABLE();
-}
-
 VkSamplerMipmapMode VulkanMipMapMode(wgpu::MipmapFilterMode filter) {
     switch (filter) {
         case wgpu::MipmapFilterMode::Linear:
@@ -89,8 +77,8 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
     createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     createInfo.pNext = nullptr;
     createInfo.flags = 0;
-    createInfo.magFilter = VulkanSamplerFilter(descriptor->magFilter);
-    createInfo.minFilter = VulkanSamplerFilter(descriptor->minFilter);
+    createInfo.magFilter = ToVulkanSamplerFilter(descriptor->magFilter);
+    createInfo.minFilter = ToVulkanSamplerFilter(descriptor->minFilter);
     createInfo.mipmapMode = VulkanMipMapMode(descriptor->mipmapFilter);
     createInfo.addressModeU = VulkanSamplerAddressMode(descriptor->addressModeU);
     createInfo.addressModeV = VulkanSamplerAddressMode(descriptor->addressModeV);

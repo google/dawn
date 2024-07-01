@@ -114,6 +114,8 @@ struct PNextChainBuilder : public StackAllocated {
 
 VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op);
 
+VkFilter ToVulkanSamplerFilter(wgpu::FilterMode filter);
+
 VkImageAspectFlags VulkanAspectMask(const Aspect& aspects);
 
 Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D& copySize);
