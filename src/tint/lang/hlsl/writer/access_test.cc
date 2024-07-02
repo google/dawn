@@ -323,5 +323,53 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, AccessDirectVariable) {
+    auto* var1 = b.Var<uniform, vec4<f32>, core::Access::kRead>("v1");
+    var1->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var1);
+
+    auto* var2 = b.Var<uniform, vec4<f32>, core::Access::kRead>("v2");
+    var2->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(var2);
+
+    auto* p = b.FunctionParam("x", ty.ptr<uniform, vec4<f32>, core::Access::kRead>());
+    auto* bar = b.Function("bar", ty.void_());
+    bar->SetParams({p});
+    b.Append(bar->Block(), [&] {
+        b.Let("a", b.LoadVectorElement(p, 1_u));
+        b.Return(bar);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Call(bar, var1);
+        b.Call(bar, var2);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_v1 : register(b0) {
+  uint4 v1[1];
+};
+cbuffer cbuffer_v2 : register(b1) {
+  uint4 v2[1];
+};
+void bar() {
+  float a = v1[1u];
+}
+
+void bar_1() {
+  float a = v2[1u];
+}
+
+void foo() {
+  bar();
+  bar_1();
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

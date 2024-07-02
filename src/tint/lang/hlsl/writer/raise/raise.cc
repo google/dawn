@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
+#include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
@@ -59,7 +60,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     do {                                 \
         auto result = name(__VA_ARGS__); \
         if (result != Success) {         \
-            return result;               \
+            return result.Failure();     \
         }                                \
     } while (false)
 
@@ -76,7 +77,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
                          array_length_from_uniform_options.ubo_binding.binding},
             array_length_from_uniform_options.bindpoint_to_size_index);
         if (result != Success) {
-            return Failure();
+            return result.Failure();
         }
     }
 
@@ -132,6 +133,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
 
+    RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
+                  core::ir::transform::DirectVariableAccessOptions{});
     RUN_TRANSFORM(raise::DecomposeMemoryAccess, module);
 
     if (options.compiler == Options::Compiler::kFXC) {
