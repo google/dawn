@@ -36,6 +36,7 @@
 
 include(lang/hlsl/intrinsic/BUILD.cmake)
 include(lang/hlsl/ir/BUILD.cmake)
+include(lang/hlsl/type/BUILD.cmake)
 include(lang/hlsl/validate/BUILD.cmake)
 include(lang/hlsl/writer/BUILD.cmake)
 

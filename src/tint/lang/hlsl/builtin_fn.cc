@@ -52,6 +52,22 @@ const char* str(BuiltinFn i) {
             return "f32tof16";
         case BuiltinFn::kF16Tof32:
             return "f16tof32";
+        case BuiltinFn::kLoad:
+            return "Load";
+        case BuiltinFn::kLoad2:
+            return "Load2";
+        case BuiltinFn::kLoad3:
+            return "Load3";
+        case BuiltinFn::kLoad4:
+            return "Load4";
+        case BuiltinFn::kStore:
+            return "Store";
+        case BuiltinFn::kStore2:
+            return "Store2";
+        case BuiltinFn::kStore3:
+            return "Store3";
+        case BuiltinFn::kStore4:
+            return "Store4";
     }
     return "<unknown>";
 }

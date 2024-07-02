@@ -38,19 +38,18 @@ import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-libtint_source_set("intrinsic") {
+if (tint_build_unittests || tint_build_benchmarks) {
+  import("//testing/test.gni")
+}
+
+libtint_source_set("type") {
   sources = [
-    "data.cc",
-    "dialect.h",
-    "type_matchers.h",
+    "byte_address_buffer.cc",
+    "byte_address_buffer.h",
   ]
   deps = [
     "${tint_src_dir}/lang/core",
-    "${tint_src_dir}/lang/core/constant",
-    "${tint_src_dir}/lang/core/intrinsic",
     "${tint_src_dir}/lang/core/type",
-    "${tint_src_dir}/lang/hlsl",
-    "${tint_src_dir}/lang/hlsl/type",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
@@ -65,4 +64,26 @@ libtint_source_set("intrinsic") {
     "${tint_src_dir}/utils/text",
     "${tint_src_dir}/utils/traits",
   ]
+}
+if (tint_build_unittests) {
+  tint_unittests_source_set("unittests") {
+    sources = [ "byte_address_buffer_test.cc" ]
+    deps = [
+      "${tint_src_dir}:gmock_and_gtest",
+      "${tint_src_dir}/lang/core",
+      "${tint_src_dir}/lang/core/type",
+      "${tint_src_dir}/lang/hlsl/type",
+      "${tint_src_dir}/utils/containers",
+      "${tint_src_dir}/utils/diagnostic",
+      "${tint_src_dir}/utils/ice",
+      "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/math",
+      "${tint_src_dir}/utils/memory",
+      "${tint_src_dir}/utils/reflection",
+      "${tint_src_dir}/utils/result",
+      "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/text",
+      "${tint_src_dir}/utils/traits",
+    ]
+  }
 }

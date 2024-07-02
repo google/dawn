@@ -41,6 +41,7 @@
 tint_add_target(tint_lang_hlsl_intrinsic lib
   lang/hlsl/intrinsic/data.cc
   lang/hlsl/intrinsic/dialect.h
+  lang/hlsl/intrinsic/type_matchers.h
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_intrinsic lib
@@ -49,6 +50,7 @@ tint_target_add_dependencies(tint_lang_hlsl_intrinsic lib
   tint_lang_core_intrinsic
   tint_lang_core_type
   tint_lang_hlsl
+  tint_lang_hlsl_type
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
