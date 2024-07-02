@@ -40,10 +40,12 @@ cc_library(
   name = "ir",
   srcs = [
     "builtin_call.cc",
+    "member_builtin_call.cc",
     "ternary.cc",
   ],
   hdrs = [
     "builtin_call.h",
+    "member_builtin_call.h",
     "ternary.h",
   ],
   deps = [
@@ -77,6 +79,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "builtin_call_test.cc",
+    "member_builtin_call_test.cc",
     "ternary_test.cc",
   ],
   deps = [
@@ -90,6 +93,7 @@ cc_library(
     "//src/tint/lang/hlsl",
     "//src/tint/lang/hlsl/intrinsic",
     "//src/tint/lang/hlsl/ir",
+    "//src/tint/lang/hlsl/type",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",

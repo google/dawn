@@ -46,6 +46,8 @@ libtint_source_set("ir") {
   sources = [
     "builtin_call.cc",
     "builtin_call.h",
+    "member_builtin_call.cc",
+    "member_builtin_call.h",
     "ternary.cc",
     "ternary.h",
   ]
@@ -77,6 +79,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
       "builtin_call_test.cc",
+      "member_builtin_call_test.cc",
       "ternary_test.cc",
     ]
     deps = [
@@ -91,6 +94,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/hlsl",
       "${tint_src_dir}/lang/hlsl/intrinsic",
       "${tint_src_dir}/lang/hlsl/ir",
+      "${tint_src_dir}/lang/hlsl/type",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",

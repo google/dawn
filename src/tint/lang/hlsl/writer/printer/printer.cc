@@ -31,7 +31,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -68,7 +67,7 @@
 #include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/lang/core/ir/multi_in_block.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -105,7 +104,9 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
+#include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 #include "src/tint/lang/hlsl/ir/ternary.h"
+#include "src/tint/lang/hlsl/type/byte_address_buffer.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
@@ -247,9 +248,6 @@ class Printer : public tint::TextGenerator {
                 ++i;
 
                 auto ptr = param->Type()->As<core::type::Pointer>();
-                auto address_space = core::AddressSpace::kUndefined;
-                auto access = core::Access::kUndefined;
-
                 if (is_ep && !param->Type()->Is<core::type::Struct>()) {
                     // ICE likely indicates that the ShaderIO transform was not run, or a builtin
                     // parameter was added after it was run.
@@ -265,7 +263,8 @@ class Printer : public tint::TextGenerator {
                             out << "inout ";
                     }
                 }
-                EmitTypeAndName(out, param->Type(), address_space, access, NameOf(param));
+                EmitTypeAndName(out, param->Type(), core::AddressSpace::kUndefined,
+                                core::Access::kUndefined, NameOf(param));
             }
 
             out << ") {";
@@ -469,38 +468,39 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitGlobalVar(const core::ir::Var* var) {
-        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-        TINT_ASSERT(ptr);
+        Switch(
+            var->Result(0)->Type(),  //
+            [&](const hlsl::type::ByteAddressBuffer* buf) { EmitStorageVariable(var, buf); },
+            [&](const core::type::Pointer* ptr) {
+                auto space = ptr->AddressSpace();
 
-        auto space = ptr->AddressSpace();
+                switch (space) {
+                    case core::AddressSpace::kUniform:
+                        EmitUniformVariable(var);
+                        break;
+                    case core::AddressSpace::kHandle:
+                        EmitHandleVariable(var);
+                        break;
+                    case core::AddressSpace::kPrivate: {
+                        auto out = Line();
+                        out << "static ";
+                        EmitVar(out, var);
+                        break;
+                    }
+                    case core::AddressSpace::kWorkgroup: {
+                        auto out = Line();
 
-        switch (space) {
-            case core::AddressSpace::kUniform:
-                EmitUniformVariable(var);
-                break;
-            case core::AddressSpace::kStorage:
-                EmitStorageVariable(var);
-                break;
-            case core::AddressSpace::kHandle:
-                EmitHandleVariable(var);
-                break;
-            case core::AddressSpace::kPrivate: {
-                auto out = Line();
-                out << "static ";
-                EmitVar(out, var);
-                break;
-            }
-            case core::AddressSpace::kWorkgroup: {
-                auto out = Line();
-                out << "groupshared ";
-                EmitVar(out, var);
-                break;
-            }
-            case core::AddressSpace::kPushConstant:
-            default: {
-                TINT_ICE() << "unhandled address space " << space;
-            }
-        }
+                        out << "groupshared ";
+                        EmitVar(out, var);
+                        break;
+                    }
+                    case core::AddressSpace::kPushConstant:
+                    default: {
+                        TINT_ICE() << "unhandled address space " << space;
+                    }
+                }
+            },
+            TINT_ICE_ON_NO_MATCH);
     }
 
     void EmitUniformVariable(const core::ir::Var* var) {
@@ -524,18 +524,15 @@ class Printer : public tint::TextGenerator {
         Line() << "};";
     }
 
-    void EmitStorageVariable(const core::ir::Var* var) {
-        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-        TINT_ASSERT(ptr);
-
+    void EmitStorageVariable(const core::ir::Var* var, const hlsl::type::ByteAddressBuffer* buf) {
         auto out = Line();
-        EmitTypeAndName(out, var->Result(0)->Type(), core::AddressSpace::kStorage, ptr->Access(),
+        EmitTypeAndName(out, var->Result(0)->Type(), core::AddressSpace::kStorage, buf->Access(),
                         NameOf(var->Result(0)));
 
         auto bp = var->BindingPoint();
         TINT_ASSERT(bp.has_value());
 
-        out << RegisterAndSpace(ptr->Access() == core::Access::kRead ? 't' : 'u', bp.value())
+        out << RegisterAndSpace(buf->Access() == core::Access::kRead ? 't' : 'u', bp.value())
             << ";";
     }
 
@@ -648,11 +645,28 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },  //
 
                     [&](const hlsl::ir::BuiltinCall* c) { EmitHlslBuiltinCall(out, c); },  //
-                    [&](const hlsl::ir::Ternary* t) { EmitTernary(out, t); },              //
+                    [&](const hlsl::ir::Ternary* t) { EmitTernary(out, t); },
+                    [&](const hlsl::ir::MemberBuiltinCall* mbc) {
+                        EmitHlslMemberBuiltinCall(out, mbc);
+                    },
                     TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitHlslMemberBuiltinCall(StringStream& out, const hlsl::ir::MemberBuiltinCall* c) {
+        EmitValue(out, c->Object());
+        out << "." << c->Func() << "(";
+        bool needs_comma = false;
+        for (const auto* arg : c->Args()) {
+            if (needs_comma) {
+                out << ", ";
+            }
+            EmitValue(out, arg);
+            needs_comma = true;
+        }
+        out << ")";
     }
 
     void EmitTernary(StringStream& out, const hlsl::ir::Ternary* t) {

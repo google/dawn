@@ -269,5 +269,59 @@ void a() {
 )");
 }
 
+TEST_F(HlslWriterTest, AccessVectorLoad) {
+    auto* var = b.Var<storage, vec4<f32>, core::Access::kRead>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.LoadVectorElement(var, 0_u));
+        b.Let("b", b.LoadVectorElement(var, 1_u));
+        b.Let("c", b.LoadVectorElement(var, 2_u));
+        b.Let("d", b.LoadVectorElement(var, 3_u));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+ByteAddressBuffer v : register(t0);
+void foo() {
+  float a = asfloat(v.Load(0u));
+  float b = asfloat(v.Load(4u));
+  float c = asfloat(v.Load(8u));
+  float d = asfloat(v.Load(12u));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessVectorStore) {
+    auto* var = b.Var<storage, vec4<f32>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.StoreVectorElement(var, 0_u, 2_f);
+        b.StoreVectorElement(var, 1_u, 4_f);
+        b.StoreVectorElement(var, 2_u, 8_f);
+        b.StoreVectorElement(var, 3_u, 16_f);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  v.Store(0u, asuint(2.0f));
+  v.Store(4u, asuint(4.0f));
+  v.Store(8u, asuint(8.0f));
+  v.Store(12u, asuint(16.0f));
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

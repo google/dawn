@@ -53,6 +53,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_printer lib
   tint_lang_hlsl
   tint_lang_hlsl_intrinsic
   tint_lang_hlsl_ir
+  tint_lang_hlsl_type
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_generator
