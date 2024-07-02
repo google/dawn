@@ -100,6 +100,7 @@ struct State {
                     case core::BuiltinFn::kDistance:
                     case core::BuiltinFn::kDot:
                     case core::BuiltinFn::kLength:
+                    case core::BuiltinFn::kModf:
                     case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureDimensions:
@@ -180,6 +181,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kLength:
                     Length(builtin);
+                    break;
+                case core::BuiltinFn::kModf:
+                    Modf(builtin);
                     break;
                 case core::BuiltinFn::kQuantizeToF16:
                     QuantizeToF16(builtin);
@@ -383,6 +387,33 @@ struct State {
                                                                 msl::BuiltinFn::kLength, arg);
             call->InsertBefore(builtin);
         }
+        builtin->Destroy();
+    }
+
+    /// Polyfill a modf call.
+    /// @param builtin the builtin call instruction
+    void Modf(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            // MSL's modf returns `fract` and outputs `whole` as an output parameter.
+            // Polyfill it by declaring the result struct and then setting the values:
+            //   __modf_result result = {};
+            //   result.fract = modf(arg, result.whole);
+            //
+            // Note: We need to use a `load` instruction to pass `result.whole`, as the intrinsic
+            // definition expects a value type (as we do not have reference types in the IR). The
+            // printer will just fold away the load, which achieves the pass-by-reference semantics
+            // that we want.
+            //
+            auto* result_type = builtin->Result(0)->Type();
+            auto* element_type = result_type->Element(0);
+            auto* result = b.Var(ty.ptr(function, result_type));
+            auto* whole = b.Access(ty.ptr(function, element_type), result, u32(1));
+            auto args = Vector<core::ir::Value*, 2>{builtin->Args()[0], b.Load(whole)->Result(0)};
+            auto* call =
+                b.Call<msl::ir::BuiltinCall>(element_type, msl::BuiltinFn::kModf, std::move(args));
+            b.Store(b.Access(ty.ptr(function, element_type), result, u32(0)), call);
+            builtin->Result(0)->ReplaceAllUsesWith(b.Load(result)->Result(0));
+        });
         builtin->Destroy();
     }
 

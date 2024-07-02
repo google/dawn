@@ -98,6 +98,8 @@ const char* str(BuiltinFn i) {
             return "fmod";
         case BuiltinFn::kLength:
             return "length";
+        case BuiltinFn::kModf:
+            return "modf";
         case BuiltinFn::kSign:
             return "sign";
         case BuiltinFn::kThreadgroupBarrier:
