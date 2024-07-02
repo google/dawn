@@ -553,6 +553,9 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
         {% if type.has_free_members_function %}
 
           private:
+        {% if type.has_free_members_function %}
+                inline void FreeMembers();
+        {% endif %}
             static inline void Reset({{as_cppType(type.name)}}& value);
         {% endif %}
     };
@@ -643,15 +646,7 @@ struct {{CppType}} : protected detail::{{CppType}} {
     {% endif %}
     {% if type.has_free_members_function %}
         {{CppType}}::~{{CppType}}() {
-            if (
-                {%- for member in type.members if member.annotation != 'value' %}
-                    {% if not loop.first %} || {% endif -%}
-                    this->{{member.name.camelCase()}} != nullptr
-                {%- endfor -%}
-            ) {
-                {{as_cMethodNamespaced(type.name, Name("free members"), c_namespace)}}(
-                    *reinterpret_cast<{{CType}}*>(this));
-            }
+            FreeMembers();
         }
 
         {{CppType}}::{{CppType}}({{CppType}}&& rhs)
@@ -667,7 +662,7 @@ struct {{CppType}} : protected detail::{{CppType}} {
             if (&rhs == this) {
                 return *this;
             }
-            this->~{{CppType}}();
+            FreeMembers();
             {% for member in type.members %}
                 ::{{metadata.namespace}}::detail::AsNonConstReference(this->{{member.name.camelCase()}}) = std::move(rhs.{{member.name.camelCase()}});
             {% endfor %}
@@ -675,7 +670,21 @@ struct {{CppType}} : protected detail::{{CppType}} {
             return *this;
         }
 
-            // static
+        {% if type.has_free_members_function %}
+            void {{CppType}}::FreeMembers() {
+                if (
+                    {%- for member in type.members if member.annotation != 'value' %}
+                        {% if not loop.first %} || {% endif -%}
+                        this->{{member.name.camelCase()}} != nullptr
+                    {%- endfor -%}
+                ) {
+                    {{as_cMethodNamespaced(type.name, Name("free members"), c_namespace)}}(
+                        *reinterpret_cast<{{CType}}*>(this));
+                }
+            }
+        {% endif %}
+
+        // static
         void {{CppType}}::Reset({{CppType}}& value) {
             {{CppType}} defaultValue{};
             {% for member in type.members %}
