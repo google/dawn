@@ -101,6 +101,7 @@ struct State {
                     case core::BuiltinFn::kDot:
                     case core::BuiltinFn::kLength:
                     case core::BuiltinFn::kQuantizeToF16:
+                    case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -182,6 +183,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kQuantizeToF16:
                     QuantizeToF16(builtin);
+                    break;
+                case core::BuiltinFn::kSign:
+                    Sign(builtin);
                     break;
 
                 // Texture builtins.
@@ -395,6 +399,37 @@ struct State {
         // Convert the argument to f16 and then back again.
         b.InsertBefore(builtin, [&] {
             b.ConvertWithResult(builtin->DetachResult(), b.Convert(type_f16, arg));
+        });
+        builtin->Destroy();
+    }
+
+    /// Polyfill a sign call if necessary.
+    /// @param builtin the builtin call instruction
+    void Sign(core::ir::CoreBuiltinCall* builtin) {
+        auto* arg = builtin->Args()[0];
+        auto* type = arg->Type();
+        b.InsertBefore(builtin, [&] {
+            // Calls to `sign` with an integer argument are replaced with select operations:
+            //   result = select(select(-1, 1, arg > 0), 0, arg == 0);
+            if (type->is_integer_scalar_or_vector()) {
+                core::ir::Value* pos_one = b.Constant(i32(1));
+                core::ir::Value* neg_one = b.Constant(i32(-1));
+                const core::type::Type* bool_type = ty.bool_();
+                if (auto* vec = type->As<core::type::Vector>()) {
+                    bool_type = ty.vec(ty.bool_(), vec->Width());
+                    pos_one = b.Splat(type, i32(1));
+                    neg_one = b.Splat(type, i32(-1));
+                }
+
+                auto* zero = b.Zero(type);
+                auto* sign = b.Call(type, core::BuiltinFn::kSelect, neg_one, pos_one,
+                                    b.GreaterThan(bool_type, arg, zero));
+                b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kSelect, sign, zero,
+                                 b.Equal(bool_type, arg, zero));
+            } else {
+                b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
+                                                       msl::BuiltinFn::kSign, arg);
+            }
         });
         builtin->Destroy();
     }

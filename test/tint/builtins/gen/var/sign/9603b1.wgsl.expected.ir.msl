@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
@@ -19,7 +17,8 @@ struct vertex_main_outputs {
 
 int3 sign_9603b1() {
   int3 arg_0 = int3(1);
-  int3 res = sign(arg_0);
+  int3 const v = arg_0;
+  int3 res = select(select(int3(-1), int3(1), (v > int3(0))), int3(0), (v == int3(0)));
   return res;
 }
 
@@ -41,34 +40,6 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v = vertex_main_inner();
-  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
+  VertexOutput const v_1 = vertex_main_inner();
+  return vertex_main_outputs{.VertexOutput_pos=v_1.pos, .VertexOutput_prevent_dce=v_1.prevent_dce};
 }
-program_source:20:14: error: no matching function for call to 'sign'
-  int3 res = sign(arg_0);
-             ^~~~
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_common:303:17: note: candidate function not viable: no known conversion from 'int3' (vector of 3 'int' values) to 'half' for 1st argument
-METAL_FUNC half sign(half x)
-                ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_common:320:18: note: candidate function not viable: no known conversion from 'int3' (vector of 3 'int' values) to 'metal::half2' (aka 'half2') for 1st argument
-METAL_FUNC half2 sign(half2 x)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_common:337:18: note: candidate function not viable: no known conversion from 'int3' (vector of 3 'int' values) to 'metal::half3' (aka 'half3') for 1st argument
-METAL_FUNC half3 sign(half3 x)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_common:354:18: note: candidate function not viable: no known conversion from 'int3' (vector of 3 'int' values) to 'metal::half4' (aka 'half4') for 1st argument
-METAL_FUNC half4 sign(half4 x)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_common:409:18: note: candidate function not viable: no known conversion from 'int3' (vector of 3 'int' values) to 'float' for 1st argument
-METAL_FUNC float sign(float x)
-                 ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_common:426:19: note: candidate function not viable: no known conversion from 'int3' (vector of 3 'int' values) to 'metal::float2' (aka 'float2') for 1st argument
-METAL_FUNC float2 sign(float2 x)
-                  ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_common:443:19: note: candidate function not viable: no known conversion from 'int3' (vector of 3 'int' values) to 'metal::float3' (aka 'float3') for 1st argument
-METAL_FUNC float3 sign(float3 x)
-                  ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_common:460:19: note: candidate function not viable: no known conversion from 'int3' (vector of 3 'int' values) to 'metal::float4' (aka 'float4') for 1st argument
-METAL_FUNC float4 sign(float4 x)
-                  ^
-

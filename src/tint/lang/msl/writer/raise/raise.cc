@@ -88,7 +88,6 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, core_polyfills);
     }
-    // polyfills.sign_int = true;
 
     {
         core::ir::transform::ConversionPolyfillConfig conversion_polyfills;

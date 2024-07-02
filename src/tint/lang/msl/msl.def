@@ -326,5 +326,7 @@ fn dot[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
 fn fmod[T: f32_f16](T, T) -> T
 fn fmod[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> vec<N, T>
 fn length[N: num, T: f32_f16](vec<N, T>) -> T
+fn sign[T: f32_f16](T) -> T
+fn sign[N: num, T: f32_f16](vec<N, T>) -> vec<N, T>
 @stage("compute") fn threadgroup_barrier(u32)
 

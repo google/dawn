@@ -1156,6 +1156,111 @@ TEST_F(MslWriter_BuiltinPolyfillTest, QuantizeToF16_Vector) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, Sign_F32) {
+    auto* value = b.FunctionParam<f32>("value");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<f32>(core::BuiltinFn::kSign, value);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:f32 = sign %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:f32 = msl.sign %value
+    ret %3
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Sign_Scalar) {
+    auto* value = b.FunctionParam<i32>("value");
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<i32>(core::BuiltinFn::kSign, value);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value:i32):i32 {
+  $B1: {
+    %3:i32 = sign %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value:i32):i32 {
+  $B1: {
+    %3:bool = gt %value, 0i
+    %4:i32 = select -1i, 1i, %3
+    %5:bool = eq %value, 0i
+    %6:i32 = select %4, 0i, %5
+    ret %6
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Sign_Vector) {
+    auto* value = b.FunctionParam<vec4<i32>>("value");
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec4<i32>>(core::BuiltinFn::kSign, value);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%value:vec4<i32>):vec4<i32> {
+  $B1: {
+    %3:vec4<i32> = sign %value
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%value:vec4<i32>):vec4<i32> {
+  $B1: {
+    %3:vec4<bool> = gt %value, vec4<i32>(0i)
+    %4:vec4<i32> = select vec4<i32>(-1i), vec4<i32>(1i), %3
+    %5:vec4<bool> = eq %value, vec4<i32>(0i)
+    %6:vec4<i32> = select %4, vec4<i32>(0i), %5
+    ret %6
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_1d) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));

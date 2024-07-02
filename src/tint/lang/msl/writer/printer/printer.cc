@@ -902,7 +902,6 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kRefract:
             case core::BuiltinFn::kSaturate:
             case core::BuiltinFn::kSelect:
-            case core::BuiltinFn::kSign:
             case core::BuiltinFn::kSin:
             case core::BuiltinFn::kSinh:
             case core::BuiltinFn::kSqrt:
