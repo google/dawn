@@ -52,12 +52,12 @@
 namespace tint::msl::writer {
 
 Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
-#define RUN_TRANSFORM(name, ...)                   \
-    do {                                           \
-        auto result = name(module, ##__VA_ARGS__); \
-        if (result != Success) {                   \
-            return result.Failure();               \
-        }                                          \
+#define RUN_TRANSFORM(name, ...)         \
+    do {                                 \
+        auto result = name(__VA_ARGS__); \
+        if (result != Success) {         \
+            return result.Failure();     \
+        }                                \
     } while (false)
 
     RaiseResult raise_result;
@@ -67,13 +67,13 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     ArrayLengthFromUniformOptions array_length_from_uniform_options{};
     PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
                                   array_length_from_uniform_options);
-    RUN_TRANSFORM(core::ir::transform::BindingRemapper, remapper_data);
+    RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
 
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};
         binary_polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
         binary_polyfills.bitshift_modulo = true;  // crbug.com/tint/1543
-        RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, binary_polyfills);
+        RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, module, binary_polyfills);
     }
 
     {
@@ -86,21 +86,21 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
         core_polyfills.radians = true;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
-        RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, core_polyfills);
+        RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
 
     {
         core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
         conversion_polyfills.ftoi = true;
-        RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, conversion_polyfills);
+        RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
     }
 
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config{};
-        RUN_TRANSFORM(core::ir::transform::Robustness, config);
+        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }
 
-    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, multiplanar_map);
+    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
 
     auto array_length_from_uniform_result = core::ir::transform::ArrayLengthFromUniform(
         module, BindingPoint{0u, array_length_from_uniform_options.ubo_binding},
@@ -112,24 +112,24 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         array_length_from_uniform_result->needs_storage_buffer_sizes;
 
     if (!options.disable_workgroup_init) {
-        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory);
+        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
 
-    RUN_TRANSFORM(core::ir::transform::PreservePadding);
-    RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors);
+    RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
+    RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper);
+    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
-    RUN_TRANSFORM(raise::ShaderIO, raise::ShaderIOConfig{options.emit_vertex_point_size});
-    RUN_TRANSFORM(raise::ModuleScopeVars);
-    RUN_TRANSFORM(raise::BuiltinPolyfill);
+    RUN_TRANSFORM(raise::ShaderIO, module, raise::ShaderIOConfig{options.emit_vertex_point_size});
+    RUN_TRANSFORM(raise::ModuleScopeVars, module);
+    RUN_TRANSFORM(raise::BuiltinPolyfill, module);
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.
-    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs);
-    RUN_TRANSFORM(core::ir::transform::RenameConflicts);
-    RUN_TRANSFORM(core::ir::transform::ValueToLet);
+    RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs, module);
+    RUN_TRANSFORM(core::ir::transform::RenameConflicts, module);
+    RUN_TRANSFORM(core::ir::transform::ValueToLet, module);
 
     return raise_result;
 }
