@@ -392,6 +392,62 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IRToProgramRenameConflictsTest, Conflict_FnLet_ShadowedBy_IfVar) {
+    auto* fn = b.Function("f", ty.i32());
+    b.Append(fn->Block(), [&] {
+        auto* outer = b.Var(ty.ptr<function, i32>());
+        b.ir.SetName(outer, "v");
+
+        auto* if_ = b.If(true);
+        b.Append(if_->True(), [&] {
+            auto* inner = b.Let("v", 42_i);
+            auto* load_outer = b.Load(outer);
+            b.Return(fn, b.Add(ty.i32(), load_outer, inner));
+        });
+
+        b.Unreachable();
+    });
+
+    auto* src = R"(
+%f = func():i32 {
+  $B1: {
+    %v:ptr<function, i32, read_write> = var
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        %v_1:i32 = let 42i  # %v_1: 'v'
+        %4:i32 = load %v
+        %5:i32 = add %4, %v_1
+        ret %5
+      }
+    }
+    unreachable
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%f = func():i32 {
+  $B1: {
+    %v:ptr<function, i32, read_write> = var
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        %v_1:i32 = let 42i
+        %4:i32 = load %v
+        %5:i32 = add %4, %v_1
+        ret %5
+      }
+    }
+    unreachable
+  }
+}
+)";
+
+    Run();
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopInitVar_ShadowedBy_LoopBodyVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {

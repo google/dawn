@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/instruction.h"
+#include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
@@ -103,7 +104,7 @@ struct State {
     /// Stack of scopes
     Vector<Scope, 8> scopes{};
 
-    /// Registers all the WGSL module-scope declarations in the root-scope.
+    /// Registers all the module-scope declarations in the root-scope.
     /// Duplicate declarations with the same name will renamed.
     void RegisterModuleScopeDecls() {
         // Declare all the user types
@@ -186,6 +187,10 @@ struct State {
             },
             [&](core::ir::Var*) {
                 // Ensure the var's type is resolvable
+                EnsureResolvable(inst->Result(0)->Type());
+            },
+            [&](core::ir::Let*) {
+                // Ensure the let's type is resolvable
                 EnsureResolvable(inst->Result(0)->Type());
             },
             [&](core::ir::Construct*) {
