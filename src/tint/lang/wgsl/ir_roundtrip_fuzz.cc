@@ -35,10 +35,29 @@
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/raise/raise.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::wgsl {
 
+bool CanRun(core::ir::Module& ir) {
+    // IRToProgram cannot handle constants whose types are builtin structures, since it would have
+    // to reverse-engineer the builtin function call that would produce the right output.
+    for (auto* c : ir.constant_values) {
+        if (auto* str = c->Type()->As<core::type::Struct>()) {
+            // TODO(350778507): Consider using a struct flag for builtin structures instead.
+            if (tint::HasPrefix(str->Name().NameView(), "__")) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 void IRRoundtripFuzzer(core::ir::Module& ir) {
+    if (!CanRun(ir)) {
+        return;
+    }
+
     if (auto res = tint::wgsl::writer::Raise(ir); res != Success) {
         TINT_ICE() << res.Failure();
     }
