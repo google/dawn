@@ -80,8 +80,9 @@ struct State {
 
     /// Process the module.
     void Process() {
-        // Find the builtins that need replacing.
-        Vector<core::ir::CoreBuiltinCall*, 4> worklist;
+        // Find the builtins and binary operators that need replacing.
+        Vector<core::ir::CoreBinary*, 4> fmod_worklist;
+        Vector<core::ir::CoreBuiltinCall*, 4> builtin_worklist;
         for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
@@ -118,16 +119,21 @@ struct State {
                     case core::BuiltinFn::kWorkgroupBarrier:
                     case core::BuiltinFn::kTextureBarrier:
                     case core::BuiltinFn::kUnpack2X16Float:
-                        worklist.Push(builtin);
+                        builtin_worklist.Push(builtin);
                         break;
                     default:
                         break;
+                }
+            } else if (auto* binary = inst->As<core::ir::CoreBinary>()) {
+                if (binary->Op() == core::BinaryOp::kModulo &&
+                    binary->LHS()->Type()->is_float_scalar_or_vector()) {
+                    fmod_worklist.Push(binary);
                 }
             }
         }
 
         // Replace the builtins that we found.
-        for (auto* builtin : worklist) {
+        for (auto* builtin : builtin_worklist) {
             switch (builtin->Func()) {
                 // Atomics.
                 case core::BuiltinFn::kAtomicAdd:
@@ -241,6 +247,11 @@ struct State {
                 default:
                     break;
             }
+        }
+
+        // Replace the fmod instructions that we found.
+        for (auto* fmod : fmod_worklist) {
+            FMod(fmod);
         }
     }
 
@@ -777,6 +788,15 @@ struct State {
             b.ConvertWithResult(builtin->DetachResult(), bitcast);
         });
         builtin->Destroy();
+    }
+
+    /// Replace a floating point modulo binary instruction with the equivalent MSL intrinsic.
+    /// @param binary the float point modulo binary instruction
+    void FMod(core::ir::CoreBinary* binary) {
+        auto* call = b.CallWithResult<msl::ir::BuiltinCall>(
+            binary->DetachResult(), msl::BuiltinFn::kFmod, binary->Operands());
+        call->InsertBefore(binary);
+        binary->Destroy();
     }
 };
 

@@ -141,7 +141,7 @@ void export_level_inner(uint3 coord, tint_module_vars_struct tint_module_vars) {
     float const c = (*tint_module_vars.buf_in).weights[((src_offset + 1u) + (*tint_module_vars.ubo).width)];
     float const d = (*tint_module_vars.buf_in).weights[((src_offset + 1u) + (*tint_module_vars.ubo).width)];
     float const sum = dot(float4(a, b, c, d), float4(1.0f));
-    (*tint_module_vars.buf_out).weights[dst_offset] = (sum % 4.0f);
+    (*tint_module_vars.buf_out).weights[dst_offset] = fmod(sum, 4.0f);
     float4 const v_4 = float4(a, (a * b), ((a / b) + c), sum);
     float4 const probabilities = (v_4 + max(sum, 0.0f));
     tint_module_vars.tex_out.write(probabilities, uint2(int2(coord.xy)));
@@ -171,9 +171,6 @@ kernel void export_level(uint3 coord [[thread_position_in_grid]], const constant
 program_source:89:8: warning: unused variable 'res' [-Wunused-variable]
   half res = asinh(arg_0);
        ^
-program_source:142:60: error: invalid operands to binary expression ('const float' and 'float')
-    (*tint_module_vars.buf_out).weights[dst_offset] = (sum % 4.0f);
-                                                       ~~~ ^ ~~~~
 program_source:154:104: error: call to deleted constructor of 'texture1d<float, access::sample>'
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.render_params=render_params};
                                                                                                        ^

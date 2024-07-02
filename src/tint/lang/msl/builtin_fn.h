@@ -73,6 +73,7 @@ enum class BuiltinFn : uint8_t {
     kWrite,
     kDistance,
     kDot,
+    kFmod,
     kLength,
     kThreadgroupBarrier,
     kNone,

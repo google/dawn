@@ -323,6 +323,8 @@ match f32_f16: f32 | f16
 
 fn distance[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
 fn dot[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
+fn fmod[T: f32_f16](T, T) -> T
+fn fmod[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> vec<N, T>
 fn length[N: num, T: f32_f16](vec<N, T>) -> T
 @stage("compute") fn threadgroup_barrier(u32)
 

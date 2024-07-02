@@ -94,6 +94,8 @@ const char* str(BuiltinFn i) {
             return "distance";
         case BuiltinFn::kDot:
             return "dot";
+        case BuiltinFn::kFmod:
+            return "fmod";
         case BuiltinFn::kLength:
             return "length";
         case BuiltinFn::kThreadgroupBarrier:
