@@ -354,24 +354,26 @@ type Progress struct {
 func (u *updater) build() error {
 	progress := Progress{}
 
-	immutableTokens := []string{
-		"KEEP",
-		"BEGIN TAG HEADER",
-		"Last rolled",
+	// All chunks other than the ones for untriaged flakes/failures produced by
+	// the CTS roller are considered immutable unless they are explicitly
+	// declared as mutable.
+	mutableTokens := []string{
+		newFlakesComment,
+		newFailuresComment,
+		"MUTABLE",
 	}
 
 	// Bin the chunks into those that contain any of the strings in
-	// immutableTokens in the comments and those that do not have these strings.
+	// mutableTokens in the comments and those that do not have these strings.
 	immutableChunks, mutableChunks := []Chunk{}, []Chunk{}
 	for _, chunk := range u.in.Chunks {
-		// Does the chunk comment contain 'KEEP' or 'BEGIN TAG HEADER' ?
-		keep := false
+		keep := true
 
 	comments:
-		for _, l := range chunk.Comments {
-			for _, s := range immutableTokens {
-				if strings.Contains(l, s) {
-					keep = true
+		for _, line := range chunk.Comments {
+			for _, token := range mutableTokens {
+				if strings.Contains(line, token) {
+					keep = false
 					break comments
 				}
 			}
