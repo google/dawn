@@ -45,7 +45,7 @@ add_library(native_dawn ${C_BINDINGS_PATH}/methods.cpp ${C_BINDINGS_PATH}/struct
 
 target_link_libraries(native_dawn webgpu_dawn)
 
-list(INSERT CMAKE_MODULE_PATH 0 ../../../../../../src/cmake)
+list(INSERT CMAKE_MODULE_PATH 0 "${Dawn_SOURCE_DIR}/src/cmake")
 include(BundleLibraries)
 bundle_libraries(webgpu_c_bundled native_dawn)
 
