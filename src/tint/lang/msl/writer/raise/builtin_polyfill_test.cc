@@ -1022,6 +1022,126 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Dot_MultipleCalls) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, Frexp_Scalar) {
+    auto* value = b.FunctionParam<f32>("value");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(core::type::CreateFrexpResult(ty, mod.symbols, ty.f32()),
+                              core::BuiltinFn::kFrexp, value);
+        auto* fract = b.Access<f32>(result, 0_u);
+        auto* exp = b.Access<i32>(result, 1_u);
+        b.Return(func, b.Add<f32>(fract, b.Convert<f32>(exp)));
+    });
+
+    auto* src = R"(
+__frexp_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  exp:i32 @offset(4)
+}
+
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:__frexp_result_f32 = frexp %value
+    %4:f32 = access %3, 0u
+    %5:i32 = access %3, 1u
+    %6:f32 = convert %5
+    %7:f32 = add %4, %6
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__frexp_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  exp:i32 @offset(4)
+}
+
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:ptr<function, __frexp_result_f32, read_write> = var
+    %4:ptr<function, i32, read_write> = access %3, 1u
+    %5:i32 = load %4
+    %6:f32 = msl.frexp %value, %5
+    %7:ptr<function, f32, read_write> = access %3, 0u
+    store %7, %6
+    %8:__frexp_result_f32 = load %3
+    %9:f32 = access %8, 0u
+    %10:i32 = access %8, 1u
+    %11:f32 = convert %10
+    %12:f32 = add %9, %11
+    ret %12
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Frexp_Vector) {
+    auto* value = b.FunctionParam<vec4<f32>>("value");
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(core::type::CreateFrexpResult(ty, mod.symbols, ty.vec4<f32>()),
+                              core::BuiltinFn::kFrexp, value);
+        auto* fract = b.Access<vec4<f32>>(result, 0_u);
+        auto* whole = b.Access<vec4<i32>>(result, 1_u);
+        b.Return(func, b.Add<vec4<f32>>(fract, b.Convert<vec4<f32>>(whole)));
+    });
+
+    auto* src = R"(
+__frexp_result_vec4_f32 = struct @align(16) {
+  fract:vec4<f32> @offset(0)
+  exp:vec4<i32> @offset(16)
+}
+
+%foo = func(%value:vec4<f32>):vec4<f32> {
+  $B1: {
+    %3:__frexp_result_vec4_f32 = frexp %value
+    %4:vec4<f32> = access %3, 0u
+    %5:vec4<i32> = access %3, 1u
+    %6:vec4<f32> = convert %5
+    %7:vec4<f32> = add %4, %6
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__frexp_result_vec4_f32 = struct @align(16) {
+  fract:vec4<f32> @offset(0)
+  exp:vec4<i32> @offset(16)
+}
+
+%foo = func(%value:vec4<f32>):vec4<f32> {
+  $B1: {
+    %3:ptr<function, __frexp_result_vec4_f32, read_write> = var
+    %4:ptr<function, vec4<i32>, read_write> = access %3, 1u
+    %5:vec4<i32> = load %4
+    %6:vec4<f32> = msl.frexp %value, %5
+    %7:ptr<function, vec4<f32>, read_write> = access %3, 0u
+    store %7, %6
+    %8:__frexp_result_vec4_f32 = load %3
+    %9:vec4<f32> = access %8, 0u
+    %10:vec4<i32> = access %8, 1u
+    %11:vec4<f32> = convert %10
+    %12:vec4<f32> = add %9, %11
+    ret %12
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, Length_Scalar) {
     auto* value = b.FunctionParam<f32>("value");
     auto* func = b.Function("foo", ty.f32());

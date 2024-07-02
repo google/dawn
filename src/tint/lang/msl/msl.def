@@ -325,6 +325,8 @@ fn distance[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
 fn dot[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
 fn fmod[T: f32_f16](T, T) -> T
 fn fmod[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> vec<N, T>
+fn frexp[T: f32_f16](T, i32) -> T
+fn frexp[N: num, T: f32_f16](vec<N, T>, vec<N, i32>) -> vec<N, T>
 fn length[N: num, T: f32_f16](vec<N, T>) -> T
 fn modf[T: f32_f16](T, T) -> T
 fn modf[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> vec<N, T>

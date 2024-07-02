@@ -99,6 +99,7 @@ struct State {
                     case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kDistance:
                     case core::BuiltinFn::kDot:
+                    case core::BuiltinFn::kFrexp:
                     case core::BuiltinFn::kLength:
                     case core::BuiltinFn::kModf:
                     case core::BuiltinFn::kQuantizeToF16:
@@ -178,6 +179,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kDot:
                     Dot(builtin);
+                    break;
+                case core::BuiltinFn::kFrexp:
+                    Frexp(builtin);
                     break;
                 case core::BuiltinFn::kLength:
                     Length(builtin);
@@ -370,6 +374,34 @@ struct State {
                 b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
                                                        msl::BuiltinFn::kDot, arg0, arg1);
             }
+        });
+        builtin->Destroy();
+    }
+
+    /// Polyfill a frexp call.
+    /// @param builtin the builtin call instruction
+    void Frexp(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            // MSL's frexp returns `fract` and outputs `exp` as an output parameter.
+            // Polyfill it by declaring the result struct and then setting the values:
+            //   __frexp_result result = {};
+            //   result.fract = frexp(arg, result.exp);
+            //
+            // Note: We need to use a `load` instruction to pass `result.exp`, as the intrinsic
+            // definition expects a value type (as we do not have reference types in the IR). The
+            // printer will just fold away the load, which achieves the pass-by-reference semantics
+            // that we want.
+            //
+            auto* result_type = builtin->Result(0)->Type();
+            auto* float_type = result_type->Element(0);
+            auto* i32_type = result_type->Element(1);
+            auto* result = b.Var(ty.ptr(function, result_type));
+            auto* exp = b.Access(ty.ptr(function, i32_type), result, u32(1));
+            auto args = Vector<core::ir::Value*, 2>{builtin->Args()[0], b.Load(exp)->Result(0)};
+            auto* call =
+                b.Call<msl::ir::BuiltinCall>(float_type, msl::BuiltinFn::kFrexp, std::move(args));
+            b.Store(b.Access(ty.ptr(function, float_type), result, u32(0)), call);
+            builtin->Result(0)->ReplaceAllUsesWith(b.Load(result)->Result(0));
         });
         builtin->Destroy();
     }

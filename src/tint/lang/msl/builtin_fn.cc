@@ -96,6 +96,8 @@ const char* str(BuiltinFn i) {
             return "dot";
         case BuiltinFn::kFmod:
             return "fmod";
+        case BuiltinFn::kFrexp:
+            return "frexp";
         case BuiltinFn::kLength:
             return "length";
         case BuiltinFn::kModf:

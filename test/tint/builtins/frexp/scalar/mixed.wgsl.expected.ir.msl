@@ -1,9 +1,18 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/lang/msl/writer/printer/printer.cc:989 internal compiler error: TINT_UNREACHABLE unhandled: frexp
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct frexp_result_f32 {
+  float fract;
+  int exp;
+};
+
+kernel void tint_symbol() {
+  float const runtime_in = 1.25f;
+  frexp_result_f32 res = frexp_result_f32{.fract=0.625f, .exp=1};
+  frexp_result_f32 v = {};
+  v.fract = frexp(runtime_in, v.exp);
+  res = v;
+  res = frexp_result_f32{.fract=0.625f, .exp=1};
+  float const fract = res.fract;
+  int const exp = res.exp;
+}

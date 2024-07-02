@@ -74,6 +74,7 @@ enum class BuiltinFn : uint8_t {
     kDistance,
     kDot,
     kFmod,
+    kFrexp,
     kLength,
     kModf,
     kSign,
