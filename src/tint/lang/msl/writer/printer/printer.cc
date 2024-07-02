@@ -1379,7 +1379,22 @@ class Printer : public tint::TextGenerator {
             }
 
             if (attributes.invariant) {
-                invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
+                if (invariant_define_name_.empty()) {
+                    invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
+                    result_.has_invariant_attribute = true;
+
+                    // 'invariant' attribute requires MSL 2.1 or higher.
+                    // WGSL can ignore the invariant attribute on pre MSL 2.1 devices.
+                    // See: https://github.com/gpuweb/gpuweb/issues/893#issuecomment-745537465
+                    Line(&preamble_buffer_);
+                    Line(&preamble_buffer_) << "#if __METAL_VERSION__ >= 210";
+                    Line(&preamble_buffer_)
+                        << "#define " << invariant_define_name_ << " [[invariant]]";
+                    Line(&preamble_buffer_) << "#else";
+                    Line(&preamble_buffer_) << "#define " << invariant_define_name_;
+                    Line(&preamble_buffer_) << "#endif";
+                    Line(&preamble_buffer_);
+                }
                 out << " " << invariant_define_name_;
             }
 

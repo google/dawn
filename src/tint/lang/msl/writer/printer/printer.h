@@ -59,6 +59,9 @@ struct PrintResult {
     /// The generated MSL.
     std::string msl = "";
 
+    /// `true` if an invariant attribute was generated.
+    bool has_invariant_attribute = false;
+
     /// A map from entry point name to a list of dynamic workgroup allocations.
     /// Each element of the vector is the size of the workgroup allocation that should be created
     /// for that index.

@@ -61,7 +61,7 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     output.msl = result->msl;
     output.workgroup_allocations = std::move(result->workgroup_allocations);
     output.needs_storage_buffer_sizes = raise_result->needs_storage_buffer_sizes;
-    // TODO(crbug.com/42251016): Set has_invariant.
+    output.has_invariant_attribute = result->has_invariant_attribute;
     // TODO(crbug.com/42251016): Set used_array_length_from_uniform_indices.
     return output;
 }
