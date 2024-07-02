@@ -3363,5 +3363,19 @@ fn main() -> @location(4000000000u) vec4<f32> {
 )");
 }
 
+// Test that we do not try to declare or name the unnameable builtin structure types.
+// See crbug.com/350518995.
+TEST_F(IRToProgramRoundtripTest, BuiltinStructInLetAndVar) {
+    RUN_TEST(R"(
+fn a(x : f32) {
+  let b = frexp(x);
+}
+
+fn c(y : f32) {
+  var d = frexp(y);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl
