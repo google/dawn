@@ -41,19 +41,27 @@ add_subdirectory(../../../../../.. dawn)
 
 set(C_BINDINGS_PATH ../../../../../../out/Debug/gen/cpp)
 
-add_library(native_dawn ${C_BINDINGS_PATH}/methods.cpp ${C_BINDINGS_PATH}/structures.cpp Util.cpp ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
-
-target_link_libraries(native_dawn webgpu_dawn)
+find_package(Python3 REQUIRED)
+DawnJSONGenerator(
+        TARGET "webgpu_dawn_native_proc"
+        PRINT_NAME "Dawn native WebGPU procs"
+        OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES)
 
 list(INSERT CMAKE_MODULE_PATH 0 "${Dawn_SOURCE_DIR}/src/cmake")
 include(BundleLibraries)
-bundle_libraries(webgpu_c_bundled native_dawn)
+bundle_libraries(webgpu_c_bundled dawn_native)
+target_sources(webgpu_c_bundled PRIVATE
+        Util.cpp
+        ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
+        ${C_BINDINGS_PATH}/methods.cpp
+        ${C_BINDINGS_PATH}/structures.cpp
+        ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
 
 find_library(log-lib log)
 
-target_link_libraries(webgpu_c_bundled ${log-lib} android)
+target_link_libraries(webgpu_c_bundled ${log-lib} android dawn_public_config)
 
-add_custom_command(DEPENDS webgpu_dawn POST_BUILD
+add_custom_command(DEPENDS dawncpp_headers POST_BUILD
                    OUTPUT ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h
                    COMMAND rm -r "${CMAKE_SOURCE_DIR}/gen" || echo
                    COMMAND ${CMAKE_COMMAND} -E copy

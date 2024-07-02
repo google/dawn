@@ -819,26 +819,28 @@ endif()
 # "{{.*}}_dawn" when you rename it.
 ###############################################################################
 
-DawnJSONGenerator(
-  TARGET "webgpu_dawn_native_proc"
-  PRINT_NAME "Dawn native WebGPU procs"
-  OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES
-)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+    DawnJSONGenerator(
+        TARGET "webgpu_dawn_native_proc"
+        PRINT_NAME "Dawn native WebGPU procs"
+        OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES
+    )
 
-include(BundleLibraries)
-bundle_libraries(webgpu_dawn dawn_native)
-add_library(dawn::webgpu ALIAS webgpu_dawn)
-target_sources(webgpu_dawn
-  PRIVATE
-    ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
-)
-target_link_libraries(webgpu_dawn
-  PRIVATE
-    dawn_internal_config
-    ${conditional_private_platform_depends}
-)
-target_compile_definitions(webgpu_dawn PRIVATE "WGPU_IMPLEMENTATION")
-target_compile_definitions(webgpu_dawn PUBLIC "WGPU_SHARED_LIBRARY")
+    include(BundleLibraries)
+    bundle_libraries(webgpu_dawn dawn_native)
+    add_library(dawn::webgpu ALIAS webgpu_dawn)
+    target_sources(webgpu_dawn
+    PRIVATE
+        ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
+    )
+    target_link_libraries(webgpu_dawn
+    PRIVATE
+        dawn_internal_config
+        ${conditional_private_platform_depends}
+    )
+    target_compile_definitions(webgpu_dawn PRIVATE "WGPU_IMPLEMENTATION")
+    target_compile_definitions(webgpu_dawn PUBLIC "WGPU_SHARED_LIBRARY")
+endif ()
 
 # Linking with dxcompiler after bundling so that the bundling process
 # doesn't see the dxcompiler and end up with unresolved linker errors.

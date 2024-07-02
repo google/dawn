@@ -53,11 +53,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(DawnSetIfNotDefined)
 
-set(DAWN_BUILD_GEN_DIR "${Dawn_BINARY_DIR}/gen")
-set(DAWN_GENERATOR_DIR "${Dawn_SOURCE_DIR}/generator")
-set(DAWN_SRC_DIR "${Dawn_SOURCE_DIR}/src")
-set(DAWN_INCLUDE_DIR "${Dawn_SOURCE_DIR}/include")
-set(DAWN_TEMPLATE_DIR "${DAWN_GENERATOR_DIR}/templates")
+set(DAWN_BUILD_GEN_DIR "${Dawn_BINARY_DIR}/gen" CACHE PATH "Directory that contains generated source files")
+set(DAWN_GENERATOR_DIR "${Dawn_SOURCE_DIR}/generator" CACHE PATH "Directory that contains scripts to generate sources and headers")
+set(DAWN_SRC_DIR "${Dawn_SOURCE_DIR}/src" CACHE PATH "Directory that contains source files for dawn")
+set(DAWN_INCLUDE_DIR "${Dawn_SOURCE_DIR}/include" CACHE PATH "Directory that contains public headers for dawn")
+set(DAWN_TEMPLATE_DIR "${DAWN_GENERATOR_DIR}/templates" CACHE PATH "Directory that contains templates for generators")
 
 function (install_if_enabled target)
     if(NOT DAWN_ENABLE_INSTALL)
