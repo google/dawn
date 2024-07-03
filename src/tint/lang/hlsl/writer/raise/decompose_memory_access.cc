@@ -383,25 +383,12 @@ struct State {
                     insert_load(ld, byte_offset);
                 },
 
-                [&](core::ir::UserCall*) {
-                    if (a->Result(0)->Type()->Is<core::type::Pointer>()) {
-                        // TODO(dsinclair): Passing a pointer into a function, re-write.
-
-                        // Create a new call
-                        // Copy the args, skip the index which is the usage.index
-
-                    } else {
-                        TINT_UNREACHABLE();
-                    }
-                },  //
-
                 [&](core::ir::StoreVectorElement*) {
                     // TODO(dsinclair): Handle stor vector elements
                 },  //
                 [&](core::ir::Store*) {
                     // TODO(dsinclair): Handle store
                 },  //
-
                 TINT_ICE_ON_NO_MATCH);
         }
 
