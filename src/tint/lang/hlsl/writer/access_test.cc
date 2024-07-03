@@ -553,7 +553,7 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessStorageStoreVector) {
+TEST_F(HlslWriterTest, AccessStorageStoreVector) {
     auto* var = b.Var<storage, vec4<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 

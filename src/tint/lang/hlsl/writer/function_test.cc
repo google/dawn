@@ -515,7 +515,7 @@ void frag_main() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithRWStorageBufferRead) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithRWStorageBufferRead) {
     // struct Data {
     //   a: i32,
     //   b: f32,
@@ -549,14 +549,13 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithRWStorageBufferRead) {
               R"(
 RWByteAddressBuffer coord : register(u0, space1);
 void frag_main() {
-  int v = asint(coord.Load(4u));
-  return;
+  int v = asint(coord.Load(0u));
 }
 
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithROStorageBufferRead) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithROStorageBufferRead) {
     // struct Data {
     //   a: i32,
     //   b: f32,
@@ -579,18 +578,17 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithROStorageBufferRead) {
 
     auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
-        auto* a = b.Access(ty.ptr<storage, i32, core::Access::kRead>(), coord, 0_u);
+        auto* a = b.Access(ty.ptr<storage, f32, core::Access::kRead>(), coord, 1_u);
         b.Var("v", b.Load(a));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl,
-              R"(ByteAddressBuffer coord : register(t0, space1);
-
+              R"(
+ByteAddressBuffer coord : register(t0, space1);
 void frag_main() {
-  int v = asint(coord.Load(4u));
-  return;
+  float v = asfloat(coord.Load(4u));
 }
 
 )");
@@ -625,8 +623,8 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithWOStorageBufferStore) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl,
-              R"(RWByteAddressBuffer coord : register(u0, space1);
-
+              R"(
+RWByteAddressBuffer coord : register(u0, space1);
 void frag_main() {
   coord.Store(4u, asuint(2.0f));
   return;
@@ -724,7 +722,7 @@ void frag_main() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionCalledByEntryPointWithStorageBuffer) {
+TEST_F(HlslWriterTest, FunctionCalledByEntryPointWithStorageBuffer) {
     // Struct S {
     //   x: f32,
     // }
@@ -883,8 +881,7 @@ void unused_entry_point() {
 )");
 }
 
-// TODO(dsinclair): Needs transform to handle discard properly
-TEST_F(HlslWriterTest, DISABLED_FunctionWithDiscardAndNonVoidReturn) {
+TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturn) {
     // fn my_func(a: i32) -> i32 {
     //   if (a == 0) {
     //     discard;
@@ -907,15 +904,12 @@ TEST_F(HlslWriterTest, DISABLED_FunctionWithDiscardAndNonVoidReturn) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
+static bool continue_execution = true;
 int my_func(int a) {
-  if (true) {
-    if ((a == 0)) {
-      discard;
-    }
-    return 42;
+  if ((a == 0)) {
+    continue_execution = false;
   }
-  int unused;
-  return unused;
+  return 42;
 }
 
 [numthreads(1, 1, 1)]
@@ -926,7 +920,7 @@ void unused_entry_point() {
 }
 
 // https://crbug.com/tint/297
-TEST_F(HlslWriterTest, DISABLED_FunctionMultipleEntryPointWithSameModuleVar) {
+TEST_F(HlslWriterTest, FunctionMultipleEntryPointWithSameModuleVar) {
     // struct Data {
     //   d : f32;
     // };
@@ -978,14 +972,13 @@ RWByteAddressBuffer data : register(u0);
 [numthreads(1, 1, 1)]
 void a() {
   float v = asfloat(data.Load(0u));
-  return;
 }
 
 [numthreads(1, 1, 1)]
 void b() {
   float v = asfloat(data.Load(0u));
-  return;
 }
+
 )");
 }
 
