@@ -35,6 +35,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/Adapter.h"
+#include "dawn/native/BlitTextureToBuffer.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Device.h"
@@ -475,6 +476,12 @@ bool CopySrcNeedsInternalTextureBindingUsage(const DeviceBase* device, const For
         device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy)) {
         return true;
     }
+
+    if (device->IsToggleEnabled(Toggle::UseBlitForT2B) &&
+        IsFormatSupportedByTextureToBufferBlit(format.format)) {
+        return true;
+    }
+
     return false;
 }
 

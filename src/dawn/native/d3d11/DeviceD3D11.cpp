@@ -450,6 +450,13 @@ bool Device::CanTextureLoadResolveTargetInTheSameRenderpass() const {
     return true;
 }
 
+bool Device::PreferNotUsingMappableOrUniformBufferAsStorage() const {
+    // D3D11 constant buffer or mappable buffer cannot be used as UAV. Allowing them to be used as
+    // storage buffer would require some workarounds including extra copies so it's better we
+    // prefer to not do that.
+    return true;
+}
+
 uint32_t Device::GetUAVSlotCount() const {
     return ToBackend(GetPhysicalDevice())->GetUAVSlotCount();
 }

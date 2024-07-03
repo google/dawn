@@ -43,6 +43,7 @@ namespace dawn::native {
 
 struct BeginRenderPassCmd;
 struct CopyTextureToBufferCmd;
+struct BufferCopy;
 struct TextureCopy;
 
 class CommandBufferBase : public ApiObjectBase {
@@ -89,6 +90,9 @@ SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Ex
 void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass);
 
 bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy);
+bool IsFullBufferOverwrittenInTextureToBufferCopy(const TextureCopy& source,
+                                                  const BufferCopy& destination,
+                                                  const Extent3D& copySize);
 
 std::array<float, 4> ConvertToFloatColor(dawn::native::Color color);
 std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn::native::Color color);

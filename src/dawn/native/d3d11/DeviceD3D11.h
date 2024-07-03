@@ -76,6 +76,7 @@ class Device final : public d3d::Device {
     bool MayRequireDuplicationOfIndirectParameters() const override;
     uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const override;
     bool CanTextureLoadResolveTargetInTheSameRenderpass() const override;
+    bool PreferNotUsingMappableOrUniformBufferAsStorage() const override;
     void SetLabelImpl() override;
 
     void DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) override;

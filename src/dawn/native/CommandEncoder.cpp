@@ -960,6 +960,12 @@ bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
         device->IsToggleEnabled(Toggle::UseBlitForStencilTextureToBufferCopy)) {
         return true;
     }
+
+    if (device->IsToggleEnabled(Toggle::UseBlitForT2B) &&
+        IsFormatSupportedByTextureToBufferBlit(format.format)) {
+        return true;
+    }
+
     return false;
 }
 

@@ -281,6 +281,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     deviceToggles->Default(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
     deviceToggles->Default(Toggle::D3D11UseUnmonitoredFence, !mDeviceInfo.supportsMonitoredFence);
+    deviceToggles->Default(Toggle::UseBlitForT2B, true);
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(

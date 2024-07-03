@@ -33,6 +33,7 @@
 
 #include <utility>
 
+#include "dawn/native/BlitTextureToBuffer.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/DeviceD3D.h"
@@ -78,11 +79,17 @@ UINT PresentModeToSwapChainFlags(wgpu::PresentMode mode) {
     return flags;
 }
 
-DXGI_USAGE ToDXGIUsage(wgpu::TextureUsage usage) {
+DXGI_USAGE ToDXGIUsage(DeviceBase* device, wgpu::TextureFormat format, wgpu::TextureUsage usage) {
     DXGI_USAGE dxgiUsage = DXGI_CPU_ACCESS_NONE;
     if (usage & wgpu::TextureUsage::TextureBinding) {
         dxgiUsage |= DXGI_USAGE_SHADER_INPUT;
     }
+
+    if (usage & wgpu::TextureUsage::CopySrc && device->IsToggleEnabled(Toggle::UseBlitForT2B) &&
+        IsFormatSupportedByTextureToBufferBlit(format)) {
+        dxgiUsage |= DXGI_USAGE_SHADER_INPUT;
+    }
+
     if (usage & wgpu::TextureUsage::StorageBinding) {
         dxgiUsage |= DXGI_USAGE_UNORDERED_ACCESS;
     }
@@ -111,7 +118,7 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     mConfig.bufferCount = PresentModeToBufferCount(GetPresentMode());
     mConfig.format = d3d::DXGITextureFormat(GetDevice(), GetFormat());
     mConfig.swapChainFlags = PresentModeToSwapChainFlags(GetPresentMode());
-    mConfig.usage = ToDXGIUsage(GetUsage());
+    mConfig.usage = ToDXGIUsage(GetDevice(), GetFormat(), GetUsage());
 
     // There is no previous swapchain so we can create one directly and don't have anything else
     // to do.

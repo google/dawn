@@ -404,6 +404,9 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
     // will be resolved into.
     virtual bool CanTextureLoadResolveTargetInTheSameRenderpass() const;
 
+    // Whether the backend prefer not using mappable/uniform buffer as storage buffer.
+    virtual bool PreferNotUsingMappableOrUniformBufferAsStorage() const;
+
     bool HasFeature(Feature feature) const;
 
     const CombinedLimits& GetLimits() const;
