@@ -655,8 +655,25 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitHlslMemberBuiltinCall(StringStream& out, const hlsl::ir::MemberBuiltinCall* c) {
+        BuiltinFn fn = c->Func();
+        std::string suffix = "";
+        if (fn == BuiltinFn::kLoadF16) {
+            fn = BuiltinFn::kLoad;
+            suffix = "<float16_t>";
+        } else if (fn == BuiltinFn::kLoad2F16) {
+            fn = BuiltinFn::kLoad2;
+            suffix = "<vector<float16_t, 2>>";
+        } else if (fn == BuiltinFn::kLoad3F16) {
+            fn = BuiltinFn::kLoad3;
+            suffix = "<vector<float16_t, 3>>";
+        } else if (fn == BuiltinFn::kLoad4F16) {
+            fn = BuiltinFn::kLoad4;
+            suffix = "<vector<float16_t, 4>>";
+        }
+
         EmitValue(out, c->Object());
-        out << "." << c->Func() << "(";
+        out << "." << fn << suffix << "(";
+
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {
             if (needs_comma) {

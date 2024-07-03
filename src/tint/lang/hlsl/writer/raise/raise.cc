@@ -133,10 +133,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
 
-    RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
-                  core::ir::transform::DirectVariableAccessOptions{});
-    RUN_TRANSFORM(raise::DecomposeMemoryAccess, module);
-
     if (options.compiler == Options::Compiler::kFXC) {
         RUN_TRANSFORM(raise::FxcPolyfill, module);
     }
@@ -156,6 +152,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }
+
+    RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
+                  core::ir::transform::DirectVariableAccessOptions{});
+    // DecomposeMemoryAccess must come after Robustness and DirectVariableAccess
+    RUN_TRANSFORM(raise::DecomposeMemoryAccess, module);
+
     if (!options.disable_workgroup_init) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }

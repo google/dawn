@@ -40,28 +40,27 @@ TINT_INSTANTIATE_TYPEINFO(tint::hlsl::type::ByteAddressBuffer);
 
 namespace tint::hlsl::type {
 
-ByteAddressBuffer::ByteAddressBuffer(const core::type::Type* source_type, core::Access access)
+ByteAddressBuffer::ByteAddressBuffer(core::Access access)
     : Base(static_cast<size_t>(Hash(tint::TypeCode::Of<ByteAddressBuffer>().bits)),
            core::AddressSpace::kStorage,
-           source_type,
+           nullptr,
            access) {}
 
 bool ByteAddressBuffer::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<ByteAddressBuffer>()) {
-        return o->StoreType() == StoreType() && o->Access() == Access();
+        return o->Access() == Access();
     }
     return false;
 }
 
 std::string ByteAddressBuffer::FriendlyName() const {
     StringStream out;
-    out << "hlsl.byte_address_buffer<" << StoreType()->FriendlyName() << ", " << Access() << ">";
+    out << "hlsl.byte_address_buffer<" << Access() << ">";
     return out.str();
 }
 
 ByteAddressBuffer* ByteAddressBuffer::Clone(core::type::CloneContext& ctx) const {
-    auto* ty = StoreType()->Clone(ctx);
-    return ctx.dst.mgr->Get<ByteAddressBuffer>(ty, Access());
+    return ctx.dst.mgr->Get<ByteAddressBuffer>(Access());
 }
 
 }  // namespace tint::hlsl::type

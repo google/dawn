@@ -28,8 +28,6 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_MEMORY_ACCESS_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_MEMORY_ACCESS_H_
 
-#include <string>
-
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -39,7 +37,7 @@ class Module;
 
 namespace tint::hlsl::writer::raise {
 
-/// DecomposeMemoryAccess is a transform used to replace storage and uniform buffer accesses with a
+/// DecomposeMemoryAccess is a transform used to replace storage buffer accesses with a
 /// combination of load, store or atomic functions on primitive types.
 ///
 /// @param module the module to transform

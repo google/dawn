@@ -52,7 +52,7 @@ type vec3<T>
 type vec4<T>
 @display("vec{N}<{T}>")     type vec<N: num, T>
 
-type byte_address_buffer<T, A: access>
+type byte_address_buffer<A: access>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
@@ -89,12 +89,17 @@ fn f32tof16[N: num](vec<N, f32>) -> vec<N, u32>
 fn f16tof32(u32) -> f32
 fn f16tof32[N: num](vec<N, u32>) -> vec<N, f32>
 
-@member_function fn Load[T](byte_address_buffer<T, readable>, offset: u32) -> u32
-@member_function fn Load2[T](byte_address_buffer<T, readable>, offset: u32) -> vec2<u32>
-@member_function fn Load3[T](byte_address_buffer<T, readable>, offset: u32) -> vec3<u32>
-@member_function fn Load4[T](byte_address_buffer<T, readable>, offset: u32) -> vec4<u32>
+@member_function fn Load(byte_address_buffer<readable>, offset: u32) -> u32
+@member_function fn Load2(byte_address_buffer<readable>, offset: u32) -> vec2<u32>
+@member_function fn Load3(byte_address_buffer<readable>, offset: u32) -> vec3<u32>
+@member_function fn Load4(byte_address_buffer<readable>, offset: u32) -> vec4<u32>
 
-@member_function fn Store[T](byte_address_buffer<T, writable>, offset: u32, value: u32)
-@member_function fn Store2[T](byte_address_buffer<T, writable>, offset: u32, value: vec2<u32>)
-@member_function fn Store3[T](byte_address_buffer<T, writable>, offset: u32, value: vec3<u32>)
-@member_function fn Store4[T](byte_address_buffer<T, writable>, offset: u32, value: vec4<u32>)
+@member_function fn LoadF16(byte_address_buffer<readable>, offset: u32) -> f16
+@member_function fn Load2F16(byte_address_buffer<readable>, offset: u32) -> vec2<f16>
+@member_function fn Load3F16(byte_address_buffer<readable>, offset: u32) -> vec3<f16>
+@member_function fn Load4F16(byte_address_buffer<readable>, offset: u32) -> vec4<f16>
+
+@member_function fn Store(byte_address_buffer<writable>, offset: u32, value: u32)
+@member_function fn Store2(byte_address_buffer<writable>, offset: u32, value: vec2<u32>)
+@member_function fn Store3(byte_address_buffer<writable>, offset: u32, value: vec3<u32>)
+@member_function fn Store4(byte_address_buffer<writable>, offset: u32, value: vec4<u32>)

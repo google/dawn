@@ -50,7 +50,7 @@ namespace {
 using IR_HlslMemberBuiltinCallTest = core::ir::IRTestHelper;
 
 TEST_F(IR_HlslMemberBuiltinCallTest, Clone) {
-    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(ty.vec3<i32>(), core::Access::kReadWrite);
+    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kReadWrite);
 
     auto* t = b.FunctionParam("t", buf);
     auto* builtin = b.MemberCall<MemberBuiltinCall>(mod.Types().u32(), BuiltinFn::kLoad, t, 2_u);
@@ -71,7 +71,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, Clone) {
 }
 
 TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
-    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(ty.vec3<i32>(), core::Access::kRead);
+    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kRead);
 
     auto* t = b.FunctionParam("t", buf);
 
@@ -87,7 +87,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:17 error: asint: no matching call to 'asint(hlsl.byte_address_buffer<vec3<i32>, read>, u32)'
+        R"(:3:17 error: asint: no matching call to 'asint(hlsl.byte_address_buffer<read>, u32)'
 
     %3:u32 = %t.asint 2u
                 ^^^^^
@@ -97,7 +97,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
   ^^^
 
 note: # Disassembly
-%foo = func(%t:hlsl.byte_address_buffer<vec3<i32>, read>):u32 {
+%foo = func(%t:hlsl.byte_address_buffer<read>):u32 {
   $B1: {
     %3:u32 = %t.asint 2u
     ret %3
@@ -107,7 +107,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
-    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(ty.vec3<i32>(), core::Access::kRead);
+    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kRead);
 
     auto* t = b.FunctionParam("t", buf);
 
@@ -123,10 +123,10 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:17 error: Store: no matching call to 'Store(hlsl.byte_address_buffer<vec3<i32>, read>, u32, u32)'
+        R"(:3:17 error: Store: no matching call to 'Store(hlsl.byte_address_buffer<read>, u32, u32)'
 
 1 candidate function:
- • 'Store(byte_address_buffer<T, write' or 'read_write>  ✗ , offset: u32  ✓ , value: u32  ✓ )'
+ • 'Store(byte_address_buffer<write' or 'read_write>  ✗ , offset: u32  ✓ , value: u32  ✓ )'
 
     %3:u32 = %t.Store 2u, 2u
                 ^^^^^
@@ -136,7 +136,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
   ^^^
 
 note: # Disassembly
-%foo = func(%t:hlsl.byte_address_buffer<vec3<i32>, read>):u32 {
+%foo = func(%t:hlsl.byte_address_buffer<read>):u32 {
   $B1: {
     %3:u32 = %t.Store 2u, 2u
     ret %3

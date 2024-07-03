@@ -39,9 +39,8 @@ namespace tint::hlsl::type {
 class ByteAddressBuffer final : public Castable<ByteAddressBuffer, core::type::MemoryView> {
   public:
     /// Constructor
-    /// @param store_type the source buffer type
     /// @param access the buffer access mode
-    explicit ByteAddressBuffer(const core::type::Type* store_type, core::Access access);
+    explicit ByteAddressBuffer(core::Access access);
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
@@ -53,6 +52,8 @@ class ByteAddressBuffer final : public Castable<ByteAddressBuffer, core::type::M
     /// @param ctx the clone context
     /// @returns a clone of this type
     ByteAddressBuffer* Clone(core::type::CloneContext& ctx) const override;
+
+    const Type* StoreType() const = delete;
 };
 
 }  // namespace tint::hlsl::type

@@ -36,10 +36,8 @@ namespace tint::hlsl::intrinsic {
 
 inline bool MatchByteAddressBuffer(core::intrinsic::MatchState&,
                                    const core::type::Type* ty,
-                                   const core::type::Type*& T,
                                    core::intrinsic::Number& A) {
     if (auto* buf = ty->As<type::ByteAddressBuffer>()) {
-        T = buf->StoreType();
         A = core::intrinsic::Number(static_cast<uint32_t>(buf->Access()));
         return true;
     }
@@ -48,9 +46,8 @@ inline bool MatchByteAddressBuffer(core::intrinsic::MatchState&,
 
 inline const type::ByteAddressBuffer* BuildByteAddressBuffer(core::intrinsic::MatchState& state,
                                                              const core::type::Type*,
-                                                             const core::type::Type* T,
                                                              core::intrinsic::Number& A) {
-    return state.types.Get<type::ByteAddressBuffer>(T, static_cast<core::Access>(A.Value()));
+    return state.types.Get<type::ByteAddressBuffer>(static_cast<core::Access>(A.Value()));
 }
 
 }  // namespace tint::hlsl::intrinsic

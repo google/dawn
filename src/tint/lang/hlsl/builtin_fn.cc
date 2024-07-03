@@ -60,6 +60,14 @@ const char* str(BuiltinFn i) {
             return "Load3";
         case BuiltinFn::kLoad4:
             return "Load4";
+        case BuiltinFn::kLoadF16:
+            return "LoadF16";
+        case BuiltinFn::kLoad2F16:
+            return "Load2F16";
+        case BuiltinFn::kLoad3F16:
+            return "Load3F16";
+        case BuiltinFn::kLoad4F16:
+            return "Load4F16";
         case BuiltinFn::kStore:
             return "Store";
         case BuiltinFn::kStore2:

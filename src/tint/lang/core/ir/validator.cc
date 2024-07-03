@@ -1103,7 +1103,9 @@ void Validator::CheckUserCall(const UserCall* call) {
 void Validator::CheckAccess(const Access* a) {
     auto* obj_view = a->Object()->Type()->As<core::type::MemoryView>();
     auto* ty = obj_view ? obj_view->StoreType() : a->Object()->Type();
-    enum Kind { kPtr, kRef, kValue };
+
+    enum Kind : uint8_t { kPtr, kRef, kValue };
+
     auto kind_of = [&](const core::type::Type* type) {
         return tint::Switch(
             type,                                                //
@@ -1111,6 +1113,7 @@ void Validator::CheckAccess(const Access* a) {
             [&](const core::type::Reference*) { return kRef; },  //
             [&](Default) { return kValue; });
     };
+
     const Kind in_kind = kind_of(a->Object()->Type());
     auto desc_of = [&](Kind kind, const core::type::Type* type) {
         switch (kind) {

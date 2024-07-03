@@ -36,25 +36,18 @@ namespace tint::hlsl::type {
 namespace {
 
 TEST(HlslTypeByteAddressBuffer, Equals) {
-    core::type::F32 f{};
-    core::type::I32 i{};
-
-    const ByteAddressBuffer a(&f, core::Access::kRead);
-    const ByteAddressBuffer b(&f, core::Access::kRead);
-    const ByteAddressBuffer c(&f, core::Access::kReadWrite);
-    const ByteAddressBuffer d(&i, core::Access::kRead);
+    const ByteAddressBuffer a(core::Access::kRead);
+    const ByteAddressBuffer b(core::Access::kRead);
+    const ByteAddressBuffer c(core::Access::kReadWrite);
 
     EXPECT_TRUE(a.Equals(b));
     EXPECT_FALSE(a.Equals(c));
-    EXPECT_FALSE(a.Equals(d));
-    EXPECT_FALSE(a.Equals(i));
 }
 
 TEST(HlslTypeByteAddressBuffer, FriendlyName) {
-    core::type::F32 f{};
-    const ByteAddressBuffer l(&f, core::Access::kReadWrite);
+    const ByteAddressBuffer l(core::Access::kReadWrite);
 
-    EXPECT_EQ(l.FriendlyName(), "hlsl.byte_address_buffer<f32, read_write>");
+    EXPECT_EQ(l.FriendlyName(), "hlsl.byte_address_buffer<read_write>");
 }
 
 }  // namespace
