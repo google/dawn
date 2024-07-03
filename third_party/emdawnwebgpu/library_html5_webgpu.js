@@ -90,4 +90,4 @@ var LibraryHTML5WebGPU = {
 {{{ html5_gpu.makeImportExport('render_bundle_encoder', 'RenderBundleEncoder') }}}
 {{{ html5_gpu.makeImportExport('render_bundle', 'RenderBundle') }}}
 
-addToLibrary(LibraryHTML5WebGPU);
+mergeInto(LibraryManager.library, LibraryHTML5WebGPU);

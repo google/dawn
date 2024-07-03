@@ -52,6 +52,7 @@ function(DawnGenerator)
         "SCRIPT;OUTPUT_HEADERS;OUTPUT_SOURCES;PRINT_NAME"
         "EXTRA_PARAMETERS"
     )
+    message(STATUS "Dawn: Configuring DawnGenerator for ${arg_PRINT_NAME}.")
 
     if (arg_UNPARSED_ARGUMENTS)
       message(FATAL_ERROR

@@ -13,7 +13,7 @@ At this time it is used to generate:
  - the Dawn, Emscripten, and upstream webgpu-native `webgpu.h` C header
  - the Dawn and Emscripten `webgpu_cpp.h` C++ wrapper over the C header
  - libraries that implements `webgpu.h` by calling in a static or `thread_local` proc table
- - other parts of the [Emscripten](https://emscripten.org/) WebGPU implementation
+ - the [Emscripten](https://emscripten.org/) WebGPU binding implementation
  - a GMock version of the API with its proc table for testing
  - validation helper functions for dawn_native
  - the definition of dawn_native's proc table

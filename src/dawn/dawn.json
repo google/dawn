@@ -39,6 +39,12 @@
         "copyright_year": "2019"
     },
 
+    "INTERNAL__HAVE_EMDAWNWEBGPU_HEADER": {
+        "category": "structure",
+        "tags": ["emscripten"],
+        "members": []
+    },
+
     "create instance": {
         "category": "function",
         "returns": "instance",
@@ -593,7 +599,8 @@
         ]
     },
     "bool": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "i"
     },
     "buffer": {
         "category": "object",
@@ -764,6 +771,7 @@
     },
     "buffer map state": {
         "category": "enum",
+        "emscripten_string_to_int": true,
         "values": [
             {"value": 1, "name": "unmapped"},
             {"value": 2, "name": "pending"},
@@ -1049,6 +1057,7 @@
     },
     "compilation message type": {
         "category": "enum",
+        "emscripten_string_to_int": true,
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "error"},
@@ -1719,16 +1728,18 @@
     },
     "device lost reason": {
         "category": "enum",
+        "emscripten_string_to_int": true,
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "unknown"},
             {"value": 2, "name": "destroyed"},
-            {"value": 3, "name": "instance dropped"},
-            {"value": 4, "name": "failed creation"}
+            {"value": 3, "name": "instance dropped", "emscripten_string_to_int": false},
+            {"value": 4, "name": "failed creation", "emscripten_string_to_int": false}
         ]
     },
     "double": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "d"
     },
     "error callback": {
         "category": "function pointer",
@@ -2510,7 +2521,8 @@
         ]
     },
     "float": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "f"
     },
     "format capabilities": {
       "category": "structure",
@@ -4459,32 +4471,40 @@
       "category": "native"
     },
     "void": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "v"
     },
     "void *": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "p"
     },
     "void const *": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "p"
     },
     "int": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "i"
     },
     "int32_t": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "i"
     },
     "size_t": {
         "category": "native",
+        "wasm type": "p",
         "wire transparent": false
     },
     "uint16_t": {
         "category": "native"
     },
     "uint32_t": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "i"
     },
     "uint64_t": {
-        "category": "native"
+        "category": "native",
+        "wasm type": "j"
     },
     "uint8_t": {
         "category": "native"

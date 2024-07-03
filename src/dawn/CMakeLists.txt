@@ -137,15 +137,3 @@ DawnJSONGenerator(
 add_custom_target(webgpu_headers_gen
     DEPENDS ${WEBGPU_HEADERS_GEN_HEADERS}
 )
-
-DawnJSONGenerator(
-    TARGET "emscripten_bits"
-    PRINT_NAME "Emscripten WebGPU bits"
-    OUTPUT_HEADERS EMSCRIPTEN_BITS_GEN_HEADERS
-    OUTPUT_SOURCES EMSCRIPTEN_BITS_GEN_SOURCES
-)
-add_custom_target(emscripten_bits_gen
-    DEPENDS
-        ${EMSCRIPTEN_BITS_GEN_HEADERS}
-        ${EMSCRIPTEN_BITS_GEN_SOURCES}
-)

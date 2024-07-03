@@ -72,12 +72,24 @@ group("android") {
   deps = [ "tools/android" ]
 }
 
+group("emdawnwebgpu") {
+  # Without a copy of Emscripten, we can only generate a few files.
+  deps = [
+    "src/emdawnwebgpu:emdawnwebgpu_headers_gen",
+    "src/emdawnwebgpu:emdawnwebgpu_js_gen",
+  ]
+  if (dawn_emscripten_dir != "") {
+    deps += [ "src/emdawnwebgpu:emdawnwebgpu" ]
+  }
+}
+
 group("all") {
   testonly = true
   deps = [
     ":android",
     ":benchmarks",
     ":cmds",
+    ":emdawnwebgpu",
     ":fuzzers",
     ":libs",
     ":tests",

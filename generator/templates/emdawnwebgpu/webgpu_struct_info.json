@@ -26,10 +26,13 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //*
 //*
-//* This generator is used to produce part of Emscripten's struct_info.json,
-//* which is a list of struct fields that it uses to generate field offset
-//* information for its own code generators.
-//* https://github.com/emscripten-core/emscripten/blob/main/src/struct_info.json
+//* This generator is used to produce a struct info file, in the format of
+//* Emscripten's struct_info.json file, which is simply a list of struct fields
+//* that it uses to generate field offset information for JS code generation.
+//* <https://github.com/emscripten-core/emscripten/blob/main/src/struct_info.json>
+//* It can be fed directly into gen_struct_info.py, or copy-pasted into the
+//* struct_info.json as part of an update to Emscripten's built-in bindings.
+//* <https://github.com/emscripten-core/emscripten/blob/main/system/include/webgpu/README.md>
 //*
 [
     // ===========================================

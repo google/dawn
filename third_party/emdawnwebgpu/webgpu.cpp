@@ -20,21 +20,21 @@
 
 // Standalone (non-method) functions
 
-WGPUInstance wgpuCreateInstance(const WGPUInstanceDescriptor* descriptor) {
-  assert(descriptor == nullptr); // descriptor not implemented yet
+WGPUInstance wgpuCreateInstance([[maybe_unused]] const WGPUInstanceDescriptor* descriptor) {
+  assert(descriptor == nullptr);  // descriptor not implemented yet
   return reinterpret_cast<WGPUInstance>(1);
 }
 
 // Instance
 
-void wgpuInstanceReference(WGPUInstance) { /* no-op for now */ }
+void wgpuInstanceAddRef(WGPUInstance) { /* no-op for now */ }
 void wgpuInstanceRelease(WGPUInstance) { /* no-op for now */ }
 
 // WGPUSurface
 
-void wgpuSurfaceGetCapabilities(WGPUSurface surface,
-                                WGPUAdapter adapter,
-                                WGPUSurfaceCapabilities* capabilities) {
+WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface surface,
+                                      WGPUAdapter adapter,
+                                      WGPUSurfaceCapabilities* capabilities) {
   assert(capabilities->nextInChain == nullptr); // TODO: Return WGPUStatus_Error
 
   static constexpr std::array<WGPUTextureFormat, 3> kSurfaceFormatsRGBAFirst = {
@@ -59,6 +59,7 @@ void wgpuSurfaceGetCapabilities(WGPUSurface surface,
       break;
     default:
       assert(false);
+      return WGPUStatus_Error;
   }
 
   {
@@ -75,11 +76,13 @@ void wgpuSurfaceGetCapabilities(WGPUSurface surface,
     capabilities->alphaModeCount = kAlphaModes.size();
     capabilities->alphaModes = kAlphaModes.data();
   }
-};
+
+  return WGPUStatus_Success;
+}
 
 // WGPUSurfaceCapabilities
 
-void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities value) {
+void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities) {
   // wgpuSurfaceCapabilities doesn't currently allocate anything.
 }
 

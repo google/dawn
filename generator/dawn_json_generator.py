@@ -928,6 +928,37 @@ def as_jsEnumValue(value):
     return "'" + value.name.js_enum_case() + "'"
 
 
+def has_wasmType(return_type, args):
+    return all(map(lambda x: len(as_wasmType(x)) == 1, [return_type] + args))
+
+
+# Returns a single character wasm type (v/p/i/j/f/d) if valid, a "(longer string)" if not
+def as_wasmType(x):
+    if isinstance(x, RecordMember):
+        if x.annotation == 'value':
+            x = x.type
+        elif '*' in x.annotation:
+            return 'p'
+        else:
+            return f'({x})'
+
+    if isinstance(x, Type):
+        if x.category == 'enum':
+            return 'i'
+        elif x.category == 'bitmask':
+            # TODO(crbug.com/347732150): Change to 'j' when bitmasks are 64-bit
+            return 'i'
+        elif x.category in ['object', 'function pointer']:
+            return 'p'
+        elif x.category == 'native':
+            return x.json_data.get('wasm type', f'({x.name.name})')
+        elif x.category in ['structure', 'callback info']:
+            return f'({x.name.name})'  # Invalid
+        else:
+            assert False, 'Type -> ' + x.category
+    assert False, x
+
+
 def convert_cType_to_cppType(typ, annotation, arg, indent=0):
     if typ.category == 'native':
         return arg
@@ -1122,6 +1153,8 @@ def make_base_render_params(metadata):
             'as_cType': lambda name: as_cType(c_prefix, name),
             'as_cppType': as_cppType,
             'as_jsEnumValue': as_jsEnumValue,
+            'has_wasmType': has_wasmType,
+            'as_wasmType': as_wasmType,
             'convert_cType_to_cppType': convert_cType_to_cppType,
             'as_varName': as_varName,
             'decorate': decorate,
@@ -1270,38 +1303,45 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender('api.h', 'webgpu-headers/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_upstream]))
 
-        if 'emscripten_bits' in targets:
+        if 'emdawnwebgpu_headers' in targets:
             assert api == 'webgpu'
             params_emscripten = parse_json(
                 loaded_json, enabled_tags=['compat', 'emscripten'])
             # system/include/webgpu
             renders.append(
-                FileRender('api.h',
-                           'emscripten-bits/system/include/webgpu/webgpu.h',
+                FileRender('api.h', 'src/emdawnwebgpu/include/webgpu/webgpu.h',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
-                FileRender(
-                    'api_cpp.h',
-                    'emscripten-bits/system/include/webgpu/webgpu_cpp.h', [
-                        RENDER_PARAMS_BASE, params_emscripten, {
-                            'c_header': api + '/' + api + '.h',
-                            'c_namespace': None,
-                        }
-                    ]))
+                FileRender('api_cpp.h',
+                           'src/emdawnwebgpu/include/webgpu/webgpu_cpp.h', [
+                               RENDER_PARAMS_BASE, params_emscripten, {
+                                   'c_header': api + '/' + api + '.h',
+                                   'c_namespace': None,
+                               }
+                           ]))
             renders.append(
                 FileRender(
                     'api_cpp_chained_struct.h',
-                    'emscripten-bits/system/include/webgpu/webgpu_cpp_chained_struct.h',
+                    'src/emdawnwebgpu/include/webgpu/webgpu_cpp_chained_struct.h',
                     [RENDER_PARAMS_BASE, params_emscripten]))
-            # Snippets to paste into existing Emscripten files
+
+        if 'emdawnwebgpu_js' in targets:
+            assert api == 'webgpu'
+            params_emscripten = parse_json(
+                loaded_json, enabled_tags=['compat', 'emscripten'])
             renders.append(
-                FileRender('api_struct_info.json',
-                           'emscripten-bits/webgpu_struct_info.json',
+                FileRender('emdawnwebgpu/webgpu_struct_info.json',
+                           'src/emdawnwebgpu/webgpu_struct_info.json',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
-                FileRender('library_api_enum_tables.js',
-                           'emscripten-bits/library_webgpu_enum_tables.js',
+                FileRender('emdawnwebgpu/library_webgpu_enum_tables.js',
+                           'src/emdawnwebgpu/library_webgpu_enum_tables.js',
                            [RENDER_PARAMS_BASE, params_emscripten]))
+            renders.append(
+                FileRender(
+                    'emdawnwebgpu/library_webgpu_generated_sig_info.js',
+                    'src/emdawnwebgpu/library_webgpu_generated_sig_info.js',
+                    [RENDER_PARAMS_BASE, params_emscripten]))
 
         if 'mock_api' in targets:
             mock_params = [
