@@ -39,6 +39,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "raise",
   srcs = [
+    "binary_polyfill.cc",
     "builtin_polyfill.cc",
     "decompose_memory_access.cc",
     "fxc_polyfill.cc",
@@ -47,6 +48,7 @@ cc_library(
     "shader_io.cc",
   ],
   hdrs = [
+    "binary_polyfill.h",
     "builtin_polyfill.h",
     "decompose_memory_access.h",
     "fxc_polyfill.h",
@@ -89,6 +91,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "binary_polyfill_test.cc",
     "builtin_polyfill_test.cc",
     "decompose_memory_access_test.cc",
     "fxc_polyfill_test.cc",

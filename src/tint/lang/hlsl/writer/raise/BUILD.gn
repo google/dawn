@@ -44,6 +44,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("raise") {
   sources = [
+    "binary_polyfill.cc",
+    "binary_polyfill.h",
     "builtin_polyfill.cc",
     "builtin_polyfill.h",
     "decompose_memory_access.cc",
@@ -89,6 +91,7 @@ libtint_source_set("raise") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "binary_polyfill_test.cc",
       "builtin_polyfill_test.cc",
       "decompose_memory_access_test.cc",
       "fxc_polyfill_test.cc",

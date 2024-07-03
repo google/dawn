@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
+#include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/decompose_memory_access.h"
 #include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
@@ -118,7 +119,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // See https://github.com/microsoft/DirectXShaderCompiler/issues/5091 for more details.
         core_polyfills.pack_4xu8_clamp = true;
         core_polyfills.pack_unpack_4x8 = options.polyfill_pack_unpack_4x8;
-        // core_polyfills.precise_float_mod = true;
         // core_polyfills.reflect_vec2_f32 = options.polyfill_reflect_vec2_f32;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         // core_polyfills.workgroup_uniform_load = true;
@@ -163,6 +163,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     RUN_TRANSFORM(raise::ShaderIO, module);
+    RUN_TRANSFORM(raise::BinaryPolyfill, module);
+    // BuiltinPolyfill must come after BinaryPolyfill as binary adds builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
 

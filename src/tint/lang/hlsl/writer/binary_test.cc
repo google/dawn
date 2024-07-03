@@ -218,8 +218,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"(left <= right)", core::BinaryOp::kLessThanEqual},
                     BinaryData{"(left >= right)", core::BinaryOp::kGreaterThanEqual}));
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryF32Mod) {
+TEST_F(HlslWriterTest, BinaryF32Mod) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -236,26 +235,21 @@ TEST_F(HlslWriterTest, DISABLED_BinaryF32Mod) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-float tint_trunc(float param_0) {
-  return param_0 < 0 ? ceil(param_0) : floor(param_0);
-}
-
-float tint_float_mod(float lhs, float rhs) {
-  return (lhs - (tint_trunc((lhs / rhs)) * rhs));
-}
-
 [numthreads(1, 1, 1)]
 void foo() {
   float left = 0.0f;
   float right = 0.0f;
-  float const val = tint_float_mod(left, right);
+  float v = left;
+  float v_1 = right;
+  float v_2 = (v / v_1);
+  float v_3 = floor(v_2);
+  float val = ((v - (((v_2 < 0.0f)) ? (ceil(v_2)) : (v_3))) * v_1);
 }
 
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryF16Mod) {
+TEST_F(HlslWriterTest, BinaryF16Mod) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -272,26 +266,21 @@ TEST_F(HlslWriterTest, DISABLED_BinaryF16Mod) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-float16_t tint_trunc(float16_t param_0) {
-  return param_0 < 0 ? ceil(param_0) : floor(param_0);
-}
-
-float16_t tint_float_mod(float16_t lhs, float16_t rhs) {
-  return (lhs - (tint_trunc((lhs / rhs)) * rhs));
-}
-
 [numthreads(1, 1, 1)]
 void foo() {
   float16_t left = float16_t(0.0h);
   float16_t right = float16_t(0.0h);
-  float16_t const val = tint_float_mod(left, right);
+  float16_t v = left;
+  float16_t v_1 = right;
+  float16_t v_2 = (v / v_1);
+  float16_t v_3 = floor(v_2);
+  float16_t val = ((v - (((v_2 < float16_t(0.0h))) ? (ceil(v_2)) : (v_3))) * v_1);
 }
 
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryF32ModVec3) {
+TEST_F(HlslWriterTest, BinaryF32ModVec3) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -308,26 +297,21 @@ TEST_F(HlslWriterTest, DISABLED_BinaryF32ModVec3) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-float3 tint_trunc(float3 param_0) {
-  return param_0 < 0 ? ceil(param_0) : floor(param_0);
-}
-
-float3 tint_float_mod(float3 lhs, float3 rhs) {
-  return (lhs - (tint_trunc((lhs / rhs)) * rhs));
-}
-
 [numthreads(1, 1, 1)]
 void foo() {
   float3 left = (0.0f).xxx;
   float3 right = (0.0f).xxx;
-  float3 const val = tint_float_mod(left, right);
+  float3 v = left;
+  float3 v_1 = right;
+  float3 v_2 = (v / v_1);
+  float3 v_3 = floor(v_2);
+  float3 val = ((v - (((v_2 < (0.0f).xxx)) ? (ceil(v_2)) : (v_3))) * v_1);
 }
 
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryF16ModVec3) {
+TEST_F(HlslWriterTest, BinaryF16ModVec3) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -344,19 +328,15 @@ TEST_F(HlslWriterTest, DISABLED_BinaryF16ModVec3) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-vector<float16_t, 3> tint_trunc(vector<float16_t, 3> param_0) {
-  return param_0 < 0 ? ceil(param_0) : floor(param_0);
-}
-
-vector<float16_t, 3> tint_float_mod(vector<float16_t, 3> lhs, vector<float16_t, 3> rhs) {
-  return (lhs - (tint_trunc((lhs / rhs)) * rhs));
-}
-
 [numthreads(1, 1, 1)]
 void foo() {
   vector<float16_t, 3> left = (float16_t(0.0h)).xxx;
   vector<float16_t, 3> right = (float16_t(0.0h)).xxx;
-  vector<float16_t, 3> const val = tint_float_mod(left, right);
+  vector<float16_t, 3> v = left;
+  vector<float16_t, 3> v_1 = right;
+  vector<float16_t, 3> v_2 = (v / v_1);
+  vector<float16_t, 3> v_3 = floor(v_2);
+  vector<float16_t, 3> val = ((v - (((v_2 < (float16_t(0.0h)).xxx)) ? (ceil(v_2)) : (v_3))) * v_1);
 }
 
 )");
