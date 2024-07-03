@@ -31,13 +31,29 @@
 #include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::msl::writer {
 namespace {
 
-void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context, Options options) {
+bool CanRun(const Program& program) {
     if (program.AST().HasOverrides()) {
-        // MSL writer assumes the SubstituteOverride and SingleEntryPoint transforms have been run
+        // MSL writer assumes the SubstituteOverride and SingleEntryPoint transforms have been run.
+        return false;
+    }
+
+    // Check for push constants, which the MSL writer does not support.
+    for (auto* global : program.AST().GlobalVariables()) {
+        if (program.Sem().Get(global)->AddressSpace() == core::AddressSpace::kPushConstant) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context, Options options) {
+    if (!CanRun(program)) {
         return;
     }
 
