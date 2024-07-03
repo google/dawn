@@ -92,11 +92,14 @@ struct State {
                     [&](core::ir::StoreVectorElement* sve) { usage_worklist.Push(sve); },
                     [&](core::ir::Store* st) { usage_worklist.Push(st); },
                     [&](core::ir::Load* ld) { usage_worklist.Push(ld); },
-                    [&](core::ir::Access* a) { usage_worklist.Push(a); });
+                    [&](core::ir::Access* a) { usage_worklist.Push(a); },
+                    [&](core::ir::Let* l) { usage_worklist.Push(l); },  //
+                    TINT_ICE_ON_NO_MATCH);
             }
 
             auto* var_ty = result->Type()->As<core::type::Pointer>();
-            for (auto* inst : usage_worklist) {
+            while (!usage_worklist.IsEmpty()) {
+                auto* inst = usage_worklist.Pop();
                 // Load instructions can be destroyed by the replacing access function
                 if (!inst->Alive()) {
                     continue;
@@ -106,9 +109,19 @@ struct State {
                     inst,
                     [&](core::ir::LoadVectorElement* l) { LoadVectorElement(l, var, var_ty); },
                     [&](core::ir::StoreVectorElement* s) { StoreVectorElement(s, var, var_ty); },
-                    [&](core::ir::Store* s) { Store(s); },                                  //
-                    [&](core::ir::Load* l) { Load(l, var); },                               //
-                    [&](core::ir::Access* a) { Access(a, var, a->Object()->Type(), 0u); },  //
+                    [&](core::ir::Store* s) { Store(s); },     //
+                    [&](core::ir::Load* l) { Load(l, var); },  //
+                    [&](core::ir::Access* a) { Access(a, var, a->Object()->Type(), 0u); },
+                    [&](core::ir::Let* let) {
+                        // The `let` is, essentially, an alias for the `var` as it's assigned
+                        // directly. Gather all the `let` usages into our worklist, and then replace
+                        // the `let` with the `var` itself.
+                        for (auto& usage : let->Result(0)->Usages()) {
+                            usage_worklist.Push(usage->instruction);
+                        }
+                        let->Result(0)->ReplaceAllUsesWith(result);
+                        let->Destroy();
+                    },
                     TINT_ICE_ON_NO_MATCH);
             }
 
@@ -309,6 +322,15 @@ struct State {
         });
     }
 
+    void InsertLoad(core::ir::Var* var, core::ir::Instruction* inst, uint32_t offset) {
+        b.InsertBefore(inst, [&] {
+            auto* call =
+                MakeLoad(inst, var, inst->Result(0)->Type()->UnwrapPtr(), b.Value(u32(offset)));
+            inst->Result(0)->ReplaceAllUsesWith(call->Result(0));
+        });
+        inst->Destroy();
+    }
+
     void Access(core::ir::Access* a,
                 core::ir::Var* var,
                 const core::type::Type* obj,
@@ -349,21 +371,20 @@ struct State {
                 TINT_ICE_ON_NO_MATCH);
         }
 
-        auto insert_load = [&](core::ir::Instruction* inst, uint32_t offset) {
-            b.InsertBefore(inst, [&] {
-                auto* call = MakeLoad(inst, var, inst->Result(0)->Type(), b.Value(u32(offset)));
-                inst->Result(0)->ReplaceAllUsesWith(call->Result(0));
-            });
-            inst->Destroy();
-        };
-
         // Copy the usages into a vector so we can remove items from the hashset.
         auto usages = a->Result(0)->Usages().Vector();
-        for (auto& usage : usages) {
+        while (!usages.IsEmpty()) {
+            auto usage = usages.Pop();
             tint::Switch(
-                usage.instruction,  //
-                [&](core::ir::Let*) {
-                    // TODO(dsinclair): handle let
+                usage.instruction,
+                [&](core::ir::Let* let) {
+                    // The `let` is essentially an alias to the `access`. So, add the `let` usages
+                    // into the usage worklist, and replace the let with the access chain directly.
+                    for (auto& u : let->Result(0)->Usages()) {
+                        usages.Push(u);
+                    }
+                    let->Result(0)->ReplaceAllUsesWith(a->Result(0));
+                    let->Destroy();
                 },
                 [&](core::ir::Access* sub_access) {
                     // Treat an access chain of the access chain as a continuation of the outer
@@ -376,11 +397,11 @@ struct State {
                     a->Result(0)->RemoveUsage(usage);
 
                     byte_offset += CalculateVectorIndex(lve->Index(), obj);
-                    insert_load(lve, byte_offset);
-                },  //
+                    InsertLoad(var, lve, byte_offset);
+                },
                 [&](core::ir::Load* ld) {
                     a->Result(0)->RemoveUsage(usage);
-                    insert_load(ld, byte_offset);
+                    InsertLoad(var, ld, byte_offset);
                 },
 
                 [&](core::ir::StoreVectorElement*) {

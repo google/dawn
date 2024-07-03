@@ -260,7 +260,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeMemoryAccessTest, DISABLED_AccessChainFromLetAccessChain) {
+TEST_F(HlslWriterDecomposeMemoryAccessTest, AccessChainFromLetAccessChain) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"),
                   {
@@ -278,11 +278,12 @@ TEST_F(HlslWriterDecomposeMemoryAccessTest, DISABLED_AccessChainFromLetAccessCha
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Let("x", b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), var));
+        auto* x = b.Let("x", var);
         auto* y = b.Let(
             "y", b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x->Result(0), 1_u));
-        b.Let("z", b.Load(b.Access(ty.ptr(storage, ty.f32(), core::Access::kReadWrite),
-                                   y->Result(0), 0_u)));
+        auto* z = b.Let(
+            "z", b.Access(ty.ptr(storage, ty.f32(), core::Access::kReadWrite), y->Result(0), 0_u));
+        b.Let("a", b.Load(z));
         b.Return(func);
     });
 
@@ -302,11 +303,13 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, Inner, read_write> = access %v, 1u
-    %a:ptr<storage, Inner, read_write> = let %3
-    %5:ptr<storage, f32, read_write> = access %a, 0u
-    %6:f32 = load %5
-    %b:f32 = let %6
+    %x:ptr<storage, SB, read_write> = let %v
+    %4:ptr<storage, Inner, read_write> = access %x, 1u
+    %y:ptr<storage, Inner, read_write> = let %4
+    %6:ptr<storage, f32, read_write> = access %y, 0u
+    %z:ptr<storage, f32, read_write> = let %6
+    %8:f32 = load %z
+    %a:f32 = let %8
     ret
   }
 }
@@ -314,9 +317,13 @@ $B1: {  # root
     ASSERT_EQ(src, str());
 
     auto* expect = R"(
-SB = struct @align(16) {
+Inner = struct @align(4) {
+  c:f32 @offset(0)
+}
+
+SB = struct @align(4) {
   a:i32 @offset(0)
-  b:vec3<f32> @offset(16)
+  b:Inner @offset(4)
 }
 
 $B1: {  # root
@@ -325,9 +332,9 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec3<u32> = %v.Load3 16u
-    %a:vec3<f32> = bitcast %3
-    %b:f32 = %a 1u
+    %3:u32 = %v.Load 4u
+    %4:f32 = bitcast %3
+    %a:f32 = let %4
     ret
   }
 }

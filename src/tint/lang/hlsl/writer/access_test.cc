@@ -664,5 +664,42 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, AccessChainFromLetAccessChain) {
+    auto* Inner =
+        ty.Struct(mod.symbols.New("Inner"),
+                  {
+                      {mod.symbols.New("c"), ty.f32(), core::type::StructMemberAttributes{}},
+                  });
+    auto* sb = ty.Struct(mod.symbols.New("SB"),
+                         {
+                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
+                             {mod.symbols.New("b"), Inner, core::type::StructMemberAttributes{}},
+                         });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", var);
+        auto* y = b.Let(
+            "y", b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x->Result(0), 1_u));
+        auto* z = b.Let(
+            "z", b.Access(ty.ptr(storage, ty.f32(), core::Access::kReadWrite), y->Result(0), 0_u));
+        b.Let("a", b.Load(z));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  float a = asfloat(v.Load(4u));
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer
