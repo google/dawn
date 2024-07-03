@@ -52,7 +52,8 @@ class ScopedCommandRecordingContext;
 
 namespace {
 
-constexpr wgpu::BufferUsage kCopyUsages = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+constexpr wgpu::BufferUsage kCopyUsages =
+    wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst | kInternalCopySrcBuffer;
 
 constexpr wgpu::BufferUsage kStagingUsages = kMappableBufferUsages | kCopyUsages;
 
@@ -75,7 +76,9 @@ bool IsMappable(wgpu::BufferUsage usage) {
 }
 
 bool IsUpload(wgpu::BufferUsage usage) {
-    return usage == (wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite);
+    return usage & wgpu::BufferUsage::MapWrite &&
+           IsSubset(usage, kInternalCopySrcBuffer | wgpu::BufferUsage::CopySrc |
+                               wgpu::BufferUsage::MapWrite);
 }
 
 bool IsStaging(wgpu::BufferUsage usage) {
@@ -829,7 +832,8 @@ MaybeError GPUUsableBuffer::InitializeInternal() {
     // We need to create a separate storage for uniform usage, because D3D11 doesn't allow constant
     // buffer to be used for other purposes.
     if (usagesToHandle & wgpu::BufferUsage::Uniform) {
-        usagesToHandle &= ~(wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
+        usagesToHandle &=
+            ~(wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc | kInternalCopySrcBuffer);
 
         // Since D3D11 doesn't allow both CPU & GPU to write to a buffer, we need separate
         // storages for CPU writes and GPU writes.

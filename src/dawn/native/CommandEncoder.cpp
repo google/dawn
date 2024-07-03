@@ -1478,7 +1478,8 @@ void CommandEncoder::InternalCopyBufferToBufferWithAllocatedSize(BufferBase* sou
                                  destination);
                 DAWN_TRY(ValidateB2BCopyAlignment(size, sourceOffset, destinationOffset));
 
-                DAWN_TRY_CONTEXT(ValidateCanUseAs(source, wgpu::BufferUsage::CopySrc),
+                DAWN_TRY_CONTEXT(ValidateCanUseAsInternal(
+                                     source, wgpu::BufferUsage::CopySrc | kInternalCopySrcBuffer),
                                  "validating source %s usage.", source);
                 DAWN_TRY_CONTEXT(ValidateCanUseAs(destination, wgpu::BufferUsage::CopyDst),
                                  "validating destination %s usage.", destination);

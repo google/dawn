@@ -55,7 +55,7 @@ namespace {
 VkBufferUsageFlags VulkanBufferUsage(wgpu::BufferUsage usage) {
     VkBufferUsageFlags flags = 0;
 
-    if (usage & wgpu::BufferUsage::CopySrc) {
+    if (usage & (wgpu::BufferUsage::CopySrc | kInternalCopySrcBuffer)) {
         flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     }
     if (usage & wgpu::BufferUsage::CopyDst) {
@@ -89,7 +89,8 @@ VkPipelineStageFlags VulkanPipelineStage(wgpu::BufferUsage usage, wgpu::ShaderSt
     if (usage & kMappableBufferUsages) {
         flags |= VK_PIPELINE_STAGE_HOST_BIT;
     }
-    if (usage & (wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst)) {
+    if (usage &
+        (wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst | kInternalCopySrcBuffer)) {
         flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
     }
     if (usage & (wgpu::BufferUsage::Index | wgpu::BufferUsage::Vertex)) {
@@ -125,7 +126,7 @@ VkAccessFlags VulkanAccessFlags(wgpu::BufferUsage usage) {
     if (usage & wgpu::BufferUsage::MapWrite) {
         flags |= VK_ACCESS_HOST_WRITE_BIT;
     }
-    if (usage & wgpu::BufferUsage::CopySrc) {
+    if (usage & (wgpu::BufferUsage::CopySrc | kInternalCopySrcBuffer)) {
         flags |= VK_ACCESS_TRANSFER_READ_BIT;
     }
     if (usage & wgpu::BufferUsage::CopyDst) {

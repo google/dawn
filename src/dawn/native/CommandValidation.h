@@ -114,6 +114,7 @@ MaybeError ValidateCanUseAs(const TextureBase* texture,
                             wgpu::TextureUsage usage,
                             UsageValidationMode mode);
 MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
+MaybeError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage);
 
 using ColorAttachmentFormats = absl::InlinedVector<const Format*, kMaxColorAttachments>;
 MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,

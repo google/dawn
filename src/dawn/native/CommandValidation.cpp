@@ -655,6 +655,12 @@ MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
     return {};
 }
 
+MaybeError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage) {
+    DAWN_INVALID_IF(!(buffer->GetUsage() & usage), "%s internal usage (%s) doesn't include %s.",
+                    buffer, buffer->GetUsage(), usage);
+    return {};
+}
+
 namespace {
 std::string TextureFormatsToString(const ColorAttachmentFormats& formats) {
     std::ostringstream ss;
