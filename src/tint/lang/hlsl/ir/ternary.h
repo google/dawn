@@ -42,6 +42,9 @@ namespace tint::hlsl::ir {
 class Ternary final : public Castable<Ternary, core::ir::Call> {
   public:
     /// Constructor
+    ///
+    /// Note, the args are in the order of (`false`, `true`, `compare`) to match select.
+    /// Note, the ternary evaluates all branches, not just the selected branch.
     Ternary(core::ir::InstructionResult* result, VectorRef<core::ir::Value*> args);
     ~Ternary() override;
 

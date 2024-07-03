@@ -58,12 +58,11 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    using BinaryType =
-        tint::UnorderedKeyWrapper<std::tuple<const core::type::Type*, const core::type::Type*>>;
-
-    // Polyfill functions for bitcast expression, BinaryType indicates the source type and the
+    // Polyfill functions for bitcast expression, BitcastType indicates the source type and the
     // destination type.
-    Hashmap<BinaryType, core::ir::Function*, 4> bitcast_funcs_{};
+    using BitcastType =
+        tint::UnorderedKeyWrapper<std::tuple<const core::type::Type*, const core::type::Type*>>;
+    Hashmap<BitcastType, core::ir::Function*, 4> bitcast_funcs_{};
 
     /// Process the module.
     void Process() {
@@ -78,6 +77,9 @@ struct State {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
                     case core::BuiltinFn::kSelect:
+                        call_worklist.Push(call);
+                        break;
+                    case core::BuiltinFn::kTrunc:
                         call_worklist.Push(call);
                         break;
                     default:
@@ -110,6 +112,9 @@ struct State {
                 case core::BuiltinFn::kSelect:
                     Select(call);
                     break;
+                case core::BuiltinFn::kTrunc:
+                    Trunc(call);
+                    break;
                 default:
                     TINT_UNREACHABLE();
             }
@@ -121,6 +126,33 @@ struct State {
         auto* ternary =
             b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(call->DetachResult(), args);
         ternary->InsertBefore(call);
+        call->Destroy();
+    }
+
+    // HLSL's trunc is broken for very large/small float values.
+    // See crbug.com/tint/1883
+    //
+    // Replace with:
+    //   value < 0 ? ceil(value) : floor(value)
+    void Trunc(core::ir::CoreBuiltinCall* call) {
+        auto* val = call->Args()[0];
+
+        auto* type = call->Result(0)->Type();
+        Vector<core::ir::Value*, 4> args;
+        b.InsertBefore(call, [&] {
+            args.Push(b.Call(type, core::BuiltinFn::kFloor, val)->Result(0));
+            args.Push(b.Call(type, core::BuiltinFn::kCeil, val)->Result(0));
+
+            const core::type::Type* comp_ty = ty.bool_();
+            if (auto* vec = type->As<core::type::Vector>()) {
+                comp_ty = ty.vec(comp_ty, vec->Width());
+            }
+            args.Push(b.LessThan(comp_ty, val, b.Zero(type))->Result(0));
+        });
+        auto* trunc =
+            b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(call->DetachResult(), args);
+        trunc->InsertBefore(call);
+
         call->Destroy();
     }
 
@@ -154,7 +186,7 @@ struct State {
     core::ir::Function* CreateBitcastFromF16(const core::type::Type* src_type,
                                              const core::type::Type* dst_type) {
         return bitcast_funcs_.GetOrAdd(
-            BinaryType{{src_type, dst_type}}, [&]() -> core::ir::Function* {
+            BitcastType{{src_type, dst_type}}, [&]() -> core::ir::Function* {
                 TINT_ASSERT(src_type->Is<core::type::Vector>());
 
                 // Generate a helper function that performs the following (in HLSL):
@@ -240,7 +272,7 @@ struct State {
     core::ir::Function* CreateBitcastToF16(const core::type::Type* src_type,
                                            const core::type::Type* dst_type) {
         return bitcast_funcs_.GetOrAdd(
-            BinaryType{{src_type, dst_type}}, [&]() -> core::ir::Function* {
+            BitcastType{{src_type, dst_type}}, [&]() -> core::ir::Function* {
                 TINT_ASSERT(dst_type->Is<core::type::Vector>());
 
                 // Generate a helper function that performs the following (in HLSL):
