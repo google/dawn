@@ -177,11 +177,12 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeMemoryAccessTest, DISABLED_AccessChainFromUnnamedAccessChain) {
+TEST_F(HlslWriterDecomposeMemoryAccessTest, AccessChainFromUnnamedAccessChain) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"),
                   {
                       {mod.symbols.New("c"), ty.f32(), core::type::StructMemberAttributes{}},
+                      {mod.symbols.New("d"), ty.u32(), core::type::StructMemberAttributes{}},
                   });
     auto* sb = ty.Struct(mod.symbols.New("SB"),
                          {
@@ -190,20 +191,22 @@ TEST_F(HlslWriterDecomposeMemoryAccessTest, DISABLED_AccessChainFromUnnamedAcces
                          });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Access(ty.ptr(storage, sb, core::Access::kReadWrite), var);
         auto* y = b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x->Result(0), 1_u);
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.f32(), core::Access::kReadWrite),
-                                   y->Result(0), 0_u)));
+        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite),
+                                   y->Result(0), 1_u)));
         b.Return(func);
     });
 
     auto* src = R"(
 Inner = struct @align(4) {
   c:f32 @offset(0)
+  d:u32 @offset(4)
 }
 
 SB = struct @align(4) {
@@ -212,16 +215,16 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<storage, SB, read_write> = access %v
     %4:ptr<storage, Inner, read_write> = access %3, 1u
-    %5:ptr<storage, f32, read_write> = access %4, 0u
-    %6:f32 = load %5
-    %b:f32 = let %6
+    %5:ptr<storage, u32, read_write> = access %4, 1u
+    %6:u32 = load %5
+    %b:u32 = let %6
     ret
   }
 }
@@ -229,20 +232,25 @@ $B1: {  # root
     ASSERT_EQ(src, str());
 
     auto* expect = R"(
-SB = struct @align(16) {
+Inner = struct @align(4) {
+  c:f32 @offset(0)
+  d:u32 @offset(4)
+}
+
+SB = struct @align(4) {
   a:i32 @offset(0)
-  b:vec3<f32> @offset(16)
+  b:Inner @offset(4)
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec3<u32> = %v.Load3 16u
-    %a:vec3<f32> = bitcast %3
-    %b:f32 = %a 1u
+    %3:u32 = %v.Load 8u
+    %4:u32 = bitcast %3
+    %b:u32 = let %4
     ret
   }
 }
@@ -265,13 +273,16 @@ TEST_F(HlslWriterDecomposeMemoryAccessTest, DISABLED_AccessChainFromLetAccessCha
                          });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* a = b.Let("a", b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), var, 1_u));
-        b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.f32(), core::Access::kReadWrite),
-                                   a->Result(0), 0_u)));
+        auto* x = b.Let("x", b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), var));
+        auto* y = b.Let(
+            "y", b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x->Result(0), 1_u));
+        b.Let("z", b.Load(b.Access(ty.ptr(storage, ty.f32(), core::Access::kReadWrite),
+                                   y->Result(0), 0_u)));
         b.Return(func);
     });
 
@@ -286,7 +297,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -309,7 +320,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
