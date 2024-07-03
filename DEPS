@@ -64,7 +64,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@efa920ce144e4dc1c1841e73179cd7e23b9f0d5e',
+    'url': '{chromium_git}/chromium/src/buildtools@896ec6b3b02cd3c372d938bea2df40ad657ea57a',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -102,12 +102,12 @@ deps = {
   },
 
   'third_party/libc++/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@93a8f551c85a12ab102407db0f9a2236bcac505a',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@751aebaa8868e1702df097bdd6fecec00f83e534',
     'condition': 'dawn_standalone',
   },
 
   'third_party/libc++abi/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@5f2c9767ceaeb8a21e4004890bf2c6b08faa8687',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@e5b130d5dc3058457ea0658a55ae6bb968f75f0e',
     'condition': 'dawn_standalone',
   },
 
@@ -115,15 +115,15 @@ deps = {
   # The //build, //tools/clang, and //tools/rust deps should all be updated
   # in unison, as there are dependencies between them.
   'build': {
-    'url': '{chromium_git}/chromium/src/build@007a74bf79d5c749f6c217f743999ffdcea4cbec',
+    'url': '{chromium_git}/chromium/src/build@41cbb5873464cc637d22a8340f76930fbbf6a5b3',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@7d6eb60255e85509c5124e727d5c9502a344c9f1',
+    'url': '{chromium_git}/chromium/src/tools/clang@ee9095f6e18be293dfdff963575b1fb7d3e1151d',
     'condition': 'dawn_standalone',
   },
   'tools/rust': {
-    'url': '{chromium_git}/chromium/src/tools/rust@e509baed59ecd097b6fe27c0ffabd3be5ed87860',
+    'url': '{chromium_git}/chromium/src/tools/rust@b40b86555ee5e6f9749749072665fb052cb90012',
     'condition': 'dawn_standalone and checkout_rust',
   },
   'tools/clang/dsymutil': {
