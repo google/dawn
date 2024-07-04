@@ -155,5 +155,521 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicStore) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore,
+               b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicLoad) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicAdd) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicAdd,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicSub) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicSub,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicMax) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicMax,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicMin) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicMin,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicAnd) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicAnd,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicOr) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicOr,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicXor) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicXor,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 2_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicExchange) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicExchange,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 2_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicCompareExchangeWeak) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* out = ty.Struct(
+        mod.symbols.New("__atomic_compare_exchange_result"),
+        {{mod.symbols.New("old_value"), ty.i32()}, {mod.symbols.New("exchanged"), ty.bool_()}});
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x",
+              b.Call(out, core::BuiltinFn::kAtomicCompareExchangeWeak,
+                     b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i, 345_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicStore) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore,
+               b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicLoad) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicAdd) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicAdd,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicSub) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicSub,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicMax) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicMax,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicMin) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicMin,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicAnd) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicAnd,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicOr) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicOr,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicXor) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicXor,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 2_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicExchange) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicExchange,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 2_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicCompareExchangeWeak) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* out = ty.Struct(
+        mod.symbols.New("__atomic_compare_exchange_result"),
+        {{mod.symbols.New("old_value"), ty.i32()}, {mod.symbols.New("exchanged"), ty.bool_()}});
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(out, core::BuiltinFn::kAtomicCompareExchangeWeak,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i,
+                          345_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

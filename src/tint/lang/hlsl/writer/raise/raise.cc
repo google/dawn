@@ -164,7 +164,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(raise::ShaderIO, module);
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
-    // BuiltinPolyfill must come after BinaryPolyfill as binary adds builtins
+    // BuiltinPolyfill must come after BinaryPolyfill and DecomposeMemoryAccess as they add builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
 
