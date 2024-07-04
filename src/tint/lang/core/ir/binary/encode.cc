@@ -142,8 +142,11 @@ struct Encoder {
             fn_out->add_parameters(Value(param_in));
         }
         if (auto ret_loc_in = fn_in->ReturnLocation()) {
-            auto& ret_loc_out = *fn_out->mutable_return_location();
-            Location(ret_loc_out, *ret_loc_in);
+            fn_out->set_return_location(*ret_loc_in);
+        }
+        if (auto ret_interp_in = fn_in->ReturnInterpolation()) {
+            auto& ret_interp_out = *fn_out->mutable_return_interpolation();
+            Interpolation(ret_interp_out, *ret_interp_in);
         }
         if (auto builtin_in = fn_in->ReturnBuiltin()) {
             fn_out->set_return_builtin(BuiltinValue(*builtin_in));
@@ -550,8 +553,11 @@ struct Encoder {
             BindingPoint(bp_out, *bp_in);
         }
         if (auto location_in = param_in->Location()) {
-            auto& location_out = *param_out.mutable_attributes()->mutable_location();
-            Location(location_out, *location_in);
+            param_out.mutable_attributes()->set_location(*location_in);
+        }
+        if (auto interpolation_in = param_in->Interpolation()) {
+            auto& interpolation_out = *param_out.mutable_attributes()->mutable_interpolation();
+            Interpolation(interpolation_out, *interpolation_in);
         }
         if (auto builtin_in = param_in->Builtin()) {
             param_out.mutable_attributes()->set_builtin(BuiltinValue(*builtin_in));
@@ -623,14 +629,6 @@ struct Encoder {
     ////////////////////////////////////////////////////////////////////////////
     // Attributes
     ////////////////////////////////////////////////////////////////////////////
-    void Location(pb::Location& location_out, const ir::Location& location_in) {
-        if (auto interpolation_in = location_in.interpolation) {
-            auto& interpolation_out = *location_out.mutable_interpolation();
-            Interpolation(interpolation_out, *interpolation_in);
-        }
-        location_out.set_value(location_in.value);
-    }
-
     void Interpolation(pb::Interpolation& interpolation_out,
                        const core::Interpolation& interpolation_in) {
         interpolation_out.set_type(InterpolationType(interpolation_in.type));

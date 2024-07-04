@@ -212,17 +212,14 @@ void Disassembler::EmitBindingPoint(BindingPoint p) {
          << StyleLiteral(p.binding) << ")";
 }
 
-void Disassembler::EmitLocation(Location loc) {
-    out_ << StyleAttribute("@location") << "(" << loc.value << ")";
-    if (loc.interpolation.has_value()) {
-        out_ << ", " << StyleAttribute("@interpolate") << "(";
-        out_ << StyleEnum(loc.interpolation->type);
-        if (loc.interpolation->sampling != core::InterpolationSampling::kUndefined) {
-            out_ << ", ";
-            out_ << StyleEnum(loc.interpolation->sampling);
-        }
-        out_ << ")";
+void Disassembler::EmitInterpolation(Interpolation interp) {
+    out_ << StyleAttribute("@interpolate") << "(";
+    out_ << StyleEnum(interp.type);
+    if (interp.sampling != core::InterpolationSampling::kUndefined) {
+        out_ << ", ";
+        out_ << StyleEnum(interp.sampling);
     }
+    out_ << ")";
 }
 
 void Disassembler::EmitParamAttributes(const FunctionParam* p) {
@@ -246,7 +243,13 @@ void Disassembler::EmitParamAttributes(const FunctionParam* p) {
         need_comma = true;
     }
     if (p->Location().has_value()) {
-        EmitLocation(p->Location().value());
+        comma();
+        out_ << StyleAttribute("@location") << "(" << p->Location().value() << ")";
+        need_comma = true;
+    }
+    if (p->Interpolation().has_value()) {
+        comma();
+        EmitInterpolation(p->Interpolation().value());
         need_comma = true;
     }
     if (p->BindingPoint().has_value()) {
@@ -283,7 +286,12 @@ void Disassembler::EmitReturnAttributes(const Function* func) {
     }
     if (func->ReturnLocation().has_value()) {
         comma();
-        EmitLocation(func->ReturnLocation().value());
+        out_ << StyleAttribute("@location") << "(" << func->ReturnLocation().value() << ")";
+        need_comma = true;
+    }
+    if (func->ReturnInterpolation().has_value()) {
+        comma();
+        EmitInterpolation(func->ReturnInterpolation().value());
         need_comma = true;
     }
     if (func->ReturnBuiltin().has_value()) {

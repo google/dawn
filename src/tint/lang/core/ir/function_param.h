@@ -115,20 +115,17 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @param loc the optional location value
     void SetLocation(std::optional<uint32_t> loc) { attributes_.location = loc; }
 
+    /// @returns the optional location attribute value
+    std::optional<uint32_t> Location() const { return attributes_.location; }
+
     /// Sets the interpolation.
     /// @param interpolation the optional location interpolation settings
     void SetInterpolation(std::optional<core::Interpolation> interpolation) {
         attributes_.interpolation = interpolation;
     }
 
-    /// @returns the location if `Attributes` contains `kLocation`
-    std::optional<ir::Location> Location() const {
-        // TODO(340196362): Remove this overload.
-        if (attributes_.location.has_value()) {
-            return ir::Location{attributes_.location.value(), attributes_.interpolation};
-        }
-        return {};
-    }
+    /// @returns the optional interpolation attribute value
+    std::optional<core::Interpolation> Interpolation() const { return attributes_.interpolation; }
 
     /// Sets the binding point
     /// @param group the group

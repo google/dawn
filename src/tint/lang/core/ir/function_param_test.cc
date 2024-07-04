@@ -77,11 +77,11 @@ TEST_F(IR_FunctionParamTest, Clone) {
     EXPECT_TRUE(new_fp->Builtin().has_value());
     EXPECT_EQ(BuiltinValue::kVertexIndex, new_fp->Builtin().value());
 
-    EXPECT_TRUE(new_fp->Location().has_value());
-    auto loc = new_fp->Location();
-    EXPECT_EQ(1u, loc->value);
-    EXPECT_EQ(core::InterpolationType::kFlat, loc->interpolation->type);
-    EXPECT_EQ(core::InterpolationSampling::kCentroid, loc->interpolation->sampling);
+    EXPECT_EQ(new_fp->Location(), 1u);
+    auto interp = new_fp->Interpolation();
+    EXPECT_TRUE(interp.has_value());
+    EXPECT_EQ(interp->type, core::InterpolationType::kFlat);
+    EXPECT_EQ(interp->sampling, core::InterpolationSampling::kCentroid);
 
     EXPECT_TRUE(new_fp->BindingPoint().has_value());
     auto bp = new_fp->BindingPoint();

@@ -113,11 +113,11 @@ TEST_F(IR_FunctionTest, Clone) {
     EXPECT_TRUE(new_f->ReturnBuiltin().has_value());
     EXPECT_EQ(BuiltinValue::kFragDepth, new_f->ReturnBuiltin().value());
 
-    EXPECT_TRUE(new_f->ReturnLocation().has_value());
-    auto loc = new_f->ReturnLocation().value();
-    EXPECT_EQ(1u, loc.value);
-    EXPECT_EQ(core::InterpolationType::kFlat, loc.interpolation->type);
-    EXPECT_EQ(core::InterpolationSampling::kCentroid, loc.interpolation->sampling);
+    EXPECT_EQ(new_f->ReturnLocation(), 1u);
+    auto interp = new_f->ReturnInterpolation();
+    EXPECT_TRUE(interp.has_value());
+    EXPECT_EQ(interp->type, core::InterpolationType::kFlat);
+    EXPECT_EQ(interp->sampling, core::InterpolationSampling::kCentroid);
 
     EXPECT_TRUE(new_f->ReturnInvariant());
 

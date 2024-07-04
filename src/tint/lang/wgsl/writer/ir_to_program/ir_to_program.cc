@@ -260,10 +260,10 @@ class State {
                 }
             }
             if (auto loc = param->Location()) {
-                attrs.Push(b.Location(u32(loc->value)));
-                if (auto interp = loc->interpolation) {
-                    attrs.Push(b.Interpolate(interp->type, interp->sampling));
-                }
+                attrs.Push(b.Location(u32(loc.value())));
+            }
+            if (auto interp = param->Interpolation()) {
+                attrs.Push(b.Interpolate(interp->type, interp->sampling));
             }
             if (param->Invariant()) {
                 attrs.Push(b.Invariant());
@@ -313,10 +313,10 @@ class State {
             }
         }
         if (auto loc = fn->ReturnLocation()) {
-            ret_attrs.Push(b.Location(u32(loc->value)));
-            if (auto interp = loc->interpolation) {
-                ret_attrs.Push(b.Interpolate(interp->type, interp->sampling));
-            }
+            ret_attrs.Push(b.Location(u32(loc.value())));
+        }
+        if (auto interp = fn->ReturnInterpolation()) {
+            ret_attrs.Push(b.Interpolate(interp->type, interp->sampling));
         }
         if (fn->ReturnInvariant()) {
             ret_attrs.Push(b.Invariant());

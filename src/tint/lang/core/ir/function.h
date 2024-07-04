@@ -122,17 +122,12 @@ class Function : public Castable<Function, Value> {
     /// @returns the return builtin attribute
     std::optional<BuiltinValue> ReturnBuiltin() const { return return_.attributes.builtin; }
 
-    /// Sets the return location
-    /// @param location the location to set
-    void SetReturnLocation(Location location) {
-        // TODO(340196362): Remove this overload.
-        return_.attributes.location = location.value;
-        return_.attributes.interpolation = location.interpolation;
-    }
-
     /// Sets the return location.
     /// @param loc the optional location to set
     void SetReturnLocation(std::optional<uint32_t> loc) { return_.attributes.location = loc; }
+
+    /// @returns the return location
+    std::optional<uint32_t> ReturnLocation() const { return return_.attributes.location; }
 
     /// Sets the return interpolation.
     /// @param interp the optional interpolation
@@ -140,14 +135,9 @@ class Function : public Castable<Function, Value> {
         return_.attributes.interpolation = interp;
     }
 
-    /// @returns the return location
-    std::optional<Location> ReturnLocation() const {
-        // TODO(340196362): Remove this overload.
-        if (return_.attributes.location.has_value()) {
-            return ir::Location{return_.attributes.location.value(),
-                                return_.attributes.interpolation};
-        }
-        return {};
+    /// @returns the return interpolation
+    std::optional<Interpolation> ReturnInterpolation() const {
+        return return_.attributes.interpolation;
     }
 
     /// Sets the return as invariant
