@@ -54,9 +54,7 @@ Function* Function::Clone(CloneContext& ctx) {
         ctx.ir.allocators.values.Create<Function>(return_.type, pipeline_stage_, workgroup_size_);
     new_func->block_ = ctx.ir.blocks.Create<ir::Block>();
     new_func->SetParams(ctx.Clone<1>(params_.Slice()));
-    new_func->return_.builtin = return_.builtin;
-    new_func->return_.location = return_.location;
-    new_func->return_.invariant = return_.invariant;
+    new_func->return_.attributes = return_.attributes;
 
     ctx.Replace(this, new_func);
     block_->CloneInto(ctx, new_func->block_);
