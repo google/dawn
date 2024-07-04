@@ -33,7 +33,10 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/hlsl/validate/validate.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
+#include "src/tint/utils/command/command.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::hlsl::writer {
 
@@ -64,6 +67,30 @@ class HlslWriterTestHelperBase : public BASE {
             return false;
         }
         output_ = result.Get();
+
+        const char* dxc_path = validate::kDxcDLLName;
+        auto dxc = tint::Command::LookPath(dxc_path);
+        if (dxc.Found()) {
+            uint32_t hlsl_shader_model = 66;
+            bool require_16bit_types = true;
+
+            auto validate_res =
+                validate::ValidateUsingDXC(dxc.Path(), output_.hlsl, output_.entry_points,
+                                           require_16bit_types, hlsl_shader_model);
+            if (validate_res.failed) {
+                size_t line_num = 1;
+
+                std::stringstream err;
+                err << "DXC was expected to succeed, but failed:\n\n";
+                for (auto line : Split(output_.hlsl, "\n")) {
+                    err << line_num++ << ": " << line << "\n";
+                }
+                err << "\n\n" << validate_res.output;
+
+                err_ = err.str();
+                return false;
+            }
+        }
 
         return true;
     }

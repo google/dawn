@@ -117,6 +117,7 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/lang/hlsl/writer/common",
         "${tint_src_dir}/lang/wgsl/ast",
+        "${tint_src_dir}/utils/command",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/ice",
@@ -133,7 +134,10 @@ if (tint_build_unittests) {
       ]
 
       if (tint_build_hlsl_writer) {
-        deps += [ "${tint_src_dir}/lang/hlsl/writer" ]
+        deps += [
+          "${tint_src_dir}/lang/hlsl/validate",
+          "${tint_src_dir}/lang/hlsl/writer",
+        ]
       }
     }
   }
