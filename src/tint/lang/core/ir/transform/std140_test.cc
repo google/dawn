@@ -1492,11 +1492,11 @@ TEST_F(IR_Std140Test, NonDefaultAlignAndSize) {
         mod.symbols.New("MyStruct"),
         Vector{
             ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 0u, 16u,
-                                             core::type::StructMemberAttributes{}),
+                                             core::IOAttributes{}),
             ty.Get<core::type::StructMember>(mod.symbols.New("m"), mat, 1u, 64u, 32u, 64u,
-                                             core::type::StructMemberAttributes{}),
+                                             core::IOAttributes{}),
             ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.i32(), 2u, 128u, 8u, 32u,
-                                             core::type::StructMemberAttributes{}),
+                                             core::IOAttributes{}),
         },
         128u, 256u, 160u);
     structure->SetStructFlag(core::type::kBlock);

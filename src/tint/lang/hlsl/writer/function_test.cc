@@ -90,7 +90,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, FunctionEntryPointWithParams) {
-    core::type::StructMemberAttributes pos_attrs{};
+    core::IOAttributes pos_attrs{};
     pos_attrs.builtin = core::BuiltinValue::kPosition;
 
     Vector members{
@@ -239,11 +239,11 @@ TEST_F(HlslWriterTest, FunctionEntryPointSharedStructDifferentStages) {
     //   const p = inputs.pos;
     // }
 
-    core::type::StructMemberAttributes pos_attrs{};
+    core::IOAttributes pos_attrs{};
     pos_attrs.builtin = core::BuiltinValue::kPosition;
-    core::type::StructMemberAttributes col1_attrs{};
+    core::IOAttributes col1_attrs{};
     col1_attrs.location = 1;
-    core::type::StructMemberAttributes col2_attrs{};
+    core::IOAttributes col2_attrs{};
     col2_attrs.location = 2;
 
     Vector members{
@@ -338,7 +338,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointSharedStructHelperFunction) {
     //   return foo(0.25);
     // }
 
-    core::type::StructMemberAttributes pos_attrs{};
+    core::IOAttributes pos_attrs{};
     pos_attrs.builtin = core::BuiltinValue::kPosition;
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("pos"), ty.vec4<f32>(), 0u, 0u,
@@ -425,13 +425,12 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniform) {
     //   var v = sub_func(1f);
     // }
 
-    Vector inner_members{ty.Get<core::type::StructMember>(
-        b.ir.symbols.New("coord"), ty.f32(), 0u, 0u, 4u, 4u, core::type::StructMemberAttributes{})};
+    Vector inner_members{ty.Get<core::type::StructMember>(b.ir.symbols.New("coord"), ty.f32(), 0u,
+                                                          0u, 4u, 4u, core::IOAttributes{})};
     auto* inner_strct = ty.Struct(b.ir.symbols.New("Inner"), std::move(inner_members));
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("coord"), inner_strct, 0u, 0u,
-                                                    16u, 16u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    16u, 16u, core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Uniforms"), std::move(members));
 
     auto* ubo = b.Var("ubo", uniform, strct);
@@ -482,13 +481,12 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniformStruct) {
     //   var v = ubo.coord.x;
     // }
 
-    Vector inner_members{ty.Get<core::type::StructMember>(
-        b.ir.symbols.New("coord"), ty.f32(), 0u, 0u, 4u, 4u, core::type::StructMemberAttributes{})};
+    Vector inner_members{ty.Get<core::type::StructMember>(b.ir.symbols.New("coord"), ty.f32(), 0u,
+                                                          0u, 4u, 4u, core::IOAttributes{})};
     auto* inner_strct = ty.Struct(b.ir.symbols.New("Inner"), std::move(inner_members));
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("coord"), inner_strct, 0u, 0u,
-                                                    16u, 16u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    16u, 16u, core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Uniforms"), std::move(members));
 
     auto* ubo = b.Var("ubo", uniform, strct);
@@ -527,9 +525,9 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithRWStorageBufferRead) {
     // }
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{}),
+                                                    core::IOAttributes{}),
                    ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Data"), std::move(members));
 
     auto* coord = b.Var("coord", storage, strct, read_write);
@@ -567,9 +565,9 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithROStorageBufferRead) {
     // }
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{}),
+                                                    core::IOAttributes{}),
                    ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Data"), std::move(members));
 
     auto* coord = b.Var("coord", storage, strct, core::Access::kRead);
@@ -606,9 +604,9 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithWOStorageBufferStore) {
     // }
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{}),
+                                                    core::IOAttributes{}),
                    ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Data"), std::move(members));
 
     auto* coord = b.Var("coord", storage, strct, core::Access::kReadWrite);
@@ -645,9 +643,9 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithStorageBufferStore) {
     // }
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{}),
+                                                    core::IOAttributes{}),
                    ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Data"), std::move(members));
 
     auto* coord = b.Var("coord", storage, strct, read_write);
@@ -686,7 +684,7 @@ TEST_F(HlslWriterTest, DISABLED_FunctionCalledByEntryPointWithUniform) {
     // }
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("x"), ty.f32(), 0u, 0u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
     auto* coord = b.Var("coord", uniform, strct);
@@ -736,7 +734,7 @@ TEST_F(HlslWriterTest, FunctionCalledByEntryPointWithStorageBuffer) {
     // }
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("x"), ty.f32(), 0u, 0u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
     auto* coord = b.Var("coord", storage, strct, core::Access::kReadWrite);
@@ -939,7 +937,7 @@ TEST_F(HlslWriterTest, FunctionMultipleEntryPointWithSameModuleVar) {
     // }
 
     Vector members{ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.f32(), 0u, 0u, 4u, 4u,
-                                                    core::type::StructMemberAttributes{})};
+                                                    core::IOAttributes{})};
     auto* strct = ty.Struct(b.ir.symbols.New("Data"), std::move(members));
 
     auto* data = b.Var("data", storage, strct, read_write);

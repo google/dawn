@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
+#include "src/tint/lang/core/io_attributes.h"
 #include "src/tint/lang/core/ir/binary/decode.h"
 #include "src/tint/lang/core/ir/binary/encode.h"
 #include "src/tint/lang/core/ir/disassembler.h"
@@ -258,24 +259,24 @@ TEST_F(IRBinaryRoundtripTest, struct) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), /* index */ 0u,
                                          /* offset */ 0u, /* align */ 4u, /* size */ 4u,
-                                         type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), /* index */ 1u,
                                          /* offset */ 4u, /* align */ 4u, /* size */ 32u,
-                                         type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.u32(), /* index */ 2u,
                                          /* offset */ 36u, /* align */ 4u, /* size */ 4u,
-                                         type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.u32(), /* index */ 3u,
                                          /* offset */ 64u, /* align */ 32u, /* size */ 4u,
-                                         type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* S = ty.Struct(b.ir.symbols.New("S"), std::move(members));
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr<function, read_write>(S)); });
     RUN_TEST();
 }
 
-TEST_F(IRBinaryRoundtripTest, StructMemberAttributes) {
-    type::StructMemberAttributes attrs{};
+TEST_F(IRBinaryRoundtripTest, IOAttributes) {
+    core::IOAttributes attrs{};
     attrs.location = 1;
     attrs.blend_src = 2;
     attrs.color = 3;

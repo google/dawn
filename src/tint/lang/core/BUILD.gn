@@ -65,6 +65,7 @@ libtint_source_set("core") {
     "interpolation_sampling.h",
     "interpolation_type.cc",
     "interpolation_type.h",
+    "io_attributes.h",
     "number.cc",
     "number.h",
     "parameter_usage.cc",

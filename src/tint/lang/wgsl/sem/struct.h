@@ -103,7 +103,7 @@ class StructMember final : public Castable<StructMember, core::type::StructMembe
                  uint32_t offset,
                  uint32_t align,
                  uint32_t size,
-                 const core::type::StructMemberAttributes& attributes);
+                 const core::IOAttributes& attributes);
 
     /// Destructor
     ~StructMember() override;

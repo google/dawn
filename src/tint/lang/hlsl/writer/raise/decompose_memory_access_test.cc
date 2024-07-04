@@ -178,17 +178,14 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeMemoryAccessTest, AccessChainFromUnnamedAccessChain) {
-    auto* Inner =
-        ty.Struct(mod.symbols.New("Inner"),
-                  {
-                      {mod.symbols.New("c"), ty.f32(), core::type::StructMemberAttributes{}},
-                      {mod.symbols.New("d"), ty.u32(), core::type::StructMemberAttributes{}},
-                  });
-    auto* sb = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                             {mod.symbols.New("b"), Inner, core::type::StructMemberAttributes{}},
-                         });
+    auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
+                                                          {mod.symbols.New("c"), ty.f32()},
+                                                          {mod.symbols.New("d"), ty.u32()},
+                                                      });
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), Inner},
+                                                });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
@@ -261,16 +258,13 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeMemoryAccessTest, AccessChainFromLetAccessChain) {
-    auto* Inner =
-        ty.Struct(mod.symbols.New("Inner"),
-                  {
-                      {mod.symbols.New("c"), ty.f32(), core::type::StructMemberAttributes{}},
-                  });
-    auto* sb = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                             {mod.symbols.New("b"), Inner, core::type::StructMemberAttributes{}},
-                         });
+    auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
+                                                          {mod.symbols.New("c"), ty.f32()},
+                                                      });
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), Inner},
+                                                });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
@@ -345,12 +339,10 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeMemoryAccessTest, AccessRwByteAddressBuffer) {
-    auto* sb =
-        ty.Struct(mod.symbols.New("SB"),
-                  {
-                      {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                      {mod.symbols.New("b"), ty.vec3<f32>(), core::type::StructMemberAttributes{}},
-                  });
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.vec3<f32>()},
+                                                });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
     b.ir.root_block->Append(var);
@@ -415,10 +407,9 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeMemoryAccessTest, AccessByteAddressBuffer) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                         });
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                });
     auto* var = b.Var("v", storage, sb, core::Access::kRead);
     b.ir.root_block->Append(var);
 
@@ -841,11 +832,10 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeMemoryAccessTest, AccessStorageStruct) {
-    auto* SB = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                             {mod.symbols.New("b"), ty.f32(), core::type::StructMemberAttributes{}},
-                         });
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.f32()},
+                                                });
 
     auto* var = b.Var("v", storage, SB, core::Access::kRead);
     var->SetBindingPoint(0, 0);
@@ -919,24 +909,20 @@ $B1: {  # root
 }
 
 TEST_F(HlslWriterDecomposeMemoryAccessTest, AccessStorageNested) {
-    auto* Inner = ty.Struct(
-        mod.symbols.New("Inner"),
-        {
-            {mod.symbols.New("s"), ty.mat3x3<f32>(), core::type::StructMemberAttributes{}},
-            {mod.symbols.New("t"), ty.array<vec3<f32>, 5>(), core::type::StructMemberAttributes{}},
-        });
-    auto* Outer =
-        ty.Struct(mod.symbols.New("Outer"),
-                  {
-                      {mod.symbols.New("x"), ty.f32(), core::type::StructMemberAttributes{}},
-                      {mod.symbols.New("y"), Inner, core::type::StructMemberAttributes{}},
-                  });
+    auto* Inner =
+        ty.Struct(mod.symbols.New("Inner"), {
+                                                {mod.symbols.New("s"), ty.mat3x3<f32>()},
+                                                {mod.symbols.New("t"), ty.array<vec3<f32>, 5>()},
+                                            });
+    auto* Outer = ty.Struct(mod.symbols.New("Outer"), {
+                                                          {mod.symbols.New("x"), ty.f32()},
+                                                          {mod.symbols.New("y"), Inner},
+                                                      });
 
-    auto* SB = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                             {mod.symbols.New("b"), Outer, core::type::StructMemberAttributes{}},
-                         });
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), Outer},
+                                                });
 
     auto* var = b.Var("v", storage, SB, core::Access::kRead);
     var->SetBindingPoint(0, 0);

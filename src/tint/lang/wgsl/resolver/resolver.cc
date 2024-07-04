@@ -4380,7 +4380,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         bool has_offset_attr = false;
         bool has_align_attr = false;
         bool has_size_attr = false;
-        core::type::StructMemberAttributes attributes;
+        core::IOAttributes attributes;
         for (auto* attribute : member->attributes) {
             Mark(attribute);
             bool ok = Switch(

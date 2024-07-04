@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,39 +25,33 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/sem/struct.h"
+#ifndef SRC_TINT_LANG_CORE_IO_ATTRIBUTES_H_
+#define SRC_TINT_LANG_CORE_IO_ATTRIBUTES_H_
 
-#include "src/tint/lang/wgsl/ast/struct_member.h"
+#include <cstdint>
+#include <optional>
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
+#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/interpolation.h"
 
-namespace tint::sem {
+namespace tint::core {
 
-Struct::Struct(const ast::Struct* declaration,
-               Symbol name,
-               VectorRef<const StructMember*> members,
-               uint32_t align,
-               uint32_t size,
-               uint32_t size_no_padding)
-    : Base(name, members, align, size, size_no_padding), declaration_(declaration) {
-    TINT_ASSERT(declaration != nullptr);
-}
+/// Attributes that can be applied to an object that will be used for shader IO.
+struct IOAttributes {
+    /// The value of a `@location` attribute.
+    std::optional<uint32_t> location;
+    /// The value of a `@blend_src` attribute.
+    std::optional<uint32_t> blend_src;
+    /// The value of a `@color` attribute.
+    std::optional<uint32_t> color;
+    /// The value of a `@builtin` attribute.
+    std::optional<core::BuiltinValue> builtin;
+    /// The values of a `@interpolate` attribute.
+    std::optional<core::Interpolation> interpolation;
+    /// True if the object is annotated with `@invariant`.
+    bool invariant = false;
+};
 
-Struct::~Struct() = default;
+}  // namespace tint::core
 
-StructMember::StructMember(const ast::StructMember* declaration,
-                           Symbol name,
-                           const core::type::Type* type,
-                           uint32_t index,
-                           uint32_t offset,
-                           uint32_t align,
-                           uint32_t size,
-                           const core::IOAttributes& attributes)
-    : Base(name, type, index, offset, align, size, attributes), declaration_(declaration) {
-    TINT_ASSERT(declaration != nullptr);
-}
-
-StructMember::~StructMember() = default;
-
-}  // namespace tint::sem
+#endif  // SRC_TINT_LANG_CORE_IO_ATTRIBUTES_H_

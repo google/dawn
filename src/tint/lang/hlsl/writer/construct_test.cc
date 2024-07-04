@@ -246,11 +246,11 @@ void a() {
 TEST_F(HlslWriterTest, ConstructStruct) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.vec3<i32>(), 2u, 8u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 

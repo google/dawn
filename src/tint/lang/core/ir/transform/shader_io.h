@@ -53,7 +53,7 @@ struct ShaderIOBackendState {
     /// @returns the index of the input
     virtual uint32_t AddInput(Symbol name,
                               const core::type::Type* type,
-                              core::type::StructMemberAttributes attributes) {
+                              core::IOAttributes attributes) {
         inputs.Push({name, type, std::move(attributes)});
         return uint32_t(inputs.Length() - 1);
     }
@@ -65,7 +65,7 @@ struct ShaderIOBackendState {
     /// @returns the index of the output
     virtual uint32_t AddOutput(Symbol name,
                                const core::type::Type* type,
-                               core::type::StructMemberAttributes attributes) {
+                               core::IOAttributes attributes) {
         outputs.Push({name, type, std::move(attributes)});
         return uint32_t(outputs.Length() - 1);
     }

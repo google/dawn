@@ -464,7 +464,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
                                                   {
                                                       mod.symbols.Register("a"),
                                                       ty.f32(),
-                                                      core::type::StructMemberAttributes{
+                                                      core::IOAttributes{
                                                           /* location */ 0u,
                                                           /* index */ 0u,
                                                           /* color */ std::nullopt,
@@ -476,7 +476,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
                                                   {
                                                       mod.symbols.Register("b"),
                                                       ty.f32(),
-                                                      core::type::StructMemberAttributes{
+                                                      core::IOAttributes{
                                                           /* location */ 0u,
                                                           /* index */ 1u,
                                                           /* color */ std::nullopt,

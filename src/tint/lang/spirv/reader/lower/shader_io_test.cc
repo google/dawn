@@ -39,15 +39,15 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class SpirvReader_ShaderIOTest : public core::ir::transform::TransformTest {
   protected:
-    core::type::StructMemberAttributes BuiltinAttrs(core::BuiltinValue builtin) {
-        core::type::StructMemberAttributes attrs;
+    core::IOAttributes BuiltinAttrs(core::BuiltinValue builtin) {
+        core::IOAttributes attrs;
         attrs.builtin = builtin;
         return attrs;
     }
-    core::type::StructMemberAttributes LocationAttrs(
+    core::IOAttributes LocationAttrs(
         uint32_t location,
         std::optional<core::Interpolation> interpolation = std::nullopt) {
-        core::type::StructMemberAttributes attrs;
+        core::IOAttributes attrs;
         attrs.location = location;
         attrs.interpolation = interpolation;
         return attrs;
@@ -800,7 +800,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnVariable) {
                       core::type::Manager::StructMemberDesc{
                           mod.symbols.New("color2"),
                           ty.vec4<f32>(),
-                          core::type::StructMemberAttributes{
+                          core::IOAttributes{
                               /* location */ std::nullopt,
                               /* index */ std::nullopt,
                               /* color */ std::nullopt,
@@ -1526,7 +1526,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnVariable) {
                       core::type::Manager::StructMemberDesc{
                           mod.symbols.New("color2"),
                           ty.vec4<f32>(),
-                          core::type::StructMemberAttributes{
+                          core::IOAttributes{
                               /* location */ std::nullopt,
                               /* index */ std::nullopt,
                               /* color */ std::nullopt,

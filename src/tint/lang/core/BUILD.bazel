@@ -66,6 +66,7 @@ cc_library(
     "interpolation.h",
     "interpolation_sampling.h",
     "interpolation_type.h",
+    "io_attributes.h",
     "number.h",
     "parameter_usage.h",
     "texel_format.h",

@@ -439,8 +439,8 @@ core::type::Struct* MkStruct(core::ir::Module& mod,
         uint32_t mem_size = d.size == 0 ? d.type->Size() : d.size;
 
         uint32_t offset = tint::RoundUp(mem_align, size);
-        members.Push(ty.Get<core::type::StructMember>(
-            d.name, d.type, i, offset, mem_align, mem_size, core::type::StructMemberAttributes{}));
+        members.Push(ty.Get<core::type::StructMember>(d.name, d.type, i, offset, mem_align,
+                                                      mem_size, core::IOAttributes{}));
 
         align = std::max(align, mem_align);
         size = offset + mem_size;

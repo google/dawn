@@ -763,7 +763,7 @@ struct Decoder {
                 Error() << "struct member must have non-zero size";
                 size = 1;
             }
-            core::type::StructMemberAttributes attributes_out{};
+            core::IOAttributes attributes_out{};
             if (member_in.has_attributes()) {
                 auto& attributes_in = member_in.attributes();
                 if (attributes_in.has_location()) {

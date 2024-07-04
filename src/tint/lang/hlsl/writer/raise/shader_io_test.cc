@@ -150,7 +150,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Struct) {
                                  {
                                      mod.symbols.New("front_facing"),
                                      ty.bool_(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ std::nullopt,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -162,7 +162,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Struct) {
                                  {
                                      mod.symbols.New("position"),
                                      ty.vec4<f32>(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ std::nullopt,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -174,7 +174,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Struct) {
                                  {
                                      mod.symbols.New("color1"),
                                      ty.f32(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ 0u,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -186,7 +186,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Struct) {
                                  {
                                      mod.symbols.New("color2"),
                                      ty.f32(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ 1u,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -304,7 +304,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Mixed) {
                                  {
                                      mod.symbols.New("position"),
                                      ty.vec4<f32>(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ std::nullopt,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -316,7 +316,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Mixed) {
                                  {
                                      mod.symbols.New("color1"),
                                      ty.f32(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ 0u,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -511,7 +511,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOReturnValue_Struct) {
                                  {
                                      mod.symbols.New("position"),
                                      ty.vec4<f32>(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ std::nullopt,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -523,7 +523,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOReturnValue_Struct) {
                                  {
                                      mod.symbols.New("color1"),
                                      ty.f32(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ 0u,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -535,7 +535,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOReturnValue_Struct) {
                                  {
                                      mod.symbols.New("color2"),
                                      ty.f32(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ 1u,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -616,7 +616,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOReturnValue_DualSourceBlending) {
                                                  {
                                                      mod.symbols.New("color1"),
                                                      ty.f32(),
-                                                     core::type::StructMemberAttributes{
+                                                     core::IOAttributes{
                                                          /* location */ 0u,
                                                          /* blend_src */ 0u,
                                                          /* color */ std::nullopt,
@@ -628,7 +628,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOReturnValue_DualSourceBlending) {
                                                  {
                                                      mod.symbols.New("color2"),
                                                      ty.f32(),
-                                                     core::type::StructMemberAttributes{
+                                                     core::IOAttributes{
                                                          /* location */ 0u,
                                                          /* blend_src */ 1u,
                                                          /* color */ std::nullopt,
@@ -696,7 +696,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOStruct_SharedByVertexAndFragment) {
                                  {
                                      mod.symbols.New("position"),
                                      ty.vec4<f32>(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ std::nullopt,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -708,7 +708,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOStruct_SharedByVertexAndFragment) {
                                  {
                                      mod.symbols.New("color"),
                                      ty.vec3<f32>(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ 0u,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -844,7 +844,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOStruct_SharedWithBuffer) {
                                  {
                                      mod.symbols.New("position"),
                                      ty.vec4<f32>(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ std::nullopt,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -856,7 +856,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOStruct_SharedWithBuffer) {
                                  {
                                      mod.symbols.New("color"),
                                      ty.vec3<f32>(),
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ 0u,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -937,7 +937,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOStructWithAttributes_NotUsedForInterface
                                  {
                                      mod.symbols.New("position"),
                                      vec4f,
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ std::nullopt,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,
@@ -949,7 +949,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOStructWithAttributes_NotUsedForInterface
                                  {
                                      mod.symbols.New("color"),
                                      vec4f,
-                                     core::type::StructMemberAttributes{
+                                     core::IOAttributes{
                                          /* location */ 0u,
                                          /* blend_src */ std::nullopt,
                                          /* color */ std::nullopt,

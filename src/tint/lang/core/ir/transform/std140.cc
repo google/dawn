@@ -164,7 +164,7 @@ struct State {
                                 ss << member->Name().Name() << "_col" << std::to_string(i);
                                 new_members.Push(ty.Get<core::type::StructMember>(
                                     sym.New(ss.str()), col, member_index, offset, col->Align(),
-                                    col->Size(), core::type::StructMemberAttributes{}));
+                                    col->Size(), core::IOAttributes{}));
                                 offset += col->Align();
                                 member_index++;
                             }
@@ -174,8 +174,7 @@ struct State {
                             auto* new_member_ty = RewriteType(member->Type());
                             new_members.Push(ty.Get<core::type::StructMember>(
                                 member->Name(), new_member_ty, member_index, member->Offset(),
-                                member->Align(), member->Size(),
-                                core::type::StructMemberAttributes{}));
+                                member->Align(), member->Size(), core::IOAttributes{}));
                             member_index_map.Add(member, member_index);
                             member_index++;
                             if (new_member_ty != member->Type()) {
@@ -214,7 +213,7 @@ struct State {
                         ss << "col" << std::to_string(i);
                         members.Push(ty.Get<core::type::StructMember>(
                             sym.New(ss.str()), col, i, offset, col->Align(), col->Size(),
-                            core::type::StructMemberAttributes{}));
+                            core::IOAttributes{}));
                         offset += col->Align();
                     }
 

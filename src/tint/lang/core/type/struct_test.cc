@@ -218,15 +218,15 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
 }
 
 TEST_F(TypeStructTest, Clone) {
-    core::type::StructMemberAttributes attrs_location_2;
+    core::IOAttributes attrs_location_2;
     attrs_location_2.location = 2;
 
     auto* s = create<Struct>(
         Sym("my_struct"),
-        tint::Vector{create<StructMember>(Sym("b"), create<Vector>(create<F32>(), 3u), 0u, 0u, 16u,
-                                          12u, attrs_location_2),
-                     create<StructMember>(Sym("a"), create<I32>(), 1u, 16u, 4u, 4u,
-                                          core::type::StructMemberAttributes{})},
+        tint::Vector{
+            create<StructMember>(Sym("b"), create<Vector>(create<F32>(), 3u), 0u, 0u, 16u, 12u,
+                                 attrs_location_2),
+            create<StructMember>(Sym("a"), create<I32>(), 1u, 16u, 4u, 4u, core::IOAttributes{})},
         4u /* align */, 8u /* size */, 16u /* size_no_padding */);
 
     GenerationID id;

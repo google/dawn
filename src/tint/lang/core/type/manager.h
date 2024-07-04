@@ -500,7 +500,7 @@ class Manager final {
         /// The type of the struct member.
         const core::type::Type* type = nullptr;
         /// The optional struct member attributes.
-        core::type::StructMemberAttributes attributes = {};
+        core::IOAttributes attributes = {};
     };
 
     /// Create a new structure declaration.

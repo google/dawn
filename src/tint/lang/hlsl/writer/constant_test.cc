@@ -575,19 +575,19 @@ void a() {
 TEST_F(HlslWriterTest, ConstantTypeStructNestedEmpty) {
     Vector members_a{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("e"), ty.f32(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* a_strct = ty.Struct(b.ir.symbols.New("A"), std::move(members_a));
 
     Vector members_s{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), a_strct, 2u, 8u, 8u, 8u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* s_strct = ty.Struct(b.ir.symbols.New("S"), std::move(members_s));
 
@@ -622,13 +622,13 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstantTypeStructNested) {
     Vector members_a{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("e"), ty.vec4<f32>(), 0u, 0u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* a_strct = ty.Struct(b.ir.symbols.New("A"), std::move(members_a));
 
     Vector members_s{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), a_strct, 0u, 0u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* s_strct = ty.Struct(b.ir.symbols.New("S"), std::move(members_s));
 
@@ -663,13 +663,13 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstantTypeLetStructComposite) {
     Vector members_a{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("e"), ty.vec4<f32>(), 0u, 0u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* a_strct = ty.Struct(b.ir.symbols.New("A"), std::move(members_a));
 
     Vector members_s{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), a_strct, 0u, 0u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* s_strct = ty.Struct(b.ir.symbols.New("S"), std::move(members_s));
 
@@ -704,13 +704,13 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstantTypeLetStructCompositeModuleScoped) {
     Vector members_a{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("e"), ty.vec4<f32>(), 0u, 0u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* a_strct = ty.Struct(b.ir.symbols.New("A"), std::move(members_a));
 
     Vector members_s{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), a_strct, 0u, 0u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* s_strct = ty.Struct(b.ir.symbols.New("S"), std::move(members_s));
 
@@ -752,13 +752,13 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstantTypeStructEmpty) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.vec3<i32>(), 2u, 8u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.array<f32, 3>(), 2u, 8u, 16u,
-                                         16u, core::type::StructMemberAttributes{}),
+                                         16u, core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
@@ -789,13 +789,13 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstantTypeStruct) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.vec3<i32>(), 2u, 16u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.vec4<f32>(), 2u, 32u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
@@ -829,13 +829,13 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstantTypeLetStruct) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.vec3<i32>(), 2u, 16u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.vec4<f32>(), 2u, 32u, 16u, 16u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
@@ -870,7 +870,7 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstantTypeStructStaticEmpty) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
@@ -894,7 +894,7 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstantTypeStructStatic) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
@@ -917,18 +917,15 @@ void unused_entry_point() {
 
 TEST_F(HlslWriterTest, ConstantTypeMultiStructAndArray) {
     auto* a_ty = ty.Struct(mod.symbols.New("A"), {
-                                                     {mod.symbols.New("a"), ty.array<i32, 2>(),
-                                                      core::type::StructMemberAttributes{}},
+                                                     {mod.symbols.New("a"), ty.array<i32, 2>()},
                                                  });
     auto* b_ty =
         ty.Struct(mod.symbols.New("B"), {
-                                            {mod.symbols.New("b"), ty.array<array<i32, 4>, 1>(),
-                                             core::type::StructMemberAttributes{}},
+                                            {mod.symbols.New("b"), ty.array<array<i32, 4>, 1>()},
                                         });
-    auto* c_ty = ty.Struct(mod.symbols.New("C"),
-                           {
-                               {mod.symbols.New("a"), a_ty, core::type::StructMemberAttributes{}},
-                           });
+    auto* c_ty = ty.Struct(mod.symbols.New("C"), {
+                                                     {mod.symbols.New("a"), a_ty},
+                                                 });
 
     b.Append(b.ir.root_block, [&] {
         b.Var<private_>("a", b.Composite(a_ty, b.Composite(ty.array<i32, 2>(), 9_i, 10_i)));

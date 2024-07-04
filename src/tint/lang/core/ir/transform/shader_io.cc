@@ -114,7 +114,7 @@ struct State {
         if (ep->Stage() == Function::PipelineStage::kVertex && backend->NeedsVertexPointSize()) {
             vertex_point_size_index =
                 backend->AddOutput(ir.symbols.New("vertex_point_size"), ty.f32(),
-                                   core::type::StructMemberAttributes{
+                                   core::IOAttributes{
                                        /* location */ std::nullopt,
                                        /* index */ std::nullopt,
                                        /* color */ std::nullopt,
@@ -172,7 +172,7 @@ struct State {
                 }
             } else {
                 // Pull out the IO attributes and remove them from the parameter.
-                core::type::StructMemberAttributes attributes;
+                core::IOAttributes attributes;
                 if (auto loc = param->Location()) {
                     attributes.location = loc->value;
                     if (loc->interpolation && ep->Stage() == Function::PipelineStage::kFragment) {
@@ -209,7 +209,7 @@ struct State {
             }
         } else {
             // Pull out the IO attributes and remove them from the original function.
-            core::type::StructMemberAttributes attributes;
+            core::IOAttributes attributes;
             if (auto loc = ep->ReturnLocation()) {
                 attributes.location = loc->value;
                 if (loc->interpolation && ep->Stage() == Function::PipelineStage::kVertex) {

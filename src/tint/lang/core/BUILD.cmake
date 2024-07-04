@@ -66,6 +66,7 @@ tint_add_target(tint_lang_core lib
   lang/core/interpolation_sampling.h
   lang/core/interpolation_type.cc
   lang/core/interpolation_type.h
+  lang/core/io_attributes.h
   lang/core/number.cc
   lang/core/number.h
   lang/core/parameter_usage.cc

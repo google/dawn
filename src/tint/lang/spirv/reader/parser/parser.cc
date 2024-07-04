@@ -257,7 +257,7 @@ class Parser {
             auto* member_ty = Type(struct_ty->element_types()[i]);
             uint32_t align = std::max<uint32_t>(member_ty->Align(), 1u);
             uint32_t offset = tint::RoundUp(align, current_size);
-            core::type::StructMemberAttributes attributes;
+            core::IOAttributes attributes;
             auto interpolation = [&]() -> core::Interpolation& {
                 // Create the interpolation field with the default values on first call.
                 if (!attributes.interpolation.has_value()) {

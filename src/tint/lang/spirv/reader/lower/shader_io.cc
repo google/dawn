@@ -179,7 +179,7 @@ struct State {
         Vector<core::ir::Value*, 4> results;
         Vector<core::type::Manager::StructMemberDesc, 4> output_descriptors;
         auto add_output = [&](Symbol name, const core::type::Type* type,
-                              core::type::StructMemberAttributes attributes) {
+                              core::IOAttributes attributes) {
             if (!name) {
                 name = ir.symbols.New();
             }
@@ -194,7 +194,7 @@ struct State {
 
             // Copy the variable attributes to the struct member.
             const auto& original_attributes = var->Attributes();
-            core::type::StructMemberAttributes var_attributes;
+            core::IOAttributes var_attributes;
             var_attributes.invariant = original_attributes.invariant;
             var_attributes.builtin = original_attributes.builtin;
             var_attributes.location = original_attributes.location;

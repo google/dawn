@@ -224,7 +224,7 @@ StructMember::StructMember(Symbol name,
                            uint32_t offset,
                            uint32_t align,
                            uint32_t size,
-                           const StructMemberAttributes& attributes)
+                           const IOAttributes& attributes)
     : name_(name),
       type_(type),
       index_(index),

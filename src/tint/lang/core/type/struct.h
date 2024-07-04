@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/interpolation.h"
+#include "src/tint/lang/core/io_attributes.h"
 #include "src/tint/lang/core/type/node.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/containers/hashset.h"
@@ -203,22 +204,6 @@ class Struct : public Castable<Struct, Type> {
     tint::Vector<const Struct*, 2> concrete_types_;
 };
 
-/// Attributes that can be applied to the StructMember
-struct StructMemberAttributes {
-    /// The value of a `@location` attribute
-    std::optional<uint32_t> location;
-    /// The value of a `@blend_src` attribute
-    std::optional<uint32_t> blend_src;
-    /// The value of a `@color` attribute
-    std::optional<uint32_t> color;
-    /// The value of a `@builtin` attribute
-    std::optional<core::BuiltinValue> builtin;
-    /// The values of a `@interpolate` attribute
-    std::optional<core::Interpolation> interpolation;
-    /// True if the member was annotated with `@invariant`
-    bool invariant = false;
-};
-
 /// StructMember holds the type information for structure members.
 class StructMember : public Castable<StructMember, Node> {
   public:
@@ -236,7 +221,7 @@ class StructMember : public Castable<StructMember, Node> {
                  uint32_t offset,
                  uint32_t align,
                  uint32_t size,
-                 const StructMemberAttributes& attributes);
+                 const IOAttributes& attributes);
 
     /// Destructor
     ~StructMember() override;
@@ -267,11 +252,11 @@ class StructMember : public Castable<StructMember, Node> {
     uint32_t Size() const { return size_; }
 
     /// @returns the optional attributes
-    const StructMemberAttributes& Attributes() const { return attributes_; }
+    const IOAttributes& Attributes() const { return attributes_; }
 
     /// Set the attributes of the struct member.
     /// @param attributes the new attributes
-    void SetAttributes(StructMemberAttributes&& attributes) { attributes_ = std::move(attributes); }
+    void SetAttributes(IOAttributes&& attributes) { attributes_ = std::move(attributes); }
 
     /// @param ctx the clone context
     /// @returns a clone of this struct member
@@ -285,7 +270,7 @@ class StructMember : public Castable<StructMember, Node> {
     const uint32_t offset_;
     const uint32_t align_;
     const uint32_t size_;
-    StructMemberAttributes attributes_;
+    IOAttributes attributes_;
 };
 
 }  // namespace tint::core::type

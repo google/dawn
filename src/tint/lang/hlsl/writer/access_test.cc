@@ -57,9 +57,9 @@ void a() {
 TEST_F(HlslWriterTest, AccessStruct) {
     Vector members{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
@@ -180,19 +180,19 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, AccessNested) {
     Vector members_a{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("e"), ty.array<f32, 3>(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* a_strct = ty.Struct(b.ir.symbols.New("A"), std::move(members_a));
 
     Vector members_s{
         ty.Get<core::type::StructMember>(b.ir.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("b"), ty.f32(), 1u, 4u, 4u, 4u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), a_strct, 2u, 8u, 8u, 8u,
-                                         core::type::StructMemberAttributes{}),
+                                         core::IOAttributes{}),
     };
     auto* s_strct = ty.Struct(b.ir.symbols.New("S"), std::move(members_s));
 
@@ -406,11 +406,10 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, AccessStorageStruct) {
-    auto* SB = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                             {mod.symbols.New("b"), ty.f32(), core::type::StructMemberAttributes{}},
-                         });
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.f32()},
+                                                });
 
     auto* var = b.Var("v", storage, SB, core::Access::kRead);
     var->SetBindingPoint(0, 0);
@@ -446,24 +445,20 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, AccessStorageNested) {
-    auto* Inner = ty.Struct(
-        mod.symbols.New("Inner"),
-        {
-            {mod.symbols.New("s"), ty.mat3x3<f32>(), core::type::StructMemberAttributes{}},
-            {mod.symbols.New("t"), ty.array<vec3<f32>, 5>(), core::type::StructMemberAttributes{}},
-        });
-    auto* Outer =
-        ty.Struct(mod.symbols.New("Outer"),
-                  {
-                      {mod.symbols.New("x"), ty.f32(), core::type::StructMemberAttributes{}},
-                      {mod.symbols.New("y"), Inner, core::type::StructMemberAttributes{}},
-                  });
+    auto* Inner =
+        ty.Struct(mod.symbols.New("Inner"), {
+                                                {mod.symbols.New("s"), ty.mat3x3<f32>()},
+                                                {mod.symbols.New("t"), ty.array<vec3<f32>, 5>()},
+                                            });
+    auto* Outer = ty.Struct(mod.symbols.New("Outer"), {
+                                                          {mod.symbols.New("x"), ty.f32()},
+                                                          {mod.symbols.New("y"), Inner},
+                                                      });
 
-    auto* SB = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                             {mod.symbols.New("b"), Outer, core::type::StructMemberAttributes{}},
-                         });
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), Outer},
+                                                });
 
     auto* var = b.Var("v", storage, SB, core::Access::kRead);
     var->SetBindingPoint(0, 0);
@@ -629,17 +624,14 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, AccessChainFromUnnamedAccessChain) {
-    auto* Inner =
-        ty.Struct(mod.symbols.New("Inner"),
-                  {
-                      {mod.symbols.New("c"), ty.f32(), core::type::StructMemberAttributes{}},
-                      {mod.symbols.New("d"), ty.u32(), core::type::StructMemberAttributes{}},
-                  });
-    auto* sb = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                             {mod.symbols.New("b"), Inner, core::type::StructMemberAttributes{}},
-                         });
+    auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
+                                                          {mod.symbols.New("c"), ty.f32()},
+                                                          {mod.symbols.New("d"), ty.u32()},
+                                                      });
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), Inner},
+                                                });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
@@ -665,16 +657,13 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, AccessChainFromLetAccessChain) {
-    auto* Inner =
-        ty.Struct(mod.symbols.New("Inner"),
-                  {
-                      {mod.symbols.New("c"), ty.f32(), core::type::StructMemberAttributes{}},
-                  });
-    auto* sb = ty.Struct(mod.symbols.New("SB"),
-                         {
-                             {mod.symbols.New("a"), ty.i32(), core::type::StructMemberAttributes{}},
-                             {mod.symbols.New("b"), Inner, core::type::StructMemberAttributes{}},
-                         });
+    auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
+                                                          {mod.symbols.New("c"), ty.f32()},
+                                                      });
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), Inner},
+                                                });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);

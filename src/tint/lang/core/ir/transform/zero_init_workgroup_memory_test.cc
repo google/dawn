@@ -1533,7 +1533,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndexInStruct) {
                                     {
                                         mod.symbols.New("global_id"),
                                         ty.vec3<u32>(),
-                                        core::type::StructMemberAttributes{
+                                        core::IOAttributes{
                                             /* location */ std::nullopt,
                                             /* index */ std::nullopt,
                                             /* color */ std::nullopt,
@@ -1545,7 +1545,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndexInStruct) {
                                     {
                                         mod.symbols.New("index"),
                                         ty.u32(),
-                                        core::type::StructMemberAttributes{
+                                        core::IOAttributes{
                                             /* location */ std::nullopt,
                                             /* index */ std::nullopt,
                                             /* color */ std::nullopt,

@@ -58,36 +58,34 @@ struct TypeTest : public TestHelper {
     const Matrix* mat4x3_af = create<Matrix>(vec3_af, 4u);
     const Reference* ref_u32 =
         create<Reference>(core::AddressSpace::kPrivate, u32, core::Access::kReadWrite);
-    const Struct* str_f32 =
-        create<Struct>(Sym("str_f32"),
-                       tint::Vector{
-                           create<StructMember>(
-                               /* name */ Sym("x"),
-                               /* type */ f32,
-                               /* index */ 0u,
-                               /* offset */ 0u,
-                               /* align */ 4u,
-                               /* size */ 4u,
-                               /* attributes */ core::type::StructMemberAttributes{}),
-                       },
-                       /* align*/ 4u,
-                       /* size*/ 4u,
-                       /* size_no_padding*/ 4u);
-    const Struct* str_f16 =
-        create<Struct>(Sym("str_f16"),
-                       tint::Vector{
-                           create<StructMember>(
-                               /* name */ Sym("x"),
-                               /* type */ f16,
-                               /* index */ 0u,
-                               /* offset */ 0u,
-                               /* align */ 4u,
-                               /* size */ 4u,
-                               /* attributes */ core::type::StructMemberAttributes{}),
-                       },
-                       /* align*/ 4u,
-                       /* size*/ 4u,
-                       /* size_no_padding*/ 4u);
+    const Struct* str_f32 = create<Struct>(Sym("str_f32"),
+                                           tint::Vector{
+                                               create<StructMember>(
+                                                   /* name */ Sym("x"),
+                                                   /* type */ f32,
+                                                   /* index */ 0u,
+                                                   /* offset */ 0u,
+                                                   /* align */ 4u,
+                                                   /* size */ 4u,
+                                                   /* attributes */ core::IOAttributes{}),
+                                           },
+                                           /* align*/ 4u,
+                                           /* size*/ 4u,
+                                           /* size_no_padding*/ 4u);
+    const Struct* str_f16 = create<Struct>(Sym("str_f16"),
+                                           tint::Vector{
+                                               create<StructMember>(
+                                                   /* name */ Sym("x"),
+                                                   /* type */ f16,
+                                                   /* index */ 0u,
+                                                   /* offset */ 0u,
+                                                   /* align */ 4u,
+                                                   /* size */ 4u,
+                                                   /* attributes */ core::IOAttributes{}),
+                                           },
+                                           /* align*/ 4u,
+                                           /* size*/ 4u,
+                                           /* size_no_padding*/ 4u);
     Struct* str_af = create<Struct>(Sym("str_af"),
                                     tint::Vector{
                                         create<StructMember>(
@@ -97,7 +95,7 @@ struct TypeTest : public TestHelper {
                                             /* offset */ 0u,
                                             /* align */ 4u,
                                             /* size */ 4u,
-                                            /* attributes */ core::type::StructMemberAttributes{}),
+                                            /* attributes */ core::IOAttributes{}),
                                     },
                                     /* align*/ 4u,
                                     /* size*/ 4u,
