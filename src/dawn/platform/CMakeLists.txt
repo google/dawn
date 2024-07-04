@@ -56,5 +56,3 @@ endif()
 if (DAWN_USE_BUILT_DXC)
   target_compile_definitions(dawn_platform PRIVATE "DAWN_USE_BUILT_DXC")
 endif()
-
-install_if_enabled(dawn_platform)

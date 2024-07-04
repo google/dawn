@@ -128,5 +128,3 @@ target_compile_definitions(dawn_wire PRIVATE "DAWN_WIRE_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(dawn_wire PRIVATE "DAWN_WIRE_SHARED_LIBRARY")
 endif()
-
-install_if_enabled(dawn_wire)

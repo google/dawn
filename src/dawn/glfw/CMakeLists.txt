@@ -34,7 +34,7 @@ set(sources
 set(conditional_private_depends)
 if (DAWN_ENABLE_METAL)
     list(APPEND sources "utils_metal.mm")
-    list(APPEND conditional_private_depends"-framework Metal")
+    list(APPEND conditional_private_depends "-framework Metal")
 endif ()
 
 dawn_add_library(

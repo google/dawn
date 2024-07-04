@@ -32,13 +32,14 @@ cmake_minimum_required(VERSION 3.13)
 #   in case any of the generator files changes. We should also remove the CACHE "" FORCE stuff to
 #   override options in third_party dependencies.
 # - When upgrading to CMake 3.20 we can take advantage of the GENERATED property being global in
-#   DawnGenerator. We should also use the path utilities in install_if_enabled.
+#   DawnGenerator. We should also use the path utilities in dawn_install_target.
 
 project(
     Dawn
     DESCRIPTION "Dawn, a WebGPU implementation"
     LANGUAGES C CXX
     HOMEPAGE_URL "https://dawn.googlesource.com/dawn"
+    VERSION 0.0.0
 )
 enable_testing()
 
@@ -58,44 +59,6 @@ set(DAWN_GENERATOR_DIR "${Dawn_SOURCE_DIR}/generator" CACHE PATH "Directory that
 set(DAWN_SRC_DIR "${Dawn_SOURCE_DIR}/src" CACHE PATH "Directory that contains source files for dawn")
 set(DAWN_INCLUDE_DIR "${Dawn_SOURCE_DIR}/include" CACHE PATH "Directory that contains public headers for dawn")
 set(DAWN_TEMPLATE_DIR "${DAWN_GENERATOR_DIR}/templates" CACHE PATH "Directory that contains templates for generators")
-
-function (install_if_enabled target)
-    if(NOT DAWN_ENABLE_INSTALL)
-        return()
-    endif()
-
-    install(TARGETS ${target}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-
-    get_target_property(targetHeaders ${target} INTERFACE_SOURCES)
-    if (NOT targetHeaders)
-        return()
-    endif()
-
-    foreach(headerFile ${targetHeaders})
-        # Starting from CMake 3.20 there is the cmake_path command that could simplify this code.
-        # Compute the install subdirectory for the header by stripping out the path to
-        # the include / gen/include directory...
-        string(FIND "${headerFile}" "${DAWN_INCLUDE_DIR}" foundIndex)
-        if (foundIndex EQUAL 0)
-            string(LENGTH "${DAWN_INCLUDE_DIR}/" lengthToRemove)
-        endif()
-        string(FIND "${headerFile}" "${DAWN_BUILD_GEN_DIR}/include/" foundIndex)
-        if (foundIndex EQUAL 0)
-            string(LENGTH "${DAWN_BUILD_GEN_DIR}/include/" lengthToRemove)
-        endif()
-        string(SUBSTRING "${headerFile}" "${lengthToRemove}" -1 headerRelDir)
-
-        # ... then remove everything after the last /
-        string(FIND "${headerRelDir}" "/" foundIndex REVERSE)
-        string(SUBSTRING "${headerRelDir}" 0 ${foundIndex} headerRelDir)
-
-        install(FILES "${headerFile}" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${headerRelDir})
-    endforeach()
-endfunction()
 
 ################################################################################
 # Configuration options
@@ -260,6 +223,8 @@ set_if_not_defined(GO_EXECUTABLE "go" "Golang executable for running the IDL gen
 
 option(DAWN_FETCH_DEPENDENCIES "Use fetch_dawn_dependencies.py as an alternative to using depot_tools" OFF)
 
+option(DAWN_BUILD_MONOLITHIC_LIBRARY "Bundle all dawn components into a single shared library." ON)
+
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
 if (${DAWN_ENABLE_DESKTOP_GL} OR ${DAWN_ENABLE_OPENGLES})
     set(DAWN_ENABLE_OPENGL ON)
@@ -269,11 +234,14 @@ if(DAWN_ENABLE_PIC)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+# Defines `CMAKE_INSTALL_*DIR` variables
+include(GNUInstallDirs)
 # The public config contains only the include paths for the Dawn headers.
 add_library(dawn_public_config INTERFACE)
 target_include_directories(dawn_public_config INTERFACE
-    "${DAWN_INCLUDE_DIR}"
-    "${DAWN_BUILD_GEN_DIR}/include"
+    "$<BUILD_INTERFACE:${DAWN_INCLUDE_DIR}>"
+    "$<BUILD_INTERFACE:${DAWN_BUILD_GEN_DIR}/include>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 # The internal config contains additional path but includes the dawn_public_config include paths
@@ -466,3 +434,32 @@ if (DAWN_EMIT_COVERAGE)
     COMMENT "Generating tint coverage data"
     VERBATIM)
 endif()
+
+if (DAWN_BUILD_MONOLITHIC_LIBRARY AND DAWN_ENABLE_INSTALL)
+  # This series of functions add the necessary information so that other CMake projects
+  # can use Dawn, be it from a build directory, a local install or when packaged.
+  install(EXPORT DawnTargets
+    FILE DawnTargets.cmake
+    NAMESPACE dawn::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Dawn")
+  export(EXPORT DawnTargets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/DawnTargets.cmake"
+      NAMESPACE dawn::
+  )
+  # Create a ConfigVersion.cmake file:
+  include(CMakePackageConfigHelpers)
+  write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/DawnConfigVersion.cmake"
+    COMPATIBILITY AnyNewerVersion)
+  # Configure config file
+  configure_package_config_file("${CMAKE_CURRENT_LIST_DIR}/src/cmake/DawnConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/DawnConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Dawn"
+  )
+  # Install the fully generated config and configVersion files
+  install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/DawnConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/DawnConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Dawn"
+  )
+endif ()

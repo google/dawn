@@ -141,3 +141,53 @@ function(dawn_add_library name)
   endif ()
   add_library("dawn::${name}" ALIAS "${name}")
 endfunction()
+
+#[==[.rst:
+.. cmake:command:: dawn_install_target
+
+  Install a target and associated header files.
+
+  .. code-block:: cmake
+
+  dawn_install_target(<name>
+    [HEADERS                  <header>...]
+  )
+
+  * ``HEADERS``: A list of header files to install.
+#]==]
+function(dawn_install_target name)
+  cmake_parse_arguments(PARSE_ARGV 1 arg
+    ""
+    ""
+    "HEADERS")
+  if (arg_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR
+      "Unparsed arguments for dawn_install_target: "
+      "${arg_UNPARSED_ARGUMENTS}")
+  endif ()
+  install(TARGETS "${name}"
+    EXPORT DawnTargets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  )
+  foreach(header IN LISTS arg_HEADERS)
+    # Starting from CMake 3.20 there is the cmake_path command that could simplify this code.
+    # Compute the install subdirectory for the header by stripping out the path to
+    # the 'include' (or) 'gen/include' directory...
+    string(FIND "${header}" "${DAWN_INCLUDE_DIR}" found)
+    if (found EQUAL 0)
+      string(LENGTH "${DAWN_INCLUDE_DIR}/" deduction)
+    endif()
+    string(FIND "${header}" "${DAWN_BUILD_GEN_DIR}/include/" found)
+    if (found EQUAL 0)
+      string(LENGTH "${DAWN_BUILD_GEN_DIR}/include/" deduction)
+    endif()
+    string(SUBSTRING "${header}" "${deduction}" -1 subdir)
+
+    # ... then remove everything after the last /
+    string(FIND "${subdir}" "/" found REVERSE)
+    string(SUBSTRING "${subdir}" 0 ${found} subdir)
+    install(FILES "${header}" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${subdir}")
+  endforeach()
+endfunction()

@@ -189,7 +189,6 @@ set(sources
     "ComputePipeline.cpp"
     "CopyTextureForBrowserHelper.cpp"
     "CreatePipelineAsyncEvent.cpp"
-    "DawnNative.cpp"
     "Device.cpp"
     "DynamicUploader.cpp"
     "EncodingContext.cpp"
@@ -318,7 +317,6 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
     list(APPEND sources
         "d3d/BackendD3D.cpp"
         "d3d/BlobD3D.cpp"
-        "d3d/D3DBackend.cpp"
         "d3d/D3DError.cpp"
         "d3d/DeviceD3D.cpp"
         "d3d/KeyedMutex.cpp"
@@ -374,7 +372,6 @@ if (DAWN_ENABLE_D3D11)
         "d3d11/CommandBufferD3D11.cpp"
         "d3d11/CommandRecordingContextD3D11.cpp"
         "d3d11/ComputePipelineD3D11.cpp"
-        "d3d11/D3D11Backend.cpp"
         "d3d11/DeviceD3D11.cpp"
         "d3d11/DeviceInfoD3D11.cpp"
         "d3d11/PhysicalDeviceD3D11.cpp"
@@ -447,7 +444,6 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/CommandRecordingContext.cpp"
         "d3d12/ComputePipelineD3D12.cpp"
         "d3d12/CPUDescriptorHeapAllocationD3D12.cpp"
-        "d3d12/D3D12Backend.cpp"
         "d3d12/D3D12Info.cpp"
         "d3d12/DeviceD3D12.cpp"
         "d3d12/GPUDescriptorHeapAllocationD3D12.cpp"
@@ -516,7 +512,6 @@ if (DAWN_ENABLE_METAL)
         "metal/CommandRecordingContext.mm"
         "metal/ComputePipelineMTL.mm"
         "metal/DeviceMTL.mm"
-        "metal/MetalBackend.mm"
         "metal/PhysicalDeviceMTL.mm"
         "metal/PipelineLayoutMTL.mm"
         "metal/QuerySetMTL.mm"
@@ -535,6 +530,7 @@ if (DAWN_ENABLE_METAL)
         list(APPEND conditional_private_platform_depends "-framework Cocoa")
     endif()
     list(APPEND conditional_private_platform_depends
+        "-framework Foundation"
         "-framework IOKit"
         "-framework IOSurface"
         "-framework QuartzCore"
@@ -551,7 +547,6 @@ if (DAWN_ENABLE_NULL)
     )
     list(APPEND sources
         "null/DeviceNull.cpp"
-        "null/NullBackend.cpp"
     )
 endif()
 
@@ -627,7 +622,6 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/DisplayEGL.cpp"
         "opengl/EGLFunctions.cpp"
         "opengl/GLFormat.cpp"
-        "opengl/OpenGLBackend.cpp"
         "opengl/OpenGLFunctions.cpp"
         "opengl/OpenGLVersion.cpp"
         "opengl/PersistentPipelineStateGL.cpp"
@@ -722,7 +716,6 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/SwapChainVk.cpp"
         "vulkan/TextureVk.cpp"
         "vulkan/UtilsVulkan.cpp"
-        "vulkan/VulkanBackend.cpp"
         "vulkan/VulkanError.cpp"
         "vulkan/VulkanExtensions.cpp"
         "vulkan/VulkanFunctions.cpp"
@@ -761,22 +754,38 @@ if (DAWN_ENABLE_VULKAN)
     endif()
 endif()
 
-dawn_add_library(
-  dawn_native
-  UTILITY_TARGET dawn_internal_config
-  HEADERS
-    ${headers}
-  PRIVATE_HEADERS
-    ${private_headers}
-  SOURCES
-    ${sources}
-  DEPENDS
+set(dawn_component_srcs)
+list(APPEND dawn_component_srcs "DawnNative.cpp")
+if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
+    list(APPEND dawn_component_srcs "d3d/D3DBackend.cpp")
+endif()
+if (DAWN_ENABLE_D3D11)
+    list(APPEND dawn_component_srcs "d3d11/D3D11Backend.cpp")
+endif()
+if (DAWN_ENABLE_D3D12)
+    list(APPEND dawn_component_srcs "d3d12/D3D12Backend.cpp")
+endif()
+if (DAWN_ENABLE_METAL)
+    list(APPEND dawn_component_srcs "metal/MetalBackend.mm")
+endif()
+if (DAWN_ENABLE_NULL)
+    list(APPEND dawn_component_srcs "null/NullBackend.cpp")
+endif()
+if (DAWN_ENABLE_OPENGL)
+    list(APPEND dawn_component_srcs "opengl/OpenGLBackend.cpp")
+endif()
+if (DAWN_ENABLE_VULKAN)
+    list(APPEND dawn_component_srcs "vulkan/VulkanBackend.cpp")
+endif()
+
+set(dawn_native_public_depends
     dawn::dawn_common
     dawn::dawn_platform
     dawn::dawncpp_headers
     dawn::partition_alloc
     ${conditional_public_depends}
-  PRIVATE_DEPENDS
+)
+set(dawn_native_private_depends
     absl::flat_hash_map
     absl::flat_hash_set
     absl::inlined_vector
@@ -784,6 +793,38 @@ dawn_add_library(
     absl::strings
     libtint
     ${conditional_private_depends}
+)
+
+# The same object files are reused to build
+# 1. dawn_native (which gets used by tests, samples, benchmarks)
+# 2. webgpu_dawn bundle (which gets installed via CMake install rules)
+dawn_add_library(
+  dawn_native_objects
+  UTILITY_TARGET dawn_internal_config
+  FORCE_OBJECT
+  HEADERS
+    ${headers}
+  PRIVATE_HEADERS
+    ${private_headers}
+  SOURCES
+    ${sources}
+  DEPENDS
+    ${dawn_native_public_depends}
+  PRIVATE_DEPENDS
+    ${dawn_native_private_depends}
+    ${conditional_private_platform_depends}
+)
+
+dawn_add_library(
+  dawn_native
+  UTILITY_TARGET dawn_internal_config
+  SOURCES
+    ${dawn_component_srcs}
+  DEPENDS
+    dawn::dawn_native_objects
+    ${dawn_native_public_depends}
+  PRIVATE_DEPENDS
+    ${dawn_native_private_depends}
     ${conditional_private_platform_depends}
 )
 
@@ -811,35 +852,59 @@ if (DAWN_ENABLE_SWIFTSHADER)
     target_compile_definitions(dawn_native PRIVATE "DAWN_ENABLE_SWIFTSHADER")
 endif()
 
-###############################################################################
-# Do the 'complete_lib' build.
-# A convenience target that bundles dawn_native and procs calling it directly so that
-# applications link against it and have WebGPU work without jumping through more hoops.
-# Note that this library name is referenced in several places, search for it and things like:
-# "{{.*}}_dawn" when you rename it.
-###############################################################################
-
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
+if (DAWN_BUILD_MONOLITHIC_LIBRARY)
+    ###############################################################################
+    # Do the 'complete_lib' build.
+    # A convenience target that bundles dawn_native and procs calling it directly so that
+    # applications link against it and have WebGPU work without jumping through more hoops.
+    # Note that this library name is referenced in several places, search for it and things like:
+    # "{{.*}}_dawn" when you rename it.
+    ###############################################################################
     DawnJSONGenerator(
         TARGET "webgpu_dawn_native_proc"
         PRINT_NAME "Dawn native WebGPU procs"
         OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES
     )
-
+    # Bundle all objects of dawn_native, it's public dependencies and private dependencies.
     include(BundleLibraries)
-    bundle_libraries(webgpu_dawn dawn_native)
-    add_library(dawn::webgpu ALIAS webgpu_dawn)
+    bundle_libraries(webgpu_dawn dawn::dawn_native_objects)
+    add_library(dawn::webgpu_dawn ALIAS webgpu_dawn)
+    # Compile backend specific sources along with webgpu_dawn_native_proc sources for export macros to get applied.
     target_sources(webgpu_dawn
-    PRIVATE
+        PRIVATE
         ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
+        ${dawn_component_srcs}
     )
+    target_compile_definitions(webgpu_dawn
+        PRIVATE
+            "WGPU_IMPLEMENTATION"
+            "DAWN_NATIVE_IMPLEMENTATION"
+        PUBLIC
+            "WGPU_SHARED_LIBRARY"
+            "DAWN_NATIVE_SHARED_LIBRARY"
+    )
+    # TODO: Revert https://dawn-review.googlesource.com/c/dawn/+/196361 and remove the next line.
+    set_target_properties(webgpu_dawn PROPERTIES CXX_EXTENSIONS NO)
+    # Apart from dawn_public_config, everything else goes inside PRIVATE, otherwise install rules will complain that they were not exported.
     target_link_libraries(webgpu_dawn
-    PRIVATE
-        dawn_internal_config
-        ${conditional_private_platform_depends}
+        PUBLIC
+            dawn_public_config
+        PRIVATE
+            dawn_internal_config
+            ${dawn_native_public_depends}
+            ${dawn_native_private_depends}
+            ${conditional_private_platform_depends}
     )
-    target_compile_definitions(webgpu_dawn PRIVATE "WGPU_IMPLEMENTATION")
-    target_compile_definitions(webgpu_dawn PUBLIC "WGPU_SHARED_LIBRARY")
+    set(webgpu_dawn_public_headers)
+    foreach(dawn_target_name IN ITEMS dawn_headers dawncpp_headers dawn_native_objects)
+        get_target_property(headers "${dawn_target_name}" INTERFACE_SOURCES)
+        list(INSERT webgpu_dawn_public_headers 0 "${headers}")
+    endforeach()
+    if (DAWN_ENABLE_INSTALL)
+        dawn_install_target(dawn_public_config)
+        dawn_install_target(webgpu_dawn
+            HEADERS ${webgpu_dawn_public_headers})
+    endif ()
 endif ()
 
 # Linking with dxcompiler after bundling so that the bundling process
@@ -850,6 +915,3 @@ if (DAWN_USE_BUILT_DXC)
     target_link_libraries(dawn_native PRIVATE dxcompiler)
     target_link_libraries(webgpu_dawn PRIVATE dxcompiler)
 endif()
-
-install_if_enabled(dawn_native)
-install_if_enabled(webgpu_dawn)

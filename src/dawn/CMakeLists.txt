@@ -26,30 +26,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ###############################################################################
-# Dawn projects
-###############################################################################
-
-add_subdirectory(partition_alloc)
-add_subdirectory(common)
-add_subdirectory(platform)
-add_subdirectory(native)
-add_subdirectory(wire)
-add_subdirectory(utils)
-
-if (DAWN_BUILD_BENCHMARKS)
-    add_subdirectory(tests/benchmarks)
-endif()
-if(DAWN_USE_GLFW)
-    add_subdirectory(glfw)
-endif()
-if (DAWN_BUILD_SAMPLES)
-    add_subdirectory(samples)
-endif()
-if (DAWN_BUILD_NODE_BINDINGS)
-    add_subdirectory(node)
-endif()
-
-###############################################################################
 # Dawn headers
 ###############################################################################
 
@@ -69,8 +45,6 @@ dawn_add_library(
     DEPENDS
         dawn_public_config
 )
-install_if_enabled(dawn_headers)
-
 ###############################################################################
 # Dawn C++ headers
 ###############################################################################
@@ -91,10 +65,32 @@ dawn_add_library(
     DEPENDS
         dawn::dawn_headers
 )
-install_if_enabled(dawncpp_headers)
-
 add_library(dawncpp ALIAS dawncpp_headers)
 add_library(webgpu_cpp ALIAS dawncpp_headers)
+
+###############################################################################
+# Dawn projects
+###############################################################################
+
+add_subdirectory(partition_alloc)
+add_subdirectory(common)
+add_subdirectory(platform)
+add_subdirectory(wire)
+add_subdirectory(native)
+add_subdirectory(utils)
+
+if (DAWN_BUILD_BENCHMARKS)
+  add_subdirectory(tests/benchmarks)
+endif()
+if(DAWN_USE_GLFW)
+  add_subdirectory(glfw)
+endif()
+if (DAWN_BUILD_SAMPLES)
+  add_subdirectory(samples)
+endif()
+if (DAWN_BUILD_NODE_BINDINGS)
+  add_subdirectory(node)
+endif()
 
 ###############################################################################
 # libdawn_proc
@@ -123,7 +119,6 @@ target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
   target_compile_definitions(dawn_proc PUBLIC "WGPU_SHARED_LIBRARY")
 endif()
-install_if_enabled(dawn_proc)
 
 ###############################################################################
 # Other generated files (upstream header, emscripten header, emscripten bits)
