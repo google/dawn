@@ -32,6 +32,7 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/io_attributes.h"
 #include "src/tint/lang/core/ir/location.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/containers/vector.h"
@@ -80,41 +81,61 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @copydoc Value::Clone()
     FunctionParam* Clone(CloneContext& ctx) override;
 
+    /// Sets the IO attributes.
+    /// @param attrs the attributes
+    void SetAttributes(const IOAttributes& attrs) { attributes_ = attrs; }
+    /// @returns the IO attributes
+    const IOAttributes& Attributes() const { return attributes_; }
+
     /// Sets the builtin information. Note, it is currently an error if the builtin is already set.
     /// @param val the builtin to set
     void SetBuiltin(core::BuiltinValue val) {
-        TINT_ASSERT(!builtin_.has_value());
-        builtin_ = val;
+        TINT_ASSERT(!attributes_.builtin.has_value());
+        attributes_.builtin = val;
     }
     /// @returns the builtin set for the parameter
-    std::optional<core::BuiltinValue> Builtin() const { return builtin_; }
+    std::optional<core::BuiltinValue> Builtin() const { return attributes_.builtin; }
 
     /// Clears the builtin attribute.
-    void ClearBuiltin() { builtin_ = {}; }
+    void ClearBuiltin() { attributes_.builtin = {}; }
 
     /// Sets the parameter as invariant
     /// @param val the value to set for invariant
-    void SetInvariant(bool val) { invariant_ = val; }
+    void SetInvariant(bool val) { attributes_.invariant = val; }
 
     /// @returns true if parameter is invariant
-    bool Invariant() const { return invariant_; }
+    bool Invariant() const { return attributes_.invariant; }
 
     /// Sets the location
     /// @param location the location
-    void SetLocation(ir::Location location) { location_ = std::move(location); }
+    void SetLocation(ir::Location location) {
+        // TODO(340196362): Remove this overload.
+        attributes_.location = location.value;
+        attributes_.interpolation = location.interpolation;
+    }
 
     /// Sets the location
     /// @param loc the location value
-    /// @param interpolation if the location interpolation settings
+    /// @param interpolation the location interpolation settings
     void SetLocation(uint32_t loc, std::optional<core::Interpolation> interpolation) {
-        location_ = {loc, interpolation};
+        attributes_.location = loc;
+        attributes_.interpolation = interpolation;
     }
 
     /// @returns the location if `Attributes` contains `kLocation`
-    std::optional<ir::Location> Location() const { return location_; }
+    std::optional<ir::Location> Location() const {
+        // TODO(340196362): Remove this overload.
+        if (attributes_.location.has_value()) {
+            return ir::Location{attributes_.location.value(), attributes_.interpolation};
+        }
+        return {};
+    }
 
     /// Clears the location attribute.
-    void ClearLocation() { location_ = {}; }
+    void ClearLocation() {
+        attributes_.location = {};
+        attributes_.interpolation = {};
+    }
 
     /// Sets the binding point
     /// @param group the group
@@ -134,10 +155,8 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     ir::Function* func_ = nullptr;
     uint32_t index_ = 0xffffffff;
     const core::type::Type* type_ = nullptr;
-    std::optional<core::BuiltinValue> builtin_;
-    std::optional<struct Location> location_;
     std::optional<struct BindingPoint> binding_point_;
-    bool invariant_ = false;
+    IOAttributes attributes_;
 };
 
 }  // namespace tint::core::ir

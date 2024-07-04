@@ -42,10 +42,8 @@ FunctionParam::~FunctionParam() = default;
 
 FunctionParam* FunctionParam::Clone(CloneContext& ctx) {
     auto* out = ctx.ir.allocators.values.Create<FunctionParam>(type_);
-    out->builtin_ = builtin_;
-    out->location_ = location_;
     out->binding_point_ = binding_point_;
-    out->invariant_ = invariant_;
+    out->attributes_ = attributes_;
 
     auto name = ctx.ir.NameOf(this);
     if (name.IsValid()) {
