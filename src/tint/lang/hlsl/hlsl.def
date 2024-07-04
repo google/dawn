@@ -51,6 +51,16 @@ type vec2<T>
 type vec3<T>
 type vec4<T>
 @display("vec{N}<{T}>")     type vec<N: num, T>
+type mat2x2<T>
+type mat2x3<T>
+type mat2x4<T>
+type mat3x2<T>
+type mat3x3<T>
+type mat3x4<T>
+type mat4x2<T>
+type mat4x3<T>
+type mat4x4<T>
+@display("mat{N}x{M}<{T}>") type mat<N: num, M: num, T>
 
 type byte_address_buffer<A: access>
 
@@ -61,6 +71,7 @@ type byte_address_buffer<A: access>
 match iu32: i32 | u32
 match f32_u32: f32 | u32
 match f32_i32: f32 | i32
+match f32_f16: f32 | f16
 
 match storage: address_space.storage
 
@@ -103,3 +114,7 @@ fn f16tof32[N: num](vec<N, u32>) -> vec<N, f32>
 @member_function fn Store2(byte_address_buffer<writable>, offset: u32, value: vec2<u32>)
 @member_function fn Store3(byte_address_buffer<writable>, offset: u32, value: vec3<u32>)
 @member_function fn Store4(byte_address_buffer<writable>, offset: u32, value: vec4<u32>)
+
+fn mul [T: f32_f16, C: num, R: num](mat<C, R, T>, vec<C, T>) -> vec<R, T>
+fn mul [T: f32_f16, C: num, R: num](vec<R, T>, mat<C, R, T>) -> vec<C, T>
+fn mul [T: f32_f16, K: num, C: num, R: num](mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>

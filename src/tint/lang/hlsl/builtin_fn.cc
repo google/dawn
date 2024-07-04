@@ -76,6 +76,8 @@ const char* str(BuiltinFn i) {
             return "Store3";
         case BuiltinFn::kStore4:
             return "Store4";
+        case BuiltinFn::kMul:
+            return "mul";
     }
     return "<unknown>";
 }

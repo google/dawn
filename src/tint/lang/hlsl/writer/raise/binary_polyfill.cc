@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/hlsl/ir/builtin_call.h"
 
 namespace tint::hlsl::writer::raise {
 namespace {
@@ -66,6 +67,21 @@ struct State {
                         }
                         break;
                     }
+                    case core::BinaryOp::kMultiply: {
+                        auto* lhs_ty = binary->LHS()->Type();
+                        auto* rhs_ty = binary->RHS()->Type();
+
+                        if ((lhs_ty->Is<core::type::Vector>() &&
+                             rhs_ty->Is<core::type::Matrix>()) ||
+                            (lhs_ty->Is<core::type::Matrix>() &&
+                             rhs_ty->Is<core::type::Vector>()) ||
+                            (lhs_ty->Is<core::type::Matrix>() &&
+                             rhs_ty->Is<core::type::Matrix>())) {
+                            binary_worklist.Push(binary);
+                        }
+                        break;
+                    }
+
                     default:
                         break;
                 }
@@ -79,10 +95,24 @@ struct State {
                 case core::BinaryOp::kModulo:
                     PreciseFloatMod(binary);
                     break;
+                case core::BinaryOp::kMultiply:
+                    Mul(binary);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED();
             }
         }
+    }
+
+    // Multiplying by a matrix requires the use of `mul` in order to get the
+    // type of multiply we desire.
+    //
+    // Matrices are transposed, so swap LHS and RHS.
+    void Mul(core::ir::Binary* binary) {
+        auto* call = b.CallWithResult<hlsl::ir::BuiltinCall>(
+            binary->DetachResult(), hlsl::BuiltinFn::kMul, binary->RHS(), binary->LHS());
+        call->InsertBefore(binary);
+        binary->Destroy();
     }
 
     // Replace with:

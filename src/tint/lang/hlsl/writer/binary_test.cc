@@ -396,8 +396,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryMulMatVec) {
+TEST_F(HlslWriterTest, BinaryMulMatVec) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -421,8 +420,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryMulVecMat) {
+TEST_F(HlslWriterTest, BinaryMulVecMat) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -446,8 +444,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Needs binary polyfill
-TEST_F(HlslWriterTest, DISABLED_BinaryMulMatMat) {
+TEST_F(HlslWriterTest, BinaryMulMatMat) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -465,7 +462,7 @@ TEST_F(HlslWriterTest, DISABLED_BinaryMulMatMat) {
 void foo() {
   float4x4 x = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
   float4x4 y = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
-  float4 c = mul(y, x);
+  float4x4 c = mul(y, x);
 }
 
 )");

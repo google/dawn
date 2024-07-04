@@ -196,5 +196,215 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF16Vec3) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BinaryPolyfillTest, MulVecMatF32) {
+    auto* x = b.FunctionParam<vec3<f32>>("x");
+    auto* y = b.FunctionParam<mat3x3<f32>>("y");
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({x, y});
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Multiply(ty.vec3<f32>(), x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%x:vec3<f32>, %y:mat3x3<f32>):void {
+  $B1: {
+    %4:vec3<f32> = mul %x, %y
+    %a:vec3<f32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%x:vec3<f32>, %y:mat3x3<f32>):void {
+  $B1: {
+    %4:vec3<f32> = hlsl.mul %y, %x
+    %a:vec3<f32> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BinaryPolyfillTest, MulVecMatF16) {
+    auto* x = b.FunctionParam<vec3<f16>>("x");
+    auto* y = b.FunctionParam<mat3x3<f16>>("y");
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({x, y});
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Multiply(ty.vec3<f16>(), x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%x:vec3<f16>, %y:mat3x3<f16>):void {
+  $B1: {
+    %4:vec3<f16> = mul %x, %y
+    %a:vec3<f16> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%x:vec3<f16>, %y:mat3x3<f16>):void {
+  $B1: {
+    %4:vec3<f16> = hlsl.mul %y, %x
+    %a:vec3<f16> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BinaryPolyfillTest, MulMatVecF32) {
+    auto* x = b.FunctionParam<mat3x3<f32>>("x");
+    auto* y = b.FunctionParam<vec3<f32>>("y");
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({x, y});
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Multiply(ty.vec3<f32>(), x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%x:mat3x3<f32>, %y:vec3<f32>):void {
+  $B1: {
+    %4:vec3<f32> = mul %x, %y
+    %a:vec3<f32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%x:mat3x3<f32>, %y:vec3<f32>):void {
+  $B1: {
+    %4:vec3<f32> = hlsl.mul %y, %x
+    %a:vec3<f32> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BinaryPolyfillTest, MulMatVecF16) {
+    auto* x = b.FunctionParam<mat3x3<f16>>("x");
+    auto* y = b.FunctionParam<vec3<f16>>("y");
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({x, y});
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Multiply(ty.vec3<f16>(), x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%x:mat3x3<f16>, %y:vec3<f16>):void {
+  $B1: {
+    %4:vec3<f16> = mul %x, %y
+    %a:vec3<f16> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%x:mat3x3<f16>, %y:vec3<f16>):void {
+  $B1: {
+    %4:vec3<f16> = hlsl.mul %y, %x
+    %a:vec3<f16> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BinaryPolyfillTest, MulMatMat32) {
+    auto* x = b.FunctionParam<mat3x3<f32>>("x");
+    auto* y = b.FunctionParam<mat3x3<f32>>("y");
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({x, y});
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Multiply(ty.mat3x3<f32>(), x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%x:mat3x3<f32>, %y:mat3x3<f32>):void {
+  $B1: {
+    %4:mat3x3<f32> = mul %x, %y
+    %a:mat3x3<f32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%x:mat3x3<f32>, %y:mat3x3<f32>):void {
+  $B1: {
+    %4:mat3x3<f32> = hlsl.mul %y, %x
+    %a:mat3x3<f32> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BinaryPolyfillTest, MulMatMat16) {
+    auto* x = b.FunctionParam<mat3x3<f16>>("x");
+    auto* y = b.FunctionParam<mat3x3<f16>>("y");
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({x, y});
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Multiply(ty.mat3x3<f16>(), x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%x:mat3x3<f16>, %y:mat3x3<f16>):void {
+  $B1: {
+    %4:mat3x3<f16> = mul %x, %y
+    %a:mat3x3<f16> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%x:mat3x3<f16>, %y:mat3x3<f16>):void {
+  $B1: {
+    %4:mat3x3<f16> = hlsl.mul %y, %x
+    %a:mat3x3<f16> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
