@@ -575,35 +575,16 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Fails DXC validation
-// hlsl.hlsl:9:9: warning: implicit truncation of vector type [-Wconversion]
-//   float a = v1[1u];
-//         ^
-// hlsl.hlsl:9:13: error: array index 1 is out of bounds
-//   float a = v1[1u];
-//             ^
-// hlsl.hlsl:3:3: note: array 'v1' declared here
-//   uint4 v1[1];
-//   ^
-// hlsl.hlsl:13:9: warning: implicit truncation of vector type [-Wconversion]
-//   float a = v2[1u];
-//         ^
-// hlsl.hlsl:13:13: error: array index 1 is out of bounds
-//   float a = v2[1u];
-//             ^
-// hlsl.hlsl:6:3: note: array 'v2' declared here
-//   uint4 v2[1];
-//   ^
-TEST_F(HlslWriterTest, DISABLED_AccessDirectVariable) {
-    auto* var1 = b.Var<uniform, vec4<f32>, core::Access::kRead>("v1");
+TEST_F(HlslWriterTest, AccessDirectVariable) {
+    auto* var1 = b.Var<storage, vec4<f32>, core::Access::kRead>("v1");
     var1->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var1);
 
-    auto* var2 = b.Var<uniform, vec4<f32>, core::Access::kRead>("v2");
+    auto* var2 = b.Var<storage, vec4<f32>, core::Access::kRead>("v2");
     var2->SetBindingPoint(0, 1);
     b.ir.root_block->Append(var2);
 
-    auto* p = b.FunctionParam("x", ty.ptr<uniform, vec4<f32>, core::Access::kRead>());
+    auto* p = b.FunctionParam("x", ty.ptr<storage, vec4<f32>, core::Access::kRead>());
     auto* bar = b.Function("bar", ty.void_());
     bar->SetParams({p});
     b.Append(bar->Block(), [&] {
@@ -620,18 +601,14 @@ TEST_F(HlslWriterTest, DISABLED_AccessDirectVariable) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-cbuffer cbuffer_v1 : register(b0) {
-  uint4 v1[1];
-};
-cbuffer cbuffer_v2 : register(b1) {
-  uint4 v2[1];
-};
+ByteAddressBuffer v1 : register(t0);
+ByteAddressBuffer v2 : register(t1);
 void bar() {
-  float a = v1[1u];
+  float a = asfloat(v1.Load(4u));
 }
 
 void bar_1() {
-  float a = v2[1u];
+  float a = asfloat(v2.Load(4u));
 }
 
 void foo() {
