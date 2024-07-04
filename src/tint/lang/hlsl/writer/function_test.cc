@@ -155,11 +155,11 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithInAndOutLocations) {
     // }
 
     auto* foo = b.FunctionParam("foo", ty.f32());
-    foo->SetLocation(0, {});
+    foo->SetLocation(0);
 
     auto* func = b.Function("frag_main", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     func->SetParams({foo});
-    func->SetReturnLocation(1, {});
+    func->SetReturnLocation(1);
     func->Block()->Append(b.Return(func, foo));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;

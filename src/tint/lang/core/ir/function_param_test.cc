@@ -63,8 +63,9 @@ TEST_F(IR_FunctionParamTest, CloneEmpty) {
 TEST_F(IR_FunctionParamTest, Clone) {
     auto* fp = b.FunctionParam(mod.Types().f32());
     fp->SetBuiltin(BuiltinValue::kVertexIndex);
-    fp->SetLocation(
-        1, Interpolation{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid});
+    fp->SetLocation(1);
+    fp->SetInterpolation(
+        Interpolation{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid});
     fp->SetInvariant(true);
     fp->SetBindingPoint(1, 2);
 

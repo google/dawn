@@ -73,10 +73,11 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_NonStruct) {
     position->SetBuiltin(core::BuiltinValue::kPosition);
     position->SetInvariant(true);
     auto* color1 = b.FunctionParam("color1", ty.f32());
-    color1->SetLocation(0, {});
+    color1->SetLocation(0);
     auto* color2 = b.FunctionParam("color2", ty.f32());
-    color2->SetLocation(1, core::Interpolation{core::InterpolationType::kLinear,
-                                               core::InterpolationSampling::kSample});
+    color2->SetLocation(1);
+    color2->SetInterpolation(core::Interpolation{core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample});
 
     ep->SetParams({front_facing, position, color1, color2});
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
@@ -321,8 +322,9 @@ TEST_F(MslWriter_ShaderIOTest, Parameters_Mixed) {
     front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
     auto* str_param = b.FunctionParam("inputs", str_ty);
     auto* color2 = b.FunctionParam("color2", ty.f32());
-    color2->SetLocation(1, core::Interpolation{core::InterpolationType::kLinear,
-                                               core::InterpolationSampling::kSample});
+    color2->SetLocation(1);
+    color2->SetInterpolation(core::Interpolation{core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample});
 
     ep->SetParams({front_facing, str_param, color2});
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
@@ -451,7 +453,7 @@ foo_outputs = struct @align(16) {
 
 TEST_F(MslWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
-    ep->SetReturnLocation(1u, {});
+    ep->SetReturnLocation(1u);
     ep->SetStage(core::ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {  //
@@ -734,7 +736,7 @@ TEST_F(MslWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
         auto* inputs = b.FunctionParam("inputs", str_ty);
         ep->SetStage(core::ir::Function::PipelineStage::kFragment);
         ep->SetParams({inputs});
-        ep->SetReturnLocation(0u, {});
+        ep->SetReturnLocation(0u);
 
         b.Append(ep->Block(), [&] {  //
             auto* position = b.Access(vec4f, inputs, 0_u);

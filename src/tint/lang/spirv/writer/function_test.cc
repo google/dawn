@@ -348,9 +348,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithCapability) {
     auto* input = b.FunctionParam("input", ty.vec4<f16>());
-    input->SetLocation(1, std::nullopt);
+    input->SetLocation(1);
     auto* func = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kFragment);
-    func->SetReturnLocation(2, std::nullopt);
+    func->SetReturnLocation(2);
     func->SetParams({input});
     b.Append(func->Block(), [&] {  //
         b.Return(func, b.Convert(ty.vec4<f32>(), input));
@@ -376,9 +376,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithCapability) {
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithoutCapability) {
     auto* input = b.FunctionParam("input", ty.vec4<f16>());
-    input->SetLocation(1, std::nullopt);
+    input->SetLocation(1);
     auto* func = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kFragment);
-    func->SetReturnLocation(2, std::nullopt);
+    func->SetReturnLocation(2);
     func->SetParams({input});
     b.Append(func->Block(), [&] {  //
         b.Return(func, b.Convert(ty.vec4<f32>(), input));
@@ -404,9 +404,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithoutCapability) {
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithCapability) {
     auto* input = b.FunctionParam("input", ty.vec4<f32>());
-    input->SetLocation(1, std::nullopt);
+    input->SetLocation(1);
     auto* func = b.Function("main", ty.vec4<f16>(), core::ir::Function::PipelineStage::kFragment);
-    func->SetReturnLocation(2, std::nullopt);
+    func->SetReturnLocation(2);
     func->SetParams({input});
     b.Append(func->Block(), [&] {  //
         b.Return(func, b.Convert(ty.vec4<f16>(), input));
@@ -432,9 +432,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithCapability) {
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithoutCapability) {
     auto* input = b.FunctionParam("input", ty.vec4<f32>());
-    input->SetLocation(1, std::nullopt);
+    input->SetLocation(1);
     auto* func = b.Function("main", ty.vec4<f16>(), core::ir::Function::PipelineStage::kFragment);
-    func->SetReturnLocation(2, std::nullopt);
+    func->SetReturnLocation(2);
     func->SetParams({input});
     b.Append(func->Block(), [&] {  //
         b.Return(func, b.Convert(ty.vec4<f16>(), input));

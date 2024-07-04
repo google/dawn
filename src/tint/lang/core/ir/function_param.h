@@ -96,9 +96,6 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @returns the builtin set for the parameter
     std::optional<core::BuiltinValue> Builtin() const { return attributes_.builtin; }
 
-    /// Clears the builtin attribute.
-    void ClearBuiltin() { attributes_.builtin = {}; }
-
     /// Sets the parameter as invariant
     /// @param val the value to set for invariant
     void SetInvariant(bool val) { attributes_.invariant = val; }
@@ -114,11 +111,13 @@ class FunctionParam : public Castable<FunctionParam, Value> {
         attributes_.interpolation = location.interpolation;
     }
 
-    /// Sets the location
-    /// @param loc the location value
-    /// @param interpolation the location interpolation settings
-    void SetLocation(uint32_t loc, std::optional<core::Interpolation> interpolation) {
-        attributes_.location = loc;
+    /// Sets the location.
+    /// @param loc the optional location value
+    void SetLocation(std::optional<uint32_t> loc) { attributes_.location = loc; }
+
+    /// Sets the interpolation.
+    /// @param interpolation the optional location interpolation settings
+    void SetInterpolation(std::optional<core::Interpolation> interpolation) {
         attributes_.interpolation = interpolation;
     }
 
@@ -129,12 +128,6 @@ class FunctionParam : public Castable<FunctionParam, Value> {
             return ir::Location{attributes_.location.value(), attributes_.interpolation};
         }
         return {};
-    }
-
-    /// Clears the location attribute.
-    void ClearLocation() {
-        attributes_.location = {};
-        attributes_.interpolation = {};
     }
 
     /// Sets the binding point

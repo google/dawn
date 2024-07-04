@@ -139,7 +139,8 @@ TEST_F(IRBinaryRoundtripTest, Fn_ParameterAttributes) {
     auto* p3 = b.FunctionParam(ty.bool_());
     p0->SetBuiltin(BuiltinValue::kGlobalInvocationId);
     p1->SetInvariant(true);
-    p2->SetLocation(10, Interpolation{InterpolationType::kFlat, InterpolationSampling::kCenter});
+    p2->SetLocation(10);
+    p2->SetInterpolation(Interpolation{InterpolationType::kFlat, InterpolationSampling::kCenter});
     p3->SetBindingPoint(20, 30);
     fn->SetParams({p0, p1, p2, p3});
     RUN_TEST();
@@ -154,17 +155,18 @@ TEST_F(IRBinaryRoundtripTest, Fn_ReturnBuiltin) {
 
 TEST_F(IRBinaryRoundtripTest, Fn_ReturnLocation) {
     auto* fn = b.Function("Function", ty.void_());
-    fn->SetReturnLocation(42, std::nullopt);
+    fn->SetReturnLocation(42);
     b.ir.SetName(fn, "Function");
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, Fn_ReturnLocation_Interpolation) {
     auto* fn = b.Function("Function", ty.void_());
-    fn->SetReturnLocation(0, core::Interpolation{
-                                 core::InterpolationType::kPerspective,
-                                 core::InterpolationSampling::kCentroid,
-                             });
+    fn->SetReturnLocation(0);
+    fn->SetReturnInterpolation(core::Interpolation{
+        core::InterpolationType::kPerspective,
+        core::InterpolationSampling::kCentroid,
+    });
     b.ir.SetName(fn, "Function");
     RUN_TEST();
 }

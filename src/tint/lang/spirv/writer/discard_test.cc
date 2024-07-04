@@ -42,7 +42,7 @@ TEST_F(SpirvWriterTest, Discard) {
     front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -94,7 +94,7 @@ TEST_F(SpirvWriterTest, DiscardBeforeAtomic) {
     front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);

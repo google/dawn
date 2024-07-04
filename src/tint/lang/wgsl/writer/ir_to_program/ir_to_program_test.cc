@@ -205,7 +205,7 @@ fn f() -> @builtin(position) @invariant vec4<f32> {
 
 TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_Location) {
     auto* fn = b.Function("f", ty.vec4<f32>(), core::ir::Function::PipelineStage::kFragment);
-    fn->SetReturnLocation(1, std::nullopt);
+    fn->SetReturnLocation(1);
 
     fn->Block()->Append(b.Return(fn, b.Splat<vec4<f32>>(0_f)));
 

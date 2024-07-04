@@ -48,7 +48,7 @@ TEST_F(IR_DemoteToHelperTest, NoModify_NoDiscard) {
     mod.root_block->Append(buffer);
 
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {  //
         b.Store(buffer, 42_i);
@@ -85,7 +85,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInEntryPoint) {
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -170,7 +170,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -273,7 +273,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         b.Call(ty.void_(), helper, front_facing);
@@ -373,7 +373,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         b.Call(ty.void_(), helper, front_facing);
@@ -456,7 +456,7 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* func = b.Var("func", ty.ptr<function, i32>());
@@ -541,7 +541,7 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
     auto* coord = b.FunctionParam("coord", ty.vec2<i32>());
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing, coord});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -623,7 +623,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -702,7 +702,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -785,7 +785,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicCompareExchange) {
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
-    ep->SetReturnLocation(0_u, {});
+    ep->SetReturnLocation(0_u);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);

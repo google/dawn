@@ -308,14 +308,11 @@ class Impl {
                 }
             }
 
-            // Note, interpolated is only valid when paired with Location, so it will only be set
-            // when the location is set.
-            std::optional<core::Interpolation> interpolation;
             for (auto* attr : ast_func->return_type_attributes) {
                 tint::Switch(
                     attr,  //
                     [&](const ast::InterpolateAttribute* interp) {
-                        interpolation = ExtractInterpolation(interp);
+                        ir_func->SetReturnInterpolation(ExtractInterpolation(interp));
                     },
                     [&](const ast::InvariantAttribute*) { ir_func->SetReturnInvariant(true); },
                     [&](const ast::BuiltinAttribute* b) {
@@ -329,9 +326,7 @@ class Impl {
                         }
                     });
             }
-            if (sem->ReturnLocation().has_value()) {
-                ir_func->SetReturnLocation(sem->ReturnLocation().value(), interpolation);
-            }
+            ir_func->SetReturnLocation(sem->ReturnLocation());
         }
 
         scopes_.Push();
@@ -343,14 +338,11 @@ class Impl {
             auto* ty = param_sem->Type()->Clone(clone_ctx_.type_ctx);
             auto* param = builder_.FunctionParam(p->name->symbol.NameView(), ty);
 
-            // Note, interpolated is only valid when paired with Location, so it will only be set
-            // when the location is set.
-            std::optional<core::Interpolation> interpolation;
             for (auto* attr : p->attributes) {
                 tint::Switch(
                     attr,  //
                     [&](const ast::InterpolateAttribute* interp) {
-                        interpolation = ExtractInterpolation(interp);
+                        param->SetInterpolation(ExtractInterpolation(interp));
                     },
                     [&](const ast::InvariantAttribute*) { param->SetInvariant(true); },
                     [&](const ast::BuiltinAttribute* b) {
@@ -364,9 +356,7 @@ class Impl {
                         }
                     });
 
-                if (param_sem->Attributes().location.has_value()) {
-                    param->SetLocation(param_sem->Attributes().location.value(), interpolation);
-                }
+                param->SetLocation(param_sem->Attributes().location);
                 if (param_sem->Attributes().color.has_value()) {
                     TINT_UNIMPLEMENTED() << "IR does not currently support texel fetch extension";
                 }
