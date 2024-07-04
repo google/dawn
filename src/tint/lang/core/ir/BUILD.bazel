@@ -125,7 +125,6 @@ cc_library(
     "let.h",
     "load.h",
     "load_vector_element.h",
-    "location.h",
     "loop.h",
     "member_builtin_call.h",
     "module.h",

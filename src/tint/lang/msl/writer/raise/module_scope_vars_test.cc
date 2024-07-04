@@ -514,8 +514,8 @@ TEST_F(MslWriter_ModuleScopeVarsTest, EntryPointHasExistingParameters) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     auto* param = b.FunctionParam<i32>("param");
-    param->SetLocation(
-        core::ir::Location{1_u, core::Interpolation{core::InterpolationType::kFlat}});
+    param->SetLocation(1_u);
+    param->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
     func->SetParams({param});
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);

@@ -109,7 +109,6 @@ libtint_source_set("ir") {
     "load.h",
     "load_vector_element.cc",
     "load_vector_element.h",
-    "location.h",
     "loop.cc",
     "loop.h",
     "member_builtin_call.cc",

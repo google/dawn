@@ -33,7 +33,6 @@
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/io_attributes.h"
-#include "src/tint/lang/core/ir/location.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/ice/ice.h"
@@ -102,14 +101,6 @@ class FunctionParam : public Castable<FunctionParam, Value> {
 
     /// @returns true if parameter is invariant
     bool Invariant() const { return attributes_.invariant; }
-
-    /// Sets the location
-    /// @param location the location
-    void SetLocation(ir::Location location) {
-        // TODO(340196362): Remove this overload.
-        attributes_.location = location.value;
-        attributes_.interpolation = location.interpolation;
-    }
 
     /// Sets the location.
     /// @param loc the optional location value

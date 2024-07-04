@@ -107,7 +107,6 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/load.h
   lang/core/ir/load_vector_element.cc
   lang/core/ir/load_vector_element.h
-  lang/core/ir/location.h
   lang/core/ir/loop.cc
   lang/core/ir/loop.h
   lang/core/ir/member_builtin_call.cc

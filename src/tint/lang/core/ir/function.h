@@ -34,7 +34,6 @@
 
 #include "src/tint/lang/core/io_attributes.h"
 #include "src/tint/lang/core/ir/function_param.h"
-#include "src/tint/lang/core/ir/location.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/containers/const_propagating_ptr.h"
