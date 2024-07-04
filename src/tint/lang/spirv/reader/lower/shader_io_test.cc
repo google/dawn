@@ -82,26 +82,26 @@ TEST_F(SpirvReader_ShaderIOTest, NoInputsOrOutputs) {
 TEST_F(SpirvReader_ShaderIOTest, Inputs) {
     auto* front_facing = b.Var("front_facing", ty.ptr(core::AddressSpace::kIn, ty.bool_()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kFrontFacing;
         front_facing->SetAttributes(std::move(attributes));
     }
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kPosition;
         attributes.invariant = true;
         position->SetAttributes(std::move(attributes));
     }
     auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kIn, ty.f32()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 0;
         color1->SetAttributes(std::move(attributes));
     }
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kIn, ty.f32()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1;
         attributes.interpolation = core::Interpolation{core::InterpolationType::kLinear,
                                                        core::InterpolationSampling::kSample};
@@ -175,26 +175,26 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByHelper) {
     auto* front_facing = b.Var("front_facing", ty.ptr(core::AddressSpace::kIn, ty.bool_()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kFrontFacing;
         front_facing->SetAttributes(std::move(attributes));
     }
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kPosition;
         attributes.invariant = true;
         position->SetAttributes(std::move(attributes));
     }
     auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kIn, ty.f32()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 0;
         color1->SetAttributes(std::move(attributes));
     }
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kIn, ty.f32()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1;
         attributes.interpolation = core::Interpolation{core::InterpolationType::kLinear,
                                                        core::InterpolationSampling::kSample};
@@ -312,19 +312,19 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper) {
     auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kGlobalInvocationId;
         gid->SetAttributes(std::move(attributes));
     }
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kLocalInvocationId;
         lid->SetAttributes(std::move(attributes));
     }
     auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kWorkgroupId;
         group_id->SetAttributes(std::move(attributes));
     }
@@ -403,19 +403,19 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedEntryPointAndHelper_ForwardReference) {
     auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kGlobalInvocationId;
         gid->SetAttributes(std::move(attributes));
     }
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kLocalInvocationId;
         lid->SetAttributes(std::move(attributes));
     }
     auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kWorkgroupId;
         group_id->SetAttributes(std::move(attributes));
     }
@@ -495,19 +495,19 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByMultipleEntryPoints) {
     auto* gid = b.Var("gid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kGlobalInvocationId;
         gid->SetAttributes(std::move(attributes));
     }
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kLocalInvocationId;
         lid->SetAttributes(std::move(attributes));
     }
     auto* group_id = b.Var("group_id", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kWorkgroupId;
         group_id->SetAttributes(std::move(attributes));
     }
@@ -604,7 +604,7 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Input_LoadVectorElement) {
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kLocalInvocationId;
         lid->SetAttributes(std::move(attributes));
     }
@@ -648,7 +648,7 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Input_AccessChains) {
     auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kLocalInvocationId;
         lid->SetAttributes(std::move(attributes));
     }
@@ -814,7 +814,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnVariable) {
                   });
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kIn, colors_str));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         colors->SetAttributes(attributes);
     }
@@ -910,7 +910,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_InterpolateOnVariable) {
         });
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kIn, colors_str));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
                                                        core::InterpolationSampling::kCentroid};
         colors->SetAttributes(attributes);
@@ -1081,7 +1081,7 @@ Colors = struct @align(16) {
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Builtin) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kPosition;
         position->SetAttributes(std::move(attributes));
     }
@@ -1135,7 +1135,7 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Builtin_WithInvariant) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kPosition;
         attributes.invariant = true;
         position->SetAttributes(std::move(attributes));
@@ -1190,7 +1190,7 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Location) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         color->SetAttributes(std::move(attributes));
     }
@@ -1244,7 +1244,7 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, SingleOutput_Location_WithInterpolation) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
                                                        core::InterpolationSampling::kCentroid};
@@ -1300,20 +1300,20 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, MultipleOutputs) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kPosition;
         attributes.invariant = true;
         position->SetAttributes(std::move(attributes));
     }
     auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         color1->SetAttributes(std::move(attributes));
     }
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
                                                        core::InterpolationSampling::kCentroid};
@@ -1542,7 +1542,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_LocationOnVariable) {
     auto* builtins = b.Var("builtins", ty.ptr(core::AddressSpace::kOut, builtin_str));
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kOut, colors_str));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         colors->SetAttributes(attributes);
     }
@@ -1666,7 +1666,7 @@ TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_InterpolateOnVariable) {
     auto* builtins = b.Var("builtins", ty.ptr(core::AddressSpace::kOut, builtin_str));
     auto* colors = b.Var("colors", ty.ptr(core::AddressSpace::kOut, colors_str));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
                                                        core::InterpolationSampling::kCentroid};
         colors->SetAttributes(attributes);
@@ -1767,20 +1767,20 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Outputs_UsedByMultipleEntryPoints) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kPosition;
         attributes.invariant = true;
         position->SetAttributes(std::move(attributes));
     }
     auto* color1 = b.Var("color1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         color1->SetAttributes(std::move(attributes));
     }
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         attributes.interpolation = core::Interpolation{core::InterpolationType::kPerspective,
                                                        core::InterpolationSampling::kCentroid};
@@ -1912,7 +1912,7 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Output_LoadAndStore) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         color->SetAttributes(std::move(attributes));
     }
@@ -1975,7 +1975,7 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Output_LoadVectorElementAndStoreVectorElement) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         color->SetAttributes(std::move(attributes));
     }
@@ -2038,7 +2038,7 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Output_AccessChain) {
     auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1u;
         color->SetAttributes(std::move(attributes));
     }
@@ -2104,26 +2104,26 @@ $B1: {  # root
 TEST_F(SpirvReader_ShaderIOTest, Inputs_And_Outputs) {
     auto* position = b.Var("position", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kPosition;
         attributes.invariant = true;
         position->SetAttributes(std::move(attributes));
     }
     auto* color_in = b.Var("color_in", ty.ptr(core::AddressSpace::kIn, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 0;
         color_in->SetAttributes(std::move(attributes));
     }
     auto* color_out_1 = b.Var("color_out_1", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 1;
         color_out_1->SetAttributes(std::move(attributes));
     }
     auto* color_out_2 = b.Var("color_out_2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.location = 2;
         color_out_2->SetAttributes(std::move(attributes));
     }
@@ -2200,13 +2200,13 @@ TEST_F(SpirvReader_ShaderIOTest, SampleMask) {
     auto* arr = ty.array<u32, 1>();
     auto* mask_in = b.Var("mask_in", ty.ptr(core::AddressSpace::kIn, arr));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kSampleMask;
         mask_in->SetAttributes(std::move(attributes));
     }
     auto* mask_out = b.Var("mask_out", ty.ptr(core::AddressSpace::kOut, arr));
     {
-        core::ir::IOAttributes attributes;
+        core::IOAttributes attributes;
         attributes.builtin = core::BuiltinValue::kSampleMask;
         mask_out->SetAttributes(std::move(attributes));
     }

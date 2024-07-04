@@ -603,7 +603,7 @@ class Parser {
         std::optional<uint32_t> group;
         std::optional<uint32_t> binding;
         core::Access access_mode = core::Access::kUndefined;
-        core::ir::IOAttributes io_attributes;
+        core::IOAttributes io_attributes;
         auto interpolation = [&]() -> core::Interpolation& {
             // Create the interpolation field with the default values on first call.
             if (!io_attributes.interpolation.has_value()) {

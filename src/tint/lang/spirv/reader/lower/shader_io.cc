@@ -379,7 +379,7 @@ struct State {
     /// @param param the parameter
     /// @param attributes the attributes
     void AddEntryPointParameterAttributes(core::ir::FunctionParam* param,
-                                          const core::ir::IOAttributes& attributes) {
+                                          const core::IOAttributes& attributes) {
         if (auto* str = param->Type()->UnwrapPtr()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 // Use the base variable attributes if not specified directly on the member.

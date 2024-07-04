@@ -33,24 +33,11 @@
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/interpolation.h"
+#include "src/tint/lang/core/io_attributes.h"
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::core::ir {
-
-/// Attributes that can be applied to a variable that will be used for shader IO.
-struct IOAttributes {
-    /// The value of a `@location` attribute.
-    std::optional<uint32_t> location;
-    /// The value of a `@blend_src` attribute.
-    std::optional<uint32_t> blend_src;
-    /// The value of a `@builtin` attribute.
-    std::optional<core::BuiltinValue> builtin;
-    /// The values of a `@interpolate` attribute.
-    std::optional<core::Interpolation> interpolation;
-    /// True if the variable is annotated with `@invariant`.
-    bool invariant = false;
-};
 
 /// A var instruction in the IR.
 class Var final : public Castable<Var, OperandInstruction<1, 1>> {

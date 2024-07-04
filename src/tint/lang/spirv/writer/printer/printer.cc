@@ -2008,7 +2008,7 @@ class Printer {
     /// @param attrs the shader IO attrs
     /// @param addrspace the address of the variable
     void EmitIOAttributes(uint32_t id,
-                          const core::ir::IOAttributes& attrs,
+                          const core::IOAttributes& attrs,
                           core::AddressSpace addrspace) {
         if (attrs.location) {
             module_.PushAnnot(spv::Op::OpDecorate,

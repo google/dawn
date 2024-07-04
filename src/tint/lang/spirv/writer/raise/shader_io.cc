@@ -126,9 +126,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // Create an IO variable and add it to the root block.
             auto* ptr = ty.ptr(addrspace, store_type, access);
             auto* var = b.Var(name.str(), ptr);
-            var->SetAttributes(core::ir::IOAttributes{
+            var->SetAttributes(core::IOAttributes{
                 io.attributes.location,
                 io.attributes.blend_src,
+                io.attributes.color,
                 io.attributes.builtin,
                 io.attributes.interpolation,
                 io.attributes.invariant,
