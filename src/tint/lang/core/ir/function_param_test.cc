@@ -64,6 +64,7 @@ TEST_F(IR_FunctionParamTest, Clone) {
     auto* fp = b.FunctionParam(mod.Types().f32());
     fp->SetBuiltin(BuiltinValue::kVertexIndex);
     fp->SetLocation(1);
+    fp->SetColor(2);
     fp->SetInterpolation(
         Interpolation{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid});
     fp->SetInvariant(true);
@@ -78,6 +79,8 @@ TEST_F(IR_FunctionParamTest, Clone) {
     EXPECT_EQ(BuiltinValue::kVertexIndex, new_fp->Builtin().value());
 
     EXPECT_EQ(new_fp->Location(), 1u);
+    EXPECT_EQ(new_fp->Color(), 2u);
+
     auto interp = new_fp->Interpolation();
     EXPECT_TRUE(interp.has_value());
     EXPECT_EQ(interp->type, core::InterpolationType::kFlat);

@@ -109,6 +109,13 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @returns the optional location attribute value
     std::optional<uint32_t> Location() const { return attributes_.location; }
 
+    /// Sets the color.
+    /// @param col the optional color value
+    void SetColor(std::optional<uint32_t> col) { attributes_.color = col; }
+
+    /// @returns the optional color attribute value
+    std::optional<uint32_t> Color() const { return attributes_.color; }
+
     /// Sets the interpolation.
     /// @param interpolation the optional location interpolation settings
     void SetInterpolation(std::optional<core::Interpolation> interpolation) {
