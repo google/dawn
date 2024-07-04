@@ -124,7 +124,7 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
 
     AdapterProperties properties = {};
     properties.nextInChain = info->nextInChain;
-    if (APIGetProperties(&properties) == wgpu::Status::Error) {
+    if (GetPropertiesInternal(&properties) == wgpu::Status::Error) {
         return wgpu::Status::Error;
     }
 
@@ -163,6 +163,11 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
 }
 
 wgpu::Status AdapterBase::APIGetProperties(AdapterProperties* properties) const {
+    mInstance->EmitDeprecationWarning("GetProperties is deprecated, use GetInfo instead.");
+    return GetPropertiesInternal(properties);
+}
+
+wgpu::Status AdapterBase::GetPropertiesInternal(AdapterProperties* properties) const {
     DAWN_ASSERT(properties != nullptr);
     UnpackedPtr<AdapterProperties> unpacked;
     if (mInstance->ConsumedError(ValidateAndUnpack(properties), &unpacked)) {

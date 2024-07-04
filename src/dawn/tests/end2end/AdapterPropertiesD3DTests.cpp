@@ -43,7 +43,7 @@ TEST_P(AdapterPropertiesD3DTest, GetD3DProperties) {
         wgpu::AdapterPropertiesD3D d3dProperties;
         properties.nextInChain = &d3dProperties;
 
-        adapter.GetProperties(&properties);
+        EXPECT_DEPRECATION_WARNING(adapter.GetProperties(&properties));
 
         // This is the minimum D3D shader model Dawn supports.
         EXPECT_GE(d3dProperties.shaderModel, 50u);

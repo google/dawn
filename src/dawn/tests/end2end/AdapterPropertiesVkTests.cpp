@@ -44,7 +44,7 @@ TEST_P(AdapterPropertiesVkTest, GetVkProperties) {
         wgpu::AdapterPropertiesVk vkProperties;
         properties.nextInChain = &vkProperties;
 
-        adapter.GetProperties(&properties);
+        EXPECT_DEPRECATION_WARNING(adapter.GetProperties(&properties));
 
         // The driver version should be set to something but it depends on the hardware.
         EXPECT_NE(vkProperties.driverVersion, 0u);

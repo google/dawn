@@ -375,8 +375,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
             reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata};
     }
 
-    AdapterProperties adapterProperties;
-    adapter->APIGetProperties(&adapterProperties);
+    AdapterInfo adapterInfo;
+    adapter->APIGetInfo(&adapterInfo);
 
     ApplyFeatures(descriptor);
 
@@ -435,11 +435,11 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 
     mIsImmediateErrorHandlingEnabled = IsToggleEnabled(Toggle::EnableImmediateErrorHandling);
 
-    // Record the cache key from the properties. Note that currently, if a new extension
+    // Record the cache key from the adapter info. Note that currently, if a new extension
     // descriptor is added (and probably handled here), the cache key recording needs to be
     // updated.
-    StreamIn(&mDeviceCacheKey, kDawnVersion, adapterProperties, mEnabledFeatures.featuresBitSet,
-             mToggles, cacheDesc);
+    StreamIn(&mDeviceCacheKey, kDawnVersion, adapterInfo, mEnabledFeatures.featuresBitSet, mToggles,
+             cacheDesc);
 }
 
 DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {

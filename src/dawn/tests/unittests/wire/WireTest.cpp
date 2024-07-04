@@ -108,16 +108,6 @@ void WireTest::SetUp() {
                 return WGPUStatus_Success;
             })));
 
-        EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
-            .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
-                *properties = {};
-                properties->vendorName = "";
-                properties->architecture = "";
-                properties->name = "";
-                properties->driverDescription = "";
-                return WGPUStatus_Success;
-            })));
-
         EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
             .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
                 *limits = {};

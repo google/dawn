@@ -192,39 +192,17 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
     }
 }
 
-void Adapter::SetProperties(const WGPUAdapterProperties* properties) {
-    mProperties = *properties;
+void Adapter::SetProperties(const WGPUAdapterInfo* info) {
     mProperties.nextInChain = nullptr;
-
-    // Loop through the chained struct.
-    WGPUChainedStructOut* chain = properties->nextInChain;
-    while (chain != nullptr) {
-        switch (chain->sType) {
-            case WGPUSType_AdapterPropertiesMemoryHeaps: {
-                // Make a copy of the heap info in `mMemoryHeapInfo`.
-                const auto* memoryHeapProperties =
-                    reinterpret_cast<const WGPUAdapterPropertiesMemoryHeaps*>(chain);
-                mMemoryHeapInfo = {
-                    memoryHeapProperties->heapInfo,
-                    memoryHeapProperties->heapInfo + memoryHeapProperties->heapCount};
-                break;
-            }
-            case WGPUSType_AdapterPropertiesD3D: {
-                auto* d3dProperties = reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain);
-                mD3DProperties.shaderModel = d3dProperties->shaderModel;
-                break;
-            }
-            case WGPUSType_AdapterPropertiesVk: {
-                auto* vkProperties = reinterpret_cast<WGPUAdapterPropertiesVk*>(chain);
-                mVkProperties.driverVersion = vkProperties->driverVersion;
-                break;
-            }
-            default:
-                DAWN_UNREACHABLE();
-                break;
-        }
-        chain = chain->next;
-    }
+    mProperties.vendorID = info->vendorID;
+    mProperties.vendorName = info->vendor;
+    mProperties.architecture = info->architecture;
+    mProperties.deviceID = info->deviceID;
+    mProperties.name = info->device;
+    mProperties.driverDescription = info->description;
+    mProperties.adapterType = info->adapterType;
+    mProperties.backendType = info->backendType;
+    mProperties.compatibilityMode = info->compatibilityMode;
 }
 
 WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {

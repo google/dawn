@@ -185,7 +185,6 @@
             { "name": "status", "type": "request adapter status" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true },
             { "name": "info", "type": "adapter info", "annotation": "const*", "optional": "true" },
-            { "name": "properties", "type": "adapter properties", "annotation": "const*", "optional": "true" },
             { "name": "limits", "type": "supported limits", "annotation": "const*", "optional": "true" },
             { "name": "features count", "type": "uint32_t"},
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}

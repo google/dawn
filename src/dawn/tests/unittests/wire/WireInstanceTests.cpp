@@ -128,16 +128,6 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     fakeInfo.vendorID = 0x134;
     fakeInfo.deviceID = 0x918;
 
-    WGPUAdapterProperties fakeProperties = {};
-    fakeProperties.vendorID = 0x134;
-    fakeProperties.vendorName = "fake-vendor";
-    fakeProperties.architecture = "fake-architecture";
-    fakeProperties.deviceID = 0x918;
-    fakeProperties.name = "fake adapter";
-    fakeProperties.driverDescription = "hello world";
-    fakeProperties.backendType = WGPUBackendType_D3D12;
-    fakeProperties.adapterType = WGPUAdapterType_IntegratedGPU;
-
     WGPUSupportedLimits fakeLimits = {};
     fakeLimits.nextInChain = nullptr;
     fakeLimits.limits.maxTextureDimension1D = 433;
@@ -157,12 +147,6 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
             EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterInfo* info) {
                     *info = fakeInfo;
-                    return WGPUStatus_Success;
-                })));
-
-            EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
-                    *properties = fakeProperties;
                     return WGPUStatus_Success;
                 })));
 
@@ -206,14 +190,14 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
 
                 WGPUAdapterProperties properties = {};
                 wgpuAdapterGetProperties(adapter, &properties);
-                EXPECT_EQ(properties.vendorID, fakeProperties.vendorID);
-                EXPECT_STREQ(properties.vendorName, fakeProperties.vendorName);
-                EXPECT_STREQ(properties.architecture, fakeProperties.architecture);
-                EXPECT_EQ(properties.deviceID, fakeProperties.deviceID);
-                EXPECT_STREQ(properties.name, fakeProperties.name);
-                EXPECT_STREQ(properties.driverDescription, fakeProperties.driverDescription);
-                EXPECT_EQ(properties.backendType, fakeProperties.backendType);
-                EXPECT_EQ(properties.adapterType, fakeProperties.adapterType);
+                EXPECT_EQ(properties.vendorID, fakeInfo.vendorID);
+                EXPECT_STREQ(properties.vendorName, fakeInfo.vendor);
+                EXPECT_STREQ(properties.architecture, fakeInfo.architecture);
+                EXPECT_EQ(properties.deviceID, fakeInfo.deviceID);
+                EXPECT_STREQ(properties.name, fakeInfo.device);
+                EXPECT_STREQ(properties.driverDescription, fakeInfo.description);
+                EXPECT_EQ(properties.backendType, fakeInfo.backendType);
+                EXPECT_EQ(properties.adapterType, fakeInfo.adapterType);
 
                 WGPUSupportedLimits limits = {};
                 EXPECT_EQ(wgpuAdapterGetLimits(adapter, &limits), WGPUStatus_Success);
@@ -280,17 +264,8 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                     info->architecture = "fake-architecture";
                     info->device = "fake adapter";
                     info->description = "hello world";
-                    return WGPUStatus_Success;
-                })));
 
-            EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
-                    properties->vendorName = "fake-vendor";
-                    properties->architecture = "fake-architecture";
-                    properties->name = "fake adapter";
-                    properties->driverDescription = "hello world";
-
-                    WGPUChainedStructOut* chain = properties->nextInChain;
+                    WGPUChainedStructOut* chain = info->nextInChain;
                     while (chain != nullptr) {
                         auto* next = chain->next;
                         switch (chain->sType) {
@@ -412,16 +387,6 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
                     info->architecture = "fake-architecture";
                     info->device = "fake adapter";
                     info->description = "hello world";
-                    return WGPUStatus_Success;
-                })));
-
-            EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
-                    *properties = {};
-                    properties->vendorName = "";
-                    properties->architecture = "";
-                    properties->name = "";
-                    properties->driverDescription = "";
                     return WGPUStatus_Success;
                 })));
 

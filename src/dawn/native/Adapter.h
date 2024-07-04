@@ -93,6 +93,8 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
     const std::string& GetName() const;
 
   private:
+    wgpu::Status GetPropertiesInternal(AdapterProperties* properties) const;
+
     std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrError<Ref<DeviceBase>>> CreateDevice(
         const DeviceDescriptor* rawDescriptor);
     ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(const DeviceDescriptor* rawDescriptor,

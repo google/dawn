@@ -103,7 +103,7 @@ void stream::Stream<{{BoolCppType}}>::Write(stream::Sink* sink, const {{BoolCppT
     StreamIn(sink, static_cast<bool>(t));
 }
 
-{% call render_streaming_impl("adapter properties", true, false) %}
+{% call render_streaming_impl("adapter info", true, false) %}
 {% endcall %}
 
 {% call render_streaming_impl("dawn cache device descriptor", true, false,
