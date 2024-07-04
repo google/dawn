@@ -654,14 +654,17 @@ class Printer : public tint::TextGenerator {
             fn = BuiltinFn::kLoad;
             suffix = "<float16_t>";
         } else if (fn == BuiltinFn::kLoad2F16) {
-            fn = BuiltinFn::kLoad2;
-            suffix = "<vector<float16_t, 2>>";
+            fn = BuiltinFn::kLoad;
+            // Note space between '> >' is required for DXC
+            suffix = "<vector<float16_t, 2> >";
         } else if (fn == BuiltinFn::kLoad3F16) {
-            fn = BuiltinFn::kLoad3;
-            suffix = "<vector<float16_t, 3>>";
+            fn = BuiltinFn::kLoad;
+            // Note space between '> >' is required for DXC
+            suffix = "<vector<float16_t, 3> >";
         } else if (fn == BuiltinFn::kLoad4F16) {
-            fn = BuiltinFn::kLoad4;
-            suffix = "<vector<float16_t, 4>>";
+            fn = BuiltinFn::kLoad;
+            // Note space between '> >' is required for DXC
+            suffix = "<vector<float16_t, 4> >";
         }
 
         EmitValue(out, c->Object());

@@ -298,13 +298,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Fails DXC validation
-// hlsl.hlsl:4:55: warning: use of right-shift operator ('>>') in template argument will require
-// parentheses in C++11 [-Wc++11-compat]
-//   vector<float16_t, 4> a = v.Load4<vector<float16_t, 4>>(0u);
-//                                                       ^
-//                                                      (      )
-TEST_F(HlslWriterTest, DISABLED_AccessStorageVectorF16) {
+TEST_F(HlslWriterTest, AccessStorageVectorF16) {
     auto* var = b.Var<storage, vec4<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -323,7 +317,7 @@ TEST_F(HlslWriterTest, DISABLED_AccessStorageVectorF16) {
     EXPECT_EQ(output_.hlsl, R"(
 ByteAddressBuffer v : register(t0);
 void foo() {
-  vector<float16_t, 4> a = v.Load4<vector<float16_t, 4>>(0u);
+  vector<float16_t, 4> a = v.Load<vector<float16_t, 4> >(0u);
   float16_t b = v.Load<float16_t>(0u);
   float16_t c = v.Load<float16_t>(2u);
   float16_t d = v.Load<float16_t>(4u);
