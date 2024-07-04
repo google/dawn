@@ -172,19 +172,11 @@ struct State {
                 }
             } else {
                 // Pull out the IO attributes and remove them from the parameter.
-                core::IOAttributes attributes;
-                if (auto loc = param->Location()) {
-                    attributes.location = loc->value;
-                    if (loc->interpolation && ep->Stage() == Function::PipelineStage::kFragment) {
-                        attributes.interpolation = *loc->interpolation;
-                    }
-                    param->ClearLocation();
-                } else if (auto builtin = param->Builtin()) {
-                    attributes.builtin = *builtin;
-                    param->ClearBuiltin();
+                auto attributes = param->Attributes();
+                if (attributes.interpolation && ep->Stage() != Function::PipelineStage::kFragment) {
+                    attributes.interpolation = {};
                 }
-                attributes.invariant = param->Invariant();
-                param->SetInvariant(false);
+                param->SetAttributes({});
 
                 auto name = ir.NameOf(param);
                 backend->AddInput(name, param->Type(), std::move(attributes));
@@ -209,19 +201,11 @@ struct State {
             }
         } else {
             // Pull out the IO attributes and remove them from the original function.
-            core::IOAttributes attributes;
-            if (auto loc = ep->ReturnLocation()) {
-                attributes.location = loc->value;
-                if (loc->interpolation && ep->Stage() == Function::PipelineStage::kVertex) {
-                    attributes.interpolation = *loc->interpolation;
-                }
-                ep->ClearReturnLocation();
-            } else if (auto builtin = ep->ReturnBuiltin()) {
-                attributes.builtin = *builtin;
-                ep->ClearReturnBuiltin();
+            auto attributes = ep->ReturnAttributes();
+            if (attributes.interpolation && ep->Stage() != Function::PipelineStage::kVertex) {
+                attributes.interpolation = {};
             }
-            attributes.invariant = ep->ReturnInvariant();
-            ep->SetReturnInvariant(false);
+            ep->SetReturnAttributes({});
 
             backend->AddOutput(ir.symbols.New(), ep->ReturnType(), std::move(attributes));
         }

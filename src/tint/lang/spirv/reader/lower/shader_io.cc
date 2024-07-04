@@ -193,13 +193,7 @@ struct State {
             }
 
             // Copy the variable attributes to the struct member.
-            const auto& original_attributes = var->Attributes();
-            core::IOAttributes var_attributes;
-            var_attributes.invariant = original_attributes.invariant;
-            var_attributes.builtin = original_attributes.builtin;
-            var_attributes.location = original_attributes.location;
-            var_attributes.interpolation = original_attributes.interpolation;
-
+            auto var_attributes = var->Attributes();
             auto var_type = var->Result(0)->Type()->UnwrapPtr();
             if (auto* str = var_type->As<core::type::Struct>()) {
                 // Add an output for each member of the struct.
@@ -240,16 +234,7 @@ struct State {
 
         if (output_descriptors.Length() == 1) {
             // Copy the output attributes to the function return.
-            const auto& attributes = output_descriptors[0].attributes;
-            wrapper->SetReturnInvariant(attributes.invariant);
-            if (attributes.builtin) {
-                wrapper->SetReturnBuiltin(attributes.builtin.value());
-            } else if (attributes.location) {
-                core::ir::Location loc;
-                loc.value = attributes.location.value();
-                loc.interpolation = attributes.interpolation;
-                wrapper->SetReturnLocation(std::move(loc));
-            }
+            wrapper->SetReturnAttributes(output_descriptors[0].attributes);
 
             // Return the output from the wrapper function.
             wrapper->SetReturnType(output_descriptors[0].type);
@@ -397,15 +382,7 @@ struct State {
             }
         } else {
             // Set attributes directly on the function parameter.
-            param->SetInvariant(attributes.invariant);
-            if (attributes.builtin) {
-                param->SetBuiltin(attributes.builtin.value());
-            } else if (attributes.location) {
-                core::ir::Location loc;
-                loc.value = attributes.location.value();
-                loc.interpolation = attributes.interpolation;
-                param->SetLocation(std::move(loc));
-            }
+            param->SetAttributes(attributes);
         }
     }
 };
