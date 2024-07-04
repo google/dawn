@@ -41,7 +41,7 @@ using testing::Not;
 // exploiting an implementation detail of Dawn Native.
 class ObjectCachingTest : public ValidationTest {
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        return {wgpu::FeatureName::StaticSamplers};
+        return {wgpu::FeatureName::StaticSamplers, wgpu::FeatureName::YCbCrVulkanSamplers};
     }
 
     void SetUp() override {
@@ -538,6 +538,26 @@ TEST_F(ObjectCachingTest, SamplerDeduplication) {
     EXPECT_NE(sampler.Get(), otherSamplerLodMinClamp.Get());
     EXPECT_NE(sampler.Get(), otherSamplerLodMaxClamp.Get());
     EXPECT_NE(sampler.Get(), otherSamplerCompareFunction.Get());
+    EXPECT_EQ(sampler.Get(), sameSampler.Get());
+}
+
+// Test that YCbCr samplers are correctly deduplicated.
+TEST_F(ObjectCachingTest, YCbCrSamplerDeduplication) {
+    wgpu::SamplerDescriptor samplerDesc;
+    wgpu::YCbCrVkDescriptor yCbCrDesc = {};
+    samplerDesc.nextInChain = &yCbCrDesc;
+    wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
+
+    wgpu::SamplerDescriptor sameSamplerDesc;
+    wgpu::YCbCrVkDescriptor sameYCbCrDesc = {};
+    sameSamplerDesc.nextInChain = &sameYCbCrDesc;
+    wgpu::Sampler sameSampler = device.CreateSampler(&sameSamplerDesc);
+
+    wgpu::SamplerDescriptor otherSamplerDescNoYCbCrSampling;
+    wgpu::Sampler otherSamplerNoYCbCrSampling =
+        device.CreateSampler(&otherSamplerDescNoYCbCrSampling);
+
+    EXPECT_NE(sampler.Get(), otherSamplerNoYCbCrSampling.Get());
     EXPECT_EQ(sampler.Get(), sameSampler.Get());
 }
 

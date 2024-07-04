@@ -139,7 +139,8 @@ bool SamplerBase::IsYCbCr() const {
 size_t SamplerBase::ComputeContentHash() {
     ObjectContentHasher recorder;
     recorder.Record(mAddressModeU, mAddressModeV, mAddressModeW, mMagFilter, mMinFilter,
-                    mMipmapFilter, mLodMinClamp, mLodMaxClamp, mCompareFunction, mMaxAnisotropy);
+                    mMipmapFilter, mLodMinClamp, mLodMaxClamp, mCompareFunction, mMaxAnisotropy,
+                    mIsYCbCr);
     return recorder.GetContentHash();
 }
 
@@ -157,7 +158,8 @@ bool SamplerBase::EqualityFunc::operator()(const SamplerBase* a, const SamplerBa
            a->mAddressModeW == b->mAddressModeW && a->mMagFilter == b->mMagFilter &&
            a->mMinFilter == b->mMinFilter && a->mMipmapFilter == b->mMipmapFilter &&
            a->mLodMinClamp == b->mLodMinClamp && a->mLodMaxClamp == b->mLodMaxClamp &&
-           a->mCompareFunction == b->mCompareFunction && a->mMaxAnisotropy == b->mMaxAnisotropy;
+           a->mCompareFunction == b->mCompareFunction && a->mMaxAnisotropy == b->mMaxAnisotropy &&
+           a->mIsYCbCr == b->mIsYCbCr;
 }
 
 }  // namespace dawn::native
