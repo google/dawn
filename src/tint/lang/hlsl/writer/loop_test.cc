@@ -86,16 +86,14 @@ void a() {
 )");
 }
 
-// TODO(dsinclair): DXC error
-//  `hlsl.hlsl:3: error: Loop must have break.`
-TEST_F(HlslWriterTest, DISABLED_LoopBodyVarInContinue) {
+TEST_F(HlslWriterTest, LoopBodyVarInContinue) {
     auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Body(), [&] {
-            auto* v = b.Var("v", b.Zero<bool>());
+            auto* v = b.Var("v", true);
             b.Continue(l);
 
             b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
@@ -109,7 +107,7 @@ TEST_F(HlslWriterTest, DISABLED_LoopBodyVarInContinue) {
 void a() {
   {
     while(true) {
-      bool v = false;
+      bool v = true;
       {
         if (v) { break; }
       }
@@ -121,16 +119,14 @@ void a() {
 )");
 }
 
-// TODO(dsinclair): DXC Error:
-//  `hlsl.hlsl:3: error: Loop must have break.`
-TEST_F(HlslWriterTest, DISABLED_LoopInitializer) {
+TEST_F(HlslWriterTest, LoopInitializer) {
     auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Initializer(), [&] {
-            auto* v = b.Var("v", b.Zero<bool>());
+            auto* v = b.Var("v", true);
             b.NextIteration(l);
 
             b.Append(l->Body(), [&] { b.Continue(l); });
@@ -144,7 +140,7 @@ TEST_F(HlslWriterTest, DISABLED_LoopInitializer) {
 [numthreads(1, 1, 1)]
 void a() {
   {
-    bool v = false;
+    bool v = true;
     while(true) {
       {
         if (v) { break; }
