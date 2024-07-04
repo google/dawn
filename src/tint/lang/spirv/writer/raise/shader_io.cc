@@ -92,7 +92,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
             if (io.attributes.builtin) {
                 // SampleMask must be an array for Vulkan.
-                if (io.attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
+                if (io.attributes.builtin == core::BuiltinValue::kSampleMask) {
                     io.type = ty.array<u32, 1>();
                 }
                 name << "_" << io.attributes.builtin.value();
@@ -149,11 +149,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // Load the input from the global variable declared earlier.
         auto* ptr = ty.ptr(core::AddressSpace::kIn, inputs[idx].type, core::Access::kRead);
         auto* from = input_vars[idx]->Result(0);
-        if (inputs[idx].attributes.builtin) {
-            if (inputs[idx].attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
-                // SampleMask becomes an array for SPIR-V, so load from the first element.
-                from = builder.Access(ptr, input_vars[idx], 0_u)->Result(0);
-            }
+
+        // SampleMask becomes an array for SPIR-V, so load from the first element.
+        if (inputs[idx].attributes.builtin == core::BuiltinValue::kSampleMask) {
+            from = builder.Access(ptr, input_vars[idx], 0_u)->Result(0);
         }
 
         auto* value = builder.Load(from)->Result(0);
@@ -171,16 +170,15 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         // Store the output to the global variable declared earlier.
         auto* ptr = ty.ptr(core::AddressSpace::kOut, outputs[idx].type, core::Access::kWrite);
         auto* to = output_vars[idx]->Result(0);
-        if (outputs[idx].attributes.builtin) {
-            if (outputs[idx].attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
-                // SampleMask becomes an array for SPIR-V, so store to the first element.
-                to = builder.Access(ptr, to, 0_u)->Result(0);
-            }
 
-            // Clamp frag_depth values if necessary.
-            if (outputs[idx].attributes.builtin.value() == core::BuiltinValue::kFragDepth) {
-                value = ClampFragDepth(builder, value);
-            }
+        // SampleMask becomes an array for SPIR-V, so store to the first element.
+        if (outputs[idx].attributes.builtin == core::BuiltinValue::kSampleMask) {
+            to = builder.Access(ptr, to, 0_u)->Result(0);
+        }
+
+        // Clamp frag_depth values if necessary.
+        if (outputs[idx].attributes.builtin == core::BuiltinValue::kFragDepth) {
+            value = ClampFragDepth(builder, value);
         }
 
         // Convert f16 values to f32 values if needed.

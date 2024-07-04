@@ -217,8 +217,7 @@ struct State {
             if (auto* str = param->Type()->As<type::Struct>()) {
                 // Check each member for the local invocation index builtin attribute.
                 for (auto* member : str->Members()) {
-                    if (member->Attributes().builtin && member->Attributes().builtin.value() ==
-                                                            BuiltinValue::kLocalInvocationIndex) {
+                    if (member->Attributes().builtin == BuiltinValue::kLocalInvocationIndex) {
                         auto* access = b.Access(ty.u32(), param, u32(member->Index()));
                         access->InsertBefore(func->Block()->Front());
                         return access->Result(0);
@@ -226,8 +225,7 @@ struct State {
                 }
             } else {
                 // Check if the parameter is the local invocation index.
-                if (param->Builtin() &&
-                    param->Builtin().value() == BuiltinValue::kLocalInvocationIndex) {
+                if (param->Builtin() == BuiltinValue::kLocalInvocationIndex) {
                     return param;
                 }
             }
