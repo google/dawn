@@ -1370,6 +1370,10 @@ class Printer : public tint::TextGenerator {
                 }
             }
 
+            if (auto color = attributes.color) {
+                out << " [[color(" << color.value() << ")]]";
+            }
+
             if (auto interpolation = attributes.interpolation) {
                 auto name = InterpolationToAttribute(interpolation->type, interpolation->sampling);
                 if (name.empty()) {

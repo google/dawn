@@ -1,9 +1,24 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/utils/containers/slice.h:216 internal compiler error: TINT_ASSERT(i < Length())
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct In {
+  float4 pos;
+  float4 uv;
+  float4 fbf;
+};
+
+struct f_inputs {
+  float4 In_uv [[user(locn0)]];
+  float4 In_fbf [[color(0)]];
+};
+
+void g(float a, float b, float c) {
+}
+
+void f_inner(In in) {
+  g(in.pos[0u], in.uv[0u], in.fbf[1u]);
+}
+
+fragment void f(float4 In_pos [[position]], f_inputs inputs [[stage_in]]) {
+  f_inner(In{.pos=In_pos, .uv=inputs.In_uv, .fbf=inputs.In_fbf});
+}

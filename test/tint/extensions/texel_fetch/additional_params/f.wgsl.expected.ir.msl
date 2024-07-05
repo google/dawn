@@ -1,9 +1,21 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.cc:371 internal compiler error: TINT_UNIMPLEMENTED IR does not currently support texel fetch extension
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct In {
+  float4 pos;
+};
+
+struct f_inputs {
+  float4 fbf [[color(2)]];
+};
+
+void g(float a, float b) {
+}
+
+void f_inner(In in, float4 fbf) {
+  g(in.pos[0u], fbf[1u]);
+}
+
+fragment void f(float4 In_pos [[position]], f_inputs inputs [[stage_in]]) {
+  f_inner(In{.pos=In_pos}, inputs.fbf);
+}
