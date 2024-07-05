@@ -97,6 +97,8 @@ def main(args):
     # Dependencies of dependencies are prefixed by their ancestors.
     required_submodules = [
         'third_party/abseil-cpp',
+        'third_party/dxc',
+        'third_party/dxheaders',
         'third_party/glfw',
         'third_party/jinja2',
         'third_party/khronos/EGL-Registry',
