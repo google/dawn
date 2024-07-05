@@ -160,6 +160,56 @@ fn f() -> @builtin(position) vec4<f32> {
 )");
 }
 
+TEST_F(IRToProgramTest, EntryPoint_Parameter_BuiltinAndInvariant) {
+    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* param = b.FunctionParam("input", ty.vec4<f32>());
+    param->SetBuiltin(core::BuiltinValue::kPosition);
+    param->SetInvariant(true);
+    fn->SetParams({param});
+
+    fn->Block()->Append(b.Return(fn));
+
+    EXPECT_WGSL(R"(
+@fragment
+fn f(@builtin(position) @invariant input : vec4<f32>) {
+}
+)");
+}
+
+TEST_F(IRToProgramTest, EntryPoint_Parameter_LocationAndInterpolation) {
+    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* param = b.FunctionParam("input", ty.f32());
+    param->SetLocation(2u);
+    param->SetInterpolation(core::Interpolation{core::InterpolationType::kLinear,
+                                                core::InterpolationSampling::kCentroid});
+    fn->SetParams({param});
+
+    fn->Block()->Append(b.Return(fn));
+
+    EXPECT_WGSL(R"(
+@fragment
+fn f(@location(2u) @interpolate(linear, centroid) input : f32) {
+}
+)");
+}
+
+TEST_F(IRToProgramTest, EntryPoint_Parameter_Color) {
+    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* param = b.FunctionParam("input", ty.f32());
+    param->SetColor(2u);
+    fn->SetParams({param});
+
+    fn->Block()->Append(b.Return(fn));
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_framebuffer_fetch;
+
+@fragment
+fn f(@color(2u) input : f32) {
+}
+)");
+}
+
 TEST_F(IRToProgramTest, EntryPoint_ReturnAttribute_FragDepth) {
     auto* fn = b.Function("f", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     fn->SetReturnBuiltin(core::BuiltinValue::kFragDepth);
@@ -2625,6 +2675,31 @@ enable chromium_experimental_subgroups;
 struct S {
   @builtin(subgroup_size)
   a : u32,
+}
+
+fn f(v : S) {
+}
+)");
+}
+
+TEST_F(IRToProgramTest, Enable_ChromiumExperimentalFramebufferFetch_StructColor) {
+    core::type::Manager::StructMemberDesc member;
+    member.name = mod.symbols.New("a");
+    member.type = ty.f32();
+    member.attributes.color = 2u;
+
+    auto* S = ty.Struct(mod.symbols.New("S"), {member});
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({b.FunctionParam(S)});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    EXPECT_WGSL(R"(
+enable chromium_experimental_framebuffer_fetch;
+
+struct S {
+  @color(2u)
+  a : f32,
 }
 
 fn f(v : S) {

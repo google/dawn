@@ -262,6 +262,10 @@ class State {
             if (auto loc = param->Location()) {
                 attrs.Push(b.Location(u32(loc.value())));
             }
+            if (auto color = param->Color()) {
+                Enable(wgsl::Extension::kChromiumExperimentalFramebufferFetch);
+                attrs.Push(b.Color(u32(color.value())));
+            }
             if (auto interp = param->Interpolation()) {
                 attrs.Push(b.Interpolate(interp->type, interp->sampling));
             }
@@ -1030,6 +1034,10 @@ class State {
                 if (auto blend_src = ir_attrs.blend_src) {
                     Enable(wgsl::Extension::kDualSourceBlending);
                     ast_attrs.Push(b.BlendSrc(u32(*blend_src)));
+                }
+                if (auto color = ir_attrs.color) {
+                    Enable(wgsl::Extension::kChromiumExperimentalFramebufferFetch);
+                    ast_attrs.Push(b.Color(u32(*color)));
                 }
                 if (auto builtin = ir_attrs.builtin) {
                     if (RequiresSubgroups(*builtin)) {
