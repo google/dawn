@@ -199,8 +199,10 @@ crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-
 # Interpolated fragment_output_mask failing on Android Arm (Pixel 6)
 # KEEP
 ################################################################################
-crbug.com/dawn/1550 [ android-t arm ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:interpolated=true;sampleCount=4;* [ Failure ]
-crbug.com/dawn/1550 [ android-t arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ Failure ]
+crbug.com/dawn/42240984 [ android-t arm ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:interpolated=true;sampleCount=4;* [ Failure ]
+crbug.com/dawn/42240984 [ android-t arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ Failure ]
+crbug.com/dawn/42240984 [ android-14 arm ] webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:interpolated=true;sampleCount=4;* [ Failure ]
+crbug.com/dawn/42240984 [ android-14 arm ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:interpolated=true;sampleCount=4;* [ Failure ]
 
 ################################################################################
 # Some copyTextureToTexture tests fail on Qualcomm Android R (Pixel 4), don't appear to repro on Android T
