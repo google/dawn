@@ -143,6 +143,17 @@ crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,sto
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
 
+
+################################################################################
+# validation of shader_io location type
+################################################################################
+crbug.com/351375039 webgpu:shader,validation,shader_io,locations:type:* [ Failure ]
+
+################################################################################
+# validation of clamp low_high
+################################################################################
+crbug.com/351378281 webgpu:shader,validation,expression,call,builtin,clamp:low_high:* [ Failure ]
+
 ################################################################################
 # Failures due to splitting off worker tests (crbug.com/330501141)
 ################################################################################
@@ -157,8 +168,6 @@ crbug.com/dawn/2478 webgpu:api,validation,buffer,mapping:mapAsync,state,mappingP
 crbug.com/341282603 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Failure ]
 crbug.com/341282605 [ intel-0x4680 linux ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,asin:f32:* [ Failure ]
-crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,dpdxFine:f32:* [ Failure ]
-crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,dpdyFine:f32:* [ Failure ]
 crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:* [ Failure ]
 crbug.com/341327471 [ intel-0x4680 linux ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 crbug.com/341327471 [ intel-0x4680 linux ] webgpu:web_platform,canvas,getCurrentTexture:resize:canvasType="onscreen" [ Failure ]
@@ -509,9 +518,13 @@ crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,p
 crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 
-# Fine derivative tests don't work on compat
-crbug.com/tint/2226 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/tint/2226 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
+# Fine derivative tests don't work on compat (and in core)
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdxCoarse:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdy:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 
 ################################################################################
 # New flakes. Please triage:
@@ -611,10 +624,6 @@ crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,misc:no_attachment:* [
 crbug.com/dawn/0000 webgpu:compat,api,validation,shader_module,shader_module:interpolate:success=false;interpolate="%40interpolate(flat)" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:f32:inputSource="const";dim=2 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,dpdxCoarse:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,dpdy:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fwidth:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fwidthCoarse:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,shader_io,user_io:* [ Failure ]
@@ -627,7 +636,6 @@ crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="uniform";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="workgroup";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,clamp:low_high:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,extractBits:count_offset:offsetStage="constant";countStage="constant" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,extractBits:count_offset:offsetStage="constant";countStage="override" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,extractBits:count_offset:offsetStage="override";countStage="constant" [ Failure ]
@@ -652,7 +660,6 @@ crbug.com/dawn/0000 webgpu:shader,validation,shader_io,interpolate:require_locat
 crbug.com/dawn/0000 webgpu:shader,validation,shader_io,interpolate:require_location:stage="fragment";attribute="%40location(0)";use_struct=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,shader_io,interpolate:require_location:stage="vertex";attribute="%40location(0)";use_struct=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,shader_io,interpolate:type_and_sampling:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,shader_io,locations:type:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
@@ -717,11 +724,10 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector:* [ Failure ]
+
