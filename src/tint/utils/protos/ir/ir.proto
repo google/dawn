@@ -382,9 +382,10 @@ message AttributesStructMember {
 message AttributesFunctionParameter {
     optional BuiltinValue builtin = 1;
     optional uint32 location = 2;
-    optional Interpolation interpolation = 3;
-    optional BindingPoint binding_point = 4;
-    bool invariant = 5;
+    optional uint32 color = 3;
+    optional Interpolation interpolation = 4;
+    optional BindingPoint binding_point = 5;
+    bool invariant = 6;
 }
 
 message Interpolation {

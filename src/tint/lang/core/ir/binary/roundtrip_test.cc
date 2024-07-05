@@ -140,6 +140,7 @@ TEST_F(IRBinaryRoundtripTest, Fn_ParameterAttributes) {
     p0->SetBuiltin(BuiltinValue::kGlobalInvocationId);
     p1->SetInvariant(true);
     p2->SetLocation(10);
+    p2->SetColor(50);
     p2->SetInterpolation(Interpolation{InterpolationType::kFlat, InterpolationSampling::kCenter});
     p3->SetBindingPoint(20, 30);
     fn->SetParams({p0, p1, p2, p3});

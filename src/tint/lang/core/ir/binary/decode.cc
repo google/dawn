@@ -944,6 +944,9 @@ struct Decoder {
             if (attrs_in.has_location()) {
                 param_out->SetLocation(attrs_in.location());
             }
+            if (attrs_in.has_color()) {
+                param_out->SetColor(attrs_in.color());
+            }
             if (attrs_in.has_interpolation()) {
                 param_out->SetInterpolation(Interpolation(attrs_in.interpolation()));
             }

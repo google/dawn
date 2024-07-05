@@ -555,6 +555,9 @@ struct Encoder {
         if (auto location_in = param_in->Location()) {
             param_out.mutable_attributes()->set_location(*location_in);
         }
+        if (auto color_in = param_in->Color()) {
+            param_out.mutable_attributes()->set_color(*color_in);
+        }
         if (auto interpolation_in = param_in->Interpolation()) {
             auto& interpolation_out = *param_out.mutable_attributes()->mutable_interpolation();
             Interpolation(interpolation_out, *interpolation_in);
