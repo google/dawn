@@ -97,7 +97,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 param->SetBuiltin(input.attributes.builtin.value());
                 input_indices.Push(InputIndex{static_cast<uint32_t>(input_params.Length()), 0u});
                 input_params.Push(param);
-            } else if (input.attributes.location) {
+            } else {
                 if (!input_struct_param) {
                     input_struct_param = b.FunctionParam("inputs", nullptr);
                     input_struct_param_index = static_cast<uint32_t>(input_params.Length());

@@ -1060,5 +1060,152 @@ foo_outputs = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_ShaderIOTest, Color_NonStruct) {
+    auto* ep = b.Function("foo", ty.void_());
+    auto* color1 = b.FunctionParam("color1", ty.f32());
+    color1->SetColor(1);
+    auto* color2 = b.FunctionParam("color2", ty.f32());
+    color2->SetColor(2);
+
+    ep->SetParams({color1, color2});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        b.Add<f32>(color1, color2);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%color1:f32 [@color(1)], %color2:f32 [@color(2)]):void {
+  $B1: {
+    %4:f32 = add %color1, %color2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  color1:f32 @offset(0), @color(1)
+  color2:f32 @offset(4), @color(2)
+}
+
+%foo_inner = func(%color1:f32, %color2:f32):void {
+  $B1: {
+    %4:f32 = add %color1, %color2
+    ret
+  }
+}
+%foo = @fragment func(%inputs:foo_inputs):void {
+  $B2: {
+    %7:f32 = access %inputs, 0u
+    %8:f32 = access %inputs, 1u
+    %9:void = call %foo_inner, %7, %8
+    ret
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, Color_Struct) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Inputs"), {
+                                                 {
+                                                     mod.symbols.New("color1"),
+                                                     ty.f32(),
+                                                     core::IOAttributes{
+                                                         /* location */ std::nullopt,
+                                                         /* blend_src */ std::nullopt,
+                                                         /* color */ 1u,
+                                                         /* builtin */ std::nullopt,
+                                                         /* interpolation */ std::nullopt,
+                                                         /* invariant */ false,
+                                                     },
+                                                 },
+                                                 {
+                                                     mod.symbols.New("color2"),
+                                                     ty.f32(),
+                                                     core::IOAttributes{
+                                                         /* location */ std::nullopt,
+                                                         /* blend_src */ std::nullopt,
+                                                         /* color */ 2u,
+                                                         /* builtin */ std::nullopt,
+                                                         /* interpolation */ std::nullopt,
+                                                         /* invariant */ false,
+                                                     },
+                                                 },
+                                             });
+
+    auto* ep = b.Function("foo", ty.void_());
+    auto* str_param = b.FunctionParam("inputs", str_ty);
+    ep->SetParams({str_param});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        auto* color1 = b.Access<f32>(str_param, 0_i);
+        auto* color2 = b.Access<f32>(str_param, 1_i);
+        b.Add<f32>(color1, color2);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+Inputs = struct @align(4) {
+  color1:f32 @offset(0), @color(1)
+  color2:f32 @offset(4), @color(2)
+}
+
+%foo = @fragment func(%inputs:Inputs):void {
+  $B1: {
+    %3:f32 = access %inputs, 0i
+    %4:f32 = access %inputs, 1i
+    %5:f32 = add %3, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Inputs = struct @align(4) {
+  color1:f32 @offset(0)
+  color2:f32 @offset(4)
+}
+
+foo_inputs = struct @align(4) {
+  Inputs_color1:f32 @offset(0), @color(1)
+  Inputs_color2:f32 @offset(4), @color(2)
+}
+
+%foo_inner = func(%inputs:Inputs):void {
+  $B1: {
+    %3:f32 = access %inputs, 0i
+    %4:f32 = access %inputs, 1i
+    %5:f32 = add %3, %4
+    ret
+  }
+}
+%foo = @fragment func(%inputs_1:foo_inputs):void {  # %inputs_1: 'inputs'
+  $B2: {
+    %8:f32 = access %inputs_1, 0u
+    %9:f32 = access %inputs_1, 1u
+    %10:Inputs = construct %8, %9
+    %11:void = call %foo_inner, %10
+    ret
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise
