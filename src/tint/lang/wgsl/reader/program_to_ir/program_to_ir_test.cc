@@ -1081,6 +1081,23 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location) {
 )");
 }
 
+TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Color) {
+    Enable(wgsl::Extension::kChromiumExperimentalFramebufferFetch);
+    Func("f", Vector{Param("a", ty.f32(), Vector{Color(2_i)})}, ty.f32(), Vector{Return("a")},
+         Vector{Stage(ast::PipelineStage::kFragment)}, Vector{Location(1_i)});
+
+    auto m = Build();
+    ASSERT_EQ(m, Success);
+
+    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
+              R"(%f = @fragment func(%a:f32 [@color(2)]):f32 [@location(1)] {
+  $B1: {
+    ret %a
+  }
+}
+)");
+}
+
 TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolation_LinearCentroid) {
     Func("f",
          Vector{Param("a", ty.f32(),

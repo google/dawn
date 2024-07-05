@@ -357,9 +357,7 @@ class Impl {
                     });
 
                 param->SetLocation(param_sem->Attributes().location);
-                if (param_sem->Attributes().color.has_value()) {
-                    TINT_UNIMPLEMENTED() << "IR does not currently support texel fetch extension";
-                }
+                param->SetColor(param_sem->Attributes().color);
             }
 
             scopes_.Set(p->name->symbol, param);
