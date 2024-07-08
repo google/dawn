@@ -88,14 +88,15 @@ fn textureLoadGeneral(tex: texture_2d<u32>, coords: vec2u, level: u32) -> vec4<u
 
 constexpr std::string_view kTexture2DArrayHead = R"(
 fn textureLoadGeneral(tex: texture_2d_array<u32>, coords: vec2u, level: u32) -> vec4<u32> {
-    return textureLoad(tex, coords, 0u, level);
+    return textureLoad(tex, coords, params.layer, level);
 }
 @group(0) @binding(0) var src_tex : texture_2d_array<u32>;
 )";
 
 constexpr std::string_view kBlitStencilShaderCommon = R"(
 struct Params {
-  origin : vec2u
+  origin : vec2u,
+  layer: u32,
 };
 @group(0) @binding(1) var<uniform> params : Params;
 
@@ -372,7 +373,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
     if (device->IsCompatibilityMode()) {
         textureViewDimension = dataTexture->GetCompatibilityTextureBindingViewDimension();
     } else {
-        textureViewDimension = wgpu::TextureViewDimension::e2D;
+        textureViewDimension = wgpu::TextureViewDimension::e2DArray;
     }
 
     // This bgl is the same for all the render pipelines.
@@ -388,7 +389,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
         bglEntries[1].binding = 1;
         bglEntries[1].visibility = wgpu::ShaderStage::Fragment;
         bglEntries[1].buffer.type = wgpu::BufferBindingType::Uniform;
-        bglEntries[1].buffer.minBindingSize = 2 * sizeof(uint32_t);
+        bglEntries[1].buffer.minBindingSize = 4 * sizeof(uint32_t);
 
         BindGroupLayoutDescriptor bglDesc = {};
         bglDesc.entryCount = bglEntries.size();
@@ -405,27 +406,35 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
     Ref<BufferBase> paramsBuffer;
     {
         BufferDescriptor bufferDesc = {};
-        bufferDesc.size = sizeof(uint32_t) * 2;
-        bufferDesc.usage = wgpu::BufferUsage::Uniform;
+        bufferDesc.size = sizeof(uint32_t) * 4;
+        bufferDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
         bufferDesc.mappedAtCreation = true;
         DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&bufferDesc));
 
         uint32_t* params = static_cast<uint32_t*>(paramsBuffer->GetMappedRange(0, bufferDesc.size));
         params[0] = dst.origin.x;
         params[1] = dst.origin.y;
+        params[2] = 0;
         DAWN_TRY(paramsBuffer->Unmap());
+    }
+
+    Ref<TextureViewBase> srcView;
+    {
+        TextureViewDescriptor viewDesc = {};
+        viewDesc.dimension = textureViewDimension;
+        // Array layer in texture views used in bind groups must consist of the entire array.
+        viewDesc.baseArrayLayer = 0;
+        viewDesc.arrayLayerCount = dataTexture->GetArrayLayers();
+        viewDesc.mipLevelCount = 1;
+        DAWN_TRY_ASSIGN(srcView, dataTexture->CreateView(&viewDesc));
     }
 
     // For each layer, blit the stencil data.
     for (uint32_t z = 0; z < copyExtent.depthOrArrayLayers; ++z) {
-        Ref<TextureViewBase> srcView;
-        {
-            TextureViewDescriptor viewDesc = {};
-            viewDesc.dimension = textureViewDimension;
-            viewDesc.baseArrayLayer = z;
-            viewDesc.arrayLayerCount = 1;
-            viewDesc.mipLevelCount = 1;
-            DAWN_TRY_ASSIGN(srcView, dataTexture->CreateView(&viewDesc));
+        if (z >= 1) {
+            // Pass the array layer info via the uniform buffer.
+            commandEncoder->APIWriteBuffer(paramsBuffer.Get(), sizeof(uint32_t) * 2,
+                                           reinterpret_cast<const uint8_t*>(&z), sizeof(uint32_t));
         }
 
         Ref<TextureViewBase> dstView;

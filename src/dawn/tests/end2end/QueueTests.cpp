@@ -320,13 +320,6 @@ void FillData(uint8_t* data, size_t count) {
 
 class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParams> {
   protected:
-    void SetUp() override {
-        DawnTestWithParams::SetUp();
-        // TODO(crbug.com/dawn/2391): Stencil8 format is failing on OpenGLES; needs
-        // investigation.
-        DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && GetParam().mTextureFormat == TextureFormat::Stencil8);
-    }
-
     static DataSpec MinimumDataSpec(wgpu::Extent3D writeSize,
                                     uint32_t overrideBytesPerRow = kStrideComputeDefault,
                                     uint32_t overrideRowsPerImage = kStrideComputeDefault) {
@@ -633,12 +626,15 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRow) {
 // Test with bytesPerRow greater than needed for cube textures.
 // Made for testing compat behavior.
 TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
+    auto format = GetParam().mTextureFormat;
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
     // TODO(crbug.com/dawn/2131): diagnose this failure on Win Angle D3D11
     DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+    // TODO(crbug.com/dawn/42241333): diagnose stencil8 failure on Angle Swiftshader
+    DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::Stencil8 && IsANGLESwiftShader());
 
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 257;
@@ -650,8 +646,7 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
     auto TestBody = [&](wgpu::Origin3D copyOrigin, wgpu::Extent3D copyExtent) {
         textureSpec.copyOrigin = copyOrigin;
         for (unsigned int b : {1, 2, 3, 4}) {
-            uint32_t bytesPerRow =
-                copyExtent.width * utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat) + b;
+            uint32_t bytesPerRow = copyExtent.width * utils::GetTexelBlockSizeInBytes(format) + b;
             DoTest(textureSpec, MinimumDataSpec(copyExtent, bytesPerRow), copyExtent,
                    wgpu::TextureViewDimension::Cube);
         }
@@ -659,7 +654,7 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
 
     TestBody({0, 0, 0}, textureSpec.textureSize);
 
-    if (utils::IsDepthOrStencilFormat(GetParam().mTextureFormat)) {
+    if (utils::IsDepthOrStencilFormat(format)) {
         // The entire subresource must be copied when the format is a depth/stencil format.
         return;
     }

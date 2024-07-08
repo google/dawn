@@ -191,17 +191,6 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 crbug.com/dawn/349420827 [ intel-0x9bc5 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 crbug.com/dawn/349420827 [ nvidia-0x2184 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 
-# stencil-only tests failing after the removal of the texture copy workaround
-crbug.com/343735745 webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
-crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyT2B";aspect="stencil-only" [ Failure ]
-crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="depth24plus-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
-crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="CopyT2B";aspect="stencil-only" [ Failure ]
-crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth24plus-stencil8";copyMethod="WriteTexture";aspect="stencil-only" [ Failure ]
-crbug.com/343735745 webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="stencil8";copyMethod="CopyB2T";aspect="stencil-only" [ Failure ]
-
 ### This section represents tests which may require CTS changes.
 
 # ANGLETextureSharing is not supported
