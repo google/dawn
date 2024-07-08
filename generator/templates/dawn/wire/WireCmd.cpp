@@ -138,7 +138,7 @@
             //* Start the transfer structure with the command ID, so that casting to WireCmd gives the ID.
             {{Return}}WireCmd commandId;
         {% elif record.extensible %}
-            bool hasNextInChain;
+            WGPUBool hasNextInChain;
         {% elif record.chained %}
             WGPUChainedStructTransfer chain;
         {% endif %}
@@ -158,7 +158,7 @@
             {% endif %}
             //* Optional members additionally come with a boolean to indicate whether they were set.
             {% if member.optional and member.type.category != "object" %}
-                bool has_{{as_varName(member.name)}};
+                WGPUBool has_{{as_varName(member.name)}};
             {% endif %}
         {% endfor %}
     };
