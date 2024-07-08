@@ -48,7 +48,8 @@
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
-#include "src/tint/lang/hlsl/writer/raise/decompose_memory_access.h"
+#include "src/tint/lang/hlsl/writer/raise/decompose_storage_access.h"
+#include "src/tint/lang/hlsl/writer/raise/decompose_uniform_access.h"
 #include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
 #include "src/tint/lang/hlsl/writer/raise/shader_io.h"
@@ -155,8 +156,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
                   core::ir::transform::DirectVariableAccessOptions{});
-    // DecomposeMemoryAccess must come after Robustness and DirectVariableAccess
-    RUN_TRANSFORM(raise::DecomposeMemoryAccess, module);
+    // DecomposeStorageAccess must come after Robustness and DirectVariableAccess
+    RUN_TRANSFORM(raise::DecomposeStorageAccess, module);
+    // Comes after DecomposeStorageAccess.
+    RUN_TRANSFORM(raise::DecomposeUniformAccess, module);
 
     if (!options.disable_workgroup_init) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
@@ -164,7 +167,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(raise::ShaderIO, module);
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
-    // BuiltinPolyfill must come after BinaryPolyfill and DecomposeMemoryAccess as they add builtins
+    // BuiltinPolyfill must come after BinaryPolyfill and DecomposeStorageAccess as they add
+    // builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
 

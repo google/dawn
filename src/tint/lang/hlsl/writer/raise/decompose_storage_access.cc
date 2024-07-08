@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/decompose_memory_access.h"
+#include "src/tint/lang/hlsl/writer/raise/decompose_storage_access.h"
 
 #include <utility>
 
@@ -132,7 +132,7 @@ struct State {
                     },
                     [&](core::ir::CoreBuiltinCall* call) {
                         ArrayLength(var, call, var_ty->StoreType(), 0);
-                    },  //
+                    },
                     TINT_ICE_ON_NO_MATCH);
             }
 
@@ -554,8 +554,8 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> DecomposeMemoryAccess(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "DecomposeMemoryAccess transform");
+Result<SuccessType> DecomposeStorageAccess(core::ir::Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "DecomposeStorageAccess transform");
     if (result != Success) {
         return result.Failure();
     }

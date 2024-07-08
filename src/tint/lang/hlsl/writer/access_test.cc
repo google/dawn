@@ -791,6 +791,7 @@ void foo() {
 
 TEST_F(HlslWriterTest, DISABLED_AccessUniformVectorLoad) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
+    var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);

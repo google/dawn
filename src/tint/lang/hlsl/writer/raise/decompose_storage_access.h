@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_MEMORY_ACCESS_H_
-#define SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_MEMORY_ACCESS_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_STORAGE_ACCESS_H_
+#define SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_STORAGE_ACCESS_H_
 
 #include "src/tint/utils/result/result.h"
 
@@ -37,13 +37,13 @@ class Module;
 
 namespace tint::hlsl::writer::raise {
 
-/// DecomposeMemoryAccess is a transform used to replace storage buffer accesses with a
+/// DecomposeStorageAccess is a transform used to replace storage buffer accesses with a
 /// combination of load, store or atomic functions on primitive types.
 ///
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> DecomposeMemoryAccess(core::ir::Module& module);
+Result<SuccessType> DecomposeStorageAccess(core::ir::Module& module);
 
 }  // namespace tint::hlsl::writer::raise
 
-#endif  // SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_MEMORY_ACCESS_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_STORAGE_ACCESS_H_

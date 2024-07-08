@@ -512,9 +512,9 @@ class Printer : public tint::TextGenerator {
                << " {";
         {
             const ScopedIndent si(this);
-
-            auto array_length = (ptr->StoreType()->Size() + 15) / 16;
-            Line() << "uint4 " << NameOf(var->Result(0)) << "[" << array_length << "];";
+            auto out = Line();
+            EmitTypeAndName(out, var->Result(0)->Type(), NameOf(var->Result(0)));
+            out << ";";
         }
         Line() << "};";
     }
