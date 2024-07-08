@@ -130,8 +130,8 @@ absl::Span<const wgpu::TextureFormat> DisplayEGL::GetPotentialSurfaceFormats() c
     static constexpr wgpu::TextureFormat kFormatWhenConfigRequired[] = {
         wgpu::TextureFormat::RGBA8Unorm};
     static constexpr wgpu::TextureFormat kFormatsWithNoConfigContext[] = {
-        wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGB10A2Unorm,
-        wgpu::TextureFormat::RGBA16Float};
+        wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8UnormSrgb,
+        wgpu::TextureFormat::RGB10A2Unorm, wgpu::TextureFormat::RGBA16Float};
 
     if (egl.HasExt(EGLExt::NoConfigContext)) {
         return {kFormatsWithNoConfigContext};
@@ -153,6 +153,11 @@ EGLConfig DisplayEGL::ChooseConfig(EGLint surfaceType,
     AddAttrib(EGL_CONFORMANT, mRenderableBit);
 
     switch (color) {
+        case wgpu::TextureFormat::RGBA8UnormSrgb:
+            if (!egl.HasExt(EGLExt::GLColorspace)) {
+                return kNoConfig;
+            }
+            [[fallthrough]];
         case wgpu::TextureFormat::RGBA8Unorm:
             AddAttrib(EGL_RED_SIZE, 8);
             AddAttrib(EGL_BLUE_SIZE, 8);
@@ -177,8 +182,6 @@ EGLConfig DisplayEGL::ChooseConfig(EGLint surfaceType,
             AddAttrib(EGL_ALPHA_SIZE, 16);
             AddAttrib(EGL_COLOR_COMPONENT_TYPE_EXT, EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT);
             break;
-
-            // TODO(344814083): Support RGBA8UnormSrgb with EGL_KHR_gl_colorspace.
 
         default:
             return kNoConfig;

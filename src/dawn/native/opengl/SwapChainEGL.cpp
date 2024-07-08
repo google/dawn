@@ -189,27 +189,41 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
     [[maybe_unused]] EGLDisplay eglDisplay = display->GetDisplay();
     Surface* surface = GetSurface();
 
+    absl::InlinedVector<EGLint, 3> attribs;
+    auto AddAttrib = [&](EGLint attrib, EGLint value) {
+        attribs.push_back(attrib);
+        attribs.push_back(value);
+    };
+
+    if (GetFormat() == wgpu::TextureFormat::RGBA8UnormSrgb) {
+        DAWN_ASSERT(egl.HasExt(EGLExt::GLColorspace));
+        AddAttrib(EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR);
+    }
+
+    attribs.push_back(EGL_NONE);
+
     auto TryCreateSurface = [&]() -> ResultOrError<EGLSurface> {
         switch (surface->GetType()) {
 #if DAWN_PLATFORM_IS(ANDROID)
             case Surface::Type::AndroidWindow:
                 return egl.CreateWindowSurface(
                     eglDisplay, config,
-                    static_cast<ANativeWindow*>(surface->GetAndroidNativeWindow()), nullptr);
+                    static_cast<ANativeWindow*>(surface->GetAndroidNativeWindow()), attribs.data());
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 #if defined(DAWN_ENABLE_BACKEND_METAL)
             case Surface::Type::MetalLayer:
                 return egl.CreateWindowSurface(eglDisplay, config, surface->GetMetalLayer(),
-                                               nullptr);
+                                               attribs.data());
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 #if DAWN_PLATFORM_IS(WIN32)
             case Surface::Type::WindowsHWND:
-                return egl.CreateWindowSurface(eglDisplay, config,
-                                               static_cast<HWND>(surface->GetHWND()), nullptr);
+                return egl.CreateWindowSurface(
+                    eglDisplay, config, static_cast<HWND>(surface->GetHWND()), attribs.data());
 #endif  // DAWN_PLATFORM_IS(WIN32)
 #if defined(DAWN_USE_X11)
             case Surface::Type::XlibWindow:
-                return egl.CreateWindowSurface(eglDisplay, config, surface->GetXWindow(), nullptr);
+                return egl.CreateWindowSurface(eglDisplay, config, surface->GetXWindow(),
+                                               attribs.data());
 #endif  // defined(DAWN_USE_X11)
 
             // TODO(344814083): Add support for creating surfaces using EGL_KHR_platform_base and

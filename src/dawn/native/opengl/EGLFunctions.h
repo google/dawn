@@ -59,6 +59,7 @@ enum class EGLExt {
     ReusableSync,
     NoConfigContext,
     PixelFormatFloat,
+    GLColorspace,
 
     EnumCount,
 };
