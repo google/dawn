@@ -54,6 +54,10 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const DisplayEGL* 
 ContextEGL::ContextEGL(const DisplayEGL* display) : mDisplay(display) {}
 
 ContextEGL::~ContextEGL() {
+    if (mOffscreenSurface != EGL_NO_SURFACE) {
+        mDisplay->egl.DestroySurface(mDisplay->GetDisplay(), mOffscreenSurface);
+        mOffscreenSurface = EGL_NO_SURFACE;
+    }
     if (mContext != EGL_NO_CONTEXT) {
         mDisplay->egl.DestroyContext(mDisplay->GetDisplay(), mContext);
         mContext = EGL_NO_CONTEXT;
@@ -68,14 +72,15 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
     // Unless EGL_KHR_no_config is present, we need to choose an EGLConfig on context creation that
     // will lock the EGLContext to be use with a single kind of color buffer. In that case the
     // display should only list one kind of color buffer as potentially supported.
-    EGLConfig config = kNoConfig;
+    EGLConfig contextConfig = kNoConfig;
     if (!egl.HasExt(EGLExt::NoConfigContext)) {
         DAWN_ASSERT(mDisplay->GetPotentialSurfaceFormats().size() == 1);
         wgpu::TextureFormat format = mDisplay->GetPotentialSurfaceFormats()[0];
 
-        config = mDisplay->ChooseConfig(EGL_WINDOW_BIT, format);
-        if (config == kNoConfig) {
-            return DAWN_FORMAT_INTERNAL_ERROR("Couldn't find an EGLConfig for %s.", format);
+        contextConfig = mDisplay->ChooseConfig(EGL_WINDOW_BIT, format);
+        if (contextConfig == kNoConfig) {
+            return DAWN_FORMAT_INTERNAL_ERROR(
+                "Couldn't find an EGLConfig rendering to a window for %s.", format);
         }
     }
 
@@ -121,13 +126,41 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
 
     attribs.push_back(EGL_NONE);
 
-    mContext = egl.CreateContext(mDisplay->GetDisplay(), config, EGL_NO_CONTEXT, attribs.data());
-    return CheckEGL(egl, mContext != EGL_NO_CONTEXT, "eglCreateContext");
+    mContext =
+        egl.CreateContext(mDisplay->GetDisplay(), contextConfig, EGL_NO_CONTEXT, attribs.data());
+    DAWN_TRY(CheckEGL(egl, mContext != EGL_NO_CONTEXT, "eglCreateContext"));
+
+    // When EGL_KHR_surfaceless_context is not supported, we need to create a pbuffer to act
+    // as an offscreen surface.
+    if (!egl.HasExt(EGLExt::SurfacelessContext)) {
+        // The first potential surface format is always a good choice to find the config. Either we
+        // only support this one and the context will be compatible with the pbuffer, or
+        // EGL_KHR_no_config_context is supported and the context is compatible with any config.
+        wgpu::TextureFormat format = mDisplay->GetPotentialSurfaceFormats()[0];
+
+        EGLConfig pbufferConfig = mDisplay->ChooseConfig(EGL_PBUFFER_BIT, format);
+        if (pbufferConfig == kNoConfig) {
+            return DAWN_FORMAT_INTERNAL_ERROR(
+                "Couldn't find an EGLConfig rendering to a window for %s.", format);
+        }
+
+        EGLint pbufferAttribs[] = {
+            EGL_WIDTH,  1,  //
+            EGL_HEIGHT, 1,  //
+            EGL_NONE,
+        };
+        mOffscreenSurface =
+            egl.CreatePbufferSurface(mDisplay->GetDisplay(), pbufferConfig, pbufferAttribs);
+        DAWN_TRY(
+            CheckEGL(egl, mOffscreenSurface != EGL_NO_SURFACE, "Creating the offscreen surface."));
+    }
+
+    return {};
 }
 
 void ContextEGL::MakeCurrent() {
-    EGLBoolean success =
-        mDisplay->egl.MakeCurrent(mDisplay->GetDisplay(), mSurface, mSurface, mContext);
+    EGLBoolean success = mDisplay->egl.MakeCurrent(mDisplay->GetDisplay(), mCurrentSurface,
+                                                   mCurrentSurface, mContext);
     IgnoreErrors(CheckEGL(mDisplay->egl, success == EGL_TRUE, "eglMakeCurrent"));
 }
 
@@ -141,11 +174,11 @@ void ContextEGL::MakeCurrent() {
 ContextEGL::ScopedMakeSurfaceCurrent::ScopedMakeSurfaceCurrent(ContextEGL* context,
                                                                EGLSurface surface)
     : mContext(context) {
-    mContext->mSurface = surface;
+    mContext->mCurrentSurface = surface;
 }
 
 ContextEGL::ScopedMakeSurfaceCurrent::~ScopedMakeSurfaceCurrent() {
-    mContext->mSurface = EGL_NO_SURFACE;
+    mContext->mCurrentSurface = mContext->mOffscreenSurface;
 }
 
 }  // namespace dawn::native::opengl

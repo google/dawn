@@ -71,7 +71,8 @@ class ContextEGL : NonMovable {
   private:
     raw_ptr<const DisplayEGL> mDisplay;
     EGLContext mContext = EGL_NO_CONTEXT;
-    EGLSurface mSurface = EGL_NO_SURFACE;
+    EGLSurface mCurrentSurface = EGL_NO_SURFACE;
+    EGLSurface mOffscreenSurface = EGL_NO_SURFACE;
 };
 
 }  // namespace dawn::native::opengl
