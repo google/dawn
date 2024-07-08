@@ -111,7 +111,10 @@ struct State {
                     [&](core::ir::StoreVectorElement* s) { StoreVectorElement(s, var, var_ty); },
                     [&](core::ir::Store* s) { Store(s); },     //
                     [&](core::ir::Load* l) { Load(l, var); },  //
-                    [&](core::ir::Access* a) { Access(a, var, a->Object()->Type(), 0u); },
+                    [&](core::ir::Access* a) {
+                        OffsetData offset;
+                        Access(a, var, a->Object()->Type(), &offset);
+                    },
                     [&](core::ir::Let* let) {
                         // The `let` is, essentially, an alias for the `var` as it's assigned
                         // directly. Gather all the `let` usages into our worklist, and then replace
@@ -130,13 +133,32 @@ struct State {
         }
     }
 
-    uint32_t CalculateVectorIndex(core::ir::Value* v, const core::type::Type* store_ty) {
-        auto* idx_value = v->As<core::ir::Constant>();
+    struct OffsetData {
+        uint32_t byte_offset = 0;
+        Vector<core::ir::Value*, 4> expr{};
+    };
 
-        // TODO(dsinclair): Handle non-constant vector indices.
-        TINT_ASSERT(idx_value);
+    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
+    void UpdateOffsetData(core::ir::Value* v, uint32_t elm_size, OffsetData* offset) {
+        tint::Switch(
+            v,  //
+            [&](core::ir::Constant* idx_value) {
+                offset->byte_offset += idx_value->Value()->ValueAs<uint32_t>() * elm_size;
+            },
+            [&](core::ir::Value* val) {
+                offset->expr.Push(
+                    b.Multiply(ty.u32(), b.Convert(ty.u32(), val), u32(elm_size))->Result(0));
+            },
+            TINT_ICE_ON_NO_MATCH);
+    }
 
-        return idx_value->Value()->ValueAs<uint32_t>() * store_ty->DeepestElement()->Size();
+    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
+    core::ir::Value* OffsetToValue(OffsetData offset) {
+        core::ir::Value* val = b.Value(u32(offset.byte_offset));
+        for (core::ir::Value* expr : offset.expr) {
+            val = b.Add(ty.u32(), val, expr)->Result(0);
+        }
+        return val;
     }
 
     // Creates the appropriate load instructions for the given result type.
@@ -165,13 +187,13 @@ struct State {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    // Creates a `v.Load{2,3,4} offset` call based on the provided type. The load returns a `u32` or
-    // vector of `u32` and then a `bitcast` is done to get back to the desired type.
+    // Creates a `v.Load{2,3,4} offset` call based on the provided type. The load returns a
+    // `u32` or vector of `u32` and then a `bitcast` is done to get back to the desired type.
     //
     // This only works for `u32`, `i32`, `f16`, `f32` and the vector sizes of those types.
     //
-    // The `f16` type is special in that `f16` uses a templated load in HLSL `Load<float16_t>` and
-    // returns the correct type, so there is no bitcast.
+    // The `f16` type is special in that `f16` uses a templated load in HLSL `Load<float16_t>`
+    // and returns the correct type, so there is no bitcast.
     core::ir::Call* MakeScalarOrVectorLoad(core::ir::Var* var,
                                            const core::type::Type* result_ty,
                                            core::ir::Value* offset) {
@@ -213,8 +235,8 @@ struct State {
         return res;
     }
 
-    // Creates a load function for the given `var` and `struct` combination. Essentially creates a
-    // function similar to:
+    // Creates a load function for the given `var` and `struct` combination. Essentially creates
+    // a function similar to:
     //
     // fn custom_load_S(offset: u32) {
     //   let a = <load S member 0>(offset + member 0 offset);
@@ -246,8 +268,8 @@ struct State {
         });
     }
 
-    // Creates a load function for the given `var` and `matrix` combination. Essentially creates a
-    // function similar to:
+    // Creates a load function for the given `var` and `matrix` combination. Essentially creates
+    // a function similar to:
     //
     // fn custom_load_M(offset: u32) {
     //   let a = <load M column 1>(offset + (1 * ColumnStride));
@@ -279,8 +301,8 @@ struct State {
         });
     }
 
-    // Creates a load function for the given `var` and `array` combination. Essentially creates a
-    // function similar to:
+    // Creates a load function for the given `var` and `array` combination. Essentially creates
+    // a function similar to:
     //
     // fn custom_load_A(offset: u32) {
     //   A a = A();
@@ -322,10 +344,10 @@ struct State {
         });
     }
 
-    void InsertLoad(core::ir::Var* var, core::ir::Instruction* inst, uint32_t offset) {
+    void InsertLoad(core::ir::Var* var, core::ir::Instruction* inst, OffsetData offset) {
         b.InsertBefore(inst, [&] {
             auto* call =
-                MakeLoad(inst, var, inst->Result(0)->Type()->UnwrapPtr(), b.Value(u32(offset)));
+                MakeLoad(inst, var, inst->Result(0)->Type()->UnwrapPtr(), OffsetToValue(offset));
             inst->Result(0)->ReplaceAllUsesWith(call->Result(0));
         });
         inst->Destroy();
@@ -334,7 +356,9 @@ struct State {
     void Access(core::ir::Access* a,
                 core::ir::Var* var,
                 const core::type::Type* obj,
-                uint32_t byte_offset) {
+                OffsetData* offset) {
+        TINT_ASSERT(offset);
+
         // Note, because we recurse through the `access` helper, the object passed in isn't
         // necessarily the originating `var` object, but maybe a partially resolved access chain
         // object.
@@ -343,29 +367,31 @@ struct State {
         }
 
         for (auto* idx_value : a->Indices()) {
-            auto* cnst = idx_value->As<core::ir::Constant>();
-
-            // TODO(dsinclair): Handle non-constant accessors where the indices are dynamic
-            TINT_ASSERT(cnst);
-
-            uint32_t idx = cnst->Value()->ValueAs<uint32_t>();
             tint::Switch(
                 obj,  //
                 [&](const core::type::Vector* v) {
-                    byte_offset += v->type()->Size() * idx;
+                    b.InsertBefore(a,
+                                   [&] { UpdateOffsetData(idx_value, v->type()->Size(), offset); });
                     obj = v->type();
                 },
                 [&](const core::type::Matrix* m) {
-                    byte_offset += m->type()->Size() * m->rows() * idx;
+                    b.InsertBefore(a,
+                                   [&] { UpdateOffsetData(idx_value, m->ColumnStride(), offset); });
                     obj = m->ColumnType();
                 },
                 [&](const core::type::Array* ary) {
-                    byte_offset += ary->Stride() * idx;
+                    b.InsertBefore(a, [&] { UpdateOffsetData(idx_value, ary->Stride(), offset); });
                     obj = ary->ElemType();
                 },
                 [&](const core::type::Struct* s) {
+                    auto* cnst = idx_value->As<core::ir::Constant>();
+
+                    // A struct index must be a constant
+                    TINT_ASSERT(cnst);
+
+                    uint32_t idx = cnst->Value()->ValueAs<uint32_t>();
                     auto* mem = s->Members()[idx];
-                    byte_offset += mem->Offset();
+                    offset->byte_offset += mem->Offset();
                     obj = mem->Type();
                 },
                 TINT_ICE_ON_NO_MATCH);
@@ -378,8 +404,9 @@ struct State {
             tint::Switch(
                 usage.instruction,
                 [&](core::ir::Let* let) {
-                    // The `let` is essentially an alias to the `access`. So, add the `let` usages
-                    // into the usage worklist, and replace the let with the access chain directly.
+                    // The `let` is essentially an alias to the `access`. So, add the `let`
+                    // usages into the usage worklist, and replace the let with the access chain
+                    // directly.
                     for (auto& u : let->Result(0)->Usages()) {
                         usages.Push(u);
                     }
@@ -388,27 +415,57 @@ struct State {
                 },
                 [&](core::ir::Access* sub_access) {
                     // Treat an access chain of the access chain as a continuation of the outer
-                    // chain. Pass through the object we stopped at and the current byte_offset and
-                    // then restart the access chain replacement for the new access chain.
-                    Access(sub_access, var, obj, byte_offset);
+                    // chain. Pass through the object we stopped at and the current byte_offset
+                    // and then restart the access chain replacement for the new access chain.
+                    Access(sub_access, var, obj, offset);
                 },
 
                 [&](core::ir::LoadVectorElement* lve) {
                     a->Result(0)->RemoveUsage(usage);
 
-                    byte_offset += CalculateVectorIndex(lve->Index(), obj);
-                    InsertLoad(var, lve, byte_offset);
+                    b.InsertBefore(lve, [&] {
+                        UpdateOffsetData(lve->Index(), obj->DeepestElement()->Size(), offset);
+                    });
+                    InsertLoad(var, lve, *offset);
                 },
                 [&](core::ir::Load* ld) {
                     a->Result(0)->RemoveUsage(usage);
-                    InsertLoad(var, ld, byte_offset);
+                    InsertLoad(var, ld, *offset);
                 },
 
                 [&](core::ir::StoreVectorElement*) {
-                    // TODO(dsinclair): Handle stor vector elements
+                    // TODO(dsinclair): Handle store vector elements
                 },  //
                 [&](core::ir::Store*) {
                     // TODO(dsinclair): Handle store
+                },  //
+                [&](core::ir::CoreBuiltinCall* call) {
+                    // Array length calls require the access
+                    TINT_ASSERT(call->Func() == core::BuiltinFn::kArrayLength);
+
+                    // If this access chain is being used in an `arrayLength` call then the access
+                    // chain _must_ have resolved to the runtime array member of the structure. So,
+                    // we _must_ have set `obj` to the array member which is a runtime array.
+                    auto* arr_ty = obj->As<core::type::Array>();
+                    TINT_ASSERT(arr_ty && arr_ty->Count()->Is<core::type::RuntimeArrayCount>());
+
+                    b.InsertBefore(a, [&] {
+                        auto* val = b.Let(ty.u32());
+                        val->SetValue(b.Zero<u32>());
+
+                        b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                            ty.void_(), BuiltinFn::kGetDimensions, var, val);
+
+                        // Because the `runtime_array` must be the last element of the outer most
+                        // structure and we're calling `arrayLength` on the array then the access
+                        // chain must have only had a single item in it and that item must have been
+                        // a constant offset.
+                        auto* div =
+                            b.Divide(ty.u32(), b.Subtract(ty.u32(), val, u32(offset->byte_offset)),
+                                     u32(arr_ty->Stride()));
+                        call->Result(0)->ReplaceAllUsesWith(div->Result(0));
+                    });
+                    call->Destroy();
                 },  //
                 TINT_ICE_ON_NO_MATCH);
         }
@@ -420,8 +477,8 @@ struct State {
         // TODO(dsinclair): Handle store
     }
 
-    // This should _only_ be handling a `var` parameter as any `access` parameters would have been
-    // replaced by the `access` being converted.
+    // This should _only_ be handling a `var` parameter as any `access` parameters would have
+    // been replaced by the `access` being converted.
     void Load(core::ir::Load* ld, core::ir::Var* var) {
         auto* result = ld->From()->As<core::ir::InstructionResult>();
         TINT_ASSERT(result);
@@ -445,10 +502,12 @@ struct State {
     void LoadVectorElement(core::ir::LoadVectorElement* lve,
                            core::ir::Var* var,
                            const core::type::Pointer* var_ty) {
-        uint32_t pos = CalculateVectorIndex(lve->Index(), var_ty->StoreType());
-
         b.InsertBefore(lve, [&] {
-            auto* result = MakeScalarOrVectorLoad(var, lve->Result(0)->Type(), b.Value(u32(pos)));
+            OffsetData offset{};
+            UpdateOffsetData(lve->Index(), var_ty->StoreType()->DeepestElement()->Size(), &offset);
+
+            auto* result =
+                MakeScalarOrVectorLoad(var, lve->Result(0)->Type(), OffsetToValue(offset));
             lve->Result(0)->ReplaceAllUsesWith(result->Result(0));
         });
 
@@ -463,14 +522,14 @@ struct State {
     void StoreVectorElement(core::ir::StoreVectorElement* sve,
                             core::ir::Var* var,
                             const core::type::Pointer* var_ty) {
-        uint32_t pos = CalculateVectorIndex(sve->Index(), var_ty->StoreType());
+        b.InsertBefore(sve, [&] {
+            OffsetData offset{};
+            UpdateOffsetData(sve->Index(), var_ty->StoreType()->DeepestElement()->Size(), &offset);
 
-        auto* cast = b.Bitcast(ty.u32(), sve->Value());
-        auto* builtin = b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kStore,
-                                                                  var, u32(pos), cast);
-
-        cast->InsertBefore(sve);
-        builtin->InsertBefore(sve);
+            auto* cast = b.Bitcast(ty.u32(), sve->Value());
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kStore, var,
+                                                      OffsetToValue(offset), cast);
+        });
         sve->Destroy();
     }
 };

@@ -100,6 +100,10 @@ fn f32tof16[N: num](vec<N, f32>) -> vec<N, u32>
 fn f16tof32(u32) -> f32
 fn f16tof32[N: num](vec<N, u32>) -> vec<N, f32>
 
+fn mul [T: f32_f16, C: num, R: num](mat<C, R, T>, vec<C, T>) -> vec<R, T>
+fn mul [T: f32_f16, C: num, R: num](vec<R, T>, mat<C, R, T>) -> vec<C, T>
+fn mul [T: f32_f16, K: num, C: num, R: num](mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
+
 @member_function fn Load(byte_address_buffer<readable>, offset: u32) -> u32
 @member_function fn Load2(byte_address_buffer<readable>, offset: u32) -> vec2<u32>
 @member_function fn Load3(byte_address_buffer<readable>, offset: u32) -> vec3<u32>
@@ -115,6 +119,5 @@ fn f16tof32[N: num](vec<N, u32>) -> vec<N, f32>
 @member_function fn Store3(byte_address_buffer<writable>, offset: u32, value: vec3<u32>)
 @member_function fn Store4(byte_address_buffer<writable>, offset: u32, value: vec4<u32>)
 
-fn mul [T: f32_f16, C: num, R: num](mat<C, R, T>, vec<C, T>) -> vec<R, T>
-fn mul [T: f32_f16, C: num, R: num](vec<R, T>, mat<C, R, T>) -> vec<C, T>
-fn mul [T: f32_f16, K: num, C: num, R: num](mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
+@member_function fn GetDimensions[A: access](byte_address_buffer<A>, u32)
+

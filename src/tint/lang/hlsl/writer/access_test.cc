@@ -686,7 +686,7 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessComplexDynamicAccessChain) {
+TEST_F(HlslWriterTest, AccessComplexDynamicAccessChain) {
     auto* S1 = ty.Struct(mod.symbols.New("S1"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.vec3<f32>()},
@@ -721,13 +721,70 @@ TEST_F(HlslWriterTest, DISABLED_AccessComplexDynamicAccessChain) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-ByteAddressBuffer v : register(t0);
-void m() {
+RWByteAddressBuffer sb : register(u0);
+void foo() {
   int i = 4;
+  int v = i;
   uint j = 1u;
+  uint v_1 = j;
   int k = 2;
-  float x = asfloat(v.Load((((((16u + (128u * uint(i))) + 16u) + (32u * j)) + 16u) + (4u * uint(k)))));
+  int v_2 = k;
+  uint v_3 = 0u;
+  sb.GetDimensions(v_3);
+  uint v_4 = min(uint(v), (((v_3 - 16u) / 128u) - 1u));
+  uint v_5 = min(v_1, 2u);
+  uint v_6 = (uint(v_4) * 128u);
+  uint v_7 = (uint(v_5) * 32u);
+  float x = asfloat(sb.Load((((48u + v_6) + v_7) + (uint(min(uint(v_2), 2u)) * 4u))));
 }
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessComplexDynamicAccessChainSplit) {
+    auto* S1 = ty.Struct(mod.symbols.New("S1"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.vec3<f32>()},
+                                                    {mod.symbols.New("c"), ty.i32()},
+                                                });
+    auto* S2 = ty.Struct(mod.symbols.New("S2"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.array(S1, 3)},
+                                                    {mod.symbols.New("c"), ty.i32()},
+                                                });
+
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.runtime_array(S2)},
+                                                });
+
+    auto* var = b.Var("sb", storage, SB, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* j = b.Load(b.Var("j", 1_u));
+        b.Let("x", b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>, read_write>(), var, 1_u,
+                                                4_u, 1_u, j, 1_u),
+                                       2_u));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer sb : register(u0);
+void foo() {
+  uint j = 1u;
+  uint v = j;
+  uint v_1 = 0u;
+  sb.GetDimensions(v_1);
+  uint v_2 = min(4u, (((v_1 - 16u) / 128u) - 1u));
+  uint v_3 = min(v, 2u);
+  uint v_4 = (uint(v_2) * 128u);
+  float x = asfloat(sb.Load(((56u + v_4) + (uint(v_3) * 32u))));
+}
+
 )");
 }
 

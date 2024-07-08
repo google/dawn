@@ -52,6 +52,8 @@ const char* str(BuiltinFn i) {
             return "f32tof16";
         case BuiltinFn::kF16Tof32:
             return "f16tof32";
+        case BuiltinFn::kMul:
+            return "mul";
         case BuiltinFn::kLoad:
             return "Load";
         case BuiltinFn::kLoad2:
@@ -76,8 +78,8 @@ const char* str(BuiltinFn i) {
             return "Store3";
         case BuiltinFn::kStore4:
             return "Store4";
-        case BuiltinFn::kMul:
-            return "mul";
+        case BuiltinFn::kGetDimensions:
+            return "GetDimensions";
     }
     return "<unknown>";
 }

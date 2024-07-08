@@ -1074,7 +1074,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeMemoryAccessTest, DISABLED_ComplexDynamicAccessChain) {
+TEST_F(HlslWriterDecomposeMemoryAccessTest, ComplexDynamicAccessChain) {
     auto* S1 = ty.Struct(mod.symbols.New("S1"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.vec3<f32>()},
@@ -1176,8 +1176,125 @@ $B1: {  # root
     %6:u32 = load %j
     %k:ptr<function, i32, read_write> = var, 2i
     %8:i32 = load %k
-    %10:f32 = bitcast %9
-    %x:f32 = let %10
+    %9:u32 = convert %4
+    %10:u32 = mul %9, 128u
+    %11:u32 = convert %6
+    %12:u32 = mul %11, 32u
+    %13:u32 = convert %8
+    %14:u32 = mul %13, 4u
+    %15:u32 = add 48u, %10
+    %16:u32 = add %15, %12
+    %17:u32 = add %16, %14
+    %18:u32 = %sb.Load %17
+    %19:f32 = bitcast %18
+    %x:f32 = let %19
+    ret
+  }
+}
+)";
+
+    Run(DecomposeMemoryAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeMemoryAccessTest, ComplexDynamicAccessChainDynamicAccessInMiddle) {
+    auto* S1 = ty.Struct(mod.symbols.New("S1"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.vec3<f32>()},
+                                                    {mod.symbols.New("c"), ty.i32()},
+                                                });
+    auto* S2 = ty.Struct(mod.symbols.New("S2"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.array(S1, 3)},
+                                                    {mod.symbols.New("c"), ty.i32()},
+                                                });
+
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.runtime_array(S2)},
+                                                });
+
+    auto* var = b.Var("sb", storage, SB, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* j = b.Load(b.Var("j", 1_u));
+        // let x : f32 = sb.b[4].b[j].b[2];
+        b.Let("x", b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>, read_write>(), var, 1_u,
+                                                4_u, 1_u, j, 1_u),
+                                       2_u));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+S1 = struct @align(16) {
+  a:i32 @offset(0)
+  b:vec3<f32> @offset(16)
+  c:i32 @offset(28)
+}
+
+S2 = struct @align(16) {
+  a_1:i32 @offset(0)
+  b_1:array<S1, 3> @offset(16)
+  c_1:i32 @offset(112)
+}
+
+SB = struct @align(16) {
+  a_2:i32 @offset(0)
+  b_2:array<S2> @offset(16)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %j:ptr<function, u32, read_write> = var, 1u
+    %4:u32 = load %j
+    %5:ptr<storage, vec3<f32>, read_write> = access %sb, 1u, 4u, 1u, %4, 1u
+    %6:f32 = load_vector_element %5, 2u
+    %x:f32 = let %6
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+S1 = struct @align(16) {
+  a:i32 @offset(0)
+  b:vec3<f32> @offset(16)
+  c:i32 @offset(28)
+}
+
+S2 = struct @align(16) {
+  a_1:i32 @offset(0)
+  b_1:array<S1, 3> @offset(16)
+  c_1:i32 @offset(112)
+}
+
+SB = struct @align(16) {
+  a_2:i32 @offset(0)
+  b_2:array<S2> @offset(16)
+}
+
+$B1: {  # root
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %j:ptr<function, u32, read_write> = var, 1u
+    %4:u32 = load %j
+    %5:u32 = convert %4
+    %6:u32 = mul %5, 32u
+    %7:u32 = add 568u, %6
+    %8:u32 = %sb.Load %7
+    %9:f32 = bitcast %8
+    %x:f32 = let %9
     ret
   }
 }
