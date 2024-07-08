@@ -51,6 +51,9 @@ class X11Functions {
     decltype(&::XSetErrorHandler) xSetErrorHandler = nullptr;
     decltype(&::XGetWindowAttributes) xGetWindowAttributes = nullptr;
 
+    // Calling XSynchronize(display, true) can help debug "X Error of failed request" messages.
+    decltype(&::XSynchronize) xSynchronize = nullptr;
+
     // Functions from x11-xcb
     decltype(&::XGetXCBConnection) xGetXCBConnection = nullptr;
 
@@ -58,6 +61,9 @@ class X11Functions {
     DynamicLib mX11Lib;
     DynamicLib mX11XcbLib;
 };
+
+// Make future X11 calls synchronously trigger a breakpoint if they cause an X11 error.
+void SynchronouslyDebugX11(Display* display);
 
 }  // namespace dawn::native
 

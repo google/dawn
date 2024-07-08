@@ -27,11 +27,16 @@
 
 #include "dawn/native/X11Functions.h"
 
+#include <memory>
+
+#include "dawn/common/Log.h"
+
 namespace dawn::native {
 
 X11Functions::X11Functions() {
     if (!mX11Lib.Open("libX11.so.6") || !mX11Lib.GetProc(&xSetErrorHandler, "XSetErrorHandler") ||
-        !mX11Lib.GetProc(&xGetWindowAttributes, "XGetWindowAttributes")) {
+        !mX11Lib.GetProc(&xGetWindowAttributes, "XGetWindowAttributes") ||
+        !mX11Lib.GetProc(&xSynchronize, "XSynchronize")) {
         mX11Lib.Close();
     }
 
@@ -48,6 +53,41 @@ bool X11Functions::IsX11Loaded() const {
 
 bool X11Functions::IsX11XcbLoaded() const {
     return mX11XcbLib.Valid();
+}
+
+struct DebugX11 {
+    static DebugX11* sDebug;
+    static void Init(Display* display) {
+        if (sDebug == nullptr) {
+            auto debug = std::make_unique<DebugX11>();
+            if (!debug->x.IsX11Loaded()) {
+                return;
+            }
+
+            debug->previousHandler = debug->x.xSetErrorHandler(&HandleError);
+            sDebug = debug.release();
+        }
+
+        // Make all X11 calls synchronous so that the error handler is called immediately.
+        sDebug->x.xSynchronize(display, true);
+    }
+
+    static int HandleError(Display* d, XErrorEvent* e) {
+        dawn::ErrorLog()
+            << "An X11 error happened, triggering a breakpoint, the culprit will be in the stack.";
+        dawn::BreakPoint();
+
+        int result = sDebug->previousHandler(d, e);
+        return result;
+    }
+
+    X11Functions x;
+    XErrorHandler previousHandler = nullptr;
+};
+DebugX11* DebugX11::sDebug = nullptr;
+
+void SynchronouslyDebugX11(Display* display) {
+    DebugX11::Init(display);
 }
 
 }  // namespace dawn::native
