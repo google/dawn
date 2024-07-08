@@ -37,6 +37,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/Ref.h"
+#include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Adapter.h"
@@ -45,7 +46,6 @@
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/Forward.h"
-#include "dawn/native/RefCountedWithExternalCount.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/dawn_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -71,7 +71,7 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor);
 
 // This is called InstanceBase for consistency across the frontend, even if the backends don't
 // specialize this class.
-class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount {
+class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<RefCounted> {
   public:
     static ResultOrError<Ref<InstanceBase>> Create(const InstanceDescriptor* descriptor = nullptr);
 

@@ -25,12 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_REFCOUNTEDWITHEXTERNALCOUNT_H_
-#define SRC_DAWN_NATIVE_REFCOUNTEDWITHEXTERNALCOUNT_H_
+#ifndef SRC_DAWN_COMMON_REFCOUNTEDWITHEXTERNALCOUNT_H_
+#define SRC_DAWN_COMMON_REFCOUNTEDWITHEXTERNALCOUNT_H_
 
 #include "dawn/common/RefCounted.h"
 
-namespace dawn::native {
+namespace dawn {
 
 // RecCountedWithExternalCountBase is a version of RefCounted which tracks a separate
 // refcount for calls to APIAddRef/APIRelease (refs added/removed by the application).
@@ -38,14 +38,12 @@ namespace dawn::native {
 // ref isn't an external ref.
 // When the external refcount drops to zero, WillDropLastExternalRef is called. and it can be called
 // more than once.
-// The derived class should override the behavior of WillDropLastExternalRef.
+// The derived class must override the behavior of WillDropLastExternalRef.
 template <typename T>
-class RefCountedWithExternalCountBase : public T {
+class RefCountedWithExternalCount : public T {
   public:
     static constexpr bool HasExternalRefCount = true;
 
-    using T::AddRef;
-    using T::Release;
     using T::T;
 
     void APIAddRef() {
@@ -57,7 +55,7 @@ class RefCountedWithExternalCountBase : public T {
         if (mExternalRefCount.Decrement()) {
             WillDropLastExternalRef();
         }
-        T::Release();
+        T::APIRelease();
     }
 
     void IncrementExternalRefCount() { mExternalRefCount.Increment(); }
@@ -66,17 +64,12 @@ class RefCountedWithExternalCountBase : public T {
         return mExternalRefCount.GetValueForTesting();
     }
 
-  protected:
-    using T::DeleteThis;
-
   private:
     virtual void WillDropLastExternalRef() = 0;
 
     RefCount mExternalRefCount{/*initCount=*/0, /*payload=*/0};
 };
 
-using RefCountedWithExternalCount = RefCountedWithExternalCountBase<RefCounted>;
+}  // namespace dawn
 
-}  // namespace dawn::native
-
-#endif  // SRC_DAWN_NATIVE_REFCOUNTEDWITHEXTERNALCOUNT_H_
+#endif  // SRC_DAWN_COMMON_REFCOUNTEDWITHEXTERNALCOUNT_H_

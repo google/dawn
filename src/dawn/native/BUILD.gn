@@ -335,7 +335,6 @@ source_set("sources") {
     "QuerySet.h",
     "Queue.cpp",
     "Queue.h",
-    "RefCountedWithExternalCount.h",
     "RenderBundle.cpp",
     "RenderBundle.h",
     "RenderBundleEncoder.cpp",

@@ -83,6 +83,7 @@ set(private_headers
     "Ref.h"
     "RefBase.h"
     "RefCounted.h"
+    "RefCountedWithExternalCount.h"
     "Result.h"
     "SerialMap.h"
     "SerialQueue.h"

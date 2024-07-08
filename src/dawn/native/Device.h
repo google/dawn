@@ -39,6 +39,7 @@
 #include "dawn/common/ContentLessObjectCache.h"
 #include "dawn/common/Mutex.h"
 #include "dawn/common/NonMovable.h"
+#include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/common/StackAllocated.h"
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Commands.h"
@@ -53,7 +54,6 @@
 #include "dawn/native/Limits.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "dawn/native/RefCountedWithExternalCount.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/UsageValidationMode.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -80,7 +80,7 @@ struct CallbackTask;
 struct InternalPipelineStore;
 struct ShaderModuleParseResult;
 
-class DeviceBase : public ErrorSink, public RefCountedWithExternalCount {
+class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCounted> {
   public:
     struct DeviceLostEvent final : public EventManager::TrackedEvent {
         // TODO(https://crbug.com/dawn/2465): Pass just the DeviceLostCallbackInfo when setters are

@@ -112,7 +112,6 @@ set(private_headers
     "QueryHelper.h"
     "QuerySet.h"
     "Queue.h"
-    "RefCountedWithExternalCount.h"
     "RenderBundle.h"
     "RenderBundleEncoder.h"
     "RenderEncoderBase.h"

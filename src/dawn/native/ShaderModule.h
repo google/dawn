@@ -41,6 +41,7 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/ContentLessObjectCacheable.h"
 #include "dawn/common/MutexProtected.h"
+#include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/CachedObject.h"
@@ -52,7 +53,6 @@
 #include "dawn/native/Limits.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PerStage.h"
-#include "dawn/native/RefCountedWithExternalCount.h"
 #include "dawn/native/dawn_platform.h"
 #include "tint/tint.h"
 
@@ -278,11 +278,11 @@ struct EntryPointMetadata {
     bool usesVertexIndex = false;
 };
 
-class ShaderModuleBase : public RefCountedWithExternalCountBase<ApiObjectBase>,
+class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
                          public CachedObject,
                          public ContentLessObjectCacheable<ShaderModuleBase> {
   public:
-    using Base = RefCountedWithExternalCountBase<ApiObjectBase>;
+    using Base = RefCountedWithExternalCount<ApiObjectBase>;
     ShaderModuleBase(DeviceBase* device,
                      const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                      std::vector<tint::wgsl::Extension> internalExtensions,
