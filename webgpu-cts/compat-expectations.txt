@@ -517,6 +517,7 @@ crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,p
 crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/351338448 webgpu:shader,validation,decl,context_dependent_resolution:attribute_names:case="interpolate" [ Failure ]
 
 # Fine derivative tests don't work on compat (and in core)
 crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
