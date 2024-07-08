@@ -74,6 +74,7 @@ match f32_i32: f32 | i32
 match f32_f16: f32 | f16
 
 match storage: address_space.storage
+match function: address_space.function
 
 match readable
   : access.read
@@ -119,5 +120,5 @@ fn mul [T: f32_f16, K: num, C: num, R: num](mat<K, R, T>, mat<C, K, T>) -> mat<C
 @member_function fn Store3(byte_address_buffer<writable>, offset: u32, value: vec3<u32>)
 @member_function fn Store4(byte_address_buffer<writable>, offset: u32, value: vec4<u32>)
 
-@member_function fn GetDimensions[A: access](byte_address_buffer<A>, u32)
+@member_function fn GetDimensions[A: access](byte_address_buffer<A>, ptr<function, u32, writable>)
 

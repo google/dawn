@@ -90,6 +90,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "access_test.cc",
+    "arraylength_test.cc",
     "binary_test.cc",
     "bitcast_test.cc",
     "builtin_test.cc",

@@ -93,6 +93,7 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [
         "access_test.cc",
+        "arraylength_test.cc",
         "binary_test.cc",
         "bitcast_test.cc",
         "builtin_test.cc",

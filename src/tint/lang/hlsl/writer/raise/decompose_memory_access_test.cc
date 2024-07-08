@@ -3581,5 +3581,403 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterDecomposeMemoryAccessTest, ArrayLengthDirect) {
+    auto* sb = b.Var("sb", ty.ptr<storage, array<i32>>());
+    sb->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(sb);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, sb));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %sb:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = arrayLength %sb
+    %len:u32 = let %3
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, u32, read_write> = var
+    %4:void = %sb.GetDimensions %3
+    %5:u32 = load %3
+    %6:u32 = div %5, 4u
+    %len:u32 = let %6
+    ret
+  }
+}
+)";
+    Run(DecomposeMemoryAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeMemoryAccessTest, ArrayLengthInStruct) {
+    auto* SB =
+        ty.Struct(mod.symbols.New("SB"), {
+                                             {mod.symbols.New("x"), ty.i32()},
+                                             {mod.symbols.New("arr"), ty.runtime_array(ty.i32())},
+                                         });
+
+    auto* sb = b.Var("sb", ty.ptr(storage, SB));
+    sb->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(sb);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kArrayLength,
+                            b.Access(ty.ptr<storage, array<i32>>(), sb, 1_u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(4) {
+  x:i32 @offset(0)
+  arr:array<i32> @offset(4)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, array<i32>, read_write> = access %sb, 1u
+    %4:u32 = arrayLength %3
+    %len:u32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(4) {
+  x:i32 @offset(0)
+  arr:array<i32> @offset(4)
+}
+
+$B1: {  # root
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, u32, read_write> = var
+    %4:void = %sb.GetDimensions %3
+    %5:u32 = load %3
+    %6:u32 = sub %5, 4u
+    %7:u32 = div %6, 4u
+    %len:u32 = let %7
+    ret
+  }
+}
+)";
+    Run(DecomposeMemoryAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeMemoryAccessTest, ArrayLengthOfStruct) {
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("f"), ty.f32()},
+                                                });
+
+    auto* sb = b.Var("sb", ty.ptr(storage, ty.runtime_array(SB), core::Access::kRead));
+    sb->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(sb);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, sb));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, array<SB>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = arrayLength %sb
+    %len:u32 = let %3
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+$B1: {  # root
+  %sb:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, u32, read_write> = var
+    %4:void = %sb.GetDimensions %3
+    %5:u32 = load %3
+    %6:u32 = div %5, 4u
+    %len:u32 = let %6
+    ret
+  }
+}
+)";
+    Run(DecomposeMemoryAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeMemoryAccessTest, ArrayLengthArrayOfArrayOfStruct) {
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("f"), ty.f32()},
+                                                });
+    auto* sb = b.Var("sb", ty.ptr(storage, ty.runtime_array(ty.array(SB, 4))));
+    sb->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(sb);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, sb));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+$B1: {  # root
+  %sb:ptr<storage, array<array<SB, 4>>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = arrayLength %sb
+    %len:u32 = let %3
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(4) {
+  f:f32 @offset(0)
+}
+
+$B1: {  # root
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, u32, read_write> = var
+    %4:void = %sb.GetDimensions %3
+    %5:u32 = load %3
+    %6:u32 = div %5, 16u
+    %len:u32 = let %6
+    ret
+  }
+}
+)";
+    Run(DecomposeMemoryAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeMemoryAccessTest, ArrayLengthMultiple) {
+    auto* sb = b.Var("sb", ty.ptr<storage, array<i32>>());
+    sb->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(sb);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, sb));
+        b.Let("b", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, sb));
+        b.Let("c", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, sb));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %sb:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = arrayLength %sb
+    %a:u32 = let %3
+    %5:u32 = arrayLength %sb
+    %b:u32 = let %5
+    %7:u32 = arrayLength %sb
+    %c:u32 = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %sb:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, u32, read_write> = var
+    %4:void = %sb.GetDimensions %3
+    %5:u32 = load %3
+    %6:u32 = div %5, 4u
+    %a:u32 = let %6
+    %8:ptr<function, u32, read_write> = var
+    %9:void = %sb.GetDimensions %8
+    %10:u32 = load %8
+    %11:u32 = div %10, 4u
+    %b:u32 = let %11
+    %13:ptr<function, u32, read_write> = var
+    %14:void = %sb.GetDimensions %13
+    %15:u32 = load %13
+    %16:u32 = div %15, 4u
+    %c:u32 = let %16
+    ret
+  }
+}
+)";
+    Run(DecomposeMemoryAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeMemoryAccessTest, ArrayLengthMultipleStorageBuffers) {
+    auto* SB1 =
+        ty.Struct(mod.symbols.New("SB1"), {
+                                              {mod.symbols.New("x"), ty.i32()},
+                                              {mod.symbols.New("arr1"), ty.runtime_array(ty.i32())},
+                                          });
+    auto* SB2 = ty.Struct(mod.symbols.New("SB2"),
+                          {
+                              {mod.symbols.New("x"), ty.i32()},
+                              {mod.symbols.New("arr2"), ty.runtime_array(ty.vec4<f32>())},
+                          });
+    auto* sb1 = b.Var("sb1", ty.ptr(storage, SB1));
+    sb1->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(sb1);
+
+    auto* sb2 = b.Var("sb2", ty.ptr(storage, SB2));
+    sb2->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(sb2);
+
+    auto* sb3 = b.Var("sb3", ty.ptr(storage, ty.runtime_array(ty.i32())));
+    sb3->SetBindingPoint(0, 2);
+    b.ir.root_block->Append(sb3);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("len1", b.Call(ty.u32(), core::BuiltinFn::kArrayLength,
+                             b.Access(ty.ptr<storage, array<i32>>(), sb1, 1_u)));
+        b.Let("len2", b.Call(ty.u32(), core::BuiltinFn::kArrayLength,
+                             b.Access(ty.ptr<storage, array<vec4<f32>>>(), sb2, 1_u)));
+        b.Let("len3", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, sb3));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB1 = struct @align(4) {
+  x:i32 @offset(0)
+  arr1:array<i32> @offset(4)
+}
+
+SB2 = struct @align(16) {
+  x_1:i32 @offset(0)
+  arr2:array<vec4<f32>> @offset(16)
+}
+
+$B1: {  # root
+  %sb1:ptr<storage, SB1, read_write> = var @binding_point(0, 0)
+  %sb2:ptr<storage, SB2, read_write> = var @binding_point(0, 1)
+  %sb3:ptr<storage, array<i32>, read_write> = var @binding_point(0, 2)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %5:ptr<storage, array<i32>, read_write> = access %sb1, 1u
+    %6:u32 = arrayLength %5
+    %len1:u32 = let %6
+    %8:ptr<storage, array<vec4<f32>>, read_write> = access %sb2, 1u
+    %9:u32 = arrayLength %8
+    %len2:u32 = let %9
+    %11:u32 = arrayLength %sb3
+    %len3:u32 = let %11
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB1 = struct @align(4) {
+  x:i32 @offset(0)
+  arr1:array<i32> @offset(4)
+}
+
+SB2 = struct @align(16) {
+  x_1:i32 @offset(0)
+  arr2:array<vec4<f32>> @offset(16)
+}
+
+$B1: {  # root
+  %sb1:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+  %sb2:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 1)
+  %sb3:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 2)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %5:ptr<function, u32, read_write> = var
+    %6:void = %sb1.GetDimensions %5
+    %7:u32 = load %5
+    %8:u32 = sub %7, 4u
+    %9:u32 = div %8, 4u
+    %len1:u32 = let %9
+    %11:ptr<function, u32, read_write> = var
+    %12:void = %sb2.GetDimensions %11
+    %13:u32 = load %11
+    %14:u32 = sub %13, 16u
+    %15:u32 = div %14, 16u
+    %len2:u32 = let %15
+    %17:ptr<function, u32, read_write> = var
+    %18:void = %sb3.GetDimensions %17
+    %19:u32 = load %17
+    %20:u32 = div %19, 4u
+    %len3:u32 = let %20
+    ret
+  }
+}
+)";
+    Run(DecomposeMemoryAccess);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

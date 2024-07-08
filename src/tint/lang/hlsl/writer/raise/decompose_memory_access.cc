@@ -93,7 +93,12 @@ struct State {
                     [&](core::ir::Store* st) { usage_worklist.Push(st); },
                     [&](core::ir::Load* ld) { usage_worklist.Push(ld); },
                     [&](core::ir::Access* a) { usage_worklist.Push(a); },
-                    [&](core::ir::Let* l) { usage_worklist.Push(l); },  //
+                    [&](core::ir::Let* l) { usage_worklist.Push(l); },
+                    [&](core::ir::CoreBuiltinCall* call) {
+                        TINT_ASSERT(call->Func() == core::BuiltinFn::kArrayLength);
+                        usage_worklist.Push(call);
+                    },
+                    //
                     TINT_ICE_ON_NO_MATCH);
             }
 
@@ -125,12 +130,44 @@ struct State {
                         let->Result(0)->ReplaceAllUsesWith(result);
                         let->Destroy();
                     },
+                    [&](core::ir::CoreBuiltinCall* call) {
+                        ArrayLength(var, call, var_ty->StoreType(), 0);
+                    },  //
                     TINT_ICE_ON_NO_MATCH);
             }
 
             // Swap the result type of the `var` to the new HLSL result type
             result->SetType(ty.Get<hlsl::type::ByteAddressBuffer>(var_ty->Access()));
         }
+    }
+
+    void ArrayLength(core::ir::Var* var,
+                     core::ir::CoreBuiltinCall* call,
+                     const core::type::Type* type,
+                     uint32_t offset) {
+        auto* arr_ty = type->As<core::type::Array>();
+        // If the `arrayLength` was called directly on the storage buffer then
+        // it _must_ be a runtime array.
+        TINT_ASSERT(arr_ty && arr_ty->Count()->As<core::type::RuntimeArrayCount>());
+
+        b.InsertBefore(call, [&] {
+            // The `GetDimensions` call uses out parameters for all return values, there is no
+            // return value. This ends up being the result value we care about.
+            //
+            // This creates a var with an access which means that when we emit the HLSL we'll emit
+            // the correct `var` name.
+            core::ir::Instruction* inst = b.Var(ty.ptr(function, ty.u32()));
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kGetDimensions, var,
+                                                      inst->Result(0));
+
+            inst = b.Load(inst);
+            if (offset > 0) {
+                inst = b.Subtract(ty.u32(), inst, u32(offset));
+            }
+            auto* div = b.Divide(ty.u32(), inst, u32(arr_ty->Stride()));
+            call->Result(0)->ReplaceAllUsesWith(div->Result(0));
+        });
+        call->Destroy();
     }
 
     struct OffsetData {
@@ -446,26 +483,7 @@ struct State {
                     // If this access chain is being used in an `arrayLength` call then the access
                     // chain _must_ have resolved to the runtime array member of the structure. So,
                     // we _must_ have set `obj` to the array member which is a runtime array.
-                    auto* arr_ty = obj->As<core::type::Array>();
-                    TINT_ASSERT(arr_ty && arr_ty->Count()->Is<core::type::RuntimeArrayCount>());
-
-                    b.InsertBefore(a, [&] {
-                        auto* val = b.Let(ty.u32());
-                        val->SetValue(b.Zero<u32>());
-
-                        b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                            ty.void_(), BuiltinFn::kGetDimensions, var, val);
-
-                        // Because the `runtime_array` must be the last element of the outer most
-                        // structure and we're calling `arrayLength` on the array then the access
-                        // chain must have only had a single item in it and that item must have been
-                        // a constant offset.
-                        auto* div =
-                            b.Divide(ty.u32(), b.Subtract(ty.u32(), val, u32(offset->byte_offset)),
-                                     u32(arr_ty->Stride()));
-                        call->Result(0)->ReplaceAllUsesWith(div->Result(0));
-                    });
-                    call->Destroy();
+                    ArrayLength(var, call, obj, offset->byte_offset);
                 },  //
                 TINT_ICE_ON_NO_MATCH);
         }

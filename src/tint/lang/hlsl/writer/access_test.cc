@@ -731,11 +731,12 @@ void foo() {
   int v_2 = k;
   uint v_3 = 0u;
   sb.GetDimensions(v_3);
-  uint v_4 = min(uint(v), (((v_3 - 16u) / 128u) - 1u));
-  uint v_5 = min(v_1, 2u);
-  uint v_6 = (uint(v_4) * 128u);
-  uint v_7 = (uint(v_5) * 32u);
-  float x = asfloat(sb.Load((((48u + v_6) + v_7) + (uint(min(uint(v_2), 2u)) * 4u))));
+  uint v_4 = (((v_3 - 16u) / 128u) - 1u);
+  uint v_5 = min(uint(v), v_4);
+  uint v_6 = min(v_1, 2u);
+  uint v_7 = (uint(v_5) * 128u);
+  uint v_8 = (uint(v_6) * 32u);
+  float x = asfloat(sb.Load((((48u + v_7) + v_8) + (uint(min(uint(v_2), 2u)) * 4u))));
 }
 
 )");
