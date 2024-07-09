@@ -114,7 +114,7 @@ class Client : public ClientBase {
     bool IsDisconnected() const;
 
   private:
-    void DestroyAllObjects();
+    void UnregisterAllObjects();
 
     template <typename T>
     void Free(T* obj) {

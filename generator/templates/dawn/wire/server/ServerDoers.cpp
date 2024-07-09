@@ -77,7 +77,7 @@ namespace dawn::wire::server {
         {% endif %}
     {% endfor %}
 
-    WireResult Server::DoDestroyObject(ObjectType objectType, ObjectId objectId) {
+    WireResult Server::DoUnregisterObject(ObjectType objectType, ObjectId objectId) {
         switch(objectType) {
             {% for type in by_category["object"] %}
                 {% set cType = as_cType(type.name) %}

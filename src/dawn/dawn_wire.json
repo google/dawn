@@ -75,7 +75,7 @@
             { "name": "event manager handle", "type": "ObjectHandle" },
             { "name": "future", "type": "future" }
         ],
-        "destroy object": [
+        "unregister object": [
             { "name": "object type", "type": "ObjectType" },
             { "name": "object id", "type": "ObjectId" }
         ],

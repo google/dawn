@@ -65,17 +65,17 @@ Client::~Client() {
         eventManager->TransitionTo(EventManager::State::ClientDropped);
     }
 
-    DestroyAllObjects();
+    UnregisterAllObjects();
 }
 
-void Client::DestroyAllObjects() {
+void Client::UnregisterAllObjects() {
     // Free all devices first since they may hold references to other objects
     // like the default queue. The Device destructor releases the default queue,
     // which would be invalid if the queue was already freed.
     while (!mObjects[ObjectType::Device].empty()) {
         ObjectBase* object = mObjects[ObjectType::Device].head()->value();
 
-        DestroyObjectCmd cmd;
+        UnregisterObjectCmd cmd;
         cmd.objectType = ObjectType::Device;
         cmd.objectId = object->GetWireId();
         SerializeCommand(cmd);
@@ -90,7 +90,7 @@ void Client::DestroyAllObjects() {
         while (!objectList.empty()) {
             ObjectBase* object = objectList.head()->value();
 
-            DestroyObjectCmd cmd;
+            UnregisterObjectCmd cmd;
             cmd.objectType = objectType;
             cmd.objectId = object->GetWireId();
             SerializeCommand(cmd);

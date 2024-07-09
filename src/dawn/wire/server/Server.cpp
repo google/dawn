@@ -167,7 +167,7 @@ void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
     // free their userdata. Also unlike other callbacks, these are cleared and unset when
     // the server is destroyed, so we don't need to check if the server is still alive
     // inside them.
-    // Also, the device is special-cased in Server::DoDestroyObject to call
+    // Also, the device is special-cased in Server::DoUnregisterObject to call
     // ClearDeviceCallbacks. This ensures that callbacks will not fire after |deviceObject|
     // is freed.
 

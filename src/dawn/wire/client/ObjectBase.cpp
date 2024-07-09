@@ -64,7 +64,7 @@ uint32_t ObjectBase::Release() {
 
     uint32_t refCount = --mRefcount;
     if (refCount == 0) {
-        DestroyObjectCmd cmd;
+        UnregisterObjectCmd cmd;
         cmd.objectType = GetObjectType();
         cmd.objectId = GetWireId();
 
