@@ -88,9 +88,9 @@ void GetCustomSerializedData(const fuzzing::Command& command,
             serializer.SerializeCommand(cmd, provider);
             break;
         }
-        case fuzzing::Command::kDestroyObject: {
-            DestroyObjectCmd cmd;
-            memset(&cmd, 0, sizeof(DestroyObjectCmd));
+        case fuzzing::Command::kUnregisterObject: {
+            UnregisterObjectCmd cmd;
+            memset(&cmd, 0, sizeof(UnregisterObjectCmd));
 
             cmd.objectType =
                 static_cast<ObjectType>(command.destroyobject().objecttype() % kObjectTypes);

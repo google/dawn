@@ -74,7 +74,7 @@ void DawnLPMObjectStore::Free(ObjectId id) {
 /*
  * Consistent hashing inspired map for fuzzer state.
  * If we store the Dawn objects in a hash table mapping FuzzInt -> ObjectId
- * then it would be highly unlikely that any subsequence DestroyObject command
+ * then it would be highly unlikely that any subsequence UnregisterObject command
  * would come up with an ID that would correspond to a valid ObjectId in the
  * hash table.
  *

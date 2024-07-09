@@ -36,7 +36,7 @@ message DeviceCreateShaderModule {
     optional bytes code = 2;
 }
 
-message DestroyObject {
+message UnregisterObject {
     required ObjectType objectType = 1;
     required uint32 objectId = 2;
 }
