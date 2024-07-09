@@ -146,23 +146,6 @@ DepthStencilAspectLayout DepthStencilAspectLayout(DXGI_FORMAT format, Aspect asp
 
 }  // namespace
 
-MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFormat) {
-    const bool supportsSharedResourceCapabilityTier2 =
-        device->GetDeviceInfo().supportsSharedResourceCapabilityTier2;
-    switch (textureFormat) {
-        case DXGI_FORMAT_NV12:
-        case DXGI_FORMAT_P010:
-            if (supportsSharedResourceCapabilityTier2) {
-                return {};
-            }
-            break;
-        default:
-            break;
-    }
-
-    return DAWN_VALIDATION_ERROR("DXGI format does not support cross-API sharing.");
-}
-
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const UnpackedPtr<TextureDescriptor>& descriptor) {

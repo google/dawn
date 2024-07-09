@@ -137,24 +137,6 @@ D3D12_RESOURCE_DIMENSION D3D12TextureDimension(wgpu::TextureDimension dimension)
 
 }  // namespace
 
-// https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_shared_resource_compatibility_tier
-MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFormat) {
-    const bool supportsSharedResourceCapabilityTier1 =
-        device->GetDeviceInfo().supportsSharedResourceCapabilityTier1;
-    switch (textureFormat) {
-        // MSDN docs are not correct, NV12 requires at-least tier 1.
-        case DXGI_FORMAT_NV12:
-            if (supportsSharedResourceCapabilityTier1) {
-                return {};
-            }
-            break;
-        default:
-            break;
-    }
-
-    return DAWN_VALIDATION_ERROR("DXGI format does not support cross-API sharing.");
-}
-
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const UnpackedPtr<TextureDescriptor>& descriptor) {

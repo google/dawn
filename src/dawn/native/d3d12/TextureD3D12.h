@@ -51,8 +51,6 @@ class SharedTextureMemory;
 class CommandRecordingContext;
 class Device;
 
-MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFormat);
-
 class Texture final : public d3d::Texture {
   public:
     static ResultOrError<Ref<Texture>> Create(Device* device,
