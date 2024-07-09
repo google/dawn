@@ -36,6 +36,7 @@
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/CommandEncoder.h"
+#include "dawn/native/CommandValidation.h"
 #include "dawn/native/ComputePassEncoder.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
@@ -879,7 +880,8 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
 
     const Format& format = src.texture->GetFormat();
 
-    uint32_t bytesPerTexel = format.GetAspectInfo(src.aspect).block.byteSize;
+    const auto& blockInfo = format.GetAspectInfo(src.aspect).block;
+    const uint32_t bytesPerTexel = blockInfo.byteSize;
     uint32_t workgroupCountX = 1;
     uint32_t workgroupCountY = (textureViewDimension == wgpu::TextureViewDimension::e1D)
                                    ? 1
@@ -963,7 +965,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
         destinationBuffer->SetInitialized(true);
         if (paddingSize > 0) {
             DAWN_ASSERT(paddingSize < 4);
-            // For fullsize copy we only need to initialize the last 4 bytes in the temp buffer.
+            // We only need to initialize the last 4 bytes in the temp buffer.
             std::array<uint8_t, 4> clearData = {};
             commandEncoder->APIWriteBuffer(destinationBuffer.Get(),
                                            destinationBuffer->GetSize() - 4, clearData.data(), 4);
@@ -980,10 +982,23 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                                               : dst.rowsPerImage;
             if (bytesPerRow == copyExtent.width * bytesPerTexel &&
                 rowsPerImage == copyExtent.height) {
-                // If the copy is compact, we only need to copy the first bytes before offset.
+                // If the copy is compact, we only need to copy from the original buffer:
+                // - the first bytes before offset.
+                // - the last bytes past the desired copy region.
                 if (dst.offset > 0) {
                     commandEncoder->InternalCopyBufferToBufferWithAllocatedSize(
                         dst.buffer.Get(), 0, destinationBuffer.Get(), 0, Align(dst.offset, 4));
+                }
+                const uint64_t numBytesToCopy =
+                    ComputeRequiredBytesInCopy(blockInfo, copyExtent, bytesPerRow, rowsPerImage)
+                        .AcquireSuccess();
+                const auto pastCopyOffset = dst.offset + numBytesToCopy;
+                const auto mod = pastCopyOffset % 4;
+                const auto lastU32Offset = pastCopyOffset - mod;
+                if (destinationBuffer->GetSize() > lastU32Offset) {
+                    commandEncoder->InternalCopyBufferToBufferWithAllocatedSize(
+                        dst.buffer.Get(), lastU32Offset, destinationBuffer.Get(), lastU32Offset,
+                        destinationBuffer->GetSize() - lastU32Offset);
                 }
             } else {
                 commandEncoder->InternalCopyBufferToBufferWithAllocatedSize(

@@ -1121,6 +1121,106 @@ TEST_P(CopyTests_T2B, MappableBufferWithOffsetUnaligned) {
     }
 }
 
+// Test that copying from a texture to a mappable buffer won't overwrite the buffer's bytes
+// before and after the copied region.
+TEST_P(CopyTests_T2B, MappableBufferBeforeAndAfterBytesNotOverwritten) {
+    // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    constexpr uint32_t kWidth = 256;
+
+    wgpu::TextureDescriptor texDesc;
+    texDesc.dimension = wgpu::TextureDimension::e2D;
+    texDesc.size = {kWidth, 1, 1};
+    texDesc.sampleCount = 1;
+    texDesc.format = GetParam().mTextureFormat;
+    texDesc.mipLevelCount = 1;
+    texDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&texDesc);
+
+    // Layout for initial data upload to texture.
+    // Some parts of this result are also reused later.
+    const utils::TextureDataCopyLayout copyLayout =
+        utils::GetTextureDataCopyLayoutForTextureAtLevel(texDesc.format, texDesc.size, 0,
+                                                         wgpu::TextureDimension::e2D);
+
+    const std::vector<uint8_t> textureArrayData =
+        GetExpectedTextureData(texDesc.format, copyLayout);
+    const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(texDesc.format);
+    {
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+        wgpu::TextureDataLayout textureDataLayout =
+            utils::CreateTextureDataLayout(0, copyLayout.bytesPerRow, copyLayout.rowsPerImage);
+        queue.WriteTexture(&imageCopyTexture, textureArrayData.data(), copyLayout.byteLength,
+                           &textureDataLayout, &copyLayout.mipSize);
+    }
+
+    // Create a destination buffer and fill its before & after bytes with random data
+    const uint32_t kCopyOffset = bytesPerTexel;
+    const auto kPastCopyOffset = kCopyOffset + textureArrayData.size();
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = Align(kPastCopyOffset + 16, 4);
+    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
+    bufferDesc.mappedAtCreation = true;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    const auto kNumPastCopyBytes = bufferDesc.size - kPastCopyOffset;
+    const std::vector<uint8_t> kExpectedFirstBytes(kCopyOffset, 97);
+    const std::vector<uint8_t> kExpectedLastBytes(kNumPastCopyBytes, 99);
+    {
+        auto ptr = static_cast<uint8_t*>(buffer.GetMappedRange());
+        memcpy(ptr, kExpectedFirstBytes.data(), kExpectedFirstBytes.size());
+        memcpy(ptr + kPastCopyOffset, kExpectedLastBytes.data(), kExpectedLastBytes.size());
+        buffer.Unmap();
+    }
+
+    // Copy the texture to buffer at offset=bytesPerTexel and with tightly packed rows.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+        wgpu::ImageCopyBuffer imageCopyBuffer =
+            utils::CreateImageCopyBuffer(buffer, /*offset=*/kCopyOffset,
+                                         /*bytesPerRow=*/256 * bytesPerTexel, /*rowsPerImage=*/1);
+        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &texDesc.size);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    {
+        bool done = false;
+        buffer.MapAsync(wgpu::MapMode::Read, 0, buffer.GetSize(),
+                        wgpu::CallbackMode::AllowProcessEvents,
+                        [&](wgpu::MapAsyncStatus status, const char*) {
+                            ASSERT_EQ(wgpu::MapAsyncStatus::Success, status);
+                            done = true;
+                        });
+        while (!done) {
+            WaitABit();
+        }
+    }
+
+    // Check copied bytes
+    const auto* bufferReadPtr = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
+    for (size_t i = 0; i < textureArrayData.size(); ++i) {
+        EXPECT_EQ(bufferReadPtr[kCopyOffset + i], textureArrayData[i])
+            << "failed at [" << kCopyOffset + i << "]";
+    }
+
+    // Check that the first & last bytes outside copied region remain intact after the copy.
+    for (size_t i = 0; i < kCopyOffset; ++i) {
+        EXPECT_EQ(bufferReadPtr[i], kExpectedFirstBytes[i]) << "failed at [" << i << "]";
+    }
+
+    for (size_t i = 0; i < kNumPastCopyBytes; ++i) {
+        const size_t idx = kPastCopyOffset + i;
+        EXPECT_EQ(bufferReadPtr[idx], kExpectedLastBytes[i]) << "failed at [" << idx << "]";
+    }
+
+    buffer.Unmap();
+}
+
 // Test that copying without a 512-byte aligned buffer offset that is greater than the bytes per row
 // works
 TEST_P(CopyTests_T2B, OffsetBufferUnalignedSmallBytesPerRow) {
