@@ -31,7 +31,7 @@
 
 namespace dawn::native::vulkan {
 
-const char* VkResultAsString(::VkResult result) {
+std::string VkResultAsString(::VkResult result) {
     // Convert to a int32_t to silence and MSVC warning that the fake errors don't appear in
     // the original VkResult enum.
     int32_t code = static_cast<int32_t>(result);
@@ -73,6 +73,8 @@ const char* VkResultAsString(::VkResult result) {
             return "VK_ERROR_FORMAT_NOT_SUPPORTED";
         case VK_ERROR_FRAGMENTED_POOL:
             return "VK_ERROR_FRAGMENTED_POOL";
+        case VK_ERROR_UNKNOWN:
+            return "VK_ERROR_UNKNOWN";
 
         case VK_ERROR_SURFACE_LOST_KHR:
             return "VK_ERROR_SURFACE_LOST_KHR";
@@ -83,8 +85,11 @@ const char* VkResultAsString(::VkResult result) {
             return "VK_FAKE_DEVICE_OOM_FOR_TESTING";
         case VK_FAKE_ERROR_FOR_TESTING:
             return "VK_FAKE_ERROR_FOR_TESTING";
-        default:
-            return "<Unknown VkResult>";
+        default: {
+            std::stringstream s;
+            s << "<Unknown VkResult: " << code << ">";
+            return s.str();
+        }
     }
 }
 

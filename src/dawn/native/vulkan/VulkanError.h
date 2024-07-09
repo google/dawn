@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_VULKANERROR_H_
 #define SRC_DAWN_NATIVE_VULKAN_VULKANERROR_H_
 
+#include <string>
+
 #include "dawn/native/ErrorInjector.h"
 #include "dawn/native/vulkan/VulkanFunctions.h"
 
@@ -37,7 +39,7 @@ constexpr VkResult VK_FAKE_DEVICE_OOM_FOR_TESTING = static_cast<VkResult>(VK_RES
 namespace dawn::native::vulkan {
 
 // Returns a string version of the result.
-const char* VkResultAsString(::VkResult result);
+std::string VkResultAsString(::VkResult result);
 
 MaybeError CheckVkSuccessImpl(VkResult result, const char* context);
 MaybeError CheckVkOOMThenSuccessImpl(VkResult result, const char* context);
