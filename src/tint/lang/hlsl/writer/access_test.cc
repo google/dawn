@@ -1165,7 +1165,7 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformStruct) {
+TEST_F(HlslWriterTest, AccessUniformStruct) {
     auto* SB = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.f32()},
@@ -1183,32 +1183,30 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStruct) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-struct SB {
+    EXPECT_EQ(output_.hlsl, R"(struct SB {
   int a;
   float b;
 };
 
+
 cbuffer cbuffer_v : register(b0) {
   uint4 v[1];
 };
-
-SB v_load(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 4u)) / 4;
-  SB tint_symbol = {asint(v[scalar_offset / 4][scalar_offset % 4]), asfloat(v[scalar_offset_1 / 4][scalar_offset_1 % 4])};
-  return tint_symbol;
+SB v_1(uint start_byte_offset) {
+  int v_2 = asint(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  SB v_3 = {v_2, asfloat(v[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)])};
+  return v_3;
 }
 
 void foo() {
-  SB a = v_load(0u);
-  float b = asfloat(v[0].y);
+  SB a = v_1(0u);
+  float b = asfloat(v[0u].y);
 }
 
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformStructNested) {
+TEST_F(HlslWriterTest, AccessUniformStructNested) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -1238,63 +1236,77 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStructNested) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-struct Inner {
-  float3x3 a;
+    EXPECT_EQ(output_.hlsl, R"(struct Inner {
+  float3x3 s;
   float3 t[5];
 };
+
 struct Outer {
   float x;
   Inner y;
 };
+
 struct SB {
   int a;
   Outer b;
 };
 
+
 cbuffer cbuffer_v : register(b0) {
   uint4 v[10];
 };
-
-float3x3 v_load_5(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  return float3x3(asfloat(v[scalar_offset / 4].xyz), asfloat(v[scalar_offset_1 / 4].xyz), asfloat(v[scalar_offset_2 / 4].xyz));
-}
-
-typedef float3 v_load_7_ret[5];
-v_load_7_ret v_load_7(uint offset) {
-  float3 arr[5] = (float3[5])0;
+typedef float3 ary_ret[5];
+ary_ret v_1(uint start_byte_offset) {
+  float3 a[5] = (float3[5])0;
   {
-    for(uint i = 0u; (i < 5u); i = (i + 1u)) {
-      const uint scalar_offset_3 = ((offset + (i * 16u))) / 4;
-      arr[i] = asfloat(v[scalar_offset_3 / 4].xyz);
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 5u)) {
+        break;
+      }
+      a[v_3] = asfloat(v[((start_byte_offset + (v_3 * 16u)) / 16u)].xyz);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  float3 v_4[5] = a;
+  return v_4;
 }
 
-Inner v_load_4(uint offset) {
-  Inner tint_symbol = {v_load_5((offset + 0u)), v_load_7((offset + 48u))};
-  return tint_symbol;
+float3x3 v_5(uint start_byte_offset) {
+  float3 v_6 = asfloat(v[(start_byte_offset / 16u)].xyz);
+  float3 v_7 = asfloat(v[((16u + start_byte_offset) / 16u)].xyz);
+  return float3x3(v_6, v_7, asfloat(v[((32u + start_byte_offset) / 16u)].xyz));
 }
 
-Outer v_load_2(uint offset) {
-  const uint scalar_offset_4 = ((offset + 0u)) / 4;
-  Outer tint_symbol_1 = {asfloat(v[scalar_offset_4 / 4][scalar_offset_4 % 4]), v_load_4((offset + 16u))};
-  return tint_symbol_1;
+Inner v_8(uint start_byte_offset) {
+  float3x3 v_9 = v_5(start_byte_offset);
+  float3 v_10[5] = v_1((48u + start_byte_offset));
+  Inner v_11 = {v_9, v_10};
+  return v_11;
 }
 
-SB v_load(uint offset) {
-  const uint scalar_offset_5 = ((offset + 0u)) / 4;
-  SB tint_symbol_2 = {asint(v[scalar_offset_5 / 4][scalar_offset_5 % 4]), v_load_2((offset + 16u))};
-  return tint_symbol_2;
+Outer v_12(uint start_byte_offset) {
+  float v_13 = asfloat(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  Inner v_14 = v_8((16u + start_byte_offset));
+  Outer v_15 = {v_13, v_14};
+  return v_15;
+}
+
+SB v_16(uint start_byte_offset) {
+  int v_17 = asint(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  Outer v_18 = v_12((16u + start_byte_offset));
+  SB v_19 = {v_17, v_18};
+  return v_19;
 }
 
 void foo() {
-  SB a = v_load(0u);
-  float3 b = asfloat(v[8].xyz);
+  SB a = v_16(0u);
+  float b = asfloat(v[8u].z);
 }
 
 )");
