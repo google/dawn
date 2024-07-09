@@ -55,7 +55,7 @@ struct Options {
     std::string input_filename;
     std::string output_filename;
 
-    bool dump_ir = false;
+    bool dump_wgsl = false;
 };
 
 bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
@@ -73,13 +73,14 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
     TINT_DEFER(opts->printer = CreatePrinter(*col.value));
 
     auto& output = options.Add<StringOption>(
-        "output-filename", "Output file name, if not specified, WGSL output will go to STDOUT",
+        "output-filename", "Output file name, if not specified, IR text output will go to STDOUT",
         ShortName{"o"}, Parameter{"name"});
     TINT_DEFER(opts->output_filename = output.value.value_or(""));
 
-    auto& dump_ir = options.Add<BoolOption>("dump-ir", "Writes the IR form of input to stdout",
-                                            Alias{"emit-ir"}, Default{false});
-    TINT_DEFER(opts->dump_ir = *dump_ir.value);
+    auto& dump_wgsl = options.Add<BoolOption>(
+        "dump-wgsl", "Writes the WGSL form of input to stdout, may fail due to validation errors",
+        Alias{"emit-wgsl"}, Default{false});
+    TINT_DEFER(opts->dump_wgsl = *dump_wgsl.value);
 
     auto& help = options.Add<BoolOption>("help", "Show usage", ShortName{"h"});
 
@@ -142,19 +143,37 @@ bool ProcessFile(const Options& options) {
         return false;
     }
 
-    if (options.dump_ir) {
-        options.printer->Print(tint::core::ir::Disassembler(module.Get()).Text());
+    const auto ir_text = tint::core::ir::Disassembler(module.Get()).Text();
+    if (options.output_filename.empty()) {
+        options.printer->Print(ir_text);
         options.printer->Print(tint::StyledText{} << "\n");
+    } else {
+        if (!tint::cmd::WriteFile(options.output_filename, "w", ir_text.Plain())) {
+            std::cerr << "Unable to print IR text to file, " << options.output_filename << "\n";
+            return false;
+        }
     }
 
-    tint::wgsl::writer::ProgramOptions writer_options;
-    auto output = tint::wgsl::writer::WgslFromIR(module.Get(), writer_options);
-    if (output != tint::Success) {
-        std::cerr << "Failed to convert IR to Program: " << output.Failure() << "\n";
-        return false;
+    if (options.dump_wgsl) {
+        tint::wgsl::writer::ProgramOptions writer_options;
+        auto output = tint::wgsl::writer::WgslFromIR(module.Get(), writer_options);
+        if (output != tint::Success) {
+            std::cerr << "Failed to convert IR to Program: " << output.Failure() << "\n";
+            return false;
+        }
+
+        if (options.output_filename.empty()) {
+            options.printer->Print(tint::StyledText{} << output->wgsl);
+            options.printer->Print(tint::StyledText{} << "\n");
+        } else {
+            if (!tint::cmd::WriteFile(options.output_filename, "w", output->wgsl)) {
+                std::cerr << "Unable to print WGSL to file, " << options.output_filename << "\n";
+                return false;
+            }
+        }
     }
 
-    return tint::cmd::WriteFile(options.output_filename, "w", output->wgsl);
+    return true;
 }
 
 }  // namespace
