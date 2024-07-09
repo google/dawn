@@ -61,7 +61,7 @@ TEST_F(HlslWriterDecomposeUniformAccessTest, NoBufferAccess) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, DISABLED_UniformAccessChainFromUnnamedAccessChain) {
+TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessChainFromUnnamedAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                           {mod.symbols.New("d"), ty.u32()},
@@ -127,14 +127,15 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %v:ptr<uniform, array<vec4<u32>, 2>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = %v.Load 8u
-    %4:u32 = bitcast %3
-    %b:u32 = let %4
+    %3:ptr<uniform, vec4<u32>, read> = access %v, 1u
+    %4:u32 = load_vector_element %3, 1u
+    %5:u32 = bitcast %4
+    %b:u32 = let %5
     ret
   }
 }
@@ -144,7 +145,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, DISABLED_UniformAccessChainFromLetAccessChain) {
+TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessChainFromLetAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                       });
@@ -211,14 +212,15 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %v:ptr<uniform, array<vec4<u32>, 2>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = %v.Load 4u
-    %4:f32 = bitcast %3
-    %a:f32 = let %4
+    %3:ptr<uniform, vec4<u32>, read> = access %v, 1u
+    %4:u32 = load_vector_element %3, 0u
+    %5:f32 = bitcast %4
+    %a:f32 = let %5
     ret
   }
 }

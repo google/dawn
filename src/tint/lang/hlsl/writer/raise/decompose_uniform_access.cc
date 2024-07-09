@@ -239,6 +239,12 @@ struct State {
                     let->Result(0)->ReplaceAllUsesWith(a->Result(0));
                     let->Destroy();
                 },
+                [&](core::ir::Access* sub_access) {
+                    // Treat an access chain of the access chain as a continuation of the outer
+                    // chain. Pass through the object we stopped at and the current byte_offset
+                    // and then restart the access chain replacement for the new access chain.
+                    Access(sub_access, var, obj_ty, offset);
+                },
                 [&](core::ir::Load* ld) {
                     a->Result(0)->RemoveUsage(usage);
                     Load(ld, var, offset);

@@ -789,7 +789,7 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformChainFromUnnamedAccessChain) {
+TEST_F(HlslWriterTest, AccessUniformChainFromUnnamedAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                           {mod.symbols.New("d"), ty.u32()},
@@ -802,7 +802,7 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformChainFromUnnamedAccessChain) {
                                                   Inner->Size(), core::IOAttributes{}));
     auto* sb = ty.Struct(mod.symbols.New("SB"), members);
 
-    auto* var = b.Var("v", uniform, sb, core::Access::kReadWrite);
+    auto* var = b.Var("v", uniform, sb, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
@@ -820,15 +820,14 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformChainFromUnnamedAccessChain) {
 cbuffer cbuffer_v : register(b0) {
   uint4 v[2];
 };
-
-[numthreads(1, 1, 1)]
-void m() {
-  uint b = v[1].y;
+void foo() {
+  uint b = v[1u].y;
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformChainFromLetAccessChain) {
+TEST_F(HlslWriterTest, AccessUniformChainFromLetAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                       });
@@ -839,17 +838,17 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformChainFromLetAccessChain) {
                                                   Inner->Size(), core::IOAttributes{}));
     auto* sb = ty.Struct(mod.symbols.New("SB"), members);
 
-    auto* var = b.Var("v", uniform, sb, core::Access::kReadWrite);
+    auto* var = b.Var("v", uniform, sb, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Let("x", var);
-        auto* y = b.Let(
-            "y", b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x->Result(0), 1_u));
-        auto* z = b.Let(
-            "z", b.Access(ty.ptr(storage, ty.f32(), core::Access::kReadWrite), y->Result(0), 0_u));
+        auto* y =
+            b.Let("y", b.Access(ty.ptr(uniform, Inner, core::Access::kRead), x->Result(0), 1_u));
+        auto* z =
+            b.Let("z", b.Access(ty.ptr(uniform, ty.f32(), core::Access::kRead), y->Result(0), 0_u));
         b.Let("a", b.Load(z));
         b.Return(func);
     });
@@ -859,10 +858,10 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformChainFromLetAccessChain) {
 cbuffer cbuffer_v : register(b0) {
   uint4 v[2];
 };
-
-void m() {
-  float a = asfloat(v[1].x);
+void foo() {
+  float a = asfloat(v[1u].x);
 }
+
 )");
 }
 
