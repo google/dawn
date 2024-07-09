@@ -45,12 +45,23 @@ endif()
 # Dependent flag checks
 ################################################################################
 
-if (TINT_BUILD_IR_BINARY AND NOT (DAWN_BUILD_PROTOBUF AND TARGET libprotobuf))
-  message(FATAL_ERROR "Build IR binary format support is enabled, but libprotobuf is not available")
+if (TINT_BUILD_IR_BINARY)
+  if (NOT DAWN_BUILD_PROTOBUF)
+    message(FATAL_ERROR "Building IR binary format 'TINT_BUILD_IR_BINARY' is "
+                        "enabled, but building protobuf 'DAWN_BUILD_PROTOBUF' "
+                        "is not")
+  endif()
+  if (NOT TARGET libprotobuf)
+    message(FATAL_ERROR "Building IR binary format 'TINT_BUILD_IR_BINARY' is "
+                        "enabled, but protobuf target is not available, "
+                        "possibly missing '${DAWN_THIRD_PARTY_DIR}/protobuf'")
+  endif()
 endif()
 
 if (TINT_BUILD_IR_FUZZER AND NOT TINT_BUILD_IR_BINARY)
-  message(FATAL_ERROR "Build IR fuzzer is enabled, but build IR binary format support is not")
+  message(FATAL_ERROR "Building IR fuzzer 'TINT_BUILD_IR_FUZZER' is enabled, "
+                      "but building IR binary format 'TINT_BUILD_IR_BINARY' is "
+                      "not")
 endif()
 
 ################################################################################
