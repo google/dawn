@@ -250,7 +250,10 @@ class KnownObjectsBase {
     // Marks an ID as deallocated
     void Free(ObjectId id) {
         DAWN_ASSERT(id < mKnown.size());
-        mKnown[id].state = AllocationState::Free;
+        Data data;
+        data.generation = mKnown[id].generation;
+        data.state = AllocationState::Free;
+        mKnown[id] = std::move(data);
     }
 
     std::vector<T> AcquireAllHandles() {

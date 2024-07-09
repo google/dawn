@@ -389,6 +389,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadSuccess) {
     // The handle is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleDestroy(clientHandle)).Times(1);
     EXPECT_CALL(serverMemoryTransferService, OnReadHandleDestroy(serverHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test ReadHandle destroy behavior
@@ -413,6 +417,11 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDestroy) {
     wgpuBufferDestroy(buffer);
     EXPECT_CALL(serverMemoryTransferService, OnReadHandleDestroy(serverHandle)).Times(1);
     EXPECT_CALL(api, BufferDestroy(apiBuffer)).Times(1);
+
+    FlushClient();
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
 
     FlushClient();
 }
@@ -456,6 +465,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadError) {
     // The handle is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleDestroy(clientHandle)).Times(1);
     EXPECT_CALL(serverMemoryTransferService, OnReadHandleDestroy(serverHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test ReadHandle creation failure.
@@ -467,7 +480,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadHandleCreationFailure) {
     descriptor.size = kBufferSize;
     descriptor.usage = WGPUBufferUsage_MapRead;
 
-    wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    wgpuBufferRelease(buffer);
 }
 
 // Test MapRead DeserializeReadHandle failure.
@@ -488,6 +502,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeReadHandleFailure
 
     // The handle is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleDestroy(clientHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test read handle DeserializeDataUpdate failure.
@@ -533,6 +551,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDeserializeDataUpdateFailure
     // The handle is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleDestroy(clientHandle)).Times(1);
     EXPECT_CALL(serverMemoryTransferService, OnReadHandleDestroy(serverHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test mapping for reading destroying the buffer before unmapping on the client side.
@@ -591,6 +613,11 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadDestroyBeforeUnmap) {
         EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
         FlushClient();
     }
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test successful mapping for writing.
@@ -644,6 +671,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteSuccess) {
     // The handle is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test WriteHandle destroy behavior
@@ -666,6 +697,11 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDestroy) {
     wgpuBufferDestroy(buffer);
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
     EXPECT_CALL(api, BufferDestroy(apiBuffer)).Times(1);
+
+    FlushClient();
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
 
     FlushClient();
 }
@@ -711,6 +747,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteError) {
     // The handle is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test WriteHandle creation failure.
@@ -722,7 +762,8 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleCreationFailure) {
     descriptor.size = kBufferSize;
     descriptor.usage = WGPUBufferUsage_MapWrite;
 
-    wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    wgpuBufferRelease(buffer);
 }
 
 // Test MapWrite DeserializeWriteHandle failure.
@@ -744,6 +785,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeWriteHandleFailu
 
     // The handle is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test MapWrite DeserializeDataUpdate failure.
@@ -795,6 +840,10 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDeserializeDataUpdateFailur
     // The handle is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test MapWrite destroying the buffer before unmapping on the client side.
@@ -851,6 +900,11 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteDestroyBeforeUnmap) {
         EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
         FlushClient();
     }
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test successful buffer creation with mappedAtCreation = true.
@@ -885,6 +939,11 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationSuccess) {
     EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
 
     FlushClient();
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test buffer creation with mappedAtCreation WriteHandle creation failure.
@@ -915,7 +974,7 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeWriteHandleFai
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
 
-    wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
     // Now bufferGetMappedRange won't be called if deserialize writeHandle fails
@@ -923,6 +982,10 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeWriteHandleFai
     FlushClient(false);
 
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test buffer creation with mappedAtCreation = true DeserializeDataUpdate failure.
@@ -957,6 +1020,10 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeDataUpdateFail
     // Failed BufferUpdateMappedData cmd will early return so BufferUnmap is not processed.
     // The server side writeHandle is destructed at buffer destruction.
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test mappedAtCreation=true destroying the buffer before unmapping on the client side.
@@ -992,6 +1059,11 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDestroyBeforeUnmap) {
         EXPECT_CALL(api, BufferUnmap(apiBuffer)).Times(1);
         FlushClient();
     }
+
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test a buffer with mappedAtCreation and MapRead usage destroy WriteHandle on unmap and switch
@@ -1030,9 +1102,13 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationAndMapReadSuccess) {
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverWriteHandle)).Times(1);
     FlushClient();
 
-    // The ReadHandle will be destoryed on buffer destroy.
+    // The ReadHandle will be destroyed on buffer destroy.
     EXPECT_CALL(clientMemoryTransferService, OnReadHandleDestroy(clientReadHandle)).Times(1);
     EXPECT_CALL(serverMemoryTransferService, OnReadHandleDestroy(serverReadHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 // Test WriteHandle preserves after unmap for a buffer with mappedAtCreation and MapWrite usage
@@ -1067,6 +1143,10 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationAndMapWriteSuccess) {
     // The writeHandle is preserved after unmap and is destroyed once the buffer is destroyed.
     EXPECT_CALL(clientMemoryTransferService, OnWriteHandleDestroy(clientHandle)).Times(1);
     EXPECT_CALL(serverMemoryTransferService, OnWriteHandleDestroy(serverHandle)).Times(1);
+    EXPECT_CALL(api, BufferRelease(apiBuffer));
+    wgpuBufferRelease(buffer);
+
+    FlushClient();
 }
 
 }  // anonymous namespace
