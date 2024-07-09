@@ -103,7 +103,7 @@ TEST_F(HlslWriterTest, AccessVector) {
 [numthreads(1, 1, 1)]
 void a() {
   float3 v = (0.0f).xxx;
-  float x = v[1u];
+  float x = v.y;
 }
 
 )");
@@ -125,7 +125,7 @@ TEST_F(HlslWriterTest, AccessMatrix) {
 [numthreads(1, 1, 1)]
 void a() {
   float4x4 v = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
-  float x = v[1u][2u];
+  float x = v[1u].z;
 }
 
 )");
@@ -789,37 +789,6 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, AccessUniformVectorLoad) {
-    auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
-    var->SetBindingPoint(0, 0);
-
-    b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("a", b.Load(var));
-        b.Let("b", b.LoadVectorElement(var, 0_u));
-        b.Let("c", b.LoadVectorElement(var, 1_u));
-        b.Let("d", b.LoadVectorElement(var, 2_u));
-        b.Let("e", b.LoadVectorElement(var, 3_u));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-cbuffer cbuffer_v : register(b0) {
-  uint4 v[1];
-};
-void foo() {
-  float4 a = asfloat(v[0u]);
-  float b = asfloat(v[0u][0u]);
-  float c = asfloat(v[0u][1u]);
-  float d = asfloat(v[0u][2u]);
-  float e = asfloat(v[0u][3u]);
-}
-
-)");
-}
-
 TEST_F(HlslWriterTest, DISABLED_AccessUniformChainFromUnnamedAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
@@ -897,7 +866,7 @@ void m() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageVector) {
+TEST_F(HlslWriterTest, AccessUniformVector) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -917,14 +886,14 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageVector) {
 cbuffer cbuffer_v : register(b0) {
   uint4 v[1];
 };
-
-void m() {
-  float4 a = asfloat(v[0]);
-  float b = asfloat(v[0].x);
-  float c = asfloat(v[0].y);
-  float d = asfloat(v[0].z);
-  float e = asfloat(v[0].w);
+void foo() {
+  float4 a = asfloat(v[0u]);
+  float b = asfloat(v[0u].x);
+  float c = asfloat(v[0u].y);
+  float d = asfloat(v[0u].z);
+  float e = asfloat(v[0u].w);
 }
+
 )");
 }
 
@@ -948,8 +917,7 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageVectorF16) {
 cbuffer cbuffer_v : register(b0) {
   uint4 v[1];
 };
-
-void m() {
+void foo() {
   uint2 ubo_load = v[0].xy;
   vector<float16_t, 2> ubo_load_xz = vector<float16_t, 2>(f16tof32(ubo_load & 0xFFFF));
   vector<float16_t, 2> ubo_load_yw = vector<float16_t, 2>(f16tof32(ubo_load >> 16));
@@ -959,10 +927,11 @@ void m() {
   float16_t d = float16_t(f16tof32(((v[0].y) & 0xFFFF)));
   float16_t e = float16_t(f16tof32(((v[0].y >> 16) & 0xFFFF)));
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageMatrix) {
+TEST_F(HlslWriterTest, AccessUniformMatrix) {
     auto* var = b.Var<uniform, mat4x4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -970,9 +939,9 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageMatrix) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
-        b.Let("b", b.Load(b.Access(ty.ptr<storage, vec4<f32>, core::Access::kRead>(), var, 3_u)));
+        b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec4<f32>, core::Access::kRead>(), var, 3_u)));
         b.Let("c", b.LoadVectorElement(
-                       b.Access(ty.ptr<storage, vec4<f32>, core::Access::kRead>(), var, 1_u), 2_u));
+                       b.Access(ty.ptr<uniform, vec4<f32>, core::Access::kRead>(), var, 1_u), 2_u));
         b.Return(func);
     });
 
@@ -981,20 +950,124 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageMatrix) {
 cbuffer cbuffer_v : register(b0) {
   uint4 v[4];
 };
-
-float4x4 v_load(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  const uint scalar_offset_3 = ((offset + 48u)) / 4;
-  return float4x4(asfloat(v[scalar_offset / 4]), asfloat(v[scalar_offset_1 / 4]), asfloat(v[scalar_offset_2 / 4]), asfloat(v[scalar_offset_3 / 4]));
+float4x4 v_1(uint start_byte_offset) {
+  float4 v_2 = asfloat(v[((0u + start_byte_offset) / 16u)]);
+  float4 v_3 = asfloat(v[((16u + start_byte_offset) / 16u)]);
+  float4 v_4 = asfloat(v[((32u + start_byte_offset) / 16u)]);
+  return float4x4(v_2, v_3, v_4, asfloat(v[((48u + start_byte_offset) / 16u)]));
 }
 
-void m() {
-  float4x4 a = v_load(0u);
-  float4 b = asfloat(v[3]);
-  float c = asfloat(v[1].z);
+void foo() {
+  float4x4 a = v_1(0u);
+  float4 b = asfloat(v[3u]);
+  float c = asfloat(v[1u].z);
 }
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessUniformMatrix2x3) {
+    auto* var = b.Var<uniform, mat2x3<f32>, core::Access::kRead>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(), var, 1_u)));
+        b.Let("c", b.LoadVectorElement(
+                       b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(), var, 1_u), 2_u));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_v : register(b0) {
+  uint4 v[2];
+};
+float2x3 v_1(uint start_byte_offset) {
+  float3 v_2 = asfloat(v[((0u + start_byte_offset) / 16u)].xyz);
+  return float2x3(v_2, asfloat(v[((16u + start_byte_offset) / 16u)].xyz));
+}
+
+void foo() {
+  float2x3 a = v_1(0u);
+  float3 b = asfloat(v[1u].xyz);
+  float c = asfloat(v[1u].z);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessUniformMatrix3x2) {
+    auto* var = b.Var<uniform, mat3x2<f32>, core::Access::kRead>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec2<f32>, core::Access::kRead>(), var, 1_u)));
+        b.Let("c", b.LoadVectorElement(
+                       b.Access(ty.ptr<uniform, vec2<f32>, core::Access::kRead>(), var, 1_u), 1_u));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_v : register(b0) {
+  uint4 v[2];
+};
+float3x2 v_1(uint start_byte_offset) {
+  uint4 v_2 = v[((0u + start_byte_offset) / 16u)];
+  float2 v_3 = asfloat(((((((0u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_2.zw) : (v_2.xy)));
+  uint4 v_4 = v[((8u + start_byte_offset) / 16u)];
+  float2 v_5 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_4.zw) : (v_4.xy)));
+  uint4 v_6 = v[((16u + start_byte_offset) / 16u)];
+  return float3x2(v_3, v_5, asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_6.zw) : (v_6.xy))));
+}
+
+void foo() {
+  float3x2 a = v_1(0u);
+  float2 b = asfloat(v[0u].zw);
+  float c = asfloat(v[0u].w);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessUniformMatrix2x2) {
+    auto* var = b.Var<uniform, mat2x2<f32>, core::Access::kRead>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec2<f32>, core::Access::kRead>(), var, 1_u)));
+        b.Let("c", b.LoadVectorElement(
+                       b.Access(ty.ptr<uniform, vec2<f32>, core::Access::kRead>(), var, 1_u), 1_u));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_v : register(b0) {
+  uint4 v[1];
+};
+float2x2 v_1(uint start_byte_offset) {
+  uint4 v_2 = v[((0u + start_byte_offset) / 16u)];
+  float2 v_3 = asfloat(((((((0u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_2.zw) : (v_2.xy)));
+  uint4 v_4 = v[((8u + start_byte_offset) / 16u)];
+  return float2x2(v_3, asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_4.zw) : (v_4.xy))));
+}
+
+void foo() {
+  float2x2 a = v_1(0u);
+  float2 b = asfloat(v[0u].zw);
+  float c = asfloat(v[0u].w);
+}
+
 )");
 }
 
@@ -1006,7 +1079,7 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformArray) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
-        b.Let("b", b.Load(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kRead>(), var, 3_u)));
+        b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(), var, 3_u)));
         b.Return(func);
     });
 
@@ -1028,14 +1101,15 @@ v_load_ret v_load(uint offset) {
   return arr;
 }
 
-void m() {
+void foo() {
   float4 a[5] = v_load(0u);
   float4 b = asfloat(v[3]);
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageArrayWhichCanHaveSizesOtherThenFive) {
+TEST_F(HlslWriterTest, DISABLED_AccessUniformArrayWhichCanHaveSizesOtherThenFive) {
     auto* var = b.Var<uniform, array<vec3<f32>, 42>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1043,7 +1117,7 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageArrayWhichCanHaveSizesOtherT
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
-        b.Let("b", b.Load(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kRead>(), var, 3_u)));
+        b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(), var, 3_u)));
         b.Return(func);
     });
 
@@ -1065,10 +1139,11 @@ v_load_ret v_load(uint offset) {
   return arr;
 }
 
-void m() {
+void foo() {
   float4 a[42] = v_load(0u);
   float4 b = asfloat(v[3]);
 }
+
 )");
 }
 
@@ -1085,7 +1160,7 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStruct) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
-        b.Let("b", b.Load(b.Access(ty.ptr<storage, f32, core::Access::kRead>(), var, 1_u)));
+        b.Let("b", b.Load(b.Access(ty.ptr<uniform, f32, core::Access::kRead>(), var, 1_u)));
         b.Return(func);
     });
 
@@ -1107,10 +1182,11 @@ SB v_load(uint offset) {
   return tint_symbol;
 }
 
-void m() {
+void foo() {
   SB a = v_load(0u);
   float b = asfloat(v[0].y);
 }
+
 )");
 }
 
@@ -1137,7 +1213,7 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStructNested) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
-        b.Let("b", b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kRead>(),
+        b.Let("b", b.LoadVectorElement(b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(),
                                                 var, 1_u, 1_u, 1_u, 3_u),
                                        2_u));
         b.Return(func);
@@ -1198,10 +1274,11 @@ SB v_load(uint offset) {
   return tint_symbol_2;
 }
 
-void m() {
+void foo() {
   SB a = v_load(0u);
   float3 b = asfloat(v[8].xyz);
 }
+
 )");
 }
 

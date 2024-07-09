@@ -339,9 +339,31 @@ class Printer : public tint::TextGenerator {
 
     void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
         EmitValue(out, l->From());
-        out << "[";
-        EmitValue(out, l->Index());
-        out << "]";
+
+        if (auto* cnst = l->Index()->As<core::ir::Constant>()) {
+            out << ".";
+            switch (cnst->Value()->ValueAs<uint32_t>()) {
+                case 0:
+                    out << "x";
+                    break;
+                case 1:
+                    out << "y";
+                    break;
+                case 2:
+                    out << "z";
+                    break;
+                case 3:
+                    out << "w";
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+
+        } else {
+            out << "[";
+            EmitValue(out, l->Index());
+            out << "]";
+        }
     }
 
     void EmitExitSwitch() { Line() << "break;"; }

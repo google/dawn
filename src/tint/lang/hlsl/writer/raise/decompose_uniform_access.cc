@@ -32,7 +32,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/hlsl/builtin_fn.h"
-#include "src/tint/lang/hlsl/ir/member_builtin_call.h"
+#include "src/tint/lang/hlsl/ir/ternary.h"
 #include "src/tint/utils/result/result.h"
 
 namespace tint::hlsl::writer::raise {
@@ -97,14 +97,12 @@ struct State {
                     continue;
                 }
 
+                OffsetData od{};
                 Switch(
                     inst,  //
-                    [&](core::ir::LoadVectorElement* l) { LoadVectorElement(l, var); },
-                    [&](core::ir::Load* l) { Load(l, var); },
-                    //                    [&](core::ir::Access* a) {
-                    //                        OffsetData offset;
-                    //                        Access(a, var, a->Object()->Type(), &offset);
-                    //                    },
+                    [&](core::ir::LoadVectorElement* l) { LoadVectorElement(l, var, od); },
+                    [&](core::ir::Load* l) { Load(l, var, od); },
+                    [&](core::ir::Access* a) { Access(a, var, a->Object()->Type(), od); },
                     [&](core::ir::Let* let) {
                         // The `let` is, essentially, an alias for the `var` as it's assigned
                         // directly. Gather all the `let` usages into our worklist, and then replace
@@ -125,27 +123,284 @@ struct State {
         }
     }
 
-    void Load(core::ir::Load* ld, core::ir::Var* var) {
+    struct OffsetData {
+        uint32_t byte_offset = 0;
+        Vector<core::ir::Value*, 4> byte_offset_expr{};
+    };
+
+    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
+    core::ir::Value* OffsetToValue(OffsetData offset) {
+        core::ir::Value* val = b.Value(u32(offset.byte_offset));
+        for (core::ir::Value* expr : offset.byte_offset_expr) {
+            val = b.Add(ty.u32(), val, expr)->Result(0);
+        }
+        return val;
+    }
+
+    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
+    core::ir::Value* OffsetValueToArrayIndex(core::ir::Value* val) {
+        if (auto* cnst = val->As<core::ir::Constant>()) {
+            auto v = cnst->Value()->ValueAs<uint32_t>();
+            return b.Value(u32(v / 16u));
+        }
+        return b.Divide(ty.u32(), val, 16_u)->Result(0);
+    }
+
+    // From the byte_offset calculate the index of the vector inside the array we need to access.
+    core::ir::Value* CalculateVectorOffset(core::ir::Value* byte_idx) {
+        if (auto* byte_cnst = byte_idx->As<core::ir::Constant>()) {
+            return b.Value(u32((byte_cnst->Value()->ValueAs<uint32_t>() % 16u) / 4u));
+        }
+        return b.Divide(ty.u32(), b.Modulo(ty.u32(), byte_idx, 16_u), 4_u)->Result(0);
+    }
+
+    void Access(core::ir::Access* a,
+                core::ir::Var* var,
+                const core::type::Type* obj_ty,
+                OffsetData& offset) {
+        // Note, because we recurse through the `access` helper, the object passed in isn't
+        // necessarily the originating `var` object, but maybe a partially resolved access chain
+        // object.
+        if (auto* view = obj_ty->As<core::type::MemoryView>()) {
+            obj_ty = view->StoreType();
+        }
+
+        auto update_offset = [&](core::ir::Value* idx_value, uint32_t size) {
+            tint::Switch(
+                idx_value,
+                [&](core::ir::Constant* cnst) {
+                    uint32_t idx = cnst->Value()->ValueAs<uint32_t>();
+                    offset.byte_offset += size * idx;
+                },
+                [&](core::ir::Value* val) {
+                    b.InsertBefore(a, [&] {
+                        offset.byte_offset_expr.Push(
+                            b.Multiply(ty.u32(), u32(size), b.Convert(ty.u32(), val))->Result(0));
+                    });
+                });
+        };
+
+        for (auto* idx_value : a->Indices()) {
+            tint::Switch(
+                obj_ty,
+                [&](const core::type::Vector* v) {
+                    update_offset(idx_value, v->type()->Size());
+                    obj_ty = v->type();
+                },
+                [&](const core::type::Matrix* m) {
+                    update_offset(idx_value, m->ColumnStride());
+                    obj_ty = m->ColumnType();
+                },
+                [&](const core::type::Array* ary) {
+                    update_offset(idx_value, ary->Stride());
+                    obj_ty = ary->ElemType();
+                },
+                [&](const core::type::Struct* s) {
+                    auto* cnst = idx_value->As<core::ir::Constant>();
+
+                    // A struct index must be a constant
+                    TINT_ASSERT(cnst);
+
+                    uint32_t idx = cnst->Value()->ValueAs<uint32_t>();
+                    auto* mem = s->Members()[idx];
+                    obj_ty = mem->Type();
+                    offset.byte_offset += mem->Offset();
+                },
+                TINT_ICE_ON_NO_MATCH);
+        }
+
+        auto usages = a->Result(0)->Usages().Vector();
+        while (!usages.IsEmpty()) {
+            auto usage = usages.Pop();
+            tint::Switch(
+                usage.instruction,
+                [&](core::ir::Let* let) {
+                    // The `let` is essentially an alias to the `access`. So, add the `let`
+                    // usages into the usage worklist, and replace the let with the access chain
+                    // directly.
+                    for (auto& u : let->Result(0)->Usages()) {
+                        usages.Push(u);
+                    }
+                    let->Result(0)->ReplaceAllUsesWith(a->Result(0));
+                    let->Destroy();
+                },
+                [&](core::ir::Load* ld) {
+                    a->Result(0)->RemoveUsage(usage);
+                    Load(ld, var, offset);
+                },
+                [&](core::ir::LoadVectorElement* lve) {
+                    a->Result(0)->RemoveUsage(usage);
+                    LoadVectorElement(lve, var, offset);
+                },
+                TINT_ICE_ON_NO_MATCH);
+        }
+        a->Destroy();
+    }
+
+    void Load(core::ir::Load* ld, core::ir::Var* var, OffsetData& offset) {
         b.InsertBefore(ld, [&] {
-            auto* access = b.Access(ty.ptr(uniform, ty.vec4<u32>()), var, 0_u);
-            auto* load = b.Load(access);
-            auto* bitcast = b.Bitcast(ld->Result(0)->Type(), load);
-            ld->Result(0)->ReplaceAllUsesWith(bitcast->Result(0));
+            auto* byte_idx = OffsetToValue(offset);
+            auto* result = MakeLoad(ld, var, ld->Result(0)->Type(), byte_idx);
+            ld->Result(0)->ReplaceAllUsesWith(result->Result(0));
         });
         ld->Destroy();
     }
 
-    // A direct vector load on the `var` means the `var` is a vector. Replace the `var` usage` with
-    // an access chain into the `var` array `0` element a `load_vector_element` to retrieve the item
-    // and a `bitcast` to the correct type.
-    void LoadVectorElement(core::ir::LoadVectorElement* lve, core::ir::Var* var) {
+    void LoadVectorElement(core::ir::LoadVectorElement* lve,
+                           core::ir::Var* var,
+                           OffsetData& offset) {
         b.InsertBefore(lve, [&] {
-            auto* access = b.Access(ty.ptr(uniform, ty.vec4<u32>()), var, 0_u);
-            auto* load = b.LoadVectorElement(access, lve->Index());
-            auto* bitcast = b.Bitcast(lve->Result(0)->Type(), load);
-            lve->Result(0)->ReplaceAllUsesWith(bitcast->Result(0));
+            // Add the byte count from the start of the vector to the requested element to the
+            // current offset calculation
+            auto elem_byte_size = lve->Result(0)->Type()->DeepestElement()->Size();
+            if (auto* cnst = lve->Index()->As<core::ir::Constant>()) {
+                offset.byte_offset += (cnst->Value()->ValueAs<uint32_t>() * elem_byte_size);
+            } else {
+                offset.byte_offset_expr.Push(
+                    b.Multiply(ty.u32(), lve->Index(), u32(elem_byte_size))->Result(0));
+            }
+
+            auto* byte_idx = OffsetToValue(offset);
+            auto* result = MakeLoad(lve, var, lve->Result(0)->Type(), byte_idx);
+            lve->Result(0)->ReplaceAllUsesWith(result->Result(0));
         });
         lve->Destroy();
+    }
+
+    // Creates the appropriate load instructions for the given result type.
+    core::ir::Call* MakeLoad(core::ir::Instruction* inst,
+                             core::ir::Var* var,
+                             const core::type::Type* result_ty,
+                             core::ir::Value* byte_idx) {
+        auto* array_idx = OffsetValueToArrayIndex(byte_idx);
+        auto* vec_idx = CalculateVectorOffset(byte_idx);
+
+        if (result_ty->is_float_scalar() || result_ty->is_integer_scalar()) {
+            return MakeScalarLoad(var, result_ty, array_idx, vec_idx);
+        }
+        if (result_ty->is_scalar_vector()) {
+            return MakeVectorLoad(var, result_ty->As<core::type::Vector>(), byte_idx, array_idx);
+        }
+
+        return tint::Switch(
+            result_ty,
+            //            [&](const core::type::Struct* s) {
+            //                auto* fn = GetLoadFunctionFor(inst, var, s);
+            //                return b.Call(fn, vec_idx);
+            //            },
+            [&](const core::type::Matrix* m) {
+                auto* fn = GetLoadFunctionFor(inst, var, m);
+                return b.Call(fn, byte_idx);
+            },
+            //            [&](const core::type::Array* a) {
+            //                auto* fn = GetLoadFunctionFor(inst, var, a);
+            //                return b.Call(fn, vec_idx);
+            //            },
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    core::ir::Call* MakeScalarLoad(core::ir::Var* var,
+                                   const core::type::Type* result_ty,
+                                   core::ir::Value* array_idx,
+                                   core::ir::Value* vec_idx) {
+        auto* access = b.Access(ty.ptr(uniform, ty.vec4<u32>()), var, array_idx);
+        core::ir::Instruction* load = b.LoadVectorElement(access, vec_idx);
+        return b.Bitcast(result_ty, load);
+    }
+
+    // When loading a vector we have to take the alignment into account to determine which part of
+    // the `uint4` to load. A `vec`  of `u32`, `f32` or `i32` has an alignment requirement of
+    // a multiple of 8-bytes (`f16` is 4-bytes). So, this means we'll have memory like:
+    //
+    // Byte: | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 |
+    // Value:|      v1       |        v2     |        v3       |          v4       |
+    // Scalar Index:   0                 1               2                   3
+    //
+    // Start with a byte address which is `offset + (column * columnStride)`, the array index is
+    // `byte_address / 16`. This gives us the `uint4` which contains our values. We can then
+    // calculate the vector offset as `(byte_address % 16) / 4`.
+    //
+    // * A 4-element row we access all 4-elements at the `array_idx`
+    // * A 3-element row we access `array_idx` at `.xyz` as it must be padded to a vec4.
+    // * A 2-element row, we have to decide if we want the `xy` or `zw` element. We have a minimum
+    //   alignment of 8-bytes as per the WGSL spec. So if the `vector_idx != 2` is `0` then we
+    //   access the `.xy` component, otherwise it is in the `.zw` component.
+    core::ir::Call* MakeVectorLoad(core::ir::Var* var,
+                                   const core::type::Vector* result_ty,
+                                   core::ir::Value* byte_idx,
+                                   core::ir::Value* array_idx) {
+        auto* access = b.Access(ty.ptr(uniform, ty.vec4<u32>()), var, array_idx);
+        core::ir::Instruction* load = nullptr;
+        if (result_ty->Width() == 4) {
+            load = b.Load(access);
+        } else if (result_ty->Width() == 3) {
+            load = b.Swizzle(ty.vec3<u32>(), b.Load(access), {0, 1, 2});
+        } else if (result_ty->Width() == 2) {
+            auto* vec_idx = CalculateVectorOffset(byte_idx);
+            if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
+                if (cnst->Value()->ValueAs<uint32_t>() == 2u) {
+                    load = b.Swizzle(ty.vec2<u32>(), b.Load(access), {2, 3});
+                } else {
+                    load = b.Swizzle(ty.vec2<u32>(), b.Load(access), {0, 1});
+                }
+            } else {
+                auto* ubo = b.Load(access);
+                // if vec_idx == 2 -> zw
+                auto* sw_lhs = b.Swizzle(ty.vec2<u32>(), ubo, {2, 3});
+                // else -> xy
+                auto* sw_rhs = b.Swizzle(ty.vec2<u32>(), ubo, {0, 1});
+                auto* cond = b.Equal(ty.bool_(), vec_idx, 2_u);
+
+                Vector<core::ir::Value*, 3> args{sw_rhs->Result(0), sw_lhs->Result(0),
+                                                 cond->Result(0)};
+
+                load = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
+                    b.InstructionResult(ty.vec2<u32>()), args);
+                b.Append(load);
+            }
+        } else {
+            TINT_UNREACHABLE();
+        }
+        return b.Bitcast(result_ty, load);
+    }
+
+    // Creates a load function for the given `var` and `matrix` combination. Essentially creates
+    // a function similar to:
+    //
+    // fn custom_load_M(offset: u32) {
+    //   const uint scalar_offset = ((offset + 0u)) / 4;
+    //   const uint scalar_offset_1 = ((offset + (1 * ColumnStride))) / 4;
+    //   const uint scalar_offset_2 = ((offset + (2 * ColumnStride))) / 4;
+    //   const uint scalar_offset_3 = ((offset + (3 * ColumnStride)))) / 4;
+    //   return float4x4(
+    //       asfloat(v[scalar_offset / 4]),
+    //       asfloat(v[scalar_offset_1 / 4]),
+    //       asfloat(v[scalar_offset_2 / 4]),
+    //      asfloat(v[scalar_offset_3 / 4])
+    //   );
+    // }
+    core::ir::Function* GetLoadFunctionFor(core::ir::Instruction* inst,
+                                           core::ir::Var* var,
+                                           const core::type::Matrix* mat) {
+        return var_and_type_to_load_fn_.GetOrAdd(VarTypePair{var, mat}, [&] {
+            auto* start_byte_offset = b.FunctionParam("start_byte_offset", ty.u32());
+            auto* fn = b.Function(mat);
+            fn->SetParams({start_byte_offset});
+
+            b.Append(fn->Block(), [&] {
+                Vector<core::ir::Value*, 4> values;
+                for (size_t i = 0; i < mat->columns(); ++i) {
+                    uint32_t stride = static_cast<uint32_t>(i * mat->ColumnStride());
+
+                    OffsetData od{stride, {start_byte_offset}};
+                    auto* byte_idx = OffsetToValue(od);
+                    values.Push(MakeLoad(inst, var, mat->ColumnType(), byte_idx)->Result(0));
+                }
+                b.Return(fn, b.Construct(mat, values));
+            });
+
+            return fn;
+        });
     }
 };
 
