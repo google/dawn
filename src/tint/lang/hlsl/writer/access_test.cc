@@ -789,17 +789,18 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformVectorLoad) {
+TEST_F(HlslWriterTest, AccessUniformVectorLoad) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("a", b.LoadVectorElement(var, 0_u));
-        b.Let("b", b.LoadVectorElement(var, 1_u));
-        b.Let("c", b.LoadVectorElement(var, 2_u));
-        b.Let("d", b.LoadVectorElement(var, 3_u));
+        b.Let("a", b.Load(var));
+        b.Let("b", b.LoadVectorElement(var, 0_u));
+        b.Let("c", b.LoadVectorElement(var, 1_u));
+        b.Let("d", b.LoadVectorElement(var, 2_u));
+        b.Let("e", b.LoadVectorElement(var, 3_u));
         b.Return(func);
     });
 
@@ -808,13 +809,14 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformVectorLoad) {
 cbuffer cbuffer_v : register(b0) {
   uint4 v[1];
 };
-
-void m() {
-  float a = asfloat(v[0].x);
-  float b = asfloat(v[0].y);
-  float c = asfloat(v[0].z);
-  float d = asfloat(v[0].w);
+void foo() {
+  float4 a = asfloat(v[0u]);
+  float b = asfloat(v[0u][0u]);
+  float c = asfloat(v[0u][1u]);
+  float d = asfloat(v[0u][2u]);
+  float e = asfloat(v[0u][3u]);
 }
+
 )");
 }
 

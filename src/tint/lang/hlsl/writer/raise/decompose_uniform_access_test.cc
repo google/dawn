@@ -228,7 +228,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, DISABLED_UniformAccessVectorLoad) {
+TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessVectorLoad) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -268,26 +268,31 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %v:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec4<u32> = %v.Load4 0u
-    %4:vec4<f32> = bitcast %3
-    %a:vec4<f32> = let %4
-    %6:u32 = %v.Load 0u
-    %7:f32 = bitcast %6
-    %b:f32 = let %7
-    %9:u32 = %v.Load 4u
-    %10:f32 = bitcast %9
-    %c:f32 = let %10
-    %12:u32 = %v.Load 8u
+    %3:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %4:vec4<u32> = load %3
+    %5:vec4<f32> = bitcast %4
+    %a:vec4<f32> = let %5
+    %7:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %8:u32 = load_vector_element %7, 0u
+    %9:f32 = bitcast %8
+    %b:f32 = let %9
+    %11:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %12:u32 = load_vector_element %11, 1u
     %13:f32 = bitcast %12
-    %d:f32 = let %13
-    %15:u32 = %v.Load 12u
-    %16:f32 = bitcast %15
-    %e:f32 = let %16
+    %c:f32 = let %13
+    %15:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %16:u32 = load_vector_element %15, 2u
+    %17:f32 = bitcast %16
+    %d:f32 = let %17
+    %19:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %20:u32 = load_vector_element %19, 3u
+    %21:f32 = bitcast %20
+    %e:f32 = let %21
     ret
   }
 }
