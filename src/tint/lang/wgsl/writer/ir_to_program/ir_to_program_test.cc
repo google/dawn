@@ -2398,6 +2398,75 @@ fn f(cond : bool) {
 )");
 }
 
+TEST_F(IRToProgramTest, While_BreakAfterStatement) {
+    auto* fn = b.Function("f", ty.void_());
+
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+
+        b.Append(loop->Body(), [&] {
+            auto* let = b.Let("cond", true);
+            auto* cond = b.If(let);
+            b.Append(cond->True(), [&] { b.ExitIf(cond); });
+            b.Append(cond->False(), [&] { b.ExitLoop(loop); });
+
+            b.ExitLoop(loop);
+        });
+
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f() {
+  loop {
+    let cond = true;
+    if (cond) {
+    } else {
+      break;
+    }
+    break;
+  }
+}
+)");
+}
+
+// Test that only the first "if continue then break" instruction is treated as the loop condition.
+// See crbug.com/351700183.
+TEST_F(IRToProgramTest, While_IfBreakInFalse) {
+    auto* fn = b.Function("f", ty.void_());
+    auto* cond = b.FunctionParam("cond", ty.bool_());
+    fn->SetParams({cond});
+
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+
+        b.Append(loop->Body(), [&] {
+            auto* if1 = b.If(true);
+            b.Append(if1->True(), [&] { b.ExitIf(if1); });
+            b.Append(if1->False(), [&] { b.ExitLoop(loop); });
+
+            auto* if2 = b.If(cond);
+            b.Append(if2->True(), [&] { b.ExitIf(if2); });
+            b.Append(if2->False(), [&] { b.ExitLoop(loop); });
+
+            b.Continue(loop);
+        });
+
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+fn f(cond : bool) {
+  while(true) {
+    if (cond) {
+    } else {
+      break;
+    }
+  }
+}
+)");
+}
+
 TEST_F(IRToProgramTest, While_IfReturn) {
     auto* fn = b.Function("f", ty.void_());
     auto* cond = b.FunctionParam("cond", ty.bool_());

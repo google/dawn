@@ -2813,6 +2813,20 @@ fn f(cond : bool) {
 )");
 }
 
+// Test case for crbug.com/351700183.
+TEST_F(IRToProgramRoundtripTest, While_ConditionAndBreak) {
+    RUN_TEST(R"(
+fn f() {
+  while(true) {
+    if (false) {
+    } else {
+      break;
+    }
+  }
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Loop
 ////////////////////////////////////////////////////////////////////////////////

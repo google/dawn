@@ -432,7 +432,7 @@ class State {
         {
             TINT_SCOPED_ASSIGNMENT(statements_, &body_stmts);
             for (auto* inst : *l->Body()) {
-                if (body_stmts.IsEmpty()) {
+                if (body_stmts.IsEmpty() && !cond) {
                     if (auto* if_ = inst->As<core::ir::If>()) {
                         if (if_->Results().IsEmpty() &&                          //
                             if_->True()->Length() == 1 &&                        //
