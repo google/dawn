@@ -951,7 +951,7 @@ cbuffer cbuffer_v : register(b0) {
   uint4 v[4];
 };
 float4x4 v_1(uint start_byte_offset) {
-  float4 v_2 = asfloat(v[((0u + start_byte_offset) / 16u)]);
+  float4 v_2 = asfloat(v[(start_byte_offset / 16u)]);
   float4 v_3 = asfloat(v[((16u + start_byte_offset) / 16u)]);
   float4 v_4 = asfloat(v[((32u + start_byte_offset) / 16u)]);
   return float4x4(v_2, v_3, v_4, asfloat(v[((48u + start_byte_offset) / 16u)]));
@@ -986,7 +986,7 @@ cbuffer cbuffer_v : register(b0) {
   uint4 v[2];
 };
 float2x3 v_1(uint start_byte_offset) {
-  float3 v_2 = asfloat(v[((0u + start_byte_offset) / 16u)].xyz);
+  float3 v_2 = asfloat(v[(start_byte_offset / 16u)].xyz);
   return float2x3(v_2, asfloat(v[((16u + start_byte_offset) / 16u)].xyz));
 }
 
@@ -1019,8 +1019,8 @@ cbuffer cbuffer_v : register(b0) {
   uint4 v[2];
 };
 float3x2 v_1(uint start_byte_offset) {
-  uint4 v_2 = v[((0u + start_byte_offset) / 16u)];
-  float2 v_3 = asfloat(((((((0u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_2.zw) : (v_2.xy)));
+  uint4 v_2 = v[(start_byte_offset / 16u)];
+  float2 v_3 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_2.zw) : (v_2.xy)));
   uint4 v_4 = v[((8u + start_byte_offset) / 16u)];
   float2 v_5 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_4.zw) : (v_4.xy)));
   uint4 v_6 = v[((16u + start_byte_offset) / 16u)];
@@ -1056,8 +1056,8 @@ cbuffer cbuffer_v : register(b0) {
   uint4 v[1];
 };
 float2x2 v_1(uint start_byte_offset) {
-  uint4 v_2 = v[((0u + start_byte_offset) / 16u)];
-  float2 v_3 = asfloat(((((((0u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_2.zw) : (v_2.xy)));
+  uint4 v_2 = v[(start_byte_offset / 16u)];
+  float2 v_3 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_2.zw) : (v_2.xy)));
   uint4 v_4 = v[((8u + start_byte_offset) / 16u)];
   return float2x2(v_3, asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_4.zw) : (v_4.xy))));
 }
@@ -1071,7 +1071,7 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformArray) {
+TEST_F(HlslWriterTest, AccessUniformArray) {
     auto* var = b.Var<uniform, array<vec3<f32>, 5>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1088,28 +1088,37 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformArray) {
 cbuffer cbuffer_v : register(b0) {
   uint4 v[5];
 };
-
-typedef float4 v_load_ret[5];
-v_load_ret v_load(uint offset) {
-  float4 arr[5] = (float4[5])0;
+typedef float3 ary_ret[5];
+ary_ret v_1(uint start_byte_offset) {
+  float3 a[5] = (float3[5])0;
   {
-    for(uint i = 0u; (i < 5u); i = (i + 1u)) {
-      const uint scalar_offset = ((offset + (i * 16u))) / 4;
-      arr[i] = asfloat(v[scalar_offset / 4]);
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 5u)) {
+        break;
+      }
+      a[v_3] = asfloat(v[((start_byte_offset + (v_3 * 16u)) / 16u)].xyz);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  float3 v_4[5] = a;
+  return v_4;
 }
 
 void foo() {
-  float4 a[5] = v_load(0u);
-  float4 b = asfloat(v[3]);
+  float3 a[5] = v_1(0u);
+  float3 b = asfloat(v[3u].xyz);
 }
 
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformArrayWhichCanHaveSizesOtherThenFive) {
+TEST_F(HlslWriterTest, AccessUniformArrayWhichCanHaveSizesOtherThenFive) {
     auto* var = b.Var<uniform, array<vec3<f32>, 42>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1126,22 +1135,31 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformArrayWhichCanHaveSizesOtherThenFive
 cbuffer cbuffer_v : register(b0) {
   uint4 v[42];
 };
-
-typedef float4 v_load_ret[42];
-v_load_ret v_load(uint offset) {
-  float4 arr[42] = (float4[42])0;
+typedef float3 ary_ret[42];
+ary_ret v_1(uint start_byte_offset) {
+  float3 a[42] = (float3[42])0;
   {
-    for(uint i = 0u; (i < 42u); i = (i + 1u)) {
-      const uint scalar_offset = ((offset + (i * 16u))) / 4;
-      arr[i] = asfloat(v[scalar_offset / 4]);
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 42u)) {
+        break;
+      }
+      a[v_3] = asfloat(v[((start_byte_offset + (v_3 * 16u)) / 16u)].xyz);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  float3 v_4[42] = a;
+  return v_4;
 }
 
 void foo() {
-  float4 a[42] = v_load(0u);
-  float4 b = asfloat(v[3]);
+  float3 a[42] = v_1(0u);
+  float3 b = asfloat(v[3u].xyz);
 }
 
 )");

@@ -130,10 +130,25 @@ struct State {
 
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
     core::ir::Value* OffsetToValue(OffsetData offset) {
-        core::ir::Value* val = b.Value(u32(offset.byte_offset));
-        for (core::ir::Value* expr : offset.byte_offset_expr) {
-            val = b.Add(ty.u32(), val, expr)->Result(0);
+        core::ir::Value* val = nullptr;
+
+        // If the offset is zero, skip setting val. This way, we won't add `0 +` and create useless
+        // addition expressions, but if the offset is zero, and there are no expressions, make sure
+        // we return the 0 value.
+        if (offset.byte_offset != 0) {
+            val = b.Value(u32(offset.byte_offset));
+        } else if (offset.byte_offset_expr.IsEmpty()) {
+            return b.Value(0_u);
         }
+
+        for (core::ir::Value* expr : offset.byte_offset_expr) {
+            if (!val) {
+                val = expr;
+            } else {
+                val = b.Add(ty.u32(), val, expr)->Result(0);
+            }
+        }
+
         return val;
     }
 
@@ -292,10 +307,10 @@ struct State {
                 auto* fn = GetLoadFunctionFor(inst, var, m);
                 return b.Call(fn, byte_idx);
             },
-            //            [&](const core::type::Array* a) {
-            //                auto* fn = GetLoadFunctionFor(inst, var, a);
-            //                return b.Call(fn, vec_idx);
-            //            },
+            [&](const core::type::Array* a) {
+                auto* fn = GetLoadFunctionFor(inst, var, a);
+                return b.Call(fn, byte_idx);
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 
@@ -397,6 +412,51 @@ struct State {
                     values.Push(MakeLoad(inst, var, mat->ColumnType(), byte_idx)->Result(0));
                 }
                 b.Return(fn, b.Construct(mat, values));
+            });
+
+            return fn;
+        });
+    }
+
+    // Creates a load function for the given `var` and `array` combination. Essentially creates
+    // a function similar to:
+    //
+    // fn custom_load_A(offset: u32) {
+    //   A a = A();
+    //   u32 i = 0;
+    //   loop {
+    //     if (i >= A length) {
+    //       break;
+    //     }
+    //     offset = (offset + (i * A->Stride())) / 16
+    //     a[i] = cast(v[offset].xyz)
+    //     i = i + 1;
+    //   }
+    //   return a;
+    // }
+    core::ir::Function* GetLoadFunctionFor(core::ir::Instruction* inst,
+                                           core::ir::Var* var,
+                                           const core::type::Array* arr) {
+        return var_and_type_to_load_fn_.GetOrAdd(VarTypePair{var, arr}, [&] {
+            auto* start_byte_offset = b.FunctionParam("start_byte_offset", ty.u32());
+            auto* fn = b.Function(arr);
+            fn->SetParams({start_byte_offset});
+
+            b.Append(fn->Block(), [&] {
+                auto* result_arr = b.Var<function>("a", b.Zero(arr));
+
+                auto* count = arr->Count()->As<core::type::ConstantArrayCount>();
+                TINT_ASSERT(count);
+
+                b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
+                    auto* stride = b.Multiply<u32>(idx, u32(arr->Stride()))->Result(0);
+                    OffsetData od{0, {start_byte_offset, stride}};
+                    auto* byte_idx = OffsetToValue(od);
+                    auto* access = b.Access(ty.ptr<function>(arr->ElemType()), result_arr, idx);
+                    b.Store(access, MakeLoad(inst, var, arr->ElemType(), byte_idx));
+                });
+
+                b.Return(fn, b.Load(result_arr));
             });
 
             return fn;
