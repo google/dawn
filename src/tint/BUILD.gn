@@ -341,6 +341,14 @@ group("cmds") {
   if (tint_build_tintd) {
     deps += [ "${tint_src_dir}/cmd/tintd" ]
   }
+  if (tint_build_ir_fuzzer && tint_build_ir_binary) {
+    if (tint_build_wgsl_reader) {
+      deps += [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
+    }
+    if (tint_build_wgsl_writer) {
+      deps += [ "${tint_src_dir}/cmd/fuzz/ir/dis" ]
+    }
+  }
 }
 
 group("fuzzers") {
