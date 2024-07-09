@@ -33,13 +33,14 @@ value class {{ enum.name.CamelCase() }}(@get:JvmName("getValue") val v: Int) {
     {% endif %}
     companion object {
         {% for value in enum.values %}
-            val {{ as_ktName(value.name.CamelCase()) }} =
+            val {{ as_ktName(value.name.CamelCase()) }} ={{' '}}
                 {{- enum.name.CamelCase() }}({{ '{:#010x}'.format(value.value) }})
         {% endfor %}
         val names = mapOf(
             {% for value in enum.values %}
                 {{ '{:#010x}'.format(value.value) }} to "{{ as_ktName(value.name.CamelCase()) }}",
-            {% endfor %} )
+            {% endfor %}
+        )
     }
     override fun toString(): String = names[v]?:v.toString()
 }

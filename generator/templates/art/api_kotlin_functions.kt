@@ -29,8 +29,7 @@ package {{ kotlin_package }}
 
 {% for function in by_category['function'] if include_method(function) %}
     external fun {{ function.name.camelCase() }}(
-        {%- for arg in function.arguments %}
-            {{- as_varName(arg.name) }}:{{ kotlin_definition(arg) }},
-        {%- endfor -%}):
-        {{- kotlin_type_declaration(function.return_type) -}}
+        {%- for arg in function.arguments -%}
+            {{- as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{' '}}
+        {%- endfor %}): {{ kotlin_type_declaration(function.return_type) -}}
 {% endfor %}

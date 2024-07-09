@@ -31,6 +31,6 @@ object Constants {
     val UINT64_MAX = java.lang.Long.parseUnsignedLong("18446744073709551615")
     val SIZE_MAX = UINT64_MAX
     {% for constant in by_category['constant'] %}
-        val {{ as_ktName(constant.name.SNAKE_CASE() ) }} = {{ constant.value }};
+        val {{ as_ktName(constant.name.SNAKE_CASE() ) }} = {{ constant.value }}
     {% endfor %}
 }
