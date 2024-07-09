@@ -112,7 +112,7 @@ class Ref : public RefBase<T*, detail::ObjectBaseTraits<T>> {
 };
 
 template <typename T>
-auto ReturnToAPI(Ref<T> r) {
+auto ReturnToAPI(Ref<T>&& r) {
     return ToAPI(r.Detach());
 }
 

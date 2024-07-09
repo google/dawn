@@ -85,12 +85,16 @@ class RequestDeviceEvent : public TrackedEvent {
 
         // Callback needs to happen before device lost handling to ensure resolution order.
         if (mCallback) {
+            Ref<Device> device = mDevice;
             mCallback(mStatus,
-                      mStatus == WGPURequestDeviceStatus_Success ? ReturnToAPI(mDevice) : nullptr,
+                      mStatus == WGPURequestDeviceStatus_Success ? ReturnToAPI(std::move(device))
+                                                                 : nullptr,
                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling());
         } else if (mCallback2) {
+            Ref<Device> device = mDevice;
             mCallback2(mStatus,
-                       mStatus == WGPURequestDeviceStatus_Success ? ReturnToAPI(mDevice) : nullptr,
+                       mStatus == WGPURequestDeviceStatus_Success ? ReturnToAPI(std::move(device))
+                                                                  : nullptr,
                        mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
                        mUserdata2.ExtractAsDangling());
         }

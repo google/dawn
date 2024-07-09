@@ -27,6 +27,8 @@
 
 #include "dawn/wire/client/SwapChain.h"
 
+#include <utility>
+
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/Device.h"
 #include "dawn/wire/client/Texture.h"
@@ -62,7 +64,7 @@ WGPUTexture SwapChain::GetCurrentTexture() {
     cmd.result = texture->GetWireHandle();
     wireClient->SerializeCommand(cmd);
 
-    return ReturnToAPI(texture);
+    return ReturnToAPI(std::move(texture));
 }
 
 }  // namespace dawn::wire::client

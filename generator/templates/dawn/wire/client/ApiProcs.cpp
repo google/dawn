@@ -30,6 +30,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include <utility>
 
 #include "dawn/wire/client/Client.h"
 #include "dawn/wire/client/webgpu.h"

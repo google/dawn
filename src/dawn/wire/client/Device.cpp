@@ -128,10 +128,11 @@ class CreatePipelineEventBase : public TrackedEvent {
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
-        mCallback(
-            mStatus,
-            mStatus == WGPUCreatePipelineAsyncStatus_Success ? ReturnToAPI(mPipeline) : nullptr,
-            mMessage ? mMessage->c_str() : nullptr, userdata1, userdata2);
+        mCallback(mStatus,
+                  mStatus == WGPUCreatePipelineAsyncStatus_Success
+                      ? ReturnToAPI(std::move(mPipeline))
+                      : nullptr,
+                  mMessage ? mMessage->c_str() : nullptr, userdata1, userdata2);
     }
 
     using Callback = decltype(std::declval<CallbackInfo>().callback);
@@ -495,7 +496,8 @@ WGPUQueue Device::GetQueue() {
         client->SerializeCommand(cmd);
     }
 
-    return ReturnToAPI(mQueue);
+    Ref<Queue> queue = mQueue;
+    return ReturnToAPI(std::move(queue));
 }
 
 template <typename Event, typename Cmd, typename CallbackInfo, typename Descriptor>

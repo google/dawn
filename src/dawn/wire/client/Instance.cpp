@@ -100,14 +100,16 @@ class RequestAdapterEvent : public TrackedEvent {
 
         if (mCallback) {
             mCallback(mStatus,
-                      mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(mAdapter) : nullptr,
+                      mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(std::move(mAdapter))
+                                                                  : nullptr,
                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling());
         } else {
-            mCallback2(
-                mStatus,
-                mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(mAdapter) : nullptr,
-                mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
-                mUserdata2.ExtractAsDangling());
+            mCallback2(mStatus,
+                       mStatus == WGPURequestAdapterStatus_Success
+                           ? ReturnToAPI(std::move(mAdapter))
+                           : nullptr,
+                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
+                       mUserdata2.ExtractAsDangling());
         }
     }
 

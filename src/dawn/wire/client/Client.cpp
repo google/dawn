@@ -105,7 +105,7 @@ ReservedBuffer Client::ReserveBuffer(WGPUDevice device, const WGPUBufferDescript
     ReservedBuffer result;
     result.handle = buffer->GetWireHandle();
     result.deviceHandle = FromAPI(device)->GetWireHandle();
-    result.buffer = ReturnToAPI(buffer);
+    result.buffer = ReturnToAPI(std::move(buffer));
     return result;
 }
 
@@ -115,7 +115,7 @@ ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescr
     ReservedTexture result;
     result.handle = texture->GetWireHandle();
     result.deviceHandle = FromAPI(device)->GetWireHandle();
-    result.texture = ReturnToAPI(texture);
+    result.texture = ReturnToAPI(std::move(texture));
     return result;
 }
 
@@ -126,7 +126,7 @@ ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device,
     ReservedSwapChain result;
     result.handle = swapChain->GetWireHandle();
     result.deviceHandle = FromAPI(device)->GetWireHandle();
-    result.swapchain = ReturnToAPI(swapChain);
+    result.swapchain = ReturnToAPI(std::move(swapChain));
     return result;
 }
 
@@ -142,7 +142,7 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
 
     ReservedInstance result;
     result.handle = instance->GetWireHandle();
-    result.instance = ReturnToAPI(instance);
+    result.instance = ReturnToAPI(std::move(instance));
     return result;
 }
 

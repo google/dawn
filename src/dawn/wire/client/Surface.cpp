@@ -27,6 +27,8 @@
 
 #include "dawn/wire/client/Surface.h"
 
+#include <utility>
+
 #include "dawn/common/Log.h"
 #include "dawn/common/Platform.h"
 #include "dawn/wire/client/Client.h"
@@ -85,7 +87,7 @@ void Surface::GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
     // cmd.result = texture->GetWireHandle(); // TODO(dawn:2320): Feed surfaceTexture to cmd
     wireClient->SerializeCommand(cmd);
 
-    surfaceTexture->texture = ReturnToAPI(texture);
+    surfaceTexture->texture = ReturnToAPI(std::move(texture));
 }
 
 }  // namespace dawn::wire::client
