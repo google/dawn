@@ -49,14 +49,14 @@ class ObjectStore {
     ObjectStore();
 
     ObjectHandle ReserveHandle();
-    void Insert(std::unique_ptr<ObjectBase> obj);
-    void Free(ObjectBase* obj);
+    void Insert(ObjectBase* obj);
+    void Remove(ObjectBase* obj);
     ObjectBase* Get(ObjectId id) const;
 
   private:
     uint32_t mCurrentId;
     std::vector<ObjectHandle> mFreeHandles;
-    std::vector<std::unique_ptr<ObjectBase>> mObjects;
+    std::vector<raw_ptr<ObjectBase>> mObjects;
 };
 
 }  // namespace dawn::wire::client

@@ -64,17 +64,15 @@ class Client : public ClientBase {
         constexpr ObjectType type = ObjectTypeToTypeEnum<T>;
 
         ObjectBaseParams params = {this, mObjectStores[type].ReserveHandle()};
-        T* object = new T(params, std::forward<Args>(args)...);
+        Ref<T> object = AcquireRef(new T(params, std::forward<Args>(args)...));
 
-        mObjects[type].Append(object);
-        mObjectStores[type].Insert(std::unique_ptr<T>(object));
+        mObjects[type].Append(object.Get());
+        mObjectStores[type].Insert(object.Get());
 
-        Ref<T> ref;
-        ref.Acquire(object);
-        return ref;
+        return object;
     }
 
-    void Free(ObjectBase* obj, ObjectType type);
+    void Unregister(ObjectBase* obj, ObjectType type);
 
     template <typename T>
     T* Get(ObjectId id) {
@@ -115,10 +113,11 @@ class Client : public ClientBase {
 
   private:
     void UnregisterAllObjects();
+    void ReclaimReservation(ObjectBase* obj, ObjectType type);
 
     template <typename T>
-    void Free(T* obj) {
-        Free(obj, ObjectTypeToTypeEnum<T>);
+    void ReclaimReservation(T* obj) {
+        ReclaimReservation(obj, ObjectTypeToTypeEnum<T>);
     }
 
 #include "dawn/wire/client/ClientPrototypes_autogen.inc"

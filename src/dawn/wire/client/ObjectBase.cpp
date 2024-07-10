@@ -33,47 +33,46 @@
 namespace dawn::wire::client {
 
 ObjectBase::ObjectBase(const ObjectBaseParams& params)
-    : mClient(params.client), mHandle(params.handle), mRefcount(1) {}
+    : mClient(params.client), mHandle(params.handle) {
+    DAWN_ASSERT(IsRegistered());
+}
 
-ObjectBase::~ObjectBase() {
-    RemoveFromList();
+bool ObjectBase::IsRegistered() const {
+    return mClient != nullptr;
 }
 
 const ObjectHandle& ObjectBase::GetWireHandle() const {
+    DAWN_ASSERT(IsRegistered());
     return mHandle;
 }
 
 ObjectId ObjectBase::GetWireId() const {
+    DAWN_ASSERT(IsRegistered());
     return mHandle.id;
 }
 
 ObjectGeneration ObjectBase::GetWireGeneration() const {
+    DAWN_ASSERT(IsRegistered());
     return mHandle.generation;
 }
 
 Client* ObjectBase::GetClient() const {
+    DAWN_ASSERT(IsRegistered());
     return mClient;
 }
 
-void ObjectBase::AddRef() {
-    mRefcount++;
+void ObjectBase::DeleteThis() {
+    Unregister();
+    RefCounted::DeleteThis();
 }
 
-uint32_t ObjectBase::Release() {
-    DAWN_ASSERT(mRefcount != 0);
-
-    uint32_t refCount = --mRefcount;
-    if (refCount == 0) {
-        UnregisterObjectCmd cmd;
-        cmd.objectType = GetObjectType();
-        cmd.objectId = GetWireId();
-
-        Client* client = GetClient();
-        client->SerializeCommand(cmd);
-        client->Free(this, GetObjectType());
+void ObjectBase::Unregister() {
+    if (!IsRegistered()) {
+        return;
     }
 
-    return refCount;
+    mClient->Unregister(this, GetObjectType());
+    mClient = nullptr;
 }
 
 ObjectWithEventsBase::ObjectWithEventsBase(const ObjectBaseParams& params,

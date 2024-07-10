@@ -31,6 +31,7 @@
 #include <memory>
 
 #include "dawn/common/LinkedList.h"
+#include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/webgpu.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/ApiObjects_autogen.h"
@@ -43,16 +44,13 @@ namespace dawn::wire::client {
 class Client;
 class Queue;
 
-class Device final : public ObjectWithEventsBase {
+class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
   public:
     explicit Device(const ObjectBaseParams& params,
                     const ObjectHandle& eventManagerHandle,
                     const WGPUDeviceDescriptor* descriptor);
 
     ObjectType GetObjectType() const override;
-
-    // Override the default Release implementation to handle the device lost event.
-    uint32_t Release();
 
     void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);
     void SetLoggingCallback(WGPULoggingCallback errorCallback, void* errorUserdata);
@@ -99,6 +97,7 @@ class Device final : public ObjectWithEventsBase {
     class DeviceLostEvent;
 
   private:
+    void WillDropLastExternalRef() override;
     template <typename Event,
               typename Cmd,
               typename CallbackInfo = typename Event::CallbackInfo,

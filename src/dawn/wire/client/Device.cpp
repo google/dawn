@@ -253,7 +253,8 @@ class Device::DeviceLostEvent : public TrackedEvent {
 Device::Device(const ObjectBaseParams& params,
                const ObjectHandle& eventManagerHandle,
                const WGPUDeviceDescriptor* descriptor)
-    : ObjectWithEventsBase(params, eventManagerHandle), mIsAlive(std::make_shared<bool>(true)) {
+    : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle),
+      mIsAlive(std::make_shared<bool>(true)) {
 #if defined(DAWN_ENABLE_ASSERTS)
     static constexpr WGPUDeviceLostCallbackInfo2 kDefaultDeviceLostCallbackInfo = {
         nullptr, WGPUCallbackMode_AllowSpontaneous,
@@ -321,15 +322,9 @@ ObjectType Device::GetObjectType() const {
     return ObjectType::Device;
 }
 
-uint32_t Device::Release() {
-    // The device always has a reference in it's DeviceLossEvent which is created at construction,
-    // so when we drop to 1, we want to set the event so that the device can be loss according to
-    // the callback mode.
-    uint32_t refCount = ObjectBase::Release();
-    if (refCount == 1) {
-        HandleDeviceLost(WGPUDeviceLostReason_Destroyed, "Device was destroyed.");
-    }
-    return refCount;
+void Device::WillDropLastExternalRef() {
+    HandleDeviceLost(WGPUDeviceLostReason_Destroyed, "Device was destroyed.");
+    Unregister();
 }
 
 WGPUStatus Device::GetLimits(WGPUSupportedLimits* limits) const {

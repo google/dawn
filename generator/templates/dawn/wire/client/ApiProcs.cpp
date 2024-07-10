@@ -112,11 +112,11 @@ namespace dawn::wire::client {
     //* When an object's refcount reaches 0, notify the server side of it and delete it.
     DAWN_WIRE_EXPORT void {{as_cMethodNamespaced(type.name, Name("release"), Name('dawn wire client'))}}({{cType}} cObj) {
         {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
-        obj->Release();
+        obj->APIRelease();
     }
 
     DAWN_WIRE_EXPORT void {{as_cMethodNamespaced(type.name, Name("add ref"), Name('dawn wire client'))}}({{cType}} cObj) {
-        reinterpret_cast<{{Type}}*>(cObj)->AddRef();
+        reinterpret_cast<{{Type}}*>(cObj)->APIAddRef();
     }
 
 {% endfor %}

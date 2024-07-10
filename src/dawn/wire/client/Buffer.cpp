@@ -439,8 +439,9 @@ Buffer::Buffer(const ObjectBaseParams& params,
       mDestructWriteHandleOnUnmap(descriptor->mappedAtCreation &&
                                   ((descriptor->usage & WGPUBufferUsage_MapWrite) == 0)) {}
 
-Buffer::~Buffer() {
+void Buffer::DeleteThis() {
     FreeMappedData();
+    ObjectWithEventsBase::DeleteThis();
 }
 
 ObjectType Buffer::GetObjectType() const {
@@ -495,8 +496,6 @@ WGPUFuture Buffer::MapAsyncF(WGPUMapMode mode,
                              size_t offset,
                              size_t size,
                              const WGPUBufferMapCallbackInfo& callbackInfo) {
-    DAWN_ASSERT(GetRefcount() != 0);
-
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<MapAsyncEvent>(callbackInfo, this));
@@ -543,8 +542,6 @@ WGPUFuture Buffer::MapAsync2(WGPUMapMode mode,
                              size_t offset,
                              size_t size,
                              const WGPUBufferMapCallbackInfo2& callbackInfo) {
-    DAWN_ASSERT(GetRefcount() != 0);
-
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<MapAsyncEvent2>(callbackInfo, this));

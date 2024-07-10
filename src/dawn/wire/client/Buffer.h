@@ -50,7 +50,7 @@ class Buffer final : public ObjectWithEventsBase {
     Buffer(const ObjectBaseParams& params,
            const ObjectHandle& eventManagerHandle,
            const WGPUBufferDescriptor* descriptor);
-    ~Buffer() override;
+    void DeleteThis() override;
 
     ObjectType GetObjectType() const override;
 

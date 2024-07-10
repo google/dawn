@@ -47,22 +47,22 @@ ObjectHandle ObjectStore::ReserveHandle() {
     return handle;
 }
 
-void ObjectStore::Insert(std::unique_ptr<ObjectBase> obj) {
+void ObjectStore::Insert(ObjectBase* obj) {
     ObjectId id = obj->GetWireId();
 
     if (id >= mObjects.size()) {
         DAWN_ASSERT(id == mObjects.size());
-        mObjects.emplace_back(std::move(obj));
+        mObjects.emplace_back(obj);
     } else {
         // The generation should never overflow. We don't recycle ObjectIds that would
         // overflow their next generation.
         DAWN_ASSERT(obj->GetWireGeneration() != 0);
         DAWN_ASSERT(mObjects[id] == nullptr);
-        mObjects[id] = std::move(obj);
+        mObjects[id] = obj;
     }
 }
 
-void ObjectStore::Free(ObjectBase* obj) {
+void ObjectStore::Remove(ObjectBase* obj) {
     DAWN_ASSERT(obj->IsInList());
     // The wire reuses ID for objects to keep them in a packed array starting from 0.
     // To avoid issues with asynchronous server->client communication referring to an ID that's
@@ -79,7 +79,7 @@ ObjectBase* ObjectStore::Get(ObjectId id) const {
     if (id >= mObjects.size()) {
         return nullptr;
     }
-    return mObjects[id].get();
+    return mObjects[id];
 }
 
 }  // namespace dawn::wire::client

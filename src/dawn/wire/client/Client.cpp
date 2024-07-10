@@ -74,12 +74,7 @@ void Client::UnregisterAllObjects() {
     // which would be invalid if the queue was already freed.
     while (!mObjects[ObjectType::Device].empty()) {
         ObjectBase* object = mObjects[ObjectType::Device].head()->value();
-
-        UnregisterObjectCmd cmd;
-        cmd.objectType = ObjectType::Device;
-        cmd.objectId = object->GetWireId();
-        SerializeCommand(cmd);
-        mObjectStores[ObjectType::Device].Free(object);
+        object->Unregister();
     }
 
     for (auto& objectList : mObjects) {
@@ -89,12 +84,7 @@ void Client::UnregisterAllObjects() {
         }
         while (!objectList.empty()) {
             ObjectBase* object = objectList.head()->value();
-
-            UnregisterObjectCmd cmd;
-            cmd.objectType = objectType;
-            cmd.objectId = object->GetWireId();
-            SerializeCommand(cmd);
-            mObjectStores[objectType].Free(object);
+            object->Unregister();
         }
     }
 }
@@ -147,23 +137,23 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
 }
 
 void Client::ReclaimBufferReservation(const ReservedBuffer& reservation) {
-    Free(FromAPI(reservation.buffer));
+    ReclaimReservation(FromAPI(reservation.buffer));
 }
 
 void Client::ReclaimTextureReservation(const ReservedTexture& reservation) {
-    Free(FromAPI(reservation.texture));
+    ReclaimReservation(FromAPI(reservation.texture));
 }
 
 void Client::ReclaimSwapChainReservation(const ReservedSwapChain& reservation) {
-    Free(FromAPI(reservation.swapchain));
+    ReclaimReservation(FromAPI(reservation.swapchain));
 }
 
 void Client::ReclaimDeviceReservation(const ReservedDevice& reservation) {
-    Free(FromAPI(reservation.device));
+    ReclaimReservation(FromAPI(reservation.device));
 }
 
 void Client::ReclaimInstanceReservation(const ReservedInstance& reservation) {
-    Free(FromAPI(reservation.instance));
+    ReclaimReservation(FromAPI(reservation.instance));
 }
 
 EventManager& Client::GetEventManager(const ObjectHandle& instance) {
@@ -201,8 +191,18 @@ bool Client::IsDisconnected() const {
     return mDisconnected;
 }
 
-void Client::Free(ObjectBase* obj, ObjectType type) {
-    mObjectStores[type].Free(obj);
+void Client::Unregister(ObjectBase* obj, ObjectType type) {
+    UnregisterObjectCmd cmd;
+    cmd.objectType = type;
+    cmd.objectId = obj->GetWireId();
+    SerializeCommand(cmd);
+
+    ReclaimReservation(obj, type);
+}
+
+void Client::ReclaimReservation(ObjectBase* obj, ObjectType type) {
+    mObjectStores[type].Remove(obj);
+    obj->RemoveFromList();
 }
 
 }  // namespace dawn::wire::client
