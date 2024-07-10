@@ -25,7 +25,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import("//generator/dawn_generator.gni")
+import("../../scripts/dawn_overrides_with_defaults.gni")
+
+import("${dawn_root}/generator/dawn_generator.gni")
 
 dawn_json_generator("kotlin_gen") {
   target = "kotlin"

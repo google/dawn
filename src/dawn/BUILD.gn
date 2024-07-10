@@ -73,3 +73,10 @@ dawn_json_generator("webgpu_headers_gen") {
   target = "webgpu_headers"
   outputs = [ "webgpu-headers/webgpu.h" ]
 }
+
+###############################################################################
+# Generated files to expose WebGPU Kotlin bindings
+###############################################################################
+group("proxy_for_jni") {
+  deps = [ "${dawn_root}/tools/android" ]
+}
