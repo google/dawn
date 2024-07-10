@@ -47,6 +47,7 @@ Developer documentation:
  - [Dawn's infrastructure](docs/dawn/infra.md)
  - [Dawn errors](docs/dawn/errors.md)
  - [Tint experimental extensions](docs/tint/experimental_extensions.md)
+ - [Quickstart with CMake](docs/quickstart-cmake.md)
 
 
 User documentation: (TODO, figure out what overlaps with the webgpu.h docs)

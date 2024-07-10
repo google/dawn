@@ -111,6 +111,11 @@ To generate a Microsoft Visual Studio solution, add `ide=vs2022` and
 `ninja-executable=<dawn parent directory>\dawn\third_party\ninja\ninja.exe`.
 The .sln file will be created in the output directory specified.
 
+For CMake builds, you can enable installation with the `DAWN_ENABLE_INSTALL` option
+and use `find_package(Dawn)` in your CMake project to discover Dawn and link with
+the `dawn::webgpu_dawn` target. Please see [Quickstart with CMake](./quickstart-cmake.md)
+for step-by-step instructions.
+
 ### Fuzzers on MacOS
 If you are attempting fuzz, using `TINT_BUILD_FUZZERS=ON`, the version of llvm
 in the XCode SDK does not have the needed libfuzzer functionality included.
