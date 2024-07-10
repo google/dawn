@@ -726,6 +726,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (@available(macOS 10.15, iOS 13.0, *)) {
         if ([*mDevice supportsFamily:MTLGPUFamilyApple6] ||
             [*mDevice supportsFamily:MTLGPUFamilyMac2]) {
+            EnableFeature(Feature::Subgroups);
+            EnableFeature(Feature::SubgroupsF16);
+            // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
             EnableFeature(Feature::ChromiumExperimentalSubgroups);
         }
     }

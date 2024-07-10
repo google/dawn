@@ -1462,6 +1462,12 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kFloat32Filterable:
             out = wgpu::FeatureName::Float32Filterable;
             return true;
+        case interop::GPUFeatureName::kSubgroups:
+            out = wgpu::FeatureName::Subgroups;
+            return true;
+        case interop::GPUFeatureName::kSubgroupsF16:
+            out = wgpu::FeatureName::SubgroupsF16;
+            return true;
         case interop::GPUFeatureName::kChromiumExperimentalSubgroups:
             out = wgpu::FeatureName::ChromiumExperimentalSubgroups;
             return true;
@@ -1493,6 +1499,8 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(TextureCompressionBC, kTextureCompressionBc);
         CASE(TextureCompressionETC2, kTextureCompressionEtc2);
         CASE(TimestampQuery, kTimestampQuery);
+        CASE(Subgroups, kSubgroups);
+        CASE(SubgroupsF16, kSubgroupsF16);
 
 #undef CASE
 

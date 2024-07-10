@@ -90,7 +90,7 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     if (IsFullSubgroupsRequired()) {
         // Workgroup size validation is handled in ValidateComputeStageWorkgroupSize when compiling
-        // shader module. Vulkan device that support ChromiumExperimentalSubgroups must support
+        // shader module. Vulkan device that support Subgroups feature must support
         // computeFullSubgroups.
         DAWN_ASSERT(device->GetDeviceInfo().subgroupSizeControlFeatures.computeFullSubgroups);
         createInfo.stage.flags |= VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT |

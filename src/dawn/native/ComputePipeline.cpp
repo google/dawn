@@ -39,6 +39,8 @@ MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
     UnpackedPtr<ComputePipelineDescriptor> unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
     auto* fullSubgroupsOption = unpacked.Get<DawnComputePipelineFullSubgroups>();
+    // TODO(349125474): Decide what to do with fullSubgroupsOption before removing deprecated
+    // ChromiumExperimentalSubgroups.
     DAWN_INVALID_IF(
         (fullSubgroupsOption && !device->HasFeature(Feature::ChromiumExperimentalSubgroups)),
         "DawnComputePipelineFullSubgroups is used without %s enabled.",

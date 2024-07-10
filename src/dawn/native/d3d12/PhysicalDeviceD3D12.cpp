@@ -154,14 +154,22 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     // ShaderF16 features require DXC version being 1.4 or higher, shader model supporting 6.2 or
     // higher, and native supporting F16 shader ops.
+    bool shaderF16Enabled = false;
     if (GetBackend()->IsDXCAvailableAndVersionAtLeast(1, 4, 1, 4) &&
         mDeviceInfo.highestSupportedShaderModel >= 62 && mDeviceInfo.supportsNative16BitShaderOps) {
         EnableFeature(Feature::ShaderF16);
+        shaderF16Enabled = true;
     }
 
     // ChromiumExperimentalSubgroups requires SM >= 6.0 and capabilities flags.
     if (GetBackend()->IsDXCAvailable() && mDeviceInfo.supportsWaveOps) {
+        // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
         EnableFeature(Feature::ChromiumExperimentalSubgroups);
+        EnableFeature(Feature::Subgroups);
+        // D3D12 devices that support both native f16 and wave ops can support subgroups-f16.
+        if (shaderF16Enabled) {
+            EnableFeature(Feature::SubgroupsF16);
+        }
     }
 
     D3D12_FEATURE_DATA_FORMAT_SUPPORT bgra8unormFormatInfo = {};
@@ -389,6 +397,9 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
         // checked in InitializeSupportedFeaturesImpl.
         switch (feature) {
             case wgpu::FeatureName::ShaderF16:
+            case wgpu::FeatureName::Subgroups:
+            case wgpu::FeatureName::SubgroupsF16:
+            // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
             case wgpu::FeatureName::ChromiumExperimentalSubgroups:
                 return FeatureValidationResult(
                     absl::StrFormat("Feature %s requires DXC for D3D12.", feature));
@@ -398,8 +409,9 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     }
     // Validate applied shader version.
     switch (feature) {
-        // The feature `shader-f16` requires using shader model 6.2 or higher.
-        case wgpu::FeatureName::ShaderF16: {
+        // The feature `shader-f16` and `subgroups-f16` requires using shader model 6.2 or higher.
+        case wgpu::FeatureName::ShaderF16:
+        case wgpu::FeatureName::SubgroupsF16: {
             if (!(GetAppliedShaderModelUnderToggles(toggles) >= 62)) {
                 return FeatureValidationResult(absl::StrFormat(
                     "Feature %s requires shader model 6.2 or higher for D3D12.", feature));

@@ -1104,6 +1104,23 @@ void* DawnTestBase::GetUniqueUserdata() {
     return reinterpret_cast<void*>(++mNextUniqueUserdata);
 }
 
+uint32_t DawnTestBase::GetDeviceCreationDeprecationWarningExpectation(
+    const wgpu::DeviceDescriptor& descriptor) {
+    uint32_t expectedDeprecatedCount = 0;
+
+    std::unordered_set<wgpu::FeatureName> requiredFeatureSet;
+    for (uint32_t i = 0; i < descriptor.requiredFeatureCount; ++i) {
+        requiredFeatureSet.insert(descriptor.requiredFeatures[i]);
+    }
+    // ChromiumExperimentalSubgroups feature is deprecated.
+    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
+    if (requiredFeatureSet.count(wgpu::FeatureName::ChromiumExperimentalSubgroups)) {
+        expectedDeprecatedCount++;
+    }
+
+    return expectedDeprecatedCount;
+}
+
 WGPUDevice DawnTestBase::CreateDeviceImpl(std::string isolationKey,
                                           const WGPUDeviceDescriptor* descriptor) {
     // Create the device from the adapter
@@ -1131,7 +1148,23 @@ WGPUDevice DawnTestBase::CreateDeviceImpl(std::string isolationKey,
     ParamTogglesHelper deviceTogglesHelper(mParam, native::ToggleStage::Device);
     cacheDesc.nextInChain = &deviceTogglesHelper.togglesDesc;
 
-    return mBackendAdapter.CreateDevice(&deviceDescriptor);
+    WGPUDevice createdDevice;
+    uint32_t deviceCreationDeprecatedWarningExpectation =
+        GetDeviceCreationDeprecationWarningExpectation(deviceDescriptor);
+    // Check and update the deprecation warning count for creating device.
+    // The same as EXPECT_DEPRECATION_WARNINGS, but without checking
+    // SkipValidation toggle.
+    if (UsesWire()) {
+        createdDevice = mBackendAdapter.CreateDevice(&deviceDescriptor);
+    } else {
+        uint64_t warningsBefore = GetDeprecationWarningCountForTesting();
+        createdDevice = mBackendAdapter.CreateDevice(&deviceDescriptor);
+        uint64_t warningsAfter = GetDeprecationWarningCountForTesting();
+        EXPECT_EQ(mLastWarningCount, warningsBefore);
+        EXPECT_EQ(warningsAfter, warningsBefore + deviceCreationDeprecatedWarningExpectation);
+        mLastWarningCount = warningsAfter;
+    }
+    return createdDevice;
 }
 
 wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {

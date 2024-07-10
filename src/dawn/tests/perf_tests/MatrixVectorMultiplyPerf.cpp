@@ -96,15 +96,31 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
     void SetUp() override;
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        mUsingF16 = false;
+        mUsingSubgroups = false;
+        mUsingSubgroupsF16 = false;
+        mAllFeaturesSupported = true;
+
         auto requirements =
             DawnPerfTestWithParams<MatrixVectorMultiplyParams>::GetRequiredFeatures();
-        if ((GetParam().mStoreType == StoreType::F16 || GetParam().mAccType == AccType::F16) &&
-            SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
-            requirements.push_back(wgpu::FeatureName::ShaderF16);
+        auto requireFeature = [&](wgpu::FeatureName feature) {
+            if (SupportsFeatures({feature})) {
+                requirements.push_back(feature);
+            } else {
+                mAllFeaturesSupported = false;
+            }
+        };
+        if (GetParam().mStoreType == StoreType::F16 || GetParam().mAccType == AccType::F16) {
+            mUsingF16 = true;
+            requireFeature(wgpu::FeatureName::ShaderF16);
         }
-        if (GetParam().mImpl == KernelImplementation::Subgroup &&
-            SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroups})) {
-            requirements.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroups);
+        if (GetParam().mImpl == KernelImplementation::Subgroup) {
+            mUsingSubgroups = true;
+            requireFeature(wgpu::FeatureName::Subgroups);
+            if (mUsingF16) {
+                mUsingSubgroupsF16 = true;
+                requireFeature(wgpu::FeatureName::SubgroupsF16);
+            }
         }
         return requirements;
     }
@@ -134,6 +150,11 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
 
     wgpu::BindGroup mBindGroup;
     wgpu::ComputePipeline mPipeline;
+
+    bool mUsingF16;
+    bool mUsingSubgroups;
+    bool mUsingSubgroupsF16;
+    bool mAllFeaturesSupported;
 };
 
 void MatrixVectorMultiplyPerf::SetUp() {
@@ -153,16 +174,10 @@ void MatrixVectorMultiplyPerf::SetUp() {
         DAWN_TEST_UNSUPPORTED_IF(GetParam().mStoreType != GetParam().mAccType);
     }
 
-    DAWN_TEST_UNSUPPORTED_IF(
-        (GetParam().mStoreType == StoreType::F16 || GetParam().mAccType == AccType::F16) &&
-        !SupportsFeatures({wgpu::FeatureName::ShaderF16}));
-
-    DAWN_TEST_UNSUPPORTED_IF(GetParam().mImpl == KernelImplementation::Subgroup &&
-                             !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroups}));
+    DAWN_TEST_UNSUPPORTED_IF(!mAllFeaturesSupported);
 
     // D3D12 device must be using DXC to support subgroups feature.
-    DAWN_ASSERT(!SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroups}) ||
-                !IsD3D12() || IsDXC());
+    DAWN_ASSERT(!(mUsingSubgroups || mUsingSubgroupsF16) || !IsD3D12() || IsDXC());
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.usage = wgpu::BufferUsage::Storage;
@@ -197,11 +212,14 @@ void MatrixVectorMultiplyPerf::SetUp() {
 
 std::string MatrixVectorMultiplyPerf::GenerateShader() const {
     std::stringstream code;
-    if (GetParam().mStoreType == StoreType::F16 || GetParam().mAccType == AccType::F16) {
+    if (mUsingF16) {
         code << "enable f16;\n";
     }
-    if (GetParam().mImpl == KernelImplementation::Subgroup) {
-        code << "enable chromium_experimental_subgroups;\n";
+    if (mUsingSubgroups) {
+        code << "enable subgroups;\n";
+    }
+    if (mUsingSubgroupsF16) {
+        code << "enable subgroups_f16;\n";
     }
     switch (GetParam().mStoreType) {
         case StoreType::F32:

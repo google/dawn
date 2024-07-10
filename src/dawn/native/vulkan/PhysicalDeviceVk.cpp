@@ -248,6 +248,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::R8UnormStorage);
     }
 
+    bool shaderF16Enabled = false;
     if (mDeviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
         mDeviceInfo.HasExt(DeviceExt::_16BitStorage) &&
         mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
@@ -256,6 +257,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         // TODO(crbug.com/tint/2164): Investigate crashes in f16 CTS tests to enable on NVIDIA.
         if (!gpu_info::IsNvidia(GetVendorId())) {
             EnableFeature(Feature::ShaderF16);
+            shaderF16Enabled = true;
         }
     }
 
@@ -371,19 +373,56 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::AdapterPropertiesVk);
     EnableFeature(Feature::DawnLoadResolveTexture);
 
+    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
     // Enable ChromiumExperimentalSubgroups feature if:
     // 1. Vulkan API version is 1.1 or later, and
     // 2. subgroupSupportedStages includes compute stage bit, and
     // 3. subgroupSupportedOperations includes basic and ballot bits, and
     // 4. VK_EXT_subgroup_size_control extension is valid, and both subgroupSizeControl
     //    and computeFullSubgroups is TRUE in VkPhysicalDeviceSubgroupSizeControlFeaturesEXT.
+    // Notes that these requirement doesn't ensure all subgroups features are supported by the
+    // Vulkan backend. For example, currently ChromiumExperimentalSubgroups feature allows using
+    // subgroups functions with f16 types in WGSL, but doesn't ensure that backend supports it.
     if ((mDeviceInfo.properties.apiVersion >= VK_API_VERSION_1_1) &&
         (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
+        (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_BASIC_BIT) &&
         (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_BALLOT_BIT) &&
         (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) &&
         (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
         (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE)) {
         EnableFeature(Feature::ChromiumExperimentalSubgroups);
+    }
+
+    // Enable Subgroups feature if:
+    // 1. Vulkan API version is 1.1 or later, and
+    // 2. subgroupSupportedStages includes compute and fragment stage bit, and
+    // 3. subgroupSupportedOperations includes vote, ballot, shuffle, shuffle relative, arithmetic,
+    //    and quad bits, and
+    // 4. VK_EXT_subgroup_size_control extension is valid, and both subgroupSizeControl
+    //    and computeFullSubgroups is TRUE in VkPhysicalDeviceSubgroupSizeControlFeaturesEXT.
+    if ((mDeviceInfo.properties.apiVersion >= VK_API_VERSION_1_1) &&
+        (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
+        (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_FRAGMENT_BIT) &&
+        (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_BASIC_BIT) &&
+        (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_BALLOT_BIT) &&
+        (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_SHUFFLE_BIT) &&
+        (mDeviceInfo.subgroupProperties.supportedOperations &
+         VK_SUBGROUP_FEATURE_SHUFFLE_RELATIVE_BIT) &&
+        (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_ARITHMETIC_BIT) &&
+        (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_QUAD_BIT) &&
+        (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) &&
+        (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
+        (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE)) {
+        EnableFeature(Feature::Subgroups);
+        // Enable SubgroupsF16 feature if:
+        // 1. Subgroups feature is enabled, and
+        // 2. ShaderF16 feature is enabled, and
+        // 3. shaderSubgroupExtendedTypes is TRUE in
+        //    VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR.
+        if (shaderF16Enabled &&
+            mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes == VK_TRUE) {
+            EnableFeature(Feature::SubgroupsF16);
+        }
     }
     // Enable ChromiumExperimentalSubgroupUniformControlFlow if
     // VK_KHR_shader_subgroup_uniform_control_flow is supported.

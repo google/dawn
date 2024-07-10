@@ -442,22 +442,17 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (HasFeature(Feature::TextureCompressionBC)) {
-        DAWN_ASSERT(ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionBC ==
-                    VK_TRUE);
+        DAWN_ASSERT(mDeviceInfo.features.textureCompressionBC == VK_TRUE);
         usedKnobs.features.textureCompressionBC = VK_TRUE;
     }
 
     if (HasFeature(Feature::TextureCompressionETC2)) {
-        DAWN_ASSERT(
-            ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionETC2 ==
-            VK_TRUE);
+        DAWN_ASSERT(mDeviceInfo.features.textureCompressionETC2 == VK_TRUE);
         usedKnobs.features.textureCompressionETC2 = VK_TRUE;
     }
 
     if (HasFeature(Feature::TextureCompressionASTC)) {
-        DAWN_ASSERT(
-            ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionASTC_LDR ==
-            VK_TRUE);
+        DAWN_ASSERT(mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE);
         usedKnobs.features.textureCompressionASTC_LDR = VK_TRUE;
     }
 
@@ -466,17 +461,17 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (HasFeature(Feature::ShaderF16)) {
-        const VulkanDeviceInfo& deviceInfo = ToBackend(GetPhysicalDevice())->GetDeviceInfo();
-        DAWN_ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
-                    deviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
-                    deviceInfo.HasExt(DeviceExt::_16BitStorage) &&
-                    deviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
-                    deviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE);
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderFloat16Int8) &&
+                    mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
+                    usedKnobs.HasExt(DeviceExt::_16BitStorage) &&
+                    mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
+                    mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess ==
+                        VK_TRUE);
 
         usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
         usedKnobs._16BitStorageFeatures.storageBuffer16BitAccess = VK_TRUE;
         usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
-        if (deviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE) {
+        if (mDeviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE) {
             usedKnobs._16BitStorageFeatures.storageInputOutput16 = VK_TRUE;
         }
 
@@ -484,6 +479,27 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
         featuresChain.Add(&usedKnobs._16BitStorageFeatures,
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
+    }
+
+    // Set device feature for subgroups with f16 types.
+    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
+    if (HasFeature(Feature::SubgroupsF16) || HasFeature(Feature::ChromiumExperimentalSubgroups)) {
+        // If ChromiumExperimentalSubgroups feature is required, set the shaderSubgroupExtendedTypes
+        // as-is, so that subgroups functions with f16 can be used if supported by backend.
+        if (HasFeature(Feature::ChromiumExperimentalSubgroups)) {
+            if (usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes)) {
+                usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
+                featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
+            }
+        } else {
+            DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes) &&
+                        mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes ==
+                            VK_TRUE &&
+                        HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups));
+
+            usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
+            featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
+        }
     }
 
     if (HasFeature(Feature::DualSourceBlending)) {

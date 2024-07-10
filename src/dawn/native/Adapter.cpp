@@ -31,6 +31,7 @@
 #include <memory>
 #include <string>
 #include <tuple>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -105,6 +106,7 @@ wgpu::Status AdapterBase::APIGetLimits(SupportedLimits* limits) const {
         limits->limits = mPhysicalDevice->GetLimits().v1;
     }
 
+    // TODO(349125474): Deprecate DawnExperimentalSubgroupLimits.
     if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
         if (!mTogglesState.IsEnabled(Toggle::AllowUnsafeAPIs)) {
             // If AllowUnsafeAPIs is not enabled, return the default-initialized
@@ -301,16 +303,25 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     // Backend-specific forced and default device toggles
     mPhysicalDevice->SetupBackendDeviceToggles(mInstance->GetPlatform(), &deviceToggles);
 
-    // Validate all required features are supported by the adapter and suitable under device
-    // toggles. Note that certain toggles in device toggles state may be overriden by user and
-    // different from the adapter toggles state, and in this case a device may support features
-    // that not supported by the adapter. We allow such toggles overriding for the convinience e.g.
-    // creating a deivce for internal usage with AllowUnsafeAPI enabled from an adapter that
-    // disabled AllowUnsafeAPIS.
+    std::unordered_set<wgpu::FeatureName> requiredFeatureSet;
     for (uint32_t i = 0; i < descriptor->requiredFeatureCount; ++i) {
-        wgpu::FeatureName feature = descriptor->requiredFeatures[i];
+        requiredFeatureSet.insert(descriptor->requiredFeatures[i]);
+    }
+    // Validate all required features are supported by the adapter and suitable under device
+    // toggles. Note that certain toggles in device toggles state may be overridden by user and
+    // different from the adapter toggles state, and in this case a device may support features
+    // that not supported by the adapter. We allow such toggles overriding for the convenience e.g.
+    // creating a device for internal usage with AllowUnsafeAPI enabled from an adapter that
+    // disabled AllowUnsafeAPIS.
+    for (wgpu::FeatureName requiredFeature : requiredFeatureSet) {
+        // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
+        if (requiredFeature == wgpu::FeatureName::ChromiumExperimentalSubgroups) {
+            GetInstance()->EmitDeprecationWarning(
+                "Feature chromium-experimental-subgroups is deprecated. Use features subgroups and "
+                "subgroups-f16 instead.");
+        }
         FeatureValidationResult result =
-            mPhysicalDevice->ValidateFeatureSupportedWithToggles(feature, deviceToggles);
+            mPhysicalDevice->ValidateFeatureSupportedWithToggles(requiredFeature, deviceToggles);
         DAWN_INVALID_IF(!result.success, "Invalid feature required: %s",
                         result.errorMessage.c_str());
     }

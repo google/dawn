@@ -31,6 +31,9 @@
 enum GPUFeatureName {
     "chromium-experimental-subgroups",
     "chromium-experimental-subgroup-uniform-control-flow",
+    // subgroups and subgroups-f16 features are not in webgpu.idl yet.
+    "subgroups",
+    "subgroups-f16",
 };
 
 dictionary GPURequestAdapterOptions {

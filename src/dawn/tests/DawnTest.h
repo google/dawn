@@ -624,6 +624,10 @@ class DawnTestBase {
 
     uint64_t GetDeprecationWarningCountForTesting() const;
 
+    // Helps compute expected deprecated warning count for creating device with given descriptor.
+    uint32_t GetDeviceCreationDeprecationWarningExpectation(
+        const wgpu::DeviceDescriptor& descriptor);
+
     void* GetUniqueUserdata();
 
   private:

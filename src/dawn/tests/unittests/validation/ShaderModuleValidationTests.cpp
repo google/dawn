@@ -753,6 +753,44 @@ TEST_F(ShaderModuleValidationTest, CreateErrorShaderModule) {
     FlushWire();
 }
 
+struct WGSLExtensionInfo {
+    const char* wgslName;
+    // Is this WGSL extension experimental, i.e. guarded by AllowUnsafeAPIs toggle
+    bool isExperimental;
+    // The WebGPU features that required to enable this extension, set to empty if no feature
+    // required.
+    const std::vector<const char*> requiredFeatureNames;
+    // The WGSL extensions dependency that required to enable this extension, set to empty if no
+    // dependency.
+    const std::vector<const char*> dependingExtensionNames;
+};
+
+const struct WGSLExtensionInfo kExtensions[] = {
+    {"f16", false, {"shader-f16"}, {}},
+    {"dual_source_blending", true, {"dual-source-blending"}, {}},
+    {"chromium_experimental_subgroups", true, {"chromium-experimental-subgroups"}, {}},
+    {"subgroups", true, {"subgroups"}, {}},
+    {"subgroups_f16", true, {"shader-f16", "subgroups", "subgroups-f16"}, {"f16", "subgroups"}},
+    {"chromium_experimental_pixel_local", true, {"pixel-local-storage-coherent"}, {}},
+    {"chromium_disable_uniformity_analysis", true, {}, {}},
+    {"chromium_internal_graphite", true, {}, {}},
+    {"chromium_experimental_framebuffer_fetch", true, {"framebuffer-fetch"}, {}},
+
+    // Currently the following WGSL extensions are not enabled under any situation.
+    /*
+    {"chromium_experimental_push_constant", true, {}},
+    {"chromium_internal_relaxed_uniform_layout", true, {}},
+    */
+};
+
+std::string EnableDependingWGSLExtensions(const WGSLExtensionInfo& extension) {
+    std::stringstream s;
+    for (const char* dependency : extension.dependingExtensionNames) {
+        s << "enable " << dependency << ";\n";
+    }
+    return s.str();
+}
+
 class ShaderModuleExtensionValidationTestBase : public ValidationTest {
   protected:
     // Skip tests if using Wire, because some features are not supported by the wire and cause the
@@ -771,31 +809,6 @@ class ShaderModuleExtensionValidationTestBase : public ValidationTest {
     }
 };
 
-struct WGSLExtensionInfo {
-    const char* wgslName;
-    // Is this WGSL extension experimental, i.e. guarded by AllowUnsafeAPIs toggle
-    bool isExperimental;
-    // The WebGPU feature that required to enable this extension, set to nullptr if no feature
-    // required.
-    const char* requiredFeatureName;
-};
-
-constexpr struct WGSLExtensionInfo kExtensions[] = {
-    {"f16", false, "shader-f16"},
-    {"dual_source_blending", true, "dual-source-blending"},
-    {"chromium_experimental_subgroups", true, "chromium-experimental-subgroups"},
-    {"chromium_experimental_pixel_local", true, "pixel-local-storage-coherent"},
-    {"chromium_disable_uniformity_analysis", true, nullptr},
-    {"chromium_internal_graphite", true, nullptr},
-    {"chromium_experimental_framebuffer_fetch", true, "framebuffer-fetch"},
-
-    // Currently the following WGSL extensions are not enabled under any situation.
-    /*
-    {"chromium_experimental_push_constant", true, nullptr},
-    {"chromium_internal_relaxed_uniform_layout", true, nullptr},
-    */
-};
-
 // Test validating WGSL extension on safe device with no feature required.
 class ShaderModuleExtensionValidationTestSafeNoFeature
     : public ShaderModuleExtensionValidationTestBase {
@@ -807,13 +820,14 @@ class ShaderModuleExtensionValidationTestSafeNoFeature
 TEST_F(ShaderModuleExtensionValidationTestSafeNoFeature,
        OnlyStableExtensionsRequiringNoFeatureAllowed) {
     for (auto& extension : kExtensions) {
-        std::string wgsl = std::string("enable ") + extension.wgslName + R"(;
+        std::string wgsl = EnableDependingWGSLExtensions(extension) + std::string("enable ") +
+                           extension.wgslName + R"(;
 
 @compute @workgroup_size(1) fn main() {})";
 
         // On a safe device with no feature required, only stable extensions requiring no features
         // are allowed.
-        if (!extension.isExperimental && !extension.requiredFeatureName) {
+        if (!extension.isExperimental && extension.requiredFeatureNames.size() == 0) {
             utils::CreateShaderModule(device, wgsl.c_str());
         } else {
             ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, wgsl.c_str()));
@@ -831,13 +845,14 @@ class ShaderModuleExtensionValidationTestUnsafeNoFeature
 TEST_F(ShaderModuleExtensionValidationTestUnsafeNoFeature,
        OnlyExtensionsRequiringNoFeatureAllowed) {
     for (auto& extension : kExtensions) {
-        std::string wgsl = std::string("enable ") + extension.wgslName + R"(;
+        std::string wgsl = EnableDependingWGSLExtensions(extension) + std::string("enable ") +
+                           extension.wgslName + R"(;
 
 @compute @workgroup_size(1) fn main() {})";
 
         // On an unsafe device with no feature required, only extensions requiring no features are
         // allowed.
-        if (!extension.requiredFeatureName) {
+        if (extension.requiredFeatureNames.size() == 0) {
             utils::CreateShaderModule(device, wgsl.c_str());
         } else {
             ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, wgsl.c_str()));
@@ -855,7 +870,8 @@ class ShaderModuleExtensionValidationTestSafeAllFeatures
 
 TEST_F(ShaderModuleExtensionValidationTestSafeAllFeatures, OnlyStableExtensionsAllowed) {
     for (auto& extension : kExtensions) {
-        std::string wgsl = std::string("enable ") + extension.wgslName + R"(;
+        std::string wgsl = EnableDependingWGSLExtensions(extension) + std::string("enable ") +
+                           extension.wgslName + R"(;
 
 @compute @workgroup_size(1) fn main() {})";
 
@@ -877,7 +893,8 @@ class ShaderModuleExtensionValidationTestUnsafeAllFeatures
 
 TEST_F(ShaderModuleExtensionValidationTestUnsafeAllFeatures, AllExtensionsAllowed) {
     for (auto& extension : kExtensions) {
-        std::string wgsl = std::string("enable ") + extension.wgslName + R"(;
+        std::string wgsl = EnableDependingWGSLExtensions(extension) + std::string("enable ") +
+                           extension.wgslName + R"(;
 
 @compute @workgroup_size(1) fn main() {})";
 

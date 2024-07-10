@@ -322,6 +322,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                 &info.shaderSubgroupUniformControlFlowFeatures,
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_UNIFORM_CONTROL_FLOW_FEATURES_KHR);
         }
+        if (info.extensions[DeviceExt::ShaderSubgroupExtendedTypes]) {
+            featuresChain.Add(
+                &info.shaderSubgroupExtendedTypes,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_EXTENDED_TYPES_FEATURES);
+        }
 
         if (info.extensions[DeviceExt::ExternalMemoryHost]) {
             propertiesChain.Add(

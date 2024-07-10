@@ -74,6 +74,8 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMaxComputeWorkgroupSizeY(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupSizeZ(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupsPerDimension(Napi::Env) override;
+    // TODO(349125474): Expose subgroups limits (subgroupMinSize and subgroupMinSize) in Node
+    // binding.
 
   private:
     wgpu::SupportedLimits limits_;

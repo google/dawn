@@ -1845,9 +1845,16 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::ShaderF16)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kF16);
     }
+    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
     if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroups)) {
         mWGSLAllowedFeatures.extensions.insert(
             tint::wgsl::Extension::kChromiumExperimentalSubgroups);
+    }
+    if (mEnabledFeatures.IsEnabled(Feature::Subgroups)) {
+        mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kSubgroups);
+    }
+    if (mEnabledFeatures.IsEnabled(Feature::SubgroupsF16)) {
+        mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kSubgroupsF16);
     }
     if (IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
         mWGSLAllowedFeatures.extensions.insert(
