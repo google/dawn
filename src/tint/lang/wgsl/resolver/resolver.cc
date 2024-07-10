@@ -58,6 +58,7 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
+#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
@@ -83,6 +84,7 @@
 #include "src/tint/lang/wgsl/resolver/unresolved_identifier.h"
 #include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/lang/wgsl/sem/break_if_statement.h"
+#include "src/tint/lang/wgsl/sem/builtin_attribute.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
@@ -1670,11 +1672,6 @@ sem::BuiltinEnumExpression<core::AddressSpace>* Resolver::AddressSpaceExpression
         return nullptr;
     }
     return address_space_expr;
-}
-
-sem::BuiltinEnumExpression<core::BuiltinValue>* Resolver::BuiltinValueExpression(
-    const ast::Expression* expr) {
-    return sem_.AsBuiltinValue(Expression(expr));
 }
 
 sem::BuiltinEnumExpression<core::TexelFormat>* Resolver::TexelFormatExpression(
@@ -3405,13 +3402,6 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                    : nullptr;
     }
 
-    if (auto builtin = resolved->BuiltinValue(); builtin != core::BuiltinValue::kUndefined) {
-        return CheckNotTemplated("builtin value", ident)
-                   ? b.create<sem::BuiltinEnumExpression<core::BuiltinValue>>(
-                         expr, current_statement_, builtin)
-                   : nullptr;
-    }
-
     if (auto i_smpl = resolved->InterpolationSampling();
         i_smpl != core::InterpolationSampling::kUndefined) {
         return CheckNotTemplated("interpolation sampling", ident)
@@ -4015,14 +4005,25 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
 
 tint::Result<tint::core::BuiltinValue> Resolver::BuiltinAttribute(
     const ast::BuiltinAttribute* attr) {
-    auto* builtin_expr = BuiltinValueExpression(attr->builtin);
-    if (!builtin_expr) {
+    const ast::BuiltinValueName* builtin_val = attr->builtin;
+    Mark(builtin_val);
+
+    const ast::Identifier* ident = builtin_val->name;
+    if (!TINT_LIKELY(CheckNotTemplated("builtin value", ident))) {
         return Failure{};
     }
-    // Apply the resolved tint::sem::BuiltinEnumExpression<tint::core::BuiltinValue> to the
-    // attribute.
-    b.Sem().Add(attr, builtin_expr);
-    return builtin_expr->Value();
+    Mark(ident);
+
+    core::BuiltinValue builtin = core::ParseBuiltinValue(ident->symbol.NameView());
+    if (builtin == core::BuiltinValue::kUndefined) {
+        sem_.ErrorUnexpectedIdent(ident, "builtin value", core::kBuiltinValueStrings);
+        return Failure{};
+    }
+
+    auto* sem = b.create<sem::BuiltinAttribute>(attr, builtin);
+    // Apply the resolved tint::sem::BuiltinAttribute to the attribute.
+    b.Sem().Add(attr, sem);
+    return builtin;
 }
 
 bool Resolver::DiagnosticAttribute(const ast::DiagnosticAttribute* attr) {

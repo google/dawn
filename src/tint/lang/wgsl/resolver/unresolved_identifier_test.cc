@@ -55,7 +55,7 @@ Possible values: 'function', 'pixel_local', 'private', 'push_constant', 'storage
 }
 
 TEST_F(ResolverUnresolvedIdentifierSuggestions, BuiltinValue) {
-    Func("f", Vector{Param("p", ty.i32(), Vector{Builtin(Expr(Source{{12, 34}}, "positon"))})},
+    Func("f", Vector{Param("p", ty.i32(), Vector{Builtin(Ident(Source{{12, 34}}, "positon"))})},
          ty.void_(), tint::Empty, Vector{Stage(ast::PipelineStage::kVertex)});
 
     EXPECT_FALSE(r()->Resolve());

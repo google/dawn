@@ -54,7 +54,6 @@ namespace tint::resolver {
 /// - core::Access
 /// - core::AddressSpace
 /// - core::BuiltinType
-/// - core::BuiltinValue
 /// - core::InterpolationSampling
 /// - core::InterpolationType
 /// - core::TexelFormat
@@ -123,15 +122,6 @@ class ResolvedIdentifier {
         return core::BuiltinType::kUndefined;
     }
 
-    /// @return the builtin value if the ResolvedIdentifier holds core::BuiltinValue, otherwise
-    /// core::BuiltinValue::kUndefined
-    core::BuiltinValue BuiltinValue() const {
-        if (auto n = std::get_if<core::BuiltinValue>(&value_)) {
-            return *n;
-        }
-        return core::BuiltinValue::kUndefined;
-    }
-
     /// @return the texel format if the ResolvedIdentifier holds type::InterpolationSampling,
     /// otherwise type::InterpolationSampling::kUndefined
     core::InterpolationSampling InterpolationSampling() const {
@@ -186,7 +176,6 @@ class ResolvedIdentifier {
                  core::Access,
                  core::AddressSpace,
                  core::BuiltinType,
-                 core::BuiltinValue,
                  core::InterpolationSampling,
                  core::InterpolationType,
                  core::TexelFormat>

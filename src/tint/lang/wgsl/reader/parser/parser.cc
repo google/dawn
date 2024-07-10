@@ -3038,6 +3038,19 @@ Maybe<const ast::Attribute*> Parser::attribute() {
             break;
     }
 
+    if (attr.value == core::Attribute::kBuiltin) {
+        return expect_paren_block(
+            "builtin attribute", [&]() -> Expect<const ast::BuiltinAttribute*> {
+                auto name = expect_builtin_value_name();
+                if (name.errored) {
+                    return Failure::kErrored;
+                }
+                match(Token::Type::kComma);
+
+                return create<ast::BuiltinAttribute>(t.source(), std::move(name.value));
+            });
+    }
+
     Vector<const ast::Expression*, 2> args;
 
     // Handle no parameter items which should have no parens
@@ -3089,8 +3102,6 @@ Maybe<const ast::Attribute*> Parser::attribute() {
             return create<ast::BindingAttribute>(t.source(), args[0]);
         case core::Attribute::kBlendSrc:
             return create<ast::BlendSrcAttribute>(t.source(), args[0]);
-        case core::Attribute::kBuiltin:
-            return create<ast::BuiltinAttribute>(t.source(), args[0]);
         case core::Attribute::kColor:
             return create<ast::ColorAttribute>(t.source(), args[0]);
         case core::Attribute::kCompute:
@@ -3187,6 +3198,17 @@ Expect<Void> Parser::expect_not_templated_ident_expr(const ast::Expression* expr
 Expect<wgsl::DiagnosticSeverity> Parser::expect_severity_control_name() {
     return expect_enum("severity control", wgsl::ParseDiagnosticSeverity,
                        wgsl::kDiagnosticSeverityStrings);
+}
+
+// builtin_value_name :
+// | ident_pattern_token
+Expect<const ast::BuiltinValueName*> Parser::expect_builtin_value_name() {
+    auto name = expect_ident("", "builtin value name");
+    if (name.errored) {
+        return Failure::kErrored;
+    }
+
+    return builder_.BuiltinValueName(name.value);
 }
 
 // diagnostic_control

@@ -117,9 +117,6 @@ StyledText SemHelper::Describe(const sem::Expression* expr) const {
         [&](const sem::BuiltinEnumExpression<core::AddressSpace>* addr) {
             text << "address space " << style::Enum(addr->Value());
         },
-        [&](const sem::BuiltinEnumExpression<core::BuiltinValue>* builtin) {
-            text << "builtin value " << style::Enum(builtin->Value());
-        },
         [&](const sem::BuiltinEnumExpression<core::InterpolationSampling>* fmt) {
             text << "interpolation sampling " << style::Enum(fmt->Value());
         },
@@ -138,28 +135,33 @@ StyledText SemHelper::Describe(const sem::Expression* expr) const {
     return text;
 }
 
+void SemHelper::ErrorUnexpectedIdent(
+    const ast::Identifier* ident,
+    std::string_view wanted,
+    tint::Slice<const std::string_view> suggestions /* = Empty */) const {
+    auto name = ident->symbol.NameView();
+    AddError(ident->source) << "unresolved " << wanted << " " << style::Code(name);
+    if (!suggestions.IsEmpty()) {
+        // Filter out suggestions that have a leading underscore.
+        Vector<std::string_view, 8> filtered;
+        for (auto str : suggestions) {
+            if (str[0] != '_') {
+                filtered.Push(str);
+            }
+        }
+        auto& note = AddNote(ident->source);
+        SuggestAlternativeOptions opts;
+        opts.alternatives_style = style::Enum;
+        SuggestAlternatives(name, filtered.Slice(), note.message, opts);
+    }
+}
+
 void SemHelper::ErrorUnexpectedExprKind(
     const sem::Expression* expr,
     std::string_view wanted,
     tint::Slice<const std::string_view> suggestions /* = Empty */) const {
     if (auto* ui = expr->As<UnresolvedIdentifier>()) {
-        auto* ident = ui->Identifier();
-        auto name = ident->identifier->symbol.NameView();
-        AddError(ident->source) << "unresolved " << wanted << " " << style::Code(name);
-        if (!suggestions.IsEmpty()) {
-            // Filter out suggestions that have a leading underscore.
-            Vector<std::string_view, 8> filtered;
-            for (auto str : suggestions) {
-                if (str[0] != '_') {
-                    filtered.Push(str);
-                }
-            }
-            auto& note = AddNote(ident->source);
-            SuggestAlternativeOptions opts;
-            opts.alternatives_style = style::Enum;
-            SuggestAlternatives(name, filtered.Slice(), note.message, opts);
-        }
-        return;
+        return ErrorUnexpectedIdent(ui->Identifier()->identifier, wanted, suggestions);
     }
 
     AddError(expr->Declaration()->source) << "cannot use " << Describe(expr) << " as " << wanted;

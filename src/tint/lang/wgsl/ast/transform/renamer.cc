@@ -1340,6 +1340,9 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
                     [&](const sem::ValueConstructor*) {
                         preserve_if_builtin_type(call->target->identifier);
                     });
+            },
+            [&](const BuiltinAttribute* builtin) {
+                preserved_identifiers.Add(builtin->builtin->name);
             });
     }
 

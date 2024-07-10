@@ -254,13 +254,6 @@ class Resolver {
         const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<core::BuiltinValue>. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<core::BuiltinValue>, then an error diagnostic is raised and
-    /// nullptr is returned.
-    sem::BuiltinEnumExpression<core::BuiltinValue>* BuiltinValueExpression(
-        const ast::Expression* expr);
-
-    /// @returns the call of Expression() cast to a
     /// sem::BuiltinEnumExpression<core::type::TexelFormat>. If the sem::Expression is not a
     /// sem::BuiltinEnumExpression<core::type::TexelFormat>, then an error diagnostic is raised and
     /// nullptr is returned.

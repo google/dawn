@@ -683,6 +683,9 @@ class Parser {
     /// Parses a diagnostic_rule_name grammar element.
     /// @return the parsed diagnostic rule name.
     Expect<const ast::DiagnosticRuleName*> expect_diagnostic_rule_name();
+    /// Parses a builtin_value_name grammar element.
+    /// @return the parsed builtin value name.
+    Expect<const ast::BuiltinValueName*> expect_builtin_value_name();
 
     /// Splits a peekable token into to parts filling in the peekable fields.
     /// @param lhs the token to set in the current position

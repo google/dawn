@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,39 +25,38 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifndef SRC_TINT_LANG_WGSL_SEM_BUILTIN_ATTRIBUTE_H_
+#define SRC_TINT_LANG_WGSL_SEM_BUILTIN_ATTRIBUTE_H_
+
 #include "src/tint/lang/core/builtin_value.h"
-#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
-#include "src/tint/lang/wgsl/ast/helper_test.h"
+#include "src/tint/lang/wgsl/ast/builtin_attribute.h"
+#include "src/tint/lang/wgsl/sem/expression.h"
 
-namespace tint::ast {
-namespace {
+namespace tint::sem {
 
-using BuiltinAttributeTest = TestHelper;
-using BuiltinAttributeDeathTest = BuiltinAttributeTest;
+/// BuiltinAttribute holds the semantic information for ast nodes that resolve to a
+/// builtin value.
+class BuiltinAttribute : public Castable<BuiltinAttribute, Node> {
+  public:
+    /// Constructor
+    /// @param declaration the AST node
+    /// @param value the builtin value
+    BuiltinAttribute(const ast::BuiltinAttribute* declaration, core::BuiltinValue value);
 
-TEST_F(BuiltinAttributeTest, Creation) {
-    auto* d = Builtin(core::BuiltinValue::kFragDepth);
-    CheckIdentifier(d->builtin->name, "frag_depth");
-}
+    /// Destructor
+    ~BuiltinAttribute() override;
 
-TEST_F(BuiltinAttributeDeathTest, Assert_Null_Builtin) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b;
-            b.Builtin(nullptr);
-        },
-        "internal compiler error");
-}
+    /// @returns the case selector declaration
+    const ast::BuiltinAttribute* Declaration() const;
 
-TEST_F(BuiltinAttributeDeathTest, Assert_DifferentGenerationID_Builtin) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.Builtin(b2.BuiltinValueName("bang"));
-        },
-        "internal compiler error");
-}
+    /// @return the enumerator value
+    core::BuiltinValue Value() const;
 
-}  // namespace
-}  // namespace tint::ast
+  private:
+    const ast::BuiltinAttribute* declaration_;
+    const core::BuiltinValue value_;
+};
+
+}  // namespace tint::sem
+
+#endif  // SRC_TINT_LANG_WGSL_SEM_BUILTIN_ATTRIBUTE_H_

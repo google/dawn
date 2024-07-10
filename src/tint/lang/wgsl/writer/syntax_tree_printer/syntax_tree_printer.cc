@@ -35,6 +35,7 @@
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
+#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
@@ -552,12 +553,7 @@ void SyntaxTreePrinter::EmitAttributes(VectorRef<const ast::Attribute*> attrs) {
                 Line() << "]";
             },
             [&](const ast::BuiltinAttribute* builtin) {
-                Line() << "BuiltinAttribute [";
-                {
-                    ScopedIndent ba(this);
-                    EmitExpression(builtin->builtin);
-                }
-                Line() << "]";
+                Line() << "BuiltinAttribute [" << builtin->builtin->String() << "]";
             },
             [&](const ast::DiagnosticAttribute* diagnostic) {
                 EmitDiagnosticControl(diagnostic->control);

@@ -47,6 +47,7 @@
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
+#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/case_statement.h"
@@ -3054,13 +3055,44 @@ class Builder {
     /// @returns the selector pointer
     const ast::CaseSelector* DefaultCaseSelector() { return create<ast::CaseSelector>(nullptr); }
 
+    /// Passthrough overload
+    /// @param name the builtin value name
+    /// @returns @p name
+    const ast::BuiltinValueName* BuiltinValueName(const ast::BuiltinValueName* name) {
+        return name;
+    }
+
+    /// Creates an ast::BuiltinValueName
+    /// @param name the builtin value name
+    /// @returns the builtin value name
+    template <typename NAME>
+    const ast::BuiltinValueName* BuiltinValueName(NAME&& name) {
+        static_assert(!traits::IsType<traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
+                      "it is invalid for a builtin value name to be templated");
+        auto* name_ident = Ident(std::forward<NAME>(name));
+        return create<ast::BuiltinValueName>(name_ident ? name_ident->source : source_, name_ident);
+    }
+
+    /// Creates an ast::BuiltinValueName
+    /// @param source the source information
+    /// @param name the builtin value name
+    /// @returns the builtin value name
+    template <typename NAME>
+    const ast::BuiltinValueName* BuiltinValueName(const Source& source, NAME&& name) {
+        static_assert(!traits::IsType<traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
+                      "it is invalid for a builtin value name to be templated");
+        auto* name_ident = Ident(std::forward<NAME>(name));
+        return create<ast::BuiltinValueName>(source, name_ident);
+    }
+
     /// Creates an ast::BuiltinAttribute
     /// @param source the source information
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
     template <typename BUILTIN>
     const ast::BuiltinAttribute* Builtin(const Source& source, BUILTIN&& builtin) {
-        return create<ast::BuiltinAttribute>(source, Expr(std::forward<BUILTIN>(builtin)));
+        return create<ast::BuiltinAttribute>(source,
+                                             BuiltinValueName(std::forward<BUILTIN>(builtin)));
     }
 
     /// Creates an ast::BuiltinAttribute
@@ -3068,7 +3100,8 @@ class Builder {
     /// @returns the builtin attribute pointer
     template <typename BUILTIN>
     const ast::BuiltinAttribute* Builtin(BUILTIN&& builtin) {
-        return create<ast::BuiltinAttribute>(source_, Expr(std::forward<BUILTIN>(builtin)));
+        return create<ast::BuiltinAttribute>(source_,
+                                             BuiltinValueName(std::forward<BUILTIN>(builtin)));
     }
 
     /// Creates an ast::InterpolateAttribute

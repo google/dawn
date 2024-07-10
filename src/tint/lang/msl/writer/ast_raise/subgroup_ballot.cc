@@ -157,10 +157,7 @@ struct SubgroupBallot::State {
         Symbol subgroup_size;
         for (auto* param : ep->params) {
             auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes);
-            if (builtin &&
-                src.Sem()
-                        .Get<sem::BuiltinEnumExpression<core::BuiltinValue>>(builtin->builtin)
-                        ->Value() == core::BuiltinValue::kSubgroupSize) {
+            if (builtin && src.Sem().Get(builtin)->Value() == core::BuiltinValue::kSubgroupSize) {
                 subgroup_size = ctx.Clone(param->name->symbol);
             }
         }

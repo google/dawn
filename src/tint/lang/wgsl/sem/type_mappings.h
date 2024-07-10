@@ -30,7 +30,7 @@
 
 #include <type_traits>
 
-#include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
+#include "src/tint/lang/wgsl/sem/builtin_attribute.h"
 
 // Forward declarations
 namespace tint {
@@ -95,7 +95,7 @@ namespace tint::sem {
 struct TypeMappings {
     //! @cond Doxygen_Suppress
     BlockStatement* operator()(ast::BlockStatement*);
-    BuiltinEnumExpression<core::BuiltinValue>* operator()(ast::BuiltinAttribute*);
+    BuiltinAttribute* operator()(ast::BuiltinAttribute*);
     CastableBase* operator()(ast::Node*);
     Expression* operator()(ast::Expression*);
     ForLoopStatement* operator()(ast::ForLoopStatement*);

@@ -87,6 +87,7 @@
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/builtin_fn.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -316,10 +317,7 @@ class Impl {
                     },
                     [&](const ast::InvariantAttribute*) { ir_func->SetReturnInvariant(true); },
                     [&](const ast::BuiltinAttribute* b) {
-                        if (auto* ident_sem =
-                                program_.Sem()
-                                    .Get(b)
-                                    ->As<sem::BuiltinEnumExpression<core::BuiltinValue>>()) {
+                        if (auto* ident_sem = program_.Sem().Get(b)->As<sem::BuiltinAttribute>()) {
                             ir_func->SetReturnBuiltin(ident_sem->Value());
                         } else {
                             TINT_ICE() << "Builtin attribute sem invalid";
@@ -346,10 +344,7 @@ class Impl {
                     },
                     [&](const ast::InvariantAttribute*) { param->SetInvariant(true); },
                     [&](const ast::BuiltinAttribute* b) {
-                        if (auto* ident_sem =
-                                program_.Sem()
-                                    .Get(b)
-                                    ->As<sem::BuiltinEnumExpression<core::BuiltinValue>>()) {
+                        if (auto* ident_sem = program_.Sem().Get(b)->As<sem::BuiltinAttribute>()) {
                             param->SetBuiltin(ident_sem->Value());
                         } else {
                             TINT_ICE() << "Builtin attribute sem invalid";

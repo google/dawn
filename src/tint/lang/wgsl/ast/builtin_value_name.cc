@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,39 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/builtin_value_name.h"
-#include "src/tint/lang/wgsl/ast/helper_test.h"
+
+#include <string>
+
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::ast::BuiltinValueName);
 
 namespace tint::ast {
-namespace {
 
-using BuiltinAttributeTest = TestHelper;
-using BuiltinAttributeDeathTest = BuiltinAttributeTest;
-
-TEST_F(BuiltinAttributeTest, Creation) {
-    auto* d = Builtin(core::BuiltinValue::kFragDepth);
-    CheckIdentifier(d->builtin->name, "frag_depth");
+BuiltinValueName::BuiltinValueName(GenerationID pid,
+                                   NodeID nid,
+                                   const Source& src,
+                                   const Identifier* n)
+    : Base(pid, nid, src), name(n) {
+    TINT_ASSERT(name != nullptr);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(name, generation_id);
 }
 
-TEST_F(BuiltinAttributeDeathTest, Assert_Null_Builtin) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b;
-            b.Builtin(nullptr);
-        },
-        "internal compiler error");
+const BuiltinValueName* BuiltinValueName::Clone(CloneContext& ctx) const {
+    auto src = ctx.Clone(source);
+    auto n = ctx.Clone(name);
+    return ctx.dst->create<BuiltinValueName>(src, n);
 }
 
-TEST_F(BuiltinAttributeDeathTest, Assert_DifferentGenerationID_Builtin) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.Builtin(b2.BuiltinValueName("bang"));
-        },
-        "internal compiler error");
+std::string BuiltinValueName::String() const {
+    return name->symbol.Name();
 }
 
-}  // namespace
 }  // namespace tint::ast

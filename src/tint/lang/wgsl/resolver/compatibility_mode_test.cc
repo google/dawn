@@ -103,7 +103,8 @@ TEST_F(ResolverCompatibilityModeTest, SampleMask_Parameter) {
     Func("main",
          Vector{Param("mask", ty.i32(),
                       Vector{
-                          create<ast::BuiltinAttribute>({}, Expr(Source{{12, 34}}, "sample_mask")),
+                          create<ast::BuiltinAttribute>(
+                              {}, BuiltinValueName(Source{{12, 34}}, "sample_mask")),
                       })},
          ty.void_(), Empty,
          Vector{
@@ -133,7 +134,7 @@ TEST_F(ResolverCompatibilityModeTest, SampleMask_ReturnValue) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             create<ast::BuiltinAttribute>({}, Expr(Source{{12, 34}}, "sample_mask")),
+             create<ast::BuiltinAttribute>({}, BuiltinValueName(Source{{12, 34}}, "sample_mask")),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -147,14 +148,13 @@ TEST_F(ResolverCompatibilityModeTest, SampleMask_StructMember) {
     //   @builtin(sample_mask) mask : u32,
     // }
 
-    Structure(
-        "S",
-        Vector{
-            Member("mask", ty.u32(),
-                   Vector{
-                       create<ast::BuiltinAttribute>({}, Expr(Source{{12, 34}}, "sample_mask")),
-                   }),
-        });
+    Structure("S", Vector{
+                       Member("mask", ty.u32(),
+                              Vector{
+                                  create<ast::BuiltinAttribute>(
+                                      {}, BuiltinValueName(Source{{12, 34}}, "sample_mask")),
+                              }),
+                   });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -170,7 +170,8 @@ TEST_F(ResolverCompatibilityModeTest, SampleIndex_Parameter) {
     Func("main",
          Vector{Param("mask", ty.i32(),
                       Vector{
-                          create<ast::BuiltinAttribute>({}, Expr(Source{{12, 34}}, "sample_index")),
+                          create<ast::BuiltinAttribute>(
+                              {}, BuiltinValueName(Source{{12, 34}}, "sample_index")),
                       })},
          ty.void_(), Empty,
          Vector{
@@ -200,7 +201,7 @@ TEST_F(ResolverCompatibilityModeTest, SampleIndex_ReturnValue) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             create<ast::BuiltinAttribute>({}, Expr(Source{{12, 34}}, "sample_index")),
+             create<ast::BuiltinAttribute>({}, BuiltinValueName(Source{{12, 34}}, "sample_index")),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -214,14 +215,13 @@ TEST_F(ResolverCompatibilityModeTest, SampleIndex_StructMember) {
     //   @builtin(sample_index) mask : u32,
     // }
 
-    Structure(
-        "S",
-        Vector{
-            Member("mask", ty.u32(),
-                   Vector{
-                       create<ast::BuiltinAttribute>({}, Expr(Source{{12, 34}}, "sample_index")),
-                   }),
-        });
+    Structure("S", Vector{
+                       Member("mask", ty.u32(),
+                              Vector{
+                                  create<ast::BuiltinAttribute>(
+                                      {}, BuiltinValueName(Source{{12, 34}}, "sample_index")),
+                              }),
+                   });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(

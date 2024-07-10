@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,39 +25,42 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/builtin_value.h"
-#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
-#include "src/tint/lang/wgsl/ast/helper_test.h"
+#ifndef SRC_TINT_LANG_WGSL_AST_BUILTIN_VALUE_NAME_H_
+#define SRC_TINT_LANG_WGSL_AST_BUILTIN_VALUE_NAME_H_
+
+#include <string>
+
+#include "src/tint/lang/wgsl/ast/node.h"
+
+// Forward declarations
+namespace tint::ast {
+class Identifier;
+}  // namespace tint::ast
 
 namespace tint::ast {
-namespace {
 
-using BuiltinAttributeTest = TestHelper;
-using BuiltinAttributeDeathTest = BuiltinAttributeTest;
+/// A builtin value name used for builtin value attributes.
+class BuiltinValueName final : public Castable<BuiltinValueName, Node> {
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
+    /// @param src the source of this node
+    /// @param name the rule name
+    BuiltinValueName(GenerationID pid, NodeID nid, const Source& src, const Identifier* name);
 
-TEST_F(BuiltinAttributeTest, Creation) {
-    auto* d = Builtin(core::BuiltinValue::kFragDepth);
-    CheckIdentifier(d->builtin->name, "frag_depth");
-}
+    /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const BuiltinValueName* Clone(CloneContext& ctx) const override;
 
-TEST_F(BuiltinAttributeDeathTest, Assert_Null_Builtin) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b;
-            b.Builtin(nullptr);
-        },
-        "internal compiler error");
-}
+    /// @return the full name of this builtin value.
+    std::string String() const;
 
-TEST_F(BuiltinAttributeDeathTest, Assert_DifferentGenerationID_Builtin) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.Builtin(b2.BuiltinValueName("bang"));
-        },
-        "internal compiler error");
-}
+    /// The builtin value name.
+    Identifier const* const name;
+};
 
-}  // namespace
 }  // namespace tint::ast
+
+#endif  // SRC_TINT_LANG_WGSL_AST_BUILTIN_VALUE_NAME_H_

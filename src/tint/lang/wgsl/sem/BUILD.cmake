@@ -51,6 +51,8 @@ tint_add_target(tint_lang_wgsl_sem lib
   lang/wgsl/sem/block_statement.h
   lang/wgsl/sem/break_if_statement.cc
   lang/wgsl/sem/break_if_statement.h
+  lang/wgsl/sem/builtin_attribute.cc
+  lang/wgsl/sem/builtin_attribute.h
   lang/wgsl/sem/builtin_enum_expression.cc
   lang/wgsl/sem/builtin_enum_expression.h
   lang/wgsl/sem/builtin_fn.cc

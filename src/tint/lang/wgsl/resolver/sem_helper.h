@@ -154,21 +154,6 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<core::BuiltinValue> if the cast is successful, otherwise an
-    /// error diagnostic is raised.
-    sem::BuiltinEnumExpression<core::BuiltinValue>* AsBuiltinValue(sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::BuiltinValue>>();
-            if (TINT_LIKELY(enum_expr)) {
-                return enum_expr;
-            }
-            ErrorUnexpectedExprKind(expr, "builtin value", core::kBuiltinValueStrings);
-        }
-        return nullptr;
-    }
-
-    /// @param expr the semantic node
-    /// @returns nullptr if @p expr is nullptr, or @p expr cast to
     /// sem::BuiltinEnumExpression<core::type::TexelFormat> if the cast is successful, otherwise an
     /// error diagnostic is raised.
     sem::BuiltinEnumExpression<core::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
@@ -272,6 +257,14 @@ class SemHelper {
     /// sem::ValueExpression, but the expression evaluated to something different.
     /// @param expr the expression
     void ErrorExpectedValueExpr(const sem::Expression* expr) const;
+
+    /// Raises an error diagnostic that the identifier @p got was not of the kind @p wanted.
+    /// @param ident the identifier
+    /// @param wanted the expected identifier kind
+    /// @param suggestions suggested valid identifiers
+    void ErrorUnexpectedIdent(const ast::Identifier* ident,
+                              std::string_view wanted,
+                              tint::Slice<const std::string_view> suggestions = Empty) const;
 
     /// Raises an error diagnostic that the expression @p got was not of the kind @p wanted.
     /// @param expr the expression

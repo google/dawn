@@ -1602,7 +1602,6 @@ crbug.com/42251274 [ intel-0x9bc5 webgpu-dxc-enabled win10 ] webgpu:shader,valid
 crbug.com/42251274 [ nvidia-0x2184 ubuntu ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
 crbug.com/42251274 [ nvidia-0x2184 webgpu-dxc-disabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
 crbug.com/42251274 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:builtin_value_names:* [ Failure ]
 crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_sampling_names:* [ Failure ]
 crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_type_names:* [ Failure ]
 crbug.com/tint/2225 webgpu:shader,execution,expression,unary,i32_conversion:abstract_float:* [ Failure ]

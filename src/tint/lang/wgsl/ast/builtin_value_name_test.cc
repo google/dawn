@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,36 +25,36 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/builtin_value_name.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
 namespace {
 
-using BuiltinAttributeTest = TestHelper;
-using BuiltinAttributeDeathTest = BuiltinAttributeTest;
+using BuiltinValueNameTest = TestHelper;
+using BuiltinValueNameDeathTest = BuiltinValueNameTest;
 
-TEST_F(BuiltinAttributeTest, Creation) {
-    auto* d = Builtin(core::BuiltinValue::kFragDepth);
-    CheckIdentifier(d->builtin->name, "frag_depth");
+TEST_F(BuiltinValueNameTest, Creation) {
+    auto* builtin = BuiltinValueName(core::BuiltinValue::kNumWorkgroups);
+    CheckIdentifier(builtin->name, "num_workgroups");
 }
 
-TEST_F(BuiltinAttributeDeathTest, Assert_Null_Builtin) {
+TEST_F(BuiltinValueNameDeathTest, Assert_Null) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b;
-            b.Builtin(nullptr);
+            b.BuiltinValueName(nullptr);
         },
         "internal compiler error");
 }
 
-TEST_F(BuiltinAttributeDeathTest, Assert_DifferentGenerationID_Builtin) {
+TEST_F(BuiltinValueNameDeathTest, Assert_DifferentGenerationID) {
     EXPECT_DEATH_IF_SUPPORTED(
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.Builtin(b2.BuiltinValueName("bang"));
+            b1.BuiltinValueName(b2.Ident("bang"));
         },
         "internal compiler error");
 }

@@ -376,7 +376,6 @@ class DependencyScanner {
         Switch(
             attr,  //
             [&](const ast::BindingAttribute* binding) { TraverseExpression(binding->expr); },
-            [&](const ast::BuiltinAttribute* builtin) { TraverseExpression(builtin->builtin); },
             [&](const ast::ColorAttribute* color) { TraverseExpression(color->expr); },
             [&](const ast::GroupAttribute* group) { TraverseExpression(group->expr); },
             [&](const ast::IdAttribute* id) { TraverseExpression(id->expr); },
@@ -417,8 +416,6 @@ class DependencyScanner {
         kFunction,
         /// Builtin
         kBuiltin,
-        /// Builtin value
-        kBuiltinValue,
         /// Address space
         kAddressSpace,
         /// Texel format
@@ -443,7 +440,6 @@ class DependencyScanner {
         std::variant<std::monostate,
                      wgsl::BuiltinFn,
                      core::BuiltinType,
-                     core::BuiltinValue,
                      core::AddressSpace,
                      core::TexelFormat,
                      core::Access,
@@ -464,10 +460,6 @@ class DependencyScanner {
             if (auto builtin_ty = core::ParseBuiltinType(symbol.NameView());
                 builtin_ty != core::BuiltinType::kUndefined) {
                 return BuiltinInfo{BuiltinType::kBuiltin, builtin_ty};
-            }
-            if (auto builtin_val = core::ParseBuiltinValue(symbol.NameView());
-                builtin_val != core::BuiltinValue::kUndefined) {
-                return BuiltinInfo{BuiltinType::kBuiltinValue, builtin_val};
             }
             if (auto addr = core::ParseAddressSpace(symbol.NameView());
                 addr != core::AddressSpace::kUndefined) {
@@ -510,10 +502,6 @@ class DependencyScanner {
                 case BuiltinType::kBuiltin:
                     graph_.resolved_identifiers.Add(
                         from, ResolvedIdentifier(builtin_info.Value<core::BuiltinType>()));
-                    break;
-                case BuiltinType::kBuiltinValue:
-                    graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(builtin_info.Value<core::BuiltinValue>()));
                     break;
                 case BuiltinType::kAddressSpace:
                     graph_.resolved_identifiers.Add(
@@ -884,9 +872,6 @@ std::string ResolvedIdentifier::String() const {
     }
     if (auto builtin_ty = BuiltinType(); builtin_ty != core::BuiltinType::kUndefined) {
         return "builtin type '" + tint::ToString(builtin_ty) + "'";
-    }
-    if (auto builtin_val = BuiltinValue(); builtin_val != core::BuiltinValue::kUndefined) {
-        return "builtin value '" + tint::ToString(builtin_val) + "'";
     }
     if (auto access = Access(); access != core::Access::kUndefined) {
         return "access '" + tint::ToString(access) + "'";

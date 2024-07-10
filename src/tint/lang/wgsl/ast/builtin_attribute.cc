@@ -30,6 +30,7 @@
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BuiltinAttribute);
@@ -39,7 +40,7 @@ namespace tint::ast {
 BuiltinAttribute::BuiltinAttribute(GenerationID pid,
                                    NodeID nid,
                                    const Source& src,
-                                   const Expression* b)
+                                   const BuiltinValueName* b)
     : Base(pid, nid, src), builtin(b) {
     TINT_ASSERT_GENERATION_IDS_EQUAL(b, generation_id);
 }

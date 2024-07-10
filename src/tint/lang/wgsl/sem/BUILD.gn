@@ -56,6 +56,8 @@ libtint_source_set("sem") {
     "block_statement.h",
     "break_if_statement.cc",
     "break_if_statement.h",
+    "builtin_attribute.cc",
+    "builtin_attribute.h",
     "builtin_enum_expression.cc",
     "builtin_enum_expression.h",
     "builtin_fn.cc",
