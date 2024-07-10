@@ -37,7 +37,7 @@ namespace dawn {
 namespace {
 
 template <class Params>
-class ExperimentalSubgroupsTestsBase : public DawnTestWithParams<Params> {
+class SubgroupsTestsBase : public DawnTestWithParams<Params> {
   public:
     using DawnTestWithParams<Params>::GetParam;
     using DawnTestWithParams<Params>::SupportsFeatures;
@@ -119,10 +119,10 @@ class ExperimentalSubgroupsTestsBase : public DawnTestWithParams<Params> {
 };
 
 using UseChromiumExperimentalSubgroups = bool;
-DAWN_TEST_PARAM_STRUCT(ExperimentalSubgroupsShaderTestsParams, UseChromiumExperimentalSubgroups);
+DAWN_TEST_PARAM_STRUCT(SubgroupsShaderTestsParams, UseChromiumExperimentalSubgroups);
 
-class ExperimentalSubgroupsShaderTests
-    : public ExperimentalSubgroupsTestsBase<ExperimentalSubgroupsShaderTestsParams> {
+class SubgroupsShaderTests
+    : public SubgroupsTestsBase<SubgroupsShaderTestsParams> {
   protected:
     // Testing reading subgroup_size. The shader declares a workgroup size of [workgroupSize, 1, 1],
     // in which each invocation read the workgroup_size built-in value and write back to output
@@ -230,7 +230,7 @@ fn main(
 
 // Test that subgroup_size builtin attribute read by each invocation is valid and identical for any
 // workgroup size between 1 and 256.
-TEST_P(ExperimentalSubgroupsShaderTests, ReadSubgroupSize) {
+TEST_P(SubgroupsShaderTests, ReadSubgroupSize) {
     DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
 
     for (uint32_t workgroupSize : {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256}) {
@@ -239,7 +239,7 @@ TEST_P(ExperimentalSubgroupsShaderTests, ReadSubgroupSize) {
 }
 
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
-DAWN_INSTANTIATE_TEST_P(ExperimentalSubgroupsShaderTests,
+DAWN_INSTANTIATE_TEST_P(SubgroupsShaderTests,
                         {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
                          VulkanBackend()},
                         {false, true}  // UseChromiumExperimentalSubgroups
@@ -292,7 +292,7 @@ std::ostream& operator<<(std::ostream& o,
 }
 
 using UseChromiumExperimentalSubgroups = bool;
-DAWN_TEST_PARAM_STRUCT(ExperimentalSubgroupsBroadcastTestsParams,
+DAWN_TEST_PARAM_STRUCT(SubgroupsBroadcastTestsParams,
                        UseChromiumExperimentalSubgroups,
                        BroadcastType,
                        SubgroupBroadcastValueOfInvocation0);
@@ -304,8 +304,8 @@ DAWN_TEST_PARAM_STRUCT(ExperimentalSubgroupsBroadcastTestsParams,
 constexpr int32_t SubgroupBroadcastConstantValueForInvocation0 = 1;
 constexpr int32_t SubgroupRegisterInitializer = 555;
 
-class ExperimentalSubgroupsBroadcastTests
-    : public ExperimentalSubgroupsTestsBase<ExperimentalSubgroupsBroadcastTestsParams> {
+class SubgroupsBroadcastTests
+    : public SubgroupsTestsBase<SubgroupsBroadcastTestsParams> {
   protected:
     // Testing subgroup broadcasting. The shader declares a workgroup size of [workgroupSize, 1, 1],
     // in which each invocation hold a register initialized to SubgroupRegisterInitializer, then
@@ -490,7 +490,7 @@ fn main(
 // Test that subgroupBroadcast builtin function works as expected for any workgroup size between 1
 // and 256. Note that although we assume invocation 0 of the workgroup has a subgroup_id of 0 in its
 // subgroup, we don't assume any other particular subgroups layout property.
-TEST_P(ExperimentalSubgroupsBroadcastTests, SubgroupBroadcast) {
+TEST_P(SubgroupsBroadcastTests, SubgroupBroadcast) {
     if (GetParam().mBroadcastType == BroadcastType::F16) {
         DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsF16SupportedByBackend());
         DAWN_ASSERT(IsShaderF16EnabledInWGSL() && IsSubgroupsEnabledInWGSL() &&
@@ -510,7 +510,7 @@ TEST_P(ExperimentalSubgroupsBroadcastTests, SubgroupBroadcast) {
 }
 
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
-DAWN_INSTANTIATE_TEST_P(ExperimentalSubgroupsBroadcastTests,
+DAWN_INSTANTIATE_TEST_P(SubgroupsBroadcastTests,
                         {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
                          VulkanBackend()},
                         {false, true},  // UseChromiumExperimentalSubgroups
@@ -526,11 +526,11 @@ DAWN_INSTANTIATE_TEST_P(ExperimentalSubgroupsBroadcastTests,
 );
 
 using UseChromiumExperimentalSubgroups = bool;
-DAWN_TEST_PARAM_STRUCT(ExperimentalSubgroupsFullSubgroupsTestsParams,
+DAWN_TEST_PARAM_STRUCT(SubgroupsFullSubgroupsTestsParams,
                        UseChromiumExperimentalSubgroups);
 
-class ExperimentalSubgroupsFullSubgroupsTests
-    : public ExperimentalSubgroupsTestsBase<ExperimentalSubgroupsFullSubgroupsTestsParams> {
+class SubgroupsFullSubgroupsTests
+    : public SubgroupsTestsBase<SubgroupsFullSubgroupsTestsParams> {
   protected:
     // Helper function that create shader module with subgroups extension required and a empty
     // compute entry point, named main, of given workgroup size
@@ -608,7 +608,7 @@ class ExperimentalSubgroupsFullSubgroupsTests
 
 // Test that creating compute pipeline with full subgroups required will validate the workgroup size
 // as expected, when using compute shader with literal workgroup size.
-TEST_P(ExperimentalSubgroupsFullSubgroupsTests,
+TEST_P(SubgroupsFullSubgroupsTests,
        ComputePipelineRequiringFullSubgroupsWithLiteralWorkgroupSize) {
     // Currently DawnComputePipelineFullSubgroups only supported with ChromiumExperimentalSubgroups
     // enabled.
@@ -643,7 +643,7 @@ TEST_P(ExperimentalSubgroupsFullSubgroupsTests,
 
 // Test that creating compute pipeline with full subgroups required will validate the workgroup size
 // as expected, when using compute shader with override constants workgroup size.
-TEST_P(ExperimentalSubgroupsFullSubgroupsTests,
+TEST_P(SubgroupsFullSubgroupsTests,
        ComputePipelineRequiringFullSubgroupsWithOverrideWorkgroupSize) {
     // Currently DawnComputePipelineFullSubgroups only supported with ChromiumExperimentalSubgroups
     // enabled.
@@ -683,7 +683,7 @@ TEST_P(ExperimentalSubgroupsFullSubgroupsTests,
 }
 
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
-DAWN_INSTANTIATE_TEST_P(ExperimentalSubgroupsFullSubgroupsTests,
+DAWN_INSTANTIATE_TEST_P(SubgroupsFullSubgroupsTests,
                         {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
                          VulkanBackend()},
                         {false, true}  // UseChromiumExperimentalSubgroups
