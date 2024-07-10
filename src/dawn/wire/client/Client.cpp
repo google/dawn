@@ -69,19 +69,7 @@ Client::~Client() {
 }
 
 void Client::UnregisterAllObjects() {
-    // Free all devices first since they may hold references to other objects
-    // like the default queue. The Device destructor releases the default queue,
-    // which would be invalid if the queue was already freed.
-    while (!mObjects[ObjectType::Device].empty()) {
-        ObjectBase* object = mObjects[ObjectType::Device].head()->value();
-        object->Unregister();
-    }
-
     for (auto& objectList : mObjects) {
-        ObjectType objectType = static_cast<ObjectType>(&objectList - mObjects.data());
-        if (objectType == ObjectType::Device) {
-            continue;
-        }
         while (!objectList.empty()) {
             ObjectBase* object = objectList.head()->value();
             object->Unregister();
