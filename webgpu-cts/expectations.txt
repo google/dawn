@@ -2086,6 +2086,12 @@ crbug.com/331316080 [ intel-0x4680 win10 ] webgpu:web_platform,canvas,readbackFr
 crbug.com/331316080 [ intel-0x4680 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg32float";dstPremultiplied=false [ Failure ]
 crbug.com/331316080 [ intel-0x4680 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg32float";dstPremultiplied=true [ Failure ]
 
+crbug.com/40223285 [ win10 webgpu-adapter-default webgpu-dedicated-worker ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
+crbug.com/40223285 [ win10 webgpu-adapter-default webgpu-service-worker ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
+crbug.com/40223285 [ win10 webgpu-adapter-default webgpu-shared-worker ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
+
+crbug.com/352379272 [ mac amd-0x67ef ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
+
 ################################################################################
 # New flakes. Please triage:
 ################################################################################
