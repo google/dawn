@@ -26,6 +26,7 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 {% from 'art/api_jni_types.kt' import arg_to_jni_type, to_jni_type with context %}
 #include <jni.h>
+#include <stdlib.h>
 #include "dawn/webgpu.h"
 #include "structures.h"
 
@@ -63,9 +64,10 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 }
 
 {% macro render_method(method, object) %}
+    {% set _kotlin_return = kotlin_return(method) %}
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
     DEFAULT extern "C"
-    {{ to_jni_type(method.return_type) }} Java_{{ kotlin_package.replace('.', '_') }}_
+    {{ arg_to_jni_type(_kotlin_return) }} Java_{{ kotlin_package.replace('.', '_') }}_
             {{- object.name.CamelCase() if object else 'FunctionsKt' -}}
             _{{ method.name.camelCase() }}(JNIEnv *env
                     {{ ', jobject obj' if object else ', jclass clazz' -}}
@@ -227,19 +229,59 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% endif %}
 
     //* Actually invoke the native version of the method.
-    {{ 'auto result =' if method.return_type.name.get() != 'void' }}
-    {% if object %}
+    {% if _kotlin_return.annotation == '*' %}
+        //* Methods that return containers are converted from two-call to single call, and the
+        //* return type is switched to a Kotlin container.
+        size_t size = wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
+            {% for arg in method.arguments -%},
+                //* The replaced output parameter is set to nullptr on the first call.
+                {{ 'nullptr' if arg == _kotlin_return else as_varName(arg.name) -}}
+            {% endfor %}
+        );
+        //* Allocate the native container
+        {{ _kotlin_return.name.get() }} = static_cast<{{ as_cType(_kotlin_return.type.name) }} *>(
+                calloc(sizeof({{ as_cType(_kotlin_return.type.name) }}), size));
+        if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
+            //* TODO(b/330293719): use type that automatically releases resources.
+            free({{ _kotlin_return.name.get() }});
+            return nullptr;
+        }
+        //* Second call completes the native container
         wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
+            {% for arg in method.arguments -%}
+                {{- ',' if object or not loop.first }}{{ as_varName(arg.name) -}}
+            {% endfor %}
+        );
+        if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
+            //* TODO(b/330293719): use type that automatically releases resources.
+            free({{ _kotlin_return.name.get() }});
+            return nullptr;
+        }
+        //* Native container converted to a Kotlin container.
+        jclass returnClass = env->FindClass("{{ jni_name(_kotlin_return.type) }}");
+        jobjectArray result = env->NewObjectArray(size, returnClass, 0);
+        auto constructor = env->GetMethodID(returnClass, "<init>", "(I)V");
+        for (int idx = 0; idx != size; idx++) {
+            jobject element = env->NewObject(returnClass, constructor,
+                    static_cast<jint>({{ _kotlin_return.name.get() }}[idx]));
+            env->SetObjectArrayElement(result, idx, element);
+        }
+        free({{ _kotlin_return.name.get() }});
     {% else %}
-        wgpu{{ method.name.CamelCase() }}(
+        {{ 'auto result =' if method.return_type.name.get() != 'void' }}
+        {% if object %}
+            wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
+        {% else %}
+            wgpu{{ method.name.CamelCase() }}(
+        {% endif %}
+            {% for arg in method.arguments -%}
+                {{- ',' if object or not loop.first }}{{ as_varName(arg.name) -}}
+            {% endfor %}
+        );
+        if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
+            return {{ '0' if method.return_type.name.get() != 'void' }};
+        }
     {% endif %}
-        {% for arg in method.arguments -%}
-            {{- ',' if object or not loop.first }}{{ as_varName(arg.name) -}}
-        {% endfor %}
-    );
-    if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
-        return {{ '0' if method.return_type.name.get() != 'void' }};
-    }
 
     //* We only handle objects and primitives to be returned.
     {% if method.return_type.category == 'object' %}

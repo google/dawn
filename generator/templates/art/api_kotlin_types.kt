@@ -34,11 +34,18 @@
         {%- if emit_defaults and (default_value or optional) -%}
             = null
         {%- endif %}
-    {%- elif arg.length and arg.constant_length != 1 %}
+    {% elif type.name.get() == 'void' %}
+        {%- if arg.length and arg.constant_length != 1 -%}  {# void with length is binary data #}
+            java.nio.ByteBuffer{{ ' = java.nio.ByteBuffer.allocateDirect(0)' if emit_defaults }}
+        {%- elif arg.annotation == '*' -%}  {# void* is a C handle; converted to Kotlin Long #}
+            Long
+        {%- else -%}
+            Unit  {# raw void is C type for no return type; Kotlin equivalent is Unit #}
+        {%- endif -%}
+    {%- elif (arg.length and arg.constant_length != 1) or arg.annotation == '*' %}
+        {# * annotation can mean an array, e.g. an output argument #}
         {%- if type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
             Array<{{ type.name.CamelCase() }}>{{ ' = arrayOf()' if emit_defaults }}
-        {%- elif type.name.get() == 'void' -%}
-            java.nio.ByteBuffer{{ ' = java.nio.ByteBuffer.allocateDirect(0)' if emit_defaults }}
         {%- elif type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
             IntArray{{ ' = intArrayOf()' if emit_defaults }}
         {%- else -%}
@@ -101,8 +108,6 @@
                 = {{ default_value }}
             {%- endif %}
         {% endif %}
-    {%- elif type.name.get() == 'void' %}
-        {{- 'Long' if arg.annotation == '*' else 'Unit' }}
     {%- elif type.name.get() in ['void *', 'void const *'] %}
         ByteBuffer
     {%- else -%}
@@ -118,6 +123,3 @@
     {{ declaration_with_defaults(arg, false) }}
 {%- endmacro %}
 
-{% macro kotlin_type_declaration(type) -%}
-    {{ declaration_with_defaults({"type": type}, false) }}
-{%- endmacro %}
