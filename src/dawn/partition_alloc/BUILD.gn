@@ -15,24 +15,15 @@ if (defined(dawn_partition_alloc_dir)) {
     public_deps = [ "${dawn_partition_alloc_dir}:raw_ptr" ]
   }
 
-  group("buildflags") {
-    public_deps = [ "${dawn_partition_alloc_dir}:buildflags" ]
-  }
-
   # PartitionAlloc do not fully support MSVC cl.exe compiler. The condition
   # is_clang || !is_win is the one used by partition_alloc.
   is_clang_or_gcc = is_clang || !is_win
+  assert(is_clang_or_gcc, "PartitionAlloc is not fully supported on MSVC")
 
-  if (is_clang_or_gcc) {
-    group("partition_alloc") {
-      public_deps = [ "${dawn_partition_alloc_dir}:partition_alloc" ]
-    }
+  group("partition_alloc") {
+    public_deps = [ "${dawn_partition_alloc_dir}:partition_alloc" ]
   }
 } else {
-  config("public_includes") {
-    include_dirs = [ "." ]
-  }
-
   source_set("raw_ptr") {
     public_configs = [ ":public_includes" ]
     public = [
@@ -41,15 +32,7 @@ if (defined(dawn_partition_alloc_dir)) {
       "partition_alloc/pointers/raw_ref.h",
     ]
   }
-
-  source_set("buildflags") {
-    public_configs = [ ":public_includes" ]
-    public = [ "partition_alloc/partition_alloc_buildflags.h" ]
-  }
-
-  # The Dawn no-op implementation of PartitionAlloc only contains buildflags
-  # to detect the feature is disabled.
-  group("partition_alloc") {
-    public_deps = [ ":buildflags" ]
+  config("public_includes") {
+    include_dirs = [ "." ]
   }
 }
