@@ -108,6 +108,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // and `firstbithigh`.
         core_polyfills.count_leading_zeros = true;
         core_polyfills.count_trailing_zeros = true;
+        core_polyfills.degrees = true;
         core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kFull;
         core_polyfills.first_leading_bit = true;
         core_polyfills.first_trailing_bit = true;
@@ -120,6 +121,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // See https://github.com/microsoft/DirectXShaderCompiler/issues/5091 for more details.
         core_polyfills.pack_4xu8_clamp = true;
         core_polyfills.pack_unpack_4x8 = options.polyfill_pack_unpack_4x8;
+        core_polyfills.radians = true;
         // core_polyfills.reflect_vec2_f32 = options.polyfill_reflect_vec2_f32;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         // core_polyfills.workgroup_uniform_load = true;
