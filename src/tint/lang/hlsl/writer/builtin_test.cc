@@ -671,5 +671,59 @@ TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicCompareExchangeWeak) {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinStorageBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kStorageBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  DeviceMemoryBarrierWithGroupSync();
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kTextureBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  DeviceMemoryBarrierWithGroupSync();
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinWorkgroupBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  GroupMemoryBarrierWithGroupSync();
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

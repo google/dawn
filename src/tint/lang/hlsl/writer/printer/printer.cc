@@ -968,6 +968,15 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupBroadcast:
                 out << "WaveReadLaneAt";
                 break;
+            case core::BuiltinFn::kWorkgroupBarrier:
+                out << "GroupMemoryBarrierWithGroupSync";
+                break;
+            case core::BuiltinFn::kStorageBarrier:
+                out << "DeviceMemoryBarrierWithGroupSync";
+                break;
+            case core::BuiltinFn::kTextureBarrier:
+                out << "DeviceMemoryBarrierWithGroupSync";
+                break;
 
             default:
                 TINT_UNREACHABLE() << "unhandled: " << func;
