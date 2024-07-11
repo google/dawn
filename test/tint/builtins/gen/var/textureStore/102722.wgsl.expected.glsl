@@ -2,7 +2,7 @@
 precision highp float;
 precision highp int;
 
-layout(r32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, r32ui) uniform highp writeonly uimage2D arg_0;
 void textureStore_102722() {
   int arg_1 = 1;
   uvec4 arg_2 = uvec4(1u);
@@ -19,7 +19,7 @@ void main() {
 }
 #version 310 es
 
-layout(r32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, r32ui) uniform highp writeonly uimage2D arg_0;
 void textureStore_102722() {
   int arg_1 = 1;
   uvec4 arg_2 = uvec4(1u);

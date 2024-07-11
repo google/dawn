@@ -1,6 +1,6 @@
 #version 310 es
 
-layout(r32ui) uniform highp writeonly uimage2D Dst;
+layout(binding = 1, r32ui) uniform highp writeonly uimage2D Dst;
 uniform highp usampler2D Src_1;
 void tint_symbol() {
   uvec4 srcValue = uvec4(0u, 0u, 0u, 0u);

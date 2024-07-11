@@ -6,7 +6,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
-layout(r32f) uniform highp readonly image2D arg_0;
+layout(binding = 0, r32f) uniform highp readonly image2D arg_0;
 vec4 textureLoad_c07013() {
   ivec2 arg_1 = ivec2(1);
   vec4 res = imageLoad(arg_0, arg_1);
@@ -32,7 +32,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
-layout(r32f) uniform highp readonly image2D arg_0;
+layout(binding = 0, r32f) uniform highp readonly image2D arg_0;
 vec4 textureLoad_c07013() {
   ivec2 arg_1 = ivec2(1);
   vec4 res = imageLoad(arg_0, arg_1);
@@ -56,7 +56,7 @@ void main() {
 #version 310 es
 
 layout(location = 0) flat out vec4 prevent_dce_1;
-layout(r32f) uniform highp readonly image2D arg_0;
+layout(binding = 0, r32f) uniform highp readonly image2D arg_0;
 vec4 textureLoad_c07013() {
   ivec2 arg_1 = ivec2(1);
   vec4 res = imageLoad(arg_0, arg_1);

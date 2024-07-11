@@ -377,7 +377,7 @@ layout(binding = 5, std430) buffer Buffer_ssbo_1 {
   float weights[];
 } buf_out;
 
-layout(rgba8) uniform highp writeonly image2D tex_out;
+layout(binding = 7, rgba8) uniform highp writeonly image2D tex_out;
 void export_level(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(uvec2(imageSize(tex_out)))))) {
     uint dst_offset = (coord.x << ((coord.y * ubo.inner.width) & 31u));

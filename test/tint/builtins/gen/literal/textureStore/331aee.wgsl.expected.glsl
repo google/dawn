@@ -2,7 +2,7 @@
 precision highp float;
 precision highp int;
 
-layout(rgba32f) uniform highp writeonly image3D arg_0;
+layout(binding = 0, rgba32f) uniform highp writeonly image3D arg_0;
 void textureStore_331aee() {
   imageStore(arg_0, ivec3(1), vec4(1.0f));
 }
@@ -17,7 +17,7 @@ void main() {
 }
 #version 310 es
 
-layout(rgba32f) uniform highp writeonly image3D arg_0;
+layout(binding = 0, rgba32f) uniform highp writeonly image3D arg_0;
 void textureStore_331aee() {
   imageStore(arg_0, ivec3(1), vec4(1.0f));
 }

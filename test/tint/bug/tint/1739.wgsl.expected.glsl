@@ -70,7 +70,7 @@ layout(binding = 3, std140) uniform ext_tex_params_block_std140_ubo {
   ExternalTextureParams_std140 inner;
 } ext_tex_params;
 
-layout(rgba8) uniform highp writeonly image2D outImage;
+layout(binding = 1, rgba8) uniform highp writeonly image2D outImage;
 vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));

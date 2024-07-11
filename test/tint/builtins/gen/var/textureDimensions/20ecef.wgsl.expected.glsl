@@ -6,7 +6,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
-layout(r32f) uniform highp image2D arg_0;
+layout(binding = 0, r32f) uniform highp image2D arg_0;
 uint textureDimensions_20ecef() {
   uint res = uvec2(imageSize(arg_0)).x;
   return res;
@@ -26,7 +26,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
-layout(r32f) uniform highp image2D arg_0;
+layout(binding = 0, r32f) uniform highp image2D arg_0;
 uint textureDimensions_20ecef() {
   uint res = uvec2(imageSize(arg_0)).x;
   return res;

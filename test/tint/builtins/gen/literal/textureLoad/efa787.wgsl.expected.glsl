@@ -6,7 +6,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
-layout(rgba8) uniform highp readonly image2DArray arg_0;
+layout(binding = 0, rgba8) uniform highp readonly image2DArray arg_0;
 vec4 textureLoad_efa787() {
   vec4 res = imageLoad(arg_0, ivec3(uvec3(uvec2(1u), 1u)));
   return res;
@@ -31,7 +31,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
-layout(rgba8) uniform highp readonly image2DArray arg_0;
+layout(binding = 0, rgba8) uniform highp readonly image2DArray arg_0;
 vec4 textureLoad_efa787() {
   vec4 res = imageLoad(arg_0, ivec3(uvec3(uvec2(1u), 1u)));
   return res;
@@ -54,7 +54,7 @@ void main() {
 #version 310 es
 
 layout(location = 0) flat out vec4 prevent_dce_1;
-layout(rgba8) uniform highp readonly image2DArray arg_0;
+layout(binding = 0, rgba8) uniform highp readonly image2DArray arg_0;
 vec4 textureLoad_efa787() {
   vec4 res = imageLoad(arg_0, ivec3(uvec3(uvec2(1u), 1u)));
   return res;

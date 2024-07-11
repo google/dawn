@@ -278,17 +278,17 @@ class ASTPrinter : public tint::TextGenerator {
     /// Handles emitting a global variable with the uniform address space
     /// @param var the AST node for the 'var'
     /// @param sem the semantic node for the 'var'
-    void EmitUniformVariable(const ast::Var* var, const sem::Variable* sem);
+    void EmitUniformVariable(const ast::Var* var, const sem::GlobalVariable* sem);
 
     /// Handles emitting a global variable with the storage address space
     /// @param var the AST node for the 'var'
     /// @param sem the semantic node for the 'var'
-    void EmitStorageVariable(const ast::Var* var, const sem::Variable* sem);
+    void EmitStorageVariable(const ast::Var* var, const sem::GlobalVariable* sem);
 
     /// Handles emitting a global variable with the handle address space
     /// @param var the AST node for the 'var'
     /// @param sem the semantic node for the 'var'
-    void EmitHandleVariable(const ast::Var* var, const sem::Variable* sem);
+    void EmitHandleVariable(const ast::Var* var, const sem::GlobalVariable* sem);
 
     /// Handles emitting a global variable with the private address space
     /// @param var the global variable

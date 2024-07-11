@@ -6,7 +6,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec2 inner;
 } prevent_dce;
 
-layout(rgba8_snorm) uniform highp readonly image2D arg_0;
+layout(binding = 0, rgba8_snorm) uniform highp readonly image2D arg_0;
 uvec2 textureDimensions_7327fa() {
   uvec2 res = uvec2(imageSize(arg_0));
   return res;
@@ -31,7 +31,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec2 inner;
 } prevent_dce;
 
-layout(rgba8_snorm) uniform highp readonly image2D arg_0;
+layout(binding = 0, rgba8_snorm) uniform highp readonly image2D arg_0;
 uvec2 textureDimensions_7327fa() {
   uvec2 res = uvec2(imageSize(arg_0));
   return res;
@@ -54,7 +54,7 @@ void main() {
 #version 310 es
 
 layout(location = 0) flat out uvec2 prevent_dce_1;
-layout(rgba8_snorm) uniform highp readonly image2D arg_0;
+layout(binding = 0, rgba8_snorm) uniform highp readonly image2D arg_0;
 uvec2 textureDimensions_7327fa() {
   uvec2 res = uvec2(imageSize(arg_0));
   return res;

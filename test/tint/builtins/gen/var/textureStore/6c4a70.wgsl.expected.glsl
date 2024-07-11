@@ -2,7 +2,7 @@
 precision highp float;
 precision highp int;
 
-layout(r32i) uniform highp iimage2D arg_0;
+layout(binding = 0, r32i) uniform highp iimage2D arg_0;
 void textureStore_6c4a70() {
   uvec2 arg_1 = uvec2(1u);
   ivec4 arg_2 = ivec4(1);
@@ -19,7 +19,7 @@ void main() {
 }
 #version 310 es
 
-layout(r32i) uniform highp iimage2D arg_0;
+layout(binding = 0, r32i) uniform highp iimage2D arg_0;
 void textureStore_6c4a70() {
   uvec2 arg_1 = uvec2(1u);
   ivec4 arg_2 = ivec4(1);

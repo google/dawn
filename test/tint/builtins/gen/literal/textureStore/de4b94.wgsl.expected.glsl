@@ -2,7 +2,7 @@
 precision highp float;
 precision highp int;
 
-layout(r32i) uniform highp writeonly iimage2D arg_0;
+layout(binding = 0, r32i) uniform highp writeonly iimage2D arg_0;
 void textureStore_de4b94() {
   imageStore(arg_0, ivec2(uvec2(1u, 0u)), ivec4(1));
 }
@@ -17,7 +17,7 @@ void main() {
 }
 #version 310 es
 
-layout(r32i) uniform highp writeonly iimage2D arg_0;
+layout(binding = 0, r32i) uniform highp writeonly iimage2D arg_0;
 void textureStore_de4b94() {
   imageStore(arg_0, ivec2(uvec2(1u, 0u)), ivec4(1));
 }

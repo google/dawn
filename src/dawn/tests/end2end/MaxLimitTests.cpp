@@ -703,8 +703,11 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
 // exercises an internal Vulkan maxFragmentCombinedOutputResources limit and makes sure that the
 // sub parts of the limit work as intended.
 TEST_P(MaxLimitTests, WriteToMaxFragmentCombinedOutputResources) {
-    // TODO(dawn:1692) Currently does not work on GL and GLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+
     // TODO(http://crbug.com/348199037): VUID-RuntimeSpirv-Location-06428
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
 

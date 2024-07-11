@@ -2,7 +2,7 @@
 precision highp float;
 precision highp int;
 
-layout(rgba16f) uniform highp writeonly image3D arg_0;
+layout(binding = 0, rgba16f) uniform highp writeonly image3D arg_0;
 void textureStore_818df6() {
   uvec3 arg_1 = uvec3(1u);
   vec4 arg_2 = vec4(1.0f);
@@ -19,7 +19,7 @@ void main() {
 }
 #version 310 es
 
-layout(rgba16f) uniform highp writeonly image3D arg_0;
+layout(binding = 0, rgba16f) uniform highp writeonly image3D arg_0;
 void textureStore_818df6() {
   uvec3 arg_1 = uvec3(1u);
   vec4 arg_2 = vec4(1.0f);

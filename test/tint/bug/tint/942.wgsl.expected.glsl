@@ -31,7 +31,7 @@ layout(binding = 1, std140) uniform params_block_ubo {
   Params inner;
 } params;
 
-layout(rgba8) uniform highp writeonly image2D outputTex;
+layout(binding = 2, rgba8) uniform highp writeonly image2D outputTex;
 struct Flip {
   uint value;
   uint pad;

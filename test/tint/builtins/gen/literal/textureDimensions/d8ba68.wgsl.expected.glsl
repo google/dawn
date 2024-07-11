@@ -6,7 +6,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec2 inner;
 } prevent_dce;
 
-layout(rgba32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, rgba32ui) uniform highp writeonly uimage2D arg_0;
 uvec2 textureDimensions_d8ba68() {
   uvec2 res = uvec2(imageSize(arg_0));
   return res;
@@ -26,7 +26,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec2 inner;
 } prevent_dce;
 
-layout(rgba32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, rgba32ui) uniform highp writeonly uimage2D arg_0;
 uvec2 textureDimensions_d8ba68() {
   uvec2 res = uvec2(imageSize(arg_0));
   return res;

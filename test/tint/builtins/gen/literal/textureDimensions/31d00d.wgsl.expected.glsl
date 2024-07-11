@@ -7,7 +7,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint pad;
 } prevent_dce;
 
-layout(r32ui) uniform highp uimage3D arg_0;
+layout(binding = 0, r32ui) uniform highp uimage3D arg_0;
 uvec3 textureDimensions_31d00d() {
   uvec3 res = uvec3(imageSize(arg_0));
   return res;
@@ -28,7 +28,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint pad;
 } prevent_dce;
 
-layout(r32ui) uniform highp uimage3D arg_0;
+layout(binding = 0, r32ui) uniform highp uimage3D arg_0;
 uvec3 textureDimensions_31d00d() {
   uvec3 res = uvec3(imageSize(arg_0));
   return res;

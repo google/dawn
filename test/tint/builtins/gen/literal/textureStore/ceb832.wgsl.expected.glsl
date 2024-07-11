@@ -2,7 +2,7 @@
 precision highp float;
 precision highp int;
 
-layout(r32i) uniform highp iimage2DArray arg_0;
+layout(binding = 0, r32i) uniform highp iimage2DArray arg_0;
 void textureStore_ceb832() {
   imageStore(arg_0, ivec3(uvec3(uvec2(1u), 1u)), ivec4(1));
 }
@@ -17,7 +17,7 @@ void main() {
 }
 #version 310 es
 
-layout(r32i) uniform highp iimage2DArray arg_0;
+layout(binding = 0, r32i) uniform highp iimage2DArray arg_0;
 void textureStore_ceb832() {
   imageStore(arg_0, ivec3(uvec3(uvec2(1u), 1u)), ivec4(1));
 }

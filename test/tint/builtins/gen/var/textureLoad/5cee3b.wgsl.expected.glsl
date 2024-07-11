@@ -6,7 +6,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec4 inner;
 } prevent_dce;
 
-layout(r32ui) uniform highp readonly uimage3D arg_0;
+layout(binding = 0, r32ui) uniform highp readonly uimage3D arg_0;
 uvec4 textureLoad_5cee3b() {
   uvec3 arg_1 = uvec3(1u);
   uvec4 res = imageLoad(arg_0, ivec3(arg_1));
@@ -32,7 +32,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec4 inner;
 } prevent_dce;
 
-layout(r32ui) uniform highp readonly uimage3D arg_0;
+layout(binding = 0, r32ui) uniform highp readonly uimage3D arg_0;
 uvec4 textureLoad_5cee3b() {
   uvec3 arg_1 = uvec3(1u);
   uvec4 res = imageLoad(arg_0, ivec3(arg_1));
@@ -56,7 +56,7 @@ void main() {
 #version 310 es
 
 layout(location = 0) flat out uvec4 prevent_dce_1;
-layout(r32ui) uniform highp readonly uimage3D arg_0;
+layout(binding = 0, r32ui) uniform highp readonly uimage3D arg_0;
 uvec4 textureLoad_5cee3b() {
   uvec3 arg_1 = uvec3(1u);
   uvec4 res = imageLoad(arg_0, ivec3(arg_1));
