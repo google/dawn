@@ -112,6 +112,7 @@ wgpu::WGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
         case tint::wgsl::LanguageFeature::kUndefined:
             DAWN_UNREACHABLE();
     }
+    DAWN_UNREACHABLE();
 }
 
 }  // anonymous namespace

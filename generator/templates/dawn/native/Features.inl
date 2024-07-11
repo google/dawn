@@ -34,8 +34,9 @@ wgpu::FeatureName ToAPI(Feature feature) {
         return wgpu::FeatureName::{{as_cppEnum(enum.name)}};
     {% endfor %}
     case Feature::InvalidEnum:
-      DAWN_UNREACHABLE();
+      break;
   }
+  DAWN_UNREACHABLE();
 }
 
 Feature FromAPI(wgpu::FeatureName feature) {

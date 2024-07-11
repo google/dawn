@@ -84,6 +84,7 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
                     DAWN_UNREACHABLE();
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
             }
+            DAWN_UNREACHABLE();
         },
         [](const SamplerBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
         [](const StaticSamplerBindingInfo& layout) {
