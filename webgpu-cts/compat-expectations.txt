@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-07-03 12:35:47PM
+# Last rolled: 2024-07-11 07:07:31AM
 
 # Flaky on all platforms
 # KEEP
@@ -142,7 +142,6 @@ crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,sto
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=1 [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
-
 
 ################################################################################
 # validation of shader_io location type
@@ -519,11 +518,6 @@ crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ 
 ################################################################################
 # New flakes. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rgba8snorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
@@ -617,7 +611,7 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fwidth:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,fwidthCoarse:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,shader_io,user_io:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_flat_names:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_flat_names:case="either" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="private";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="";trailing_comma=true [ Failure ]
@@ -654,17 +648,7 @@ crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:api,operation,memory_sync,buffer,mul
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,unary,i32_conversion:abstract_float:* [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,validation,decl,context_dependent_resolution:builtin_value_names:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,validation,expression,binary,div_rem:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
@@ -710,7 +694,6 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,mul
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="queue-op";readOp="input-vertex";readContext="render-pass-encoder";writeOp="t2b-copy";writeContext="command-encoder" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="queue-op";readOp="input-vertex";readContext="render-pass-encoder";writeOp="write-buffer";writeContext="queue" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,inversesqrt:f16:inputSource="storage_rw";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:* [ Failure ]
@@ -720,4 +703,3 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:const_array
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector:* [ Failure ]
-
