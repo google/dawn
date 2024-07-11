@@ -270,7 +270,18 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     }
 
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
-    auto result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
+    tint::Result<tint::hlsl::writer::Output> result;
+    if (r.useTintIR) {
+        // Convert the AST program to an IR module.
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(transformedProgram);
+        DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                        ir.Failure().reason.Str());
+
+        result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
+    } else {
+        result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
+    }
+
     DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
                     result.Failure().reason.Str());
 

@@ -94,6 +94,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.shaderModel = 50;
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
+    req.hlsl.useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
 
     req.bytecode.hasShaderF16Feature = false;
     req.bytecode.compileFlags = compileFlags;
