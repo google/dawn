@@ -1056,7 +1056,7 @@ void Validator::CheckConstruct(const Construct* construct) {
         return;
     }
 
-    if (auto* str = construct->Result(0)->Type()->As<type::Struct>()) {
+    if (auto* str = As<type::Struct>(construct->Result(0)->Type())) {
         auto members = str->Members();
         if (args.Length() != str->Members().Length()) {
             AddError(construct) << "structure has " << members.Length()
@@ -1593,14 +1593,21 @@ void Validator::CheckStore(const Store* s) {
 
     if (auto* from = s->From()) {
         if (auto* to = s->To()) {
-            auto* mv = to->Type()->As<core::type::MemoryView>();
+            auto* mv = As<core::type::MemoryView>(to->Type());
             if (!mv) {
                 AddError(s, Store::kToOperandOffset) << "store target operand is not a memory view";
                 return;
             }
             auto* value_type = from->Type();
             auto* store_type = mv->StoreType();
-            if (value_type != store_type) {
+
+            if (!store_type) {
+                AddError(s, Store::kToOperandOffset) << "store type must not be null";
+            }
+            if (!value_type) {
+                AddError(s, Store::kFromOperandOffset) << "value type must not be null";
+            }
+            if (store_type && value_type && value_type != store_type) {
                 AddError(s, Store::kFromOperandOffset)
                     << "value type " << style::Type(value_type->FriendlyName())
                     << " does not match store type " << style::Type(store_type->FriendlyName());

@@ -384,7 +384,12 @@ void Disassembler::EmitValueWithType(const Instruction* val) {
 void Disassembler::EmitValueWithType(const Value* val) {
     EmitValue(val);
     if (val) {
-        out_ << ":" << StyleType(val->Type()->FriendlyName());
+        out_ << ":";
+        if (val->Type()) {
+            out_ << StyleType(val->Type()->FriendlyName());
+        } else {
+            out_ << StyleType("null");
+        }
     }
 }
 

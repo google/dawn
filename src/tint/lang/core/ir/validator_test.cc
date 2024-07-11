@@ -4797,6 +4797,73 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Store_NoStoreType) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32>());
+        var->Result(0)->SetType(nullptr);
+        b.Append(mod.allocators.instructions.Create<ir::Store>(var->Result(0), b.Constant(42_u)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:11 error: store: store target operand is not a memory view
+    store %2, 42u
+          ^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:null = var
+    store %2, 42u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Store_NoValueType) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32>());
+        auto* val = b.Construct(ty.u32(), 42_u);
+        val->Result(0)->SetType(nullptr);
+
+        b.Append(mod.allocators.instructions.Create<ir::Store>(var->Result(0), val->Result(0)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:15 error: store: value type must not be null
+    store %2, %3
+              ^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, i32, read_write> = var
+    %3:null = construct 42u
+    store %2, %3
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     auto* f = b.Function("my_func", ty.void_());
 
