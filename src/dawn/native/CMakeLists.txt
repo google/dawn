@@ -910,5 +910,4 @@ endif ()
 # doesn't work well with shared libs
 if (DAWN_USE_BUILT_DXC)
     target_link_libraries(dawn_native PRIVATE dxcompiler)
-    target_link_libraries(webgpu_dawn PRIVATE dxcompiler)
 endif()

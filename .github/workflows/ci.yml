@@ -13,159 +13,104 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  gn:
-    strategy:
-      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
-      fail-fast: false
-
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    name: GN ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - name: Install Ubuntu build dependencies
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt update
-        sudo apt install libgl-dev libx11-xcb-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
-
-    - name: Install depot_tools
-      uses: newkdev/setup-depot-tools@v1.0.1
-
-    - uses: actions/checkout@v3
-
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=out/build" >> "$GITHUB_OUTPUT"
-
-    - name: Set up checkout
-      run: |
-        cp ./scripts/standalone.gclient .gclient
-
-    - name: gclient sync --no-history --shallow
-      run: gclient sync --no-history --shallow
-      env:
-        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
-
-    - name: Set up sccache
-      uses: mozilla-actions/sccache-action@v0.0.3
-
-    - name: Generate build files
-      shell: bash
-      run: |
-        mkdir -p ${{ steps.strings.outputs.build-output-dir }}
-        cat << EOF >> ${{ steps.strings.outputs.build-output-dir }}/args.gn
-        cc_wrapper="sccache"
-        is_debug=false
-        is_component_build=true
-        is_clang=true
-        EOF
-        gn gen ${{ steps.strings.outputs.build-output-dir }}
-
-      env:
-        SCCACHE_GHA_ENABLED: "true"
-        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
-
-    - name: Build
-      run: autoninja -C ${{ steps.strings.outputs.build-output-dir }}
-      env:
-        SCCACHE_GHA_ENABLED: "true"
-        DEPOT_TOOLS_WIN_TOOLCHAIN: 0
-
   cmake:
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
       fail-fast: false
 
+      # Set up a matrix to run the following 6 configurations:
+      # 1. <Windows, Debug, latest MSVC compiler toolchain on the default runner image, default generator>
+      # 2. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
+      # 3. <Linux, Debug, latest GCC compiler toolchain in the container, default generator>
+      # 4. <Linux, Release, latest GCC compiler toolchain in the container, default generator>
+      # 5. <MacOS, Debug, latest Clang compiler toolchain on the default runner image, default generator>
+      # 6. <MacOS, Release, latest Clang compiler toolchain on the default runner image, default generator>
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest, ubuntu-latest, windows-latest]
         build_type: [Debug, Release]
-        c_compiler: [clang, cl]
+        toolchain: [gcc, clang, msvc]
         include:
+          - os: macos-latest
+            toolchain: clang
+            c_compiler: $(brew --prefix llvm@15)/bin/clang
+            cpp_compiler: $(brew --prefix llvm@15)/bin/clang++
+            env:
+              MACOSX_DEPLOYMENT_TARGET: "11.0"
+            container: null
           - os: windows-latest
+            toolchain: msvc
             c_compiler: cl
             cpp_compiler: cl
+            container: null
           - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
-          - os: macos-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+            toolchain: gcc
+            c_compiler: gcc
+            cpp_compiler: g++
+            # The manylinux container is to ensure ABI compatibility with glibc 2.28.
+            # This way, the continuous delivery process casts a wide net across many linux distros.
+            container: dockcross/manylinux_2_28-x64:latest
         exclude:
-          - os: windows-latest
-            c_compiler: clang
-          - os: windows-latest
-            c_compiler: cl
-            build_type: Debug
-          - os: ubuntu-latest
-            c_compiler: cl
-          - os: macos-latest
-            c_compiler: cl
+            - os: macos-latest
+              toolchain: msvc
+            - os: macos-latest
+              toolchain: gcc
+            - os: ubuntu-latest
+              toolchain: msvc
+            - os: ubuntu-latest
+              toolchain: clang
+            - os: windows-latest
+              toolchain: clang
+            - os: windows-latest
+              toolchain: gcc
 
-    name: CMake ${{ matrix.os }} ${{ matrix.build_type }} (${{ matrix.c_compiler }})
+    name: CMake-${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.toolchain }}
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    env:
+      SCCACHE_GHA_ENABLED: "true"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/out/build" >> "$GITHUB_OUTPUT"
-
-    - name: Install Ubuntu build dependencies
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt update
-        sudo apt install libgl-dev libx11-xcb-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev wayland-protocols libwayland-dev libxkbcommon-dev
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Fetch dependencies
-      run: python ./tools/fetch_dawn_dependencies.py --use-test-deps --shallow
-
-    - name: Set up Ninja
-      uses: seanmiddleditch/gha-setup-ninja@master
-
-    - name: Set up Visual Studio environment
-      if: matrix.os == 'windows-latest'
-      uses: seanmiddleditch/gha-setup-vsdevenv@master
+    - name: Set up dependencies on linux
+      if: matrix.container == 'dockcross/manylinux_2_28-x64:latest'
+      run: >
+        dnf install -y mesa-libGL-devel libxcb libxcb-devel libX11-xcb libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel libXext-devel libxkbcommon libxkbcommon-devel libxkbcommon-x11-devel mesa-vulkan-drivers wayland-protocols-devel wayland-devel
 
     - name: Set up sccache
-      uses: mozilla-actions/sccache-action@v0.0.3
+      # dawn-ci.cmake documents why sccache is not used in other platforms.
+      if: matrix.os == 'ubuntu-latest'
+      uses: mozilla-actions/sccache-action@v0.0.5
 
     - name: Configure CMake
       run: >
-        cmake -G Ninja -B ${{ steps.strings.outputs.build-output-dir }}
+        cmake
+        -S .
+        -B out/${{ matrix.build_type }}
+        -C .github/workflows/dawn-ci.cmake
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -DCMAKE_C_COMPILER_LAUNCHER=sccache
-        -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
-        -S ${{ github.workspace }}
-      env:
-        SCCACHE_GHA_ENABLED: "true"
 
     - name: Build
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-      env:
-        SCCACHE_GHA_ENABLED: "true"
+      run: cmake --build out/${{ matrix.build_type }} --config ${{ matrix.build_type }}
+
+    - name: Package
+      run: |
+        cmake --install out/${{ matrix.build_type }} --config ${{ matrix.build_type }} --prefix Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}
+        cmake -E tar cvzf Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}
+        path: Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz
 
   golang:
     name: Go Build and Test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v4
