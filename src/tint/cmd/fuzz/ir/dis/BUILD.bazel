@@ -88,6 +88,12 @@ cc_binary(
     ],
     "//conditions:default": [],
   }) + select({
+    ":tint_build_spv_writer": [
+      "//src/tint/lang/spirv/writer",
+      "//src/tint/lang/spirv/writer/common",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_wgsl_writer": [
       "//src/tint/lang/wgsl/writer",
     ],
@@ -113,6 +119,11 @@ alias(
 )
 
 alias(
+  name = "tint_build_spv_writer",
+  actual = "//src/tint:tint_build_spv_writer_true",
+)
+
+alias(
   name = "tint_build_wgsl_writer",
   actual = "//src/tint:tint_build_wgsl_writer_true",
 )
@@ -125,11 +136,12 @@ selects.config_setting_group(
     ],
 )
 selects.config_setting_group(
-    name = "tint_build_ir_binary_and_tint_build_wgsl_writer_and_tint_build_ir_fuzzer",
+    name = "tint_build_ir_binary_and_tint_build_ir_fuzzer_and_tint_build_wgsl_writer_and_tint_build_spv_writer",
     match_all = [
         ":tint_build_ir_binary",
-        ":tint_build_wgsl_writer",
         ":tint_build_ir_fuzzer",
+        ":tint_build_wgsl_writer",
+        ":tint_build_spv_writer",
     ],
 )
 

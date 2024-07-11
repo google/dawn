@@ -345,7 +345,7 @@ group("cmds") {
     if (tint_build_wgsl_reader) {
       deps += [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
     }
-    if (tint_build_wgsl_writer) {
+    if (tint_build_wgsl_writer && tint_build_spv_writer) {
       deps += [ "${tint_src_dir}/cmd/fuzz/ir/dis" ]
     }
   }

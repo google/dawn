@@ -37,7 +37,8 @@
 import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
-if (tint_build_ir_binary && tint_build_wgsl_writer && tint_build_ir_fuzzer) {
+if (tint_build_ir_binary && tint_build_ir_fuzzer && tint_build_wgsl_writer &&
+    tint_build_spv_writer) {
   tint_executable("dis") {
     output_name = "ir_fuzz_dis"
     sources = [ "main.cc" ]
@@ -84,6 +85,13 @@ if (tint_build_ir_binary && tint_build_wgsl_writer && tint_build_ir_fuzzer) {
 
     if (tint_build_spv_reader) {
       deps += [ "${tint_src_dir}/lang/spirv/reader/common" ]
+    }
+
+    if (tint_build_spv_writer) {
+      deps += [
+        "${tint_src_dir}/lang/spirv/writer",
+        "${tint_src_dir}/lang/spirv/writer/common",
+      ]
     }
 
     if (tint_build_wgsl_writer) {
