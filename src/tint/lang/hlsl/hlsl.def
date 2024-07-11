@@ -37,6 +37,7 @@
 
 import "src/tint/lang/core/address_space.def"
 import "src/tint/lang/core/access.def"
+import "src/tint/lang/core/texel_format.def"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types                                                                      //
@@ -64,11 +65,31 @@ type mat4x4<T>
 
 type byte_address_buffer<A: access>
 
+type sampler
+type sampler_comparison
+type texture_1d<T>
+type texture_2d<T>
+type texture_2d_array<T>
+type texture_3d<T>
+type texture_cube<T>
+type texture_cube_array<T>
+type texture_depth_2d
+type texture_depth_2d_array
+type texture_depth_cube
+type texture_depth_cube_array
+type texture_depth_multisampled_2d
+type texture_multisampled_2d<T>
+type texture_storage_1d<F: texel_format, A: access>
+type texture_storage_2d<F: texel_format, A: access>
+type texture_storage_2d_array<F: texel_format, A: access>
+type texture_storage_3d<F: texel_format, A: access>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
 match iu32: i32 | u32
+match fiu32: f32 | i32 | u32
 match f32_u32: f32 | u32
 match f32_i32: f32 | i32
 match f32_f16: f32 | f16
@@ -125,4 +146,115 @@ fn sign[N: num, T: fi32_f16](vec<N, T>) -> vec<N, i32>
 @member_function fn Store4(byte_address_buffer<writable>, offset: u32, value: vec4<u32>)
 
 @member_function fn GetDimensions[A: access](byte_address_buffer<A>, width: ptr<function, u32, writable>)
+
+@member_function fn GetDimensions[T: fiu32](texture: texture_1d<T>,
+                                              width: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_1d<T>,
+                                              level: u32,
+                                              width: ptr<function, u32, writable>,
+                                              num_levels: ptr<function, u32, writable>)
+
+@member_function fn GetDimensions[F: texel_format, A: access](texture: texture_storage_1d<F, A>,
+                                                                width: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_2d<T>,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_2d<T>,
+                                              level: u32,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                         num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions[F: texel_format, A: access](texture: texture_storage_2d<F, A>,
+                                                                width: ptr<function, u32, writable>,
+                                                               height: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_2d_array<T>,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                           elements: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_2d_array<T>,
+                                              level: u32,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                           elements: ptr<function, u32, writable>,
+                                         num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>,
+                                                                width: ptr<function, u32, writable>,
+                                                               height: ptr<function, u32, writable>,
+                                                             elements: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_3d<T>,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                              depth: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_3d<T>,
+                                              level: u32,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                              depth: ptr<function, u32, writable>,
+                                         num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions[F: texel_format, A: access](texture: texture_storage_3d<F, A>,
+                                                                width: ptr<function, u32, writable>,
+                                                               height: ptr<function, u32, writable>,
+                                                                depth: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_cube<T>,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_cube<T>,
+                                              level: u32,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                         num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_cube_array<T>,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                           elements: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_cube_array<T>,
+                                              level: u32,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                           elements: ptr<function, u32, writable>,
+                                         num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions[T: fiu32](texture: texture_multisampled_2d<T>,
+                                              width: ptr<function, u32, writable>,
+                                             height: ptr<function, u32, writable>,
+                                            samples: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_2d,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_2d,
+                                    level: u32,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>,
+                               num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_2d_array,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>,
+                                 elements: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_2d_array,
+                                    level: u32,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>,
+                                 elements: ptr<function, u32, writable>,
+                               num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_cube,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_cube,
+                                    level: u32,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>,
+                               num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_cube_array,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>,
+                                 elements: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_cube_array,
+                                    level: u32,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>,
+                                 elements: ptr<function, u32, writable>,
+                               num_levels: ptr<function, u32, writable>)
+@member_function fn GetDimensions(texture: texture_depth_multisampled_2d,
+                                    width: ptr<function, u32, writable>,
+                                   height: ptr<function, u32, writable>,
+                                  samples: ptr<function, u32, writable>)
 
