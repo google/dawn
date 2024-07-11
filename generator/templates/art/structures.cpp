@@ -47,7 +47,7 @@ namespace dawn::kotlin_api {
                 if (mObj) {
                     //* TODO(b/330293719): free associated resources.
                     converted->{{ member.name.camelCase() }} =
-                            env->GetStringUTFChars(static_cast<jstring>(mObj), 0);
+                            env->GetStringUTFChars(reinterpret_cast<jstring>(mObj), 0);
                 }
             }
             {% elif member.constant_length == 1 %} {
