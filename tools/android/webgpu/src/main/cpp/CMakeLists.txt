@@ -30,38 +30,34 @@ project(webgpu VERSION 1.1.0 LANGUAGES CXX)
 
 cmake_minimum_required(VERSION 3.22.1)
 
+set(DAWN_DIR "${webgpu_SOURCE_DIR}/../../../../../..")
+list(INSERT CMAKE_MODULE_PATH 0 "${DAWN_DIR}/src/cmake")
+include(DawnCompilerChecks)
+
+# Build Dawn with many things disabled to speed up compilation.
 set(DAWN_BUILD_ANDROID_SAMPLES OFF)
-set(DAWN_BUILD_MONOLITHIC_LIBRARY OFF)
 set(DAWN_BUILD_SAMPLES OFF)
 set(TINT_BUILD_TESTS OFF)
 set(TINT_BUILD_CMD_TOOLS OFF)
 
+# Build the monolithic library as that's what we link against.
+set(DAWN_BUILD_MONOLITHIC_LIBRARY TRUE)
+add_subdirectory(${DAWN_DIR} dawn)
+
+# Make the library exposing both Dawn's API and the JNI methods.
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(C_BINDINGS_PATH ${DAWN_DIR}/out/Debug/gen/cpp)
 
-add_subdirectory(../../../../../.. dawn)
-
-set(C_BINDINGS_PATH ../../../../../../out/Debug/gen/cpp)
-
-find_package(Python3 REQUIRED)
-DawnJSONGenerator(
-        TARGET "webgpu_dawn_native_proc"
-        PRINT_NAME "Dawn native WebGPU procs"
-        OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES)
-
-list(INSERT CMAKE_MODULE_PATH 0 "${Dawn_SOURCE_DIR}/src/cmake")
-include(BundleLibraries)
-bundle_libraries(webgpu_c_bundled dawn_native)
+add_library(webgpu_c_bundled SHARED)
 target_sources(webgpu_c_bundled PRIVATE
         Util.cpp
-        ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
         ${C_BINDINGS_PATH}/methods.cpp
         ${C_BINDINGS_PATH}/structures.cpp
         ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
 
-find_library(log-lib log)
+target_link_libraries(webgpu_c_bundled android webgpu_dawn)
 
-target_link_libraries(webgpu_c_bundled ${log-lib} android dawn_public_config)
-
+# Copy headers for webgpu_c_bundled over.
 add_custom_command(DEPENDS dawncpp_headers POST_BUILD
                    OUTPUT ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h
                    COMMAND rm -r "${CMAKE_SOURCE_DIR}/gen" || echo
