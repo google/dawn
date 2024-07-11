@@ -1311,6 +1311,69 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, AccessStoreScalar) {
+    auto* var = b.Var<storage, f32, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var), 2_f);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  v.Store(0u, asuint(2.0f));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_AccessStoreVectorElement) {
+    auto* var = b.Var<storage, vec3<f32>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u), 2_f);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  v.Store(4u, 2.0f);
+}
+)");
+}
+
+TEST_F(HlslWriterTest, AccessStoreVector) {
+    auto* var = b.Var<storage, vec3<f32>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var),
+                b.Composite(ty.vec3<f32>(), 2_f, 3_f, 4_f));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  v.Store3(0u, asuint(float3(2.0f, 3.0f, 4.0f)));
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, DISABLED_AccessStoreMatrixElement) {
     auto* var = b.Var<storage, mat4x4<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);

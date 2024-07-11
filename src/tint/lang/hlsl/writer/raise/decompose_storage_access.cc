@@ -114,10 +114,13 @@ struct State {
                     inst,
                     [&](core::ir::LoadVectorElement* l) { LoadVectorElement(l, var, var_ty); },
                     [&](core::ir::StoreVectorElement* s) { StoreVectorElement(s, var, var_ty); },
-                    [&](core::ir::Store* s) { Store(s); },     //
+                    [&](core::ir::Store* s) {
+                        OffsetData offset{};
+                        Store(s, var, offset);
+                    },                                         //
                     [&](core::ir::Load* l) { Load(l, var); },  //
                     [&](core::ir::Access* a) {
-                        OffsetData offset;
+                        OffsetData offset{};
                         Access(a, var, a->Object()->Type(), &offset);
                     },
                     [&](core::ir::Let* let) {
@@ -196,6 +199,52 @@ struct State {
             val = b.Add(ty.u32(), val, expr)->Result(0);
         }
         return val;
+    }
+
+    // Creates the appropriate store instructions for the given result type.
+    core::ir::Call* MakeStore(core::ir::Var* var, core::ir::Value* from, core::ir::Value* offset) {
+        auto* store_ty = from->Type();
+        if (store_ty->is_numeric_scalar_or_vector()) {
+            return MakeScalarOrVectorStore(var, from, offset);
+        }
+
+        // TODO(dsinclair): This currently only handles scalars and entire vectors. Add vector
+        // elements, matrices, structs ...
+
+        TINT_UNREACHABLE();
+    }
+
+    // Creates a `v.Store{2,3,4} offset, value` call based on the provided type. The stored value is
+    // bitcast to a `u32` (or `u32` vector as needed).
+    //
+    // This only works for `u32`, `i32`, `f32` and the vector sizes of those types.
+    core::ir::Call* MakeScalarOrVectorStore(core::ir::Var* var,
+                                            core::ir::Value* from,
+                                            core::ir::Value* offset) {
+        // TODO(dsinclair): Support f16 store
+
+        const core::type::Type* cast_ty = ty.u32();
+        hlsl::BuiltinFn fn = hlsl::BuiltinFn::kStore;
+        if (auto* vec = from->Type()->As<core::type::Vector>()) {
+            cast_ty = ty.vec(cast_ty, vec->Width());
+
+            switch (vec->Width()) {
+                case 2:
+                    fn = BuiltinFn::kStore2;
+                    break;
+                case 3:
+                    fn = BuiltinFn::kStore3;
+                    break;
+                case 4:
+                    fn = BuiltinFn::kStore4;
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+        }
+
+        auto* cast = b.Bitcast(cast_ty, from);
+        return b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), fn, var, offset, cast);
     }
 
     // Creates the appropriate load instructions for the given result type.
@@ -472,17 +521,18 @@ struct State {
 
                 [&](core::ir::StoreVectorElement*) {
                     // TODO(dsinclair): Handle store vector elements
-                },  //
-                [&](core::ir::Store*) {
-                    // TODO(dsinclair): Handle store
-                },  //
+                },
+                [&](core::ir::Store* store) {  //
+                    Store(store, var, *offset);
+                },
                 [&](core::ir::CoreBuiltinCall* call) {
                     // Array length calls require the access
                     TINT_ASSERT(call->Func() == core::BuiltinFn::kArrayLength);
 
-                    // If this access chain is being used in an `arrayLength` call then the access
-                    // chain _must_ have resolved to the runtime array member of the structure. So,
-                    // we _must_ have set `obj` to the array member which is a runtime array.
+                    // If this access chain is being used in an `arrayLength` call then the
+                    // access chain _must_ have resolved to the runtime array member of the
+                    // structure. So, we _must_ have set `obj` to the array member which is a
+                    // runtime array.
                     ArrayLength(var, call, obj, offset->byte_offset);
                 },  //
                 TINT_ICE_ON_NO_MATCH);
@@ -491,8 +541,12 @@ struct State {
         a->Destroy();
     }
 
-    void Store(core::ir::Store*) {
-        // TODO(dsinclair): Handle store
+    void Store(core::ir::Store* store, core::ir::Var* var, OffsetData& offset) {
+        b.InsertBefore(store, [&] {
+            auto* off = OffsetToValue(offset);
+            MakeStore(var, store->From(), off);
+        });
+        store->Destroy();
     }
 
     // This should _only_ be handling a `var` parameter as any `access` parameters would have
