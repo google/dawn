@@ -427,8 +427,14 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
 
             if (useMappableBuffer) {
                 const auto* mappedPtr = static_cast<const uint8_t*>(buffer.GetConstMappedRange());
-                EXPECT_EQ(memcmp(mappedPtr + bufferOffset, expected.data(), expected.size()), 0)
-                    << errorMsgSs.str();
+                for (size_t i = 0; i < expected.size(); ++i) {
+                    if (mappedPtr[bufferOffset + i] != expected[i]) {
+                        EXPECT_EQ(mappedPtr[bufferOffset + i], expected[i])
+                            << "with i=" << i << "\n"
+                            << errorMsgSs.str();
+                        break;
+                    }
+                }
             } else {
                 EXPECT_BUFFER_U8_RANGE_EQ(reinterpret_cast<const uint8_t*>(expected.data()), buffer,
                                           bufferOffset, expected.size())
@@ -1725,6 +1731,10 @@ DAWN_INSTANTIATE_TEST_P(CopyTests_T2B,
                             wgpu::TextureFormat::R16Uint,
                             wgpu::TextureFormat::R16Sint,
                             wgpu::TextureFormat::R16Float,
+
+                            wgpu::TextureFormat::RG16Uint,
+                            wgpu::TextureFormat::RG16Sint,
+                            wgpu::TextureFormat::RG16Float,
 
                             wgpu::TextureFormat::R32Uint,
                             wgpu::TextureFormat::R32Sint,
