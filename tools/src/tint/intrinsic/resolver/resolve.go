@@ -116,8 +116,14 @@ func Resolve(a *ast.AST) (*sem.Sem, error) {
 		}
 	}
 
+	var usages = ast.EnumDecl{}
+	for _, e := range a.Enums {
+		if e.Name == "usages" {
+			usages = e
+		}
+	}
 	// Calculate the unique parameter names
-	r.s.UniqueParameterNames = r.calculateUniqueParameterNames()
+	r.s.UniqueParameterNames = r.calculateUniqueParameterNames(usages)
 
 	return r.s, nil
 }
@@ -612,9 +618,15 @@ func (r *resolver) lookupNamed(s *scope, a ast.TemplatedName) (sem.Named, error)
 
 // calculateUniqueParameterNames() iterates over all the parameters of all
 // builtin overloads, calculating the list of unique parameter names
-func (r *resolver) calculateUniqueParameterNames() []string {
+func (r *resolver) calculateUniqueParameterNames(usages ast.EnumDecl) []string {
 	set := map[string]struct{}{"": {}}
 	names := []string{}
+
+	for _, e := range usages.Entries {
+		set[e.Name] = struct{}{}
+		names = append(names, e.Name)
+	}
+
 	for _, intrinsics := range [][]*sem.Intrinsic{
 		r.s.Builtins,
 		r.s.UnaryOperators,

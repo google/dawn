@@ -124,5 +124,5 @@ fn sign[N: num, T: fi32_f16](vec<N, T>) -> vec<N, i32>
 @member_function fn Store3(byte_address_buffer<writable>, offset: u32, value: vec3<u32>)
 @member_function fn Store4(byte_address_buffer<writable>, offset: u32, value: vec4<u32>)
 
-@member_function fn GetDimensions[A: access](byte_address_buffer<A>, ptr<function, u32, writable>)
+@member_function fn GetDimensions[A: access](byte_address_buffer<A>, width: ptr<function, u32, writable>)
 
