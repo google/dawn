@@ -697,6 +697,7 @@ MaybeError CommandBuffer::Execute() {
                 const TexelBlockInfo& blockInfo = formatInfo.GetAspectInfo(src.aspect).block;
 
                 gl.BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle());
+                gl.PixelStorei(GL_PACK_ALIGNMENT, std::min(8u, blockInfo.byteSize));
                 gl.PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / blockInfo.byteSize);
 
                 GLenum glAttachment;
@@ -733,14 +734,29 @@ MaybeError CommandBuffer::Execute() {
                         DAWN_UNREACHABLE();
                     case wgpu::TextureDimension::e1D:
                     case wgpu::TextureDimension::e2D: {
-                        if (texture->GetArrayLayers() == 1) {
+                        if (target == GL_TEXTURE_2D) {
+                            DAWN_ASSERT(texture->GetArrayLayers() == 1);
                             gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment, target,
                                                     texture->GetHandle(), src.mipLevel);
                             gl.ReadPixels(src.origin.x, src.origin.y, copySize.width,
                                           copySize.height, glFormat, glType, offset);
                             break;
+                        } else if (target == GL_TEXTURE_CUBE_MAP) {
+                            DAWN_ASSERT(texture->GetArrayLayers() == 6);
+                            const uint64_t bytesPerImage = dst.bytesPerRow * dst.rowsPerImage;
+                            for (uint32_t z = 0; z < copySize.depthOrArrayLayers; ++z) {
+                                GLenum cubeMapTarget =
+                                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + z + src.origin.z;
+                                gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment,
+                                                        cubeMapTarget, texture->GetHandle(),
+                                                        src.mipLevel);
+                                gl.ReadPixels(src.origin.x, src.origin.y, copySize.width,
+                                              copySize.height, glFormat, glType, offset);
+                                offset += bytesPerImage;
+                            }
+                            break;
                         }
-                        // Implementation for 2D array and cube map is the same as 3D.
+                        // Implementation for 2D array is the same as 3D.
                         [[fallthrough]];
                     }
 
@@ -760,7 +776,7 @@ MaybeError CommandBuffer::Execute() {
                 }
 
                 gl.PixelStorei(GL_PACK_ROW_LENGTH, 0);
-
+                gl.PixelStorei(GL_PACK_ALIGNMENT, 4);  // Reset to default
                 gl.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
                 gl.DeleteFramebuffers(1, &readFBO);
 
