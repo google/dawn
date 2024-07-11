@@ -117,8 +117,11 @@ struct State {
                     [&](core::ir::Store* s) {
                         OffsetData offset{};
                         Store(s, var, offset);
-                    },                                         //
-                    [&](core::ir::Load* l) { Load(l, var); },  //
+                    },
+                    [&](core::ir::Load* l) {
+                        OffsetData offset{};
+                        Load(l, var, offset);
+                    },
                     [&](core::ir::Access* a) {
                         OffsetData offset{};
                         Access(a, var, a->Object()->Type(), &offset);
@@ -430,15 +433,6 @@ struct State {
         });
     }
 
-    void InsertLoad(core::ir::Var* var, core::ir::Instruction* inst, OffsetData offset) {
-        b.InsertBefore(inst, [&] {
-            auto* call =
-                MakeLoad(inst, var, inst->Result(0)->Type()->UnwrapPtr(), OffsetToValue(offset));
-            inst->Result(0)->ReplaceAllUsesWith(call->Result(0));
-        });
-        inst->Destroy();
-    }
-
     void Access(core::ir::Access* a,
                 core::ir::Var* var,
                 const core::type::Type* obj,
@@ -512,11 +506,11 @@ struct State {
                     b.InsertBefore(lve, [&] {
                         UpdateOffsetData(lve->Index(), obj->DeepestElement()->Size(), offset);
                     });
-                    InsertLoad(var, lve, *offset);
+                    Load(lve, var, *offset);
                 },
                 [&](core::ir::Load* ld) {
                     a->Result(0)->RemoveUsage(usage);
-                    InsertLoad(var, ld, *offset);
+                    Load(ld, var, *offset);
                 },
 
                 [&](core::ir::StoreVectorElement*) {
@@ -549,22 +543,13 @@ struct State {
         store->Destroy();
     }
 
-    // This should _only_ be handling a `var` parameter as any `access` parameters would have
-    // been replaced by the `access` being converted.
-    void Load(core::ir::Load* ld, core::ir::Var* var) {
-        auto* result = ld->From()->As<core::ir::InstructionResult>();
-        TINT_ASSERT(result);
-
-        auto* inst = result->Instruction()->As<core::ir::Var>();
-        TINT_ASSERT(inst);
-
-        const core::type::Type* result_ty = inst->Result(0)->Type()->UnwrapPtr();
-
-        b.InsertBefore(ld, [&] {
-            auto* call = MakeLoad(ld, var, result_ty, b.Value(0_u));
-            ld->Result(0)->ReplaceAllUsesWith(call->Result(0));
+    void Load(core::ir::Instruction* inst, core::ir::Var* var, OffsetData& offset) {
+        b.InsertBefore(inst, [&] {
+            auto* off = OffsetToValue(offset);
+            auto* call = MakeLoad(inst, var, inst->Result(0)->Type(), off);
+            inst->Result(0)->ReplaceAllUsesWith(call->Result(0));
         });
-        ld->Destroy();
+        inst->Destroy();
     }
 
     // Converts to:
