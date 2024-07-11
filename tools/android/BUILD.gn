@@ -29,12 +29,18 @@ import("../../scripts/dawn_overrides_with_defaults.gni")
 
 import("${dawn_root}/generator/dawn_generator.gni")
 
-dawn_json_generator("kotlin_gen") {
-  target = "kotlin"
+dawn_json_generator("jni_gen") {
+  target = "jni"
   outputs = [
     "cpp/methods.cpp",
     "cpp/structures.cpp",
     "cpp/structures.h",
+  ]
+}
+
+dawn_json_generator("kotlin_gen") {
+  target = "kotlin"
+  outputs = [
     "java/android/dawn/Adapter.kt",
     "java/android/dawn/AdapterInfo.kt",
     "java/android/dawn/AdapterProperties.kt",
@@ -212,5 +218,8 @@ dawn_json_generator("kotlin_gen") {
 }
 
 group("android") {
-  deps = [ ":kotlin_gen" ]
+  deps = [
+    ":jni_gen",
+    ":kotlin_gen",
+  ]
 }

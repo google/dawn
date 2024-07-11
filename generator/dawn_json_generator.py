@@ -1619,15 +1619,6 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender('art/api_kotlin_async_helpers.kt',
                            'java/' + kt_file_path + '/AsyncHelpers.kt',
                            [RENDER_PARAMS_BASE, params_kotlin]))
-            renders.append(
-                FileRender('art/structures.h', 'cpp/structures.h',
-                           [RENDER_PARAMS_BASE, params_kotlin]))
-            renders.append(
-                FileRender('art/structures.cpp', 'cpp/structures.cpp',
-                           [RENDER_PARAMS_BASE, params_kotlin]))
-            renders.append(
-                FileRender('art/methods.cpp', 'cpp/methods.cpp',
-                           [RENDER_PARAMS_BASE, params_kotlin]))
 
             for enum in (params_kotlin['by_category']['bitmask'] +
                          params_kotlin['by_category']['enum']):
@@ -1642,6 +1633,18 @@ class MultiGeneratorFromDawnJSON(Generator):
             renders.append(
                 FileRender('art/api_kotlin_constants.kt',
                            'java/' + kt_file_path + '/Constants.kt',
+                           [RENDER_PARAMS_BASE, params_kotlin]))
+
+        if "jni" in targets:
+            params_kotlin = compute_kotlin_params(loaded_json, kotlin_json)
+            renders.append(
+                FileRender('art/structures.h', 'cpp/structures.h',
+                           [RENDER_PARAMS_BASE, params_kotlin]))
+            renders.append(
+                FileRender('art/structures.cpp', 'cpp/structures.cpp',
+                           [RENDER_PARAMS_BASE, params_kotlin]))
+            renders.append(
+                FileRender('art/methods.cpp', 'cpp/methods.cpp',
                            [RENDER_PARAMS_BASE, params_kotlin]))
 
         return renders

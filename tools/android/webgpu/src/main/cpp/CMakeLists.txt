@@ -46,14 +46,21 @@ add_subdirectory(${DAWN_DIR} dawn)
 
 # Make the library exposing both Dawn's API and the JNI methods.
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(C_BINDINGS_PATH ${DAWN_DIR}/out/Debug/gen/cpp)
+
+find_package(Python3 REQUIRED)
+DawnJSONGenerator(
+    TARGET "jni"
+    PRINT_NAME "Dawn JNI binding"
+    OUTPUT_SOURCES WEBGPU_JNI_SOURCES
+    OUTPUT_HEADERS WEBGPU_JNI_HEADERS
+)
 
 add_library(webgpu_c_bundled SHARED)
 target_sources(webgpu_c_bundled PRIVATE
-        Util.cpp
-        ${C_BINDINGS_PATH}/methods.cpp
-        ${C_BINDINGS_PATH}/structures.cpp
-        ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
+    ${WEBGPU_JNI_SOURCES}
+    ${WEBGPU_JNI_HEADERS}
+    Util.cpp
+)
 
 target_link_libraries(webgpu_c_bundled android webgpu_dawn)
 
