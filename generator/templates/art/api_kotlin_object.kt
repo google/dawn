@@ -26,13 +26,16 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package {{ kotlin_package }}
 
+import dalvik.annotation.optimization.FastNative
 import java.nio.ByteBuffer
+
 {% from 'art/api_kotlin_types.kt' import kotlin_declaration, kotlin_definition with context %}
 
 class {{ obj.name.CamelCase() }}(val handle: Long): AutoCloseable {
     {% for method in obj.methods if include_method(method) %}
 
-        @JvmName("{{ method.name.camelCase() }}") 
+        @FastNative
+        @JvmName("{{ method.name.camelCase() }}")
         external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in filter_arguments(method.arguments) %}
