@@ -52,6 +52,18 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
 
     ObjectType GetObjectType() const override;
 
+    void SetLimits(const WGPUSupportedLimits* limits);
+    void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
+
+    bool IsAlive() const;
+    WGPUFuture GetDeviceLostFuture();
+
+    void HandleError(WGPUErrorType errorType, const char* message);
+    void HandleLogging(WGPULoggingType loggingType, const char* message);
+    void HandleDeviceLost(WGPUDeviceLostReason reason, const char* message);
+    class DeviceLostEvent;
+
+    // WebGPU API
     void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);
     void SetLoggingCallback(WGPULoggingCallback errorCallback, void* errorUserdata);
     void SetDeviceLostCallback(WGPUDeviceLostCallback errorCallback, void* errorUserdata);
@@ -59,7 +71,9 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     void PopErrorScope(WGPUErrorCallback callback, void* userdata);
     WGPUFuture PopErrorScopeF(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
     WGPUFuture PopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo);
+
     WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
+    WGPUBuffer CreateErrorBuffer(const WGPUBufferDescriptor* descriptor);
     void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
                                     WGPUCreateComputePipelineAsyncCallback callback,
                                     void* userdata);
@@ -79,22 +93,10 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
         WGPURenderPipelineDescriptor const* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo2& callbackInfo);
 
-    void HandleError(WGPUErrorType errorType, const char* message);
-    void HandleLogging(WGPULoggingType loggingType, const char* message);
-    void HandleDeviceLost(WGPUDeviceLostReason reason, const char* message);
-
     WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
     size_t EnumerateFeatures(WGPUFeatureName* features) const;
-    void SetLimits(const WGPUSupportedLimits* limits);
-    void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
-
     WGPUQueue GetQueue();
-    WGPUFuture GetDeviceLostFuture();
-
-    std::weak_ptr<bool> GetAliveWeakPtr();
-
-    class DeviceLostEvent;
 
   private:
     void WillDropLastExternalRef() override;
@@ -122,8 +124,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     raw_ptr<void> mLoggingUserdata = nullptr;
 
     Ref<Queue> mQueue;
-
-    std::shared_ptr<bool> mIsAlive;
+    bool mIsAlive = true;
 };
 
 }  // namespace dawn::wire::client

@@ -274,6 +274,7 @@
             "AdapterGetInstance",
             "BufferDestroy",
             "BufferUnmap",
+            "DeviceCreateErrorBuffer",
             "DeviceGetAdapter",
             "DeviceGetQueue",
             "DeviceGetSupportedSurfaceUsage",

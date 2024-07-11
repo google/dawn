@@ -253,8 +253,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
 Device::Device(const ObjectBaseParams& params,
                const ObjectHandle& eventManagerHandle,
                const WGPUDeviceDescriptor* descriptor)
-    : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle),
-      mIsAlive(std::make_shared<bool>(true)) {
+    : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle) {
 #if defined(DAWN_ENABLE_ASSERTS)
     static constexpr WGPUDeviceLostCallbackInfo2 kDefaultDeviceLostCallbackInfo = {
         nullptr, WGPUCallbackMode_AllowSpontaneous,
@@ -322,6 +321,10 @@ ObjectType Device::GetObjectType() const {
     return ObjectType::Device;
 }
 
+bool Device::IsAlive() const {
+    return mIsAlive;
+}
+
 void Device::WillDropLastExternalRef() {
     HandleDeviceLost(WGPUDeviceLostReason_Destroyed, "Device was destroyed.");
     Unregister();
@@ -369,6 +372,7 @@ void Device::HandleDeviceLost(WGPUDeviceLostReason reason, const char* message) 
         DAWN_CHECK(GetEventManager().SetFutureReady<DeviceLostEvent>(futureID, reason, message) ==
                    WireResult::Success);
     }
+    mIsAlive = false;
 }
 
 WGPUFuture Device::GetDeviceLostFuture() {
@@ -381,10 +385,6 @@ WGPUFuture Device::GetDeviceLostFuture() {
         }
     }
     return {mDeviceLostInfo.futureID};
-}
-
-std::weak_ptr<bool> Device::GetAliveWeakPtr() {
-    return mIsAlive;
 }
 
 void Device::SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata) {
@@ -472,6 +472,10 @@ void Device::InjectError(WGPUErrorType type, const char* message) {
 
 WGPUBuffer Device::CreateBuffer(const WGPUBufferDescriptor* descriptor) {
     return Buffer::Create(this, descriptor);
+}
+
+WGPUBuffer Device::CreateErrorBuffer(const WGPUBufferDescriptor* descriptor) {
+    return Buffer::CreateError(this, descriptor);
 }
 
 WGPUQueue Device::GetQueue() {

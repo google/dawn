@@ -125,10 +125,11 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
     }
 
     // Test to exercise client functions that should override server response for callbacks.
-    template <typename ExpFn>
-    void TestEarlyMapCancelled(void (*cancelFn)(WGPUBuffer),
-                               ExpFn cancelExp,
-                               WGPUBufferMapAsyncStatus expected) {
+    template <typename CancelFn, typename ExpFn>
+    void TestEarlyMapCancelled(CancelFn cancelMapping,
+                               ExpFn addExpectations,
+                               WGPUBufferMapAsyncStatus expected,
+                               bool calledInCancelFn) {
         WGPUMapMode mapMode = GetMapMode();
         SetupBuffer(mapMode);
         BufferMapAsync(buffer, mapMode, 0, kBufferSize, nullptr);
@@ -139,22 +140,22 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
                 api.CallBufferMapAsyncCallback(apiBuffer, WGPUBufferMapAsyncStatus_Success);
             }));
         ExpectMappedRangeCall(kBufferSize, &bufferContent);
-        cancelExp();
+        addExpectations();
 
         // The callback should get called with the expected status, regardless if the server has
         // responded.
-        if (IsSpontaneous()) {
+        if (calledInCancelFn) {
             // In spontaneous mode, the callback gets called as a part of the cancel function.
             ExpectWireCallbacksWhen([&](auto& mockCb) {
                 EXPECT_CALL(mockCb, Call(expected, _)).Times(1);
 
-                cancelFn(buffer);
+                cancelMapping();
             });
             FlushClient();
             FlushCallbacks();
         } else {
             // Otherwise, the callback will fire when we flush them.
-            cancelFn(buffer);
+            cancelMapping();
             FlushClient();
             ExpectWireCallbacksWhen([&](auto& mockCb) {
                 EXPECT_CALL(mockCb, Call(expected, _)).Times(1);
@@ -165,10 +166,11 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
     }
 
     // Test to exercise client functions that should override server error response for callbacks.
-    template <typename ExpFn>
-    void TestEarlyMapErrorCancelled(void (*cancelFn)(WGPUBuffer),
-                                    ExpFn cancelExp,
-                                    WGPUBufferMapAsyncStatus expected) {
+    template <typename CancelFn, typename ExpFn>
+    void TestEarlyMapErrorCancelled(CancelFn cancelMapping,
+                                    ExpFn addExpectations,
+                                    WGPUBufferMapAsyncStatus expected,
+                                    bool calledInCancelFn) {
         WGPUMapMode mapMode = GetMapMode();
         SetupBuffer(mapMode);
         BufferMapAsync(buffer, mapMode, 0, kBufferSize, nullptr);
@@ -182,22 +184,22 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
         FlushClient();
         FlushFutures();
 
-        cancelExp();
+        addExpectations();
 
         // The callback should get called with the expected status status, not server-side error,
         // even if the request fails on the server side.
-        if (IsSpontaneous()) {
+        if (calledInCancelFn) {
             // In spontaneous mode, the callback gets called as a part of the cancel function.
             ExpectWireCallbacksWhen([&](auto& mockCb) {
                 EXPECT_CALL(mockCb, Call(expected, _)).Times(1);
 
-                cancelFn(buffer);
+                cancelMapping();
             });
             FlushClient();
             FlushCallbacks();
         } else {
             // Otherwise, the callback will fire when we flush them.
-            cancelFn(buffer);
+            cancelMapping();
             FlushClient();
             ExpectWireCallbacksWhen([&](auto& mockCb) {
                 EXPECT_CALL(mockCb, Call(expected, _)).Times(1);
@@ -276,31 +278,56 @@ TEST_P(WireBufferMappingTests, ErrorWhileMapping) {
 // Check the map callback is called with "UnmappedBeforeCallback" when the map request would have
 // worked, but Unmap() was called.
 TEST_P(WireBufferMappingTests, UnmapCalledTooEarly) {
-    TestEarlyMapCancelled(
-        &wgpuBufferUnmap, [&]() { EXPECT_CALL(api, BufferUnmap(apiBuffer)); },
-        WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
+    TestEarlyMapCancelled([&]() { wgpuBufferUnmap(buffer); },
+                          [&]() { EXPECT_CALL(api, BufferUnmap(apiBuffer)); },
+                          WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, IsSpontaneous());
 }
 
 // Check that if Unmap() was called early client-side, we disregard server-side validation errors.
 TEST_P(WireBufferMappingTests, UnmapCalledTooEarlyServerSideError) {
-    TestEarlyMapErrorCancelled(
-        &wgpuBufferUnmap, [&]() { EXPECT_CALL(api, BufferUnmap(apiBuffer)); },
-        WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
+    TestEarlyMapErrorCancelled([&]() { wgpuBufferUnmap(buffer); },
+                               [&]() { EXPECT_CALL(api, BufferUnmap(apiBuffer)); },
+                               WGPUBufferMapAsyncStatus_UnmappedBeforeCallback, IsSpontaneous());
 }
 
 // Check the map callback is called with "DestroyedBeforeCallback" when the map request would have
 // worked, but Destroy() was called.
 TEST_P(WireBufferMappingTests, DestroyCalledTooEarly) {
-    TestEarlyMapCancelled(
-        &wgpuBufferDestroy, [&]() { EXPECT_CALL(api, BufferDestroy(apiBuffer)); },
-        WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
+    TestEarlyMapCancelled([&]() { wgpuBufferDestroy(buffer); },
+                          [&]() { EXPECT_CALL(api, BufferDestroy(apiBuffer)); },
+                          WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, IsSpontaneous());
 }
 
 // Check that if Destroy() was called early client-side, we disregard server-side validation errors.
 TEST_P(WireBufferMappingTests, DestroyCalledTooEarlyServerSideError) {
+    TestEarlyMapErrorCancelled([&]() { wgpuBufferDestroy(buffer); },
+                               [&]() { EXPECT_CALL(api, BufferDestroy(apiBuffer)); },
+                               WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, IsSpontaneous());
+}
+
+// Check the map callback is called with "DestroyedBeforeCallback" when the map request would have
+// worked, but the device was released.
+TEST_P(WireBufferMappingTests, DeviceReleasedTooEarly) {
+    TestEarlyMapCancelled(
+        [&]() { wgpuDeviceRelease(device); },
+        [&]() {
+            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
+            EXPECT_CALL(api, DeviceRelease(apiDevice));
+        },
+        WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, false);
+    DefaultApiDeviceWasReleased();
+}
+
+// Check that if device is released early client-side, we disregard server-side validation errors.
+TEST_P(WireBufferMappingTests, DeviceReleasedTooEarlyServerSideError) {
     TestEarlyMapErrorCancelled(
-        &wgpuBufferDestroy, [&]() { EXPECT_CALL(api, BufferDestroy(apiBuffer)); },
-        WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
+        [&]() { wgpuDeviceRelease(device); },
+        [&]() {
+            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
+            EXPECT_CALL(api, DeviceRelease(apiDevice));
+        },
+        WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, false);
+    DefaultApiDeviceWasReleased();
 }
 
 // Test that the callback isn't fired twice when Unmap() is called inside the callback.

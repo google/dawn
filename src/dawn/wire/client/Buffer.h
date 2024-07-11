@@ -46,9 +46,11 @@ class Device;
 class Buffer final : public ObjectWithEventsBase {
   public:
     static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
+    static WGPUBuffer CreateError(Device* device, const WGPUBufferDescriptor* descriptor);
 
     Buffer(const ObjectBaseParams& params,
            const ObjectHandle& eventManagerHandle,
+           Device* device,
            const WGPUBufferDescriptor* descriptor);
     void DeleteThis() override;
 
@@ -96,8 +98,7 @@ class Buffer final : public ObjectWithEventsBase {
     const uint64_t mSize = 0;
     const WGPUBufferUsage mUsage;
     const bool mDestructWriteHandleOnUnmap;
-
-    std::weak_ptr<bool> mIsDeviceAlive;
+    Ref<Device> mDevice;
 
     // Mapping members are mutable depending on the current map state.
     enum class MapRequestType { Read, Write };

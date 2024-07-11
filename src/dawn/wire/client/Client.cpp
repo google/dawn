@@ -78,7 +78,8 @@ void Client::UnregisterAllObjects() {
 }
 
 ReservedBuffer Client::ReserveBuffer(WGPUDevice device, const WGPUBufferDescriptor* descriptor) {
-    Ref<Buffer> buffer = Make<Buffer>(FromAPI(device)->GetEventManagerHandle(), descriptor);
+    Ref<Buffer> buffer =
+        Make<Buffer>(FromAPI(device)->GetEventManagerHandle(), FromAPI(device), descriptor);
 
     ReservedBuffer result;
     result.handle = buffer->GetWireHandle();

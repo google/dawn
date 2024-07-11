@@ -50,7 +50,7 @@ WGPUBuffer CreateErrorBufferOOMAtClient(Device* device, const WGPUBufferDescript
     errorInfo.chain.sType = WGPUSType_DawnBufferDescriptorErrorInfoFromWireClient;
     errorInfo.outOfMemory = true;
     errorBufferDescriptor.nextInChain = &errorInfo.chain;
-    return GetProcs().deviceCreateErrorBuffer(ToAPI(device), &errorBufferDescriptor);
+    return device->CreateErrorBuffer(&errorBufferDescriptor);
 }
 }  // anonymous namespace
 
@@ -176,14 +176,12 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
             return Callback();
         }
 
+        // Device destruction/loss implicitly makes the map requests aborted.
+        if (!mBuffer->mDevice->IsAlive()) {
+            status = WGPUBufferMapAsyncStatus_DestroyedBeforeCallback;
+        }
+
         if (status == WGPUBufferMapAsyncStatus_Success) {
-            if (mBuffer->mIsDeviceAlive.expired()) {
-                // If the device lost its last ref before this callback was resolved, we want to
-                // overwrite the status. This is necessary because otherwise dropping the last
-                // device reference could race w.r.t what this callback would see.
-                status = WGPUBufferMapAsyncStatus_DestroyedBeforeCallback;
-                return Callback();
-            }
             DAWN_ASSERT(mBuffer->mPendingMapRequest->type);
             switch (*mBuffer->mPendingMapRequest->type) {
                 case MapRequestType::Read:
@@ -297,20 +295,19 @@ class Buffer::MapAsyncEvent2 : public TrackedEvent {
             }
         };
 
+        // The request has been cancelled before completion, return that result.
         if (!IsPendingRequest(futureID)) {
             DAWN_ASSERT(mStatus != WGPUMapAsyncStatus_Success);
             return Callback();
         }
 
         if (mStatus == WGPUMapAsyncStatus_Success) {
-            if (mBuffer->mIsDeviceAlive.expired()) {
-                // If the device lost its last ref before this callback was resolved, we want to
-                // overwrite the status. This is necessary because otherwise dropping the last
-                // device reference could race w.r.t what this callback would see.
+            // Device destruction/loss implicitly makes the map requests aborted.
+            if (!mBuffer->mDevice->IsAlive()) {
                 mStatus = WGPUMapAsyncStatus_Aborted;
-                mMessage = "Buffer was destroyed before mapping was resolved.";
-                return Callback();
+                mMessage = "The Device was lost before mapping was resolved.";
             }
+
             DAWN_ASSERT(mBuffer->mPendingMapRequest->type);
             switch (*mBuffer->mPendingMapRequest->type) {
                 case MapRequestType::Read:
@@ -387,8 +384,8 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     // Create the buffer and send the creation command.
     // This must happen after any potential error buffer creation
     // as server expects allocating ids to be monotonically increasing
-    Ref<Buffer> buffer = wireClient->Make<Buffer>(device->GetEventManagerHandle(), descriptor);
-    buffer->mIsDeviceAlive = device->GetAliveWeakPtr();
+    Ref<Buffer> buffer =
+        wireClient->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
 
     if (descriptor->mappedAtCreation) {
         // If the buffer is mapped at creation, a write handle is created and will be
@@ -428,8 +425,23 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     return ReturnToAPI(std::move(buffer));
 }
 
+// static
+WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descriptor) {
+    Client* client = device->GetClient();
+    Ref<Buffer> buffer = client->Make<Buffer>(device->GetEventManagerHandle(), device, descriptor);
+
+    DeviceCreateErrorBufferCmd cmd;
+    cmd.self = ToAPI(device);
+    cmd.descriptor = descriptor;
+    cmd.result = buffer->GetWireHandle();
+    client->SerializeCommand(cmd);
+
+    return ReturnToAPI(std::move(buffer));
+}
+
 Buffer::Buffer(const ObjectBaseParams& params,
                const ObjectHandle& eventManagerHandle,
+               Device* device,
                const WGPUBufferDescriptor* descriptor)
     : ObjectWithEventsBase(params, eventManagerHandle),
       mSize(descriptor->size),
@@ -437,7 +449,8 @@ Buffer::Buffer(const ObjectBaseParams& params,
       // This flag is for the write handle created by mappedAtCreation
       // instead of MapWrite usage. We don't have such a case for read handle.
       mDestructWriteHandleOnUnmap(descriptor->mappedAtCreation &&
-                                  ((descriptor->usage & WGPUBufferUsage_MapWrite) == 0)) {}
+                                  ((descriptor->usage & WGPUBufferUsage_MapWrite) == 0)),
+      mDevice(device) {}
 
 void Buffer::DeleteThis() {
     FreeMappedData();
