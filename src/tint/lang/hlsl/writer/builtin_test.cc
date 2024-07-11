@@ -671,6 +671,39 @@ TEST_F(HlslWriterTest, DISABLED_BuiltinWorkgroupAtomicCompareExchangeWeak) {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinSignScalar) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.f16(), core::BuiltinFn::kSign, 1_h));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  float16_t x = float16_t(sign(float16_t(1.0h)));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinSignVector) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.vec3<f32>(), core::BuiltinFn::kSign,
+                          b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  float3 x = float3(sign(float3(1.0f, 2.0f, 3.0f)));
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, BuiltinStorageBarrier) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);

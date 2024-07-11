@@ -53,6 +53,7 @@ enum class BuiltinFn : uint8_t {
     kF32Tof16,
     kF16Tof32,
     kMul,
+    kSign,
     kLoad,
     kLoad2,
     kLoad3,

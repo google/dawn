@@ -77,8 +77,7 @@ struct State {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
                     case core::BuiltinFn::kSelect:
-                        call_worklist.Push(call);
-                        break;
+                    case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTrunc:
                         call_worklist.Push(call);
                         break;
@@ -111,6 +110,9 @@ struct State {
             switch (call->Func()) {
                 case core::BuiltinFn::kSelect:
                     Select(call);
+                    break;
+                case core::BuiltinFn::kSign:
+                    Sign(call);
                     break;
                 case core::BuiltinFn::kTrunc:
                     Trunc(call);
@@ -346,6 +348,24 @@ struct State {
                 });
                 return f;
             });
+    }
+
+    // The HLSL `sign` method always returns an `int` result (scalar or vector). In WGSL the result
+    // is expected to be the same type as the argument. This injects a cast to the expected WGSL
+    // result type after the call to `hlsl.sign`.
+    void Sign(core::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            const core::type::Type* result_ty = ty.i32();
+            if (auto* vec = call->Result(0)->Type()->As<core::type::Vector>()) {
+                result_ty = ty.vec(result_ty, vec->Width());
+            }
+
+            auto* sign =
+                b.Call<hlsl::ir::BuiltinCall>(result_ty, hlsl::BuiltinFn::kSign, call->Args()[0]);
+
+            b.ConvertWithResult(call->DetachResult(), sign);
+        });
+        call->Destroy();
     }
 
     /// Replaces a bitcast with a call to the ToF16 polyfill for the given types
