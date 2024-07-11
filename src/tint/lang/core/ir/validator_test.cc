@@ -849,6 +849,37 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Access_NoObject) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.vec3<f32>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), nullptr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:21 error: access: null object
+    %3:f32 = access undef
+                    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func(%2:vec3<f32>):void {
+  $B1: {
+    %3:f32 = access undef
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Access_NegativeIndex) {
     auto* f = b.Function("my_func", ty.void_());
     auto* obj = b.FunctionParam(ty.vec3<f32>());

@@ -1101,6 +1101,11 @@ void Validator::CheckUserCall(const UserCall* call) {
 }
 
 void Validator::CheckAccess(const Access* a) {
+    if (!a->Object()) {
+        AddError(a, Access::kObjectOperandOffset) << "null object";
+        return;
+    }
+
     auto* obj_view = a->Object()->Type()->As<core::type::MemoryView>();
     auto* ty = obj_view ? obj_view->StoreType() : a->Object()->Type();
 
