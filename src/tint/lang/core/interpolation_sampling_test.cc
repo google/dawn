@@ -58,8 +58,8 @@ inline std::ostream& operator<<(std::ostream& out, Case c) {
 }
 
 static constexpr Case kValidCases[] = {
-    {"center", InterpolationSampling::kCenter},
-    {"centroid", InterpolationSampling::kCentroid},
+    {"center", InterpolationSampling::kCenter}, {"centroid", InterpolationSampling::kCentroid},
+    {"either", InterpolationSampling::kEither}, {"first", InterpolationSampling::kFirst},
     {"sample", InterpolationSampling::kSample},
 };
 
@@ -70,9 +70,15 @@ static constexpr Case kInvalidCases[] = {
     {"1entroid", InterpolationSampling::kUndefined},
     {"enJrqqid", InterpolationSampling::kUndefined},
     {"llen77roid", InterpolationSampling::kUndefined},
-    {"sapppHHe", InterpolationSampling::kUndefined},
-    {"cam", InterpolationSampling::kUndefined},
-    {"sbGpl", InterpolationSampling::kUndefined},
+    {"eipphHHr", InterpolationSampling::kUndefined},
+    {"cit", InterpolationSampling::kUndefined},
+    {"ebGhe", InterpolationSampling::kUndefined},
+    {"fivist", InterpolationSampling::kUndefined},
+    {"fi8WWt", InterpolationSampling::kUndefined},
+    {"Mxxrs", InterpolationSampling::kUndefined},
+    {"saXggl", InterpolationSampling::kUndefined},
+    {"Xmle", InterpolationSampling::kUndefined},
+    {"sam3le", InterpolationSampling::kUndefined},
 };
 
 using InterpolationSamplingParseTest = testing::TestWithParam<Case>;

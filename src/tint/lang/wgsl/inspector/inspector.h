@@ -262,11 +262,9 @@ class Inspector {
     /// Constructs |sampler_targets_| if it hasn't already been instantiated.
     void GenerateSamplerTargets();
 
-    /// @param type the type of the parameter or structure member
     /// @param attributes attributes associated with the parameter or structure member
     /// @returns the interpolation type and sampling modes for the value
     std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
-        const core::type::Type* type,
         VectorRef<const ast::Attribute*> attributes) const;
 
     /// @param func the root function of the callgraph to consider for the computation.

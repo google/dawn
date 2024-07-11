@@ -555,6 +555,10 @@ std::string InterpolationSamplingToString(tint::inspector::InterpolationSampling
             return "centroid";
         case tint::inspector::InterpolationSampling::kSample:
             return "sample";
+        case tint::inspector::InterpolationSampling::kFirst:
+            return "first";
+        case tint::inspector::InterpolationSampling::kEither:
+            return "either";
     }
     return "unknown";
 }

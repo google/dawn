@@ -595,7 +595,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
     EXPECT_EQ("in_var4", result[0].input_variables[2].variable_name);
     EXPECT_EQ(std::nullopt, result[0].input_variables[2].attributes.location);
     EXPECT_EQ(2u, result[0].input_variables[2].attributes.color);
-    EXPECT_EQ(InterpolationType::kFlat, result[0].input_variables[2].interpolation_type);
+    EXPECT_EQ(InterpolationType::kPerspective, result[0].input_variables[2].interpolation_type);
     EXPECT_EQ(ComponentType::kU32, result[0].input_variables[2].component_type);
 
     ASSERT_EQ(1u, result[0].output_variables.size());
@@ -1727,7 +1727,13 @@ INSTANTIATE_TEST_SUITE_P(
             InterpolationType::kLinear, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
             core::InterpolationType::kFlat, core::InterpolationSampling::kUndefined,
-            InterpolationType::kFlat, InterpolationSampling::kNone}));
+            InterpolationType::kFlat, InterpolationSampling::kFirst},
+        InspectorGetEntryPointInterpolateTestParams{
+            core::InterpolationType::kFlat, core::InterpolationSampling::kFirst,
+            InterpolationType::kFlat, InterpolationSampling::kFirst},
+        InspectorGetEntryPointInterpolateTestParams{
+            core::InterpolationType::kFlat, core::InterpolationSampling::kEither,
+            InterpolationType::kFlat, InterpolationSampling::kEither}));
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
     GlobalConst("C", Expr(true));

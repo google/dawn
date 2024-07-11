@@ -2028,7 +2028,8 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
         std::string interfaceDeclaration;
         {
             std::ostringstream sstream;
-            sstream << "struct A { @location(0) @interpolate(flat) a: " << kTypes[i] << ",\n";
+            sstream << "struct A { @location(0) @interpolate(flat, either) a: " << kTypes[i]
+                    << ",\n";
             interfaceDeclaration = sstream.str();
         }
 
@@ -2084,22 +2085,25 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
         Center,
         Centroid,
         Sample,
+        First,
+        Either,
         Count,
     };
     constexpr std::array<const char*, static_cast<size_t>(InterpolationType::Count)>
         kInterpolationTypeString = {{"", "perspective", "linear", "flat"}};
     constexpr std::array<const char*, static_cast<size_t>(InterpolationSampling::Count)>
-        kInterpolationSamplingString = {{"", "center", "centroid", "sample"}};
+        kInterpolationSamplingString = {{"", "center", "centroid", "sample", "first", "either"}};
 
     struct InterpolationAttribute {
         InterpolationType interpolationType;
         InterpolationSampling interpolationSampling;
     };
 
-    // Interpolation sampling is not used with flat interpolation.
-    constexpr std::array<InterpolationAttribute, 10> validInterpolationAttributes = {{
+    constexpr std::array<InterpolationAttribute, 12> validInterpolationAttributes = {{
         {InterpolationType::None, InterpolationSampling::None},
         {InterpolationType::Flat, InterpolationSampling::None},
+        {InterpolationType::Flat, InterpolationSampling::First},
+        {InterpolationType::Flat, InterpolationSampling::Either},
         {InterpolationType::Linear, InterpolationSampling::None},
         {InterpolationType::Linear, InterpolationSampling::Center},
         {InterpolationType::Linear, InterpolationSampling::Centroid},
@@ -2176,6 +2180,9 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
                 break;
 
             case InterpolationType::Flat:
+                if (appliedAttribute.interpolationSampling == InterpolationSampling::None) {
+                    appliedAttribute.interpolationSampling = InterpolationSampling::First;
+                }
                 break;
             default:
                 DAWN_UNREACHABLE();

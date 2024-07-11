@@ -70,7 +70,15 @@ enum class PixelLocalMemberType : uint8_t {
 enum class InterpolationType : uint8_t { kPerspective, kLinear, kFlat, kUnknown };
 
 /// Type of interpolation sampling of a stage variable.
-enum class InterpolationSampling : uint8_t { kNone, kCenter, kCentroid, kSample, kUnknown };
+enum class InterpolationSampling : uint8_t {
+    kNone,
+    kCenter,
+    kCentroid,
+    kSample,
+    kFirst,
+    kEither,
+    kUnknown
+};
 
 /// Reflection data about an entry point input or output.
 struct StageVariable {

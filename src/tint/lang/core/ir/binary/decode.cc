@@ -1315,6 +1315,10 @@ struct Decoder {
                 return core::InterpolationSampling::kCentroid;
             case pb::InterpolationSampling::sample:
                 return core::InterpolationSampling::kSample;
+            case pb::InterpolationSampling::first:
+                return core::InterpolationSampling::kFirst;
+            case pb::InterpolationSampling::either:
+                return core::InterpolationSampling::kEither;
 
             case pb::InterpolationSampling::InterpolationSampling_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::InterpolationSampling::InterpolationSampling_INT_MAX_SENTINEL_DO_NOT_USE_:

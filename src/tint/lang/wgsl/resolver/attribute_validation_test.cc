@@ -2533,7 +2533,9 @@ TEST_P(InterpolateParameterTest, All) {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(
             r()->error(),
-            R"(12:34 error: flat interpolation attribute must not have a sampling parameter)");
+            params.type == core::InterpolationType::kFlat
+                ? R"(12:34 error: flat interpolation can only use 'first' and 'either' sampling parameters)"
+                : R"(12:34 error: 'first' and 'either' sampling parameters can only be used with flat interpolation)");
     }
 }
 
@@ -2563,7 +2565,9 @@ TEST_P(InterpolateParameterTest, IntegerScalar) {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(
             r()->error(),
-            R"(12:34 error: flat interpolation attribute must not have a sampling parameter)");
+            params.type == core::InterpolationType::kFlat
+                ? R"(12:34 error: flat interpolation can only use 'first' and 'either' sampling parameters)"
+                : R"(12:34 error: 'first' and 'either' sampling parameters can only be used with flat interpolation)");
     }
 }
 
@@ -2593,7 +2597,9 @@ TEST_P(InterpolateParameterTest, IntegerVector) {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(
             r()->error(),
-            R"(12:34 error: flat interpolation attribute must not have a sampling parameter)");
+            params.type == core::InterpolationType::kFlat
+                ? R"(12:34 error: flat interpolation can only use 'first' and 'either' sampling parameters)"
+                : R"(12:34 error: 'first' and 'either' sampling parameters can only be used with flat interpolation)");
     }
 }
 
@@ -2606,15 +2612,22 @@ INSTANTIATE_TEST_SUITE_P(
         Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kCenter, true},
         Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kCentroid, true},
         Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kSample, true},
+        Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kFirst, false},
+        Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kEither, false},
+
         Params{core::InterpolationType::kLinear, core::InterpolationSampling::kUndefined, true},
         Params{core::InterpolationType::kLinear, core::InterpolationSampling::kCenter, true},
         Params{core::InterpolationType::kLinear, core::InterpolationSampling::kCentroid, true},
         Params{core::InterpolationType::kLinear, core::InterpolationSampling::kSample, true},
-        // flat interpolation must not have a sampling type
+        Params{core::InterpolationType::kLinear, core::InterpolationSampling::kFirst, false},
+        Params{core::InterpolationType::kLinear, core::InterpolationSampling::kEither, false},
+
         Params{core::InterpolationType::kFlat, core::InterpolationSampling::kUndefined, true},
         Params{core::InterpolationType::kFlat, core::InterpolationSampling::kCenter, false},
         Params{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid, false},
-        Params{core::InterpolationType::kFlat, core::InterpolationSampling::kSample, false}));
+        Params{core::InterpolationType::kFlat, core::InterpolationSampling::kSample, false},
+        Params{core::InterpolationType::kFlat, core::InterpolationSampling::kFirst, true},
+        Params{core::InterpolationType::kFlat, core::InterpolationSampling::kEither, true}));
 
 TEST_F(InterpolateTest, FragmentInput_Integer_MissingFlatInterpolation) {
     Func("main", Vector{Param(Source{{12, 34}}, "a", ty.i32(), Vector{Location(0_a)})}, ty.void_(),

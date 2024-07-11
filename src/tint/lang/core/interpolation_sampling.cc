@@ -51,6 +51,12 @@ InterpolationSampling ParseInterpolationSampling(std::string_view str) {
     if (str == "centroid") {
         return InterpolationSampling::kCentroid;
     }
+    if (str == "either") {
+        return InterpolationSampling::kEither;
+    }
+    if (str == "first") {
+        return InterpolationSampling::kFirst;
+    }
     if (str == "sample") {
         return InterpolationSampling::kSample;
     }
@@ -65,6 +71,10 @@ std::string_view ToString(InterpolationSampling value) {
             return "center";
         case InterpolationSampling::kCentroid:
             return "centroid";
+        case InterpolationSampling::kEither:
+            return "either";
+        case InterpolationSampling::kFirst:
+            return "first";
         case InterpolationSampling::kSample:
             return "sample";
     }

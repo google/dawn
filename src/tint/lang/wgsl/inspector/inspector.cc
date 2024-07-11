@@ -662,7 +662,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     stage_variable.attributes.color = color;
 
     std::tie(stage_variable.interpolation_type, stage_variable.interpolation_sampling) =
-        CalculateInterpolationData(type, attributes);
+        CalculateInterpolationData(attributes);
 
     variables.push_back(stage_variable);
 }
@@ -888,12 +888,8 @@ void Inspector::GenerateSamplerTargets() {
 }
 
 std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpolationData(
-    const core::type::Type* type,
     VectorRef<const ast::Attribute*> attributes) const {
     auto* interpolation_attribute = ast::GetAttribute<ast::InterpolateAttribute>(attributes);
-    if (type->is_integer_scalar_or_vector()) {
-        return {InterpolationType::kFlat, InterpolationSampling::kNone};
-    }
 
     if (!interpolation_attribute) {
         return {InterpolationType::kPerspective, InterpolationSampling::kCenter};
@@ -912,9 +908,12 @@ std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpo
                                 ->Value();
     }
 
-    if (ast_interpolation_type != core::InterpolationType::kFlat &&
-        ast_sampling_type == core::InterpolationSampling::kUndefined) {
-        ast_sampling_type = core::InterpolationSampling::kCenter;
+    if (ast_sampling_type == core::InterpolationSampling::kUndefined) {
+        if (ast_interpolation_type == core::InterpolationType::kFlat) {
+            ast_sampling_type = core::InterpolationSampling::kFirst;
+        } else {
+            ast_sampling_type = core::InterpolationSampling::kCenter;
+        }
     }
 
     auto interpolation_type = InterpolationType::kUnknown;
@@ -945,6 +944,12 @@ std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpo
             break;
         case core::InterpolationSampling::kSample:
             sampling_type = InterpolationSampling::kSample;
+            break;
+        case core::InterpolationSampling::kFirst:
+            sampling_type = InterpolationSampling::kFirst;
+            break;
+        case core::InterpolationSampling::kEither:
+            sampling_type = InterpolationSampling::kEither;
             break;
     }
 

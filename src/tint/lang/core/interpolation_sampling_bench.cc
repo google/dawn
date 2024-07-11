@@ -44,9 +44,11 @@ namespace {
 
 void InterpolationSamplingParser(::benchmark::State& state) {
     const char* kStrings[] = {
-        "ccnter",     "c3r",   "centeV",  "center",   "1enter",    "cnqqer",    "centll77",
-        "qqenrppHid", "cntov", "cenGoid", "centroid", "ceviiroid", "ceWWtro8d", "cxxtMoid",
-        "saXggl",     "Xmle",  "sam3le",  "sample",   "sEmple",    "amTTlPP",   "ddamxxl",
+        "ccnter",     "c3r",        "centeV",  "center",   "1enter",    "cnqqer",    "centll77",
+        "qqenrppHid", "cntov",      "cenGoid", "centroid", "ceviiroid", "ceWWtro8d", "cxxtMoid",
+        "eiXgge",     "Xter",       "eit3er",  "either",   "eEther",    "itTTePP",   "dditxxe",
+        "f44rst",     "fiVVSSt",    "22RRt",   "first",    "fFst",      "firt",      "ROOHVt",
+        "saypl",      "snnm77lrre", "004mple", "sample",   "spoo",      "amzze",     "1implpp",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {

@@ -320,6 +320,98 @@ TEST_F(ResolverCompatibilityModeTest, SampleInterpolation_StructMember) {
         R"(12:34 error: use of '@interpolate(..., sample)' is not allowed in compatibility mode)");
 }
 
+TEST_F(ResolverCompatibilityModeTest, FirstInterpolation_Parameter) {
+    // @fragment
+    // fn main(@location(1) @interpolate(flat, first) value : f32) {
+    // }
+
+    Func("main",
+         Vector{Param("value", ty.f32(),
+                      Vector{
+                          Location(1_i),
+                          Interpolate(Source{{12, 34}}, core::InterpolationType::kFlat,
+                                      core::InterpolationSampling::kFirst),
+                      })},
+         ty.void_(), Empty,
+         Vector{
+             Stage(ast::PipelineStage::kFragment),
+         },
+         Vector{
+             Builtin(core::BuiltinValue::kPosition),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: flat interpolation must use 'either' sampling parameter in compatibility mode)");
+}
+
+TEST_F(ResolverCompatibilityModeTest, FirstInterpolation_StructMember) {
+    // struct S {
+    //   @location(1) @interpolate(flat, first) value : f32,
+    // }
+
+    Structure("S", Vector{
+                       Member("value", ty.f32(),
+                              Vector{
+                                  Location(1_i),
+                                  Interpolate(Source{{12, 34}}, core::InterpolationType::kFlat,
+                                              core::InterpolationSampling::kFirst),
+                              }),
+                   });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: flat interpolation must use 'either' sampling parameter in compatibility mode)");
+}
+
+TEST_F(ResolverCompatibilityModeTest, FlatNoneInterpolation_Parameter) {
+    // @fragment
+    // fn main(@location(1) @interpolate(flat) value : f32) {
+    // }
+
+    Func("main",
+         Vector{Param("value", ty.f32(),
+                      Vector{
+                          Location(1_i),
+                          Interpolate(Source{{12, 34}}, core::InterpolationType::kFlat,
+                                      core::InterpolationSampling::kUndefined),
+                      })},
+         ty.void_(), Empty,
+         Vector{
+             Stage(ast::PipelineStage::kFragment),
+         },
+         Vector{
+             Builtin(core::BuiltinValue::kPosition),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: flat interpolation must use 'either' sampling parameter in compatibility mode)");
+}
+
+TEST_F(ResolverCompatibilityModeTest, FlatNoneInterpolation_StructMember) {
+    // struct S {
+    //   @location(1) @interpolate(flat) value : f32,
+    // }
+
+    Structure("S", Vector{
+                       Member("value", ty.f32(),
+                              Vector{
+                                  Location(1_i),
+                                  Interpolate(Source{{12, 34}}, core::InterpolationType::kFlat,
+                                              core::InterpolationSampling::kUndefined),
+                              }),
+                   });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: flat interpolation must use 'either' sampling parameter in compatibility mode)");
+}
+
 class ResolverCompatibilityModeTest_TextureLoad : public ResolverCompatibilityModeTest {
   protected:
     void add_call_param(std::string name, ast::Type type, ExpressionList* call_params) {

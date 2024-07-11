@@ -92,6 +92,8 @@ enum class InterpolationSampling {
     Center,
     Centroid,
     Sample,
+    First,
+    Either,
 };
 
 enum class PixelLocalMemberType {

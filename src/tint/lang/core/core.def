@@ -77,6 +77,8 @@ enum interpolation_sampling {
   center
   centroid
   sample
+  first
+  either
 }
 
 enum builtin_type {

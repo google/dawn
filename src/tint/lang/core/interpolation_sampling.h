@@ -49,6 +49,8 @@ enum class InterpolationSampling : uint8_t {
     kUndefined,
     kCenter,
     kCentroid,
+    kEither,
+    kFirst,
     kSample,
 };
 
@@ -71,9 +73,7 @@ auto& operator<<(STREAM& out, InterpolationSampling value) {
 InterpolationSampling ParseInterpolationSampling(std::string_view str);
 
 constexpr std::string_view kInterpolationSamplingStrings[] = {
-    "center",
-    "centroid",
-    "sample",
+    "center", "centroid", "either", "first", "sample",
 };
 
 }  // namespace tint::core

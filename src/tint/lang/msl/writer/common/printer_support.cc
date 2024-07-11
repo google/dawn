@@ -101,6 +101,9 @@ std::string InterpolationToAttribute(core::InterpolationType type,
                 attr = "center_";
             }
             break;
+        case core::InterpolationSampling::kFirst:
+        case core::InterpolationSampling::kEither:
+            break;
     }
     switch (type) {
         case core::InterpolationType::kPerspective:

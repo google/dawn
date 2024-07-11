@@ -100,7 +100,7 @@ TEST_F(ResolverUnresolvedIdentifierSuggestions, InterpolationSampling) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: unresolved interpolation sampling 'centre'
 12:34 note: Did you mean 'center'?
-Possible values: 'center', 'centroid', 'sample')");
+Possible values: 'center', 'centroid', 'either', 'first', 'sample')");
 }
 
 TEST_F(ResolverUnresolvedIdentifierSuggestions, InterpolationType) {

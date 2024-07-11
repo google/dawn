@@ -847,6 +847,10 @@ struct Encoder {
                 return pb::InterpolationSampling::centroid;
             case core::InterpolationSampling::kSample:
                 return pb::InterpolationSampling::sample;
+            case core::InterpolationSampling::kFirst:
+                return pb::InterpolationSampling::first;
+            case core::InterpolationSampling::kEither:
+                return pb::InterpolationSampling::either;
             case core::InterpolationSampling::kUndefined:
                 break;
         }

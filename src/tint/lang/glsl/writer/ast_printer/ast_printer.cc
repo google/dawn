@@ -2150,6 +2150,8 @@ void ASTPrinter::EmitInterpolationQualifiers(StringStream& out,
                         break;
                     case core::InterpolationSampling::kSample:
                     case core::InterpolationSampling::kCenter:
+                    case core::InterpolationSampling::kFirst:
+                    case core::InterpolationSampling::kEither:
                     case core::InterpolationSampling::kUndefined:
                         break;
                 }

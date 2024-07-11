@@ -4095,6 +4095,8 @@ void Builder::AddInterpolationDecorations(uint32_t id,
             module_.PushAnnot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationSample)});
             break;
         case core::InterpolationSampling::kCenter:
+        case core::InterpolationSampling::kFirst:
+        case core::InterpolationSampling::kEither:
         case core::InterpolationSampling::kUndefined:
             break;
     }

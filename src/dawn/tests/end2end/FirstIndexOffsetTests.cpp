@@ -117,6 +117,10 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
                                      CheckIndex checkIndex,
                                      uint32_t firstVertex,
                                      uint32_t firstInstance) {
+    // Compatibility mode does not support @interpolate(flat, first).
+    // It only supports @interpolate(flat, either).
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
     using wgpu::operator&;
 
     std::stringstream vertexInputs;

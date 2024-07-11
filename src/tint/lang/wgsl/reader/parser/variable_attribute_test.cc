@@ -325,6 +325,38 @@ TEST_F(WGSLParserTest, Attribute_Interpolate_Flat) {
     EXPECT_EQ(interp->sampling, nullptr);
 }
 
+TEST_F(WGSLParserTest, Attribute_Interpolate_Flat_First) {
+    auto p = parser("interpolate(flat, first)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_FALSE(p->has_error());
+    ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
+
+    auto* interp = var_attr->As<ast::InterpolateAttribute>();
+    ast::CheckIdentifier(interp->type, "flat");
+    ast::CheckIdentifier(interp->sampling, "first");
+}
+
+TEST_F(WGSLParserTest, Attribute_Interpolate_Either) {
+    auto p = parser("interpolate(flat, either)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_FALSE(p->has_error());
+    ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
+
+    auto* interp = var_attr->As<ast::InterpolateAttribute>();
+    ast::CheckIdentifier(interp->type, "flat");
+    ast::CheckIdentifier(interp->sampling, "either");
+}
+
 TEST_F(WGSLParserTest, Attribute_Interpolate_Single_TrailingComma) {
     auto p = parser("interpolate(flat,)");
     auto attr = p->attribute();

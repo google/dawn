@@ -647,6 +647,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         case InterpolationSampling::Sample:
             s->Append("Sample");
             break;
+        case InterpolationSampling::First:
+            s->Append("First");
+            break;
+        case InterpolationSampling::Either:
+            s->Append("Either");
+            break;
     }
     return {true};
 }

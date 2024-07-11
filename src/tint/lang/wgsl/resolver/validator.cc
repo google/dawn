@@ -1153,27 +1153,53 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
         return false;
     }
 
-    if (attr->sampling && i_type->Value() == core::InterpolationType::kFlat) {
-        AddError(attr->source) << "flat interpolation attribute must not have a sampling parameter";
-        return false;
-    }
+    if (attr->sampling) {
+        auto s_type = sem_.AsInterpolationSampling(sem_.Get(attr->sampling))->Value();
+        bool is_first_or_either = s_type == core::InterpolationSampling::kFirst ||
+                                  s_type == core::InterpolationSampling::kEither;
 
-    if (mode_ == wgsl::ValidationMode::kCompat) {
-        if (i_type->Value() == core::InterpolationType::kLinear) {
-            AddError(attr->source)
-                << "use of '@interpolate(linear)' is not allowed in compatibility mode";
-            return false;
-        }
+        if (i_type->Value() == core::InterpolationType::kFlat) {
+            if (!is_first_or_either) {
+                AddError(attr->source)
+                    << "flat interpolation can only use 'first' and 'either' sampling parameters";
+                return false;
+            }
+            if (mode_ == wgsl::ValidationMode::kCompat &&
+                s_type == core::InterpolationSampling::kFirst) {
+                AddError(attr->source) << "flat interpolation must use 'either' sampling parameter "
+                                          "in compatibility mode";
+                return false;
+            }
+        } else {
+            if (is_first_or_either) {
+                AddError(attr->source) << "'first' and 'either' sampling parameters can only be "
+                                          "used with flat interpolation";
+                return false;
+            }
 
-        if (attr->sampling) {
-            auto s_type = sem_.AsInterpolationSampling(sem_.Get(attr->sampling));
-            if (s_type->Value() == core::InterpolationSampling::kSample) {
+            if (mode_ == wgsl::ValidationMode::kCompat &&
+                s_type == core::InterpolationSampling::kSample) {
                 AddError(attr->source)
                     << "use of '@interpolate(..., sample)' is not allowed in compatibility mode";
                 return false;
             }
         }
+    } else {
+        if (mode_ == wgsl::ValidationMode::kCompat &&
+            i_type->Value() == core::InterpolationType::kFlat) {
+            AddError(attr->source)
+                << "flat interpolation must use 'either' sampling parameter in compatibility mode";
+            return false;
+        }
     }
+
+    if (mode_ == wgsl::ValidationMode::kCompat &&
+        i_type->Value() == core::InterpolationType::kLinear) {
+        AddError(attr->source)
+            << "use of '@interpolate(linear)' is not allowed in compatibility mode";
+        return false;
+    }
+
     return true;
 }
 

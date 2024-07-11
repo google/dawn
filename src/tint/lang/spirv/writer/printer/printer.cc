@@ -2040,6 +2040,8 @@ class Printer {
                     module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationSample)});
                     break;
                 case core::InterpolationSampling::kCenter:
+                case core::InterpolationSampling::kFirst:
+                case core::InterpolationSampling::kEither:
                 case core::InterpolationSampling::kUndefined:
                     break;
             }

@@ -1220,10 +1220,10 @@ TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutput) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
     @location(1) var1: f32,
-    @location(3) @interpolate(flat) var3: u32,
-    @location(5) @interpolate(flat) var5: i32,
+    @location(3) @interpolate(flat, either) var3: u32,
+    @location(5) @interpolate(flat, either) var5: i32,
     @location(7) var7: f32,
-    @location(9) @interpolate(flat) var9: u32,
+    @location(9) @interpolate(flat, either) var9: u32,
     @builtin(position) pos: vec4f,
 }
 
@@ -1247,7 +1247,7 @@ struct ShaderIO {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
-    @location(3) @interpolate(flat) var3: u32,
+    @location(3) @interpolate(flat, either) var3: u32,
     @location(7) var7: f32,
 }
 

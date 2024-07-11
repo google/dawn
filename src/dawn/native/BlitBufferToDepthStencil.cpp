@@ -101,7 +101,7 @@ struct Params {
 @group(0) @binding(1) var<uniform> params : Params;
 
 struct VertexOutputs {
-  @location(0) @interpolate(flat) stencil_val : u32,
+  @location(0) @interpolate(flat, either) stencil_val : u32,
   @builtin(position) position : vec4f,
 };
 

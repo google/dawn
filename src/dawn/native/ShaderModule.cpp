@@ -307,6 +307,10 @@ ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSam
             return InterpolationSampling::Centroid;
         case tint::inspector::InterpolationSampling::kSample:
             return InterpolationSampling::Sample;
+        case tint::inspector::InterpolationSampling::kFirst:
+            return InterpolationSampling::First;
+        case tint::inspector::InterpolationSampling::kEither:
+            return InterpolationSampling::Either;
         case tint::inspector::InterpolationSampling::kUnknown:
             return DAWN_VALIDATION_ERROR(
                 "Attempted to convert 'Unknown' interpolation sampling type from Tint");

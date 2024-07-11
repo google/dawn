@@ -236,8 +236,7 @@ TEST_F(CompatValidationTest, CanNotUseSampleIndex) {
 TEST_F(CompatValidationTest, CanNotUseShaderWithUnsupportedInterpolateTypeOrSampling) {
     static const char* interpolateParams[] = {
         "perspective",  // should pass
-        "linear",
-        "perspective, sample",
+        "linear",      "perspective, sample", "flat", "flat, first",
     };
     for (auto interpolateParam : interpolateParams) {
         auto wgsl = absl::StrFormat(R"(
