@@ -44,8 +44,7 @@
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/styled_text_printer.h"
 
-#include "third_party/spirv-tools/src/include/spirv-tools/libspirv.h"
-#include "third_party/spirv-tools/src/include/spirv-tools/libspirv.hpp"
+#include "spirv-tools/libspirv.hpp"
 
 TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS();
 #include "src/tint/utils/protos/ir_fuzz/ir_fuzz.pb.h"
