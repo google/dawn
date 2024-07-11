@@ -123,9 +123,10 @@ fn f32tof16[N: num](vec<N, f32>) -> vec<N, u32>
 fn f16tof32(u32) -> f32
 fn f16tof32[N: num](vec<N, u32>) -> vec<N, f32>
 
-fn mul [T: f32_f16, C: num, R: num](mat<C, R, T>, vec<C, T>) -> vec<R, T>
-fn mul [T: f32_f16, C: num, R: num](vec<R, T>, mat<C, R, T>) -> vec<C, T>
-fn mul [T: f32_f16, K: num, C: num, R: num](mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
+// Treat the HLSL matrices as transposed when used in `mul`
+fn mul [T: f32_f16, C: num, R: num](mat<R, C, T>, vec<C, T>) -> vec<R, T>
+fn mul [T: f32_f16, C: num, R: num](vec<R, T>, mat<R, C, T>) -> vec<C, T>
+fn mul [T: f32_f16, K: num, C: num, R: num](mat<R, K, T>, mat<K, C, T>) -> mat<R, C, T>
 
 fn sign[T: fi32_f16](T) -> i32
 fn sign[N: num, T: fi32_f16](vec<N, T>) -> vec<N, i32>

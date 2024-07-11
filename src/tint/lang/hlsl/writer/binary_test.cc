@@ -444,6 +444,54 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, BinaryMulVec4Mat3x4) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Var("x", b.Zero<vec4<f32>>());
+        auto* y = b.Var("y", b.Zero<mat3x4<f32>>());
+        auto* l = b.Load(x);
+        auto* r = b.Load(y);
+        b.Var("c", b.Multiply(ty.vec3<f32>(), l, r));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  float4 x = (0.0f).xxxx;
+  float3x4 y = float3x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
+  float3 c = mul(y, x);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BinaryMulMat3x2Vec3) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Var("x", b.Zero<mat3x2<f32>>());
+        auto* y = b.Var("y", b.Zero<vec3<f32>>());
+        auto* l = b.Load(x);
+        auto* r = b.Load(y);
+        b.Var("c", b.Multiply(ty.vec2<f32>(), l, r));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  float3x2 x = float3x2((0.0f).xx, (0.0f).xx, (0.0f).xx);
+  float3 y = (0.0f).xxx;
+  float2 c = mul(y, x);
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, BinaryMulMatMat) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);

@@ -1057,20 +1057,20 @@ constexpr NumberMatcher kNumberMatchers[] = {
 
 constexpr MatcherIndex kMatcherIndices[] = {
   /* [0] */ MatcherIndex(22),
-  /* [1] */ MatcherIndex(1),
-  /* [2] */ MatcherIndex(2),
+  /* [1] */ MatcherIndex(2),
+  /* [2] */ MatcherIndex(1),
   /* [3] */ MatcherIndex(0),
   /* [4] */ MatcherIndex(22),
-  /* [5] */ MatcherIndex(2),
-  /* [6] */ MatcherIndex(3),
+  /* [5] */ MatcherIndex(3),
+  /* [6] */ MatcherIndex(2),
   /* [7] */ MatcherIndex(0),
   /* [8] */ MatcherIndex(22),
-  /* [9] */ MatcherIndex(1),
-  /* [10] */ MatcherIndex(3),
+  /* [9] */ MatcherIndex(3),
+  /* [10] */ MatcherIndex(1),
   /* [11] */ MatcherIndex(0),
   /* [12] */ MatcherIndex(22),
-  /* [13] */ MatcherIndex(2),
-  /* [14] */ MatcherIndex(1),
+  /* [13] */ MatcherIndex(1),
+  /* [14] */ MatcherIndex(2),
   /* [15] */ MatcherIndex(0),
   /* [16] */ MatcherIndex(8),
   /* [17] */ MatcherIndex(5),
@@ -2600,9 +2600,9 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [5] */
-    /* fn mul[T : f32_f16, C : num, R : num](mat<C, R, T>, vec<C, T>) -> vec<R, T> */
-    /* fn mul[T : f32_f16, C : num, R : num](vec<R, T>, mat<C, R, T>) -> vec<C, T> */
-    /* fn mul[T : f32_f16, K : num, C : num, R : num](mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T> */
+    /* fn mul[T : f32_f16, C : num, R : num](mat<R, C, T>, vec<C, T>) -> vec<R, T> */
+    /* fn mul[T : f32_f16, C : num, R : num](vec<R, T>, mat<R, C, T>) -> vec<C, T> */
+    /* fn mul[T : f32_f16, K : num, C : num, R : num](mat<R, K, T>, mat<K, C, T>) -> mat<R, C, T> */
     /* num overloads */ 3,
     /* overloads */ OverloadIndex(27),
   },
