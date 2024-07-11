@@ -93,10 +93,10 @@ void GetCustomSerializedData(const fuzzing::Command& command,
             memset(&cmd, 0, sizeof(UnregisterObjectCmd));
 
             cmd.objectType =
-                static_cast<ObjectType>(command.destroyobject().objecttype() % kObjectTypes);
+                static_cast<ObjectType>(command.unregisterobject().objecttype() % kObjectTypes);
 
             cmd.objectId = objectStores[static_cast<ObjectType>(cmd.objectType)].Lookup(
-                command.destroyobject().objectid());
+                command.unregisterobject().objectid());
 
             if (cmd.objectId == static_cast<ObjectId>(DawnLPMFuzzer::kInvalidObjectId)) {
                 break;
