@@ -109,7 +109,8 @@ tasks.register('generateBindings', Exec) {
     '--output-dir', "$project.projectDir/../../../out/Debug/gen",
     '--dawn-json', 'src/dawn/dawn.json',
     '--targets', 'kotlin',
-    '--kotlin-json', 'src/dawn/dawn_kotlin.json'
+    '--kotlin-json', 'src/dawn/dawn_kotlin.json',
+    '--jinja2-path', 'third_party/jinja2'
 }
 
 preBuild {
