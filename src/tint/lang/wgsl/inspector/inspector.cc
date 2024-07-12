@@ -895,18 +895,8 @@ std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpo
         return {InterpolationType::kPerspective, InterpolationSampling::kCenter};
     }
 
-    auto& sem = program_.Sem();
-
-    auto ast_interpolation_type =
-        sem.Get<sem::BuiltinEnumExpression<core::InterpolationType>>(interpolation_attribute->type)
-            ->Value();
-
-    auto ast_sampling_type = core::InterpolationSampling::kUndefined;
-    if (interpolation_attribute->sampling) {
-        ast_sampling_type = sem.Get<sem::BuiltinEnumExpression<core::InterpolationSampling>>(
-                                   interpolation_attribute->sampling)
-                                ->Value();
-    }
+    auto ast_interpolation_type = interpolation_attribute->interpolation.type;
+    auto ast_sampling_type = interpolation_attribute->interpolation.sampling;
 
     if (ast_sampling_type == core::InterpolationSampling::kUndefined) {
         if (ast_interpolation_type == core::InterpolationType::kFlat) {

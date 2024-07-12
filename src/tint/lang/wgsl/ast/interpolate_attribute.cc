@@ -29,6 +29,7 @@
 
 #include <string>
 
+#include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/wgsl/ast/builder.h"
 #include "src/tint/lang/wgsl/ast/clone_context.h"
 
@@ -39,9 +40,8 @@ namespace tint::ast {
 InterpolateAttribute::InterpolateAttribute(GenerationID pid,
                                            NodeID nid,
                                            const Source& src,
-                                           const Expression* ty,
-                                           const Expression* smpl)
-    : Base(pid, nid, src), type(ty), sampling(smpl) {}
+                                           core::Interpolation interp)
+    : Base(pid, nid, src), interpolation(interp) {}
 
 InterpolateAttribute::~InterpolateAttribute() = default;
 
@@ -52,9 +52,7 @@ std::string InterpolateAttribute::Name() const {
 const InterpolateAttribute* InterpolateAttribute::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx.Clone(source);
-    auto* ty = ctx.Clone(type);
-    auto* smpl = ctx.Clone(sampling);
-    return ctx.dst->create<InterpolateAttribute>(src, ty, smpl);
+    return ctx.dst->create<InterpolateAttribute>(src, interpolation);
 }
 
 }  // namespace tint::ast

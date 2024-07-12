@@ -565,14 +565,15 @@ void SyntaxTreePrinter::EmitAttributes(VectorRef<const ast::Attribute*> attrs) {
                     Line() << "type: [";
                     {
                         ScopedIndent ty(this);
-                        EmitExpression(interpolate->type);
+                        Line() << core::ToString(interpolate->interpolation.type);
                     }
                     Line() << "]";
-                    if (interpolate->sampling) {
+                    if (interpolate->interpolation.sampling !=
+                        core::InterpolationSampling::kUndefined) {
                         Line() << "sampling: [";
                         {
                             ScopedIndent sa(this);
-                            EmitExpression(interpolate->sampling);
+                            Line() << core::ToString(interpolate->interpolation.sampling);
                         }
                         Line() << "]";
                     }

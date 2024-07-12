@@ -33,9 +33,6 @@
 
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/builtin_type.h"
-#include "src/tint/lang/core/builtin_value.h"
-#include "src/tint/lang/core/interpolation_sampling.h"
-#include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/builtin_fn.h"
@@ -54,8 +51,6 @@ namespace tint::resolver {
 /// - core::Access
 /// - core::AddressSpace
 /// - core::BuiltinType
-/// - core::InterpolationSampling
-/// - core::InterpolationType
 /// - core::TexelFormat
 class ResolvedIdentifier {
   public:
@@ -122,24 +117,6 @@ class ResolvedIdentifier {
         return core::BuiltinType::kUndefined;
     }
 
-    /// @return the texel format if the ResolvedIdentifier holds type::InterpolationSampling,
-    /// otherwise type::InterpolationSampling::kUndefined
-    core::InterpolationSampling InterpolationSampling() const {
-        if (auto n = std::get_if<core::InterpolationSampling>(&value_)) {
-            return *n;
-        }
-        return core::InterpolationSampling::kUndefined;
-    }
-
-    /// @return the texel format if the ResolvedIdentifier holds type::InterpolationType,
-    /// otherwise type::InterpolationType::kUndefined
-    core::InterpolationType InterpolationType() const {
-        if (auto n = std::get_if<core::InterpolationType>(&value_)) {
-            return *n;
-        }
-        return core::InterpolationType::kUndefined;
-    }
-
     /// @return the texel format if the ResolvedIdentifier holds type::TexelFormat, otherwise
     /// type::TexelFormat::kUndefined
     core::TexelFormat TexelFormat() const {
@@ -176,8 +153,6 @@ class ResolvedIdentifier {
                  core::Access,
                  core::AddressSpace,
                  core::BuiltinType,
-                 core::InterpolationSampling,
-                 core::InterpolationType,
                  core::TexelFormat>
         value_;
 };

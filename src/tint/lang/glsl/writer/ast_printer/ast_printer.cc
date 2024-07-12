@@ -2126,11 +2126,7 @@ void ASTPrinter::EmitInterpolationQualifiers(StringStream& out,
                                              VectorRef<const ast::Attribute*> attributes) {
     for (auto* attr : attributes) {
         if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
-            auto& sem = builder_.Sem();
-            auto i_type =
-                sem.Get<sem::BuiltinEnumExpression<core::InterpolationType>>(interpolate->type)
-                    ->Value();
-            switch (i_type) {
+            switch (interpolate->interpolation.type) {
                 case core::InterpolationType::kPerspective:
                 case core::InterpolationType::kLinear:
                 case core::InterpolationType::kUndefined:
@@ -2140,21 +2136,16 @@ void ASTPrinter::EmitInterpolationQualifiers(StringStream& out,
                     break;
             }
 
-            if (interpolate->sampling) {
-                auto i_smpl = sem.Get<sem::BuiltinEnumExpression<core::InterpolationSampling>>(
-                                     interpolate->sampling)
-                                  ->Value();
-                switch (i_smpl) {
-                    case core::InterpolationSampling::kCentroid:
-                        out << "centroid ";
-                        break;
-                    case core::InterpolationSampling::kSample:
-                    case core::InterpolationSampling::kCenter:
-                    case core::InterpolationSampling::kFirst:
-                    case core::InterpolationSampling::kEither:
-                    case core::InterpolationSampling::kUndefined:
-                        break;
-                }
+            switch (interpolate->interpolation.sampling) {
+                case core::InterpolationSampling::kCentroid:
+                    out << "centroid ";
+                    break;
+                case core::InterpolationSampling::kSample:
+                case core::InterpolationSampling::kCenter:
+                case core::InterpolationSampling::kFirst:
+                case core::InterpolationSampling::kEither:
+                case core::InterpolationSampling::kUndefined:
+                    break;
             }
         }
     }

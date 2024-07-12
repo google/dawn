@@ -31,8 +31,6 @@
 #include <string>
 
 #include "src/tint/lang/core/builtin_value.h"
-#include "src/tint/lang/core/interpolation_sampling.h"
-#include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
@@ -206,39 +204,6 @@ class SemHelper {
             return expr->Value();
         }
         return core::Access::kUndefined;
-    }
-
-    /// @param expr the semantic node
-    /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<core::InterpolationSampling> if the cast is successful,
-    /// otherwise an error diagnostic is raised.
-    sem::BuiltinEnumExpression<core::InterpolationSampling>* AsInterpolationSampling(
-        sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::InterpolationSampling>>();
-            if (TINT_LIKELY(enum_expr)) {
-                return enum_expr;
-            }
-            ErrorUnexpectedExprKind(expr, "interpolation sampling",
-                                    core::kInterpolationSamplingStrings);
-        }
-        return nullptr;
-    }
-
-    /// @param expr the semantic node
-    /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<core::InterpolationType> if the cast is successful, otherwise
-    /// an error diagnostic is raised.
-    sem::BuiltinEnumExpression<core::InterpolationType>* AsInterpolationType(
-        sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::InterpolationType>>();
-            if (TINT_LIKELY(enum_expr)) {
-                return enum_expr;
-            }
-            ErrorUnexpectedExprKind(expr, "interpolation type", core::kInterpolationTypeStrings);
-        }
-        return nullptr;
     }
 
     /// @returns the resolved type of the ast::Expression @p expr

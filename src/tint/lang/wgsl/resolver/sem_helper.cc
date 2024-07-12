@@ -117,12 +117,6 @@ StyledText SemHelper::Describe(const sem::Expression* expr) const {
         [&](const sem::BuiltinEnumExpression<core::AddressSpace>* addr) {
             text << "address space " << style::Enum(addr->Value());
         },
-        [&](const sem::BuiltinEnumExpression<core::InterpolationSampling>* fmt) {
-            text << "interpolation sampling " << style::Enum(fmt->Value());
-        },
-        [&](const sem::BuiltinEnumExpression<core::InterpolationType>* fmt) {
-            text << "interpolation type " << style::Enum(fmt->Value());
-        },
         [&](const sem::BuiltinEnumExpression<core::TexelFormat>* fmt) {
             text << "texel format " << style::Enum(fmt->Value());
         },

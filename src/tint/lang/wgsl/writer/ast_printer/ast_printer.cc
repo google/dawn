@@ -517,10 +517,11 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
             },
             [&](const ast::InterpolateAttribute* interpolate) {
                 out << "interpolate(";
-                EmitExpression(out, interpolate->type);
-                if (interpolate->sampling) {
+                out << core::ToString(interpolate->interpolation.type);
+                if (interpolate->interpolation.sampling !=
+                    core::InterpolationSampling::kUndefined) {
                     out << ", ";
-                    EmitExpression(out, interpolate->sampling);
+                    out << core::ToString(interpolate->interpolation.sampling);
                 }
                 out << ")";
             },

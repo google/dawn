@@ -1142,30 +1142,30 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
 
     auto* type = storage_ty->UnwrapRef();
 
-    auto i_type = sem_.AsInterpolationType(sem_.Get(attr->type));
-    if (TINT_UNLIKELY(!i_type)) {
+    auto i_type = attr->interpolation.type;
+    auto i_sampling = attr->interpolation.sampling;
+    if (TINT_UNLIKELY(i_type == core::InterpolationType::kUndefined)) {
         return false;
     }
 
-    if (type->is_integer_scalar_or_vector() && i_type->Value() != core::InterpolationType::kFlat) {
+    if (type->is_integer_scalar_or_vector() && i_type != core::InterpolationType::kFlat) {
         AddError(attr->source) << "interpolation type must be " << style::Enum("flat")
                                << " for integral user-defined IO types";
         return false;
     }
 
-    if (attr->sampling) {
-        auto s_type = sem_.AsInterpolationSampling(sem_.Get(attr->sampling))->Value();
-        bool is_first_or_either = s_type == core::InterpolationSampling::kFirst ||
-                                  s_type == core::InterpolationSampling::kEither;
+    if (i_sampling != core::InterpolationSampling::kUndefined) {
+        bool is_first_or_either = i_sampling == core::InterpolationSampling::kFirst ||
+                                  i_sampling == core::InterpolationSampling::kEither;
 
-        if (i_type->Value() == core::InterpolationType::kFlat) {
+        if (i_type == core::InterpolationType::kFlat) {
             if (!is_first_or_either) {
                 AddError(attr->source)
                     << "flat interpolation can only use 'first' and 'either' sampling parameters";
                 return false;
             }
             if (mode_ == wgsl::ValidationMode::kCompat &&
-                s_type == core::InterpolationSampling::kFirst) {
+                i_sampling == core::InterpolationSampling::kFirst) {
                 AddError(attr->source) << "flat interpolation must use 'either' sampling parameter "
                                           "in compatibility mode";
                 return false;
@@ -1178,23 +1178,21 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
             }
 
             if (mode_ == wgsl::ValidationMode::kCompat &&
-                s_type == core::InterpolationSampling::kSample) {
+                i_sampling == core::InterpolationSampling::kSample) {
                 AddError(attr->source)
                     << "use of '@interpolate(..., sample)' is not allowed in compatibility mode";
                 return false;
             }
         }
     } else {
-        if (mode_ == wgsl::ValidationMode::kCompat &&
-            i_type->Value() == core::InterpolationType::kFlat) {
+        if (mode_ == wgsl::ValidationMode::kCompat && i_type == core::InterpolationType::kFlat) {
             AddError(attr->source)
                 << "flat interpolation must use 'either' sampling parameter in compatibility mode";
             return false;
         }
     }
 
-    if (mode_ == wgsl::ValidationMode::kCompat &&
-        i_type->Value() == core::InterpolationType::kLinear) {
+    if (mode_ == wgsl::ValidationMode::kCompat && i_type == core::InterpolationType::kLinear) {
         AddError(attr->source)
             << "use of '@interpolate(linear)' is not allowed in compatibility mode";
         return false;

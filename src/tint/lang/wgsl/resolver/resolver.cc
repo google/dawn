@@ -689,11 +689,11 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     }
                     return BuiltinAttribute(attr) == Success ? kSuccess : kErrored;
                 },
-                [&](const ast::InterpolateAttribute* attr) {
+                [&](const ast::InterpolateAttribute*) {
                     if (!has_io_address_space) {
                         return kInvalid;
                     }
-                    return InterpolateAttribute(attr) == Success ? kSuccess : kErrored;
+                    return kSuccess;
                 },
                 [&](const ast::InvariantAttribute* attr) {
                     if (!has_io_address_space) {
@@ -787,9 +787,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                 [&](const ast::InvariantAttribute* attr) -> bool {
                     return InvariantAttribute(attr);
                 },
-                [&](const ast::InterpolateAttribute* attr) {
-                    return InterpolateAttribute(attr) == Success;
-                },
+                [&](const ast::InterpolateAttribute*) { return true; },
                 [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
                 [&](const ast::GroupAttribute* attr) {
                     if (validator_.IsValidationEnabled(
@@ -1130,9 +1128,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                 [&](const ast::InternalAttribute* attr) {
                     return InternalAttribute(attr) ? kSuccess : kErrored;
                 },
-                [&](const ast::InterpolateAttribute* attr) {
-                    return InterpolateAttribute(attr) == Success ? kSuccess : kErrored;
-                },
+                [&](const ast::InterpolateAttribute*) { return kSuccess; },
                 [&](const ast::InvariantAttribute* attr) {
                     return InvariantAttribute(attr) ? kSuccess : kErrored;
                 },
@@ -1681,16 +1677,6 @@ sem::BuiltinEnumExpression<core::TexelFormat>* Resolver::TexelFormatExpression(
 
 sem::BuiltinEnumExpression<core::Access>* Resolver::AccessExpression(const ast::Expression* expr) {
     return sem_.AsAccess(Expression(expr));
-}
-
-sem::BuiltinEnumExpression<core::InterpolationSampling>* Resolver::InterpolationSampling(
-    const ast::Expression* expr) {
-    return sem_.AsInterpolationSampling(Expression(expr));
-}
-
-sem::BuiltinEnumExpression<core::InterpolationType>* Resolver::InterpolationType(
-    const ast::Expression* expr) {
-    return sem_.AsInterpolationType(Expression(expr));
 }
 
 void Resolver::RegisterStore(const sem::ValueExpression* expr) {
@@ -3402,22 +3388,6 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                    : nullptr;
     }
 
-    if (auto i_smpl = resolved->InterpolationSampling();
-        i_smpl != core::InterpolationSampling::kUndefined) {
-        return CheckNotTemplated("interpolation sampling", ident)
-                   ? b.create<sem::BuiltinEnumExpression<core::InterpolationSampling>>(
-                         expr, current_statement_, i_smpl)
-                   : nullptr;
-    }
-
-    if (auto i_type = resolved->InterpolationType();
-        i_type != core::InterpolationType::kUndefined) {
-        return CheckNotTemplated("interpolation type", ident)
-                   ? b.create<sem::BuiltinEnumExpression<core::InterpolationType>>(
-                         expr, current_statement_, i_type)
-                   : nullptr;
-    }
-
     if (auto fmt = resolved->TexelFormat(); fmt != core::TexelFormat::kUndefined) {
         return CheckNotTemplated("texel format", ident)
                    ? b.create<sem::BuiltinEnumExpression<core::TexelFormat>>(
@@ -4046,24 +4016,6 @@ bool Resolver::StrideAttribute(const ast::StrideAttribute*) {
     return true;
 }
 
-tint::Result<core::Interpolation> Resolver::InterpolateAttribute(
-    const ast::InterpolateAttribute* attr) {
-    core::Interpolation out;
-    auto* type = InterpolationType(attr->type);
-    if (!type) {
-        return Failure{};
-    }
-    out.type = type->Value();
-    if (attr->sampling) {
-        auto* sampling = InterpolationSampling(attr->sampling);
-        if (!sampling) {
-            return Failure{};
-        }
-        out.sampling = sampling->Value();
-    }
-    return out;
-}
-
 bool Resolver::InternalAttribute(const ast::InternalAttribute* attr) {
     for (auto* dep : attr->dependencies) {
         if (!Expression(dep)) {
@@ -4517,11 +4469,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     return true;
                 },
                 [&](const ast::InterpolateAttribute* attr) {
-                    auto value = InterpolateAttribute(attr);
-                    if (value != Success) {
-                        return false;
-                    }
-                    attributes.interpolation = value.Get();
+                    attributes.interpolation = attr->interpolation;
                     return true;
                 },
                 [&](const ast::InvariantAttribute* attr) {

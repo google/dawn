@@ -265,20 +265,6 @@ class Resolver {
     /// diagnostic is raised and nullptr is returned.
     sem::BuiltinEnumExpression<core::Access>* AccessExpression(const ast::Expression* expr);
 
-    /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<core::InterpolationSampling>*. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<core::InterpolationSampling>*, then an error diagnostic is
-    /// raised and nullptr is returned.
-    sem::BuiltinEnumExpression<core::InterpolationSampling>* InterpolationSampling(
-        const ast::Expression* expr);
-
-    /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<core::InterpolationType>*. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<core::InterpolationType>*, then an error diagnostic is raised
-    /// and nullptr is returned.
-    sem::BuiltinEnumExpression<core::InterpolationType>* InterpolationType(
-        const ast::Expression* expr);
-
     /// Expression traverses the graph of expressions starting at `expr`, building a post-ordered
     /// list (leaf-first) of all the expression nodes. Each of the expressions are then resolved by
     /// dispatching to the appropriate expression handlers below.
@@ -468,10 +454,6 @@ class Resolver {
     /// Resolves the `@stride` attribute @p attr
     /// @returns true on success, false on failure
     bool StrideAttribute(const ast::StrideAttribute*);
-
-    /// Resolves the `@interpolate` attribute @p attr
-    /// @returns true on success, false on failure
-    tint::Result<core::Interpolation> InterpolateAttribute(const ast::InterpolateAttribute* attr);
 
     /// Resolves the internal attribute @p attr
     /// @returns true on success, false on failure

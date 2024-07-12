@@ -812,19 +812,8 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                 return true;
             },
             [&](const ast::InterpolateAttribute* interpolate) {
-                auto& s = builder_.Sem();
-                auto i_type =
-                    s.Get<sem::BuiltinEnumExpression<core::InterpolationType>>(interpolate->type)
-                        ->Value();
-
-                auto i_smpl = core::InterpolationSampling::kUndefined;
-                if (interpolate->sampling) {
-                    i_smpl = s.Get<sem::BuiltinEnumExpression<core::InterpolationSampling>>(
-                                  interpolate->sampling)
-                                 ->Value();
-                }
-
-                AddInterpolationDecorations(var_id, i_type, i_smpl);
+                AddInterpolationDecorations(var_id, interpolate->interpolation.type,
+                                            interpolate->interpolation.sampling);
                 return true;
             },
             [&](const ast::InvariantAttribute*) {

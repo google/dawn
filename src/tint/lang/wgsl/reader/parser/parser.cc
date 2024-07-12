@@ -3051,6 +3051,34 @@ Maybe<const ast::Attribute*> Parser::attribute() {
             });
     }
 
+    // interpolate_attr :
+    //   '@' 'interpolate' '(' interpolate_type_name ',' ? ')'
+    // | '@' 'interpolate' '(' interpolate_type_name ',' interpolate_sampling_name ',' ? ')'
+    if (attr.value == core::Attribute::kInterpolate) {
+        return expect_paren_block(
+            "interpolate attribute", [&]() -> Expect<const ast::InterpolateAttribute*> {
+                auto type_name =
+                    expect_enum("interpolation type name", core::ParseInterpolationType,
+                                core::kInterpolationTypeStrings);
+                if (type_name.errored) {
+                    return Failure::kErrored;
+                }
+                if (!match(Token::Type::kComma) || peek().Is(Token::Type::kParenRight)) {
+                    return builder_.Interpolate(t.source(), type_name.value);
+                }
+
+                auto sampling_name =
+                    expect_enum("interpolation sampling name", core::ParseInterpolationSampling,
+                                core::kInterpolationSamplingStrings);
+                if (sampling_name.errored) {
+                    return Failure::kErrored;
+                }
+                match(Token::Type::kComma);
+
+                return builder_.Interpolate(t.source(), type_name.value, sampling_name.value);
+            });
+    }
+
     Vector<const ast::Expression*, 2> args;
 
     // Handle no parameter items which should have no parens
@@ -3114,9 +3142,6 @@ Maybe<const ast::Attribute*> Parser::attribute() {
             return create<ast::IdAttribute>(t.source(), args[0]);
         case core::Attribute::kInputAttachmentIndex:
             return create<ast::InputAttachmentIndexAttribute>(t.source(), args[0]);
-        case core::Attribute::kInterpolate:
-            return create<ast::InterpolateAttribute>(t.source(), args[0],
-                                                     args.Length() == 2 ? args[1] : nullptr);
         case core::Attribute::kInvariant:
             return create<ast::InvariantAttribute>(t.source());
         case core::Attribute::kLocation:

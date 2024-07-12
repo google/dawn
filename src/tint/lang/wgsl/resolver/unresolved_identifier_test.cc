@@ -88,34 +88,5 @@ TEST_F(ResolverUnresolvedIdentifierSuggestions, AccessMode) {
 Possible values: 'read', 'read_write', 'write')");
 }
 
-TEST_F(ResolverUnresolvedIdentifierSuggestions, InterpolationSampling) {
-    Structure("s", Vector{
-                       Member("m", ty.vec4<f32>(),
-                              Vector{
-                                  Interpolate(core::InterpolationType::kLinear,
-                                              Expr(Source{{12, 34}}, "centre")),
-                              }),
-                   });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: unresolved interpolation sampling 'centre'
-12:34 note: Did you mean 'center'?
-Possible values: 'center', 'centroid', 'either', 'first', 'sample')");
-}
-
-TEST_F(ResolverUnresolvedIdentifierSuggestions, InterpolationType) {
-    Structure("s", Vector{
-                       Member("m", ty.vec4<f32>(),
-                              Vector{
-                                  Interpolate(Expr(Source{{12, 34}}, "liner")),
-                              }),
-                   });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: unresolved interpolation type 'liner'
-12:34 note: Did you mean 'linear'?
-Possible values: 'flat', 'linear', 'perspective')");
-}
-
 }  // namespace
 }  // namespace tint::resolver

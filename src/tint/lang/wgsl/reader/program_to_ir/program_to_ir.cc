@@ -258,24 +258,6 @@ class Impl {
         return std::move(mod);
     }
 
-    core::Interpolation ExtractInterpolation(const ast::InterpolateAttribute* interp) {
-        auto type = program_.Sem()
-                        .Get(interp->type)
-                        ->As<sem::BuiltinEnumExpression<core::InterpolationType>>();
-        core::InterpolationType interpolation_type = type->Value();
-
-        core::InterpolationSampling interpolation_sampling =
-            core::InterpolationSampling::kUndefined;
-        if (interp->sampling) {
-            auto sampling = program_.Sem()
-                                .Get(interp->sampling)
-                                ->As<sem::BuiltinEnumExpression<core::InterpolationSampling>>();
-            interpolation_sampling = sampling->Value();
-        }
-
-        return core::Interpolation{interpolation_type, interpolation_sampling};
-    }
-
     void EmitFunction(const ast::Function* ast_func) {
         // The flow stack should have been emptied when the previous function finished building.
         TINT_ASSERT(control_stack_.IsEmpty());
@@ -313,7 +295,7 @@ class Impl {
                 tint::Switch(
                     attr,  //
                     [&](const ast::InterpolateAttribute* interp) {
-                        ir_func->SetReturnInterpolation(ExtractInterpolation(interp));
+                        ir_func->SetReturnInterpolation(interp->interpolation);
                     },
                     [&](const ast::InvariantAttribute*) { ir_func->SetReturnInvariant(true); },
                     [&](const ast::BuiltinAttribute* b) {
@@ -340,7 +322,7 @@ class Impl {
                 tint::Switch(
                     attr,  //
                     [&](const ast::InterpolateAttribute* interp) {
-                        param->SetInterpolation(ExtractInterpolation(interp));
+                        param->SetInterpolation(interp->interpolation);
                     },
                     [&](const ast::InvariantAttribute*) { param->SetInvariant(true); },
                     [&](const ast::BuiltinAttribute* b) {

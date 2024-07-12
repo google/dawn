@@ -33,6 +33,7 @@
 #include "src/tint/api/common/override_id.h"
 
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/number.h"
@@ -3118,7 +3119,8 @@ class Builder {
     /// @returns the interpolate attribute pointer
     template <typename TYPE>
     const ast::InterpolateAttribute* Interpolate(const Source& source, TYPE&& type) {
-        return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)), nullptr);
+        return Interpolate(source, std::forward<TYPE>(type),
+                           core::InterpolationSampling::kUndefined);
     }
 
     /// Creates an ast::InterpolateAttribute
@@ -3139,14 +3141,9 @@ class Builder {
     const ast::InterpolateAttribute* Interpolate(const Source& source,
                                                  TYPE&& type,
                                                  SAMPLING&& sampling) {
-        if constexpr (std::is_same_v<std::decay_t<SAMPLING>, core::InterpolationSampling>) {
-            if (sampling == core::InterpolationSampling::kUndefined) {
-                return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)),
-                                                         nullptr);
-            }
-        }
-        return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)),
-                                                 Expr(std::forward<SAMPLING>(sampling)));
+        core::Interpolation interpolation{std::forward<TYPE>(type),
+                                          std::forward<SAMPLING>(sampling)};
+        return create<ast::InterpolateAttribute>(source, interpolation);
     }
 
     /// Creates an ast::InterpolateAttribute using flat interpolation
