@@ -453,7 +453,10 @@ cmake_configure_file("clang-config-h") {
 cmake_configure_file("dxc-config-h") {
   input = "$dawn_dxc_dir/include/dxc/config.h.cmake"
   output = "$target_gen_dir/include/dxc/config.h"
-  values = [ "DXC_DISABLE_ALLOCATOR_OVERRIDES=1" ]
+  values = [
+    "DXC_DISABLE_ALLOCATOR_OVERRIDES=1",
+    "DXC_CODEGEN_EXCEPTIONS_TRAP=1",
+  ]
 }
 
 #######################################################################
