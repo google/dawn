@@ -44,6 +44,12 @@ class Store final : public Castable<Store, OperandInstruction<2, 0>> {
     /// The offset in Operands() for the `from` value
     static constexpr size_t kFromOperandOffset = 1;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 0;
+
+    /// The fixed number of operands used by this instruction
+    static constexpr size_t kNumOperands = 2;
+
     /// Constructor (no results, no operands)
     Store();
 

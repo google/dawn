@@ -297,16 +297,54 @@ class Validator {
     /// @returns the styled  name for the given block
     StyledText NameOf(const Block* block);
 
+    /// Checks the given result is not null
+    /// @param inst the instruction
+    /// @param idx the result index
+    /// @returns true if the result is not null
+    bool CheckResultNotNull(const ir::Instruction* inst, size_t idx);
+
+    /// Checks the number of results for @p inst are exactly equal to @p count and that none of
+    /// them are null.
+    /// @param inst the instruction
+    /// @param count the number of results to check
+    /// @returns true if the results count is as expected and none are null
+    bool CheckResults(const ir::Instruction* inst, size_t count);
+
+    /// Checks the given operand is not null
+    /// @param inst the instruction
+    /// @param idx the operand index
+    /// @returns true if the operand is not null
+    bool CheckOperandNotNull(const ir::Instruction* inst, size_t idx);
+
+    /// Checks the number of operands for @p inst are exactly equal to @p count and that none of
+    /// them are null.
+    /// @param inst the instruction
+    /// @param count the number of operands to check
+    /// @returns true if the operands count is as expected and none are null
+    bool CheckOperands(const ir::Instruction* inst, size_t count);
+
+    /// Checks the number of results and operands for @p inst are exactly equal to num_results
+    /// and num_operands, respectively, and that none of them are null.
+    /// @param inst the instruction
+    /// @param num_results expected number of results for the instruction
+    /// @param num_operands expected number of operands for the instruction
+    /// @returns true if the result and operand counts are as expected and none are null
+    bool CheckResultsAndOperands(const ir::Instruction* inst,
+                                 size_t num_results,
+                                 size_t num_operands);
+
     /// Checks the given operand is not null
     /// @param inst the instruction
     /// @param operand the operand
     /// @param idx the operand index
+    // TODO(345196551): Remove this override once it is no longer used.
     void CheckOperandNotNull(const ir::Instruction* inst, const ir::Value* operand, size_t idx);
 
     /// Checks all operands in the given range (inclusive) for @p inst are not null
     /// @param inst the instruction
     /// @param start_operand the first operand to check
     /// @param end_operand the last operand to check
+    // TODO(345196551): Remove this override once it is no longer used.
     void CheckOperandsNotNull(const ir::Instruction* inst,
                               size_t start_operand,
                               size_t end_operand);
@@ -730,12 +768,73 @@ StyledText Validator::NameOf(const Block* block) {
                         << Disassemble().NameOf(block);
 }
 
+bool Validator::CheckResultNotNull(const Instruction* inst, size_t idx) {
+    auto* result = inst->Result(idx);
+    if (TINT_UNLIKELY(result == nullptr)) {
+        AddResultError(inst, idx) << "result is undefined";
+        return false;
+    }
+    return true;
+}
+
+bool Validator::CheckResults(const ir::Instruction* inst, size_t count) {
+    if (TINT_UNLIKELY(inst->Results().Length() != count)) {
+        AddError(inst) << "expected exactly " << count << " results, got "
+                       << inst->Results().Length();
+        return false;
+    }
+
+    bool passed = true;
+    for (size_t i = 0; i < count; i++) {
+        if (TINT_UNLIKELY(!CheckResultNotNull(inst, i))) {
+            passed = false;
+        }
+    }
+    return passed;
+}
+
+bool Validator::CheckOperandNotNull(const Instruction* inst, size_t idx) {
+    auto* operand = inst->Operand(idx);
+    if (TINT_UNLIKELY(operand == nullptr)) {
+        AddError(inst, idx) << "operand is undefined";
+        return false;
+    }
+    return true;
+}
+
+bool Validator::CheckOperands(const ir::Instruction* inst, size_t count) {
+    if (TINT_UNLIKELY(inst->Operands().Length() != count)) {
+        AddError(inst) << "expected exactly " << count << " operands, got "
+                       << inst->Operands().Length();
+        return false;
+    }
+
+    bool passed = true;
+    for (size_t i = 0; i < count; i++) {
+        if (TINT_UNLIKELY(!CheckOperandNotNull(inst, i))) {
+            passed = false;
+        }
+    }
+    return passed;
+}
+
+bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
+                                        size_t num_results,
+                                        size_t num_operands) {
+    // Intentionally avoiding short-circuiting here
+    bool results_passed = CheckResults(inst, num_results);
+    bool operands_passed = CheckOperands(inst, num_operands);
+    return results_passed && operands_passed;
+}
+
+// TODO(345196551): Remove this override once it is no longer used.
 void Validator::CheckOperandNotNull(const Instruction* inst, const ir::Value* operand, size_t idx) {
     if (operand == nullptr) {
         AddError(inst, idx) << "operand is undefined";
     }
 }
 
+// TODO(345196551): Remove this override once it is no longer used.
 void Validator::CheckOperandsNotNull(const Instruction* inst,
                                      size_t start_operand,
                                      size_t end_operand) {
@@ -1589,7 +1688,9 @@ void Validator::CheckLoad(const Load* l) {
 }
 
 void Validator::CheckStore(const Store* s) {
-    CheckOperandsNotNull(s, Store::kToOperandOffset, Store::kFromOperandOffset);
+    if (TINT_UNLIKELY(!CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands))) {
+        return;
+    }
 
     if (auto* from = s->From()) {
         if (auto* to = s->To()) {

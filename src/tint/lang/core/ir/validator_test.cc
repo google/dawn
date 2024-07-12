@@ -4735,6 +4735,75 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Store_NullToAndFrom) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Append(mod.allocators.instructions.Create<ir::Store>(nullptr, nullptr));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:11 error: store: operand is undefined
+    store undef, undef
+          ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:3:18 error: store: operand is undefined
+    store undef, undef
+                 ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    store undef, undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Store_NonEmptyResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32>());
+        auto* store =
+            mod.allocators.instructions.Create<ir::Store>(var->Result(0), b.Constant(42_i));
+        store->SetResults(Vector{b.InstructionResult(ty.i32())});
+        b.Append(store);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:4:5 error: store: expected exactly 0 results, got 1
+    store %2, 42i
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, i32, read_write> = var
+    store %2, 42i
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Store_TargetNotMemoryView) {
     auto* f = b.Function("my_func", ty.void_());
 
