@@ -3059,58 +3059,51 @@ class Builder {
     /// @param source the source information
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
-    template <typename BUILTIN>
-    const ast::BuiltinAttribute* Builtin(const Source& source, BUILTIN&& builtin) {
-        core::BuiltinValue value{std::forward<BUILTIN>(builtin)};
-        return create<ast::BuiltinAttribute>(source, value);
+    const ast::BuiltinAttribute* Builtin(const Source& source, core::BuiltinValue builtin) {
+        return create<ast::BuiltinAttribute>(source, builtin);
     }
 
     /// Creates an ast::BuiltinAttribute
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
-    template <typename BUILTIN>
-    const ast::BuiltinAttribute* Builtin(BUILTIN&& builtin) {
-        return Builtin(source_, std::forward<BUILTIN>(builtin));
+    const ast::BuiltinAttribute* Builtin(core::BuiltinValue builtin) {
+        return Builtin(source_, builtin);
     }
 
     /// Creates an ast::InterpolateAttribute
     /// @param type the interpolation type
     /// @returns the interpolate attribute pointer
-    template <typename TYPE, typename = DisableIfSource<TYPE>>
-    const ast::InterpolateAttribute* Interpolate(TYPE&& type) {
-        return Interpolate(source_, std::forward<TYPE>(type));
-    }
-
-    /// Creates an ast::InterpolateAttribute
-    /// @param source the source information
-    /// @param type the interpolation type
-    /// @returns the interpolate attribute pointer
-    template <typename TYPE>
-    const ast::InterpolateAttribute* Interpolate(const Source& source, TYPE&& type) {
-        return Interpolate(source, std::forward<TYPE>(type),
-                           core::InterpolationSampling::kUndefined);
-    }
-
-    /// Creates an ast::InterpolateAttribute
-    /// @param type the interpolation type
-    /// @param sampling the interpolation sampling
-    /// @returns the interpolate attribute pointer
-    template <typename TYPE, typename SAMPLING, typename = DisableIfSource<TYPE>>
-    const ast::InterpolateAttribute* Interpolate(TYPE&& type, SAMPLING&& sampling) {
-        return Interpolate(source_, std::forward<TYPE>(type), std::forward<SAMPLING>(sampling));
+    const ast::InterpolateAttribute* Interpolate(core::InterpolationType type) {
+        return Interpolate(source_, type);
     }
 
     /// Creates an ast::InterpolateAttribute
     /// @param source the source information
     /// @param type the interpolation type
-    /// @param sampling the interpolation sampling
     /// @returns the interpolate attribute pointer
-    template <typename TYPE, typename SAMPLING>
     const ast::InterpolateAttribute* Interpolate(const Source& source,
-                                                 TYPE&& type,
-                                                 SAMPLING&& sampling) {
-        core::Interpolation interpolation{std::forward<TYPE>(type),
-                                          std::forward<SAMPLING>(sampling)};
+                                                 core::InterpolationType type) {
+        return Interpolate(source, type, core::InterpolationSampling::kUndefined);
+    }
+
+    /// Creates an ast::InterpolateAttribute
+    /// @param type the interpolation type
+    /// @param sampling the interpolation sampling
+    /// @returns the interpolate attribute pointer
+    const ast::InterpolateAttribute* Interpolate(core::InterpolationType type,
+                                                 core::InterpolationSampling sampling) {
+        return Interpolate(source_, type, sampling);
+    }
+
+    /// Creates an ast::InterpolateAttribute
+    /// @param source the source information
+    /// @param type the interpolation type
+    /// @param sampling the interpolation sampling
+    /// @returns the interpolate attribute pointer
+    const ast::InterpolateAttribute* Interpolate(const Source& source,
+                                                 core::InterpolationType type,
+                                                 core::InterpolationSampling sampling) {
+        core::Interpolation interpolation{type, sampling};
         return create<ast::InterpolateAttribute>(source, interpolation);
     }
 
