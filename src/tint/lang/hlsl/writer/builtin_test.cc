@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/hlsl/writer/helper_test.h"
 
@@ -1230,6 +1231,88 @@ void foo() {
   Texture2DMS<float4> v_1 = v;
   int2 v_2 = int2(int2(1, 2));
   float x = v_1.Load(v_2, int(3u)).x;
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureStore1D) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k1d, core::TexelFormat::kR32Float,
+                    core::Access::kReadWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Value(1_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, 0_f, 0_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWTexture1D<float4> v : register(u0);
+void foo() {
+  v[1] = float4(0.5f, 0.0f, 0.0f, 1.0f);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureStore3D) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k3d, core::TexelFormat::kR32Float,
+                    core::Access::kReadWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec3<i32>(), 1_i, 2_i, 3_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, 0_f, 0_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWTexture3D<float4> v : register(u0);
+void foo() {
+  v[int3(1, 2, 3)] = float4(0.5f, 0.0f, 0.0f, 1.0f);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureStoreArray) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,
+                    core::Access::kReadWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec2<i32>(), 1_i, 2_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, .4_f, .3_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, 3_u, value);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWTexture2DArray<float4> v : register(u0);
+void foo() {
+  RWTexture2DArray<float4> v_1 = v;
+  v_1[int3(int2(1, 2), int(3u))] = float4(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f);
 }
 
 )");

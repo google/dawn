@@ -82,6 +82,8 @@ const char* str(BuiltinFn i) {
             return "Store4";
         case BuiltinFn::kGetDimensions:
             return "GetDimensions";
+        case BuiltinFn::kTextureStore:
+            return "textureStore";
     }
     return "<unknown>";
 }

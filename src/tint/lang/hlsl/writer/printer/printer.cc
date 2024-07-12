@@ -718,6 +718,11 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitHlslBuiltinCall(StringStream& out, const hlsl::ir::BuiltinCall* c) {
+        if (c->Func() == hlsl::BuiltinFn::kTextureStore) {
+            EmitTextureStore(out, c);
+            return;
+        }
+
         out << c->Func() << "(";
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {
@@ -728,6 +733,15 @@ class Printer : public tint::TextGenerator {
             needs_comma = true;
         }
         out << ")";
+    }
+
+    void EmitTextureStore(StringStream& out, const hlsl::ir::BuiltinCall* c) {
+        auto args = c->Args();
+        EmitValue(out, args[0]);
+        out << "[";
+        EmitValue(out, args[1]);
+        out << "] = ";
+        EmitValue(out, args[2]);
     }
 
     /// Emit a convert instruction
