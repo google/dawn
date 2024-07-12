@@ -845,7 +845,7 @@ Maybe<Parser::VariableQualifier> Parser::variable_qualifier() {
         if (address_space.errored) {
             return Failure::kErrored;
         }
-        if (match(Token::Type::kComma)) {
+        if (match(Token::Type::kComma) && !peek().Is(Token::Type::kTemplateArgsRight)) {
             auto access = expect_expression("'var' access mode");
             if (access.errored) {
                 return Failure::kErrored;
