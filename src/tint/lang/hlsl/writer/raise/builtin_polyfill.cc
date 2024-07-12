@@ -80,6 +80,7 @@ struct State {
                 switch (call->Func()) {
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
+                    case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kTextureNumLevels:
                     case core::BuiltinFn::kTrunc:
                         call_worklist.Push(call);
@@ -116,6 +117,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSign:
                     Sign(call);
+                    break;
+                case core::BuiltinFn::kTextureNumLayers:
+                    TextureNumLayers(call);
                     break;
                 case core::BuiltinFn::kTextureNumLevels:
                     TextureNumLevels(call);
@@ -383,6 +387,30 @@ struct State {
         b.InsertBefore(bitcast,
                        [&] { b.CallWithResult(bitcast->DetachResult(), f, bitcast->Args()[0]); });
         bitcast->Destroy();
+    }
+
+    void TextureNumLayers(core::ir::CoreBuiltinCall* call) {
+        auto* tex = call->Args()[0];
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+
+        TINT_ASSERT(tex_type->dim() == core::type::TextureDimension::k2dArray ||
+                    tex_type->dim() == core::type::TextureDimension::kCubeArray);
+
+        const core::type::Type* query_ty = ty.vec(ty.u32(), 3);
+        b.InsertBefore(call, [&] {
+            core::ir::Instruction* out = b.Var(ty.ptr(function, query_ty));
+
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.void_(), hlsl::BuiltinFn::kGetDimensions, tex,
+                Vector<core::ir::Value*, 3>{
+                    b.Access(ty.ptr<function, u32>(), out, 0_u)->Result(0),
+                    b.Access(ty.ptr<function, u32>(), out, 1_u)->Result(0),
+                    b.Access(ty.ptr<function, u32>(), out, 2_u)->Result(0)});
+
+            out = b.Swizzle(ty.u32(), out, {2_u});
+            call->Result(0)->ReplaceAllUsesWith(out->Result(0));
+        });
+        call->Destroy();
     }
 
     void TextureNumLevels(core::ir::CoreBuiltinCall* call) {

@@ -840,5 +840,59 @@ void unused_entry_point() {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinTextureLayers2dArray) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
+
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t});
+
+    b.Append(func->Block(), [&] {
+        b.Let("d", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, t));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo(Texture2DArray<float4> t) {
+  uint3 v = (0u).xxx;
+  t.GetDimensions(v[0u], v[1u], v[2u]);
+  uint d = v.z;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureNumLayersCubeArray) {
+    auto* t = b.FunctionParam("t", ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::kCubeArray, ty.f32()));
+
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t});
+
+    b.Append(func->Block(), [&] {
+        b.Let("d", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, t));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo(TextureCubeArray<float4> t) {
+  uint3 v = (0u).xxx;
+  t.GetDimensions(v[0u], v[1u], v[2u]);
+  uint d = v.z;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer
