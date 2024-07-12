@@ -38,6 +38,8 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/texture.h"
+#include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/hlsl/builtin_fn.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
 #include "src/tint/lang/hlsl/ir/member_builtin_call.h"
@@ -82,6 +84,7 @@ struct State {
                 switch (call->Func()) {
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
+                    case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kTextureNumLevels:
                     case core::BuiltinFn::kTextureNumSamples:
@@ -120,6 +123,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSign:
                     Sign(call);
+                    break;
+                case core::BuiltinFn::kTextureDimensions:
+                    TextureDimensions(call);
                     break;
                 case core::BuiltinFn::kTextureNumLayers:
                     TextureNumLayers(call);
@@ -461,6 +467,91 @@ struct State {
 
             out = b.Swizzle(ty.u32(), out, swizzle);
             call->Result(0)->ReplaceAllUsesWith(out->Result(0));
+        });
+        call->Destroy();
+    }
+
+    void TextureDimensions(core::ir::CoreBuiltinCall* call) {
+        auto* tex = call->Args()[0];
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+        bool has_level = call->Args().Length() > 1;
+        bool is_ms =
+            tex_type
+                ->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture>();
+
+        Vector<uint32_t, 2> swizzle{};
+        uint32_t query_size = 0;
+        switch (tex_type->dim()) {
+            case core::type::TextureDimension::kNone:
+                TINT_ICE() << "texture dimension is kNone";
+            case core::type::TextureDimension::k1d:
+                query_size = 1;
+                break;
+            case core::type::TextureDimension::k2d:
+                if (is_ms) {
+                    query_size = 3;
+                    swizzle = {0_u, 1_u};
+                } else {
+                    query_size = 2;
+                }
+                break;
+            case core::type::TextureDimension::k2dArray:
+                query_size = is_ms ? 4 : 3;
+                swizzle = {0_u, 1_u};
+                break;
+            case core::type::TextureDimension::k3d:
+                query_size = 3;
+                break;
+            case core::type::TextureDimension::kCube:
+                query_size = 2;
+                break;
+            case core::type::TextureDimension::kCubeArray:
+                query_size = 3;
+                swizzle = {0_u, 1_u};
+                break;
+        }
+
+        // Query with a `level` adds a `number_of_levels` output parameter
+        if (has_level) {
+            // If there was no swizzle, we will need to swizzle out the required query parameters as
+            // the query will increase by one item.
+            if (swizzle.IsEmpty()) {
+                for (uint32_t i = 0; i < query_size; ++i) {
+                    swizzle.Push(i);
+                }
+            }
+            query_size += 1;
+        }
+
+        const core::type::Type* query_ty = ty.u32();
+        if (query_size > 1) {
+            query_ty = ty.vec(query_ty, query_size);
+        }
+
+        b.InsertBefore(call, [&] {
+            Vector<core::ir::Value*, 5> args;
+
+            // Push the level if needed
+            if (has_level) {
+                args.Push(b.Convert(ty.u32(), call->Args()[1])->Result(0));
+            }
+
+            core::ir::Instruction* query = b.Var(ty.ptr(function, query_ty));
+            if (query_size == 1) {
+                args.Push(query->Result(0));
+            } else {
+                for (uint32_t i = 0; i < query_size; ++i) {
+                    args.Push(b.Access(ty.ptr<function, u32>(), query, u32(i))->Result(0));
+                }
+            }
+
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kGetDimensions,
+                                                      tex, args);
+            query = b.Load(query);
+            if (!swizzle.IsEmpty()) {
+                query = b.Swizzle(ty.vec2<u32>(), query, swizzle);
+            }
+            call->Result(0)->ReplaceAllUsesWith(query->Result(0));
         });
         call->Destroy();
     }

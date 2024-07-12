@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/hlsl/writer/helper_test.h"
 
 #include "gtest/gtest.h"
@@ -832,6 +833,116 @@ void foo(Texture3D<float4> t) {
   uint4 v = (0u).xxxx;
   t.GetDimensions(0u, v[0u], v[1u], v[2u], v[3u]);
   uint d = v.w;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureDimension1D) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t});
+
+    b.Append(func->Block(), [&] {
+        b.Let("d", b.Call(ty.u32(), core::BuiltinFn::kTextureDimensions, t));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo(Texture1D<float4> t) {
+  uint v = 0u;
+  t.GetDimensions(v);
+  uint d = v;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureDimension2D) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t});
+
+    b.Append(func->Block(), [&] {
+        b.Let("d", b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, t));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo(Texture2D<float4> t) {
+  uint2 v = (0u).xx;
+  t.GetDimensions(v[0u], v[1u]);
+  uint2 d = v;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureDimension2dLOD) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t});
+
+    b.Append(func->Block(), [&] {
+        b.Let("d", b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, t, 1_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo(Texture2D<float4> t) {
+  uint3 v = (0u).xxx;
+  t.GetDimensions(0u, v[0u], v[1u], v[2u]);
+  uint3 v_1 = (0u).xxx;
+  t.GetDimensions(uint(min(uint(1), (v.z - 1u))), v_1[0u], v_1[1u], v_1[2u]);
+  uint2 d = v_1.xy;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureDimension3D) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k3d, ty.f32()));
+
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t});
+
+    b.Append(func->Block(), [&] {
+        b.Let("d", b.Call(ty.vec3<u32>(), core::BuiltinFn::kTextureDimensions, t));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo(Texture3D<float4> t) {
+  uint3 v = (0u).xxx;
+  t.GetDimensions(v[0u], v[1u], v[2u]);
+  uint3 d = v;
 }
 
 [numthreads(1, 1, 1)]
