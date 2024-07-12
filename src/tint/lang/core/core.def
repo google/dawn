@@ -228,12 +228,13 @@ enum attribute {
 
 // These are paramter usages which show up in other def files but not in core.def.
 enum usages {
-  width
-  height
   depth
   elements
-  samples
+  location
+  height
   num_levels
+  samples
+  width
 }
 
 ////////////////////////////////////////////////////////////////////////////////

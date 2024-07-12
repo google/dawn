@@ -66,6 +66,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "input_attachment";
         case ParameterUsage::kLevel:
             return "level";
+        case ParameterUsage::kLocation:
+            return "location";
         case ParameterUsage::kNumLevels:
             return "num_levels";
         case ParameterUsage::kOffset:

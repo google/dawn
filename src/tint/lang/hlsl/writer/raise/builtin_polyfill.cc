@@ -35,8 +35,11 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
@@ -85,6 +88,7 @@ struct State {
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureDimensions:
+                    case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kTextureNumLevels:
                     case core::BuiltinFn::kTextureNumSamples:
@@ -126,6 +130,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(call);
+                    break;
+                case core::BuiltinFn::kTextureLoad:
+                    TextureLoad(call);
                     break;
                 case core::BuiltinFn::kTextureNumLayers:
                     TextureNumLayers(call);
@@ -578,6 +585,82 @@ struct State {
             out = b.Swizzle(ty.u32(), out, {2_u});
             call->Result(0)->ReplaceAllUsesWith(out->Result(0));
         });
+        call->Destroy();
+    }
+
+    void TextureLoad(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        auto* tex = args[0];
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+
+        Vector<uint32_t, 2> swizzle;
+        const core::type::Type* ret_ty = tint::Switch(
+            tex_type,  //
+            [&](const core::type::SampledTexture* sampled) { return sampled->type(); },
+            [&](const core::type::StorageTexture* storage) { return storage->type(); },
+            [&](const core::type::MultisampledTexture* ms) { return ms->type(); },
+            [&](const core::type::DepthTexture*) {
+                swizzle.Push(0u);
+                return ty.f32();
+            },
+            [&](const core::type::DepthMultisampledTexture*) {
+                swizzle.Push(0);
+                return ty.f32();
+            },
+            TINT_ICE_ON_NO_MATCH);
+
+        bool is_ms = tex_type->Is<core::type::MultisampledTexture>() ||
+                     tex_type->Is<core::type::DepthMultisampledTexture>();
+        b.InsertBefore(call, [&] {
+            Vector<core::ir::Value*, 2> call_args;
+            switch (tex_type->dim()) {
+                case core::type::TextureDimension::k1d: {
+                    // Pack the coords with the level
+                    auto* coord = b.Convert(ty.i32(), args[1]);
+                    auto* lvl = b.Convert(ty.i32(), args[2]);
+                    call_args.Push(b.Construct(ty.vec2<i32>(), coord, lvl)->Result(0));
+                    break;
+                }
+                case core::type::TextureDimension::k2d: {
+                    if (is_ms) {
+                        // Pass coords and samples as separate parameters
+                        call_args.Push(b.Convert(ty.vec2<i32>(), args[1])->Result(0));
+                        call_args.Push(b.Convert(ty.i32(), args[2])->Result(0));
+                    } else {
+                        // Pack coords with the level
+                        auto* coord = b.Convert(ty.vec2<i32>(), args[1]);
+                        auto* lvl = b.Convert(ty.i32(), args[2]);
+                        call_args.Push(b.Construct(ty.vec3<i32>(), coord, lvl)->Result(0));
+                    }
+                    break;
+                }
+                case core::type::TextureDimension::k2dArray: {
+                    auto* coord = b.Convert(ty.vec2<i32>(), args[1]);
+                    auto* ary_idx = b.Convert(ty.i32(), args[2]);
+                    auto* lvl = b.Convert(ty.i32(), args[3]);
+                    call_args.Push(b.Construct(ty.vec4<i32>(), coord, ary_idx, lvl)->Result(0));
+                    break;
+                }
+                case core::type::TextureDimension::k3d: {
+                    auto* coord = b.Convert(ty.vec3<i32>(), args[1]);
+                    auto* lvl = b.Convert(ty.i32(), args[2]);
+                    call_args.Push(b.Construct(ty.vec4<i32>(), coord, lvl)->Result(0));
+                    break;
+                }
+                default:
+                    TINT_UNREACHABLE();
+            }
+
+            core::ir::Instruction* builtin = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.vec4(ret_ty), hlsl::BuiltinFn::kLoad, tex, call_args);
+            if (!swizzle.IsEmpty()) {
+                builtin = b.Swizzle(ty.f32(), builtin, swizzle);
+            } else {
+                builtin = b.Convert(call->Result(0)->Type(), builtin);
+            }
+            call->Result(0)->ReplaceAllUsesWith(builtin->Result(0));
+        });
+
         call->Destroy();
     }
 };

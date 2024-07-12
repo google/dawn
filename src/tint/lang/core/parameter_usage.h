@@ -59,6 +59,7 @@ enum class ParameterUsage : uint8_t {
     kHeight,
     kInputAttachment,
     kLevel,
+    kLocation,
     kNumLevels,
     kOffset,
     kSampleIndex,

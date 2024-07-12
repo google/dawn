@@ -105,6 +105,30 @@ match writable
   : access.write
   | access.read_write
 
+match f32_texel_format
+  : texel_format.r8unorm
+  | texel_format.bgra8unorm
+  | texel_format.rgba8unorm
+  | texel_format.rgba8snorm
+  | texel_format.rgba16float
+  | texel_format.r32float
+  | texel_format.rg32float
+  | texel_format.rgba32float
+
+match u32_texel_format
+  : texel_format.rgba8uint
+  | texel_format.rgba16uint
+  | texel_format.r32uint
+  | texel_format.rg32uint
+  | texel_format.rgba32uint
+
+match i32_texel_format
+  : texel_format.rgba8sint
+  | texel_format.rgba16sint
+  | texel_format.r32sint
+  | texel_format.rg32sint
+  | texel_format.rgba32sint
+
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
@@ -258,4 +282,47 @@ fn sign[N: num, T: fi32_f16](vec<N, T>) -> vec<N, i32>
                                     width: ptr<function, u32, writable>,
                                    height: ptr<function, u32, writable>,
                                   samples: ptr<function, u32, writable>)
+
+@member_function fn Load[T: fiu32](texture: texture_1d<T>, location: vec2<i32>) -> vec4<T>
+@member_function fn Load[T: fiu32](texture: texture_2d<T>, location: vec3<i32>) -> vec4<T>
+@member_function fn Load[T: fiu32](texture: texture_2d_array<T>, location: vec4<i32>) -> vec4<T>
+@member_function fn Load[T: fiu32](texture: texture_multisampled_2d<T>,
+                                  location: vec2<i32>,
+                              sample_index: i32) -> vec4<T>
+@member_function fn Load[T: fiu32](texture: texture_3d<T>, location: vec4<i32>) -> vec4<T>
+
+@member_function fn Load(texture: texture_depth_2d, location: vec3<i32>) -> vec4<f32>
+@member_function fn Load(texture: texture_depth_2d_array, location: vec4<i32>) -> vec4<f32>
+@member_function fn Load(texture: texture_depth_multisampled_2d,
+                                  location: vec2<i32>,
+                              sample_index: i32) -> vec4<f32>
+
+@member_function fn Load[F: f32_texel_format, A: readable](texture: texture_storage_1d<F, A>,
+                                                          location: vec2<i32>) -> vec4<f32>
+@member_function fn Load[F: f32_texel_format, A: readable](texture: texture_storage_2d<F, A>,
+                                                          location: vec3<i32>) -> vec4<f32>
+@member_function fn Load[F: f32_texel_format, A: readable](texture: texture_storage_2d_array<F, A>,
+                                                          location: vec4<i32>) -> vec4<f32>
+@member_function fn Load[F: f32_texel_format, A: readable](texture: texture_storage_3d<F, A>,
+                                                          location: vec4<i32>) -> vec4<f32>
+
+@member_function fn Load[F: u32_texel_format, A: readable](texture: texture_storage_1d<F, A>,
+                                                          location: vec2<i32>) -> vec4<u32>
+@member_function fn Load[F: u32_texel_format, A: readable](texture: texture_storage_2d<F, A>,
+                                                          location: vec3<i32>) -> vec4<u32>
+@member_function fn Load[F: u32_texel_format, A: readable](texture: texture_storage_2d_array<F, A>,
+                                                          location: vec4<i32>) -> vec4<u32>
+@member_function fn Load[F: u32_texel_format, A: readable](texture: texture_storage_3d<F, A>,
+                                                          location: vec4<i32>) -> vec4<u32>
+
+
+@member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_1d<F, A>,
+                                                          location: vec2<i32>) -> vec4<i32>
+@member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_2d<F, A>,
+                                                          location: vec3<i32>) -> vec4<i32>
+@member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_2d_array<F, A>,
+                                                          location: vec4<i32>) -> vec4<i32>
+@member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_3d<F, A>,
+                                                          location: vec4<i32>) -> vec4<i32>
+
 

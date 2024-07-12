@@ -32,6 +32,8 @@
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -731,6 +733,286 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_3d) {
 )";
 
     capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_1DF32) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Zero<i32>();
+        auto* level = b.Zero<u32>();
+        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, coords, level);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_1d<f32>):vec4<f32> {
+  $B1: {
+    %3:vec4<f32> = textureLoad %t, 0i, 0u
+    ret %3
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_1d<f32>):vec4<f32> {
+  $B1: {
+    %3:i32 = convert 0i
+    %4:i32 = convert 0u
+    %5:vec2<i32> = construct %3, %4
+    %6:vec4<f32> = %t.Load %5
+    %7:vec4<f32> = convert %6
+    ret %7
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_2DLevelI32) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.i32()));
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Zero<vec2<i32>>();
+        auto* level = b.Zero<i32>();
+        auto* result = b.Call<vec4<i32>>(core::BuiltinFn::kTextureLoad, t, coords, level);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<i32>):vec4<i32> {
+  $B1: {
+    %3:vec4<i32> = textureLoad %t, vec2<i32>(0i), 0i
+    ret %3
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<i32>):vec4<i32> {
+  $B1: {
+    %3:vec2<i32> = convert vec2<i32>(0i)
+    %4:i32 = convert 0i
+    %5:vec3<i32> = construct %3, %4
+    %6:vec4<i32> = %t.Load %5
+    %7:vec4<i32> = convert %6
+    ret %7
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_3DLevelU32) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k3d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Zero<vec3<i32>>();
+        auto* level = b.Zero<u32>();
+        auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, t, coords, level);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_3d<f32>):vec4<f32> {
+  $B1: {
+    %3:vec4<f32> = textureLoad %t, vec3<i32>(0i), 0u
+    ret %3
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_3d<f32>):vec4<f32> {
+  $B1: {
+    %3:vec3<i32> = convert vec3<i32>(0i)
+    %4:i32 = convert 0u
+    %5:vec4<i32> = construct %3, %4
+    %6:vec4<f32> = %t.Load %5
+    %7:vec4<f32> = convert %6
+    ret %7
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_Multisampled2DI32) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.i32()));
+    auto* func = b.Function("foo", ty.vec4<i32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Zero<vec2<i32>>();
+        auto* sample_idx = b.Zero<u32>();
+        auto* result = b.Call<vec4<i32>>(core::BuiltinFn::kTextureLoad, t, coords, sample_idx);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_multisampled_2d<i32>):vec4<i32> {
+  $B1: {
+    %3:vec4<i32> = textureLoad %t, vec2<i32>(0i), 0u
+    ret %3
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_multisampled_2d<i32>):vec4<i32> {
+  $B1: {
+    %3:vec2<i32> = convert vec2<i32>(0i)
+    %4:i32 = convert 0u
+    %5:vec4<i32> = %t.Load %3, %4
+    %6:vec4<i32> = convert %5
+    ret %6
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_Depth2DLevelF32) {
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Zero<vec2<i32>>();
+        auto* level = b.Zero<u32>();
+        auto* result = b.Call<f32>(core::BuiltinFn::kTextureLoad, t, coords, level);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d):f32 {
+  $B1: {
+    %3:f32 = textureLoad %t, vec2<i32>(0i), 0u
+    ret %3
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d):f32 {
+  $B1: {
+    %3:vec2<i32> = convert vec2<i32>(0i)
+    %4:i32 = convert 0u
+    %5:vec3<i32> = construct %3, %4
+    %6:vec4<f32> = %t.Load %5
+    %7:f32 = swizzle %6, x
+    ret %7
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_Depth2DArrayLevelF32) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Zero<vec2<i32>>();
+        auto* array_idx = b.Zero<u32>();
+        auto* sample_idx = b.Zero<u32>();
+        auto* result = b.Call<f32>(core::BuiltinFn::kTextureLoad, t, coords, array_idx, sample_idx);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_2d_array):f32 {
+  $B1: {
+    %3:f32 = textureLoad %t, vec2<i32>(0i), 0u, 0u
+    ret %3
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_2d_array):f32 {
+  $B1: {
+    %3:vec2<i32> = convert vec2<i32>(0i)
+    %4:i32 = convert 0u
+    %5:i32 = convert 0u
+    %6:vec4<i32> = construct %3, %4, %5
+    %7:vec4<f32> = %t.Load %6
+    %8:f32 = swizzle %7, x
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureLoad_DepthMultisampledF32) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d));
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Zero<vec2<i32>>();
+        auto* sample_idx = b.Zero<u32>();
+        auto* result = b.Call<f32>(core::BuiltinFn::kTextureLoad, t, coords, sample_idx);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_multisampled_2d):f32 {
+  $B1: {
+    %3:f32 = textureLoad %t, vec2<i32>(0i), 0u
+    ret %3
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_multisampled_2d):f32 {
+  $B1: {
+    %3:vec2<i32> = convert vec2<i32>(0i)
+    %4:i32 = convert 0u
+    %5:vec4<f32> = %t.Load %3, %4
+    %6:f32 = swizzle %5, x
+    ret %6
+  }
+}
+)";
+
     Run(BuiltinPolyfill);
 
     EXPECT_EQ(expect, str());
