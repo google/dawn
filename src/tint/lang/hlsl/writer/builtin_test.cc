@@ -28,6 +28,7 @@
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/number.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/hlsl/writer/helper_test.h"
 
@@ -882,6 +883,33 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLayersCubeArray) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo(TextureCubeArray<float4> t) {
+  uint3 v = (0u).xxx;
+  t.GetDimensions(v[0u], v[1u], v[2u]);
+  uint d = v.z;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinTextureNumSamples) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d));
+
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t});
+
+    b.Append(func->Block(), [&] {
+        b.Let("d", b.Call(ty.u32(), core::BuiltinFn::kTextureNumSamples, t));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo(Texture2DMS<float4> t) {
   uint3 v = (0u).xxx;
   t.GetDimensions(v[0u], v[1u], v[2u]);
   uint d = v.z;

@@ -34,7 +34,9 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/hlsl/builtin_fn.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
@@ -82,6 +84,7 @@ struct State {
                     case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kTextureNumLevels:
+                    case core::BuiltinFn::kTextureNumSamples:
                     case core::BuiltinFn::kTrunc:
                         call_worklist.Push(call);
                         break;
@@ -123,6 +126,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureNumLevels:
                     TextureNumLevels(call);
+                    break;
+                case core::BuiltinFn::kTextureNumSamples:
+                    TextureNumSamples(call);
                     break;
                 case core::BuiltinFn::kTrunc:
                     Trunc(call);
@@ -454,6 +460,31 @@ struct State {
                                                       tex, args);
 
             out = b.Swizzle(ty.u32(), out, swizzle);
+            call->Result(0)->ReplaceAllUsesWith(out->Result(0));
+        });
+        call->Destroy();
+    }
+
+    void TextureNumSamples(core::ir::CoreBuiltinCall* call) {
+        auto* tex = call->Args()[0];
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+
+        TINT_ASSERT(tex_type->dim() == core::type::TextureDimension::k2d);
+        TINT_ASSERT((tex_type->IsAnyOf<core::type::DepthMultisampledTexture,
+                                       core::type::MultisampledTexture>()));
+
+        const core::type::Type* query_ty = ty.vec(ty.u32(), 3);
+        b.InsertBefore(call, [&] {
+            core::ir::Instruction* out = b.Var(ty.ptr(function, query_ty));
+
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.void_(), hlsl::BuiltinFn::kGetDimensions, tex,
+                Vector<core::ir::Value*, 3>{
+                    b.Access(ty.ptr<function, u32>(), out, 0_u)->Result(0),
+                    b.Access(ty.ptr<function, u32>(), out, 1_u)->Result(0),
+                    b.Access(ty.ptr<function, u32>(), out, 2_u)->Result(0)});
+
+            out = b.Swizzle(ty.u32(), out, {2_u});
             call->Result(0)->ReplaceAllUsesWith(out->Result(0));
         });
         call->Destroy();
