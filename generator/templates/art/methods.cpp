@@ -24,7 +24,7 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-{% from 'art/api_jni_types.kt' import arg_to_jni_type, to_jni_type with context %}
+{% from 'art/api_jni_types.kt' import arg_to_jni_type, jni_signature, to_jni_type with context %}
 #include <jni.h>
 #include <stdlib.h>
 #include "dawn/webgpu.h"
@@ -182,15 +182,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                 jmethodID callbackMethod = env->GetMethodID(
                         env->FindClass("{{ jni_name(arg.type) }}"), "callback", "(
                     {%- for callbackArg in filter_arguments(arg.type.arguments) -%}
-                        {%- if callbackArg.type.category in ['bitmask', 'enum'] -%}
-                            I
-                        {%- elif callbackArg.type.category in ['object', 'structure'] -%}
-                            L{{ jni_name(callbackArg.type) }};
-                        {%- elif callbackArg.type.name.get() == 'char' -%}
-                            Ljava/lang/String;
-                        {%- else -%}
-                            {{ unreachable_code() }}
-                        {%- endif -%}
+                        {{- jni_signature(callbackArg) -}}
                     {%- endfor %})V");
 
                 //* Call the callback with all converted parameters.

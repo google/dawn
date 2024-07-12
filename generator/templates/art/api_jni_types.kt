@@ -52,3 +52,35 @@
         {{ jni_primitives[type.name.get()] }}
     {% endif %}
 {% endmacro %}
+
+{% macro jni_signature(member) %}
+    {%- if member.length == 'strlen' -%}
+        Ljava/lang/String;
+    {%- elif member.length and member.length != 'constant' -%}
+        {%- if member.type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
+            //*  JvmInline does not inline bitmask/enums in arrays.
+            [L{{ jni_name(member.type) }};
+        {%- elif member.type.name.get() == 'uint32_t' -%}
+            [I
+        {%- else -%}
+            {{ unreachable_code() }}
+        {%- endif -%}
+    {%- elif member.type.category in ['function pointer', 'object', 'structure'] -%}
+        L{{ jni_name(member.type) }};
+    {%- elif member.type.name.get() in ['int', 'int64_t', 'uint64_t', 'size_t', 'void'] -%}  {# remove void #}
+        J
+    {%- elif member.type.name.get() in ['int', 'int32_t', 'uint32_t'] or member.type.category in ['bitmask', 'enum'] -%}
+        //*  JvmInline makes lone bitmask/enums appear as integer to JNI.
+        I
+    {%- elif member.type.name.get() in ['int16_t', 'uint16_t'] -%}
+        S
+    {%- elif member.type.name.get() == 'double' -%}
+        D
+    {%- elif member.type.name.get() == 'float' -%}
+        F
+    {%- elif member.type.name.get() == 'bool' -%}
+        Z
+    {%- else -%}
+        {{ unreachable_code() }}
+    {%- endif -%}
+{% endmacro %}
