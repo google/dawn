@@ -1332,14 +1332,15 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessStoreVectorElement) {
+TEST_F(HlslWriterTest, AccessStoreVectorElement) {
     auto* var = b.Var<storage, vec3<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u), 2_f);
+        b.StoreVectorElement(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var),
+                             1_u, 2_f);
         b.Return(func);
     });
 
@@ -1347,8 +1348,9 @@ TEST_F(HlslWriterTest, DISABLED_AccessStoreVectorElement) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void foo() {
-  v.Store(4u, 2.0f);
+  v.Store(4u, asuint(2.0f));
 }
+
 )");
 }
 

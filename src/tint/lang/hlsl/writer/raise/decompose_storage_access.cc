@@ -116,7 +116,7 @@ struct State {
                     [&](core::ir::StoreVectorElement* s) { StoreVectorElement(s, var, var_ty); },
                     [&](core::ir::Store* s) {
                         OffsetData offset{};
-                        Store(s, var, offset);
+                        Store(s, var, s->From(), offset);
                     },
                     [&](core::ir::Load* l) {
                         OffsetData offset{};
@@ -211,8 +211,8 @@ struct State {
             return MakeScalarOrVectorStore(var, from, offset);
         }
 
-        // TODO(dsinclair): This currently only handles scalars and entire vectors. Add vector
-        // elements, matrices, structs ...
+        // TODO(dsinclair): This currently only handles scalars vectors. Add arrays, matrices,
+        // structs ...
 
         TINT_UNREACHABLE();
     }
@@ -513,12 +513,15 @@ struct State {
                     Load(ld, var, *offset);
                 },
 
-                [&](core::ir::StoreVectorElement*) {
-                    // TODO(dsinclair): Handle store vector elements
+                [&](core::ir::StoreVectorElement* sve) {
+                    a->Result(0)->RemoveUsage(usage);
+
+                    b.InsertBefore(sve, [&] {
+                        UpdateOffsetData(sve->Index(), obj->DeepestElement()->Size(), offset);
+                    });
+                    Store(sve, var, sve->Value(), *offset);
                 },
-                [&](core::ir::Store* store) {  //
-                    Store(store, var, *offset);
-                },
+                [&](core::ir::Store* store) { Store(store, var, store->From(), *offset); },
                 [&](core::ir::CoreBuiltinCall* call) {
                     // Array length calls require the access
                     TINT_ASSERT(call->Func() == core::BuiltinFn::kArrayLength);
@@ -535,12 +538,15 @@ struct State {
         a->Destroy();
     }
 
-    void Store(core::ir::Store* store, core::ir::Var* var, OffsetData& offset) {
-        b.InsertBefore(store, [&] {
+    void Store(core::ir::Instruction* inst,
+               core::ir::Var* var,
+               core::ir::Value* from,
+               OffsetData& offset) {
+        b.InsertBefore(inst, [&] {
             auto* off = OffsetToValue(offset);
-            MakeStore(var, store->From(), off);
+            MakeStore(var, from, off);
         });
-        store->Destroy();
+        inst->Destroy();
     }
 
     void Load(core::ir::Instruction* inst, core::ir::Var* var, OffsetData& offset) {

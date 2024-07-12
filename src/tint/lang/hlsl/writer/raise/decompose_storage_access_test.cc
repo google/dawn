@@ -2506,26 +2506,27 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StoreVectorElement) {
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorElement) {
     auto* var = b.Var<storage, vec3<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u), 2_f);
+        b.StoreVectorElement(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var),
+                             1_u, 2_f);
         b.Return(func);
     });
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<storage, mat4x4<f32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<storage, vec3<f32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, vec4<f32>, read_write> = access %v, 1u
-    store_vector_element %3, 2u, 5.0f
+    %3:ptr<storage, vec3<f32>, read_write> = access %v
+    store_vector_element %3, 1u, 2.0f
     ret
   }
 }
@@ -2533,6 +2534,17 @@ $B1: {  # root
     ASSERT_EQ(src, str());
 
     auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = bitcast 2.0f
+    %4:void = %v.Store 4u, %3
+    ret
+  }
+}
 )";
     Run(DecomposeStorageAccess);
     EXPECT_EQ(expect, str());
