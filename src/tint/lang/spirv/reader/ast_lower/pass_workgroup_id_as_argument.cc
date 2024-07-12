@@ -70,7 +70,7 @@ struct PassWorkgroupIdAsArgument::State {
                 for (auto* param : func->params) {
                     if (auto* builtin =
                             ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
-                        if (sem.Get(builtin)->Value() == core::BuiltinValue::kWorkgroupId) {
+                        if (builtin->builtin == core::BuiltinValue::kWorkgroupId) {
                             ProcessBuiltin(func, param);
                             made_changes = true;
                         }

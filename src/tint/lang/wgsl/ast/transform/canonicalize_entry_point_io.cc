@@ -188,7 +188,7 @@ struct CanonicalizeEntryPointIO::State {
         auto* cloned = ctx.Clone(in);
         out.Push(cloned);
         if (auto* builtin = in->As<BuiltinAttribute>()) {
-            builtin_attrs.Add(cloned->As<BuiltinAttribute>(), ctx.src->Sem().Get(builtin)->Value());
+            builtin_attrs.Add(cloned->As<BuiltinAttribute>(), builtin->builtin);
         }
     }
 
@@ -220,7 +220,7 @@ struct CanonicalizeEntryPointIO::State {
         } else {
             // attr belongs to the source program.
             // Obtain the builtin value from the semantic info.
-            return ctx.src->Sem().Get(attr)->Value();
+            return attr->builtin;
         }
         TINT_ICE() << "could not obtain builtin value from attribute";
     }

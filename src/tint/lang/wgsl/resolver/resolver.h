@@ -402,10 +402,6 @@ class Resolver {
     /// current_function_
     bool WorkgroupSize(const ast::Function*);
 
-    /// Resolves the `@builtin` attribute @p attr
-    /// @returns the builtin value on success
-    tint::Result<tint::core::BuiltinValue> BuiltinAttribute(const ast::BuiltinAttribute* attr);
-
     /// Resolves the `@location` attribute @p attr
     /// @returns the location value on success.
     tint::Result<uint32_t> LocationAttribute(const ast::LocationAttribute* attr);

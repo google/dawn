@@ -441,8 +441,7 @@ struct PixelLocal::State {
             // 2. `@builtin(position)` is declared as an individual input parameter
             if (auto* attribute = ast::GetAttribute<ast::BuiltinAttribute>(
                     parameter->Declaration()->attributes)) {
-                auto builtin = sem.Get(attribute)->Value();
-                if (builtin == core::BuiltinValue::kPosition) {
+                if (attribute->builtin == core::BuiltinValue::kPosition) {
                     return b.Decl(
                         b.Let(variable_with_position_symbol, b.Expr(new_entry_point_params[i])));
                 }

@@ -827,48 +827,6 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
     EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(front_facing)' must be 'bool'");
 }
 
-// TODO(crbug.com/tint/1846): This isn't a validation test, but this sits next to other @builtin
-// tests. Clean this up.
-TEST_F(ResolverBuiltinsValidationTest, StructMemberAttributeMapsToSemBuiltinEnum) {
-    // struct S {
-    //   @builtin(front_facing) b : bool;
-    // };
-    // @fragment
-    // fn f(s : S) {}
-
-    auto* builtin = Builtin(core::BuiltinValue::kFrontFacing);
-    auto* s = Structure("S", Vector{
-                                 Member("f", ty.bool_(), Vector{builtin}),
-                             });
-    Func("f", Vector{Param("b", ty.Of(s))}, ty.void_(), tint::Empty,
-         Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* builtin_expr = Sem().Get(builtin);
-    ASSERT_NE(builtin_expr, nullptr);
-    EXPECT_EQ(builtin_expr->Value(), core::BuiltinValue::kFrontFacing);
-}
-
-// TODO(crbug.com/tint/1846): This isn't a validation test, but this sits next to other @builtin
-// tests. Clean this up.
-TEST_F(ResolverBuiltinsValidationTest, ParamAttributeMapsToSemBuiltinEnum) {
-    // @fragment
-    // fn f(@builtin(front_facing) b : bool) {}
-
-    auto* builtin = Builtin(core::BuiltinValue::kFrontFacing);
-    Func("f", Vector{Param("b", ty.bool_(), Vector{builtin})}, ty.void_(), tint::Empty,
-         Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* builtin_expr = Sem().Get(builtin);
-    ASSERT_NE(builtin_expr, nullptr);
-    EXPECT_EQ(builtin_expr->Value(), core::BuiltinValue::kFrontFacing);
-}
-
 TEST_F(ResolverBuiltinsValidationTest, Length_Float_Scalar) {
     auto* builtin = Call("length", 1_f);
     WrapInFunction(builtin);

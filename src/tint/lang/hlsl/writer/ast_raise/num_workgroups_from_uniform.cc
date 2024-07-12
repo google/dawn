@@ -52,7 +52,7 @@ namespace {
 bool ShouldRun(const Program& program) {
     for (auto* node : program.ASTNodes().Objects()) {
         if (auto* attr = node->As<ast::BuiltinAttribute>()) {
-            if (program.Sem().Get(attr)->Value() == core::BuiltinValue::kNumWorkgroups) {
+            if (attr->builtin == core::BuiltinValue::kNumWorkgroups) {
                 return true;
             }
         }

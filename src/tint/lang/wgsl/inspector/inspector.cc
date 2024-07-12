@@ -687,7 +687,7 @@ bool Inspector::ContainsBuiltin(core::BuiltinValue builtin,
     if (!builtin_declaration) {
         return false;
     }
-    return program_.Sem().Get(builtin_declaration)->Value() == builtin;
+    return builtin_declaration->builtin == builtin;
 }
 
 std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(

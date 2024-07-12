@@ -233,8 +233,8 @@ TEST_F(WGSLParserTest, Attribute_Location_MissingInvalid) {
 class BuiltinTest : public WGSLParserTestWithParam<core::BuiltinValue> {};
 
 TEST_P(BuiltinTest, Attribute_Builtin) {
-    auto str = tint::ToString(GetParam());
-    auto p = parser("builtin(" + str + ")");
+    auto param = GetParam();
+    auto p = parser("builtin(" + tint::ToString(param) + ")");
 
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
@@ -246,11 +246,11 @@ TEST_P(BuiltinTest, Attribute_Builtin) {
     ASSERT_TRUE(var_attr->Is<ast::BuiltinAttribute>());
 
     auto* builtin = var_attr->As<ast::BuiltinAttribute>();
-    ast::CheckIdentifier(builtin->builtin->name, str);
+    EXPECT_EQ(builtin->builtin, param);
 }
 TEST_P(BuiltinTest, Attribute_Builtin_TrailingComma) {
-    auto str = tint::ToString(GetParam());
-    auto p = parser("builtin(" + str + ",)");
+    auto param = GetParam();
+    auto p = parser("builtin(" + tint::ToString(param) + ",)");
 
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
@@ -262,7 +262,7 @@ TEST_P(BuiltinTest, Attribute_Builtin_TrailingComma) {
     ASSERT_TRUE(var_attr->Is<ast::BuiltinAttribute>());
 
     auto* builtin = var_attr->As<ast::BuiltinAttribute>();
-    ast::CheckIdentifier(builtin->builtin->name, str);
+    EXPECT_EQ(builtin->builtin, param);
 }
 INSTANTIATE_TEST_SUITE_P(WGSLParserTest,
                          BuiltinTest,
@@ -306,7 +306,20 @@ TEST_F(WGSLParserTest, Attribute_Builtin_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:9: expected builtin value name");
+    EXPECT_EQ(p->error(), R"(1:9: expected builtin value name
+Possible values: '__point_size', 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id')");
+}
+
+TEST_F(WGSLParserTest, Attribute_Builtin_MisspelledValue) {
+    auto p = parser("builtin(positon)");
+    auto attr = p->attribute();
+    EXPECT_FALSE(attr.matched);
+    EXPECT_TRUE(attr.errored);
+    EXPECT_EQ(attr.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), R"(1:9: expected builtin value name
+Did you mean 'position'?
+Possible values: '__point_size', 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id')");
 }
 
 TEST_F(WGSLParserTest, Attribute_Interpolate_Flat) {

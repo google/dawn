@@ -298,8 +298,7 @@ struct ZeroInitWorkgroupMemory::State {
         std::function<const ast::Expression*()> local_index;
         for (auto* param : fn->params) {
             if (auto* builtin_attr = GetAttribute<BuiltinAttribute>(param->attributes)) {
-                auto builtin = sem.Get(builtin_attr)->Value();
-                if (builtin == core::BuiltinValue::kLocalInvocationIndex) {
+                if (builtin_attr->builtin == core::BuiltinValue::kLocalInvocationIndex) {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 }
             }

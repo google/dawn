@@ -795,7 +795,7 @@ struct VertexPulling::State {
             if (TINT_UNLIKELY(!builtin_attr)) {
                 TINT_ICE() << "Invalid entry point parameter";
             }
-            auto builtin = src.Sem().Get(builtin_attr)->Value();
+            auto builtin = builtin_attr->builtin;
             // Check for existing vertex_index and instance_index builtins.
             if (builtin == core::BuiltinValue::kVertexIndex) {
                 vertex_index_expr = [this, param] {
@@ -848,7 +848,7 @@ struct VertexPulling::State {
                 if (TINT_UNLIKELY(!builtin_attr)) {
                     TINT_ICE() << "Invalid entry point parameter";
                 }
-                auto builtin = src.Sem().Get(builtin_attr)->Value();
+                auto builtin = builtin_attr->builtin;
                 // Check for existing vertex_index and instance_index builtins.
                 if (builtin == core::BuiltinValue::kVertexIndex) {
                     vertex_index_expr = member_expr;

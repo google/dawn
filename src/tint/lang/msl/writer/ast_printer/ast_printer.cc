@@ -2063,11 +2063,10 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                         if (!builtin_attr) {
                             continue;
                         }
-                        auto builtin = builder_.Sem().Get(builtin_attr)->Value();
 
                         builtin_found = true;
 
-                        auto name = BuiltinToAttribute(builtin);
+                        auto name = BuiltinToAttribute(builtin_attr->builtin);
                         if (name.empty()) {
                             diagnostics_.AddError(Source{}) << "unknown builtin";
                             return false;

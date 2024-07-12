@@ -1192,7 +1192,7 @@ class UniformityGraph {
             // Only the num_workgroups and workgroup_id builtins, and subgroup_size builtin used in
             // compute stage are uniform.
             if (auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(obj->attributes)) {
-                auto builtin = b.Sem().Get(builtin_attr)->Value();
+                auto builtin = builtin_attr->builtin;
                 if (builtin == core::BuiltinValue::kNumWorkgroups ||
                     builtin == core::BuiltinValue::kWorkgroupId) {
                     return false;

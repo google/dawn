@@ -987,7 +987,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
     auto* type = storage_ty->UnwrapRef();
     bool is_stage_mismatch = false;
     bool is_output = !is_input;
-    auto builtin = sem_.Get(attr)->Value();
+    auto builtin = attr->builtin;
 
     auto err_builtin_type = [&](std::string_view required) {
         AddError(attr->source) << "store type of " << style::Attribute("@builtin")
@@ -1066,9 +1066,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             break;
         case core::BuiltinValue::kSampleMask:
             if (mode_ == wgsl::ValidationMode::kCompat) {
-                AddError(attr->builtin->source) << "use of " << style::Attribute("@builtin")
-                                                << style::Code("(", style::Enum(builtin), ")")
-                                                << " is not allowed in compatibility mode";
+                AddError(attr->source) << "use of " << style::Attribute("@builtin")
+                                       << style::Code("(", style::Enum(builtin), ")")
+                                       << " is not allowed in compatibility mode";
                 return false;
             }
             if (stage != ast::PipelineStage::kNone && !(stage == ast::PipelineStage::kFragment)) {
@@ -1081,9 +1081,9 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             break;
         case core::BuiltinValue::kSampleIndex:
             if (mode_ == wgsl::ValidationMode::kCompat) {
-                AddError(attr->builtin->source) << "use of " << style::Attribute("@builtin")
-                                                << style::Code("(", style::Enum(builtin), ")")
-                                                << " is not allowed in compatibility mode";
+                AddError(attr->source) << "use of " << style::Attribute("@builtin")
+                                       << style::Code("(", style::Enum(builtin), ")")
+                                       << " is not allowed in compatibility mode";
                 return false;
             }
             if (stage != ast::PipelineStage::kNone &&
@@ -1323,7 +1323,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             bool ok = Switch(
                 attr,  //
                 [&](const ast::BuiltinAttribute* builtin_attr) {
-                    auto builtin = sem_.Get(builtin_attr)->Value();
+                    auto builtin = builtin_attr->builtin;
 
                     if (pipeline_io_attribute) {
                         AddError(attr->source) << "multiple entry point IO attributes";
@@ -1486,8 +1486,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 bool has_position = false;
                 if (pipeline_io_attribute) {
                     if (auto* builtin_attr = pipeline_io_attribute->As<ast::BuiltinAttribute>()) {
-                        auto builtin = sem_.Get(builtin_attr)->Value();
-                        has_position = (builtin == core::BuiltinValue::kPosition);
+                        has_position = (builtin_attr->builtin == core::BuiltinValue::kPosition);
                     }
                 }
                 if (!has_position) {
@@ -1561,8 +1560,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
         for (auto* global : func->TransitivelyReferencedGlobals()) {
             if (auto* builtin_attr =
                     ast::GetAttribute<ast::BuiltinAttribute>(global->Declaration()->attributes)) {
-                auto builtin = sem_.Get(builtin_attr)->Value();
-                if (builtin == core::BuiltinValue::kPosition) {
+                if (builtin_attr->builtin == core::BuiltinValue::kPosition) {
                     found = true;
                     break;
                 }
@@ -2428,8 +2426,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                                           /* is_input */ false)) {
                         return false;
                     }
-                    auto builtin = sem_.Get(builtin_attr)->Value();
-                    if (builtin == core::BuiltinValue::kPosition) {
+                    if (builtin_attr->builtin == core::BuiltinValue::kPosition) {
                         has_position = true;
                     }
                     return true;

@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
@@ -78,25 +77,6 @@ TEST_P(ResolverAddressSpaceUsedWithTemplateArgs, Test) {
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverAddressSpaceUsedWithTemplateArgs,
                          testing::ValuesIn(core::kAddressSpaceStrings));
-
-////////////////////////////////////////////////////////////////////////////////
-// builtin value
-////////////////////////////////////////////////////////////////////////////////
-using ResolverBuiltinValueUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
-
-TEST_P(ResolverBuiltinValueUsedWithTemplateArgs, Test) {
-    // fn f(@builtin(BUILTIN<T>) p : vec4<f32>) {}
-    auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
-    Func("f", Vector{Param("p", ty.vec4<f32>(), Vector{Builtin(tmpl)})}, ty.void_(), tint::Empty,
-         Vector{Stage(ast::PipelineStage::kFragment)});
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: builtin value '" + std::string(GetParam()) +
-                                "' does not take template arguments");
-}
-
-INSTANTIATE_TEST_SUITE_P(,
-                         ResolverBuiltinValueUsedWithTemplateArgs,
-                         testing::ValuesIn(core::kBuiltinValueStrings));
 
 ////////////////////////////////////////////////////////////////////////////////
 // texel format

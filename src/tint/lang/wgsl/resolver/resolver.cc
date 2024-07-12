@@ -58,7 +58,6 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
-#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
@@ -84,7 +83,6 @@
 #include "src/tint/lang/wgsl/resolver/unresolved_identifier.h"
 #include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/lang/wgsl/sem/break_if_statement.h"
-#include "src/tint/lang/wgsl/sem/builtin_attribute.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
@@ -683,11 +681,11 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     global->Attributes().color = value.Get();
                     return kSuccess;
                 },
-                [&](const ast::BuiltinAttribute* attr) {
+                [&](const ast::BuiltinAttribute*) {
                     if (!has_io_address_space) {
                         return kInvalid;
                     }
-                    return BuiltinAttribute(attr) == Success ? kSuccess : kErrored;
+                    return kSuccess;
                 },
                 [&](const ast::InterpolateAttribute*) {
                     if (!has_io_address_space) {
@@ -781,9 +779,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                     sem->Attributes().color = value.Get();
                     return true;
                 },
-                [&](const ast::BuiltinAttribute* attr) {
-                    return BuiltinAttribute(attr) == Success;
-                },
+                [&](const ast::BuiltinAttribute*) { return true; },
                 [&](const ast::InvariantAttribute* attr) -> bool {
                     return InvariantAttribute(attr);
                 },
@@ -1122,9 +1118,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                     func->SetReturnIndex(value.Get());
                     return kSuccess;
                 },
-                [&](const ast::BuiltinAttribute* attr) {
-                    return BuiltinAttribute(attr) == Success ? kSuccess : kErrored;
-                },
+                [&](const ast::BuiltinAttribute*) { return kSuccess; },
                 [&](const ast::InternalAttribute* attr) {
                     return InternalAttribute(attr) ? kSuccess : kErrored;
                 },
@@ -3973,29 +3967,6 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
     return ws;
 }
 
-tint::Result<tint::core::BuiltinValue> Resolver::BuiltinAttribute(
-    const ast::BuiltinAttribute* attr) {
-    const ast::BuiltinValueName* builtin_val = attr->builtin;
-    Mark(builtin_val);
-
-    const ast::Identifier* ident = builtin_val->name;
-    if (!TINT_LIKELY(CheckNotTemplated("builtin value", ident))) {
-        return Failure{};
-    }
-    Mark(ident);
-
-    core::BuiltinValue builtin = core::ParseBuiltinValue(ident->symbol.NameView());
-    if (builtin == core::BuiltinValue::kUndefined) {
-        sem_.ErrorUnexpectedIdent(ident, "builtin value", core::kBuiltinValueStrings);
-        return Failure{};
-    }
-
-    auto* sem = b.create<sem::BuiltinAttribute>(attr, builtin);
-    // Apply the resolved tint::sem::BuiltinAttribute to the attribute.
-    b.Sem().Add(attr, sem);
-    return builtin;
-}
-
 bool Resolver::DiagnosticAttribute(const ast::DiagnosticAttribute* attr) {
     return DiagnosticControl(attr->control);
 }
@@ -4461,11 +4432,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     return true;
                 },
                 [&](const ast::BuiltinAttribute* attr) {
-                    auto value = BuiltinAttribute(attr);
-                    if (value != Success) {
-                        return false;
-                    }
-                    attributes.builtin = value.Get();
+                    attributes.builtin = attr->builtin;
                     return true;
                 },
                 [&](const ast::InterpolateAttribute* attr) {

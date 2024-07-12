@@ -2086,9 +2086,8 @@ void ASTPrinter::EmitIOVariable(const sem::GlobalVariable* var) {
     auto* decl = var->Declaration();
 
     if (auto* attr = ast::GetAttribute<ast::BuiltinAttribute>(decl->attributes)) {
-        auto builtin = builder_.Sem().Get(attr)->Value();
         // Use of gl_SampleID requires the GL_OES_sample_variables extension
-        if (RequiresOESSampleVariables(builtin)) {
+        if (RequiresOESSampleVariables(attr->builtin)) {
             requires_oes_sample_variables_ = true;
         }
         // Do not emit builtin (gl_) variables.
