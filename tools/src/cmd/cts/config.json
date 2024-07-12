@@ -49,6 +49,11 @@
       "Bucket": "try",
       "Builder": "dawn-try-win10-x86-rel"
     },
+    "Win-Intel-UHD770": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "dawn-try-win-x64-intel-uhd770-rel"
+    },
     "Mac": {
       "Project": "chromium",
       "Bucket": "try",
