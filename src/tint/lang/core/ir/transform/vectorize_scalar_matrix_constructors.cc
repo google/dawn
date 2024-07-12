@@ -94,7 +94,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> VectorizeScalarMatrixConstructors(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "VectorizeScalarMatrixConstructors transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "VectorizeScalarMatrixConstructors transform",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowVectorElementPointer,
+                                          });
     if (result != Success) {
         return result;
     }

@@ -217,7 +217,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PromoteInitializers(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "PromoteInitializers transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "PromoteInitializers transform",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowVectorElementPointer,
+                                          });
     if (result != Success) {
         return result;
     }

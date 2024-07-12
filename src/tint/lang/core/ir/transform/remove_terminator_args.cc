@@ -164,7 +164,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> RemoveTerminatorArgs(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "RemoveTerminatorArgs transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "RemoveTerminatorArgs transform",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowVectorElementPointer,
+                                          });
     if (result != Success) {
         return result;
     }

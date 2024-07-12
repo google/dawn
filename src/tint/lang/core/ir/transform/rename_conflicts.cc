@@ -293,7 +293,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "RenameConflicts transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "RenameConflicts transform",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowVectorElementPointer,
+                                          });
     if (result != Success) {
         return result;
     }

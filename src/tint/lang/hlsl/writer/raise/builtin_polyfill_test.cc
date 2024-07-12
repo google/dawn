@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -454,6 +455,44 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SignVec) {
 }
 )";
 
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumLevels) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureNumLevels, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:u32 = textureNumLevels %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:ptr<function, vec2<u32>, read_write> = var
+    %4:ptr<function, u32, read_write> = access %3, 0u
+    %5:ptr<function, u32, read_write> = access %3, 1u
+    %6:void = %t.GetDimensions 0u, %4, %5
+    %7:u32 = swizzle %3, y
+    ret %7
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
     Run(BuiltinPolyfill);
     EXPECT_EQ(expect, str());
 }

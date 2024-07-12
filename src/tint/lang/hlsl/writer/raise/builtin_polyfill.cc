@@ -35,8 +35,10 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/hlsl/builtin_fn.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
+#include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 #include "src/tint/lang/hlsl/ir/ternary.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/math/hash.h"
@@ -78,6 +80,7 @@ struct State {
                 switch (call->Func()) {
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
+                    case core::BuiltinFn::kTextureNumLevels:
                     case core::BuiltinFn::kTrunc:
                         call_worklist.Push(call);
                         break;
@@ -113,6 +116,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSign:
                     Sign(call);
+                    break;
+                case core::BuiltinFn::kTextureNumLevels:
+                    TextureNumLevels(call);
                     break;
                 case core::BuiltinFn::kTrunc:
                     Trunc(call);
@@ -377,6 +383,52 @@ struct State {
         b.InsertBefore(bitcast,
                        [&] { b.CallWithResult(bitcast->DetachResult(), f, bitcast->Args()[0]); });
         bitcast->Destroy();
+    }
+
+    void TextureNumLevels(core::ir::CoreBuiltinCall* call) {
+        auto* tex = call->Args()[0];
+        auto* tex_type = tex->Type()->As<core::type::Texture>();
+
+        Vector<uint32_t, 2> swizzle{};
+        uint32_t query_size = 0;
+        switch (tex_type->dim()) {
+            case core::type::TextureDimension::kNone:
+                TINT_ICE() << "texture dimension is kNone";
+            case core::type::TextureDimension::k1d:
+                query_size = 2;
+                swizzle = {1_u};
+                break;
+            case core::type::TextureDimension::k2d:
+            case core::type::TextureDimension::kCube:
+                query_size = 3;
+                swizzle = {2_u};
+                break;
+            case core::type::TextureDimension::k2dArray:
+            case core::type::TextureDimension::k3d:
+            case core::type::TextureDimension::kCubeArray:
+                query_size = 4;
+                swizzle = {3_u};
+                break;
+        }
+
+        const core::type::Type* query_ty = ty.vec(ty.u32(), query_size);
+        b.InsertBefore(call, [&] {
+            Vector<core::ir::Value*, 5> args;
+            // Pass the `level` parameter so the `num_levels` overload is used.
+            args.Push(b.Value(0_u));
+
+            core::ir::Instruction* out = b.Var(ty.ptr(function, query_ty));
+            for (uint32_t i = 0; i < query_size; ++i) {
+                args.Push(b.Access(ty.ptr<function, u32>(), out, u32(i))->Result(0));
+            }
+
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), hlsl::BuiltinFn::kGetDimensions,
+                                                      tex, args);
+
+            out = b.Swizzle(ty.u32(), out, swizzle);
+            call->Result(0)->ReplaceAllUsesWith(out->Result(0));
+        });
+        call->Destroy();
     }
 };
 
