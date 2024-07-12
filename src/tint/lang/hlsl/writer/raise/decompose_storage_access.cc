@@ -56,6 +56,8 @@ struct State {
     using VarTypePair = std::pair<core::ir::Var*, const core::type::Type*>;
     /// Maps a struct to the load function
     Hashmap<VarTypePair, core::ir::Function*, 2> var_and_type_to_load_fn_{};
+    /// Maps a struct to the store function
+    Hashmap<VarTypePair, core::ir::Function*, 2> var_and_type_to_store_fn_{};
 
     /// Process the module.
     void Process() {
@@ -205,25 +207,42 @@ struct State {
     }
 
     // Creates the appropriate store instructions for the given result type.
-    core::ir::Call* MakeStore(core::ir::Var* var, core::ir::Value* from, core::ir::Value* offset) {
+    void MakeStore(core::ir::Instruction* inst,
+                   core::ir::Var* var,
+                   core::ir::Value* from,
+                   core::ir::Value* offset) {
         auto* store_ty = from->Type();
         if (store_ty->is_numeric_scalar_or_vector()) {
-            return MakeScalarOrVectorStore(var, from, offset);
+            MakeScalarOrVectorStore(var, from, offset);
+            return;
         }
 
-        // TODO(dsinclair): This currently only handles scalars vectors. Add arrays, matrices,
-        // structs ...
+        // TODO(dsinclair): This is missing arrays and matrices
 
-        TINT_UNREACHABLE();
+        tint::Switch(
+            from->Type(),  //
+            [&](const core::type::Struct* s) {
+                auto* fn = GetStoreFunctionFor(inst, var, s);
+                b.Call(fn, offset, from);
+            },
+            //            [&](const core::type::Matrix* m) {
+            //                auto* fn = GetLoadFunctionFor(inst, var, m);
+            //                return b.Call(fn, offset);
+            //            }, /
+            //            [&](const core::type::Array* a) {
+            //                auto* fn = GetLoadFunctionFor(inst, var, a);
+            //                return b.Call(fn, offset);
+            //            },
+            TINT_ICE_ON_NO_MATCH);
     }
 
     // Creates a `v.Store{2,3,4} offset, value` call based on the provided type. The stored value is
     // bitcast to a `u32` (or `u32` vector as needed).
     //
     // This only works for `u32`, `i32`, `f32` and the vector sizes of those types.
-    core::ir::Call* MakeScalarOrVectorStore(core::ir::Var* var,
-                                            core::ir::Value* from,
-                                            core::ir::Value* offset) {
+    void MakeScalarOrVectorStore(core::ir::Var* var,
+                                 core::ir::Value* from,
+                                 core::ir::Value* offset) {
         // TODO(dsinclair): Support f16 store
 
         const core::type::Type* cast_ty = ty.u32();
@@ -247,7 +266,7 @@ struct State {
         }
 
         auto* cast = b.Bitcast(cast_ty, from);
-        return b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), fn, var, offset, cast);
+        b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), fn, var, offset, cast);
     }
 
     // Creates the appropriate load instructions for the given result type.
@@ -351,6 +370,29 @@ struct State {
                 }
 
                 b.Return(fn, b.Construct(s, values));
+            });
+
+            return fn;
+        });
+    }
+
+    core::ir::Function* GetStoreFunctionFor(core::ir::Instruction* inst,
+                                            core::ir::Var* var,
+                                            const core::type::Struct* s) {
+        return var_and_type_to_store_fn_.GetOrAdd(VarTypePair{var, s}, [&] {
+            auto* p = b.FunctionParam("offset", ty.u32());
+            auto* obj = b.FunctionParam("obj", s);
+            auto* fn = b.Function(ty.void_());
+            fn->SetParams({p, obj});
+
+            b.Append(fn->Block(), [&] {
+                for (const auto* mem : s->Members()) {
+                    auto* from = b.Access(mem->Type(), obj, u32(mem->Index()));
+                    MakeStore(inst, var, from->Result(0),
+                              b.Add<u32>(p, u32(mem->Offset()))->Result(0));
+                }
+
+                b.Return(fn);
             });
 
             return fn;
@@ -544,7 +586,7 @@ struct State {
                OffsetData& offset) {
         b.InsertBefore(inst, [&] {
             auto* off = OffsetToValue(offset);
-            MakeStore(var, from, off);
+            MakeStore(inst, var, from, off);
         });
         inst->Destroy();
     }

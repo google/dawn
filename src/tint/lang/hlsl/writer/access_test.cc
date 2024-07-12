@@ -1497,7 +1497,7 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessStoreStructMember) {
+TEST_F(HlslWriterTest, AccessStoreStructMember) {
     auto* SB = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.f32()},
@@ -1519,10 +1519,11 @@ RWByteAddressBuffer v : register(u0);
 void foo() {
   v.Store(4u, asuint(3.0f));
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessStoreStructNested) {
+TEST_F(HlslWriterTest, AccessStoreStructNested) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -1550,27 +1551,85 @@ TEST_F(HlslWriterTest, DISABLED_AccessStoreStructNested) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-struct Inner {
-  float3x3 s;
-  float3 t[5];
-};
-struct Outer {
-  float x;
-  Inner y;
-};
-struct SB2 {
-  int a;
-  Outer b;
-};
-
 RWByteAddressBuffer v : register(u0);
 void foo() {
   v.Store(16u, asuint(2.0f));
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessStoreStruct) {
+TEST_F(HlslWriterTest, AccessStoreStruct) {
+    auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
+                                                          {mod.symbols.New("s"), ty.f32()},
+                                                          {mod.symbols.New("t"), ty.vec3<f32>()},
+                                                      });
+    auto* Outer = ty.Struct(mod.symbols.New("Outer"), {
+                                                          {mod.symbols.New("x"), ty.f32()},
+                                                          {mod.symbols.New("y"), Inner},
+                                                      });
+
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), Outer},
+                                                });
+
+    auto* var = b.Var("v", storage, SB, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* s = b.Let("s", b.Zero(SB));
+        b.Store(var, s);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(struct Inner {
+  float s;
+  float3 t;
+};
+
+struct Outer {
+  float x;
+  Inner y;
+};
+
+struct SB {
+  int a;
+  Outer b;
+};
+
+
+RWByteAddressBuffer v : register(u0);
+void v_1(uint offset, Inner obj) {
+  v.Store((offset + 0u), asuint(obj.s));
+  v.Store3((offset + 16u), asuint(obj.t));
+}
+
+void v_2(uint offset, Outer obj) {
+  v.Store((offset + 0u), asuint(obj.x));
+  Inner v_3 = obj.y;
+  v_1((offset + 16u), v_3);
+}
+
+void v_4(uint offset, SB obj) {
+  v.Store((offset + 0u), asuint(obj.a));
+  Outer v_5 = obj.b;
+  v_2((offset + 16u), v_5);
+}
+
+void foo() {
+  SB v_6 = (SB)0;
+  SB s = v_6;
+  v_4(0u, s);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_AccessStoreStructComplex) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},

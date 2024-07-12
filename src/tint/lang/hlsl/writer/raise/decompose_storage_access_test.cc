@@ -2756,7 +2756,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StoreStructMember) {
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreStructMember) {
     auto* SB = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.f32()},
@@ -2793,12 +2793,28 @@ $B1: {  # root
     ASSERT_EQ(src, str());
 
     auto* expect = R"(
+SB = struct @align(4) {
+  a:i32 @offset(0)
+  b:f32 @offset(4)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = bitcast 3.0f
+    %4:void = %v.Store 4u, %3
+    ret
+  }
+}
 )";
     Run(DecomposeStorageAccess);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StoreStructNested) {
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreStructNested) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -2855,12 +2871,163 @@ $B1: {  # root
     ASSERT_EQ(src, str());
 
     auto* expect = R"(
+Inner = struct @align(16) {
+  s:mat3x3<f32> @offset(0)
+  t:array<vec3<f32>, 5> @offset(48)
+}
+
+Outer = struct @align(16) {
+  x:f32 @offset(0)
+  y:Inner @offset(16)
+}
+
+SB = struct @align(16) {
+  a:i32 @offset(0)
+  b:Outer @offset(16)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = bitcast 2.0f
+    %4:void = %v.Store 16u, %3
+    ret
+  }
+}
 )";
     Run(DecomposeStorageAccess);
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StoreStruct) {
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreStruct) {
+    auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
+                                                          {mod.symbols.New("s"), ty.f32()},
+                                                          {mod.symbols.New("t"), ty.vec3<f32>()},
+                                                      });
+    auto* Outer = ty.Struct(mod.symbols.New("Outer"), {
+                                                          {mod.symbols.New("x"), ty.f32()},
+                                                          {mod.symbols.New("y"), Inner},
+                                                      });
+
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), Outer},
+                                                });
+
+    auto* var = b.Var("v", storage, SB, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* s = b.Let("s", b.Zero(SB));
+        b.Store(var, s);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+Inner = struct @align(16) {
+  s:f32 @offset(0)
+  t:vec3<f32> @offset(16)
+}
+
+Outer = struct @align(16) {
+  x:f32 @offset(0)
+  y:Inner @offset(16)
+}
+
+SB = struct @align(16) {
+  a:i32 @offset(0)
+  b:Outer @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %s:SB = let SB(0i, Outer(0.0f, Inner(0.0f, vec3<f32>(0.0f))))
+    store %v, %s
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+Inner = struct @align(16) {
+  s:f32 @offset(0)
+  t:vec3<f32> @offset(16)
+}
+
+Outer = struct @align(16) {
+  x:f32 @offset(0)
+  y:Inner @offset(16)
+}
+
+SB = struct @align(16) {
+  a:i32 @offset(0)
+  b:Outer @offset(16)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %s:SB = let SB(0i, Outer(0.0f, Inner(0.0f, vec3<f32>(0.0f))))
+    %4:void = call %5, 0u, %s
+    ret
+  }
+}
+%5 = func(%offset:u32, %obj:SB):void {
+  $B3: {
+    %8:i32 = access %obj, 0u
+    %9:u32 = add %offset, 0u
+    %10:u32 = bitcast %8
+    %11:void = %v.Store %9, %10
+    %12:Outer = access %obj, 1u
+    %13:u32 = add %offset, 16u
+    %14:void = call %15, %13, %12
+    ret
+  }
+}
+%15 = func(%offset_1:u32, %obj_1:Outer):void {  # %offset_1: 'offset', %obj_1: 'obj'
+  $B4: {
+    %18:f32 = access %obj_1, 0u
+    %19:u32 = add %offset_1, 0u
+    %20:u32 = bitcast %18
+    %21:void = %v.Store %19, %20
+    %22:Inner = access %obj_1, 1u
+    %23:u32 = add %offset_1, 16u
+    %24:void = call %25, %23, %22
+    ret
+  }
+}
+%25 = func(%offset_2:u32, %obj_2:Inner):void {  # %offset_2: 'offset', %obj_2: 'obj'
+  $B5: {
+    %28:f32 = access %obj_2, 0u
+    %29:u32 = add %offset_2, 0u
+    %30:u32 = bitcast %28
+    %31:void = %v.Store %29, %30
+    %32:vec3<f32> = access %obj_2, 1u
+    %33:u32 = add %offset_2, 16u
+    %34:vec3<u32> = bitcast %32
+    %35:void = %v.Store3 %33, %34
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StoreStructComplex) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
