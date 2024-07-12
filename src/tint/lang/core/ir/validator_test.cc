@@ -4677,6 +4677,39 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Load_MissingResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32>());
+        auto* load = mod.allocators.instructions.Create<ir::Load>(nullptr, var->Result(0));
+        load->ClearResults();
+        b.Append(load);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:13 error: load: expected exactly 1 results, got 0
+    undef = load %2
+            ^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, i32, read_write> = var
+    undef = load %2
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Store_NullTo) {
     auto* f = b.Function("my_func", ty.void_());
 

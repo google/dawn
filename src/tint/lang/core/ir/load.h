@@ -41,6 +41,12 @@ class Load final : public Castable<Load, OperandInstruction<1, 1>> {
     /// The offset in Operands() for the from value
     static constexpr size_t kFromOperandOffset = 0;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
+    /// The fixed number of operands used by this instruction
+    static constexpr size_t kNumOperands = 1;
+
     /// Constructor (no results, no operands)
     Load();
 

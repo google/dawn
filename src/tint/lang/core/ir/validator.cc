@@ -1670,7 +1670,9 @@ void Validator::CheckExitLoop(const ExitLoop* l) {
 }
 
 void Validator::CheckLoad(const Load* l) {
-    CheckOperandNotNull(l, l->From(), Load::kFromOperandOffset);
+    if (TINT_UNLIKELY(!CheckResultsAndOperands(l, Load::kNumResults, Load::kNumOperands))) {
+        return;
+    }
 
     if (auto* from = l->From()) {
         auto* mv = from->Type()->As<core::type::MemoryView>();
