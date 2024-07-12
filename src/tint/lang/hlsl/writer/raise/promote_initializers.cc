@@ -188,7 +188,9 @@ struct State {
                 args.Push(b.Constant(v));
             }
         } else if (auto* splat_val = val->Value()->As<core::constant::Splat>()) {
-            args.Push(b.Constant(splat_val->el));
+            for (uint32_t i = 0; i < splat_val->NumElements(); i++) {
+                args.Push(b.Constant(splat_val->el));
+            }
         }
         return args;
     }

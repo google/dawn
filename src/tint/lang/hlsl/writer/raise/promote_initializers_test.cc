@@ -313,6 +313,50 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterPromoteInitializersTest, ModuleScopedStruct_SplatMultipleElements) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("a"), ty.i32()},
+                                                       {mod.symbols.New("b"), ty.i32()},
+                                                       {mod.symbols.New("c"), ty.i32()},
+                                                   });
+
+    b.ir.root_block->Append(b.Var<private_>("a", b.Splat(str_ty, 1_i)));
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  c:i32 @offset(8)
+}
+
+$B1: {  # root
+  %a:ptr<private, S, read_write> = var, S(1i)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  c:i32 @offset(8)
+}
+
+$B1: {  # root
+  %1:S = construct 1i, 1i, 1i
+  %2:S = let %1
+  %a:ptr<private, S, read_write> = var, %2
+}
+
+)";
+    Run(PromoteInitializers);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriterPromoteInitializersTest, ModuleScopedArray) {
     capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
 
