@@ -609,4 +609,12 @@ WireResult Client::DoDeviceCreateRenderPipelineAsyncCallback(ObjectHandle eventM
         .SetFutureReady<CreateRenderPipelineEvent>(future.id, status, message);
 }
 
+void Device::Destroy() {
+    DeviceDestroyCmd cmd;
+    cmd.self = ToAPI(this);
+    GetClient()->SerializeCommand(cmd);
+
+    mIsAlive = false;
+}
+
 }  // namespace dawn::wire::client

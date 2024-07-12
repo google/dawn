@@ -98,6 +98,8 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     size_t EnumerateFeatures(WGPUFeatureName* features) const;
     WGPUQueue GetQueue();
 
+    void Destroy();
+
   private:
     void WillDropLastExternalRef() override;
     template <typename Event,

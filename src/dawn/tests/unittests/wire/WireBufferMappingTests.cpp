@@ -330,6 +330,21 @@ TEST_P(WireBufferMappingTests, DeviceReleasedTooEarlyServerSideError) {
     DefaultApiDeviceWasReleased();
 }
 
+// Check the map callback is called with "DestroyedBeforeCallback" when the map request would have
+// worked, but the device was destroyed.
+TEST_P(WireBufferMappingTests, DeviceDestroyedTooEarly) {
+    TestEarlyMapCancelled([&]() { wgpuDeviceDestroy(device); },
+                          [&]() { EXPECT_CALL(api, DeviceDestroy(apiDevice)); },
+                          WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, false);
+}
+
+// Check that if device is destroyed early client-side, we disregard server-side validation errors.
+TEST_P(WireBufferMappingTests, DeviceDestroyedTooEarlyServerSideError) {
+    TestEarlyMapErrorCancelled([&]() { wgpuDeviceDestroy(device); },
+                               [&]() { EXPECT_CALL(api, DeviceDestroy(apiDevice)); },
+                               WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, false);
+}
+
 // Test that the callback isn't fired twice when Unmap() is called inside the callback.
 TEST_P(WireBufferMappingTests, UnmapInsideMapCallback) {
     TestCancelInCallback(&wgpuBufferUnmap, [&]() { EXPECT_CALL(api, BufferUnmap(apiBuffer)); });
