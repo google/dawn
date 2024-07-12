@@ -44,6 +44,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 if (tint_build_msl_writer) {
   libtint_source_set("raise") {
     sources = [
+      "binary_polyfill.cc",
+      "binary_polyfill.h",
       "builtin_polyfill.cc",
       "builtin_polyfill.h",
       "module_scope_vars.cc",
@@ -91,6 +93,7 @@ if (tint_build_unittests) {
   if (tint_build_msl_writer) {
     tint_unittests_source_set("unittests") {
       sources = [
+        "binary_polyfill_test.cc",
         "builtin_polyfill_test.cc",
         "module_scope_vars_test.cc",
         "shader_io_test.cc",

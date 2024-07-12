@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_BUILTIN_POLYFILL_H_
-#define SRC_TINT_LANG_MSL_WRITER_RAISE_BUILTIN_POLYFILL_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_BINARY_POLYFILL_H_
+#define SRC_TINT_LANG_MSL_WRITER_RAISE_BINARY_POLYFILL_H_
 
 #include "src/tint/utils/result/result.h"
 
@@ -37,12 +37,12 @@ class Module;
 
 namespace tint::msl::writer::raise {
 
-/// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
+/// BinaryPolyfill is a transform that replaces binary instructions with polyfills and calls to
 /// MSL backend intrinsic functions.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& module);
+Result<SuccessType> BinaryPolyfill(core::ir::Module& module);
 
 }  // namespace tint::msl::writer::raise
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_BUILTIN_POLYFILL_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_RAISE_BINARY_POLYFILL_H_
