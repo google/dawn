@@ -10,7 +10,10 @@ struct tint_module_vars_struct {
 };
 
 int tint_div_i32(int lhs, int rhs) {
-  return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))));
+  uint const v_1 = uint((lhs == (-2147483647 - 1)));
+  bool const v_2 = bool((v_1 & uint((rhs == -1))));
+  uint const v_3 = uint((rhs == 0));
+  return (lhs / select(rhs, 1, bool((v_3 | uint(v_2)))));
 }
 
 void foo(tint_module_vars_struct tint_module_vars) {

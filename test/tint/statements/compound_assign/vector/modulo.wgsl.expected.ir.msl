@@ -10,8 +10,11 @@ struct tint_module_vars_struct {
 };
 
 int4 tint_mod_v4i32(int4 lhs, int4 rhs) {
-  int4 const v_1 = select(rhs, int4(1), ((rhs == int4(0)) | ((lhs == int4((-2147483647 - 1))) & (rhs == int4(-1)))));
-  return (lhs - ((lhs / v_1) * v_1));
+  uint4 const v_1 = uint4((lhs == int4((-2147483647 - 1))));
+  bool4 const v_2 = bool4((v_1 & uint4((rhs == int4(-1)))));
+  uint4 const v_3 = uint4((rhs == int4(0)));
+  int4 const v_4 = select(rhs, int4(1), bool4((v_3 | uint4(v_2))));
+  return (lhs - ((lhs / v_4) * v_4));
 }
 
 void foo(tint_module_vars_struct tint_module_vars) {
