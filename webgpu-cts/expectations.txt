@@ -379,12 +379,9 @@ crbug.com/dawn/2500 [ android-14 android-pixel-6 ] webgpu:shader,execution,shade
 crbug.com/dawn/2500 [ android-14 android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/dawn/0000 [ android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
 crbug.com/dawn/0000 [ android-14 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation ] webgpu:shader,validation,shader_io,interpolate:duplicate:attr="" [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
-crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation ] webgpu:shader,validation,shader_io,interpolate:duplicate:attr="" [ Failure ]
+crbug.com/dawn/0000 [ android-14 ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 ] webgpu:shader,validation,shader_io,interpolate:duplicate:attr="" [ Failure ]
 
 ################################################################################
 # Failures due to M2 Macbook OS upgrade
@@ -2100,6 +2097,19 @@ crbug.com/40223285 [ webgpu-adapter-default webgpu-shared-worker win10 ] webgpu:
 
 crbug.com/352379272 [ amd-0x67ef mac ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
 
+crbug.com/352768986 [ android-r ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
+crbug.com/352768986 [ android-r ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
+crbug.com/352768986 [ android-t ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
+crbug.com/352768986 [ android-t ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
+crbug.com/352768986 [ chromeos ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
+crbug.com/352768986 [ chromeos ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
+crbug.com/352768986 [ linux ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
+crbug.com/352768986 [ linux ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
+crbug.com/352768986 [ mac ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
+crbug.com/352768986 [ mac ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
+crbug.com/352768986 [ win ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
+crbug.com/352768986 [ win ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
+
 ################################################################################
 # New flakes. Please triage:
 ################################################################################
@@ -2125,7 +2135,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 ubuntu webgpu-adap
 ################################################################################
 # New failures. Please triage:
 ################################################################################
-crbug.com/dawn/0000 webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="private";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="";trailing_comma=true [ Failure ]
@@ -2133,7 +2142,6 @@ crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="read_write";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="uniform";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="workgroup";access_mode="";trailing_comma=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,memory_layout:write_layout:* [ Failure ]
 crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,expression,constructor,non_zero:concrete_matrix_elements:* [ Failure ]
 crbug.com/dawn/0000 [ android-t ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
