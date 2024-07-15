@@ -316,12 +316,35 @@ class Validator {
     /// @returns true if the operand is not null
     bool CheckOperandNotNull(const ir::Instruction* inst, size_t idx);
 
+    /// Checks the number of operands provided to @p inst and that none of them are null.
+    /// @param inst the instruction
+    /// @param min_count the minimum number of operands to expect
+    /// @param max_count the maximum number of operands to expect, if not set, than only the minimum
+    /// number is checked.
+    /// @returns true if the number of operands is in the expected range and none are null
+    bool CheckOperands(const ir::Instruction* inst,
+                       size_t min_count,
+                       std::optional<size_t> max_count);
+
     /// Checks the number of operands for @p inst are exactly equal to @p count and that none of
     /// them are null.
     /// @param inst the instruction
     /// @param count the number of operands to check
     /// @returns true if the operands count is as expected and none are null
     bool CheckOperands(const ir::Instruction* inst, size_t count);
+
+    /// Checks the number of results for @p inst are exactly equal to @p num_results and the number
+    /// of operands is correctly. Both results and operands are confirmed to be non-null.
+    /// @param inst the instruction
+    /// @param num_results expected number of results for the instruction
+    /// @param min_operands the minimum number of operands to expect
+    /// @param max_operands the maximum number of operands to expect, if not set, than only the
+    /// minimum number is checked.
+    /// @returns true if the result and operand counts are as expected and none are null
+    bool CheckResultsAndOperandRange(const ir::Instruction* inst,
+                                     size_t num_results,
+                                     size_t min_operands,
+                                     std::optional<size_t> max_operands);
 
     /// Checks the number of results and operands for @p inst are exactly equal to num_results
     /// and num_operands, respectively, and that none of them are null.
@@ -802,6 +825,35 @@ bool Validator::CheckOperandNotNull(const Instruction* inst, size_t idx) {
     return true;
 }
 
+bool Validator::CheckOperands(const ir::Instruction* inst,
+                              size_t min_count,
+                              std::optional<size_t> max_count) {
+    if (TINT_UNLIKELY(inst->Operands().Length() < min_count)) {
+        if (max_count.has_value()) {
+            AddError(inst) << "expected between " << min_count << " and " << max_count.value()
+                           << " operands, got " << inst->Operands().Length();
+        } else {
+            AddError(inst) << "expected at least " << min_count << " operands, got "
+                           << inst->Operands().Length();
+        }
+        return false;
+    }
+
+    if (TINT_UNLIKELY(max_count.has_value() && inst->Operands().Length() > max_count.value())) {
+        AddError(inst) << "expected between " << min_count << " and " << max_count.value()
+                       << " operands, got " << inst->Operands().Length();
+        return false;
+    }
+
+    bool passed = true;
+    for (size_t i = 0; i < inst->Operands().Length(); i++) {
+        if (TINT_UNLIKELY(!CheckOperandNotNull(inst, i))) {
+            passed = false;
+        }
+    }
+    return passed;
+}
+
 bool Validator::CheckOperands(const ir::Instruction* inst, size_t count) {
     if (TINT_UNLIKELY(inst->Operands().Length() != count)) {
         AddError(inst) << "expected exactly " << count << " operands, got "
@@ -816,6 +868,16 @@ bool Validator::CheckOperands(const ir::Instruction* inst, size_t count) {
         }
     }
     return passed;
+}
+
+bool Validator::CheckResultsAndOperandRange(const ir::Instruction* inst,
+                                            size_t num_results,
+                                            size_t min_operands,
+                                            std::optional<size_t> max_operands = {}) {
+    // Intentionally avoiding short-circuiting here
+    bool results_passed = CheckResults(inst, num_results);
+    bool operands_passed = CheckOperands(inst, min_operands, max_operands);
+    return results_passed && operands_passed;
 }
 
 bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
@@ -1200,8 +1262,7 @@ void Validator::CheckUserCall(const UserCall* call) {
 }
 
 void Validator::CheckAccess(const Access* a) {
-    if (!a->Object()) {
-        AddError(a, Access::kObjectOperandOffset) << "null object";
+    if (!CheckResultsAndOperandRange(a, Access::kNumResults, Access::kMinNumOperands)) {
         return;
     }
 
@@ -1670,7 +1731,7 @@ void Validator::CheckExitLoop(const ExitLoop* l) {
 }
 
 void Validator::CheckLoad(const Load* l) {
-    if (TINT_UNLIKELY(!CheckResultsAndOperands(l, Load::kNumResults, Load::kNumOperands))) {
+    if (!CheckResultsAndOperands(l, Load::kNumResults, Load::kNumOperands)) {
         return;
     }
 
@@ -1690,7 +1751,7 @@ void Validator::CheckLoad(const Load* l) {
 }
 
 void Validator::CheckStore(const Store* s) {
-    if (TINT_UNLIKELY(!CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands))) {
+    if (!CheckResultsAndOperands(s, Store::kNumResults, Store::kNumOperands)) {
         return;
     }
 
