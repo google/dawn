@@ -896,7 +896,30 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageVectorF16) {
+TEST_F(HlslWriterTest, AccessUniformStorageScalarF16) {
+    auto* var = b.Var<uniform, f16, core::Access::kRead>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_v : register(b0) {
+  uint4 v[1];
+};
+void foo() {
+  float16_t a = float16_t(f16tof32(v[0u].x));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, AccessUniformStorageVectorF16) {
     auto* var = b.Var<uniform, vec4<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -916,15 +939,65 @@ TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageVectorF16) {
 cbuffer cbuffer_v : register(b0) {
   uint4 v[1];
 };
+vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
+  uint4 v = src;
+  uint4 mask = (65535u).xxxx;
+  uint4 shift = (16u).xxxx;
+  float4 t_low = f16tof32((v & mask));
+  float4 t_high = f16tof32(((v >> shift) & mask));
+  return vector<float16_t, 4>(t_low.x, t_high.x, t_low.y, t_high.y);
+}
+
 void foo() {
-  uint2 ubo_load = v[0].xy;
+  vector<float16_t, 4> a = tint_bitcast_to_f16(v[0u]);
+  float16_t b = float16_t(f16tof32(v[0u].x));
+  float16_t c = float16_t(f16tof32((v[0u].x >> 16u)));
+  float16_t d = float16_t(f16tof32(v[0u].y));
+  float16_t e = float16_t(f16tof32((v[0u].y >> 16u)));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, DISABLED_AccessUniformStorageMat2x3F16) {
+    auto* var = b.Var<uniform, mat2x3<f16>, core::Access::kRead>("v");
+    var->SetBindingPoint(0, 0);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Load(var));
+        b.Let("b", b.Load(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u)));
+        b.Let("c", b.LoadVectorElement(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u), 2_u));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_v : register(b0) {
+  uint4 v[1];
+};
+
+matrix<float16_t, 2, 3> v_load(uint offset) {
+  const uint scalar_offset = ((offset + 0u)) / 4;
+  uint4 ubo_load_1 = v[scalar_offset / 4];
+  uint2 ubo_load = ((scalar_offset & 2) ? ubo_load_1.zw : ubo_load_1.xy);
   vector<float16_t, 2> ubo_load_xz = vector<float16_t, 2>(f16tof32(ubo_load & 0xFFFF));
-  vector<float16_t, 2> ubo_load_yw = vector<float16_t, 2>(f16tof32(ubo_load >> 16));
-  vector<float16_t, 4> a = vector<float16_t, 4>(ubo_load_xz[0], ubo_load_yw[0], ubo_load_xz[1], ubo_load_yw[1]);
-  float16_t b = float16_t(f16tof32(((v[0].x) & 0xFFFF)));
-  float16_t c = float16_t(f16tof32(((v[0].x >> 16) & 0xFFFF)));
-  float16_t d = float16_t(f16tof32(((v[0].y) & 0xFFFF)));
-  float16_t e = float16_t(f16tof32(((v[0].y >> 16) & 0xFFFF)));
+  float16_t ubo_load_y = f16tof32(ubo_load[0] >> 16);
+  const uint scalar_offset_1 = ((offset + 8u)) / 4;
+  uint4 ubo_load_3 = v[scalar_offset_1 / 4];
+  uint2 ubo_load_2 = ((scalar_offset_1 & 2) ? ubo_load_3.zw : ubo_load_3.xy);
+  vector<float16_t, 2> ubo_load_2_xz = vector<float16_t, 2>(f16tof32(ubo_load_2 & 0xFFFF));
+  float16_t ubo_load_2_y = f16tof32(ubo_load_2[0] >> 16);
+  return matrix<float16_t, 2, 3>(vector<float16_t, 3>(ubo_load_xz[0], ubo_load_y, ubo_load_xz[1]), vector<float16_t, 3>(ubo_load_2_xz[0], ubo_load_2_y, ubo_load_2_xz[1]));
+}
+
+void foo() {
+  matrix<float16_t, 2, 3> a = v_load(0u);
+  uint2 ubo_load_4 = v[0].zw;
+  vector<float16_t, 2> ubo_load_4_xz = vector<float16_t, 2>(f16tof32(ubo_load_4 & 0xFFFF));
+  float16_t ubo_load_4_y = f16tof32(ubo_load_4[0] >> 16);
+  vector<float16_t, 3> b = vector<float16_t, 3>(ubo_load_4_xz[0], ubo_load_4_y, ubo_load_4_xz[1]);
+  float16_t c = float16_t(f16tof32(((v[0].w) & 0xFFFF)));
 }
 
 )");
