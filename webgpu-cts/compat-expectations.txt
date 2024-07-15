@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-07-12 07:02:11AM
+# Last rolled: 2024-07-15 07:28:04AM
 
 # Flaky on all platforms
 # KEEP
@@ -540,14 +540,14 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:arrayed:texture_type="texture_depth_2d_array" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:sampled:texture_type="texture_2d_array" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_flat_names:case="either" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="function";access_mode="";trailing_comma=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="private";access_mode="";trailing_comma=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="";trailing_comma=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:depth:texture_type="texture_depth_2d_array";view_type="full" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:depth:texture_type="texture_depth_2d_array";view_type="partial" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:depth:texture_type="texture_depth_cube";view_type="full" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:depth:texture_type="texture_depth_cube";view_type="partial" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:sampled:texture_type="texture_2d_array" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:sampled:texture_type="texture_cube" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="read";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="read_write";trailing_comma=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="uniform";access_mode="";trailing_comma=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="workgroup";access_mode="";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,extractBits:count_offset:offsetStage="constant";countStage="constant" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,extractBits:count_offset:offsetStage="constant";countStage="override" [ Failure ]
