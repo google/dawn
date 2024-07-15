@@ -31,10 +31,11 @@ set(headers
 set(sources
     "utils.cpp"
 )
-set(conditional_private_depends)
+set(conditional_public_depends)
 if (DAWN_ENABLE_METAL)
     list(APPEND sources "utils_metal.mm")
-    list(APPEND conditional_private_depends "-framework Metal")
+    list(APPEND conditional_public_depends "-framework Metal")
+    list(APPEND conditional_public_depends "-framework QuartzCore")
 endif ()
 
 dawn_add_library(
@@ -47,9 +48,9 @@ dawn_add_library(
   DEPENDS
     dawn::dawn_common
     dawn::dawncpp_headers
+    ${conditional_public_depends}
   PRIVATE_DEPENDS
     glfw
-    ${conditional_private_depends}
 )
 target_compile_definitions(dawn_glfw PRIVATE "WGPU_GLFW_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
