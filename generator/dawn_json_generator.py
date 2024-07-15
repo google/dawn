@@ -1348,8 +1348,8 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_emscripten = parse_json(
                 loaded_json, enabled_tags=['compat', 'emscripten'])
             renders.append(
-                FileRender('emdawnwebgpu/webgpu_struct_info.json',
-                           'src/emdawnwebgpu/webgpu_struct_info.json',
+                FileRender('emdawnwebgpu/struct_info_webgpu.json',
+                           'src/emdawnwebgpu/struct_info_webgpu.json',
                            [RENDER_PARAMS_BASE, params_emscripten]))
             renders.append(
                 FileRender('emdawnwebgpu/library_webgpu_enum_tables.js',

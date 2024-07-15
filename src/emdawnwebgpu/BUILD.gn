@@ -41,7 +41,7 @@ dawn_json_generator("emdawnwebgpu_headers_gen") {
 dawn_json_generator("emdawnwebgpu_js_gen") {
   target = "emdawnwebgpu_js"
   outputs = [
-    "src/emdawnwebgpu/webgpu_struct_info.json",
+    "src/emdawnwebgpu/struct_info_webgpu.json",
     "src/emdawnwebgpu/library_webgpu_enum_tables.js",
     "src/emdawnwebgpu/library_webgpu_generated_sig_info.js",
   ]
@@ -57,7 +57,7 @@ dawn_json_generator("emdawnwebgpu_js_gen") {
 #     - webgpu_generated_struct_info{32,64}.json
 #       which are generated using an Emscripten tool "gen_struct_info.py", from:
 #         - webgpu.h (generated from dawn.json)
-#         - webgpu_struct_info.json (generated from dawn.json)
+#         - struct_info_webgpu.json (generated from dawn.json)
 #
 # The bindings also require the following helpers (generated above):
 #
@@ -72,7 +72,7 @@ if (dawn_emscripten_dir != "") {
 
       deps = [
         ":emdawnwebgpu_headers_gen",  # for webgpu.h
-        ":emdawnwebgpu_js_gen",  # for webgpu_struct_info.json
+        ":emdawnwebgpu_js_gen",  # for struct_info_webgpu.json
       ]
 
       script = rebase_path(dawn_emscripten_dir, root_build_dir) +
@@ -92,13 +92,13 @@ if (dawn_emscripten_dir != "") {
   }
 
   webgpu_gen_struct_info("webgpu_generated_struct_info32") {
-    sources = [ "${target_gen_dir}/webgpu_struct_info.json" ]
+    sources = [ "${target_gen_dir}/struct_info_webgpu.json" ]
     outputs = [ "${target_gen_dir}/webgpu_generated_struct_info32.json" ]
     wasm64 = false
   }
 
   webgpu_gen_struct_info("webgpu_generated_struct_info64") {
-    sources = [ "${target_gen_dir}/webgpu_struct_info.json" ]
+    sources = [ "${target_gen_dir}/struct_info_webgpu.json" ]
     outputs = [ "${target_gen_dir}/webgpu_generated_struct_info64.json" ]
     wasm64 = true
   }
