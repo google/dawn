@@ -70,9 +70,10 @@ Client::~Client() {
 
 void Client::UnregisterAllObjects() {
     for (auto& objectList : mObjects) {
-        while (!objectList.empty()) {
-            ObjectBase* object = objectList.head()->value();
-            object->Unregister();
+        for (auto object : objectList.GetAllObjects()) {
+            if (object != nullptr) {
+                object->Unregister();
+            }
         }
     }
 }
@@ -160,18 +161,20 @@ void Client::Disconnect() {
         eventManager->TransitionTo(EventManager::State::ClientDropped);
     }
 
-    auto& deviceList = mObjects[ObjectType::Device];
     {
-        for (LinkNode<ObjectBase>* device = deviceList.head(); device != deviceList.end();
-             device = device->next()) {
-            static_cast<Device*>(device->value())
-                ->HandleDeviceLost(WGPUDeviceLostReason_Unknown, "GPU connection lost");
+        auto& deviceList = mObjects[ObjectType::Device];
+        for (auto object : deviceList.GetAllObjects()) {
+            if (object != nullptr) {
+                static_cast<Device*>(object)->HandleDeviceLost(WGPUDeviceLostReason_Unknown,
+                                                               "GPU connection lost");
+            }
         }
     }
     for (auto& objectList : mObjects) {
-        for (LinkNode<ObjectBase>* object = objectList.head(); object != objectList.end();
-             object = object->next()) {
-            object->value()->CancelCallbacksForDisconnect();
+        for (auto object : objectList.GetAllObjects()) {
+            if (object != nullptr) {
+                object->CancelCallbacksForDisconnect();
+            }
         }
     }
 }
@@ -190,8 +193,7 @@ void Client::Unregister(ObjectBase* obj, ObjectType type) {
 }
 
 void Client::ReclaimReservation(ObjectBase* obj, ObjectType type) {
-    mObjectStores[type].Remove(obj);
-    obj->RemoveFromList();
+    mObjects[type].Remove(obj);
 }
 
 }  // namespace dawn::wire::client

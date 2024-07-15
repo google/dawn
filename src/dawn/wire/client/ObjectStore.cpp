@@ -63,7 +63,6 @@ void ObjectStore::Insert(ObjectBase* obj) {
 }
 
 void ObjectStore::Remove(ObjectBase* obj) {
-    DAWN_ASSERT(obj->IsInList());
     // The wire reuses ID for objects to keep them in a packed array starting from 0.
     // To avoid issues with asynchronous server->client communication referring to an ID that's
     // already reused, each handle also has a generation that's increment by one on each reuse.
@@ -73,6 +72,10 @@ void ObjectStore::Remove(ObjectBase* obj) {
         mFreeHandles.push_back({currentHandle.id, currentHandle.generation + 1});
     }
     mObjects[currentHandle.id] = nullptr;
+}
+
+const std::vector<raw_ptr<ObjectBase>>& ObjectStore::GetAllObjects() const {
+    return mObjects;
 }
 
 ObjectBase* ObjectStore::Get(ObjectId id) const {
