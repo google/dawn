@@ -252,8 +252,10 @@ class Device::DeviceLostEvent : public TrackedEvent {
 
 Device::Device(const ObjectBaseParams& params,
                const ObjectHandle& eventManagerHandle,
+               Adapter* adapter,
                const WGPUDeviceDescriptor* descriptor)
-    : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle) {
+    : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle),
+      mAdapter(adapter) {
 #if defined(DAWN_ENABLE_ASSERTS)
     static constexpr WGPUDeviceLostCallbackInfo2 kDefaultDeviceLostCallbackInfo = {
         nullptr, WGPUCallbackMode_AllowSpontaneous,
@@ -476,6 +478,11 @@ WGPUBuffer Device::CreateBuffer(const WGPUBufferDescriptor* descriptor) {
 
 WGPUBuffer Device::CreateErrorBuffer(const WGPUBufferDescriptor* descriptor) {
     return Buffer::CreateError(this, descriptor);
+}
+
+WGPUAdapter Device::GetAdapter() const {
+    Ref<Adapter> adapter = mAdapter;
+    return ReturnToAPI(std::move(adapter));
 }
 
 WGPUQueue Device::GetQueue() {

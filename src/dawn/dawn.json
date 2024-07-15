@@ -1576,7 +1576,7 @@
             {
                 "name": "get adapter",
                 "returns": "adapter",
-                "tags": ["dawn", "native"]
+                "tags": ["dawn"]
             },
             {
                 "name": "get queue",

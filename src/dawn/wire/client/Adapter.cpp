@@ -348,7 +348,7 @@ void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
 WGPUFuture Adapter::RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
                                    const WGPURequestDeviceCallbackInfo& callbackInfo) {
     Client* client = GetClient();
-    Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), descriptor);
+    Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), this, descriptor);
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(callbackInfo, device));
     if (!tracked) {
@@ -384,7 +384,7 @@ WGPUFuture Adapter::RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
 WGPUFuture Adapter::RequestDevice2(const WGPUDeviceDescriptor* descriptor,
                                    const WGPURequestDeviceCallbackInfo2& callbackInfo) {
     Client* client = GetClient();
-    Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), descriptor);
+    Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), this, descriptor);
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(callbackInfo, device));
     if (!tracked) {

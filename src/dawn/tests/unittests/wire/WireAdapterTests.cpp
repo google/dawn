@@ -230,6 +230,8 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
         FlushCallbacks();
     });
 
+    EXPECT_EQ(device.GetAdapter().Get(), adapter.Get());
+
     device = nullptr;
     // Cleared when the device is destroyed.
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
@@ -356,7 +358,6 @@ TEST_P(WireAdapterTests, RequestDeviceAdapterDestroyedBeforeCallback) {
             api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Success,
                                                  apiDevice, nullptr);
         }));
-    EXPECT_CALL(api, AdapterRelease(apiAdapter));
     FlushClient();
     FlushFutures();
 
