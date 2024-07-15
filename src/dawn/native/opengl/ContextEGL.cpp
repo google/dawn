@@ -86,44 +86,47 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
 
     DAWN_TRY(CheckEGL(egl, egl.BindAPI(mDisplay->GetAPIEnum()), "eglBindAPI"));
 
-    int major, minor;
-    switch (backend) {
-        case wgpu::BackendType::OpenGLES:
-            major = 3;
-            minor = 1;
-            break;
-        case wgpu::BackendType::OpenGL:
-            major = 4;
-            minor = 4;
-            break;
-        default:
-            DAWN_UNREACHABLE();
-    }
-
-    std::vector<EGLint> attribs{
-        EGL_CONTEXT_MAJOR_VERSION,
-        major,
-        EGL_CONTEXT_MINOR_VERSION,
-        minor,
+    absl::InlinedVector<EGLint, 10> attribs;
+    auto AddAttrib = [&](EGLint attrib, EGLint value) {
+        attribs.push_back(attrib);
+        attribs.push_back(value);
     };
+
+    if (egl.HasExt(EGLExt::CreateContext)) {
+        switch (backend) {
+            case wgpu::BackendType::OpenGLES:
+                AddAttrib(EGL_CONTEXT_MAJOR_VERSION, 3);
+                AddAttrib(EGL_CONTEXT_MINOR_VERSION, 1);
+                break;
+            case wgpu::BackendType::OpenGL:
+                AddAttrib(EGL_CONTEXT_MAJOR_VERSION, 4);
+                AddAttrib(EGL_CONTEXT_MINOR_VERSION, 4);
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    } else {
+        // Without EGL 1.5 or EGL_KHR_create_context we have to request ES 2.0 or above and see what
+        // context version we end up getting.
+        AddAttrib(EGL_CONTEXT_CLIENT_VERSION, 2);
+    }
 
     if (useRobustness) {
         DAWN_ASSERT(egl.HasExt(EGLExt::CreateContextRobustness));
         // EGL_EXT_create_context_robustness is promoted to 1.5 but with a different enum value.
         if (egl.GetMinorVersion() >= 5) {
-            attribs.push_back(EGL_CONTEXT_OPENGL_ROBUST_ACCESS);
+            AddAttrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS, EGL_TRUE);
         } else {
-            attribs.push_back(EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT);
+            AddAttrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT, EGL_TRUE);
         }
-        attribs.push_back(EGL_TRUE);
     }
 
     if (useANGLETextureSharing) {
         DAWN_ASSERT(egl.HasExt(EGLExt::DisplayTextureShareGroup));
-        attribs.push_back(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE);
-        attribs.push_back(EGL_TRUE);
+        AddAttrib(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE, EGL_TRUE);
     }
 
+    // The attrib list is finished with an EGL_NONE tag.
     attribs.push_back(EGL_NONE);
 
     mContext =

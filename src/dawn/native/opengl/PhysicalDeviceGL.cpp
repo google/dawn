@@ -114,6 +114,7 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
         AcquireRef(new PhysicalDevice(backendType, std::move(display)));
     DAWN_TRY_WITH_CLEANUP(physicalDevice->Initialize(), {
         egl.MakeCurrent(eglDisplay, prevDrawSurface, prevReadSurface, prevContext);
+        context = nullptr;
     });
 
     egl.MakeCurrent(eglDisplay, prevDrawSurface, prevReadSurface, prevContext);
@@ -135,6 +136,19 @@ bool PhysicalDevice::SupportsExternalImages() const {
 
 MaybeError PhysicalDevice::InitializeImpl() {
     DAWN_TRY(mFunctions.Initialize(mDisplay->egl.GetProcAddress));
+
+    // In some cases (like like of EGL_KHR_create_context) we don't know before this point that we
+    // got a GL context that supports the required version. Check it now.
+    switch (GetBackendType()) {
+        case wgpu::BackendType::OpenGLES:
+            DAWN_INVALID_IF(!mFunctions.IsAtLeastGLES(3, 1), "OpenGL ES 3.1 is required.");
+            break;
+        case wgpu::BackendType::OpenGL:
+            DAWN_INVALID_IF(!mFunctions.IsAtLeastGL(4, 4), "Desktop OpenGL 4.4 is required.");
+            break;
+        default:
+            DAWN_UNREACHABLE();
+    }
 
     if (mFunctions.GetVersion().IsES()) {
         DAWN_ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);
