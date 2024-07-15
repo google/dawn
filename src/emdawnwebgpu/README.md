@@ -34,7 +34,7 @@ can use Dawn's fork of the bindings:
 - Set up a Dawn GN build, with `dawn_emscripten_dir` in the GN args set to point to
   your Emscripten source checkout.
 
-- Build the `emscripten_webgpu` GN build target.
+- Build the `emdawnwebgpu` GN build target.
 
-- Configure the Emscripten build with all of the linker flags listed in `emscripten_webgpu_config`
+- Configure the Emscripten build with all of the linker flags listed in `emdawnwebgpu_config`
   (and without `-sUSE_WEBGPU`, because we don't want the built-in bindings).
