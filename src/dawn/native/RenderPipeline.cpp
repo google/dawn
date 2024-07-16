@@ -297,7 +297,8 @@ MaybeError ValidateStencilFaceUnused(StencilFaceState face) {
 }
 
 MaybeError ValidateDepthStencilState(const DeviceBase* device,
-                                     const DepthStencilState* descriptor) {
+                                     const DepthStencilState* descriptor,
+                                     const wgpu::PrimitiveTopology topology) {
     DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->depthCompare),
                      "validating depth compare function");
     DAWN_TRY_CONTEXT(ValidateCompareFunction(descriptor->stencilFront.compare),
@@ -374,6 +375,24 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
                          "validating that stencilBack doesn't use stencil when the depth-stencil "
                          "format (%s) doesn't have a stencil aspect.",
                          descriptor->format);
+    }
+
+    switch (topology) {
+        case wgpu::PrimitiveTopology::PointList:
+        case wgpu::PrimitiveTopology::LineList:
+        case wgpu::PrimitiveTopology::LineStrip:
+            DAWN_INVALID_IF(descriptor->depthBias != 0, "depthBias must be 0 when using %s.",
+                            topology);
+            DAWN_INVALID_IF(descriptor->depthBiasSlopeScale != 0,
+                            "depthBiasSlopeScale must be 0 when using %s.", topology);
+            DAWN_INVALID_IF(descriptor->depthBiasClamp != 0,
+                            "depthBiasClamp must be 0 when using using %s.", topology);
+            break;
+        case wgpu::PrimitiveTopology::TriangleList:
+        case wgpu::PrimitiveTopology::TriangleStrip:
+            break;
+        case wgpu::PrimitiveTopology::Undefined:
+            DAWN_UNREACHABLE();
     }
 
     return {};
@@ -840,7 +859,8 @@ MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                      "validating primitive state.");
 
     if (descriptor->depthStencil) {
-        DAWN_TRY_CONTEXT(ValidateDepthStencilState(device, descriptor->depthStencil),
+        DAWN_TRY_CONTEXT(ValidateDepthStencilState(device, descriptor->depthStencil,
+                                                   descriptor->primitive.topology),
                          "validating depthStencil state.");
     }
 

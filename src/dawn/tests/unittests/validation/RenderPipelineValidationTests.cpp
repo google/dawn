@@ -136,6 +136,80 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
     }
 }
 
+/// Tests that depthBias can't be used with point or line topologies.
+TEST_F(RenderPipelineValidationTest, DepthBiasNotWithPointLine) {
+    constexpr std::array<wgpu::PrimitiveTopology, 2> kValidTopologyTypes = {
+        {wgpu::PrimitiveTopology::TriangleList, wgpu::PrimitiveTopology::TriangleStrip}};
+
+    constexpr std::array<wgpu::PrimitiveTopology, 3> kInvalidTopologyTypes = {
+        {wgpu::PrimitiveTopology::PointList, wgpu::PrimitiveTopology::LineList,
+         wgpu::PrimitiveTopology::LineStrip}};
+
+    // Depth bias parameters can be used with triangle topologies
+    for (wgpu::PrimitiveTopology primitiveTopology : kValidTopologyTypes) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+
+        descriptor.primitive.topology = primitiveTopology;
+        if (primitiveTopology == wgpu::PrimitiveTopology::TriangleStrip) {
+            descriptor.primitive.stripIndexFormat = wgpu::IndexFormat::Uint32;
+        }
+
+        wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
+        depthStencil->depthBias = 1;
+        depthStencil->depthBiasSlopeScale = 1;
+        depthStencil->depthBiasClamp = 1;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    for (wgpu::PrimitiveTopology primitiveTopology : kInvalidTopologyTypes) {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+
+        descriptor.primitive.topology = primitiveTopology;
+        if (primitiveTopology == wgpu::PrimitiveTopology::LineStrip) {
+            descriptor.primitive.stripIndexFormat = wgpu::IndexFormat::Uint32;
+        }
+
+        wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
+
+        // Depth bias parameters of zero are valid with point or line topologies
+        {
+            depthStencil->depthBias = 0;
+            depthStencil->depthBiasSlopeScale = 0;
+            depthStencil->depthBiasClamp = 0;
+            device.CreateRenderPipeline(&descriptor);
+        }
+
+        // Non-zero depthBias cannot be used with point or line topologies
+        {
+            depthStencil->depthBias = 1;
+            depthStencil->depthBiasSlopeScale = 0;
+            depthStencil->depthBiasClamp = 0;
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+        }
+
+        // Non-zero depthBiasSlopeScale cannot be used with point or line topologies
+        {
+            depthStencil->depthBias = 0;
+            depthStencil->depthBiasSlopeScale = 1;
+            depthStencil->depthBiasClamp = 0;
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+        }
+
+        // Non-zero depthBiasClamp cannot be used with point or line topologies
+        {
+            depthStencil->depthBias = 0;
+            depthStencil->depthBiasSlopeScale = 0;
+            depthStencil->depthBiasClamp = 1;
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+        }
+    }
+}
+
 // Tests that depth or stencil aspect is required if we enable depth or stencil test.
 TEST_F(RenderPipelineValidationTest, DepthStencilAspectRequirement) {
     // Control case, stencil aspect is required if stencil test or stencil write is enabled
@@ -1911,6 +1985,26 @@ TEST_F(RenderPipelineValidationTest, LoadResolveTextureOnUnsupportedDevice) {
 
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pipelineDescriptor),
                         testing::HasSubstr("feature is not enabled"));
+}
+
+/// Tests that depthBias can't be used with point or line topologies.
+TEST_F(RenderPipelineValidationTest, PointLineDepthBias) {
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.multisample.count = 3;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
 }
 
 class DepthClipControlValidationTest : public RenderPipelineValidationTest {
