@@ -168,22 +168,14 @@ TEST_P(SubresourceRenderAttachmentTest, ColorTexture) {
 
 // Test rendering into a subresource of a depth texture
 TEST_P(SubresourceRenderAttachmentTest, DepthTexture) {
-    // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
-    // depth.
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_read"));
-
     DoTest(Type::Depth);
 }
 
 // Test rendering into a subresource of a stencil texture
 TEST_P(SubresourceRenderAttachmentTest, StencilTexture) {
-    // TODO(crbug.com/dawn/667): Work around the fact that some platforms are unable to read
-    // stencil.
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
-
-    // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
-    DAWN_SUPPRESS_TEST_IF(IsANGLE());
-
+    // TODO(crbug.com/352360580): Investigate failures.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
     DoTest(Type::Stencil);
 }
 

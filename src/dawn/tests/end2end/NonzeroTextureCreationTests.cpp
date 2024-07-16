@@ -102,21 +102,6 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::RGBA8Snorm &&
                                  IsANGLESwiftShader());
 
-        // TODO(crbug.com/dawn/667): ANGLE claims to support NV_read_stencil, but won't read
-        // correctly from a DEPTH32F_STENCIL8 texture.
-        DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
-                              GetParam().mAspect == wgpu::TextureAspect::StencilOnly && IsANGLE());
-
-        // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
-        // reading depth.
-        DAWN_TEST_UNSUPPORTED_IF(GetParam().mAspect == wgpu::TextureAspect::DepthOnly &&
-                                 HasToggleEnabled("disable_depth_read"));
-
-        // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
-        // reading stencil.
-        DAWN_TEST_UNSUPPORTED_IF(GetParam().mAspect == wgpu::TextureAspect::StencilOnly &&
-                                 HasToggleEnabled("disable_stencil_read"));
-
         // You can't read compressed textures in compat mode.
         DAWN_TEST_UNSUPPORTED_IF(utils::IsCompressedTextureFormat(GetParam().mFormat) &&
                                  IsCompatibilityMode());
@@ -299,9 +284,6 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
 
 // Test that texture clears to a non-zero value because toggle is enabled.
 TEST_P(NonzeroNonrenderableTextureCreationTests, TextureCreationClears) {
-    // TODO(dawn:667): suppress
-    DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::RGBA8Snorm &&
-                          (IsOpenGL() || IsOpenGLES()));
     Run();
 }
 

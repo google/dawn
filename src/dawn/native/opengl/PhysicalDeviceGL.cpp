@@ -353,14 +353,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     bool supportsSnormRead =
         gl.IsAtLeastGL(4, 4) || gl.IsGLExtensionSupported("GL_EXT_render_snorm");
 
-    bool supportsDepthRead = gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_depth");
-
-    bool supportsStencilRead =
-        gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_stencil");
-
-    bool supportsDepthStencilRead =
-        gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_depth_stencil");
-
     // Desktop GL supports BGRA textures via swizzling in the driver; ES requires an extension.
     bool supportsBGRARead =
         gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_EXT_read_format_bgra");
@@ -374,9 +366,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     // TODO(crbug.com/dawn/343): Investigate emulation.
     deviceToggles->Default(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
-    deviceToggles->Default(Toggle::DisableDepthRead, !supportsDepthRead);
-    deviceToggles->Default(Toggle::DisableStencilRead, !supportsStencilRead);
-    deviceToggles->Default(Toggle::DisableDepthStencilRead, !supportsDepthStencilRead);
     deviceToggles->Default(Toggle::DisableSampleVariables, !supportsSampleVariables);
     deviceToggles->Default(Toggle::FlushBeforeClientWaitSync, gl.GetVersion().IsES());
     // For OpenGL ES, we must use a placeholder fragment shader for vertex-only render pipeline.

@@ -1055,10 +1055,6 @@ TEST_P(MultithreadTextureCopyTests, CopyStencilToStencilNoRace) {
     // combination.
     DAWN_SUPPRESS_TEST_IF(IsANGLE());
 
-    // TODO(crbug.com/dawn/667): Work around the fact that some platforms are unable to read
-    // stencil.
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
-
     // TODO(dawn:1924): Intel Gen9 specific.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen9());
 
