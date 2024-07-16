@@ -65,6 +65,7 @@ func main() {
 	flag.StringVar(&opts.Adapter, "adapter", "", "name (or substring) of the GPU adapter to use")
 	flag.BoolVar(&opts.Validate, "validate", false, "enable backend validation")
 	flag.BoolVar(&opts.DumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
+	flag.BoolVar(&opts.DumpShadersPretty, "dump-shaders-pretty", false, "dump WGSL shaders, but don't run symbol renaming. May fail tests that shadow predeclared builtins. Enables --verbose")
 	flag.BoolVar(&opts.UseFXC, "fxc", false, "Use FXC instead of DXC. Disables 'use_dxc' Dawn flag")
 	flag.BoolVar(&lldb, "lldb", false, "launch node via lldb")
 	flag.Parse()

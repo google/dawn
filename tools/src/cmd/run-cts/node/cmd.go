@@ -53,6 +53,7 @@ type flags struct {
 	build                bool
 	validate             bool
 	dumpShaders          bool
+	dumpShadersPretty    bool
 	fxc                  bool
 	useIR                bool
 	unrollConstEvalLoops bool
@@ -101,6 +102,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 		" set to 'vulkan' if VK_ICD_FILENAMES environment variable is set, 'default' otherwise")
 	flag.StringVar(&c.flags.adapterName, "adapter", "", "name (or substring) of the GPU adapter to use")
 	flag.BoolVar(&c.flags.dumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
+	flag.BoolVar(&c.flags.dumpShadersPretty, "dump-shaders-pretty", false, "dump WGSL shaders, but don't run symbol renaming. May fail tests that shadow predeclared builtins. Enables --verbose")
 	flag.BoolVar(&c.flags.fxc, "fxc", false, "Use FXC instead of DXC. Disables 'use_dxc' Dawn flag")
 	flag.BoolVar(&c.flags.useIR, "use-ir", false, "Use Tint's IR generator code path")
 	flag.BoolVar(&c.flags.unrollConstEvalLoops, "unroll-const-eval-loops", unrollConstEvalLoopsDefault, "unroll loops in const-eval tests")
@@ -198,17 +200,21 @@ func (c *cmd) processFlags() error {
 	}
 
 	c.flags.dawn.SetOptions(node.Options{
-		BinDir:          c.flags.bin,
-		Backend:         c.flags.backend,
-		Adapter:         c.flags.adapterName,
-		Validate:        c.flags.validate,
-		AllowUnsafeAPIs: true,
-		DumpShaders:     c.flags.dumpShaders,
-		UseFXC:          c.flags.fxc,
-		UseIR:           c.flags.useIR,
+		BinDir:            c.flags.bin,
+		Backend:           c.flags.backend,
+		Adapter:           c.flags.adapterName,
+		Validate:          c.flags.validate,
+		AllowUnsafeAPIs:   true,
+		DumpShaders:       c.flags.dumpShaders,
+		DumpShadersPretty: c.flags.dumpShadersPretty,
+		UseFXC:            c.flags.fxc,
+		UseIR:             c.flags.useIR,
 	})
 
 	if c.flags.dumpShaders {
+		c.flags.Verbose = true
+	}
+	if c.flags.dumpShadersPretty {
 		c.flags.Verbose = true
 	}
 
