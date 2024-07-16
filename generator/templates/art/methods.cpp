@@ -27,7 +27,9 @@
 {% from 'art/api_jni_types.kt' import arg_to_jni_type, jni_signature, to_jni_type with context %}
 #include <jni.h>
 #include <stdlib.h>
+
 #include "dawn/webgpu.h"
+#include "JNIContext.h"
 #include "structures.h"
 
 // Converts every method call from the Kotlin-hosted version to the native version, performing
@@ -77,6 +79,9 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         {{ arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
     {% endfor %}) {
 
+    // * Helper context for the duration of this method call.
+    JNIContext c(env);
+
     //*  A variable is declared for each parameter of the native method.
     {% for arg in method.arguments %}
         {{ as_annotated_cType(arg) }};
@@ -87,7 +92,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% for arg in filter_arguments(method.arguments) %}
         {% if arg.length == 'strlen' %}
             if (_{{ as_varName(arg.name) }}) {  //* Don't convert null strings.
-                {{ as_varName(arg.name) }} = env->GetStringUTFChars(_{{ as_varName(arg.name) }}, 0);
+                {{ as_varName(arg.name) }} = c.GetStringUTFChars(_{{ as_varName(arg.name) }});
             } else {
                 {{ as_varName(arg.name) }} = nullptr;
             }
@@ -97,7 +102,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                 if (_{{ as_varName(arg.name) }}) {
                     //* TODO(b/330293719): free associated resources.
                     auto convertedMember = new {{ as_cType(arg.type.name) }}();
-                    Convert(env, _{{ as_varName(arg.name) }}, convertedMember);
+                    Convert(&c, env, _{{ as_varName(arg.name) }}, convertedMember);
                     {{ as_varName(arg.name) }} = convertedMember;
                 } else {
                     {{ as_varName(arg.name) }} = nullptr;
@@ -108,10 +113,9 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         {% elif arg.length %}
             //*  Container types.
             {% if arg.type.name.get() == 'uint32_t' %}
-                //* TODO(b/330293719): free associated resources.
                 {{ as_varName(arg.name) }} =
-                        reinterpret_cast<{{ as_cType(arg.type.name) }}*>(
-                               env->GetIntArrayElements(_{{ as_varName(arg.name) }}, 0));
+                        reinterpret_cast<const {{ as_cType(arg.type.name) }}*>(
+                               c.GetIntArrayElements(_{{ as_varName(arg.name) }}));
                 {{ arg.length.name.camelCase() }} =
                        env->GetArrayLength(_{{ as_varName(arg.name) }});
             {% elif arg.type.name.get() == 'void' %}

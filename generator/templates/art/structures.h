@@ -24,15 +24,18 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#include <jni.h>
+
 #include "dawn/webgpu.h"
 
 namespace dawn::kotlin_api {
 
+class JNIContext;
+
 // Converts Kotlin objects representing Dawn structures into native structures that can be passed
 // into the native Dawn API.
-
 {% for structure in by_category['structure'] %}
-    void Convert(JNIEnv *env, jobject obj, {{ as_cType(structure.name) }}* converted);
+    void Convert(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted);
 {% endfor %}
 
 }  // namespace dawn::kotlin_api

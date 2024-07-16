@@ -59,10 +59,13 @@ add_library(webgpu_c_bundled SHARED)
 target_sources(webgpu_c_bundled PRIVATE
     ${WEBGPU_JNI_SOURCES}
     ${WEBGPU_JNI_HEADERS}
+    JNIContext.cpp
+    JNIContext.h
     Util.cpp
 )
 
-target_link_libraries(webgpu_c_bundled android webgpu_dawn)
+target_include_directories(webgpu_c_bundled PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(webgpu_c_bundled PRIVATE android webgpu_dawn dawn_common dawn_internal_config)
 
 # Copy headers for webgpu_c_bundled over.
 add_custom_command(DEPENDS dawncpp_headers POST_BUILD
