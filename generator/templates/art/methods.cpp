@@ -235,22 +235,18 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             {% endfor %}
         );
         //* Allocate the native container
-        {{ _kotlin_return.name.get() }} = static_cast<{{ as_cType(_kotlin_return.type.name) }} *>(
-                calloc(sizeof({{ as_cType(_kotlin_return.type.name) }}), size));
+        auto returnAllocation = std::make_unique<{{ as_cType(_kotlin_return.type.name) }}[]>(size);
         if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
-            //* TODO(b/330293719): use type that automatically releases resources.
-            free({{ _kotlin_return.name.get() }});
             return nullptr;
         }
         //* Second call completes the native container
         wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
             {% for arg in method.arguments -%}
-                {{- ',' if object or not loop.first }}{{ as_varName(arg.name) -}}
+                {{- ', ' if object or not loop.first -}}
+                {{- 'returnAllocation.get()' if arg == _kotlin_return else as_varName(arg.name) -}}
             {% endfor %}
         );
         if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
-            //* TODO(b/330293719): use type that automatically releases resources.
-            free({{ _kotlin_return.name.get() }});
             return nullptr;
         }
         //* Native container converted to a Kotlin container.
@@ -259,10 +255,9 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         auto constructor = env->GetMethodID(returnClass, "<init>", "(I)V");
         for (int idx = 0; idx != size; idx++) {
             jobject element = env->NewObject(returnClass, constructor,
-                    static_cast<jint>({{ _kotlin_return.name.get() }}[idx]));
+                    static_cast<jint>(returnAllocation[idx]));
             env->SetObjectArrayElement(result, idx, element);
         }
-        free({{ _kotlin_return.name.get() }});
     {% else %}
         {{ 'auto result =' if method.return_type.name.get() != 'void' }}
         {% if object %}
