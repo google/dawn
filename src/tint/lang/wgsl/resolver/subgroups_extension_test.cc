@@ -30,6 +30,7 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::resolver {
@@ -165,6 +166,47 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeFragmentShader) {
               "error: '@builtin(subgroup_size)' is only valid as a compute shader input");
 }
 
+TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeComputeShaderOutput) {
+    Enable(wgsl::Extension::kSubgroups);
+
+    Func("main", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call<u32>()),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         },
+         Vector{Builtin(Source{{1, 2}}, core::BuiltinValue::kSubgroupSize)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "1:2 error: '@builtin(subgroup_size)' is only valid as a compute shader input");
+}
+
+TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeComputeShaderStructOutput) {
+    Enable(wgsl::Extension::kSubgroups);
+
+    auto* s = Structure(
+        "Output", Vector{
+                      Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupSize)}),
+                  });
+
+    Func("main", tint::Empty, ty.Of(s),
+         Vector{
+             Return(Call(ty.Of(s), Call<u32>())),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: '@builtin(subgroup_size)' is only valid as a compute shader input
+note: while analyzing entry point 'main')");
+}
+
 // Using builtin(subgroup_invocation_id) for anything other than a compute shader input should fail.
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdFragmentShader) {
     Enable(wgsl::Extension::kSubgroups);
@@ -175,6 +217,25 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdFragmentShader) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: '@builtin(subgroup_invocation_id)' is only valid as a compute shader input");
+}
+
+TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdComputeShaderOutput) {
+    Enable(wgsl::Extension::kSubgroups);
+
+    Func("main", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call<u32>()),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         },
+         Vector{Builtin(Source{{1, 2}}, core::BuiltinValue::kSubgroupInvocationId)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        "1:2 error: '@builtin(subgroup_invocation_id)' is only valid as a compute shader input");
 }
 
 }  // namespace
