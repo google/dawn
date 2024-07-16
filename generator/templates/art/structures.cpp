@@ -58,8 +58,7 @@ namespace dawn::kotlin_api {
                     //* Convert optional structure if present.
                     jobject mObj = env->CallObjectMethod(obj, method);
                     if (mObj) {
-                        //* TODO(b/330293719): free associated resources.
-                        auto convertedMember = new {{ as_cType(member.type.name) }}();
+                        auto convertedMember = c->Alloc<{{ as_cType(member.type.name) }}>();
                         Convert(c, env, mObj, convertedMember);
                         converted->{{ member.name.camelCase() }} = convertedMember;
                     }
@@ -87,8 +86,7 @@ namespace dawn::kotlin_api {
                     //* These container types are represented in Kotlin as arrays of objects.
                     auto in = static_cast<jobjectArray>(env->CallObjectMethod(obj, method));
                     size_t length = env->GetArrayLength(in);
-                    //* TODO(b/330293719): free associated resources.
-                    auto out = new {{ as_cType(member.type.name) }}[length]();
+                    auto out = c->AllocArray<{{ as_cType(member.type.name) }}>(length);
                     {% if member.type.category in ['bitmask', 'enum'] %} {
                         jclass memberClass = env->FindClass("{{ jni_name(member.type) }}");
                         jmethodID getValue = env->GetMethodID(memberClass, "getValue", "()I");
@@ -167,8 +165,7 @@ namespace dawn::kotlin_api {
                     env->GetMethodID(clz, "get{{ child.name.CamelCase() }}",
                             "()L{{ jni_name(child) }};"));
             if (child) {
-                //* TODO(b/330293719): free associated resources.
-                auto out = new {{ as_cType(child.name) }}();
+                auto out = c->Alloc<{{ as_cType(child.name) }}>();
                 Convert(c, env, child, out);
                 out->chain.next = converted->nextInChain;
                 converted->nextInChain = &out->chain;

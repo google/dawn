@@ -100,8 +100,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             //*  Optional structure.
             {% if arg.type.category == 'structure' %}
                 if (_{{ as_varName(arg.name) }}) {
-                    //* TODO(b/330293719): free associated resources.
-                    auto convertedMember = new {{ as_cType(arg.type.name) }}();
+                    auto convertedMember = c.Alloc<{{ as_cType(arg.type.name) }}>();
                     Convert(&c, env, _{{ as_varName(arg.name) }}, convertedMember);
                     {{ as_varName(arg.name) }} = convertedMember;
                 } else {
@@ -125,8 +124,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
                         env->GetDirectBufferCapacity(_{{ as_varName(arg.name) }});
             {% else %} {
                 size_t length = env->GetArrayLength(_{{ as_varName(arg.name) }});
-                //* TODO(b/330293719): free associated resources.
-                auto out = new {{ as_cType(arg.type.name) }}[length]();
+                auto out = c.AllocArray<{{ as_cType(arg.type.name) }}>(length);
                 {% if arg.type.category in ['bitmask', 'enum'] %} {
                     jclass memberClass = env->FindClass("{{ jni_name(arg.type) }}");
                     jmethodID getValue = env->GetMethodID(memberClass, "getValue", "()I");

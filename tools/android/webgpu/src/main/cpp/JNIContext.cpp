@@ -41,6 +41,13 @@ JNIContext::~JNIContext() {
     for (auto [array, ints] : mIntArraysToRelease) {
         env->ReleaseIntArrayElements(array, ints, JNI_ABORT);
     }
+
+    for (auto allocation : mAllocationsToFree) {
+        delete allocation;
+    }
+    for (auto allocation : mArrayAllocationsToFree) {
+        delete[] allocation;
+    }
 }
 
 const char* JNIContext::GetStringUTFChars(jstring s) {
