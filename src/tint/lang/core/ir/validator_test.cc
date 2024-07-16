@@ -521,6 +521,154 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, CallToFunctionNullArg) {
+    auto* g = b.Function("g", ty.void_());
+    g->SetParams({b.FunctionParam<i32>()});
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Call(g, nullptr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:24 error: call: operand is undefined
+    %4:void = call %g, undef
+                       ^^^^^
+
+:7:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+%g = func(%2:i32):void {
+  $B1: {
+    ret
+  }
+}
+%f = func():void {
+  $B2: {
+    %4:void = call %g, undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, CallToNullFunction) {
+    auto* g = b.Function("g", ty.void_());
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Call(g);
+        c->SetOperands(Vector{static_cast<ir::Value*>(nullptr)});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:20 error: call: operand is undefined
+    %3:void = call undef
+                   ^^^^^
+
+:7:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+%g = func():void {
+  $B1: {
+    ret
+  }
+}
+%f = func():void {
+  $B2: {
+    %3:void = call undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, CallToFunctionNoResult) {
+    auto* g = b.Function("g", ty.void_());
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Call(g);
+        c->ClearResults();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:13 error: call: expected exactly 1 results, got 0
+    undef = call %g
+            ^^^^
+
+:7:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+%g = func():void {
+  $B1: {
+    ret
+  }
+}
+%f = func():void {
+  $B2: {
+    undef = call %g
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, CallToFunctionNoOperands) {
+    auto* g = b.Function("g", ty.void_());
+    b.Append(g->Block(), [&] { b.Return(g); });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Call(g);
+        c->ClearOperands();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:15 error: call: expected at least 1 operands, got 0
+    %3:void = call undef
+              ^^^^
+
+:7:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+%g = func():void {
+  $B1: {
+    ret
+  }
+}
+%f = func():void {
+  $B2: {
+    %3:void = call undef
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},

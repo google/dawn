@@ -1245,6 +1245,10 @@ void Validator::CheckConstruct(const Construct* construct) {
 }
 
 void Validator::CheckUserCall(const UserCall* call) {
+    if (!CheckResultsAndOperandRange(call, UserCall::kNumResults, UserCall::kMinOperands)) {
+        return;
+    }
+
     if (call->Target()->Stage() != Function::PipelineStage::kUndefined) {
         AddError(call, UserCall::kFunctionOperandOffset)
             << "call target must not have a pipeline stage";

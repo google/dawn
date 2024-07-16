@@ -45,6 +45,12 @@ class UserCall final : public Castable<UserCall, Call> {
     /// The base offset in Operands() for the call arguments
     static constexpr size_t kArgsOperandOffset = 1;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
+    /// The minimum number of operands expected for this instruction
+    static constexpr size_t kMinOperands = 1;
+
     /// Constructor (no results, no operands)
     UserCall();
 
