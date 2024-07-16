@@ -29,7 +29,7 @@
 import json, os, sys
 from collections import namedtuple
 
-from generator_lib import Generator, run_generator, FileRender
+from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
 
 def parse_mask(mask):
@@ -223,18 +223,19 @@ class DawnGpuInfoGenerator(Generator):
     def get_dependencies(self, args):
         return [os.path.abspath(args.gpu_info_json)]
 
-    def get_file_renders(self, args):
+    def get_outputs(self, args):
         with open(args.gpu_info_json) as f:
             loaded_json = json.loads(f.read())
 
         params = parse_json(loaded_json)
 
-        return [
+        renders = [
             FileRender("dawn/common/GPUInfo.h",
                        "src/dawn/common/GPUInfo_autogen.h", [params]),
             FileRender("dawn/common/GPUInfo.cpp",
                        "src/dawn/common/GPUInfo_autogen.cpp", [params]),
         ]
+        return GeneratorOutput(renders=renders, imported_templates=[])
 
 
 if __name__ == "__main__":

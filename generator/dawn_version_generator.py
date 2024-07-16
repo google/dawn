@@ -28,7 +28,7 @@
 
 import os, subprocess, sys, shutil
 
-from generator_lib import Generator, run_generator, FileRender
+from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
 def get_git():
     # Will find git, git.exe, git.bat...
@@ -147,13 +147,14 @@ class DawnVersionGenerator(Generator):
                 return []
         return []
 
-    def get_file_renders(self, args):
+    def get_outputs(self, args):
         params = compute_params(args)
 
-        return [
+        renders = [
             FileRender("dawn/common/Version.h",
                        "src/dawn/common/Version_autogen.h", [params]),
         ]
+        return GeneratorOutput(renders=renders, imported_templates=[])
 
 
 if __name__ == "__main__":

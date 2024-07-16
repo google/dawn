@@ -29,7 +29,7 @@
 import json, os, sys
 from collections import namedtuple, defaultdict
 
-from generator_lib import Generator, run_generator, FileRender
+from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
 ############################################################
 # OBJECT MODEL
@@ -1217,7 +1217,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             'Comma-separated subset of targets to output. Available targets: '
             + ', '.join(allowed_targets))
 
-    def get_file_renders(self, args):
+    def get_outputs(self, args):
         with open(args.dawn_json) as f:
             loaded_json = json.loads(f.read())
 
@@ -1239,6 +1239,7 @@ class MultiGeneratorFromDawnJSON(Generator):
                 lpm_json = json.loads(f.read())
 
         renders = []
+        imported_templates = []
 
         params_dawn = parse_json(
             loaded_json,
@@ -1256,6 +1257,7 @@ class MultiGeneratorFromDawnJSON(Generator):
         api = metadata.api.lower()
         prefix = metadata.proc_table_prefix.lower()
         if 'headers' in targets:
+            imported_templates.append('BSD_LICENSE')
             renders.append(
                 FileRender('api.h', 'include/dawn/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_all]))
@@ -1317,6 +1319,7 @@ class MultiGeneratorFromDawnJSON(Generator):
                 loaded_json,
                 enabled_tags=['compat', 'upstream', 'native'],
                 disabled_tags=['dawn'])
+            imported_templates.append('BSD_LICENSE')
             renders.append(
                 FileRender('api.h', 'webgpu-headers/' + api + '.h',
                            [RENDER_PARAMS_BASE, params_upstream]))
@@ -1326,6 +1329,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_emscripten = parse_json(
                 loaded_json, enabled_tags=['compat', 'emscripten'])
             # system/include/webgpu
+            imported_templates.append('BSD_LICENSE')
             renders.append(
                 FileRender('api.h', 'src/emdawnwebgpu/include/webgpu/webgpu.h',
                            [RENDER_PARAMS_BASE, params_emscripten]))
@@ -1586,6 +1590,11 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json)
             kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
             jni_name = params_kotlin['jni_name']
+
+            imported_templates += [
+                "art/api_kotlin_types.kt",
+            ]
+
             by_category = params_kotlin['by_category']
             for structure in by_category['structure']:
                 renders.append(
@@ -1637,6 +1646,11 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if "jni" in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json)
+
+            imported_templates += [
+                "art/api_jni_types.kt",
+            ]
+
             renders.append(
                 FileRender('art/structures.h', 'cpp/structures.h',
                            [RENDER_PARAMS_BASE, params_kotlin]))
@@ -1647,7 +1661,8 @@ class MultiGeneratorFromDawnJSON(Generator):
                 FileRender('art/methods.cpp', 'cpp/methods.cpp',
                            [RENDER_PARAMS_BASE, params_kotlin]))
 
-        return renders
+        return GeneratorOutput(renders=renders,
+                               imported_templates=imported_templates)
 
     def get_dependencies(self, args):
         deps = [os.path.abspath(args.dawn_json)]

@@ -30,7 +30,7 @@ import os, json, sys
 from collections import namedtuple
 import xml.etree.ElementTree as etree
 
-from generator_lib import Generator, run_generator, FileRender
+from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
 
 class ProcName:
@@ -261,7 +261,7 @@ class OpenGLLoaderGenerator(Generator):
             'The JSON file that defines the OpenGL and GLES extensions to use.'
         )
 
-    def get_file_renders(self, args):
+    def get_outputs(self, args):
         supported_extensions = []
         with open(args.supported_extensions) as f:
             supported_extensions_json = json.loads(f.read())
@@ -271,7 +271,7 @@ class OpenGLLoaderGenerator(Generator):
         params = compute_params(
             etree.parse(args.gl_xml).getroot(), supported_extensions)
 
-        return [
+        renders = [
             FileRender(
                 'opengl/OpenGLFunctionsBase.cpp',
                 'src/dawn/native/opengl/OpenGLFunctionsBase_autogen.cpp',
@@ -283,6 +283,7 @@ class OpenGLLoaderGenerator(Generator):
                        'src/dawn/native/opengl/opengl_platform_autogen.h',
                        [params]),
         ]
+        return GeneratorOutput(renders=renders, imported_templates=[])
 
     def get_dependencies(self, args):
         return [
