@@ -149,11 +149,12 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         // nor used in non-compat.
         wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
         if (IsCompatibilityMode()) {
-            textureBindingViewDimensionDesc.textureBindingViewDimension =
-                descriptor.dimension == wgpu::TextureDimension::e3D
-                    ? wgpu::TextureViewDimension::e3D
-                : descriptor.size.depthOrArrayLayers > 1 ? wgpu::TextureViewDimension::e2DArray
-                                                         : wgpu::TextureViewDimension::e2D;
+            if (descriptor.dimension == wgpu::TextureDimension::e2D &&
+                descriptor.size.depthOrArrayLayers == 6) {
+                // Testing cube texture copy for compat.
+                textureBindingViewDimensionDesc.textureBindingViewDimension =
+                    wgpu::TextureViewDimension::Cube;
+            }
             descriptor.nextInChain = &textureBindingViewDimensionDesc;
         }
 
@@ -354,10 +355,10 @@ DAWN_INSTANTIATE_TEST_P(
     {wgpu::TextureUsage(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc),
      wgpu::TextureUsage::CopySrc},
     {wgpu::TextureDimension::e2D},
-    {1u, 7u},          // depth or array layers
-    {4u},              // mip count
-    {0u, 1u, 2u, 3u},  // mip
-    {1u}               // sample count
+    {1u, 7u, 6u /* test for compat cube */},  // depth or array layers
+    {4u},                                     // mip count
+    {0u, 1u, 2u, 3u},                         // mip
+    {1u}                                      // sample count
 );
 
 DAWN_INSTANTIATE_TEST_P(NonzeroNonrenderableTextureCreationTests,
@@ -377,10 +378,10 @@ DAWN_INSTANTIATE_TEST_P(NonzeroNonrenderableTextureCreationTests,
                         {wgpu::TextureAspect::All},
                         {wgpu::TextureUsage::CopySrc},
                         {wgpu::TextureDimension::e2D, wgpu::TextureDimension::e3D},
-                        {1u, 7u},          // depth or array layers
-                        {4u},              // mip count
-                        {0u, 1u, 2u, 3u},  // mip
-                        {1u}               // sample count
+                        {1u, 7u, 6u /* test for compat cube */},  // depth or array layers
+                        {4u},                                     // mip count
+                        {0u, 1u, 2u, 3u},                         // mip
+                        {1u}                                      // sample count
 );
 
 DAWN_INSTANTIATE_TEST_P(NonzeroCompressedTextureCreationTests,
@@ -400,10 +401,10 @@ DAWN_INSTANTIATE_TEST_P(NonzeroCompressedTextureCreationTests,
                         {wgpu::TextureAspect::All},
                         {wgpu::TextureUsage::CopySrc},
                         {wgpu::TextureDimension::e2D},
-                        {1u, 7u},          // depth or array layers
-                        {4u},              // mip count
-                        {0u, 1u, 2u, 3u},  // mip
-                        {1u}               // sample count
+                        {1u, 7u, 6u /* test for compat cube */},  // depth or array layers
+                        {4u},                                     // mip count
+                        {0u, 1u, 2u, 3u},                         // mip
+                        {1u}                                      // sample count
 );
 
 DAWN_INSTANTIATE_TEST_P(NonzeroDepthTextureCreationTests,
@@ -425,10 +426,10 @@ DAWN_INSTANTIATE_TEST_P(NonzeroDepthTextureCreationTests,
                                             wgpu::TextureUsage::CopySrc),
                          wgpu::TextureUsage::CopySrc},
                         {wgpu::TextureDimension::e2D},
-                        {1u, 7u},          // depth or array layers
-                        {4u},              // mip count
-                        {0u, 1u, 2u, 3u},  // mip
-                        {1u}               // sample count
+                        {1u, 7u, 6u /* test for compat cube */},  // depth or array layers
+                        {4u},                                     // mip count
+                        {0u, 1u, 2u, 3u},                         // mip
+                        {1u}                                      // sample count
 );
 
 DAWN_INSTANTIATE_TEST_P(
@@ -451,10 +452,10 @@ DAWN_INSTANTIATE_TEST_P(
                         wgpu::TextureUsage::TextureBinding),
      wgpu::TextureUsage(wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc)},
     {wgpu::TextureDimension::e2D},
-    {1u, 7u},          // depth or array layers
-    {4u},              // mip count
-    {0u, 1u, 2u, 3u},  // mip
-    {1u}               // sample count
+    {1u, 7u, 6u /* test for compat cube */},  // depth or array layers
+    {4u},                                     // mip count
+    {0u, 1u, 2u, 3u},                         // mip
+    {1u}                                      // sample count
 );
 
 DAWN_INSTANTIATE_TEST_P(
@@ -477,10 +478,10 @@ DAWN_INSTANTIATE_TEST_P(
                         wgpu::TextureUsage::TextureBinding),
      wgpu::TextureUsage(wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc)},
     {wgpu::TextureDimension::e2D},
-    {1u, 7u},          // depth or array layers
-    {4u},              // mip count
-    {0u, 1u, 2u, 3u},  // mip
-    {1u}               // sample count
+    {1u, 7u, 6u /* test for compat cube */},  // depth or array layers
+    {4u},                                     // mip count
+    {0u, 1u, 2u, 3u},                         // mip
+    {1u}                                      // sample count
 );
 
 DAWN_INSTANTIATE_TEST_P(
