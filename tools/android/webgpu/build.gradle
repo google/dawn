@@ -41,6 +41,7 @@ android {
             cmake {
                 arguments '-DANDROID_STL=c++_shared'
                 version '3.22.1'
+                targets 'webgpu_c_bundled'
             }
         }
     }

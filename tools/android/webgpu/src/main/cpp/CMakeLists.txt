@@ -31,18 +31,10 @@ project(webgpu VERSION 1.1.0 LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.22.1)
 
 set(DAWN_DIR "${webgpu_SOURCE_DIR}/../../../../../..")
+add_subdirectory(${DAWN_DIR} dawn)
+
 list(INSERT CMAKE_MODULE_PATH 0 "${DAWN_DIR}/src/cmake")
 include(DawnCompilerChecks)
-
-# Build Dawn with many things disabled to speed up compilation.
-set(DAWN_BUILD_ANDROID_SAMPLES OFF)
-set(DAWN_BUILD_SAMPLES OFF)
-set(TINT_BUILD_TESTS OFF)
-set(TINT_BUILD_CMD_TOOLS OFF)
-
-# Build the monolithic library as that's what we link against.
-set(DAWN_BUILD_MONOLITHIC_LIBRARY TRUE)
-add_subdirectory(${DAWN_DIR} dawn)
 
 # Make the library exposing both Dawn's API and the JNI methods.
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
