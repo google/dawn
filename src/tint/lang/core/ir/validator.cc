@@ -889,14 +889,14 @@ bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
     return results_passed && operands_passed;
 }
 
-// TODO(345196551): Remove this override once it is no longer used.
+// TODO(353498500): Remove this function once it is no longer used.
 void Validator::CheckOperandNotNull(const Instruction* inst, const ir::Value* operand, size_t idx) {
     if (operand == nullptr) {
         AddError(inst, idx) << "operand is undefined";
     }
 }
 
-// TODO(345196551): Remove this override once it is no longer used.
+// TODO(353498500): Remove this function once it is no longer used.
 void Validator::CheckOperandsNotNull(const Instruction* inst,
                                      size_t start_operand,
                                      size_t end_operand) {
@@ -1056,6 +1056,9 @@ void Validator::CheckInstruction(const Instruction* inst) {
         AddError(inst) << "destroyed instruction found in instruction list";
         return;
     }
+    // TODO(353475590): Once all instruction types have been updated to using new checking code,
+    //                  remove the duplicate reporting of results being null, see
+    //                  Validator::CheckResults
     auto results = inst->Results();
     for (size_t i = 0; i < results.Length(); ++i) {
         auto* res = results[i];
@@ -1129,6 +1132,11 @@ void Validator::CheckInstruction(const Instruction* inst) {
 }
 
 void Validator::CheckVar(const Var* var) {
+    // Intentionally not checking operands, since Var may have a null operand
+    if (!CheckResults(var, Var::kNumResults)) {
+        return;
+    }
+
     if (var->Result(0) && var->Initializer()) {
         if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtrOrRef()) {
             AddError(var) << "initializer type "

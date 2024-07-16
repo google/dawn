@@ -1745,12 +1745,21 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
     auto* v = mod.allocators.instructions.Create<ir::Var>(nullptr);
+    v->SetInitializer(b.Constant(0_i));
     mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:2:3 error: var: result is undefined
-  undef = var
+  undef = var, 0i
+  ^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+:2:3 error: var: result is undefined
+  undef = var, 0i
   ^^^^^
 
 :1:1 note: in block
@@ -1759,7 +1768,7 @@ $B1: {  # root
 
 note: # Disassembly
 $B1: {  # root
-  undef = var
+  undef = var, 0i
 }
 
 )");
@@ -1767,6 +1776,7 @@ $B1: {  # root
 
 TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
     auto* v = mod.allocators.instructions.Create<ir::Var>(nullptr);
+    v->SetInitializer(b.Constant(0_i));
 
     auto* f = b.Function("my_func", ty.void_());
 
@@ -1777,7 +1787,15 @@ TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: var: result is undefined
-    undef = var
+    undef = var, 0i
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:3:5 error: var: result is undefined
+    undef = var, 0i
     ^^^^^
 
 :2:3 note: in block
@@ -1787,7 +1805,37 @@ TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    undef = var
+    undef = var, 0i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Function_NoResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<function, f32>();
+        v->SetInitializer(b.Constant(1_i));
+        v->ClearResults();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:13 error: var: expected exactly 1 results, got 0
+    undef = var, 1i
+            ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    undef = var, 1i
     ret
   }
 }

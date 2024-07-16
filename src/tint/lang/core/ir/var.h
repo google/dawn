@@ -45,6 +45,9 @@ class Var final : public Castable<Var, OperandInstruction<1, 1>> {
     /// The offset in Operands() for the initializer
     static constexpr size_t kInitializerOperandOffset = 0;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
     /// Constructor (no results, no operands)
     Var();
 
