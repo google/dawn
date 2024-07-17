@@ -1449,7 +1449,7 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessStoreMatrixElement) {
+TEST_F(HlslWriterTest, AccessStoreMatrixElement) {
     auto* var = b.Var<storage, mat4x4<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1467,10 +1467,11 @@ RWByteAddressBuffer v : register(u0);
 void foo() {
   v.Store(24u, asuint(5.0f));
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessStoreMatrixColumn) {
+TEST_F(HlslWriterTest, AccessStoreMatrixColumn) {
     auto* var = b.Var<storage, mat4x4<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1486,12 +1487,13 @@ TEST_F(HlslWriterTest, DISABLED_AccessStoreMatrixColumn) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
 void foo() {
-  v2.Store4(16u, asuint((5.0f).xxxx));
+  v.Store4(16u, asuint((5.0f).xxxx));
 }
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_AccessStoreMatrix) {
+TEST_F(HlslWriterTest, AccessStoreMatrix) {
     auto* var = b.Var<storage, mat4x4<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1505,16 +1507,17 @@ TEST_F(HlslWriterTest, DISABLED_AccessStoreMatrix) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer v : register(u0);
-void v_1(uint offset, float4x4 value) {
-  v.Store4((offset + 0u), asuint(value[0u]));
-  v.Store4((offset + 16u), asuint(value[1u]));
-  v.Store4((offset + 32u), asuint(value[2u]));
-  v.Store4((offset + 48u), asuint(value[3u]));
+void v_1(uint offset, float4x4 obj) {
+  v.Store4((offset + 0u), asuint(obj[0u]));
+  v.Store4((offset + 16u), asuint(obj[1u]));
+  v.Store4((offset + 32u), asuint(obj[2u]));
+  v.Store4((offset + 48u), asuint(obj[3u]));
 }
 
 void foo() {
   v_1(0u, float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
 }
+
 )");
 }
 

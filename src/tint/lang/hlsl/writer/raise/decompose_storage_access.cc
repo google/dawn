@@ -225,10 +225,10 @@ struct State {
                 auto* fn = GetStoreFunctionFor(inst, var, s);
                 b.Call(fn, offset, from);
             },
-            //            [&](const core::type::Matrix* m) {
-            //                auto* fn = GetLoadFunctionFor(inst, var, m);
-            //                return b.Call(fn, offset);
-            //            }, /
+            [&](const core::type::Matrix* m) {
+                auto* fn = GetStoreFunctionFor(inst, var, m);
+                b.Call(fn, offset, from);
+            },
             //            [&](const core::type::Array* a) {
             //                auto* fn = GetLoadFunctionFor(inst, var, a);
             //                return b.Call(fn, offset);
@@ -425,6 +425,30 @@ struct State {
                 }
 
                 b.Return(fn, b.Construct(mat, values));
+            });
+
+            return fn;
+        });
+    }
+
+    core::ir::Function* GetStoreFunctionFor(core::ir::Instruction* inst,
+                                            core::ir::Var* var,
+                                            const core::type::Matrix* mat) {
+        return var_and_type_to_store_fn_.GetOrAdd(VarTypePair{var, mat}, [&] {
+            auto* p = b.FunctionParam("offset", ty.u32());
+            auto* obj = b.FunctionParam("obj", mat);
+            auto* fn = b.Function(ty.void_());
+            fn->SetParams({p, obj});
+
+            b.Append(fn->Block(), [&] {
+                Vector<core::ir::Value*, 4> values;
+                for (size_t i = 0; i < mat->columns(); ++i) {
+                    auto* from = b.Access(mat->ColumnType(), obj, u32(i));
+                    MakeStore(inst, var, from->Result(0),
+                              b.Add<u32>(p, u32(i * mat->ColumnStride()))->Result(0));
+                }
+
+                b.Return(fn);
             });
 
             return fn;
