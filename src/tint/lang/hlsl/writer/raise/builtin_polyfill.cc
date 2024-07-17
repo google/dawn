@@ -207,12 +207,7 @@ struct State {
         b.InsertBefore(call, [&] {
             args.Push(b.Call(type, core::BuiltinFn::kFloor, val)->Result(0));
             args.Push(b.Call(type, core::BuiltinFn::kCeil, val)->Result(0));
-
-            const core::type::Type* comp_ty = ty.bool_();
-            if (auto* vec = type->As<core::type::Vector>()) {
-                comp_ty = ty.vec(comp_ty, vec->Width());
-            }
-            args.Push(b.LessThan(comp_ty, val, b.Zero(type))->Result(0));
+            args.Push(b.LessThan(ty.match_width(ty.bool_(), type), val, b.Zero(type))->Result(0));
         });
         auto* trunc =
             b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(call->DetachResult(), args);
@@ -355,17 +350,8 @@ struct State {
                 auto* src = b.FunctionParam("src", src_type);
                 f->SetParams({src});
                 b.Append(f->Block(), [&] {
-                    const core::type::Type* uint_ty = nullptr;
-                    const core::type::Type* float_ty = nullptr;
-
-                    auto* src_vec = src_type->As<core::type::Vector>();
-                    if (src_vec) {
-                        uint_ty = ty.vec(ty.u32(), src_vec->Width());
-                        float_ty = ty.vec(ty.f32(), src_vec->Width());
-                    } else {
-                        uint_ty = ty.u32();
-                        float_ty = ty.f32();
-                    }
+                    const core::type::Type* uint_ty = ty.match_width(ty.u32(), src_type);
+                    const core::type::Type* float_ty = ty.match_width(ty.f32(), src_type);
 
                     core::ir::Instruction* v = nullptr;
                     tint::Switch(
@@ -383,7 +369,7 @@ struct State {
 
                     core::ir::Value* mask = nullptr;
                     core::ir::Value* shift = nullptr;
-                    if (src_vec) {
+                    if (src_type->Is<core::type::Vector>()) {
                         mask = b.Let("mask", b.Splat(uint_ty, 0xffff_u))->Result(0);
                         shift = b.Let("shift", b.Splat(uint_ty, 16_u))->Result(0);
                     } else {

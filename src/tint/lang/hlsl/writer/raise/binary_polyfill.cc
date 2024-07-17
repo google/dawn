@@ -27,9 +27,6 @@
 
 #include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
 
-#include <string>
-#include <tuple>
-
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"

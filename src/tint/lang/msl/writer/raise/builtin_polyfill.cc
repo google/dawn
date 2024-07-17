@@ -442,15 +442,11 @@ struct State {
     /// @param builtin the builtin call instruction
     void QuantizeToF16(core::ir::CoreBuiltinCall* builtin) {
         auto* arg = builtin->Args()[0];
-        auto* type_f32 = arg->Type();
-        const core::type::Type* type_f16 = ty.f16();
-        if (auto* vec = type_f32->As<core::type::Vector>()) {
-            type_f16 = ty.vec(ty.f16(), vec->Width());
-        }
 
         // Convert the argument to f16 and then back again.
         b.InsertBefore(builtin, [&] {
-            b.ConvertWithResult(builtin->DetachResult(), b.Convert(type_f16, arg));
+            b.ConvertWithResult(builtin->DetachResult(),
+                                b.Convert(ty.match_width(ty.f16(), arg->Type()), arg));
         });
         builtin->Destroy();
     }
@@ -466,9 +462,8 @@ struct State {
             if (type->is_integer_scalar_or_vector()) {
                 core::ir::Value* pos_one = b.Constant(i32(1));
                 core::ir::Value* neg_one = b.Constant(i32(-1));
-                const core::type::Type* bool_type = ty.bool_();
-                if (auto* vec = type->As<core::type::Vector>()) {
-                    bool_type = ty.vec(ty.bool_(), vec->Width());
+                const core::type::Type* bool_type = ty.match_width(ty.bool_(), type);
+                if (type->Is<core::type::Vector>()) {
                     pos_one = b.Splat(type, i32(1));
                     neg_one = b.Splat(type, i32(-1));
                 }
@@ -606,11 +601,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Convert the coordinates to unsigned integers if necessary.
             if (coords->Type()->is_signed_integer_scalar_or_vector()) {
-                if (auto* vec = coords->Type()->As<core::type::Vector>()) {
-                    coords = b.Convert(ty.vec(ty.u32(), vec->Width()), coords)->Result(0);
-                } else {
-                    coords = b.Convert(ty.u32(), coords)->Result(0);
-                }
+                coords = b.Convert(ty.match_width(ty.u32(), coords->Type()), coords)->Result(0);
             }
 
             // Call the `read()` member function.
@@ -828,11 +819,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Convert the coordinates to unsigned integers if necessary.
             if (coords->Type()->is_signed_integer_scalar_or_vector()) {
-                if (auto* vec = coords->Type()->As<core::type::Vector>()) {
-                    coords = b.Convert(ty.vec(ty.u32(), vec->Width()), coords)->Result(0);
-                } else {
-                    coords = b.Convert(ty.u32(), coords)->Result(0);
-                }
+                coords = b.Convert(ty.match_width(ty.u32(), coords->Type()), coords)->Result(0);
             }
 
             // Call the `write()` member function.

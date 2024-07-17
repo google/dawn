@@ -245,11 +245,9 @@ struct State {
                                  core::ir::Value* offset) {
         // TODO(dsinclair): Support f16 store
 
-        const core::type::Type* cast_ty = ty.u32();
+        const core::type::Type* cast_ty = ty.match_width(ty.u32(), from->Type());
         hlsl::BuiltinFn fn = hlsl::BuiltinFn::kStore;
         if (auto* vec = from->Type()->As<core::type::Vector>()) {
-            cast_ty = ty.vec(cast_ty, vec->Width());
-
             switch (vec->Width()) {
                 case 2:
                     fn = BuiltinFn::kStore2;
@@ -307,15 +305,16 @@ struct State {
                                            core::ir::Value* offset) {
         bool is_f16 = result_ty->DeepestElement()->Is<core::type::F16>();
 
-        const core::type::Type* load_ty = ty.u32();
+        const core::type::Type* load_ty = nullptr;
         // An `f16` load returns an `f16` instead of a `u32`
         if (is_f16) {
-            load_ty = ty.f16();
+            load_ty = ty.match_width(ty.f16(), result_ty);
+        } else {
+            load_ty = ty.match_width(ty.u32(), result_ty);
         }
 
         auto fn = is_f16 ? BuiltinFn::kLoadF16 : BuiltinFn::kLoad;
         if (auto* v = result_ty->As<core::type::Vector>()) {
-            load_ty = ty.vec(load_ty, v->Width());
             switch (v->Width()) {
                 case 2:
                     fn = is_f16 ? BuiltinFn::kLoad2F16 : BuiltinFn::kLoad2;

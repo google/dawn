@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/spirv/writer/ast_raise/var_for_dynamic_index.h"
 
-#include <utility>
-
 #include "src/tint/lang/wgsl/ast/transform/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"

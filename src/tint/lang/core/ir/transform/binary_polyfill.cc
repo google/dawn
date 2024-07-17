@@ -106,19 +106,6 @@ struct State {
         }
     }
 
-    /// Return a type with element type @p type that has the same number of vector components as
-    /// @p match. If @p match is scalar just return @p type.
-    /// @param el_ty the type to extend
-    /// @param match the type to match the component count of
-    /// @returns a type with the same number of vector components as @p match
-    const core::type::Type* MatchWidth(const core::type::Type* el_ty,
-                                       const core::type::Type* match) {
-        if (auto* vec = match->As<core::type::Vector>()) {
-            return ty.vec(el_ty, vec->Width());
-        }
-        return el_ty;
-    }
-
     /// Return a constant that has the same number of vector components as @p match, each with the
     /// value @p element. If @p match is scalar just return @p element.
     /// @param element the value to extend
@@ -126,7 +113,7 @@ struct State {
     /// @returns a value with the same number of vector components as @p match
     ir::Constant* MatchWidth(ir::Constant* element, const core::type::Type* match) {
         if (match->Is<core::type::Vector>()) {
-            return b.Splat(MatchWidth(element->Type(), match), element);
+            return b.Splat(ty.match_width(element->Type(), match), element);
         }
         return element;
     }
@@ -169,7 +156,7 @@ struct State {
 
                 // Select either the RHS or a constant one value if the RHS is zero.
                 // If this is a signed operation, we also check for `INT_MIN / -1`.
-                auto* bool_ty = MatchWidth(ty.bool_(), result_ty);
+                auto* bool_ty = ty.match_width(ty.bool_(), result_ty);
                 auto* cond = b.Equal(bool_ty, rhs, zero);
                 if (is_signed) {
                     auto* lowest = MatchWidth(b.Constant(i32::Lowest()), result_ty);
