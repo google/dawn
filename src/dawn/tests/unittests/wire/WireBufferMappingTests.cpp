@@ -104,7 +104,7 @@ class WireBufferMappingTests : public WireBufferMappingTestBase {
         descriptor.size = kBufferSize;
         descriptor.usage = usage;
 
-        buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+        buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
 
         EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
             .WillOnce(Return(apiBuffer))
@@ -309,7 +309,7 @@ TEST_P(WireBufferMappingTests, DestroyCalledTooEarlyServerSideError) {
 // worked, but the device was released.
 TEST_P(WireBufferMappingTests, DeviceReleasedTooEarly) {
     TestEarlyMapCancelled(
-        [&]() { wgpuDeviceRelease(device); },
+        [&]() { device = nullptr; },
         [&]() {
             EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
             EXPECT_CALL(api, DeviceRelease(apiDevice));
@@ -321,7 +321,7 @@ TEST_P(WireBufferMappingTests, DeviceReleasedTooEarly) {
 // Check that if device is released early client-side, we disregard server-side validation errors.
 TEST_P(WireBufferMappingTests, DeviceReleasedTooEarlyServerSideError) {
     TestEarlyMapErrorCancelled(
-        [&]() { wgpuDeviceRelease(device); },
+        [&]() { device = nullptr; },
         [&]() {
             EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
             EXPECT_CALL(api, DeviceRelease(apiDevice));
@@ -333,14 +333,14 @@ TEST_P(WireBufferMappingTests, DeviceReleasedTooEarlyServerSideError) {
 // Check the map callback is called with "DestroyedBeforeCallback" when the map request would have
 // worked, but the device was destroyed.
 TEST_P(WireBufferMappingTests, DeviceDestroyedTooEarly) {
-    TestEarlyMapCancelled([&]() { wgpuDeviceDestroy(device); },
+    TestEarlyMapCancelled([&]() { wgpuDeviceDestroy(cDevice); },
                           [&]() { EXPECT_CALL(api, DeviceDestroy(apiDevice)); },
                           WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, false);
 }
 
 // Check that if device is destroyed early client-side, we disregard server-side validation errors.
 TEST_P(WireBufferMappingTests, DeviceDestroyedTooEarlyServerSideError) {
-    TestEarlyMapErrorCancelled([&]() { wgpuDeviceDestroy(device); },
+    TestEarlyMapErrorCancelled([&]() { wgpuDeviceDestroy(cDevice); },
                                [&]() { EXPECT_CALL(api, DeviceDestroy(apiDevice)); },
                                WGPUBufferMapAsyncStatus_DestroyedBeforeCallback, false);
 }
@@ -545,7 +545,7 @@ TEST_F(WireBufferMappedAtCreationTests, Success) {
     WGPUBuffer apiBuffer = api.GetNewBuffer();
     uint32_t apiBufferData = 1234;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, 4)).WillOnce(Return(&apiBufferData));
@@ -567,7 +567,7 @@ TEST_F(WireBufferMappedAtCreationTests, ReleaseBeforeUnmap) {
     WGPUBuffer apiBuffer = api.GetNewBuffer();
     uint32_t apiBufferData = 1234;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, 4)).WillOnce(Return(&apiBufferData));
@@ -590,7 +590,7 @@ TEST_P(WireBufferMappedAtCreationTests, MapSuccess) {
     WGPUBuffer apiBuffer = api.GetNewBuffer();
     uint32_t apiBufferData = 1234;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, 4)).WillOnce(Return(&apiBufferData));
@@ -628,7 +628,7 @@ TEST_P(WireBufferMappedAtCreationTests, MapFailure) {
     WGPUBuffer apiBuffer = api.GetNewBuffer();
     uint32_t apiBufferData = 1234;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
     EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, 4)).WillOnce(Return(&apiBufferData));
@@ -673,7 +673,7 @@ TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
         descriptor.size = kOOMSize;
         descriptor.mappedAtCreation = true;
 
-        wgpuDeviceCreateBuffer(device, &descriptor);
+        wgpuDeviceCreateBuffer(cDevice, &descriptor);
         FlushClient();
     }
 
@@ -683,7 +683,7 @@ TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
         descriptor.usage = WGPUBufferUsage_MapRead;
         descriptor.size = kOOMSize;
 
-        wgpuDeviceCreateBuffer(device, &descriptor);
+        wgpuDeviceCreateBuffer(cDevice, &descriptor);
         EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
         FlushClient();
     }
@@ -694,7 +694,7 @@ TEST_F(WireBufferMappingTests, MaxSizeMappableBufferOOMDirectly) {
         descriptor.usage = WGPUBufferUsage_MapWrite;
         descriptor.size = kOOMSize;
 
-        wgpuDeviceCreateBuffer(device, &descriptor);
+        wgpuDeviceCreateBuffer(cDevice, &descriptor);
         EXPECT_CALL(api, DeviceCreateErrorBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
         FlushClient();
     }

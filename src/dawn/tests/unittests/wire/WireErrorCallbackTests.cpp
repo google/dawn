@@ -106,7 +106,7 @@ class WireErrorCallbackTests : public WireTest {
 
 // Test the return wire for device validation error callbacks
 TEST_F(WireErrorCallbackTests, DeviceValidationErrorCallback) {
-    wgpuDeviceSetUncapturedErrorCallback(device, ToMockDeviceErrorCallback, this);
+    wgpuDeviceSetUncapturedErrorCallback(cDevice, ToMockDeviceErrorCallback, this);
 
     // Setting the error callback should stay on the client side and do nothing
     FlushClient();
@@ -125,7 +125,7 @@ TEST_F(WireErrorCallbackTests, DeviceValidationErrorCallback) {
 
 // Test the return wire for device OOM error callbacks
 TEST_F(WireErrorCallbackTests, DeviceOutOfMemoryErrorCallback) {
-    wgpuDeviceSetUncapturedErrorCallback(device, ToMockDeviceErrorCallback, this);
+    wgpuDeviceSetUncapturedErrorCallback(cDevice, ToMockDeviceErrorCallback, this);
 
     // Setting the error callback should stay on the client side and do nothing
     FlushClient();
@@ -144,7 +144,7 @@ TEST_F(WireErrorCallbackTests, DeviceOutOfMemoryErrorCallback) {
 
 // Test the return wire for device internal error callbacks
 TEST_F(WireErrorCallbackTests, DeviceInternalErrorCallback) {
-    wgpuDeviceSetUncapturedErrorCallback(device, ToMockDeviceErrorCallback, this);
+    wgpuDeviceSetUncapturedErrorCallback(cDevice, ToMockDeviceErrorCallback, this);
 
     // Setting the error callback should stay on the client side and do nothing
     FlushClient();
@@ -163,7 +163,7 @@ TEST_F(WireErrorCallbackTests, DeviceInternalErrorCallback) {
 
 // Test the return wire for device user warning callbacks
 TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
-    wgpuDeviceSetLoggingCallback(device, ToMockDeviceLoggingCallback, this);
+    wgpuDeviceSetLoggingCallback(cDevice, ToMockDeviceLoggingCallback, this);
 
     // Setting the injected warning callback should stay on the client side and do nothing
     FlushClient();
@@ -180,7 +180,7 @@ TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
 
 // Test the return wire for device lost callback
 TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
-    wgpuDeviceSetDeviceLostCallback(device, ToMockDeviceLostCallback, this);
+    wgpuDeviceSetDeviceLostCallback(cDevice, ToMockDeviceLostCallback, this);
 
     // Setting the error callback should stay on the client side and do nothing
     FlushClient();
@@ -215,7 +215,7 @@ class WirePopErrorScopeCallbackTests : public WireFutureTestWithParamsBase<> {
 
     void PushErrorScope(WGPUErrorFilter filter) {
         EXPECT_CALL(api, DevicePushErrorScope(apiDevice, filter)).Times(1);
-        wgpuDevicePushErrorScope(device, filter);
+        wgpuDevicePushErrorScope(cDevice, filter);
         FlushClient();
     }
 
@@ -247,7 +247,7 @@ TEST_P(WirePopErrorScopeCallbackTests, TypeAndFilters) {
     for (const auto& [type, filter] : kErrorTypeAndFilters) {
         PushErrorScope(filter);
 
-        DevicePopErrorScope(device, this);
+        DevicePopErrorScope(cDevice, this);
         EXPECT_CALL(api, OnDevicePopErrorScope2(apiDevice, _)).WillOnce([&] {
             api.CallDevicePopErrorScope2Callback(apiDevice, WGPUPopErrorScopeStatus_Success, type,
                                                  "Some error message");
@@ -276,7 +276,7 @@ TEST_P(WirePopErrorScopeCallbackTests, TypeAndFilters) {
 TEST_P(WirePopErrorScopeCallbackTests, DisconnectBeforeServerReply) {
     PushErrorScope(WGPUErrorFilter_Validation);
 
-    DevicePopErrorScope(device, this);
+    DevicePopErrorScope(cDevice, this);
     EXPECT_CALL(api, OnDevicePopErrorScope2(apiDevice, _)).Times(1);
 
     FlushClient();
@@ -304,7 +304,7 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectAfterServerReply) {
 
     PushErrorScope(WGPUErrorFilter_Validation);
 
-    DevicePopErrorScope(device, this);
+    DevicePopErrorScope(cDevice, this);
     EXPECT_CALL(api, OnDevicePopErrorScope2(apiDevice, _)).WillOnce(InvokeWithoutArgs([&] {
         api.CallDevicePopErrorScope2Callback(apiDevice, WGPUPopErrorScopeStatus_Success,
                                              WGPUErrorType_Validation, "Some error message");
@@ -329,7 +329,7 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectAfterServerReply) {
 
 // Empty stack (We are emulating the errors that would be callback-ed from native).
 TEST_P(WirePopErrorScopeCallbackTests, EmptyStack) {
-    DevicePopErrorScope(device, this);
+    DevicePopErrorScope(cDevice, this);
     EXPECT_CALL(api, OnDevicePopErrorScope2(apiDevice, _)).WillOnce(InvokeWithoutArgs([&] {
         api.CallDevicePopErrorScope2Callback(apiDevice, WGPUPopErrorScopeStatus_Success,
                                              WGPUErrorType_Validation, "No error scopes to pop");

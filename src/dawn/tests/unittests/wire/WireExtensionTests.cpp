@@ -46,7 +46,7 @@ class WireExtensionTests : public WireTest {
 TEST_F(WireExtensionTests, ChainedStruct) {
     WGPUShaderModuleDescriptor shaderModuleDesc = {};
     WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(device, &shaderModuleDesc);
+    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(cDevice, &shaderModuleDesc);
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
@@ -59,7 +59,7 @@ TEST_F(WireExtensionTests, ChainedStruct) {
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
-    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
@@ -78,7 +78,7 @@ TEST_F(WireExtensionTests, ChainedStruct) {
 TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     WGPUShaderModuleDescriptor shaderModuleDesc = {};
     WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(device, &shaderModuleDesc);
+    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(cDevice, &shaderModuleDesc);
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
@@ -96,7 +96,7 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.primitive.nextInChain = &clientExt1.chain;
 
-    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
@@ -120,7 +120,7 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     clientExt2.chain.next = &clientExt1.chain;
     clientExt1.chain.next = nullptr;
 
-    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
@@ -144,7 +144,7 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
 TEST_F(WireExtensionTests, InvalidSType) {
     WGPUShaderModuleDescriptor shaderModuleDesc = {};
     WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(device, &shaderModuleDesc);
+    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(cDevice, &shaderModuleDesc);
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
@@ -156,7 +156,7 @@ TEST_F(WireExtensionTests, InvalidSType) {
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
-    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
@@ -171,7 +171,7 @@ TEST_F(WireExtensionTests, InvalidSType) {
 TEST_F(WireExtensionTests, UnknownSType) {
     WGPUShaderModuleDescriptor shaderModuleDesc = {};
     WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(device, &shaderModuleDesc);
+    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(cDevice, &shaderModuleDesc);
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
@@ -183,7 +183,7 @@ TEST_F(WireExtensionTests, UnknownSType) {
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
-    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
@@ -199,7 +199,7 @@ TEST_F(WireExtensionTests, UnknownSType) {
 TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     WGPUShaderModuleDescriptor shaderModuleDesc = {};
     WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(device, &shaderModuleDesc);
+    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(cDevice, &shaderModuleDesc);
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
@@ -216,7 +216,7 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.primitive.nextInChain = &clientExt1.chain;
 
-    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
@@ -236,7 +236,7 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     clientExt2.chain.next = &clientExt1.chain;
     clientExt1.chain.next = nullptr;
 
-    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {

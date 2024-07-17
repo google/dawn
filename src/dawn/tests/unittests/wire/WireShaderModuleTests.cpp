@@ -55,7 +55,7 @@ class WireShaderModuleTests : public WireShaderModuleTestBase {
         WireShaderModuleTestBase::SetUp();
         WGPUShaderModuleDescriptor descriptor = {};
         apiShaderModule = api.GetNewShaderModule();
-        shaderModule = wgpuDeviceCreateShaderModule(device, &descriptor);
+        shaderModule = wgpuDeviceCreateShaderModule(cDevice, &descriptor);
         EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
             .WillOnce(Return(apiShaderModule))
             .RetiresOnSaturation();

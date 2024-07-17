@@ -328,7 +328,9 @@ bool Device::IsAlive() const {
 }
 
 void Device::WillDropLastExternalRef() {
-    HandleDeviceLost(WGPUDeviceLostReason_Destroyed, "Device was destroyed.");
+    if (IsRegistered()) {
+        HandleDeviceLost(WGPUDeviceLostReason_Destroyed, "Device was destroyed.");
+    }
     Unregister();
 }
 

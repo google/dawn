@@ -54,7 +54,7 @@ DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireQueueTests);
 
 // Test that a successful OnSubmittedWorkDone call is forwarded to the client.
 TEST_P(WireQueueTests, OnSubmittedWorkDoneSuccess) {
-    QueueOnSubmittedWorkDone(queue);
+    QueueOnSubmittedWorkDone(cQueue);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
         api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Success);
     }));
@@ -70,7 +70,7 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneSuccess) {
 
 // Test that an error OnSubmittedWorkDone call is forwarded as an error to the client.
 TEST_P(WireQueueTests, OnSubmittedWorkDoneError) {
-    QueueOnSubmittedWorkDone(queue);
+    QueueOnSubmittedWorkDone(cQueue);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
         api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
     }));
@@ -91,7 +91,7 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectAfterReply) {
     // reponse, the callback would also be fired.
     DAWN_SKIP_TEST_IF(IsSpontaneous());
 
-    QueueOnSubmittedWorkDone(queue);
+    QueueOnSubmittedWorkDone(cQueue);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
         api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
     }));
@@ -109,7 +109,7 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectAfterReply) {
 // to the client (i.e. before the event was ever ready) will call the callback with instance
 // dropped.
 TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectBeforeReply) {
-    QueueOnSubmittedWorkDone(queue);
+    QueueOnSubmittedWorkDone(cQueue);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
         api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
     }));
@@ -130,14 +130,14 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneAfterDisconnect) {
     ExpectWireCallbacksWhen([&](auto& mockCb) {
         EXPECT_CALL(mockCb, Call(WGPUQueueWorkDoneStatus_InstanceDropped, nullptr)).Times(1);
 
-        QueueOnSubmittedWorkDone(queue);
+        QueueOnSubmittedWorkDone(cQueue);
     });
 }
 
 // Test that requests inside user callbacks before disconnect are called
 TEST_P(WireQueueTests, OnSubmittedWorkDoneInsideCallbackBeforeDisconnect) {
     static constexpr size_t kNumRequests = 10;
-    QueueOnSubmittedWorkDone(queue);
+    QueueOnSubmittedWorkDone(cQueue);
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
         api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
     }));
@@ -148,7 +148,7 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneInsideCallbackBeforeDisconnect) {
             .Times(kNumRequests + 1)
             .WillOnce([&]() {
                 for (size_t i = 0; i < kNumRequests; i++) {
-                    QueueOnSubmittedWorkDone(queue);
+                    QueueOnSubmittedWorkDone(cQueue);
                 }
             })
             .WillRepeatedly(Return());
@@ -164,12 +164,12 @@ TEST_F(WireQueueTests, DefaultQueueThenDeviceReleased) {
 
     // Release the queue which is the last external client reference.
     // The device still holds a reference.
-    wgpuQueueRelease(queue);
+    queue = nullptr;
     FlushClient();
 
     // Release the device which holds an internal reference to the queue.
     // Now, the queue and device should be released on the server.
-    wgpuDeviceRelease(device);
+    device = nullptr;
 
     EXPECT_CALL(api, QueueRelease(apiQueue));
     EXPECT_CALL(api, DeviceRelease(apiDevice));
@@ -190,7 +190,7 @@ TEST_F(WireQueueTests, DeviceThenDefaultQueueReleased) {
     // Release the device which holds an internal reference to the queue.
     // Now, the should be released on the server, but not the queue since
     // the default queue still has one external reference.
-    wgpuDeviceRelease(device);
+    device = nullptr;
 
     EXPECT_CALL(api, DeviceRelease(apiDevice));
     // These set X callback methods are called before the device is released.
@@ -198,7 +198,7 @@ TEST_F(WireQueueTests, DeviceThenDefaultQueueReleased) {
     FlushClient();
 
     // Release the external queue reference. The queue should be released.
-    wgpuQueueRelease(queue);
+    queue = nullptr;
     EXPECT_CALL(api, QueueRelease(apiQueue));
     FlushClient();
 

@@ -49,7 +49,7 @@ class WireInjectTextureTests : public WireTest {
 // Test that reserving and injecting a texture makes calls on the client object forward to the
 // server object correctly.
 TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
-    auto reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+    auto reserved = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
 
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureAddRef(apiTexture));
@@ -63,8 +63,8 @@ TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
 
 // Test that reserve correctly returns different IDs each time.
 TEST_F(WireInjectTextureTests, ReserveDifferentIDs) {
-    auto reserved1 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
-    auto reserved2 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+    auto reserved1 = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
+    auto reserved2 = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
 
     ASSERT_NE(reserved1.handle.id, reserved2.handle.id);
     ASSERT_NE(reserved1.texture, reserved2.texture);
@@ -72,7 +72,7 @@ TEST_F(WireInjectTextureTests, ReserveDifferentIDs) {
 
 // Test that injecting the same id without a destroy first fails.
 TEST_F(WireInjectTextureTests, InjectExistingID) {
-    auto reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+    auto reserved = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
 
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureAddRef(apiTexture));
@@ -90,7 +90,7 @@ TEST_F(WireInjectTextureTests, ReuseIDAndGeneration) {
     ReservedTexture reserved;
     WGPUTexture apiTexture = nullptr;
     for (int i = 0; i < 2; ++i) {
-        reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+        reserved = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
 
         apiTexture = api.GetNewTexture();
         EXPECT_CALL(api, TextureAddRef(apiTexture));
@@ -123,7 +123,7 @@ TEST_F(WireInjectTextureTests, ReuseIDAndGeneration) {
 
 // Test that the server only borrows the texture and does a single addref-release
 TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
-    auto reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+    auto reserved = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
 
     // Injecting the texture adds a reference
     WGPUTexture apiTexture = api.GetNewTexture();
@@ -145,17 +145,17 @@ TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
 TEST_F(WireInjectTextureTests, ReclaimTextureReservation) {
     // Test that doing a reservation and full release is an error.
     {
-        auto reserved = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+        auto reserved = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
         wgpuTextureRelease(reserved.texture);
         FlushClient(false);
     }
 
     // Test that doing a reservation and then reclaiming it recycles the ID.
     {
-        auto reserved1 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+        auto reserved1 = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
         GetWireClient()->ReclaimTextureReservation(reserved1);
 
-        auto reserved2 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+        auto reserved2 = GetWireClient()->ReserveTexture(cDevice, &placeholderDesc);
 
         // The ID is the same, but the generation is still different.
         ASSERT_EQ(reserved1.handle.id, reserved2.handle.id);
@@ -176,7 +176,7 @@ TEST_F(WireInjectTextureTests, ReservedTextureReflection) {
     desc.sampleCount = 3;
     desc.usage = WGPUTextureUsage_RenderAttachment;
 
-    auto reserved = GetWireClient()->ReserveTexture(device, &desc);
+    auto reserved = GetWireClient()->ReserveTexture(cDevice, &desc);
     WGPUTexture texture = reserved.texture;
 
     ASSERT_EQ(desc.size.width, wgpuTextureGetWidth(texture));

@@ -43,7 +43,7 @@ class WireOptionalTests : public WireTest {
 TEST_F(WireOptionalTests, OptionalObjectValue) {
     WGPUBindGroupLayoutDescriptor bglDesc = {};
     bglDesc.entryCount = 0;
-    WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDesc);
+    WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(cDevice, &bglDesc);
 
     WGPUBindGroupLayout apiBindGroupLayout = api.GetNewBindGroupLayout();
     EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _))
@@ -62,7 +62,7 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
     bgDesc.entryCount = 1;
     bgDesc.entries = &entry;
 
-    wgpuDeviceCreateBindGroup(device, &bgDesc);
+    wgpuDeviceCreateBindGroup(cDevice, &bgDesc);
 
     WGPUBindGroup apiPlaceholderBindGroup = api.GetNewBindGroup();
     EXPECT_CALL(api, DeviceCreateBindGroup(
@@ -82,7 +82,7 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
 TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create shader module
     WGPUShaderModuleDescriptor vertexDescriptor = {};
-    WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
+    WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(cDevice, &vertexDescriptor);
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
@@ -122,7 +122,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     WGPUPipelineLayoutDescriptor layoutDescriptor = {};
     layoutDescriptor.bindGroupLayoutCount = 0;
     layoutDescriptor.bindGroupLayouts = nullptr;
-    WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(device, &layoutDescriptor);
+    WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(cDevice, &layoutDescriptor);
     WGPUPipelineLayout apiLayout = api.GetNewPipelineLayout();
     EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, _)).WillOnce(Return(apiLayout));
 
@@ -149,7 +149,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
 
     // First case: depthStencil is not null.
     pipelineDescriptor.depthStencil = &depthStencilState;
-    wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
+    wgpuDeviceCreateRenderPipeline(cDevice, &pipelineDescriptor);
 
     WGPURenderPipeline apiPlaceholderPipeline = api.GetNewRenderPipeline();
     EXPECT_CALL(
@@ -180,7 +180,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
 
     // Second case: depthStencil is null.
     pipelineDescriptor.depthStencil = nullptr;
-    wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
+    wgpuDeviceCreateRenderPipeline(cDevice, &pipelineDescriptor);
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
                     apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {

@@ -125,7 +125,7 @@ class WireMemoryTransferServiceTests : public WireTest {
         descriptor.usage = usage;
 
         WGPUBuffer apiBuffer = api.GetNewBuffer();
-        WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+        WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
 
         EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
             .WillOnce(Return(apiBuffer))
@@ -143,7 +143,7 @@ class WireMemoryTransferServiceTests : public WireTest {
 
         WGPUBuffer apiBuffer = api.GetNewBuffer();
 
-        WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+        WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
 
         EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
         EXPECT_CALL(api, BufferGetMappedRange(apiBuffer, 0, sizeof(mBufferContent)))
@@ -480,7 +480,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapReadHandleCreationFailure) {
     descriptor.size = kBufferSize;
     descriptor.usage = WGPUBufferUsage_MapRead;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
     wgpuBufferRelease(buffer);
 }
 
@@ -762,7 +762,7 @@ TEST_F(WireMemoryTransferServiceTests, BufferMapWriteHandleCreationFailure) {
     descriptor.size = kBufferSize;
     descriptor.usage = WGPUBufferUsage_MapWrite;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
     wgpuBufferRelease(buffer);
 }
 
@@ -955,7 +955,7 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationWriteHandleCreationFailur
     descriptor.size = sizeof(mBufferContent);
     descriptor.mappedAtCreation = true;
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
     EXPECT_EQ(nullptr, buffer);
 }
 
@@ -974,7 +974,7 @@ TEST_F(WireMemoryTransferServiceTests, MappedAtCreationDeserializeWriteHandleFai
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
 
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+    WGPUBuffer buffer = wgpuDeviceCreateBuffer(cDevice, &descriptor);
 
     EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _)).WillOnce(Return(apiBuffer));
     // Now bufferGetMappedRange won't be called if deserialize writeHandle fails
