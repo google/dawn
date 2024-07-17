@@ -933,6 +933,7 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSaturate:
             case core::BuiltinFn::kSin:
             case core::BuiltinFn::kSinh:
+            case core::BuiltinFn::kSmoothstep:
             case core::BuiltinFn::kSqrt:
             case core::BuiltinFn::kStep:
             case core::BuiltinFn::kTan:
