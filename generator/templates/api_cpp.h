@@ -245,6 +245,8 @@ class ObjectBase {
         {{" "}}= {{member.default_value}}
     {%- elif member.default_value != None -%}
         {{" "}}= {{member.default_value}}
+    {%- elif member.type.category == "structure" and member.annotation == "value" and is_struct -%}
+        {{" "}}= {}
     {%- else -%}
         {{assert(member.default_value == None)}}
         {%- if force_default -%}
