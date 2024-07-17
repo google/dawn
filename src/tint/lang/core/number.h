@@ -358,10 +358,19 @@ tint::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
     using T = std::conditional_t<IsFloatingPoint<UnwrapNumber<TO>> || IsFloatingPoint<FROM>,
                                  AFloat::type, AInt::type>;
     const auto value = static_cast<T>(num.value);
+    // Float to integral conversions clamp to the target range.
+    // https://gpuweb.github.io/gpuweb/wgsl/#scalar-floating-point-to-integral-conversion
+    constexpr auto float_to_integral = IsFloatingPoint<FROM> && IsIntegral<UnwrapNumber<TO>>;
     if (value > static_cast<T>(TO::kHighestValue)) {
+        if (float_to_integral) {
+            return TO(TO::kHighestValue);
+        }
         return ConversionFailure::kExceedsPositiveLimit;
     }
     if (value < static_cast<T>(TO::kLowestValue)) {
+        if (float_to_integral) {
+            return TO(TO::kLowestValue);
+        }
         return ConversionFailure::kExceedsNegativeLimit;
     }
     return TO(value);  // Success
