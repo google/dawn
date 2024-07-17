@@ -1173,5 +1173,295 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack2x16Float) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.vec2<f32>(), core::BuiltinFn::kUnpack2X16Float, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:vec2<f32> = unpack2x16float %3
+    %a:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:u32 = and %3, 65535u
+    %5:u32 = shr %3, 16u
+    %6:vec2<u32> = construct %4, %5
+    %7:vec2<f32> = hlsl.f16tof32 %6
+    %a:vec2<f32> = let %7
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack2x16snorm) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.vec2<f32>(), core::BuiltinFn::kUnpack2X16Snorm, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:vec2<f32> = unpack2x16snorm %3
+    %a:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:i32 = convert %3
+    %5:i32 = shl %4, 16u
+    %6:vec2<i32> = construct %5, %4
+    %7:vec2<i32> = shr %6, vec2<u32>(16u)
+    %8:vec2<f32> = convert %7
+    %9:vec2<f32> = div %8, 32767.0f
+    %10:vec2<f32> = clamp %9, vec2<f32>(-1.0f), vec2<f32>(1.0f)
+    %a:vec2<f32> = let %10
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack2x16unorm) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.vec2<f32>(), core::BuiltinFn::kUnpack2X16Unorm, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:vec2<f32> = unpack2x16unorm %3
+    %a:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:u32 = and %3, 65535u
+    %5:u32 = shr %3, 16u
+    %6:vec2<u32> = construct %4, %5
+    %7:vec2<f32> = convert %6
+    %8:vec2<f32> = div %7, 65535.0f
+    %a:vec2<f32> = let %8
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4x8Snorm) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.vec4<f32>(), core::BuiltinFn::kUnpack4X8Snorm, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:vec4<f32> = unpack4x8snorm %3
+    %a:vec4<f32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:i32 = convert %3
+    %5:i32 = shl %4, 24u
+    %6:i32 = shl %4, 16u
+    %7:i32 = shl %4, 8u
+    %8:vec4<i32> = construct %5, %6, %7, %4
+    %9:vec4<i32> = shr %8, vec4<u32>(24u)
+    %10:vec4<f32> = convert %9
+    %11:vec4<f32> = div %10, 127.0f
+    %12:vec4<f32> = clamp %11, vec4<f32>(-1.0f), vec4<f32>(1.0f)
+    %a:vec4<f32> = let %12
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4x8Unorm) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.vec4<f32>(), core::BuiltinFn::kUnpack4X8Unorm, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:vec4<f32> = unpack4x8unorm %3
+    %a:vec4<f32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:u32 = and %3, 255u
+    %5:u32 = shr %3, 8u
+    %6:u32 = and %5, 255u
+    %7:u32 = shr %3, 16u
+    %8:u32 = and %7, 255u
+    %9:u32 = shr %3, 24u
+    %10:vec4<u32> = construct %4, %6, %8, %9
+    %11:vec4<f32> = convert %10
+    %12:vec4<f32> = div %11, 255.0f
+    %a:vec4<f32> = let %12
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xI8) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.vec4<i32>(), core::BuiltinFn::kUnpack4XI8, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:vec4<i32> = unpack4xI8 %3
+    %a:vec4<i32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:hlsl.int8_t4_packed = convert %3
+    %5:vec4<i32> = hlsl.unpack_s8s32 %4
+    %a:vec4<i32> = let %5
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xU8) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.vec4<u32>(), core::BuiltinFn::kUnpack4XU8, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:vec4<u32> = unpack4xU8 %3
+    %a:vec4<u32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:hlsl.uint8_t4_packed = convert %3
+    %5:vec4<u32> = hlsl.unpack_u8u32 %4
+    %a:vec4<u32> = let %5
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

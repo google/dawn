@@ -40,9 +40,13 @@ cc_library(
   name = "type",
   srcs = [
     "byte_address_buffer.cc",
+    "int8_t4_packed.cc",
+    "uint8_t4_packed.cc",
   ],
   hdrs = [
     "byte_address_buffer.h",
+    "int8_t4_packed.h",
+    "uint8_t4_packed.h",
   ],
   deps = [
     "//src/tint/lang/core",
@@ -69,6 +73,8 @@ cc_library(
   alwayslink = True,
   srcs = [
     "byte_address_buffer_test.cc",
+    "int8_t4_packed_test.cc",
+    "uint8_t4_packed_test.cc",
   ],
   deps = [
     "//src/tint/lang/core",

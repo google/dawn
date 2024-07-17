@@ -31,6 +31,8 @@
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/hlsl/type/byte_address_buffer.h"
+#include "src/tint/lang/hlsl/type/int8_t4_packed.h"
+#include "src/tint/lang/hlsl/type/uint8_t4_packed.h"
 
 namespace tint::hlsl::intrinsic {
 
@@ -48,6 +50,24 @@ inline const type::ByteAddressBuffer* BuildByteAddressBuffer(core::intrinsic::Ma
                                                              const core::type::Type*,
                                                              core::intrinsic::Number& A) {
     return state.types.Get<type::ByteAddressBuffer>(static_cast<core::Access>(A.Value()));
+}
+
+inline bool MatchInt8T4Packed(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    return ty->Is<type::Int8T4Packed>();
+}
+
+inline const type::Int8T4Packed* BuildInt8T4Packed(core::intrinsic::MatchState& state,
+                                                   const core::type::Type*) {
+    return state.types.Get<type::Int8T4Packed>();
+}
+
+inline bool MatchUint8T4Packed(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    return ty->Is<type::Uint8T4Packed>();
+}
+
+inline const type::Uint8T4Packed* BuildUint8T4Packed(core::intrinsic::MatchState& state,
+                                                     const core::type::Type*) {
+    return state.types.Get<type::Uint8T4Packed>();
 }
 
 }  // namespace tint::hlsl::intrinsic

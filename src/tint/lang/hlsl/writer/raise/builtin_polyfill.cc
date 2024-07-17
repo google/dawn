@@ -47,6 +47,8 @@
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
 #include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 #include "src/tint/lang/hlsl/ir/ternary.h"
+#include "src/tint/lang/hlsl/type/int8_t4_packed.h"
+#include "src/tint/lang/hlsl/type/uint8_t4_packed.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/math/hash.h"
 
@@ -94,6 +96,13 @@ struct State {
                     case core::BuiltinFn::kTextureNumSamples:
                     case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kTrunc:
+                    case core::BuiltinFn::kUnpack2X16Float:
+                    case core::BuiltinFn::kUnpack2X16Snorm:
+                    case core::BuiltinFn::kUnpack2X16Unorm:
+                    case core::BuiltinFn::kUnpack4X8Snorm:
+                    case core::BuiltinFn::kUnpack4X8Unorm:
+                    case core::BuiltinFn::kUnpack4XI8:
+                    case core::BuiltinFn::kUnpack4XU8:
                         call_worklist.Push(call);
                         break;
                     default:
@@ -149,6 +158,27 @@ struct State {
                     break;
                 case core::BuiltinFn::kTrunc:
                     Trunc(call);
+                    break;
+                case core::BuiltinFn::kUnpack2X16Float:
+                    Unpack2x16Float(call);
+                    break;
+                case core::BuiltinFn::kUnpack2X16Snorm:
+                    Unpack2x16Snorm(call);
+                    break;
+                case core::BuiltinFn::kUnpack2X16Unorm:
+                    Unpack2x16Unorm(call);
+                    break;
+                case core::BuiltinFn::kUnpack4X8Snorm:
+                    Unpack4x8Snorm(call);
+                    break;
+                case core::BuiltinFn::kUnpack4X8Unorm:
+                    Unpack4x8Unorm(call);
+                    break;
+                case core::BuiltinFn::kUnpack4XI8:
+                    Unpack4xI8(call);
+                    break;
+                case core::BuiltinFn::kUnpack4XU8:
+                    Unpack4xU8(call);
                     break;
                 default:
                     TINT_UNREACHABLE();
@@ -699,6 +729,112 @@ struct State {
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kTextureStore, new_args);
+        });
+        call->Destroy();
+    }
+
+    void Unpack2x16Float(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* x = b.And(ty.u32(), args[0], 0xffff_u);
+            auto* y = b.ShiftRight(ty.u32(), args[0], 16_u);
+            auto* conv = b.Construct(ty.vec2<u32>(), x, y);
+
+            b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
+                                                    hlsl::BuiltinFn::kF16Tof32, conv);
+        });
+        call->Destroy();
+    }
+
+    void Unpack2x16Snorm(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* conv = b.Convert(ty.i32(), args[0]);
+            auto* x = b.ShiftLeft(ty.i32(), conv, 16_u);
+
+            auto* vec = b.Construct(ty.vec2<i32>(), x, conv);
+            auto* v = b.ShiftRight(ty.vec2<i32>(), vec, b.Composite(ty.vec2<u32>(), 16_u));
+
+            auto* flt = b.Convert(ty.vec2<f32>(), v);
+            auto* scale = b.Divide(ty.vec2<f32>(), flt, 32767_f);
+
+            auto* lower = b.Splat(ty.vec2<f32>(), -1_f);
+            auto* upper = b.Splat(ty.vec2<f32>(), 1_f);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
+        });
+        call->Destroy();
+    }
+
+    void Unpack2x16Unorm(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* x = b.And(ty.u32(), args[0], 0xffff_u);
+            auto* y = b.ShiftRight(ty.u32(), args[0], 16_u);
+            auto* conv = b.Construct(ty.vec2<u32>(), x, y);
+            auto* flt_conv = b.Convert(ty.vec2<f32>(), conv);
+            auto* scale = b.Divide(ty.vec2<f32>(), flt_conv, 0xffff_f);
+
+            call->Result(0)->ReplaceAllUsesWith(scale->Result(0));
+        });
+        call->Destroy();
+    }
+
+    void Unpack4x8Snorm(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* conv = b.Convert(ty.i32(), args[0]);
+            auto* x = b.ShiftLeft(ty.i32(), conv, 24_u);
+            auto* y = b.ShiftLeft(ty.i32(), conv, 16_u);
+            auto* z = b.ShiftLeft(ty.i32(), conv, 8_u);
+            auto* cons = b.Construct(ty.vec4<i32>(), x, y, z, conv);
+            auto* shr = b.ShiftRight(ty.vec4<i32>(), cons, b.Composite(ty.vec4<u32>(), 24_u));
+            auto* flt = b.Convert(ty.vec4<f32>(), shr);
+            auto* scale = b.Divide(ty.vec4<f32>(), flt, 127_f);
+
+            auto* lower = b.Splat(ty.vec4<f32>(), -1_f);
+            auto* upper = b.Splat(ty.vec4<f32>(), 1_f);
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
+        });
+        call->Destroy();
+    }
+
+    void Unpack4x8Unorm(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* val = args[0];
+            auto* x = b.And(ty.u32(), val, 0xff_u);
+            auto* y = b.And(ty.u32(), b.ShiftRight(ty.u32(), val, 8_u), 0xff_u);
+            auto* z = b.And(ty.u32(), b.ShiftRight(ty.u32(), val, 16_u), 0xff_u);
+            auto* w = b.ShiftRight(ty.u32(), val, 24_u);
+            auto* cons = b.Construct(ty.vec4<u32>(), x, y, z, w);
+            auto* conv = b.Convert(ty.vec4<f32>(), cons);
+            auto* scale = b.Divide(ty.vec4<f32>(), conv, 255_f);
+
+            call->Result(0)->ReplaceAllUsesWith(scale->Result(0));
+        });
+        call->Destroy();
+    }
+
+    void Unpack4xI8(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* type = ty.Get<hlsl::type::Int8T4Packed>();
+            auto* conv = b.Convert(type, args[0]);
+
+            b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
+                                                    hlsl::BuiltinFn::kUnpackS8S32, conv);
+        });
+        call->Destroy();
+    }
+
+    void Unpack4xU8(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* type = ty.Get<hlsl::type::Uint8T4Packed>();
+            auto* conv = b.Convert(type, args[0]);
+
+            b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
+                                                    hlsl::BuiltinFn::kUnpackU8U32, conv);
         });
         call->Destroy();
     }

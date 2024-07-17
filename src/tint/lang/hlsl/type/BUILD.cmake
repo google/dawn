@@ -41,6 +41,10 @@
 tint_add_target(tint_lang_hlsl_type lib
   lang/hlsl/type/byte_address_buffer.cc
   lang/hlsl/type/byte_address_buffer.h
+  lang/hlsl/type/int8_t4_packed.cc
+  lang/hlsl/type/int8_t4_packed.h
+  lang/hlsl/type/uint8_t4_packed.cc
+  lang/hlsl/type/uint8_t4_packed.h
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_type lib
@@ -67,6 +71,8 @@ tint_target_add_dependencies(tint_lang_hlsl_type lib
 ################################################################################
 tint_add_target(tint_lang_hlsl_type_test test
   lang/hlsl/type/byte_address_buffer_test.cc
+  lang/hlsl/type/int8_t4_packed_test.cc
+  lang/hlsl/type/uint8_t4_packed_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_type_test test

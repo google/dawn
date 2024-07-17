@@ -56,6 +56,10 @@ const char* str(BuiltinFn i) {
             return "mul";
         case BuiltinFn::kSign:
             return "sign";
+        case BuiltinFn::kUnpackS8S32:
+            return "unpack_s8s32";
+        case BuiltinFn::kUnpackU8U32:
+            return "unpack_u8u32";
         case BuiltinFn::kLoad:
             return "Load";
         case BuiltinFn::kLoad2:

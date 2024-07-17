@@ -107,6 +107,8 @@
 #include "src/tint/lang/hlsl/ir/member_builtin_call.h"
 #include "src/tint/lang/hlsl/ir/ternary.h"
 #include "src/tint/lang/hlsl/type/byte_address_buffer.h"
+#include "src/tint/lang/hlsl/type/int8_t4_packed.h"
+#include "src/tint/lang/hlsl/type/uint8_t4_packed.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
@@ -1221,6 +1223,9 @@ class Printer : public tint::TextGenerator {
                 }
                 out << "ByteAddressBuffer";
             },
+            [&](const hlsl::type::Int8T4Packed*) { out << "int8_t4_packed"; },
+            [&](const hlsl::type::Uint8T4Packed*) { out << "uint8_t4_packed"; },
+
             [&](const core::type::Bool*) { out << "bool"; },      //
             [&](const core::type::F16*) { out << "float16_t"; },  //
             [&](const core::type::F32*) { out << "float"; },      //
