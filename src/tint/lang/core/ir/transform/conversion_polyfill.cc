@@ -121,11 +121,11 @@ struct State {
 
             // Integer limits.
             if (res_ty->is_signed_integer_scalar_or_vector()) {
-                limits.low_limit_i = MatchWidth(b.Constant(i32(INT32_MIN)), res_ty);
-                limits.high_limit_i = MatchWidth(b.Constant(i32(INT32_MAX)), res_ty);
+                limits.low_limit_i = b.MatchWidth(i32(INT32_MIN), res_ty);
+                limits.high_limit_i = b.MatchWidth(i32(INT32_MAX), res_ty);
             } else {
-                limits.low_limit_i = MatchWidth(b.Constant(u32(0)), res_ty);
-                limits.high_limit_i = MatchWidth(b.Constant(u32(UINT32_MAX)), res_ty);
+                limits.low_limit_i = b.MatchWidth(u32(0), res_ty);
+                limits.high_limit_i = b.MatchWidth(u32(UINT32_MAX), res_ty);
             }
 
             // Largest integers representable in the source floating point format.
@@ -135,23 +135,23 @@ struct State {
                     // INT32_MAX is (2^31 - 1), which is not exactly representable as an f32, so we
                     // instead use the next highest integer value in the f32 domain.
                     const float kMaxI32AsF32 = std::nexttowardf(0x1p+31f, 0.0L);
-                    limits.low_limit_f = MatchWidth(b.Constant(f32(INT32_MIN)), res_ty);
-                    limits.high_limit_f = MatchWidth(b.Constant(f32(kMaxI32AsF32)), res_ty);
+                    limits.low_limit_f = b.MatchWidth(f32(INT32_MIN), res_ty);
+                    limits.high_limit_f = b.MatchWidth(f32(kMaxI32AsF32), res_ty);
                 } else {
                     // UINT32_MAX is (2^32 - 1), which is not exactly representable as an f32, so we
                     // instead use the next highest integer value in the f32 domain.
                     const float kMaxU32AsF32 = std::nexttowardf(0x1p+32f, 0.0L);
-                    limits.low_limit_f = MatchWidth(b.Constant(f32(0)), res_ty);
-                    limits.high_limit_f = MatchWidth(b.Constant(f32(kMaxU32AsF32)), res_ty);
+                    limits.low_limit_f = b.MatchWidth(f32(0), res_ty);
+                    limits.high_limit_f = b.MatchWidth(f32(kMaxU32AsF32), res_ty);
                 }
             } else if (src_el_ty->Is<type::F16>()) {
                 constexpr float MAX_F16 = 65504;
                 if (res_ty->is_signed_integer_scalar_or_vector()) {
-                    limits.low_limit_f = MatchWidth(b.Constant(f16(-MAX_F16)), res_ty);
-                    limits.high_limit_f = MatchWidth(b.Constant(f16(MAX_F16)), res_ty);
+                    limits.low_limit_f = b.MatchWidth(f16(-MAX_F16), res_ty);
+                    limits.high_limit_f = b.MatchWidth(f16(MAX_F16), res_ty);
                 } else {
-                    limits.low_limit_f = MatchWidth(b.Constant(f16(0)), res_ty);
-                    limits.high_limit_f = MatchWidth(b.Constant(f16(MAX_F16)), res_ty);
+                    limits.low_limit_f = b.MatchWidth(f16(0), res_ty);
+                    limits.high_limit_f = b.MatchWidth(f16(MAX_F16), res_ty);
                 }
             } else {
                 TINT_UNIMPLEMENTED() << "unhandled floating-point type";
@@ -183,18 +183,6 @@ struct State {
         // Call the helper function, splatting the arguments to match the target vector width.
         auto* call = b.CallWithResult(convert->DetachResult(), helper, convert->Args()[0]);
         call->InsertBefore(convert);
-    }
-
-    /// Return a constant that has the same number of vector components as @p match, each with the
-    /// value @p element. If @p match is scalar just return @p element.
-    /// @param element the value to extend
-    /// @param match the type to match the component count of
-    /// @returns a value with the same number of vector components as @p match
-    ir::Constant* MatchWidth(ir::Constant* element, const core::type::Type* match) {
-        if (match->Is<core::type::Vector>()) {
-            return b.Splat(ty.match_width(element->Type(), match), element);
-        }
-        return element;
     }
 };
 

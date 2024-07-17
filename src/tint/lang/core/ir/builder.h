@@ -400,6 +400,20 @@ class Builder {
         return ir.constant_values.Get(v);
     }
 
+    /// Return a constant that has the same number of vector components as `match`, each with the
+    /// `value`. If `match` is scalar just return `value` as a constant.
+    /// @param value the value
+    /// @param match the type to match
+    /// @returns the new constant
+    template <typename ARG>
+    ir::Constant* MatchWidth(ARG&& value, const core::type::Type* match) {
+        auto* element = Constant(std::forward<ARG>(value));
+        if (match->Is<core::type::Vector>()) {
+            return Splat(ir.Types().match_width(element->Type(), match), element);
+        }
+        return element;
+    }
+
     /// Creates a new ir::Constant
     /// @param ty the splat type
     /// @param value the splat value

@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"

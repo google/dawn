@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/wgsl/ast/transform/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"

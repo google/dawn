@@ -29,7 +29,6 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include <utility>
 
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/transform/hoist_to_decl_before.h"
@@ -40,7 +39,6 @@
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
-#include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/rtti/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DemoteToHelper);

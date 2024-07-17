@@ -460,14 +460,9 @@ struct State {
             // Calls to `sign` with an integer argument are replaced with select operations:
             //   result = select(select(-1, 1, arg > 0), 0, arg == 0);
             if (type->is_integer_scalar_or_vector()) {
-                core::ir::Value* pos_one = b.Constant(i32(1));
-                core::ir::Value* neg_one = b.Constant(i32(-1));
+                core::ir::Value* pos_one = b.MatchWidth(i32(1), type);
+                core::ir::Value* neg_one = b.MatchWidth(i32(-1), type);
                 const core::type::Type* bool_type = ty.match_width(ty.bool_(), type);
-                if (type->Is<core::type::Vector>()) {
-                    pos_one = b.Splat(type, i32(1));
-                    neg_one = b.Splat(type, i32(-1));
-                }
-
                 auto* zero = b.Zero(type);
                 auto* sign = b.Call(type, core::BuiltinFn::kSelect, neg_one, pos_one,
                                     b.GreaterThan(bool_type, arg, zero));

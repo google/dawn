@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -106,18 +104,6 @@ struct State {
         }
     }
 
-    /// Return a constant that has the same number of vector components as @p match, each with the
-    /// value @p element. If @p match is scalar just return @p element.
-    /// @param element the value to extend
-    /// @param match the type to match the component count of
-    /// @returns a value with the same number of vector components as @p match
-    ir::Constant* MatchWidth(ir::Constant* element, const core::type::Type* match) {
-        if (match->Is<core::type::Vector>()) {
-            return b.Splat(ty.match_width(element->Type(), match), element);
-        }
-        return element;
-    }
-
     /// Replace an integer divide or modulo with a call to helper function that prevents
     /// divide-by-zero and signed integer overflow.
     /// @param binary the binary instruction
@@ -147,11 +133,11 @@ struct State {
                 ir::Constant* one = nullptr;
                 ir::Constant* zero = nullptr;
                 if (is_signed) {
-                    one = MatchWidth(b.Constant(1_i), result_ty);
-                    zero = MatchWidth(b.Constant(0_i), result_ty);
+                    one = b.MatchWidth(1_i, result_ty);
+                    zero = b.MatchWidth(0_i, result_ty);
                 } else {
-                    one = MatchWidth(b.Constant(1_u), result_ty);
-                    zero = MatchWidth(b.Constant(0_u), result_ty);
+                    one = b.MatchWidth(1_u, result_ty);
+                    zero = b.MatchWidth(0_u, result_ty);
                 }
 
                 // Select either the RHS or a constant one value if the RHS is zero.
@@ -159,8 +145,8 @@ struct State {
                 auto* bool_ty = ty.match_width(ty.bool_(), result_ty);
                 auto* cond = b.Equal(bool_ty, rhs, zero);
                 if (is_signed) {
-                    auto* lowest = MatchWidth(b.Constant(i32::Lowest()), result_ty);
-                    auto* minus_one = MatchWidth(b.Constant(-1_i), result_ty);
+                    auto* lowest = b.MatchWidth(i32::Lowest(), result_ty);
+                    auto* minus_one = b.MatchWidth(-1_i, result_ty);
                     auto* lhs_is_lowest = b.Equal(bool_ty, lhs, lowest);
                     auto* rhs_is_minus_one = b.Equal(bool_ty, rhs, minus_one);
                     cond = b.Or(bool_ty, cond, b.And(bool_ty, lhs_is_lowest, rhs_is_minus_one));
@@ -205,8 +191,8 @@ struct State {
     void MaskShiftAmount(ir::CoreBinary* binary) {
         auto* lhs = binary->LHS();
         auto* rhs = binary->RHS();
-        auto* mask = b.Constant(u32(lhs->Type()->DeepestElement()->Size() * 8 - 1));
-        auto* masked = b.And(rhs->Type(), rhs, MatchWidth(mask, rhs->Type()));
+        auto mask = u32(lhs->Type()->DeepestElement()->Size() * 8 - 1);
+        auto* masked = b.And(rhs->Type(), rhs, b.MatchWidth(mask, rhs->Type()));
         masked->InsertBefore(binary);
         binary->SetOperand(ir::CoreBinary::kRhsOperandOffset, masked->Result(0));
     }
