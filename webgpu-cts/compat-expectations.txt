@@ -181,12 +181,6 @@ crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lo
 
 ### This section represents things that are probably fixable in Dawn.
 
-# interpolation "flat" failures; require spec change
-crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
-crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
-crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat"} [ Failure ]
-crbug.com/dawn/2376 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat"} [ Failure ]
-
 # bitcast ai_to_f32 failures; precision issue?
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
@@ -489,30 +483,14 @@ crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTex
 crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
 
 ################################################################################
-# crbug.com/351338488 "either" interpolation sampling is not implemented yet.
+# crbug.com/353552533 ANGLE Vulkan returns wrong values for gl_FragCoord when multisampling.
 ################################################################################
-crbug.com/351338448 webgpu:api,validation,render_pipeline,inter_stage:interpolation_sampling:isAsync=false;output="%40interpolate(flat,%20either)";input="%40interpolate(flat,%20either)" [ Failure ]
-crbug.com/351338448 webgpu:api,validation,render_pipeline,inter_stage:interpolation_sampling:isAsync=true;output="%40interpolate(flat,%20either)";input="%40interpolate(flat,%20either)" [ Failure ]
-crbug.com/351338448 webgpu:api,validation,render_pipeline,inter_stage:interpolation_type:isAsync=false;output="%40interpolate(flat,%20either)";input="%40interpolate(perspective)" [ Failure ]
-crbug.com/351338448 webgpu:api,validation,render_pipeline,inter_stage:interpolation_type:isAsync=true;output="%40interpolate(flat,%20either)";input="%40interpolate(perspective)" [ Failure ]
-crbug.com/351338448 webgpu:compat,api,validation,shader_module,shader_module:interpolate:success=true;interpolate="%40interpolate(flat,%20either)" [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=1;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=1;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=1;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=1;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=1;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=1;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,validation,decl,context_dependent_resolution:attribute_names:case="interpolate" [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 
 # Fine derivative tests don't work on compat (and in core)
 crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
