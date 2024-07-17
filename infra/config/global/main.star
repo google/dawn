@@ -377,9 +377,6 @@ def add_try_builder(name, os, properties):
         reclient.jobs.LOW_JOBS_FOR_CQ,
     )
     properties_try.update(properties)
-    properties_try["$depot_tools/bot_update"] = {
-        "apply_patch_on_gclient": True,
-    }
     luci.builder(
         name = name,
         bucket = "try",
@@ -716,9 +713,6 @@ luci.builder(
     properties = {
         "repo_name": "dawn",
         "runhooks": True,
-        "$depot_tools/bot_update": {
-            "apply_patch_on_gclient": True,
-        },
     },
     service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
 )
