@@ -108,12 +108,13 @@ wgpu::Status AdapterBase::APIGetLimits(SupportedLimits* limits) const {
 
     // TODO(349125474): Deprecate DawnExperimentalSubgroupLimits.
     if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
-        if (!mTogglesState.IsEnabled(Toggle::AllowUnsafeAPIs)) {
-            // If AllowUnsafeAPIs is not enabled, return the default-initialized
+        if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::Subgroups)) {
+            // If subgroups features are not supported, return the default-initialized
             // DawnExperimentalSubgroupLimits object, where minSubgroupSize and
             // maxSubgroupSize are WGPU_LIMIT_U32_UNDEFINED.
             *subgroupLimits = DawnExperimentalSubgroupLimits{};
         } else {
+            // If adapter supports subgroups features, always return the valid subgroup limits.
             *subgroupLimits = mPhysicalDevice->GetLimits().experimentalSubgroupLimits;
         }
     }
