@@ -153,7 +153,7 @@ class WireTest : public testing::Test {
     testing::MockCallback<WGPUDeviceLostCallback2> deviceLostCallback;
     testing::MockCallback<WGPUUncapturedErrorCallback> uncapturedErrorCallback;
 
-    WGPUInstance instance;
+    wgpu::Instance instance;
     WGPUInstance apiInstance;
     wgpu::Adapter adapter;
     WGPUAdapter apiAdapter;

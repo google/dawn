@@ -139,14 +139,14 @@ class WireFutureTestWithParamsBase : public WireTest, public testing::WithParamI
             if (mFutureIDs.empty()) {
                 return;
             }
-            std::vector<WGPUFutureWaitInfo> waitInfos;
+            std::vector<wgpu::FutureWaitInfo> waitInfos;
             for (auto futureID : mFutureIDs) {
                 waitInfos.push_back({{futureID}, false});
             }
-            EXPECT_EQ(wgpuInstanceWaitAny(instance, mFutureIDs.size(), waitInfos.data(), 0),
-                      WGPUWaitStatus_Success);
+            EXPECT_EQ(instance.WaitAny(mFutureIDs.size(), waitInfos.data(), 0),
+                      wgpu::WaitStatus::Success);
         } else if (callbackMode == CallbackMode::ProcessEvents) {
-            wgpuInstanceProcessEvents(instance);
+            instance.ProcessEvents();
         }
     }
 

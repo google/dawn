@@ -83,19 +83,18 @@ void WireTest::SetUp() {
     dawnProcSetProcs(&dawn::wire::client::GetProcs());
 
     auto reservedInstance = GetWireClient()->ReserveInstance();
-    instance = reservedInstance.instance;
+    instance = wgpu::Instance::Acquire(reservedInstance.instance);
     apiInstance = api.GetNewInstance();
     EXPECT_CALL(api, InstanceAddRef(apiInstance));
     EXPECT_TRUE(GetWireServer()->InjectInstance(apiInstance, reservedInstance.handle));
 
     // Create the adapter for testing.
     apiAdapter = api.GetNewAdapter();
-    WGPURequestAdapterOptions adapterOpts = {};
-    MockCallback<WGPURequestAdapterCallback2> adapterCb;
-    wgpuInstanceRequestAdapter2(instance, &adapterOpts,
-                                {nullptr, WGPUCallbackMode_AllowSpontaneous, adapterCb.Callback(),
-                                 nullptr, adapterCb.MakeUserdata(this)});
-    EXPECT_CALL(api, OnInstanceRequestAdapter2(apiInstance, NotNull(), _)).WillOnce([&]() {
+    MockCallback<void (*)(wgpu::RequestAdapterStatus, wgpu::Adapter, const char*, void*)> adapterCb;
+    instance.RequestAdapter(nullptr, wgpu::CallbackMode::AllowSpontaneous, adapterCb.Callback(),
+                            adapterCb.MakeUserdata(this));
+
+    EXPECT_CALL(api, OnInstanceRequestAdapter2(apiInstance, _, _)).WillOnce([&]() {
         EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
         EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
@@ -122,13 +121,10 @@ void WireTest::SetUp() {
                                                 apiAdapter, nullptr);
     });
     FlushClient();
-    WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(adapterCb,
-                Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, nullptr, this))
-        .WillOnce(SaveArg<1>(&cAdapter));
+    EXPECT_CALL(adapterCb, Call(wgpu::RequestAdapterStatus::Success, NotNull(), nullptr, this))
+        .WillOnce(SaveArg<1>(&adapter));
     FlushServer();
-    EXPECT_NE(cAdapter, nullptr);
-    adapter = wgpu::Adapter::Acquire(cAdapter);
+    EXPECT_NE(adapter, nullptr);
 
     // Create the device for testing.
     apiDevice = api.GetNewDevice();
@@ -195,6 +191,7 @@ void WireTest::TearDown() {
         adapter.MoveToCHandle();
     }
 
+    instance = nullptr;
     dawnProcSetProcs(nullptr);
 
     // Derived classes should call the base TearDown() first. The client must

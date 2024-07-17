@@ -76,10 +76,10 @@ class WireInstanceTests : public WireInstanceTestBase {
   protected:
     // Overriden version of wgpuInstanceRequestAdapter that defers to the API call based on the
     // test callback mode.
-    void InstanceRequestAdapter(WGPUInstance i,
-                                WGPURequestAdapterOptions const* options,
+    void InstanceRequestAdapter(const wgpu::Instance& i,
+                                wgpu::RequestAdapterOptions const* options,
                                 void* userdata = nullptr) {
-        CallImpl(userdata, i, options);
+        CallImpl(userdata, i.Get(), reinterpret_cast<const WGPURequestAdapterOptions*>(options));
     }
 };
 
@@ -87,9 +87,9 @@ DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireInstanceTests);
 
 // Test that RequestAdapterOptions are passed from the client to the server.
 TEST_P(WireInstanceTests, RequestAdapterPassesOptions) {
-    for (WGPUPowerPreference powerPreference :
-         {WGPUPowerPreference_LowPower, WGPUPowerPreference_HighPerformance}) {
-        WGPURequestAdapterOptions options = {};
+    for (auto powerPreference :
+         {wgpu::PowerPreference::LowPower, wgpu::PowerPreference::HighPerformance}) {
+        wgpu::RequestAdapterOptions options = {};
         options.powerPreference = powerPreference;
 
         InstanceRequestAdapter(instance, &options, nullptr);
@@ -115,7 +115,7 @@ TEST_P(WireInstanceTests, RequestAdapterPassesOptions) {
 
 // Test that RequestAdapter forwards the adapter information to the client.
 TEST_P(WireInstanceTests, RequestAdapterSuccess) {
-    WGPURequestAdapterOptions options = {};
+    wgpu::RequestAdapterOptions options = {};
     InstanceRequestAdapter(instance, &options, nullptr);
 
     WGPUAdapterInfo fakeInfo = {};
@@ -222,7 +222,7 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
 
 // Test that RequestAdapter forwards all chained properties to the client.
 TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
-    WGPURequestAdapterOptions options = {};
+    wgpu::RequestAdapterOptions options = {};
     InstanceRequestAdapter(instance, &options, nullptr);
 
     WGPUMemoryHeapInfo fakeHeapInfo[3] = {
@@ -366,7 +366,7 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
 // Test that features returned by the implementation that aren't supported in the wire are not
 // exposed.
 TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
-    WGPURequestAdapterOptions options = {};
+    wgpu::RequestAdapterOptions options = {};
     InstanceRequestAdapter(instance, &options, nullptr);
 
     std::initializer_list<WGPUFeatureName> fakeFeatures = {
@@ -429,7 +429,7 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
 
 // Test that RequestAdapter errors forward to the client.
 TEST_P(WireInstanceTests, RequestAdapterError) {
-    WGPURequestAdapterOptions options = {};
+    wgpu::RequestAdapterOptions options = {};
     InstanceRequestAdapter(instance, &options, nullptr);
 
     // Expect the server to receive the message. Then, mock an error.
@@ -458,21 +458,21 @@ TEST_P(WireInstanceTests, DISABLED_RequestAdapterInstanceDestroyedBeforeCallback
     // TODO(crbug.com/dawn/2061) This test does not currently pass because the callbacks aren't
     // actually triggered by the destruction of the instance at the moment. Once we move the
     // EventManager to be per-Instance, this test should pass.
-    WGPURequestAdapterOptions options = {};
+    wgpu::RequestAdapterOptions options = {};
     InstanceRequestAdapter(instance, &options, nullptr);
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
         EXPECT_CALL(mockCb, Call(WGPURequestAdapterStatus_Unknown, nullptr, NotNull(), nullptr))
             .Times(1);
 
-        wgpuInstanceRelease(instance);
+        instance = nullptr;
     });
 }
 
 // Test that RequestAdapter receives unknown status if the wire is disconnected
 // before the callback happens.
 TEST_P(WireInstanceTests, RequestAdapterWireDisconnectBeforeCallback) {
-    WGPURequestAdapterOptions options = {};
+    wgpu::RequestAdapterOptions options = {};
     InstanceRequestAdapter(instance, &options, nullptr);
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {

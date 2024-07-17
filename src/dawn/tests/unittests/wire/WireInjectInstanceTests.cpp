@@ -27,13 +27,16 @@
 
 #include "dawn/tests/unittests/wire/WireTest.h"
 
+#include "dawn/tests/MockCallback.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 
 namespace dawn::wire {
 namespace {
 
+using testing::_;
 using testing::Mock;
+using testing::MockCallback;
 using testing::NotNull;
 using testing::Return;
 
@@ -52,12 +55,18 @@ TEST_F(WireInjectInstanceTests, CallAfterReserveInject) {
     EXPECT_CALL(api, InstanceAddRef(serverInstance));
     ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 
-    WGPUSurfaceDescriptor surfaceDesc = {};
-    wgpuInstanceCreateSurface(reserved.instance, &surfaceDesc);
-    WGPUSurface serverSurface = api.GetNewSurface();
-    EXPECT_CALL(api, InstanceCreateSurface(serverInstance, NotNull()))
-        .WillOnce(Return(serverSurface));
+    MockCallback<void (*)(wgpu::RequestAdapterStatus, wgpu::Adapter, const char*, void*)> adapterCb;
+    instance.RequestAdapter(nullptr, wgpu::CallbackMode::AllowSpontaneous, adapterCb.Callback(),
+                            adapterCb.MakeUserdata(this));
+
+    EXPECT_CALL(api, OnInstanceRequestAdapter2(apiInstance, _, _)).WillOnce([&]() {
+        api.CallInstanceRequestAdapter2Callback(apiInstance, WGPURequestAdapterStatus_Error,
+                                                nullptr, "Some error message.");
+    });
     FlushClient();
+
+    EXPECT_CALL(adapterCb, Call(wgpu::RequestAdapterStatus::Error, _, _, this));
+    FlushServer();
 }
 
 // Test that reserve correctly returns different IDs each time.

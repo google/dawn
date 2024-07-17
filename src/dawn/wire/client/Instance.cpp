@@ -150,7 +150,9 @@ Instance::Instance(const ObjectBaseParams& params)
     : RefCountedWithExternalCount<ObjectWithEventsBase>(params, params.handle) {}
 
 void Instance::WillDropLastExternalRef() {
-    GetEventManager().TransitionTo(EventManager::State::InstanceDropped);
+    if (IsRegistered()) {
+        GetEventManager().TransitionTo(EventManager::State::InstanceDropped);
+    }
     Unregister();
 }
 
