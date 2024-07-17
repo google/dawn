@@ -2096,7 +2096,10 @@ Eval::Result Eval::ShiftRight(const core::type::Type* ty,
             T result = 0;
             if constexpr (IsAbstract<NumberT>) {
                 if (static_cast<size_t>(e2) >= bit_width) {
-                    result = T{0};
+                    // For an abstract shift right, if e1 is negative, each inserted bit is 1,
+                    // resulting in the value -1 for all 1s. For a non-negative e1, each inserted
+                    // bit is 0, resulting in 0.
+                    result = e1 < 0 ? T{-1} : T{0};
                 } else {
                     result = signed_shift_right();
                 }

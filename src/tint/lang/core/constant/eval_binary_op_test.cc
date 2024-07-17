@@ -1400,7 +1400,8 @@ std::vector<Case> ShiftRightCases() {
 
     // Test shift right by bit width or more
     if constexpr (IsAbstract<T>) {
-        // For abstract int, no error, result is 0
+        // For abstract int, no error, result is replaced with all msb (-1 for negative, 0 for
+        // non-negative)
         ConcatInto(  //
             r, std::vector<Case>{
                    C(T{0}, u32{B::NumBits}, T{0}),
@@ -1409,6 +1410,8 @@ std::vector<Case> ShiftRightCases() {
                    C(T{42}, u32{B::NumBits}, T{0}),
                    C(T{42}, u32{B::NumBits + 1}, T{0}),
                    C(T{42}, u32{B::NumBits + 1000}, T{0}),
+                   C(T{-42}, u32{B::NumBits + 1}, T{-1}),
+                   C(T{-42}, u32{B::NumBits + 1000}, T{-1}),
                });
     } else {
         // For concretes, error
