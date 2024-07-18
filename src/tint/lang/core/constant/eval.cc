@@ -2012,18 +2012,14 @@ Eval::Result Eval::ShiftLeft(const core::type::Type* ty,
                     e2u = 0;
                 }
             } else {
-                if (static_cast<size_t>(e2) >= bit_width) {
+                if (static_cast<size_t>(e2) >= bit_width && use_runtime_semantics_) {
                     // At shader/pipeline-creation time, it is an error to shift by the bit width of
-                    // the lhs or greater.
-                    // NOTE: At runtime, we shift by e2 % (bit width of e1).
+                    // the lhs or greater, which should have already been caught by the validator.
+                    // At runtime, we shift by e2 % (bit width of e1).
                     AddError(source)
                         << "shift left value must be less than the bit width of the lhs, which is "
                         << bit_width;
-                    if (use_runtime_semantics_) {
-                        e2u = e2u % bit_width;
-                    } else {
-                        return error;
-                    }
+                    e2u = e2u % bit_width;
                 }
 
                 if constexpr (std::is_signed_v<T>) {
@@ -2104,17 +2100,14 @@ Eval::Result Eval::ShiftRight(const core::type::Type* ty,
                     result = signed_shift_right();
                 }
             } else {
-                if (static_cast<size_t>(e2) >= bit_width) {
+                if (static_cast<size_t>(e2) >= bit_width && use_runtime_semantics_) {
                     // At shader/pipeline-creation time, it is an error to shift by the bit width of
-                    // the lhs or greater. NOTE: At runtime, we shift by e2 % (bit width of e1).
+                    // the lhs or greater, which should have already been caught by the validator.
+                    // At runtime, we shift by e2 % (bit width of e1).
                     AddError(source)
                         << "shift right value must be less than the bit width of the lhs, which is "
                         << bit_width;
-                    if (use_runtime_semantics_) {
-                        e2u = e2u % bit_width;
-                    } else {
-                        return error;
-                    }
+                    e2u = e2u % bit_width;
                 }
 
                 if constexpr (std::is_signed_v<T>) {

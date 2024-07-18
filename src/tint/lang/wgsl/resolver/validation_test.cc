@@ -1341,6 +1341,55 @@ TEST_F(ResolverTest, U32_Overflow) {
     EXPECT_EQ(r()->error(), R"(12:24 error: value 4294967296 cannot be represented as 'u32')");
 }
 
+TEST_F(ResolverValidationTest, ShiftLeft_I32_PartialEval_Valid) {
+    auto* lhs = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shl(lhs, Expr(31_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_I32_PartialEval_Invalid) {
+    auto* lhs = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shl(Source{{1, 2}}, lhs, Expr(32_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: shift left value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(ResolverValidationTest, ShiftRight_U32_PartialEval_Invalid) {
+    auto* lhs = GlobalVar("v", ty.u32(), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shr(Source{{1, 2}}, lhs, Expr(64_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: shift right value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_VecI32_PartialEval_Valid) {
+    auto* lhs = GlobalVar("v", ty.vec3(ty.i32()), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shl(lhs, Call<vec3<u32>>(0_u, 1_u, 2_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_VecI32_PartialEval_Invalid) {
+    auto* lhs = GlobalVar("v", ty.vec3(ty.i32()), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shl(Source{{1, 2}}, lhs, Call<vec3<u32>>(31_u, 32_u, 33_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: shift left value must be less than the bit width of the lhs, which is 32)");
+}
+
 }  // namespace
 }  // namespace tint::resolver
 

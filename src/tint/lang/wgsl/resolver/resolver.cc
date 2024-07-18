@@ -3591,6 +3591,10 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
         }
     }
 
+    if (!validator_.BinaryExpression(expr, rhs, lhs_ty)) {
+        return nullptr;
+    }
+
     const core::constant::Value* value = nullptr;
     if (not_evaluated_.Contains(expr)) {
         // This expression is short-circuited by an ancestor expression.

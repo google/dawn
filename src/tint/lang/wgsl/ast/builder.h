@@ -2129,6 +2129,17 @@ class Builder {
                                              Expr(std::forward<RHS>(rhs)));
     }
 
+    /// @param source the source information
+    /// @param lhs the left hand argument to the bit shift right operation
+    /// @param rhs the right hand argument to the bit shift right operation
+    /// @returns a `ast::BinaryExpression` bit shifting right `lhs` by `rhs`
+    template <typename LHS, typename RHS>
+    const ast::BinaryExpression* Shr(const Source& source, LHS&& lhs, RHS&& rhs) {
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kShiftRight,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
+    }
+
     /// @param lhs the left hand argument to the bit shift left operation
     /// @param rhs the right hand argument to the bit shift left operation
     /// @returns a `ast::BinaryExpression` bit shifting left `lhs` by `rhs`
