@@ -869,7 +869,10 @@ TEST_F(HlslWriterTransformTest, ShaderIOStruct_SharedWithBuffer) {
                                  },
                              });
 
-    auto* buffer = mod.root_block->Append(b.Var(ty.ptr(storage, str_ty, read)));
+    auto* var = b.Var(ty.ptr(storage, str_ty, read));
+    var->SetBindingPoint(0, 0);
+
+    auto* buffer = mod.root_block->Append(var);
 
     auto* ep = b.Function("vert", str_ty, core::ir::Function::PipelineStage::kVertex);
 
@@ -882,7 +885,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %vert = @vertex func():Outputs {
@@ -906,7 +909,7 @@ vert_outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %vert_inner = func():Outputs {
@@ -962,7 +965,10 @@ TEST_F(HlslWriterTransformTest, ShaderIOStructWithAttributes_NotUsedForInterface
                                  },
                              });
 
-    auto* buffer = mod.root_block->Append(b.Var(ty.ptr(storage, str_ty, read)));
+    auto* var = b.Var(ty.ptr(storage, str_ty, read));
+    var->SetBindingPoint(0, 0);
+
+    auto* buffer = mod.root_block->Append(var);
 
     auto* ep = b.Function("frag", ty.void_(), core::ir::Function::PipelineStage::kFragment);
 
@@ -978,7 +984,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {
@@ -998,7 +1004,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {

@@ -2020,6 +2020,75 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Var_HandleMissingBindingPoint) {
+    auto* v = b.Var(ty.ptr<handle, i32>());
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:31 error: var: resource variable missing binding points
+  %1:ptr<handle, i32, read> = var
+                              ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:ptr<handle, i32, read> = var
+}
+
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_StorageMissingBindingPoint) {
+    auto* v = b.Var(ty.ptr<storage, i32>());
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:38 error: var: resource variable missing binding points
+  %1:ptr<storage, i32, read_write> = var
+                                     ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:ptr<storage, i32, read_write> = var
+}
+
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_UniformMissingBindingPoint) {
+    auto* v = b.Var(ty.ptr<uniform, i32>());
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:32 error: var: resource variable missing binding points
+  %1:ptr<uniform, i32, read> = var
+                               ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:ptr<uniform, i32, read> = var
+}
+
+)");
+}
+
 TEST_F(IR_ValidatorTest, Let_NullResult) {
     auto* v = mod.allocators.instructions.Create<ir::Let>(nullptr, b.Constant(1_i));
 

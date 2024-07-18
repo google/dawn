@@ -229,6 +229,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessRwByteAddressBuffer) {
                                                 });
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -246,7 +247,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -270,7 +271,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -295,6 +296,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessByteAddressBuffer) {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                 });
     auto* var = b.Var("v", storage, sb, core::Access::kRead);
+    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -309,7 +311,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read> = var
+  %v:ptr<storage, SB, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -329,7 +331,7 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var
+  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {

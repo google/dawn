@@ -882,7 +882,9 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
                                  },
                              });
 
-    auto* buffer = mod.root_block->Append(b.Var(ty.ptr(storage, str_ty, read)));
+    auto* var = b.Var(ty.ptr(storage, str_ty, read));
+    var->SetBindingPoint(0, 0);
+    auto* buffer = mod.root_block->Append(var);
 
     auto* ep = b.Function("vert", str_ty);
     ep->SetStage(core::ir::Function::PipelineStage::kVertex);
@@ -898,7 +900,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
 }
 
 %vert = @vertex func():Outputs {
@@ -917,7 +919,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, read> = var
+  %1:ptr<storage, Outputs, read> = var @binding_point(0, 0)
   %vert_position_Output:ptr<__out, vec4<f32>, write> = var @builtin(position)
   %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
 }

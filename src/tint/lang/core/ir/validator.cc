@@ -1137,12 +1137,35 @@ void Validator::CheckVar(const Var* var) {
         return;
     }
 
-    if (var->Result(0) && var->Initializer()) {
+    // Check that initializer and result type match
+    if (var->Initializer()) {
         if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtrOrRef()) {
             AddError(var) << "initializer type "
                           << style::Type(var->Initializer()->Type()->FriendlyName())
                           << " does not match store type "
                           << style::Type(var->Result(0)->Type()->UnwrapPtrOrRef()->FriendlyName());
+            return;
+        }
+    }
+
+    // Check that resource variables have @group and @binding set
+    auto* type = var->Result(0)->Type();
+    if (type == nullptr) {
+        return;
+    }
+
+    if (auto* mv = type->As<type::MemoryView>()) {
+        switch (mv->AddressSpace()) {
+            case AddressSpace::kHandle:
+            case AddressSpace::kStorage:
+            case AddressSpace::kUniform:
+                if (!var->BindingPoint().has_value()) {
+                    AddError(var) << "resource variable missing binding points";
+                    return;
+                }
+                break;
+            default:
+                break;
         }
     }
 }
