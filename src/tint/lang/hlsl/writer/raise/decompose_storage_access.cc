@@ -412,27 +412,33 @@ struct State {
     void MakeScalarOrVectorStore(core::ir::Var* var,
                                  core::ir::Value* from,
                                  core::ir::Value* offset) {
-        // TODO(dsinclair): Support f16 store
+        bool is_f16 = from->Type()->DeepestElement()->Is<core::type::F16>();
 
         const core::type::Type* cast_ty = ty.match_width(ty.u32(), from->Type());
-        hlsl::BuiltinFn fn = hlsl::BuiltinFn::kStore;
+        auto fn = is_f16 ? BuiltinFn::kStoreF16 : BuiltinFn::kStore;
         if (auto* vec = from->Type()->As<core::type::Vector>()) {
             switch (vec->Width()) {
                 case 2:
-                    fn = BuiltinFn::kStore2;
+                    fn = is_f16 ? BuiltinFn::kStore2F16 : BuiltinFn::kStore2;
                     break;
                 case 3:
-                    fn = BuiltinFn::kStore3;
+                    fn = is_f16 ? BuiltinFn::kStore3F16 : BuiltinFn::kStore3;
                     break;
                 case 4:
-                    fn = BuiltinFn::kStore4;
+                    fn = is_f16 ? BuiltinFn::kStore4F16 : BuiltinFn::kStore4;
                     break;
                 default:
                     TINT_UNREACHABLE();
             }
         }
 
-        auto* cast = b.Bitcast(cast_ty, from);
+        core::ir::Value* cast = nullptr;
+        // The `f16` type is not cast in a store as the store itself ends up templated.
+        if (is_f16) {
+            cast = from;
+        } else {
+            cast = b.Bitcast(cast_ty, from)->Result(0);
+        }
         b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), fn, var, offset, cast);
     }
 

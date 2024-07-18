@@ -676,22 +676,27 @@ class Printer : public tint::TextGenerator {
 
     void EmitHlslMemberBuiltinCall(StringStream& out, const hlsl::ir::MemberBuiltinCall* c) {
         BuiltinFn fn = c->Func();
+
         std::string suffix = "";
-        if (fn == BuiltinFn::kLoadF16) {
-            fn = BuiltinFn::kLoad;
+        if (fn == BuiltinFn::kLoadF16 || fn == BuiltinFn::kStoreF16) {
             suffix = "<float16_t>";
-        } else if (fn == BuiltinFn::kLoad2F16) {
-            fn = BuiltinFn::kLoad;
+        } else if (fn == BuiltinFn::kLoad2F16 || fn == BuiltinFn::kStore2F16) {
             // Note space between '> >' is required for DXC
             suffix = "<vector<float16_t, 2> >";
-        } else if (fn == BuiltinFn::kLoad3F16) {
-            fn = BuiltinFn::kLoad;
+        } else if (fn == BuiltinFn::kLoad3F16 || fn == BuiltinFn::kStore3F16) {
             // Note space between '> >' is required for DXC
             suffix = "<vector<float16_t, 3> >";
-        } else if (fn == BuiltinFn::kLoad4F16) {
-            fn = BuiltinFn::kLoad;
+        } else if (fn == BuiltinFn::kLoad4F16 || fn == BuiltinFn::kStore4F16) {
             // Note space between '> >' is required for DXC
             suffix = "<vector<float16_t, 4> >";
+        }
+
+        if (fn == BuiltinFn::kLoadF16 || fn == BuiltinFn::kLoad2F16 || fn == BuiltinFn::kLoad3F16 ||
+            fn == BuiltinFn::kLoad4F16) {
+            fn = BuiltinFn::kLoad;
+        } else if (fn == BuiltinFn::kStoreF16 || fn == BuiltinFn::kStore2F16 ||
+                   fn == BuiltinFn::kStore3F16 || fn == BuiltinFn::kStore4F16) {
+            fn = BuiltinFn::kStore;
         }
 
         EmitValue(out, c->Object());

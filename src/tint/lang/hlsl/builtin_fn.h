@@ -79,6 +79,10 @@ enum class BuiltinFn : uint8_t {
     kStore2,
     kStore3,
     kStore4,
+    kStoreF16,
+    kStore2F16,
+    kStore3F16,
+    kStore4F16,
     kGetDimensions,
     kNone,
 };

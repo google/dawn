@@ -1987,60 +1987,6 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVecF16) {
-    auto* var = b.Var<storage, vec4<f16>, core::Access::kReadWrite>("v");
-    var->SetBindingPoint(0, 0);
-
-    b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.StoreVectorElement(var, 0_u, 1_h);
-        b.StoreVectorElement(var, 1_u, 2_h);
-        b.StoreVectorElement(var, 2_u, 3_h);
-        b.StoreVectorElement(var, 3_u, 4_h);
-        b.Return(func);
-    });
-
-    auto* src = R"(
-$B1: {  # root
-  %v:ptr<storage, vec4<f16>, read_write> = var @binding_point(0, 0)
-}
-
-%foo = @fragment func():void {
-  $B2: {
-    store_vector_element %v, 0u, 1.0h
-    store_vector_element %v, 1u, 2.0h
-    store_vector_element %v, 2u, 3.0h
-    store_vector_element %v, 3u, 4.0h
-    ret
-  }
-}
-)";
-    ASSERT_EQ(src, str());
-
-    auto* expect = R"(
-$B1: {  # root
-  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
-}
-
-%foo = @fragment func():void {
-  $B2: {
-    %3:u32 = bitcast 1.0h
-    %4:void = %v.Store 0u, %3
-    %5:u32 = bitcast 2.0h
-    %6:void = %v.Store 2u, %5
-    %7:u32 = bitcast 3.0h
-    %8:void = %v.Store 4u, %7
-    %9:u32 = bitcast 4.0h
-    %10:void = %v.Store 6u, %9
-    ret
-  }
-}
-)";
-    Run(DecomposeStorageAccess);
-    EXPECT_EQ(expect, str());
-}
-
 TEST_F(HlslWriterDecomposeStorageAccessTest, StoreScalar) {
     auto* var = b.Var<storage, f32, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
@@ -2076,6 +2022,48 @@ $B1: {  # root
   $B2: {
     %3:u32 = bitcast 2.0f
     %4:void = %v.Store 0u, %3
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreScalarF16) {
+    auto* var = b.Var<storage, f16, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr<storage, f16, core::Access::kReadWrite>(), var), 2_h);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, f16, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, f16, read_write> = access %v
+    store %3, 2.0h
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = %v.StoreF16 0u, 2.0h
     ret
   }
 }
@@ -2128,6 +2116,49 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorElementF16) {
+    auto* var = b.Var<storage, vec3<f16>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.StoreVectorElement(b.Access(ty.ptr<storage, vec3<f16>, core::Access::kReadWrite>(), var),
+                             1_u, 2_h);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, vec3<f16>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, vec3<f16>, read_write> = access %v
+    store_vector_element %3, 1u, 2.0h
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = %v.StoreF16 2u, 2.0h
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVector) {
     auto* var = b.Var<storage, vec3<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
@@ -2164,6 +2195,50 @@ $B1: {  # root
   $B2: {
     %3:vec3<u32> = bitcast vec3<f32>(2.0f, 3.0f, 4.0f)
     %4:void = %v.Store3 0u, %3
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorF16) {
+    auto* var = b.Var<storage, vec3<f16>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr<storage, vec3<f16>, core::Access::kReadWrite>(), var),
+                b.Composite(ty.vec3<f16>(), 2_h, 3_h, 4_h));
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, vec3<f16>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, vec3<f16>, read_write> = access %v
+    store %3, vec3<f16>(2.0h, 3.0h, 4.0h)
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = %v.Store3F16 0u, vec3<f16>(2.0h, 3.0h, 4.0h)
     ret
   }
 }
@@ -2216,6 +2291,49 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixElementF16) {
+    auto* var = b.Var<storage, mat2x3<f16>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.StoreVectorElement(
+            b.Access(ty.ptr<storage, vec3<f16>, core::Access::kReadWrite>(), var, 1_u), 2_u, 5_h);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, mat2x3<f16>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, vec3<f16>, read_write> = access %v, 1u
+    store_vector_element %3, 2u, 5.0h
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = %v.StoreF16 12u, 5.0h
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixColumn) {
     auto* var = b.Var<storage, mat2x3<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
@@ -2252,6 +2370,49 @@ $B1: {  # root
   $B2: {
     %3:vec3<u32> = bitcast vec3<f32>(5.0f)
     %4:void = %v.Store3 16u, %3
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixColumnF16) {
+    auto* var = b.Var<storage, mat2x3<f16>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr<storage, vec3<f16>, core::Access::kReadWrite>(), var, 1_u),
+                b.Splat<vec3<f16>>(5_h));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, mat2x3<f16>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, vec3<f16>, read_write> = access %v, 1u
+    store %3, vec3<f16>(5.0h)
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = %v.Store3F16 8u, vec3<f16>(5.0h)
     ret
   }
 }
@@ -2314,6 +2475,58 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreMatrixF16) {
+    auto* var = b.Var<storage, mat2x3<f16>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(var, b.Zero<mat2x3<f16>>());
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, mat2x3<f16>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    store %v, mat2x3<f16>(vec3<f16>(0.0h))
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = call %4, 0u, mat2x3<f16>(vec3<f16>(0.0h))
+    ret
+  }
+}
+%4 = func(%offset:u32, %obj:mat2x3<f16>):void {
+  $B3: {
+    %7:vec3<f16> = access %obj, 0u
+    %8:u32 = add %offset, 0u
+    %9:void = %v.Store3F16 %8, %7
+    %10:vec3<f16> = access %obj, 1u
+    %11:u32 = add %offset, 8u
+    %12:void = %v.Store3F16 %11, %10
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriterDecomposeStorageAccessTest, StoreArrayElement) {
     auto* var = b.Var<storage, array<f32, 5>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
@@ -2349,6 +2562,48 @@ $B1: {  # root
   $B2: {
     %3:u32 = bitcast 1.0f
     %4:void = %v.Store 12u, %3
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreArrayElementF16) {
+    auto* var = b.Var<storage, array<f16, 5>, core::Access::kReadWrite>("v");
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr<storage, f16, core::Access::kReadWrite>(), var, 3_u), 1_h);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, array<f16, 5>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, f16, read_write> = access %v, 3u
+    store %3, 1.0h
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = %v.StoreF16 6u, 1.0h
     ret
   }
 }
@@ -2479,6 +2734,63 @@ $B1: {  # root
   $B2: {
     %3:u32 = bitcast 3.0f
     %4:void = %v.Store 4u, %3
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StoreStructMemberF16) {
+    auto* SB = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.f16()},
+                                                });
+
+    auto* var = b.Var("v", storage, SB, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+
+    b.ir.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Store(b.Access(ty.ptr<storage, f16, core::Access::kReadWrite>(), var, 1_u), 3_h);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(4) {
+  a:i32 @offset(0)
+  b:f16 @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, f16, read_write> = access %v, 1u
+    store %3, 3.0h
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(4) {
+  a:i32 @offset(0)
+  b:f16 @offset(4)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = %v.StoreF16 4u, 3.0h
     ret
   }
 }

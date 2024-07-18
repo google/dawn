@@ -106,6 +106,14 @@ const char* str(BuiltinFn i) {
             return "Store3";
         case BuiltinFn::kStore4:
             return "Store4";
+        case BuiltinFn::kStoreF16:
+            return "StoreF16";
+        case BuiltinFn::kStore2F16:
+            return "Store2F16";
+        case BuiltinFn::kStore3F16:
+            return "Store3F16";
+        case BuiltinFn::kStore4F16:
+            return "Store4F16";
         case BuiltinFn::kGetDimensions:
             return "GetDimensions";
     }

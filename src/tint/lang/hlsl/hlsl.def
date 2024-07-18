@@ -250,6 +250,11 @@ fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
 @member_function fn Store3(byte_address_buffer<writable>, offset: u32, value: vec3<u32>)
 @member_function fn Store4(byte_address_buffer<writable>, offset: u32, value: vec4<u32>)
 
+@member_function fn StoreF16(byte_address_buffer<writable>, offset: u32, value: f16)
+@member_function fn Store2F16(byte_address_buffer<writable>, offset: u32, value: vec2<f16>)
+@member_function fn Store3F16(byte_address_buffer<writable>, offset: u32, value: vec3<f16>)
+@member_function fn Store4F16(byte_address_buffer<writable>, offset: u32, value: vec4<f16>)
+
 @member_function fn GetDimensions[A: access](byte_address_buffer<A>, width: ptr<function, u32, writable>)
 
 @member_function fn GetDimensions[T: fiu32](texture: texture_1d<T>,
