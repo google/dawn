@@ -377,11 +377,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::Subgroups,
      {"Supports the \"enable subgroups;\" directive in WGSL.",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
-      FeatureInfo::FeatureState::Experimental}},
+      FeatureInfo::FeatureState::Stable}},
     {Feature::SubgroupsF16,
      {"Supports the \"enable subgroups_f16;\" directive in WGSL.",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
-      FeatureInfo::FeatureState::Experimental}},
+      FeatureInfo::FeatureState::Stable}},
 };
 
 }  // anonymous namespace
