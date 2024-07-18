@@ -229,10 +229,10 @@ struct State {
                 auto* fn = GetStoreFunctionFor(inst, var, m);
                 b.Call(fn, offset, from);
             },
-            //            [&](const core::type::Array* a) {
-            //                auto* fn = GetLoadFunctionFor(inst, var, a);
-            //                return b.Call(fn, offset);
-            //            },
+            [&](const core::type::Array* a) {
+                auto* fn = GetStoreFunctionFor(inst, var, a);
+                b.Call(fn, offset, from);
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 
@@ -492,6 +492,33 @@ struct State {
                 });
 
                 b.Return(fn, b.Load(result_arr));
+            });
+
+            return fn;
+        });
+    }
+
+    core::ir::Function* GetStoreFunctionFor(core::ir::Instruction* inst,
+                                            core::ir::Var* var,
+                                            const core::type::Array* arr) {
+        return var_and_type_to_store_fn_.GetOrAdd(VarTypePair{var, arr}, [&] {
+            auto* p = b.FunctionParam("offset", ty.u32());
+            auto* obj = b.FunctionParam("obj", arr);
+            auto* fn = b.Function(ty.void_());
+            fn->SetParams({p, obj});
+
+            b.Append(fn->Block(), [&] {
+                auto* count = arr->Count()->As<core::type::ConstantArrayCount>();
+                TINT_ASSERT(count);
+
+                b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
+                    auto* from = b.Access(arr->ElemType(), obj, idx);
+                    auto* stride = b.Multiply<u32>(idx, u32(arr->Stride()));
+                    auto* byte_offset = b.Add<u32>(p, stride);
+                    MakeStore(inst, var, from->Result(0), byte_offset->Result(0));
+                });
+
+                b.Return(fn);
             });
 
             return fn;
