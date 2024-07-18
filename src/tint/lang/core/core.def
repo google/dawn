@@ -226,7 +226,7 @@ enum attribute {
   input_attachment_index
 }
 
-// These are paramter usages which show up in other def files but are not used in core.def.
+// These are parameter usages which show up in other def files but not in core.def.
 enum usages {
   depth
   compare_value
