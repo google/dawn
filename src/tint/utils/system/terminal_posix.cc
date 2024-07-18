@@ -29,6 +29,7 @@
 
 #include <unistd.h>
 
+#include <sys/select.h>
 #include <termios.h>
 #include <chrono>
 #include <cstdint>
