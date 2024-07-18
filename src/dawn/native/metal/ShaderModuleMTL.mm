@@ -115,24 +115,11 @@ MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
 
 namespace {
 
-ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
-    DeviceBase* device,
-    const ProgrammableStage& programmableStage,
+tint::msl::writer::Bindings generateBindingInfo(
     SingleShaderStage stage,
     const PipelineLayout* layout,
-    ShaderModule::MetalFunctionData* out,
-    uint32_t sampleMask,
-    const RenderPipeline* renderPipeline,
     const BindingInfoArray& moduleBindingInfo,
-    std::optional<uint32_t> maxSubgroupSizeForFullSubgroups) {
-    ScopedTintICEHandler scopedICEHandler(device);
-
-    std::ostringstream errorStream;
-    errorStream << "Tint MSL failure:\n";
-
-    tint::msl::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
-    arrayLengthFromUniform.ubo_binding = kBufferLengthBufferSlot;
-
+    tint::msl::writer::ArrayLengthFromUniformOptions& arrayLengthFromUniform) {
     tint::msl::writer::Bindings bindings;
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
@@ -212,6 +199,29 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
     }
+    return bindings;
+}
+
+ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
+    DeviceBase* device,
+    const ProgrammableStage& programmableStage,
+    SingleShaderStage stage,
+    const PipelineLayout* layout,
+    ShaderModule::MetalFunctionData* out,
+    uint32_t sampleMask,
+    const RenderPipeline* renderPipeline,
+    const BindingInfoArray& moduleBindingInfo,
+    std::optional<uint32_t> maxSubgroupSizeForFullSubgroups) {
+    ScopedTintICEHandler scopedICEHandler(device);
+
+    std::ostringstream errorStream;
+    errorStream << "Tint MSL failure:\n";
+
+    tint::msl::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
+    arrayLengthFromUniform.ubo_binding = kBufferLengthBufferSlot;
+
+    tint::msl::writer::Bindings bindings =
+        generateBindingInfo(stage, layout, moduleBindingInfo, arrayLengthFromUniform);
 
     std::optional<tint::ast::transform::VertexPulling::Config> vertexPullingTransformConfig;
     if (stage == SingleShaderStage::Vertex &&
