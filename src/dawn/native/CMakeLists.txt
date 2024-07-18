@@ -882,6 +882,8 @@ if (DAWN_BUILD_MONOLITHIC_LIBRARY)
             "WGPU_SHARED_LIBRARY"
             "DAWN_NATIVE_SHARED_LIBRARY"
     )
+    # TODO: Revert https://dawn-review.googlesource.com/c/dawn/+/196361 and remove the next line.
+    set_target_properties(webgpu_dawn PROPERTIES CXX_EXTENSIONS NO)
     # Apart from dawn_public_config, everything else goes inside PRIVATE, otherwise install rules will complain that they were not exported.
     target_link_libraries(webgpu_dawn
         PUBLIC
