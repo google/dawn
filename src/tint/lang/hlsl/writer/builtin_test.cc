@@ -1318,6 +1318,24 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinQuantizeToF16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("x", b.Zero(ty.vec2<f32>()));
+        b.Let("a", b.Call(ty.vec2<f32>(), core::BuiltinFn::kQuantizeToF16, b.Load(v)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  float2 x = (0.0f).xx;
+  float2 a = f16tof32(f32tof16(x));
+}
+
+)");
+}
+
 TEST_F(HlslWriterTest, BuiltinUnpack2x16Float) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {

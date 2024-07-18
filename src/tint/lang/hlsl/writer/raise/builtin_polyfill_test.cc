@@ -1173,6 +1173,44 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, QuantizeToF16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("x", b.Zero(ty.vec2<f32>()));
+        b.Let("a", b.Call(ty.vec2<f32>(), core::BuiltinFn::kQuantizeToF16, b.Load(v)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
+    %3:vec2<f32> = load %x
+    %4:vec2<f32> = quantizeToF16 %3
+    %a:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
+    %3:vec2<f32> = load %x
+    %4:vec2<u32> = hlsl.f32tof16 %3
+    %5:vec2<f32> = hlsl.f16tof32 %4
+    %a:vec2<f32> = let %5
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack2x16Float) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
