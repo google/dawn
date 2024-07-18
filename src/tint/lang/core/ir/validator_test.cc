@@ -669,6 +669,39 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, CallToNonFunctionTarget) {
+    auto* g = b.Function("g", ty.void_());
+    mod.functions.Pop();  // Remove g, since it isn't actually going to be used, it is just needed
+                          // to create the UserCall before mangling it
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Call(g);
+        c->SetOperands(Vector{b.Value(0_i)});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:20 error: call: target not defined or not a function
+    %2:void = call 0i
+                   ^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    %2:void = call 0i
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},

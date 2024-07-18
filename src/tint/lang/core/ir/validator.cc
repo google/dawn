@@ -1272,6 +1272,11 @@ void Validator::CheckUserCall(const UserCall* call) {
         return;
     }
 
+    if (!call->Target()) {
+        AddError(call, UserCall::kFunctionOperandOffset) << "target not defined or not a function";
+        return;
+    }
+
     if (call->Target()->Stage() != Function::PipelineStage::kUndefined) {
         AddError(call, UserCall::kFunctionOperandOffset)
             << "call target must not have a pipeline stage";
