@@ -48,6 +48,10 @@ const char* str(BuiltinFn i) {
             return "asuint";
         case BuiltinFn::kAsfloat:
             return "asfloat";
+        case BuiltinFn::kDot4AddI8Packed:
+            return "dot4add_i8packed";
+        case BuiltinFn::kDot4AddU8Packed:
+            return "dot4add_u8packed";
         case BuiltinFn::kF32Tof16:
             return "f32tof16";
         case BuiltinFn::kF16Tof32:

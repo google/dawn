@@ -147,6 +147,9 @@ fn asuint[T: f32_i32, N: num](vec<N, T>) -> vec<N, u32>
 fn asfloat[T: iu32](T) -> f32
 fn asfloat[T: iu32, N: num](vec<N, T>) -> vec<N, f32>
 
+fn dot4add_i8packed(u32, u32, ptr<function, i32, writable>) -> i32
+fn dot4add_u8packed(u32, u32, ptr<function, u32, writable>) -> u32
+
 fn f32tof16(f32) -> u32
 fn f32tof16[N: num](vec<N, f32>) -> vec<N, u32>
 

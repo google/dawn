@@ -1848,5 +1848,81 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xU8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, Dot4U8Packed) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.u32(), core::BuiltinFn::kDot4U8Packed, b.Load(u), u32(3_u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:u32 = dot4U8Packed %3, 3u
+    %a:u32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %accumulator:ptr<function, u32, read_write> = var, 0u
+    %5:u32 = hlsl.dot4add_u8packed %3, 3u, %accumulator
+    %a:u32 = let %5
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Dot4I8Packed) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kDot4I8Packed, b.Load(u), u32(3_u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %4:i32 = dot4I8Packed %3, 3u
+    %a:i32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, u32, read_write> = var, 2u
+    %3:u32 = load %u
+    %accumulator:ptr<function, i32, read_write> = var, 0i
+    %5:i32 = hlsl.dot4add_i8packed %3, 3u, %accumulator
+    %a:i32 = let %5
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

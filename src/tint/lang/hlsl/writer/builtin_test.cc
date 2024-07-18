@@ -1534,5 +1534,95 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinDot4U8PackedPolyfill) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.u32(), core::BuiltinFn::kDot4U8Packed, b.Load(u), u32(3_u)));
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.polyfill_dot_4x8_packed = true;
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  uint u = 2u;
+  uint v = u;
+  uint4 v_1 = uint4(0u, 8u, 16u, 24u);
+  uint4 v_2 = (uint4((v).xxxx) >> v_1);
+  uint4 v_3 = (v_2 & uint4((255u).xxxx));
+  uint4 v_4 = uint4(0u, 8u, 16u, 24u);
+  uint4 v_5 = (uint4((3u).xxxx) >> v_4);
+  uint a = dot(v_3, (v_5 & uint4((255u).xxxx)));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinDot4U8Packed) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.u32(), core::BuiltinFn::kDot4U8Packed, b.Load(u), u32(3_u)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  uint u = 2u;
+  uint accumulator = 0u;
+  uint a = dot4add_u8packed(u, 3u, accumulator);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinDot4I8PackedPolyfill) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kDot4I8Packed, b.Load(u), u32(3_u)));
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.polyfill_dot_4x8_packed = true;
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  uint u = 2u;
+  uint v = u;
+  uint4 v_1 = uint4(24u, 16u, 8u, 0u);
+  int4 v_2 = asint((uint4((v).xxxx) << v_1));
+  int4 v_3 = (v_2 >> uint4((24u).xxxx));
+  uint4 v_4 = uint4(24u, 16u, 8u, 0u);
+  int4 v_5 = asint((uint4((3u).xxxx) << v_4));
+  int a = dot(v_3, (v_5 >> uint4((24u).xxxx)));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinDot4I8Packed) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 2_u);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kDot4I8Packed, b.Load(u), u32(3_u)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  uint u = 2u;
+  int accumulator = 0;
+  int a = dot4add_i8packed(u, 3u, accumulator);
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

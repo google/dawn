@@ -50,6 +50,8 @@ enum class BuiltinFn : uint8_t {
     kAsint,
     kAsuint,
     kAsfloat,
+    kDot4AddI8Packed,
+    kDot4AddU8Packed,
     kF32Tof16,
     kF16Tof32,
     kInterlockedCompareExchange,
