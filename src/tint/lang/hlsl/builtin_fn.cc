@@ -52,10 +52,28 @@ const char* str(BuiltinFn i) {
             return "f32tof16";
         case BuiltinFn::kF16Tof32:
             return "f16tof32";
+        case BuiltinFn::kInterlockedCompareExchange:
+            return "InterlockedCompareExchange";
+        case BuiltinFn::kInterlockedExchange:
+            return "InterlockedExchange";
+        case BuiltinFn::kInterlockedAdd:
+            return "InterlockedAdd";
+        case BuiltinFn::kInterlockedMax:
+            return "InterlockedMax";
+        case BuiltinFn::kInterlockedMin:
+            return "InterlockedMin";
+        case BuiltinFn::kInterlockedAnd:
+            return "InterlockedAnd";
+        case BuiltinFn::kInterlockedOr:
+            return "InterlockedOr";
+        case BuiltinFn::kInterlockedXor:
+            return "InterlockedXor";
         case BuiltinFn::kMul:
             return "mul";
         case BuiltinFn::kSign:
             return "sign";
+        case BuiltinFn::kTextureStore:
+            return "textureStore";
         case BuiltinFn::kUnpackS8S32:
             return "unpack_s8s32";
         case BuiltinFn::kUnpackU8U32:
@@ -86,8 +104,6 @@ const char* str(BuiltinFn i) {
             return "Store4";
         case BuiltinFn::kGetDimensions:
             return "GetDimensions";
-        case BuiltinFn::kTextureStore:
-            return "textureStore";
     }
     return "<unknown>";
 }

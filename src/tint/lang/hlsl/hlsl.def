@@ -62,6 +62,7 @@ type mat4x2<T>
 type mat4x3<T>
 type mat4x4<T>
 @display("mat{N}x{M}<{T}>") type mat<N: num, M: num, T>
+type atomic<T>
 
 type byte_address_buffer<A: access>
 type int8_t4_packed
@@ -99,7 +100,9 @@ match fi32_f16: f32 | i32 | f16
 
 match storage: address_space.storage
 match function: address_space.function
+match workgroup: address_space.workgroup
 
+match read_write: access.read_write
 match readable
   : access.read
   | access.read_write
@@ -134,6 +137,7 @@ match i32_texel_format
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
+
 fn asint[T: f32_u32](T) -> i32
 fn asint[T: f32_u32, N: num](vec<N, T>) -> vec<N, i32>
 
@@ -149,6 +153,32 @@ fn f32tof16[N: num](vec<N, f32>) -> vec<N, u32>
 fn f16tof32(u32) -> f32
 fn f16tof32[N: num](vec<N, u32>) -> vec<N, f32>
 
+fn InterlockedCompareExchange[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+                                compare_value: iu32,
+                                        value: iu32,
+                               original_value: ptr<function, iu32, read_write>)
+fn InterlockedExchange[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+                                 value: iu32,
+                        original_value: ptr<function, iu32, read_write>)
+fn InterlockedAdd[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+                            value: iu32,
+                   original_value: ptr<function, iu32, read_write>)
+fn InterlockedMax[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+                            value: iu32,
+                   original_value: ptr<function, iu32, read_write>)
+fn InterlockedMin[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+                            value: iu32,
+                   original_value: ptr<function, iu32, read_write>)
+fn InterlockedAnd[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+                            value: iu32,
+                   original_value: ptr<function, iu32, read_write>)
+fn InterlockedOr[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+                           value: iu32,
+                  original_value: ptr<function, iu32, read_write>)
+fn InterlockedXor[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+                            value: iu32,
+                   original_value: ptr<function, iu32, read_write>)
+
 // Treat the HLSL matrices as transposed when used in `mul`
 fn mul [T: f32_f16, C: num, R: num](mat<R, C, T>, vec<C, T>) -> vec<R, T>
 fn mul [T: f32_f16, C: num, R: num](vec<R, T>, mat<R, C, T>) -> vec<C, T>
@@ -157,8 +187,50 @@ fn mul [T: f32_f16, K: num, C: num, R: num](mat<R, K, T>, mat<K, C, T>) -> mat<R
 fn sign[T: fi32_f16](T) -> i32
 fn sign[N: num, T: fi32_f16](vec<N, T>) -> vec<N, i32>
 
+fn textureStore[C: iu32](texture: texture_storage_1d<f32_texel_format, writable>,
+                          coords: C,
+                           value: vec4<f32>)
+fn textureStore[C: iu32](texture: texture_storage_2d<f32_texel_format, writable>,
+                          coords: vec2<C>,
+                           value: vec4<f32>)
+fn textureStore[C: iu32](texture: texture_storage_2d_array<f32_texel_format, writable>,
+                          coords: vec3<C>,
+                           value: vec4<f32>)
+fn textureStore[C: iu32](texture: texture_storage_3d<f32_texel_format, writable>,
+                          coords: vec3<C>,
+                           value: vec4<f32>)
+fn textureStore[C: iu32](texture: texture_storage_1d<i32_texel_format, writable>,
+                          coords: C,
+                           value: vec4<i32>)
+fn textureStore[C: iu32](texture: texture_storage_2d<i32_texel_format, writable>,
+                          coords: vec2<C>,
+                           value: vec4<i32>)
+fn textureStore[C: iu32](texture: texture_storage_2d_array<i32_texel_format, writable>,
+                          coords: vec3<C>,
+                           value: vec4<i32>)
+fn textureStore[C: iu32](texture: texture_storage_3d<i32_texel_format, writable>,
+                          coords: vec3<C>,
+                           value: vec4<i32>)
+fn textureStore[C: iu32](texture: texture_storage_1d<u32_texel_format, writable>,
+                          coords: C,
+                           value: vec4<u32>)
+fn textureStore[C: iu32](texture: texture_storage_2d<u32_texel_format, writable>,
+                          coords: vec2<C>,
+                           value: vec4<u32>)
+fn textureStore[C: iu32](texture: texture_storage_2d_array<u32_texel_format, writable>,
+                          coords: vec3<C>,
+                           value: vec4<u32>)
+fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>,
+                          coords: vec3<C>,
+                           value: vec4<u32>)
+
 fn unpack_s8s32(int8_t4_packed) -> vec4<i32>
 fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Member Functions                                                           //
+////////////////////////////////////////////////////////////////////////////////
 
 @member_function fn Load(byte_address_buffer<readable>, offset: u32) -> u32
 @member_function fn Load2(byte_address_buffer<readable>, offset: u32) -> vec2<u32>
@@ -329,42 +401,3 @@ fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
                                                           location: vec4<i32>) -> vec4<i32>
 @member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_3d<F, A>,
                                                           location: vec4<i32>) -> vec4<i32>
-
-fn textureStore[C: iu32](texture: texture_storage_1d<f32_texel_format, writable>,
-                          coords: C,
-                           value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<f32_texel_format, writable>,
-                          coords: vec2<C>,
-                           value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_2d_array<f32_texel_format, writable>,
-                          coords: vec3<C>,
-                           value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<f32_texel_format, writable>,
-                          coords: vec3<C>,
-                           value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_1d<i32_texel_format, writable>,
-                          coords: C,
-                           value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<i32_texel_format, writable>,
-                          coords: vec2<C>,
-                           value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_2d_array<i32_texel_format, writable>,
-                          coords: vec3<C>,
-                           value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<i32_texel_format, writable>,
-                          coords: vec3<C>,
-                           value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_1d<u32_texel_format, writable>,
-                          coords: C,
-                           value: vec4<u32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<u32_texel_format, writable>,
-                          coords: vec2<C>,
-                           value: vec4<u32>)
-fn textureStore[C: iu32](texture: texture_storage_2d_array<u32_texel_format, writable>,
-                          coords: vec3<C>,
-                           value: vec4<u32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>,
-                          coords: vec3<C>,
-                           value: vec4<u32>)
-
-
