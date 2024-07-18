@@ -1257,13 +1257,6 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     if (builtin->IsPacked4x8IntegerDotProductBuiltin()) {
         return EmitPacked4x8IntegerDotProductBuiltinCall(out, expr, builtin);
     }
-    if (builtin->IsSubgroup()) {
-        if (builtin->Fn() == wgsl::BuiltinFn::kSubgroupBroadcast) {
-            // Fall through the regular path.
-        } else {
-            return EmitSubgroupCall(out, expr, builtin);
-        }
-    }
 
     auto name = generate_builtin_name(builtin);
     if (name.empty()) {
@@ -2605,18 +2598,6 @@ bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::BuiltinFn* builti
     return true;
 }
 
-bool ASTPrinter::EmitSubgroupCall(StringStream& out,
-                                  [[maybe_unused]] const ast::CallExpression* expr,
-                                  const sem::BuiltinFn* builtin) {
-    if (builtin->Fn() == wgsl::BuiltinFn::kSubgroupBallot) {
-        out << "WaveActiveBallot(true)";
-    } else {
-        // subgroupBroadcast is already handled in the regular builtin flow.
-        TINT_UNREACHABLE() << "unexpected subgroup builtin type " << builtin->Fn();
-    }
-    return true;
-}
-
 bool ASTPrinter::EmitTextureOrStorageBufferCallArgExpression(StringStream& out,
                                                              const ast::Expression* expr) {
     // TODO(crbug.com/tint/1976): Workaround DXC bug that fails to compile texture/storage function
@@ -3089,6 +3070,8 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             return "reversebits";
         case wgsl::BuiltinFn::kSmoothstep:
             return "smoothstep";
+        case wgsl::BuiltinFn::kSubgroupBallot:
+            return "WaveActiveBallot";
         case wgsl::BuiltinFn::kSubgroupBroadcast:
             return "WaveReadLaneAt";
         default:

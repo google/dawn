@@ -11,7 +11,7 @@
                OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
                OpName %prevent_dce "prevent_dce"
-               OpName %subgroupBallot_7e6d0e "subgroupBallot_7e6d0e"
+               OpName %subgroupBallot_1a8251 "subgroupBallot_1a8251"
                OpName %res "res"
                OpName %compute_main "compute_main"
                OpDecorate %prevent_dce_block Block
@@ -24,16 +24,16 @@
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
 %prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
           %6 = OpTypeFunction %v4uint
-     %uint_3 = OpConstant %uint 3
        %bool = OpTypeBool
        %true = OpConstantTrue %bool
+     %uint_3 = OpConstant %uint 3
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
          %15 = OpConstantNull %v4uint
        %void = OpTypeVoid
          %17 = OpTypeFunction %void
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_v4uint = OpTypePointer StorageBuffer %v4uint
-%subgroupBallot_7e6d0e = OpFunction %v4uint None %6
+%subgroupBallot_1a8251 = OpFunction %v4uint None %6
           %8 = OpLabel
         %res = OpVariable %_ptr_Function_v4uint Function %15
           %9 = OpGroupNonUniformBallot %v4uint %uint_3 %true
@@ -44,7 +44,7 @@
 %compute_main = OpFunction %void None %17
          %20 = OpLabel
          %23 = OpAccessChain %_ptr_StorageBuffer_v4uint %prevent_dce %uint_0
-         %24 = OpFunctionCall %v4uint %subgroupBallot_7e6d0e
+         %24 = OpFunctionCall %v4uint %subgroupBallot_1a8251
                OpStore %23 %24
                OpReturn
                OpFunctionEnd

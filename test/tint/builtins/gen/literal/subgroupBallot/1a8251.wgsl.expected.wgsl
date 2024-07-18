@@ -2,12 +2,12 @@ enable subgroups;
 
 @group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
 
-fn subgroupBallot_7e6d0e() -> vec4<u32> {
-  var res : vec4<u32> = subgroupBallot();
+fn subgroupBallot_1a8251() -> vec4<u32> {
+  var res : vec4<u32> = subgroupBallot(true);
   return res;
 }
 
 @compute @workgroup_size(1)
 fn compute_main() {
-  prevent_dce = subgroupBallot_7e6d0e();
+  prevent_dce = subgroupBallot_1a8251();
 }

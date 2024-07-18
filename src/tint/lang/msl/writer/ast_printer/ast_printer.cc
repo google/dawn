@@ -666,9 +666,12 @@ bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
 bool ASTPrinter::EmitFunctionCall(StringStream& out,
                                   const sem::Call* call,
                                   const sem::Function* fn) {
-    if (ast::GetAttribute<SubgroupBallot::SimdActiveThreadsMask>(fn->Declaration()->attributes) !=
-        nullptr) {
-        out << "as_type<uint2>((ulong)simd_active_threads_mask())";
+    if (ast::GetAttribute<SubgroupBallot::SimdBallot>(fn->Declaration()->attributes) != nullptr) {
+        out << "as_type<uint2>((ulong)simd_ballot(";
+        if (!EmitExpression(out, call->Arguments()[0]->Declaration())) {
+            return false;
+        }
+        out << "))";
         return true;
     }
 

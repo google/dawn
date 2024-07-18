@@ -36,7 +36,7 @@
 namespace tint::msl::writer {
 
 /// SubgroupBallot is a transform that replaces calls to `subgroupBallot()` with an
-/// implementation that uses MSL's `simd_active_threads_mask()`.
+/// implementation that uses MSL's `simd_ballot()`.
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * CanonicalizeEntryPointIO
@@ -53,26 +53,25 @@ class SubgroupBallot final : public Castable<SubgroupBallot, ast::transform::Tra
                       const ast::transform::DataMap& inputs,
                       ast::transform::DataMap& outputs) const override;
 
-    /// SimdActiveThreadsMask is an InternalAttribute that is used to decorate a stub function so
-    /// that the MSL backend transforms this into calls to the `simd_active_threads_mask` function.
-    class SimdActiveThreadsMask final
-        : public Castable<SimdActiveThreadsMask, ast::InternalAttribute> {
+    /// SimdBallot is an InternalAttribute that is used to decorate a stub function so
+    /// that the MSL backend transforms this into calls to the `simd_ballot` function.
+    class SimdBallot final : public Castable<SimdBallot, ast::InternalAttribute> {
       public:
         /// Constructor
         /// @param pid the identifier of the program that owns this node
         /// @param nid the unique node identifier
-        SimdActiveThreadsMask(GenerationID pid, ast::NodeID nid) : Base(pid, nid, Empty) {}
+        SimdBallot(GenerationID pid, ast::NodeID nid) : Base(pid, nid, Empty) {}
 
         /// Destructor
-        ~SimdActiveThreadsMask() override;
+        ~SimdBallot() override;
 
         /// @copydoc ast::InternalAttribute::InternalName
-        std::string InternalName() const override { return "simd_active_threads_mask"; }
+        std::string InternalName() const override { return "simd_ballot"; }
 
         /// Performs a deep clone of this object using the program::CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const SimdActiveThreadsMask* Clone(ast::CloneContext& ctx) const override;
+        const SimdBallot* Clone(ast::CloneContext& ctx) const override;
     };
 
   private:

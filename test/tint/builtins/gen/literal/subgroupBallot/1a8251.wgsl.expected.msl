@@ -6,13 +6,13 @@ struct tint_private_vars_struct {
 };
 
 
-uint4 tint_msl_subgroup_ballot(thread tint_private_vars_struct* const tint_private_vars) {
-  uint4 const tint_symbol = uint4(as_type<uint2>((ulong)simd_active_threads_mask()), 0u, 0u);
+uint4 tint_msl_subgroup_ballot(bool pred, thread tint_private_vars_struct* const tint_private_vars) {
+  uint4 const tint_symbol = uint4(as_type<uint2>((ulong)simd_ballot(pred)), 0u, 0u);
   return (tint_symbol & (*(tint_private_vars)).tint_subgroup_size_mask);
 }
 
-uint4 subgroupBallot_7e6d0e(thread tint_private_vars_struct* const tint_private_vars) {
-  uint4 res = tint_msl_subgroup_ballot(tint_private_vars);
+uint4 subgroupBallot_1a8251(thread tint_private_vars_struct* const tint_private_vars) {
+  uint4 res = tint_msl_subgroup_ballot(true, tint_private_vars);
   return res;
 }
 
@@ -23,7 +23,7 @@ kernel void compute_main(device uint4* tint_symbol_1 [[buffer(0)]], uint tint_su
     tint_private_vars.tint_subgroup_size_mask[0u] = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, gt);
     tint_private_vars.tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size)), gt);
   }
-  *(tint_symbol_1) = subgroupBallot_7e6d0e(&(tint_private_vars));
+  *(tint_symbol_1) = subgroupBallot_1a8251(&(tint_private_vars));
   return;
 }
 

@@ -38,7 +38,7 @@
 #include "src/tint/lang/wgsl/sem/statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::msl::writer::SubgroupBallot);
-TINT_INSTANTIATE_TYPEINFO(tint::msl::writer::SubgroupBallot::SimdActiveThreadsMask);
+TINT_INSTANTIATE_TYPEINFO(tint::msl::writer::SubgroupBallot::SimdBallot);
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
@@ -80,7 +80,8 @@ struct SubgroupBallot::State {
                 // helper function and make a note of the function that we are in.
                 auto* builtin = call->Target()->As<sem::BuiltinFn>();
                 if (builtin && builtin->Fn() == wgsl::BuiltinFn::kSubgroupBallot) {
-                    ctx.Replace(call->Declaration(), b.Call(GetHelper()));
+                    auto* pred = ctx.Clone(call->Arguments()[0]->Declaration());
+                    ctx.Replace(call->Declaration(), b.Call(GetHelper(), pred));
                     ballot_callers.Add(call->Stmt()->Function());
                     made_changes = true;
                 }
@@ -103,30 +104,35 @@ struct SubgroupBallot::State {
         return resolver::Resolve(b);
     }
 
-    /// Get (or create) the `tint_msl_subgroup` helper function.
+    /// Get (or create) the `tint_msl_subgroup_ballot` helper function.
     /// @returns the name of the helper function
     Symbol GetHelper() {
         if (!ballot_helper) {
-            auto intrinsic = b.Symbols().New("tint_msl_simd_active_threads_mask");
+            auto intrinsic = b.Symbols().New("tint_msl_simd_ballot");
             subgroup_size_mask = b.Symbols().New("tint_subgroup_size_mask");
             ballot_helper = b.Symbols().New("tint_msl_subgroup_ballot");
 
             // Declare the `tint_msl_subgroup_ballot` intrinsic function, which will use the
-            // `simd_active_threads_mask` function to return 64-bit vote.
-            b.Func(intrinsic, Empty, b.ty.vec2<u32>(), nullptr,
-                   Vector{b.ASTNodes().Create<SimdActiveThreadsMask>(b.ID(), b.AllocateNodeID()),
-                          b.Disable(ast::DisabledValidation::kFunctionHasNoBody)});
+            // `simd_ballot` function to return 64-bit vote.
+            {
+                auto* pred = b.Param("pred", b.ty.bool_());
+                b.Func(intrinsic, Vector{pred}, b.ty.vec2<u32>(), nullptr,
+                       Vector{b.ASTNodes().Create<SimdBallot>(b.ID(), b.AllocateNodeID()),
+                              b.Disable(ast::DisabledValidation::kFunctionHasNoBody)});
+            }
 
             // Declare the `tint_subgroup_size_mask` variable.
             b.GlobalVar(subgroup_size_mask, core::AddressSpace::kPrivate, b.ty.vec4<u32>());
 
             // Declare the `tint_msl_subgroup_ballot` helper function as follows:
-            //   fn tint_msl_subgroup_ballot() -> vec4u {
-            //     let vote : vec2u = vec4f(tint_simd_active_threads_mask(), 0, 0);
+            //   fn tint_msl_subgroup_ballot(pred : bool) -> vec4u {
+            //     let vote : vec2u = vec4f(tint_simd_ballot(pred), 0, 0);
             //     return (vote & tint_subgroup_size_mask);
             //   }
-            auto* vote = b.Let(b.Sym(), b.Call(b.ty.vec4<u32>(), b.Call(intrinsic), 0_u, 0_u));
-            b.Func(ballot_helper, Empty, b.ty.vec4<u32>(),
+            auto* pred = b.Param("pred", b.ty.bool_());
+            auto* vote =
+                b.Let(b.Sym(), b.Call(b.ty.vec4<u32>(), b.Call(intrinsic, pred), 0_u, 0_u));
+            b.Func(ballot_helper, Vector{pred}, b.ty.vec4<u32>(),
                    Vector{
                        b.Decl(vote),
                        b.Return(b.And(vote, subgroup_size_mask)),
@@ -199,12 +205,11 @@ ast::transform::Transform::ApplyResult SubgroupBallot::Apply(const Program& src,
     return State(src).Run();
 }
 
-SubgroupBallot::SimdActiveThreadsMask::~SimdActiveThreadsMask() = default;
+SubgroupBallot::SimdBallot::~SimdBallot() = default;
 
-const SubgroupBallot::SimdActiveThreadsMask* SubgroupBallot::SimdActiveThreadsMask::Clone(
-    ast::CloneContext& ctx) const {
-    return ctx.dst->ASTNodes().Create<SubgroupBallot::SimdActiveThreadsMask>(
-        ctx.dst->ID(), ctx.dst->AllocateNodeID());
+const SubgroupBallot::SimdBallot* SubgroupBallot::SimdBallot::Clone(ast::CloneContext& ctx) const {
+    return ctx.dst->ASTNodes().Create<SubgroupBallot::SimdBallot>(ctx.dst->ID(),
+                                                                  ctx.dst->AllocateNodeID());
 }
 
 }  // namespace tint::msl::writer

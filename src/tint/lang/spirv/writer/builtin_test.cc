@@ -1906,7 +1906,7 @@ TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
 TEST_F(SpirvWriterTest, Builtin_SubgroupBallot) {
     auto* func = b.Function("foo", ty.vec4<u32>());
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<u32>(), core::BuiltinFn::kSubgroupBallot);
+        auto* result = b.Call(ty.vec4<u32>(), core::BuiltinFn::kSubgroupBallot, true);
         mod.SetName(result, "result");
         b.Return(func, result);
     });

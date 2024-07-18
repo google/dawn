@@ -2542,11 +2542,12 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
         }
         case wgsl::BuiltinFn::kSubgroupBallot: {
             module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
+            auto first_param_id = get_arg_as_value_id(0);
             if (!push_function_inst(
                     spv::Op::OpGroupNonUniformBallot,
                     {Operand(result_type_id), result,
                      Operand(GenerateConstantIfNeeded(ScalarConstant::U32(SpvScopeSubgroup))),
-                     Operand(GenerateConstantIfNeeded(ScalarConstant::Bool(true)))})) {
+                     Operand(first_param_id)})) {
                 return 0;
             }
             return result_id;

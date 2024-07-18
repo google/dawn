@@ -835,10 +835,10 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithoutExtension) {
-    // fn func { return subgroupBallot(); }
+    // fn func { return subgroupBallot(true); }
     Func("func", tint::Empty, ty.vec4<u32>(),
          Vector{
-             Return(Call(Source{Source::Location{12, 34}}, "subgroupBallot")),
+             Return(Call(Source{Source::Location{12, 34}}, "subgroupBallot", true)),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -849,6 +849,19 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithoutExtension) {
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithExtension) {
     // enable subgroups;
+    // fn func -> vec4<u32> { return subgroupBallot(true); }
+    Enable(wgsl::Extension::kSubgroups);
+
+    Func("func", tint::Empty, ty.vec4<u32>(),
+         Vector{
+             Return(Call("subgroupBallot", true)),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithoutArgument) {
+    // enable subgroups;
     // fn func -> vec4<u32> { return subgroupBallot(); }
     Enable(wgsl::Extension::kSubgroups);
 
@@ -857,17 +870,23 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithExtension) {
              Return(Call("subgroupBallot")),
          });
 
-    EXPECT_TRUE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: no matching call to 'subgroupBallot()'
+
+1 candidate function:
+ • 'subgroupBallot(bool  ✗ ) -> vec4<u32>'
+)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithExperimentalExtension) {
     // enable chromium_experimental_subgroups;
-    // fn func -> vec4<u32> { return subgroupBallot(); }
+    // fn func -> vec4<u32> { return subgroupBallot(true); }
     Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
 
     Func("func", tint::Empty, ty.vec4<u32>(),
          Vector{
-             Return(Call("subgroupBallot")),
+             Return(Call("subgroupBallot", true)),
          });
 
     EXPECT_TRUE(r()->Resolve());

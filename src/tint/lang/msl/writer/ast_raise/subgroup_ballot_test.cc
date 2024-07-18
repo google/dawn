@@ -46,7 +46,8 @@ enable chromium_experimental_subgroups;
 
 @compute @workgroup_size(64)
 fn foo() {
-  let x : vec4u = subgroupBallot();
+  let pred = true;
+  let x : vec4u = subgroupBallot(pred);
 }
 )";
 
@@ -54,13 +55,13 @@ fn foo() {
         R"(
 enable chromium_experimental_subgroups;
 
-@internal(simd_active_threads_mask) @internal(disable_validation__function_has_no_body)
-fn tint_msl_simd_active_threads_mask() -> vec2<u32>
+@internal(simd_ballot) @internal(disable_validation__function_has_no_body)
+fn tint_msl_simd_ballot(pred : bool) -> vec2<u32>
 
 var<private> tint_subgroup_size_mask : vec4<u32>;
 
-fn tint_msl_subgroup_ballot() -> vec4<u32> {
-  let tint_symbol = vec4<u32>(tint_msl_simd_active_threads_mask(), 0u, 0u);
+fn tint_msl_subgroup_ballot(pred : bool) -> vec4<u32> {
+  let tint_symbol = vec4<u32>(tint_msl_simd_ballot(pred), 0u, 0u);
   return (tint_symbol & tint_subgroup_size_mask);
 }
 
@@ -71,7 +72,8 @@ fn foo(@builtin(subgroup_size) tint_subgroup_size : u32) {
     tint_subgroup_size_mask[0u] = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, gt);
     tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size)), gt);
   }
-  let x : vec4u = tint_msl_subgroup_ballot();
+  let pred = true;
+  let x : vec4u = tint_msl_subgroup_ballot(pred);
 }
 )";
 
@@ -85,7 +87,8 @@ TEST_F(SubgroupBallotTest, IndirectUse) {
 enable chromium_experimental_subgroups;
 
 fn bar() -> vec4u {
-  return subgroupBallot();
+  let pred = true;
+  return subgroupBallot(pred);
 }
 
 @compute @workgroup_size(64)
@@ -98,18 +101,19 @@ fn foo() {
         R"(
 enable chromium_experimental_subgroups;
 
-@internal(simd_active_threads_mask) @internal(disable_validation__function_has_no_body)
-fn tint_msl_simd_active_threads_mask() -> vec2<u32>
+@internal(simd_ballot) @internal(disable_validation__function_has_no_body)
+fn tint_msl_simd_ballot(pred : bool) -> vec2<u32>
 
 var<private> tint_subgroup_size_mask : vec4<u32>;
 
-fn tint_msl_subgroup_ballot() -> vec4<u32> {
-  let tint_symbol = vec4<u32>(tint_msl_simd_active_threads_mask(), 0u, 0u);
+fn tint_msl_subgroup_ballot(pred : bool) -> vec4<u32> {
+  let tint_symbol = vec4<u32>(tint_msl_simd_ballot(pred), 0u, 0u);
   return (tint_symbol & tint_subgroup_size_mask);
 }
 
 fn bar() -> vec4u {
-  return tint_msl_subgroup_ballot();
+  let pred = true;
+  return tint_msl_subgroup_ballot(pred);
 }
 
 @compute @workgroup_size(64)
@@ -137,7 +141,8 @@ fn foo(@builtin(workgroup_id) group_id: vec3u,
        @builtin(subgroup_size) size : u32,
        @builtin(local_invocation_index) index : u32) {
   let sz = size;
-  let x : vec4u = subgroupBallot();
+  let pred = true;
+  let x : vec4u = subgroupBallot(pred);
 }
 )";
 
@@ -145,13 +150,13 @@ fn foo(@builtin(workgroup_id) group_id: vec3u,
         R"(
 enable chromium_experimental_subgroups;
 
-@internal(simd_active_threads_mask) @internal(disable_validation__function_has_no_body)
-fn tint_msl_simd_active_threads_mask() -> vec2<u32>
+@internal(simd_ballot) @internal(disable_validation__function_has_no_body)
+fn tint_msl_simd_ballot(pred : bool) -> vec2<u32>
 
 var<private> tint_subgroup_size_mask : vec4<u32>;
 
-fn tint_msl_subgroup_ballot() -> vec4<u32> {
-  let tint_symbol = vec4<u32>(tint_msl_simd_active_threads_mask(), 0u, 0u);
+fn tint_msl_subgroup_ballot(pred : bool) -> vec4<u32> {
+  let tint_symbol = vec4<u32>(tint_msl_simd_ballot(pred), 0u, 0u);
   return (tint_symbol & tint_subgroup_size_mask);
 }
 
@@ -163,7 +168,8 @@ fn foo(@builtin(workgroup_id) group_id : vec3u, @builtin(subgroup_size) size : u
     tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - size)), gt);
   }
   let sz = size;
-  let x : vec4u = tint_msl_subgroup_ballot();
+  let pred = true;
+  let x : vec4u = tint_msl_subgroup_ballot(pred);
 }
 )";
 

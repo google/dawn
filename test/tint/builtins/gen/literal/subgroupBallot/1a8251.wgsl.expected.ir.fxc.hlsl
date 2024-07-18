@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/msl/writer/printer/printer.cc:989 internal compiler error: TINT_UNREACHABLE unhandled: subgroupBallot
+../../src/tint/lang/hlsl/writer/printer/printer.cc:1002 internal compiler error: TINT_UNREACHABLE unhandled: subgroupBallot
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *
