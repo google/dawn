@@ -1962,5 +1962,24 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinSubgroupBallot) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.vec4<u32>(), core::BuiltinFn::kSubgroupBallot, true));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+[numthreads(1, 1, 1)]
+void foo() {
+  uint4 x = WaveActiveBallot(true);
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

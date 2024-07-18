@@ -990,6 +990,9 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kReverseBits:  // uint
                 out << "reversebits";
                 break;
+            case core::BuiltinFn::kSubgroupBallot:
+                out << "WaveActiveBallot";
+                break;
             case core::BuiltinFn::kSubgroupBroadcast:
                 out << "WaveReadLaneAt";
                 break;
