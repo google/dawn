@@ -162,18 +162,23 @@ INSTANTIATE_TEST_SUITE_P(
                          // f32 -> i32
                          Success(0_f, 0_i),
                          Success(1_f, 1_i),
+                         Success(1.9_f, 1_i),
+                         Success(-1.9_f, -1_i),
                          Success(2_f, 2_i),
                          Success(1e20_f, i32::Highest()),
                          Success(-1e20_f, i32::Lowest()),
                          // f32 -> u32
                          Success(0_f, 0_i),
                          Success(1_f, 1_i),
+                         Success(1.9_f, 1_i),
                          Success(-1_f, u32::Lowest()),
                          Success(2_f, 2_i),
                          Success(1e20_f, u32::Highest()),
                          Success(-1e20_f, u32::Lowest()),
                          // f32 -> bool
                          Success(0_f, false),
+                         Success(0.1_f, true),
+                         Success(0.9_f, true),
                          Success(1_f, true),
                          Success(-1_f, true),
                          Success(2_f, true),
@@ -211,7 +216,9 @@ INSTANTIATE_TEST_SUITE_P(
                          // abstract-float -> i32
                          Success(0.0_a, 0_i),
                          Success(1.0_a, 1_i),
+                         Success(1.9_a, 1_i),
                          Success(-1.0_a, -1_i),
+                         Success(-1.9_a, -1_i),
                          Success(AFloat(0x7fffffff), i32::Highest()),
                          Success(-AFloat(0x80000000), i32::Lowest()),
                          Success(AFloat(0x80000000), i32::Highest()),  // overflow
@@ -219,6 +226,7 @@ INSTANTIATE_TEST_SUITE_P(
                          // abstract-float -> u32
                          Success(0.0_a, 0_u),
                          Success(1.0_a, 1_u),
+                         Success(1.9_a, 1_u),
                          Success(AFloat(0xffffffff), 0xffffffff_u),
                          Success(AFloat(0x100000000), u32::Highest()),  // overflow
                          Success(AFloat(-1), u32::Lowest()),            // underflow
@@ -232,6 +240,7 @@ INSTANTIATE_TEST_SUITE_P(
                          Unrepresentable<f32>(-1e40_a),
                          // abstract-float -> bool
                          Success(0.0_a, false),
+                         Success(0.1_a, true),
                          Success(1.0_a, true),
                          Success(AFloat(0xffffffff), true),
                          Success(AFloat(0x100000000), true),
