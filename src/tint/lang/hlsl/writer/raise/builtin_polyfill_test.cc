@@ -270,8 +270,8 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastToF16) {
     %12:u32 = and %11, 65535u
     %13:f32 = hlsl.f16tof32 %12
     %t_high:f32 = let %13
-    %15:f16 = swizzle %t_low, x
-    %16:f16 = swizzle %t_high, x
+    %15:f16 = convert %t_low
+    %16:f16 = convert %t_high
     %17:vec2<f16> = construct %15, %16
     ret %17
   }
@@ -383,12 +383,16 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BitcastToVec4F16) {
     %17:vec2<u32> = and %16, %mask
     %18:vec2<f32> = hlsl.f16tof32 %17
     %t_high:vec2<f32> = let %18
-    %20:f16 = swizzle %t_low, x
-    %21:f16 = swizzle %t_high, x
-    %22:f16 = swizzle %t_low, y
-    %23:f16 = swizzle %t_high, y
-    %24:vec4<f16> = construct %20, %21, %22, %23
-    ret %24
+    %20:f32 = swizzle %t_low, x
+    %21:f32 = swizzle %t_high, x
+    %22:f16 = convert %20
+    %23:f16 = convert %21
+    %24:f32 = swizzle %t_low, y
+    %25:f16 = convert %24
+    %26:f32 = swizzle %t_high, y
+    %27:f16 = convert %26
+    %28:vec4<f16> = construct %22, %23, %25, %27
+    ret %28
   }
 }
 )";

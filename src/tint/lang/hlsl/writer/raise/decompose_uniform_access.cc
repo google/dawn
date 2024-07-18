@@ -290,10 +290,10 @@ struct State {
     }
 
     // Creates the appropriate load instructions for the given result type.
-    core::ir::Call* MakeLoad(core::ir::Instruction* inst,
-                             core::ir::Var* var,
-                             const core::type::Type* result_ty,
-                             core::ir::Value* byte_idx) {
+    core::ir::Instruction* MakeLoad(core::ir::Instruction* inst,
+                                    core::ir::Var* var,
+                                    const core::type::Type* result_ty,
+                                    core::ir::Value* byte_idx) {
         if (result_ty->is_float_scalar() || result_ty->is_integer_scalar()) {
             return MakeScalarLoad(var, result_ty, byte_idx);
         }
@@ -327,26 +327,33 @@ struct State {
         auto* vec_idx = CalculateVectorOffset(byte_idx);
         core::ir::Instruction* load = b.LoadVectorElement(access, vec_idx);
         if (result_ty->Is<core::type::F16>()) {
-            if (auto* cnst = byte_idx->As<core::ir::Constant>()) {
-                if (cnst->Value()->ValueAs<uint32_t>() % 4 != 0) {
-                    load = b.ShiftRight(ty.u32(), load, 16_u);
-                }
-            } else {
-                auto* false_ = b.Value(16_u);
-                auto* true_ = b.Value(0_u);
-                auto* cond = b.Equal(ty.bool_(), b.Modulo(ty.u32(), byte_idx, 4_u), 0_u);
-
-                Vector<core::ir::Value*, 3> args{false_, true_, cond->Result(0)};
-                auto* shift_amt = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
-                    b.InstructionResult(ty.u32()), args);
-                b.Append(shift_amt);
-
-                load = b.ShiftRight(ty.u32(), load, shift_amt);
-            }
-            load = b.Call<hlsl::ir::BuiltinCall>(ty.f32(), hlsl::BuiltinFn::kF16Tof32, load);
-            return b.Convert(result_ty, load);
+            return MakeScalarLoadF16(load, result_ty, byte_idx);
         }
         return b.Bitcast(result_ty, load);
+    }
+
+    core::ir::Call* MakeScalarLoadF16(core::ir::Instruction* load,
+                                      const core::type::Type* result_ty,
+                                      core::ir::Value* byte_idx) {
+        // Handle F16
+        if (auto* cnst = byte_idx->As<core::ir::Constant>()) {
+            if (cnst->Value()->ValueAs<uint32_t>() % 4 != 0) {
+                load = b.ShiftRight(ty.u32(), load, 16_u);
+            }
+        } else {
+            auto* false_ = b.Value(16_u);
+            auto* true_ = b.Value(0_u);
+            auto* cond = b.Equal(ty.bool_(), b.Modulo(ty.u32(), byte_idx, 4_u), 0_u);
+
+            Vector<core::ir::Value*, 3> args{false_, true_, cond->Result(0)};
+            auto* shift_amt = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
+                b.InstructionResult(ty.u32()), args);
+            b.Append(shift_amt);
+
+            load = b.ShiftRight(ty.u32(), load, shift_amt);
+        }
+        load = b.Call<hlsl::ir::BuiltinCall>(ty.f32(), hlsl::BuiltinFn::kF16Tof32, load);
+        return b.Convert(result_ty, load);
     }
 
     // When loading a vector we have to take the alignment into account to determine which part of
@@ -366,11 +373,15 @@ struct State {
     // * A 2-element row, we have to decide if we want the `xy` or `zw` element. We have a minimum
     //   alignment of 8-bytes as per the WGSL spec. So if the `vector_idx != 2` is `0` then we
     //   access the `.xy` component, otherwise it is in the `.zw` component.
-    core::ir::Call* MakeVectorLoad(core::ir::Var* var,
-                                   const core::type::Vector* result_ty,
-                                   core::ir::Value* byte_idx) {
+    core::ir::Instruction* MakeVectorLoad(core::ir::Var* var,
+                                          const core::type::Vector* result_ty,
+                                          core::ir::Value* byte_idx) {
         auto* array_idx = OffsetValueToArrayIndex(byte_idx);
         auto* access = b.Access(ty.ptr(uniform, ty.vec4<u32>()), var, array_idx);
+
+        if (result_ty->DeepestElement()->Is<core::type::F16>()) {
+            return MakeVectorLoadF16(access, result_ty, byte_idx);
+        }
 
         core::ir::Instruction* load = nullptr;
         if (result_ty->Width() == 4) {
@@ -404,6 +415,52 @@ struct State {
             TINT_UNREACHABLE();
         }
         return b.Bitcast(result_ty, load);
+    }
+
+    core::ir::Instruction* MakeVectorLoadF16(core::ir::Access* access,
+                                             const core::type::Vector* result_ty,
+                                             core::ir::Value* byte_idx) {
+        core::ir::Instruction* load = nullptr;
+        // Vec4 ends up being the same as a bitcast of vec2<u32> to a vec4<f16>
+        if (result_ty->Width() == 4) {
+            return b.Bitcast(result_ty, b.Load(access));
+        }
+
+        // A vec3 will be stored as a vec4, so we can bitcast as if we're a vec4 and swizzle out the
+        // last element
+        if (result_ty->Width() == 3) {
+            auto* bc = b.Bitcast(ty.vec4(result_ty->type()), b.Load(access));
+            return b.Swizzle(result_ty, bc, {0, 1, 2});
+        }
+
+        // Vec2 ends up being the same as a bitcast u32 to vec2<f16>
+        if (result_ty->Width() == 2) {
+            auto* vec_idx = CalculateVectorOffset(byte_idx);
+            if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
+                if (cnst->Value()->ValueAs<uint32_t>() == 2u) {
+                    load = b.Swizzle(ty.u32(), b.Load(access), {2});
+                } else {
+                    load = b.Swizzle(ty.u32(), b.Load(access), {0});
+                }
+            } else {
+                auto* ubo = b.Load(access);
+                // if vec_idx == 2 -> zw
+                auto* sw_lhs = b.Swizzle(ty.u32(), ubo, {2});
+                // else -> xy
+                auto* sw_rhs = b.Swizzle(ty.u32(), ubo, {0});
+                auto* cond = b.Equal(ty.bool_(), vec_idx, 2_u);
+
+                Vector<core::ir::Value*, 3> args{sw_rhs->Result(0), sw_lhs->Result(0),
+                                                 cond->Result(0)};
+
+                load = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
+                    b.InstructionResult(ty.u32()), args);
+                b.Append(load);
+            }
+            return b.Bitcast(result_ty, load);
+        }
+
+        TINT_UNREACHABLE();
     }
 
     // Creates a load function for the given `var` and `matrix` combination. Essentially creates

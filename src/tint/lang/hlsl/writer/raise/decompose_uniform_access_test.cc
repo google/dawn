@@ -438,7 +438,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, DISABLED_UniformAccessMat2x3F16) {
+TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessMat2x3F16) {
     auto* var = b.Var<uniform, mat2x3<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -446,10 +446,8 @@ TEST_F(HlslWriterDecomposeUniformAccessTest, DISABLED_UniformAccessMat2x3F16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
-        b.Let("b", b.LoadVectorElement(var, 0_u));
-        b.Let("c", b.LoadVectorElement(var, 1_u));
-        b.Let("d", b.LoadVectorElement(var, 2_u));
-        b.Let("e", b.LoadVectorElement(var, 3_u));
+        b.Let("b", b.Load(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u)));
+        b.Let("c", b.LoadVectorElement(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u), 2_u));
         b.Return(func);
     });
 
@@ -460,16 +458,14 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec4<f16> = load %v
-    %a:vec4<f16> = let %3
-    %5:f16 = load_vector_element %v, 0u
-    %b:f16 = let %5
-    %7:f16 = load_vector_element %v, 1u
-    %c:f16 = let %7
-    %9:f16 = load_vector_element %v, 2u
-    %d:f16 = let %9
-    %11:f16 = load_vector_element %v, 3u
-    %e:f16 = let %11
+    %3:mat2x3<f16> = load %v
+    %a:mat2x3<f16> = let %3
+    %5:ptr<uniform, vec3<f16>, read> = access %v, 1u
+    %6:vec3<f16> = load %5
+    %b:vec3<f16> = let %6
+    %8:ptr<uniform, vec3<f16>, read> = access %v, 1u
+    %9:f16 = load_vector_element %8, 2u
+    %c:f16 = let %9
     ret
   }
 }
@@ -478,22 +474,41 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+  %v:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:vec4<f16> = %v.Load4F16 0u
-    %a:vec4<f16> = let %3
-    %5:f16 = %v.LoadF16 0u
-    %b:f16 = let %5
-    %7:f16 = %v.LoadF16 2u
-    %c:f16 = let %7
-    %9:f16 = %v.LoadF16 4u
-    %d:f16 = let %9
-    %11:f16 = %v.LoadF16 6u
-    %e:f16 = let %11
+    %3:mat2x3<f16> = call %4, 0u
+    %a:mat2x3<f16> = let %3
+    %6:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %7:vec4<u32> = load %6
+    %8:vec4<f16> = bitcast %7
+    %9:vec3<f16> = swizzle %8, xyz
+    %b:vec3<f16> = let %9
+    %11:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %12:u32 = load_vector_element %11, 3u
+    %13:f32 = hlsl.f16tof32 %12
+    %14:f16 = convert %13
+    %c:f16 = let %14
     ret
+  }
+}
+%4 = func(%start_byte_offset:u32):mat2x3<f16> {
+  $B3: {
+    %17:u32 = div %start_byte_offset, 16u
+    %18:ptr<uniform, vec4<u32>, read> = access %v, %17
+    %19:vec4<u32> = load %18
+    %20:vec4<f16> = bitcast %19
+    %21:vec3<f16> = swizzle %20, xyz
+    %22:u32 = add 8u, %start_byte_offset
+    %23:u32 = div %22, 16u
+    %24:ptr<uniform, vec4<u32>, read> = access %v, %23
+    %25:vec4<u32> = load %24
+    %26:vec4<f16> = bitcast %25
+    %27:vec3<f16> = swizzle %26, xyz
+    %28:mat2x3<f16> = construct %21, %27
+    ret %28
   }
 }
 )";

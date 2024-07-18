@@ -526,9 +526,11 @@ struct State {
                         },
                         TINT_ICE_ON_NO_MATCH);
 
+                    bool src_vec = src_type->Is<core::type::Vector>();
+
                     core::ir::Value* mask = nullptr;
                     core::ir::Value* shift = nullptr;
-                    if (src_type->Is<core::type::Vector>()) {
+                    if (src_vec) {
                         mask = b.Let("mask", b.Splat(uint_ty, 0xffff_u))->Result(0);
                         shift = b.Let("shift", b.Splat(uint_ty, 16_u))->Result(0);
                     } else {
@@ -544,13 +546,26 @@ struct State {
                     auto* t_high = b.Let(
                         "t_high", b.Call<hlsl::ir::BuiltinCall>(float_ty, BuiltinFn::kF16Tof32, h));
 
-                    auto* x = b.Swizzle(ty.f16(), t_low, {0_u});
-                    auto* y = b.Swizzle(ty.f16(), t_high, {0_u});
-                    if (dst_type->As<core::type::Vector>()->Width() == 2) {
+                    core::ir::Instruction* x = nullptr;
+                    core::ir::Instruction* y = nullptr;
+                    if (src_vec) {
+                        x = b.Swizzle(ty.f32(), t_low, {0_u});
+                        y = b.Swizzle(ty.f32(), t_high, {0_u});
+                    } else {
+                        x = t_low;
+                        y = t_high;
+                    }
+                    x = b.Convert(ty.f16(), x);
+                    y = b.Convert(ty.f16(), y);
+
+                    auto dst_width = dst_type->As<core::type::Vector>()->Width();
+                    TINT_ASSERT(dst_width == 2 || dst_width == 4);
+
+                    if (dst_width == 2) {
                         b.Return(f, b.Construct(dst_type, x, y));
                     } else {
-                        auto* z = b.Swizzle(ty.f16(), t_low, {1_u});
-                        auto* w = b.Swizzle(ty.f16(), t_high, {1_u});
+                        auto* z = b.Convert(ty.f16(), b.Swizzle(ty.f32(), t_low, {1_u}));
+                        auto* w = b.Convert(ty.f16(), b.Swizzle(ty.f32(), t_high, {1_u}));
                         b.Return(f, b.Construct(dst_type, x, y, z, w));
                     }
                 });
