@@ -92,7 +92,7 @@ static void PrintTypeList(StyledText& ss, VectorRef<const core::type::Type*> typ
             ss << ", ";
         }
         first = false;
-        ss << style::Type(arg->FriendlyName());
+        ss << style::Type((arg != nullptr) ? arg->FriendlyName() : "undef");
     }
 }
 
