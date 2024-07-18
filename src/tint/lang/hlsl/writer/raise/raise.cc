@@ -97,9 +97,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // TODO(dsinclair): Add missing polyfills
 
         core::ir::transform::BuiltinPolyfillConfig core_polyfills{};
-        // core_polyfills.acosh = ast::transform::BuiltinPolyfill::Level::kFull;
-        // core_polyfills.asinh = true;
-        // core_polyfills.atanh = ast::transform::BuiltinPolyfill::Level::kFull;
         // core_polyfills.bitshift_modulo = true;
         core_polyfills.clamp_int = true;
         core_polyfills.dot_4x8_packed = options.polyfill_dot_4x8_packed;

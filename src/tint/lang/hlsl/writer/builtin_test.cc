@@ -1905,5 +1905,62 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinAsinh) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", .25_f);
+        b.Let("a", b.Call(ty.f32(), core::BuiltinFn::kAsinh, b.Load(u)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  float u = 0.25f;
+  float v = u;
+  float a = log((v + sqrt(((v * v) + 1.0f))));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinAcosh) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 1.25_h);
+        b.Let("a", b.Call(ty.f16(), core::BuiltinFn::kAcosh, b.Load(u)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  float16_t u = float16_t(1.25h);
+  float16_t v = u;
+  float16_t a = log((v + sqrt(((v * v) - float16_t(1.0h)))));
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinAtanh) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", .25_f);
+        b.Let("a", b.Call(ty.f32(), core::BuiltinFn::kAtanh, b.Load(u)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  float u = 0.25f;
+  float v = u;
+  float a = (log(((1.0f + v) / (1.0f - v))) * 0.5f);
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

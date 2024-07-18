@@ -2270,7 +2270,126 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8Clamp) {
 }
 )";
     Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, Asinh) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 0.25_f);
+        b.Let("a", b.Call(ty.f32(), core::BuiltinFn::kAsinh, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, f32, read_write> = var, 0.25f
+    %3:f32 = load %u
+    %4:f32 = asinh %3
+    %a:f32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, f32, read_write> = var, 0.25f
+    %3:f32 = load %u
+    %4:f32 = mul %3, %3
+    %5:f32 = add %4, 1.0f
+    %6:f32 = sqrt %5
+    %7:f32 = add %3, %6
+    %8:f32 = log %7
+    %a:f32 = let %8
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Acosh) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 1.25_h);
+        b.Let("a", b.Call(ty.f16(), core::BuiltinFn::kAcosh, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, f16, read_write> = var, 1.25h
+    %3:f16 = load %u
+    %4:f16 = acosh %3
+    %a:f16 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, f16, read_write> = var, 1.25h
+    %3:f16 = load %u
+    %4:f16 = mul %3, %3
+    %5:f16 = sub %4, 1.0h
+    %6:f16 = sqrt %5
+    %7:f16 = add %3, %6
+    %8:f16 = log %7
+    %a:f16 = let %8
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Atanh) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 0.25_f);
+        b.Let("a", b.Call(ty.f32(), core::BuiltinFn::kAtanh, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, f32, read_write> = var, 0.25f
+    %3:f32 = load %u
+    %4:f32 = atanh %3
+    %a:f32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, f32, read_write> = var, 0.25f
+    %3:f32 = load %u
+    %4:f32 = add 1.0f, %3
+    %5:f32 = sub 1.0f, %3
+    %6:f32 = div %4, %5
+    %7:f32 = log %6
+    %8:f32 = mul %7, 0.5f
+    %a:f32 = let %8
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
     EXPECT_EQ(expect, str());
 }
 
