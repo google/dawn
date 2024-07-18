@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
@@ -1207,6 +1209,352 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, QuantizeToF16) {
 }
 )";
     Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+struct AtomicData {
+    core::BuiltinFn fn;
+    const char* atomic;
+    const char* interlock;
+};
+[[maybe_unused]] std::ostream& operator<<(std::ostream& out, const AtomicData& data) {
+    out << data.interlock;
+    return out;
+}
+using HlslBuiltinPolyfillWorkgroupAtomic = core::ir::transform::TransformTestWithParam<AtomicData>;
+TEST_P(HlslBuiltinPolyfillWorkgroupAtomic, Access) {
+    auto param = GetParam();
+    auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), param.fn, var, 123_i));
+        b.Return(func);
+    });
+
+    std::string src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:i32 = )" + std::string(param.atomic) +
+                      R"( %v, 123i
+    %x:i32 = let %3
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    std::string expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:void = hlsl.)" + std::string(param.interlock) +
+                         R"( %v, 123i, %3
+    %5:i32 = load %3
+    %x:i32 = let %5
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    HlslWriter_BuiltinPolyfillTest,
+    HlslBuiltinPolyfillWorkgroupAtomic,
+    testing::Values(AtomicData{core::BuiltinFn::kAtomicAdd, "atomicAdd", "InterlockedAdd"},
+                    AtomicData{core::BuiltinFn::kAtomicMax, "atomicMax", "InterlockedMax"},
+                    AtomicData{core::BuiltinFn::kAtomicMin, "atomicMin", "InterlockedMin"},
+                    AtomicData{core::BuiltinFn::kAtomicAnd, "atomicAnd", "InterlockedAnd"},
+                    AtomicData{core::BuiltinFn::kAtomicOr, "atomicOr", "InterlockedOr"},
+                    AtomicData{core::BuiltinFn::kAtomicXor, "atomicXor", "InterlockedXor"},
+                    AtomicData{core::BuiltinFn::kAtomicExchange, "atomicExchange",
+                               "InterlockedExchange"}));
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, BuiltinWorkgroupAtomicStore) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore,
+               b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
+    %4:void = atomicStore %3, 123i
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
+    %4:ptr<function, i32, read_write> = var, 0i
+    %5:void = hlsl.InterlockedExchange %3, 123i, %4
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, BuiltinWorkgroupAtomicLoad) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
+    %4:i32 = atomicLoad %3
+    %x:i32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
+    %4:ptr<function, i32, read_write> = var, 0i
+    %5:void = hlsl.InterlockedOr %3, 0i, %4
+    %6:i32 = load %4
+    %x:i32 = let %6
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, BuiltinWorkgroupAtomicSub) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicSub,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
+    %4:i32 = atomicSub %3, 123i
+    %x:i32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
+    %4:ptr<function, i32, read_write> = var, 0i
+    %5:i32 = negation 123i
+    %6:void = hlsl.InterlockedAdd %3, %5, %4
+    %7:i32 = load %4
+    %x:i32 = let %7
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, BuiltinWorkgroupAtomicCompareExchangeWeak) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
+                          core::BuiltinFn::kAtomicCompareExchangeWeak,
+                          b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i,
+                          345_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
+    %4:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %3, 123i, 345i
+    %x:__atomic_compare_exchange_result_i32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<workgroup, atomic<i32>, read_write> = access %v, 1u
+    %4:ptr<function, i32, read_write> = var, 0i
+    %5:void = hlsl.InterlockedCompareExchange %3, 123i, 345i, %4
+    %6:i32 = load %4
+    %7:bool = eq %6, 123i
+    %8:__atomic_compare_exchange_result_i32 = construct %6, %7
+    %x:__atomic_compare_exchange_result_i32 = let %8
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
 
     EXPECT_EQ(expect, str());
 }
@@ -1497,7 +1845,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xU8) {
 }
 )";
     Run(BuiltinPolyfill);
-
     EXPECT_EQ(expect, str());
 }
 

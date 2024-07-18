@@ -87,6 +87,17 @@ struct State {
             }
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
+                    case core::BuiltinFn::kAtomicAdd:
+                    case core::BuiltinFn::kAtomicSub:
+                    case core::BuiltinFn::kAtomicMin:
+                    case core::BuiltinFn::kAtomicMax:
+                    case core::BuiltinFn::kAtomicAnd:
+                    case core::BuiltinFn::kAtomicOr:
+                    case core::BuiltinFn::kAtomicXor:
+                    case core::BuiltinFn::kAtomicLoad:
+                    case core::BuiltinFn::kAtomicStore:
+                    case core::BuiltinFn::kAtomicExchange:
+                    case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
@@ -133,6 +144,39 @@ struct State {
         // Replace the builtin calls that we found
         for (auto* call : call_worklist) {
             switch (call->Func()) {
+                case core::BuiltinFn::kAtomicAdd:
+                    AtomicAdd(call);
+                    break;
+                case core::BuiltinFn::kAtomicSub:
+                    AtomicSub(call);
+                    break;
+                case core::BuiltinFn::kAtomicMin:
+                    AtomicMin(call);
+                    break;
+                case core::BuiltinFn::kAtomicMax:
+                    AtomicMax(call);
+                    break;
+                case core::BuiltinFn::kAtomicAnd:
+                    AtomicAnd(call);
+                    break;
+                case core::BuiltinFn::kAtomicOr:
+                    AtomicOr(call);
+                    break;
+                case core::BuiltinFn::kAtomicXor:
+                    AtomicXor(call);
+                    break;
+                case core::BuiltinFn::kAtomicLoad:
+                    AtomicLoad(call);
+                    break;
+                case core::BuiltinFn::kAtomicStore:
+                    AtomicStore(call);
+                    break;
+                case core::BuiltinFn::kAtomicExchange:
+                    AtomicExchange(call);
+                    break;
+                case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                    AtomicCompareExchangeWeak(call);
+                    break;
                 case core::BuiltinFn::kQuantizeToF16:
                     QuantizeToF16(call);
                     break;
@@ -188,6 +232,109 @@ struct State {
                     TINT_UNREACHABLE();
             }
         }
+    }
+
+    void Interlocked(core::ir::CoreBuiltinCall* call, BuiltinFn fn) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            b.Call<hlsl::ir::BuiltinCall>(ty.void_(), fn, args[0], args[1], original_value);
+            b.LoadWithResult(call->DetachResult(), original_value)->Result(0);
+        });
+        call->Destroy();
+    }
+
+    void AtomicAnd(core::ir::CoreBuiltinCall* call) {
+        Interlocked(call, BuiltinFn::kInterlockedAnd);
+    }
+
+    void AtomicOr(core::ir::CoreBuiltinCall* call) { Interlocked(call, BuiltinFn::kInterlockedOr); }
+
+    void AtomicXor(core::ir::CoreBuiltinCall* call) {
+        Interlocked(call, BuiltinFn::kInterlockedXor);
+    }
+
+    void AtomicMin(core::ir::CoreBuiltinCall* call) {
+        Interlocked(call, BuiltinFn::kInterlockedMin);
+    }
+
+    void AtomicMax(core::ir::CoreBuiltinCall* call) {
+        Interlocked(call, BuiltinFn::kInterlockedMax);
+    }
+
+    void AtomicAdd(core::ir::CoreBuiltinCall* call) {
+        Interlocked(call, BuiltinFn::kInterlockedAdd);
+    }
+
+    void AtomicExchange(core::ir::CoreBuiltinCall* call) {
+        Interlocked(call, BuiltinFn::kInterlockedExchange);
+    }
+
+    // An atomic sub is a negated atomic add
+    void AtomicSub(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            auto* val = b.Negation(type, args[1]);
+            b.Call<hlsl::ir::BuiltinCall>(ty.void_(), BuiltinFn::kInterlockedAdd, args[0], val,
+                                          original_value);
+            b.LoadWithResult(call->DetachResult(), original_value)->Result(0);
+        });
+        call->Destroy();
+    }
+
+    void AtomicCompareExchangeWeak(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            auto* cmp = args[1];
+            b.Call<hlsl::ir::BuiltinCall>(ty.void_(), BuiltinFn::kInterlockedCompareExchange,
+                                          args[0], cmp, args[2], original_value);
+
+            auto* o = b.Load(original_value);
+            b.ConstructWithResult(call->DetachResult(), o, b.Equal(ty.bool_(), o, cmp));
+        });
+        call->Destroy();
+    }
+
+    // An atomic load is an Or with 0
+    void AtomicLoad(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        auto* type = call->Result(0)->Type();
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            b.Call<hlsl::ir::BuiltinCall>(ty.void_(), BuiltinFn::kInterlockedOr, args[0],
+                                          b.Zero(type), original_value);
+            b.LoadWithResult(call->DetachResult(), original_value)->Result(0);
+        });
+        call->Destroy();
+    }
+
+    void AtomicStore(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            b.Call<hlsl::ir::BuiltinCall>(ty.void_(), BuiltinFn::kInterlockedExchange, args[0],
+                                          args[1], original_value);
+        });
+        call->Destroy();
     }
 
     void Select(core::ir::CoreBuiltinCall* call) {
