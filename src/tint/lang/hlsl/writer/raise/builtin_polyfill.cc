@@ -100,6 +100,14 @@ struct State {
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     case core::BuiltinFn::kDot4I8Packed:
                     case core::BuiltinFn::kDot4U8Packed:
+                    case core::BuiltinFn::kPack2X16Float:
+                    case core::BuiltinFn::kPack2X16Snorm:
+                    case core::BuiltinFn::kPack2X16Unorm:
+                    case core::BuiltinFn::kPack4X8Snorm:
+                    case core::BuiltinFn::kPack4X8Unorm:
+                    case core::BuiltinFn::kPack4XI8:
+                    case core::BuiltinFn::kPack4XU8:
+                    case core::BuiltinFn::kPack4XI8Clamp:
                     case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
@@ -184,6 +192,30 @@ struct State {
                     break;
                 case core::BuiltinFn::kDot4U8Packed:
                     Dot4U8Packed(call);
+                    break;
+                case core::BuiltinFn::kPack2X16Float:
+                    Pack2x16Float(call);
+                    break;
+                case core::BuiltinFn::kPack2X16Snorm:
+                    Pack2x16Snorm(call);
+                    break;
+                case core::BuiltinFn::kPack2X16Unorm:
+                    Pack2x16Unorm(call);
+                    break;
+                case core::BuiltinFn::kPack4X8Snorm:
+                    Pack4x8Snorm(call);
+                    break;
+                case core::BuiltinFn::kPack4X8Unorm:
+                    Pack4x8Unorm(call);
+                    break;
+                case core::BuiltinFn::kPack4XI8:
+                    Pack4xI8(call);
+                    break;
+                case core::BuiltinFn::kPack4XU8:
+                    Pack4xU8(call);
+                    break;
+                case core::BuiltinFn::kPack4XI8Clamp:
+                    Pack4xI8Clamp(call);
                     break;
                 case core::BuiltinFn::kQuantizeToF16:
                     QuantizeToF16(call);
@@ -893,6 +925,21 @@ struct State {
         call->Destroy();
     }
 
+    void Pack2x16Float(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* bc =
+                b.Call<hlsl::ir::BuiltinCall>(ty.vec2<u32>(), hlsl::BuiltinFn::kF32Tof16, args[0]);
+
+            auto* lower = b.Swizzle(ty.u32(), bc, {0});
+            auto* upper = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), bc, {1}), 16_u);
+            auto* res = b.Or(ty.u32(), lower, upper);
+            call->Result(0)->ReplaceAllUsesWith(res->Result(0));
+        });
+        call->Destroy();
+    }
+
     void Unpack2x16Float(core::ir::CoreBuiltinCall* call) {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
@@ -902,6 +949,27 @@ struct State {
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kF16Tof32, conv);
+        });
+        call->Destroy();
+    }
+
+    void Pack2x16Snorm(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* clamp_lower = b.Splat(ty.vec2<f32>(), -1_f);
+            auto* clamp_upper = b.Splat(ty.vec2<f32>(), 1_f);
+            auto* clamp =
+                b.Call(ty.vec2<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+            auto* mul = b.Multiply(ty.vec2<f32>(), clamp, 32767_f);
+            auto* round = b.Call(ty.vec2<f32>(), core::BuiltinFn::kRound, mul);
+            auto* conv = b.Convert(ty.vec2<i32>(), round);
+            auto* res = b.And(ty.vec2<i32>(), conv, b.Splat(ty.vec2<i32>(), 0xffff_i));
+
+            auto* lower = b.Swizzle(ty.i32(), res, {0});
+            auto* upper = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), res, {1}), 16_u);
+
+            b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(), hlsl::BuiltinFn::kAsuint,
+                                                    b.Or(ty.i32(), lower, upper));
         });
         call->Destroy();
     }
@@ -925,6 +993,24 @@ struct State {
         call->Destroy();
     }
 
+    void Pack2x16Unorm(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* clamp_lower = b.Splat(ty.vec2<f32>(), 0_f);
+            auto* clamp_upper = b.Splat(ty.vec2<f32>(), 1_f);
+            auto* clamp =
+                b.Call(ty.vec2<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+            auto* mul = b.Multiply(ty.vec2<f32>(), clamp, 65535_f);
+            auto* round = b.Call(ty.vec2<f32>(), core::BuiltinFn::kRound, mul);
+            auto* conv = b.Convert(ty.vec2<u32>(), round);
+            auto* lower = b.Swizzle(ty.u32(), conv, {0});
+            auto* upper = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {1}), 16_u);
+            auto* result = b.Or(ty.u32(), lower, upper);
+            call->Result(0)->ReplaceAllUsesWith(result->Result(0));
+        });
+        call->Destroy();
+    }
+
     void Unpack2x16Unorm(core::ir::CoreBuiltinCall* call) {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
@@ -935,6 +1021,28 @@ struct State {
             auto* scale = b.Divide(ty.vec2<f32>(), flt_conv, 0xffff_f);
 
             call->Result(0)->ReplaceAllUsesWith(scale->Result(0));
+        });
+        call->Destroy();
+    }
+
+    void Pack4x8Snorm(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* clamp_lower = b.Splat(ty.vec4<f32>(), -1_f);
+            auto* clamp_upper = b.Splat(ty.vec4<f32>(), 1_f);
+            auto* clamp =
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+            auto* mul = b.Multiply(ty.vec4<f32>(), clamp, 127_f);
+            auto* round = b.Call(ty.vec4<f32>(), core::BuiltinFn::kRound, mul);
+            auto* conv = b.Convert(ty.vec4<i32>(), round);
+            auto* band = b.And(ty.vec4<i32>(), conv, b.Splat(ty.vec4<i32>(), 0xff_i));
+            auto* x = b.Swizzle(ty.i32(), band, {0});
+            auto* y = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), band, {1}), 8_u);
+            auto* z = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), band, {2}), 16_u);
+            auto* w = b.ShiftLeft(ty.i32(), b.Swizzle(ty.i32(), band, {3}), 24_u);
+            b.CallWithResult<hlsl::ir::BuiltinCall>(
+                call->DetachResult(), hlsl::BuiltinFn::kAsuint,
+                b.Or(ty.i32(), x, b.Or(ty.i32(), y, b.Or(ty.i32(), z, w))));
         });
         call->Destroy();
     }
@@ -958,6 +1066,27 @@ struct State {
         call->Destroy();
     }
 
+    void Pack4x8Unorm(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* clamp_lower = b.Splat(ty.vec4<f32>(), 0_f);
+            auto* clamp_upper = b.Splat(ty.vec4<f32>(), 1_f);
+            auto* clamp =
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kClamp, args[0], clamp_lower, clamp_upper);
+            auto* mul = b.Multiply(ty.vec4<f32>(), clamp, 255_f);
+            auto* round = b.Call(ty.vec4<f32>(), core::BuiltinFn::kRound, mul);
+            auto* conv = b.Convert(ty.vec4<u32>(), round);
+            auto* x = b.Swizzle(ty.u32(), conv, {0});
+            auto* y = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {1}), 8_u);
+            auto* z = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {2}), 16_u);
+            auto* w = b.ShiftLeft(ty.u32(), b.Swizzle(ty.u32(), conv, {3}), 24_u);
+            auto* res = b.Or(ty.u32(), x, b.Or(ty.u32(), y, b.Or(ty.u32(), z, w)));
+
+            call->Result(0)->ReplaceAllUsesWith(res->Result(0));
+        });
+        call->Destroy();
+    }
+
     void Unpack4x8Unorm(core::ir::CoreBuiltinCall* call) {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
@@ -975,6 +1104,18 @@ struct State {
         call->Destroy();
     }
 
+    void Pack4xI8(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* type = ty.Get<hlsl::type::Int8T4Packed>();
+            auto* packed = b.Call<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kPackS8, args[0]);
+            auto* conv = b.Convert(ty.u32(), packed);
+
+            call->Result(0)->ReplaceAllUsesWith(conv->Result(0));
+        });
+        call->Destroy();
+    }
+
     void Unpack4xI8(core::ir::CoreBuiltinCall* call) {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
@@ -983,6 +1124,18 @@ struct State {
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kUnpackS8S32, conv);
+        });
+        call->Destroy();
+    }
+
+    void Pack4xU8(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* type = ty.Get<hlsl::type::Uint8T4Packed>();
+            auto* packed = b.Call<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kPackU8, args[0]);
+            auto* conv = b.Convert(ty.u32(), packed);
+
+            call->Result(0)->ReplaceAllUsesWith(conv->Result(0));
         });
         call->Destroy();
     }
@@ -999,13 +1152,15 @@ struct State {
         call->Destroy();
     }
 
-    void QuantizeToF16(core::ir::CoreBuiltinCall* call) {
-        auto* u32_type = ty.match_width(ty.u32(), call->Result(0)->Type());
+    void Pack4xI8Clamp(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
         b.InsertBefore(call, [&] {
-            auto* inner = b.Call<hlsl::ir::BuiltinCall>(u32_type, hlsl::BuiltinFn::kF32Tof16,
-                                                        call->Args()[0]);
-            b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
-                                                    hlsl::BuiltinFn::kF16Tof32, inner);
+            auto* type = ty.Get<hlsl::type::Int8T4Packed>();
+            auto* packed =
+                b.Call<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kPackClampS8, args[0]);
+            auto* conv = b.Convert(ty.u32(), packed);
+
+            call->Result(0)->ReplaceAllUsesWith(conv->Result(0));
         });
         call->Destroy();
     }
@@ -1026,6 +1181,17 @@ struct State {
             auto* acc = b.Var("accumulator", b.Zero(ty.u32()));
             b.CallWithResult<hlsl::ir::BuiltinCall>(
                 call->DetachResult(), hlsl::BuiltinFn::kDot4AddU8Packed, args[0], args[1], acc);
+        });
+        call->Destroy();
+    }
+
+    void QuantizeToF16(core::ir::CoreBuiltinCall* call) {
+        auto* u32_type = ty.match_width(ty.u32(), call->Result(0)->Type());
+        b.InsertBefore(call, [&] {
+            auto* inner = b.Call<hlsl::ir::BuiltinCall>(u32_type, hlsl::BuiltinFn::kF32Tof16,
+                                                        call->Args()[0]);
+            b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
+                                                    hlsl::BuiltinFn::kF16Tof32, inner);
         });
         call->Destroy();
     }

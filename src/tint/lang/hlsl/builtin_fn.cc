@@ -74,6 +74,12 @@ const char* str(BuiltinFn i) {
             return "InterlockedXor";
         case BuiltinFn::kMul:
             return "mul";
+        case BuiltinFn::kPackU8:
+            return "pack_u8";
+        case BuiltinFn::kPackS8:
+            return "pack_s8";
+        case BuiltinFn::kPackClampS8:
+            return "pack_clamp_s8";
         case BuiltinFn::kSign:
             return "sign";
         case BuiltinFn::kTextureStore:

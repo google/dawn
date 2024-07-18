@@ -28,7 +28,7 @@
 #ifndef SRC_TINT_LANG_HLSL_INTRINSIC_TYPE_MATCHERS_H_
 #define SRC_TINT_LANG_HLSL_INTRINSIC_TYPE_MATCHERS_H_
 
-#include "src/tint/lang/core/intrinsic/table.h"
+#include "src/tint/lang/core/intrinsic/table.h"  // IWYU pragma: export
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/hlsl/type/byte_address_buffer.h"
 #include "src/tint/lang/hlsl/type/int8_t4_packed.h"
@@ -53,7 +53,7 @@ inline const type::ByteAddressBuffer* BuildByteAddressBuffer(core::intrinsic::Ma
 }
 
 inline bool MatchInt8T4Packed(core::intrinsic::MatchState&, const core::type::Type* ty) {
-    return ty->Is<type::Int8T4Packed>();
+    return ty->IsAnyOf<core::intrinsic::Any, type::Int8T4Packed>();
 }
 
 inline const type::Int8T4Packed* BuildInt8T4Packed(core::intrinsic::MatchState& state,
@@ -62,7 +62,7 @@ inline const type::Int8T4Packed* BuildInt8T4Packed(core::intrinsic::MatchState& 
 }
 
 inline bool MatchUint8T4Packed(core::intrinsic::MatchState&, const core::type::Type* ty) {
-    return ty->Is<type::Uint8T4Packed>();
+    return ty->IsAnyOf<core::intrinsic::Any, type::Uint8T4Packed>();
 }
 
 inline const type::Uint8T4Packed* BuildUint8T4Packed(core::intrinsic::MatchState& state,
