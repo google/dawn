@@ -29,10 +29,13 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/number.h"
+#include "src/tint/lang/core/type/builtin_structs.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -1306,7 +1309,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicStore) {
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicStore) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
@@ -1346,13 +1349,75 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = convert 16u
+    %5:void = %v.InterlockedExchange %4, 123i, %3
+    ret
+  }
+}
 )";
     Run(DecomposeStorageAccess);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicLoad) {
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicStoreDirect) {
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, var, 123_i);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:void = atomicStore %v, 123i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = convert 0u
+    %5:void = %v.InterlockedExchange %4, 123i, %3
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicLoad) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
@@ -1393,31 +1458,6 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-)";
-    Run(DecomposeStorageAccess);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicAdd) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicAdd,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
-        b.Return(func);
-    });
-
-    auto* src = R"(
 SB = struct @align(16) {
   padding:vec4<f32> @offset(0)
   a:atomic<i32> @offset(16)
@@ -1425,14 +1465,45 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, atomic<i32>, read_write> = access %v, 1u
-    %4:i32 = atomicAdd %3, 123i
-    %x:i32 = let %4
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = convert 16u
+    %5:void = %v.InterlockedOr %4, 0i, %3
+    %6:i32 = load %3
+    %x:i32 = let %6
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicLoadDirect) {
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad, var));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:i32 = atomicLoad %v
+    %x:i32 = let %3
     ret
   }
 }
@@ -1440,13 +1511,27 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = convert 0u
+    %5:void = %v.InterlockedOr %4, 0i, %3
+    %6:i32 = load %3
+    %x:i32 = let %6
+    ret
+  }
+}
 )";
     Run(DecomposeStorageAccess);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicSub) {
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicSub) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
@@ -1487,31 +1572,6 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-)";
-    Run(DecomposeStorageAccess);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicMax) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicMax,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
-        b.Return(func);
-    });
-
-    auto* src = R"(
 SB = struct @align(16) {
   padding:vec4<f32> @offset(0)
   a:atomic<i32> @offset(16)
@@ -1519,61 +1579,46 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, atomic<i32>, read_write> = access %v, 1u
-    %4:i32 = atomicMax %3, 123i
-    %x:i32 = let %4
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = negation 123i
+    %5:i32 = convert 16u
+    %6:void = %v.InterlockedAdd %5, %4, %3
+    %7:i32 = load %3
+    %x:i32 = let %7
     ret
   }
 }
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
 )";
     Run(DecomposeStorageAccess);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicMin) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicSubDirect) {
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicMin,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicSub, var, 123_i));
         b.Return(func);
     });
 
     auto* src = R"(
-SB = struct @align(16) {
-  padding:vec4<f32> @offset(0)
-  a:atomic<i32> @offset(16)
-  b:atomic<u32> @offset(20)
-}
-
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, atomic<i32>, read_write> = access %v, 1u
-    %4:i32 = atomicMin %3, 123i
-    %x:i32 = let %4
+    %3:i32 = atomicSub %v, 123i
+    %x:i32 = let %3
     ret
   }
 }
@@ -1581,210 +1626,33 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-)";
-    Run(DecomposeStorageAccess);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicAnd) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicAnd,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
-        b.Return(func);
-    });
-
-    auto* src = R"(
-SB = struct @align(16) {
-  padding:vec4<f32> @offset(0)
-  a:atomic<i32> @offset(16)
-  b:atomic<u32> @offset(20)
-}
-
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, atomic<i32>, read_write> = access %v, 1u
-    %4:i32 = atomicAnd %3, 123i
-    %x:i32 = let %4
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = negation 123i
+    %5:i32 = convert 0u
+    %6:void = %v.InterlockedAdd %5, %4, %3
+    %7:i32 = load %3
+    %x:i32 = let %7
     ret
   }
 }
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
 )";
     Run(DecomposeStorageAccess);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicOr) {
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicCompareExchangeWeak) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
                                                     {mod.symbols.New("b"), ty.atomic<u32>()},
                                                 });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicOr,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
-        b.Return(func);
-    });
-
-    auto* src = R"(
-SB = struct @align(16) {
-  padding:vec4<f32> @offset(0)
-  a:atomic<i32> @offset(16)
-  b:atomic<u32> @offset(20)
-}
-
-$B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
-}
-
-%foo = @fragment func():void {
-  $B2: {
-    %3:ptr<storage, atomic<i32>, read_write> = access %v, 1u
-    %4:i32 = atomicOr %3, 123i
-    %x:i32 = let %4
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-)";
-    Run(DecomposeStorageAccess);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicXor) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicXor,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 2_u), 123_i));
-        b.Return(func);
-    });
-
-    auto* src = R"(
-SB = struct @align(16) {
-  padding:vec4<f32> @offset(0)
-  a:atomic<i32> @offset(16)
-  b:atomic<u32> @offset(20)
-}
-
-$B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
-}
-
-%foo = @fragment func():void {
-  $B2: {
-    %3:ptr<storage, atomic<i32>, read_write> = access %v, 2u
-    %4:i32 = atomicXor %3, 123i
-    %x:i32 = let %4
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-)";
-    Run(DecomposeStorageAccess);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicExchange) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicExchange,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 2_u), 123_i));
-        b.Return(func);
-    });
-
-    auto* src = R"(
-SB = struct @align(16) {
-  padding:vec4<f32> @offset(0)
-  a:atomic<i32> @offset(16)
-  b:atomic<u32> @offset(20)
-}
-
-$B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
-}
-
-%foo = @fragment func():void {
-  $B2: {
-    %3:ptr<storage, atomic<i32>, read_write> = access %v, 2u
-    %4:i32 = atomicExchange %3, 123i
-    %x:i32 = let %4
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-)";
-    Run(DecomposeStorageAccess);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicCompareExchangeWeak) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* out = ty.Struct(
-        mod.symbols.New("__atomic_compare_exchange_result"),
-        {{mod.symbols.New("old_value"), ty.i32()}, {mod.symbols.New("exchanged"), ty.bool_()}});
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
@@ -1793,7 +1661,8 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, DISABLED_StorageAtomicCompareExchan
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("x",
-              b.Call(out, core::BuiltinFn::kAtomicCompareExchangeWeak,
+              b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
+                     core::BuiltinFn::kAtomicCompareExchangeWeak,
                      b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i, 345_i));
         b.Return(func);
     });
@@ -1804,7 +1673,8 @@ SB = struct @align(16) {
   a:atomic<i32> @offset(16)
   b:atomic<u32> @offset(20)
 }
-__atomic_compare_exchange_result = struct @align(4) {
+
+__atomic_compare_exchange_result_i32 = struct @align(4) {
   old_value:i32 @offset(0)
   exchanged:bool @offset(4)
 }
@@ -1816,8 +1686,8 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<storage, atomic<i32>, read_write> = access %v, 1u
-    %4:__atomic_compare_exchange_result = atomicCompareExchangeWeak %3, 123i, 345i
-    %x:__atomic_compare_exchange_result = let %4
+    %4:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %3, 123i, 345i
+    %x:__atomic_compare_exchange_result_i32 = let %4
     ret
   }
 }
@@ -1825,11 +1695,242 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = convert 16u
+    %5:void = %v.InterlockedCompareExchange %4, 123i, 345i, %3
+    %6:i32 = load %3
+    %7:bool = eq %6, 123i
+    %8:__atomic_compare_exchange_result_i32 = construct %6, %7
+    %x:__atomic_compare_exchange_result_i32 = let %8
+    ret
+  }
+}
 )";
     Run(DecomposeStorageAccess);
 
     EXPECT_EQ(expect, str());
 }
+
+TEST_F(HlslWriterDecomposeStorageAccessTest, StorageAtomicCompareExchangeWeakDirect) {
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
+                          core::BuiltinFn::kAtomicCompareExchangeWeak, var, 123_i, 345_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<storage, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %v, 123i, 345i
+    %x:__atomic_compare_exchange_result_i32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = convert 0u
+    %5:void = %v.InterlockedCompareExchange %4, 123i, 345i, %3
+    %6:i32 = load %3
+    %7:bool = eq %6, 123i
+    %8:__atomic_compare_exchange_result_i32 = construct %6, %7
+    %x:__atomic_compare_exchange_result_i32 = let %8
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+
+    EXPECT_EQ(expect, str());
+}
+
+struct AtomicData {
+    core::BuiltinFn fn;
+    const char* atomic_name;
+    const char* interlock;
+};
+[[maybe_unused]] std::ostream& operator<<(std::ostream& out, const AtomicData& data) {
+    out << data.interlock;
+    return out;
+}
+using DecomposeBuiltinAtomic = core::ir::transform::TransformTestWithParam<AtomicData>;
+TEST_P(DecomposeBuiltinAtomic, IndirectAccess) {
+    auto params = GetParam();
+
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), params.fn,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    auto src = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, atomic<i32>, read_write> = access %v, 1u
+    %4:i32 = )" +
+               std::string(params.atomic_name) + R"( %3, 123i
+    %x:i32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto expect = R"(
+SB = struct @align(16) {
+  padding:vec4<f32> @offset(0)
+  a:atomic<i32> @offset(16)
+  b:atomic<u32> @offset(20)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, i32, read_write> = var, 0i
+    %4:i32 = convert 16u
+    %5:void = %v.)" +
+                  std::string(params.interlock) + R"( %4, 123i, %3
+    %6:i32 = load %3
+    %x:i32 = let %6
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(DecomposeBuiltinAtomic, DirectAccess) {
+    auto param = GetParam();
+
+    auto* var = b.Var("v", storage, ty.atomic<u32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), param.fn, var, 123_u));
+        b.Return(func);
+    });
+
+    auto src = R"(
+$B1: {  # root
+  %v:ptr<storage, atomic<u32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = )" +
+               std::string(param.atomic_name) + R"( %v, 123u
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto expect = R"(
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<function, u32, read_write> = var, 0u
+    %4:u32 = convert 0u
+    %5:void = %v.)" +
+                  std::string(param.interlock) + R"( %4, 123u, %3
+    %6:u32 = load %3
+    %x:u32 = let %6
+    ret
+  }
+}
+)";
+    Run(DecomposeStorageAccess);
+
+    EXPECT_EQ(expect, str());
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    HlslWriterDecomposeStorageAccessTest,
+    DecomposeBuiltinAtomic,
+    testing::Values(AtomicData{core::BuiltinFn::kAtomicAdd, "atomicAdd", "InterlockedAdd"},
+                    AtomicData{core::BuiltinFn::kAtomicMax, "atomicMax", "InterlockedMax"},
+                    AtomicData{core::BuiltinFn::kAtomicMin, "atomicMin", "InterlockedMin"},
+                    AtomicData{core::BuiltinFn::kAtomicAnd, "atomicAnd", "InterlockedAnd"},
+                    AtomicData{core::BuiltinFn::kAtomicOr, "atomicOr", "InterlockedOr"},
+                    AtomicData{core::BuiltinFn::kAtomicXor, "atomicXor", "InterlockedXor"},
+                    AtomicData{core::BuiltinFn::kAtomicExchange, "atomicExchange",
+                               "InterlockedExchange"}));
 
 TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVecF32) {
     auto* var = b.Var<storage, vec4<f32>, core::Access::kReadWrite>("v");

@@ -162,7 +162,7 @@ void foo() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicStore) {
+TEST_F(HlslWriterTest, BuiltinStorageAtomicStore) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
@@ -182,10 +182,38 @@ TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicStore) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.InterlockedExchange(int(16u), 123, v_1);
+}
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicLoad) {
+TEST_F(HlslWriterTest, BuiltinStorageAtomicStoreDirect) {
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, var, 123_i);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.InterlockedExchange(int(0u), 123, v_1);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinStorageAtomicLoad) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
@@ -205,33 +233,40 @@ TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicLoad) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.InterlockedOr(int(16u), 0, v_1);
+  int x = v_1;
+}
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicAdd) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+TEST_F(HlslWriterTest, BuiltinStorageAtomicLoadDirect) {
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicAdd,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad, var));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.InterlockedOr(int(0u), 0, v_1);
+  int x = v_1;
+}
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicSub) {
+TEST_F(HlslWriterTest, BuiltinStorageAtomicSub) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
@@ -251,157 +286,45 @@ TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicSub) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.InterlockedAdd(int(16u), -(123), v_1);
+  int x = v_1;
+}
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicMax) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+TEST_F(HlslWriterTest, BuiltinStorageAtomicSubDirect) {
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicMax,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicSub, var, 123_i));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.InterlockedAdd(int(0u), -(123), v_1);
+  int x = v_1;
+}
+
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicMin) {
+TEST_F(HlslWriterTest, BuiltinStorageAtomicCompareExchangeWeak) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
                                                     {mod.symbols.New("b"), ty.atomic<u32>()},
                                                 });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicMin,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-)");
-}
-
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicAnd) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicAnd,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-)");
-}
-
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicOr) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicOr,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-)");
-}
-
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicXor) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicXor,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 2_u), 123_i));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-)");
-}
-
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicExchange) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
-    b.ir.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] {
-        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicExchange,
-                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 2_u), 123_i));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
-)");
-}
-
-TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicCompareExchangeWeak) {
-    auto* sb = ty.Struct(mod.symbols.New("SB"), {
-                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
-                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
-                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
-                                                });
-
-    auto* out = ty.Struct(
-        mod.symbols.New("__atomic_compare_exchange_result"),
-        {{mod.symbols.New("old_value"), ty.i32()}, {mod.symbols.New("exchanged"), ty.bool_()}});
 
     auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
@@ -410,13 +333,57 @@ TEST_F(HlslWriterTest, DISABLED_BuiltinStorageAtomicCompareExchangeWeak) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("x",
-              b.Call(out, core::BuiltinFn::kAtomicCompareExchangeWeak,
+              b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
+                     core::BuiltinFn::kAtomicCompareExchangeWeak,
                      b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i, 345_i));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
+    EXPECT_EQ(output_.hlsl, R"(struct atomic_compare_exchange_result_i32 {
+  int old_value;
+  bool exchanged;
+};
+
+
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.InterlockedCompareExchange(int(16u), 123, 345, v_1);
+  int v_2 = v_1;
+  atomic_compare_exchange_result_i32 x = {v_2, (v_2 == 123)};
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, BuiltinStorageAtomicCompareExchangeWeakDirect) {
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
+                          core::BuiltinFn::kAtomicCompareExchangeWeak, var, 123_i, 345_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(struct atomic_compare_exchange_result_i32 {
+  int old_value;
+  bool exchanged;
+};
+
+
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.InterlockedCompareExchange(int(0u), 123, 345, v_1);
+  int v_2 = v_1;
+  atomic_compare_exchange_result_i32 x = {v_2, (v_2 == 123)};
+}
+
 )");
 }
 
@@ -428,48 +395,67 @@ struct AtomicData {
     out << data.interlock;
     return out;
 }
-using HlslBuiltinWorkgroupAtomic = HlslWriterTestWithParam<AtomicData>;
-TEST_P(HlslBuiltinWorkgroupAtomic, Access) {
+
+using HlslBuiltinAtomic = HlslWriterTestWithParam<AtomicData>;
+TEST_P(HlslBuiltinAtomic, IndirectAccess) {
     auto param = GetParam();
-    auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("padding"), ty.vec4<f32>()},
+                                                    {mod.symbols.New("a"), ty.atomic<i32>()},
+                                                    {mod.symbols.New("b"), ty.atomic<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), param.fn,
+                          b.Access(ty.ptr<storage, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.)" + std::string(param.interlock) +
+                                R"((int(16u), 123, v_1);
+  int x = v_1;
+}
+
+)");
+}
+
+TEST_P(HlslBuiltinAtomic, DirectAccess) {
+    auto param = GetParam();
+    auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("x", b.Call(ty.i32(), param.fn, var, 123_i));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(struct foo_inputs {
-  uint tint_local_index : SV_GroupIndex;
-};
-
-
-groupshared int v;
-void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
-    int v_1 = 0;
-    InterlockedExchange(v, 0, v_1);
-  }
-  GroupMemoryBarrierWithGroupSync();
-  int v_2 = 0;
-  )" + std::string(param.interlock) +
-                                R"((v, 123, v_2);
-  int x = v_2;
-}
-
-[numthreads(1, 1, 1)]
-void foo(foo_inputs inputs) {
-  foo_inner(inputs.tint_local_index);
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer v : register(u0);
+void foo() {
+  int v_1 = 0;
+  v.)" + std::string(param.interlock) +
+                                R"((int(0u), 123, v_1);
+  int x = v_1;
 }
 
 )");
 }
 
 INSTANTIATE_TEST_SUITE_P(HlslWriterTest,
-                         HlslBuiltinWorkgroupAtomic,
+                         HlslBuiltinAtomic,
                          testing::Values(AtomicData{core::BuiltinFn::kAtomicAdd, "InterlockedAdd"},
                                          AtomicData{core::BuiltinFn::kAtomicMax, "InterlockedMax"},
                                          AtomicData{core::BuiltinFn::kAtomicMin, "InterlockedMin"},
@@ -697,6 +683,58 @@ void foo(foo_inputs inputs) {
 
 )");
 }
+
+using HlslBuiltinWorkgroupAtomic = HlslWriterTestWithParam<AtomicData>;
+TEST_P(HlslBuiltinWorkgroupAtomic, Access) {
+    auto param = GetParam();
+    auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), param.fn, var, 123_i));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(struct foo_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+
+groupshared int v;
+void foo_inner(uint tint_local_index) {
+  if ((tint_local_index == 0u)) {
+    int v_1 = 0;
+    InterlockedExchange(v, 0, v_1);
+  }
+  GroupMemoryBarrierWithGroupSync();
+  int v_2 = 0;
+  )" + std::string(param.interlock) +
+                                R"((v, 123, v_2);
+  int x = v_2;
+}
+
+[numthreads(1, 1, 1)]
+void foo(foo_inputs inputs) {
+  foo_inner(inputs.tint_local_index);
+}
+
+)");
+}
+
+INSTANTIATE_TEST_SUITE_P(HlslWriterTest,
+                         HlslBuiltinWorkgroupAtomic,
+                         testing::Values(AtomicData{core::BuiltinFn::kAtomicAdd, "InterlockedAdd"},
+                                         AtomicData{core::BuiltinFn::kAtomicMax, "InterlockedMax"},
+                                         AtomicData{core::BuiltinFn::kAtomicMin, "InterlockedMin"},
+                                         AtomicData{core::BuiltinFn::kAtomicAnd, "InterlockedAnd"},
+                                         AtomicData{core::BuiltinFn::kAtomicOr, "InterlockedOr"},
+                                         AtomicData{core::BuiltinFn::kAtomicXor, "InterlockedXor"},
+                                         AtomicData{core::BuiltinFn::kAtomicExchange,
+                                                    "InterlockedExchange"}));
 
 TEST_F(HlslWriterTest, BuiltinSignScalar) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);

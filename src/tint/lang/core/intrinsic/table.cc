@@ -213,7 +213,7 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
         auto candidate = ScoreOverload<ScoreMode::kEarlyReject>(context, overload, template_args,
                                                                 args, earliest_eval_stage);
         if (candidate.score == 0) {
-            match_idx = overload_idx;
+            match_idx = candidates.Length();
             num_matched++;
         }
         candidates.Push(std::move(candidate));

@@ -97,8 +97,24 @@ struct State {
                     [&](core::ir::Access* a) { usage_worklist.Push(a); },
                     [&](core::ir::Let* l) { usage_worklist.Push(l); },
                     [&](core::ir::CoreBuiltinCall* call) {
-                        TINT_ASSERT(call->Func() == core::BuiltinFn::kArrayLength);
-                        usage_worklist.Push(call);
+                        switch (call->Func()) {
+                            case core::BuiltinFn::kArrayLength:
+                            case core::BuiltinFn::kAtomicAnd:
+                            case core::BuiltinFn::kAtomicOr:
+                            case core::BuiltinFn::kAtomicXor:
+                            case core::BuiltinFn::kAtomicMin:
+                            case core::BuiltinFn::kAtomicMax:
+                            case core::BuiltinFn::kAtomicAdd:
+                            case core::BuiltinFn::kAtomicSub:
+                            case core::BuiltinFn::kAtomicExchange:
+                            case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                            case core::BuiltinFn::kAtomicStore:
+                            case core::BuiltinFn::kAtomicLoad:
+                                usage_worklist.Push(call);
+                                break;
+                            default:
+                                TINT_UNREACHABLE() << call->Func();
+                        }
                     },
                     //
                     TINT_ICE_ON_NO_MATCH);
@@ -139,7 +155,46 @@ struct State {
                         let->Destroy();
                     },
                     [&](core::ir::CoreBuiltinCall* call) {
-                        ArrayLength(var, call, var_ty->StoreType(), 0);
+                        switch (call->Func()) {
+                            case core::BuiltinFn::kArrayLength:
+                                ArrayLength(var, call, var_ty->StoreType(), 0);
+                                break;
+                            case core::BuiltinFn::kAtomicAnd:
+                                AtomicAnd(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicOr:
+                                AtomicOr(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicXor:
+                                AtomicXor(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicMin:
+                                AtomicMin(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicMax:
+                                AtomicMax(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicAdd:
+                                AtomicAdd(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicSub:
+                                AtomicSub(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicExchange:
+                                AtomicExchange(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                                AtomicCompareExchangeWeak(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicStore:
+                                AtomicStore(var, call, 0);
+                                break;
+                            case core::BuiltinFn::kAtomicLoad:
+                                AtomicLoad(var, call, 0);
+                                break;
+                            default:
+                                TINT_UNREACHABLE();
+                        }
                     },
                     TINT_ICE_ON_NO_MATCH);
             }
@@ -174,6 +229,120 @@ struct State {
             }
             auto* div = b.Divide(ty.u32(), inst, u32(arr_ty->Stride()));
             call->Result(0)->ReplaceAllUsesWith(div->Result(0));
+        });
+        call->Destroy();
+    }
+
+    void Interlocked(core::ir::Var* var,
+                     core::ir::CoreBuiltinCall* call,
+                     uint32_t offset,
+                     BuiltinFn fn) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.void_(), fn, var, b.Convert(type, u32(offset)), args[1], original_value);
+            b.LoadWithResult(call->DetachResult(), original_value);
+        });
+        call->Destroy();
+    }
+
+    void AtomicAnd(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        Interlocked(var, call, offset, BuiltinFn::kInterlockedAnd);
+    }
+
+    void AtomicOr(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        Interlocked(var, call, offset, BuiltinFn::kInterlockedOr);
+    }
+
+    void AtomicXor(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        Interlocked(var, call, offset, BuiltinFn::kInterlockedXor);
+    }
+
+    void AtomicMin(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        Interlocked(var, call, offset, BuiltinFn::kInterlockedMin);
+    }
+
+    void AtomicMax(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        Interlocked(var, call, offset, BuiltinFn::kInterlockedMax);
+    }
+
+    void AtomicAdd(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        Interlocked(var, call, offset, BuiltinFn::kInterlockedAdd);
+    }
+
+    void AtomicExchange(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        Interlocked(var, call, offset, BuiltinFn::kInterlockedExchange);
+    }
+
+    // An atomic sub is a negated atomic add
+    void AtomicSub(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            auto* val = b.Negation(type, args[1]);
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedAdd, var,
+                                                      b.Convert(type, u32(offset)), val,
+                                                      original_value);
+            b.LoadWithResult(call->DetachResult(), original_value);
+        });
+        call->Destroy();
+    }
+
+    void AtomicCompareExchangeWeak(core::ir::Var* var,
+                                   core::ir::CoreBuiltinCall* call,
+                                   uint32_t offset) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            auto* cmp = args[1];
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.void_(), BuiltinFn::kInterlockedCompareExchange, var,
+                b.Convert(type, u32(offset)), cmp, args[2], original_value);
+
+            auto* o = b.Load(original_value);
+            b.ConstructWithResult(call->DetachResult(), o, b.Equal(ty.bool_(), o, cmp));
+        });
+        call->Destroy();
+    }
+
+    // An atomic load is an Or with 0
+    void AtomicLoad(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        auto* type = call->Result(0)->Type();
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedOr, var,
+                                                      b.Convert(type, u32(offset)), b.Zero(type),
+                                                      original_value);
+            b.LoadWithResult(call->DetachResult(), original_value);
+        });
+        call->Destroy();
+    }
+
+    void AtomicStore(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+
+        b.InsertBefore(call, [&] {
+            auto* original_value = b.Var(ty.ptr(function, type));
+            original_value->SetInitializer(b.Zero(type));
+
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedExchange,
+                                                      var, b.Convert(type, u32(offset)), args[1],
+                                                      original_value);
         });
         call->Destroy();
     }
@@ -615,14 +784,50 @@ struct State {
                 },
                 [&](core::ir::Store* store) { Store(store, var, store->From(), *offset); },
                 [&](core::ir::CoreBuiltinCall* call) {
-                    // Array length calls require the access
-                    TINT_ASSERT(call->Func() == core::BuiltinFn::kArrayLength);
-
-                    // If this access chain is being used in an `arrayLength` call then the
-                    // access chain _must_ have resolved to the runtime array member of the
-                    // structure. So, we _must_ have set `obj` to the array member which is a
-                    // runtime array.
-                    ArrayLength(var, call, obj, offset->byte_offset);
+                    switch (call->Func()) {
+                        case core::BuiltinFn::kArrayLength:
+                            // If this access chain is being used in an `arrayLength` call then the
+                            // access chain _must_ have resolved to the runtime array member of the
+                            // structure. So, we _must_ have set `obj` to the array member which is
+                            // a runtime array.
+                            ArrayLength(var, call, obj, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicAnd:
+                            AtomicAnd(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicOr:
+                            AtomicOr(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicXor:
+                            AtomicXor(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicMin:
+                            AtomicMin(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicMax:
+                            AtomicMax(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicAdd:
+                            AtomicAdd(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicSub:
+                            AtomicSub(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicExchange:
+                            AtomicExchange(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                            AtomicCompareExchangeWeak(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicStore:
+                            AtomicStore(var, call, offset->byte_offset);
+                            break;
+                        case core::BuiltinFn::kAtomicLoad:
+                            AtomicLoad(var, call, offset->byte_offset);
+                            break;
+                        default:
+                            TINT_UNREACHABLE() << call->Func();
+                    }
                 },  //
                 TINT_ICE_ON_NO_MATCH);
         }
