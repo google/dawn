@@ -81,7 +81,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-07-16 09:43:40AM
+# Last rolled: 2024-07-18 08:24:36AM
 
 # Flaky on all platforms
 # KEEP
@@ -519,8 +519,8 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ################################################################################
 crbug.com/dawn/0000 webgpu:api,operation,adapter,requestDevice:always_returns_device:compatibilityMode=false [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,uncapturederror:iff_uncaptured:errorType="out-of-memory" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,misc:no_attachment:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:f32:inputSource="const";dim=2 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:arrayed:texture_type="texture_depth_2d_array" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:sampled:texture_type="texture_2d_array" [ Failure ]
@@ -553,7 +553,6 @@ crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:parti
 crbug.com/dawn/0000 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,unary,i32_conversion:abstract_float:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,validation,expression,binary,div_rem:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
