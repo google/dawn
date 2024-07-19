@@ -52,7 +52,8 @@ TEST(SpirvValidateTest, Valid) {
     EXPECT_EQ(res, Success);
 }
 
-TEST(SpirvValidateTest, Invalid) {
+// TODO(353960895): Re-enable once the SPIRV-Tools change is rolled everywhere.
+TEST(SpirvValidateTest, DISABLED_Invalid) {
     uint32_t spirv[] = {
         0x07230203, 0x00010600, 0x00070000, 0x00000011, 0x00000000, 0x00020011, 0x00000001,
         0x0003000e, 0x00000000, 0x00000001, 0x0005000f, 0x00000005, 0x00000001, 0x6e69616d,
