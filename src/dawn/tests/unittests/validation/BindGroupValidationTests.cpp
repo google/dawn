@@ -2463,7 +2463,7 @@ TEST_F(SetBindGroupValidationTest, BindGroupSlotBoundary) {
 
     PlaceholderRenderPass renderPass(device);
 
-    auto TestIndex = [=](wgpu::BindGroup bg, uint32_t i, bool valid) {
+    auto TestIndex = [this, renderPass](wgpu::BindGroup bg, uint32_t i, bool valid) {
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder cp = encoder.BeginComputePass();
@@ -2519,7 +2519,7 @@ TEST_F(SetBindGroupValidationTest, BindGroupSlotBoundary) {
 
 // Test that dynamic offset count must be zero when unsetting a bindgroup.
 TEST_F(SetBindGroupValidationTest, UnsetWithDynamicOffsetIsInvalid) {
-    auto TestDynamicOffsetCount = [=](uint32_t count, uint32_t* offsets, bool valid) {
+    auto TestDynamicOffsetCount = [this](uint32_t count, uint32_t* offsets, bool valid) {
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             wgpu::ComputePassEncoder cp = encoder.BeginComputePass();

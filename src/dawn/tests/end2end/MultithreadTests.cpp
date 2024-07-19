@@ -62,7 +62,7 @@ class LockStep {
 
     void Wait(Step step) {
         std::unique_lock<std::mutex> lg(mMutex);
-        mCv.wait(lg, [=] { return mStep == step; });
+        mCv.wait(lg, [this, step] { return mStep == step; });
     }
 
   private:
@@ -201,7 +201,7 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
 
     constexpr uint32_t kSize = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
 
-    utils::RunInParallel(10, [=, &myData = std::as_const(myData)](uint32_t) {
+    utils::RunInParallel(10, [this, &myData = std::as_const(myData)](uint32_t) {
         // Create buffer and request mapping.
         wgpu::Buffer buffer =
             CreateBuffer(kSize, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
@@ -718,7 +718,8 @@ TEST_P(MultithreadEncodingTests, RenderPassEncodersInParallel) {
 
     std::vector<wgpu::CommandBuffer> commandBuffers(kNumThreads);
 
-    utils::RunInParallel(kNumThreads, [=, &commandBuffers](uint32_t index) {
+    utils::RunInParallel(kNumThreads, [this, msaaRenderTargetView, resolveTargetView,
+                                       &commandBuffers](uint32_t index) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         // Clear the renderTarget to red.
@@ -768,7 +769,8 @@ TEST_P(MultithreadEncodingTests, RenderPassEncoders_ResolveToMipLevelOne_InParal
 
     std::vector<wgpu::CommandBuffer> commandBuffers(kNumThreads);
 
-    utils::RunInParallel(kNumThreads, [=, &commandBuffers](uint32_t index) {
+    utils::RunInParallel(kNumThreads, [this, msaaRenderTargetView, resolveTargetView,
+                                       &commandBuffers](uint32_t index) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         // Clear the renderTarget to red.
@@ -817,7 +819,7 @@ TEST_P(MultithreadEncodingTests, ComputePassEncodersInParallel) {
 
     std::vector<wgpu::CommandBuffer> commandBuffers(kNumThreads);
 
-    utils::RunInParallel(kNumThreads, [=, &commandBuffers](uint32_t index) {
+    utils::RunInParallel(kNumThreads, [this, pipeline, bindGroup, &commandBuffers](uint32_t index) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
@@ -1436,7 +1438,7 @@ TEST_P(MultithreadDrawIndexedIndirectTests, IndirectOffsetInParallel) {
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
 
-    utils::RunInParallel(10, [=](uint32_t) {
+    utils::RunInParallel(10, [this, filled, notFilled](uint32_t) {
         // Test an offset draw call, with indirect buffer containing 2 calls:
         // 1) first 3 indices of the second quad (top right triangle)
         // 2) last 3 indices of the second quad

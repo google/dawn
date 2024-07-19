@@ -1118,33 +1118,33 @@ class Impl {
                     [&](const ast::BinaryExpression* e) {
                         if (e->op == core::BinaryOp::kLogicalAnd ||
                             e->op == core::BinaryOp::kLogicalOr) {
-                            tasks.Push([=] { EndShortCircuit(e); });
-                            tasks.Push([=] { Process(e->rhs); });
-                            tasks.Push([=] { BeginShortCircuit(e); });
-                            tasks.Push([=] { Process(e->lhs); });
+                            tasks.Push([this, e] { EndShortCircuit(e); });
+                            tasks.Push([this, e] { Process(e->rhs); });
+                            tasks.Push([this, e] { BeginShortCircuit(e); });
+                            tasks.Push([this, e] { Process(e->lhs); });
                         } else {
-                            tasks.Push([=] { EmitBinary(e); });
-                            tasks.Push([=] { Process(e->rhs); });
-                            tasks.Push([=] { Process(e->lhs); });
+                            tasks.Push([this, e] { EmitBinary(e); });
+                            tasks.Push([this, e] { Process(e->rhs); });
+                            tasks.Push([this, e] { Process(e->lhs); });
                         }
                     },
                     [&](const ast::IndexAccessorExpression* e) {
-                        tasks.Push([=] { EmitAccess(e); });
-                        tasks.Push([=] { Process(e->index); });
-                        tasks.Push([=] { Process(e->object); });
+                        tasks.Push([this, e] { EmitAccess(e); });
+                        tasks.Push([this, e] { Process(e->index); });
+                        tasks.Push([this, e] { Process(e->object); });
                     },
                     [&](const ast::MemberAccessorExpression* e) {
-                        tasks.Push([=] { EmitAccess(e); });
-                        tasks.Push([=] { Process(e->object); });
+                        tasks.Push([this, e] { EmitAccess(e); });
+                        tasks.Push([this, e] { Process(e->object); });
                     },
                     [&](const ast::UnaryOpExpression* e) {
-                        tasks.Push([=] { EmitUnary(e); });
-                        tasks.Push([=] { Process(e->expr); });
+                        tasks.Push([this, e] { EmitUnary(e); });
+                        tasks.Push([this, e] { Process(e->expr); });
                     },
                     [&](const ast::CallExpression* e) {
-                        tasks.Push([=] { EmitCall(e); });
+                        tasks.Push([this, e] { EmitCall(e); });
                         for (auto* arg : tint::Reverse(e->args)) {
-                            tasks.Push([=] { Process(arg); });
+                            tasks.Push([this, arg] { Process(arg); });
                         }
                     },
                     [&](const ast::LiteralExpression* e) { EmitLiteral(e); },

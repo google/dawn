@@ -2673,7 +2673,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             auto* f32 = builder_.create<core::type::F32>();
             auto* spirv_result_type = builder_.create<core::type::Vector>(f32, 4u);
             auto spirv_result = result_op();
-            post_emission = [=] {
+            post_emission = [this, result_type, result_id, spirv_result] {
                 return push_function_inst(spv::Op::OpCompositeExtract,
                                           {result_type, result_id, spirv_result, Operand(0u)});
             };
@@ -2704,7 +2704,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             auto* spirv_result_type =
                 builder_.create<core::type::Vector>(element_type, spirv_result_width);
             if (swizzle.size() > 1) {
-                post_emission = [=] {
+                post_emission = [this, result_type, result_id, spirv_result, swizzle] {
                     OperandList operands{
                         result_type,
                         result_id,
@@ -2717,7 +2717,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                     return push_function_inst(spv::Op::OpVectorShuffle, operands);
                 };
             } else {
-                post_emission = [=] {
+                post_emission = [this, result_type, result_id, spirv_result, swizzle] {
                     return push_function_inst(
                         spv::Op::OpCompositeExtract,
                         {result_type, result_id, spirv_result, Operand(swizzle[0])});
