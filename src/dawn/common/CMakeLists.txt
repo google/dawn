@@ -150,6 +150,9 @@ if (DAWN_ENABLE_VULKAN)
         Vulkan-Headers)
 endif ()
 
+list(APPEND conditional_private_depends
+    ${CMAKE_DL_LIBS})
+
 dawn_add_library(
     dawn_common
     UTILITY_TARGET dawn_internal_config
