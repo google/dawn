@@ -32,6 +32,6 @@ fun interface {{ function_pointer.name.CamelCase() }} {
     @JvmName("callback")  //* Required to access Inline Value Class parameters via JNI.
     fun callback(
     {%- for arg in filter_arguments(function_pointer.arguments) -%}
-        {{ as_varName(arg.name) }}:{{ kotlin_declaration(arg) }},
+        {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},{{ ' ' }}
     {%- endfor -%});
 }

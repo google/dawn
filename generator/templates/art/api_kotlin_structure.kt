@@ -31,8 +31,8 @@ class {{ structure.name.CamelCase() }}(
     {% for member in structure.members if include_structure_member(structure, member) %}
         {# We supply a getter that is excluded from name manging to allow Inline Value Classed
            enums/bitmasks to be accessible as integers from the JVM adapter layer. #}
-        {%- if member.type.category in ['bitmask', 'enum'] -%}
-            @get:JvmName("get{{ member.name.CamelCase() }}")
+        {% if member.type.category in ['bitmask', 'enum'] %}
+        {{'    '}}@get:JvmName("get{{ member.name.CamelCase() }}")
         {% endif %}
         var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
     {% endfor %}
