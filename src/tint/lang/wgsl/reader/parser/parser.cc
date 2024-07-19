@@ -3050,7 +3050,7 @@ Maybe<const ast::Attribute*> Parser::attribute() {
                 }
                 match(Token::Type::kComma);
 
-                return builder_.Builtin(name.value);
+                return builder_.Builtin(t.source(), name.value);
             });
     }
 
