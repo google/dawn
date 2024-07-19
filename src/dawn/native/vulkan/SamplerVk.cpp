@@ -110,11 +110,9 @@ MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
     }
 
     VkSamplerYcbcrConversionInfo samplerYCbCrInfo = {};
-    if (auto* yCbCrVkDescriptor = Unpack(descriptor).Get<YCbCrVkDescriptor>()) {
-        mYCbCrVkDescriptor = *yCbCrVkDescriptor;
-        mYCbCrVkDescriptor.nextInChain = nullptr;
+    if (IsYCbCr()) {
         DAWN_TRY_ASSIGN(mSamplerYCbCrConversion,
-                        CreateSamplerYCbCrConversionCreateInfo(mYCbCrVkDescriptor, device));
+                        CreateSamplerYCbCrConversionCreateInfo(GetYCbCrVkDescriptor(), device));
 
         samplerYCbCrInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO;
         samplerYCbCrInfo.pNext = nullptr;
