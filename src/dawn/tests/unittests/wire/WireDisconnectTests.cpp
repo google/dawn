@@ -47,7 +47,7 @@ class WireDisconnectTests : public WireTest {};
 // Test that commands are not received if the client disconnects.
 TEST_F(WireDisconnectTests, CommandsAfterDisconnect) {
     // Check that commands work at all.
-    wgpuDeviceCreateCommandEncoder(cDevice, nullptr);
+    wgpu::CommandEncoder encoder1 = device.CreateCommandEncoder();
 
     WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
@@ -58,7 +58,7 @@ TEST_F(WireDisconnectTests, CommandsAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     // Command is not received because client disconnected.
-    wgpuDeviceCreateCommandEncoder(cDevice, nullptr);
+    wgpu::CommandEncoder encoder2 = device.CreateCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(_, _)).Times(Exactly(0));
     FlushClient();
 }
@@ -67,7 +67,7 @@ TEST_F(WireDisconnectTests, CommandsAfterDisconnect) {
 // after are received.
 TEST_F(WireDisconnectTests, FlushAfterDisconnect) {
     // Check that commands work at all.
-    wgpuDeviceCreateCommandEncoder(cDevice, nullptr);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
     // Disconnect.
     GetWireClient()->Disconnect();
@@ -109,8 +109,8 @@ TEST_F(WireDisconnectTests, ServerLostThenDisconnect) {
 // callback again.
 TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
     MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
-    wgpuDeviceSetDeviceLostCallback(cDevice, mockDeviceLostCallback.Callback(),
-                                    mockDeviceLostCallback.MakeUserdata(this));
+    device.SetDeviceLostCallback(mockDeviceLostCallback.Callback(),
+                                 mockDeviceLostCallback.MakeUserdata(this));
 
     api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
                                                 "lost reason");
@@ -129,8 +129,8 @@ TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
 // Check that a device loss after a disconnect does not trigger the callback again.
 TEST_F(WireDisconnectTests, DisconnectThenServerLost) {
     MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
-    wgpuDeviceSetDeviceLostCallback(cDevice, mockDeviceLostCallback.Callback(),
-                                    mockDeviceLostCallback.MakeUserdata(this));
+    device.SetDeviceLostCallback(mockDeviceLostCallback.Callback(),
+                                 mockDeviceLostCallback.MakeUserdata(this));
 
     // Disconnect the client. We should see the callback once.
     EXPECT_CALL(mockDeviceLostCallback, Call(WGPUDeviceLostReason_InstanceDropped, _, this))
@@ -147,9 +147,8 @@ TEST_F(WireDisconnectTests, DisconnectThenServerLost) {
 
 // Test that client objects are all destroyed if the WireClient is destroyed.
 TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
-    WGPUSamplerDescriptor desc = {};
-    wgpuDeviceCreateCommandEncoder(cDevice, nullptr);
-    wgpuDeviceCreateSampler(cDevice, &desc);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::Sampler sampler = device.CreateSampler();
 
     WGPUCommandEncoder apiCommandEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
