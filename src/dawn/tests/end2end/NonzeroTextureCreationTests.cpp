@@ -106,8 +106,7 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
         DAWN_TEST_UNSUPPORTED_IF(utils::IsCompressedTextureFormat(GetParam().mFormat) &&
                                  IsCompatibilityMode());
 
-        // TODO(crbug.com/dawn/667): Workaround the fact that you can't use textureLoad with
-        // texture_depth_xxx in compat mode.
+        // textureLoad() of depth textures is forbidden in Compat mode.
         DAWN_TEST_UNSUPPORTED_IF(utils::IsDepthOrStencilFormat(GetParam().mFormat) &&
                                  IsCompatibilityMode());
 
