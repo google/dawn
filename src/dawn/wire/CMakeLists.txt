@@ -99,6 +99,7 @@ set(sources
     "server/ServerInstance.cpp"
     "server/ServerQueue.cpp"
     "server/ServerShaderModule.cpp"
+    "server/ServerSurface.cpp"
     "SupportedFeatures.cpp"
     "Wire.cpp"
     "WireClient.cpp"

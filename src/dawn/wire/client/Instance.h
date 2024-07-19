@@ -60,6 +60,8 @@ class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> 
     // TODO(https://github.com/webgpu-native/webgpu-headers/issues/252): Add a count argument.
     size_t EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const;
 
+    WGPUSurface CreateSurface(const WGPUSurfaceDescriptor* desc) const;
+
   private:
     void WillDropLastExternalRef() override;
     void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,

@@ -349,6 +349,12 @@ size_t Instance::EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) co
     return mWGSLFeatures.size();
 }
 
+WGPUSurface Instance::CreateSurface(const WGPUSurfaceDescriptor* desc) const {
+    dawn::ErrorLog() << "Instance::CreateSurface is not supported in the wire. Use "
+                        "dawn::wire::client::WireClient::InjectSurface instead.";
+    return nullptr;
+}
+
 }  // namespace dawn::wire::client
 
 // Free-standing API functions

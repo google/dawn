@@ -147,6 +147,7 @@ dawn_component("wire") {
     "server/ServerInstance.cpp",
     "server/ServerQueue.cpp",
     "server/ServerShaderModule.cpp",
+    "server/ServerSurface.cpp",
   ]
 
   # Make headers publicly visible

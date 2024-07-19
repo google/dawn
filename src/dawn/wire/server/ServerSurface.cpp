@@ -25,42 +25,29 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_WIRE_CLIENT_SURFACE_H_
-#define SRC_DAWN_WIRE_CLIENT_SURFACE_H_
+#include "dawn/wire/server/ObjectStorage.h"
+#include "dawn/wire/server/Server.h"
 
-#include <vector>
+namespace dawn::wire::server {
 
-#include "dawn/webgpu.h"
-#include "dawn/wire/client/ObjectBase.h"
+WireResult Server::DoSurfaceGetCurrentTexture(Known<WGPUSurface> surface,
+                                              Known<WGPUDevice> configuredDevice,
+                                              ObjectHandle textureHandle) {
+    Reserved<WGPUTexture> texture;
+    WIRE_TRY(Objects<WGPUTexture>().Allocate(&texture, textureHandle, AllocationState::Reserved));
 
-namespace dawn::wire::client {
+    WGPUSurfaceTexture surfaceTexture;
+    mProcs.surfaceGetCurrentTexture(surface->handle, &surfaceTexture);
 
-class Device;
+    if (surfaceTexture.texture != nullptr) {
+        return FillReservation(texture.id, surfaceTexture.texture);
+    } else {
+        // The client always assumes that a texture will be associated with the reservation, so
+        // create an error texture on the configured device.
+        WGPUTextureDescriptor desc = WGPU_TEXTURE_DESCRIPTOR_INIT;
+        WGPUTexture errorTexture = mProcs.deviceCreateErrorTexture(configuredDevice->handle, &desc);
+        return FillReservation(texture.id, errorTexture);
+    }
+}
 
-class Surface final : public ObjectBase {
-  public:
-    explicit Surface(const ObjectBaseParams& params, const WGPUSurfaceCapabilities* capabilities);
-    ~Surface() override;
-
-    ObjectType GetObjectType() const override;
-
-    // WebGPU API
-    void Configure(const WGPUSurfaceConfiguration* config);
-    void Unconfigure();
-    WGPUTextureFormat GetPreferredFormat(WGPUAdapter adapter) const;
-    WGPUStatus GetCapabilities(WGPUAdapter adapter, WGPUSurfaceCapabilities* capabilities) const;
-    void GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture);
-
-  private:
-    WGPUTextureUsageFlags mSupportedUsages;
-    std::vector<WGPUTextureFormat> mSupportedFormats;
-    std::vector<WGPUPresentMode> mSupportedPresentModes;
-    std::vector<WGPUCompositeAlphaMode> mSupportedAlphaModes;
-
-    Ref<Device> mConfiguredDevice;
-    WGPUTextureDescriptor mTextureDescriptor;
-};
-
-}  // namespace dawn::wire::client
-
-#endif  // SRC_DAWN_WIRE_CLIENT_SURFACE_H_
+}  // namespace dawn::wire::server

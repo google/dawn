@@ -87,12 +87,14 @@ class Client : public ClientBase {
     ReservedTexture ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor);
     ReservedSwapChain ReserveSwapChain(WGPUDevice device,
                                        const WGPUSwapChainDescriptor* descriptor);
+    ReservedSurface ReserveSurface(WGPUInstance instance,
+                                   const WGPUSurfaceCapabilities* capabilities);
     ReservedInstance ReserveInstance(const WGPUInstanceDescriptor* descriptor);
 
     void ReclaimBufferReservation(const ReservedBuffer& reservation);
     void ReclaimTextureReservation(const ReservedTexture& reservation);
     void ReclaimSwapChainReservation(const ReservedSwapChain& reservation);
-    void ReclaimDeviceReservation(const ReservedDevice& reservation);
+    void ReclaimSurfaceReservation(const ReservedSurface& reservation);
     void ReclaimInstanceReservation(const ReservedInstance& reservation);
 
     template <typename Cmd>

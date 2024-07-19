@@ -56,6 +56,11 @@ ReservedSwapChain WireClient::ReserveSwapChain(WGPUDevice device,
     return mImpl->ReserveSwapChain(device, descriptor);
 }
 
+ReservedSurface WireClient::ReserveSurface(WGPUInstance instance,
+                                           const WGPUSurfaceCapabilities* capabilities) {
+    return mImpl->ReserveSurface(instance, capabilities);
+}
+
 ReservedInstance WireClient::ReserveInstance(const WGPUInstanceDescriptor* descriptor) {
     return mImpl->ReserveInstance(descriptor);
 }
@@ -72,8 +77,8 @@ void WireClient::ReclaimSwapChainReservation(const ReservedSwapChain& reservatio
     mImpl->ReclaimSwapChainReservation(reservation);
 }
 
-void WireClient::ReclaimDeviceReservation(const ReservedDevice& reservation) {
-    mImpl->ReclaimDeviceReservation(reservation);
+void WireClient::ReclaimSurfaceReservation(const ReservedSurface& reservation) {
+    mImpl->ReclaimSurfaceReservation(reservation);
 }
 
 void WireClient::ReclaimInstanceReservation(const ReservedInstance& reservation) {

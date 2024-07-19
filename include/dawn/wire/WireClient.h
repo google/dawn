@@ -61,8 +61,9 @@ struct ReservedSwapChain {
     Handle handle;
 };
 
-struct ReservedDevice {
-    WGPUDevice device;
+struct ReservedSurface {
+    WGPUSurface surface;
+    Handle instanceHandle;
     Handle handle;
 };
 
@@ -87,12 +88,14 @@ class DAWN_WIRE_EXPORT WireClient : public CommandHandler {
     ReservedTexture ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor);
     ReservedSwapChain ReserveSwapChain(WGPUDevice device,
                                        const WGPUSwapChainDescriptor* descriptor);
+    ReservedSurface ReserveSurface(WGPUInstance instance,
+                                   const WGPUSurfaceCapabilities* capabilities);
     ReservedInstance ReserveInstance(const WGPUInstanceDescriptor* descriptor = nullptr);
 
     void ReclaimBufferReservation(const ReservedBuffer& reservation);
     void ReclaimTextureReservation(const ReservedTexture& reservation);
     void ReclaimSwapChainReservation(const ReservedSwapChain& reservation);
-    void ReclaimDeviceReservation(const ReservedDevice& reservation);
+    void ReclaimSurfaceReservation(const ReservedSurface& reservation);
     void ReclaimInstanceReservation(const ReservedInstance& reservation);
 
     // Disconnects the client.
