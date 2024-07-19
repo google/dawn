@@ -132,6 +132,85 @@ luci.binding(
     groups = "flex-try-led-users",
 )
 
+# Shadow buckets for LED jobs.
+luci.bucket(
+    name = "ci.shadow",
+    shadows = "ci",
+    constraints = luci.bucket_constraints(
+        pools = ["luci.flex.ci"],
+    ),
+    bindings = [
+        luci.binding(
+            roles = "role/buildbucket.creator",
+            groups = [
+                "mdb/chrome-build-access-sphinx",
+                "mdb/chrome-troopers",
+                "chromium-led-users",
+                "flex-ci-led-users",
+            ],
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        luci.binding(
+            roles = "role/buildbucket.triggerer",
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        # Allow ci builders to create invocations in their own builds.
+        luci.binding(
+            roles = "role/resultdb.invocationCreator",
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+    ],
+    dynamic = True,
+)
+
+luci.bucket(
+    name = "try.shadow",
+    shadows = "try",
+    constraints = luci.bucket_constraints(
+        pools = ["luci.flex.try"],
+        service_accounts = [
+            "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+        ],
+    ),
+    bindings = [
+        luci.binding(
+            roles = "role/buildbucket.creator",
+            groups = [
+                "mdb/chrome-build-access-sphinx",
+                "mdb/chrome-troopers",
+                "chromium-led-users",
+                "flex-ci-led-users",
+            ],
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        luci.binding(
+            roles = "role/buildbucket.triggerer",
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        # Allow try builders to create invocations in their own builds.
+        luci.binding(
+            roles = "role/resultdb.invocationCreator",
+            groups = [
+                "project-dawn-tryjob-access",
+            ],
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+    ],
+    dynamic = True,
+)
+
 os_category = struct(
     LINUX = "Linux",
     MAC = "Mac",
@@ -356,6 +435,7 @@ def add_ci_builder(name, os, properties):
         caches = get_default_caches(os, clang),
         notifies = ["gardener-notifier"],
         service_account = "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
+        shadow_service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
     )
 
 def add_try_builder(name, os, properties):
