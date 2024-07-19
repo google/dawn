@@ -3285,12 +3285,12 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                     b.create<sem::VariableUser>(expr, stage, current_statement_, value, variable);
 
                 if (current_statement_) {
-                    // If identifier is part of a loop continuing block, make sure it
-                    // doesn't refer to a variable that is bypassed by a continue statement
-                    // in the loop's body block.
-                    if (auto* continuing_block =
-                            current_statement_
-                                ->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
+                    // Check all parent continuing blocks to make sure that this is not a reference
+                    // to a variable that is bypassed by a continue statement in a loop's body
+                    // block.
+                    auto* continuing_block =
+                        current_statement_->FindFirstParent<sem::LoopContinuingBlockStatement>();
+                    while (continuing_block) {
                         auto* loop_block =
                             continuing_block->FindFirstParent<sem::LoopBlockStatement>();
                         if (loop_block->FirstContinue()) {
@@ -3311,6 +3311,9 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                                 }
                             }
                         }
+                        continuing_block =
+                            continuing_block->Parent()
+                                ->FindFirstParent<sem::LoopContinuingBlockStatement>();
                     }
                 }
 
