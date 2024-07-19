@@ -121,15 +121,15 @@ interop::Interface<interop::GPUAdapterInfo> GPUAdapter::getInfo(Napi::Env env) {
 }
 
 bool GPUAdapter::getIsFallbackAdapter(Napi::Env) {
-    WGPUAdapterProperties adapterProperties = {};
-    adapter_.GetProperties(&adapterProperties);
-    return adapterProperties.adapterType == WGPUAdapterType_CPU;
+    WGPUAdapterInfo adapterInfo = {};
+    adapter_.GetInfo(&adapterInfo);
+    return adapterInfo.adapterType == WGPUAdapterType_CPU;
 }
 
 bool GPUAdapter::getIsCompatibilityMode(Napi::Env) {
-    WGPUAdapterProperties adapterProperties = {};
-    adapter_.GetProperties(&adapterProperties);
-    return adapterProperties.compatibilityMode;
+    WGPUAdapterInfo adapterInfo = {};
+    adapter_.GetInfo(&adapterInfo);
+    return adapterInfo.compatibilityMode;
 }
 
 namespace {
