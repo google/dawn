@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include "src/tint/lang/spirv/validate/validate.h"
 
@@ -52,8 +52,7 @@ TEST(SpirvValidateTest, Valid) {
     EXPECT_EQ(res, Success);
 }
 
-// TODO(353960895): Re-enable once the SPIRV-Tools change is rolled everywhere.
-TEST(SpirvValidateTest, DISABLED_Invalid) {
+TEST(SpirvValidateTest, Invalid) {
     uint32_t spirv[] = {
         0x07230203, 0x00010600, 0x00070000, 0x00000011, 0x00000000, 0x00020011, 0x00000001,
         0x0003000e, 0x00000000, 0x00000001, 0x0005000f, 0x00000005, 0x00000001, 0x6e69616d,
@@ -71,43 +70,9 @@ TEST(SpirvValidateTest, DISABLED_Invalid) {
     };
     auto res = Validate(spirv, SPV_ENV_VULKAN_1_3);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(spirv error: SPIR-V failed validation.
-
-Disassembly:
-; SPIR-V
-; Version: 1.6
-; Generator: Khronos SPIR-V Tools Assembler; 0
-; Bound: 17
-; Schema: 0
-               OpCapability Shader
-               OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %main "main"
-               OpExecutionMode %main LocalSize 1 1 1
-               OpName %main "main"
-               OpName %m "m"
-       %void = OpTypeVoid
-          %4 = OpTypeFunction %void
-      %float = OpTypeFloat 32
-    %v3float = OpTypeVector %float 3
-%mat3v3float = OpTypeMatrix %v3float 3
-%_ptr_Function_mat3v3float = OpTypePointer Function %mat3v3float
-          %9 = OpConstantNull %v3float
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
-%_ptr_Function_v3float = OpTypePointer Function %v3float
-       %main = OpFunction %void None %4
-         %13 = OpLabel
-          %m = OpVariable %_ptr_Function_mat3v3float Function %9
-         %14 = OpAccessChain %_ptr_Function_v3float %m %int_1
-         %15 = OpLoad %v3float %14
-         %16 = OpCompositeExtract %float %15 1
-               OpReturn
-               OpFunctionEnd
-
-spirv:1:1 error: Initializer type must match the type pointed to by the Result Type
-  %m = OpVariable %_ptr_Function_mat3v3float Function %9
-
-)");
+    auto got = res.Failure().reason.Str();
+    EXPECT_THAT(got, testing::HasSubstr("spirv error: SPIR-V failed validation."));
+    EXPECT_THAT(got, testing::HasSubstr("error: Initializer type must match"));
 }
 
 }  // namespace
