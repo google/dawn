@@ -84,11 +84,9 @@
 # Last rolled: 2024-07-19 11:35:12AM
 
 # Flaky on all platforms
-# KEEP
-crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ Failure ]
+crbug.com/42251085 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ Failure ]
 
 # Flaky memory_sync failures on Intel
-# KEEP
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-index";readContext="render-bundle-encoder";writeOp="t2b-copy";writeContext="command-encoder" [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
@@ -99,23 +97,16 @@ crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,sa
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
 
-################################################################################
 # Transformed video external texture failures with compute
 # These are failing because external texture transforms are now used for the
 # non-zero-copy path and that's not implemented yet for compute shaders.
-# KEEP
-################################################################################
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-hflip.mp4";* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-180.mp4";* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-270.mp4";* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-90.mp4";* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-vflip.mp4";* [ Failure ]
 
-################################################################################
 # Failures due to Linux/Intel UHD 630 OS/driver upgrade
-# The keep can be removed once this config is promoted to stable.
-# KEEP
-################################################################################
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm-srgb";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
@@ -150,26 +141,16 @@ crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,sto
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
 
-################################################################################
 # validation of shader_io location type
-################################################################################
 crbug.com/351375039 webgpu:shader,validation,shader_io,locations:type:* [ Failure ]
 
-################################################################################
 # validation of clamp low_high
-################################################################################
 crbug.com/351378281 webgpu:shader,validation,expression,call,builtin,clamp:low_high:* [ Failure ]
 
-################################################################################
 # Failures due to splitting off worker tests (crbug.com/330501141)
-################################################################################
 crbug.com/dawn/2478 webgpu:api,validation,buffer,mapping:getMappedRange,state,mappingPending: [ Failure ]
 crbug.com/dawn/2478 webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
 crbug.com/dawn/2478 webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
-
-################################################################################
-# Linux/Intel UHD 770 initial failures (crbug.com/329253685)
-################################################################################
 
 crbug.com/341282603 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Failure ]
 crbug.com/341282605 [ intel-0x4680 linux ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
@@ -179,15 +160,16 @@ crbug.com/341327471 [ intel-0x4680 linux ] webgpu:web_platform,canvas,getCurrent
 crbug.com/341327471 [ intel-0x4680 linux ] webgpu:web_platform,canvas,getCurrentTexture:resize:canvasType="onscreen" [ Failure ]
 crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
 
-### This section represents things that are probably fixable in Dawn.
+################################################################################
+# This section represents things that are probably fixable in Dawn.
+################################################################################
 
 # bitcast ai_to_f32 failures; precision issue?
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
+crbug.com/354152178 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
+crbug.com/354152178 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
+crbug.com/354152178 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 
-################################################################################
 # crbug.com/bug/349420827: smoothstep execution
-################################################################################
 crbug.com/dawn/349420827 [ intel-0x9bc5 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 crbug.com/dawn/349420827 [ nvidia-0x2184 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 
@@ -382,6 +364,37 @@ crbug.com/dawn/2123 [ nvidia-0x2184 ] webgpu:api,validation,capability_checks,li
 crbug.com/dawn/2125 webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 
+# copyTextureToTexture failures on Intel
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="3d" [ Failure ]
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
+crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
+
+# crbug.com/353552533 ANGLE Vulkan returns wrong values for gl_FragCoord when multisampling.
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
+
+# Fine derivative tests don't work on compat (and in core)
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdxCoarse:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdy:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
+crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
+
+################################################################################
+# Assorted failures that are missing bug associations (NEEDS TRIAGE)
+################################################################################
+
 # Intel failures (undiagnosed)
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="1d" [ Failure ]
@@ -471,35 +484,6 @@ crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,
 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 
-# copyTextureToTexture failures on Intel
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="3d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
-crbug.com/dawn/2208 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
-
-################################################################################
-# crbug.com/353552533 ANGLE Vulkan returns wrong values for gl_FragCoord when multisampling.
-################################################################################
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-
-# Fine derivative tests don't work on compat (and in core)
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdxCoarse:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdy:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
-
 ################################################################################
 # New flakes. Please triage:
 ################################################################################
@@ -551,7 +535,6 @@ crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:parti
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="override";typeA="vec3%3Cf32%3E";typeB="vec3%3Ci32%3E" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="override";typeA="vec4%3Cf32%3E";typeB="vec4%3Ci32%3E" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:* [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,validation,expression,binary,div_rem:* [ Failure ]
