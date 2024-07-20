@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandEncoder.h"
@@ -294,8 +295,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets) {
         const auto& indices = ToBackend(mPipelineLayout)->GetBindingIndexInfo()[groupIndex];
 
-        for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
-             ++bindingIndex) {
+        for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
             MatchVariant(
                 bindingInfo.bindingLayout,

@@ -29,6 +29,7 @@
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Range.h"
 #include "dawn/common/ityp_stack_vec.h"
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
@@ -64,10 +65,7 @@ BindGroup::BindGroup(Device* device,
         bindingCount);
 
     uint32_t numWrites = 0;
-    for (const auto& bindingItem : GetLayout()->GetBindingMap()) {
-        // We cannot use structured binding here because lambda expressions can only capture
-        // variables, while structured binding doesn't introduce variables.
-        BindingIndex bindingIndex = bindingItem.second;
+    for (BindingIndex bindingIndex : Range(GetLayout()->GetBindingCount())) {
         const BindingInfo& bindingInfo = GetLayout()->GetBindingInfo(bindingIndex);
 
         auto& write = writes[numWrites];

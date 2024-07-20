@@ -31,6 +31,7 @@
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
@@ -66,8 +67,7 @@ BindGroup::BindGroup(Device* device,
     // This is because they are created as root descriptors which are never heap allocated.
     // Since dynamic buffers are packed in the front, we can skip over these bindings by
     // starting from the dynamic buffer count.
-    for (BindingIndex bindingIndex = bgl->GetDynamicBufferCount();
-         bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
+    for (BindingIndex bindingIndex : Range(bgl->GetDynamicBufferCount(), bgl->GetBindingCount())) {
         const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
 
         // Increment size does not need to be stored and is only used to get a handle

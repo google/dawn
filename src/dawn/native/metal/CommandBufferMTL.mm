@@ -29,6 +29,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/Commands.h"
@@ -559,8 +560,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
         // TODO(crbug.com/dawn/854): Maintain buffers and offsets arrays in BindGroup
         // so that we only have to do one setVertexBuffers and one setFragmentBuffers
         // call here.
-        for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
-             ++bindingIndex) {
+        for (BindingIndex bindingIndex : Range(group->GetLayout()->GetBindingCount())) {
             const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
 
             bool hasVertStage =
