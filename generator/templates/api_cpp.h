@@ -118,6 +118,10 @@ static T& AsNonConstReference(const T& value) {
 
 {% endfor %}
 
+// TODO(crbug.com/42241461): Update these to not be using the C callback types, and instead be
+// defined using C++ types instead. Note that when we remove these, the C++ callback info types
+// should also all be removed as they will no longer be necessary given the C++ templated
+// functions calls and setter utilities.
 {% for type in by_category["function pointer"] %}
     using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
 {% endfor %}
