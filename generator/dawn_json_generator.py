@@ -355,7 +355,6 @@ class StructureType(Record, Type):
 
 
 class CallbackInfoType(StructureType):
-
     def __init__(self, is_enabled, name, json_data):
         StructureType.__init__(self, is_enabled, name, json_data)
         self.extensible = 'in'
@@ -817,37 +816,27 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     params_kotlin['jni_primitives'] = kotlin_json['jni_primitives']
     kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
 
-    # The 'length' members are removed as Kotlin can infer that from the container.
-    # 'length' members are identified when some *other* member specifies its name as the
-    # length parameter. Void pointer members refer to binary structures that cannot be used by
-    # clients without conversion to ART types in handwritten code, so we don't convert those.
-    def include_structure_member(structure, member):
-        if member.type.category in ['callback info', 'function pointer']:
-            return False
-        if member.type.name.get() in ['void *', 'void const *']:
-            return False
-        for other in structure.members:
-            if other.length == member:
-                return False
-        return True
+    def kotlin_record_members(members):
+        for member in members:
+            # Skip over callback infos as we haven't implemented support for them yet.
+            # TODO(352710628) support converting callback info.
+            if member.type.category in ['callback info']:
+                continue
 
-    def filter_arguments(arguments):
-        # TODO(b/352047733): Replace methods that require special handling with an exceptions list.
-        for argument in arguments:
             # length parameters are omitted because Kotlin containers have 'length'.
-            if argument in [arg.length for arg in arguments]:
+            if member in [m.length for m in members]:
                 continue
 
             # userdata parameter omitted because Kotlin clients can achieve the same with closures.
-            if argument.name.get() == 'userdata':
+            if member.name.get() == 'userdata':
                 continue
 
             # Dawn uses 'annotation = *' for output parameters, for example to return arrays.
             # We convert the return type and strip out the parameters.
-            if argument.annotation == '*':
+            if member.annotation == '*':
                 continue
 
-            yield argument
+            yield member
 
     def kotlin_return(method):
         for argument in method.arguments:
@@ -859,6 +848,7 @@ def compute_kotlin_params(loaded_json, kotlin_json):
 
         return {"type": method.return_type}
 
+    # TODO(b/352047733): Replace methods that require special handling with an exceptions list.
     def include_method(method):
         if method.return_type.category == 'function pointer':
             # Kotlin doesn't support returning functions.
@@ -882,6 +872,14 @@ def compute_kotlin_params(loaded_json, kotlin_json):
                         return False
         return True
 
+    # TODO(42240932): Remove this filtering once the deprecated "callback info" structures are
+    # removed.
+    def include_structure(structure):
+        # TODO(352710628) support converting callback info.
+        if structure.name.canonical_case().endswith(" callback info"):
+            return False
+        return True
+
     def jni_name(type):
         return kt_file_path + '/' + type.name.CamelCase()
 
@@ -903,10 +901,10 @@ def compute_kotlin_params(loaded_json, kotlin_json):
         for chain_root in structure.chain_roots:
             chain_children[chain_root.name.get()].append(structure)
     params_kotlin['chain_children'] = chain_children
-    params_kotlin['filter_arguments'] = filter_arguments
-    params_kotlin['include_structure_member'] = include_structure_member
     params_kotlin['kotlin_return'] = kotlin_return
     params_kotlin['include_method'] = include_method
+    params_kotlin['include_structure'] = include_structure
+    params_kotlin['kotlin_record_members'] = kotlin_record_members
     params_kotlin['jni_name'] = jni_name
     params_kotlin['is_async_method'] = is_async_method
     return params_kotlin
@@ -1179,6 +1177,7 @@ def make_base_render_params(metadata):
             'as_ktName': as_ktName,
             'has_callbackInfoStruct': has_callbackInfoStruct,
             'find_by_name': find_by_name,
+            'print': print,
             'unreachable_code': unreachable_code
         }
 

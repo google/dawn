@@ -37,7 +37,7 @@ class {{ obj.name.CamelCase() }}(val handle: Long): AutoCloseable {
         @JvmName("{{ method.name.camelCase() }}")
         external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
-        {%- for arg in filter_arguments(method.arguments) %}
+        {%- for arg in kotlin_record_members(method.arguments) %}
             {{- as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
         {%- endfor -%}): {{ kotlin_declaration(kotlin_return(method)) }}
 

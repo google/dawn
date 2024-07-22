@@ -3849,7 +3849,7 @@
         "chain roots": ["surface descriptor"],
         "tags": ["art", "native"],
         "members": [
-            {"name": "window", "type": "void", "annotation": "*"}
+            {"name": "window", "type": "void *"}
         ]
     },
     "surface descriptor from canvas HTML selector": {

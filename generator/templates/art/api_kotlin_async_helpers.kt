@@ -37,7 +37,7 @@ import kotlin.coroutines.suspendCoroutine
     //* Function pointers generally end in Callback which we replace with Return.
     {% set return_name = function_pointer.name.chunks[:-1] | map('title') | join + 'Return' %}
     data class {{ return_name }}(
-        {% for arg in filter_arguments(function_pointer.arguments) %}
+        {% for arg in kotlin_record_members(function_pointer.arguments) %}
             val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},
         {% endfor %})
 {% endfor %}
@@ -56,10 +56,10 @@ import kotlin.coroutines.suspendCoroutine
                     {%- for arg in method.arguments[:-2] %}
                         {{- as_varName(arg.name) }},
                     {% endfor %}) {
-                    {%- for arg in filter_arguments(function_pointer.arguments) %}
+                    {%- for arg in kotlin_record_members(function_pointer.arguments) %}
                         {{- as_varName(arg.name) }},
                     {%- endfor %} -> it.resume({{ return_name }}(
-                        {%- for arg in filter_arguments(function_pointer.arguments) %}
+                        {%- for arg in kotlin_record_members(function_pointer.arguments) %}
                             {{- as_varName(arg.name) }},
                         {%- endfor %})
                     )

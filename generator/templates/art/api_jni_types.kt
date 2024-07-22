@@ -67,9 +67,9 @@
         {%- endif -%}
     {%- elif member.type.category in ['function pointer', 'object', 'structure'] -%}
         L{{ jni_name(member.type) }};
-    {%- elif member.type.name.get() in ['int', 'int64_t', 'uint64_t', 'size_t', 'void'] -%}  {# remove void #}
+    {%- elif member.type.name.get() in ['int64_t', 'uint64_t', 'size_t', 'void *'] -%}
         J
-    {%- elif member.type.name.get() in ['int', 'int32_t', 'uint32_t'] or member.type.category in ['bitmask', 'enum'] -%}
+    {%- elif member.type.name.get() in ['int32_t', 'uint32_t'] or member.type.category in ['bitmask', 'enum'] -%}
         //*  JvmInline makes lone bitmask/enums appear as integer to JNI.
         I
     {%- elif member.type.name.get() in ['int16_t', 'uint16_t'] -%}

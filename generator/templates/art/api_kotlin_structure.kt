@@ -28,7 +28,7 @@ package {{ kotlin_package }}
 {% from 'art/api_kotlin_types.kt' import kotlin_definition with context %}
 
 class {{ structure.name.CamelCase() }}(
-    {% for member in structure.members if include_structure_member(structure, member) %}
+    {% for member in kotlin_record_members(structure.members) %}
         {# We supply a getter that is excluded from name manging to allow Inline Value Classed
            enums/bitmasks to be accessible as integers from the JVM adapter layer. #}
         {% if member.type.category in ['bitmask', 'enum'] %}
