@@ -325,6 +325,7 @@ dawn_test("dawn_unittests") {
     "unittests/BuddyMemoryAllocatorTests.cpp",
     "unittests/ChainUtilsTests.cpp",
     "unittests/CommandAllocatorTests.cpp",
+    "unittests/CommandLineParserTests.cpp",
     "unittests/ContentLessObjectCacheTests.cpp",
     "unittests/DefaultTests.cpp",
     "unittests/EnumClassBitmasksTests.cpp",

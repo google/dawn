@@ -29,6 +29,7 @@ set(private_headers
     "BinarySemaphore.h"
     "ComboRenderBundleEncoderDescriptor.h"
     "ComboRenderPipelineDescriptor.h"
+    "CommandLineParser.h"
     "PlatformDebugLogger.h"
     "SystemUtils.h"
     "TerribleCommandBuffer.h"
@@ -42,6 +43,7 @@ set(sources
     "BinarySemaphore.cpp"
     "ComboRenderBundleEncoderDescriptor.cpp"
     "ComboRenderPipelineDescriptor.cpp"
+    "CommandLineParser.cpp"
     "SystemUtils.cpp"
     "TerribleCommandBuffer.cpp"
     "TestUtils.cpp"
@@ -50,6 +52,7 @@ set(sources
     "WireHelper.cpp"
 )
 set(conditional_private_depends)
+
 if(WIN32 AND NOT WINDOWS_STORE)
   list(APPEND sources "WindowsDebugLogger.cpp")
 else()
@@ -74,6 +77,7 @@ endif()
 if (TINT_BUILD_SPV_READER)
     list(APPEND conditional_private_depends SPIRV-Tools-opt)
 endif ()
+
 dawn_add_library(
   dawn_utils
   UTILITY_TARGET dawn_internal_config
@@ -85,9 +89,14 @@ dawn_add_library(
     dawn::dawn_wire
     dawn::dawncpp_headers
     dawn::partition_alloc
+    absl::span
   PRIVATE_DEPENDS
+    absl::strings
+    absl::str_format_internal
+    absl::flat_hash_map
     ${conditional_private_depends}
 )
+
 # Needed by WGPUHelpers
 target_compile_definitions(dawn_utils
   PUBLIC
