@@ -59,7 +59,7 @@ GPUShaderModule::getCompilationInfo(Napi::Env env) {
                 case WGPUCompilationMessageType_Info:
                     return interop::GPUCompilationMessageType::kInfo;
                 default:
-                    UNREACHABLE();
+                    UNREACHABLE("unrecognized handled compilation message type", message.type);
             }
         }
         uint64_t getLineNum(Napi::Env) override { return message.lineNum; }

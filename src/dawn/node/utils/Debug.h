@@ -149,11 +149,11 @@ template <typename... MSG_ARGS>
     } while (false)
 
 // UNREACHABLE() prints 'UNREACHABLE' with the current file, line and
-// function to stdout, along with the optional message, then calls abort().
+// function to stdout, along with the message, then calls abort().
 // The macro calls Fatal(), which is annotated with [[noreturn]].
 // Used to stub code that has not yet been implemented.
 #define UNREACHABLE(...) \
-    ::wgpu::utils::Fatal("UNREACHABLE", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    ::wgpu::utils::Fatal("UNREACHABLE", __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 }  // namespace wgpu::utils
 
