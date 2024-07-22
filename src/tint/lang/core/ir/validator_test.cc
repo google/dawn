@@ -2023,6 +2023,189 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Var_Function_UnexpectedInputAttachmentIndex) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<function, f32>();
+        v->SetInputAttachmentIndex(0);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:41 error: var: '@input_attachment_index' is not valid for non-handle var
+    %2:ptr<function, f32, read_write> = var @input_attachment_index(0)
+                                        ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var @input_attachment_index(0)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Private_UnexpectedInputAttachmentIndex) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<private_, f32>();
+
+        v->SetInputAttachmentIndex(0);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:40 error: var: '@input_attachment_index' is not valid for non-handle var
+    %2:ptr<private, f32, read_write> = var @input_attachment_index(0)
+                                       ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<private, f32, read_write> = var @input_attachment_index(0)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_PushConstant_UnexpectedInputAttachmentIndex) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<push_constant, f32>();
+        v->SetInputAttachmentIndex(0);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:40 error: var: '@input_attachment_index' is not valid for non-handle var
+    %2:ptr<push_constant, f32, read> = var @input_attachment_index(0)
+                                       ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<push_constant, f32, read> = var @input_attachment_index(0)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Storage_UnexpectedInputAttachmentIndex) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<storage, f32>();
+        v->SetBindingPoint(0, 0);
+        v->SetInputAttachmentIndex(0);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:40 error: var: '@input_attachment_index' is not valid for non-handle var
+    %2:ptr<storage, f32, read_write> = var @binding_point(0, 0) @input_attachment_index(0)
+                                       ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<storage, f32, read_write> = var @binding_point(0, 0) @input_attachment_index(0)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Uniform_UnexpectedInputAttachmentIndex) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<uniform, f32>();
+        v->SetBindingPoint(0, 0);
+        v->SetInputAttachmentIndex(0);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:34 error: var: '@input_attachment_index' is not valid for non-handle var
+    %2:ptr<uniform, f32, read> = var @binding_point(0, 0) @input_attachment_index(0)
+                                 ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<uniform, f32, read> = var @binding_point(0, 0) @input_attachment_index(0)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Workgroup_UnexpectedInputAttachmentIndex) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<workgroup, f32>();
+        v->SetInputAttachmentIndex(0);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:42 error: var: '@input_attachment_index' is not valid for non-handle var
+    %2:ptr<workgroup, f32, read_write> = var @input_attachment_index(0)
+                                         ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<workgroup, f32, read_write> = var @input_attachment_index(0)
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Var_Init_WrongType) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -5293,16 +5476,24 @@ TEST_F(IR_ValidatorTest, Store_NoStoreType) {
     auto* f = b.Function("my_func", ty.void_());
 
     b.Append(f->Block(), [&] {
-        auto* var = b.Var(ty.ptr<function, i32>());
-        var->Result(0)->SetType(nullptr);
-        b.Append(mod.allocators.instructions.Create<ir::Store>(var->Result(0), b.Constant(42_u)));
+        auto* result = b.InstructionResult(ty.u32());
+        result->SetType(nullptr);
+        b.Append(mod.allocators.instructions.Create<ir::Store>(result, b.Constant(42_u)));
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:11 error: store: store target operand is not a memory view
+              R"(:3:11 error: store: %2 is not in scope
+    store %2, 42u
+          ^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:3:11 error: store: store target operand is not a memory view
     store %2, 42u
           ^^
 
@@ -5313,7 +5504,6 @@ TEST_F(IR_ValidatorTest, Store_NoStoreType) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    %2:null = var
     store %2, 42u
     ret
   }

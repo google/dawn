@@ -212,6 +212,10 @@ void Disassembler::EmitBindingPoint(BindingPoint p) {
          << StyleLiteral(p.binding) << ")";
 }
 
+void Disassembler::EmitInputAttachmentIndex(uint32_t i) {
+    out_ << StyleAttribute("@input_attachment_index") << "(" << StyleLiteral(i) << ")";
+}
+
 void Disassembler::EmitInterpolation(Interpolation interp) {
     out_ << StyleAttribute("@interpolate") << "(";
     out_ << StyleEnum(interp.type);
@@ -513,6 +517,12 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
                 out_ << " ";
                 EmitBindingPoint(v->BindingPoint().value());
             }
+
+            if (v->InputAttachmentIndex().has_value()) {
+                out_ << " ";
+                EmitInputAttachmentIndex(v->InputAttachmentIndex().value());
+            }
+
             if (v->Attributes().invariant) {
                 out_ << " " << StyleAttribute("@invariant");
             }

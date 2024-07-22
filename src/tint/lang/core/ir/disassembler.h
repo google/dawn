@@ -232,6 +232,7 @@ class Disassembler {
     void EmitParamAttributes(const FunctionParam* p);
     void EmitReturnAttributes(const Function* func);
     void EmitBindingPoint(BindingPoint p);
+    void EmitInputAttachmentIndex(uint32_t i);
     void EmitInterpolation(Interpolation interp);
     void EmitInstruction(const Instruction* inst);
     void EmitValueWithType(const Instruction* val);
