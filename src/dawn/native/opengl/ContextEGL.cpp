@@ -42,16 +42,16 @@
 namespace dawn::native::opengl {
 
 // static
-ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const DisplayEGL* display,
+ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(Ref<DisplayEGL> display,
                                                               wgpu::BackendType backend,
                                                               bool useRobustness,
                                                               bool useANGLETextureSharing) {
-    auto context = std::make_unique<ContextEGL>(display);
+    auto context = std::make_unique<ContextEGL>(std::move(display));
     DAWN_TRY(context->Initialize(backend, useRobustness, useANGLETextureSharing));
     return std::move(context);
 }
 
-ContextEGL::ContextEGL(const DisplayEGL* display) : mDisplay(display) {}
+ContextEGL::ContextEGL(Ref<DisplayEGL> display) : mDisplay(std::move(display)) {}
 
 ContextEGL::~ContextEGL() {
     if (mOffscreenSurface != EGL_NO_SURFACE) {

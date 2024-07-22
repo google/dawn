@@ -93,7 +93,7 @@ uint32_t GetDeviceIdFromRender(std::string_view render) {
 
 // static
 ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
-                                                          std::unique_ptr<DisplayEGL> display) {
+                                                          Ref<DisplayEGL> display) {
     const EGLFunctions& egl = display->egl;
     EGLDisplay eglDisplay = display->GetDisplay();
 
@@ -101,7 +101,7 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     // that we can query the limits and other properties. Assumes that the limit are the same
     // irrespective of the context creation options.
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context, ContextEGL::Create(display.get(), backendType, /*useRobustness*/ false,
+    DAWN_TRY_ASSIGN(context, ContextEGL::Create(display, backendType, /*useRobustness*/ false,
                                                 /*useANGLETextureSharing*/ false));
 
     EGLSurface prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
@@ -114,7 +114,6 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
         AcquireRef(new PhysicalDevice(backendType, std::move(display)));
     DAWN_TRY_WITH_CLEANUP(physicalDevice->Initialize(), {
         egl.MakeCurrent(eglDisplay, prevDrawSurface, prevReadSurface, prevContext);
-        context = nullptr;
     });
 
     egl.MakeCurrent(eglDisplay, prevDrawSurface, prevReadSurface, prevContext);
@@ -122,11 +121,11 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     return physicalDevice;
 }
 
-PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType, std::unique_ptr<DisplayEGL> display)
+PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType, Ref<DisplayEGL> display)
     : PhysicalDeviceBase(backendType), mDisplay(std::move(display)) {}
 
 DisplayEGL* PhysicalDevice::GetDisplay() const {
-    return mDisplay.get();
+    return mDisplay.Get();
 }
 
 bool PhysicalDevice::SupportsExternalImages() const {
@@ -417,7 +416,7 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     bool useRobustness = !deviceToggles.IsEnabled(Toggle::DisableRobustness);
 
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay.get(), GetBackendType(), useRobustness,
+    DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
                                                 useANGLETextureSharing));
 
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,

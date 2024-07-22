@@ -67,9 +67,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
 
     // A helper function performing checks on the display we're trying to use, and adding the
     // physical device from it to the list returned by the discovery.
-    auto AppendNewDeviceFrom =
-        [&](ResultOrError<std::unique_ptr<DisplayEGL>> maybeDisplay) -> MaybeError {
-        std::unique_ptr<DisplayEGL> display;
+    auto AppendNewDeviceFrom = [&](ResultOrError<Ref<DisplayEGL>> maybeDisplay) -> MaybeError {
+        Ref<DisplayEGL> display;
         DAWN_TRY_ASSIGN(display, std::move(maybeDisplay));
 
         if (!display->egl.HasExt(EGLExt::CreateContextRobustness)) {
