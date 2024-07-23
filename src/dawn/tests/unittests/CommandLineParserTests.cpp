@@ -429,7 +429,7 @@ TEST(CommandLineParserTest, ArgvArgcSkipCommandName) {
 }
 
 // Tests for the generation of the help strings for the options.
-TEST(CommandLineParserTest, OptionHelp) {
+TEST(CommandLineParserTest, PrintHelp) {
     // A test with a few options, checks that they are sorted.
     {
         CLP opts;
@@ -438,7 +438,7 @@ TEST(CommandLineParserTest, OptionHelp) {
         opts.AddString("baz");
 
         std::stringstream s;
-        opts.AddHelp(s);
+        opts.PrintHelp(s);
         EXPECT_EQ(s.str(), R"(--bar <value>
 --baz <value>
 --foo <value>
@@ -451,7 +451,7 @@ TEST(CommandLineParserTest, OptionHelp) {
         opts.AddString("foo").Parameter("bar");
 
         std::stringstream s;
-        opts.AddHelp(s);
+        opts.PrintHelp(s);
         EXPECT_EQ(s.str(), R"(--foo <bar>
 )");
     }
@@ -462,7 +462,7 @@ TEST(CommandLineParserTest, OptionHelp) {
         opts.AddBool("foo", "enable fooing");
 
         std::stringstream s;
-        opts.AddHelp(s);
+        opts.PrintHelp(s);
         EXPECT_EQ(s.str(), R"(--foo  enable fooing
 )");
     }
@@ -479,7 +479,7 @@ TEST(CommandLineParserTest, OptionHelp) {
         opts.AddEnum(conversions, "cell", "which story to get");
 
         std::stringstream s;
-        opts.AddHelp(s);
+        opts.PrintHelp(s);
         EXPECT_EQ(s.str(), R"(--cell <pop|six|uh-uh>  which story to get
 )");
     }
@@ -490,11 +490,26 @@ TEST(CommandLineParserTest, OptionHelp) {
         opts.AddString("foo").ShortName('f');
 
         std::stringstream s;
-        opts.AddHelp(s);
+        opts.PrintHelp(s);
         EXPECT_EQ(s.str(), R"(--foo <value>
 -f  alias for --foo
 )");
     }
+}
+
+// Tests that AddHelp() add the correct option.
+TEST(CommandLineParserTest, HelpOption) {
+    CLP opts;
+    CLP::BoolOption& helpOpt = opts.AddHelp();
+
+    std::stringstream s;
+    opts.PrintHelp(s);
+    EXPECT_EQ(s.str(), R"(--help  Shows the help
+-h  alias for --help
+)");
+
+    ExpectSuccess(opts.Parse(Split("-h")));
+    EXPECT_TRUE(helpOpt.GetValue());
 }
 
 }  // anonymous namespace

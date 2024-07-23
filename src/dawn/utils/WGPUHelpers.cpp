@@ -452,4 +452,21 @@ ColorSpaceConversionInfo GetNoopRGBColorSpaceConversionInfo() {
     return info;
 }
 
+bool BackendRequiresCompat(wgpu::BackendType backend) {
+    switch (backend) {
+        case wgpu::BackendType::D3D12:
+        case wgpu::BackendType::Metal:
+        case wgpu::BackendType::Vulkan:
+        case wgpu::BackendType::WebGPU:
+        case wgpu::BackendType::Null:
+            return false;
+        case wgpu::BackendType::D3D11:
+        case wgpu::BackendType::OpenGL:
+        case wgpu::BackendType::OpenGLES:
+            return true;
+        case wgpu::BackendType::Undefined:
+            DAWN_UNREACHABLE();
+    }
+}
+
 }  // namespace dawn::utils

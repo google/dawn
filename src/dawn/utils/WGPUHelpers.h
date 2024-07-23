@@ -207,6 +207,8 @@ struct ColorSpaceConversionInfo {
 ColorSpaceConversionInfo GetYUVBT709ToRGBSRGBColorSpaceConversionInfo();
 ColorSpaceConversionInfo GetNoopRGBColorSpaceConversionInfo();
 
+bool BackendRequiresCompat(wgpu::BackendType backend);
+
 }  // namespace dawn::utils
 
 #endif  // SRC_DAWN_UTILS_WGPUHELPERS_H_

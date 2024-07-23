@@ -45,7 +45,7 @@ namespace dawn::utils {
 //   CommandLineParser parser;
 //   auto& dryRun = parser.AddBool("dry-run", "fake operations").ShortName('d');
 //   auto& input = parser.AddString("input", "the input file to process").ShortName('i');
-//   auto& help = opts.AddBool("help", "Shows the help").ShortName('h');
+//   auto& help = opts.AddHelp();
 //
 //   auto result = parser.Parse(argc, argv);
 //   if (!result.success) {
@@ -55,7 +55,7 @@ namespace dawn::utils {
 //
 //   if (help.GetValue()) {
 //       std::cout << "Usage: " << argv[0] << " <options>\n\noptions\n";
-//       parser.AddHelp(std::cout);
+//       parser.PrintHelp(std::cout);
 //       return 0;
 //   }
 //
@@ -196,6 +196,9 @@ class CommandLineParser {
         return AddOption(std::make_unique<EnumOption<E>>(std::move(conversions), name, desc));
     }
 
+    // Helper to add a --help option.
+    BoolOption& AddHelp();
+
     // Helper structs for the Parse calls.
     struct ParseResult {
         bool success;
@@ -219,7 +222,7 @@ class CommandLineParser {
                       const ParseOptions& parseOptions = kDefaultParseOptions);
 
     // Generate summary of options for a --help and add it to the stream.
-    void AddHelp(std::ostream& s);
+    void PrintHelp(std::ostream& s);
 
   private:
     template <typename T>

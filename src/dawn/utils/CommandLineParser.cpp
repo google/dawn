@@ -198,6 +198,10 @@ std::string CommandLineParser::JoinConversionNames(absl::Span<const std::string_
     return absl::StrJoin(names, separator);
 }
 
+CommandLineParser::BoolOption& CommandLineParser::AddHelp() {
+    return AddBool("help", "Shows the help").ShortName('h');
+}
+
 // static
 const CommandLineParser::ParseOptions CommandLineParser::kDefaultParseOptions = {};
 
@@ -307,7 +311,7 @@ CommandLineParser::ParseResult CommandLineParser::Parse(int argc,
     return Parse(args, parseOptions);
 }
 
-void CommandLineParser::AddHelp(std::ostream& s) {
+void CommandLineParser::PrintHelp(std::ostream& s) {
     // Sort options in alphabetical order using a trick that std::tuple is sorted lexicographically.
     std::vector<std::tuple<std::string_view, OptionBase*>> sortedOptions;
     for (auto& option : mOptions) {
