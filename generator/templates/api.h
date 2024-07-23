@@ -111,10 +111,7 @@ typedef uint32_t {{API}}Bool;
 {% endfor %}
 
 {% for type in by_category["bitmask"] %}
-    //* TODO(crbug.com/42241186): Remove one of these, based on resolution of what the name is:
-    //* https://github.com/webgpu-native/webgpu-headers/issues/273#issuecomment-2195951806
     typedef {{API}}Flags {{as_cType(type.name)}};
-    typedef {{API}}Flags {{as_cType(type.name)}}Flags;
     {% for value in type.values %}
         static const {{as_cType(type.name)}} {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "016X")}};
     {% endfor %}

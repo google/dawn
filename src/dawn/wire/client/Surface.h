@@ -52,7 +52,7 @@ class Surface final : public ObjectBase {
     void GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture);
 
   private:
-    WGPUTextureUsageFlags mSupportedUsages;
+    WGPUTextureUsage mSupportedUsages;
     std::vector<WGPUTextureFormat> mSupportedFormats;
     std::vector<WGPUPresentMode> mSupportedPresentModes;
     std::vector<WGPUCompositeAlphaMode> mSupportedAlphaModes;
