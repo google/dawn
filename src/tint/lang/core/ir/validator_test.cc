@@ -702,6 +702,72 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, CallToBuiltinMissingResult) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, 1_f);
+        c->SetResults(Vector{static_cast<ir::InstructionResult*>(nullptr)});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: abs: result is undefined
+    undef = abs 1.0f
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:3:13 error: abs: call to builtin does not have a return type
+    undef = abs 1.0f
+            ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    undef = abs 1.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, CallToBuiltinMismatchResultType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, 1_f);
+        c->Result(0)->SetType(ty.i32());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:14 error: abs: call result type does not match builtin return type
+    %2:i32 = abs 1.0f
+             ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    %2:i32 = abs 1.0f
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},

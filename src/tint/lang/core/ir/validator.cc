@@ -1212,15 +1212,23 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
         symbols_,
     };
 
-    auto result = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                            Empty, args, core::EvaluationStage::kRuntime);
-    if (result != Success) {
-        AddError(call) << result.Failure();
+    auto builtin = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
+                                             Empty, args, core::EvaluationStage::kRuntime);
+    if (builtin != Success) {
+        AddError(call) << builtin.Failure();
         return;
     }
 
-    if (result->return_type != call->Result(0)->Type()) {
+    TINT_ASSERT(builtin->return_type);
+
+    if (call->Result(0) == nullptr) {
+        AddError(call) << "call to builtin does not have a return type";
+        return;
+    }
+
+    if (builtin->return_type != call->Result(0)->Type()) {
         AddError(call) << "call result type does not match builtin return type";
+        return;
     }
 }
 
