@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 
 #include <unordered_set>
+#include "src/tint/lang/wgsl/sem/load.h"
 #include "src/tint/utils/containers/hashset.h"
 
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
@@ -134,13 +135,17 @@ struct SimplifyPointers::State {
                         break;
                 }
             }
-            if (auto* user = ctx.src->Sem().Get<sem::VariableUser>(op.expr)) {
-                auto* var = user->Variable();
-                if (var->Is<sem::LocalVariable>() &&  //
-                    var->Declaration()->Is<Let>() &&  //
-                    var->Type()->Is<core::type::Pointer>()) {
-                    op.expr = var->Declaration()->initializer;
-                    continue;
+
+            if (auto* sem = ctx.src->Sem().Get<sem::ValueExpression>(op.expr)) {
+                // There may be an implicit load before the identifier due to a swizzle on pointer.
+                if (auto* user = sem->UnwrapLoad()->As<sem::VariableUser>()) {
+                    auto* var = user->Variable();
+                    if (var->Is<sem::LocalVariable>() &&  //
+                        var->Declaration()->Is<Let>() &&  //
+                        var->Type()->Is<core::type::Pointer>()) {
+                        op.expr = var->Declaration()->initializer;
+                        continue;
+                    }
                 }
             }
             return op;
@@ -236,7 +241,8 @@ struct SimplifyPointers::State {
                 },
                 [&](const AccessorExpression* accessor) {
                     if (auto* a = ctx.src->Sem().Get<sem::ValueExpression>(accessor->object)) {
-                        if (a->Type()->Is<core::type::Pointer>()) {
+                        // There may be an implicit load if this is a swizzle.
+                        if (a->UnwrapLoad()->Type()->Is<core::type::Pointer>()) {
                             // Object is an implicitly dereferenced pointer (i.e. syntax sugar).
                             is_accessor_object_pointer.Add(accessor->object);
                         }

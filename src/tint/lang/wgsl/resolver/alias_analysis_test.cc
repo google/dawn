@@ -850,6 +850,37 @@ TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
 12:34 note: aliases with another argument passed here)");
 }
 
+TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle_FromPointer) {
+    // fn f2(p1 : ptr<function, vec4<f32>, p2 : ptr<function, vec4<f32>) {
+    //   _ = p2.zy;
+    //   *p1 = vec4<f32>();
+    // }
+    // fn f1() {
+    //   var v : vec4<f32>;
+    //   f2(&v, &v);
+    // }
+    Structure("S", Vector{Member("a", ty.i32())});
+    Func("f2",
+         Vector{
+             Param("p1", ty.ptr<function, vec4<f32>>()),
+             Param("p2", ty.ptr<function, vec4<f32>>()),
+         },
+         ty.void_(),
+         Vector{
+             Assign(Phony(), MemberAccessor("p2", "zy")),
+             Assign(Deref("p1"), Call<vec4<f32>>()),
+         });
+    Func("f1", tint::Empty, ty.void_(),
+         Vector{
+             Decl(Var("v", ty.vec4<f32>())),
+             CallStmt(
+                 Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
+         });
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), R"(56:76 error: invalid aliased pointer argument
+12:34 note: aliases with another argument passed here)");
+}
+
 TEST_F(ResolverAliasAnalysisTest, SinglePointerReadWrite) {
     // Test that we can both read and write from a single pointer parameter.
     //

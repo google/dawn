@@ -513,5 +513,26 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SimplifyPointersTest, SwizzleFromPointer) {
+    auto* src = R"(
+fn f() {
+  var a : vec4f;
+  let p : ptr<function, vec4f> = &a;
+  let v : vec2f = p.yw;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var a : vec4f;
+  let v : vec2f = a.yw;
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::ast::transform

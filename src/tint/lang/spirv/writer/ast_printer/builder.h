@@ -386,7 +386,7 @@ class Builder {
     /// @param type the reference type of the expression
     /// @param id the SPIR-V id of the expression
     /// @returns the ID of the loaded value or 0 on failure.
-    uint32_t GenerateLoad(const core::type::Reference* type, uint32_t id);
+    uint32_t GenerateLoad(const core::type::MemoryView* type, uint32_t id);
     /// Generates an OpLoad on the given ID if it has reference type in WGSL, otherwise return the
     /// ID itself.
     /// @param type the type of the expression

@@ -3529,8 +3529,25 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 // the swizzle.
                 ty = b.create<core::type::Vector>(vec->type(), static_cast<uint32_t>(size));
 
-                // The load rule is invoked before the swizzle, if necessary.
-                obj_expr = Load(object);
+                if (obj_expr->Type()->Is<core::type::Pointer>()) {
+                    // If the LHS is a pointer, the load rule is invoked. We special case this
+                    // because our usual handling of implicit loads assumes the expression has
+                    // reference type. This expression also has an implicit dereference before the
+                    // load, but we have no way of representing that, so we create the load directly
+                    // from the pointer expression.
+                    auto* load =
+                        b.create<sem::Load>(obj_expr, current_statement_, obj_expr->Stage());
+                    load->Behaviors() = obj_expr->Behaviors();
+                    b.Sem().Replace(obj_expr->Declaration(), load);
+
+                    // Register the load for the alias analysis.
+                    RegisterLoad(obj_expr);
+
+                    obj_expr = load;
+                } else {
+                    // The load rule is invoked before the swizzle, if necessary.
+                    obj_expr = Load(obj_expr);
+                }
             }
             const core::constant::Value* val = nullptr;
             if (auto* obj_val = object->ConstantValue()) {

@@ -261,9 +261,9 @@ struct Atomics::State {
         // with atomicLoad and atomicStore.
         for (auto* node : ctx.src->ASTNodes().Objects()) {
             if (auto* load = ctx.src->Sem().Get<sem::Load>(node)) {
-                if (is_ref_to_atomic_var(load->Reference())) {
-                    ctx.Replace(load->Reference()->Declaration(), [=] {
-                        auto* expr = ctx.CloneWithoutTransform(load->Reference()->Declaration());
+                if (is_ref_to_atomic_var(load->Source())) {
+                    ctx.Replace(load->Source()->Declaration(), [=] {
+                        auto* expr = ctx.CloneWithoutTransform(load->Source()->Declaration());
                         return b.Call(wgsl::BuiltinFn::kAtomicLoad, b.AddressOf(expr));
                     });
                 }

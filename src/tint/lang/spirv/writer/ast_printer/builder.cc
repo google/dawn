@@ -520,11 +520,11 @@ uint32_t Builder::GenerateExpression(const sem::Expression* expr) {
         }
     }
     if (auto* load = expr->As<sem::Load>()) {
-        auto ref_id = GenerateExpression(load->Reference());
+        auto ref_id = GenerateExpression(load->Source());
         if (ref_id == 0) {
             return 0;
         }
-        return GenerateLoad(load->ReferenceType(), ref_id);
+        return GenerateLoad(load->MemoryView(), ref_id);
     }
     return Switch(
         expr->Declaration(),  //
@@ -1120,7 +1120,7 @@ uint32_t Builder::GenerateIdentifierExpression(const ast::IdentifierExpression* 
                       "' does not resolve to a variable";
 }
 
-uint32_t Builder::GenerateLoad(const core::type::Reference* type, uint32_t id) {
+uint32_t Builder::GenerateLoad(const core::type::MemoryView* type, uint32_t id) {
     auto type_id = GenerateTypeIfNeeded(type->StoreType());
     auto result = result_op();
     auto result_id = std::get<uint32_t>(result);

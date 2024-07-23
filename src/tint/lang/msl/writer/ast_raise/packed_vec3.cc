@@ -467,7 +467,7 @@ struct PackedVec3::State {
                 [&](const sem::Load* load) {
                     // Unpack loads of types that contain vec3s in host-shareable address spaces.
                     if (ContainsVec3(load->Type()) &&
-                        core::IsHostShareable(load->ReferenceType()->AddressSpace())) {
+                        core::IsHostShareable(load->MemoryView()->AddressSpace())) {
                         to_unpack.Add(load);
                     }
                 },

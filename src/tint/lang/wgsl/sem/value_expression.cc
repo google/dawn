@@ -68,7 +68,7 @@ const ValueExpression* ValueExpression::UnwrapMaterialize() const {
 
 const ValueExpression* ValueExpression::UnwrapLoad() const {
     if (auto* l = As<Load>()) {
-        return l->Reference();
+        return l->Source();
     }
     return this;
 }
@@ -76,7 +76,7 @@ const ValueExpression* ValueExpression::UnwrapLoad() const {
 const ValueExpression* ValueExpression::Unwrap() const {
     return Switch(
         this,  // note: An expression can only be wrapped by a Load or Materialize, not both.
-        [&](const Load* load) { return load->Reference(); },
+        [&](const Load* load) { return load->Source(); },
         [&](const Materialize* materialize) { return materialize->Expr(); },
         [&](Default) { return this; });
 }

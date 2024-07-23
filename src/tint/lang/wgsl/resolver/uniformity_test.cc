@@ -5486,7 +5486,7 @@ fn foo() {
 
 TEST_F(UniformityAnalysisTest, VectorElement_NonUniform) {
     std::string src = R"(
-@group(0) @binding(0) var<storage, read_write> v : array<i32>;
+@group(0) @binding(0) var<storage, read_write> v : vec4<i32>;
 
 fn foo() {
   if (v[2] == 0) {
@@ -5508,6 +5508,60 @@ test:5:3 note: control flow depends on possibly non-uniform value
 test:5:7 note: reading from read_write storage buffer 'v' may result in a non-uniform value
   if (v[2] == 0) {
       ^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, VectorSwizzle_NonUniform) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> v : vec4<i32>;
+
+fn foo() {
+  if (any(v.xy == vec2())) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:6:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (any(v.xy == vec2())) {
+  ^^
+
+test:5:11 note: reading from read_write storage buffer 'v' may result in a non-uniform value
+  if (any(v.xy == vec2())) {
+          ^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, VectorSwizzleFromPointer_NonUniform) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> v : vec4<i32>;
+
+fn foo() {
+  if (any((&v).xy == vec2())) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:6:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on possibly non-uniform value
+  if (any((&v).xy == vec2())) {
+  ^^
+
+test:5:13 note: reading from read_write storage buffer 'v' may result in a non-uniform value
+  if (any((&v).xy == vec2())) {
+            ^
 )");
 }
 

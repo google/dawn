@@ -1,0 +1,9 @@
+SKIP: FAILED
+
+../../src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.cc:1164 internal compiler error: expression did not resolve to a value
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

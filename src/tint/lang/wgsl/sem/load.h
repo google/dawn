@@ -33,30 +33,30 @@
 
 namespace tint::sem {
 
-/// Load is a semantic expression which represents the load of a reference to a non-reference value.
+/// Load is a semantic expression which represents the load of a memory view to a value.
 /// Loads from reference types are implicit in WGSL, so the Load semantic node shares the same AST
 /// node as the inner semantic node.
 class Load final : public Castable<Load, ValueExpression> {
   public:
     /// Constructor
-    /// @param reference the reference expression being loaded
+    /// @param source the source expression being loaded from
     /// @param statement the statement that owns this expression
     /// @param stage the earliest evaluation stage for the expression
-    Load(const ValueExpression* reference, const Statement* statement, core::EvaluationStage stage);
+    Load(const ValueExpression* source, const Statement* statement, core::EvaluationStage stage);
 
     /// Destructor
     ~Load() override;
 
-    /// @return the reference being loaded
-    const ValueExpression* Reference() const { return reference_; }
+    /// @return the source object being loaded
+    const ValueExpression* Source() const { return source_; }
 
-    /// @returns the type of the loaded reference.
-    const core::type::Reference* ReferenceType() const {
-        return static_cast<const core::type::Reference*>(reference_->Type());
+    /// @returns the type of the memory view being loaded from.
+    const core::type::MemoryView* MemoryView() const {
+        return static_cast<const core::type::MemoryView*>(source_->Type());
     }
 
   private:
-    ValueExpression const* const reference_;
+    ValueExpression const* const source_;
 };
 
 }  // namespace tint::sem
