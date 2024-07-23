@@ -174,7 +174,7 @@ namespace {{native_namespace}} {
         const bool useStrlen = this->length == SIZE_MAX;
         DAWN_ASSERT(!(isNull && useStrlen));
         return std::string_view(this->data, isNull      ? 0
-                                            : useStrlen ? strlen(this->data)
+                                            : useStrlen ? std::strlen(this->data)
                                                         : this->length);
     }
 
@@ -185,7 +185,7 @@ namespace {{native_namespace}} {
             return std::nullopt;
         }
         return std::string_view(this->data, isNull      ? 0
-                                            : useStrlen ? strlen(this->data)
+                                            : useStrlen ? std::strlen(this->data)
                                                         : this->length);
     }
 
