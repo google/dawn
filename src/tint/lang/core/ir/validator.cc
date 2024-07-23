@@ -1429,7 +1429,10 @@ void Validator::CheckAccess(const Access* a) {
 }
 
 void Validator::CheckBinary(const Binary* b) {
-    CheckOperandsNotNull(b, Binary::kLhsOperandOffset, Binary::kRhsOperandOffset);
+    if (!CheckResultsAndOperandRange(b, Binary::kNumResults, Binary::kNumOperands)) {
+        return;
+    }
+
     if (b->LHS() && b->RHS()) {
         intrinsic::Context context{b->TableData(), type_mgr_, symbols_};
 

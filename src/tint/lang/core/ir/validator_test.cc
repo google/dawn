@@ -2687,10 +2687,74 @@ TEST_F(IR_ValidatorTest, Binary_Result_Nullptr) {
   $B1: {
   ^^^
 
+:3:5 error: binary: result is undefined
+    undef = add 3i, 2i
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
 note: # Disassembly
 %my_func = func():void {
   $B1: {
     undef = add 3i, 2i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Binary_MissingOperands) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    auto* add = sb.Add(ty.i32(), sb.Constant(1_i), sb.Constant(2_i));
+    add->ClearOperands();
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: binary: expected at least 2 operands, got 0
+    %2:i32 = add 
+    ^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:i32 = add 
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Binary_MissingResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    auto* add = sb.Add(ty.i32(), sb.Constant(1_i), sb.Constant(2_i));
+    add->ClearResults();
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: binary: expected exactly 1 results, got 0
+    undef = add 1i, 2i
+    ^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    undef = add 1i, 2i
     ret
   }
 }
