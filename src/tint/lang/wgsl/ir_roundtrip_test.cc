@@ -3391,5 +3391,15 @@ fn c(y : f32) {
 )");
 }
 
+// Test that we do not try to name the unnameable builtin structure types in array declarations.
+// See crbug.com/353249345.
+TEST_F(IRToProgramRoundtripTest, BuiltinStructInInferredArrayType) {
+    RUN_TEST(R"(
+fn a(x : f32) {
+  let y = array(frexp(x));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl

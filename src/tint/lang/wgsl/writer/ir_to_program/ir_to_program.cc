@@ -953,6 +953,11 @@ class State {
             },
             [&](const core::type::Array* a) {
                 auto el = Type(a->ElemType());
+                if (!el) {
+                    // The element type is untypeable, so we need to infer it instead.
+                    return ast::Type{b.Expr(b.Ident("array"))};
+                }
+
                 Vector<const ast::Attribute*, 1> attrs;
                 if (!a->IsStrideImplicit()) {
                     attrs.Push(b.Stride(a->Stride()));
