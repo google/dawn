@@ -2808,6 +2808,14 @@ TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
   $B1: {
   ^^^
 
+:3:5 error: unary: result is undefined
+    undef = negation 2i
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
 note: # Disassembly
 %my_func = func():void {
   $B1: {
@@ -2843,6 +2851,66 @@ note: # Disassembly
 %my_func = func():void {
   $B1: {
     %2:f32 = complement 2i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Unary_MissingOperands) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    auto* u = b.Negation(ty.f32(), 2_f);
+    u->ClearOperands();
+    sb.Append(u);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: unary: expected at least 1 operands, got 0
+    %2:f32 = negation 
+    ^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:f32 = negation 
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Unary_MissingResults) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    auto* u = b.Negation(ty.f32(), 2_f);
+    u->ClearResults();
+    sb.Append(u);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: unary: expected exactly 1 results, got 0
+    undef = negation 2.0f
+    ^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    undef = negation 2.0f
     ret
   }
 }

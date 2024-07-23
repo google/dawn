@@ -1456,7 +1456,10 @@ void Validator::CheckBinary(const Binary* b) {
 }
 
 void Validator::CheckUnary(const Unary* u) {
-    CheckOperandNotNull(u, u->Val(), Unary::kValueOperandOffset);
+    if (!CheckResultsAndOperandRange(u, Unary::kNumResults, Unary::kNumOperands)) {
+        return;
+    }
+
     if (u->Val()) {
         intrinsic::Context context{u->TableData(), type_mgr_, symbols_};
 
