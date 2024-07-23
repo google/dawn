@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -41,6 +42,7 @@
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
+#include "dawn/utils/CommandLineParser.h"
 #include "webgpu/webgpu_glfw.h"
 
 void PrintDeviceError(WGPUErrorType errorType, const char* message, void*) {
@@ -237,119 +239,51 @@ wgpu::SwapChain GetSwapChain() {
 }
 
 bool InitSample(int argc, const char** argv) {
-    for (int i = 1; i < argc; i++) {
-        std::string_view arg(argv[i]);
-        std::string_view opt, value;
+    dawn::utils::CommandLineParser opts;
+    auto& helpOpt = opts.AddHelp();
+    auto& enableTogglesOpt = opts.AddStringList("enable-toggles", "Toggles to enable in Dawn")
+                                 .ShortName('e')
+                                 .Parameter("comma separated list");
+    auto& disableTogglesOpt = opts.AddStringList("disable-toggles", "Toggles to disable in Dawn")
+                                  .ShortName('d')
+                                  .Parameter("comma separated list");
+    auto& backendOpt =
+        opts.AddEnum<wgpu::BackendType>({{"d3d11", wgpu::BackendType::D3D11},
+                                         {"d3d12", wgpu::BackendType::D3D12},
+                                         {"metal", wgpu::BackendType::Metal},
+                                         {"null", wgpu::BackendType::Null},
+                                         {"opengl", wgpu::BackendType::OpenGL},
+                                         {"opengles", wgpu::BackendType::OpenGLES},
+                                         {"vulkan", wgpu::BackendType::Vulkan}},
+                                        "backend", "The backend to get an adapter from")
+            .ShortName('b')
+            .Default(wgpu::BackendType::Undefined);
+    auto& adapterTypeOpt = opts.AddEnum<wgpu::AdapterType>(
+                                   {
+                                       {"discrete", wgpu::AdapterType::DiscreteGPU},
+                                       {"integrated", wgpu::AdapterType::IntegratedGPU},
+                                       {"cpu", wgpu::AdapterType::CPU},
+                                   },
+                                   "adapter-type", "The type of adapter to request")
+                               .ShortName('a')
+                               .Default(wgpu::AdapterType::Unknown);
 
-        static constexpr struct Option {
-            const char* shortOpt;
-            const char* longOpt;
-            bool hasValue;
-        } options[] = {
-            {"-b", "--backend=", true},       {"-c", "--cmd-buf=", true},
-            {"-e", "--enable-toggle=", true}, {"-d", "--disable-toggle=", true},
-            {"-a", "--adapter-type=", true},  {"-h", "--help", false},
-        };
-
-        for (const Option& option : options) {
-            if (!option.hasValue) {
-                if (arg == option.shortOpt || arg == option.longOpt) {
-                    opt = option.shortOpt;
-                    break;
-                }
-                continue;
-            }
-
-            if (arg == option.shortOpt) {
-                opt = option.shortOpt;
-                if (++i < argc) {
-                    value = argv[i];
-                }
-                break;
-            }
-
-            if (arg.rfind(option.longOpt, 0) == 0) {
-                opt = option.shortOpt;
-                if (option.hasValue) {
-                    value = arg.substr(strlen(option.longOpt));
-                }
-                break;
-            }
-        }
-
-        if (opt == "-b") {
-            if (value == "d3d11") {
-                backendType = wgpu::BackendType::D3D11;
-                continue;
-            }
-            if (value == "d3d12") {
-                backendType = wgpu::BackendType::D3D12;
-                continue;
-            }
-            if (value == "metal") {
-                backendType = wgpu::BackendType::Metal;
-                continue;
-            }
-            if (value == "null") {
-                backendType = wgpu::BackendType::Null;
-                continue;
-            }
-            if (value == "opengl") {
-                backendType = wgpu::BackendType::OpenGL;
-                continue;
-            }
-            if (value == "opengles") {
-                backendType = wgpu::BackendType::OpenGLES;
-                continue;
-            }
-            if (value == "vulkan") {
-                backendType = wgpu::BackendType::Vulkan;
-                continue;
-            }
-            fprintf(stderr,
-                    "--backend expects a backend name (opengl, opengles, metal, d3d11, d3d12, "
-                    "null, vulkan)\n");
-            return false;
-        }
-
-        if (opt == "-e") {
-            enableToggles.push_back(std::string(value));
-            continue;
-        }
-
-        if (opt == "-d") {
-            disableToggles.push_back(std::string(value));
-            continue;
-        }
-
-        if (opt == "-a") {
-            if (value == "discrete") {
-                adapterType = wgpu::AdapterType::DiscreteGPU;
-                continue;
-            }
-            if (value == "integrated") {
-                adapterType = wgpu::AdapterType::IntegratedGPU;
-                continue;
-            }
-            if (value == "cpu") {
-                adapterType = wgpu::AdapterType::CPU;
-                continue;
-            }
-            fprintf(stderr, "--adapter-type expects an adapter type (discrete, integrated, cpu)\n");
-            return false;
-        }
-
-        if (opt == "-h") {
-            printf(
-                "Usage: %s [-b BACKEND] [-e TOGGLE] [-d TOGGLE] [-a "
-                "ADAPTER]\n",
-                argv[0]);
-            printf("  BACKEND is one of: d3d12, metal, null, opengl, opengles, vulkan\n");
-            printf("  TOGGLE is device toggle name to enable or disable\n");
-            printf("  ADAPTER is one of: discrete, integrated, cpu\n");
-            return false;
-        }
+    auto result = opts.Parse(argc, argv);
+    if (!result.success) {
+        std::cerr << result.errorMessage << "\n";
+        return false;
     }
+
+    if (helpOpt.GetValue()) {
+        std::cout << "Usage: " << argv[0] << " <options>\n\noptions\n";
+        opts.PrintHelp(std::cout);
+        return false;
+    }
+
+    backendType = backendOpt.GetValue();
+    adapterType = adapterTypeOpt.GetValue();
+    enableToggles = enableTogglesOpt.GetOwnedValue();
+    disableToggles = disableTogglesOpt.GetOwnedValue();
 
     // TODO(dawn:810): Reenable once the OpenGL(ES) backend is able to create its own context such
     // that it can use surface-based swapchains.
