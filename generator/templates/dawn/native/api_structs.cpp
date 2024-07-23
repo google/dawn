@@ -32,6 +32,7 @@
 {% set namespace = metadata.namespace %}
 #include "{{native_dir}}/{{namespace}}_structs_autogen.h"
 
+#include <cstring>
 #include <tuple>
 
 #include "dawn/common/Assert.h"
