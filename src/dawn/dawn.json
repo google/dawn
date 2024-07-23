@@ -66,6 +66,14 @@
             {"name": "proc name", "type": "char", "annotation": "const*"}
         ]
     },
+    "get proc address 2": {
+        "category": "function",
+        "returns": "proc",
+        "args": [
+            {"name": "device", "type": "device", "optional": true},
+            {"name": "proc name", "type": "string view"}
+        ]
+    },
 
     "request adapter options": {
         "category": "structure",

@@ -104,7 +104,7 @@ namespace {{native_namespace}} {
         {% endfor %}
     {% endfor %}
 
-    {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" %}
+    {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" and function.name.canonical_case() != "get proc address 2" %}
         {{as_cType(function.return_type.name)}} Native{{function.name.CamelCase()}}(
             {%- for arg in function.arguments -%}
                 {%- if not loop.first %}, {% endif -%}
@@ -146,7 +146,7 @@ namespace {{native_namespace}} {
         {% set c_prefix = metadata.c_prefix %}
         struct ProcEntry {
             {{c_prefix}}Proc proc;
-            const char* name;
+            std::string_view name;
         };
         static const ProcEntry sProcMap[] = {
             {% for (type, method) in c_methods_sorted_by_name %}
@@ -157,25 +157,34 @@ namespace {{native_namespace}} {
 
     }  // anonymous namespace
 
-    WGPUProc NativeGetProcAddress(WGPUDevice, const char* procName) {
-        if (procName == nullptr) {
+    //* TODO(crbug.com/42241188): Remove "2" suffix when WGPUStringView changes complete.
+    WGPUProc NativeGetProcAddress2(WGPUDevice, WGPUStringView procName);
+
+    WGPUProc NativeGetProcAddress(WGPUDevice device, const char* procName) {
+        return NativeGetProcAddress2(device, WGPUStringView{procName, SIZE_MAX});
+    }
+
+    WGPUProc NativeGetProcAddress2(WGPUDevice, WGPUStringView cProcName) {
+        if (cProcName.data == nullptr) {
             return nullptr;
         }
 
+        std::string_view procName(cProcName.data, cProcName.length != SIZE_MAX ? cProcName.length : strlen(cProcName.data));
+
         const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
-            [](const ProcEntry &a, const char *b) -> bool {
-                return strcmp(a.name, b) < 0;
+            [](const ProcEntry &a, const std::string_view& b) -> bool {
+                return a.name.compare(b) < 0;
             }
         );
 
-        if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
+        if (entry != &sProcMap[sProcMapSize] && entry->name == procName) {
             return entry->proc;
         }
 
         // Special case the free-standing functions of the API.
         // TODO(dawn:1238) Checking string one by one is slow, it needs to be optimized.
         {% for function in by_category["function"] %}
-            if (strcmp(procName, "{{as_cMethod(None, function.name)}}") == 0) {
+            if (procName == "{{as_cMethod(None, function.name)}}") {
                 return reinterpret_cast<{{c_prefix}}Proc>(Native{{as_cppType(function.name)}});
             }
 
@@ -183,8 +192,8 @@ namespace {{native_namespace}} {
         return nullptr;
     }
 
-    std::vector<const char*> GetProcMapNamesForTestingInternal() {
-        std::vector<const char*> result;
+    std::vector<std::string_view> GetProcMapNamesForTestingInternal() {
+        std::vector<std::string_view> result;
         result.reserve(sProcMapSize);
         for (const ProcEntry& entry : sProcMap) {
             result.push_back(entry.name);

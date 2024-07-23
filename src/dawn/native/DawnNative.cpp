@@ -250,9 +250,9 @@ bool IsTextureSubresourceInitialized(WGPUTexture texture,
     return textureBase->IsSubresourceContentInitialized(range);
 }
 
-std::vector<const char*> GetProcMapNamesForTestingInternal();
+std::vector<std::string_view> GetProcMapNamesForTestingInternal();
 
-std::vector<const char*> GetProcMapNamesForTesting() {
+std::vector<std::string_view> GetProcMapNamesForTesting() {
     return GetProcMapNamesForTestingInternal();
 }
 

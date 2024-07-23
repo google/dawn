@@ -903,10 +903,21 @@ void {{CppType}}::SetUncapturedErrorCallback(L callback) {
 
 // Free Functions
 {% for function in by_category["function"] if not function.no_cpp %}
-    static inline {{as_cppType(function.return_type.name)}} {{as_cppType(function.name)}}(
+    //* TODO(crbug.com/42241188): Remove "2" suffix when WGPUStringView changes complete.
+    {% set OriginalFunctionName = as_cppType(function.name) %}
+    {% set FunctionName = OriginalFunctionName[:-1] if function.name.chunks[-1] == "2" else OriginalFunctionName %}
+    static inline {{as_cppType(function.return_type.name)}} {{FunctionName}}(
         {%- for arg in function.arguments -%}
             {%- if not loop.first %}, {% endif -%}
-            {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
+            {%- if arg.type.name.get() == "string" and arg.annotation == "value" -%}
+                {%- if arg.optional -%}
+                    std::optional<std::string_view> {{as_varName(arg.name)}}{{render_cpp_default_value(arg, False)}}
+                {%- else -%}
+                    std::string_view {{as_varName(arg.name)}}{{render_cpp_default_value(arg, False)}}
+                {%- endif -%}
+            {%- else -%}
+                {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
+            {%- endif -%}
         {%- endfor -%}
     ) {
         {% if function.return_type.name.concatcase() == "void" %}
