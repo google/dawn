@@ -453,7 +453,8 @@
         "chain roots": ["bind group layout entry"],
         "tags": ["dawn"],
         "members": [
-            {"name": "sampler", "type": "sampler"}
+            {"name": "sampler", "type": "sampler"},
+            {"name": "sampled texture binding", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED" }
         ]
     },
     "texture sample type": {

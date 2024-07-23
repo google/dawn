@@ -56,10 +56,14 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
         return false;
     };
 
-    auto spirv_seen = [&diagnostics, &seen_spirv_bindings](const binding::BindingInfo& src,
-                                                           const tint::BindingPoint& dst) -> bool {
+    const auto& statically_paired_texture_binding_points =
+        options.statically_paired_texture_binding_points;
+    auto spirv_seen = [&diagnostics, &seen_spirv_bindings,
+                       &statically_paired_texture_binding_points](
+                          const binding::BindingInfo& src, const tint::BindingPoint& dst) -> bool {
         if (auto binding = seen_spirv_bindings.Get(src)) {
-            if (*binding != dst) {
+            if (*binding != dst && !statically_paired_texture_binding_points.count(*binding) &&
+                !statically_paired_texture_binding_points.count(dst)) {
                 diagnostics.AddError(Source{})
                     << "found duplicate SPIR-V binding point: [group: " << src.group
                     << ", binding: " << src.binding << "]";

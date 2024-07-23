@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/utils/reflection/reflection.h"
@@ -131,6 +132,12 @@ struct Options {
     /// The bindings
     Bindings bindings;
 
+    // BindingPoints for textures that are paired with static samplers in the
+    // BGL. These BindingPoints are the only ones that are allowed to map to
+    // duplicate spir-v bindings, since they must map to the spir-v bindings of
+    // the samplers with which they are paired.
+    std::unordered_set<BindingPoint> statically_paired_texture_binding_points = {};
+
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
 
@@ -174,6 +181,7 @@ struct Options {
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  bindings,
+                 statically_paired_texture_binding_points,
                  disable_robustness,
                  disable_image_robustness,
                  disable_runtime_sized_array_index_clamping,

@@ -120,6 +120,20 @@ BindGroup::BindGroup(Device* device,
                     // resources.
                     return false;
                 }
+
+                // TODO(crbug.com/41488897: Add GetVkDescriptorSet{Index,
+                // Type}(BindingIndex) functions to BindGroupLayoutVk that
+                // access vectors holding entries for all BGL entries and
+                // eliminate this special-case code in favor of calling those
+                // functions to assign `dstBinding` and `descriptorType` above.
+                if (auto samplerIndex =
+                        ToBackend(GetLayout())->GetStaticSamplerIndexForTexture(bindingIndex)) {
+                    // Write the info of the texture at the binding index for the
+                    // sampler.
+                    write.dstBinding = static_cast<uint32_t>(samplerIndex.value());
+                    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                }
+
                 writeImageInfo[numWrites].imageView = handle;
                 writeImageInfo[numWrites].imageLayout = VulkanImageLayout(
                     view->GetTexture()->GetFormat(), wgpu::TextureUsage::TextureBinding);

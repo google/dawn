@@ -261,7 +261,9 @@ SamplerBindingInfo::SamplerBindingInfo(const SamplerBindingLayout& apiLayout)
     : type(apiLayout.type) {}
 
 StaticSamplerBindingInfo::StaticSamplerBindingInfo(const StaticSamplerBindingLayout& apiLayout)
-    : sampler(apiLayout.sampler) {}
+    : sampler(apiLayout.sampler),
+      sampledTextureBinding(BindingNumber{apiLayout.sampledTextureBinding}),
+      isUsedForSingleTextureBinding(apiLayout.sampledTextureBinding < WGPU_LIMIT_U32_UNDEFINED) {}
 
 InputAttachmentBindingInfo::InputAttachmentBindingInfo() = default;
 InputAttachmentBindingInfo::InputAttachmentBindingInfo(wgpu::TextureSampleType sampleType)

@@ -30,6 +30,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
@@ -240,6 +241,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     // Creation of module and spirv is deferred to this point when using tint generator
 
     tint::spirv::writer::Bindings bindings;
+    std::unordered_set<tint::BindingPoint> statically_paired_texture_binding_points;
 
     const BindingInfoArray& moduleBindingInfo =
         GetEntryPoint(programmableStage.entryPoint.c_str()).bindings;
@@ -288,6 +290,11 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                                  dstBindingPoint.group, dstBindingPoint.binding});
                 },
                 [&](const TextureBindingInfo& bindingInfo) {
+                    if (auto samplerIndex = bgl->GetStaticSamplerIndexForTexture(
+                            BindingIndex{dstBindingPoint.binding})) {
+                        dstBindingPoint.binding = static_cast<uint32_t>(samplerIndex.value());
+                        statically_paired_texture_binding_points.insert(srcBindingPoint);
+                    }
                     bindings.texture.emplace(srcBindingPoint,
                                              tint::spirv::writer::binding::Texture{
                                                  dstBindingPoint.group, dstBindingPoint.binding});
@@ -341,7 +348,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.maxSubgroupSizeForFullSubgroups = maxSubgroupSizeForFullSubgroups;
-
+    req.tintOptions.statically_paired_texture_binding_points =
+        std::move(statically_paired_texture_binding_points);
     req.tintOptions.clamp_frag_depth = clampFragDepth;
     req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
     req.tintOptions.emit_vertex_point_size = emitPointSize;

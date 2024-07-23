@@ -32,6 +32,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Range.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
@@ -88,11 +89,11 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
         },
         [](const SamplerBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLER; },
         [](const StaticSamplerBindingInfo& layout) {
-            // By the Vulkan spec, YCbCr samplers must have descriptor type
-            // COMBINED_IMAGE_SAMPLER:
-            // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkSamplerYcbcrConversionInfo.html
-            return (layout.sampler->IsYCbCr()) ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-                                               : VK_DESCRIPTOR_TYPE_SAMPLER;
+            // Make this entry into a combined image sampler iff the client
+            // specified a single texture binding to be paired with it.
+            return (layout.isUsedForSingleTextureBinding)
+                       ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+                       : VK_DESCRIPTOR_TYPE_SAMPLER;
         },
         [](const TextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; },
         [](const StorageTextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; },
@@ -115,7 +116,33 @@ MaybeError BindGroupLayout::Initialize() {
     ityp::vector<BindingIndex, VkDescriptorSetLayoutBinding> bindings;
     bindings.reserve(GetBindingCount());
 
+    // Build the mapping from the indices of textures that will be paired with
+    // static samplers at the Vk level in combined image sampler entries to
+    // their respective sampler indices.
+    for (BindingIndex bindingIndex : Range(GetBindingCount())) {
+        const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
+        if (!std::holds_alternative<StaticSamplerBindingInfo>(bindingInfo.bindingLayout)) {
+            continue;
+        }
+
+        auto samplerLayout = std::get<StaticSamplerBindingInfo>(bindingInfo.bindingLayout);
+        if (!samplerLayout.isUsedForSingleTextureBinding) {
+            // The client did not specify that this sampler should be paired
+            // with a single texture binding.
+            continue;
+        }
+
+        mTextureToStaticSamplerIndices[GetBindingIndex(samplerLayout.sampledTextureBinding)] =
+            bindingIndex;
+    }
+
     for (const auto& [_, bindingIndex] : GetBindingMap()) {
+        if (mTextureToStaticSamplerIndices.contains(bindingIndex)) {
+            // This texture will be bound into the VkDescriptorSet at the index
+            // for the sampler itself.
+            continue;
+        }
+
         const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
 
         VkDescriptorSetLayoutBinding vkBinding;
@@ -154,6 +181,12 @@ MaybeError BindGroupLayout::Initialize() {
     absl::flat_hash_map<VkDescriptorType, uint32_t> descriptorCountPerType;
 
     for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
+        if (mTextureToStaticSamplerIndices.contains(bindingIndex)) {
+            // This texture will be bound into the VkDescriptorSet at the index
+            // for the sampler itself.
+            continue;
+        }
+
         VkDescriptorType vulkanType = VulkanDescriptorType(GetBindingInfo(bindingIndex));
 
         // absl:flat_hash_map::operator[] will return 0 if the key doesn't exist.
@@ -211,6 +244,14 @@ void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
                                           DescriptorSetAllocation* descriptorSetAllocation) {
     mDescriptorSetAllocator->Deallocate(descriptorSetAllocation);
     mBindGroupAllocator->Deallocate(bindGroup);
+}
+
+std::optional<BindingIndex> BindGroupLayout::GetStaticSamplerIndexForTexture(
+    BindingIndex textureBinding) const {
+    if (mTextureToStaticSamplerIndices.contains(textureBinding)) {
+        return mTextureToStaticSamplerIndices.at(textureBinding);
+    }
+    return {};
 }
 
 void BindGroupLayout::SetLabelImpl() {
