@@ -115,8 +115,6 @@ typedef uint32_t {{API}}Bool;
     {% for value in type.values %}
         static const {{as_cType(type.name)}} {{as_cEnum(type.name, value.name)}} = 0x{{format(value.value, "016X")}};
     {% endfor %}
-    //* TODO(crbug.com/42241186): Remove Force32 values
-    static const {{as_cType(type.name)}} {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF;
 {% endfor -%}
 
 {% for type in by_category["function pointer"] %}
