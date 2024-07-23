@@ -25,8 +25,6 @@ int tint_mod(int lhs, int rhs) {
 }
 
 void foo(int maybe_zero) {
-  a = tint_div(a, 0);
-  a = tint_mod(a, 0);
   a = tint_div(a, maybe_zero);
   a = tint_mod(a, maybe_zero);
   b = (b / 0.0f);

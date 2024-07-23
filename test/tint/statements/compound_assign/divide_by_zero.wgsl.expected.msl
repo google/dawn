@@ -20,8 +20,6 @@ int tint_mod(int lhs, int rhs) {
 }
 
 void foo(int maybe_zero, thread tint_private_vars_struct* const tint_private_vars) {
-  (*(tint_private_vars)).a = tint_div((*(tint_private_vars)).a, 0);
-  (*(tint_private_vars)).a = tint_mod((*(tint_private_vars)).a, 0);
   (*(tint_private_vars)).a = tint_div((*(tint_private_vars)).a, maybe_zero);
   (*(tint_private_vars)).a = tint_mod((*(tint_private_vars)).a, maybe_zero);
   (*(tint_private_vars)).b = ((*(tint_private_vars)).b / 0.0f);
