@@ -34,9 +34,11 @@
 
     "jni_primitives" : {
         "bool": "jboolean",
+        "double": "jdouble",
         "float": "jfloat",
         "int32_t": "jint",
         "size_t": "jlong",
+        "uint16_t": "jshort",
         "uint32_t": "jint",
         "uint64_t": "jlong",
         "void *": "jobject",

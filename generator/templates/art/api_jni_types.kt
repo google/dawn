@@ -84,3 +84,52 @@
         {{ unreachable_code('Unsupported type: ' + member.type.name.get()) }}
     {%- endif -%}
 {% endmacro %}
+
+{% macro convert_array_element_to_kotlin(input, output, size, member) %}
+    {% if member.type.category in ['bitmask', 'enum'] %}
+        //* Kotlin value classes do not get inlined in arrays, so the creation method is different.
+        jobject {{ output }};
+        {
+            jclass clz = env->FindClass("{{ jni_name(member.type) }}");
+            {{ output }} = env->NewObject(clz, env->GetMethodID(clz, "<init>", "(I)V"),
+                    static_cast<jint>({{ input }}));
+        }
+    {% else %}
+        {{ convert_to_kotlin(input, output, size, member) }}
+    {% endif %}
+{% endmacro %}
+
+{% macro convert_to_kotlin(input, output, size, member) %}
+    {% if member.type.name.get() in ['void const *', 'void *'] %}
+        jobject {{ output }} = toByteBuffer(env, {{ input }}, {{ size }});
+    {% elif size is string %}
+        //* Native container converted to a Kotlin container.
+        {% if member.type.category in ['bitmask', 'enum', 'object', 'structure'] %}
+            jobjectArray {{ output }} = env->NewObjectArray({{ size }},
+                    env->FindClass("{{ jni_name(member.type) }}"), 0);
+            for (int idx = 0; idx != {{ size }}; idx++) {
+                {{ convert_array_element_to_kotlin(input + '[idx]', 'element', None, {'type': member.type}) }}
+                env->SetObjectArrayElement({{ output }}, idx, element);
+            }
+        {% else %}
+            {{ unreachable_code() }}
+        {% endif %}
+    {% elif member.type.category == 'object' %}
+        jobject {{ output }};
+        {
+            jclass clz = env->FindClass("{{ jni_name(member.type) }}");
+            {{ output }} = env->NewObject(clz, env->GetMethodID(clz, "<init>", "(J)V"),
+                    reinterpret_cast<jlong>({{ input }}));
+        }
+    {% elif member.type.name.get() == 'void' %}
+        jlong {{ output }} = reinterpret_cast<jlong>({{ input }});
+    {% elif member.type.name.get() == 'char' %}
+        jstring {{ output }} = {{ input }} ? env->NewStringUTF({{ input }}) : nullptr;
+    {% elif member.type.category in ['bitmask', 'enum', 'native'] %}
+        //* We use Kotlin value classes for bitmask and enum, and they get inlined as lone values.
+        {{ to_jni_type(member.type) }} {{ output }} =
+                static_cast<{{ to_jni_type(member.type) }}>({{ input }});
+    {% else %}
+        {{ unreachable_code() }}
+    {% endif %}
+{% endmacro %}
