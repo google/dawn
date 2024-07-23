@@ -1672,23 +1672,24 @@ bool Validator::Statements(VectorRef<const ast::Statement*> stmts) const {
     return true;
 }
 
-bool Validator::BinaryExpression(const ast::BinaryExpression* expr,
-                                 const tint::sem::ValueExpression* rhs,
-                                 const tint::core::type::Type* lhs_ty) const {
-    switch (expr->op) {
+bool Validator::BinaryExpression(const ast::Node* node,
+                                 const core::BinaryOp op,
+                                 const tint::sem::ValueExpression* lhs,
+                                 const tint::sem::ValueExpression* rhs) const {
+    switch (op) {
         case core::BinaryOp::kShiftLeft:
-        case core::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftRight: {
             // If lhs value is a concrete type, and rhs is a const-expression greater than or equal
             // to the bit width of lhs, then it is a shader-creation error.
-            if (!lhs_ty->HoldsAbstract() && rhs->Stage() == core::EvaluationStage::kConstant) {
-                const uint32_t bit_width = lhs_ty->DeepestElement()->Size() * 8;
+            const auto* elem_type = lhs->Type()->UnwrapRef()->DeepestElement();
+            if (!elem_type->HoldsAbstract() && rhs->Stage() == core::EvaluationStage::kConstant) {
+                const uint32_t bit_width = elem_type->Size() * 8;
                 auto* rhs_val = rhs->ConstantValue();
                 for (size_t i = 0, n = rhs_val->NumElements(); i < n; i++) {
                     auto* shift_val = n == 1 ? rhs_val : rhs_val->Index(i);
                     if (shift_val->ValueAs<u32>() >= bit_width) {
-                        AddError(expr->source)
-                            << "shift "
-                            << (expr->op == core::BinaryOp::kShiftLeft ? "left" : "right")
+                        AddError(node->source)
+                            << "shift " << (op == core::BinaryOp::kShiftLeft ? "left" : "right")
                             << " value must be less than the bit width of the lhs, which is "
                             << bit_width;
                         return false;
@@ -1696,8 +1697,10 @@ bool Validator::BinaryExpression(const ast::BinaryExpression* expr,
                 }
             }
             return true;
-        default:
+        }
+        default: {
             return true;
+        }
     }
 }
 
@@ -2750,6 +2753,9 @@ bool Validator::Assignment(const ast::Statement* a, const core::type::Type* rhs_
     } else if (auto* compound = a->As<ast::CompoundAssignmentStatement>()) {
         lhs = compound->lhs;
         rhs = compound->rhs;
+        if (!BinaryExpression(a, compound->op, sem_.GetVal(lhs), sem_.GetVal(rhs))) {
+            return false;
+        }
     } else {
         TINT_ICE() << "invalid assignment statement";
     }

@@ -1453,6 +1453,25 @@ TEST_F(ResolverValidationTest, ShiftLeft_VecI32_PartialEval_Invalid) {
         R"(1:2 error: shift left value must be less than the bit width of the lhs, which is 32)");
 }
 
+TEST_F(ResolverValidationTest, ShiftLeft_I32_CompoundAssign_Valid) {
+    GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
+    auto* expr = CompoundAssign(Source{{1, 2}}, "v", 1_u, core::BinaryOp::kShiftLeft);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_I32_CompoundAssign_Invalid) {
+    GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
+    auto* expr = CompoundAssign(Source{{1, 2}}, "v", 64_u, core::BinaryOp::kShiftLeft);
+    WrapInFunction(expr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: shift left value must be less than the bit width of the lhs, which is 32)");
+}
+
 }  // namespace
 }  // namespace tint::resolver
 

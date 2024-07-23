@@ -3594,7 +3594,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
         }
     }
 
-    if (!validator_.BinaryExpression(expr, rhs, lhs_ty)) {
+    if (!validator_.BinaryExpression(expr, expr->op, lhs, rhs)) {
         return nullptr;
     }
 
