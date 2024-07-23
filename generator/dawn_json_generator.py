@@ -28,6 +28,7 @@
 
 import json, os, sys
 from collections import namedtuple, defaultdict
+from copy import deepcopy
 
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
 
@@ -844,6 +845,12 @@ def compute_kotlin_params(loaded_json, kotlin_json):
                 # TODO(b/352048981): Use handwritten methods for container returns to avoid the need
                 # for special casing logic.
                 if method.return_type.name.get() == 'size_t':
+                    # Convert the output parameter to a Kotlin return container.
+                    container_type = deepcopy(argument)
+                    container_type.length = 'size_t'
+                    return container_type
+                if (method.return_type.name.get() == 'status'
+                        and argument.type.category == 'structure'):
                     return argument
 
         return {"type": method.return_type}
@@ -854,22 +861,12 @@ def compute_kotlin_params(loaded_json, kotlin_json):
             # Kotlin doesn't support returning functions.
             return False
         for argument in method.arguments:
-            if (argument.annotation == '*'
-                    and method.return_type.name.get() != 'size_t'):
-                # Dawn uses 'annotation = *' for output parameters, for example to return arrays.
-                # Kotlin doesn't support that at the moment, unless a container is returned.
-                return False
             if argument.type.category == 'callback info':
                 # We don't handle this yet.
                 return False
             if argument.annotation == 'value' and argument.type.category == 'structure':
                 # Passing structures by value is not supported at the moment.
                 return False
-            if argument.type.category == 'function pointer':
-                # Currently returning structures in callbacks is not supported.
-                for callback_arg in argument.type.arguments:
-                    if callback_arg.type.category == 'structure':
-                        return False
         return True
 
     def include_structure(structure):
@@ -887,7 +884,7 @@ def compute_kotlin_params(loaded_json, kotlin_json):
     # We assume that if the final two parameters are named 'userdata' and 'callback' respectively
     # that this is an async method that uses function pointer based callbacks.
     def is_async_method(method):
-        if len(method.arguments) < 3:
+        if len(method.arguments) < 2:
             return False  # Not enough parameters to be an async method.
         if method.arguments[-1].name.get() != 'userdata':
             return False

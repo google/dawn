@@ -24,12 +24,13 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-{% from 'art/api_jni_types.kt' import jni_signature with context %}
+{% from 'art/api_jni_types.kt' import convert_to_kotlin, jni_signature with context %}
 
 #include "structures.h"
 
 #include <jni.h>
 
+#include "dawn/common/Assert.h"
 #include "dawn/webgpu.h"
 #include "JNIContext.h"
 
@@ -40,15 +41,80 @@ namespace dawn::kotlin_api {
 
 // Special-case noop handling of the two callback info that are part of other structures.
 // TODO(352710628) support converting callback info.
-void Convert(JNIContext* c, JNIEnv* env, jobject obj, WGPUDeviceLostCallbackInfo* info) {
+void ToNative(JNIContext* c, JNIEnv* env, jobject obj, WGPUDeviceLostCallbackInfo* info) {
     *info = {};
 }
-void Convert(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallbackInfo* info) {
+void ToNative(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallbackInfo* info) {
     *info = {};
 }
 
+jobject ToKotlin(JNIEnv *env, const WGPUDeviceLostCallbackInfo* input) {
+}
+
+jobject ToKotlin(JNIEnv *env, const WGPUUncapturedErrorCallbackInfo* input) {
+}
+
 {% for structure in by_category['structure'] if include_structure(structure) %}
-    void Convert(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted) {
+    //* Native -> Kotlin converter.
+    //* TODO(b/354411474): Filter the structures for which to add a ToKotlin conversion.
+    jobject ToKotlin(JNIEnv *env, const {{ as_cType(structure.name) }}* input) {
+        if (!input) {
+            return nullptr;
+        }
+        //* Make a new Kotlin object to receive a copy of the structure.
+        jclass clz = env->FindClass("{{ jni_name(structure) }}");
+
+        //* JNI signature needs to be built using the same logic used in the Kotlin structure spec.
+        jmethodID ctor = env->GetMethodID(clz, "<init>", "(
+        {%- for member in kotlin_record_members(structure.members) %}
+            {{- jni_signature(member) -}}
+        {%- endfor -%}
+
+        {%- for structure in chain_children[structure.name.get()] -%}
+            {{- jni_signature({'type': structure}) -}}
+        {%- endfor %})V");
+
+        //* Each field converted using the individual value converter.
+        {% for member in kotlin_record_members(structure.members) %}
+            {{ convert_to_kotlin('input->' + member.name.camelCase(), member.name.camelCase(),
+                                 'input->' + member.length.name.camelCase() if member.length.name,
+                                 member) }}
+        {% endfor %}
+
+        //* Allow conversion of every child structure.
+        {% for structure in chain_children[structure.name.get()] %}
+            jobject {{ structure.name.camelCase() }} = nullptr;
+        {% endfor %}
+
+        //* Walk the chain to find and convert (recursively) all child structures.
+        {% if chain_children[structure.name.get()] %}
+            for (const WGPUChainedStruct* child = input->nextInChain;
+                    child != nullptr; child = child->next) {
+                switch (child->sType) {
+                    {% for structure in chain_children[structure.name.get()] %}
+                        case WGPUSType_{{ structure.name.CamelCase() }}:
+                            {{ structure.name.camelCase() }} = ToKotlin(env,
+                                    reinterpret_cast<const {{ as_cType(structure.name) }}*>(child));
+                            break;
+                    {% endfor %}
+                        default:
+                            DAWN_UNREACHABLE();
+                }
+            }
+        {% endif %}
+
+        //* Now all the fields are converted, invoke the constructor.
+        jobject converted = env->NewObject(clz, ctor
+        {%- for member in kotlin_record_members(structure.members) %}
+            ,{{ member.name.camelCase() }}
+        {% endfor %}
+        {%- for structure in chain_children[structure.name.get()] -%}
+            ,{{ structure.name.camelCase() }}
+        {%- endfor %});
+        return converted;
+    }
+
+    void ToNative(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted) {
         jclass clz = env->FindClass("{{ jni_name(structure) }}");
 
         //* Convert each member in turn from corresponding members of the Kotlin object obtained via
@@ -61,6 +127,8 @@ void Convert(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallbac
                 if (mObj) {
                     converted->{{ member.name.camelCase() }} =
                             c->GetStringUTFChars(reinterpret_cast<jstring>(mObj));
+                } else {
+                    converted->{{ member.name.camelCase() }} = nullptr;
                 }
             {% elif member.constant_length == 1 %}
                 {% if member.type.category == 'structure' %}
@@ -68,7 +136,7 @@ void Convert(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallbac
                     jobject mObj = env->CallObjectMethod(obj, method);
                     if (mObj) {
                         auto convertedMember = c->Alloc<{{ as_cType(member.type.name) }}>();
-                        Convert(c, env, mObj, convertedMember);
+                        ToNative(c, env, mObj, convertedMember);
                         converted->{{ member.name.camelCase() }} = convertedMember;
                     }
                 {% elif member.type.name.get() == 'void' %}
@@ -116,7 +184,7 @@ void Convert(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallbac
                     }
                     {% elif member.type.category == 'structure' %}
                         for (int idx = 0; idx != length; idx++) {
-                            Convert(c, env, env->GetObjectArrayElement(in, idx), out + idx);
+                            ToNative(c, env, env->GetObjectArrayElement(in, idx), out + idx);
                         }
                     {% else %}
                         {{ unreachable_code() }}
@@ -135,11 +203,13 @@ void Convert(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallbac
                     converted->{{ member.name.camelCase() }} =
                             reinterpret_cast<{{ as_cType(member.type.name) }}>(
                                     env->CallLongMethod(mObj, getHandle));
+                } else {
+                    converted->{{ member.name.camelCase() }} = nullptr;
                 }
             {% else %}
                 {% if member.type.category == 'structure' or member.type.category == 'callback info' %}
                     //* Mandatory structure.
-                    Convert(c, env, env->CallObjectMethod(obj, method),
+                    ToNative(c, env, env->CallObjectMethod(obj, method),
                             &converted->{{ member.name.camelCase() }});
                 {% elif member.type.name.get() == 'void *' %}
                     converted->{{ member.name.camelCase() }} =
@@ -178,7 +248,7 @@ void Convert(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallbac
                             "()L{{ jni_name(child) }};"));
             if (child) {
                 auto out = c->Alloc<{{ as_cType(child.name) }}>();
-                Convert(c, env, child, out);
+                ToNative(c, env, child, out);
                 out->chain.next = converted->nextInChain;
                 converted->nextInChain = &out->chain;
             }

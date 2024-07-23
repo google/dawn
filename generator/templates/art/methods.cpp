@@ -101,7 +101,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             {% if arg.type.category == 'structure' %}
                 if (_{{ as_varName(arg.name) }}) {
                     auto convertedMember = c.Alloc<{{ as_cType(arg.type.name) }}>();
-                    Convert(&c, env, _{{ as_varName(arg.name) }}, convertedMember);
+                    ToNative(&c, env, _{{ as_varName(arg.name) }}, convertedMember);
                     {{ as_varName(arg.name) }} = convertedMember;
                 } else {
                     {{ as_varName(arg.name) }} = nullptr;
@@ -216,13 +216,13 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% endif %}
 
     //* Actually invoke the native version of the method.
-    {% if _kotlin_return.annotation == '*' %}
+    {% if _kotlin_return.length == 'size_t' %}
         //* Methods that return containers are converted from two-call to single call, and the
         //* return type is switched to a Kotlin container.
         size_t size = wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
             {% for arg in method.arguments -%},
                 //* The replaced output parameter is set to nullptr on the first call.
-                {{ 'nullptr' if arg == _kotlin_return else as_varName(arg.name) -}}
+                {{ 'nullptr' if arg.annotation == '*' else as_varName(arg.name) -}}
             {% endfor %}
         );
         //* Allocate the native container
@@ -241,7 +241,12 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             return nullptr;
         }
     {% else %}
-        {{ 'auto result =' if method.return_type.name.get() != 'void' }}
+        {% if _kotlin_return.annotation == '*' %}
+            //* Make a native container to accept the data output via parameter.
+            {{ as_cType(_kotlin_return.type.name) }} out;
+            {{ _kotlin_return.name.get() }} = &out;
+        {% endif %}
+        {{ 'auto result =' if _kotlin_return.type.name.get() != 'void' }}
         {% if object %}
             wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
         {% else %}
@@ -258,7 +263,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% if _kotlin_return.type.name.get() != 'void' %}
         {{ convert_to_kotlin(_kotlin_return.name.get() if _kotlin_return.annotation == '*' else 'result',
                              'result_kt',
-                             'size' if _kotlin_return.type.name.get() in ['void const *', 'void *'] or _kotlin_return.annotation == '*',
+                             'size' if _kotlin_return.type.name.get() in ['void const *', 'void *'] or _kotlin_return.length == 'size_t',
                              _kotlin_return) }}
         return result_kt;
     {% endif %}

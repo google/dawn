@@ -40,7 +40,7 @@
         {%- else -%}
             Unit  {# raw void is C type for no return type; Kotlin equivalent is Unit #}
         {%- endif -%}
-    {%- elif (arg.length and arg.constant_length != 1) or arg.annotation == '*' %}
+    {%- elif arg.length and arg.length != 'constant' %}
         {# * annotation can mean an array, e.g. an output argument #}
         {%- if type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
             Array<{{ type.name.CamelCase() }}>{{ ' = arrayOf()' if emit_defaults }}
