@@ -360,6 +360,13 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
             }
         ]
     },
@@ -393,6 +400,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             }
         ]
@@ -602,6 +616,20 @@
         "category": "native",
         "wasm type": "i"
     },
+    "string view": {
+        "category": "structure",
+        "members": [
+            {"name": "data", "type": "char", "annotation": "const*", "optional": true},
+            {"name": "length", "type": "size_t", "default": "SIZE_MAX"}
+        ]
+    },
+    "nullable string view": {
+        "category": "structure",
+        "members": [
+            {"name": "data", "type": "char", "annotation": "const*", "optional": true},
+            {"name": "length", "type": "size_t", "default": "SIZE_MAX"}
+        ]
+    },
     "buffer": {
         "category": "object",
         "methods": [
@@ -660,6 +688,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             },
             {
@@ -834,6 +869,13 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
             }
         ]
     },
@@ -919,9 +961,22 @@
                 ]
             },
             {
+                "name": "inject validation error 2",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "message", "type": "string view"}
+                ]
+            },
+            {
                 "name": "insert debug marker",
                 "args": [
                     {"name": "marker label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "insert debug marker 2",
+                "args": [
+                    {"name": "marker label", "type": "string view"}
                 ]
             },
             {
@@ -932,6 +987,12 @@
                 "name": "push debug group",
                 "args": [
                     {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "push debug group 2",
+                "args": [
+                    {"name": "group label", "type": "string view"}
                 ]
             },
             {
@@ -966,6 +1027,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             }
         ]
@@ -1084,6 +1152,12 @@
                 ]
             },
             {
+                "name": "insert debug marker 2",
+                "args": [
+                    {"name": "marker label", "type": "string view"}
+                ]
+            },
+            {
                 "name": "pop debug group",
                 "args": []
             },
@@ -1091,6 +1165,12 @@
                 "name": "push debug group",
                 "args": [
                     {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "push debug group 2",
+                "args": [
+                    {"name": "group label", "type": "string view"}
                 ]
             },
             {
@@ -1140,6 +1220,13 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
             }
         ]
     },
@@ -1176,6 +1263,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             }
         ]
@@ -1493,6 +1587,15 @@
                 ]
             },
             {
+                "name": "create error shader module 2",
+                "returns": "shader module",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "descriptor", "type": "shader module descriptor", "annotation": "const*"},
+                    {"name": "error message", "type": "string view"}
+                ]
+            },
+            {
                 "name": "create swap chain",
                 "tags": ["art", "dawn", "emscripten"],
                 "returns": "swap chain",
@@ -1591,10 +1694,26 @@
                 "tags": ["dawn"]
             },
             {
+                "name": "inject error 2",
+                "args": [
+                    {"name": "type", "type": "error type"},
+                    {"name": "message", "type": "string view"}
+                ],
+                "tags": ["dawn"]
+            },
+            {
                 "name": "force loss",
                 "args": [
                     {"name": "type", "type": "device lost reason"},
                     {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
+                ],
+                "tags": ["dawn"]
+            },
+            {
+                "name": "force loss 2",
+                "args": [
+                    {"name": "type", "type": "device lost reason"},
+                    {"name": "message", "type": "string view"}
                 ],
                 "tags": ["dawn"]
             },
@@ -1666,6 +1785,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             },
             {
@@ -1941,6 +2067,13 @@
                 ]
             },
             {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
+            },
+            {
                 "name": "destroy",
                 "returns": "void"
             },
@@ -2008,6 +2141,13 @@
                 ]
             },
             {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
+            },
+            {
                 "name": "get properties",
                 "returns": "status",
                 "args": [
@@ -2070,6 +2210,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             },
             {
@@ -2813,6 +2960,13 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
             }
         ]
     },
@@ -2892,6 +3046,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             },
             {
@@ -3006,6 +3167,13 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
             }
         ]
     },
@@ -3065,6 +3233,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             }
         ]
@@ -3129,6 +3304,12 @@
                 ]
             },
             {
+                "name": "insert debug marker 2",
+                "args": [
+                    {"name": "marker label", "type": "string view"}
+                ]
+            },
+            {
                 "name": "pop debug group",
                 "args": []
             },
@@ -3136,6 +3317,12 @@
                 "name": "push debug group",
                 "args": [
                     {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "push debug group 2",
+                "args": [
+                    {"name": "group label", "type": "string view"}
                 ]
             },
             {
@@ -3168,6 +3355,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             }
         ]
@@ -3340,6 +3534,12 @@
                 ]
             },
             {
+                "name": "insert debug marker 2",
+                "args": [
+                    {"name": "marker label", "type": "string view"}
+                ]
+            },
+            {
                 "name": "pop debug group",
                 "args": []
             },
@@ -3347,6 +3547,12 @@
                 "name": "push debug group",
                 "args": [
                     {"name": "group label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "push debug group 2",
+                "args": [
+                    {"name": "group label", "type": "string view"}
                 ]
             },
             {
@@ -3429,6 +3635,13 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
             }
         ]
     },
@@ -3456,8 +3669,14 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
             }
-
         ]
     },
 
@@ -3640,6 +3859,13 @@
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
+                ]
             }
         ]
     },
@@ -3693,6 +3919,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             }
         ]
@@ -3828,10 +4061,16 @@
             },
             {
                 "name": "set label",
-                "tags": [],
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             }
         ]
@@ -4063,6 +4302,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             },
             {
@@ -4328,6 +4574,13 @@
                 "returns": "void",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "set label 2",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "nullable string view"}
                 ]
             }
         ]

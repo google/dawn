@@ -38,6 +38,7 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/ValidationUtils_autogen.h"
+#include "dawn/native/utils/WGPUHelpers.h"
 
 namespace dawn::native {
 
@@ -67,16 +68,15 @@ MaybeError ProgrammableEncoder::ValidateProgrammableEncoderEnd() const {
     return {};
 }
 
-void ProgrammableEncoder::APIInsertDebugMarker(const char* groupLabel) {
+void ProgrammableEncoder::APIInsertDebugMarker2(std::string_view groupLabel) {
+    groupLabel = utils::NormalizeLabel(groupLabel);
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             InsertDebugMarkerCmd* cmd =
                 allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
-            cmd->length = strlen(groupLabel);
-
-            char* label = allocator->AllocateData<char>(cmd->length + 1);
-            memcpy(label, groupLabel, cmd->length + 1);
+            cmd->length = groupLabel.length();
+            allocator->CopyAsNullTerminatedString(groupLabel);
 
             return {};
         },
@@ -100,19 +100,18 @@ void ProgrammableEncoder::APIPopDebugGroup() {
         "encoding %s.PopDebugGroup().", this);
 }
 
-void ProgrammableEncoder::APIPushDebugGroup(const char* groupLabel) {
+void ProgrammableEncoder::APIPushDebugGroup2(std::string_view groupLabel) {
+    groupLabel = utils::NormalizeLabel(groupLabel);
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
-            cmd->length = strlen(groupLabel);
-
-            char* label = allocator->AllocateData<char>(cmd->length + 1);
-            memcpy(label, groupLabel, cmd->length + 1);
+            cmd->length = groupLabel.length();
+            const char* label = allocator->CopyAsNullTerminatedString(groupLabel);
 
             mDebugGroupStackSize++;
-            mEncodingContext->PushDebugGroupLabel(groupLabel);
+            mEncodingContext->PushDebugGroupLabel(std::string_view(label, cmd->length));
 
             return {};
         },

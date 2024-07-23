@@ -75,7 +75,7 @@ namespace {{native_namespace}} {
     {% set ChainedStructName = Name("chained struct") %}
     {{render_structure_conversions(ChainedStructName)|indent}}
 
-    {% for type in by_category["structure"] %}
+    {% for type in by_category["structure"] if type.name.get() != "string view" and type.name.get() != "nullable string view" %}
         {{render_structure_conversions(type.name)|indent}}
 
     {% endfor %}

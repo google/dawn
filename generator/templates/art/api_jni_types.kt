@@ -81,6 +81,6 @@
     {%- elif member.type.name.get() == 'bool' -%}
         Z
     {%- else -%}
-        {{ unreachable_code() }}
+        {{ unreachable_code('Unsupported type: ' + member.type.name.get()) }}
     {%- endif -%}
 {% endmacro %}

@@ -202,29 +202,26 @@
                 {% continue %}
             {% endif %}
             //* Normal handling for pointer members and structs.
-            {% if member.annotation != "value" or member.type.category == "structure" %}
+            {% if member.annotation != "value" %}
                 {% if member.type.category != "object" and member.optional %}
-                    if (record.{{as_varName(member.name)}} != nullptr) {
-                {% else %}
-                    {
+                    if (record.{{as_varName(member.name)}} != nullptr)
                 {% endif %}
-                {% if member.annotation != "value" %}
-                        {% do assert(member.annotation != "const*const*", "const*const* not valid here") %}
-                        auto memberLength = {{member_length(member, "record.")}};
-                        auto size = WireAlignSizeofN<{{member_transfer_type(member)}}>(memberLength);
-                        DAWN_ASSERT(size);
-                        result += *size;
-                        //* Structures might contain more pointers so we need to add their extra size as well.
-                        {% if member.type.category == "structure" %}
-                            for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-                                {% do assert(member.annotation == "const*" or member.annotation == "*", "unhandled annotation: " + member.annotation)%}
-                                result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}}[i]);
-                            }
-                        {% endif %}
-                    {% elif member.type.category == "structure" %}
-                        result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}});
+                {
+                    {% do assert(member.annotation != "const*const*", "const*const* not valid here") %}
+                    auto memberLength = {{member_length(member, "record.")}};
+                    auto size = WireAlignSizeofN<{{member_transfer_type(member)}}>(memberLength);
+                    DAWN_ASSERT(size);
+                    result += *size;
+                    //* Structures might contain more pointers so we need to add their extra size as well.
+                    {% if member.type.category == "structure" %}
+                        for (decltype(memberLength) i = 0; i < memberLength; ++i) {
+                            {% do assert(member.annotation == "const*" or member.annotation == "*", "unhandled annotation: " + member.annotation)%}
+                            result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}}[i]);
+                        }
                     {% endif %}
                 }
+            {% elif member.type.category == "structure" %}
+                result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}});
             {% endif %}
         {% endfor %}
         return result;
@@ -737,10 +734,95 @@ WireResult DeserializeChainedStruct(WGPUChainedStructOut** outChainNext,
                                     DeserializeAllocator* allocator,
                                     const ObjectIdResolver& resolver);
 
+// Manually define serialization and deserialization for WGPUStringView because
+// it has a special encoding where:
+//  { .data = nullptr, .length = SIZE_MAX }  --> nil
+//  { .data = non-null, .length = SIZE_MAX } --> null-terminated, use strlen
+//  { .data = ..., .length = 0 }             --> ""
+//  { .data = ..., .length > 0 }             --> string of size `length`
+struct WGPUStringViewTransfer {
+    bool has_data;
+    uint64_t length;
+};
+
+size_t WGPUStringViewGetExtraRequiredSize(const WGPUStringView& record) {
+    size_t size = record.length;
+    if (size == SIZE_MAX) {
+        // This is a null-terminated string, or it's nil.
+        size = record.data ? std::strlen(record.data) : 0;
+    }
+    return Align(size, kWireBufferAlignment);
+}
+
+WireResult WGPUStringViewSerialize(
+    const WGPUStringView& record,
+    WGPUStringViewTransfer* transfer,
+    SerializeBuffer* buffer) {
+
+    bool has_data = record.data != nullptr;
+    uint64_t length = record.length;
+    transfer->has_data = has_data;
+
+    if (!has_data) {
+        transfer->length = length;
+        return WireResult::Success;
+    }
+    if (length == SIZE_MAX) {
+        length = std::strlen(record.data);
+    }
+    if (length > 0) {
+        char* memberBuffer;
+        WIRE_TRY(buffer->NextN(length, &memberBuffer));
+        memcpy(memberBuffer, record.data, length);
+    }
+    transfer->length = length;
+    return WireResult::Success;
+}
+
+WireResult WGPUStringViewDeserialize(
+    WGPUStringView* record,
+    const volatile WGPUStringViewTransfer* transfer,
+    DeserializeBuffer* deserializeBuffer,
+    DeserializeAllocator* allocator) {
+
+    bool has_data = transfer->has_data;
+    uint64_t length = transfer->length;
+
+    if (length > SIZE_MAX) {
+        return WireResult::FatalError;
+    }
+    if (!has_data) {
+        record->data = nullptr;
+        if (length != 0 && length != SIZE_MAX) {
+            // Invalid string.
+            return WireResult::FatalError;
+        }
+        record->length = static_cast<size_t>(length);
+        return WireResult::Success;
+    }
+    if (length == 0) {
+        record->data = "";
+        record->length = 0;
+        return WireResult::Success;
+    }
+
+    size_t stringLength = static_cast<size_t>(length);
+    const volatile char* stringInBuffer;
+    WIRE_TRY(deserializeBuffer->ReadN(stringLength, &stringInBuffer));
+
+    char* copiedString;
+    WIRE_TRY(GetSpace(allocator, stringLength, &copiedString));
+    memcpy(copiedString, const_cast<const char*>(stringInBuffer), stringLength);
+
+    record->data = copiedString;
+    record->length = stringLength;
+    return WireResult::Success;
+}
+
 //* Output structure [de]serialization first because it is used by commands.
 {% for type in by_category["structure"] %}
     {%- set name = as_cType(type.name) -%}
-    {% if type.name.CamelCase() not in client_side_structures -%}
+    {% if type.name.CamelCase() not in client_side_structures and name != "WGPUStringView" -%}
         {{write_record_serialization_helpers(type, name, type.members, is_cmd=False)}}
     {% endif %}
 {% endfor %}

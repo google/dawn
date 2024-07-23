@@ -208,7 +208,7 @@ ComputePassUsages EncodingContext::AcquireComputePassUsages() {
     return std::move(mComputePassUsages);
 }
 
-void EncodingContext::PushDebugGroupLabel(const char* groupLabel) {
+void EncodingContext::PushDebugGroupLabel(std::string_view groupLabel) {
     mDebugGroupLabels.emplace_back(groupLabel);
 }
 

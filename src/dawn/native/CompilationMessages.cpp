@@ -90,13 +90,13 @@ OwnedCompilationMessages::OwnedCompilationMessages() {
 
 OwnedCompilationMessages::~OwnedCompilationMessages() = default;
 
-void OwnedCompilationMessages::AddUnanchoredMessage(std::string message,
+void OwnedCompilationMessages::AddUnanchoredMessage(std::string_view message,
                                                     wgpu::CompilationMessageType type) {
     AddMessage(message, {nullptr, nullptr, static_cast<WGPUCompilationMessageType>(type), 0, 0, 0,
                          0, 0, 0, 0});
 }
 
-void OwnedCompilationMessages::AddMessageForTesting(std::string message,
+void OwnedCompilationMessages::AddMessageForTesting(std::string_view message,
                                                     wgpu::CompilationMessageType type,
                                                     uint64_t lineNum,
                                                     uint64_t linePos,
@@ -168,7 +168,7 @@ MaybeError OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& di
     return {};
 }
 
-void OwnedCompilationMessages::AddMessage(std::string messageString,
+void OwnedCompilationMessages::AddMessage(std::string_view messageString,
                                           const WGPUCompilationMessage& message) {
     // Cannot add messages after GetCompilationInfo has been called.
     DAWN_ASSERT(mCompilationInfo.messages == nullptr);
@@ -177,7 +177,7 @@ void OwnedCompilationMessages::AddMessage(std::string messageString,
     // The message string won't be populated until GetCompilationInfo.
     DAWN_ASSERT(message.message == nullptr);
 
-    mMessageStrings.push_back(messageString);
+    mMessageStrings.push_back(std::string(messageString));
     mMessages.push_back(message);
 }
 

@@ -160,7 +160,7 @@ class EncodingContext {
     RenderPassUsages AcquireRenderPassUsages();
     ComputePassUsages AcquireComputePassUsages();
 
-    void PushDebugGroupLabel(const char* groupLabel);
+    void PushDebugGroupLabel(std::string_view groupLabel);
     void PopDebugGroupLabel();
 
   private:
@@ -195,7 +195,7 @@ class EncodingContext {
     bool mDestroyed = false;
 
     std::unique_ptr<ErrorData> mError;
-    std::vector<std::string> mDebugGroupLabels;
+    std::vector<std::string_view> mDebugGroupLabels;
 };
 
 }  // namespace dawn::native

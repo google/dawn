@@ -114,7 +114,7 @@
             Long
         {% endif %}
     {%- else -%}
-        {{ unreachable_code() }}
+        {{ unreachable_code('Unsupported type: ' + type.name.get()) }}
     {%- endif %}
 {% endmacro %}
 

@@ -24,6 +24,8 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+{% from 'dawn/cpp_macros.tmpl' import wgpu_string_constructors with context %}
+
 {% set API = metadata.api.upper() %}
 {% set api = API.lower() %}
 {% set CAPI = metadata.c_prefix %}
@@ -41,7 +43,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <functional>
+#include <string_view>
+#include <type_traits>
+#include <utility>
 
 #include "{{c_header}}"
 #include "{{api}}/{{api}}_cpp_chained_struct.h"
@@ -328,7 +334,7 @@ class ObjectBase {
 {% macro render_cpp_method_declaration(type, method, dfn=False) %}
     {% set CppType = as_cppType(type.name) %}
     {% set OriginalMethodName = method.name.CamelCase() %}
-    {% set MethodName = OriginalMethodName[:-1] if method.name.chunks[-1] == "f" else OriginalMethodName %}
+    {% set MethodName = OriginalMethodName[:-1] if method.name.chunks[-1] == "f" or method.name.chunks[-1] == "2" else OriginalMethodName %}
     {% set MethodName = CppType + "::" + MethodName if dfn else MethodName %}
     {{"ConvertibleStatus" if method.return_type.name.get() == "status" else as_cppType(method.return_type.name)}} {{MethodName}}(
         {%- for arg in method.arguments -%}
@@ -556,6 +562,14 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
                 {{member_declaration}};
             {% endif %}
         {% endfor %}
+
+        //* Custom string constructors
+        {% if type.name.get() == "string view" %}
+            {{wgpu_string_constructors(as_cppType(type.name), false) | indent(4)}}
+        {% elif type.name.get() == "nullable string view" %}
+            {{wgpu_string_constructors(as_cppType(type.name), true) | indent(4)}}
+        {% endif %}
+
         {% if type.has_free_members_function %}
 
           private:

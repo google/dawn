@@ -52,12 +52,12 @@ class OwnedCompilationMessages : public NonCopyable {
 
     // Adds a message on line 0 (before the first line).
     void AddUnanchoredMessage(
-        std::string message,
+        std::string_view message,
         wgpu::CompilationMessageType type = wgpu::CompilationMessageType::Info);
     // For testing only. Uses the linePos/offset/length for both utf8 and utf16
     // (which is incorrect for non-ASCII strings).
     void AddMessageForTesting(
-        std::string message,
+        std::string_view message,
         wgpu::CompilationMessageType type = wgpu::CompilationMessageType::Info,
         uint64_t lineNum = 0,
         uint64_t linePos = 0,
@@ -72,7 +72,7 @@ class OwnedCompilationMessages : public NonCopyable {
 
   private:
     MaybeError AddMessage(const tint::diag::Diagnostic& diagnostic);
-    void AddMessage(std::string messageString, const WGPUCompilationMessage& message);
+    void AddMessage(std::string_view messageString, const WGPUCompilationMessage& message);
     void AddFormattedTintMessages(const tint::diag::List& diagnostics);
 
     WGPUCompilationInfo mCompilationInfo;

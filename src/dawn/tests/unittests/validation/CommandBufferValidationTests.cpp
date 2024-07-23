@@ -37,6 +37,7 @@ namespace dawn {
 namespace {
 
 using ::testing::HasSubstr;
+using ::testing::StartsWith;
 
 class CommandBufferValidationTest : public ValidationTest {};
 
@@ -340,6 +341,80 @@ TEST_F(CommandBufferValidationTest, InjectValidationError) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.InjectValidationError("my error");
     ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("my error"));
+}
+
+// Test that calling inject validation error with a std::string_view produces an error which
+// preserves the string.
+TEST_F(CommandBufferValidationTest, InjectedValidateErrorStringView) {
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    std::string_view sv = "my error";
+    encoder.InjectValidationError(sv);
+    ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr(sv));
+}
+
+// Test that calling inject validation error with various wgpu::NullableStringView produces
+// an error which preserves the string.
+TEST_F(CommandBufferValidationTest, InjectedValidateErrorVariousStringTypes) {
+    // Use strlen
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        const char* s = "my error";
+        encoder.InjectValidationError(s);
+        ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr(s));
+    }
+
+    // Use explicit length which truncates a null-terminated string.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.InjectValidationError(std::string_view("my error bad", 8));
+        ASSERT_DEVICE_ERROR(encoder.Finish(),
+                            testing::AllOf(HasSubstr("my error"), Not(HasSubstr("bad"))));
+    }
+
+    // Empty, nullptr string
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.InjectValidationError(std::string_view(nullptr, 0));
+        // empty error string, followed by a newline and error context
+        ASSERT_DEVICE_ERROR(encoder.Finish(), StartsWith("\n"));
+    }
+
+    // Empty, non-null string
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.InjectValidationError(std::string_view("foobar", 0));
+        // empty error string, followed by a newline and error context
+        ASSERT_DEVICE_ERROR(encoder.Finish(), StartsWith("\n"));
+    }
+
+    // Set label on encoder and inject validation error
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetLabel("my encoder");
+        encoder.InjectValidationError("err");
+        ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("my encoder"));
+    }
+
+    // Set label on encoder, then clear it, and inject validation error
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetLabel("my encoder");
+        encoder.SetLabel(std::nullopt);
+        encoder.InjectValidationError("err");
+        ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("CommandEncoder (unlabeled)"));
+    }
+
+    // Encoder label has a null terminator and the injected error has a null terminator.
+    // Both get truncated at the null terminator, but they don't truncate each other.
+    // The error should have both the first part of the encoder label and the first
+    // part of the injected error.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.SetLabel(std::string_view("my\0encoder", 10));
+        encoder.InjectValidationError(std::string_view("err\0or", 6));
+        ASSERT_DEVICE_ERROR(encoder.Finish(), AllOf(HasSubstr("validation error: err."),
+                                                    HasSubstr("[CommandEncoder \"my\"]")));
+    }
 }
 
 TEST_F(CommandBufferValidationTest, DestroyEncoder) {

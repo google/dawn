@@ -228,4 +228,15 @@ void CommandAllocator::ResetPointers() {
     mEndPtr = reinterpret_cast<char*>(&mPlaceholderSpace[1]);
 }
 
+const char* CommandAllocator::CopyAsNullTerminatedString(std::string_view in) {
+    // Include extra null-terminator character. The string_view may not be
+    // null-terminated. It also may already have a null-terminator inside of
+    // it, in which case adding the null-terminator is unnecessary. However,
+    // this is unlikely, so always include the extra character.
+    char* out = AllocateData<char>(in.length() + 1);
+    memcpy(out, in.data(), in.length());
+    out[in.length()] = '\0';
+    return out;
+}
+
 }  // namespace dawn::native

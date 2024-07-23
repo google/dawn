@@ -801,8 +801,8 @@ def as_protobufMemberNameLPM(*names):
     return ''.join([name.concatcase().lower() for name in names])
 
 
-def unreachable_code():
-    assert False
+def unreachable_code(msg="unreachable_code"):
+    assert False, msg
 
 
 ############################################################
@@ -872,11 +872,12 @@ def compute_kotlin_params(loaded_json, kotlin_json):
                         return False
         return True
 
-    # TODO(42240932): Remove this filtering once the deprecated "callback info" structures are
-    # removed.
     def include_structure(structure):
         # TODO(352710628) support converting callback info.
         if structure.name.canonical_case().endswith(" callback info"):
+            return False
+        if (structure.name.canonical_case() == "string view"
+                or structure.name.canonical_case() == "nullable string view"):
             return False
         return True
 
@@ -924,6 +925,9 @@ def as_cType(c_prefix, name):
     # Special case for 'bool' because it has a typedef for compatibility.
     if name.native and name.get() != 'bool':
         return name.concatcase()
+    elif name.get() == 'nullable string view':
+        # nullable string view type doesn't exist in C.
+        return c_prefix + 'StringView'
     else:
         return c_prefix + name.CamelCase()
 
@@ -1270,6 +1274,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                            [RENDER_PARAMS_BASE, params_dawn]))
 
         if 'cpp_headers' in targets:
+            imported_templates += [
+                "dawn/cpp_macros.tmpl",
+            ]
+
             renders.append(
                 FileRender('api_cpp.h', 'include/dawn/' + api + '_cpp.h', [
                     RENDER_PARAMS_BASE, params_all, {
@@ -1324,6 +1332,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                            [RENDER_PARAMS_BASE, params_upstream]))
 
         if 'emdawnwebgpu_headers' in targets:
+            imported_templates += [
+                "dawn/cpp_macros.tmpl",
+            ]
+
             assert api == 'webgpu'
             params_emscripten = parse_json(
                 loaded_json, enabled_tags=['compat', 'emscripten'])
@@ -1388,6 +1400,10 @@ class MultiGeneratorFromDawnJSON(Generator):
                     'as_annotated_frontendType': \
                         lambda arg: annotated(as_frontendType(metadata, arg.type), arg),
                 }
+            ]
+
+            imported_templates += [
+                "dawn/cpp_macros.tmpl",
             ]
 
             impl_dir = metadata.impl_dir + '/' if metadata.impl_dir else ''
@@ -1596,13 +1612,15 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             by_category = params_kotlin['by_category']
             for structure in by_category['structure']:
-                renders.append(
-                    FileRender('art/api_kotlin_structure.kt',
-                               'java/' + jni_name(structure) + '.kt', [
-                                   RENDER_PARAMS_BASE, params_kotlin, {
-                                       'structure': structure
-                                   }
-                               ]))
+                if (structure.name.get() != "string view"
+                        and structure.name.get() != "nullable string view"):
+                    renders.append(
+                        FileRender('art/api_kotlin_structure.kt',
+                                   'java/' + jni_name(structure) + '.kt', [
+                                       RENDER_PARAMS_BASE, params_kotlin, {
+                                           'structure': structure
+                                       }
+                                   ]))
             for obj in by_category['object']:
                 renders.append(
                     FileRender(

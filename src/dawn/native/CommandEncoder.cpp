@@ -58,6 +58,7 @@
 #include "dawn/native/RenderPassWorkaroundsHelper.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/ValidationUtils_autogen.h"
+#include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
@@ -1875,23 +1876,25 @@ void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_
         "encoding %s.ClearBuffer(%s, %u, %u).", this, buffer, offset, size);
 }
 
-void CommandEncoder::APIInjectValidationError(const char* message) {
-    if (!mEncodingContext.ConsumedError(mEncodingContext.CheckCurrentEncoder(this),
-                                        "injecting validation error: %s.", message)) {
-        mEncodingContext.HandleError(DAWN_MAKE_ERROR(InternalErrorType::Validation, message));
-    }
+void CommandEncoder::APIInjectValidationError2(std::string_view message) {
+    message = utils::NormalizeLabel(message);
+    mEncodingContext.TryEncode(
+        this,
+        [&](CommandAllocator*) -> MaybeError {
+            return DAWN_MAKE_ERROR(InternalErrorType::Validation, std::string(message));
+        },
+        "injecting validation error: %s.", message);
 }
 
-void CommandEncoder::APIInsertDebugMarker(const char* groupLabel) {
+void CommandEncoder::APIInsertDebugMarker2(std::string_view groupLabel) {
+    groupLabel = utils::NormalizeLabel(groupLabel);
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             InsertDebugMarkerCmd* cmd =
                 allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
-            cmd->length = strlen(groupLabel);
-
-            char* label = allocator->AllocateData<char>(cmd->length + 1);
-            memcpy(label, groupLabel, cmd->length + 1);
+            cmd->length = groupLabel.length();
+            allocator->CopyAsNullTerminatedString(groupLabel);
 
             return {};
         },
@@ -1915,19 +1918,18 @@ void CommandEncoder::APIPopDebugGroup() {
         "encoding %s.PopDebugGroup().", this);
 }
 
-void CommandEncoder::APIPushDebugGroup(const char* groupLabel) {
+void CommandEncoder::APIPushDebugGroup2(std::string_view groupLabel) {
+    groupLabel = utils::NormalizeLabel(groupLabel);
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
-            cmd->length = strlen(groupLabel);
-
-            char* label = allocator->AllocateData<char>(cmd->length + 1);
-            memcpy(label, groupLabel, cmd->length + 1);
+            cmd->length = groupLabel.length();
+            const char* label = allocator->CopyAsNullTerminatedString(groupLabel);
 
             mDebugGroupStackSize++;
-            mEncodingContext.PushDebugGroupLabel(groupLabel);
+            mEncodingContext.PushDebugGroupLabel(std::string_view(label, cmd->length));
 
             return {};
         },
@@ -2036,7 +2038,7 @@ CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* desc
     auto deviceLock(GetDevice()->GetScopedLock());
 
     Ref<CommandBufferBase> commandBuffer;
-    if (GetDevice()->ConsumedError(Finish(descriptor), &commandBuffer)) {
+    if (GetDevice()->ConsumedError(Finish(descriptor), &commandBuffer, "finishing %s.", this)) {
         Ref<CommandBufferBase> errorCommandBuffer =
             CommandBufferBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
         errorCommandBuffer->SetEncoderLabel(this->GetLabel());

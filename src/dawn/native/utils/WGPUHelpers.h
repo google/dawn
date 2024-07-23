@@ -167,6 +167,10 @@ void FreeApiSeq(T** apiData, size_t* apiSize) {
     *apiSize = 0;
 }
 
+// Normalize the label, truncating it at the first null-terminator, if any.
+std::string_view NormalizeLabel(std::string_view in);
+std::string_view NormalizeLabel(std::optional<std::string_view> in);
+
 }  // namespace dawn::native::utils
 
 #endif  // SRC_DAWN_NATIVE_UTILS_WGPUHELPERS_H_

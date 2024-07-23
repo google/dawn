@@ -34,6 +34,7 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
+#include "dawn/native/utils/WGPUHelpers.h"
 
 namespace dawn::native {
 
@@ -105,7 +106,11 @@ ApiObjectBase::~ApiObjectBase() {
 }
 
 void ApiObjectBase::APISetLabel(const char* label) {
-    SetLabel(label);
+    SetLabel(std::string(label ? label : ""));
+}
+
+void ApiObjectBase::APISetLabel2(std::optional<std::string_view> label) {
+    SetLabel(std::string(utils::NormalizeLabel(label)));
 }
 
 void ApiObjectBase::SetLabel(std::string label) {

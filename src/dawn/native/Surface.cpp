@@ -661,7 +661,11 @@ void Surface::APIUnconfigure() {
 }
 
 void Surface::APISetLabel(const char* label) {
-    mLabel = label;
+    mLabel = label ? label : "";
+}
+
+void Surface::APISetLabel2(std::optional<std::string_view> label) {
+    mLabel = utils::NormalizeLabel(label);
 }
 
 }  // namespace dawn::native

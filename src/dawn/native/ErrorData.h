@@ -75,7 +75,7 @@ class [[nodiscard]] ErrorData {
             AppendContext(absl::StrFormat("[Failed to format error: \"%s\"]", formatStr));
         }
     }
-    void AppendDebugGroup(std::string label);
+    void AppendDebugGroup(std::string_view label);
     void AppendBackendMessage(std::string message);
     template <typename... Args>
     void AppendBackendMessage(const char* formatStr, const Args&... args) {
