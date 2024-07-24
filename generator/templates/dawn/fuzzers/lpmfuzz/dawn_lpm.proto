@@ -127,6 +127,10 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
     {% elif member.type.name.get() == "ObjectId" %}
         {{ optionality(member) }}  {{ lift_objectid_member(member, count) }} = {{ count.value }};
         {% set count.value = count.value + 1 %}
+    {% elif member.type.name.get() == "string view" %}
+        required string {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
+    {% elif member.type.name.get() == "nullable string view" %}
+        optional string {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
     {% elif member.type in by_category["structure"] or
        member.type in by_category["enum"] %}
         {{ optionality(member) }}  {{ as_protobufTypeLPM(member) }} {{ as_protobufNameLPM(member.name) }} = {{ count.value }};
@@ -174,9 +178,11 @@ import "third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto";
 {% endmacro %}
 
 {% for structure in by_category["callback info"] + by_category["structure"] %}
-    message {{structure.name.CamelCase()}} {
-        {{ lift_proto_members_helper(structure, structure.name, structure.members) }}
-    }
+    {% if structure.name.get() != "string view" and structure.name.get() != "nullable string view" %}
+        message {{structure.name.CamelCase()}} {
+            {{ lift_proto_members_helper(structure, structure.name, structure.members) }}
+        }
+    {% endif %}
 {% endfor %}
 
 
