@@ -85,6 +85,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.first_leading_bit = true;
         core_polyfills.first_trailing_bit = true;
         core_polyfills.insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
+        core_polyfills.pack_unpack_4x8 = true;
+        core_polyfills.pack_4xu8_clamp = true;
         core_polyfills.radians = true;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
