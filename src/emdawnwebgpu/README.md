@@ -1,3 +1,5 @@
+# Dawn Emscripten Fork
+
 Dawn temporarily maintains a fork of the Emscripten WebGPU bindings
 (`library_webgpu.js` and friends). The forked files live in
 [`//third_party/emdawnwebgpu`](../third_party/emdawnwebgpu/)
@@ -14,7 +16,9 @@ it up as needed for import into other projects that use these bindings.)
 Changes to this code in the Dawn repository will be synced back out to the
 upstream Emscripten repository after webgpu.h becomes stable, in what should
 theoretically be one big final breaking update. Between then and now, projects
-can use Dawn's fork of the bindings:
+can use Dawn's fork of the bindings.
+
+## Setting up Emscripten
 
 - Get an emsdk toolchain:
   [instructions](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended).
@@ -31,6 +35,8 @@ can use Dawn's fork of the bindings:
   Note this must be a source checkout of Emscripten,
   not emsdk's `upstream/emscripten` release, which excludes necessary tools.
 
+## Building Dawn Emscripten bindings with GN
+
 - Set up a Dawn GN build, with `dawn_emscripten_dir` in the GN args set to point to
   your Emscripten source checkout.
 
@@ -38,3 +44,20 @@ can use Dawn's fork of the bindings:
 
 - Configure the Emscripten build with all of the linker flags listed in `emdawnwebgpu_config`
   (and without `-sUSE_WEBGPU`, because we don't want the built-in bindings).
+
+## Building Dawn Emscripten bindings and samples with CMake
+
+Set up the build directory using emcmake
+
+```
+mkdir out/cmake-wasm
+cd out/cmake-wasm
+
+# Make sure the path is to the source checkout of Emscripten, not emsdk's release.
+emcmake cmake -GNinja -DDAWN_EMSCRIPTEN_TOOLCHAIN="path/to/emscripten" ../..
+
+ninja
+
+# The resulting html files can then be served and viewed in a compatible Browser.
+
+```

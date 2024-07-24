@@ -40,9 +40,9 @@ target_include_directories(dawn_benchmarks PUBLIC
 target_link_libraries(dawn_benchmarks PRIVATE
     benchmark::benchmark
     benchmark::benchmark_main
-    dawn_common
-    dawn_native
-    dawn_utils
+    dawn::dawn_common
+    dawn::dawn_native
+    dawn::dawn_wgpu_utils
     dawncpp_headers
     dawncpp
     dawn_proc

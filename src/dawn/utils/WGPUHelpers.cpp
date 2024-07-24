@@ -338,6 +338,7 @@ BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
     storageTexture.viewDimension = textureViewDimension;
 }
 
+#ifndef __EMSCRIPTEN__
 // ExternalTextureBindingLayout never contains data, so just make one that can be reused instead
 // of declaring a new one every time it's needed.
 wgpu::ExternalTextureBindingLayout kExternalTextureBindingLayout = {};
@@ -351,6 +352,14 @@ BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
     nextInChain = bindingLayout;
 }
 
+BindingInitializationHelper::BindingInitializationHelper(
+    uint32_t binding,
+    const wgpu::ExternalTexture& externalTexture)
+    : binding(binding) {
+    externalTextureBindingEntry.externalTexture = externalTexture;
+}
+#endif  // __EMSCRIPTEN__
+
 BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
     const wgpu::BindGroupLayoutEntry& entry)
     : wgpu::BindGroupLayoutEntry(entry) {}
@@ -362,13 +371,6 @@ BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
 BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
                                                          const wgpu::TextureView& textureView)
     : binding(binding), textureView(textureView) {}
-
-BindingInitializationHelper::BindingInitializationHelper(
-    uint32_t binding,
-    const wgpu::ExternalTexture& externalTexture)
-    : binding(binding) {
-    externalTextureBindingEntry.externalTexture = externalTexture;
-}
 
 BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
                                                          const wgpu::Buffer& buffer,
@@ -390,9 +392,11 @@ wgpu::BindGroupEntry BindingInitializationHelper::GetAsBinding() const {
     result.buffer = buffer;
     result.offset = offset;
     result.size = size;
+#ifndef __EMSCRIPTEN__
     if (externalTextureBindingEntry.externalTexture != nullptr) {
         result.nextInChain = &externalTextureBindingEntry;
     }
+#endif  // __EMSCRIPTEN__
 
     return result;
 }

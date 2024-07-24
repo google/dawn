@@ -143,28 +143,6 @@ bool IsCompressedTextureFormat(wgpu::TextureFormat textureFormat) {
            IsETC2TextureFormat(textureFormat);
 }
 
-bool IsUnorm16TextureFormat(wgpu::TextureFormat textureFormat) {
-    switch (textureFormat) {
-        case wgpu::TextureFormat::R16Unorm:
-        case wgpu::TextureFormat::RG16Unorm:
-        case wgpu::TextureFormat::RGBA16Unorm:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool IsSnorm16TextureFormat(wgpu::TextureFormat textureFormat) {
-    switch (textureFormat) {
-        case wgpu::TextureFormat::R16Snorm:
-        case wgpu::TextureFormat::RG16Snorm:
-        case wgpu::TextureFormat::RGBA16Snorm:
-            return true;
-        default:
-            return false;
-    }
-}
-
 bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat) {
     switch (textureFormat) {
         case wgpu::TextureFormat::Depth16Unorm:
@@ -190,27 +168,13 @@ bool IsDepthOrStencilFormat(wgpu::TextureFormat textureFormat) {
     }
 }
 
-bool IsMultiPlanarFormat(wgpu::TextureFormat textureFormat) {
-    switch (textureFormat) {
-        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-        case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
-        case wgpu::TextureFormat::R8BG8Biplanar444Unorm:
-        case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
-        case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
-        case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
-        case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
-            return true;
-        default:
-            return false;
-    }
-}
-
 bool IsRenderableFormat(const wgpu::Device& device, wgpu::TextureFormat textureFormat) {
     if (IsBCTextureFormat(textureFormat) || IsETC2TextureFormat(textureFormat) ||
         IsASTCTextureFormat(textureFormat)) {
         return false;
     }
 
+#ifndef __EMSCRIPTEN__
     if (IsUnorm16TextureFormat(textureFormat)) {
         return device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats);
     }
@@ -218,6 +182,7 @@ bool IsRenderableFormat(const wgpu::Device& device, wgpu::TextureFormat textureF
     if (IsSnorm16TextureFormat(textureFormat)) {
         return device.HasFeature(wgpu::FeatureName::Snorm16TextureFormats);
     }
+#endif  // __EMSCRIPTEN__
 
     switch (textureFormat) {
         case wgpu::TextureFormat::RGB9E5Ufloat:
@@ -241,6 +206,7 @@ bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
         return false;
     }
 
+#ifndef __EMSCRIPTEN__
     if (IsUnorm16TextureFormat(textureFormat)) {
         return device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats);
     }
@@ -248,6 +214,7 @@ bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
     if (IsSnorm16TextureFormat(textureFormat)) {
         return device.HasFeature(wgpu::FeatureName::Snorm16TextureFormats);
     }
+#endif  // __EMSCRIPTEN__
 
     switch (textureFormat) {
         case wgpu::TextureFormat::R32Uint:
@@ -287,6 +254,7 @@ bool TextureFormatSupportsResolveTarget(const wgpu::Device& device,
         case wgpu::TextureFormat::RGB10A2Unorm:
             return true;
 
+#ifndef __EMSCRIPTEN__
         case wgpu::TextureFormat::R16Unorm:
         case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::RG16Unorm:
@@ -294,6 +262,7 @@ bool TextureFormatSupportsResolveTarget(const wgpu::Device& device,
         case wgpu::TextureFormat::RGBA16Unorm:
         case wgpu::TextureFormat::RGBA16Snorm:
             return device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats);
+#endif  // __EMSCRIPTEN__
 
         default:
             return false;
@@ -313,6 +282,44 @@ bool TextureFormatSupportsReadWriteStorageTexture(wgpu::TextureFormat format) {
 
 bool IsStencilOnlyFormat(wgpu::TextureFormat textureFormat) {
     return textureFormat == wgpu::TextureFormat::Stencil8;
+}
+
+#ifndef __EMSCRIPTEN__
+bool IsUnorm16TextureFormat(wgpu::TextureFormat textureFormat) {
+    switch (textureFormat) {
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RGBA16Unorm:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool IsSnorm16TextureFormat(wgpu::TextureFormat textureFormat) {
+    switch (textureFormat) {
+        case wgpu::TextureFormat::R16Snorm:
+        case wgpu::TextureFormat::RG16Snorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool IsMultiPlanarFormat(wgpu::TextureFormat textureFormat) {
+    switch (textureFormat) {
+        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+        case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
+        case wgpu::TextureFormat::R8BG8Biplanar444Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
+        case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
+            return true;
+        default:
+            return false;
+    }
 }
 
 uint32_t GetMultiPlaneTextureBitDepth(wgpu::TextureFormat textureFormat) {
@@ -390,6 +397,7 @@ SubsamplingFactor GetMultiPlaneTextureSubsamplingFactor(wgpu::TextureFormat text
             return {0, 0};
     }
 }
+#endif  // __EMSCRIPTEN__
 
 uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
     switch (textureFormat) {
@@ -400,8 +408,6 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::Stencil8:
             return 1u;
 
-        case wgpu::TextureFormat::R16Unorm:
-        case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::R16Uint:
         case wgpu::TextureFormat::R16Sint:
         case wgpu::TextureFormat::R16Float:
@@ -414,8 +420,6 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R32Float:
         case wgpu::TextureFormat::R32Uint:
         case wgpu::TextureFormat::R32Sint:
-        case wgpu::TextureFormat::RG16Unorm:
-        case wgpu::TextureFormat::RG16Snorm:
         case wgpu::TextureFormat::RG16Uint:
         case wgpu::TextureFormat::RG16Sint:
         case wgpu::TextureFormat::RG16Float:
@@ -435,8 +439,6 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::RG32Float:
         case wgpu::TextureFormat::RG32Uint:
         case wgpu::TextureFormat::RG32Sint:
-        case wgpu::TextureFormat::RGBA16Unorm:
-        case wgpu::TextureFormat::RGBA16Snorm:
         case wgpu::TextureFormat::RGBA16Uint:
         case wgpu::TextureFormat::RGBA16Sint:
         case wgpu::TextureFormat::RGBA16Float:
@@ -518,6 +520,19 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
 
         case wgpu::TextureFormat::Depth24PlusStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8:
+            break;
+
+#ifndef __EMSCRIPTEN__
+        // Unorm and Snorm 16 formats.
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::R16Snorm:
+            return 2u;
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RG16Snorm:
+            return 4u;
+        case wgpu::TextureFormat::RGBA16Unorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return 8u;
 
         // Block size of a multi-planar format depends on aspect.
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
@@ -528,6 +543,7 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
         case wgpu::TextureFormat::External:
+#endif  // __EMSCRIPTEN__
 
         case wgpu::TextureFormat::Undefined:
             break;
@@ -541,8 +557,6 @@ uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R8Snorm:
         case wgpu::TextureFormat::R8Uint:
         case wgpu::TextureFormat::R8Sint:
-        case wgpu::TextureFormat::R16Unorm:
-        case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::R16Uint:
         case wgpu::TextureFormat::R16Sint:
         case wgpu::TextureFormat::R16Float:
@@ -553,8 +567,6 @@ uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R32Float:
         case wgpu::TextureFormat::R32Uint:
         case wgpu::TextureFormat::R32Sint:
-        case wgpu::TextureFormat::RG16Unorm:
-        case wgpu::TextureFormat::RG16Snorm:
         case wgpu::TextureFormat::RG16Uint:
         case wgpu::TextureFormat::RG16Sint:
         case wgpu::TextureFormat::RG16Float:
@@ -572,8 +584,6 @@ uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::RG32Float:
         case wgpu::TextureFormat::RG32Uint:
         case wgpu::TextureFormat::RG32Sint:
-        case wgpu::TextureFormat::RGBA16Unorm:
-        case wgpu::TextureFormat::RGBA16Snorm:
         case wgpu::TextureFormat::RGBA16Uint:
         case wgpu::TextureFormat::RGBA16Sint:
         case wgpu::TextureFormat::RGBA16Float:
@@ -649,6 +659,16 @@ uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::ASTC12x12UnormSrgb:
             return 12u;
 
+#ifndef __EMSCRIPTEN__
+        // Unorm and Snorm 16 formats.
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::R16Snorm:
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RG16Snorm:
+        case wgpu::TextureFormat::RGBA16Unorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return 1u;
+
         // Block size of a multi-planar format depends on aspect.
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
         case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
@@ -658,6 +678,7 @@ uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
         case wgpu::TextureFormat::External:
+#endif  // __EMSCRIPTEN__
 
         case wgpu::TextureFormat::Undefined:
             break;
@@ -671,8 +692,6 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R8Snorm:
         case wgpu::TextureFormat::R8Uint:
         case wgpu::TextureFormat::R8Sint:
-        case wgpu::TextureFormat::R16Unorm:
-        case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::R16Uint:
         case wgpu::TextureFormat::R16Sint:
         case wgpu::TextureFormat::R16Float:
@@ -683,8 +702,6 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R32Float:
         case wgpu::TextureFormat::R32Uint:
         case wgpu::TextureFormat::R32Sint:
-        case wgpu::TextureFormat::RG16Unorm:
-        case wgpu::TextureFormat::RG16Snorm:
         case wgpu::TextureFormat::RG16Uint:
         case wgpu::TextureFormat::RG16Sint:
         case wgpu::TextureFormat::RG16Float:
@@ -702,8 +719,6 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::RG32Float:
         case wgpu::TextureFormat::RG32Uint:
         case wgpu::TextureFormat::RG32Sint:
-        case wgpu::TextureFormat::RGBA16Unorm:
-        case wgpu::TextureFormat::RGBA16Snorm:
         case wgpu::TextureFormat::RGBA16Uint:
         case wgpu::TextureFormat::RGBA16Sint:
         case wgpu::TextureFormat::RGBA16Float:
@@ -779,6 +794,16 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::ASTC12x12UnormSrgb:
             return 12u;
 
+#ifndef __EMSCRIPTEN__
+        // Unorm and Snorm 16 formats.
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::R16Snorm:
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RG16Snorm:
+        case wgpu::TextureFormat::RGBA16Unorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return 1u;
+
         // Block size of a multi-planar format depends on aspect.
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
         case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
@@ -788,6 +813,7 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
         case wgpu::TextureFormat::R8BG8A8Triplanar420Unorm:
         case wgpu::TextureFormat::External:
+#endif  // __EMSCRIPTEN__
 
         case wgpu::TextureFormat::Undefined:
             break;
@@ -799,14 +825,10 @@ const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) 
     switch (textureFormat) {
         case wgpu::TextureFormat::R8Unorm:
         case wgpu::TextureFormat::R8Snorm:
-        case wgpu::TextureFormat::R16Unorm:
-        case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::R16Float:
         case wgpu::TextureFormat::RG8Unorm:
         case wgpu::TextureFormat::RG8Snorm:
         case wgpu::TextureFormat::R32Float:
-        case wgpu::TextureFormat::RG16Unorm:
-        case wgpu::TextureFormat::RG16Snorm:
         case wgpu::TextureFormat::RG16Float:
         case wgpu::TextureFormat::RGBA8Unorm:
         case wgpu::TextureFormat::RGBA8Snorm:
@@ -814,8 +836,6 @@ const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) 
         case wgpu::TextureFormat::RG11B10Ufloat:
         case wgpu::TextureFormat::RGB9E5Ufloat:
         case wgpu::TextureFormat::RG32Float:
-        case wgpu::TextureFormat::RGBA16Unorm:
-        case wgpu::TextureFormat::RGBA16Snorm:
         case wgpu::TextureFormat::RGBA16Float:
         case wgpu::TextureFormat::RGBA32Float:
         case wgpu::TextureFormat::BGRA8Unorm:
@@ -846,6 +866,17 @@ const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) 
         case wgpu::TextureFormat::RGBA32Sint:
             return "i32";
 
+#ifndef __EMSCRIPTEN__
+        // Unorm and Snorm 16 formats.
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::R16Snorm:
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RG16Snorm:
+        case wgpu::TextureFormat::RGBA16Unorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return "f32";
+#endif  // __EMSCRIPTEN__
+
         default:
             DAWN_UNREACHABLE();
     }
@@ -857,8 +888,6 @@ uint32_t GetTextureComponentCount(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::R8Snorm:
         case wgpu::TextureFormat::R8Uint:
         case wgpu::TextureFormat::R8Sint:
-        case wgpu::TextureFormat::R16Unorm:
-        case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::R16Uint:
         case wgpu::TextureFormat::R16Sint:
         case wgpu::TextureFormat::R16Float:
@@ -874,8 +903,6 @@ uint32_t GetTextureComponentCount(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::RG8Snorm:
         case wgpu::TextureFormat::RG8Uint:
         case wgpu::TextureFormat::RG8Sint:
-        case wgpu::TextureFormat::RG16Unorm:
-        case wgpu::TextureFormat::RG16Snorm:
         case wgpu::TextureFormat::RG16Uint:
         case wgpu::TextureFormat::RG16Sint:
         case wgpu::TextureFormat::RG16Float:
@@ -895,8 +922,6 @@ uint32_t GetTextureComponentCount(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::BGRA8UnormSrgb:
         case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::RGB10A2Unorm:
-        case wgpu::TextureFormat::RGBA16Unorm:
-        case wgpu::TextureFormat::RGBA16Snorm:
         case wgpu::TextureFormat::RGBA16Uint:
         case wgpu::TextureFormat::RGBA16Sint:
         case wgpu::TextureFormat::RGBA16Float:
@@ -904,6 +929,20 @@ uint32_t GetTextureComponentCount(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::RGBA32Uint:
         case wgpu::TextureFormat::RGBA32Sint:
             return 4u;
+
+#ifndef __EMSCRIPTEN__
+        // Unorm and Snorm 16 formats.
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::R16Snorm:
+            return 1u;
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RG16Snorm:
+            return 2u;
+        case wgpu::TextureFormat::RGBA16Unorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return 4u;
+#endif  // __EMSCRIPTEN__
+
         default:
             // Compressed foramts, depth-stencil combined formats, multi-planar formats are
             // unreachable.
@@ -924,10 +963,6 @@ const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {
             return "rgba8sint";
         case wgpu::TextureFormat::BGRA8Unorm:
             return "bgra8unorm";
-        case wgpu::TextureFormat::RGBA16Unorm:
-            return "rgba16unorm";
-        case wgpu::TextureFormat::RGBA16Snorm:
-            return "rgba16snorm";
         case wgpu::TextureFormat::RGBA16Uint:
             return "rgba16uint";
         case wgpu::TextureFormat::RGBA16Sint:
@@ -955,6 +990,15 @@ const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {
         // For Chromium Internal Graphite
         case wgpu::TextureFormat::R8Unorm:
             return "r8unorm";
+
+#ifndef __EMSCRIPTEN__
+        // Unorm and Snorm 16 formats.
+        case wgpu::TextureFormat::RGBA16Unorm:
+            return "rgba16unorm";
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return "rgba16snorm";
+#endif  // __EMSCRIPTEN__
+
         default:
             DAWN_UNREACHABLE();
     }

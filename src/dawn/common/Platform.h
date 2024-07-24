@@ -89,6 +89,7 @@
 #elif defined(__EMSCRIPTEN__)
 #define DAWN_PLATFORM_IS_EMSCRIPTEN 1
 #define DAWN_PLATFORM_IS_POSIX 1
+#include <emscripten/emscripten.h>
 
 #else
 #error "Unsupported platform."
@@ -163,6 +164,11 @@
 #elif defined(__PPC64__)
 #define DAWN_PLATFORM_IS_PPC64 1
 
+#elif defined(__wasm32__)
+#define DAWN_PLATFORM_IS_WASM32 1
+#elif defined(__wasm64__)
+#define DAWN_PLATFORM_IS_WASM64 1
+
 #else
 #error "Unsupported platform."
 #endif
@@ -174,13 +180,13 @@
 #if defined(DAWN_PLATFORM_IS_X86_64) || defined(DAWN_PLATFORM_IS_ARM64) ||   \
     defined(DAWN_PLATFORM_IS_RISCV64) || defined(DAWN_PLATFORM_IS_MIPS64) || \
     defined(DAWN_PLATFORM_IS_S390X) || defined(DAWN_PLATFORM_IS_PPC64) ||    \
-    defined(DAWN_PLATFORM_IS_LOONGARCH64)
+    defined(DAWN_PLATFORM_IS_LOONGARCH64) || defined(DAWN_PLATFORM_IS_WASM64)
 #define DAWN_PLATFORM_IS_64_BIT 1
 static_assert(sizeof(sizeof(char)) == 8, "Expect sizeof(size_t) == 8");
 #elif defined(DAWN_PLATFORM_IS_I386) || defined(DAWN_PLATFORM_IS_ARM32) ||   \
     defined(DAWN_PLATFORM_IS_RISCV32) || defined(DAWN_PLATFORM_IS_MIPS32) || \
     defined(DAWN_PLATFORM_IS_S390) || defined(DAWN_PLATFORM_IS_PPC32) ||     \
-    defined(DAWN_PLATFORM_IS_EMSCRIPTEN) || defined(DAWN_PLATFORM_IS_LOONGARCH32)
+    defined(DAWN_PLATFORM_IS_LOONGARCH32) || defined(DAWN_PLATFORM_IS_WASM32)
 #define DAWN_PLATFORM_IS_32_BIT 1
 static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
 #else
@@ -294,6 +300,13 @@ static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
 #endif
 #if !defined(DAWN_PLATFORM_IS_PPC64)
 #define DAWN_PLATFORM_IS_PPC64 0
+#endif
+
+#if !defined(DAWN_PLATFORM_IS_WASM32)
+#define DAWN_PLATFORM_IS_WASM32 0
+#endif
+#if !defined(DAWN_PLATFORM_IS_WASM64)
+#define DAWN_PLATFORM_IS_WASM64 0
 #endif
 
 #if !defined(DAWN_PLATFORM_IS_64_BIT)

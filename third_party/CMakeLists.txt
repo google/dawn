@@ -47,6 +47,36 @@ if (DAWN_FETCH_DEPENDENCIES)
     )
 endif ()
 
+################################################################################
+# Start of Emscripten enabled third party directories
+#   To minimize the number of third party targets to make when building with
+#   Emscripten to the minimal set, only subdirectories added within the Start
+#   and End of the Emscripten block are enabled .
+################################################################################
+
+if (NOT TARGET absl::strings)
+    # Recommended setting for compability with future abseil releases.
+    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
+    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+        add_compile_options(
+            -Wno-array-parameter
+            -Wno-deprecated-builtins
+            -Wno-unknown-warning-option
+        )
+    endif()
+
+    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
+endif()
+
+################################################################################
+# End of Emscripten enabled third party directories
+################################################################################
+if (${DAWN_ENABLE_EMSCRIPTEN})
+    return()
+endif()
+
 if (NOT TARGET SPIRV-Headers)
     set(SPIRV_HEADERS_SKIP_EXAMPLES ON CACHE BOOL "" FORCE)
     set(SPIRV_HEADERS_SKIP_INSTALL ON CACHE BOOL "" FORCE)
@@ -92,22 +122,6 @@ if (NOT TARGET glfw AND DAWN_USE_GLFW)
 
     message(STATUS "Dawn: using GLFW at ${DAWN_GLFW_DIR}")
     add_subdirectory(${DAWN_GLFW_DIR} "${CMAKE_CURRENT_BINARY_DIR}/glfw")
-endif()
-
-if (NOT TARGET absl::strings)
-    # Recommended setting for compability with future abseil releases.
-    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
-    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
-    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
-        add_compile_options(
-            -Wno-array-parameter
-            -Wno-deprecated-builtins
-            -Wno-unknown-warning-option
-        )
-    endif()
-
-    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
 endif()
 
 if (DAWN_BUILD_PROTOBUF AND NOT TARGET libprotobuf-mutator)

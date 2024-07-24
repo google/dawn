@@ -27,11 +27,14 @@
 //*
 //*
 {% include 'BSD_LICENSE' %}
+
 {% if 'dawn' in enabled_tags %}
     #ifdef __EMSCRIPTEN__
-    #error "Do not include this header. Emscripten already provides headers needed for {{metadata.api}}."
-    #endif
+    // When using Emscripten, just forward to including the Emscripten header.
+    #include "webgpu/webgpu.h"
+    #else
 {% endif %}
+
 #ifndef {{metadata.api.upper()}}_H_
 #define {{metadata.api.upper()}}_H_
 
@@ -298,3 +301,7 @@ extern "C" {
 #endif
 
 #endif // {{metadata.api.upper()}}_H_
+
+{% if 'dawn' in enabled_tags %}
+    #endif // __EMSCRIPTEN__
+{% endif %}

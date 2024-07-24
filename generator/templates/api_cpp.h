@@ -29,11 +29,14 @@
 {% set API = metadata.api.upper() %}
 {% set api = API.lower() %}
 {% set CAPI = metadata.c_prefix %}
+
 {% if 'dawn' in enabled_tags %}
     #ifdef __EMSCRIPTEN__
-    #error "This header is for native Dawn. Use Dawn's or Emscripten's Emscripten bindings instead."
-    #endif
+    // When using Emscripten, just forward to including the Emscripten header.
+    #include "webgpu/webgpu_cpp.h"
+    #else
 {% endif %}
+
 {% set PREFIX = "" if not c_namespace else c_namespace.SNAKE_CASE() + "_" %}
 #ifndef {{PREFIX}}{{API}}_CPP_H_
 #define {{PREFIX}}{{API}}_CPP_H_
@@ -953,3 +956,7 @@ struct hash<{{metadata.namespace}}::{{BoolCppType}}> {
 }  // namespace std
 
 #endif // {{PREFIX}}{{API}}_CPP_H_
+
+{% if 'dawn' in enabled_tags %}
+    #endif // __EMSCRIPTEN__
+{% endif %}

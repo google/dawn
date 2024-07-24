@@ -28,17 +28,44 @@
 #ifndef SRC_DAWN_SAMPLES_SAMPLEUTILS_H_
 #define SRC_DAWN_SAMPLES_SAMPLEUTILS_H_
 
+#ifndef __EMSCRIPTEN__
+#include "GLFW/glfw3.h"
+#endif  // __EMSCRIPTEN__
+
 #include "dawn/webgpu_cpp.h"
 
-bool InitSample(int argc, const char** argv);
-void DoFlush();
-bool ShouldQuit();
-
-struct GLFWwindow;
-struct GLFWwindow* GetGLFWWindow();
-
-wgpu::Device CreateCppDawnDevice();
 wgpu::TextureFormat GetPreferredSwapChainTextureFormat();
-wgpu::SwapChain GetSwapChain();
+bool InitSample(int argc, const char** argv);
+
+class SampleBase {
+  public:
+    SampleBase();
+    SampleBase(uint32_t w, uint32_t h);
+
+    static int Run(unsigned int delay);
+
+  protected:
+    virtual bool SetupImpl() = 0;
+    virtual void FrameImpl() = 0;
+
+    wgpu::Instance instance = nullptr;
+    wgpu::Adapter adapter = nullptr;
+    wgpu::Device device = nullptr;
+    wgpu::Queue queue = nullptr;
+
+    wgpu::Surface surface = nullptr;
+
+  private:
+    bool Setup();
+
+    static constexpr uint32_t kWidth = 640;
+    static constexpr uint32_t kHeight = 480;
+    uint32_t width = kWidth;
+    uint32_t height = kHeight;
+
+#ifndef __EMSCRIPTEN__
+    GLFWwindow* window = nullptr;
+#endif  // __EMSCRIPTEN__
+};
 
 #endif  // SRC_DAWN_SAMPLES_SAMPLEUTILS_H_

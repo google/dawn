@@ -52,10 +52,12 @@ void BreakPoint() {
     __asm__ __volatile__("ebreak");
 #elif DAWN_PLATFORM_IS(MIPS)
     __asm__ __volatile__("break");
-#elif DAWN_PLATFORM_IS(S390) || DAWN_PLATFORM_IS_(S390X)
+#elif DAWN_PLATFORM_IS(S390) || DAWN_PLATFORM_IS(S390X)
     __asm__ __volatile__(".word 0x0001");
-#elif DAWN_PLATFORM_IS(PPC) || DAWN_PLATFORM_IS_(PPC64)
+#elif DAWN_PLATFORM_IS(PPC) || DAWN_PLATFORM_IS(PPC64)
     __asm__ __volatile__("twge 2,2");
+#elif DAWN_PLATFORM_IS(WASM32) || DAWN_PLATFORM_IS(WASM64)
+    EM_ASM(debugger;);
 #else
 #error "Unsupported platform"
 #endif
