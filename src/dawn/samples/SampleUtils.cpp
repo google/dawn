@@ -42,6 +42,7 @@
 #include "dawn/common/SystemUtils.h"
 #include "dawn/utils/CommandLineParser.h"
 #include "dawn/utils/SystemUtils.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 #ifndef __EMSCRIPTEN__
 #include "GLFW/glfw3.h"
@@ -109,16 +110,6 @@ bool InitSample(int argc, const char** argv) {
     adapterType = adapterTypeOpt.GetValue();
     enableToggles = enableTogglesOpt.GetOwnedValue();
     disableToggles = disableTogglesOpt.GetOwnedValue();
-
-    // TODO(dawn:810): Reenable once the OpenGL(ES) backend is able to create its own context such
-    // that it can use surface-based swapchains.
-    if (backendType == wgpu::BackendType::OpenGL || backendType == wgpu::BackendType::OpenGLES) {
-        fprintf(stderr,
-                "The OpenGL(ES) backend is temporarily not supported for samples. See "
-                "https://crbug.com/dawn/810\n");
-        return false;
-    }
-
     return true;
 }
 
@@ -142,6 +133,10 @@ int SampleBase::Run(unsigned int delay) {
     // Setup base adapter options.
     wgpu::RequestAdapterOptions adapterOptions = {};
     adapterOptions.backendType = backendType;
+    if (backendType != wgpu::BackendType::Undefined) {
+        adapterOptions.compatibilityMode = dawn::utils::BackendRequiresCompat(backendType);
+    }
+
     switch (adapterType) {
         case wgpu::AdapterType::CPU:
             adapterOptions.forceFallbackAdapter = true;
