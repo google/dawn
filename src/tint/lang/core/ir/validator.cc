@@ -1141,9 +1141,14 @@ void Validator::CheckVar(const Var* var) {
     if (var->Initializer()) {
         if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtrOrRef()) {
             AddError(var) << "initializer type "
-                          << style::Type(var->Initializer()->Type()->FriendlyName())
+                          << style::Type(var->Initializer()->Type()
+                                             ? var->Initializer()->Type()->FriendlyName()
+                                             : "undef")
                           << " does not match store type "
-                          << style::Type(var->Result(0)->Type()->UnwrapPtrOrRef()->FriendlyName());
+                          << style::Type(
+                                 var->Result(0)->Type()
+                                     ? var->Result(0)->Type()->UnwrapPtrOrRef()->FriendlyName()
+                                     : "undef");
             return;
         }
     }
