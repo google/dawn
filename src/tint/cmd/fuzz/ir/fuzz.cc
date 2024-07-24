@@ -108,6 +108,8 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
     // leading to non-determinism, which we must avoid.
     TINT_STATIC_INIT(Fuzzers().Sort([](auto& a, auto& b) { return a.name < b.name; }));
 
+    bool ran_atleast_once = false;
+
     // Run each of the program fuzzer functions
     if (options.run_concurrently) {
         const size_t n = Fuzzers().Length();
@@ -118,6 +120,8 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
                 Fuzzers()[i].name.find(options.filter) == std::string::npos) {
                 continue;
             }
+            ran_atleast_once = true;
+
             threads.Push(std::thread([i, &acquire_module, &data, &options] {
                 auto& fuzzer = Fuzzers()[i];
                 currently_running = fuzzer.name;
@@ -137,6 +141,7 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
             if (!options.filter.empty() && fuzzer.name.find(options.filter) == std::string::npos) {
                 continue;
             }
+            ran_atleast_once = true;
 
             currently_running = fuzzer.name;
             if (options.verbose) {
@@ -145,6 +150,11 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
             auto mod = acquire_module();
             fuzzer.fn(mod, data);
         }
+    }
+
+    if (!options.filter.empty() && !ran_atleast_once) {
+        std::cerr << "ERROR: --filter=" << options.filter << " did not match any fuzzers\n";
+        exit(EXIT_FAILURE);
     }
 }
 #endif  // TINT_BUILD_IR_BINARY
