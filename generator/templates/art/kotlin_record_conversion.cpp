@@ -24,7 +24,7 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-{% from 'art/api_jni_types.kt' import arg_to_jni_type with context %}
+{% from 'art/api_jni_types.kt' import arg_to_jni_type, convert_to_kotlin, jni_signature with context %}
 
 {% macro define_kotlin_record_structure(struct_name, members) %}
     struct {{struct_name}} {
@@ -81,6 +81,10 @@
                     out = reinterpret_cast<const uint32_t*>(c->GetIntArrayElements(in));
                     outLength = env->GetArrayLength(in);
 
+                {% elif member.type.name.get() == 'void' %}
+                    out = env->GetDirectBufferAddress(in);
+                    outLength = env->GetDirectBufferCapacity(in);
+
                 {% else %}
                     //* These container types are represented in Kotlin as arrays of objects.
                     outLength = env->GetArrayLength(in);
@@ -134,6 +138,44 @@
 
             {% elif member.type.category in ["native", "enum", "bitmask"] %}
                 out = static_cast<{{as_cType(member.type.name)}}>(in);
+
+            {% elif member.type.category == 'function pointer' %}
+                //* Function pointers themselves require each argument converting.
+                //* A custom native callback is generated to wrap the Kotlin callback.
+                out = [](
+                    {%- for callbackArg in member.type.arguments %}
+                        {{ as_annotated_cType(callbackArg) }}{{ ',' if not loop.last }}
+                    {%- endfor %}) {
+                    UserData* userData1 = static_cast<UserData *>(userdata);
+                    JNIEnv *env = userData1->env;
+                    if (env->ExceptionCheck()) {
+                        return;
+                    }
+
+                    {%- for callbackArg in kotlin_record_members(member.type.arguments) -%}
+                        {{ convert_to_kotlin(callbackArg.name.camelCase(),
+                                             '_' + callbackArg.name.camelCase(),
+                                             'input->' + callbackArg.length.name.camelCase() if callbackArg.length.name,
+                                             callbackArg) }}
+                    {% endfor %}
+
+                    //* Get the client (Kotlin) callback so we can call it.
+                    jmethodID callbackMethod = env->GetMethodID(
+                            env->FindClass("{{ jni_name(member.type) }}"), "callback", "(
+                        {%- for callbackArg in kotlin_record_members(member.type.arguments) -%}
+                            {{- jni_signature(callbackArg) -}}
+                        {%- endfor %})V");
+
+                    //* Call the callback with all converted parameters.
+                    env->CallVoidMethod(userData1->callback, callbackMethod
+                    {%- for callbackArg in kotlin_record_members(member.type.arguments) %}
+                         ,_{{ callbackArg.name.camelCase() }}
+                    {%- endfor %});
+                };
+                //* TODO(b/330293719): free associated resources.
+                outStruct->userdata = new UserData(
+                        {.env = env, .callback = env->NewGlobalRef(in)});
+
             {% else %}
                 {{ unreachable_code() }}
             {% endif %}
