@@ -853,7 +853,7 @@ def compute_kotlin_params(loaded_json, kotlin_json):
                         and argument.type.category == 'structure'):
                     return argument
 
-        return {"type": method.return_type}
+        return {"type": method.return_type, "name": None}
 
     # TODO(b/352047733): Replace methods that require special handling with an exceptions list.
     def include_method(method):
@@ -1663,6 +1663,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             imported_templates += [
                 "art/api_jni_types.kt",
+                "art/kotlin_record_conversion.cpp",
             ]
 
             renders.append(
