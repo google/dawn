@@ -1228,6 +1228,7 @@ void TextureBase::DumpMemoryStatistics(dawn::native::MemoryDump* dump, const cha
     dump->AddString(name.c_str(), "label", GetLabel());
     dump->AddString(name.c_str(), "dimensions", GetSizeLabel());
     dump->AddString(name.c_str(), "format", absl::StrFormat("%s", GetFormat().format));
+    dump->AddString(name.c_str(), "sample_count", absl::StrFormat("%u", GetSampleCount()));
     dump->AddString(name.c_str(), "usage", absl::StrFormat("%s", GetUsage()));
     dump->AddString(name.c_str(), "internal_usage", absl::StrFormat("%s", GetInternalUsage()));
 }
