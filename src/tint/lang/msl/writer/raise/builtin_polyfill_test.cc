@@ -3213,5 +3213,73 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureBarrier) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, Pack2x16Float) {
+    auto* func = b.Function("foo", ty.u32());
+    auto* input = b.FunctionParam("input", ty.vec2<f32>());
+    func->SetParams(Vector{input});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kPack2X16Float, input);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%input:vec2<f32>):u32 {
+  $B1: {
+    %3:u32 = pack2x16float %input
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%input:vec2<f32>):u32 {
+  $B1: {
+    %3:vec2<f16> = convert %input
+    %4:u32 = bitcast %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Float) {
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    auto* input = b.FunctionParam("input", ty.u32());
+    func->SetParams(Vector{input});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<f32>>(core::BuiltinFn::kUnpack2X16Float, input);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:vec2<f32> = unpack2x16float %input
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:vec2<f16> = bitcast %input
+    %4:vec2<f32> = convert %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

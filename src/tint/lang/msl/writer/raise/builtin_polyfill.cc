@@ -101,6 +101,7 @@ struct State {
                     case core::BuiltinFn::kFrexp:
                     case core::BuiltinFn::kLength:
                     case core::BuiltinFn::kModf:
+                    case core::BuiltinFn::kPack2X16Float:
                     case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureDimensions:
@@ -246,6 +247,9 @@ struct State {
                     break;
 
                 // Pack/unpack builtins.
+                case core::BuiltinFn::kPack2X16Float:
+                    Pack2x16Float(builtin);
+                    break;
                 case core::BuiltinFn::kUnpack2X16Float:
                     Unpack2x16Float(builtin);
                     break;
@@ -434,6 +438,18 @@ struct State {
                 b.Call<msl::ir::BuiltinCall>(element_type, msl::BuiltinFn::kModf, std::move(args));
             b.Store(b.Access(ty.ptr(function, element_type), result, u32(0)), call);
             builtin->Result(0)->ReplaceAllUsesWith(b.Load(result)->Result(0));
+        });
+        builtin->Destroy();
+    }
+
+    /// Polyfill an Pack2x16Float call.
+    /// @param builtin the builtin call instruction
+    void Pack2x16Float(core::ir::CoreBuiltinCall* builtin) {
+        // Replace the call with `as_type<uint>(half2(value))`.
+        b.InsertBefore(builtin, [&] {
+            auto* convert = b.Convert<vec2<f16>>(builtin->Args()[0]);
+            auto* bitcast = b.Bitcast(ty.u32(), convert);
+            bitcast->SetResults(Vector{builtin->DetachResult()});
         });
         builtin->Destroy();
     }
