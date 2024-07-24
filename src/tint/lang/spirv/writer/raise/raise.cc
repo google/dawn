@@ -51,6 +51,7 @@
 #include "src/tint/lang/spirv/writer/raise/handle_matrix_arithmetic.h"
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
+#include "src/tint/lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h"
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 #include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 
@@ -142,6 +143,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::ExpandImplicitSplats, module);
     RUN_TRANSFORM(raise::HandleMatrixArithmetic, module);
     RUN_TRANSFORM(raise::MergeReturn, module);
+    RUN_TRANSFORM(raise::RemoveUnreachableInLoopContinuing, module);
     RUN_TRANSFORM(raise::ShaderIO, module,
                   raise::ShaderIOConfig{options.clamp_frag_depth, options.emit_vertex_point_size,
                                         !options.use_storage_input_output_16});

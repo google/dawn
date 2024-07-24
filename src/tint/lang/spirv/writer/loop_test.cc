@@ -336,6 +336,146 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing) {
 )");
 }
 
+// Test that we generate valid SPIR-V when there is an unreachable instruction in the body of a
+// loop nested inside another loop's continuing block. SPIR-V requires that continue blocks are
+// structurally post-dominated by back-edge blocks, and the presence of OpUnreachable (a function
+// terminator) can trip up this validation. See crbug.com/354627692.
+TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* outer_loop = b.Loop();
+        b.Append(outer_loop->Body(), [&] {
+            b.Continue(outer_loop);
+
+            b.Append(outer_loop->Continuing(), [&] {
+                auto* inner_loop = b.Loop();
+                b.Append(inner_loop->Body(), [&] {
+                    auto* ifelse = b.If(true);
+                    b.Append(ifelse->True(), [&] {  //
+                        b.ExitLoop(inner_loop);
+                    });
+                    b.Append(ifelse->False(), [&] {  //
+                        b.ExitLoop(inner_loop);
+                    });
+                    b.Unreachable();
+
+                    b.Append(inner_loop->Continuing(), [&] {  //
+                        b.BreakIf(inner_loop, true);
+                    });
+                });
+                b.BreakIf(outer_loop, true);
+            });
+        });
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %6
+          %6 = OpLabel
+               OpBranch %11
+         %11 = OpLabel
+               OpLoopMerge %12 %10 None
+               OpBranch %9
+          %9 = OpLabel
+               OpSelectionMerge %13 None
+               OpBranchConditional %true %14 %15
+         %14 = OpLabel
+               OpBranch %12
+         %15 = OpLabel
+               OpBranch %12
+         %13 = OpLabel
+               OpBranch %12
+         %10 = OpLabel
+               OpBranchConditional %true %12 %11
+         %12 = OpLabel
+               OpBranchConditional %true %8 %7
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody_WithResults) {
+    auto* func = b.Function("foo", ty.i32());
+    b.Append(func->Block(), [&] {
+        auto* outer_result = b.InstructionResult(ty.i32());
+        auto* outer_loop = b.Loop();
+        outer_loop->SetResults(Vector{outer_result});
+        b.Append(outer_loop->Body(), [&] {
+            b.Continue(outer_loop);
+
+            b.Append(outer_loop->Continuing(), [&] {
+                auto* inner_result = b.InstructionResult(ty.i32());
+                auto* inner_loop = b.Loop();
+                inner_loop->SetResults(Vector{inner_result});
+                b.Append(inner_loop->Body(), [&] {
+                    auto* ifelse = b.If(true);
+                    b.Append(ifelse->True(), [&] {  //
+                        b.ExitLoop(inner_loop, 1_i);
+                    });
+                    b.Append(ifelse->False(), [&] {  //
+                        b.ExitLoop(inner_loop, 2_i);
+                    });
+                    b.Unreachable();
+
+                    b.Append(inner_loop->Continuing(), [&] {  //
+                        b.BreakIf(inner_loop, true, Empty, 3_i);
+                    });
+                });
+                b.BreakIf(outer_loop, true, Empty, inner_result);
+            });
+        });
+        b.Return(func, outer_result);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+               OpLoopMerge %8 %6 None
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %6
+          %6 = OpLabel
+               OpBranch %11
+         %11 = OpLabel
+               OpLoopMerge %12 %10 None
+               OpBranch %9
+          %9 = OpLabel
+               OpSelectionMerge %13 None
+               OpBranchConditional %true %14 %15
+         %14 = OpLabel
+               OpBranch %12
+         %15 = OpLabel
+               OpBranch %12
+         %13 = OpLabel
+               OpBranch %12
+         %10 = OpLabel
+               OpBranchConditional %true %12 %11
+         %12 = OpLabel
+         %18 = OpPhi %int %int_3 %10 %20 %13 %int_1 %14 %int_2 %15
+               OpBranchConditional %true %8 %7
+          %8 = OpLabel
+         %23 = OpPhi %int %18 %12
+               OpReturnValue %23
+               OpFunctionEnd
+
+               ; Function unused_entry_point
+%unused_entry_point = OpFunction %void None %26
+         %27 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
 TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.void_());
 

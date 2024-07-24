@@ -53,6 +53,8 @@ tint_add_target(tint_lang_spirv_writer_raise lib
   lang/spirv/writer/raise/pass_matrix_by_pointer.h
   lang/spirv/writer/raise/raise.cc
   lang/spirv/writer/raise/raise.h
+  lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.cc
+  lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h
   lang/spirv/writer/raise/shader_io.cc
   lang/spirv/writer/raise/shader_io.h
   lang/spirv/writer/raise/var_for_dynamic_index.cc
@@ -112,6 +114,7 @@ tint_add_target(tint_lang_spirv_writer_raise_test test
   lang/spirv/writer/raise/handle_matrix_arithmetic_test.cc
   lang/spirv/writer/raise/merge_return_test.cc
   lang/spirv/writer/raise/pass_matrix_by_pointer_test.cc
+  lang/spirv/writer/raise/remove_unreachable_in_loop_continuing_test.cc
   lang/spirv/writer/raise/shader_io_test.cc
   lang/spirv/writer/raise/var_for_dynamic_index_test.cc
 )

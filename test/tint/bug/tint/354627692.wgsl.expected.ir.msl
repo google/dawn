@@ -1,0 +1,32 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device int* tint_symbol;
+};
+
+kernel void tint_symbol_1(device int* tint_symbol [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_symbol=tint_symbol};
+  int i = (*tint_module_vars.tint_symbol);
+  {
+    while(true) {
+      {
+        {
+          while(true) {
+            if ((i > 5)) {
+              i = (i * 2);
+              break;
+            } else {
+              i = (i * 2);
+              break;
+            }
+            /* unreachable */
+          }
+        }
+        if ((i > 10)) { break; }
+      }
+      continue;
+    }
+  }
+  (*tint_module_vars.tint_symbol) = i;
+}
