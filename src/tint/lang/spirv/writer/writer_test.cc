@@ -86,5 +86,24 @@ TEST_F(SpirvWriterTest, Unreachable) {
 )");
 }
 
+// Test that we fail gracefully when a function has too many parameters.
+// See crbug.com/354748060.
+TEST_F(SpirvWriterTest, TooManyFunctionParameters) {
+    Vector<core::ir::FunctionParam*, 256> params;
+    for (uint32_t i = 0; i < 256; i++) {
+        params.Push(b.FunctionParam(ty.i32()));
+    }
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams(std::move(params));
+    b.Append(func->Block(), [&] {  //
+        b.Return(func);
+    });
+
+    EXPECT_FALSE(Generate());
+    EXPECT_THAT(Error(),
+                testing::HasSubstr(
+                    "Function 'foo' has more than 255 parameters after running Tint transforms"));
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

@@ -307,7 +307,10 @@ class Printer {
 
         // Emit functions.
         for (core::ir::Function* func : ir_.functions) {
-            EmitFunction(func);
+            auto res = EmitFunction(func);
+            if (res != Success) {
+                return res;
+            }
         }
 
         return Success;
@@ -694,7 +697,17 @@ class Printer {
 
     /// Emit a function.
     /// @param func the function to emit
-    void EmitFunction(core::ir::Function* func) {
+    Result<SuccessType> EmitFunction(core::ir::Function* func) {
+        if (func->Params().Length() > 255) {
+            // Tint transforms may add additional function parameters which can cause a valid input
+            // shader to exceed SPIR-V's function parameter limit. There isn't much we can do about
+            // this, so just fail gracefully instead of a generating invalid SPIR-V.
+            StringStream ss;
+            ss << "Function '" << ir_.NameOf(func).Name()
+               << "' has more than 255 parameters after running Tint transforms";
+            return Failure{ss.str()};
+        }
+
         auto id = Value(func);
 
         // Emit the function name.
@@ -748,6 +761,8 @@ class Printer {
 
         // Add the function to the module.
         module_.PushFunction(current_function_);
+
+        return Success;
     }
 
     /// Emit entry point declarations for a function.
