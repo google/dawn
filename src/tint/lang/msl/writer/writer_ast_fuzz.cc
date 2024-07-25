@@ -27,6 +27,8 @@
 
 // GEN_BUILD:CONDITION(tint_build_wgsl_reader)
 
+#include <iostream>
+
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/writer.h"
@@ -59,7 +61,11 @@ void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context,
 
     options.bindings = GenerateBindings(program);
 
-    [[maybe_unused]] auto res = tint::msl::writer::Generate(program, options);
+    auto res = tint::msl::writer::Generate(program, options);
+
+    if (res == Success && context.options.dump) {
+        std::cout << "Dumping generated MSL:\n" << res->msl << std::endl;
+    }
 }
 
 }  // namespace

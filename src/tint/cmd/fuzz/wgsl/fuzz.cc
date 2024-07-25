@@ -149,6 +149,10 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
     };
 #endif
 
+    if (options.dump) {
+        std::cout << "Dumping input WGSL:\n" << wgsl << std::endl;
+    }
+
     // Ensure that fuzzers are sorted. Without this, the fuzzers may be registered in any order,
     // leading to non-determinism, which we must avoid.
     TINT_STATIC_INIT(Fuzzers().Sort([](auto& a, auto& b) { return a.name < b.name; }));

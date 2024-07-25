@@ -115,6 +115,8 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     auto& opt_verbose =
         opts.Add<tint::cli::BoolOption>("verbose", "prints the name of each fuzzer before running");
     auto& opt_dxc = opts.Add<tint::cli::StringOption>("dxc", "path to DXC DLL");
+    auto& opt_dump =
+        opts.Add<tint::cli::BoolOption>("dump", "dumps shader input/output from fuzzer");
 
     tint::cli::ParseOptions parse_opts;
     parse_opts.ignore_unknown = true;
@@ -134,6 +136,7 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     options.run_concurrently = opt_concurrent.value.value_or(false);
     options.verbose = opt_verbose.value.value_or(false);
     options.dxc = opt_dxc.value.value_or(get_default_dxc_path(argv));
+    options.dump = opt_dump.value.value_or(false);
 
     print_dxc_path_found(options.dxc);
     return 0;

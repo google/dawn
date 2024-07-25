@@ -52,6 +52,8 @@ struct Options {
     /// If not empty, load DXC from this path when fuzzing HLSL generation, and fail the fuzzer if
     /// not found, or if DXC fails to compile.
     std::string dxc;
+    /// If true, dump shader input/output text to stdout
+    bool dump = false;
 };
 
 /// ProgramProperties is an enumerator of flags used to describe characteristics of the input

@@ -68,7 +68,9 @@ bool CanRun(const Program& program) {
     return true;
 }
 
-void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context, Options options) {
+void ASTFuzzer(const tint::Program& program,
+               const fuzz::wgsl::Context& context,
+               const Options& options) {
     if (!CanRun(program)) {
         return;
     }
@@ -97,6 +99,10 @@ void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context,
 
     if (res != Success) {
         return;
+    }
+
+    if (context.options.dump) {
+        std::cout << "Dumping generated HLSL:\n" << res->hlsl << std::endl;
     }
 
     auto dxc = tint::Command::LookPath(dxc_path);
