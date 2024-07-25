@@ -715,6 +715,9 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
                         "One of the blend factor is reading the alpha of the fragment shader "
                         "output with `blend_src(1)` but it is missing from that fragment shader "
                         "output.");
+        DAWN_INVALID_IF(descriptor->targetCount != 1,
+                        "One of the blend factor uses `blend_src(1)` but the color targets count "
+                        "is not 1.");
     }
 
     auto extraFramebufferInputs = fragmentMetadata.fragmentInputMask & ~targetMask;

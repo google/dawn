@@ -3194,6 +3194,43 @@ TEST_F(DualSourceBlendingFeatureTest, ConstValueAsBlendSrc) {
     device.CreateRenderPipeline(&descriptor);
 }
 
+// Test that when `Src` is used in the blend factor, it is not allowed to have multiple color
+// targets, even when all the color targets whose index is non-zero have a color mask equal to None.
+TEST_F(DualSourceBlendingFeatureTest, MultipleColorTargets) {
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        enable dual_source_blending;
+        struct FragOut {
+            @location(0) @blend_src(0) color : vec4f,
+            @location(0) @blend_src(1) blend : vec4f,
+        }
+        @fragment fn main() -> FragOut {
+            var output : FragOut;
+            output.color = vec4f(0.0, 1.0, 0.0, 1.0);
+            output.blend = vec4f(0.0, 1.0, 0.0, 1.0);
+            return output;
+        })");
+
+    constexpr std::array<wgpu::ColorWriteMask, 2> kColorWriteMasks = {
+        {wgpu::ColorWriteMask::All, wgpu::ColorWriteMask::None}};
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.cFragment.targetCount = 2;
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    descriptor.cTargets[0].blend = &descriptor.cBlends[0];
+    descriptor.cBlends[0].color.srcFactor = wgpu::BlendFactor::Src1;
+    descriptor.cBlends[0].color.dstFactor = wgpu::BlendFactor::Src;
+    descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
+    descriptor.cTargets[1] = descriptor.cTargets[0];
+    descriptor.cTargets[1].blend = nullptr;
+
+    for (wgpu::ColorWriteMask writeMask : kColorWriteMasks) {
+        descriptor.cTargets[1].writeMask = writeMask;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+}
+
 class FramebufferFetchFeatureTest : public RenderPipelineValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
