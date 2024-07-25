@@ -27,6 +27,8 @@
 
 #include "dawn/native/CreatePipelineAsyncEvent.h"
 
+#include <webgpu/webgpu.h>
+
 #include <utility>
 
 #include "dawn/common/FutureUtils.h"
@@ -45,7 +47,6 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-#include "dawn/webgpu.h"
 
 namespace dawn::native {
 

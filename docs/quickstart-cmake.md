@@ -62,9 +62,10 @@ $ cd TestDawn
 Now, create a `hello_webgpu.cpp` C++ file within the `TestDawn` directory.
 
 ```cpp
+#include <webgpu/webgpu_cpp.h>
+
 #include <cstdlib>
 #include <iostream>
-#include <webgpu/webgpu_cpp.h>
 
 int main(int argc, char *argv[]) {
   wgpu::InstanceDescriptor instanceDescriptor{};

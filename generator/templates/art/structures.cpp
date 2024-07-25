@@ -29,9 +29,9 @@
 #include "structures.h"
 
 #include <jni.h>
+#include <webgpu/webgpu.h>
 
 #include "dawn/common/Assert.h"
-#include "dawn/webgpu.h"
 #include "JNIContext.h"
 
 // Converts Kotlin objects representing Dawn structures into native structures that can be passed

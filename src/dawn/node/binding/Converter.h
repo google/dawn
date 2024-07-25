@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NODE_BINDING_CONVERTER_H_
 #define SRC_DAWN_NODE_BINDING_CONVERTER_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <functional>
 #include <string>
 #include <type_traits>
@@ -36,7 +38,6 @@
 #include <vector>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"

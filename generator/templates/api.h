@@ -30,9 +30,8 @@
 
 {% if 'dawn' in enabled_tags %}
     #ifdef __EMSCRIPTEN__
-    // When using Emscripten, just forward to including the Emscripten header.
-    #include "webgpu/webgpu.h"
-    #else
+    #error "Do not include this header. Emscripten already provides headers needed for {{metadata.api}}."
+    #endif
 {% endif %}
 
 #ifndef {{metadata.api.upper()}}_H_
@@ -301,7 +300,3 @@ extern "C" {
 #endif
 
 #endif // {{metadata.api.upper()}}_H_
-
-{% if 'dawn' in enabled_tags %}
-    #endif // __EMSCRIPTEN__
-{% endif %}

@@ -28,7 +28,8 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_OBJECTBASE_H_
 #define SRC_DAWN_WIRE_CLIENT_OBJECTBASE_H_
 
-#include "dawn/webgpu.h"
+#include <webgpu/webgpu.h>
+
 #include "partition_alloc/pointers/raw_ptr.h"
 
 #include "dawn/common/Ref.h"

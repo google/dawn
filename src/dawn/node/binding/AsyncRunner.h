@@ -29,11 +29,13 @@
 #define SRC_DAWN_NODE_BINDING_ASYNCRUNNER_H_
 
 #include <stdint.h>
+
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 #include <utility>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/interop/Core.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 

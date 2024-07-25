@@ -28,9 +28,8 @@
 
 {% if 'dawn' in enabled_tags %}
     #ifdef __EMSCRIPTEN__
-    // When using Emscripten, just forward to including the Emscripten header.
-    #include "webgpu/webgpu_cpp_chained_struct.h"
-    #else
+    #error "Do not include this header. Emscripten already provides headers needed for {{metadata.api}}."
+    #endif
 {% endif %}
 
 #ifndef {{API}}_CPP_CHAINED_STRUCT_H_
@@ -59,7 +58,3 @@ namespace {{metadata.namespace}} {
 }  // namespace {{metadata.namespace}}}
 
 #endif // {{API}}_CPP_CHAINED_STRUCT_H_
-
-{% if 'dawn' in enabled_tags %}
-    #endif // __EMSCRIPTEN__
-{% endif %}

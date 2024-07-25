@@ -25,8 +25,7 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <jni.h>
-
-#include "dawn/webgpu.h"
+#include <webgpu/webgpu.h>
 
 namespace dawn::kotlin_api {
 

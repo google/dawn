@@ -28,10 +28,10 @@
 #ifndef SRC_DAWN_FUZZERS_DAWNWIRESERVERFUZZER_H_
 #define SRC_DAWN_FUZZERS_DAWNWIRESERVERFUZZER_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <cstdint>
 #include <functional>
-
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn::native {
 

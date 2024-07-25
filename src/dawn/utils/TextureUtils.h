@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_UTILS_TEXTUREUTILS_H_
 #define SRC_DAWN_UTILS_TEXTUREUTILS_H_
 
-#include <array>
+#include <webgpu/webgpu_cpp.h>
 
-#include "dawn/webgpu_cpp.h"
+#include <array>
 
 #include "dawn/common/Assert.h"
 

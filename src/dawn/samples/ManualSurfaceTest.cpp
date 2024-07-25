@@ -77,6 +77,8 @@
 //    - Check OpenGL rendering with extra usages / depth buffer / MRT.
 //    - Check with GLFW transparency on / off.
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <algorithm>
 #include <iostream>
 #include <memory>
@@ -93,7 +95,6 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/CommandLineParser.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn/webgpu_cpp.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "webgpu/webgpu_glfw.h"
 

@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_FEATURES_H_
 #define SRC_DAWN_NATIVE_FEATURES_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <bitset>
 #include <string>
 #include <vector>
@@ -35,7 +37,6 @@
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/Features_autogen.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn::native {
 

@@ -28,13 +28,14 @@
 #ifndef INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 #define INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include "dawn/dawn_proc_table.h"
 #include "dawn/native/dawn_native_export.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn::platform {
 class Platform;

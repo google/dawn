@@ -25,6 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <gmock/gmock.h>
+#include <webgpu/webgpu.h>
+
 #include <atomic>
 #include <cstdint>
 #include <utility>
@@ -32,8 +35,6 @@
 
 #include "dawn/common/FutureUtils.h"
 #include "dawn/tests/DawnTest.h"
-#include "dawn/webgpu.h"
-#include "gmock/gmock.h"
 
 namespace dawn {
 namespace {

@@ -32,9 +32,8 @@
 
 {% if 'dawn' in enabled_tags %}
     #ifdef __EMSCRIPTEN__
-    // When using Emscripten, just forward to including the Emscripten header.
-    #include "webgpu/webgpu_cpp.h"
-    #else
+    #error "Do not include this header. Emscripten already provides headers needed for {{metadata.api}}."
+    #endif
 {% endif %}
 
 {% set PREFIX = "" if not c_namespace else c_namespace.SNAKE_CASE() + "_" %}
@@ -956,7 +955,3 @@ struct hash<{{metadata.namespace}}::{{BoolCppType}}> {
 }  // namespace std
 
 #endif // {{PREFIX}}{{API}}_CPP_H_
-
-{% if 'dawn' in enabled_tags %}
-    #endif // __EMSCRIPTEN__
-{% endif %}

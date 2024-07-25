@@ -29,13 +29,14 @@
 #include <gbm.h>
 #include <unistd.h>
 #include <vulkan/vulkan.h>
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn {
 namespace {

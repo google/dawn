@@ -32,7 +32,7 @@
 #include "GLFW/glfw3.h"
 #endif  // __EMSCRIPTEN__
 
-#include "dawn/webgpu_cpp.h"
+#include <webgpu/webgpu_cpp.h>
 
 wgpu::TextureFormat GetPreferredSwapChainTextureFormat();
 bool InitSample(int argc, const char** argv);

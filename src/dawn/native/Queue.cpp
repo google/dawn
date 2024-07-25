@@ -27,6 +27,8 @@
 
 #include "dawn/native/Queue.h"
 
+#include <webgpu/webgpu.h>
+
 #include <algorithm>
 #include <cstring>
 #include <set>
@@ -57,7 +59,6 @@
 #include "dawn/native/Texture.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-#include "dawn/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {

@@ -28,11 +28,12 @@
 #ifndef SRC_DAWN_UTILS_COMBORENDERPIPELINEDESCRIPTOR_H_
 #define SRC_DAWN_UTILS_COMBORENDERPIPELINEDESCRIPTOR_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <array>
 #include <vector>
 
 #include "dawn/common/Constants.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn::utils {
 

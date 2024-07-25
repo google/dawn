@@ -28,8 +28,8 @@
 {% from 'art/api_jni_types.kt' import arg_to_jni_type, convert_to_kotlin, jni_signature, to_jni_type with context %}
 #include <jni.h>
 #include <stdlib.h>
+#include <webgpu/webgpu.h>
 
-#include "dawn/webgpu.h"
 #include "JNIContext.h"
 #include "structures.h"
 

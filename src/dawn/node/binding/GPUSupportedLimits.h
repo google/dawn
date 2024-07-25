@@ -28,9 +28,9 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUSUPPORTEDLIMITS_H_
 #define SRC_DAWN_NODE_BINDING_GPUSUPPORTEDLIMITS_H_
 
-#include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
+#include <webgpu/webgpu_cpp.h>
 
+#include "dawn/native/DawnNative.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 

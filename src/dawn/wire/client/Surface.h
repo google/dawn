@@ -28,9 +28,10 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_SURFACE_H_
 #define SRC_DAWN_WIRE_CLIENT_SURFACE_H_
 
+#include <webgpu/webgpu.h>
+
 #include <vector>
 
-#include "dawn/webgpu.h"
 #include "dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {

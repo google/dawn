@@ -26,6 +26,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <android/hardware_buffer.h>
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 #include <string>
 #include <utility>
@@ -36,7 +38,6 @@
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn {
 namespace {

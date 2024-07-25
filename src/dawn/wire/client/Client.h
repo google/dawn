@@ -28,13 +28,14 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_CLIENT_H_
 #define SRC_DAWN_WIRE_CLIENT_CLIENT_H_
 
+#include <webgpu/webgpu.h>
+
 #include <memory>
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/NonCopyable.h"
-#include "dawn/webgpu.h"
 #include "dawn/wire/ChunkedCommandSerializer.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireClient.h"

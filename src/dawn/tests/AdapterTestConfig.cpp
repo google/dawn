@@ -27,13 +27,14 @@
 
 #include "dawn/tests/AdapterTestConfig.h"
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <initializer_list>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include "dawn/common/Assert.h"
-#include "dawn/webgpu_cpp.h"
 
 BackendTestConfig::BackendTestConfig(wgpu::BackendType backendType,
                                      std::initializer_list<const char*> forceEnabledWorkarounds,

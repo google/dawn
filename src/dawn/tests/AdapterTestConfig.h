@@ -29,13 +29,12 @@
 #define SRC_DAWN_TESTS_ADAPTERTESTCONFIG_H_
 
 #include <stdint.h>
+#include <webgpu/webgpu_cpp.h>
 
 #include <initializer_list>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include "dawn/webgpu_cpp.h"
 
 struct BackendTestConfig {
     BackendTestConfig(wgpu::BackendType backendType,

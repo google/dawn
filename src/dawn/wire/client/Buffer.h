@@ -28,13 +28,14 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_BUFFER_H_
 #define SRC_DAWN_WIRE_CLIENT_BUFFER_H_
 
+#include <webgpu/webgpu.h>
+
 #include <memory>
 #include <optional>
 
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
-#include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/ObjectBase.h"
 #include "partition_alloc/pointers/raw_ptr.h"

@@ -25,14 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <gtest/gtest.h>
+#include <webgpu/webgpu_cpp.h>
+#include <webgpu/webgpu_enum_class_bitmasks.h>
+
 #include <cmath>
 #include <limits>
 #include <vector>
 
 #include "dawn/common/Math.h"
-#include "dawn/webgpu_cpp.h"
-#include "gtest/gtest.h"
-#include "webgpu/webgpu_enum_class_bitmasks.h"
 
 namespace wgpu {
 

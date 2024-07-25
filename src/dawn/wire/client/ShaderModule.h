@@ -28,11 +28,11 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_SHADERMODULE_H_
 #define SRC_DAWN_WIRE_CLIENT_SHADERMODULE_H_
 
+#include <webgpu/webgpu.h>
+
 #include <optional>
 #include <string>
 #include <vector>
-
-#include "dawn/webgpu.h"
 
 #include "dawn/wire/client/ObjectBase.h"
 

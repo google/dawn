@@ -28,12 +28,13 @@
 #ifndef SRC_DAWN_TESTS_DAWNNATIVETEST_H_
 #define SRC_DAWN_TESTS_DAWNNATIVETEST_H_
 
+#include <gtest/gtest.h>
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/ErrorData.h"
-#include "dawn/webgpu_cpp.h"
-#include "gtest/gtest.h"
 
 namespace dawn::native {
 

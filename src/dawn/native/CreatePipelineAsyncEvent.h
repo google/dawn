@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_CREATEPIPELINEASYNCEVENT_H_
 #define SRC_DAWN_NATIVE_CREATEPIPELINEASYNCEVENT_H_
 
+#include <webgpu/webgpu.h>
+
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -37,7 +39,6 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/EventManager.h"
 #include "dawn/native/Pipeline.h"
-#include "dawn/webgpu.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {

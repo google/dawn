@@ -27,6 +27,8 @@
 
 #include "dawn/fuzzers/DawnWireServerFuzzer.h"
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <fstream>
 #include <memory>
 #include <vector>
@@ -38,7 +40,6 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/utils/SystemUtils.h"
-#include "dawn/webgpu_cpp.h"
 #include "dawn/wire/WireServer.h"
 
 namespace {

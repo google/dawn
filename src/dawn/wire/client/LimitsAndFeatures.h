@@ -28,8 +28,9 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_LIMITSANDFEATURES_H_
 #define SRC_DAWN_WIRE_CLIENT_LIMITSANDFEATURES_H_
 
+#include <webgpu/webgpu.h>
+
 #include "absl/container/flat_hash_set.h"
-#include "dawn/webgpu.h"
 
 namespace dawn::wire::client {
 

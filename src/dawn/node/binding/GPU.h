@@ -28,11 +28,11 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPU_H_
 #define SRC_DAWN_NODE_BINDING_GPU_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
-
 #include "src/dawn/node/binding/AsyncRunner.h"
 #include "src/dawn/node/binding/Flags.h"
 #include "src/dawn/node/interop/NodeAPI.h"

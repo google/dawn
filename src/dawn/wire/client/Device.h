@@ -28,11 +28,12 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_DEVICE_H_
 #define SRC_DAWN_WIRE_CLIENT_DEVICE_H_
 
+#include <webgpu/webgpu.h>
+
 #include <memory>
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/RefCountedWithExternalCount.h"
-#include "dawn/webgpu.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/LimitsAndFeatures.h"

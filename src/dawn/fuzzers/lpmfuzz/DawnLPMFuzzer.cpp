@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <fstream>
 #include <memory>
 #include <vector>
@@ -40,7 +42,6 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/TerribleCommandBuffer.h"
-#include "dawn/webgpu_cpp.h"
 #include "dawn/wire/ChunkedCommandSerializer.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireResult.h"

@@ -28,10 +28,11 @@
 #ifndef INCLUDE_DAWN_WIRE_WIRE_H_
 #define INCLUDE_DAWN_WIRE_WIRE_H_
 
+#include <webgpu/webgpu.h>
+
 #include <cstdint>
 #include <limits>
 
-#include "dawn/webgpu.h"
 #include "dawn/wire/dawn_wire_export.h"
 
 namespace dawn::wire {

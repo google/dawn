@@ -28,8 +28,9 @@
 #ifndef SRC_DAWN_FUZZERS_DAWNLPMFUZZER_H_
 #define SRC_DAWN_FUZZERS_DAWNLPMFUZZER_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include "dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.pb.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn::native {
 
