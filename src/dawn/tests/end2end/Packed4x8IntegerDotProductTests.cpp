@@ -36,6 +36,9 @@ namespace {
 class Packed4x8IntegerDotProductTests : public DawnTest {};
 
 TEST_P(Packed4x8IntegerDotProductTests, Dot4x8Packed) {
+    // crbug.com/355485146.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && IsMetal());
+
     const char* computeShader = R"(
         struct Buf {
             data1 : i32,
