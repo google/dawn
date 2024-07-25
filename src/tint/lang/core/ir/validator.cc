@@ -1847,9 +1847,10 @@ void Validator::CheckStore(const Store* s) {
 }
 
 void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
-    CheckOperandsNotNull(l,  //
-                         LoadVectorElement::kFromOperandOffset,
-                         LoadVectorElement::kIndexOperandOffset);
+    if (!CheckResultsAndOperands(l, LoadVectorElement::kNumResults,
+                                 LoadVectorElement::kNumOperands)) {
+        return;
+    }
 
     if (auto* res = l->Result(0)) {
         if (auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset)) {

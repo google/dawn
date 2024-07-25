@@ -5765,6 +5765,14 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
   $B1: {
   ^^^
 
+:4:5 error: load_vector_element: result is undefined
+    undef = load_vector_element %2, 1i
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
 note: # Disassembly
 %my_func = func():void {
   $B1: {
@@ -5830,6 +5838,70 @@ note: # Disassembly
   $B1: {
     %2:ptr<function, vec3<f32>, read_write> = var
     %3:f32 = load_vector_element %2, undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, LoadVectorElement_MissingResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, vec3<f32>>());
+        auto* load = b.LoadVectorElement(var, b.Constant(1_i));
+        load->ClearResults();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:13 error: load_vector_element: expected exactly 1 results, got 0
+    undef = load_vector_element %2, 1i
+            ^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec3<f32>, read_write> = var
+    undef = load_vector_element %2, 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, LoadVectorElement_MissingOperands) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, vec3<f32>>());
+        auto* load = b.LoadVectorElement(var, b.Constant(1_i));
+        load->ClearOperands();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:14 error: load_vector_element: expected exactly 2 operands, got 0
+    %3:f32 = load_vector_element
+             ^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec3<f32>, read_write> = var
+    %3:f32 = load_vector_element
     ret
   }
 }

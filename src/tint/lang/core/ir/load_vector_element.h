@@ -36,13 +36,19 @@
 namespace tint::core::ir {
 
 /// A load instruction for a single vector element in the IR.
-class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstruction<3, 0>> {
+class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstruction<2, 1>> {
   public:
     /// The offset in Operands() for the `from` value
     static constexpr size_t kFromOperandOffset = 0;
 
     /// The offset in Operands() for the `index` value
     static constexpr size_t kIndexOperandOffset = 1;
+
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
+    /// The fixed number of operands used by this instruction
+    static constexpr size_t kNumOperands = 2;
 
     /// Constructor (no results, no operands)
     LoadVectorElement();
