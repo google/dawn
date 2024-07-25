@@ -43,7 +43,8 @@ namespace wgpu::binding {
 // tasks in flight.
 class AsyncRunner {
   public:
-    explicit AsyncRunner(dawn::native::Instance* instance);
+    // Creates an AsyncRunner to use to process events on the instance.
+    static std::shared_ptr<AsyncRunner> Create(dawn::native::Instance* instance);
 
     // Begin() should be called when a new asynchronous task is started.
     // If the number of executing asynchronous tasks transitions from 0 to 1, then a function
@@ -62,12 +63,16 @@ class AsyncRunner {
     // once.
     void Reject(Napi::Env env, interop::Promise<void> promise, Napi::Error error);
 
-  private:
-    void QueueTick(Napi::Env env);
+    // Use AsyncRunner::Create instead of this constructor.
+    explicit AsyncRunner(dawn::native::Instance* instance);
 
+  private:
+    void ScheduleProcessEvents(Napi::Env env);
+
+    std::weak_ptr<AsyncRunner> weak_this_;
     const dawn::native::Instance* const instance_;
-    uint64_t count_ = 0;
-    bool tick_queued_ = false;
+    uint64_t tasks_waiting_ = 0;
+    bool process_events_queued_ = false;
 };
 
 // AsyncTask is a RAII helper for calling AsyncRunner::Begin() on construction, and

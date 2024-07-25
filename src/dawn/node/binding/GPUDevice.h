@@ -134,8 +134,6 @@ class GPUDevice final : public interop::GPUDevice {
     bool dispatchEvent(Napi::Env, interop::Interface<interop::Event> event) override;
 
   private:
-    void QueueTick();
-
     Napi::Env env_;
     wgpu::Device device_;
     std::shared_ptr<AsyncRunner> async_;

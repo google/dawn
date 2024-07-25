@@ -32,40 +32,52 @@
 
 namespace wgpu::binding {
 
+// static
+std::shared_ptr<AsyncRunner> AsyncRunner::Create(dawn::native::Instance* instance) {
+    auto runner = std::make_shared<AsyncRunner>(instance);
+    runner->weak_this_ = runner;
+    return runner;
+}
+
 AsyncRunner::AsyncRunner(dawn::native::Instance* instance) : instance_(instance) {}
 
 void AsyncRunner::Begin(Napi::Env env) {
-    assert(count_ != std::numeric_limits<decltype(count_)>::max());
-    if (count_++ == 0) {
-        QueueTick(env);
+    assert(tasks_waiting_ != std::numeric_limits<decltype(tasks_waiting_)>::max());
+    if (tasks_waiting_ == 0) {
+        ScheduleProcessEvents(env);
     }
+    tasks_waiting_++;
 }
 
 void AsyncRunner::End() {
-    assert(count_ > 0);
-    count_--;
+    assert(tasks_waiting_ > 0);
+    tasks_waiting_--;
 }
 
-void AsyncRunner::QueueTick(Napi::Env env) {
+void AsyncRunner::ScheduleProcessEvents(Napi::Env env) {
     // TODO(crbug.com/dawn/1127): We probably want to reduce the frequency at which this gets
     // called.
-    if (tick_queued_) {
+    if (process_events_queued_) {
         return;
     }
-    tick_queued_ = true;
+    process_events_queued_ = true;
+
+    auto weak_self = weak_this_;
     env.Global()
         .Get("setImmediate")
         .As<Napi::Function>()
         .Call({
             // TODO(crbug.com/dawn/1127): Create once, reuse.
             Napi::Function::New(env,
-                                [this, env](const Napi::CallbackInfo&) {
-                                    tick_queued_ = false;
-                                    if (count_ > 0) {
-                                        wgpu::Instance instance = instance_->Get();
-                                        instance.ProcessEvents();
-                                        QueueTick(env);
+                                [weak_self, env](const Napi::CallbackInfo&) {
+                                    auto self = weak_self.lock();
+                                    if (self == nullptr) {
+                                        return;
                                     }
+
+                                    self->process_events_queued_ = false;
+                                    wgpuInstanceProcessEvents(self->instance_->Get());
+                                    self->ScheduleProcessEvents(env);
                                 }),
         });
 }
