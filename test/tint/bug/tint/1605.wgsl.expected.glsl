@@ -2,9 +2,6 @@
 
 layout(binding = 0, std140) uniform b_block_ubo {
   int inner;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 } b;
 
 bool func_3() {

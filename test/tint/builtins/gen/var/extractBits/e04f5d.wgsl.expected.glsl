@@ -10,7 +10,6 @@ ivec3 tint_extract_bits(ivec3 v, uint offset, uint count) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
-  uint pad;
 } prevent_dce;
 
 ivec3 extractBits_e04f5d() {
@@ -44,7 +43,6 @@ ivec3 tint_extract_bits(ivec3 v, uint offset, uint count) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
-  uint pad;
 } prevent_dce;
 
 ivec3 extractBits_e04f5d() {

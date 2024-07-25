@@ -24,7 +24,6 @@ uvec3 tint_first_trailing_bit(uvec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uvec3 firstTrailingBit_cb51ce() {
@@ -70,7 +69,6 @@ uvec3 tint_first_trailing_bit(uvec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uvec3 firstTrailingBit_cb51ce() {

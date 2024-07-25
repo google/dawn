@@ -4,7 +4,6 @@ precision highp int;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
-  uint pad;
 } prevent_dce;
 
 ivec3 bitcast_a8ea1b() {
@@ -29,7 +28,6 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
-  uint pad;
 } prevent_dce;
 
 ivec3 bitcast_a8ea1b() {

@@ -5,7 +5,6 @@ layout(binding = 0, std140) uniform m_block_std140_ubo {
   f16vec2 inner_0;
   f16vec2 inner_1;
   f16vec2 inner_2;
-  uint pad;
 } m;
 
 f16mat3x2 load_m_inner() {

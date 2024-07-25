@@ -9,7 +9,6 @@ uvec3 tint_select(uvec3 param_0, uvec3 param_1, bvec3 param_2) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uvec3 select_28a27e() {
@@ -42,7 +41,6 @@ uvec3 tint_select(uvec3 param_0, uvec3 param_1, bvec3 param_2) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uvec3 select_28a27e() {

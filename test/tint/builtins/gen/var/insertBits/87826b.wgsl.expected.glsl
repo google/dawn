@@ -10,7 +10,6 @@ uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uvec3 insertBits_87826b() {
@@ -45,7 +44,6 @@ uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uvec3 insertBits_87826b() {

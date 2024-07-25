@@ -24,7 +24,6 @@ ivec3 tint_first_leading_bit(ivec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
-  uint pad;
 } prevent_dce;
 
 ivec3 firstLeadingBit_35053e() {
@@ -70,7 +69,6 @@ ivec3 tint_first_leading_bit(ivec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec3 inner;
-  uint pad;
 } prevent_dce;
 
 ivec3 firstLeadingBit_35053e() {

@@ -33,6 +33,7 @@
 
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/parameter.h"
+#include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
@@ -92,7 +93,6 @@ ast::transform::Transform::ApplyResult PadStructs::Apply(const Program& src,
             return nullptr;
         }
         uint32_t offset = 0;
-        bool has_runtime_sized_array = false;
         tint::Vector<const ast::StructMember*, 8> new_members;
         Hashset<std::string, 8> member_names;
         for (auto* mem : str->Members()) {
@@ -118,20 +118,19 @@ ast::transform::Transform::ApplyResult PadStructs::Apply(const Program& src,
             if (ty->Is<core::type::Struct>() && str->UsedAs(core::AddressSpace::kUniform)) {
                 // std140 structs should be padded out to 16 bytes.
                 size = tint::RoundUp(16u, size);
-            } else if (auto* array_ty = ty->As<core::type::Array>()) {
-                if (array_ty->Count()->Is<core::type::RuntimeArrayCount>()) {
-                    has_runtime_sized_array = true;
-                }
             }
             offset += size;
         }
 
-        // Add any required padding after the last member, if it's not a runtime-sized array.
+        // Add any required padding after the last member, if it's not a block.
         uint32_t struct_size = str->Size();
         if (str->UsedAs(core::AddressSpace::kUniform)) {
             struct_size = tint::RoundUp(16u, struct_size);
         }
-        if (offset < struct_size && !has_runtime_sized_array) {
+
+        bool is_block = ast::HasAttribute<ast::transform::AddBlockAttribute::BlockAttribute>(
+            ast_str->attributes);
+        if (offset < struct_size && !is_block) {
             CreatePadding(&new_members, &padding_members, &member_names, last_padding_index,
                           ctx.dst, struct_size - offset);
         }

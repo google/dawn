@@ -4,7 +4,6 @@ precision highp int;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 layout(binding = 0, rgba8_snorm) uniform highp readonly image3D arg_0;
@@ -30,7 +29,6 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 layout(binding = 0, rgba8_snorm) uniform highp readonly image3D arg_0;

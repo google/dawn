@@ -2,7 +2,6 @@
 
 layout(binding = 0, std430) buffer s_block_ssbo {
   ivec3 inner;
-  uint pad;
 } s;
 
 void tint_symbol() {

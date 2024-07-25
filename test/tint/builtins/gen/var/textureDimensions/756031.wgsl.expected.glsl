@@ -4,7 +4,6 @@ precision highp int;
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uniform highp isampler3D arg_0_1;
@@ -31,7 +30,6 @@ void main() {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uniform highp isampler3D arg_0_1;

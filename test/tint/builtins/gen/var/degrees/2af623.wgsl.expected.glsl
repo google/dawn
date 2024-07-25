@@ -9,7 +9,6 @@ vec3 tint_degrees(vec3 param_0) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
-  uint pad;
 } prevent_dce;
 
 vec3 degrees_2af623() {
@@ -40,7 +39,6 @@ vec3 tint_degrees(vec3 param_0) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec3 inner;
-  uint pad;
 } prevent_dce;
 
 vec3 degrees_2af623() {

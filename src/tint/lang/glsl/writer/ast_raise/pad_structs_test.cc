@@ -30,6 +30,7 @@
 #include <memory>
 #include <utility>
 
+#include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
 namespace tint::glsl::writer {
@@ -452,93 +453,29 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PadStructsTest, LastMemberRuntimeSizeArray) {
-    // Structs with runtime-sized arrays should not be padded after the
-    // last member.
+TEST_F(PadStructsTest, StructWithBlockAttribute) {
     auto* src = R"(
-struct T {
-  a : f32,
-  b : i32,
-}
-
-struct S {
-  a : vec4<f32>,
-  b : array<T>,
-}
-
-@group(0) @binding(0) var<storage, read_write> s : S;
+@group(0) @binding(0) var<uniform> u : i32;
 
 fn main() {
-  s.b[0] = T(1.0f, 23);
+  let x = u;
 }
 )";
     auto* expect = R"(
-struct T {
-  a : f32,
-  b : i32,
+@internal(block)
+struct u_block {
+  inner : i32,
 }
 
-struct S {
-  a : vec4<f32>,
-  b : array<T>,
-}
-
-@group(0) @binding(0) var<storage, read_write> s : S;
+@group(0) @binding(0) var<uniform> u : u_block;
 
 fn main() {
-  s.b[0] = T(1.0f, 23);
+  let x = u.inner;
 }
 )";
-
     ast::transform::DataMap data;
-    auto got = Run<PadStructs>(src, data);
-
-    EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(PadStructsTest, LastMemberFixedSizeArray) {
-    // Structs without runtime-sized arrays should be padded after the last
-    // member.
-    auto* src = R"(
-struct T {
-  a : f32,
-  b : i32,
-}
-
-struct S {
-  a : vec4<f32>,
-  b : array<T, 1u>,
-}
-
-@group(0) @binding(0) var<storage, read_write> s : S;
-
-fn main() {
-  s.b[0] = T(1.0f, 23);
-}
-)";
-    auto* expect = R"(
-struct T {
-  a : f32,
-  b : i32,
-}
-
-@internal(disable_validation__ignore_struct_member)
-struct S {
-  a : vec4<f32>,
-  b : array<T, 1u>,
-  pad : u32,
-  pad_1 : u32,
-}
-
-@group(0) @binding(0) var<storage, read_write> s : S;
-
-fn main() {
-  s.b[0] = T(1.0f, 23);
-}
-)";
-
-    ast::transform::DataMap data;
-    auto got = Run<PadStructs>(src, data);
+    auto blockAdded = Run<ast::transform::AddBlockAttribute>(src, data);
+    auto got = Run<PadStructs>(std::move(blockAdded.program), data);
 
     EXPECT_EQ(expect, str(got));
 }

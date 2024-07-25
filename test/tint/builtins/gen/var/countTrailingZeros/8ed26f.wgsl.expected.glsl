@@ -24,7 +24,6 @@ uvec3 tint_count_trailing_zeros(uvec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uvec3 countTrailingZeros_8ed26f() {
@@ -70,7 +69,6 @@ uvec3 tint_count_trailing_zeros(uvec3 v) {
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec3 inner;
-  uint pad;
 } prevent_dce;
 
 uvec3 countTrailingZeros_8ed26f() {
