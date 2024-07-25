@@ -194,8 +194,10 @@ class EncodingContext {
     bool mWereCommandsAcquired = false;
     bool mDestroyed = false;
 
-    std::unique_ptr<ErrorData> mError;
+    // Contains pointers to strings allocated inside the command allocators.
     std::vector<std::string_view> mDebugGroupLabels;
+
+    std::unique_ptr<ErrorData> mError;
 };
 
 }  // namespace dawn::native

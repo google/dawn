@@ -51,13 +51,17 @@ void EncodingContext::Destroy() {
     if (mDestroyed) {
         return;
     }
-    if (!mWereCommandsAcquired) {
-        FreeCommands(GetIterator());
-    }
+
     // If we weren't already finished, then we want to handle an error here so that any calls
-    // to Finish after Destroy will return a meaningful error.
+    // to Finish after Destroy will return a meaningful error. Handle errors before destroying
+    // commands as debug groups point inside the command allocators.
     if (!IsFinished()) {
         HandleError(DAWN_VALIDATION_ERROR("Destroyed encoder cannot be finished."));
+    }
+
+    mDebugGroupLabels.clear();
+    if (!mWereCommandsAcquired) {
+        FreeCommands(GetIterator());
     }
     mDestroyed = true;
     mCurrentEncoder = nullptr;
