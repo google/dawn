@@ -38,7 +38,6 @@
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/RenderPassEncoder.h"
 #include "dawn/native/Texture.h"
 
 namespace dawn::native {
@@ -152,11 +151,11 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
     CommandEncoder* encoder,
     RenderPassResourceUsageTracker* usageTracker,
     BeginRenderPassCmd* cmd,
-    std::function<void()>* passEndCallbackOut) {
+    RenderPassEncoder::EndCallback* passEndCallbackOut) {
     auto device = encoder->GetDevice();
 
     // List of operations to perform on render pass end.
-    absl::InlinedVector<std::function<void()>, 1> passEndOperations;
+    absl::InlinedVector<RenderPassEncoder::EndCallback, 1> passEndOperations;
 
     // dawn:56, dawn:1569
     // swap the resolve targets for the temp resolve textures.
@@ -180,7 +179,7 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
         }
 
         passEndOperations.emplace_back([encoder, temporaryResolveAttachments = std::move(
-                                                     temporaryResolveAttachments)]() -> void {
+                                                     temporaryResolveAttachments)]() -> MaybeError {
             // Called once the render pass has been ended.
             // Handle any copies needed for the AlwaysResolveIntoZeroLevelAndLayer
             // workaround immediately after the render pass ends and before any additional
@@ -188,6 +187,7 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
             for (auto& copyTarget : temporaryResolveAttachments) {
                 CopyTextureView(encoder, copyTarget.copySrc.Get(), copyTarget.copyDst.Get());
             }
+            return {};
         });
     }
 
@@ -227,28 +227,30 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
                 }
             }
 
-            passEndOperations.emplace_back([encoder, temporaryResolveAttachments = std::move(
-                                                         temporaryResolveAttachments)]() -> void {
-                // Called once the render pass has been ended.
-                // Handles any separate resolve passes needed for the
-                // ResolveMultipleAttachmentInSeparatePasses workaround immediately after the
-                // render pass ends and before any additional commands are recorded.
-                for (auto& deferredResolve : temporaryResolveAttachments) {
-                    RenderPassColorAttachment attachment = {};
-                    attachment.view = deferredResolve.copySrc.Get();
-                    attachment.resolveTarget = deferredResolve.copyDst.Get();
-                    attachment.loadOp = wgpu::LoadOp::Load;
-                    attachment.storeOp = deferredResolve.storeOp;
+            passEndOperations.emplace_back(
+                [encoder, temporaryResolveAttachments =
+                              std::move(temporaryResolveAttachments)]() -> MaybeError {
+                    // Called once the render pass has been ended.
+                    // Handles any separate resolve passes needed for the
+                    // ResolveMultipleAttachmentInSeparatePasses workaround immediately after the
+                    // render pass ends and before any additional commands are recorded.
+                    for (auto& deferredResolve : temporaryResolveAttachments) {
+                        RenderPassColorAttachment attachment = {};
+                        attachment.view = deferredResolve.copySrc.Get();
+                        attachment.resolveTarget = deferredResolve.copyDst.Get();
+                        attachment.loadOp = wgpu::LoadOp::Load;
+                        attachment.storeOp = deferredResolve.storeOp;
 
-                    RenderPassDescriptor resolvePass = {};
-                    resolvePass.colorAttachmentCount = 1;
-                    resolvePass.colorAttachments = &attachment;
+                        RenderPassDescriptor resolvePass = {};
+                        resolvePass.colorAttachmentCount = 1;
+                        resolvePass.colorAttachments = &attachment;
 
-                    // Begin and end an empty render pass to force the resolve.
-                    Ref<RenderPassEncoder> rpEncoder = encoder->BeginRenderPass(&resolvePass);
-                    rpEncoder->End();
-                }
-            });
+                        // Begin and end an empty render pass to force the resolve.
+                        Ref<RenderPassEncoder> rpEncoder = encoder->BeginRenderPass(&resolvePass);
+                        rpEncoder->End();
+                    }
+                    return {};
+                });
         }
     }
 
@@ -256,13 +258,14 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
         cmd->attachmentState->GetExpandResolveInfo().attachmentsToExpandResolve.any() &&
         device->CanTextureLoadResolveTargetInTheSameRenderpass();
 
-    *passEndCallbackOut = [passEndOperations = std::move(passEndOperations)] {
+    *passEndCallbackOut = [passEndOperations = std::move(passEndOperations)]() -> MaybeError {
         // Apply the operations in reverse order.
         // We copy the MSAA textures to temp resolve targets, then from temp resolve targets
         // to actual resolve targets.
         for (auto opIte = passEndOperations.rbegin(); opIte != passEndOperations.rend(); ++opIte) {
-            (*opIte)();
+            DAWN_TRY((*opIte)());
         }
+        return {};
     };
 
     return {};

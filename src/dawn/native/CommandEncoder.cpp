@@ -1190,7 +1190,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
     ClearWithDrawHelper clearWithDrawHelper;
     RenderPassWorkaroundsHelper renderpassWorkaroundsHelper;
 
-    std::function<void()> passEndCallback = nullptr;
+    RenderPassEncoder::EndCallback passEndCallback = nullptr;
 
     bool success = mEncodingContext.TryEncode(
         this,

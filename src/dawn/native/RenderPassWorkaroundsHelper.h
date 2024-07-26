@@ -36,11 +36,11 @@
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
+#include "dawn/native/RenderPassEncoder.h"
 
 namespace dawn::native {
 struct BeginRenderPassCmd;
 class CommandEncoder;
-class RenderPassEncoder;
 struct RenderPassDescriptor;
 class RenderPassResourceUsageTracker;
 class TextureBase;
@@ -59,7 +59,7 @@ class RenderPassWorkaroundsHelper : NonMovable {
     MaybeError ApplyOnPostEncoding(CommandEncoder* encoder,
                                    RenderPassResourceUsageTracker* usageTracker,
                                    BeginRenderPassCmd* cmd,
-                                   std::function<void()>* passEndCallbackOut);
+                                   RenderPassEncoder::EndCallback* passEndCallbackOut);
 
     MaybeError ApplyOnRenderPassStart(RenderPassEncoder* rpEncoder,
                                       const RenderPassDescriptor* rpDesc);

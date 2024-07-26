@@ -73,7 +73,7 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
                                      uint32_t renderTargetHeight,
                                      bool depthReadOnly,
                                      bool stencilReadOnly,
-                                     std::function<void()> endCallback)
+                                     EndCallback endCallback)
     : RenderEncoderBase(device,
                         descriptor->label,
                         encodingContext,
@@ -104,7 +104,7 @@ Ref<RenderPassEncoder> RenderPassEncoder::Create(
     uint32_t renderTargetHeight,
     bool depthReadOnly,
     bool stencilReadOnly,
-    std::function<void()> endCallback) {
+    EndCallback endCallback) {
     return AcquireRef(new RenderPassEncoder(device, descriptor, commandEncoder, encodingContext,
                                             std::move(usageTracker), std::move(attachmentState),
                                             renderTargetWidth, renderTargetHeight, depthReadOnly,
@@ -196,13 +196,13 @@ void RenderPassEncoder::End() {
             DAWN_TRY(mEncodingContext->ExitRenderPass(this, std::move(mUsageTracker),
                                                       mCommandEncoder.Get(),
                                                       std::move(mIndirectDrawMetadata)));
+            if (mEndCallback) {
+                mEncodingContext->ConsumedError(mEndCallback());
+            }
+
             return {};
         },
         "encoding %s.End().", this);
-
-    if (mEndCallback) {
-        mEndCallback();
-    }
 }
 
 void RenderPassEncoder::APISetStencilReference(uint32_t reference) {
