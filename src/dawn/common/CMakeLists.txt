@@ -118,6 +118,8 @@ set(sources
     "WeakRefSupport.cpp"
 )
 
+set(conditional_private_depends)
+
 if (WIN32)
     list(APPEND headers
         "windows_with_undefs.h"
@@ -134,9 +136,12 @@ elseif(APPLE)
         "IOSurfaceUtils.cpp"
         "SystemUtils_mac.mm"
     )
+    list(APPEND conditional_private_depends
+        "-framework Foundation"
+        "-framework IOSurface"
+    )
 endif()
 
-set(conditional_private_depends)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Android")
     find_library(log_lib log)
