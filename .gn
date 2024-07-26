@@ -48,4 +48,5 @@ default_args = {
   vma_vulkan_headers_dir = "//third_party/vulkan-headers/src"
   use_fuzztest_wrapper = false
   use_sysroot = true
+  enable_js_protobuf = false
 }
