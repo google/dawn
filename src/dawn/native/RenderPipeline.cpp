@@ -388,11 +388,11 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
             DAWN_INVALID_IF(descriptor->depthBiasClamp != 0,
                             "depthBiasClamp must be 0 when using using %s.", topology);
             break;
+        case wgpu::PrimitiveTopology::Undefined:
+            // Default is TriangleList.
         case wgpu::PrimitiveTopology::TriangleList:
         case wgpu::PrimitiveTopology::TriangleStrip:
             break;
-        case wgpu::PrimitiveTopology::Undefined:
-            DAWN_UNREACHABLE();
     }
 
     return {};
