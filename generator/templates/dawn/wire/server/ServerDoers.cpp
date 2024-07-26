@@ -52,6 +52,17 @@ namespace dawn::wire::server {
                         {%- if not loop.last -%}, {% endif %}
                     {%- endfor -%}
                 ) {
+                    //* Some arguments need to be sanitized so do that now.
+                    {% for member in command.members %}
+                        {% set MemberName = as_varName(member.name) %}
+                        {% if member.type.name.get() == "string view" %}
+                            // String views must not be nullable.
+                            if ({{MemberName}}.data == nullptr && {{MemberName}}.length == SIZE_MAX) {
+                                return WireResult::FatalError;
+                            }
+                        {% endif %}
+                    {% endfor %}
+
                     {% set ret = command.members|selectattr("is_return_value")|list %}
                     //* If there is a return value, assign it.
                     {% if ret|length == 1 %}
