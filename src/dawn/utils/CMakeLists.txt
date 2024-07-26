@@ -71,7 +71,7 @@ dawn_add_library(
     "BinarySemaphore.h"
     "TerribleCommandBuffer.h"
     "TestUtils.h"
-    "WireHelper.cpp"
+    "WireHelper.h"
   SOURCES
     "BinarySemaphore.cpp"
     "TerribleCommandBuffer.cpp"
