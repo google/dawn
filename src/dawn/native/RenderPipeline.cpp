@@ -256,8 +256,7 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
 MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState* rawDescriptor) {
     UnpackedPtr<PrimitiveState> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
-    const auto* depthClipControl = descriptor.Get<PrimitiveDepthClipControl>();
-    DAWN_INVALID_IF(depthClipControl && !device->HasFeature(Feature::DepthClipControl),
+    DAWN_INVALID_IF(descriptor->unclippedDepth && !device->HasFeature(Feature::DepthClipControl),
                     "%s is not supported", wgpu::FeatureName::DepthClipControl);
     DAWN_TRY(ValidatePrimitiveTopology(descriptor->topology));
     DAWN_TRY(ValidateIndexFormat(descriptor->stripIndexFormat));
@@ -984,11 +983,6 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     }
 
     mPrimitive = descriptor->primitive.WithTrivialFrontendDefaults();
-    UnpackedPtr<PrimitiveState> unpackedPrimitive = Unpack(&mPrimitive);
-    if (auto* depthClipControl = unpackedPrimitive.Get<PrimitiveDepthClipControl>()) {
-        mUnclippedDepth = depthClipControl->unclippedDepth;
-    }
-
     mMultisample = descriptor->multisample;
 
     if (mAttachmentState->HasDepthStencilAttachment()) {
@@ -1197,7 +1191,7 @@ float RenderPipelineBase::GetDepthBiasClamp() const {
 
 bool RenderPipelineBase::HasUnclippedDepth() const {
     DAWN_ASSERT(!IsError());
-    return mUnclippedDepth;
+    return mPrimitive.unclippedDepth;
 }
 
 ColorAttachmentMask RenderPipelineBase::GetColorAttachmentsMask() const {
@@ -1315,7 +1309,7 @@ size_t RenderPipelineBase::ComputeContentHash() {
 
     // Record primitive state
     recorder.Record(mPrimitive.topology, mPrimitive.stripIndexFormat, mPrimitive.frontFace,
-                    mPrimitive.cullMode, mUnclippedDepth);
+                    mPrimitive.cullMode, mPrimitive.unclippedDepth);
 
     // Record multisample state
     // Sample count hashed as part of the attachment state
@@ -1431,7 +1425,7 @@ bool RenderPipelineBase::EqualityFunc::operator()(const RenderPipelineBase* a,
         if (stateA.topology != stateB.topology ||
             stateA.stripIndexFormat != stateB.stripIndexFormat ||
             stateA.frontFace != stateB.frontFace || stateA.cullMode != stateB.cullMode ||
-            a->mUnclippedDepth != b->mUnclippedDepth) {
+            stateA.unclippedDepth != stateB.unclippedDepth) {
             return false;
         }
     }

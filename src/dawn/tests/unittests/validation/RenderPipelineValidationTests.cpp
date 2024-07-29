@@ -1338,49 +1338,20 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatAllowed) {
     }
 }
 
-// Test that specifying a unclippedDepth value is an error if the feature is not enabled.
+// Test that setting unclippedDepth to true is an error if the feature is not enabled.
 TEST_F(RenderPipelineValidationTest, UnclippedDepthWithoutFeature) {
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClipControl depthClipControl;
-        depthClipControl.unclippedDepth = true;
-        descriptor.primitive.nextInChain = &depthClipControl;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                            testing::HasSubstr("not supported"));
+        descriptor.primitive.unclippedDepth = false;
+        device.CreateRenderPipeline(&descriptor);
     }
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClipControl depthClipControl;
-        depthClipControl.unclippedDepth = false;
-        descriptor.primitive.nextInChain = &depthClipControl;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                            testing::HasSubstr("not supported"));
-    }
-}
-
-// Test that specifying an unclippedDepth value is an error if the feature is not enabled.
-TEST_F(RenderPipelineValidationTest, DepthClipControlWithoutFeature) {
-    {
-        utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClipControl depthClipControl;
-        depthClipControl.unclippedDepth = true;
-        descriptor.primitive.nextInChain = &depthClipControl;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                            testing::HasSubstr("not supported"));
-    }
-    {
-        utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClipControl depthClipControl;
-        depthClipControl.unclippedDepth = false;
-        descriptor.primitive.nextInChain = &depthClipControl;
+        descriptor.primitive.unclippedDepth = true;
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
                             testing::HasSubstr("not supported"));
     }
@@ -2020,18 +1991,14 @@ TEST_F(DepthClipControlValidationTest, Success) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClipControl depthClipControl;
-        depthClipControl.unclippedDepth = true;
-        descriptor.primitive.nextInChain = &depthClipControl;
+        descriptor.primitive.unclippedDepth = true;
         device.CreateRenderPipeline(&descriptor);
     }
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClipControl depthClipControl;
-        depthClipControl.unclippedDepth = false;
-        descriptor.primitive.nextInChain = &depthClipControl;
+        descriptor.primitive.unclippedDepth = false;
         device.CreateRenderPipeline(&descriptor);
     }
 }

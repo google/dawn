@@ -173,7 +173,6 @@ class RenderPipelineBase : public PipelineBase,
     PrimitiveState mPrimitive;
     DepthStencilState mDepthStencil;
     MultisampleState mMultisample;
-    bool mUnclippedDepth = false;
     bool mWritesDepth = false;
     bool mWritesStencil = false;
     bool mUsesFragDepth = false;

@@ -72,6 +72,8 @@
 #define {{API}}_NULLABLE
 #endif
 
+#define WGPU_BREAKING_CHANGE_DEPTH_CLIP_CONTROL
+
 #include <stdint.h>
 #include <stddef.h>
 

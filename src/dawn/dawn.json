@@ -3756,7 +3756,8 @@
             {"name": "topology", "type": "primitive topology", "default": "triangle list"},
             {"name": "strip index format", "type": "index format", "default": "undefined"},
             {"name": "front face", "type": "front face", "default": "CCW"},
-            {"name": "cull mode", "type": "cull mode", "default": "none"}
+            {"name": "cull mode", "type": "cull mode", "default": "none"},
+            {"name": "unclipped depth", "type": "bool", "default": "false"}
         ]
     },
 
