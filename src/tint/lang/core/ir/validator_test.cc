@@ -2302,6 +2302,51 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Var_Init_NullType) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* i = b.Var<function, f32>("i");
+        i->SetInitializer(b.Constant(0_f));
+        auto* load = b.Load(i);
+        auto* load_ret = load->Result(0);
+        auto* j = b.Var<function, f32>("j");
+        j->SetInitializer(load_ret);
+        load_ret->SetType(nullptr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:5 error: load: result type is undefined
+    %3:null = load %i
+    ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:5:46 error: var: operand type is undefined
+    %j:ptr<function, f32, read_write> = var, %3
+                                             ^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %i:ptr<function, f32, read_write> = var, 0.0f
+    %3:null = load %i
+    %j:ptr<function, f32, read_write> = var, %3
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Var_HandleMissingBindingPoint) {
     auto* v = b.Var(ty.ptr<handle, i32>());
     mod.root_block->Append(v);
@@ -5691,7 +5736,7 @@ TEST_F(IR_ValidatorTest, Store_NoStoreType) {
   $B1: {
   ^^^
 
-:3:11 error: store: store target operand is not a memory view
+:3:11 error: store: operand type is undefined
     store %2, 42u
           ^^
 
@@ -5724,7 +5769,7 @@ TEST_F(IR_ValidatorTest, Store_NoValueType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:15 error: store: value type must not be null
+              R"(:5:15 error: store: operand type is undefined
     store %2, %3
               ^^
 
