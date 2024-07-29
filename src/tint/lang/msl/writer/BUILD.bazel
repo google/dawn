@@ -139,7 +139,6 @@ cc_library(
   ],
   deps = [
     "//src/tint/api/common",
-    "//src/tint/cmd/bench:bench",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/type",
@@ -169,6 +168,11 @@ cc_library(
       "//src/tint/lang/msl/writer/helpers",
     ],
     "//conditions:default": [],
+  }) + select({
+    ":tint_build_spv_reader_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
+      "//src/tint/cmd/bench:bench",
+    ],
+    "//conditions:default": [],
   }),
   copts = COPTS,
   visibility = ["//visibility:public"],
@@ -180,7 +184,35 @@ alias(
 )
 
 alias(
+  name = "tint_build_spv_reader",
+  actual = "//src/tint:tint_build_spv_reader_true",
+)
+
+alias(
   name = "tint_build_wgsl_reader",
   actual = "//src/tint:tint_build_wgsl_reader_true",
+)
+
+alias(
+  name = "tint_build_wgsl_writer",
+  actual = "//src/tint:tint_build_wgsl_writer_true",
+)
+
+selects.config_setting_group(
+    name = "tint_build_msl_writer_and_tint_build_spv_reader_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer",
+    match_all = [
+        ":tint_build_msl_writer",
+        ":tint_build_spv_reader",
+        ":tint_build_wgsl_reader",
+        ":tint_build_wgsl_writer",
+    ],
+)
+selects.config_setting_group(
+    name = "tint_build_spv_reader_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer",
+    match_all = [
+        ":tint_build_spv_reader",
+        ":tint_build_wgsl_reader",
+        ":tint_build_wgsl_writer",
+    ],
 )
 

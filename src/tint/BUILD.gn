@@ -380,7 +380,8 @@ group("tests") {
 group("benchmarks") {
   testonly = true
   deps = []
-  if (tint_build_benchmarks) {
+  if (tint_build_benchmarks && tint_build_spv_reader &&
+      tint_build_wgsl_reader && tint_build_wgsl_writer) {
     deps += [ "${tint_src_dir}/cmd/bench:bench_cmd" ]
   }
 }

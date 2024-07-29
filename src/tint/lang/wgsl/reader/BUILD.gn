@@ -114,13 +114,13 @@ if (tint_build_unittests) {
   }
 }
 if (tint_build_benchmarks) {
-  if (tint_build_wgsl_reader) {
+  if (tint_build_wgsl_reader && tint_build_spv_reader &&
+      tint_build_wgsl_reader && tint_build_wgsl_writer) {
     tint_unittests_source_set("bench") {
       sources = [ "reader_bench.cc" ]
       deps = [
         "${tint_src_dir}:google_benchmark",
         "${tint_src_dir}/api/common",
-        "${tint_src_dir}/cmd/bench:bench",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/ir",
@@ -145,6 +145,11 @@ if (tint_build_benchmarks) {
         "${tint_src_dir}/utils/text",
         "${tint_src_dir}/utils/traits",
       ]
+
+      if (tint_build_spv_reader && tint_build_wgsl_reader &&
+          tint_build_wgsl_writer) {
+        deps += [ "${tint_src_dir}/cmd/bench:bench" ]
+      }
 
       if (tint_build_wgsl_reader) {
         deps += [ "${tint_src_dir}/lang/wgsl/reader" ]
