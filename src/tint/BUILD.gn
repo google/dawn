@@ -258,6 +258,12 @@ if (tint_build_benchmarks) {
     testonly = true
     public_deps = [ "//third_party/google_benchmark" ]
   }
+  action("generate_benchmark_inputs") {
+    output_header = "${target_gen_dir}/cmd/bench/benchmark_inputs.h"
+    outputs = [ output_header ]
+    script = "${tint_src_dir}/cmd/bench/generate_benchmark_inputs.py"
+    args = [ rebase_path(output_header, root_build_dir) ]
+  }
 }
 
 group("abseil") {

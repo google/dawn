@@ -259,6 +259,7 @@ endfunction()
 
 function(tint_bench_compile_options TARGET)
   tint_core_compile_options(${TARGET})
+  target_include_directories(${TARGET} PUBLIC "${DAWN_BUILD_GEN_DIR}")
   set_target_properties(${TARGET} PROPERTIES FOLDER "Benchmarks")
 endfunction()
 
@@ -320,6 +321,18 @@ endif()
 ################################################################################
 # Benchmarks
 ################################################################################
+if(TINT_BUILD_BENCHMARKS)
+  set(SCRIPT "${TINT_ROOT_SOURCE_DIR}/src/tint/cmd/bench/generate_benchmark_inputs.py")
+  set(OUTPUT "${DAWN_BUILD_GEN_DIR}/src/tint/cmd/bench/benchmark_inputs.h")
+  set(ARGS ${Python3_EXECUTABLE} ${SCRIPT} ${OUTPUT})
+  add_custom_command(
+    COMMAND ${ARGS}
+    OUTPUT ${OUTPUT}
+    DEPENDS ${SCRIPT}
+    COMMENT "Tint benchmark: Generating ${OUTPUT}."
+  )
+  add_custom_target(tint_generate_benchmark_inputs DEPENDS ${OUTPUT})
+endif()
 if(TINT_BUILD_BENCHMARKS AND TINT_EXTERNAL_BENCHMARK_CORPUS_DIR)
   # Glob all the files at TINT_EXTERNAL_BENCHMARK_CORPUS_DIR, and create a header
   # that lists these with the macros:
