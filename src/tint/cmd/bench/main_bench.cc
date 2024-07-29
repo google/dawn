@@ -25,7 +25,61 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <iomanip>
+#include <iostream>
+
 #include "src/tint/cmd/bench/bench.h"
+#include "src/tint/utils/text/string.h"
+
+/// ChromePerfReporter is a custom benchmark reporter used to output benchmark results in the format
+/// required for the Chrome Perf waterfall, as described here:
+/// [chromium]//src/tools/perf/generate_legacy_perf_dashboard_json.py
+class ChromePerfReporter final : public benchmark::BenchmarkReporter {
+  public:
+    bool ReportContext([[maybe_unused]] const Context& context) override { return true; }
+
+    void ReportRunsConfig([[maybe_unused]] double min_time,
+                          [[maybe_unused]] bool has_explicit_iters,
+                          [[maybe_unused]] benchmark::IterationCount iters) override {}
+
+    void ReportRuns(const std::vector<Run>& report) override {
+        for (auto& run : report) {
+            auto fullname = run.benchmark_name();
+
+            if (run.skipped) {
+                std::cout << "FAILED " << fullname << ": " << run.skip_message << "\n";
+                continue;
+            }
+
+            auto graph_and_trace = tint::Split(fullname, "/");
+            TINT_ASSERT(graph_and_trace.Length() <= 2u);
+            if (graph_and_trace.Length() == 1u) {
+                graph_and_trace.Push(graph_and_trace[0]);
+                graph_and_trace[0] = "TintInternals";
+            }
+
+            std::cout << "*RESULT " << graph_and_trace[0] << ": " << graph_and_trace[1] << "= "
+                      << std::fixed << run.GetAdjustedRealTime() << " ";
+            switch (run.time_unit) {
+                case benchmark::kNanosecond:
+                    std::cout << "ns";
+                    break;
+                case benchmark::kMicrosecond:
+                    std::cout << "us";
+                    break;
+                case benchmark::kMillisecond:
+                    std::cout << "ms";
+                    break;
+                case benchmark::kSecond:
+                    std::cout << "s";
+                    break;
+            }
+            std::cout << "\n";
+        }
+    }
+
+    void Finalize() override {}
+};
 
 int main(int argc, char** argv) {
     benchmark::Initialize(&argc, argv);
@@ -35,5 +89,5 @@ int main(int argc, char** argv) {
     if (!tint::bench::Initialize()) {
         return 1;
     }
-    benchmark::RunSpecifiedBenchmarks();
+    benchmark::RunSpecifiedBenchmarks(new ChromePerfReporter);
 }
