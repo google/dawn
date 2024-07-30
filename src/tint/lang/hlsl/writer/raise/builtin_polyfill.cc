@@ -115,6 +115,7 @@ struct State {
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureDimensions:
+                    case core::BuiltinFn::kTextureGatherCompare:
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kTextureNumLevels:
@@ -240,6 +241,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(call);
+                    break;
+                case core::BuiltinFn::kTextureGatherCompare:
+                    TextureGatherCompare(call);
                     break;
                 case core::BuiltinFn::kTextureLoad:
                     TextureLoad(call);
@@ -995,6 +999,55 @@ struct State {
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kTextureStore, new_args);
+        });
+        call->Destroy();
+    }
+
+    void TextureGatherCompare(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            auto* tex = args[0];
+
+            Vector<core::ir::Value*, 4> params;
+            params.Push(args[1]);
+
+            auto* coords = args[2];
+
+            auto* tex_type = tex->Type()->As<core::type::Texture>();
+            TINT_ASSERT(tex_type);
+
+            switch (tex_type->dim()) {
+                case core::type::TextureDimension::k2d:
+                    params.Push(coords);
+                    params.Push(args[3]);
+
+                    if (args.Length() > 4) {
+                        params.Push(args[4]);
+                    }
+                    break;
+                case core::type::TextureDimension::k2dArray:
+                    params.Push(
+                        b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[3]))->Result(0));
+                    params.Push(args[4]);
+                    if (args.Length() > 5) {
+                        params.Push(args[5]);
+                    }
+                    break;
+                case core::type::TextureDimension::kCube:
+                    params.Push(coords);
+                    params.Push(args[3]);
+                    break;
+                case core::type::TextureDimension::kCubeArray:
+                    params.Push(
+                        b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[3]))->Result(0));
+                    params.Push(args[4]);
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+
+            b.MemberCallWithResult<hlsl::ir::MemberBuiltinCall>(
+                call->DetachResult(), hlsl::BuiltinFn::kGatherCmp, tex, params);
         });
         call->Destroy();
     }

@@ -259,6 +259,33 @@ fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
 @member_function fn Store3F16(byte_address_buffer<writable>, offset: u32, value: vec3<f16>)
 @member_function fn Store4F16(byte_address_buffer<writable>, offset: u32, value: vec4<f16>)
 
+@member_function fn GatherCmp(texture: texture_depth_2d,
+                              sampler: sampler_comparison,
+                               coords: vec2<f32>,
+                            depth_ref: f32) -> vec4<f32>
+@member_function fn GatherCmp(texture: texture_depth_2d,
+                              sampler: sampler_comparison,
+                               coords: vec2<f32>,
+                            depth_ref: f32,
+                               offset: vec2<i32>) -> vec4<f32>
+@member_function fn GatherCmp(texture: texture_depth_2d_array,
+                              sampler: sampler_comparison,
+                               coords: vec3<f32>,
+                            depth_ref: f32) -> vec4<f32>
+@member_function fn GatherCmp(texture: texture_depth_2d_array,
+                              sampler: sampler_comparison,
+                               coords: vec3<f32>,
+                            depth_ref: f32,
+                               offset: vec2<i32>) -> vec4<f32>
+@member_function fn GatherCmp(texture: texture_depth_cube,
+                              sampler: sampler_comparison,
+                               coords: vec3<f32>,
+                            depth_ref: f32) -> vec4<f32>
+@member_function fn GatherCmp(texture: texture_depth_cube_array,
+                              sampler: sampler_comparison,
+                               coords: vec4<f32>,
+                            depth_ref: f32) -> vec4<f32>
+
 @member_function fn GetDimensions[A: access](byte_address_buffer<A>, width: ptr<function, u32, writable>)
 
 @member_function fn GetDimensions[T: fiu32](texture: texture_1d<T>,

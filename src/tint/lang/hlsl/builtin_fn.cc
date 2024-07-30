@@ -120,6 +120,8 @@ const char* str(BuiltinFn i) {
             return "Store3F16";
         case BuiltinFn::kStore4F16:
             return "Store4F16";
+        case BuiltinFn::kGatherCmp:
+            return "GatherCmp";
         case BuiltinFn::kGetDimensions:
             return "GetDimensions";
     }
