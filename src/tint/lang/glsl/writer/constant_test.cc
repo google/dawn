@@ -25,22 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/glsl/writer/printer/helper_test.h"
+#include "src/tint/lang/glsl/writer/helper_test.h"
+
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::glsl::writer {
 namespace {
 
-TEST_F(GlslPrinterTest, Function_Empty) {
-    auto* func = b.Function("foo", ty.void_());
-    func->Block()->Append(b.Return(func));
-
-    ASSERT_TRUE(Generate()) << err_ << output_;
-    EXPECT_EQ(output_, GlslHeader() + R"(
-void foo() {
-}
-void unused_entry_point() {
-}
-)");
+TEST_F(GlslWriterTest, DISABLED_Constant_Bool_True) {
+    FAIL();
 }
 
 }  // namespace

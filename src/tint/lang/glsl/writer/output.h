@@ -47,6 +47,8 @@ struct Output {
     /// Copy constructor
     Output(const Output&);
 
+    Output& operator=(const Output&) = default;
+
     /// The generated GLSL.
     std::string glsl = "";
 };

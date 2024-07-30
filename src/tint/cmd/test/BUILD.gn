@@ -98,9 +98,9 @@ if (tint_build_unittests) {
 
     if (tint_build_glsl_writer) {
       deps += [
+        "${tint_src_dir}/lang/glsl/writer:unittests",
         "${tint_src_dir}/lang/glsl/writer/ast_printer:unittests",
         "${tint_src_dir}/lang/glsl/writer/common:unittests",
-        "${tint_src_dir}/lang/glsl/writer/printer:unittests",
       ]
     }
 

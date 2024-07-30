@@ -25,23 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_GLSL_WRITER_PRINTER_HELPER_TEST_H_
-#define SRC_TINT_LANG_GLSL_WRITER_PRINTER_HELPER_TEST_H_
+#ifndef SRC_TINT_LANG_GLSL_WRITER_HELPER_TEST_H_
+#define SRC_TINT_LANG_GLSL_WRITER_HELPER_TEST_H_
 
 #include <string>
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/glsl/writer/common/version.h"
-#include "src/tint/lang/glsl/writer/printer/printer.h"
-#include "src/tint/lang/glsl/writer/raise/raise.h"
+#include "src/tint/lang/glsl/writer/writer.h"
 
 namespace tint::glsl::writer {
 
 /// Base helper class for testing the GLSL generator implementation.
 template <typename BASE>
-class GlslPrinterTestHelperBase : public BASE {
+class GlslWriterTestHelperBase : public BASE {
   public:
     /// The test module.
     core::ir::Module mod;
@@ -57,17 +54,13 @@ class GlslPrinterTestHelperBase : public BASE {
     std::string err_;
 
     /// Generated GLSL
-    std::string output_;
+    Output output_;
 
     /// Run the writer on the IR module and validate the result.
+    /// @param options the writer options
     /// @returns true if generation and validation succeeded
-    bool Generate() {
-        if (auto raised = Raise(mod, {}); raised != Success) {
-            err_ = raised.Failure().reason.Str();
-            return false;
-        }
-
-        auto result = Print(mod, version);
+    bool Generate(Options options = {}) {
+        auto result = writer::Generate(mod, options, "");
         if (result != Success) {
             err_ = result.Failure().reason.Str();
             return false;
@@ -90,12 +83,12 @@ class GlslPrinterTestHelperBase : public BASE {
 };
 
 /// Test class
-using GlslPrinterTest = GlslPrinterTestHelperBase<testing::Test>;
+using GlslWriterTest = GlslWriterTestHelperBase<testing::Test>;
 
 /// Test param class
 template <typename T>
-using GlslPrinterTestWithParam = GlslPrinterTestHelperBase<testing::TestWithParam<T>>;
+using GlslWriterTestWithParam = GlslWriterTestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::glsl::writer
 
-#endif  // SRC_TINT_LANG_GLSL_WRITER_PRINTER_HELPER_TEST_H_
+#endif  // SRC_TINT_LANG_GLSL_WRITER_HELPER_TEST_H_
