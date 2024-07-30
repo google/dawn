@@ -977,6 +977,12 @@ void Validator::CheckFunction(const Function* func) {
         AddError(func) << "references are not permitted as return types";
     }
 
+    if (func->Stage() != Function::PipelineStage::kUndefined) {
+        if (TINT_UNLIKELY(mod_.NameOf(func).Name().empty())) {
+            AddError(func) << "entry points must have names";
+        }
+    }
+
     QueueBlock(func->Block());
     ProcessTasks();
 }

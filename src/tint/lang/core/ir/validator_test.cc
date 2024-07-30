@@ -340,6 +340,29 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_UnnamedEntryPoint) {
+    auto* f = b.Function(ty.void_());
+    f->SetWorkgroupSize(0, 0, 0);
+    f->SetStage(Function::PipelineStage::kCompute);
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: entry points must have names
+%1 = @compute @workgroup_size(0, 0, 0) func():void {
+^^
+
+note: # Disassembly
+%1 = @compute @workgroup_size(0, 0, 0) func():void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
     auto* f = b.Function("f", ty.void_());
     auto* g = b.Function("g", ty.void_());
