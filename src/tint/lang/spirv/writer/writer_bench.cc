@@ -46,7 +46,7 @@ namespace tint::spirv::writer {
 namespace {
 
 void GenerateSPIRV(benchmark::State& state, std::string input_name) {
-    auto res = bench::LoadProgram(input_name);
+    auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
         state.SkipWithError(res.Failure().reason.Str());
         return;
@@ -61,7 +61,7 @@ void GenerateSPIRV(benchmark::State& state, std::string input_name) {
 
 void GenerateSPIRV_UseIR(benchmark::State& state, std::string input_name) {
 #if TINT_BUILD_WGSL_READER
-    auto res = bench::LoadProgram(input_name);
+    auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
         state.SkipWithError(res.Failure().reason.Str());
         return;
