@@ -65,7 +65,7 @@ namespace tint::bench {
 
 struct BenchmarkInput {
     const char* name = nullptr;
-    const char* wgsl = nullptr;
+    const std::string wgsl;
     const std::vector<uint32_t> spirv;
 };
 const BenchmarkInput kBenchmarkInputs[] = {''',
@@ -73,9 +73,12 @@ const BenchmarkInput kBenchmarkInputs[] = {''',
 
         # Add an entry to the array for each benchmark.
         for f in wgsl_files:
-            # WGSL shaders are emitted as string literals.
-            with open(benchmark_dir + '/' + f, 'r') as input:
-                print(f'    {{"{f}", R"({input.read()})"}},', file=output)
+            # WGSL shaders are emitted as char initializer lists.
+            with open(benchmark_dir + '/' + f, 'rb') as input:
+                print(f'    {{"{f}", {{', file=output, end='')
+                for char in input.read():
+                    print(char, file=output, end=', ')
+                print(f'}}}},', file=output)
         for f in spv_files:
             # SPIR-V shaders are emitted as uint32_t initializer lists.
             with open(benchmark_dir + '/' + f, 'rb') as input:
