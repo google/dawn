@@ -1459,6 +1459,540 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_Alpha) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k2d, ty.i32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 3_u, t, s, coords));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_2d<i32> = load %1
+    %6:sampler = load %2
+    %7:vec4<i32> = textureGather 3u, %5, %6, %4
+    %x:vec4<i32> = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_2d<i32> = load %1
+    %6:sampler = load %2
+    %7:vec4<i32> = %5.GatherAlpha %6, %4
+    %x:vec4<i32> = let %7
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_RedOffset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k2d, ty.i32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* offset = b.Composite<vec2<i32>>(1_i, 3_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 0_u, t, s, coords, offset));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_2d<i32> = load %1
+    %6:sampler = load %2
+    %7:vec4<i32> = textureGather 0u, %5, %6, %4, vec2<i32>(1i, 3i)
+    %x:vec4<i32> = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_2d<i32> = load %1
+    %6:sampler = load %2
+    %7:vec4<i32> = %5.GatherRed %6, %4, vec2<i32>(1i, 3i)
+    %x:vec4<i32> = let %7
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_GreenArray) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k2dArray, ty.i32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(1_u);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x",
+              b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 1_u, t, s, coords, array_idx));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d_array<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_2d_array<i32> = load %1
+    %6:sampler = load %2
+    %7:vec4<i32> = textureGather 1u, %5, %6, %4, 1u
+    %x:vec4<i32> = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d_array<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_2d_array<i32> = load %1
+    %6:sampler = load %2
+    %7:f32 = convert 1u
+    %8:vec3<f32> = construct %4, %7
+    %9:vec4<i32> = %5.GatherGreen %6, %8
+    %x:vec4<i32> = let %9
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_BlueArrayOffset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k2dArray, ty.i32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(1_i);
+        auto* offset = b.Composite<vec2<i32>>(1_i, 2_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 2_u, t, s, coords, array_idx,
+                                     offset));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d_array<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_2d_array<i32> = load %1
+    %6:sampler = load %2
+    %7:vec4<i32> = textureGather 2u, %5, %6, %4, 1i, vec2<i32>(1i, 2i)
+    %x:vec4<i32> = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_2d_array<i32>, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_2d_array<i32> = load %1
+    %6:sampler = load %2
+    %7:f32 = convert 1i
+    %8:vec3<f32> = construct %4, %7
+    %9:vec4<i32> = %5.GatherBlue %6, %8, vec2<i32>(1i, 2i)
+    %x:vec4<i32> = let %9
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_Depth) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(
+            ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureGather, t, s, coords));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = textureGather %5, %6, %4
+    %x:vec4<f32> = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = %5.Gather %6, %4
+    %x:vec4<f32> = let %7
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthOffset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(
+            ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* offset = b.Composite<vec2<i32>>(3_i, 4_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureGather, t, s, coords, offset));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = textureGather %5, %6, %4, vec2<i32>(3i, 4i)
+    %x:vec4<f32> = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = %5.Gather %6, %4, vec2<i32>(3i, 4i)
+    %x:vec4<f32> = let %7
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthArray) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(
+            handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(4_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureGather, t, s, coords, array_idx));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d_array = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = textureGather %5, %6, %4, 4i
+    %x:vec4<f32> = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d_array = load %1
+    %6:sampler = load %2
+    %7:f32 = convert 4i
+    %8:vec3<f32> = construct %4, %7
+    %9:vec4<f32> = %5.Gather %6, %8
+    %x:vec4<f32> = let %9
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureGather_DepthArrayOffset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(
+            handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(4_u);
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x",
+              b.Call<vec4<f32>>(core::BuiltinFn::kTextureGather, t, s, coords, array_idx, offset));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d_array = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = textureGather %5, %6, %4, 4u, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d_array = load %1
+    %6:sampler = load %2
+    %7:f32 = convert 4u
+    %8:vec3<f32> = construct %4, %7
+    %9:vec4<f32> = %5.Gather %6, %8, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %9
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriter_BuiltinPolyfillTest, QuantizeToF16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {

@@ -115,6 +115,7 @@ struct State {
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureDimensions:
+                    case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureNumLayers:
@@ -241,6 +242,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(call);
+                    break;
+                case core::BuiltinFn::kTextureGather:
+                    TextureGather(call);
                     break;
                 case core::BuiltinFn::kTextureGatherCompare:
                     TextureGatherCompare(call);
@@ -999,6 +1003,81 @@ struct State {
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kTextureStore, new_args);
+        });
+        call->Destroy();
+    }
+
+    void TextureGather(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            core::ir::Value* tex = nullptr;
+            hlsl::BuiltinFn fn = hlsl::BuiltinFn::kGather;
+
+            core::ir::Value* coords = nullptr;
+
+            Vector<core::ir::Value*, 4> params;
+
+            uint32_t idx = 0;
+            if (!args[idx]->Type()->Is<core::type::Texture>()) {
+                auto* comp = args[idx++]->As<core::ir::Constant>();
+                TINT_ASSERT(comp);
+
+                switch (comp->Value()->ValueAs<int32_t>()) {
+                    case 0:
+                        fn = hlsl::BuiltinFn::kGatherRed;
+                        break;
+                    case 1:
+                        fn = hlsl::BuiltinFn::kGatherGreen;
+                        break;
+                    case 2:
+                        fn = hlsl::BuiltinFn::kGatherBlue;
+                        break;
+                    case 3:
+                        fn = hlsl::BuiltinFn::kGatherAlpha;
+                        break;
+                    default:
+                        TINT_UNREACHABLE();
+                }
+            }
+
+            tex = args[idx++];
+
+            auto* tex_type = tex->Type()->As<core::type::Texture>();
+            TINT_ASSERT(tex_type);
+
+            bool is_depth = tex_type->Is<core::type::DepthTexture>();
+
+            params.Push(args[idx++]);  // sampler
+            coords = args[idx++];
+
+            uint32_t offset_idx = 0;
+
+            switch (tex_type->dim()) {
+                case core::type::TextureDimension::k2d:
+                    params.Push(coords);
+                    offset_idx = is_depth ? 3 : 4;
+                    break;
+                case core::type::TextureDimension::k2dArray:
+                    params.Push(b.Construct(ty.vec3<f32>(), coords, b.Convert<f32>(args[idx++]))
+                                    ->Result(0));
+                    offset_idx = is_depth ? 4 : 5;
+                    break;
+                case core::type::TextureDimension::kCube:
+                    params.Push(coords);
+                    break;
+                case core::type::TextureDimension::kCubeArray:
+                    params.Push(b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))
+                                    ->Result(0));
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+            if (offset_idx > 0 && args.Length() > offset_idx) {
+                params.Push(args[offset_idx]);
+            }
+
+            b.MemberCallWithResult<hlsl::ir::MemberBuiltinCall>(call->DetachResult(), fn, tex,
+                                                                params);
         });
         call->Destroy();
     }
