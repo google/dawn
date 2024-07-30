@@ -1100,7 +1100,18 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
             offset += 8;
         }
 
-        auto result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
+        tint::Result<tint::glsl::writer::Output> result;
+        if (options.use_ir) {
+            // Convert the AST program to an IR module.
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(prg);
+            if (ir != tint::Success) {
+                std::cerr << "Failed to generate IR: " << ir << "\n";
+                return false;
+            }
+            result = tint::glsl::writer::Generate(ir.Get(), gen_options, entry_point_name);
+        } else {
+            result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
+        }
         if (result != tint::Success) {
             tint::cmd::PrintWGSL(std::cerr, prg);
             std::cerr << "Failed to generate: " << result.Failure() << "\n";
