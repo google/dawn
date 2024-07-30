@@ -334,47 +334,6 @@ if(TINT_BUILD_BENCHMARKS)
   )
   add_custom_target(tint_generate_benchmark_inputs DEPENDS ${OUTPUT})
 endif()
-if(TINT_BUILD_BENCHMARKS AND TINT_EXTERNAL_BENCHMARK_CORPUS_DIR)
-  # Glob all the files at TINT_EXTERNAL_BENCHMARK_CORPUS_DIR, and create a header
-  # that lists these with the macros:
-  # TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS()
-  # TINT_BENCHMARK_EXTERNAL_SPV_PROGRAMS()
-  set(TINT_BENCHMARK_GEN_DIR "${DAWN_BUILD_GEN_DIR}/src/tint/benchmark/")
-  set(TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER "${TINT_BENCHMARK_GEN_DIR}/external_wgsl_programs.h")
-  message("Globbing ${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}...")
-
-  file(GLOB_RECURSE
-    TINT_EXTERNAL_WGSL_BENCHMARK_FILES
-    RELATIVE "${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}"
-    "${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}/**.wgsl"
-  )
-  list(TRANSFORM TINT_EXTERNAL_WGSL_BENCHMARK_FILES REPLACE
-    "(.+)"
-    "    BENCHMARK_CAPTURE\(FUNC, \"\\1\", \"${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}/\\1\")"
-  )
-  list(JOIN TINT_EXTERNAL_WGSL_BENCHMARK_FILES "; \\\n" TINT_EXTERNAL_WGSL_BENCHMARK_FILES)
-
-  file(GLOB_RECURSE
-    TINT_EXTERNAL_SPV_BENCHMARK_FILES
-    RELATIVE "${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}"
-    "${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}/**.spv")
-
-  list(TRANSFORM TINT_EXTERNAL_SPV_BENCHMARK_FILES REPLACE
-    "(.+)"
-    "    BENCHMARK_CAPTURE\(FUNC, \"\\1\", \"${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}/\\1\")"
-  )
-  list(JOIN TINT_EXTERNAL_SPV_BENCHMARK_FILES "; \\\n" TINT_EXTERNAL_SPV_BENCHMARK_FILES)
-
-  file(CONFIGURE
-    OUTPUT "${TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER}"
-    CONTENT "
-#define TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS(FUNC) \\
-${TINT_EXTERNAL_WGSL_BENCHMARK_FILES};
-
-#define TINT_BENCHMARK_EXTERNAL_SPV_PROGRAMS(FUNC) \\
-${TINT_EXTERNAL_SPV_BENCHMARK_FILES};"
-  )
-endif(TINT_BUILD_BENCHMARKS AND TINT_EXTERNAL_BENCHMARK_CORPUS_DIR)
 
 ################################################################################
 # Functions used by BUILD.cmake files
@@ -581,11 +540,6 @@ function(tint_target_add_external_dependencies TARGET KIND)
     elseif(${DEPENDENCY} STREQUAL "google-benchmark")
       set_target_properties(${TARGET} PROPERTIES FOLDER "Benchmarks")
       target_link_libraries(${TARGET} PRIVATE benchmark::benchmark)
-      if(TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER)
-        target_compile_definitions(${TARGET} PRIVATE
-          "TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER=\"${TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER}\""
-        )
-      endif()
     elseif(${DEPENDENCY} STREQUAL "gtest")
       target_include_directories(${TARGET} PRIVATE ${gmock_SOURCE_DIR}/include)
       target_link_libraries(${TARGET} PRIVATE gmock)

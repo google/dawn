@@ -208,8 +208,6 @@ option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_othe
 
 option(TINT_BUILD_TINTD "Build the WGSL language server" OFF)
 
-set_if_not_defined(TINT_EXTERNAL_BENCHMARK_CORPUS_DIR "" "Directory that holds a corpus of external shaders to benchmark.")
-
 option(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
 option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 option(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to detect non-deterministic output" OFF)
@@ -334,7 +332,6 @@ message(STATUS "Tint build IR fuzzer: ${TINT_BUILD_IR_FUZZER}")
 message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
-message(STATUS "Tint external benchmark corpus dir: ${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}")
 endif()
 
 set(IS_ASAN ${DAWN_ENABLE_ASAN})
