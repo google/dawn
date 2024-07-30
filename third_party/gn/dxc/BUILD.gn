@@ -1243,6 +1243,7 @@ template("dxcompiler_sourceset") {
     deps += ClangSemaDeps
 
     include_dirs = [
+      "${dawn_dxc_dir}/tools/clang/tools/dxcvalidator",
       "${target_gen_dir}/utils/version",  # hlsl_dxcversion_autogen
       "${target_gen_dir}/tools/clang/include",
       "${target_gen_dir}/tools/clang/tools/dxcompiler",
@@ -2265,6 +2266,11 @@ dxcompiler_sourceset("dxcompiler_sources") {
   ]
 }
 
+dxcompiler_sourceset("dxcvalidator_lib") {
+  target_type = "static_library"
+  sources = [ "$dawn_dxc_dir/tools/clang/tools/dxcvalidator/dxcvalidator.cpp" ]
+}
+
 source_set("windows_version_resource") {
   defines = [
     # Include version.inc
@@ -2307,6 +2313,7 @@ loadable_module("dxcompiler") {
     ":clang_lib_tooling",
     ":clang_tools_libclang",
     ":dxcompiler_sources",
+    ":dxcvalidator_lib",
     ":lib_analysis",
     ":lib_asmparser",
     ":lib_astmatchers",
