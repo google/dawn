@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
 #define SRC_TINT_LANG_GLSL_WRITER_RAISE_RAISE_H_
 
+#include "src/tint/lang/glsl/writer/common/options.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -38,9 +39,10 @@ class Module;
 namespace tint::glsl::writer {
 
 /// Raise a core IR module to the MSL dialect of the IR.
-/// @param mod the core IR module to raise to MSL dialect
+/// @param module the core IR module to raise to MSL dialect
+/// @param options the writer options
 /// @returns success or failure
-Result<SuccessType> Raise(core::ir::Module& mod);
+Result<SuccessType> Raise(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::glsl::writer
 

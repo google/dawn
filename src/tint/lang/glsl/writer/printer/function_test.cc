@@ -38,6 +38,8 @@ TEST_F(GlslPrinterTest, Function_Empty) {
     EXPECT_EQ(output_, GlslHeader() + R"(
 void foo() {
 }
+void unused_entry_point() {
+}
 )");
 }
 

@@ -59,7 +59,6 @@ tint_target_add_dependencies(tint_lang_glsl_writer lib
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
-  tint_lang_glsl_writer_raise
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
@@ -87,6 +86,7 @@ if(TINT_BUILD_GLSL_WRITER)
     tint_lang_glsl_writer_ast_printer
     tint_lang_glsl_writer_common
     tint_lang_glsl_writer_printer
+    tint_lang_glsl_writer_raise
   )
 endif(TINT_BUILD_GLSL_WRITER)
 

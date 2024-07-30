@@ -90,7 +90,11 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/core/intrinsic",
         "${tint_src_dir}/lang/core/ir",
         "${tint_src_dir}/lang/core/type",
-        "${tint_src_dir}/lang/glsl/writer/raise",
+        "${tint_src_dir}/lang/wgsl",
+        "${tint_src_dir}/lang/wgsl/ast",
+        "${tint_src_dir}/lang/wgsl/ast/transform",
+        "${tint_src_dir}/lang/wgsl/program",
+        "${tint_src_dir}/lang/wgsl/sem",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/ice",
@@ -110,6 +114,7 @@ if (tint_build_unittests) {
         deps += [
           "${tint_src_dir}/lang/glsl/writer/common",
           "${tint_src_dir}/lang/glsl/writer/printer",
+          "${tint_src_dir}/lang/glsl/writer/raise",
         ]
       }
     }
