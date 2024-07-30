@@ -849,7 +849,7 @@ void Disassembler::EmitTerminator(const Terminator* term) {
         [&](const ir::BreakIf* bi) {
             out_ << "  "
                  << StyleComment("# -> [t: exit_loop ", NameOf(bi->Loop()),
-                                 ", f: ", NameOf(bi->Loop()->Body()), "]");
+                                 ", f: ", NameOf(bi->Loop() ? bi->Loop()->Body() : nullptr), "]");
         },
         [&](const ir::Continue* c) {
             out_ << "  " << StyleComment("# -> ", NameOf(c->Loop()->Continuing()));
@@ -860,7 +860,8 @@ void Disassembler::EmitTerminator(const Terminator* term) {
         },                                                                                      //
         [&](const ir::ExitLoop* e) { out_ << "  " << StyleComment("# ", NameOf(e->Loop())); },  //
         [&](const ir::NextIteration* ni) {
-            out_ << "  " << StyleComment("# -> ", NameOf(ni->Loop()->Body()));
+            out_ << "  "
+                 << StyleComment("# -> ", NameOf(ni->Loop() ? ni->Loop()->Body() : nullptr));
         });
 }
 
@@ -925,13 +926,19 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
 }
 
 StyledText Disassembler::NameOf(const Block* node) {
-    TINT_ASSERT(node);
+    if (!node) {
+        return StyledText{} << StyleError("undef");
+    }
+
     auto id = block_ids_.GetOrAdd(node, [&] { return block_ids_.Count(); });
     return StyledText{} << StyleLabel("$B", id);
 }
 
 StyledText Disassembler::NameOf(const Value* value) {
-    TINT_ASSERT(value);
+    if (!value) {
+        return StyledText{} << StyleError("undef");
+    }
+
     auto id = value_ids_.GetOrAdd(value, [&] {
         if (auto sym = mod_.NameOf(value)) {
             if (ids_.Add(sym.Name())) {
