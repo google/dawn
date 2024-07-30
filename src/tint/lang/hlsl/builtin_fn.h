@@ -87,6 +87,11 @@ enum class BuiltinFn : uint8_t {
     kStore3F16,
     kStore4F16,
     kGatherCmp,
+    kGather,
+    kGatherAlpha,
+    kGatherBlue,
+    kGatherGreen,
+    kGatherRed,
     kGetDimensions,
     kNone,
 };

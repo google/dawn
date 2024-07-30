@@ -122,6 +122,16 @@ const char* str(BuiltinFn i) {
             return "Store4F16";
         case BuiltinFn::kGatherCmp:
             return "GatherCmp";
+        case BuiltinFn::kGather:
+            return "Gather";
+        case BuiltinFn::kGatherAlpha:
+            return "GatherAlpha";
+        case BuiltinFn::kGatherBlue:
+            return "GatherBlue";
+        case BuiltinFn::kGatherGreen:
+            return "GatherGreen";
+        case BuiltinFn::kGatherRed:
+            return "GatherRed";
         case BuiltinFn::kGetDimensions:
             return "GetDimensions";
     }

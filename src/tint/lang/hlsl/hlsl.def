@@ -286,6 +286,111 @@ fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
                                coords: vec4<f32>,
                             depth_ref: f32) -> vec4<f32>
 
+@member_function fn Gather(texture: texture_depth_2d,
+                           sampler: sampler,
+                            coords: vec2<f32>) -> vec4<f32>
+@member_function fn Gather(texture: texture_depth_2d,
+                           sampler: sampler,
+                            coords: vec2<f32>,
+                            offset: vec2<i32>) -> vec4<f32>
+@member_function fn Gather(texture: texture_depth_2d_array,
+                           sampler: sampler,
+                            coords: vec3<f32>) -> vec4<f32>
+@member_function fn Gather(texture: texture_depth_2d_array,
+                           sampler: sampler,
+                            coords: vec3<f32>,
+                            offset: vec2<i32>) -> vec4<f32>
+@member_function fn Gather(texture: texture_depth_cube,
+                           sampler: sampler,
+                            coords: vec3<f32>) -> vec4<f32>
+@member_function fn Gather(texture: texture_depth_cube_array,
+                           sampler: sampler,
+                            coords: vec4<f32>) -> vec4<f32>
+
+@member_function fn GatherAlpha[T: fiu32](texture: texture_2d<T>,
+                                          sampler: sampler,
+                                           coords: vec2<f32>) -> vec4<T>
+@member_function fn GatherAlpha[T: fiu32](texture: texture_2d<T>,
+                                          sampler: sampler,
+                                           coords: vec2<f32>,
+                                           offset: vec2<i32>) -> vec4<T>
+@member_function fn GatherAlpha[T: fiu32](texture: texture_2d_array<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>) -> vec4<T>
+@member_function fn GatherAlpha[T: fiu32](texture: texture_2d_array<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>,
+                                           offset: vec2<i32>) -> vec4<T>
+@member_function fn GatherAlpha[T: fiu32](texture: texture_cube<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>) -> vec4<T>
+@member_function fn GatherAlpha[T: fiu32](texture: texture_cube_array<T>,
+                                          sampler: sampler,
+                                           coords: vec4<f32>) -> vec4<T>
+
+@member_function fn GatherBlue[T: fiu32](texture: texture_2d<T>,
+                                          sampler: sampler,
+                                           coords: vec2<f32>) -> vec4<T>
+@member_function fn GatherBlue[T: fiu32](texture: texture_2d<T>,
+                                          sampler: sampler,
+                                           coords: vec2<f32>,
+                                           offset: vec2<i32>) -> vec4<T>
+@member_function fn GatherBlue[T: fiu32](texture: texture_2d_array<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>) -> vec4<T>
+@member_function fn GatherBlue[T: fiu32](texture: texture_2d_array<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>,
+                                           offset: vec2<i32>) -> vec4<T>
+@member_function fn GatherBlue[T: fiu32](texture: texture_cube<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>) -> vec4<T>
+@member_function fn GatherBlue[T: fiu32](texture: texture_cube_array<T>,
+                                          sampler: sampler,
+                                           coords: vec4<f32>) -> vec4<T>
+
+@member_function fn GatherGreen[T: fiu32](texture: texture_2d<T>,
+                                          sampler: sampler,
+                                           coords: vec2<f32>) -> vec4<T>
+@member_function fn GatherGreen[T: fiu32](texture: texture_2d<T>,
+                                          sampler: sampler,
+                                           coords: vec2<f32>,
+                                           offset: vec2<i32>) -> vec4<T>
+@member_function fn GatherGreen[T: fiu32](texture: texture_2d_array<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>) -> vec4<T>
+@member_function fn GatherGreen[T: fiu32](texture: texture_2d_array<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>,
+                                           offset: vec2<i32>) -> vec4<T>
+@member_function fn GatherGreen[T: fiu32](texture: texture_cube<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>) -> vec4<T>
+@member_function fn GatherGreen[T: fiu32](texture: texture_cube_array<T>,
+                                          sampler: sampler,
+                                           coords: vec4<f32>) -> vec4<T>
+
+@member_function fn GatherRed[T: fiu32](texture: texture_2d<T>,
+                                          sampler: sampler,
+                                           coords: vec2<f32>) -> vec4<T>
+@member_function fn GatherRed[T: fiu32](texture: texture_2d<T>,
+                                          sampler: sampler,
+                                           coords: vec2<f32>,
+                                           offset: vec2<i32>) -> vec4<T>
+@member_function fn GatherRed[T: fiu32](texture: texture_2d_array<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>) -> vec4<T>
+@member_function fn GatherRed[T: fiu32](texture: texture_2d_array<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>,
+                                           offset: vec2<i32>) -> vec4<T>
+@member_function fn GatherRed[T: fiu32](texture: texture_cube<T>,
+                                          sampler: sampler,
+                                           coords: vec3<f32>) -> vec4<T>
+@member_function fn GatherRed[T: fiu32](texture: texture_cube_array<T>,
+                                          sampler: sampler,
+                                           coords: vec4<f32>) -> vec4<T>
+
 @member_function fn GetDimensions[A: access](byte_address_buffer<A>, width: ptr<function, u32, writable>)
 
 @member_function fn GetDimensions[T: fiu32](texture: texture_1d<T>,
