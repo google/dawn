@@ -384,12 +384,12 @@ crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,p
 crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 
 # Fine derivative tests don't work on compat (and in core)
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdxCoarse:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdy:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
-crbug.com/42251283 webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
+crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
+crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:* [ Failure ]
+crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
+crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdy:* [ Failure ]
+crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
+crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
