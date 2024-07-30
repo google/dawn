@@ -155,7 +155,7 @@ if (tint_build_benchmarks) {
       }
 
       if (tint_build_wgsl_reader && tint_build_spv_reader &&
-          tint_build_wgsl_reader && tint_build_wgsl_writer) {
+          tint_build_wgsl_writer) {
         deps += [ "${tint_src_dir}/lang/wgsl/reader:bench" ]
       }
 
