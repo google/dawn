@@ -182,7 +182,7 @@ void Disassembler::EmitBlock(const Block* blk, std::string_view comment /* = "" 
                     EmitValue(p);
                     psm.Store(p);
                 }
-                out_ << ":" << StyleType(p->Type()->FriendlyName());
+                out_ << ":" << NameOf(p->Type());
             }
             out_ << ")";
         }
@@ -338,12 +338,12 @@ void Disassembler::EmitFunction(const Function* func) {
             out_ << ", ";
         }
         SourceMarker sm(this);
-        out_ << NameOf(p) << ":" << StyleType(p->Type() ? p->Type()->FriendlyName() : "undef");
+        out_ << NameOf(p) << ":" << NameOf(p->Type());
         sm.Store(p);
 
         EmitParamAttributes(p);
     }
-    out_ << "):" << StyleType(func->ReturnType()->FriendlyName());
+    out_ << "):" << NameOf(func->ReturnType());
 
     EmitReturnAttributes(func);
 
@@ -388,12 +388,7 @@ void Disassembler::EmitValueWithType(const Instruction* val) {
 void Disassembler::EmitValueWithType(const Value* val) {
     EmitValue(val);
     if (val) {
-        out_ << ":";
-        if (val->Type()) {
-            out_ << StyleType(val->Type()->FriendlyName());
-        } else {
-            out_ << StyleType("null");
-        }
+        out_ << ":" << NameOf(val->Type());
     }
 }
 
@@ -425,12 +420,12 @@ void Disassembler::EmitValue(const Value* val) {
                             out_ << StyleLiteral((scalar->ValueAs<bool>() ? "true" : "false"));
                         },
                         [&](const core::constant::Splat* splat) {
-                            out_ << StyleType(splat->Type()->FriendlyName()) << "(";
+                            out_ << NameOf(splat->Type()) << "(";
                             emit(splat->Index(0));
                             out_ << ")";
                         },
                         [&](const core::constant::Composite* composite) {
-                            out_ << StyleType(composite->Type()->FriendlyName()) << "(";
+                            out_ << NameOf(composite->Type()) << "(";
                             bool need_comma = false;
                             for (const auto* elem : composite->elements) {
                                 if (need_comma) {
@@ -641,7 +636,7 @@ void Disassembler::EmitIf(const If* if_) {
     out_ << StyleInstruction("if") << " ";
     EmitOperand(if_, If::kConditionOperandOffset);
 
-    bool has_false = !if_->False()->IsEmpty();
+    bool has_false = if_->False() != nullptr && !if_->False()->IsEmpty();
 
     out_ << " [" << StyleKeyword("t") << ": " << NameOf(if_->True());
     if (has_false) {
@@ -691,14 +686,14 @@ void Disassembler::EmitLoop(const Loop* l) {
     }
     out_ << StyleInstruction("loop") << " [";
 
-    if (!l->Initializer()->IsEmpty()) {
+    if (l->Initializer() != nullptr && !l->Initializer()->IsEmpty()) {
         out_ << StyleKeyword("i") << ": " << NameOf(l->Initializer());
         out_ << ", ";
     }
 
     out_ << StyleKeyword("b") << ": " << NameOf(l->Body());
 
-    if (!l->Continuing()->IsEmpty()) {
+    if (l->Continuing() != nullptr && !l->Continuing()->IsEmpty()) {
         out_ << ", ";
         out_ << StyleKeyword("c") << ": " << NameOf(l->Continuing());
     }
@@ -709,18 +704,17 @@ void Disassembler::EmitLoop(const Loop* l) {
     out_ << " {  " << StyleComment("# ", NameOf(l));
     EmitLine();
 
-    if (!l->Initializer()->IsEmpty()) {
+    if (l->Initializer() != nullptr && !l->Initializer()->IsEmpty()) {
         ScopedIndent si(indent_size_);
         EmitBlock(l->Initializer(), "initializer");
     }
 
-    // Loop is assumed to always have a body
-    {
+    if (l->Body() != nullptr) {
         ScopedIndent si(indent_size_);
         EmitBlock(l->Body(), "body");
     }
 
-    if (!l->Continuing()->IsEmpty()) {
+    if (l->Continuing() != nullptr && !l->Continuing()->IsEmpty()) {
         ScopedIndent si(indent_size_);
         EmitBlock(l->Continuing(), "continuing");
     }
@@ -852,7 +846,8 @@ void Disassembler::EmitTerminator(const Terminator* term) {
                                  ", f: ", NameOf(bi->Loop() ? bi->Loop()->Body() : nullptr), "]");
         },
         [&](const ir::Continue* c) {
-            out_ << "  " << StyleComment("# -> ", NameOf(c->Loop()->Continuing()));
+            out_ << "  "
+                 << StyleComment("# -> ", NameOf(c->Loop() ? c->Loop()->Continuing() : nullptr));
         },                                                                                  //
         [&](const ir::ExitIf* e) { out_ << "  " << StyleComment("# ", NameOf(e->If())); },  //
         [&](const ir::ExitSwitch* e) {
@@ -892,8 +887,7 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
     out_ << " {";
     EmitLine();
     for (auto* member : str->Members()) {
-        out_ << "  " << StyleVariable(member->Name().Name()) << ":"
-             << StyleType(member->Type()->FriendlyName());
+        out_ << "  " << StyleVariable(member->Name().Name()) << ":" << NameOf(member->Type());
         out_ << " " << StyleAttribute("@offset") << "(" << StyleLiteral(member->Offset()) << ")";
         if (member->Attributes().invariant) {
             out_ << ", " << StyleAttribute("@invariant");
@@ -923,6 +917,14 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
     out_ << "}";
     EmitLine();
     EmitLine();
+}
+
+StyledText Disassembler::NameOf(const type::Type* ty) {
+    if (!ty) {
+        return StyledText{} << StyleError("undef");
+    }
+
+    return StyledText{} << StyleType(ty->FriendlyName());
 }
 
 StyledText Disassembler::NameOf(const Block* node) {

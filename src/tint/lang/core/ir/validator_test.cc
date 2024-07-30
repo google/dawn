@@ -2320,8 +2320,8 @@ TEST_F(IR_ValidatorTest, Var_Init_NullType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:5 error: load: result type is undefined
-    %3:null = load %i
-    ^^^^^^^
+    %3:undef = load %i
+    ^^^^^^^^
 
 :2:3 note: in block
   $B1: {
@@ -2339,7 +2339,7 @@ note: # Disassembly
 %my_func = func():void {
   $B1: {
     %i:ptr<function, f32, read_write> = var, 0.0f
-    %3:null = load %i
+    %3:undef = load %i
     %j:ptr<function, f32, read_write> = var, %3
     ret
   }
@@ -5781,7 +5781,7 @@ note: # Disassembly
 %my_func = func():void {
   $B1: {
     %2:ptr<function, i32, read_write> = var
-    %3:null = construct 42u
+    %3:undef = construct 42u
     store %2, %3
     ret
   }
