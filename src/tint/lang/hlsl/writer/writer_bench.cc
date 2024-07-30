@@ -33,7 +33,7 @@
 namespace tint::hlsl::writer {
 namespace {
 
-void GenerateHLSL(benchmark::State& state, std::string input_name) {
+void GenerateHLSL_AST(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
         state.SkipWithError(res.Failure().reason.Str());
@@ -47,7 +47,7 @@ void GenerateHLSL(benchmark::State& state, std::string input_name) {
     }
 }
 
-TINT_BENCHMARK_PROGRAMS(GenerateHLSL);
+TINT_BENCHMARK_PROGRAMS(GenerateHLSL_AST);
 
 }  // namespace
 }  // namespace tint::hlsl::writer

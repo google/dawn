@@ -35,7 +35,7 @@
 namespace tint::glsl::writer {
 namespace {
 
-void GenerateGLSL(benchmark::State& state, std::string input_name) {
+void GenerateGLSL_AST(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
         state.SkipWithError(res.Failure().reason.Str());
@@ -59,7 +59,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
     }
 }
 
-TINT_BENCHMARK_PROGRAMS(GenerateGLSL);
+TINT_BENCHMARK_PROGRAMS(GenerateGLSL_AST);
 
 }  // namespace
 }  // namespace tint::glsl::writer

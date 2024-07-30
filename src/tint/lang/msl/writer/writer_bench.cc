@@ -36,7 +36,7 @@
 namespace tint::msl::writer {
 namespace {
 
-void GenerateMSL(benchmark::State& state, std::string input_name) {
+void GenerateMSL_AST(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
     if (res != Success) {
         state.SkipWithError(res.Failure().reason.Str());
@@ -72,7 +72,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
     }
 }
 
-TINT_BENCHMARK_PROGRAMS(GenerateMSL);
+TINT_BENCHMARK_PROGRAMS(GenerateMSL_AST);
 
 }  // namespace
 }  // namespace tint::msl::writer
