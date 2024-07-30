@@ -791,6 +791,49 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, CallToBuiltinArgNullType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* i = b.Var<function, f32>("i");
+        i->SetInitializer(b.Constant(0_f));
+        auto* load = b.Load(i);
+        auto* load_ret = load->Result(0);
+        b.Call(ty.f32(), BuiltinFn::kAbs, load_ret);
+        load_ret->SetType(nullptr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:5 error: load: result type is undefined
+    %3:undef = load %i
+    ^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:5:14 error: abs: argument to builtin has undefined type
+    %4:f32 = abs %3
+             ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    %i:ptr<function, f32, read_write> = var, 0.0f
+    %3:undef = load %i
+    %4:f32 = abs %3
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},

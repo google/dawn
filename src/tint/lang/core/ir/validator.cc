@@ -1211,7 +1211,13 @@ void Validator::CheckCall(const Call* call) {
 }
 
 void Validator::CheckBuiltinCall(const BuiltinCall* call) {
-    auto args = Transform<8>(call->Args(), [&](const ir::Value* v) { return v->Type(); });
+    auto args =
+        Transform<8>(call->Args(), [&](const ir::Value* v) { return v ? v->Type() : nullptr; });
+    if (args.Any([&](const type::Type* ty) { return ty == nullptr; })) {
+        AddError(call) << "argument to builtin has undefined type";
+        return;
+    }
+
     intrinsic::Context context{
         call->TableData(),
         type_mgr_,
