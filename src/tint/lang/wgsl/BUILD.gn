@@ -122,7 +122,7 @@ if (tint_build_unittests) {
   }
 }
 if (tint_build_benchmarks) {
-  tint_unittests_source_set("bench") {
+  tint_benchmarks_source_set("bench") {
     sources = [
       "diagnostic_rule_bench.cc",
       "diagnostic_severity_bench.cc",

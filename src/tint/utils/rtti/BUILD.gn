@@ -75,7 +75,7 @@ if (tint_build_unittests) {
   }
 }
 if (tint_build_benchmarks) {
-  tint_unittests_source_set("bench") {
+  tint_benchmarks_source_set("bench") {
     sources = [ "switch_bench.cc" ]
     deps = [
       "${tint_src_dir}:google_benchmark",

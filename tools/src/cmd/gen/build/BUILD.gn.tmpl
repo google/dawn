@@ -64,7 +64,7 @@ tint_executable("{{$.Directory.Name}}") {
 {{- else if $.Kind.IsTest -}}
 tint_unittests_source_set("unittests") {
 {{- else if $.Kind.IsBench -}}
-tint_unittests_source_set("bench") {
+tint_benchmarks_source_set("bench") {
 {{- else if $.Kind.IsFuzz -}}
 tint_fuzz_source_set("fuzz") {
 {{- else if $.Kind.IsTestCmd -}}

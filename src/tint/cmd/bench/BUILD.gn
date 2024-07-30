@@ -44,7 +44,7 @@ if (tint_build_unittests || tint_build_benchmarks) {
 if (tint_build_benchmarks) {
   if (tint_build_spv_reader && tint_build_wgsl_reader &&
       tint_build_wgsl_writer) {
-    tint_unittests_source_set("bench") {
+    tint_benchmarks_source_set("bench") {
       sources = [
         "bench.cc",
         "bench.h",

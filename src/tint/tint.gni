@@ -128,6 +128,36 @@ template("tint_unittests_source_set") {
 }
 
 ###############################################################################
+# Benchmarks - only built when tint_build_benchmarks is enabled
+###############################################################################
+template("tint_benchmarks_source_set") {
+  if (tint_build_benchmarks) {
+    source_set(target_name) {
+      forward_variables_from(invoker, "*", [ "configs" ])
+
+      testonly = true
+
+      if (defined(invoker.configs)) {
+        configs += invoker.configs
+      }
+
+      configs += [ "${tint_src_dir}:tint_common_config" ]
+
+      if (build_with_chromium) {
+        configs -= [ "//build/config/compiler:chromium_code" ]
+        configs += [ "//build/config/compiler:no_chromium_code" ]
+      }
+
+      if (!defined(invoker.deps)) {
+        deps = []
+      }
+
+      deps += [ "${tint_src_dir}:generate_benchmark_inputs" ]
+    }
+  }
+}
+
+###############################################################################
 # Fuzzers - only built when tint_has_fuzzers is enabled
 ###############################################################################
 if (tint_has_fuzzers) {

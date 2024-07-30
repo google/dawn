@@ -135,7 +135,7 @@ if (tint_build_unittests) {
 if (tint_build_benchmarks) {
   if (tint_build_wgsl_writer && tint_build_spv_reader &&
       tint_build_wgsl_reader && tint_build_wgsl_writer) {
-    tint_unittests_source_set("bench") {
+    tint_benchmarks_source_set("bench") {
       sources = [ "writer_bench.cc" ]
       deps = [
         "${tint_src_dir}:google_benchmark",
