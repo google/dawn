@@ -364,15 +364,6 @@ class Validator {
     // TODO(345196551): Remove this override once it is no longer used.
     void CheckOperandNotNull(const ir::Instruction* inst, const ir::Value* operand, size_t idx);
 
-    /// Checks all operands in the given range (inclusive) for @p inst are not null
-    /// @param inst the instruction
-    /// @param start_operand the first operand to check
-    /// @param end_operand the last operand to check
-    // TODO(345196551): Remove this override once it is no longer used.
-    void CheckOperandsNotNull(const ir::Instruction* inst,
-                              size_t start_operand,
-                              size_t end_operand);
-
     /// Validates the root block
     /// @param blk the block
     void CheckRootBlock(const Block* blk);
@@ -908,16 +899,6 @@ bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
 void Validator::CheckOperandNotNull(const Instruction* inst, const ir::Value* operand, size_t idx) {
     if (operand == nullptr) {
         AddError(inst, idx) << "operand is undefined";
-    }
-}
-
-// TODO(353498500): Remove this function once it is no longer used.
-void Validator::CheckOperandsNotNull(const Instruction* inst,
-                                     size_t start_operand,
-                                     size_t end_operand) {
-    auto operands = inst->Operands();
-    for (size_t i = start_operand; i <= end_operand; i++) {
-        CheckOperandNotNull(inst, operands[i], i);
     }
 }
 
@@ -1871,9 +1852,10 @@ void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
 }
 
 void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
-    CheckOperandsNotNull(s,  //
-                         StoreVectorElement::kToOperandOffset,
-                         StoreVectorElement::kValueOperandOffset);
+    if (!CheckResultsAndOperands(s, StoreVectorElement::kNumResults,
+                                 StoreVectorElement::kNumOperands)) {
+        return;
+    }
 
     if (auto* value = s->Value()) {
         if (auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset)) {

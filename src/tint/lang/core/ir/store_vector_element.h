@@ -47,6 +47,12 @@ class StoreVectorElement final : public Castable<StoreVectorElement, OperandInst
     /// The offset in Operands() for the `value` value
     static constexpr size_t kValueOperandOffset = 2;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 0;
+
+    /// The fixed number of operands used by this instruction
+    static constexpr size_t kNumOperands = 3;
+
     /// Constructor (no operands)
     StoreVectorElement();
 

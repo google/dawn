@@ -5958,14 +5958,14 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
 
     b.Append(f->Block(), [&] {
         b.Append(mod.allocators.instructions.Create<ir::StoreVectorElement>(
-            nullptr, b.Constant(1_i), b.Constant(2_i)));
+            nullptr, b.Constant(1_i), b.Constant(2_f)));
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:3:26 error: store_vector_element: operand is undefined
-    store_vector_element undef, 1i, 2i
+    store_vector_element undef, 1i, 2.0f
                          ^^^^^
 
 :2:3 note: in block
@@ -5975,7 +5975,7 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    store_vector_element undef, 1i, 2i
+    store_vector_element undef, 1i, 2.0f
     ret
   }
 }
@@ -5988,23 +5988,15 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_NullIndex) {
     b.Append(f->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, vec3<f32>>());
         b.Append(mod.allocators.instructions.Create<ir::StoreVectorElement>(var->Result(0), nullptr,
-                                                                            b.Constant(2_i)));
+                                                                            b.Constant(2_f)));
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:4:30 error: store_vector_element: operand is undefined
-    store_vector_element %2, undef, 2i
+    store_vector_element %2, undef, 2.0f
                              ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:4:37 error: store_vector_element: value type 'i32' does not match vector pointer element type 'f32'
-    store_vector_element %2, undef, 2i
-                                    ^^
 
 :2:3 note: in block
   $B1: {
@@ -6014,7 +6006,7 @@ note: # Disassembly
 %my_func = func():void {
   $B1: {
     %2:ptr<function, vec3<f32>, read_write> = var
-    store_vector_element %2, undef, 2i
+    store_vector_element %2, undef, 2.0f
     ret
   }
 }
@@ -6046,6 +6038,70 @@ note: # Disassembly
   $B1: {
     %2:ptr<function, vec3<f32>, read_write> = var
     store_vector_element %2, 1i, undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, StoreVectorElement_MissingOperands) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, vec3<f32>>());
+        auto* store = b.StoreVectorElement(var, b.Constant(1_i), b.Constant(2_f));
+        store->ClearOperands();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:5 error: store_vector_element: expected exactly 3 operands, got 0
+    store_vector_element 
+    ^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec3<f32>, read_write> = var
+    store_vector_element 
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, StoreVectorElement_UnexpectedResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, vec3<f32>>());
+        auto* store = b.StoreVectorElement(var, b.Constant(1_i), b.Constant(2_f));
+        store->SetResults(Vector{b.InstructionResult(ty.f32())});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:5 error: store_vector_element: expected exactly 0 results, got 1
+    store_vector_element %2, 1i, 2.0f
+    ^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec3<f32>, read_write> = var
+    store_vector_element %2, 1i, 2.0f
     ret
   }
 }
