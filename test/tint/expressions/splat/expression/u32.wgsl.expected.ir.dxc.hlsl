@@ -1,3 +1,4 @@
+
 void f() {
   uint2 v2 = (3u).xx;
   uint3 v3 = (3u).xxx;

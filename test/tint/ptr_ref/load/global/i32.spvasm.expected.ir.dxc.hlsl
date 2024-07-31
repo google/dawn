@@ -1,5 +1,5 @@
-SKIP: FAILED
 
+static int I = 0;
 void main_1() {
   int x_11 = (I + 1);
 }
@@ -8,9 +8,4 @@ void main_1() {
 void main() {
   main_1();
 }
-
-DXC validation failure:
-hlsl.hlsl:2:15: error: use of undeclared identifier 'I'
-  int x_11 = (I + 1);
-              ^
 

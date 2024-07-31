@@ -1,9 +1,17 @@
-SKIP: FAILED
+struct S {
+  vector<float16_t, 3> v;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+static S P = (S)0;
+void f() {
+  P.v = vector<float16_t, 3>(float16_t(1.0h), float16_t(2.0h), float16_t(3.0h));
+  P.v[0u] = float16_t(1.0h);
+  P.v[1u] = float16_t(2.0h);
+  P.v[2u] = float16_t(3.0h);
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

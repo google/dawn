@@ -1,9 +1,15 @@
-SKIP: FAILED
+struct _A {
+  int _B;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:504 internal compiler error: Switch() matched no cases. Type: tint::core::type::Struct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+RWByteAddressBuffer s : register(u0);
+[numthreads(1, 1, 1)]
+void f() {
+  _A v = (_A)0;
+  _A c = v;
+  int d = c._B;
+  _A v_1 = v;
+  s.Store(0u, asuint((v_1._B + d)));
+}
+

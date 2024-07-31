@@ -1,8 +1,10 @@
-SKIP: FAILED
 
+static int zero[2][3] = (int[2][3])0;
+static const int v[2][3] = {{1, 2, 3}, {4, 5, 6}};
+static int init[2][3] = v;
 [numthreads(1, 1, 1)]
 void main() {
-  int[2][3] v0 = zero;
-  int[2][3] v1 = init;
+  int v0[2][3] = zero;
+  int v1[2][3] = init;
 }
 

@@ -1,3 +1,4 @@
+
 void f() {
   int vec3f = 1;
   int b = vec3f;

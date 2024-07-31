@@ -1,9 +1,42 @@
-SKIP: FAILED
+struct main_outputs {
+  int tint_symbol : SV_Target2;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::If
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_inputs {
+  nointerpolation int3 x : TEXCOORD1;
+};
+
+
+static bool continue_execution = true;
+int f(int x) {
+  if ((x == 10)) {
+    continue_execution = false;
+  }
+  return x;
+}
+
+int main_inner(int3 x) {
+  int y = x[0u];
+  {
+    while(true) {
+      int r = f(y);
+      if ((r == 0)) {
+        break;
+      }
+      {
+      }
+      continue;
+    }
+  }
+  return y;
+}
+
+main_outputs main(main_inputs inputs) {
+  main_outputs v = {main_inner(inputs.x)};
+  if (!(continue_execution)) {
+    discard;
+  }
+  main_outputs v_1 = v;
+  return v_1;
+}
+

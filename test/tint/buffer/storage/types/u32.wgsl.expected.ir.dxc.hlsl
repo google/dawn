@@ -1,15 +1,8 @@
-SKIP: FAILED
 
+ByteAddressBuffer tint_symbol : register(t0);
+RWByteAddressBuffer tint_symbol_1 : register(u1);
 [numthreads(1, 1, 1)]
 void main() {
-  tint_symbol_1 = tint_symbol;
+  tint_symbol_1.Store(0u, tint_symbol.Load(0u));
 }
-
-DXC validation failure:
-hlsl.hlsl:3:3: error: use of undeclared identifier 'tint_symbol_1'
-  tint_symbol_1 = tint_symbol;
-  ^
-hlsl.hlsl:3:19: error: use of undeclared identifier 'tint_symbol'
-  tint_symbol_1 = tint_symbol;
-                  ^
 

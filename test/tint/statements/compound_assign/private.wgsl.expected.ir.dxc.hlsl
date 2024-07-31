@@ -1,32 +1,18 @@
-SKIP: FAILED
+
+static int a = 0;
+static float4 b = (0.0f).xxxx;
+static float2x2 c = float2x2((0.0f).xx, (0.0f).xx);
+int tint_div_i32(int lhs, int rhs) {
+  return (lhs / ((((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))) ? (1) : (rhs)));
+}
 
 void foo() {
-  a = (a / 2);
-  b = (b * float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
+  a = tint_div_i32(a, 2);
+  b = mul(float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx), b);
   c = (c * 2.0f);
 }
 
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
 }
-
-DXC validation failure:
-hlsl.hlsl:2:3: error: use of undeclared identifier 'a'
-  a = (a / 2);
-  ^
-hlsl.hlsl:2:8: error: use of undeclared identifier 'a'
-  a = (a / 2);
-       ^
-hlsl.hlsl:3:3: error: use of undeclared identifier 'b'
-  b = (b * float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
-  ^
-hlsl.hlsl:3:8: error: use of undeclared identifier 'b'
-  b = (b * float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
-       ^
-hlsl.hlsl:4:3: error: use of undeclared identifier 'c'
-  c = (c * 2.0f);
-  ^
-hlsl.hlsl:4:8: error: use of undeclared identifier 'c'
-  c = (c * 2.0f);
-       ^
 

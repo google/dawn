@@ -1,16 +1,11 @@
-SKIP: FAILED
 
+cbuffer cbuffer_u : register(b0) {
+  uint4 u[1];
+};
+RWByteAddressBuffer s : register(u1);
 [numthreads(1, 1, 1)]
 void main() {
-  uint2 x = u;
-  s = x;
+  uint2 x = u[0u].xy;
+  s.Store2(0u, x);
 }
-
-DXC validation failure:
-hlsl.hlsl:3:13: error: use of undeclared identifier 'u'
-  uint2 x = u;
-            ^
-hlsl.hlsl:4:3: error: use of undeclared identifier 's'
-  s = x;
-  ^
 

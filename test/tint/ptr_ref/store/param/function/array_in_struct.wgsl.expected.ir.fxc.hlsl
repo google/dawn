@@ -1,9 +1,16 @@
-SKIP: FAILED
+struct str {
+  int arr[4];
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:287 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+void func(inout int pointer[4]) {
+  int v[4] = (int[4])0;
+  pointer = v;
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  str F = (str)0;
+  func(F.arr);
+}
+

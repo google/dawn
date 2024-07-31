@@ -1,9 +1,30 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct In {
+  float4 a;
+  float4 b;
+  int4 fbf;
+};
+
+struct f_inputs {
+  int4 In_fbf;
+  float4 In_a : TEXCOORD0;
+  nointerpolation float4 In_b : TEXCOORD1;
+};
+
+
+void g(float a, float b, int c) {
+}
+
+void f_inner(In tint_symbol) {
+  g(tint_symbol.a[0u], tint_symbol.b[1u], tint_symbol.fbf[0u]);
+}
+
+void f(f_inputs inputs) {
+  In v = {inputs.In_a, inputs.In_b, inputs.In_fbf};
+  f_inner(v);
+}
+
+FXC validation failure:
+c:\src\dawn\Shader@0x0000021FC3333270(21,17-22): error X3502: 'f': input parameter 'inputs' missing semantics
+

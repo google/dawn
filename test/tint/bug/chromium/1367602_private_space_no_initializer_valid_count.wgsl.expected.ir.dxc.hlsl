@@ -1,3 +1,5 @@
+
+static bool v[65535] = (bool[65535])0;
 void f() {
 }
 

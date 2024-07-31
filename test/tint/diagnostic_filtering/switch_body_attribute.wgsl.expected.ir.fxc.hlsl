@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/switch_body_attribute.wgsl:5:11 warning: 'dpdx' must only be called from uniform control flow
       _ = dpdx(1.0);
           ^^^^^^^^^
@@ -12,10 +10,26 @@ SKIP: FAILED
   switch (i32(x)) @diagnostic(warning, derivative_uniformity) {
               ^
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Switch
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_inputs {
+  float x : TEXCOORD0;
+};
+
+
+int tint_f32_to_i32(float value) {
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (-2147483648))) : (2147483647));
+}
+
+void main_inner(float x) {
+  switch(tint_f32_to_i32(x)) {
+    default:
+    {
+      ddx(1.0f);
+      break;
+    }
+  }
+}
+
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
+}
+

@@ -1,5 +1,6 @@
+
 void f() {
-  float[4] v = (float[4])0;
+  float v[4] = (float[4])0;
 }
 
 [numthreads(1, 1, 1)]

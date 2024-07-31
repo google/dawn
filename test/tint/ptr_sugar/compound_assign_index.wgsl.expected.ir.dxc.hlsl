@@ -1,9 +1,33 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::StoreVectorElement
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void deref() {
+  int3 a = (0).xxx;
+  int3 p = a;
+  p[0] = (p.x + 42);
+}
+
+void no_deref() {
+  int3 a = (0).xxx;
+  int3 p = a;
+  p[0] = (p.x + 42);
+}
+
+void deref_inc() {
+  int3 a = (0).xxx;
+  int3 p = a;
+  p[0] = (p.x + 1);
+}
+
+void no_deref_inc() {
+  int3 a = (0).xxx;
+  int3 p = a;
+  p[0] = (p.x + 1);
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  deref();
+  no_deref();
+  deref_inc();
+  no_deref_inc();
+}
+

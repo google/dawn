@@ -1,6 +1,5 @@
-SKIP: FAILED
 
-void X() {
+void X(float2 a, float2 b) {
 }
 
 float2 Y() {

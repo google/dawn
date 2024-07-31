@@ -1,9 +1,22 @@
-SKIP: FAILED
+struct main_inputs {
+  uint idx : SV_GroupIndex;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::StoreVectorElement
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+RWByteAddressBuffer io : register(u0);
+float3 Bad(uint index, float3 rd) {
+  float3 normal = (0.0f).xxx;
+  normal[index] = -(float(sign(rd[index])));
+  return normalize(normal);
+}
+
+void main_inner(uint idx) {
+  uint v_1 = io.Load(12u);
+  io.Store3(0u, asuint(Bad(v_1, asfloat(io.Load3(0u)))));
+}
+
+[numthreads(1, 1, 1)]
+void main(main_inputs inputs) {
+  main_inner(inputs.idx);
+}
+

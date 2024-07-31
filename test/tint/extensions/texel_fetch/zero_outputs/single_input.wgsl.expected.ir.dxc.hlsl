@@ -1,9 +1,23 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.cc:371 internal compiler error: TINT_UNIMPLEMENTED IR does not currently support texel fetch extension
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct f_inputs {
+  float4 fbf;
+};
+
+
+void g(float a) {
+}
+
+void f_inner(float4 fbf) {
+  g(fbf[1u]);
+}
+
+void f(f_inputs inputs) {
+  f_inner(inputs.fbf);
+}
+
+DXC validation failure:
+hlsl.hlsl:13:1: error: Semantic must be defined for all parameters of an entry function or patch constant function
+void f(f_inputs inputs) {
+^
+

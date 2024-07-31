@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:287 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
+..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1010 internal compiler error: TINT_UNREACHABLE unhandled: textureSample
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

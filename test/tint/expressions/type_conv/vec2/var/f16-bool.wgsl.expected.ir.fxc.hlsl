@@ -1,9 +1,15 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Convert
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+static vector<float16_t, 2> u = (float16_t(1.0h)).xx;
+void f() {
+  bool2 v = bool2(u);
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+
+FXC validation failure:
+c:\src\dawn\Shader@0x0000019F5F7076D0(2,15-23): error X3000: syntax error: unexpected token 'float16_t'
+

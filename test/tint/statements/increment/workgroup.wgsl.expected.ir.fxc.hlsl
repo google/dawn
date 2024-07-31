@@ -1,5 +1,5 @@
-SKIP: FAILED
 
+groupshared int i;
 void main() {
   i = (i + 1);
 }

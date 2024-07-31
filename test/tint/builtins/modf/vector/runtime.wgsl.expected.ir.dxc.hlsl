@@ -1,9 +1,23 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct modf_result_vec2_f32 {
+  float2 fract;
+  float2 whole;
+};
+
+
+[numthreads(1, 1, 1)]
+void main() {
+  float2 tint_symbol = float2(1.25f, 3.75f);
+  modf_result_vec2_f32 v = modf(tint_symbol);
+  modf_result_vec2_f32 res = v;
+  float2 fract = res.fract;
+  modf_result_vec2_f32 v_1 = v;
+  float2 whole = v_1.whole;
+}
+
+DXC validation failure:
+hlsl.hlsl:10:28: error: use of undeclared identifier 'modf'
+  modf_result_vec2_f32 v = modf(tint_symbol);
+                           ^
+

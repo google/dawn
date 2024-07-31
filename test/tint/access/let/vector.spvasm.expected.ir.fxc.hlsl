@@ -1,4 +1,3 @@
-SKIP: FAILED
 
 void main_1() {
   float x_11 = 2.0f;

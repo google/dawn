@@ -1,9 +1,26 @@
-SKIP: FAILED
+struct frexp_result_f32 {
+  float f;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Construct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct frexp_result_f32_1 {
+  float fract;
+  int exp;
+};
+
+struct main_outputs {
+  float4 tint_symbol : SV_Target0;
+};
+
+
+static frexp_result_f32 a = (frexp_result_f32)0;
+static const frexp_result_f32_1 v = {0.5f, 1};
+static frexp_result_f32_1 b = v;
+float4 main_inner() {
+  return float4(a.f, b.fract, 0.0f, 0.0f);
+}
+
+main_outputs main() {
+  main_outputs v_1 = {main_inner()};
+  return v_1;
+}
+

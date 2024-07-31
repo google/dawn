@@ -1,4 +1,3 @@
-SKIP: FAILED
 
 void main() {
   int i = 0;

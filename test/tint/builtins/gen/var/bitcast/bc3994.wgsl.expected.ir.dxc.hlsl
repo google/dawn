@@ -1,9 +1,55 @@
-SKIP: FAILED
+struct VertexOutput {
+  float4 pos;
+  vector<float16_t, 4> prevent_dce;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Bitcast
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct vertex_main_outputs {
+  nointerpolation vector<float16_t, 4> VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
+};
+
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {
+  uint2 v = src;
+  uint2 mask = (65535u).xx;
+  uint2 shift = (16u).xx;
+  float2 t_low = f16tof32((v & mask));
+  float2 t_high = f16tof32(((v >> shift) & mask));
+  float16_t v_1 = float16_t(t_low.x);
+  float16_t v_2 = float16_t(t_high.x);
+  float16_t v_3 = float16_t(t_low.y);
+  return vector<float16_t, 4>(v_1, v_2, v_3, float16_t(t_high.y));
+}
+
+vector<float16_t, 4> bitcast_bc3994() {
+  uint2 arg_0 = (1u).xx;
+  vector<float16_t, 4> res = tint_bitcast_to_f16(arg_0);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 4> >(0u, bitcast_bc3994());
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store<vector<float16_t, 4> >(0u, bitcast_bc3994());
+}
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  tint_symbol.prevent_dce = bitcast_bc3994();
+  VertexOutput v_4 = tint_symbol;
+  return v_4;
+}
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_5 = vertex_main_inner();
+  VertexOutput v_6 = v_5;
+  VertexOutput v_7 = v_5;
+  vertex_main_outputs v_8 = {v_7.prevent_dce, v_6.pos};
+  return v_8;
+}
+

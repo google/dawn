@@ -1,9 +1,20 @@
-SKIP: FAILED
+struct VertexOutputs {
+  float4 position;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:504 internal compiler error: Switch() matched no cases. Type: tint::core::type::Struct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_outputs {
+  float4 VertexOutputs_position : SV_Position;
+};
+
+
+VertexOutputs main_inner() {
+  VertexOutputs v = {float4(1.0f, 2.0f, 3.0f, 4.0f)};
+  return v;
+}
+
+main_outputs main() {
+  VertexOutputs v_1 = main_inner();
+  main_outputs v_2 = {v_1.position};
+  return v_2;
+}
+

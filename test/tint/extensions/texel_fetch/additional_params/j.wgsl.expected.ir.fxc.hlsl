@@ -1,9 +1,23 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.cc:371 internal compiler error: TINT_UNIMPLEMENTED IR does not currently support texel fetch extension
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct f_inputs {
+  float4 fbf;
+  float4 a : TEXCOORD0;
+  nointerpolation float4 b : TEXCOORD1;
+};
+
+
+void g(float a, float b, float c) {
+}
+
+void f_inner(float4 a, float4 b, float4 fbf) {
+  g(a[0u], b[1u], fbf[0u]);
+}
+
+void f(f_inputs inputs) {
+  f_inner(inputs.a, inputs.b, inputs.fbf);
+}
+
+FXC validation failure:
+c:\src\dawn\Shader@0x000002C44D9FF380(15,17-22): error X3502: 'f': input parameter 'inputs' missing semantics
+

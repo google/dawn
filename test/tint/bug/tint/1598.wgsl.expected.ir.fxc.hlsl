@@ -1,6 +1,5 @@
-SKIP: FAILED
 
 void main() {
-  int[5] a = (int[5])0;
+  int a[5] = (int[5])0;
 }
 

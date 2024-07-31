@@ -1,5 +1,5 @@
-SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0);
 float subgroupBroadcast_08beca() {
   float arg_0 = 1.0f;
   float res = WaveReadLaneAt(arg_0, 1u);
@@ -8,11 +8,6 @@ float subgroupBroadcast_08beca() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  prevent_dce = subgroupBroadcast_08beca();
+  prevent_dce.Store(0u, asuint(subgroupBroadcast_08beca()));
 }
-
-DXC validation failure:
-hlsl.hlsl:9:3: error: use of undeclared identifier 'prevent_dce'
-  prevent_dce = subgroupBroadcast_08beca();
-  ^
 

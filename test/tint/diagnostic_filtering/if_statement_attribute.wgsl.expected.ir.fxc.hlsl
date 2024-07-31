@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/if_statement_attribute.wgsl:8:14 warning: 'dpdx' must only be called from uniform control flow
   } else if (dpdx(1.0) > 0)  {
              ^^^^^^^^^
@@ -12,10 +10,22 @@ SKIP: FAILED
   if (x > 0) {
       ^
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::If
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_inputs {
+  float x : TEXCOORD0;
+};
+
+
+Texture2D<float4> t : register(t1);
+SamplerState s : register(s2);
+void main_inner(float x) {
+  if ((x > 0.0f)) {
+  } else {
+    if ((ddx(1.0f) > 0.0f)) {
+    }
+  }
+}
+
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
+}
+

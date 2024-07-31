@@ -1,9 +1,69 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: textureDimensions
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWTexture2DArray<float4> t_rgba8unorm : register(u0);
+RWTexture2DArray<float4> t_rgba8snorm : register(u1);
+RWTexture2DArray<uint4> t_rgba8uint : register(u2);
+RWTexture2DArray<int4> t_rgba8sint : register(u3);
+RWTexture2DArray<uint4> t_rgba16uint : register(u4);
+RWTexture2DArray<int4> t_rgba16sint : register(u5);
+RWTexture2DArray<float4> t_rgba16float : register(u6);
+RWTexture2DArray<uint4> t_r32uint : register(u7);
+RWTexture2DArray<int4> t_r32sint : register(u8);
+RWTexture2DArray<float4> t_r32float : register(u9);
+RWTexture2DArray<uint4> t_rg32uint : register(u10);
+RWTexture2DArray<int4> t_rg32sint : register(u11);
+RWTexture2DArray<float4> t_rg32float : register(u12);
+RWTexture2DArray<uint4> t_rgba32uint : register(u13);
+RWTexture2DArray<int4> t_rgba32sint : register(u14);
+RWTexture2DArray<float4> t_rgba32float : register(u15);
+[numthreads(1, 1, 1)]
+void main() {
+  uint3 v = (0u).xxx;
+  t_rgba8unorm.GetDimensions(v[0u], v[1u], v[2u]);
+  uint2 dim1 = v.xy;
+  uint3 v_1 = (0u).xxx;
+  t_rgba8snorm.GetDimensions(v_1[0u], v_1[1u], v_1[2u]);
+  uint2 dim2 = v_1.xy;
+  uint3 v_2 = (0u).xxx;
+  t_rgba8uint.GetDimensions(v_2[0u], v_2[1u], v_2[2u]);
+  uint2 dim3 = v_2.xy;
+  uint3 v_3 = (0u).xxx;
+  t_rgba8sint.GetDimensions(v_3[0u], v_3[1u], v_3[2u]);
+  uint2 dim4 = v_3.xy;
+  uint3 v_4 = (0u).xxx;
+  t_rgba16uint.GetDimensions(v_4[0u], v_4[1u], v_4[2u]);
+  uint2 dim5 = v_4.xy;
+  uint3 v_5 = (0u).xxx;
+  t_rgba16sint.GetDimensions(v_5[0u], v_5[1u], v_5[2u]);
+  uint2 dim6 = v_5.xy;
+  uint3 v_6 = (0u).xxx;
+  t_rgba16float.GetDimensions(v_6[0u], v_6[1u], v_6[2u]);
+  uint2 dim7 = v_6.xy;
+  uint3 v_7 = (0u).xxx;
+  t_r32uint.GetDimensions(v_7[0u], v_7[1u], v_7[2u]);
+  uint2 dim8 = v_7.xy;
+  uint3 v_8 = (0u).xxx;
+  t_r32sint.GetDimensions(v_8[0u], v_8[1u], v_8[2u]);
+  uint2 dim9 = v_8.xy;
+  uint3 v_9 = (0u).xxx;
+  t_r32float.GetDimensions(v_9[0u], v_9[1u], v_9[2u]);
+  uint2 dim10 = v_9.xy;
+  uint3 v_10 = (0u).xxx;
+  t_rg32uint.GetDimensions(v_10[0u], v_10[1u], v_10[2u]);
+  uint2 dim11 = v_10.xy;
+  uint3 v_11 = (0u).xxx;
+  t_rg32sint.GetDimensions(v_11[0u], v_11[1u], v_11[2u]);
+  uint2 dim12 = v_11.xy;
+  uint3 v_12 = (0u).xxx;
+  t_rg32float.GetDimensions(v_12[0u], v_12[1u], v_12[2u]);
+  uint2 dim13 = v_12.xy;
+  uint3 v_13 = (0u).xxx;
+  t_rgba32uint.GetDimensions(v_13[0u], v_13[1u], v_13[2u]);
+  uint2 dim14 = v_13.xy;
+  uint3 v_14 = (0u).xxx;
+  t_rgba32sint.GetDimensions(v_14[0u], v_14[1u], v_14[2u]);
+  uint2 dim15 = v_14.xy;
+  uint3 v_15 = (0u).xxx;
+  t_rgba32float.GetDimensions(v_15[0u], v_15[1u], v_15[2u]);
+  uint2 dim16 = v_15.xy;
+}
+

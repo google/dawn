@@ -1,9 +1,26 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+static uint var_1 = 0u;
+void main_1() {
+  {
+    while(true) {
+      var_1 = 1u;
+      if (false) {
+        break;
+      }
+      {
+        var_1 = 2u;
+      }
+      continue;
+    }
+  }
+}
+
+void main() {
+  main_1();
+}
+
+FXC validation failure:
+c:\src\dawn\Shader@0x000002096FB14620(5,11-14): error X3696: infinite loop detected - loop never exits
+

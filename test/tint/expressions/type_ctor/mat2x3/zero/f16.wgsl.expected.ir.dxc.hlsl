@@ -1,15 +1,13 @@
-SKIP: FAILED
+
+static matrix<float16_t, 2, 3> m = matrix<float16_t, 2, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+RWByteAddressBuffer tint_symbol : register(u0);
+void v(uint offset, matrix<float16_t, 2, 3> obj) {
+  tint_symbol.Store<vector<float16_t, 3> >((offset + 0u), obj[0u]);
+  tint_symbol.Store<vector<float16_t, 3> >((offset + 8u), obj[1u]);
+}
 
 [numthreads(1, 1, 1)]
 void f() {
-  tint_symbol = m;
+  v(0u, m);
 }
-
-DXC validation failure:
-hlsl.hlsl:3:3: error: use of undeclared identifier 'tint_symbol'
-  tint_symbol = m;
-  ^
-hlsl.hlsl:3:17: error: use of undeclared identifier 'm'
-  tint_symbol = m;
-                ^
 

@@ -1,15 +1,15 @@
-SKIP: FAILED
+
+static float4x2 m = float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx);
+RWByteAddressBuffer tint_symbol : register(u0);
+void v(uint offset, float4x2 obj) {
+  tint_symbol.Store2((offset + 0u), asuint(obj[0u]));
+  tint_symbol.Store2((offset + 8u), asuint(obj[1u]));
+  tint_symbol.Store2((offset + 16u), asuint(obj[2u]));
+  tint_symbol.Store2((offset + 24u), asuint(obj[3u]));
+}
 
 [numthreads(1, 1, 1)]
 void f() {
-  tint_symbol = m;
+  v(0u, m);
 }
-
-DXC validation failure:
-hlsl.hlsl:3:3: error: use of undeclared identifier 'tint_symbol'
-  tint_symbol = m;
-  ^
-hlsl.hlsl:3:17: error: use of undeclared identifier 'm'
-  tint_symbol = m;
-                ^
 

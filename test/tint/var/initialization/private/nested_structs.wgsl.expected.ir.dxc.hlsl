@@ -1,9 +1,23 @@
-SKIP: FAILED
+struct S1 {
+  int i;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct S2 {
+  S1 s1;
+};
+
+struct S3 {
+  S2 s2;
+};
+
+
+static const S1 v = {42};
+static const S2 v_1 = {v};
+static const S3 v_2 = {v_1};
+static S3 P = v_2;
+RWByteAddressBuffer tint_symbol : register(u0);
+[numthreads(1, 1, 1)]
+void main() {
+  tint_symbol.Store(0u, asuint(P.s2.s1.i));
+}
+

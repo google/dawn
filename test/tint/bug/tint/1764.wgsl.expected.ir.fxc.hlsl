@@ -1,9 +1,32 @@
-SKIP: FAILED
+struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+groupshared int W[246];
+void main_inner(uint tint_local_index) {
+  {
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint v_1 = v;
+      if ((v_1 >= 246u)) {
+        break;
+      }
+      W[v_1] = 0;
+      {
+        v = (v_1 + 1u);
+      }
+      continue;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
+  int p[246] = W;
+  p[0] = 42;
+}
+
+[numthreads(1, 1, 1)]
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
+}
+

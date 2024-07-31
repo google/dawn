@@ -1,9 +1,16 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: atomicStore
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer sb_rw : register(u0);
+void atomicStore_cdc29e() {
+  uint v = 0u;
+  sb_rw.InterlockedExchange(uint(0u), 1u, v);
+}
+
+void fragment_main() {
+  atomicStore_cdc29e();
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  atomicStore_cdc29e();
+}
+

@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: extractBits
+..\..\src\tint\lang\core\ir\transform\builtin_polyfill.cc:407 internal compiler error: TINT_UNIMPLEMENTED extractBits polyfill level
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

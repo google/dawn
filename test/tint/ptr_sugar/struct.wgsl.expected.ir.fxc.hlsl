@@ -1,9 +1,25 @@
-SKIP: FAILED
+struct S {
+  int x;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:504 internal compiler error: Switch() matched no cases. Type: tint::core::type::Struct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+void deref() {
+  S a = (S)0;
+  S p = a;
+  int b = p.x;
+  p.x = 42;
+}
+
+void no_deref() {
+  S a = (S)0;
+  S p = a;
+  int b = p.x;
+  p.x = 42;
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  deref();
+  no_deref();
+}
+

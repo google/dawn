@@ -1,5 +1,5 @@
-SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0);
 float fwidthCoarse_159c8a() {
   float arg_0 = 1.0f;
   float res = fwidth(arg_0);
@@ -7,11 +7,6 @@ float fwidthCoarse_159c8a() {
 }
 
 void fragment_main() {
-  prevent_dce = fwidthCoarse_159c8a();
+  prevent_dce.Store(0u, asuint(fwidthCoarse_159c8a()));
 }
-
-DXC validation failure:
-hlsl.hlsl:8:3: error: use of undeclared identifier 'prevent_dce'
-  prevent_dce = fwidthCoarse_159c8a();
-  ^
 

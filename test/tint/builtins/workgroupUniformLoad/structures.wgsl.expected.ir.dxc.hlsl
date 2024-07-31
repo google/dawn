@@ -1,9 +1,24 @@
-SKIP: FAILED
+struct Inner {
+  bool b;
+  int4 v;
+  float3x3 m;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: workgroupBarrier
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct Outer {
+  Inner a[4];
+};
+
+
+groupshared Outer v;
+Outer foo() {
+  GroupMemoryBarrierWithGroupSync();
+  Outer v_1 = v;
+  GroupMemoryBarrierWithGroupSync();
+  Outer v_2 = v_1;
+  return v_2;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

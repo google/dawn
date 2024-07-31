@@ -1,9 +1,15 @@
-SKIP: FAILED
+struct main_inputs {
+  uint3 id : SV_DispatchThreadID;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+ByteAddressBuffer input : register(t0);
+void main_inner(uint3 id) {
+  int3 pos = (asint(input.Load3(0u)) - (0).xxx);
+}
+
+[numthreads(1, 1, 1)]
+void main(main_inputs inputs) {
+  main_inner(inputs.id);
+}
+

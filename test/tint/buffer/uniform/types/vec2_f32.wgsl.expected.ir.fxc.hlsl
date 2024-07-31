@@ -1,8 +1,11 @@
-SKIP: FAILED
 
+cbuffer cbuffer_u : register(b0) {
+  uint4 u[1];
+};
+RWByteAddressBuffer s : register(u1);
 [numthreads(1, 1, 1)]
 void main() {
-  float2 x = u;
-  s = x;
+  float2 x = asfloat(u[0u].xy);
+  s.Store2(0u, asuint(x));
 }
 

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 
 RWByteAddressBuffer buffer : register(u0);
 void deref() {

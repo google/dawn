@@ -1,4 +1,3 @@
-SKIP: FAILED
 
 int c() {
   int a = 1;
@@ -7,8 +6,9 @@ int c() {
 }
 
 void b() {
-  int b = c();
-  b = (b + c());
+  int b_1 = c();
+  int v = c();
+  b_1 = (b_1 + v);
 }
 
 [numthreads(1, 1, 1)]

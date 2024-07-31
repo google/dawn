@@ -1,9 +1,49 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+[numthreads(1, 1, 1)]
+void main() {
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 2)) {
+      } else {
+        break;
+      }
+      {
+        int j = 0;
+        while(true) {
+          if ((j < 2)) {
+          } else {
+            break;
+          }
+          switch(i) {
+            case 0:
+            {
+              {
+                j = (j + 2);
+              }
+              continue;
+            }
+            default:
+            {
+              break;
+            }
+          }
+          {
+            j = (j + 2);
+          }
+          continue;
+        }
+      }
+      {
+        i = (i + 2);
+      }
+      continue;
+    }
+  }
+}
+
+FXC validation failure:
+c:\src\dawn\Shader@0x0000016C57E63C20(24,15-23): error X3708: continue cannot be used in a switch
+

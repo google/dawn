@@ -1,9 +1,19 @@
-SKIP: FAILED
+struct F_inputs {
+  uint mat2x2 : SV_GroupIndex;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+groupshared float2x2 W;
+void F_inner(uint mat2x2_1) {
+  if ((mat2x2_1 == 0u)) {
+    W = float2x2((0.0f).xx, (0.0f).xx);
+  }
+  GroupMemoryBarrierWithGroupSync();
+  W[0] = (W[0] + 0.0f);
+}
+
+[numthreads(1, 1, 1)]
+void F(F_inputs inputs) {
+  F_inner(inputs.mat2x2);
+}
+

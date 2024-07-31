@@ -1,5 +1,19 @@
-SKIP: FAILED
+struct main1_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
 
+struct main2_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+struct main3_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+
+groupshared int a;
+groupshared int b;
+groupshared int c;
 void uses_a() {
   a = (a + 1);
 }
@@ -23,20 +37,30 @@ void outer() {
   no_uses();
 }
 
-[numthreads(1, 1, 1)]
-void main1() {
+void main1_inner(uint tint_local_index) {
+  if ((tint_local_index == 0u)) {
+    a = 0;
+  }
+  GroupMemoryBarrierWithGroupSync();
   a = 42;
   uses_a();
 }
 
-[numthreads(1, 1, 1)]
-void main2() {
+void main2_inner(uint tint_local_index) {
+  if ((tint_local_index == 0u)) {
+    b = 0;
+  }
+  GroupMemoryBarrierWithGroupSync();
   b = 7;
   uses_b();
 }
 
-[numthreads(1, 1, 1)]
-void main3() {
+void main3_inner(uint tint_local_index) {
+  if ((tint_local_index == 0u)) {
+    a = 0;
+    b = 0;
+  }
+  GroupMemoryBarrierWithGroupSync();
   outer();
   no_uses();
 }
@@ -46,32 +70,18 @@ void main4() {
   no_uses();
 }
 
-DXC validation failure:
-hlsl.hlsl:2:3: error: use of undeclared identifier 'a'
-  a = (a + 1);
-  ^
-hlsl.hlsl:2:8: error: use of undeclared identifier 'a'
-  a = (a + 1);
-       ^
-hlsl.hlsl:6:3: error: use of undeclared identifier 'b'
-  b = (b * 2);
-  ^
-hlsl.hlsl:6:8: error: use of undeclared identifier 'b'
-  b = (b * 2);
-       ^
-hlsl.hlsl:10:3: error: use of undeclared identifier 'b'
-  b = a;
-  ^
-hlsl.hlsl:10:7: error: use of undeclared identifier 'a'
-  b = a;
-      ^
-hlsl.hlsl:17:3: error: use of undeclared identifier 'a'
-  a = 0;
-  ^
-hlsl.hlsl:26:3: error: use of undeclared identifier 'a'
-  a = 42;
-  ^
-hlsl.hlsl:32:3: error: use of undeclared identifier 'b'
-  b = 7;
-  ^
+[numthreads(1, 1, 1)]
+void main1(main1_inputs inputs) {
+  main1_inner(inputs.tint_local_index);
+}
+
+[numthreads(1, 1, 1)]
+void main2(main2_inputs inputs) {
+  main2_inner(inputs.tint_local_index);
+}
+
+[numthreads(1, 1, 1)]
+void main3(main3_inputs inputs) {
+  main3_inner(inputs.tint_local_index);
+}
 

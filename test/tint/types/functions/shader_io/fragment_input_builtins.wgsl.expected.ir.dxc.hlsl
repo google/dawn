@@ -1,9 +1,19 @@
-SKIP: FAILED
+struct main_inputs {
+  float4 position : SV_Position;
+  bool front_facing : SV_IsFrontFace;
+  uint sample_index : SV_SampleIndex;
+  uint sample_mask : SV_Coverage;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::If
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+void main_inner(float4 position, bool front_facing, uint sample_index, uint sample_mask) {
+  if (front_facing) {
+    float4 foo = position;
+    uint bar = (sample_index + sample_mask);
+  }
+}
+
+void main(main_inputs inputs) {
+  main_inner(float4(inputs.position.xyz, (1.0f / inputs.position[3u])), inputs.front_facing, inputs.sample_index, inputs.sample_mask);
+}
+

@@ -1,9 +1,43 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+static uint x_1 = 0u;
+static bool x_7 = false;
+static bool x_8 = false;
+void main_1() {
+  bool x_101 = x_7;
+  bool x_102 = x_8;
+  {
+    while(true) {
+      uint x_2 = 0u;
+      if (x_101) {
+        break;
+      }
+      x_2 = 0u;
+      if (x_102) {
+        x_2 = 1u;
+        {
+          x_1 = x_2;
+        }
+        continue;
+      } else {
+        {
+          x_1 = x_2;
+        }
+        continue;
+      }
+      /* unreachable */
+    }
+  }
+}
+
+void main() {
+  main_1();
+}
+
+DXC validation failure:
+error: validation errors
+hlsl.hlsl:32: error: Loop must have break.
+Validation failed.
+
+

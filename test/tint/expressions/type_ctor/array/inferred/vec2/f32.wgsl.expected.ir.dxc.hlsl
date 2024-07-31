@@ -1,19 +1,11 @@
-SKIP: FAILED
 
+static const float2 v_1[2] = {(1.0f).xx, (2.0f).xx};
+static float2 arr[2] = v_1;
 void f() {
-  float2[2] v = arr;
+  float2 v[2] = arr;
 }
 
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
 }
-
-DXC validation failure:
-hlsl.hlsl:2:14: error: brackets are not allowed here; to declare an array, place the brackets after the name
-  float2[2] v = arr;
-        ~~~  ^
-             [2]
-hlsl.hlsl:2:17: error: use of undeclared identifier 'arr'
-  float2[2] v = arr;
-                ^
 

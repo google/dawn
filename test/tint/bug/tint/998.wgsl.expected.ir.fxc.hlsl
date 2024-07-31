@@ -1,9 +1,20 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct S {
+  uint data[3];
+};
+
+
+cbuffer cbuffer_constants : register(b0, space1) {
+  uint4 constants[1];
+};
+RWByteAddressBuffer result : register(u1, space1);
+static S s = (S)0;
+[numthreads(1, 1, 1)]
+void main() {
+  s.data[constants[0u].x] = 0u;
+}
+
+FXC validation failure:
+c:\src\dawn\Shader@0x000001A7A5B63A10(13,3-25): error X3500: array reference cannot be used as an l-value; not natively addressable
+

@@ -1,9 +1,15 @@
-SKIP: FAILED
+struct S {
+  uint data[3];
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+cbuffer cbuffer_constants : register(b0, space1) {
+  uint4 constants[1];
+};
+RWByteAddressBuffer result : register(u1, space1);
+static S s = (S)0;
+[numthreads(1, 1, 1)]
+void main() {
+  s.data[constants[0u].x] = 0u;
+}
+

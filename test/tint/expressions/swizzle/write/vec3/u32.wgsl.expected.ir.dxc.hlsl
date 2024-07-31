@@ -1,9 +1,17 @@
-SKIP: FAILED
+struct S {
+  uint3 v;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+static S P = (S)0;
+void f() {
+  P.v = uint3(1u, 2u, 3u);
+  P.v[0u] = 1u;
+  P.v[1u] = 2u;
+  P.v[2u] = 3u;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

@@ -1,9 +1,30 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: atomicMax
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer sb_rw : register(u0);
+void atomicMax_51b9be() {
+  uint arg_1 = 0u;
+  uint res = 0u;
+  arg_1 = 1u;
+  uint x_18 = arg_1;
+  uint v = 0u;
+  sb_rw.InterlockedMax(uint(0u), x_18, v);
+  uint x_13 = v;
+  res = x_13;
+}
+
+void fragment_main_1() {
+  atomicMax_51b9be();
+}
+
+void fragment_main() {
+  fragment_main_1();
+}
+
+void compute_main_1() {
+  atomicMax_51b9be();
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  compute_main_1();
+}
+

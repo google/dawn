@@ -1,7 +1,6 @@
-SKIP: FAILED
 
 void f() {
-  bool[65535] v = (bool[65535])0;
+  bool v[65535] = (bool[65535])0;
 }
 
 [numthreads(1, 1, 1)]

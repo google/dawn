@@ -1,9 +1,27 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: atomicLoad
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer sb_rw : register(u0);
+void atomicLoad_fe6cc3() {
+  uint res = 0u;
+  uint v = 0u;
+  sb_rw.InterlockedOr(uint(0u), 0u, v);
+  uint x_9 = v;
+  res = x_9;
+}
+
+void fragment_main_1() {
+  atomicLoad_fe6cc3();
+}
+
+void fragment_main() {
+  fragment_main_1();
+}
+
+void compute_main_1() {
+  atomicLoad_fe6cc3();
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  compute_main_1();
+}
+

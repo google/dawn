@@ -1,5 +1,5 @@
-SKIP: FAILED
 
+static int I = 0;
 void main_1() {
   I = 123;
   I = 123;

@@ -1,9 +1,20 @@
-SKIP: FAILED
+struct Out {
+  float4 pos;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:504 internal compiler error: Switch() matched no cases. Type: tint::core::type::Struct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_outputs {
+  precise float4 Out_pos : SV_Position;
+};
+
+
+Out main_inner() {
+  Out v = (Out)0;
+  return v;
+}
+
+main_outputs main() {
+  Out v_1 = main_inner();
+  main_outputs v_2 = {v_1.pos};
+  return v_2;
+}
+

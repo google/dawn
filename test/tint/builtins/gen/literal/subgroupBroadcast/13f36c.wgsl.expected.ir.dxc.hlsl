@@ -1,5 +1,5 @@
-SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0);
 vector<float16_t, 2> subgroupBroadcast_13f36c() {
   vector<float16_t, 2> res = WaveReadLaneAt((float16_t(1.0h)).xx, 1u);
   return res;
@@ -7,11 +7,6 @@ vector<float16_t, 2> subgroupBroadcast_13f36c() {
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  prevent_dce = subgroupBroadcast_13f36c();
+  prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupBroadcast_13f36c());
 }
-
-DXC validation failure:
-hlsl.hlsl:8:3: error: use of undeclared identifier 'prevent_dce'
-  prevent_dce = subgroupBroadcast_13f36c();
-  ^
 

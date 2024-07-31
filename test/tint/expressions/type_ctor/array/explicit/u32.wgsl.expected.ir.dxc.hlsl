@@ -1,19 +1,11 @@
-SKIP: FAILED
 
+static const uint v_1[2] = {1u, 2u};
+static uint arr[2] = v_1;
 void f() {
-  uint[2] v = arr;
+  uint v[2] = arr;
 }
 
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
 }
-
-DXC validation failure:
-hlsl.hlsl:2:12: error: brackets are not allowed here; to declare an array, place the brackets after the name
-  uint[2] v = arr;
-      ~~~  ^
-           [2]
-hlsl.hlsl:2:15: error: use of undeclared identifier 'arr'
-  uint[2] v = arr;
-              ^
 

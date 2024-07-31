@@ -1,9 +1,13 @@
-SKIP: FAILED
 
-../../src/tint/lang/hlsl/writer/printer/printer.cc:1002 internal compiler error: TINT_UNREACHABLE unhandled: subgroupBallot
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer prevent_dce : register(u0);
+uint4 subgroupBallot_1a8251() {
+  bool arg_0 = true;
+  uint4 res = WaveActiveBallot(arg_0);
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store4(0u, subgroupBallot_1a8251());
+}
+

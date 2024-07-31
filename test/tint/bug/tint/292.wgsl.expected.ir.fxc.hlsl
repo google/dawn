@@ -1,9 +1,16 @@
-SKIP: FAILED
+struct main_outputs {
+  float4 tint_symbol : SV_Position;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreUnary
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+float4 main_inner() {
+  float3 light = float3(1.20000004768371582031f, 1.0f, 2.0f);
+  float3 negative_light = -(light);
+  return (0.0f).xxxx;
+}
+
+main_outputs main() {
+  main_outputs v = {main_inner()};
+  return v;
+}
+

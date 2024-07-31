@@ -1,7 +1,8 @@
-SKIP: FAILED
 
+static const uint2 v_1[2] = {(1u).xx, (2u).xx};
+static uint2 arr[2] = v_1;
 void f() {
-  uint2[2] v = arr;
+  uint2 v[2] = arr;
 }
 
 [numthreads(1, 1, 1)]

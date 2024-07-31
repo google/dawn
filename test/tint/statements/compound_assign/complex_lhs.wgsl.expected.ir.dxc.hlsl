@@ -1,9 +1,28 @@
-SKIP: FAILED
+struct S {
+  int4 a[4];
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:504 internal compiler error: Switch() matched no cases. Type: tint::core::type::Struct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+static int counter = 0;
+int foo() {
+  counter = (counter + 1);
+  return counter;
+}
+
+int bar() {
+  counter = (counter + 2);
+  return counter;
+}
+
+void main() {
+  S x = (S)0;
+  S p = x;
+  int4 v = p.a[foo()];
+  int v_1 = bar();
+  v[v_1] = (v[v_1] + 5);
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

@@ -1,3 +1,4 @@
+
 [numthreads(1, 1, 1)]
 void f() {
   float a = 4.0f;

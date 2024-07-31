@@ -1,9 +1,12 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:287 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+ByteAddressBuffer S : register(t0);
+float4 func(uint pointer_indices[1]) {
+  return asfloat(S.Load4((0u + (uint(pointer_indices[0u]) * 16u))));
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  uint v[1] = (uint[1])0;
+  float4 r = func(v);
+}
+

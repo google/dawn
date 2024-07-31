@@ -1,9 +1,30 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: atomicMin
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer sb_rw : register(u0);
+void atomicMin_c67a74() {
+  uint arg_1 = 0u;
+  uint res = 0u;
+  arg_1 = 1u;
+  uint x_18 = arg_1;
+  uint v = 0u;
+  sb_rw.InterlockedMin(uint(0u), x_18, v);
+  uint x_13 = v;
+  res = x_13;
+}
+
+void fragment_main_1() {
+  atomicMin_c67a74();
+}
+
+void fragment_main() {
+  fragment_main_1();
+}
+
+void compute_main_1() {
+  atomicMin_c67a74();
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  compute_main_1();
+}
+

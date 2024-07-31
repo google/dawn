@@ -1,17 +1,21 @@
-SKIP: FAILED
+struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
 
-[numthreads(1, 1, 1)]
-void main() {
+
+groupshared int i;
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index == 0u)) {
+    i = 0;
+  }
+  GroupMemoryBarrierWithGroupSync();
   i = 123;
   int p = i;
   int u = (p + 1);
 }
 
-DXC validation failure:
-hlsl.hlsl:3:3: error: use of undeclared identifier 'i'
-  i = 123;
-  ^
-hlsl.hlsl:4:11: error: use of undeclared identifier 'i'
-  int p = i;
-          ^
+[numthreads(1, 1, 1)]
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
+}
 

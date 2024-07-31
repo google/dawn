@@ -1,9 +1,16 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: textureStore
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWTexture2DArray<float4> arg_0 : register(u0, space1);
+void textureStore_1e79f0() {
+  RWTexture2DArray<float4> v = arg_0;
+  v[int3((1).xx, int(1))] = (1.0f).xxxx;
+}
+
+void fragment_main() {
+  textureStore_1e79f0();
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  textureStore_1e79f0();
+}
+

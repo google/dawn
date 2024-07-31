@@ -1,4 +1,3 @@
-SKIP: FAILED
 
 void f() {
   int vec3f = 1;

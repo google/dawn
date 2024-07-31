@@ -1,9 +1,37 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+cbuffer cbuffer_u : register(b0) {
+  uint4 u[1];
+};
+void a(matrix<float16_t, 2, 2> m) {
+}
+
+void b(vector<float16_t, 2> v) {
+}
+
+void c(float16_t f) {
+}
+
+vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
+  uint v = src;
+  float t_low = f16tof32((v & 65535u));
+  float t_high = f16tof32(((v >> 16u) & 65535u));
+  float16_t v_1 = float16_t(t_low);
+  return vector<float16_t, 2>(v_1, float16_t(t_high));
+}
+
+matrix<float16_t, 2, 2> v_2(uint start_byte_offset) {
+  uint4 v_3 = u[(start_byte_offset / 16u)];
+  vector<float16_t, 2> v_4 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_3.z) : (v_3.x)));
+  uint4 v_5 = u[((4u + start_byte_offset) / 16u)];
+  return matrix<float16_t, 2, 2>(v_4, tint_bitcast_to_f16(((((((4u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_5.z) : (v_5.x))));
+}
+
+[numthreads(1, 1, 1)]
+void f() {
+  a(v_2(0u));
+  b(tint_bitcast_to_f16(u[0u].x));
+  b(tint_bitcast_to_f16(u[0u].x).yx);
+  c(float16_t(f16tof32(u[0u].y)));
+  c(tint_bitcast_to_f16(u[0u].x).yx[0u]);
+}
+

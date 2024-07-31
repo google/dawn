@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/loop_continuing_attribute.wgsl:5:11 warning: 'dpdx' must only be called from uniform control flow
       _ = dpdx(1.0);
           ^^^^^^^^^
@@ -12,10 +10,24 @@ SKIP: FAILED
       break if x > 0.0;
                ^
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_inputs {
+  float x : TEXCOORD0;
+};
+
+
+void main_inner(float x) {
+  {
+    while(true) {
+      {
+        ddx(1.0f);
+        if ((x > 0.0f)) { break; }
+      }
+      continue;
+    }
+  }
+}
+
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
+}
+

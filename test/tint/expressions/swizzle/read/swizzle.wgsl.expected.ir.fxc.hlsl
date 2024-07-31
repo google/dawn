@@ -1,9 +1,17 @@
-SKIP: FAILED
+struct S {
+  float3 val[3];
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::LoadVectorElement
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+void a() {
+  int4 a_1 = (0).xxxx;
+  int b = a_1.x;
+  int4 c = a_1.zzyy;
+  S d = (S)0;
+  float3 e = d.val[2].yzx;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

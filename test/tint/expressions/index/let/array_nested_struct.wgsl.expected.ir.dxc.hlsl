@@ -1,9 +1,16 @@
-SKIP: FAILED
+struct S {
+  int m;
+  uint n[4];
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+uint f() {
+  S v[2] = (S[2])0;
+  S a[2] = v;
+  return a[1].n[1];
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

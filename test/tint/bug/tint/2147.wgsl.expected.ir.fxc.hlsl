@@ -1,9 +1,33 @@
-SKIP: FAILED
+struct atomic_compare_exchange_result_i32 {
+  int old_value;
+  bool exchanged;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::If
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_outputs {
+  float4 tint_symbol : SV_Target0;
+};
+
+
+RWByteAddressBuffer S : register(u0);
+static bool continue_execution = true;
+float4 main_inner() {
+  if (false) {
+    continue_execution = false;
+  }
+  int v = 0;
+  S.InterlockedCompareExchange(int(0u), 0, 1, v);
+  int v_1 = v;
+  atomic_compare_exchange_result_i32 v_2 = {v_1, (v_1 == 0)};
+  int old_value = v_2.old_value;
+  return float4((float(old_value)).xxxx);
+}
+
+main_outputs main() {
+  main_outputs v_3 = {main_inner()};
+  if (!(continue_execution)) {
+    discard;
+  }
+  main_outputs v_4 = v_3;
+  return v_4;
+}
+

@@ -1,9 +1,23 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct frexp_result_vec2_f32 {
+  float2 fract;
+  int2 exp;
+};
+
+
+[numthreads(1, 1, 1)]
+void main() {
+  float2 tint_symbol = float2(1.25f, 3.75f);
+  frexp_result_vec2_f32 v = frexp(tint_symbol);
+  frexp_result_vec2_f32 res = v;
+  float2 fract = res.fract;
+  frexp_result_vec2_f32 v_1 = v;
+  int2 exp = v_1.exp;
+}
+
+DXC validation failure:
+hlsl.hlsl:10:29: error: use of undeclared identifier 'frexp'
+  frexp_result_vec2_f32 v = frexp(tint_symbol);
+                            ^
+

@@ -1,9 +1,23 @@
-SKIP: FAILED
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: atomicCompareExchangeWeak
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+RWByteAddressBuffer sb_rw : register(u0);
+void atomicCompareExchangeWeak_63d8e6() {
+  uint v = 0u;
+  sb_rw.InterlockedCompareExchange(uint(0u), 1u, 1u, v);
+  uint v_1 = v;
+  atomic_compare_exchange_result_u32 res = {v_1, (v_1 == 1u)};
+}
+
+void fragment_main() {
+  atomicCompareExchangeWeak_63d8e6();
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  atomicCompareExchangeWeak_63d8e6();
+}
+

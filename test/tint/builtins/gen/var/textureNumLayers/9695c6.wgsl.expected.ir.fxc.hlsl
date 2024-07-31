@@ -1,9 +1,19 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: textureNumLayers
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer prevent_dce : register(u0);
+RWTexture2DArray<uint4> arg_0 : register(u0, space1);
+uint textureNumLayers_9695c6() {
+  uint3 v = (0u).xxx;
+  arg_0.GetDimensions(v[0u], v[1u], v[2u]);
+  uint res = v.z;
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store(0u, textureNumLayers_9695c6());
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store(0u, textureNumLayers_9695c6());
+}
+

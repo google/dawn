@@ -1,9 +1,13 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: textureLoad
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+Texture1D<int4> arg_0 : register(t0);
+void d() {
+  Texture1D<int4> v = arg_0;
+  int v_1 = int(1);
+  int4(v.Load(int2(v_1, int(0))));
+  float l = 0.14112000167369842529f;
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

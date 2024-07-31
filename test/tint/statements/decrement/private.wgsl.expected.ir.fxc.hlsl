@@ -1,5 +1,5 @@
-SKIP: FAILED
 
+static int i = 0;
 void main() {
   i = (i - 1);
 }

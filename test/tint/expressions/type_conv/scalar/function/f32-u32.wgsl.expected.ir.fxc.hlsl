@@ -1,9 +1,19 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Construct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+static float t = 0.0f;
+float m() {
+  t = 1.0f;
+  return float(t);
+}
+
+uint tint_f32_to_u32(float value) {
+  return (((value <= 4294967040.0f)) ? ((((value >= 0.0f)) ? (uint(value)) : (0u))) : (4294967295u));
+}
+
+void f() {
+  uint v = tint_f32_to_u32(m());
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

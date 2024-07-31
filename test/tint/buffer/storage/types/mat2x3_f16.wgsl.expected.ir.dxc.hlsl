@@ -1,15 +1,18 @@
-SKIP: FAILED
+
+ByteAddressBuffer tint_symbol : register(t0);
+RWByteAddressBuffer tint_symbol_1 : register(u1);
+void v(uint offset, matrix<float16_t, 2, 3> obj) {
+  tint_symbol_1.Store<vector<float16_t, 3> >((offset + 0u), obj[0u]);
+  tint_symbol_1.Store<vector<float16_t, 3> >((offset + 8u), obj[1u]);
+}
+
+matrix<float16_t, 2, 3> v_1(uint offset) {
+  vector<float16_t, 3> v_2 = tint_symbol.Load<vector<float16_t, 3> >((offset + 0u));
+  return matrix<float16_t, 2, 3>(v_2, tint_symbol.Load<vector<float16_t, 3> >((offset + 8u)));
+}
 
 [numthreads(1, 1, 1)]
 void main() {
-  tint_symbol_1 = tint_symbol;
+  v(0u, v_1(0u));
 }
-
-DXC validation failure:
-hlsl.hlsl:3:3: error: use of undeclared identifier 'tint_symbol_1'
-  tint_symbol_1 = tint_symbol;
-  ^
-hlsl.hlsl:3:19: error: use of undeclared identifier 'tint_symbol'
-  tint_symbol_1 = tint_symbol;
-                  ^
 

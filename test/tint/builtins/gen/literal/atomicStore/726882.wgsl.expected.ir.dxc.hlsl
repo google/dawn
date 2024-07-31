@@ -1,9 +1,25 @@
-SKIP: FAILED
+struct compute_main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: atomicStore
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+groupshared uint arg_0;
+void atomicStore_726882() {
+  uint v = 0u;
+  InterlockedExchange(arg_0, 1u, v);
+}
+
+void compute_main_inner(uint tint_local_index) {
+  if ((tint_local_index == 0u)) {
+    uint v_1 = 0u;
+    InterlockedExchange(arg_0, 0u, v_1);
+  }
+  GroupMemoryBarrierWithGroupSync();
+  atomicStore_726882();
+}
+
+[numthreads(1, 1, 1)]
+void compute_main(compute_main_inputs inputs) {
+  compute_main_inner(inputs.tint_local_index);
+}
+

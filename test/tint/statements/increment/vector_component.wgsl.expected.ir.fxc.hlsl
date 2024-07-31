@@ -1,9 +1,11 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::StoreVectorElement
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer a : register(u0);
+void main() {
+  a.Store(4u, (a.Load(4u) + 1u));
+  a.Store(8u, (a.Load(8u) + 1u));
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

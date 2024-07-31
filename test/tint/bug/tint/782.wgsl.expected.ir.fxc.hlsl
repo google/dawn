@@ -1,9 +1,9 @@
-SKIP: FAILED
 
 void foo() {
-  int[2] explicitStride = (int[2])0;
-  int[2] implictStride = (int[2])0;
-  implictStride = explicitStride;
+  int explicitStride[2] = (int[2])0;
+  int implictStride[2] = (int[2])0;
+  int v[2] = explicitStride;
+  implictStride = v;
 }
 
 [numthreads(1, 1, 1)]

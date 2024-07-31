@@ -1,9 +1,10 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: textureDimensions
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+TextureCube t_f : register(t0);
+[numthreads(1, 1, 1)]
+void main() {
+  TextureCube v = t_f;
+  uint3 v_1 = (0u).xxx;
+  v.GetDimensions(uint(0), v_1[0u], v_1[1u], v_1[2u]);
+  uint2 dims = v_1.xy;
+}
+

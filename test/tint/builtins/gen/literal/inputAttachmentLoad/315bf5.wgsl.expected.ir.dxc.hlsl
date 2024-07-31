@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: inputAttachmentLoad
+..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1010 internal compiler error: TINT_UNREACHABLE unhandled: inputAttachmentLoad
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -1,4 +1,3 @@
-SKIP: FAILED
 
 void d() {
 }

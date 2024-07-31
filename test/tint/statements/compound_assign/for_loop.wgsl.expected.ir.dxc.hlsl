@@ -1,9 +1,41 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:198 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Loop
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer v : register(u0);
+static uint i = 0u;
+int idx1() {
+  i = (i + 1u);
+  return 1;
+}
+
+int idx2() {
+  i = (i + 2u);
+  return 1;
+}
+
+int idx3() {
+  i = (i + 3u);
+  return 1;
+}
+
+void foo() {
+  float a[4] = (float[4])0;
+  {
+    float v_1 = a[idx1()];
+    v_1 = (v_1 * 2.0f);
+    while(true) {
+      if ((a[idx2()] < 10.0f)) {
+      } else {
+        break;
+      }
+      {
+        float v_2 = a[idx3()];
+        v_2 = (v_2 + 1.0f);
+      }
+      continue;
+    }
+  }
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

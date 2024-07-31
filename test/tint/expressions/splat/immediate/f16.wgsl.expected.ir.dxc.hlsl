@@ -1,3 +1,4 @@
+
 void f() {
   vector<float16_t, 2> v2 = (float16_t(1.0h)).xx;
   vector<float16_t, 3> v3 = (float16_t(1.0h)).xxx;

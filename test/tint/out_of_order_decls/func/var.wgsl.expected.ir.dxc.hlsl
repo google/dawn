@@ -1,11 +1,6 @@
-SKIP: FAILED
 
+static int a = 1;
 void f() {
   int b = a;
 }
-
-DXC validation failure:
-hlsl.hlsl:2:11: error: use of undeclared identifier 'a'
-  int b = a;
-          ^
 

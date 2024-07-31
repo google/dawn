@@ -1,3 +1,4 @@
+
 void f() {
   bool2 v2 = (true).xx;
   bool3 v3 = (true).xxx;

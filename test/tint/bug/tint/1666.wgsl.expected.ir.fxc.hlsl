@@ -1,9 +1,37 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+ByteAddressBuffer rarr : register(t0);
+void tint_symbol() {
+  int idx = 3;
+  int x = int2(1, 2)[idx];
+}
+
+void tint_symbol_1() {
+  int idx = 4;
+  float2 x = float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f))[idx];
+}
+
+void fixed_size_array() {
+  int v[2] = {1, 2};
+  int idx = 3;
+  int arr[2] = v;
+  int x = arr[idx];
+}
+
+void runtime_size_array() {
+  int idx = -1;
+  float x = asfloat(rarr.Load((0u + (uint(idx) * 4u))));
+}
+
+[numthreads(1, 1, 1)]
+void f() {
+  tint_symbol();
+  tint_symbol_1();
+  fixed_size_array();
+  runtime_size_array();
+}
+
+FXC validation failure:
+c:\src\dawn\Shader@0x00000258BAD45980(5,11-25): error X3504: array index out of bounds
+

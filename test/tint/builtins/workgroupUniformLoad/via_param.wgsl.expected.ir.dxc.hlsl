@@ -1,9 +1,18 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: workgroupBarrier
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+groupshared int v[4];
+int foo(uint p_indices[1]) {
+  GroupMemoryBarrierWithGroupSync();
+  int v_1 = v[p_indices[0u]];
+  GroupMemoryBarrierWithGroupSync();
+  return v_1;
+}
+
+int bar() {
+  uint v_2[1] = (uint[1])0;
+  return foo(v_2);
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

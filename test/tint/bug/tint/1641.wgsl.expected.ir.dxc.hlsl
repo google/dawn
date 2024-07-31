@@ -1,9 +1,20 @@
-SKIP: FAILED
+struct Normals {
+  float3 f;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Construct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_outputs {
+  float4 tint_symbol : SV_Position;
+};
+
+
+float4 main_inner() {
+  int zero = 0;
+  Normals v[1] = {{float3(0.0f, 0.0f, 1.0f)}};
+  return float4(v[zero].f, 1.0f);
+}
+
+main_outputs main() {
+  main_outputs v_1 = {main_inner()};
+  return v_1;
+}
+

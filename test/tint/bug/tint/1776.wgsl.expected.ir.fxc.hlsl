@@ -1,9 +1,18 @@
-SKIP: FAILED
+struct S {
+  float4 a;
+  int b;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+ByteAddressBuffer sb : register(t0);
+S v(uint offset) {
+  float4 v_1 = asfloat(sb.Load4((offset + 0u)));
+  S v_2 = {v_1, asint(sb.Load((offset + 16u)))};
+  return v_2;
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  S x = v(32u);
+}
+

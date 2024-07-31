@@ -1,9 +1,21 @@
-SKIP: FAILED
+struct str {
+  int i;
+};
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:287 internal compiler error: Switch() matched no cases. Type: tint::core::ir::FunctionParam
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+RWByteAddressBuffer S : register(u0);
+void v(uint offset, str obj) {
+  S.Store((offset + 0u), asuint(obj.i));
+}
+
+void func(uint pointer_indices[1]) {
+  str v_1 = (str)0;
+  v((0u + (uint(pointer_indices[0u]) * 4u)), v_1);
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  uint v_2[1] = (uint[1])0;
+  func(v_2);
+}
+

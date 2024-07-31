@@ -1,9 +1,13 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Access
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer U : register(u0);
+void f() {
+  U.Store3(0u, asuint(float3(1.0f, 2.0f, 3.0f)));
+  U.Store(0u, asuint(1.0f));
+  U.Store(4u, asuint(2.0f));
+  U.Store(8u, asuint(3.0f));
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

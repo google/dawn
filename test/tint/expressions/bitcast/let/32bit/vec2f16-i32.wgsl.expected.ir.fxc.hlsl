@@ -1,9 +1,19 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:285 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Bitcast
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+int tint_bitcast_from_f16(vector<float16_t, 2> src) {
+  uint2 r = f32tof16(float2(src));
+  return asint(((r.x & 65535u) | ((r.y & 65535u) << 16u)));
+}
+
+[numthreads(1, 1, 1)]
+void f() {
+  vector<float16_t, 2> a = vector<float16_t, 2>(float16_t(1.0h), float16_t(2.0h));
+  int b = tint_bitcast_from_f16(a);
+}
+
+FXC validation failure:
+c:\src\dawn\Shader@0x000001B0B71E5BB0(2,34-42): error X3000: syntax error: unexpected token 'float16_t'
+c:\src\dawn\Shader@0x000001B0B71E5BB0(3,29-31): error X3004: undeclared identifier 'src'
+c:\src\dawn\Shader@0x000001B0B71E5BB0(3,22-32): error X3014: incorrect number of arguments to numeric-type constructor
+

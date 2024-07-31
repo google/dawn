@@ -1,9 +1,13 @@
-SKIP: FAILED
 
-<dawn>/src/tint/lang/hlsl/writer/printer/printer.cc:400 internal compiler error: TINT_UNREACHABLE unhandled: radians
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+void main_1() {
+  float a = 0.0f;
+  float b = 0.0f;
+  a = 42.0f;
+  b = (a * 0.01745329238474369049f);
+}
+
+[numthreads(1, 1, 1)]
+void main() {
+  main_1();
+}
+
