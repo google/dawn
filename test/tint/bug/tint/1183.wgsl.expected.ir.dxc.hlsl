@@ -1,9 +1,16 @@
-SKIP: FAILED
+struct f_outputs {
+  float4 tint_symbol : SV_Target0;
+};
 
-..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1010 internal compiler error: TINT_UNREACHABLE unhandled: textureSample
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+
+Texture2D<float4> t : register(t0);
+SamplerState s : register(s0, space1);
+float4 f_inner() {
+  return t.Sample(s, (0.0f).xx, int2(4, 6));
+}
+
+f_outputs f() {
+  f_outputs v = {f_inner()};
+  return v;
+}
+

@@ -85,8 +85,8 @@ ary_ret_1 v_16(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   Outer l_a[4] = v_16(0u);
-  Outer l_a_3 = v_13(900u);
-  Inner l_a_3_a[4] = v_8(768u);
+  Outer l_a_3 = v_13(768u);
+  Inner l_a_3_a[4] = v_8(900u);
   Inner l_a_3_a_2 = v_6(900u);
   matrix<float16_t, 2, 2> l_a_3_a_2_m = v_2(900u);
   vector<float16_t, 2> l_a_3_a_2_m_1 = tint_bitcast_to_f16(a[56u].x);

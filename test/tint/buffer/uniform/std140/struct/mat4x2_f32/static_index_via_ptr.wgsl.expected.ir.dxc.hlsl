@@ -81,9 +81,9 @@ ary_ret_1 v_18(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   Outer l_a[4] = v_18(0u);
-  Outer l_a_3 = v_15(904u);
+  Outer l_a_3 = v_15(768u);
   Inner l_a_3_a[4] = v_10(904u);
-  Inner l_a_3_a_2 = v_8(904u);
+  Inner l_a_3_a_2 = v_8(896u);
   float4x2 l_a_3_a_2_m = v(904u);
   float2 l_a_3_a_2_m_1 = asfloat(a[56u].zw);
   float l_a_3_a_2_m_1_0 = asfloat(a[56u].z);

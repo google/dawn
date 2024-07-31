@@ -579,3 +579,55 @@ fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
                                     offset: iu32,
                                      value: iu32,
                             original_value: ptr<function, iu32, read_write>)
+
+@member_function fn Sample(texture: texture_1d<f32>,
+                           sampler: sampler,
+                            coords: f32) -> vec4<f32>
+@member_function fn Sample(texture: texture_2d<f32>,
+                           sampler: sampler,
+                            coords: vec2<f32>) -> vec4<f32>
+@member_function fn Sample(texture: texture_2d<f32>,
+                           sampler: sampler,
+                            coords: vec2<f32>,
+                            offset: vec2<i32>) -> vec4<f32>
+@member_function fn Sample(texture: texture_2d_array<f32>,
+                           sampler: sampler,
+                            coords: vec3<f32>) -> vec4<f32>
+@member_function fn Sample(texture: texture_2d_array<f32>,
+                           sampler: sampler,
+                            coords: vec3<f32>,
+                            offset: vec2<i32>) -> vec4<f32>
+@member_function fn Sample(texture: texture_3d<f32>,
+                           sampler: sampler,
+                            coords: vec3<f32>) -> vec4<f32>
+@member_function fn Sample(texture: texture_3d<f32>,
+                           sampler: sampler,
+                            coords: vec3<f32>,
+                            offset: vec3<i32>) -> vec4<f32>
+@member_function fn Sample(texture: texture_cube<f32>,
+                           sampler: sampler,
+                            coords: vec3<f32>) -> vec4<f32>
+@member_function fn Sample(texture: texture_cube_array<f32>,
+                           sampler: sampler,
+                            coords: vec4<f32>) -> vec4<f32>
+@member_function fn Sample(texture: texture_depth_2d,
+                           sampler: sampler,
+                            coords: vec2<f32>) -> f32
+@member_function fn Sample(texture: texture_depth_2d,
+                           sampler: sampler,
+                            coords: vec2<f32>,
+                            offset: vec2<i32>) -> f32
+@member_function fn Sample(texture: texture_depth_2d_array,
+                           sampler: sampler,
+                            coords: vec3<f32>) -> f32
+@member_function fn Sample(texture: texture_depth_2d_array,
+                           sampler: sampler,
+                            coords: vec3<f32>,
+                            offset: vec2<i32>) -> f32
+@member_function fn Sample(texture: texture_depth_cube,
+                           sampler: sampler,
+                            coords: vec3<f32>) -> f32
+@member_function fn Sample(texture: texture_depth_cube_array,
+                           sampler: sampler,
+                            coords: vec4<f32>) -> f32
+

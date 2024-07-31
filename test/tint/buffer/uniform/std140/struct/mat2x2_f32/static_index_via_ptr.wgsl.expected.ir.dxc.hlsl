@@ -78,9 +78,9 @@ ary_ret_1 v_14(uint start_byte_offset) {
 void f() {
   Outer l_a[4] = v_14(0u);
   Outer l_a_3 = v_11(904u);
-  Inner l_a_3_a[4] = v_6(768u);
-  Inner l_a_3_a_2 = v_4(904u);
-  float2x2 l_a_3_a_2_m = v(896u);
+  Inner l_a_3_a[4] = v_6(904u);
+  Inner l_a_3_a_2 = v_4(896u);
+  float2x2 l_a_3_a_2_m = v(904u);
   float2 l_a_3_a_2_m_1 = asfloat(a[56u].zw);
   float l_a_3_a_2_m_1_0 = asfloat(a[56u].z);
 }

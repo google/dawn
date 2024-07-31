@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/else_if_body_attribute.wgsl:8:9 warning: 'textureSample' must only be called from uniform control flow
     _ = textureSample(t, s, vec2(0, 0));
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -12,10 +10,23 @@ SKIP: FAILED
   if (x > 0) {
       ^
 
-..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1010 internal compiler error: TINT_UNREACHABLE unhandled: textureSample
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct main_inputs {
+  float x : TEXCOORD0;
+};
+
+
+Texture2D<float4> t : register(t1);
+SamplerState s : register(s2);
+void main_inner(float x) {
+  if ((x > 0.0f)) {
+  } else {
+    if ((x < 0.0f)) {
+      t.Sample(s, (0.0f).xx);
+    }
+  }
+}
+
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
+}
+

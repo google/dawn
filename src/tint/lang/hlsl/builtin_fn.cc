@@ -134,6 +134,8 @@ const char* str(BuiltinFn i) {
             return "GatherRed";
         case BuiltinFn::kGetDimensions:
             return "GetDimensions";
+        case BuiltinFn::kSample:
+            return "Sample";
     }
     return "<unknown>";
 }

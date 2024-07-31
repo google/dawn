@@ -53,7 +53,7 @@ void f() {
   uint v_10 = (16u * uint(i()));
   uint v_11 = (8u * uint(i()));
   matrix<float16_t, 2, 3> v_12[4] = v_6(0u);
-  matrix<float16_t, 2, 3> l_a_i = v_4(v_10);
+  matrix<float16_t, 2, 3> l_a_i = v_4((v_10 + v_11));
   vector<float16_t, 3> l_a_i_i = tint_bitcast_to_f16(a[((v_10 + v_11) / 16u)]).xyz;
   uint v_13 = a[((v_10 + v_11) / 16u)][(((v_10 + v_11) % 16u) / 4u)];
   matrix<float16_t, 2, 3> l_a[4] = v_12;
