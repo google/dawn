@@ -278,8 +278,12 @@ using AInt = Number<int64_t>;
 /// `AFloat` is a type alias to `Number<double>`.
 using AFloat = Number<double>;
 
+/// `i8` is a type alias to `Number<int8_t>`.
+using i8 = Number<int8_t>;
 /// `i32` is a type alias to `Number<int32_t>`.
 using i32 = Number<int32_t>;
+/// `u8` is a type alias to `Number<uint8_t>`.
+using u8 = Number<uint8_t>;
 /// `u32` is a type alias to `Number<uint32_t>`.
 using u32 = Number<uint32_t>;
 /// `f32` is a type alias to `Number<float>`
