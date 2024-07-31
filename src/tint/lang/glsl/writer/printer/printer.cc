@@ -36,7 +36,10 @@
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
@@ -158,6 +161,8 @@ class Printer : public tint::TextGenerator {
         tint::Switch(
             ty,                                               //
             [&](const core::type::Bool*) { out << "bool"; },  //
+            [&](const core::type::I32*) { out << "int"; },    //
+            [&](const core::type::U32*) { out << "uint"; },   //
             [&](const core::type::Void*) { out << "void"; },  //
 
             // TODO(dsinclair): Handle remaining types
@@ -199,6 +204,8 @@ class Printer : public tint::TextGenerator {
         tint::Switch(
             c->Type(),  //
             [&](const core::type::Bool*) { out << (c->ValueAs<AInt>() ? "true" : "false"); },
+            [&](const core::type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
+            [&](const core::type::U32*) { out << c->ValueAs<AInt>() << "u"; },
 
             // TODO(dsinclair): Emit remaining constant types
             TINT_ICE_ON_NO_MATCH);
