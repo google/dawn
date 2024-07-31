@@ -68,6 +68,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/f32.h
   lang/core/type/i32.cc
   lang/core/type/i32.h
+  lang/core/type/i8.cc
+  lang/core/type/i8.h
   lang/core/type/input_attachment.cc
   lang/core/type/input_attachment.h
   lang/core/type/invalid.cc
@@ -108,6 +110,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/type.h
   lang/core/type/u32.cc
   lang/core/type/u32.h
+  lang/core/type/u8.cc
+  lang/core/type/u8.h
   lang/core/type/unique_node.cc
   lang/core/type/unique_node.h
   lang/core/type/vector.cc
@@ -149,6 +153,7 @@ tint_add_target(tint_lang_core_type_test test
   lang/core/type/f32_test.cc
   lang/core/type/helper_test.h
   lang/core/type/i32_test.cc
+  lang/core/type/i8_test.cc
   lang/core/type/input_attachment_test.cc
   lang/core/type/manager_test.cc
   lang/core/type/matrix_test.cc
@@ -162,6 +167,7 @@ tint_add_target(tint_lang_core_type_test test
   lang/core/type/texture_test.cc
   lang/core/type/type_test.cc
   lang/core/type/u32_test.cc
+  lang/core/type/u8_test.cc
   lang/core/type/vector_test.cc
 )
 
