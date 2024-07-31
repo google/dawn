@@ -151,7 +151,7 @@ cc_binary(
     ],
     "//conditions:default": [],
   }) + select({
-    ":tint_build_wgsl_writer_and_tint_build_spv_reader_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
+    ":tint_build_wgsl_writer_and_tint_build_spv_reader_and_tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/writer:bench",
     ],
     "//conditions:default": [],
@@ -248,12 +248,11 @@ selects.config_setting_group(
     ],
 )
 selects.config_setting_group(
-    name = "tint_build_wgsl_writer_and_tint_build_spv_reader_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer",
+    name = "tint_build_wgsl_writer_and_tint_build_spv_reader_and_tint_build_wgsl_reader",
     match_all = [
         ":tint_build_wgsl_writer",
         ":tint_build_spv_reader",
         ":tint_build_wgsl_reader",
-        ":tint_build_wgsl_writer",
     ],
 )
 
