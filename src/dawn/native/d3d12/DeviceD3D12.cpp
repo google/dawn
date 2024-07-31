@@ -91,6 +91,12 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     mD3d12Device = ToBackend(GetPhysicalDevice())->GetDevice();
 
+    // Querying for the ID3D12DebugDevice interface will tell us whether the debug layer
+    // is enabled. The debug layer can be enabled internally via command line flags or externally
+    // via dxcpl.exe or d3dconfig.exe.
+    ComPtr<ID3D12DebugDevice> d3d12DebugDevice;
+    mIsDebugLayerEnabled = SUCCEEDED(mD3d12Device.As(&d3d12DebugDevice));
+
     DAWN_ASSERT(mD3d12Device != nullptr);
 
     Ref<Queue> queue;
@@ -656,7 +662,7 @@ void AppendDebugLayerMessagesToError(ID3D12InfoQueue* infoQueue,
 }
 
 MaybeError Device::CheckDebugLayerAndGenerateErrors() {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled()) {
+    if (!mIsDebugLayerEnabled) {
         return {};
     }
 
