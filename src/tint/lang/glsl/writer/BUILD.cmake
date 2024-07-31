@@ -91,16 +91,15 @@ if(TINT_BUILD_GLSL_WRITER)
 endif(TINT_BUILD_GLSL_WRITER)
 
 endif(TINT_BUILD_GLSL_WRITER)
-if(TINT_BUILD_GLSL_WRITER)
+if(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_GLSL_VALIDATOR)
 ################################################################################
 # Target:    tint_lang_glsl_writer_test
 # Kind:      test
-# Condition: TINT_BUILD_GLSL_WRITER
+# Condition: TINT_BUILD_GLSL_WRITER AND TINT_BUILD_GLSL_VALIDATOR
 ################################################################################
 tint_add_target(tint_lang_glsl_writer_test test
   lang/glsl/writer/constant_test.cc
   lang/glsl/writer/function_test.cc
-  lang/glsl/writer/helper_test.h
 )
 
 tint_target_add_dependencies(tint_lang_glsl_writer_test test
@@ -134,6 +133,15 @@ tint_target_add_external_dependencies(tint_lang_glsl_writer_test test
   "gtest"
 )
 
+if(TINT_BUILD_GLSL_VALIDATOR)
+  tint_target_add_sources(tint_lang_glsl_writer_test test
+    "lang/glsl/writer/helper_test.h"
+  )
+  tint_target_add_dependencies(tint_lang_glsl_writer_test test
+    tint_lang_glsl_validate
+  )
+endif(TINT_BUILD_GLSL_VALIDATOR)
+
 if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_lang_glsl_writer_test test
     tint_lang_glsl_writer
@@ -141,7 +149,7 @@ if(TINT_BUILD_GLSL_WRITER)
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
-endif(TINT_BUILD_GLSL_WRITER)
+endif(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_GLSL_VALIDATOR)
 if(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_glsl_writer_bench

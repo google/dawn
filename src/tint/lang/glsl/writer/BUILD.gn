@@ -87,12 +87,11 @@ if (tint_build_glsl_writer) {
   }
 }
 if (tint_build_unittests) {
-  if (tint_build_glsl_writer) {
+  if (tint_build_glsl_writer && tint_build_glsl_validator) {
     tint_unittests_source_set("unittests") {
       sources = [
         "constant_test.cc",
         "function_test.cc",
-        "helper_test.h",
       ]
       deps = [
         "${tint_src_dir}:gmock_and_gtest",
@@ -121,6 +120,11 @@ if (tint_build_unittests) {
         "${tint_src_dir}/utils/text",
         "${tint_src_dir}/utils/traits",
       ]
+
+      if (tint_build_glsl_validator) {
+        sources += [ "helper_test.h" ]
+        deps += [ "${tint_src_dir}/lang/glsl/validate" ]
+      }
 
       if (tint_build_glsl_writer) {
         deps += [

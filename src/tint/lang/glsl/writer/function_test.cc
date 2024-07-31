@@ -31,14 +31,13 @@ namespace tint::glsl::writer {
 namespace {
 
 TEST_F(GlslWriterTest, Function_Empty) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
     func->Block()->Append(b.Return(func));
 
-    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    ASSERT_TRUE(Generate(tint::ast::PipelineStage::kCompute)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo() {
-}
-void unused_entry_point() {
+void main() {
 }
 )");
 }

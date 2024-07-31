@@ -89,8 +89,14 @@ cc_library(
   srcs = [
     "constant_test.cc",
     "function_test.cc",
-    "helper_test.h",
-  ],
+  ] + select({
+    ":tint_build_glsl_validator": [
+      "helper_test.h",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    "//conditions:default": [],
+  }),
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
@@ -118,6 +124,11 @@ cc_library(
     "//src/tint/utils/traits",
     "@gtest",
   ] + select({
+    ":tint_build_glsl_validator": [
+      "//src/tint/lang/glsl/validate",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer",
       "//src/tint/lang/glsl/writer/common",
@@ -175,6 +186,11 @@ cc_library(
 )
 
 alias(
+  name = "tint_build_glsl_validator",
+  actual = "//src/tint:tint_build_glsl_validator_true",
+)
+
+alias(
   name = "tint_build_glsl_writer",
   actual = "//src/tint:tint_build_glsl_writer_true",
 )
@@ -194,6 +210,13 @@ alias(
   actual = "//src/tint:tint_build_wgsl_writer_true",
 )
 
+selects.config_setting_group(
+    name = "tint_build_glsl_writer_and_tint_build_glsl_validator",
+    match_all = [
+        ":tint_build_glsl_writer",
+        ":tint_build_glsl_validator",
+    ],
+)
 selects.config_setting_group(
     name = "tint_build_glsl_writer_and_tint_build_spv_reader_and_tint_build_wgsl_reader_and_tint_build_wgsl_writer",
     match_all = [
