@@ -6250,7 +6250,7 @@ TEST_P(IR_ValidatorRefTypeTest, Var) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("3:5 error: var: reference type is not permitted"));
+                    testing::HasSubstr("3:5 error: var: reference types are not permitted"));
     }
 }
 
@@ -6273,7 +6273,7 @@ TEST_P(IR_ValidatorRefTypeTest, FnParam) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("references are not permitted as parameter types"));
+                    testing::HasSubstr("reference types are not permitted"));
     }
 }
 
@@ -6295,7 +6295,39 @@ TEST_P(IR_ValidatorRefTypeTest, FnRet) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("references are not permitted as return types"));
+                    testing::HasSubstr("reference types are not permitted"));
+    }
+}
+
+TEST_P(IR_ValidatorRefTypeTest, BlockParam) {
+    bool holds_ref = std::get<0>(GetParam());
+    bool refs_allowed = std::get<1>(GetParam());
+    auto* type = std::get<2>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Continuing()->SetParams({b.BlockParam(type)});
+        b.Append(loop->Body(), [&] {  //
+            b.Continue(loop, nullptr);
+        });
+        b.Append(loop->Continuing(), [&] {  //
+            b.NextIteration(loop);
+        });
+        b.Unreachable();
+    });
+
+    Capabilities caps;
+    if (refs_allowed) {
+        caps.Add(Capability::kAllowRefTypes);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (!holds_ref) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("reference types are not permitted"));
     }
 }
 
