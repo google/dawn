@@ -74,11 +74,13 @@
 #include "src/tint/lang/core/type/f16.h"    // IWYU pragma: export
 #include "src/tint/lang/core/type/f32.h"    // IWYU pragma: export
 #include "src/tint/lang/core/type/i32.h"    // IWYU pragma: export
+#include "src/tint/lang/core/type/i8.h"     // IWYU pragma: export
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"  // IWYU pragma: export
 #include "src/tint/lang/core/type/type.h"     // IWYU pragma: export
 #include "src/tint/lang/core/type/u32.h"      // IWYU pragma: export
+#include "src/tint/lang/core/type/u8.h"       // IWYU pragma: export
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"  // IWYU pragma: export
 #include "src/tint/utils/ice/ice.h"
@@ -340,10 +342,20 @@ class Builder {
     /// @returns the new constant
     ir::Constant* Constant(core::i32 v) { return Constant(ConstantValue(v)); }
 
+    /// Creates a ir::Constant for an i8 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    ir::Constant* Constant(core::i8 v) { return Constant(ConstantValue(v)); }
+
     /// Creates a ir::Constant for a u32 Scalar
     /// @param v the value
     /// @returns the new constant
     ir::Constant* Constant(core::u32 v) { return Constant(ConstantValue(v)); }
+
+    /// Creates a ir::Constant for a u8 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    ir::Constant* Constant(core::u8 v) { return Constant(ConstantValue(v)); }
 
     /// Creates a ir::Constant for a f32 Scalar
     /// @param v the value
@@ -377,10 +389,20 @@ class Builder {
     /// @returns the new constant
     const core::constant::Value* ConstantValue(core::i32 v) { return ir.constant_values.Get(v); }
 
+    /// Creates a core::constant::Value for an i8 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const core::constant::Value* ConstantValue(core::i8 v) { return ir.constant_values.Get(v); }
+
     /// Creates a core::constant::Value for a u32 Scalar
     /// @param v the value
     /// @returns the new constant
     const core::constant::Value* ConstantValue(core::u32 v) { return ir.constant_values.Get(v); }
+
+    /// Creates a core::constant::Value for a u8 Scalar
+    /// @param v the value
+    /// @returns the new constant
+    const core::constant::Value* ConstantValue(core::u8 v) { return ir.constant_values.Get(v); }
 
     /// Creates a core::constant::Value for a f32 Scalar
     /// @param v the value
