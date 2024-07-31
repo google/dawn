@@ -3014,9 +3014,9 @@ TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1RequiresBlendSrc1InWGSL) {
     }
 }
 
-// Test that when any blend factor uses the alpha channel of `src1` the fragment shader output with
-// `@blend_src(1)` must have an alpha channel.
-TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1AlphaInWGSL) {
+// Test that when any color blend factor uses the alpha channel of `src1` the fragment shader output
+// with `@blend_src(1)` must have an alpha channel.
+TEST_F(DualSourceBlendingFeatureTest, ColorBlendFactorSrc1AlphaRequiresBlendSrc1AlphaInWGSL) {
     constexpr std::array kBlendFactors = {wgpu::BlendFactor::Src1, wgpu::BlendFactor::OneMinusSrc1,
                                           wgpu::BlendFactor::Src1Alpha,
                                           wgpu::BlendFactor::OneMinusSrc1Alpha};
@@ -3035,7 +3035,11 @@ TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1Alpha
         })");
 
     auto CheckBlendFactorSrc1Alpha = [&](const wgpu::RenderPipelineDescriptor* descriptor,
-                                         wgpu::BlendFactor blendFactor) {
+                                         wgpu::BlendFactor blendFactor, bool isColorBlendFactor) {
+        if (!isColorBlendFactor) {
+            device.CreateRenderPipeline(descriptor);
+            return;
+        }
         switch (blendFactor) {
             case wgpu::BlendFactor::Src1:
             case wgpu::BlendFactor::OneMinusSrc1:
@@ -3061,7 +3065,8 @@ TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1Alpha
         descriptor.cBlends[0].color.dstFactor = wgpu::BlendFactor::Src;
         descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
 
-        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor);
+        constexpr bool kIsColorBlendFactor = true;
+        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor, kIsColorBlendFactor);
     }
 
     // Test color dstFactor
@@ -3075,7 +3080,8 @@ TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1Alpha
         descriptor.cBlends[0].color.dstFactor = blendFactor;
         descriptor.cBlends[0].color.operation = wgpu::BlendOperation::Add;
 
-        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor);
+        constexpr bool kIsColorBlendFactor = true;
+        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor, kIsColorBlendFactor);
     }
 
     // Test alpha srcFactor
@@ -3089,7 +3095,8 @@ TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1Alpha
         descriptor.cBlends[0].alpha.dstFactor = wgpu::BlendFactor::SrcAlpha;
         descriptor.cBlends[0].alpha.operation = wgpu::BlendOperation::Add;
 
-        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor);
+        constexpr bool kIsColorBlendFactor = false;
+        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor, kIsColorBlendFactor);
     }
 
     // Test alpha dstFactor
@@ -3103,7 +3110,8 @@ TEST_F(DualSourceBlendingFeatureTest, BlendFactorSrc1AlphaRequiresBlendSrc1Alpha
         descriptor.cBlends[0].alpha.dstFactor = blendFactor;
         descriptor.cBlends[0].alpha.operation = wgpu::BlendOperation::Add;
 
-        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor);
+        constexpr bool kIsColorBlendFactor = false;
+        CheckBlendFactorSrc1Alpha(&descriptor, blendFactor, kIsColorBlendFactor);
     }
 }
 
