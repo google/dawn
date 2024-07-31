@@ -33,8 +33,34 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::glsl::writer {
 namespace {
 
-TEST_F(GlslWriterTest, DISABLED_Constant_Bool_True) {
-    FAIL();
+TEST_F(GlslWriterTest, ConstantBoolFalse) {
+    auto* f = b.Function("a", ty.bool_());
+    f->Block()->Append(b.Return(f, false));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+bool a() {
+  return false;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+}
+)");
+}
+
+TEST_F(GlslWriterTest, ConstantBoolTrue) {
+    auto* f = b.Function("a", ty.bool_());
+    f->Block()->Append(b.Return(f, true));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+bool a() {
+  return true;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+}
+)");
 }
 
 }  // namespace

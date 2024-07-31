@@ -35,6 +35,8 @@
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
@@ -141,7 +143,7 @@ class Printer : public tint::TextGenerator {
         TINT_SCOPED_ASSIGNMENT(current_block_, block);
 
         for (auto* inst : *block) {
-            Switch(
+            tint::Switch(
                 inst,                                                      //
                 [&](const core::ir::Return* r) { EmitReturn(r); },         //
                 [&](const core::ir::Unreachable*) { EmitUnreachable(); },  //
@@ -152,7 +154,15 @@ class Printer : public tint::TextGenerator {
     /// Emit a type
     /// @param out the stream to emit too
     /// @param ty the type to emit
-    void EmitType(StringStream& out, [[maybe_unused]] const core::type::Type* ty) { out << "void"; }
+    void EmitType(StringStream& out, const core::type::Type* ty) {
+        tint::Switch(
+            ty,                                               //
+            [&](const core::type::Bool*) { out << "bool"; },  //
+            [&](const core::type::Void*) { out << "void"; },  //
+
+            // TODO(dsinclair): Handle remaining types
+            TINT_ICE_ON_NO_MATCH);
+    }
 
     /// Emit a return instruction
     /// @param r the return instruction
@@ -165,11 +175,33 @@ class Printer : public tint::TextGenerator {
 
         auto out = Line();
         out << "return";
-        // TODO(dsinclair): Handle return args
-        // if (!r->Args().IsEmpty()) {
-        //     out << " " << Expr(r->Args().Front());
-        // }
+        if (!r->Args().IsEmpty()) {
+            out << " ";
+            EmitValue(out, r->Args().Front());
+        }
         out << ";";
+    }
+
+    void EmitValue(StringStream& out, const core::ir::Value* v) {
+        tint::Switch(
+            v,                                                           //
+            [&](const core::ir::Constant* c) { EmitConstant(out, c); },  //
+
+            // TODO(dsinclair): Handle remaining value types
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitConstant(StringStream& out, const core::ir::Constant* c) {
+        EmitConstant(out, c->Value());
+    }
+
+    void EmitConstant(StringStream& out, const core::constant::Value* c) {
+        tint::Switch(
+            c->Type(),  //
+            [&](const core::type::Bool*) { out << (c->ValueAs<AInt>() ? "true" : "false"); },
+
+            // TODO(dsinclair): Emit remaining constant types
+            TINT_ICE_ON_NO_MATCH);
     }
 
     /// Emit an unreachable instruction
