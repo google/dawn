@@ -38,9 +38,11 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -97,6 +99,14 @@ const Scalar<i32>* Manager::Get(i32 value) {
 
 const Scalar<u32>* Manager::Get(u32 value) {
     return Get<Scalar<u32>>(types.u32(), value);
+}
+
+const Scalar<i8>* Manager::Get(i8 value) {
+    return Get<Scalar<i8>>(types.i8(), value);
+}
+
+const Scalar<u8>* Manager::Get(u8 value) {
+    return Get<Scalar<u8>>(types.u8(), value);
 }
 
 const Scalar<f32>* Manager::Get(f32 value) {
