@@ -102,7 +102,15 @@ class Printer : public tint::TextGenerator {
         {
             auto out = Line();
 
-            // TODO(dsinclair): Emit function stage if any
+            if (func->Stage() == core::ir::Function::PipelineStage::kCompute) {
+                auto wg_opt = func->WorkgroupSize();
+                TINT_ASSERT(wg_opt.has_value());
+
+                auto& wg = wg_opt.value();
+                Line() << "layout(local_size_x = " << wg[0] << ", local_size_y = " << wg[1]
+                       << ", local_size_z = " << wg[2] << ") in;";
+            }
+
             // TODO(dsinclair): Handle return type attributes
 
             EmitType(out, func->ReturnType());
