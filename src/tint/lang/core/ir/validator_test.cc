@@ -6412,6 +6412,157 @@ TEST_F(IR_ValidatorTest, PointerInStructure_WithCapability) {
     EXPECT_EQ(res, Success) << res.Failure();
 }
 
+using IR_Validator8BitIntTypeTest = IRTestParamHelper<std::tuple<
+    /* int8_allowed */ bool,
+    /* type_builder */ TypeBuilderFn>>;
+
+TEST_P(IR_Validator8BitIntTypeTest, Var) {
+    bool int8_allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var(ty.ptr<function>(type));
+        b.Return(fn);
+    });
+
+    Capabilities caps;
+    if (int8_allowed) {
+        caps.Add(Capability::kAllow8BitIntegers);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (int8_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("3:5 error: var: 8-bit integer types are not permitted"));
+    }
+}
+
+TEST_P(IR_Validator8BitIntTypeTest, FnParam) {
+    bool int8_allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    fn->SetParams(Vector{b.FunctionParam(type)});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    Capabilities caps;
+    if (int8_allowed) {
+        caps.Add(Capability::kAllow8BitIntegers);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (int8_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("8-bit integer types are not permitted"));
+    }
+}
+
+TEST_P(IR_Validator8BitIntTypeTest, FnRet) {
+    bool int8_allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", type);
+    b.Append(fn->Block(), [&] { b.Unreachable(); });
+
+    Capabilities caps;
+    if (int8_allowed) {
+        caps.Add(Capability::kAllow8BitIntegers);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (int8_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("8-bit integer types are not permitted"));
+    }
+}
+
+TEST_P(IR_Validator8BitIntTypeTest, BlockParam) {
+    bool int8_allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Continuing()->SetParams({b.BlockParam(type)});
+        b.Append(loop->Body(), [&] {  //
+            b.Continue(loop, nullptr);
+        });
+        b.Append(loop->Continuing(), [&] {  //
+            b.NextIteration(loop);
+        });
+        b.Unreachable();
+    });
+
+    Capabilities caps;
+    if (int8_allowed) {
+        caps.Add(Capability::kAllow8BitIntegers);
+    }
+    auto res = ir::Validate(mod, caps);
+    if (int8_allowed) {
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        ASSERT_NE(res, Success);
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr("8-bit integer types are not permitted"));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(Int8Types,
+                         IR_Validator8BitIntTypeTest,
+                         testing::Combine(
+                             /* int8_allowed */ testing::Values(false, true),
+                             /* type_builder */
+                             testing::Values(TypeBuilder<i8>,
+                                             TypeBuilder<u8>,
+                                             TypeBuilder<vec4<i8>>,
+                                             TypeBuilder<array<u8, 4>>)));
+
+TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed) {
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Convert(ty.i32(), u8(1));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:22 error: convert: 8-bit integer types are not permitted
+    %2:i32 = convert 1u8
+                     ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:i32 = convert 1u8
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_Allowed) {
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Convert(ty.i32(), u8(1));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllow8BitIntegers});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Switch_NoCondition) {
     auto* f = b.Function("my_func", ty.void_());
 

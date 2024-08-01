@@ -74,10 +74,12 @@
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/hashset.h"
@@ -903,6 +905,22 @@ void Validator::CheckType(const core::type::Type* root,
                         diag() << "nested pointer types are not permitted";
                         return false;
                     }
+                }
+                return true;
+            },
+            [&](const type::I8*) {
+                // i8 types are guarded by the Allow8BitIntegers capability.
+                if (!capabilities_.Contains(Capability::kAllow8BitIntegers)) {
+                    diag() << "8-bit integer types are not permitted";
+                    return false;
+                }
+                return true;
+            },
+            [&](const type::U8*) {
+                // u8 types are guarded by the Allow8BitIntegers capability.
+                if (!capabilities_.Contains(Capability::kAllow8BitIntegers)) {
+                    diag() << "8-bit integer types are not permitted";
+                    return false;
                 }
                 return true;
             },
