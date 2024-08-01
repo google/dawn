@@ -34,7 +34,7 @@ ary_ret v_3(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   float3x4 v_7[4] = v_3(0u);
-  float3x4 l_a_i = v(96u);
+  float3x4 l_a_i = v(112u);
   float4 l_a_i_i = asfloat(a[7u]);
   float3x4 l_a[4] = v_7;
   s.Store(0u, asuint((((asfloat(a[7u].x) + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u])));

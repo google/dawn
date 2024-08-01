@@ -77,7 +77,7 @@ void f() {
   Outer l_a[4] = v_12(0u);
   Outer l_a_3 = v_9(912u);
   Inner l_a_3_a[4] = v_4(912u);
-  Inner l_a_3_a_2 = v_2(896u);
+  Inner l_a_3_a_2 = v_2(912u);
   float2x4 l_a_3_a_2_m = v(896u);
   float4 l_a_3_a_2_m_1 = asfloat(a[57u]);
   float l_a_3_a_2_m_1_0 = asfloat(a[57u].x);

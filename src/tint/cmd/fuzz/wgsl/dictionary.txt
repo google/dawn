@@ -253,6 +253,7 @@
 "ldexp"
 "length"
 "let"
+"level"
 "linear"
 "local_invocation_id"
 "local_invocation_index"

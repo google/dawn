@@ -42,7 +42,7 @@ void f() {
   uint v_7 = (48u * uint(i()));
   uint v_8 = (16u * uint(i()));
   float3x4 v_9[4] = v_3(0u);
-  float3x4 l_a_i = v(v_7);
+  float3x4 l_a_i = v((v_7 + v_8));
   float4 l_a_i_i = asfloat(a[((v_7 + v_8) / 16u)]);
   float3x4 l_a[4] = v_9;
   s.Store(0u, asuint((((asfloat(a[((v_7 + v_8) / 16u)][(((v_7 + v_8) % 16u) / 4u)]) + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u])));

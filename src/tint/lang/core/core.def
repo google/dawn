@@ -232,6 +232,7 @@ enum usages {
   compare_value
   elements
   height
+  level
   location
   num_levels
   original_value

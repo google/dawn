@@ -90,7 +90,7 @@ ary_ret_1 v_20(uint start_byte_offset) {
 void f() {
   Outer l_a[4] = v_20(0u);
   Outer l_a_3 = v_17(768u);
-  Inner l_a_3_a[4] = v_12(768u);
+  Inner l_a_3_a[4] = v_12(900u);
   Inner l_a_3_a_2 = v_10(896u);
   matrix<float16_t, 4, 2> l_a_3_a_2_m = v_2(900u);
   vector<float16_t, 2> l_a_3_a_2_m_1 = tint_bitcast_to_f16(a[56u].x);
