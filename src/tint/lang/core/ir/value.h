@@ -88,7 +88,7 @@ class Value : public Castable<Value> {
 
     /// @returns the set of usages of this value. An instruction may appear multiple times if it
     /// uses the value for multiple different operands.
-    const Hashset<Usage, 4>& Usages() { return uses_; }
+    const Hashset<Usage, 4>& UsagesUnsorted() { return uses_; }
 
     /// @returns true if this Value has any usages
     bool IsUsed() const { return !uses_.IsEmpty(); }

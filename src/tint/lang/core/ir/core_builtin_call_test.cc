@@ -41,8 +41,8 @@ TEST_F(IR_CoreBuiltinCallTest, Usage) {
     auto* arg2 = b.Constant(2_u);
     auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, arg1, arg2);
 
-    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{builtin, 0u}));
-    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
+    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{builtin, 0u}));
+    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Result) {

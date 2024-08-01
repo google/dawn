@@ -69,7 +69,7 @@ TEST_F(IR_BitcastTest, Bitcast_Usage) {
     auto args = inst->Args();
     ASSERT_EQ(args.Length(), 1u);
     ASSERT_NE(args[0], nullptr);
-    EXPECT_THAT(args[0]->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(args[0]->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
 TEST_F(IR_BitcastDeathTest, Fail_NullType) {

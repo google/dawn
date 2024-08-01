@@ -40,7 +40,7 @@ using IR_SwitchTest = IRTestHelper;
 TEST_F(IR_SwitchTest, Usage) {
     auto* cond = b.Constant(true);
     auto* switch_ = b.Switch(cond);
-    EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{switch_, 0u}));
+    EXPECT_THAT(cond->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{switch_, 0u}));
 }
 
 TEST_F(IR_SwitchTest, Results) {

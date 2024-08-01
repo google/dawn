@@ -43,15 +43,15 @@ TEST_F(IR_OperandInstructionTest, Destroy) {
     auto* lhs = inst->LHS();
     auto* rhs = inst->RHS();
     EXPECT_EQ(inst->Block(), block);
-    EXPECT_THAT(lhs->Usages(), testing::ElementsAre(Usage{inst, 0u}));
-    EXPECT_THAT(rhs->Usages(), testing::ElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(lhs->UsagesUnsorted(), testing::ElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(rhs->UsagesUnsorted(), testing::ElementsAre(Usage{inst, 1u}));
     EXPECT_TRUE(inst->Result(0)->Alive());
 
     inst->Destroy();
 
     EXPECT_EQ(inst->Block(), nullptr);
-    EXPECT_TRUE(lhs->Usages().IsEmpty());
-    EXPECT_TRUE(rhs->Usages().IsEmpty());
+    EXPECT_FALSE(lhs->IsUsed());
+    EXPECT_FALSE(rhs->IsUsed());
     EXPECT_FALSE(inst->Result(0)->Alive());
 }
 

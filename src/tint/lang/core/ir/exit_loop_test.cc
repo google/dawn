@@ -42,8 +42,8 @@ TEST_F(IR_ExitLoopTest, Usage) {
     auto* loop = b.Loop();
     auto* e = b.ExitLoop(loop, arg1, arg2);
 
-    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
-    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
+    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{e, 0u}));
+    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{e, 1u}));
     EXPECT_EQ(loop->Result(0), nullptr);
 }
 

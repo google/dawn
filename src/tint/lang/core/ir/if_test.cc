@@ -39,7 +39,7 @@ using IR_IfDeathTest = IR_IfTest;
 TEST_F(IR_IfTest, Usage) {
     auto* cond = b.Constant(true);
     auto* if_ = b.If(cond);
-    EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{if_, 0u}));
+    EXPECT_THAT(cond->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{if_, 0u}));
 }
 
 TEST_F(IR_IfTest, Result) {

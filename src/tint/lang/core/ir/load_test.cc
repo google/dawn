@@ -57,7 +57,7 @@ TEST_F(IR_LoadTest, Usage) {
     auto* inst = b.Load(var);
 
     ASSERT_NE(inst->From(), nullptr);
-    EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(inst->From()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
 TEST_F(IR_LoadTest, Results) {

@@ -608,7 +608,7 @@ struct State {
     /// @param value the pointer value that was used as a now replaced pointer argument.
     void DeleteDeadInstructions(ir::Value* value) {
         // While value has no uses...
-        while (value && value->Usages().Count() == 0) {
+        while (value && !value->IsUsed()) {
             auto* inst_res = value->As<InstructionResult>();
             if (!inst_res) {
                 return;  // Only instructions can be removed.

@@ -87,7 +87,7 @@ struct State {
         for (auto* var : var_worklist) {
             auto* result = var->Result(0);
 
-            auto usage_worklist = result->Usages().Vector();
+            auto usage_worklist = result->UsagesUnsorted().Vector();
             auto* var_ty = result->Type()->As<core::type::Pointer>();
             while (!usage_worklist.IsEmpty()) {
                 auto usage = usage_worklist.Pop();
@@ -108,7 +108,7 @@ struct State {
                         // The `let` is, essentially, an alias for the `var` as it's assigned
                         // directly. Gather all the `let` usages into our worklist, and then replace
                         // the `let` with the `var` itself.
-                        for (auto& use : let->Result(0)->Usages()) {
+                        for (auto& use : let->Result(0)->UsagesUnsorted()) {
                             usage_worklist.Push(use);
                         }
                         let->Result(0)->ReplaceAllUsesWith(result);
@@ -225,7 +225,7 @@ struct State {
                 TINT_ICE_ON_NO_MATCH);
         }
 
-        auto usages = a->Result(0)->Usages().Vector();
+        auto usages = a->Result(0)->UsagesUnsorted().Vector();
         while (!usages.IsEmpty()) {
             auto usage = usages.Pop();
             tint::Switch(
@@ -234,7 +234,7 @@ struct State {
                     // The `let` is essentially an alias to the `access`. So, add the `let`
                     // usages into the usage worklist, and replace the let with the access chain
                     // directly.
-                    for (auto& u : let->Result(0)->Usages()) {
+                    for (auto& u : let->Result(0)->UsagesUnsorted()) {
                         usages.Push(u);
                     }
                     let->Result(0)->ReplaceAllUsesWith(a->Result(0));

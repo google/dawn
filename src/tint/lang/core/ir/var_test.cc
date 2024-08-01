@@ -65,9 +65,9 @@ TEST_F(IR_VarTest, Initializer_Usage) {
     auto* init = b.Constant(1_f);
     var->SetInitializer(init);
 
-    EXPECT_THAT(init->Usages(), testing::UnorderedElementsAre(Usage{var, 0u}));
+    EXPECT_THAT(init->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{var, 0u}));
     var->SetInitializer(nullptr);
-    EXPECT_TRUE(init->Usages().IsEmpty());
+    EXPECT_FALSE(init->IsUsed());
 }
 
 TEST_F(IR_VarTest, Clone) {

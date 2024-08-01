@@ -46,8 +46,8 @@ TEST_F(IR_AccessTest, SetsUsage) {
     auto* idx = b.Constant(u32(1));
     auto* a = b.Access(ty.i32(), var, idx);
 
-    EXPECT_THAT(var->Result(0)->Usages(), testing::UnorderedElementsAre(Usage{a, 0u}));
-    EXPECT_THAT(idx->Usages(), testing::UnorderedElementsAre(Usage{a, 1u}));
+    EXPECT_THAT(var->Result(0)->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{a, 0u}));
+    EXPECT_THAT(idx->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{a, 1u}));
 }
 
 TEST_F(IR_AccessTest, Result) {

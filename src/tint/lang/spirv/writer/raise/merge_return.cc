@@ -72,7 +72,7 @@ struct State {
     /// @param fn the function to process
     void Process(core::ir::Function* fn) {
         // Find all of the nested return instructions in the function.
-        for (const auto& usage : fn->Usages()) {
+        for (const auto& usage : fn->UsagesUnsorted()) {
             if (auto* ret = usage->instruction->As<core::ir::Return>()) {
                 TransitivelyMarkAsReturning(ret->Block()->Parent());
             }

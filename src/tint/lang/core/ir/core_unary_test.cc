@@ -82,7 +82,7 @@ TEST_F(IR_UnaryTest, Usage) {
     EXPECT_EQ(inst->Op(), UnaryOp::kNegation);
 
     ASSERT_NE(inst->Val(), nullptr);
-    EXPECT_THAT(inst->Val()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(inst->Val()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 }
 
 TEST_F(IR_UnaryTest, Result) {

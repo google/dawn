@@ -75,9 +75,10 @@ void Var::SetInitializer(Value* initializer) {
 
 void Var::DestroyIfOnlyAssigned() {
     auto* result = Result(0);
-    if (result->Usages().All([](const Usage& u) { return u.instruction->Is<ir::Store>(); })) {
-        while (!result->Usages().IsEmpty()) {
-            auto& usage = *result->Usages().begin();
+    if (result->UsagesUnsorted().All(
+            [](const Usage& u) { return u.instruction->Is<ir::Store>(); })) {
+        while (result->IsUsed()) {
+            auto& usage = *result->UsagesUnsorted().begin();
             usage->instruction->Destroy();
         }
         Destroy();

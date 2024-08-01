@@ -87,7 +87,7 @@ struct State {
 
             // Find all the usages of the `var` which is loading or storing.
             Vector<core::ir::Instruction*, 4> usage_worklist;
-            for (auto& usage : result->Usages()) {
+            for (auto& usage : result->UsagesUnsorted()) {
                 Switch(
                     usage->instruction,
                     [&](core::ir::LoadVectorElement* lve) { usage_worklist.Push(lve); },
@@ -148,7 +148,7 @@ struct State {
                         // The `let` is, essentially, an alias for the `var` as it's assigned
                         // directly. Gather all the `let` usages into our worklist, and then replace
                         // the `let` with the `var` itself.
-                        for (auto& usage : let->Result(0)->Usages()) {
+                        for (auto& usage : let->Result(0)->UsagesUnsorted()) {
                             usage_worklist.Push(usage->instruction);
                         }
                         let->Result(0)->ReplaceAllUsesWith(result);
@@ -741,7 +741,7 @@ struct State {
         }
 
         // Copy the usages into a vector so we can remove items from the hashset.
-        auto usages = a->Result(0)->Usages().Vector();
+        auto usages = a->Result(0)->UsagesUnsorted().Vector();
         while (!usages.IsEmpty()) {
             auto usage = usages.Pop();
             tint::Switch(
@@ -750,7 +750,7 @@ struct State {
                     // The `let` is essentially an alias to the `access`. So, add the `let`
                     // usages into the usage worklist, and replace the let with the access chain
                     // directly.
-                    for (auto& u : let->Result(0)->Usages()) {
+                    for (auto& u : let->Result(0)->UsagesUnsorted()) {
                         usages.Push(u);
                     }
                     let->Result(0)->ReplaceAllUsesWith(a->Result(0));

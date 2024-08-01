@@ -92,8 +92,8 @@ struct State {
 
         auto maybe_put_in_let = [&](auto* inst) {
             if (auto* result = inst->Result(0)) {
-                auto& usages = result->Usages();
-                switch (usages.Count()) {
+                auto& usages = result->UsagesUnsorted();
+                switch (result->NumUsages()) {
                     case 0:  // No usage
                         break;
                     case 1: {  // Single usage

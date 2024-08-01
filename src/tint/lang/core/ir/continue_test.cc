@@ -44,8 +44,8 @@ TEST_F(IR_ContinueTest, Usage) {
 
     auto* brk = b.Continue(loop, arg1, arg2);
 
-    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{brk, 0u}));
-    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{brk, 1u}));
+    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{brk, 0u}));
+    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{brk, 1u}));
 }
 
 TEST_F(IR_ContinueTest, Results) {

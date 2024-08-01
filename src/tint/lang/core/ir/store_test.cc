@@ -56,10 +56,10 @@ TEST_F(IR_StoreTest, Usage) {
     auto* inst = b.Store(to, 4_i);
 
     ASSERT_NE(inst->To(), nullptr);
-    EXPECT_THAT(inst->To()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(inst->To()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 
     ASSERT_NE(inst->From(), nullptr);
-    EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(inst->From()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_StoreTest, Result) {

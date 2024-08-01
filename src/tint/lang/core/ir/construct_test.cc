@@ -42,8 +42,8 @@ TEST_F(IR_ConstructTest, Usage) {
     auto* arg2 = b.Constant(false);
     auto* c = b.Construct(mod.Types().f32(), arg1, arg2);
 
-    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{c, 0u}));
-    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{c, 1u}));
+    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{c, 0u}));
+    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{c, 1u}));
 }
 
 TEST_F(IR_ConstructTest, Result) {

@@ -164,7 +164,7 @@ struct State {
         if (inst->IsAnyOf<core::ir::Var, core::ir::Let>()) {
             return;
         }
-        if (inst->Is<core::ir::Call>() && value->Usages().IsEmpty()) {
+        if (inst->Is<core::ir::Call>() && !value->IsUsed()) {
             bool must_use =
                 inst->Is<core::ir::BuiltinCall>() && !value->Type()->Is<core::type::Void>();
             if (!must_use) {

@@ -337,10 +337,10 @@ TEST_F(IR_BinaryTest, Binary_Usage) {
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
 
     ASSERT_NE(inst->LHS(), nullptr);
-    EXPECT_THAT(inst->LHS()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(inst->LHS()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 
     ASSERT_NE(inst->RHS(), nullptr);
-    EXPECT_THAT(inst->RHS()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(inst->RHS()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
@@ -351,7 +351,7 @@ TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
     ASSERT_EQ(inst->LHS(), inst->RHS());
 
     ASSERT_NE(inst->LHS(), nullptr);
-    EXPECT_THAT(inst->LHS()->Usages(),
+    EXPECT_THAT(inst->LHS()->UsagesUnsorted(),
                 testing::UnorderedElementsAre(Usage{inst, 0u}, Usage{inst, 1u}));
 }
 
@@ -362,11 +362,11 @@ TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
 
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
 
-    EXPECT_THAT(rhs_a->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
-    EXPECT_THAT(rhs_b->Usages(), testing::UnorderedElementsAre());
+    EXPECT_THAT(rhs_a->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(rhs_b->UsagesUnsorted(), testing::UnorderedElementsAre());
     inst->SetOperand(1, rhs_b);
-    EXPECT_THAT(rhs_a->Usages(), testing::UnorderedElementsAre());
-    EXPECT_THAT(rhs_b->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(rhs_a->UsagesUnsorted(), testing::UnorderedElementsAre());
+    EXPECT_THAT(rhs_b->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_BinaryTest, Clone) {

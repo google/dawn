@@ -69,7 +69,7 @@ struct State {
                 });
 
                 // If there are no other uses of the access instruction, remove it.
-                if (access->Result(0)->Usages().IsEmpty()) {
+                if (!access->Result(0)->IsUsed()) {
                     access->Destroy();
                 }
             }

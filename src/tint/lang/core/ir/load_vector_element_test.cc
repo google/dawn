@@ -56,10 +56,10 @@ TEST_F(IR_LoadVectorElementTest, Usage) {
     auto* inst = b.LoadVectorElement(from, 2_i);
 
     ASSERT_NE(inst->From(), nullptr);
-    EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(inst->From()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 
     ASSERT_NE(inst->Index(), nullptr);
-    EXPECT_THAT(inst->Index()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(inst->Index()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_LoadVectorElementTest, Result) {
