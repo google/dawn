@@ -1006,13 +1006,6 @@ void Validator::CheckFunction(const Function* func) {
         }
     }
 
-    // void needs to be filtered out, since it isn't constructible, but used in the IR when no
-    // return is specified.
-    if (TINT_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
-                      !func->ReturnType()->IsConstructible())) {
-        AddError(func) << "function return type must be constructible";
-    }
-
     QueueBlock(func->Block());
     ProcessTasks();
 }
