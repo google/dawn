@@ -36,6 +36,8 @@
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/f16.h"
+#include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
@@ -49,6 +51,8 @@ using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::glsl::writer {
 namespace {
+
+constexpr const char* kAMDGpuShaderHalfFloat = "GL_AMD_gpu_shader_half_float";
 
 /// PIMPL class for the MSL generator
 class Printer : public tint::TextGenerator {
@@ -98,6 +102,8 @@ class Printer : public tint::TextGenerator {
     const core::ir::Function* current_function_ = nullptr;
     /// The current block being emitted
     const core::ir::Block* current_block_ = nullptr;
+
+    Hashset<std::string, 4> emitted_extensions_;
 
     /// Emit the function
     /// @param func the function to emit
@@ -154,16 +160,32 @@ class Printer : public tint::TextGenerator {
         }
     }
 
+    void EmitExtension(std::string name) {
+        if (emitted_extensions_.Contains(name)) {
+            return;
+        }
+        emitted_extensions_.Add(name);
+
+        TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+
+        Line() << "#extension " << name << ": require";
+    }
+
     /// Emit a type
     /// @param out the stream to emit too
     /// @param ty the type to emit
     void EmitType(StringStream& out, const core::type::Type* ty) {
         tint::Switch(
-            ty,                                               //
-            [&](const core::type::Bool*) { out << "bool"; },  //
-            [&](const core::type::I32*) { out << "int"; },    //
-            [&](const core::type::U32*) { out << "uint"; },   //
-            [&](const core::type::Void*) { out << "void"; },  //
+            ty,  //
+            [&](const core::type::Bool*) { out << "bool"; },
+            [&](const core::type::I32*) { out << "int"; },
+            [&](const core::type::U32*) { out << "uint"; },
+            [&](const core::type::Void*) { out << "void"; },
+            [&](const core::type::F32*) { out << "float"; },
+            [&](const core::type::F16*) {
+                EmitExtension(kAMDGpuShaderHalfFloat);
+                out << "float16_t";
+            },
 
             // TODO(dsinclair): Handle remaining types
             TINT_ICE_ON_NO_MATCH);
@@ -206,6 +228,8 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Bool*) { out << (c->ValueAs<AInt>() ? "true" : "false"); },
             [&](const core::type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
             [&](const core::type::U32*) { out << c->ValueAs<AInt>() << "u"; },
+            [&](const core::type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
+            [&](const core::type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
 
             // TODO(dsinclair): Emit remaining constant types
             TINT_ICE_ON_NO_MATCH);

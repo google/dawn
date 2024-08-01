@@ -108,5 +108,38 @@ void unused_entry_point() {
 )");
 }
 
+TEST_F(GlslWriterTest, ConstantFloat) {
+    auto* f = b.Function("a", ty.f32());
+    // Use a number close to 1<<30 but whose decimal representation ends in 0.
+    f->Block()->Append(b.Return(f, f32((1 << 30) - 4)));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+float a() {
+  return 1073741824.0f;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+}
+)");
+}
+
+TEST_F(GlslWriterTest, ConstantF16) {
+    auto* f = b.Function("a", ty.f16());
+    // Use a number close to 1<<16 but whose decimal representation ends in 0.
+    f->Block()->Append(b.Return(f, f16((1 << 15) - 8)));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+
+float16_t a() {
+  return 32752.0hf;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

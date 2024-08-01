@@ -29,7 +29,6 @@
 #define SRC_TINT_UTILS_GENERATOR_TEXT_GENERATOR_H_
 
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
