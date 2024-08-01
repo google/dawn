@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
@@ -53,6 +54,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 
 //! @cond Doxygen_Suppress
@@ -91,12 +93,28 @@ inline bool MatchI32(intrinsic::MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<intrinsic::Any, type::I32, type::AbstractInt>();
 }
 
+inline const type::I8* BuildI8(intrinsic::MatchState& state, const type::Type*) {
+    return state.types.i8();
+}
+
+inline bool MatchI8(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::I8, type::AbstractInt>();
+}
+
 inline const type::U32* BuildU32(intrinsic::MatchState& state, const type::Type*) {
     return state.types.u32();
 }
 
 inline bool MatchU32(intrinsic::MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<intrinsic::Any, type::U32, type::AbstractInt>();
+}
+
+inline const type::U8* BuildU8(intrinsic::MatchState& state, const type::Type*) {
+    return state.types.u8();
+}
+
+inline bool MatchU8(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::U8, type::AbstractInt>();
 }
 
 inline bool MatchVec(intrinsic::MatchState&,
