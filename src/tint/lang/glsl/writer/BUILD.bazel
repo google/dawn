@@ -90,6 +90,7 @@ cc_library(
     "call_test.cc",
     "constant_test.cc",
     "function_test.cc",
+    "var_and_let_test.cc",
   ] + select({
     ":tint_build_glsl_validator": [
       "helper_test.h",

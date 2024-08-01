@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/function.h"
+#include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -176,6 +177,7 @@ class Printer : public tint::TextGenerator {
             tint::Switch(
                 inst,                                                      //
                 [&](const core::ir::Call* i) { EmitCallStmt(i); },         //
+                [&](const core::ir::Let* i) { EmitLet(i); },               //
                 [&](const core::ir::Return* r) { EmitReturn(r); },         //
                 [&](const core::ir::Unreachable*) { EmitUnreachable(); },  //
 
@@ -192,6 +194,17 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::Swizzle*) { /* inlined */ },                         //
                 TINT_ICE_ON_NO_MATCH);
         }
+    }
+
+    void EmitLet(const core::ir::Let* l) {
+        auto out = Line();
+
+        // TODO(dsinclair): Investigate using `const` here as well, the AST printer doesn't emit
+        //                  const with a let, but we should be able to.
+        EmitTypeAndName(out, l->Result(0)->Type(), NameOf(l->Result(0)));
+        out << " = ";
+        EmitValue(out, l->Value());
+        out << ";";
     }
 
     void EmitCallStmt(const core::ir::Call* c) {
@@ -213,10 +226,26 @@ class Printer : public tint::TextGenerator {
         Line() << "#extension " << name << ": require";
     }
 
+    void EmitTypeAndName(StringStream& out, const core::type::Type* type, const std::string& name) {
+        bool name_printed = false;
+        EmitType(out, type, name, &name_printed);
+
+        if (!name.empty() && !name_printed) {
+            out << " " << name;
+        }
+    }
+
     /// Emit a type
     /// @param out the stream to emit too
     /// @param ty the type to emit
-    void EmitType(StringStream& out, const core::type::Type* ty) {
+    void EmitType(StringStream& out,
+                  const core::type::Type* ty,
+                  [[maybe_unused]] const std::string& name = "",
+                  bool* name_printed = nullptr) {
+        if (name_printed) {
+            *name_printed = false;
+        }
+
         tint::Switch(
             ty,  //
             [&](const core::type::Bool*) { out << "bool"; },

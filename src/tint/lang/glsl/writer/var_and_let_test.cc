@@ -27,84 +27,25 @@
 
 #include "src/tint/lang/glsl/writer/helper_test.h"
 
-using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::glsl::writer {
 namespace {
 
-TEST_F(GlslWriterTest, CallWithoutParams) {
-    auto* f = b.Function("a", ty.bool_());
-    f->Block()->Append(b.Return(f, false));
-
-    auto* ep = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
-    b.Append(ep->Block(), [&] {
-        b.Let("x", b.Call(f));
-        b.Return(ep);
+TEST_F(GlslWriterTest, Let) {
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Let("a", 2_f);
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-bool a() {
-  return false;
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  bool x = a();
-}
-)");
-}
-
-// TODO(dsinclair): Enable when FunctionParam is supported
-TEST_F(GlslWriterTest, DISABLED_CallWithParams) {
-    auto* p1 = b.FunctionParam("p1", ty.f32());
-    auto* p2 = b.FunctionParam("p2", ty.bool_());
-
-    auto* f = b.Function("a", ty.bool_());
-    f->SetParams({p1, p2});
-    f->Block()->Append(b.Return(f, p2));
-
-    auto* ep = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
-    b.Append(ep->Block(), [&] {
-        b.Let("x", b.Call(f, 1.2_f, false));
-        b.Return(ep);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-bool a(float p1, bool p2) {
-  return p2;
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-    bool x = a(1.2f, false);
-}
-
-)");
-}
-
-TEST_F(GlslWriterTest, CallStatement) {
-    auto* f = b.Function("a", ty.bool_());
-    f->Block()->Append(b.Return(f, false));
-
-    auto* ep = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
-    b.Append(ep->Block(), [&] {
-        b.Call(f);
-        b.Return(ep);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-bool a() {
-  return false;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  a();
+  float a = 2.0f;
 }
 )");
 }
