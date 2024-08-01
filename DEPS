@@ -59,7 +59,13 @@ vars = {
   # but parity with DEPS file is expected.
   'SUBMODULE_MIGRATION': 'True',
 
-  'fetch_cmake': False
+  'fetch_cmake': False,
+
+  # condition to allowlist deps to be synced in Cider. Allowlisting is needed
+  # because not all deps are compatible with Cider. Once we migrate everything
+  # to be compatible we can get rid of this allowlisting mecahnism and remove
+  # this condition. Tracking bug for removing this condition: b/349365433
+  'non_git_source': 'True',
 }
 
 deps = {
@@ -379,6 +385,7 @@ deps = {
       'version': Var('dawn_go_version'),
     }],
     'dep_type': 'cipd',
+    'condition': 'non_git_source',
   },
 
   'tools/cmake': {
