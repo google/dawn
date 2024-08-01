@@ -63,5 +63,50 @@ void unused_entry_point() {
 )");
 }
 
+TEST_F(GlslWriterTest, ConstantInt) {
+    auto* f = b.Function("a", ty.i32());
+    f->Block()->Append(b.Return(f, -12345_i));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+int a() {
+  return -12345;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+}
+)");
+}
+
+TEST_F(GlslWriterTest, ConstantIntMin) {
+    auto* f = b.Function("a", ty.i32());
+    b.Append(f->Block(), [&] { b.Return(f, i32(std::numeric_limits<int32_t>::min())); });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+int a() {
+  return (-2147483647 - 1);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+}
+)");
+}
+
+TEST_F(GlslWriterTest, ConstantUInt) {
+    auto* f = b.Function("a", ty.u32());
+    f->Block()->Append(b.Return(f, 56779_u));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+uint a() {
+  return 56779u;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer
