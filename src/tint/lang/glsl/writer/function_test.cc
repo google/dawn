@@ -43,5 +43,20 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, FunctionWithParams) {
+    auto* func = b.Function("my_func", ty.void_());
+    func->SetParams({b.FunctionParam("a", ty.f32()), b.FunctionParam("b", ty.i32())});
+    func->Block()->Append(b.Return(func));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+void my_func(float a, int b) {
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

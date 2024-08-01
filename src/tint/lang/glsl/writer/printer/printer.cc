@@ -51,6 +51,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
@@ -156,9 +157,25 @@ class Printer : public tint::TextGenerator {
             // TODO(dsinclair): Handle return type attributes
 
             EmitType(out, func->ReturnType());
-            out << " " << ir_.NameOf(func).Name() << "() {";
+            out << " " << ir_.NameOf(func).Name() << "(";
 
-            // TODO(dsinclair): Emit Function parameters
+            size_t i = 0;
+            for (auto* param : func->Params()) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                ++i;
+
+                const core::type::Type* type = param->Type();
+                if (auto* ptr = type->As<core::type::Pointer>()) {
+                    // Transform pointer parameters in to `inout` parameters.
+                    out << "inout ";
+                    type = ptr->StoreType();
+                }
+                EmitTypeAndName(out, type, NameOf(param));
+            }
+
+            out << ") {";
         }
         {
             ScopedIndent si(current_buffer_);
@@ -290,7 +307,7 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },  //
                     TINT_ICE_ON_NO_MATCH);
             },
-            // TODO(dsinclair): Handle remaining value types
+            [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
             TINT_ICE_ON_NO_MATCH);
     }
 
