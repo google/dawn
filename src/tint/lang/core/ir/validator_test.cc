@@ -363,6 +363,73 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_NonConstructibleReturnType) {
+    auto types = Vector<const core::type::Type*, 2>{
+        ty.external_texture(),   ty.sampler(), ty.runtime_array(ty.f32()), ty.ptr<function, i32>(),
+        ty.ref<function, u32>(),
+    };
+
+    for (auto t : types) {
+        auto* f = b.Function(t);
+        b.Append(f->Block(), [&] { b.Unreachable(); });
+    }
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: function return type must be constructible
+%1 = func():texture_external {
+^^
+
+:6:1 error: function return type must be constructible
+%2 = func():sampler {
+^^
+
+:11:1 error: function return type must be constructible
+%3 = func():array<f32> {
+^^
+
+:16:1 error: function return type must be constructible
+%4 = func():ptr<function, i32, read_write> {
+^^
+
+:21:1 error: reference types are not permitted here
+%5 = func():ref<function, u32, read_write> {
+^^
+
+:21:1 error: function return type must be constructible
+%5 = func():ref<function, u32, read_write> {
+^^
+
+note: # Disassembly
+%1 = func():texture_external {
+  $B1: {
+    unreachable
+  }
+}
+%2 = func():sampler {
+  $B2: {
+    unreachable
+  }
+}
+%3 = func():array<f32> {
+  $B3: {
+    unreachable
+  }
+}
+%4 = func():ptr<function, i32, read_write> {
+  $B4: {
+    unreachable
+  }
+}
+%5 = func():ref<function, u32, read_write> {
+  $B5: {
+    unreachable
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
     auto* f = b.Function("f", ty.void_());
     auto* g = b.Function("g", ty.void_());
