@@ -3579,5 +3579,73 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterDecomposeStorageAccessTest, AccessChainReused) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("a"), ty.i32()},
+                                                    {mod.symbols.New("b"), ty.vec3<f32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Access(ty.ptr(storage, ty.vec3<f32>(), core::Access::kReadWrite), var, 1_u);
+        b.Let("b", b.LoadVectorElement(x, 1_u));
+        b.Let("c", b.LoadVectorElement(x, 2_u));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  a:i32 @offset(0)
+  b:vec3<f32> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, vec3<f32>, read_write> = access %v, 1u
+    %4:f32 = load_vector_element %3, 1u
+    %b:f32 = let %4
+    %6:f32 = load_vector_element %3, 2u
+    %c:f32 = let %6
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  a:i32 @offset(0)
+  b:vec3<f32> @offset(16)
+}
+
+$B1: {  # root
+  %v:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:u32 = %v.Load 20u
+    %4:f32 = bitcast %3
+    %b:f32 = let %4
+    %6:u32 = %v.Load 24u
+    %7:f32 = bitcast %6
+    %c:f32 = let %7
+    ret
+  }
+}
+)";
+
+    Run(DecomposeStorageAccess);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

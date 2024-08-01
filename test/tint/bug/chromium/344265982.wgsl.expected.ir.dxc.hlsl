@@ -8,8 +8,7 @@ void foo() {
       } else {
         break;
       }
-      uint v = (uint(i) * 4u);
-      switch(asint(buffer.Load((0u + v)))) {
+      switch(asint(buffer.Load((0u + (uint(i) * 4u))))) {
         case 1:
         {
           {
@@ -19,8 +18,8 @@ void foo() {
         }
         default:
         {
-          uint v_1 = ((0u + v) + (uint(i) * 4u));
-          buffer.Store(v_1, asuint(2));
+          uint v = (0u + (uint(i) * 4u));
+          buffer.Store(v, asuint(2));
           break;
         }
       }

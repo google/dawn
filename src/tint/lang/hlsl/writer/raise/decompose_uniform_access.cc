@@ -173,7 +173,7 @@ struct State {
     void Access(core::ir::Access* a,
                 core::ir::Var* var,
                 const core::type::Type* obj_ty,
-                OffsetData& offset) {
+                OffsetData offset) {
         // Note, because we recurse through the `access` helper, the object passed in isn't
         // necessarily the originating `var` object, but maybe a partially resolved access chain
         // object.
@@ -259,7 +259,7 @@ struct State {
         a->Destroy();
     }
 
-    void Load(core::ir::Load* ld, core::ir::Var* var, OffsetData& offset) {
+    void Load(core::ir::Load* ld, core::ir::Var* var, OffsetData offset) {
         b.InsertBefore(ld, [&] {
             auto* byte_idx = OffsetToValue(offset);
             auto* result = MakeLoad(ld, var, ld->Result(0)->Type(), byte_idx);
@@ -270,7 +270,7 @@ struct State {
 
     void LoadVectorElement(core::ir::LoadVectorElement* lve,
                            core::ir::Var* var,
-                           OffsetData& offset) {
+                           OffsetData offset) {
         b.InsertBefore(lve, [&] {
             // Add the byte count from the start of the vector to the requested element to the
             // current offset calculation

@@ -90,7 +90,7 @@ void f() {
   Outer l_a[4] = v_17(0u);
   Outer l_a_3 = v_14(768u);
   Inner l_a_3_a[4] = v_9(768u);
-  Inner l_a_3_a_2 = v_7(904u);
+  Inner l_a_3_a_2 = v_7(896u);
   matrix<float16_t, 3, 3> l_a_3_a_2_m = v_4(896u);
   vector<float16_t, 3> l_a_3_a_2_m_1 = tint_bitcast_to_f16(a[56u]).xyz;
   float16_t l_a_3_a_2_m_1_0 = float16_t(f16tof32(a[56u].z));

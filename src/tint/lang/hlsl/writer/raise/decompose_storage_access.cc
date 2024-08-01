@@ -142,7 +142,7 @@ struct State {
                     },
                     [&](core::ir::Access* a) {
                         OffsetData offset{};
-                        Access(a, var, a->Object()->Type(), &offset);
+                        Access(a, var, a->Object()->Type(), offset);
                     },
                     [&](core::ir::Let* let) {
                         // The `let` is, essentially, an alias for the `var` as it's assigned
@@ -385,8 +385,6 @@ struct State {
             MakeScalarOrVectorStore(var, from, offset);
             return;
         }
-
-        // TODO(dsinclair): This is missing arrays and matrices
 
         tint::Switch(
             from->Type(),  //
@@ -703,9 +701,7 @@ struct State {
     void Access(core::ir::Access* a,
                 core::ir::Var* var,
                 const core::type::Type* obj,
-                OffsetData* offset) {
-        TINT_ASSERT(offset);
-
+                OffsetData offset) {
         // Note, because we recurse through the `access` helper, the object passed in isn't
         // necessarily the originating `var` object, but maybe a partially resolved access chain
         // object.
@@ -717,17 +713,17 @@ struct State {
             tint::Switch(
                 obj,  //
                 [&](const core::type::Vector* v) {
-                    b.InsertBefore(a,
-                                   [&] { UpdateOffsetData(idx_value, v->type()->Size(), offset); });
+                    b.InsertBefore(
+                        a, [&] { UpdateOffsetData(idx_value, v->type()->Size(), &offset); });
                     obj = v->type();
                 },
                 [&](const core::type::Matrix* m) {
-                    b.InsertBefore(a,
-                                   [&] { UpdateOffsetData(idx_value, m->ColumnStride(), offset); });
+                    b.InsertBefore(
+                        a, [&] { UpdateOffsetData(idx_value, m->ColumnStride(), &offset); });
                     obj = m->ColumnType();
                 },
                 [&](const core::type::Array* ary) {
-                    b.InsertBefore(a, [&] { UpdateOffsetData(idx_value, ary->Stride(), offset); });
+                    b.InsertBefore(a, [&] { UpdateOffsetData(idx_value, ary->Stride(), &offset); });
                     obj = ary->ElemType();
                 },
                 [&](const core::type::Struct* s) {
@@ -738,7 +734,7 @@ struct State {
 
                     uint32_t idx = cnst->Value()->ValueAs<uint32_t>();
                     auto* mem = s->Members()[idx];
-                    offset->byte_offset += mem->Offset();
+                    offset.byte_offset += mem->Offset();
                     obj = mem->Type();
                 },
                 TINT_ICE_ON_NO_MATCH);
@@ -770,25 +766,28 @@ struct State {
                 [&](core::ir::LoadVectorElement* lve) {
                     a->Result(0)->RemoveUsage(usage);
 
+                    OffsetData load_offset = offset;
                     b.InsertBefore(lve, [&] {
-                        UpdateOffsetData(lve->Index(), obj->DeepestElement()->Size(), offset);
+                        UpdateOffsetData(lve->Index(), obj->DeepestElement()->Size(), &load_offset);
                     });
-                    Load(lve, var, *offset);
+                    Load(lve, var, load_offset);
                 },
                 [&](core::ir::Load* ld) {
                     a->Result(0)->RemoveUsage(usage);
-                    Load(ld, var, *offset);
+                    Load(ld, var, offset);
                 },
 
                 [&](core::ir::StoreVectorElement* sve) {
                     a->Result(0)->RemoveUsage(usage);
 
+                    OffsetData store_offset = offset;
                     b.InsertBefore(sve, [&] {
-                        UpdateOffsetData(sve->Index(), obj->DeepestElement()->Size(), offset);
+                        UpdateOffsetData(sve->Index(), obj->DeepestElement()->Size(),
+                                         &store_offset);
                     });
-                    Store(sve, var, sve->Value(), *offset);
+                    Store(sve, var, sve->Value(), store_offset);
                 },
-                [&](core::ir::Store* store) { Store(store, var, store->From(), *offset); },
+                [&](core::ir::Store* store) { Store(store, var, store->From(), offset); },
                 [&](core::ir::CoreBuiltinCall* call) {
                     switch (call->Func()) {
                         case core::BuiltinFn::kArrayLength:
@@ -796,40 +795,40 @@ struct State {
                             // access chain _must_ have resolved to the runtime array member of the
                             // structure. So, we _must_ have set `obj` to the array member which is
                             // a runtime array.
-                            ArrayLength(var, call, obj, offset->byte_offset);
+                            ArrayLength(var, call, obj, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicAnd:
-                            AtomicAnd(var, call, offset->byte_offset);
+                            AtomicAnd(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicOr:
-                            AtomicOr(var, call, offset->byte_offset);
+                            AtomicOr(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicXor:
-                            AtomicXor(var, call, offset->byte_offset);
+                            AtomicXor(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicMin:
-                            AtomicMin(var, call, offset->byte_offset);
+                            AtomicMin(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicMax:
-                            AtomicMax(var, call, offset->byte_offset);
+                            AtomicMax(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicAdd:
-                            AtomicAdd(var, call, offset->byte_offset);
+                            AtomicAdd(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicSub:
-                            AtomicSub(var, call, offset->byte_offset);
+                            AtomicSub(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicExchange:
-                            AtomicExchange(var, call, offset->byte_offset);
+                            AtomicExchange(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicCompareExchangeWeak:
-                            AtomicCompareExchangeWeak(var, call, offset->byte_offset);
+                            AtomicCompareExchangeWeak(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicStore:
-                            AtomicStore(var, call, offset->byte_offset);
+                            AtomicStore(var, call, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicLoad:
-                            AtomicLoad(var, call, offset->byte_offset);
+                            AtomicLoad(var, call, offset.byte_offset);
                             break;
                         default:
                             TINT_UNREACHABLE() << call->Func();

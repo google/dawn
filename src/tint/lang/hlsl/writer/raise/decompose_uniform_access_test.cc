@@ -1050,5 +1050,75 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessChainReused) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("c"), ty.f32()},
+                                                    {mod.symbols.New("d"), ty.vec3<f32>()},
+                                                });
+
+    auto* var = b.Var("v", uniform, sb, core::Access::kRead);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Access(ty.ptr(uniform, ty.vec3<f32>(), core::Access::kRead), var, 1_u);
+        b.Let("b", b.LoadVectorElement(x, 1_u));
+        b.Let("c", b.LoadVectorElement(x, 2_u));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(16) {
+  c:f32 @offset(0)
+  d:vec3<f32> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<uniform, vec3<f32>, read> = access %v, 1u
+    %4:f32 = load_vector_element %3, 1u
+    %b:f32 = let %4
+    %6:f32 = load_vector_element %3, 2u
+    %c:f32 = let %6
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(16) {
+  c:f32 @offset(0)
+  d:vec3<f32> @offset(16)
+}
+
+$B1: {  # root
+  %v:ptr<uniform, array<vec4<u32>, 2>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<uniform, vec4<u32>, read> = access %v, 1u
+    %4:u32 = load_vector_element %3, 1u
+    %5:f32 = bitcast %4
+    %b:f32 = let %5
+    %7:ptr<uniform, vec4<u32>, read> = access %v, 1u
+    %8:u32 = load_vector_element %7, 2u
+    %9:f32 = bitcast %8
+    %c:f32 = let %9
+    ret
+  }
+}
+)";
+
+    Run(DecomposeUniformAccess);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

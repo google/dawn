@@ -76,7 +76,7 @@ ary_ret_1 v_13(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   Outer l_a[4] = v_13(0u);
-  Outer l_a_3 = v_10(912u);
+  Outer l_a_3 = v_10(768u);
   Inner l_a_3_a[4] = v_5(768u);
   Inner l_a_3_a_2 = v_3(896u);
   float3x3 l_a_3_a_2_m = v(896u);
