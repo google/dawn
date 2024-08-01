@@ -1995,8 +1995,10 @@ wgpu::Status DeviceBase::APIGetLimits(SupportedLimits* limits) const {
     limits->limits = mLimits.v1;
 
     if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
-        if (!mToggles.IsEnabled(Toggle::AllowUnsafeAPIs)) {
-            // If AllowUnsafeAPIs is not enabled, return the default-initialized
+        // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
+        if (!(HasFeature(Feature::Subgroups) ||
+              HasFeature(Feature::ChromiumExperimentalSubgroups))) {
+            // If subgroups feature is not enabled, return the default-initialized
             // DawnExperimentalSubgroupLimits object, where minSubgroupSize and
             // maxSubgroupSize are WGPU_LIMIT_U32_UNDEFINED.
             *subgroupLimits = DawnExperimentalSubgroupLimits{};

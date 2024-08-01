@@ -58,3 +58,8 @@ enum WGSLFeatureName {
     "unrestricted_pointer_parameters",
     "pointer_composite_access",
 };
+
+interface GPUSupportedLimits {
+    readonly attribute (unsigned long or undefined) minSubgroupSize;
+    readonly attribute (unsigned long or undefined) maxSubgroupSize;
+};

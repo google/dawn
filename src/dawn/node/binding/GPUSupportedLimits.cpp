@@ -35,7 +35,19 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUSupportedLimits
 ////////////////////////////////////////////////////////////////////////////////
 
-GPUSupportedLimits::GPUSupportedLimits(wgpu::SupportedLimits limits) : limits_(std::move(limits)) {}
+GPUSupportedLimits::GPUSupportedLimits(wgpu::SupportedLimits limits) : limits_(std::move(limits)) {
+    // Unpack the reported limits.
+    for (wgpu::ChainedStructOut* chain = limits_.nextInChain; chain; chain = chain->nextInChain) {
+        if (chain->sType == wgpu::SType::DawnExperimentalSubgroupLimits) {
+            subgroup_limits_ = *static_cast<wgpu::DawnExperimentalSubgroupLimits*>(chain);
+            // Clear to prevent using invalid pointer.
+            subgroup_limits_->nextInChain = nullptr;
+            break;
+        }
+    }
+    // Clear to prevent using invalid pointer.
+    limits_.nextInChain = nullptr;
+}
 
 uint32_t GPUSupportedLimits::getMaxTextureDimension1D(Napi::Env) {
     return limits_.limits.maxTextureDimension1D;
@@ -163,6 +175,20 @@ uint32_t GPUSupportedLimits::getMaxComputeWorkgroupSizeZ(Napi::Env) {
 
 uint32_t GPUSupportedLimits::getMaxComputeWorkgroupsPerDimension(Napi::Env) {
     return limits_.limits.maxComputeWorkgroupsPerDimension;
+}
+
+std::variant<uint32_t, interop::UndefinedType> GPUSupportedLimits::getMinSubgroupSize(Napi::Env) {
+    if (subgroup_limits_.has_value()) {
+        return subgroup_limits_->minSubgroupSize;
+    }
+    return interop::Undefined;
+}
+
+std::variant<uint32_t, interop::UndefinedType> GPUSupportedLimits::getMaxSubgroupSize(Napi::Env) {
+    if (subgroup_limits_.has_value()) {
+        return subgroup_limits_->maxSubgroupSize;
+    }
+    return interop::Undefined;
 }
 
 }  // namespace wgpu::binding
