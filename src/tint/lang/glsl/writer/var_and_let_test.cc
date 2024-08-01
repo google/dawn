@@ -50,5 +50,39 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, Var) {
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Var("a", 1_u);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  uint a = 1u;
+}
+)");
+}
+
+TEST_F(GlslWriterTest, VarZeroInit) {
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Var("a", function, ty.f32());
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  float a = 0.0f;
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

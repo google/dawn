@@ -83,8 +83,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Enable when `var` is supported
-TEST_F(GlslWriterTest, DISABLED_CallWithPointerParams) {
+TEST_F(GlslWriterTest, CallWithPointerParams) {
     auto* p1 = b.FunctionParam("p1", ty.f32());
     auto* p2 = b.FunctionParam("p2", ty.bool_());
     auto* p3 = b.FunctionParam("p3", ty.ptr<function, i32>());
@@ -97,21 +96,20 @@ TEST_F(GlslWriterTest, DISABLED_CallWithPointerParams) {
     ep->SetWorkgroupSize(1, 1, 1);
     b.Append(ep->Block(), [&] {
         auto* y = b.Var("y", 1_i);
-        b.Let("x", b.Call(f, 1.2_f, false, y));
+        b.Let("x", b.Call(f, 1.5_f, false, y));
         b.Return(ep);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-bool a(float p1, bool p2 inout int c) {
+bool a(float p1, bool p2, inout int p3) {
   return p2;
 }
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-    bool x = a(1.2f, false);
+  int y = 1;
+  bool x = a(1.5f, false, y);
 }
-
 )");
 }
 

@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -197,6 +198,7 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::Let* i) { EmitLet(i); },               //
                 [&](const core::ir::Return* r) { EmitReturn(r); },         //
                 [&](const core::ir::Unreachable*) { EmitUnreachable(); },  //
+                [&](const core::ir::Var* v) { EmitVar(Line(), v); },       //
 
                 [&](const core::ir::NextIteration*) { /* do nothing */ },                //
                 [&](const core::ir::ExitIf*) { /* do nothing handled by transform */ },  //
@@ -254,17 +256,38 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a type
     /// @param out the stream to emit too
-    /// @param ty the type to emit
+    /// @param type the type to emit
     void EmitType(StringStream& out,
-                  const core::type::Type* ty,
+                  const core::type::Type* type,
                   [[maybe_unused]] const std::string& name = "",
                   bool* name_printed = nullptr) {
         if (name_printed) {
             *name_printed = false;
         }
 
+        if (auto* ptr = type->As<core::type::MemoryView>()) {
+            switch (ptr->AddressSpace()) {
+                case core::AddressSpace::kIn: {
+                    out << "in ";
+                    break;
+                }
+                case core::AddressSpace::kOut: {
+                    out << "out ";
+                    break;
+                }
+                case core::AddressSpace::kUniform:
+                case core::AddressSpace::kPushConstant:
+                case core::AddressSpace::kHandle: {
+                    out << "uniform ";
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
         tint::Switch(
-            ty,  //
+            type,  //
             [&](const core::type::Bool*) { out << "bool"; },
             [&](const core::type::I32*) { out << "int"; },
             [&](const core::type::U32*) { out << "uint"; },
@@ -273,6 +296,9 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::F16*) {
                 EmitExtension(kAMDGpuShaderHalfFloat);
                 out << "float16_t";
+            },
+            [&](const core::type::Pointer* p) {
+                EmitType(out, p->StoreType(), name, name_printed);
             },
 
             // TODO(dsinclair): Handle remaining types
@@ -297,14 +323,37 @@ class Printer : public tint::TextGenerator {
         out << ";";
     }
 
+    void EmitVar(StringStream& out, const core::ir::Var* var) {
+        EmitTypeAndName(out, var->Result(0)->Type(), NameOf(var->Result(0)));
+        out << " = ";
+
+        if (var->Initializer()) {
+            EmitValue(out, var->Initializer());
+        } else {
+            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+            TINT_ASSERT(ptr);
+
+            EmitZeroValue(out, ptr->UnwrapPtr());
+        }
+        out << ";";
+    }
+
+    /// Emits the zero value for the given type
+    /// @param out the stream to emit too
+    /// @param ty the type
+    void EmitZeroValue(StringStream& out, const core::type::Type* ty) {
+        EmitConstant(out, ir_.constant_values.Zero(ty));
+    }
+
     void EmitValue(StringStream& out, const core::ir::Value* v) {
         tint::Switch(
             v,                                                           //
             [&](const core::ir::Constant* c) { EmitConstant(out, c); },  //
             [&](const core::ir::InstructionResult* r) {
                 tint::Switch(
-                    r->Instruction(),                                            //
-                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },  //
+                    r->Instruction(),                                                  //
+                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },        //
+                    [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },  //
                     TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
