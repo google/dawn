@@ -48,6 +48,8 @@ enum class Capability {
     kAllowRefTypes,
     /// Allows module scoped lets
     kAllowModuleScopeLets,
+    /// Allows pointers inside structures.
+    kAllowPointersInStructures,
 };
 
 /// Capabilities is a set of Capability

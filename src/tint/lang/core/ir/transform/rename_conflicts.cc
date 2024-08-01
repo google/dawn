@@ -295,6 +295,7 @@ struct State {
 Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "RenameConflicts transform",
                                           core::ir::Capabilities{
+                                              core::ir::Capability::kAllowPointersInStructures,
                                               core::ir::Capability::kAllowVectorElementPointer,
                                           });
     if (result != Success) {

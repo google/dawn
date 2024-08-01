@@ -888,6 +888,21 @@ void Validator::CheckType(const core::type::Type* root,
                     ignore_caps.Contains(Capability::kAllowRefTypes)) {
                     diag() << "reference types are not permitted here";
                     return false;
+                } else if (type != root) {
+                    // If they are allowed, reference types still cannot be nested.
+                    diag() << "nested reference types are not permitted";
+                    return false;
+                }
+                return true;
+            },
+            [&](const type::Pointer*) {
+                if (type != root) {
+                    // Nesting pointer types inside structures is guarded by a capability.
+                    if (!(root->Is<type::Struct>() &&
+                          capabilities_.Contains(Capability::kAllowPointersInStructures))) {
+                        diag() << "nested pointer types are not permitted";
+                        return false;
+                    }
                 }
                 return true;
             },
@@ -906,7 +921,7 @@ void Validator::CheckType(const core::type::Type* root,
         }
 
         if (auto* view = ty->As<type::MemoryView>(); view && seen.Add(view)) {
-            stack.Push(view);
+            stack.Push(view->StoreType());
             continue;
         }
 

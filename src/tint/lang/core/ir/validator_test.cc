@@ -1826,7 +1826,7 @@ TEST_F(IR_ValidatorTest, Access_ExtractPointerFromStruct) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod);
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersInStructures});
     ASSERT_EQ(res, Success);
 }
 
@@ -6349,6 +6349,68 @@ INSTANTIATE_TEST_SUITE_P(RefTypes,
                                           testing::Values(RefTypeBuilder<i32>,
                                                           RefTypeBuilder<bool>,
                                                           RefTypeBuilder<vec4<f32>>)));
+
+TEST_F(IR_ValidatorTest, PointerToPointer) {
+    auto* type = ty.ptr<function, ptr<function, i32>>();
+    auto* fn = b.Function("my_func", ty.void_());
+    fn->SetParams(Vector{b.FunctionParam(type)});
+    b.Append(fn->Block(), [&] {  //
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr("nested pointer types are not permitted"));
+}
+
+TEST_F(IR_ValidatorTest, ReferenceToReference) {
+    auto* type = ty.ref<function>(ty.ref<function, i32>());
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {  //
+        b.Var(type);
+        b.Return(fn);
+    });
+
+    Capabilities caps;
+    caps.Add(Capability::kAllowRefTypes);
+    auto res = ir::Validate(mod, caps);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr("nested reference types are not permitted"));
+}
+
+TEST_F(IR_ValidatorTest, PointerInStructure_WithoutCapability) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("S"), {
+                                            {mod.symbols.New("a"), ty.ptr<private_, i32>()},
+                                        });
+
+    auto* fn = b.Function("F", ty.void_());
+    auto* param = b.FunctionParam("param", str_ty);
+    fn->SetParams({param});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr("nested pointer types are not permitted"));
+}
+
+TEST_F(IR_ValidatorTest, PointerInStructure_WithCapability) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("S"), {
+                                            {mod.symbols.New("a"), ty.ptr<private_, i32>()},
+                                        });
+
+    auto* fn = b.Function("F", ty.void_());
+    auto* param = b.FunctionParam("param", str_ty);
+    fn->SetParams({param});
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersInStructures});
+    EXPECT_EQ(res, Success) << res.Failure();
+}
 
 TEST_F(IR_ValidatorTest, Switch_NoCondition) {
     auto* f = b.Function("my_func", ty.void_());

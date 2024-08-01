@@ -39,7 +39,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer::raise {
 namespace {
 
-using MslWriter_ModuleScopeVarsTest = core::ir::transform::TransformTest;
+class MslWriter_ModuleScopeVarsTest : public core::ir::transform::TransformTest {
+  public:
+    void SetUp() override { capabilities.Add(core::ir::Capability::kAllowPointersInStructures); }
+};
 
 TEST_F(MslWriter_ModuleScopeVarsTest, NoModuleScopeVars) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
