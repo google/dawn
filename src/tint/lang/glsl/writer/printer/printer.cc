@@ -30,10 +30,21 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/lang/core/ir/access.h"
+#include "src/tint/lang/core/ir/bitcast.h"
+#include "src/tint/lang/core/ir/construct.h"
+#include "src/tint/lang/core/ir/core_binary.h"
+#include "src/tint/lang/core/ir/core_unary.h"
+#include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/function.h"
+#include "src/tint/lang/core/ir/load.h"
+#include "src/tint/lang/core/ir/load_vector_element.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unreachable.h"
+#include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -59,7 +70,7 @@ class Printer : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
-    explicit Printer(const core::ir::Module& module) : ir_(module) {}
+    explicit Printer(core::ir::Module& module) : ir_(module) {}
 
     /// @param version the GLSL version information
     /// @returns the generated GLSL shader
@@ -80,7 +91,7 @@ class Printer : public tint::TextGenerator {
         }
 
         // Emit module-scope declarations.
-        EmitBlockInstructions(ir_.root_block);
+        EmitBlock(ir_.root_block);
 
         // Emit functions.
         for (auto& func : ir_.functions) {
@@ -93,7 +104,7 @@ class Printer : public tint::TextGenerator {
     }
 
   private:
-    const core::ir::Module& ir_;
+    core::ir::Module& ir_;
 
     /// The buffer holding preamble text
     TextBuffer preamble_buffer_;
@@ -104,6 +115,25 @@ class Printer : public tint::TextGenerator {
     const core::ir::Block* current_block_ = nullptr;
 
     Hashset<std::string, 4> emitted_extensions_;
+
+    /// A hashmap of value to name
+    Hashmap<const core::ir::Value*, std::string, 32> names_;
+
+    /// @returns the name of the given value, creating a new unique name if the value is unnamed in
+    /// the module.
+    std::string NameOf(const core::ir::Value* value) {
+        return names_.GetOrAdd(value, [&] {
+            auto sym = ir_.NameOf(value);
+            return sym.IsValid() ? sym.Name() : UniqueIdentifier("v");
+        });
+    }
+
+    /// @return a new, unique identifier with the given prefix.
+    /// @param prefix optional prefix to apply to the generated identifier. If empty
+    /// "tint_symbol" will be used.
+    std::string UniqueIdentifier(const std::string& prefix /* = "" */) {
+        return ir_.symbols.New(prefix).Name();
+    }
 
     /// Emit the function
     /// @param func the function to emit
@@ -140,23 +170,35 @@ class Printer : public tint::TextGenerator {
     /// Emit a block
     /// @param block the block to emit
     void EmitBlock(const core::ir::Block* block) {
-        // TODO(dsinclair): Handle marking inline
-        // MarkInlinable(block);
-
-        EmitBlockInstructions(block);
-    }
-
-    /// Emit the instructions in a block
-    /// @param block the block with the instructions to emit
-    void EmitBlockInstructions(const core::ir::Block* block) {
         TINT_SCOPED_ASSIGNMENT(current_block_, block);
 
         for (auto* inst : *block) {
             tint::Switch(
                 inst,                                                      //
+                [&](const core::ir::Call* i) { EmitCallStmt(i); },         //
                 [&](const core::ir::Return* r) { EmitReturn(r); },         //
                 [&](const core::ir::Unreachable*) { EmitUnreachable(); },  //
+
+                [&](const core::ir::NextIteration*) { /* do nothing */ },                //
+                [&](const core::ir::ExitIf*) { /* do nothing handled by transform */ },  //
+                                                                                         //
+                [&](const core::ir::Access*) { /* inlined */ },                          //
+                [&](const core::ir::Bitcast*) { /* inlined */ },                         //
+                [&](const core::ir::Construct*) { /* inlined */ },                       //
+                [&](const core::ir::CoreBinary*) { /* inlined */ },                      //
+                [&](const core::ir::CoreUnary*) { /* inlined */ },                       //
+                [&](const core::ir::Load*) { /* inlined */ },                            //
+                [&](const core::ir::LoadVectorElement*) { /* inlined */ },               //
+                [&](const core::ir::Swizzle*) { /* inlined */ },                         //
                 TINT_ICE_ON_NO_MATCH);
+        }
+    }
+
+    void EmitCallStmt(const core::ir::Call* c) {
+        if (!c->Result(0)->IsUsed()) {
+            auto out = Line();
+            EmitValue(out, c->Result(0));
+            out << ";";
         }
     }
 
@@ -213,9 +255,29 @@ class Printer : public tint::TextGenerator {
         tint::Switch(
             v,                                                           //
             [&](const core::ir::Constant* c) { EmitConstant(out, c); },  //
-
+            [&](const core::ir::InstructionResult* r) {
+                tint::Switch(
+                    r->Instruction(),                                            //
+                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },  //
+                    TINT_ICE_ON_NO_MATCH);
+            },
             // TODO(dsinclair): Handle remaining value types
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Emits a user call instruction
+    void EmitUserCall(StringStream& out, const core::ir::UserCall* c) {
+        out << NameOf(c->Target()) << "(";
+        size_t i = 0;
+        for (const auto* arg : c->Args()) {
+            if (i > 0) {
+                out << ", ";
+            }
+            ++i;
+
+            EmitValue(out, arg);
+        }
+        out << ")";
     }
 
     void EmitConstant(StringStream& out, const core::ir::Constant* c) {
@@ -240,7 +302,7 @@ class Printer : public tint::TextGenerator {
 };
 }  // namespace
 
-Result<std::string> Print(const core::ir::Module& module, const Version& version) {
+Result<std::string> Print(core::ir::Module& module, const Version& version) {
     return Printer{module}.Generate(version);
 }
 

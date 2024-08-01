@@ -87,6 +87,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "call_test.cc",
     "constant_test.cc",
     "function_test.cc",
   ] + select({
