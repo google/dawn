@@ -653,6 +653,76 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+// Test that when we arrayLength is called on a parameter but the originating variable at the
+// callsite is not in the bindpoint map, we reintroduce an arrayLength call instead of passing
+// undef to the callee.
+TEST_F(IR_ArrayLengthFromUniformTest, ViaParameter_NotInMap) {
+    auto* arr = ty.array<i32>();
+    auto* arr_ptr = ty.ptr<storage>(arr);
+
+    auto* buffer = b.Var("buffer", arr_ptr);
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* bar = b.Function("bar", ty.u32());
+    auto* param = b.FunctionParam("param", arr_ptr);
+    bar->SetParams({param});
+    b.Append(bar->Block(), [&] {
+        auto* len = b.Call<u32>(BuiltinFn::kArrayLength, param);
+        b.Return(bar, len);
+    });
+
+    auto* foo = b.Function("foo", ty.u32());
+    b.Append(foo->Block(), [&] {
+        auto* len = b.Call<u32>(bar, buffer);
+        b.Return(foo, len);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%bar = func(%param:ptr<storage, array<i32>, read_write>):u32 {
+  $B2: {
+    %4:u32 = arrayLength %param
+    ret %4
+  }
+}
+%foo = func():u32 {
+  $B3: {
+    %6:u32 = call %bar, %buffer
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
+  $B2: {
+    ret %tint_array_length
+  }
+}
+%foo = func():u32 {
+  $B3: {
+    %6:u32 = arrayLength %buffer
+    %7:u32 = call %bar, %buffer, %6
+    ret %7
+  }
+}
+)";
+
+    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_index;
+    Run(ArrayLengthFromUniform, BindingPoint{1, 2}, bindpoint_to_index);
+
+    EXPECT_EQ(expect, str());
+}
+
 // Test that we re-use the length parameter for multiple arrayLength calls on the same parameter.
 TEST_F(IR_ArrayLengthFromUniformTest, ViaParameter_MultipleCallsSameParameter) {
     auto* arr = ty.array<i32>();

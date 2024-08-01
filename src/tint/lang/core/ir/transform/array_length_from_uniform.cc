@@ -134,7 +134,15 @@ struct State {
                 if (auto* call = use.instruction->As<core::ir::UserCall>()) {
                     // Get the length of the array in the calling function and pass that.
                     auto* arg = call->Args()[array_param->Index()];
-                    call->AppendArg(GetComputedLength(arg, call));
+                    auto* len = GetComputedLength(arg, call);
+                    if (!len) {
+                        // The originating variable was not in the bindpoint map, so we need to call
+                        // the original arrayLength builtin as the callee is expecting a value.
+                        b.InsertBefore(call, [&] {
+                            len = b.Call<u32>(BuiltinFn::kArrayLength, arg)->Result(0);
+                        });
+                    }
+                    call->AppendArg(len);
                 }
             });
 
