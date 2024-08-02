@@ -396,6 +396,7 @@ dawn_test("dawn_unittests") {
     "unittests/validation/InternalUsageValidationTests.cpp",
     "unittests/validation/LabelTests.cpp",
     "unittests/validation/MinimumBufferSizeValidationTests.cpp",
+    "unittests/validation/MultiDrawIndirectValidationTests.cpp",
     "unittests/validation/MultipleDeviceTests.cpp",
     "unittests/validation/ObjectCachingTests.cpp",
     "unittests/validation/OverridableConstantsValidationTests.cpp",

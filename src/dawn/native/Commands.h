@@ -63,6 +63,8 @@ enum class Command {
     DrawIndexed,
     DrawIndirect,
     DrawIndexedIndirect,
+    MultiDrawIndirect,
+    MultiDrawIndexedIndirect,
     EndComputePass,
     EndOcclusionQuery,
     EndRenderPass,
@@ -255,6 +257,19 @@ struct DrawIndirectCmd {
 };
 
 struct DrawIndexedIndirectCmd : DrawIndirectCmd {};
+
+struct MultiDrawIndirectCmd {
+    MultiDrawIndirectCmd();
+    ~MultiDrawIndirectCmd();
+
+    Ref<BufferBase> indirectBuffer;
+    uint64_t indirectOffset;
+    uint32_t maxDrawCount;
+    Ref<BufferBase> drawCountBuffer;
+    uint64_t drawCountOffset;
+};
+
+struct MultiDrawIndexedIndirectCmd : MultiDrawIndirectCmd {};
 
 struct EndComputePassCmd {
     EndComputePassCmd();

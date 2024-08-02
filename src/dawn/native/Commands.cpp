@@ -109,6 +109,18 @@ void FreeCommands(CommandIterator* commands) {
                 draw->~DrawIndexedIndirectCmd();
                 break;
             }
+            case Command::MultiDrawIndirect: {
+                MultiDrawIndirectCmd* cmd = commands->NextCommand<MultiDrawIndirectCmd>();
+                cmd->~MultiDrawIndirectCmd();
+                break;
+            }
+            case Command::MultiDrawIndexedIndirect: {
+                MultiDrawIndexedIndirectCmd* cmd =
+                    commands->NextCommand<MultiDrawIndexedIndirectCmd>();
+                cmd->~MultiDrawIndexedIndirectCmd();
+                break;
+            }
+
             case Command::EndComputePass: {
                 EndComputePassCmd* cmd = commands->NextCommand<EndComputePassCmd>();
                 cmd->~EndComputePassCmd();
@@ -285,6 +297,14 @@ void SkipCommand(CommandIterator* commands, Command type) {
             commands->NextCommand<DrawIndexedIndirectCmd>();
             break;
 
+        case Command::MultiDrawIndirect:
+            commands->NextCommand<MultiDrawIndirectCmd>();
+            break;
+
+        case Command::MultiDrawIndexedIndirect:
+            commands->NextCommand<MultiDrawIndexedIndirectCmd>();
+            break;
+
         case Command::EndComputePass:
             commands->NextCommand<EndComputePassCmd>();
             break;
@@ -421,6 +441,9 @@ DispatchIndirectCmd::~DispatchIndirectCmd() = default;
 
 DrawIndirectCmd::DrawIndirectCmd() = default;
 DrawIndirectCmd::~DrawIndirectCmd() = default;
+
+MultiDrawIndirectCmd::MultiDrawIndirectCmd() = default;
+MultiDrawIndirectCmd::~MultiDrawIndirectCmd() = default;
 
 EndComputePassCmd::EndComputePassCmd() = default;
 EndComputePassCmd::~EndComputePassCmd() = default;

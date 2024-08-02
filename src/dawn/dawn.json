@@ -2667,7 +2667,8 @@
             {"value": 51, "name": "y cb cr vulkan samplers", "tags": ["dawn"]},
             {"value": 52, "name": "shader module compilation options", "tags": ["dawn"]},
 
-            {"value": 53, "name": "dawn load resolve texture", "tags": ["dawn"]}
+            {"value": 53, "name": "dawn load resolve texture", "tags": ["dawn"]},
+            {"value": 54, "name": "multi draw indirect", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -3528,6 +3529,27 @@
                     {"name": "indirect buffer", "type": "buffer"},
                     {"name": "indirect offset", "type": "uint64_t"}
               ]
+            },
+            {
+                "name": "multi draw indirect",
+                "args": [
+                    {"name": "indirect buffer", "type": "buffer"},
+                    {"name": "indirect offset", "type": "uint64_t"},
+                    {"name": "max draw count", "type": "uint32_t"},
+                    {"name": "draw count buffer", "type": "buffer", "optional": true},
+                    {"name": "draw count buffer offset", "type": "uint64_t", "default": "0"}
+
+                ]
+            },
+            {
+                "name": "multi draw indexed indirect",
+                "args": [
+                    {"name": "indirect buffer", "type": "buffer"},
+                    {"name": "indirect offset", "type": "uint64_t"},
+                    {"name": "max draw count", "type": "uint32_t"},
+                    {"name": "draw count buffer", "type": "buffer", "optional": true},
+                    {"name": "draw count buffer offset", "type": "uint64_t", "default": "0"}
+                ]
             },
             {
               "name": "execute bundles",
