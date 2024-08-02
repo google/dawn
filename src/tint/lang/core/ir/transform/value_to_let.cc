@@ -176,6 +176,7 @@ struct State {
 Result<SuccessType> ValueToLet(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "ValueToLet transform",
                                           core::ir::Capabilities{
+                                              core::ir::Capability::kAllow8BitIntegers,
                                               core::ir::Capability::kAllowPointersInStructures,
                                               core::ir::Capability::kAllowVectorElementPointer,
                                           });

@@ -77,6 +77,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -84,6 +85,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/msl/barrier_type.h"
@@ -119,6 +121,7 @@ class Printer : public tint::TextGenerator {
         auto valid =
             core::ir::ValidateAndDumpIfNeeded(ir_, "MSL writer",
                                               core::ir::Capabilities{
+                                                  core::ir::Capability::kAllow8BitIntegers,
                                                   core::ir::Capability::kAllowPointersInStructures,
                                               });
         if (valid != Success) {
@@ -403,7 +406,7 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::LoadVectorElement*) { /* inlined */ },  //
                 [&](const core::ir::Swizzle*) { /* inlined */ },            //
                 [&](const core::ir::Bitcast*) { /* inlined */ },            //
-                [&](const core::ir::CoreBinary*) { /* inlined */ },         //
+                [&](const core::ir::Binary*) { /* inlined */ },             //
                 [&](const core::ir::CoreUnary*) { /* inlined */ },          //
                 [&](const core::ir::Load*) { /* inlined */ },               //
                 [&](const core::ir::Construct*) { /* inlined */ },          //
@@ -419,7 +422,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::InstructionResult* r) {
                 Switch(
                     r->Instruction(),                                                    //
-                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },          //
+                    [&](const core::ir::Binary* b) { EmitBinary(out, b); },              //
                     [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },            //
                     [&](const core::ir::Convert* b) { EmitConvert(out, b); },            //
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },        //
@@ -465,7 +468,7 @@ class Printer : public tint::TextGenerator {
 
     /// Emit a binary instruction
     /// @param b the binary instruction
-    void EmitBinary(StringStream& out, const core::ir::CoreBinary* b) {
+    void EmitBinary(StringStream& out, const core::ir::Binary* b) {
         auto kind = [&] {
             switch (b->Op()) {
                 case core::BinaryOp::kAdd:
@@ -1100,6 +1103,8 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::F16*) { out << "half"; },   //
             [&](const core::type::I32*) { out << "int"; },    //
             [&](const core::type::U32*) { out << "uint"; },   //
+            [&](const core::type::I8*) { out << "char"; },    //
+            [&](const core::type::U8*) { out << "uchar"; },   //
             [&](const core::type::Array* arr) { EmitArrayType(out, arr); },
             [&](const core::type::Vector* vec) { EmitVectorType(out, vec); },
             [&](const core::type::Matrix* mat) { EmitMatrixType(out, mat); },
