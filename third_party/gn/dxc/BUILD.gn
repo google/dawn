@@ -1184,7 +1184,6 @@ static_library("dxclib") {
     "$dawn_dxc_dir/lib/DXIL/DxilTypeSystem.cpp",
     "$dawn_dxc_dir/lib/DXIL/DxilUtil.cpp",
     "$dawn_dxc_dir/lib/DXIL/DxilUtilDbgInfoAndMisc.cpp",
-    "$dawn_dxc_dir/lib/DXIL/DxilWaveMatrix.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/FileIOHelper.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/Global.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/HLSLOptions.cpp",
