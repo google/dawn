@@ -156,3 +156,9 @@ tint.dot
 
 ### pyenv files
 /.python-version
+
+### Clangd cached index files
+/.cache
+
+### The 'compile_commands' file can be generated at root
+compile_commands.json

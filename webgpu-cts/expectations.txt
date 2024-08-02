@@ -1392,24 +1392,6 @@ crbug.com/351372334 webgpu:shader,validation,expression,call,builtin,insertBits:
 crbug.com/351372334 webgpu:shader,validation,expression,call,builtin,insertBits:count_offset:offsetStage="override";countStage="constant" [ Failure ]
 crbug.com/351372334 webgpu:shader,validation,expression,call,builtin,insertBits:count_offset:offsetStage="override";countStage="override" [ Failure ]
 
-# validation of diagnostic duplicate name at same location
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="compound";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="for_body";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="for_stmt";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="function";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="if_else";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="if_stmt";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="if_then";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="loop_body";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="loop_continuing";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="loop_stmt";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="switch_body";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="switch_case";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="switch_default";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="switch_stmt";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="while_body";same_rule=true [ Failure ]
-crbug.com/351370529 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:loc="while_stmt";same_rule=true [ Failure ]
-
 # some missing tint validation errors
 crbug.com/350775869 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="constant";* [ Failure ]
 crbug.com/350775869 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="override";* [ Failure ]

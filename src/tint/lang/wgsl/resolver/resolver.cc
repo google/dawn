@@ -222,7 +222,8 @@ bool Resolver::ResolveInternal() {
 
     SetShadows();
 
-    if (!validator_.DiagnosticControls(diagnostic_controls, "directive")) {
+    if (!validator_.DiagnosticControls(diagnostic_controls, "directive",
+                                       DiagnosticDuplicates::kAllowed)) {
         return false;
     }
 

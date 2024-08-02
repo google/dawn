@@ -362,7 +362,10 @@ TEST_F(ResolverDiagnosticControlTest, Conflict_SameNameSameSeverity_Attribute) {
         DiagnosticAttribute(wgsl::DiagnosticSeverity::kError,
                             DiagnosticRuleName(Source{{56, 78}}, "chromium", "unreachable_code"));
     Func("foo", {}, ty.void_(), {}, Vector{attr1, attr2});
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(56:78 error: duplicate diagnostic attribute
+12:34 note: first attribute declared here)");
 }
 
 TEST_F(ResolverDiagnosticControlTest, Conflict_SameNameDifferentSeverity_Attribute) {
@@ -406,6 +409,20 @@ TEST_F(ResolverDiagnosticControlTest, Conflict_DifferentUnknownNameDifferentSeve
         DiagnosticAttribute(wgsl::DiagnosticSeverity::kOff, "chromium", "unreachable_codex");
     Func("foo", {}, ty.void_(), {}, Vector{attr1, attr2});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverDiagnosticControlTest, Conflict_SameNameSameInfoSeverity_Attribute) {
+    auto* attr1 =
+        DiagnosticAttribute(wgsl::DiagnosticSeverity::kInfo,
+                            DiagnosticRuleName(Source{{12, 34}}, "chromium", "unreachable_code"));
+    auto* attr2 =
+        DiagnosticAttribute(wgsl::DiagnosticSeverity::kInfo,
+                            DiagnosticRuleName(Source{{56, 78}}, "chromium", "unreachable_code"));
+    Func("foo", {}, ty.void_(), {}, Vector{attr1, attr2});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(56:78 error: duplicate diagnostic attribute
+12:34 note: first attribute declared here)");
 }
 
 }  // namespace

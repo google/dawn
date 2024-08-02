@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_WGSL_RESOLVER_VALIDATOR_H_
 #define SRC_TINT_LANG_WGSL_RESOLVER_VALIDATOR_H_
 
+#include <cstdint>
 #include <set>
 #include <string>
 #include <utility>
@@ -107,6 +108,14 @@ struct TypeAndAddressSpace {
 
 /// DiagnosticFilterStack is a scoped stack of diagnostic filters.
 using DiagnosticFilterStack = ScopeStack<wgsl::DiagnosticRule, wgsl::DiagnosticSeverity>;
+
+/// Enumerator of duplication behavior for diagnostics.
+enum class DiagnosticDuplicates : uint8_t {
+    // Diagnostic duplicates are allowed.
+    kAllowed,
+    // Diagnostic duplicates are not allowed.
+    kDenied,
+};
 
 /// Validation logic for various ast nodes. The validations in general should
 /// be shallow and depend on the resolver to call on children. The validations
@@ -553,9 +562,11 @@ class Validator {
     /// Validates a set of diagnostic controls.
     /// @param controls the diagnostic controls to validate
     /// @param use the place where the controls are being used ("directive" or "attribute")
+    /// @param allow_duplicates if same name same severity diagnostics are allowed
     /// @returns true on success, false otherwise.
     bool DiagnosticControls(VectorRef<const ast::DiagnosticControl*> controls,
-                            const char* use) const;
+                            const char* use,
+                            DiagnosticDuplicates allow_duplicates) const;
 
     /// Validates a address space layout
     /// @param type the type to validate

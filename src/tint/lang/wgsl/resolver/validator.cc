@@ -2921,11 +2921,12 @@ bool Validator::NoDuplicateAttributes(VectorRef<const ast::Attribute*> attribute
             }
         }
     }
-    return DiagnosticControls(diagnostic_controls, "attribute");
+    return DiagnosticControls(diagnostic_controls, "attribute", DiagnosticDuplicates::kDenied);
 }
 
 bool Validator::DiagnosticControls(VectorRef<const ast::DiagnosticControl*> controls,
-                                   const char* use) const {
+                                   const char* use,
+                                   DiagnosticDuplicates allow_duplicates) const {
     // Make sure that no two diagnostic controls conflict.
     // They conflict if the rule name is the same and the severity is different.
     Hashmap<std::pair<Symbol, Symbol>, const ast::DiagnosticControl*, 8> diagnostics;
@@ -2934,12 +2935,18 @@ bool Validator::DiagnosticControls(VectorRef<const ast::DiagnosticControl*> cont
         auto name = dc->rule_name->name->symbol;
 
         auto diag_added = diagnostics.Add(std::make_pair(category, name), dc);
-        if (!diag_added && diag_added.value->severity != dc->severity) {
-            AddError(dc->rule_name->source) << "conflicting diagnostic " << use;
-            AddNote(diag_added.value->rule_name->source)
-                << "severity of " << style::Code(dc->rule_name->String()) << " set to "
-                << style::Code(dc->severity) << " here";
-            return false;
+        if (!diag_added) {
+            if (diag_added.value->severity != dc->severity) {
+                AddError(dc->rule_name->source) << "conflicting diagnostic " << use;
+                AddNote(diag_added.value->rule_name->source)
+                    << "severity of " << style::Code(dc->rule_name->String()) << " set to "
+                    << style::Code(dc->severity) << " here";
+                return false;
+            } else if (allow_duplicates == DiagnosticDuplicates::kDenied) {
+                AddError(dc->rule_name->source) << "duplicate diagnostic " << use;
+                AddNote(diag_added.value->rule_name->source) << "first " << use << " declared here";
+                return false;
+            }
         }
     }
     return true;
