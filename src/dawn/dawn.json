@@ -2668,7 +2668,8 @@
             {"value": 52, "name": "shader module compilation options", "tags": ["dawn"]},
 
             {"value": 53, "name": "dawn load resolve texture", "tags": ["dawn"]},
-            {"value": 54, "name": "multi draw indirect", "tags": ["dawn"]}
+            {"value": 54, "name": "dawn partial load resolve texture", "tags": ["dawn"]},
+            {"value": 55, "name": "multi draw indirect", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -3455,6 +3456,18 @@
             {"name": "max draw count", "type": "uint64_t", "default": 50000000}
         ]
     },
+    "render pass descriptor expand resolve rect": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["render pass descriptor"],
+        "members": [
+            {"name": "x", "type": "uint32_t"},
+            {"name": "y", "type": "uint32_t"},
+            {"name": "width", "type": "uint32_t"},
+            {"name": "height", "type": "uint32_t"}
+        ]
+    },
     "render pass pixel local storage": {
         "category": "structure",
         "tags": ["dawn"],
@@ -4237,6 +4250,7 @@
             {"value": 2, "name": "shader module WGSL descriptor"},
             {"value": 3, "name": "primitive depth clip control"},
             {"value": 4, "name": "render pass descriptor max draw count"},
+            {"value": 5, "name": "render pass descriptor expand resolve rect"},
 
             {"value": 0, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
 

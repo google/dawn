@@ -108,6 +108,13 @@ static constexpr wgpu::TextureViewDimension kInternalInputAttachmentDim =
 static constexpr uint32_t kEnumPrefixMask = 0xFFFF'0000;
 static constexpr uint32_t kDawnEnumPrefix = 0x0005'0000;
 
+struct Rect2D {
+    uint32_t x;
+    uint32_t y;
+    uint32_t width;
+    uint32_t height;
+};
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_DAWN_PLATFORM_H_

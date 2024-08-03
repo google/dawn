@@ -109,6 +109,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_YCbCrVulkanSamplers:
         case WGPUFeatureName_ShaderModuleCompilationOptions:
         case WGPUFeatureName_DawnLoadResolveTexture:
+        case WGPUFeatureName_DawnPartialLoadResolveTexture:
         case WGPUFeatureName_Subgroups:
         case WGPUFeatureName_SubgroupsF16:
             return true;

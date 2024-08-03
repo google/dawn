@@ -35,6 +35,7 @@
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/HashUtils.h"
 #include "dawn/native/BindGroup.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/InternalPipelineStore.h"
@@ -60,7 +61,7 @@ constexpr char kBlitToColorVS[] = R"(
 }
 )";
 
-std::string GenerateFS(const BlitColorToColorWithDrawPipelineKey& pipelineKey) {
+std::string GenerateExpandFS(const BlitColorToColorWithDrawPipelineKey& pipelineKey) {
     std::ostringstream outputStructStream;
     std::ostringstream assignOutputsStream;
     std::ostringstream finalStream;
@@ -77,7 +78,7 @@ std::string GenerateFS(const BlitColorToColorWithDrawPipelineKey& pipelineKey) {
 
     finalStream << "struct OutputColor {\n" << outputStructStream.str() << "}\n\n";
     finalStream << R"(
-@fragment fn blit_to_color(@builtin(position) position : vec4f) -> OutputColor {
+@fragment fn expand_multisample(@builtin(position) position : vec4f) -> OutputColor {
     var outputColor : OutputColor;
 )" << assignOutputsStream.str()
                 << R"(
@@ -87,7 +88,26 @@ std::string GenerateFS(const BlitColorToColorWithDrawPipelineKey& pipelineKey) {
     return finalStream.str();
 }
 
-ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
+// Generate the fragment shader to average multiple samples into one.
+std::string GenerateResolveFS(uint32_t sampleCount) {
+    std::ostringstream ss;
+
+    ss << R"(
+@group(0) @binding(0) var srcTex : texture_multisampled_2d<f32>;
+
+@fragment
+fn resolve_multisample(@builtin(position) position : vec4f) -> @location(0) vec4f {
+    var sum = vec4f(0.0, 0.0, 0.0, 0.0);)";
+    ss << "\n";
+    for (uint32_t sample = 0; sample < sampleCount; ++sample) {
+        ss << absl::StrFormat("    sum += textureLoad(srcTex, vec2u(position.xy), %u);\n", sample);
+    }
+    ss << absl::StrFormat("    return sum / %u;\n", sampleCount) << "}\n";
+
+    return ss.str();
+}
+
+ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
     DeviceBase* device,
     const BlitColorToColorWithDrawPipelineKey& pipelineKey,
     uint8_t colorAttachmentCount) {
@@ -109,14 +129,14 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     DAWN_TRY_ASSIGN(vshaderModule, device->CreateShaderModule(&shaderModuleDesc));
 
     // fragment shader's source will depend on pipeline key.
-    std::string fsCode = GenerateFS(pipelineKey);
+    std::string fsCode = GenerateExpandFS(pipelineKey);
     wgslDesc.code = fsCode.c_str();
     Ref<ShaderModuleBase> fshaderModule;
     DAWN_TRY_ASSIGN(fshaderModule, device->CreateShaderModule(&shaderModuleDesc));
 
     FragmentState fragmentState = {};
     fragmentState.module = fshaderModule.Get();
-    fragmentState.entryPoint = "blit_to_color";
+    fragmentState.entryPoint = "expand_multisample";
 
     // Color target states.
     PerColorAttachment<ColorTargetState> colorTargets = {};
@@ -142,7 +162,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     fragmentState.targets = colorTargets.data();
 
     RenderPipelineDescriptor renderPipelineDesc = {};
-    renderPipelineDesc.label = "blit_color_to_color";
+    renderPipelineDesc.label = "expand_multisample";
     renderPipelineDesc.vertex.module = vshaderModule.Get();
     renderPipelineDesc.vertex.entryPoint = "vert_fullscreen_quad";
     renderPipelineDesc.fragment = &fragmentState;
@@ -190,11 +210,63 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     return pipeline;
 }
 
+ResultOrError<Ref<RenderPipelineBase>> GetOrCreateResolveMultisamplePipeline(
+    DeviceBase* device,
+    const ResolveMultisampleWithDrawPipelineKey& pipelineKey) {
+    // Try finding the pipeline from the cache.
+    InternalPipelineStore* store = device->GetInternalPipelineStore();
+    {
+        auto it = store->resolveMultisamplePipelines.find(pipelineKey);
+        if (it != store->resolveMultisamplePipelines.end()) {
+            return it->second;
+        }
+    }
+
+    // vertex shader's source.
+    ShaderModuleWGSLDescriptor wgslDesc = {};
+    ShaderModuleDescriptor shaderModuleDesc = {};
+    shaderModuleDesc.nextInChain = &wgslDesc;
+    wgslDesc.code = kBlitToColorVS;
+
+    Ref<ShaderModuleBase> vshaderModule;
+    DAWN_TRY_ASSIGN(vshaderModule, device->CreateShaderModule(&shaderModuleDesc));
+
+    // fragment shader's source will depend on sample count.
+    std::string fsCode = GenerateResolveFS(pipelineKey.sampleCount);
+    wgslDesc.code = fsCode.c_str();
+    Ref<ShaderModuleBase> fshaderModule;
+    DAWN_TRY_ASSIGN(fshaderModule, device->CreateShaderModule(&shaderModuleDesc));
+
+    FragmentState fragmentState = {};
+    fragmentState.module = fshaderModule.Get();
+    fragmentState.entryPoint = "resolve_multisample";
+
+    // Color target states.
+    ColorTargetState colorTarget = {};
+    colorTarget.format = pipelineKey.colorTargetFormat;
+
+    fragmentState.targetCount = 1;
+    fragmentState.targets = &colorTarget;
+
+    RenderPipelineDescriptor renderPipelineDesc = {};
+    renderPipelineDesc.label = "resolve_multisample";
+    renderPipelineDesc.vertex.module = vshaderModule.Get();
+    renderPipelineDesc.vertex.entryPoint = "vert_fullscreen_quad";
+    renderPipelineDesc.fragment = &fragmentState;
+
+    Ref<RenderPipelineBase> pipeline;
+    DAWN_TRY_ASSIGN(pipeline, device->CreateRenderPipeline(&renderPipelineDesc));
+
+    store->resolveMultisamplePipelines.emplace(pipelineKey, pipeline);
+    return pipeline;
+}
+
 }  // namespace
 
-MaybeError ExpandResolveTextureWithDraw(DeviceBase* device,
-                                        RenderPassEncoder* renderEncoder,
-                                        const RenderPassDescriptor* renderPassDescriptor) {
+MaybeError ExpandResolveTextureWithDraw(
+    DeviceBase* device,
+    RenderPassEncoder* renderEncoder,
+    const UnpackedPtr<RenderPassDescriptor>& renderPassDescriptor) {
     DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     DAWN_ASSERT(device->CanTextureLoadResolveTargetInTheSameRenderpass());
 
@@ -234,7 +306,7 @@ MaybeError ExpandResolveTextureWithDraw(DeviceBase* device,
     }
 
     Ref<RenderPipelineBase> pipeline;
-    DAWN_TRY_ASSIGN(pipeline, GetOrCreateColorBlitPipeline(
+    DAWN_TRY_ASSIGN(pipeline, GetOrCreateExpandMultisamplePipeline(
                                   device, pipelineKey, renderPassDescriptor->colorAttachmentCount));
 
     Ref<BindGroupLayoutBase> bgl;
@@ -261,9 +333,16 @@ MaybeError ExpandResolveTextureWithDraw(DeviceBase* device,
     }
 
     // Draw to perform the blit.
-    renderEncoder->APISetBindGroup(0, bindGroup.Get(), 0, nullptr);
+    renderEncoder->APISetBindGroup(0, bindGroup.Get());
     renderEncoder->APISetPipeline(pipeline.Get());
-    renderEncoder->APIDraw(3, 1, 0, 0);
+
+    if (const auto* rect = renderPassDescriptor.Get<RenderPassDescriptorExpandResolveRect>()) {
+        // TODO(chromium:344814092): Prevent the scissor to be reset to outside of this region by
+        // passing the scissor bound to the render pass creation.
+        renderEncoder->APISetScissorRect(rect->x, rect->y, rect->width, rect->height);
+    }
+
+    renderEncoder->APIDraw(3);
 
     return {};
 }
@@ -302,6 +381,63 @@ bool BlitColorToColorWithDrawPipelineKey::EqualityFunc::operator()(
     }
 
     return a.depthStencilFormat == b.depthStencilFormat && a.sampleCount == b.sampleCount;
+}
+
+MaybeError ResolveMultisampleWithDraw(DeviceBase* device,
+                                      CommandEncoder* encoder,
+                                      Rect2D rect,
+                                      TextureViewBase* src,
+                                      TextureViewBase* dst) {
+    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+
+    ResolveMultisampleWithDrawPipelineKey pipelineKey{dst->GetFormat().format,
+                                                      src->GetTexture()->GetSampleCount()};
+    Ref<RenderPipelineBase> pipeline;
+    DAWN_TRY_ASSIGN(pipeline, GetOrCreateResolveMultisamplePipeline(device, pipelineKey));
+
+    Ref<BindGroupLayoutBase> bindGroupLayout;
+    DAWN_TRY_ASSIGN(bindGroupLayout, pipeline->GetBindGroupLayout(0));
+
+    Ref<BindGroupBase> bindGroup;
+    DAWN_TRY_ASSIGN(bindGroup, utils::MakeBindGroup(device, bindGroupLayout, {{0, src}},
+                                                    UsageValidationMode::Internal));
+
+    // Color attachment descriptor.
+    RenderPassColorAttachment colorAttachmentDesc;
+    colorAttachmentDesc.view = dst;
+    colorAttachmentDesc.loadOp = wgpu::LoadOp::Load;
+    colorAttachmentDesc.storeOp = wgpu::StoreOp::Store;
+
+    // Create render pass.
+    RenderPassDescriptor renderPassDesc;
+    renderPassDesc.colorAttachmentCount = 1;
+    renderPassDesc.colorAttachments = &colorAttachmentDesc;
+    Ref<RenderPassEncoder> renderEncoder = encoder->BeginRenderPass(&renderPassDesc);
+
+    // Draw to perform the resolve.
+    renderEncoder->APISetBindGroup(0, bindGroup.Get(), 0, nullptr);
+    renderEncoder->APISetPipeline(pipeline.Get());
+    renderEncoder->APISetScissorRect(rect.x, rect.y, rect.width, rect.height);
+    renderEncoder->APIDraw(3);
+    renderEncoder->End();
+
+    return {};
+}
+
+size_t ResolveMultisampleWithDrawPipelineKey::HashFunc::operator()(
+    const ResolveMultisampleWithDrawPipelineKey& key) const {
+    size_t hash = 0;
+
+    HashCombine(&hash, key.colorTargetFormat);
+    HashCombine(&hash, key.sampleCount);
+
+    return hash;
+}
+
+bool ResolveMultisampleWithDrawPipelineKey::EqualityFunc::operator()(
+    const ResolveMultisampleWithDrawPipelineKey& a,
+    const ResolveMultisampleWithDrawPipelineKey& b) const {
+    return a.colorTargetFormat == b.colorTargetFormat && a.sampleCount == b.sampleCount;
 }
 
 }  // namespace dawn::native

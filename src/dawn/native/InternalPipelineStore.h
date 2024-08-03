@@ -104,6 +104,8 @@ struct InternalPipelineStore {
     absl::flat_hash_map<wgpu::TextureFormat, Ref<RenderPipelineBase>> depthBlitPipelines;
 
     BlitColorToColorWithDrawPipelinesCache expandResolveTexturePipelines;
+
+    ResolveMultisampleWithDrawPipelinesCache resolveMultisamplePipelines;
 };
 
 }  // namespace dawn::native

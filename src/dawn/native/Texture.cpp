@@ -806,6 +806,13 @@ TextureBase::TextureBase(DeviceBase* device, const UnpackedPtr<TextureDescriptor
     if (mInternalUsage & wgpu::TextureUsage::StorageBinding) {
         AddInternalUsage(kReadOnlyStorageTexture | kWriteOnlyStorageTexture);
     }
+
+    bool supportsMSAAPartialResolve = device->HasFeature(Feature::DawnPartialLoadResolveTexture) &&
+                                      GetSampleCount() > 1 &&
+                                      (GetUsage() & wgpu::TextureUsage::RenderAttachment);
+    if (supportsMSAAPartialResolve) {
+        AddInternalUsage(wgpu::TextureUsage::TextureBinding);
+    }
 }
 
 TextureBase::~TextureBase() = default;
