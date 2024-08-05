@@ -81,7 +81,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-07-25 03:40:21AM
+# Last rolled: 2024-08-05 07:59:00AM
 
 # Flaky on all platforms
 crbug.com/42251085 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ Failure ]
@@ -384,12 +384,12 @@ crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,p
 crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 
 # Fine derivative tests don't work on compat (and in core)
-crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
-crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:* [ Failure ]
-crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdy:* [ Failure ]
-crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
-crbug.com/42251283 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
+crbug.com/42251283 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,dpdx:* [ Failure ]
+crbug.com/42251283 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,dpdxCoarse:* [ Failure ]
+crbug.com/42251283 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
+crbug.com/42251283 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,dpdy:* [ Failure ]
+crbug.com/42251283 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
+crbug.com/42251283 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
@@ -510,7 +510,6 @@ crbug.com/dawn/0000 webgpu:api,operation,uncapturederror:iff_uncaptured:errorTyp
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,misc:no_attachment:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:f32:inputSource="const";dim=2 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:format="depth16unorm";texture_type="texture_depth_2d_array" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:arrayed:texture_type="texture_depth_2d_array" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:sampled:texture_type="texture_2d_array" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
@@ -538,7 +537,9 @@ crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:parti
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="override";typeA="vec2%3Cf32%3E";typeB="vec2%3Ci32%3E" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="override";typeA="vec3%3Cf32%3E";typeB="vec3%3Ci32%3E" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="override";typeA="vec4%3Cf32%3E";typeB="vec4%3Ci32%3E" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,diagnostic:duplicate_attribute_same_location:* [ Failure ]
+crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
