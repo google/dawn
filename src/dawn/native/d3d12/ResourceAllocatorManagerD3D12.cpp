@@ -168,6 +168,11 @@ uint64_t GetInitialResourcePlacementAlignment(
                 return device->IsToggleEnabled(Toggle::D3D12Use64KBAlignedMSAATexture)
                            ? D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT
                            : D3D12_DEFAULT_MSAA_RESOURCE_PLACEMENT_ALIGNMENT;
+            } else if (requestedResourceDescriptor.Flags &
+                       (D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET |
+                        D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)) {
+                // Render target and depth stencil textures do not support the small alignment.
+                return D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
             } else {
                 return D3D12_SMALL_RESOURCE_PLACEMENT_ALIGNMENT;
             }
