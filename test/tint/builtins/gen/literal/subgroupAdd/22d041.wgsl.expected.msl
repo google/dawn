@@ -1,16 +1,13 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
-
-fn subgroupAdd_22d041() -> vec3<i32> {
-  var res : vec3<i32> = subgroupAdd(vec3<i32>(1i));
+using namespace metal;
+int3 subgroupAdd_22d041() {
+  int3 res = simd_sum(int3(1));
   return res;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = subgroupAdd_22d041();
+kernel void compute_main(device packed_int3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_int3(subgroupAdd_22d041());
+  return;
 }
 
-Failed to generate: error: Unknown import method: subgroupAdd

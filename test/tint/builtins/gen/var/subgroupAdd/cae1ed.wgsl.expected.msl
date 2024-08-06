@@ -1,19 +1,14 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-enable f16;
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
-fn subgroupAdd_cae1ed() -> vec2<f16> {
-  var arg_0 = vec2<f16>(1.0h);
-  var res : vec2<f16> = subgroupAdd(arg_0);
+using namespace metal;
+half2 subgroupAdd_cae1ed() {
+  half2 arg_0 = half2(1.0h);
+  half2 res = simd_sum(arg_0);
   return res;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = subgroupAdd_cae1ed();
+kernel void compute_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupAdd_cae1ed();
+  return;
 }
 
-Failed to generate: error: Unknown import method: subgroupAdd

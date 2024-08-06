@@ -1,17 +1,14 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<f32>;
-
-fn subgroupMul_93eccd() -> vec3<f32> {
-  var arg_0 = vec3<f32>(1.0f);
-  var res : vec3<f32> = subgroupMul(arg_0);
+using namespace metal;
+float3 subgroupMul_93eccd() {
+  float3 arg_0 = float3(1.0f);
+  float3 res = simd_product(arg_0);
   return res;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = subgroupMul_93eccd();
+kernel void compute_main(device packed_float3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_float3(subgroupMul_93eccd());
+  return;
 }
 
-Failed to generate: error: Unknown import method: subgroupMul

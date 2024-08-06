@@ -1,16 +1,13 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f32>;
-
-fn subgroupExclusiveAdd_4c8024() -> vec2<f32> {
-  var res : vec2<f32> = subgroupExclusiveAdd(vec2<f32>(1.0f));
+using namespace metal;
+float2 subgroupExclusiveAdd_4c8024() {
+  float2 res = simd_prefix_exclusive_sum(float2(1.0f));
   return res;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = subgroupExclusiveAdd_4c8024();
+kernel void compute_main(device float2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupExclusiveAdd_4c8024();
+  return;
 }
 
-Failed to generate: error: Unknown import method: subgroupExclusiveAdd

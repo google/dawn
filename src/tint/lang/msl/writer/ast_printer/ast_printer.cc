@@ -805,6 +805,42 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             return true;
         }
 
+        case wgsl::BuiltinFn::kSubgroupAdd: {
+            out << "simd_sum(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
+        case wgsl::BuiltinFn::kSubgroupExclusiveAdd: {
+            out << "simd_prefix_exclusive_sum(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
+        case wgsl::BuiltinFn::kSubgroupMul: {
+            out << "simd_product(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
+        case wgsl::BuiltinFn::kSubgroupExclusiveMul: {
+            out << "simd_prefix_exclusive_product(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
         default:
             break;
     }
