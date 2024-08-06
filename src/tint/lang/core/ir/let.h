@@ -41,12 +41,14 @@ class Let final : public Castable<Let, OperandInstruction<1, 1>> {
     static constexpr size_t kValueOperandOffset = 0;
 
     /// Constructor (no result, no operands)
-    Let();
+    /// @param id the instruction id
+    explicit Let(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param value the let's value
-    Let(InstructionResult* result, Value* value);
+    Let(Id id, InstructionResult* result, Value* value);
 
     ~Let() override;
 

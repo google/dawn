@@ -34,9 +34,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Bitcast);
 
 namespace tint::core::ir {
 
-Bitcast::Bitcast() = default;
+Bitcast::Bitcast(Id id) : Base(id) {}
 
-Bitcast::Bitcast(InstructionResult* result, Value* val) {
+Bitcast::Bitcast(Id id, InstructionResult* result, Value* val) : Base(id) {
     AddOperand(Bitcast::kValueOperandOffset, val);
     AddResult(result);
 }
@@ -46,7 +46,8 @@ Bitcast::~Bitcast() = default;
 Bitcast* Bitcast::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* val = ctx.Remap(Val());
-    return ctx.ir.allocators.instructions.Create<Bitcast>(new_result, val);
+    return ctx.ir.allocators.instructions.Create<Bitcast>(ctx.ir.NextInstructionId(), new_result,
+                                                          val);
 }
 
 }  // namespace tint::core::ir

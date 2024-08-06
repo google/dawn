@@ -33,6 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Terminator);
 
 namespace tint::core::ir {
 
+Terminator::Terminator(Id id) : Base(id) {}
+
 Terminator::~Terminator() = default;
 
 }  // namespace tint::core::ir

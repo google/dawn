@@ -134,6 +134,9 @@ class Module {
     /// @returns the functions in the module, in dependency order
     Vector<const Function*, 16> DependencyOrderedFunctions() const;
 
+    /// @returns the next instruction id for this module
+    Instruction::Id NextInstructionId() { return next_instruction_id_++; }
+
     /// The block allocator
     BlockAllocator<Block> blocks;
 
@@ -160,6 +163,9 @@ class Module {
 
     /// The map of core::constant::Value to their ir::Constant.
     Hashmap<const core::constant::Value*, ir::Constant*, 16> constants;
+
+  private:
+    Instruction::Id next_instruction_id_ = 0;
 };
 
 }  // namespace tint::core::ir

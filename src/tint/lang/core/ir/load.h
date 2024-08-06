@@ -48,12 +48,14 @@ class Load final : public Castable<Load, OperandInstruction<1, 1>> {
     static constexpr size_t kNumOperands = 1;
 
     /// Constructor (no results, no operands)
-    Load();
+    /// @param id the instruction id
+    explicit Load(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param from the value being loaded from
-    Load(InstructionResult* result, Value* from);
+    Load(Id id, InstructionResult* result, Value* from);
 
     ~Load() override;
 

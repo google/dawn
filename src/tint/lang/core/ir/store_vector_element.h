@@ -54,13 +54,16 @@ class StoreVectorElement final : public Castable<StoreVectorElement, OperandInst
     static constexpr size_t kNumOperands = 3;
 
     /// Constructor (no operands)
-    StoreVectorElement();
+    /// @param id the instruction id
+    explicit StoreVectorElement(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param to the vector pointer
     /// @param index the new vector element index
     /// @param value the new vector element value
-    StoreVectorElement(ir::Value* to, ir::Value* index, ir::Value* value);
+    StoreVectorElement(Id id, ir::Value* to, ir::Value* index, ir::Value* value);
+
     ~StoreVectorElement() override;
 
     /// @copydoc Instruction::Clone()

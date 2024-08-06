@@ -53,13 +53,16 @@ class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
     static constexpr size_t kNumOperands = 1;
 
     /// Constructor (no results, no operands)
-    Unary();
+    /// @param id the instruction id
+    explicit Unary(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param op the unary operator
     /// @param val the input value for the instruction
-    Unary(InstructionResult* result, UnaryOp op, Value* val);
+    Unary(Id id, InstructionResult* result, UnaryOp op, Value* val);
+
     ~Unary() override;
 
     /// @returns the value for the instruction

@@ -62,13 +62,15 @@ class If final : public Castable<If, ControlInstruction> {
     static constexpr size_t kConditionOperandOffset = 0;
 
     /// Constructor (no results, no operands, no blocks)
-    If();
+    /// @param id the instruction id
+    explicit If(Id id);
 
     /// Constructor
     /// @param cond the if condition
     /// @param t the true block
     /// @param f the false block
-    If(Value* cond, ir::Block* t, ir::Block* f);
+    If(Id id, Value* cond, ir::Block* t, ir::Block* f);
+
     ~If() override;
 
     /// @copydoc Instruction::Clone()

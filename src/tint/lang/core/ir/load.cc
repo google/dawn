@@ -36,11 +36,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Load);
 
 namespace tint::core::ir {
 
-Load::Load() {
+Load::Load(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 
-Load::Load(InstructionResult* result, Value* from) {
+Load::Load(Id id, InstructionResult* result, Value* from) : Base(id) {
     flags_.Add(Flag::kSequenced);
 
     AddOperand(Load::kFromOperandOffset, from);
@@ -52,7 +52,8 @@ Load::~Load() = default;
 Load* Load::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* from = ctx.Remap(From());
-    return ctx.ir.allocators.instructions.Create<Load>(new_result, from);
+    return ctx.ir.allocators.instructions.Create<Load>(ctx.ir.NextInstructionId(), new_result,
+                                                       from);
 }
 
 }  // namespace tint::core::ir

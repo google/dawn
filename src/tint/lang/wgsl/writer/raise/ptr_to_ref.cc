@@ -101,7 +101,8 @@ struct Impl {
         if (auto* ref_ty = As<core::type::Reference>(operand->Type())) {
             auto* as_ptr = b.InstructionResult(RefToPtr(ref_ty));
             mod.allocators.instructions
-                .Create<wgsl::ir::Unary>(as_ptr, core::UnaryOp::kAddressOf, operand)
+                .Create<wgsl::ir::Unary>(mod.NextInstructionId(), as_ptr, core::UnaryOp::kAddressOf,
+                                         operand)
                 ->InsertBefore(use.instruction);
             use.instruction->SetOperand(use.operand_index, as_ptr);
         }
@@ -117,7 +118,8 @@ struct Impl {
         if (auto* ptr_ty = As<core::type::Pointer>(operand->Type())) {
             auto* as_ptr = b.InstructionResult(PtrToRef(ptr_ty));
             mod.allocators.instructions
-                .Create<wgsl::ir::Unary>(as_ptr, core::UnaryOp::kIndirection, operand)
+                .Create<wgsl::ir::Unary>(mod.NextInstructionId(), as_ptr,
+                                         core::UnaryOp::kIndirection, operand)
                 ->InsertBefore(use.instruction);
             use.instruction->SetOperand(use.operand_index, as_ptr);
         }

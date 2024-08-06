@@ -48,12 +48,14 @@ class Continue final : public Castable<Continue, Terminator> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor (no operands, no loop)
-    Continue();
+    /// @param id the instruction id
+    explicit Continue(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param loop the loop owning the continue block
     /// @param args the arguments for the MultiInBlock
-    explicit Continue(ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
+    Continue(Id id, ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
     ~Continue() override;
 
     /// @copydoc Instruction::Clone()

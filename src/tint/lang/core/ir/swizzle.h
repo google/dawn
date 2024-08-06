@@ -43,13 +43,16 @@ class Swizzle final : public Castable<Swizzle, OperandInstruction<1, 1>> {
     static constexpr size_t kObjectOperandOffset = 0;
 
     /// Constructor (no results, no operands)
-    Swizzle();
+    /// @param id the instruction id
+    explicit Swizzle(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param object the object being swizzled
     /// @param indices the indices to swizzle
-    Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices);
+    Swizzle(Id id, InstructionResult* result, Value* object, VectorRef<uint32_t> indices);
+
     ~Swizzle() override;
 
     /// @copydoc Instruction::Clone()

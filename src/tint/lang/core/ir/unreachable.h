@@ -37,6 +37,9 @@ namespace tint::core::ir {
 /// An unreachable instruction in the IR.
 class Unreachable final : public Castable<Unreachable, Terminator> {
   public:
+    /// @param id the instruction id
+    explicit Unreachable(Instruction::Id id);
+
     ~Unreachable() override;
 
     /// @copydoc Instruction::Clone()

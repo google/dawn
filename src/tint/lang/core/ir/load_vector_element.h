@@ -51,13 +51,16 @@ class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstru
     static constexpr size_t kNumOperands = 2;
 
     /// Constructor (no results, no operands)
-    LoadVectorElement();
+    /// @param id the instruction id
+    explicit LoadVectorElement(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param from the vector pointer
     /// @param index the new vector element index
-    LoadVectorElement(InstructionResult* result, ir::Value* from, ir::Value* index);
+    LoadVectorElement(Id id, InstructionResult* result, ir::Value* from, ir::Value* index);
+
     ~LoadVectorElement() override;
 
     /// @copydoc Instruction::Clone()

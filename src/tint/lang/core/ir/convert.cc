@@ -36,9 +36,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Convert);
 
 namespace tint::core::ir {
 
-Convert::Convert() = default;
+Convert::Convert(Id id) : Base(id) {}
 
-Convert::Convert(InstructionResult* result, Value* value) {
+Convert::Convert(Id id, InstructionResult* result, Value* value) : Base(id) {
     AddOperand(Convert::kValueOperandOffset, value);
     AddResult(result);
 }
@@ -48,7 +48,8 @@ Convert::~Convert() = default;
 Convert* Convert::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* val = ctx.Remap(Args()[0]);
-    return ctx.ir.allocators.instructions.Create<Convert>(new_result, val);
+    return ctx.ir.allocators.instructions.Create<Convert>(ctx.ir.NextInstructionId(), new_result,
+                                                          val);
 }
 
 }  // namespace tint::core::ir

@@ -59,7 +59,7 @@ class Call : public Castable<Call, OperandInstruction<4, 1>> {
 
   protected:
     /// Constructor
-    Call();
+    explicit Call(Id id);
 };
 
 }  // namespace tint::core::ir

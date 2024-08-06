@@ -37,11 +37,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::msl::ir::Binary);
 
 namespace tint::msl::ir {
 
-Binary::Binary(core::ir::InstructionResult* result,
+Binary::Binary(Instruction::Id id,
+               core::ir::InstructionResult* result,
                core::BinaryOp op,
                core::ir::Value* lhs,
                core::ir::Value* rhs)
-    : Base(result, op, lhs, rhs) {}
+    : Base(id, result, op, lhs, rhs) {}
 
 Binary::~Binary() = default;
 
@@ -49,7 +50,8 @@ Binary* Binary::Clone(core::ir::CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* new_rhs = ctx.Remap(RHS());
     auto* new_lhs = ctx.Remap(LHS());
-    return ctx.ir.allocators.instructions.Create<Binary>(new_result, Op(), new_lhs, new_rhs);
+    return ctx.ir.allocators.instructions.Create<Binary>(ctx.ir.NextInstructionId(), new_result,
+                                                         Op(), new_lhs, new_rhs);
 }
 
 }  // namespace tint::msl::ir

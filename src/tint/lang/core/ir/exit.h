@@ -41,6 +41,10 @@ namespace tint::core::ir {
 /// The base class for all exit terminators.
 class Exit : public Castable<Exit, Terminator> {
   public:
+    /// Constructor
+    /// @param id the instruction id
+    explicit Exit(Instruction::Id id);
+
     ~Exit() override;
 
     /// @copydoc Value::Destroy

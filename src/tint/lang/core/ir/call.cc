@@ -33,7 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Call);
 
 namespace tint::core::ir {
 
-Call::Call() = default;
+Call::Call(Id id) : Base(id) {}
 
 Call::~Call() = default;
 

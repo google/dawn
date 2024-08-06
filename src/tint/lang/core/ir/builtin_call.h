@@ -41,12 +41,15 @@ class BuiltinCall : public Castable<BuiltinCall, Call> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor (no results, no operands)
-    BuiltinCall();
+    /// @param id the instruction id
+    explicit BuiltinCall(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param args the conversion arguments
-    explicit BuiltinCall(InstructionResult* result, VectorRef<Value*> args = tint::Empty);
+    BuiltinCall(Id id, InstructionResult* result, VectorRef<Value*> args = tint::Empty);
+
     ~BuiltinCall() override;
 
     /// @returns the identifier for the function

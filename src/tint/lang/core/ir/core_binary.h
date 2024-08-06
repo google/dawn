@@ -39,14 +39,17 @@ class CoreBinary final : public Castable<CoreBinary, Binary> {
     static constexpr size_t kValueOperandOffset = 0;
 
     /// Constructor (no results, no operands)
-    CoreBinary();
+    /// @param id the instruction id
+    explicit CoreBinary(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param op the Binary operator
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    CoreBinary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs);
+    CoreBinary(Id id, InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs);
+
     ~CoreBinary() override;
 
     /// @copydoc Instruction::Clone()

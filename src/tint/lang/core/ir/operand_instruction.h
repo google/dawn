@@ -42,6 +42,10 @@ namespace tint::core::ir {
 template <unsigned N, unsigned R>
 class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction> {
   public:
+    /// Constructor
+    /// @param id the instruction id
+    explicit OperandInstruction(Instruction::Id id) : OperandInstruction::Base(id) {}
+
     /// Destructor
     ~OperandInstruction() override = default;
 

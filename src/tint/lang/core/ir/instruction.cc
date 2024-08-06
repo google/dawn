@@ -34,7 +34,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Instruction);
 
 namespace tint::core::ir {
 
-Instruction::Instruction() = default;
+Instruction::Instruction(Id id) : id_(id) {}
 
 Instruction::~Instruction() = default;
 

@@ -39,13 +39,16 @@ class Unary final : public Castable<Unary, core::ir::Unary> {
     static constexpr size_t kValueOperandOffset = 0;
 
     /// Constructor (no results, no operands)
-    Unary();
+    /// @param id the instruction id
+    explicit Unary(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param op the unary operator
     /// @param val the input value for the instruction
-    Unary(core::ir::InstructionResult* result, core::UnaryOp op, core::ir::Value* val);
+    Unary(Id id, core::ir::InstructionResult* result, core::UnaryOp op, core::ir::Value* val);
+
     ~Unary() override;
 
     /// @copydoc core::ir::Instruction::Clone()

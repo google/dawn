@@ -37,10 +37,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Swizzle);
 
 namespace tint::core::ir {
 
-Swizzle::Swizzle() = default;
+Swizzle::Swizzle(Id id) : Base(id) {}
 
-Swizzle::Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices)
-    : indices_(std::move(indices)) {
+Swizzle::Swizzle(Id id, InstructionResult* result, Value* object, VectorRef<uint32_t> indices)
+    : Base(id), indices_(std::move(indices)) {
     TINT_ASSERT(!indices.IsEmpty());
     TINT_ASSERT(indices.Length() <= 4);
 
@@ -57,7 +57,8 @@ Swizzle::~Swizzle() = default;
 Swizzle* Swizzle::Clone(CloneContext& ctx) {
     auto* result = ctx.Clone(Result(0));
     auto* obj = ctx.Remap(Object());
-    return ctx.ir.allocators.instructions.Create<Swizzle>(result, obj, indices_);
+    return ctx.ir.allocators.instructions.Create<Swizzle>(ctx.ir.NextInstructionId(), result, obj,
+                                                          indices_);
 }
 
 }  // namespace tint::core::ir

@@ -42,12 +42,15 @@ class Bitcast final : public Castable<Bitcast, Call> {
     static constexpr size_t kValueOperandOffset = 0;
 
     /// Constructor (no results, no operands)
-    Bitcast();
+    /// @param id the instruction id
+    explicit Bitcast(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param val the value being bitcast
-    Bitcast(InstructionResult* result, Value* val);
+    Bitcast(Id id, InstructionResult* result, Value* val);
+
     ~Bitcast() override;
 
     /// @copydoc Instruction::Clone()

@@ -35,10 +35,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::CoreBinary);
 
 namespace tint::core::ir {
 
-CoreBinary::CoreBinary() = default;
+CoreBinary::CoreBinary(Id id) : Base(id) {}
 
-CoreBinary::CoreBinary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs)
-    : Base(result, op, lhs, rhs) {}
+CoreBinary::CoreBinary(Id id, InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs)
+    : Base(id, result, op, lhs, rhs) {}
 
 CoreBinary::~CoreBinary() = default;
 
@@ -46,7 +46,8 @@ CoreBinary* CoreBinary::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* lhs = ctx.Remap(LHS());
     auto* rhs = ctx.Remap(RHS());
-    return ctx.ir.allocators.instructions.Create<CoreBinary>(new_result, Op(), lhs, rhs);
+    return ctx.ir.allocators.instructions.Create<CoreBinary>(ctx.ir.NextInstructionId(), new_result,
+                                                             Op(), lhs, rhs);
 }
 
 const core::intrinsic::TableData& CoreBinary::TableData() const {

@@ -39,13 +39,16 @@ class CoreUnary final : public Castable<CoreUnary, Unary> {
     static constexpr size_t kValueOperandOffset = 0;
 
     /// Constructor (no results, no operands)
-    CoreUnary();
+    /// @param id the instruction id
+    explicit CoreUnary(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param op the unary operator
     /// @param val the input value for the instruction
-    CoreUnary(InstructionResult* result, UnaryOp op, Value* val);
+    CoreUnary(Id id, InstructionResult* result, UnaryOp op, Value* val);
+
     ~CoreUnary() override;
 
     /// @copydoc Instruction::Clone()

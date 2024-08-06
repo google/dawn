@@ -34,9 +34,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Unary);
 
 namespace tint::core::ir {
 
-Unary::Unary() = default;
+Unary::Unary(Id id) : Base(id) {}
 
-Unary::Unary(InstructionResult* result, UnaryOp op, Value* val) : op_(op) {
+Unary::Unary(Id id, InstructionResult* result, UnaryOp op, Value* val) : Base(id), op_(op) {
     AddOperand(Unary::kValueOperandOffset, val);
     AddResult(result);
 }

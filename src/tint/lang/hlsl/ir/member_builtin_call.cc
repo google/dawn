@@ -42,11 +42,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::hlsl::ir::MemberBuiltinCall);
 
 namespace tint::hlsl::ir {
 
-MemberBuiltinCall::MemberBuiltinCall(core::ir::InstructionResult* result,
+MemberBuiltinCall::MemberBuiltinCall(Id id,
+                                     core::ir::InstructionResult* result,
                                      BuiltinFn func,
                                      core::ir::Value* object,
                                      VectorRef<core::ir::Value*> arguments)
-    : Base(result, object, arguments), func_(func) {
+    : Base(id, result, object, arguments), func_(func) {
     TINT_ASSERT(func != BuiltinFn::kNone);
 }
 
@@ -56,8 +57,8 @@ MemberBuiltinCall* MemberBuiltinCall::Clone(core::ir::CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* new_object = ctx.Clone(Object());
     auto new_args = ctx.Clone<MemberBuiltinCall::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<MemberBuiltinCall>(new_result, func_, new_object,
-                                                                    std::move(new_args));
+    return ctx.ir.allocators.instructions.Create<MemberBuiltinCall>(
+        ctx.ir.NextInstructionId(), new_result, func_, new_object, std::move(new_args));
 }
 
 }  // namespace tint::hlsl::ir

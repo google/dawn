@@ -39,7 +39,9 @@ namespace tint::core::ir {
 class Discard final : public Castable<Discard, Call> {
   public:
     /// Constructor
-    Discard();
+    /// @param id the instruction id
+    explicit Discard(Id id);
+
     ~Discard() override;
 
     /// @copydoc Instruction::Clone()

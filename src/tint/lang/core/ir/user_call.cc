@@ -36,11 +36,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::UserCall);
 
 namespace tint::core::ir {
 
-UserCall::UserCall() {
+UserCall::UserCall(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 
-UserCall::UserCall(InstructionResult* result, Function* func, VectorRef<Value*> arguments) {
+UserCall::UserCall(Id id, InstructionResult* result, Function* func, VectorRef<Value*> arguments)
+    : Base(id) {
     flags_.Add(Flag::kSequenced);
     AddOperand(UserCall::kFunctionOperandOffset, func);
     AddOperands(UserCall::kArgsOperandOffset, std::move(arguments));
@@ -53,7 +54,8 @@ UserCall* UserCall::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* target = ctx.Remap(Target());
     auto args = ctx.Remap<UserCall::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<UserCall>(new_result, target, args);
+    return ctx.ir.allocators.instructions.Create<UserCall>(ctx.ir.NextInstructionId(), new_result,
+                                                           target, args);
 }
 
 void UserCall::SetArgs(VectorRef<Value*> arguments) {

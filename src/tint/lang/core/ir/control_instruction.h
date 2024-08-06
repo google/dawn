@@ -45,7 +45,8 @@ namespace tint::core::ir {
 class ControlInstruction : public Castable<ControlInstruction, OperandInstruction<1, 1>> {
   public:
     /// Constructor
-    ControlInstruction();
+    /// @param id the instruction id
+    explicit ControlInstruction(Id id);
 
     /// Destructor
     ~ControlInstruction() override;

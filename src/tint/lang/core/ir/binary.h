@@ -56,14 +56,16 @@ class Binary : public Castable<Binary, OperandInstruction<2, 1>> {
     static constexpr size_t kNumOperands = 2;
 
     /// Constructor (no results, no operands)
-    Binary();
+    /// @param id the instruction id
+    explicit Binary(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param op the binary operator
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    Binary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs);
+    Binary(Id id, InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs);
     ~Binary() override;
 
     /// @returns the binary operator

@@ -42,12 +42,15 @@ namespace tint::wgsl::ir {
 class BuiltinCall : public Castable<BuiltinCall, core::ir::BuiltinCall> {
   public:
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param fn the builtin function
     /// @param args the conversion arguments
-    BuiltinCall(core::ir::InstructionResult* result,
+    BuiltinCall(Id id,
+                core::ir::InstructionResult* result,
                 BuiltinFn fn,
                 VectorRef<core::ir::Value*> args = tint::Empty);
+
     ~BuiltinCall() override;
 
     /// @copydoc core::ir::Instruction::Clone()

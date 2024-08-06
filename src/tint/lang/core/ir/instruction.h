@@ -47,6 +47,8 @@ namespace tint::core::ir {
 /// An instruction in the IR.
 class Instruction : public Castable<Instruction> {
   public:
+    using Id = uint32_t;
+
     /// Destructor
     ~Instruction() override;
 
@@ -166,7 +168,10 @@ class Instruction : public Castable<Instruction> {
     };
 
     /// Constructor
-    Instruction();
+    explicit Instruction(Id id);
+
+    /// The instruction id
+    Id id_;
 
     /// The block that owns this instruction
     ConstPropagatingPtr<ir::Block> block_;

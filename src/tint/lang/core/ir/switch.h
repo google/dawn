@@ -82,11 +82,14 @@ class Switch final : public Castable<Switch, ControlInstruction> {
     };
 
     /// Constructor (no results, no operands, no cases)
-    Switch();
+    /// @param id the instruction id
+    explicit Switch(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param cond the condition
-    explicit Switch(Value* cond);
+    Switch(Id id, Value* cond);
+
     ~Switch() override;
 
     /// @copydoc Instruction::Clone()

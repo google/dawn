@@ -33,7 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::ControlInstruction);
 
 namespace tint::core::ir {
 
-ControlInstruction::ControlInstruction() {
+ControlInstruction::ControlInstruction(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 

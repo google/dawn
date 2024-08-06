@@ -42,15 +42,19 @@ namespace tint::core::ir {
 class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
   public:
     /// Constructor (no results, no operands)
-    CoreBuiltinCall();
+    /// @param id the instruction id
+    explicit CoreBuiltinCall(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param func the builtin function
     /// @param args the conversion arguments
-    CoreBuiltinCall(InstructionResult* result,
+    CoreBuiltinCall(Id id,
+                    InstructionResult* result,
                     core::BuiltinFn func,
                     VectorRef<Value*> args = tint::Empty);
+
     ~CoreBuiltinCall() override;
 
     /// @copydoc Instruction::Clone()

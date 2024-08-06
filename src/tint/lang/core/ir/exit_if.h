@@ -47,12 +47,15 @@ class ExitIf final : public Castable<ExitIf, Exit> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor (no operands, no if)
-    ExitIf();
+    /// @param id the instruction id
+    explicit ExitIf(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param i the if being exited
     /// @param args the target MultiInBlock arguments
-    explicit ExitIf(ir::If* i, VectorRef<Value*> args = tint::Empty);
+    ExitIf(Id id, ir::If* i, VectorRef<Value*> args = tint::Empty);
+
     ~ExitIf() override;
 
     /// @copydoc Instruction::Clone()

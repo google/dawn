@@ -481,8 +481,10 @@ void Disassembler::EmitInstruction(const Instruction* inst) {
         },
         [&](const StoreVectorElement* s) {
             EmitInstructionName(s);
-            out_ << " ";
-            EmitOperandList(s);
+            if (s->Operands().Length() > 0) {
+                out_ << " ";
+                EmitOperandList(s);
+            }
         },
         [&](const UserCall* uc) {
             EmitValueWithType(uc);
@@ -869,8 +871,12 @@ void Disassembler::EmitTerminator(const Terminator* term) {
 void Disassembler::EmitBinary(const Binary* b) {
     SourceMarker sm(this);
     EmitValueWithType(b);
-    out_ << " = " << NameOf(b->Op()) << " ";
-    EmitOperandList(b);
+    out_ << " = " << NameOf(b->Op());
+
+    if (b->Operands().Length() > 0) {
+        out_ << " ";
+        EmitOperandList(b);
+    }
 
     sm.Store(b);
 }
@@ -878,8 +884,12 @@ void Disassembler::EmitBinary(const Binary* b) {
 void Disassembler::EmitUnary(const Unary* u) {
     SourceMarker sm(this);
     EmitValueWithType(u);
-    out_ << " = " << NameOf(u->Op()) << " ";
-    EmitOperandList(u);
+    out_ << " = " << NameOf(u->Op());
+
+    if (u->Operands().Length() > 0) {
+        out_ << " ";
+        EmitOperandList(u);
+    }
 
     sm.Store(u);
 }

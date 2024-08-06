@@ -49,11 +49,14 @@ class Var final : public Castable<Var, OperandInstruction<1, 1>> {
     static constexpr size_t kNumResults = 1;
 
     /// Constructor (no results, no operands)
-    Var();
+    /// @param id the instruction id
+    explicit Var(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
-    explicit Var(InstructionResult* result);
+    explicit Var(Id id, InstructionResult* result);
+
     ~Var() override;
 
     /// @copydoc Instruction::Clone()

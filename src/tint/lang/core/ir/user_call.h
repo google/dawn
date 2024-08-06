@@ -52,13 +52,16 @@ class UserCall final : public Castable<UserCall, Call> {
     static constexpr size_t kMinOperands = 1;
 
     /// Constructor (no results, no operands)
-    UserCall();
+    /// @param id the instruction id
+    explicit UserCall(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param func the function being called
     /// @param args the function arguments
-    UserCall(InstructionResult* result, Function* func, VectorRef<Value*> args);
+    UserCall(Id id, InstructionResult* result, Function* func, VectorRef<Value*> args);
+
     ~UserCall() override;
 
     /// @copydoc Instruction::Clone()

@@ -47,12 +47,15 @@ class ExitLoop final : public Castable<ExitLoop, Exit> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor (no operands, no loop)
-    ExitLoop();
+    /// @param id the instruction id
+    explicit ExitLoop(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param loop the loop being exited
     /// @param args the target MultiInBlock arguments
-    explicit ExitLoop(ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
+    ExitLoop(Id id, ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
+
     ~ExitLoop() override;
 
     /// @copydoc Instruction::Clone()

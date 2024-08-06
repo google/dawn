@@ -42,12 +42,15 @@ class Construct final : public Castable<Construct, Call> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor (no result, no operands)
-    Construct();
+    /// @param id the instruction id
+    explicit Construct(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param args the constructor arguments
-    explicit Construct(InstructionResult* result, VectorRef<Value*> args = tint::Empty);
+    Construct(Id id, InstructionResult* result, VectorRef<Value*> args = tint::Empty);
+
     ~Construct() override;
 
     /// @copydoc Instruction::Clone()

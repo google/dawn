@@ -39,11 +39,13 @@ namespace tint::msl::ir {
 class Binary final : public Castable<Binary, core::ir::Binary> {
   public:
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param op the Binary operator
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    Binary(core::ir::InstructionResult* result,
+    Binary(Instruction::Id id,
+           core::ir::InstructionResult* result,
            core::BinaryOp op,
            core::ir::Value* lhs,
            core::ir::Value* rhs);

@@ -37,6 +37,10 @@ namespace tint::core::ir {
 /// An terminate invocation instruction in the IR.
 class TerminateInvocation final : public Castable<TerminateInvocation, Terminator> {
   public:
+    /// Constructor
+    /// @param id the instruction id
+    explicit TerminateInvocation(Id id);
+
     ~TerminateInvocation() override;
 
     /// @copydoc Instruction::Clone()

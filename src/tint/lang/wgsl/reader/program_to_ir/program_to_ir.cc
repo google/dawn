@@ -979,7 +979,8 @@ class Impl {
                         auto* res = impl.builder_.InstructionResult(ty);
                         inst =
                             impl.builder_.ir.allocators.instructions.Create<wgsl::ir::BuiltinCall>(
-                                res, b->Fn(), std::move(args));
+                                impl.builder_.ir.NextInstructionId(), res, b->Fn(),
+                                std::move(args));
                     }
                 } else if (sem->Target()->As<sem::ValueConstructor>()) {
                     inst = impl.builder_.Construct(ty, std::move(args));

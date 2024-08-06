@@ -51,12 +51,15 @@ class Store final : public Castable<Store, OperandInstruction<2, 0>> {
     static constexpr size_t kNumOperands = 2;
 
     /// Constructor (no results, no operands)
-    Store();
+    /// @param id the instruction id
+    explicit Store(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param to the value to store too
     /// @param from the value being stored from
-    Store(Value* to, Value* from);
+    Store(Id id, Value* to, Value* from);
+
     ~Store() override;
 
     /// @copydoc Instruction::Clone()

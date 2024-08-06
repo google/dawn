@@ -47,12 +47,15 @@ class ExitSwitch final : public Castable<ExitSwitch, Exit> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor (no operands, no switch)
-    ExitSwitch();
+    /// @param id the instruction id
+    explicit ExitSwitch(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param sw the switch being exited
     /// @param args the target MultiInBlock arguments
-    explicit ExitSwitch(ir::Switch* sw, VectorRef<Value*> args = tint::Empty);
+    ExitSwitch(Id id, ir::Switch* sw, VectorRef<Value*> args = tint::Empty);
+
     ~ExitSwitch() override;
 
     /// @copydoc Instruction::Clone()
