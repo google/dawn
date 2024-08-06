@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_PLATFORMFUNCTIONS_H_
 #define SRC_DAWN_NATIVE_D3D12_PLATFORMFUNCTIONS_H_
 
+#include <string>
+
 #include "dawn/native/d3d/PlatformFunctions.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 
@@ -41,6 +43,7 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     ~PlatformFunctions() override;
 
     MaybeError LoadFunctions();
+    bool IsDXCBinaryAvailable() const;
     bool IsPIXEventRuntimeLoaded() const;
 
     // Functions from d3d12.dll
@@ -73,16 +76,27 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
 
     PFN_SET_MARKER_ON_COMMAND_LIST pixSetMarkerOnCommandList = nullptr;
 
+    // Functions from dxcompiler.dll
+    using PFN_DXC_CREATE_INSTANCE = HRESULT(WINAPI*)(REFCLSID rclsid,
+                                                     REFIID riid,
+                                                     _COM_Outptr_ void** ppCompiler);
+    PFN_DXC_CREATE_INSTANCE dxcCreateInstance = nullptr;
+
   private:
     using Base = d3d::PlatformFunctions;
 
     MaybeError LoadD3D12();
     MaybeError LoadD3D11();
     void LoadPIXRuntime();
+    void LoadDXCLibraries();
+    void LoadDXIL(const std::string& baseWindowsSDKPath);
+    void LoadDXCompiler(const std::string& baseWindowsSDKPath);
 
     DynamicLib mD3D12Lib;
     DynamicLib mD3D11Lib;
     DynamicLib mPIXEventRuntimeLib;
+    DynamicLib mDXILLib;
+    DynamicLib mDXCompilerLib;
 };
 
 }  // namespace dawn::native::d3d12

@@ -95,10 +95,6 @@ bool IsDepthStencil(DXGI_FORMAT format) {
     }
 }
 
-uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion) {
-    return (majorVersion << 32) + minorVersion;
-}
-
 DXGI_FORMAT DXGITypelessTextureFormat(const DeviceBase* device, wgpu::TextureFormat format) {
     switch (format) {
         case wgpu::TextureFormat::R8Unorm:

@@ -156,7 +156,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         // available.
         DAWN_ASSERT(ToBackend(device->GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
         // We can get the DXC version information since IsDXCAvailable() is true.
-        d3d::DxcVersionInfo dxcVersionInfo =
+        d3d12::DxcVersionInfo dxcVersionInfo =
             ToBackend(device->GetPhysicalDevice())->GetBackend()->GetDxcVersion();
 
         req.bytecode.compiler = d3d::Compiler::DXC;
