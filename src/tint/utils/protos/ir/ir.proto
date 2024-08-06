@@ -632,4 +632,8 @@ enum BuiltinFn {
     subgroup_ballot = 119;
     subgroup_broadcast = 120;
     input_attachment_load = 121;
+    subgroup_add = 122;
+    subgroup_exclusive_add = 123;
+    subgroup_mul = 124;
+    subgroup_exclusive_mul = 125;
 }

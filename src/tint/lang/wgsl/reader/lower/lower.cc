@@ -168,6 +168,10 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kSubgroupBallot)
         CASE(kSubgroupBroadcast)
         CASE(kInputAttachmentLoad)
+        CASE(kSubgroupAdd)
+        CASE(kSubgroupExclusiveAdd)
+        CASE(kSubgroupMul)
+        CASE(kSubgroupExclusiveMul)
 
         case tint::wgsl::BuiltinFn::kBitcast:               // should lower to ir::Bitcast
         case tint::wgsl::BuiltinFn::kWorkgroupUniformLoad:  // should be handled in Lower()

@@ -622,6 +622,14 @@ match workgroup
 @must_use @stage("compute") fn subgroupBallot(bool) -> vec4<u32>
 @must_use @stage("compute") fn subgroupBroadcast[T: fiu32_f16](value: T, @const sourceLaneIndex: u32) -> T
 @must_use @stage("compute") fn subgroupBroadcast[N: num, T: fiu32_f16](value: vec<N, T>, @const sourceLaneIndex: u32) -> vec<N, T>
+@must_use @stage("compute") fn subgroupAdd[T: fiu32_f16](value: T) -> T
+@must_use @stage("compute") fn subgroupAdd[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
+@must_use @stage("compute") fn subgroupExclusiveAdd[T: fiu32_f16](value: T) -> T
+@must_use @stage("compute") fn subgroupExclusiveAdd[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
+@must_use @stage("compute") fn subgroupMul[T: fiu32_f16](value: T) -> T
+@must_use @stage("compute") fn subgroupMul[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
+@must_use @stage("compute") fn subgroupExclusiveMul[T: fiu32_f16](value: T) -> T
+@must_use @stage("compute") fn subgroupExclusiveMul[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

@@ -171,6 +171,10 @@ enum class BuiltinFn : uint8_t {
     kAtomicCompareExchangeWeak,
     kSubgroupBallot,
     kSubgroupBroadcast,
+    kSubgroupAdd,
+    kSubgroupExclusiveAdd,
+    kSubgroupMul,
+    kSubgroupExclusiveMul,
     kTintMaterialize,
     kNone,
 };
@@ -318,6 +322,10 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kAtomicCompareExchangeWeak,
     BuiltinFn::kSubgroupBallot,
     BuiltinFn::kSubgroupBroadcast,
+    BuiltinFn::kSubgroupAdd,
+    BuiltinFn::kSubgroupExclusiveAdd,
+    BuiltinFn::kSubgroupMul,
+    BuiltinFn::kSubgroupExclusiveMul,
     BuiltinFn::kTintMaterialize,
 };
 
@@ -447,6 +455,10 @@ constexpr const char* kBuiltinFnStrings[] = {
     "atomicCompareExchangeWeak",
     "subgroupBallot",
     "subgroupBroadcast",
+    "subgroupAdd",
+    "subgroupExclusiveAdd",
+    "subgroupMul",
+    "subgroupExclusiveMul",
     "__tint_materialize",
 };
 

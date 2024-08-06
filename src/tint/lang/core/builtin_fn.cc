@@ -405,6 +405,18 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupBroadcast") {
         return BuiltinFn::kSubgroupBroadcast;
     }
+    if (name == "subgroupAdd") {
+        return BuiltinFn::kSubgroupAdd;
+    }
+    if (name == "subgroupExclusiveAdd") {
+        return BuiltinFn::kSubgroupExclusiveAdd;
+    }
+    if (name == "subgroupMul") {
+        return BuiltinFn::kSubgroupMul;
+    }
+    if (name == "subgroupExclusiveMul") {
+        return BuiltinFn::kSubgroupExclusiveMul;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -656,6 +668,14 @@ const char* str(BuiltinFn i) {
             return "subgroupBallot";
         case BuiltinFn::kSubgroupBroadcast:
             return "subgroupBroadcast";
+        case BuiltinFn::kSubgroupAdd:
+            return "subgroupAdd";
+        case BuiltinFn::kSubgroupExclusiveAdd:
+            return "subgroupExclusiveAdd";
+        case BuiltinFn::kSubgroupMul:
+            return "subgroupMul";
+        case BuiltinFn::kSubgroupExclusiveMul:
+            return "subgroupExclusiveMul";
     }
     return "<unknown>";
 }

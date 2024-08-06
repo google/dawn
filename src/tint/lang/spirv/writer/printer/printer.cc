@@ -1648,6 +1648,34 @@ class Printer {
                     Constant(b_.ConstantValue(u32(spv::MemorySemanticsMask::UniformMemory |
                                                   spv::MemorySemanticsMask::AcquireRelease))));
                 break;
+            case core::BuiltinFn::kSubgroupAdd:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = result_ty->is_integer_scalar_or_vector() ? spv::Op::OpGroupNonUniformIAdd
+                                                              : spv::Op::OpGroupNonUniformFAdd;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
+                break;
+            case core::BuiltinFn::kSubgroupExclusiveAdd:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = result_ty->is_integer_scalar_or_vector() ? spv::Op::OpGroupNonUniformIAdd
+                                                              : spv::Op::OpGroupNonUniformFAdd;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::ExclusiveScan)));
+                break;
+            case core::BuiltinFn::kSubgroupMul:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = result_ty->is_integer_scalar_or_vector() ? spv::Op::OpGroupNonUniformIMul
+                                                              : spv::Op::OpGroupNonUniformFMul;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
+                break;
+            case core::BuiltinFn::kSubgroupExclusiveMul:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = result_ty->is_integer_scalar_or_vector() ? spv::Op::OpGroupNonUniformIMul
+                                                              : spv::Op::OpGroupNonUniformFMul;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::ExclusiveScan)));
+                break;
             case core::BuiltinFn::kSubgroupBallot:
                 module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
                 op = spv::Op::OpGroupNonUniformBallot;

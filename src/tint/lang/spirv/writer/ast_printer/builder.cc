@@ -2565,6 +2565,14 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             return result_id;
         }
+        case wgsl::BuiltinFn::kSubgroupAdd:
+        case wgsl::BuiltinFn::kSubgroupExclusiveAdd:
+        case wgsl::BuiltinFn::kSubgroupMul:
+        case wgsl::BuiltinFn::kSubgroupExclusiveMul: {
+            // TODO(crbug.com/354738715): Implement more subgroup builtins. Adding this explicit
+            // failure in the intermediary CL to avoid a new ICE that can get caught by the fuzzers.
+            return 0;
+        }
         default: {
             auto inst_id = builtin_to_glsl_method(builtin);
             if (inst_id == 0) {
