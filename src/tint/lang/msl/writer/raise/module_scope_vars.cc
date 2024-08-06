@@ -93,7 +93,7 @@ struct State {
         for (auto& var : module_vars) {
             Vector<core::ir::Instruction*, 16> to_destroy;
             auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-            var->Result(0)->ForEachUse([&](core::ir::Usage use) {  //
+            var->Result(0)->ForEachUseUnsorted([&](core::ir::Usage use) {  //
                 auto* extracted_variable = GetVariableFromStruct(var, use.instruction, index);
 
                 // We drop the pointer from handle variables and store them in the struct by value
@@ -271,7 +271,7 @@ struct State {
         func->AppendParam(param);
 
         // Update all callsites to pass the module-scope variables structure as an argument.
-        func->ForEachUse([&](core::ir::Usage use) {
+        func->ForEachUseUnsorted([&](core::ir::Usage use) {
             if (auto* call = use.instruction->As<core::ir::UserCall>()) {
                 call->AppendArg(*function_to_struct_value.Get(ContainingFunction(call)));
             }

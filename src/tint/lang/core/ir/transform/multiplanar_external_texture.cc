@@ -210,7 +210,7 @@ struct State {
     /// @param plane_1 the second plane of the replacement texture
     /// @param params the parameters of the replacement texture
     void ReplaceUses(Value* old_value, Value* plane_0, Value* plane_1, Value* params) {
-        old_value->ForEachUse([&](Usage use) {
+        old_value->ForEachUseUnsorted([&](Usage use) {
             tint::Switch(
                 use.instruction,
                 [&](Load* load) {

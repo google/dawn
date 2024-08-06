@@ -70,7 +70,7 @@ class ReferencedModuleVars {
         for (auto inst : *ir_.root_block) {
             if (auto* var = inst->As<Var>()) {
                 if (!pred || pred(var)) {
-                    var->Result(0)->ForEachUse([&](const Usage& use) {
+                    var->Result(0)->ForEachUseUnsorted([&](const Usage& use) {
                         block_to_direct_vars_.GetOrAddZero(use.instruction->Block()).Add(var);
                     });
                 }

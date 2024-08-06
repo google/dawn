@@ -141,7 +141,7 @@ struct State {
         value->SetType(new_ptr_type);
 
         // Update all uses of the module-scope variable.
-        value->ForEachUse([&](core::ir::Usage use) {
+        value->ForEachUseUnsorted([&](core::ir::Usage use) {
             if (auto* access = use.instruction->As<core::ir::Access>()) {
                 ReplaceOutputPointerAddressSpace(access->Result(0));
             } else if (!use.instruction->IsAnyOf<core::ir::Load, core::ir::LoadVectorElement,
@@ -258,7 +258,7 @@ struct State {
     /// @param value the input pointer value
     void ReplaceInputPointerUses(core::ir::Var* var, core::ir::Value* value) {
         Vector<core::ir::Instruction*, 8> to_destroy;
-        value->ForEachUse([&](core::ir::Usage use) {
+        value->ForEachUseUnsorted([&](core::ir::Usage use) {
             auto* object = value;
             if (object->Type()->Is<core::type::Pointer>()) {
                 // Get (or create) the function parameter that will replace the variable.
@@ -338,7 +338,7 @@ struct State {
             }
 
             // Update the callsites of this function.
-            func->ForEachUse([&](core::ir::Usage use) {
+            func->ForEachUseUnsorted([&](core::ir::Usage use) {
                 if (auto* call = use.instruction->As<core::ir::UserCall>()) {
                     // Recurse into the calling function.
                     auto* caller = ContainingFunction(call);

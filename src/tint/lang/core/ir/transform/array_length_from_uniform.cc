@@ -130,7 +130,7 @@ struct State {
             array_param->Function()->AppendParam(length);
 
             // Update callsites of this function to pass the array length to it.
-            array_param->Function()->ForEachUse([&](core::ir::Usage use) {
+            array_param->Function()->ForEachUseUnsorted([&](core::ir::Usage use) {
                 if (auto* call = use.instruction->As<core::ir::UserCall>()) {
                     // Get the length of the array in the calling function and pass that.
                     auto* arg = call->Args()[array_param->Index()];

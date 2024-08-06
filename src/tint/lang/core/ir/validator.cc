@@ -1635,7 +1635,7 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
         // Check that all subsequent instruction values are not used in the continuing block.
         for (auto* inst = holds_continue; inst; inst = inst->next) {
             for (auto* result : inst->Results()) {
-                result->ForEachUse([&](Usage use) {
+                result->ForEachUseUnsorted([&](Usage use) {
                     if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
                         AddError(use.instruction, use.operand_index)
                             << NameOf(result)

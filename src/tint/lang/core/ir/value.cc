@@ -46,8 +46,15 @@ void Value::Destroy() {
     flags_.Add(Flag::kDead);
 }
 
-void Value::ForEachUse(std::function<void(Usage use)> func) const {
+void Value::ForEachUseUnsorted(std::function<void(Usage use)> func) const {
     auto uses = uses_;
+    for (auto& use : uses) {
+        func(use);
+    }
+}
+
+void Value::ForEachUseSorted(std::function<void(Usage use)> func) const {
+    auto uses = UsagesSorted();
     for (auto& use : uses) {
         func(use);
     }
@@ -68,7 +75,7 @@ void Value::ReplaceAllUsesWith(Value* replacement) {
     }
 }
 
-Vector<Usage, 4> Value::UsagesSorted() {
+Vector<Usage, 4> Value::UsagesSorted() const {
     auto v = uses_.Vector();
     std::sort(v.begin(), v.end());
     return v;

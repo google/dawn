@@ -140,7 +140,7 @@ struct State {
     /// @param old_value the value whose usages should be replaced
     /// @param new_value the value to use instead
     void ReplaceUses(Value* old_value, Value* new_value) {
-        old_value->ForEachUse([&](Usage use) {
+        old_value->ForEachUseUnsorted([&](Usage use) {
             tint::Switch(
                 use.instruction,
                 [&](Load* load) {

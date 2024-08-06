@@ -109,7 +109,7 @@ struct State {
             }
 
             // Transform instructions that accessed the variable to use the decomposed var.
-            old_var->Result(0)->ForEachUse(
+            old_var->Result(0)->ForEachUseSorted(
                 [&](Usage use) { Replace(use.instruction, new_var->Result(0)); });
 
             // Replace the original variable with the new variable.
@@ -340,7 +340,8 @@ struct State {
                         access->SetOperand(Access::kObjectOperandOffset, replacement);
                         auto* result = access->Result(0);
                         result->SetType(result->Type()->UnwrapPtrOrRef());
-                        result->ForEachUse([&](Usage use) { Replace(use.instruction, result); });
+                        result->ForEachUseSorted(
+                            [&](Usage use) { Replace(use.instruction, result); });
                         return;
                     }
 
@@ -408,7 +409,7 @@ struct State {
                     }
 
                     // Replace every instruction that uses the original access instruction.
-                    access->Result(0)->ForEachUse(
+                    access->Result(0)->ForEachUseSorted(
                         [&](Usage use) { Replace(use.instruction, replacement); });
                     access->Destroy();
                 },
@@ -438,7 +439,7 @@ struct State {
                 },
                 [&](Let* let) {
                     // Let instructions just fold away.
-                    let->Result(0)->ForEachUse(
+                    let->Result(0)->ForEachUseSorted(
                         [&](Usage use) { Replace(use.instruction, replacement); });
                     let->Destroy();
                 });

@@ -127,7 +127,7 @@ struct State {
                            core::ir::Value* object,
                            core::ir::Value* index) {
         Vector<core::ir::Instruction*, 4> to_destroy;
-        access->Result(0)->ForEachUse([&](core::ir::Usage use) {
+        access->Result(0)->ForEachUseUnsorted([&](core::ir::Usage use) {
             Switch(
                 use.instruction,
                 [&](core::ir::Load* load) {
