@@ -138,6 +138,8 @@ const char* str(BuiltinFn i) {
             return "Sample";
         case BuiltinFn::kSampleBias:
             return "SampleBias";
+        case BuiltinFn::kSampleGrad:
+            return "SampleGrad";
         case BuiltinFn::kSampleLevel:
             return "SampleLevel";
     }
