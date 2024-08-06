@@ -96,6 +96,7 @@ enum class BuiltinFn : uint8_t {
     kSample,
     kSampleBias,
     kSampleCmp,
+    kSampleCmpLevelZero,
     kSampleGrad,
     kSampleLevel,
     kNone,

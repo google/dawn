@@ -124,6 +124,7 @@ struct State {
                     case core::BuiltinFn::kTextureSample:
                     case core::BuiltinFn::kTextureSampleBias:
                     case core::BuiltinFn::kTextureSampleCompare:
+                    case core::BuiltinFn::kTextureSampleCompareLevel:
                     case core::BuiltinFn::kTextureSampleGrad:
                     case core::BuiltinFn::kTextureSampleLevel:
                     case core::BuiltinFn::kTextureStore:
@@ -273,6 +274,7 @@ struct State {
                     TextureSampleBias(call);
                     break;
                 case core::BuiltinFn::kTextureSampleCompare:
+                case core::BuiltinFn::kTextureSampleCompareLevel:
                     TextureSampleCompare(call);
                     break;
                 case core::BuiltinFn::kTextureSampleGrad:
@@ -1257,6 +1259,10 @@ struct State {
     }
 
     void TextureSampleCompare(core::ir::CoreBuiltinCall* call) {
+        hlsl::BuiltinFn fn = call->Func() == core::BuiltinFn::kTextureSampleCompare
+                                 ? hlsl::BuiltinFn::kSampleCmp
+                                 : hlsl::BuiltinFn::kSampleCmpLevelZero;
+
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             core::ir::Value* tex = args[0];
@@ -1304,8 +1310,8 @@ struct State {
                     TINT_UNREACHABLE();
             }
 
-            b.MemberCallWithResult<hlsl::ir::MemberBuiltinCall>(
-                call->DetachResult(), hlsl::BuiltinFn::kSampleCmp, tex, params);
+            b.MemberCallWithResult<hlsl::ir::MemberBuiltinCall>(call->DetachResult(), fn, tex,
+                                                                params);
         });
         call->Destroy();
     }
