@@ -784,6 +784,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     if (gpu_info::IsNvidia(vendorId)) {
         deviceToggles->Default(Toggle::D3D12ForceStencilComponentReplicateSwizzle, true);
+        deviceToggles->Default(Toggle::D3D12ExpandShaderResourceStateTransitionsToCopySource, true);
     }
 }
 

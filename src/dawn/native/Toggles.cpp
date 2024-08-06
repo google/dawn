@@ -552,6 +552,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Force a replicate swizzle for the stencil component i.e. (ssss) instead of (s001) to "
       "workaround issues on certain Nvidia drivers on D3D12 with depth24_unorm_stencil8 format.",
       "https://crbug.com/341254292", ToggleStage::Device}},
+    {Toggle::D3D12ExpandShaderResourceStateTransitionsToCopySource,
+     {"d3d12_expand_shader_resource_state_transitions_to_copy_source",
+      "When transitioning to any shader resource states PIXEL or NON_PIXEL_SHADER_RESOURCE include "
+      "COPY_SOURCE too on Nvidia since the shader resource states seem to miss flushing all caches "
+      "and layout transitions causing rendering corruption.",
+      "https://crbug.com/356905061", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "
