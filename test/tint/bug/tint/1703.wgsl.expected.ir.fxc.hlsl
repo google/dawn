@@ -1,9 +1,31 @@
-SKIP: FAILED
 
-..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1010 internal compiler error: TINT_UNREACHABLE unhandled: textureSampleBias
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+static float4 my_global = (0.0f).xxxx;
+cbuffer cbuffer_my_uniform : register(b0) {
+  uint4 my_uniform[1];
+};
+Texture2D<float4> my_texture : register(t1);
+SamplerState my_sampler : register(s2);
+void foo_member_initialize() {
+  bool2 vb2 = (false).xx;
+  vb2[0u] = (my_global.z != 0.0f);
+  vb2[0u] = (asfloat(my_uniform[0u].x) == -1.0f);
+  vb2 = bool2((asfloat(my_uniform[0u].x) == -1.0f), false);
+  if (vb2.x) {
+    float4 r = my_texture.SampleBias(my_sampler, (0.0f).xx, 0.0f);
+  }
+}
+
+void foo_default_initialize() {
+  bool2 vb2 = (false).xx;
+  vb2[0u] = (my_global.z != 0.0f);
+  vb2[0u] = (asfloat(my_uniform[0u].x) == -1.0f);
+  vb2 = (false).xx;
+  if (vb2.x) {
+    float4 r = my_texture.SampleBias(my_sampler, (0.0f).xx, 0.0f);
+  }
+}
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

@@ -631,6 +631,42 @@ fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
                            sampler: sampler,
                             coords: vec4<f32>) -> f32
 
+@member_function fn SampleBias(texture: texture_2d<f32>,
+                               sampler: sampler,
+                                coords: vec2<f32>,
+                                  bias: f32) -> vec4<f32>
+@member_function fn SampleBias(texture: texture_2d<f32>,
+                               sampler: sampler,
+                                coords: vec2<f32>,
+                                  bias: f32,
+                                offset: vec2<i32>) -> vec4<f32>
+@member_function fn SampleBias(texture: texture_2d_array<f32>,
+                               sampler: sampler,
+                                coords: vec3<f32>,
+                                  bias: f32) -> vec4<f32>
+@member_function fn SampleBias(texture: texture_2d_array<f32>,
+                               sampler: sampler,
+                                coords: vec3<f32>,
+                                  bias: f32,
+                                offset: vec2<i32>) -> vec4<f32>
+@member_function fn SampleBias(texture: texture_3d<f32>,
+                               sampler: sampler,
+                                coords: vec3<f32>,
+                                  bias: f32) -> vec4<f32>
+@member_function fn SampleBias(texture: texture_3d<f32>,
+                               sampler: sampler,
+                                coords: vec3<f32>,
+                                  bias: f32,
+                                offset: vec3<i32>) -> vec4<f32>
+@member_function fn SampleBias(texture: texture_cube<f32>,
+                               sampler: sampler,
+                                coords: vec3<f32>,
+                                  bias: f32) -> vec4<f32>
+@member_function fn SampleBias(texture: texture_cube_array<f32>,
+                               sampler: sampler,
+                                coords: vec4<f32>,
+                                  bias: f32) -> vec4<f32>
+
 @member_function fn SampleLevel(texture: texture_2d<f32>,
                                 sampler: sampler,
                                  coords: vec2<f32>,
@@ -692,3 +728,4 @@ fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
                                 sampler: sampler,
                                  coords: vec4<f32>,
                                   level: f32) -> f32
+

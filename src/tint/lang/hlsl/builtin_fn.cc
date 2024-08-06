@@ -136,6 +136,8 @@ const char* str(BuiltinFn i) {
             return "GetDimensions";
         case BuiltinFn::kSample:
             return "Sample";
+        case BuiltinFn::kSampleBias:
+            return "SampleBias";
         case BuiltinFn::kSampleLevel:
             return "SampleLevel";
     }
