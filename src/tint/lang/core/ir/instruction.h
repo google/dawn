@@ -52,6 +52,16 @@ class Instruction : public Castable<Instruction> {
     /// Destructor
     ~Instruction() override;
 
+    /// An equality helper for Instructions.
+    /// @param other the instruction to compare against
+    /// @returns true if the two instructions have matching IDs
+    bool operator==(const Instruction& other) const { return id_ == other.id_; }
+
+    /// A comparison helper for Instruction.
+    /// @param other the instruction to compare against
+    /// @returns true if `this` is less then `other`.
+    bool operator<(const Instruction& other) const { return id_ < other.id_; }
+
     /// Set an operand at a given index.
     /// @param index the operand index
     /// @param value the value to use

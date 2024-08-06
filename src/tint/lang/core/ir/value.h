@@ -56,6 +56,22 @@ struct Usage {
     bool operator==(const Usage& other) const {
         return instruction == other.instruction && operand_index == other.operand_index;
     }
+
+    /// A comparison helper for Usage.
+    /// @param other the usage to compare against
+    /// @returns true if `this` is less then `other`.
+    bool operator<(const Usage& other) const {
+        if (instruction == nullptr && other.instruction != nullptr) {
+            return false;
+        }
+        if (instruction != nullptr && other.instruction == nullptr) {
+            return true;
+        }
+        if (instruction == other.instruction) {
+            return operand_index < other.operand_index;
+        }
+        return instruction < other.instruction;
+    }
 };
 
 /// Value in the IR.
@@ -89,6 +105,11 @@ class Value : public Castable<Value> {
     /// @returns the set of usages of this value. An instruction may appear multiple times if it
     /// uses the value for multiple different operands.
     const Hashset<Usage, 4>& UsagesUnsorted() { return uses_; }
+
+    /// @returns a sorted list of usages of this value. The usages are in the order of
+    /// <instruction, operand index> where the instructions are ordered earliest instruction to
+    /// latest and the operand indices from lowest to highest.
+    Vector<Usage, 4> UsagesSorted();
 
     /// @returns true if this Value has any usages
     bool IsUsed() const { return !uses_.IsEmpty(); }

@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/core/ir/value.h"
 
+#include <algorithm>
+
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/utils/ice/ice.h"
@@ -64,6 +66,12 @@ void Value::ReplaceAllUsesWith(Value* replacement) {
         auto& use = *uses_.begin();
         use->instruction->SetOperand(use->operand_index, replacement);
     }
+}
+
+Vector<Usage, 4> Value::UsagesSorted() {
+    auto v = uses_.Vector();
+    std::sort(v.begin(), v.end());
+    return v;
 }
 
 }  // namespace tint::core::ir

@@ -180,5 +180,15 @@ TEST_F(IR_InstructionTest, DetachResult) {
     EXPECT_EQ(inst->Results().Length(), 0u);
 }
 
+TEST_F(IR_InstructionTest, Comparison) {
+    auto* x = b.Let("foo", 42_u);
+    auto* y = b.Let("foo", 42_u);
+
+    EXPECT_EQ(*x, *x);
+    EXPECT_FALSE(*x == *y);
+
+    EXPECT_TRUE((*x) < (*y));
+}
+
 }  // namespace
 }  // namespace tint::core::ir
